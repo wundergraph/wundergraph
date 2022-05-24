@@ -39,7 +39,4 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           title: Release wunderctl to ${{ github.event.release.tag_name }}
-          add-paths: |
-            *.json
-            .changeset/*
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
