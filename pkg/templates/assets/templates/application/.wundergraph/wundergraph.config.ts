@@ -125,7 +125,6 @@ configureWunderGraphApplication({
 		hasDotWunderGraphDirectory: false,
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
-		allowedHosts: ['localhost', '127.0.0.1'],
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production'
 	},
 });
