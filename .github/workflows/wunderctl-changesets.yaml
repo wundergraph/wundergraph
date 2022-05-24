@@ -18,12 +18,11 @@ jobs:
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           
-      - name: Add changeset to release wunderctl ${{ github.event.release.tag_name }}
+      - name: Add changeset to release wunderctl ${{ github.ref_name }}
         env: 
-          WUNDERCTL_VERSION: ${{ github.event.release.tag_name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
+          WUNDERCTL_VERSION: ${{ github.ref_name }}
         run: |
-          echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}\n${RELEASE_BODY}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
+          echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
 
       - run: pnpm boot --ignore-scripts
 
