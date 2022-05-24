@@ -53,7 +53,6 @@
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@wundergraph/protobuf": "workspace:0.90.0",
-    "@rjsf/core": "^4.1.0",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "cross-spawn": "^7.0.3",
@@ -73,10 +72,8 @@
     "protobufjs": "^6.11.2",
     "swagger2openapi": "^7.0.8"
   },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    }
+  "optionalDependencies": {
+    "@rjsf/core": "^4.1.0"
   },
   "jest": {
     "preset": "ts-jest",
