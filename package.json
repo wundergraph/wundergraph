@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.90.10",
+  "version": "0.90.11",
   "name": "wundergraph-env",
   "license": "Apache-2.0",
   "author": {
@@ -44,7 +44,7 @@
     "npm": {
       "publish": false
     },
-    "hooks":{
+    "hooks": {
       "after:bump": "pnpm ci:version:install"
     },
     "plugins": {
