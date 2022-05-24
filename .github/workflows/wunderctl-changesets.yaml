@@ -1,8 +1,10 @@
 name: Wunderctl Changesets
 
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [released]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 env:
   CI: true
@@ -12,30 +14,32 @@ jobs:
   version:
     timeout-minutes: 14
     runs-on: ubuntu-latest
+    # run only for engine release
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           
-      - name: Add changeset to release wunderctl ${{ github.ref_name }}
+      - name: Add changeset to release wunderctl ${{ github.event.release.tag_name }}
         env: 
-          WUNDERCTL_VERSION: ${{ github.ref_name }}
+          WUNDERCTL_VERSION: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
+          echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}\n${RELEASE_BODY}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
 
       - run: pnpm boot --ignore-scripts
 
       - run: pnpm build
+          
+      - run: pnpm ci:version 
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        uses: changesets/action@v1
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
         with:
-          version: pnpm ci:version
-          publish: pnpm ci:publish
-          commit: '[ci] wunderctl release'
-          title: '[ci] wunderctl release'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          title: Release wunderctl to ${{ github.event.release.tag_name }}
+          add-paths: |
+            *.json
+            .changeset/*
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
