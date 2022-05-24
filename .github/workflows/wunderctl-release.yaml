@@ -23,6 +23,8 @@ jobs:
           working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - run: pnpm boot
+        
+      - run: pnpm run build
 
       - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
         env:
