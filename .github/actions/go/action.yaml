@@ -25,8 +25,3 @@ runs:
     - uses: actions/setup-go@v2
       with:
         go-version: ${{ inputs.go-version }}
-
-    - name: Install Protoc
-      uses: arduino/setup-protoc@v1
-      with:
-        version: '3.x'
