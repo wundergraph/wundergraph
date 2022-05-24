@@ -12,8 +12,6 @@ jobs:
   version:
     timeout-minutes: 14
     runs-on: ubuntu-latest
-    # run only for engine release
-    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/node
