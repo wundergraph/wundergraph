@@ -1,3 +1,4 @@
 node_modules
 wgpb
 tsconfig.json
+dist/tsconfig.tsbuildinfo

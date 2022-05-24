@@ -3,10 +3,10 @@
   "version": "0.90.0",
   "license": "Apache-2.0",
   "main": "./dist/wundernode_config.js",
-  "description": "WunderGraph protobuf descriptions",
   "types": "./dist/wundernode_config.d.ts",
+  "description": "WunderGraph protobuf descriptions",
   "files": [
-    "./dist"
+    "dist"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
