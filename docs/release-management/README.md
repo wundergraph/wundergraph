@@ -23,8 +23,7 @@ If you want to publish a new version of Wunderctl, you can do so by following:
 
 1. Create a tag with `pnpm engine:release` and follow the instructions (all yes).
 2. [GoReleaser](https://goreleaser.com/) workflows are triggered and creates a Github Release with the changes.
-3. The `wunderctl-changesets` workflow is triggered and creates a PR `[ci] wunderctl release` with the changes.
-4. Approve the PR and merge to `main`. The changes are detected by the `wunderctl-changesets` workflow and deployed to the NPM registry. It also creates a Github Release for the `wunderctl` npm package.
+3. The `wunderctl-release` workflow is triggered and publish the `wunderctl` package to npm.
 
 ## Next Releases
 
