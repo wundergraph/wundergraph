@@ -9,6 +9,7 @@ on:
       - 'packages/**'
       -  '.changeset/*'
       - '!packages/*-testapp/**'
+      - '!packages/wunderctl/**'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
