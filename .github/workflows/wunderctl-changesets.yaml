@@ -29,7 +29,7 @@ jobs:
         run: |
           echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}\n${RELEASE_BODY}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
 
-      - run: pnpm boot --ignore-scripts
+      - run: pnpm boot
 
       - run: pnpm build
           
@@ -39,4 +39,5 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           title: Release wunderctl to ${{ github.event.release.tag_name }}
+          base: main
           token: ${{ secrets.GITHUB_TOKEN }}
