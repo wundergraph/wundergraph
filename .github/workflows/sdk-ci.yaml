@@ -7,7 +7,7 @@ on:
     tags-ignore:
       - '*'
     paths:
-      - 'packages/**'
+      - 'packages/**/*'
       - '.github/workflows/sdk-ci.yaml'
       - '!packages/*-testapp/**'
       - '!*.md'
@@ -17,7 +17,7 @@ on:
       - main
       - next
     paths:
-      - 'packages/sdk/**'
+      - 'packages/sdk/**/*'
       - '.github/workflows/sdk-ci.yaml'
       - '!packages/*-testapp/**'
       - '!*.md'

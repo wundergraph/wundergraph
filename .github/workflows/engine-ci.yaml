@@ -7,7 +7,7 @@ on:
     tags-ignore:
       - '*'
     paths-ignore:
-      - 'packages/**'
+      - 'packages/**/*'
       - 'package.json'
       - '*.md'
       - '**/*.md'
@@ -16,7 +16,7 @@ on:
       - main
       - next
     paths-ignore:
-      - 'packages/**'
+      - 'packages/**/*'
       - 'package.json'
       - '*.md'
       - '**/*.md'
