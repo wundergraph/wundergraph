@@ -122,7 +122,7 @@ brews:
 
     # SPDX identifier of your app's license.
     # Default is empty.
-    license: "MIT"
+    license: "Apache-2.0"
 
     # Setting this will prevent goreleaser to actually try to commit the updated
     # formula - instead, the formula file will be stored on the dist folder only,

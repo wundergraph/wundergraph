@@ -18,7 +18,6 @@ env:
 jobs:
   # Update package versions from changesets.
   version:
-    if: "false"
     timeout-minutes: 14
     runs-on: ubuntu-latest
     steps:
