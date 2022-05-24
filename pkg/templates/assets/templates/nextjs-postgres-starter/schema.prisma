@@ -1,0 +1,10 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://admin:admin@localhost:54322/example?schema=public"
+}
+
+model user {
+  id    Int    @id @default(autoincrement())
+  email String @unique
+  name  String
+}

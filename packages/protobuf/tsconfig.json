@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declarationDir": "./dist",
+    "outDir": "./dist",
+    "typeRoots": ["./node_modules/@types", "./wgpb/**/"]
+  },
+  "include": ["wgpb/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

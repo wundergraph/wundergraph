@@ -1,0 +1,47 @@
+name: "Setup Node"
+description: "This action install node and cache modules. It uses pnpm as package manager."
+inputs:
+  node-version:
+    description: 'The node version to install (Default: lts)'
+    default: 'lts/*'
+    required: false
+  working-directory:
+    description: 'The working directory of your node package'
+    default: '.'
+    required: false
+
+env:
+  CI: true
+  PNPM_CACHE_FOLDER: .pnpm-store
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 'lts/*'
+        
+    - name: Cache pnpm modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.pnpm-store
+        key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-
+
+    - name: Install Protoc
+      uses: arduino/setup-protoc@v1
+      with:
+        version: '3.x'
+
+    - uses: pnpm/action-setup@v2.1.0
+      with:
+        version: latest
+
+    - name: setup pnpm config
+      run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+      shell: bash
+
+    - name: setup pnpm config registry
+      run: pnpm config set registry https://registry.npmjs.org
+      shell: bash

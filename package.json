@@ -1,0 +1,54 @@
+{
+  "private": true,
+  "version": "0.77.0-next.0",
+  "name": "wundergraph-env",
+  "author": {
+    "name": "WunderGraph Maintainers",
+    "email": "info@wundergraph.com"
+  },
+  "repository": {
+    "type": "https",
+    "url": "https://github.com/wundergraph/wundergraph"
+  },
+  "homepage": "https://wundergraph.com",
+  "scripts": {
+    "boot": "pnpm install --filter='!./packages/*-testapp' --ignore-scripts",
+    "build": "pnpm -r run --filter='!./packages/*-testapp' build",
+    "test": "pnpm run -r test",
+    "changeset:add": "pnpm changeset",
+    "format": "prettier --write --loglevel silent --end-of-line=auto \"./**/*.{cjs,js,jsx,ts,tsx,html,css,json}\" --ignore-path .gitignore",
+    "changeset": "changeset",
+    "codegen": "pnpm run --filter='./packages/protobuf' build",
+    "changeset:check": "changeset status --since-main",
+    "ci:version": "pnpm changeset version && pnpm ci:version:install",
+    "ci:version:install": "pnpm install --no-frozen-lockfile",
+    "ci:publish": "pnpm changeset publish",
+    "enter-next": "pnpm changeset pre enter next",
+    "exit-next": "pnpm changeset pre exit",
+    "current-tag": "svu current",
+    "engine:release": "release-it --git.requireBranch=main",
+    "engine:release-next": "release-it --git.requireBranch=next --preRelease=next"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=7.0.0"
+  },
+  "release-it": {
+    "dry-run": false,
+    "git": {
+      "tagMatch": "[!@]*",
+      "tagName": "v${version}",
+      "requireCleanWorkingDir": true
+    },
+    "npm": {
+      "publish": false
+    }
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.4.4",
+    "@changesets/cli": "^2.22.0",
+    "prettier": "^2.6.2",
+    "release-it": "^15.0.0",
+    "rimraf": "^3.0.2"
+  }
+}

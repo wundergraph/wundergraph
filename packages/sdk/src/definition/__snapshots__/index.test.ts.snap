@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`introspect GraphQL API with interface type definitions 1`] = `
+GraphQLApi {
+  "DataSources": Array [
+    Object {
+      "ChildNodes": Array [
+        Object {
+          "fieldNames": Array [
+            "id",
+            "displayName",
+            "isLoggedIn",
+          ],
+          "typeName": "api_User",
+        },
+        Object {
+          "fieldNames": Array [
+            "id",
+            "displayName",
+            "isLoggedIn",
+            "hasVerifiedEmail",
+          ],
+          "typeName": "api_RegisteredUser",
+        },
+      ],
+      "Custom": Object {
+        "Federation": Object {
+          "Enabled": false,
+          "ServiceSDL": "",
+        },
+        "Fetch": Object {
+          "baseUrl": Object {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "body": Object {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "header": Object {},
+          "mTLS": undefined,
+          "method": 1,
+          "path": Object {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "query": Array [],
+          "upstreamAuthentication": undefined,
+          "url": Object {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "http://localhost:8080/graphql",
+          },
+          "urlEncodeBody": false,
+        },
+        "Subscription": Object {
+          "Enabled": false,
+          "URL": Object {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "ws://localhost:8080/graphql",
+          },
+        },
+        "UpstreamSchema": "type Query {
+  user: User
+}
+
+interface User {
+  id: ID!
+  displayName: String!
+  isLoggedIn: Boolean!
+}
+
+type RegisteredUser implements User {
+  id: ID!
+  displayName: String!
+  isLoggedIn: Boolean!
+  hasVerifiedEmail: Boolean!
+}",
+      },
+      "Directives": Array [],
+      "Kind": 2,
+      "RootNodes": Array [
+        Object {
+          "fieldNames": Array [
+            "api_user",
+          ],
+          "typeName": "Query",
+        },
+      ],
+    },
+  ],
+  "DefaultFlushInterval": 500,
+  "Fields": Array [
+    Object {
+      "argumentsConfiguration": Array [],
+      "disableDefaultFieldMapping": false,
+      "fieldName": "api_user",
+      "path": Array [
+        "user",
+      ],
+      "requiresFields": Array [],
+      "typeName": "Query",
+      "unescapeResponseJson": false,
+    },
+  ],
+  "Schema": "type Query {
+  api_user: api_User
+}
+
+interface api_User {
+  id: ID!
+  displayName: String!
+  isLoggedIn: Boolean!
+}
+
+type api_RegisteredUser implements api_User {
+  id: ID!
+  displayName: String!
+  isLoggedIn: Boolean!
+  hasVerifiedEmail: Boolean!
+}",
+  "Types": Array [
+    Object {
+      "renameTo": "User",
+      "typeName": "api_User",
+    },
+    Object {
+      "renameTo": "RegisteredUser",
+      "typeName": "api_RegisteredUser",
+    },
+  ],
+  "interpolateVariableDefinitionAsJSON": Array [],
+}
+`;

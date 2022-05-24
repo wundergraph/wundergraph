@@ -1,0 +1,133 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod download
+    # you may remove this if you don't need go generate
+    - go generate ../...
+builds:
+  - binary: wunderctl
+    id: darwin_amd64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}}
+    goos:
+      - darwin
+    goarch:
+      - amd64
+#    hooks:
+#      post: install_name_tool -rpath "/Users/runner/go/pkg/mod/github.com/jensneuse/goprisma@v0.0.11/lib/darwin" "@executable_path/lib/darwin" "./dist/darwin_amd64_darwin_amd64/wunderctl" && gon -log-level=info -log-json gon_amd64.json
+  - binary: wunderctl
+    id: darwin_arm64
+    env:
+      - CGO_ENABLED=0
+#      - SDKROOT=/Applications/Xcode_12.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk
+#      - MACOSX_DEPLOYMENT_TARGET=11.1
+    ldflags:
+      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}}
+    goos:
+      - darwin
+    goarch:
+      - arm64
+#    hooks:
+#      post: install_name_tool -rpath "/Users/runner/go/pkg/mod/github.com/jensneuse/goprisma@v0.0.11/lib/darwin-aarch64" "@executable_path/lib/darwin-aarch64" "./dist/darwin_arm64_darwin_arm64/wunderctl" && gon gon_arm64.json
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+release:
+  github:
+    owner: wundergraph
+    name: wundergraph
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_darwin_checksums.txt"
+# .goreleaser.yml
+brews:
+  -
+    # Name template of the recipe
+    # Default to project name
+    name: wunderctl
+
+    # IDs of the archives to use.
+    # Defaults to all.
+    #ids:
+    #  - foo
+    #  - bar
+
+    # GOARM to specify which 32-bit arm version to use if there are multiple versions
+    # from the build section. Brew formulas support atm only one 32-bit version.
+    # Default is 6 for all artifacts or each id if there a multiple versions.
+    goarm: 6
+
+    # NOTE: make sure the url_template, the token and given repo (github or gitlab) owner and name are from the
+    # same kind. We will probably unify this in the next major version like it is done with scoop.
+
+    # GitHub/GitLab repository to push the formula to
+    tap:
+      owner: wundergraph
+      name: homebrew-wundergraph
+      # Optionally a branch can be provided. If the branch does not exist, it
+      # will be created. If no branch is listed, the default branch will be used
+      branch: main
+      # Optionally a token can be provided, if it differs from the token provided to GoReleaser
+      #token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+
+    # Template for the url which is determined by the given Token (github or gitlab)
+    # Default for github is "https://github.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    # Default for gitlab is "https://gitlab.com/<repo_owner>/<repo_name>/-/releases/{{ .Tag }}/downloads/{{ .ArtifactName }}"
+    # Default for gitea is "https://gitea.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    # https://github.com/wundergraph/wunderctl/releases/download/v0.40.0/wunderctl_0.40.0_Darwin_x86_64.tar.gz
+    # url_template: "http://github.com/foo/bar/releases/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "https://github.com/wundergraph/wundergraph/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+
+    # Allows you to set a custom download strategy. Note that you'll need
+    # to implement the strategy and add it to your tap repository.
+    # Example: https://docs.brew.sh/Formula-Cookbook#specifying-the-download-strategy-explicitly
+    # Default is empty.
+    download_strategy: CurlDownloadStrategy
+
+    # Git author used to commit to the repository.
+    # Defaults are shown.
+    commit_author:
+      name: jensneuse
+      email: jens.neuse@gmx.de
+
+    # The project name and current git tag are used in the format string.
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+
+    # Folder inside the repository to put the formula.
+    # Default is the root folder.
+    folder: Formula
+
+    # Your app's homepage.
+    # Default is empty.
+    homepage: "https://wundergraph.com/"
+
+    # Template of your app's description.
+    # Default is empty.
+    description: "wunderctl - the WunderGraph Command Line Interface"
+
+    # SPDX identifier of your app's license.
+    # Default is empty.
+    license: "MIT"
+
+    # Setting this will prevent goreleaser to actually try to commit the updated
+    # formula - instead, the formula file will be stored on the dist folder only,
+    # leaving the responsibility of publishing it to the user.
+    # If set to auto, the release will not be uploaded to the homebrew tap
+    # in case there is an indicator for prerelease in the tag e.g. v1.0.0-rc1
+    # Default is false.
+    skip_upload: auto

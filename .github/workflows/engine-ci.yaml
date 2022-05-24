@@ -1,0 +1,47 @@
+name: engine-ci
+on:
+  push:
+    branches:
+      - main
+      - next
+    tags-ignore:
+      - '**'
+    paths-ignore:
+      - 'packages/**'
+      - '*.md'
+  pull_request:
+    branches:
+      - main
+      - next
+    paths-ignore:
+      - 'packages/**'
+      - '*.md'
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: true
+
+env:
+  WORKING_DIRECTORY: '.'
+  CI: true
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/go
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          version: '3.x'
+      
+      - run: pnpm boot
+      - run: make engine-dev
+      - run: make test-go
+      - run: make build

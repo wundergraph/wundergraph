@@ -1,0 +1,29 @@
+name: wundernode-docker-release
+on:
+  push:
+    tags: ['v*']
+
+env:
+  CI: true
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    if: "false"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Docker build and publish
+        run: |
+          VERSION=$(make version)
+          DOCKER_BUILDKIT=1
+          DATE=$(date +%s)
+          COMMIT=${GITHUB_SHA::8}
+          echo commit: $COMMIT
+          echo date: $DATE
+          echo version: $VERSION
+          docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_PASSWORD }}
+          docker build --build-arg COMMIT=$COMMIT --build-arg VERSION=$VERSION --build-arg DATE=$DATE -t wundergraph/wundernode:latest -t wundergraph/wundernode:main -t wundergraph/wundernode:$COMMIT -t wundergraph/wundernode:$VERSION .
+          docker push wundergraph/wundernode:latest
+          docker push wundergraph/wundernode:main
+          docker push wundergraph/wundernode:$COMMIT
+          docker push wundergraph/wundernode:$VERSION

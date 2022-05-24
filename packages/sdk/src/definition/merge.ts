@@ -1,0 +1,586 @@
+import { Api, DataSource, StaticApiCustom } from './index';
+import { ASTNode, buildSchema, Kind, ObjectTypeDefinitionNode, parse, print, printSchema, visit } from 'graphql';
+import { mergeSchemas } from '@graphql-tools/schema';
+import {
+	ConfigurationVariableKind,
+	DataSourceKind,
+	FieldConfiguration,
+	TypeConfiguration,
+} from '@wundergraph/protobuf';
+
+export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[]): Api<T> => {
+	const dataSources: DataSource<T>[] = apis
+		.map((api) => api.DataSources)
+		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue]);
+	const fields = mergeApiFields(apis);
+	const types = mergeTypeConfigurations(apis);
+	const schema = mergeApiSchemas(roles, apis, dataSources, fields);
+	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
+	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+};
+
+const mergeApiFields = <T extends {} = {}>(apis: Api<T>[]): FieldConfiguration[] => {
+	const fields: FieldConfiguration[] = [];
+	apis
+		.map((a) => a.Fields)
+		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue])
+		.forEach((f) => {
+			const existing = fields.find(
+				(existing) => existing.typeName === f.typeName && existing.fieldName === f.fieldName
+			);
+			if (!existing) {
+				fields.push(f);
+				return;
+			}
+			if (f.requiresFields) {
+				existing.requiresFields = [...new Set([...(existing.requiresFields || []), ...f.requiresFields])];
+			}
+			if (f.argumentsConfiguration) {
+				existing.argumentsConfiguration = existing.argumentsConfiguration || [];
+				f.argumentsConfiguration.forEach((a) => {
+					const exists = existing.argumentsConfiguration!.find((e) => e.name === a.name) !== undefined;
+					if (exists) {
+						return;
+					}
+					existing.argumentsConfiguration!.push(a);
+				});
+			}
+		});
+	return fields;
+};
+
+const mergeTypeConfigurations = <T extends {} = {}>(apis: Api<T>[]): TypeConfiguration[] => {
+	const out: TypeConfiguration[] = [];
+	apis.forEach((api) => {
+		api.Types.forEach((conf) => {
+			const exists = out.find((existing) => existing.typeName === conf.typeName) !== undefined;
+			if (exists) {
+				return;
+			}
+			out.push(conf);
+		});
+	});
+	return out;
+};
+
+export const baseSchema = `
+directive @fromClaim(
+  name: Claim
+) on VARIABLE_DEFINITION
+
+enum Claim {
+  EMAIL
+  EMAIL_VERIFIED
+  NAME
+  NICKNAME
+  LOCATION
+  PROVIDER
+}
+
+directive @hooksVariable on VARIABLE_DEFINITION
+
+directive @jsonSchema (
+  """
+  The value of both of these keywords MUST be a string.
+
+  Both of these keywords can be used to decorate a user interface with
+  information about the data produced by this user interface.  A title
+  will preferably be short, whereas a description will provide
+  explanation about the purpose of the instance described by this
+  schema.
+  """
+  title: String
+  """
+  The value of both of these keywords MUST be a string.
+
+  Both of these keywords can be used to decorate a user interface with
+  information about the data produced by this user interface.  A title
+  will preferably be short, whereas a description will provide
+  explanation about the purpose of the instance described by this
+  schema.
+  """
+  description: String
+  """
+  The value of "multipleOf" MUST be a number, strictly greater than 0.
+
+  A numeric instance is valid only if division by this keyword's value
+  results in an integer.
+  """
+  multipleOf: Int
+  """
+  The value of "maximum" MUST be a number, representing an inclusive
+  upper limit for a numeric instance.
+
+  If the instance is a number, then this keyword validates only if the
+  instance is less than or exactly equal to "maximum".
+  """
+  maximum: Int
+  """
+  The value of "exclusiveMaximum" MUST be number, representing an
+  exclusive upper limit for a numeric instance.
+
+  If the instance is a number, then the instance is valid only if it
+  has a value strictly less than (not equal to) "exclusiveMaximum".
+  """
+  exclusiveMaximum: Int
+  """
+  The value of "minimum" MUST be a number, representing an inclusive
+  lower limit for a numeric instance.
+
+  If the instance is a number, then this keyword validates only if the
+  instance is greater than or exactly equal to "minimum".
+  """
+  minimum: Int
+  """
+  The value of "exclusiveMinimum" MUST be number, representing an
+  exclusive lower limit for a numeric instance.
+
+  If the instance is a number, then the instance is valid only if it
+  has a value strictly greater than (not equal to) "exclusiveMinimum".
+  """
+  exclusiveMinimum: Int
+  """
+  The value of this keyword MUST be a non-negative integer.
+
+  A string instance is valid against this keyword if its length is less
+  than, or equal to, the value of this keyword.
+
+  The length of a string instance is defined as the number of its
+  characters as defined by RFC 7159 [RFC7159].
+  """
+  maxLength: Int
+  """
+  The value of this keyword MUST be a non-negative integer.
+
+  A string instance is valid against this keyword if its length is
+  greater than, or equal to, the value of this keyword.
+
+  The length of a string instance is defined as the number of its
+  characters as defined by RFC 7159 [RFC7159].
+
+  Omitting this keyword has the same behavior as a value of 0.
+  """
+  minLength: Int
+  """
+  The value of this keyword MUST be a string.  This string SHOULD be a
+  valid regular expression, according to the ECMA 262 regular
+  expression dialect.
+
+  A string instance is considered valid if the regular expression
+  matches the instance successfully.  Recall: regular expressions are
+  not implicitly anchored.
+  """
+  pattern: String
+  """
+  The value of this keyword MUST be a non-negative integer.
+
+  An array instance is valid against "maxItems" if its size is less
+  than, or equal to, the value of this keyword.
+  """
+  maxItems: Int
+  """
+  The value of this keyword MUST be a non-negative integer.
+
+  An array instance is valid against "minItems" if its size is greater
+  than, or equal to, the value of this keyword.
+
+  Omitting this keyword has the same behavior as a value of 0.
+  """
+  minItems: Int
+  """
+  The value of this keyword MUST be a boolean.
+
+  If this keyword has boolean value false, the instance validates
+  successfully.  If it has boolean value true, the instance validates
+  successfully if all of its elements are unique.
+
+  Omitting this keyword has the same behavior as a value of false.
+  """
+  uniqueItems: Boolean
+  commonPattern: COMMON_REGEX_PATTERN
+) on VARIABLE_DEFINITION
+
+enum COMMON_REGEX_PATTERN {
+    EMAIL
+    DOMAIN
+}
+`;
+
+const roleSchema = (roles: string[]) => `
+directive @rbac(
+  "the user must match all roles"
+  requireMatchAll: [WG_ROLE]
+  "the user must match at least one of the roles"
+  requireMatchAny: [WG_ROLE]
+  "the user must not match all of the roles"
+  denyMatchAll: [WG_ROLE]
+  "the user must not match any of the roles"
+  denyMatchAny: [WG_ROLE]
+) on QUERY | MUTATION | SUBSCRIPTION
+
+enum WG_ROLE {
+    ${roles.join(' ')}
+}
+`;
+
+const uuidSchema = `
+"""
+The directive @injectGeneratedUUID injects a generated UUID into the variable.
+This variable MUST be a string.
+At the same time, it removes the variable from the input definition,
+disallowing the user to supply it.
+
+This means, the UUID is 100% generated server-side and can be considered untempered.
+"""
+directive @injectGeneratedUUID on VARIABLE_DEFINITION
+`;
+
+const injectEnvironmentVariableSchema = `
+"""
+The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
+"""
+directive @injectEnvironmentVariable (
+    name: String!
+) on VARIABLE_DEFINITION
+`;
+
+const dateTimeSchema = `
+"""
+The directive @injectCurrentDateTime injects a DateTime string of the current date and time into the variable.
+This variable MUST be a string compatible scalar. 
+
+The default format, is: ISO 8601
+If no format is chosen, the default format is used.
+Custom formats are allowed by specifying a format conforming to the Golang specification for specifying a date time format.
+"""
+directive @injectCurrentDateTime (
+    format: WunderGraphDateTimeFormat = ISO8601
+    """customFormat must conform to the Golang specification for specifying a date time format"""
+    customFormat: String
+) on VARIABLE_DEFINITION
+
+enum WunderGraphDateTimeFormat {
+    "2006-01-02T15:04:05-0700"
+    ISO8601
+    "Mon Jan _2 15:04:05 2006"
+    ANSIC
+    "Mon Jan _2 15:04:05 MST 2006"
+    UnixDate
+    "Mon Jan 02 15:04:05 -0700 2006"
+    RubyDate
+    "02 Jan 06 15:04 MST"
+    RFC822
+    "02 Jan 06 15:04 -0700"
+    RFC822Z
+    "Monday, 02-Jan-06 15:04:05 MST"
+    RFC850
+    "Mon, 02 Jan 2006 15:04:05 MST"
+    RFC1123
+    "Mon, 02 Jan 2006 15:04:05 -0700"
+    RFC1123Z
+    "2006-01-02T15:04:05Z07:00"
+    RFC3339
+    "2006-01-02T15:04:05.999999999Z07:00"
+    RFC3339Nano
+    "3:04PM"
+    Kitchen
+    "Jan _2 15:04:05"
+    Stamp
+    "Jan _2 15:04:05.000"
+    StampMilli
+    "Jan _2 15:04:05.000000"
+    StampMicro
+    "Jan _2 15:04:05.000000000"
+    StampNano
+}
+`;
+
+const internalSchema = `
+"""
+The @internalOperation Directive marks an Operation as internal.
+By doing so, the Operation is no longer accessible from the public API.
+It can only be accessed by internal services, like hooks.
+"""
+directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION 
+`;
+
+const exportSchema = `
+
+"""
+The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.
+As the execution is depth first, a field can only be used after it has been exported.
+Additionally, a field can only be used after using the '_join' field or on a different data source.
+It's not possible to export a field and use it in for the same data source.
+
+Note that the @export directive only works on fields that return a single value.
+It's not possible to export a list or object field.
+"""
+directive @export (
+    """
+    The argument 'as' is the name of the variable to export the field to.
+    """
+    as: String!
+) on FIELD
+
+"""
+The directive @internal marks a variable definition as internal so that clients can't access it.
+The field is also not visible in the public API.
+It's only being used as an internal variable to export fields into.
+"""
+directive @internal on VARIABLE_DEFINITION
+`;
+
+const transformSchema = `
+"""
+The @transform directive allows to apply transformations to the response.
+By applying the directive, the shape of the response can be altered,
+which will also modify the JSON-Schema of the response.
+That is, you will keep full type safety and code-generation for transformed fields.
+"""
+directive @transform(
+    """
+    Using the 'get' transformation allows you to extract a nested field using a JSON path.
+    This is useful to unnest data, e.g. when using the '_join' field, which adds an extra layer of nesting.
+    
+    Example:
+    
+    query GetName {
+        name: me @transform(get: "info.name") {
+            info {
+                name
+            }
+        }
+    }
+    
+    Before the transformation, the resolve looks like this:
+    
+    {
+        "name": {
+            "info": {
+                "name": "John Doe"
+            }
+        }
+    }
+    
+    With the transformation applied, the response will be reshaped like this:
+    
+    {
+        "name": "John Doe"
+    }
+    
+    """
+    get: String
+) on FIELD
+`;
+
+const mergeApiSchemas = <T extends {} = {}>(
+	roles: string[],
+	apis: Api<T>[],
+	dataSources: DataSource[],
+	fields: FieldConfiguration[]
+): string => {
+	const graphQLSchemas = apis.map((api, i) => {
+		return buildSchema(api.Schema, {
+			assumeValidSDL: true,
+		});
+	});
+
+	graphQLSchemas.push(
+		buildSchema(baseSchema, {
+			assumeValidSDL: true,
+		})
+	);
+
+	if (roles.length) {
+		graphQLSchemas.push(buildSchema(roleSchema(roles), { assumeValidSDL: true }));
+	}
+
+	graphQLSchemas.push(buildSchema(dateTimeSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(uuidSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(internalSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(injectEnvironmentVariableSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(exportSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(transformSchema, { assumeValidSDL: true }));
+
+	const mergedGraphQLSchema = mergeSchemas({
+		schemas: graphQLSchemas,
+		assumeValid: true,
+	});
+
+	const queryTypeName = mergedGraphQLSchema.getQueryType()?.name;
+	const mutationTypeName = mergedGraphQLSchema.getMutationType()?.name;
+	const subscriptionTypeName = mergedGraphQLSchema.getSubscriptionType()?.name;
+
+	const hasQueryType = queryTypeName !== undefined;
+
+	const rootTypeNames: string[] = [];
+	if (queryTypeName) {
+		rootTypeNames.push(queryTypeName);
+	}
+	if (mutationTypeName) {
+		rootTypeNames.push(mutationTypeName);
+	}
+	if (subscriptionTypeName) {
+		rootTypeNames.push(subscriptionTypeName);
+	}
+
+	const printed = printSchema(mergedGraphQLSchema);
+
+	const ast = parse(printed);
+	const filtered = visit(ast, {
+		ObjectTypeDefinition: (node) => {
+			if (node.name.value.startsWith('__')) {
+				return null;
+			}
+			switch (node.name.value) {
+				case 'Entity':
+					return null;
+			}
+			const hasJoinField = node.fields?.find((field) => field.name.value === '_join') !== undefined;
+			const isRootType = rootTypeNames.includes(node.name.value);
+			if (hasJoinField || isRootType || !hasQueryType) {
+				return;
+			}
+			const custom: StaticApiCustom = {
+				data: {
+					kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+					staticVariableContent: '{}',
+					placeholderVariableName: '',
+					environmentVariableDefaultValue: '',
+					environmentVariableName: '',
+				},
+			};
+			dataSources.push({
+				Kind: DataSourceKind.STATIC,
+				RootNodes: [
+					{
+						typeName: node.name.value,
+						fieldNames: ['_join'],
+					},
+				],
+				Custom: custom,
+				ChildNodes: [],
+				Directives: [],
+			});
+			fields.push({
+				typeName: node.name.value,
+				fieldName: '_join',
+				disableDefaultFieldMapping: true,
+				path: ['_join'],
+				requiresFields: [],
+				argumentsConfiguration: [],
+				unescapeResponseJson: false,
+			});
+			const updated: ObjectTypeDefinitionNode = {
+				...node,
+				fields: [
+					...(node.fields || []),
+					{
+						kind: Kind.FIELD_DEFINITION,
+						type: {
+							kind: Kind.NON_NULL_TYPE,
+							type: {
+								kind: Kind.NAMED_TYPE,
+								name: {
+									kind: Kind.NAME,
+									value: queryTypeName,
+								},
+							},
+						},
+						name: {
+							kind: Kind.NAME,
+							value: '_join',
+						},
+					},
+				],
+			};
+			return updated;
+		},
+		UnionTypeDefinition: (node) => {
+			if (node.name.value.startsWith('__')) {
+				return null;
+			}
+		},
+		ScalarTypeDefinition: (node) => {
+			if (node.name.value.startsWith('__')) {
+				return null;
+			}
+		},
+		FieldDefinition: (node) => {
+			if (node.name.value.startsWith('__')) {
+				return null;
+			}
+		},
+		DirectiveDefinition: (node) => {
+			switch (node.name.value) {
+				case 'key':
+				case 'extends':
+				case 'external':
+				case 'requires':
+				case 'provides':
+					return null;
+			}
+		},
+	});
+	const withoutEmptyDescription = removeEmptyDescriptions(filtered);
+	return print(withoutEmptyDescription);
+};
+
+const removeEmptyDescriptions = (astNode: ASTNode): ASTNode => {
+	return visit(astNode, {
+		enter: (node) => {
+			switch (node.kind) {
+				case 'ObjectTypeDefinition':
+				case 'ScalarTypeDefinition':
+				case 'InterfaceTypeDefinition':
+				case 'UnionTypeDefinition':
+				case 'FieldDefinition':
+					if (node.description && node.description.value === '') {
+						return {
+							...node,
+							description: undefined,
+						};
+					}
+			}
+		},
+	});
+};
+
+const wunderGraphDirectives = [
+	'internalOperation',
+	'injectEnvironmentVariable',
+	'fromClaim',
+	'hooksVariable',
+	'jsonSchema',
+	'rbac',
+	'injectGeneratedUUID',
+	'injectCurrentDateTime',
+	'internalOperation',
+	'export',
+];
+
+const wunderGraphEnums = ['Claim', 'COMMON_REGEX_PATTERN', 'WG_ROLE', 'WunderGraphDateTimeFormat'];
+
+export const removeBaseSchema = (schema: string): string => {
+	const document = parse(schema);
+	const filtered = visit(document, {
+		ObjectTypeDefinition: (node) => {
+			const fields = node.fields?.filter((field) => field.name.value !== '_join');
+			return {
+				...node,
+				fields,
+			};
+		},
+		DirectiveDefinition: (node) => {
+			if (wunderGraphDirectives.includes(node.name.value)) {
+				return null;
+			}
+		},
+		EnumTypeDefinition: (node) => {
+			if (wunderGraphEnums.includes(node.name.value)) {
+				return null;
+			}
+		},
+	});
+	return print(filtered);
+};

@@ -1,0 +1,239 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "httpbin.org",
+    "description": "API Management facade for a very handy and free online HTTP tool.",
+    "version": "1.0"
+  },
+  "host": "httpbin.org",
+  "schemes": ["http", "https"],
+  "paths": {
+    "/status/{code}": {
+      "get": {
+        "description": "Returns provided HTTP Status code.",
+        "operationId": "/status",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "description": "HTTP code to return.",
+            "required": true,
+            "type": "number",
+            "default": 200,
+            "enum": [200]
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/get": {
+      "get": {
+        "description": "Returns GET data.",
+        "operationId": "/get",
+        "responses": {}
+      }
+    },
+    "/post": {
+      "post": {
+        "description": "Returns POST data.",
+        "operationId": "/post",
+        "responses": {}
+      }
+    },
+    "/patch": {
+      "patch": {
+        "description": "Returns PATCH data.",
+        "operationId": "/patch",
+        "responses": {}
+      }
+    },
+    "/put": {
+      "put": {
+        "description": "Returns PUT data.",
+        "operationId": "/put",
+        "responses": {}
+      }
+    },
+    "/delete": {
+      "delete": {
+        "description": "Returns DELETE data.",
+        "operationId": "/delete",
+        "responses": {}
+      }
+    },
+    "/xml": {
+      "get": {
+        "description": "Returns some XML.",
+        "operationId": "/xml",
+        "responses": {}
+      }
+    },
+    "/ip": {
+      "get": {
+        "description": "Returns origin IP.",
+        "operationId": "/ip",
+        "responses": {}
+      }
+    },
+    "/user-agent": {
+      "get": {
+        "description": "Returns user agent string.",
+        "operationId": "/user-agent",
+        "responses": {}
+      }
+    },
+    "/headers": {
+      "get": {
+        "description": "Returns headers dictionary.",
+        "operationId": "/headers",
+        "responses": {}
+      }
+    },
+    "/delay/{seconds}": {
+      "get": {
+        "description": "Delays responding for n–10 seconds.",
+        "operationId": "/delay",
+        "parameters": [
+          {
+            "name": "seconds",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "default": 2,
+            "enum": [2]
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/cache/{maxAge}": {
+      "get": {
+        "operationId": "/cache",
+        "description": "Sets a Cache-Control header for n seconds.",
+        "parameters": [
+          {
+            "name": "maxAge",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string",
+            "default": 10,
+            "enum": [10]
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/uuid": {
+      "get": {
+        "operationId": "/uuid",
+        "description": "Returns UUID4.",
+        "responses": {}
+      }
+    },
+    "/anything": {
+      "get": {
+        "operationId": "/anything",
+        "description": "Returns request data, including method used.",
+        "responses": {}
+      }
+    },
+    "/gzip": {
+      "get": {
+        "operationId": "/gzip",
+        "description": "Returns gzip-encoded data.",
+        "responses": {}
+      }
+    },
+    "/base64/{value}": {
+      "get": {
+        "operationId": "/base64",
+        "description": "Decodes base64url-encoded string.",
+        "parameters": [
+          {
+            "name": "value",
+            "in": "path",
+            "description": "Base64 encoded string.",
+            "required": true,
+            "type": "string",
+            "default": "aGVsbG8gd29ybGQNCg%3D%3D"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/deflate": {
+      "get": {
+        "operationId": "/deflate",
+        "description": "Returns deflate-encoded data.",
+        "responses": {}
+      }
+    },
+    "/brotli": {
+      "get": {
+        "operationId": "/brotli",
+        "description": "Returns brotli-encoded data.",
+        "responses": {}
+      }
+    },
+    "/response-headers": {
+      "get": {
+        "operationId": "/response-headers",
+        "description": "Returns key-value query parameters as response headers.",
+        "responses": {}
+      }
+    },
+    "/bytes/{number}": {
+      "get": {
+        "operationId": "/bytes",
+        "description": "Generates n random bytes of binary data",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "description": "Number of bytes to return.",
+            "required": true,
+            "type": "string",
+            "default": "1024"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/redirect-to": {
+      "get": {
+        "operationId": "/redirect-to",
+        "description": "302 redirects to a URL provided in query",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "description": "Redirect target",
+            "required": true,
+            "type": "string",
+            "default": "http://example.com"
+          }
+        ],
+        "responses": {}
+      }
+    },
+    "/stream/{number}": {
+      "get": {
+        "operationId": "/stream",
+        "description": "Streams min(number, 100) lines.",
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "description": "Number of lines to stream.",
+            "required": true,
+            "type": "number",
+            "default": "10"
+          }
+        ],
+        "responses": {}
+      }
+    }
+  }
+}

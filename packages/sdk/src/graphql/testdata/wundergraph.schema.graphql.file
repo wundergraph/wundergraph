@@ -1,0 +1,5146 @@
+enum QueryMode {
+  default
+  insensitive
+}
+
+input NestedStringFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: NestedStringFilter
+}
+
+input StringFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: QueryMode
+  not: NestedStringFilter
+}
+
+input NestedDateTimeFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeFilter
+}
+
+input DateTimeFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeFilter
+}
+
+input NestedStringNullableFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: NestedStringNullableFilter
+}
+
+input StringNullableFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: QueryMode
+  not: NestedStringNullableFilter
+}
+
+enum user_role {
+  user
+  admin
+}
+
+input Enumuser_roleFilter {
+  equals: user_role
+  in: [user_role]
+  notIn: [user_role]
+  not: user_role
+}
+
+input NestedDateTimeNullableFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeNullableFilter
+}
+
+input DateTimeNullableFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeNullableFilter
+}
+
+input Access_tokenListRelationFilter {
+  every: access_tokenWhereInput
+  some: access_tokenWhereInput
+  none: access_tokenWhereInput
+}
+
+enum membership {
+  owner
+  maintainer
+  viewer
+  guest
+}
+
+input EnummembershipFilter {
+  equals: membership
+  in: [membership]
+  notIn: [membership]
+  not: membership
+}
+
+input NestedIntFilter {
+  equals: Int
+  in: [Int]
+  notIn: [Int]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: NestedIntFilter
+}
+
+input IntFilter {
+  equals: Int
+  in: [Int]
+  notIn: [Int]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: NestedIntFilter
+}
+
+input NestedBoolFilter {
+  equals: Boolean
+  not: NestedBoolFilter
+}
+
+input BoolFilter {
+  equals: Boolean
+  not: NestedBoolFilter
+}
+
+input NamespaceListRelationFilter {
+  every: namespaceWhereInput
+  some: namespaceWhereInput
+  none: namespaceWhereInput
+}
+
+input price_planWhereInput {
+  AND: price_planWhereInput
+  OR: [price_planWhereInput]
+  NOT: price_planWhereInput
+  id: IntFilter
+  name: StringFilter
+  quota_daily_requests: IntFilter
+  quota_environments: IntFilter
+  quota_members: IntFilter
+  quota_apis: IntFilter
+  allow_secondary_environments: BoolFilter
+  namespace: NamespaceListRelationFilter
+}
+
+input Price_planRelationFilter {
+  is: price_planWhereInput
+  isNot: price_planWhereInput
+}
+
+input JsonFilter {
+  equals: DateTime
+  not: DateTime
+}
+
+input ApiRelationFilter {
+  is: apiWhereInput
+  isNot: apiWhereInput
+}
+
+input DeploymentRelationFilter {
+  is: deploymentWhereInput
+  isNot: deploymentWhereInput
+}
+
+input StringNullableListFilter {
+  equals: [String]
+  has: String
+  hasEvery: [String]
+  hasSome: [String]
+  isEmpty: Boolean
+}
+
+input edgeWhereInput {
+  AND: edgeWhereInput
+  OR: [edgeWhereInput]
+  NOT: edgeWhereInput
+  id: StringFilter
+  name: StringFilter
+  location: StringFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  environment_edges: Environment_edgesListRelationFilter
+}
+
+input EdgeRelationFilter {
+  is: edgeWhereInput
+  isNot: edgeWhereInput
+}
+
+input environment_edgesWhereInput {
+  AND: environment_edgesWhereInput
+  OR: [environment_edgesWhereInput]
+  NOT: environment_edgesWhereInput
+  environment_id: StringFilter
+  edge_id: StringFilter
+  edge: EdgeRelationFilter
+  environment: EnvironmentRelationFilter
+}
+
+input Environment_edgesListRelationFilter {
+  every: environment_edgesWhereInput
+  some: environment_edgesWhereInput
+  none: environment_edgesWhereInput
+}
+
+input NodepoolListRelationFilter {
+  every: nodepoolWhereInput
+  some: nodepoolWhereInput
+  none: nodepoolWhereInput
+}
+
+input wundernodeWhereInput {
+  AND: wundernodeWhereInput
+  OR: [wundernodeWhereInput]
+  NOT: wundernodeWhereInput
+  id: StringFilter
+  etag: StringFilter
+  config: JsonFilter
+  ipv4: StringNullableFilter
+  ipv6: StringNullableFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  nodepool: NodepoolListRelationFilter
+}
+
+input WundernodeRelationFilter {
+  is: wundernodeWhereInput
+  isNot: wundernodeWhereInput
+}
+
+input nodepoolWhereInput {
+  AND: nodepoolWhereInput
+  OR: [nodepoolWhereInput]
+  NOT: nodepoolWhereInput
+  id: StringFilter
+  wundernode_id: StringFilter
+  shared: BoolFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  wundernode: WundernodeRelationFilter
+  nodepool_environment: Nodepool_environmentListRelationFilter
+}
+
+input NodepoolRelationFilter {
+  is: nodepoolWhereInput
+  isNot: nodepoolWhereInput
+}
+
+input nodepool_environmentWhereInput {
+  AND: nodepool_environmentWhereInput
+  OR: [nodepool_environmentWhereInput]
+  NOT: nodepool_environmentWhereInput
+  nodepool_id: StringFilter
+  environment_id: StringFilter
+  environment: EnvironmentRelationFilter
+  nodepool: NodepoolRelationFilter
+}
+
+input Nodepool_environmentListRelationFilter {
+  every: nodepool_environmentWhereInput
+  some: nodepool_environmentWhereInput
+  none: nodepool_environmentWhereInput
+}
+
+input environmentWhereInput {
+  AND: environmentWhereInput
+  OR: [environmentWhereInput]
+  NOT: environmentWhereInput
+  id: StringFilter
+  name: StringFilter
+  namespace_id: StringFilter
+  primary_hostname: StringFilter
+  hostnames: StringNullableListFilter
+  primary: BoolFilter
+  namespace: NamespaceRelationFilter
+  deployment_environment: Deployment_environmentListRelationFilter
+  environment_edges: Environment_edgesListRelationFilter
+  nodepool_environment: Nodepool_environmentListRelationFilter
+}
+
+input EnvironmentRelationFilter {
+  is: environmentWhereInput
+  isNot: environmentWhereInput
+}
+
+input deployment_environmentWhereInput {
+  AND: deployment_environmentWhereInput
+  OR: [deployment_environmentWhereInput]
+  NOT: deployment_environmentWhereInput
+  deployment_id: StringFilter
+  environment_id: StringFilter
+  deployment: DeploymentRelationFilter
+  environment: EnvironmentRelationFilter
+}
+
+input Deployment_environmentListRelationFilter {
+  every: deployment_environmentWhereInput
+  some: deployment_environmentWhereInput
+  none: deployment_environmentWhereInput
+}
+
+input deploymentWhereInput {
+  AND: deploymentWhereInput
+  OR: [deploymentWhereInput]
+  NOT: deploymentWhereInput
+  id: StringFilter
+  api_id: StringFilter
+  name: StringFilter
+  config: JsonFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  api: ApiRelationFilter
+  deployment_environment: Deployment_environmentListRelationFilter
+}
+
+input DeploymentListRelationFilter {
+  every: deploymentWhereInput
+  some: deploymentWhereInput
+  none: deploymentWhereInput
+}
+
+input apiWhereInput {
+  AND: apiWhereInput
+  OR: [apiWhereInput]
+  NOT: apiWhereInput
+  id: StringFilter
+  namespace_id: StringFilter
+  name: StringFilter
+  markdown_description: StringFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  namespace: NamespaceRelationFilter
+  deployment: DeploymentListRelationFilter
+}
+
+input ApiListRelationFilter {
+  every: apiWhereInput
+  some: apiWhereInput
+  none: apiWhereInput
+}
+
+input EnvironmentListRelationFilter {
+  every: environmentWhereInput
+  some: environmentWhereInput
+  none: environmentWhereInput
+}
+
+input namespaceWhereInput {
+  AND: namespaceWhereInput
+  OR: [namespaceWhereInput]
+  NOT: namespaceWhereInput
+  id: StringFilter
+  name: StringFilter
+  price_plan_id: IntFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  price_plan: Price_planRelationFilter
+  api: ApiListRelationFilter
+  environment: EnvironmentListRelationFilter
+  namespace_members: Namespace_membersListRelationFilter
+}
+
+input NamespaceRelationFilter {
+  is: namespaceWhereInput
+  isNot: namespaceWhereInput
+}
+
+input namespace_membersWhereInput {
+  AND: namespace_membersWhereInput
+  OR: [namespace_membersWhereInput]
+  NOT: namespace_membersWhereInput
+  user_id: StringFilter
+  namespace_id: StringFilter
+  membership: EnummembershipFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  namespace: NamespaceRelationFilter
+  users: UsersRelationFilter
+}
+
+input Namespace_membersListRelationFilter {
+  every: namespace_membersWhereInput
+  some: namespace_membersWhereInput
+  none: namespace_membersWhereInput
+}
+
+input usersWhereInput {
+  AND: usersWhereInput
+  OR: [usersWhereInput]
+  NOT: usersWhereInput
+  id: StringFilter
+  name: StringNullableFilter
+  email: StringFilter
+  role: Enumuser_roleFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  access_token: Access_tokenListRelationFilter
+  namespace_members: Namespace_membersListRelationFilter
+}
+
+input UsersRelationFilter {
+  is: usersWhereInput
+  isNot: usersWhereInput
+}
+
+input access_tokenWhereInput {
+  AND: access_tokenWhereInput
+  OR: [access_tokenWhereInput]
+  NOT: access_tokenWhereInput
+  id: StringFilter
+  token: StringFilter
+  user_id: StringFilter
+  name: StringFilter
+  created_at: DateTimeFilter
+  users: UsersRelationFilter
+}
+
+enum SortOrder {
+  asc
+  desc
+}
+
+input access_tokenOrderByInput {
+  id: SortOrder
+  token: SortOrder
+  user_id: SortOrder
+  name: SortOrder
+  created_at: SortOrder
+}
+
+input access_tokenWhereUniqueInput {
+  id: String
+  token: String
+}
+
+enum Access_tokenScalarFieldEnum {
+  id
+  token
+  user_id
+  name
+  created_at
+}
+
+input namespace_membersOrderByInput {
+  user_id: SortOrder
+  namespace_id: SortOrder
+  membership: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input namespace_membersUser_idNamespace_idCompoundUniqueInput {
+  user_id: String!
+  namespace_id: String!
+}
+
+input namespace_membersWhereUniqueInput {
+  user_id_namespace_id: namespace_membersUser_idNamespace_idCompoundUniqueInput
+}
+
+enum Namespace_membersScalarFieldEnum {
+  user_id
+  namespace_id
+  membership
+  created_at
+  updated_at
+}
+
+input namespaceOrderByInput {
+  id: SortOrder
+  name: SortOrder
+  price_plan_id: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input namespaceWhereUniqueInput {
+  id: String
+  name: String
+}
+
+enum NamespaceScalarFieldEnum {
+  id
+  name
+  price_plan_id
+  created_at
+  updated_at
+}
+
+type price_plan {
+  id: Int!
+  name: String!
+  quota_daily_requests: Int!
+  quota_environments: Int!
+  quota_members: Int!
+  quota_apis: Int!
+  allow_secondary_environments: Boolean!
+  namespace(where: namespaceWhereInput, orderBy: [namespaceOrderByInput], cursor: namespaceWhereUniqueInput, take: Int, skip: Int, distinct: [NamespaceScalarFieldEnum]): [namespace]
+}
+
+input apiOrderByInput {
+  id: SortOrder
+  namespace_id: SortOrder
+  name: SortOrder
+  markdown_description: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input apiApi_namespace_id_name_keyCompoundUniqueInput {
+  namespace_id: String!
+  name: String!
+}
+
+input apiWhereUniqueInput {
+  id: String
+  api_namespace_id_name_key: apiApi_namespace_id_name_keyCompoundUniqueInput
+}
+
+enum ApiScalarFieldEnum {
+  id
+  namespace_id
+  name
+  markdown_description
+  created_at
+  updated_at
+}
+
+input deploymentOrderByInput {
+  id: SortOrder
+  api_id: SortOrder
+  name: SortOrder
+  config: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input deploymentDeployment_api_id_name_keyCompoundUniqueInput {
+  api_id: String!
+  name: String!
+}
+
+input deploymentWhereUniqueInput {
+  id: String
+  deployment_api_id_name_key: deploymentDeployment_api_id_name_keyCompoundUniqueInput
+}
+
+enum DeploymentScalarFieldEnum {
+  id
+  api_id
+  name
+  config
+  created_at
+  updated_at
+}
+
+input deployment_environmentOrderByInput {
+  deployment_id: SortOrder
+  environment_id: SortOrder
+}
+
+input deployment_environmentDeployment_idEnvironment_idCompoundUniqueInput {
+  deployment_id: String!
+  environment_id: String!
+}
+
+input deployment_environmentWhereUniqueInput {
+  deployment_id_environment_id: deployment_environmentDeployment_idEnvironment_idCompoundUniqueInput
+}
+
+enum Deployment_environmentScalarFieldEnum {
+  deployment_id
+  environment_id
+}
+
+input environment_edgesOrderByInput {
+  environment_id: SortOrder
+  edge_id: SortOrder
+}
+
+input environment_edgesEnvironment_idEdge_idCompoundUniqueInput {
+  environment_id: String!
+  edge_id: String!
+}
+
+input environment_edgesWhereUniqueInput {
+  environment_id_edge_id: environment_edgesEnvironment_idEdge_idCompoundUniqueInput
+}
+
+enum Environment_edgesScalarFieldEnum {
+  environment_id
+  edge_id
+}
+
+type edge {
+  id: String!
+  name: String!
+  location: String!
+  created_at: DateTime!
+  updated_at: DateTime
+  environment_edges(where: environment_edgesWhereInput, orderBy: [environment_edgesOrderByInput], cursor: environment_edgesWhereUniqueInput, take: Int, skip: Int, distinct: [Environment_edgesScalarFieldEnum]): [environment_edges]
+}
+
+type environment_edges {
+  environment_id: String!
+  edge_id: String!
+  edge: edge!
+  environment: environment!
+}
+
+input nodepool_environmentOrderByInput {
+  nodepool_id: SortOrder
+  environment_id: SortOrder
+}
+
+input nodepool_environmentNodepool_idEnvironment_idCompoundUniqueInput {
+  nodepool_id: String!
+  environment_id: String!
+}
+
+input nodepool_environmentWhereUniqueInput {
+  nodepool_id_environment_id: nodepool_environmentNodepool_idEnvironment_idCompoundUniqueInput
+}
+
+enum Nodepool_environmentScalarFieldEnum {
+  nodepool_id
+  environment_id
+}
+
+input nodepoolOrderByInput {
+  id: SortOrder
+  wundernode_id: SortOrder
+  shared: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input nodepoolWhereUniqueInput {
+  id: String
+}
+
+enum NodepoolScalarFieldEnum {
+  id
+  wundernode_id
+  shared
+  created_at
+  updated_at
+}
+
+type wundernode {
+  id: String!
+  etag: String!
+  config: Json!
+  ipv4: String
+  ipv6: String
+  created_at: DateTime!
+  updated_at: DateTime
+  nodepool(where: nodepoolWhereInput, orderBy: [nodepoolOrderByInput], cursor: nodepoolWhereUniqueInput, take: Int, skip: Int, distinct: [NodepoolScalarFieldEnum]): [nodepool]
+}
+
+type nodepool {
+  id: String!
+  wundernode_id: String!
+  shared: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime
+  wundernode: wundernode!
+  nodepool_environment(where: nodepool_environmentWhereInput, orderBy: [nodepool_environmentOrderByInput], cursor: nodepool_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Nodepool_environmentScalarFieldEnum]): [nodepool_environment]
+}
+
+type nodepool_environment {
+  nodepool_id: String!
+  environment_id: String!
+  environment: environment!
+  nodepool: nodepool!
+}
+
+type environment {
+  id: String!
+  name: String!
+  namespace_id: String!
+  primary_hostname: String!
+  hostnames: [String]
+  primary: Boolean!
+  namespace: namespace!
+  deployment_environment(where: deployment_environmentWhereInput, orderBy: [deployment_environmentOrderByInput], cursor: deployment_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Deployment_environmentScalarFieldEnum]): [deployment_environment]
+  environment_edges(where: environment_edgesWhereInput, orderBy: [environment_edgesOrderByInput], cursor: environment_edgesWhereUniqueInput, take: Int, skip: Int, distinct: [Environment_edgesScalarFieldEnum]): [environment_edges]
+  nodepool_environment(where: nodepool_environmentWhereInput, orderBy: [nodepool_environmentOrderByInput], cursor: nodepool_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Nodepool_environmentScalarFieldEnum]): [nodepool_environment]
+}
+
+type deployment_environment {
+  deployment_id: String!
+  environment_id: String!
+  deployment: deployment!
+  environment: environment!
+}
+
+type deployment {
+  id: String!
+  api_id: String!
+  name: String!
+  config: Json!
+  created_at: DateTime!
+  updated_at: DateTime
+  api: api!
+  deployment_environment(where: deployment_environmentWhereInput, orderBy: [deployment_environmentOrderByInput], cursor: deployment_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Deployment_environmentScalarFieldEnum]): [deployment_environment]
+}
+
+type api {
+  id: String!
+  namespace_id: String!
+  name: String!
+  markdown_description: String!
+  created_at: DateTime!
+  updated_at: DateTime
+  namespace: namespace!
+  deployment(where: deploymentWhereInput, orderBy: [deploymentOrderByInput], cursor: deploymentWhereUniqueInput, take: Int, skip: Int, distinct: [DeploymentScalarFieldEnum]): [deployment]
+}
+
+input environmentOrderByInput {
+  id: SortOrder
+  name: SortOrder
+  namespace_id: SortOrder
+  primary_hostname: SortOrder
+  hostnames: SortOrder
+  primary: SortOrder
+}
+
+input environmentEnvironment_namespace_id_name_keyCompoundUniqueInput {
+  namespace_id: String!
+  name: String!
+}
+
+input environmentWhereUniqueInput {
+  id: String
+  environment_namespace_id_name_key: environmentEnvironment_namespace_id_name_keyCompoundUniqueInput
+}
+
+enum EnvironmentScalarFieldEnum {
+  id
+  name
+  namespace_id
+  primary_hostname
+  hostnames
+  primary
+}
+
+type namespace {
+  id: String!
+  name: String!
+  price_plan_id: Int!
+  created_at: DateTime!
+  updated_at: DateTime
+  price_plan: price_plan!
+  api(where: apiWhereInput, orderBy: [apiOrderByInput], cursor: apiWhereUniqueInput, take: Int, skip: Int, distinct: [ApiScalarFieldEnum]): [api]
+  environment(where: environmentWhereInput, orderBy: [environmentOrderByInput], cursor: environmentWhereUniqueInput, take: Int, skip: Int, distinct: [EnvironmentScalarFieldEnum]): [environment]
+  namespace_members(where: namespace_membersWhereInput, orderBy: [namespace_membersOrderByInput], cursor: namespace_membersWhereUniqueInput, take: Int, skip: Int, distinct: [Namespace_membersScalarFieldEnum]): [namespace_members]
+}
+
+type namespace_members {
+  user_id: String!
+  namespace_id: String!
+  membership: membership!
+  created_at: DateTime!
+  updated_at: DateTime
+  namespace: namespace!
+  users: users!
+}
+
+type users {
+  id: String!
+  name: String
+  email: String!
+  role: user_role!
+  created_at: DateTime!
+  updated_at: DateTime
+  access_token(where: access_tokenWhereInput, orderBy: [access_tokenOrderByInput], cursor: access_tokenWhereUniqueInput, take: Int, skip: Int, distinct: [Access_tokenScalarFieldEnum]): [access_token]
+  namespace_members(where: namespace_membersWhereInput, orderBy: [namespace_membersOrderByInput], cursor: namespace_membersWhereUniqueInput, take: Int, skip: Int, distinct: [Namespace_membersScalarFieldEnum]): [namespace_members]
+}
+
+type access_token {
+  id: String!
+  token: String!
+  user_id: String!
+  name: String!
+  created_at: DateTime!
+  users: users!
+}
+
+type Access_tokenCountAggregateOutputType {
+  id: Int!
+  token: Int!
+  user_id: Int!
+  name: Int!
+  created_at: Int!
+}
+
+type Access_tokenMinAggregateOutputType {
+  id: String
+  token: String
+  user_id: String
+  name: String
+  created_at: DateTime
+}
+
+type Access_tokenMaxAggregateOutputType {
+  id: String
+  token: String
+  user_id: String
+  name: String
+  created_at: DateTime
+}
+
+type AggregateAccess_token {
+  count: Access_tokenCountAggregateOutputType
+  min: Access_tokenMinAggregateOutputType
+  max: Access_tokenMaxAggregateOutputType
+}
+
+input NestedStringWithAggregatesFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: NestedStringWithAggregatesFilter
+  count: NestedIntFilter
+  min: NestedStringFilter
+  max: NestedStringFilter
+}
+
+input StringWithAggregatesFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: QueryMode
+  not: NestedStringWithAggregatesFilter
+  count: NestedIntFilter
+  min: NestedStringFilter
+  max: NestedStringFilter
+}
+
+input NestedDateTimeWithAggregatesFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeWithAggregatesFilter
+  count: NestedIntFilter
+  min: NestedDateTimeFilter
+  max: NestedDateTimeFilter
+}
+
+input DateTimeWithAggregatesFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeWithAggregatesFilter
+  count: NestedIntFilter
+  min: NestedDateTimeFilter
+  max: NestedDateTimeFilter
+}
+
+input access_tokenScalarWhereWithAggregatesInput {
+  AND: access_tokenScalarWhereWithAggregatesInput
+  OR: [access_tokenScalarWhereWithAggregatesInput]
+  NOT: access_tokenScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  token: StringWithAggregatesFilter
+  user_id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+}
+
+type Access_tokenGroupByOutputType {
+  id: String!
+  token: String!
+  user_id: String!
+  name: String!
+  created_at: DateTime!
+  count: Access_tokenCountAggregateOutputType
+  min: Access_tokenMinAggregateOutputType
+  max: Access_tokenMaxAggregateOutputType
+}
+
+input admin_configWhereInput {
+  AND: admin_configWhereInput
+  OR: [admin_configWhereInput]
+  NOT: admin_configWhereInput
+  id: StringFilter
+  wundernode_image_tag: StringFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input admin_configOrderByInput {
+  id: SortOrder
+  wundernode_image_tag: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input admin_configWhereUniqueInput {
+  id: String
+}
+
+enum Admin_configScalarFieldEnum {
+  id
+  wundernode_image_tag
+  created_at
+  updated_at
+}
+
+type admin_config {
+  id: String!
+  wundernode_image_tag: String!
+  created_at: DateTime!
+  updated_at: DateTime
+}
+
+type Admin_configCountAggregateOutputType {
+  id: Int!
+  wundernode_image_tag: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type Admin_configMinAggregateOutputType {
+  id: String
+  wundernode_image_tag: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Admin_configMaxAggregateOutputType {
+  id: String
+  wundernode_image_tag: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateAdmin_config {
+  count: Admin_configCountAggregateOutputType
+  min: Admin_configMinAggregateOutputType
+  max: Admin_configMaxAggregateOutputType
+}
+
+input NestedIntNullableFilter {
+  equals: Int
+  in: [Int]
+  notIn: [Int]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: NestedIntNullableFilter
+}
+
+input NestedDateTimeNullableWithAggregatesFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeNullableWithAggregatesFilter
+  count: NestedIntNullableFilter
+  min: NestedDateTimeNullableFilter
+  max: NestedDateTimeNullableFilter
+}
+
+input DateTimeNullableWithAggregatesFilter {
+  equals: DateTime
+  in: [DateTime]
+  notIn: [DateTime]
+  lt: DateTime
+  lte: DateTime
+  gt: DateTime
+  gte: DateTime
+  not: NestedDateTimeNullableWithAggregatesFilter
+  count: NestedIntNullableFilter
+  min: NestedDateTimeNullableFilter
+  max: NestedDateTimeNullableFilter
+}
+
+input admin_configScalarWhereWithAggregatesInput {
+  AND: admin_configScalarWhereWithAggregatesInput
+  OR: [admin_configScalarWhereWithAggregatesInput]
+  NOT: admin_configScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  wundernode_image_tag: StringWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type Admin_configGroupByOutputType {
+  id: String!
+  wundernode_image_tag: String!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: Admin_configCountAggregateOutputType
+  min: Admin_configMinAggregateOutputType
+  max: Admin_configMaxAggregateOutputType
+}
+
+type ApiCountAggregateOutputType {
+  id: Int!
+  namespace_id: Int!
+  name: Int!
+  markdown_description: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type ApiMinAggregateOutputType {
+  id: String
+  namespace_id: String
+  name: String
+  markdown_description: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type ApiMaxAggregateOutputType {
+  id: String
+  namespace_id: String
+  name: String
+  markdown_description: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateApi {
+  count: ApiCountAggregateOutputType
+  min: ApiMinAggregateOutputType
+  max: ApiMaxAggregateOutputType
+}
+
+input apiScalarWhereWithAggregatesInput {
+  AND: apiScalarWhereWithAggregatesInput
+  OR: [apiScalarWhereWithAggregatesInput]
+  NOT: apiScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  namespace_id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  markdown_description: StringWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type ApiGroupByOutputType {
+  id: String!
+  namespace_id: String!
+  name: String!
+  markdown_description: String!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: ApiCountAggregateOutputType
+  min: ApiMinAggregateOutputType
+  max: ApiMaxAggregateOutputType
+}
+
+type DeploymentCountAggregateOutputType {
+  id: Int!
+  api_id: Int!
+  name: Int!
+  config: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type DeploymentMinAggregateOutputType {
+  id: String
+  api_id: String
+  name: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type DeploymentMaxAggregateOutputType {
+  id: String
+  api_id: String
+  name: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateDeployment {
+  count: DeploymentCountAggregateOutputType
+  min: DeploymentMinAggregateOutputType
+  max: DeploymentMaxAggregateOutputType
+}
+
+input NestedJsonFilter {
+  equals: DateTime
+  not: DateTime
+}
+
+input JsonWithAggregatesFilter {
+  equals: DateTime
+  not: DateTime
+  count: NestedIntFilter
+  min: NestedJsonFilter
+  max: NestedJsonFilter
+}
+
+input deploymentScalarWhereWithAggregatesInput {
+  AND: deploymentScalarWhereWithAggregatesInput
+  OR: [deploymentScalarWhereWithAggregatesInput]
+  NOT: deploymentScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  api_id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  config: JsonWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type DeploymentGroupByOutputType {
+  id: String!
+  api_id: String!
+  name: String!
+  config: Json!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: DeploymentCountAggregateOutputType
+  min: DeploymentMinAggregateOutputType
+  max: DeploymentMaxAggregateOutputType
+}
+
+type Deployment_environmentCountAggregateOutputType {
+  deployment_id: Int!
+  environment_id: Int!
+}
+
+type Deployment_environmentMinAggregateOutputType {
+  deployment_id: String
+  environment_id: String
+}
+
+type Deployment_environmentMaxAggregateOutputType {
+  deployment_id: String
+  environment_id: String
+}
+
+type AggregateDeployment_environment {
+  count: Deployment_environmentCountAggregateOutputType
+  min: Deployment_environmentMinAggregateOutputType
+  max: Deployment_environmentMaxAggregateOutputType
+}
+
+input deployment_environmentScalarWhereWithAggregatesInput {
+  AND: deployment_environmentScalarWhereWithAggregatesInput
+  OR: [deployment_environmentScalarWhereWithAggregatesInput]
+  NOT: deployment_environmentScalarWhereWithAggregatesInput
+  deployment_id: StringWithAggregatesFilter
+  environment_id: StringWithAggregatesFilter
+}
+
+type Deployment_environmentGroupByOutputType {
+  deployment_id: String!
+  environment_id: String!
+  count: Deployment_environmentCountAggregateOutputType
+  min: Deployment_environmentMinAggregateOutputType
+  max: Deployment_environmentMaxAggregateOutputType
+}
+
+input edgeOrderByInput {
+  id: SortOrder
+  name: SortOrder
+  location: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input edgeWhereUniqueInput {
+  id: String
+  name: String
+}
+
+enum EdgeScalarFieldEnum {
+  id
+  name
+  location
+  created_at
+  updated_at
+}
+
+type EdgeCountAggregateOutputType {
+  id: Int!
+  name: Int!
+  location: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type EdgeMinAggregateOutputType {
+  id: String
+  name: String
+  location: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type EdgeMaxAggregateOutputType {
+  id: String
+  name: String
+  location: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateEdge {
+  count: EdgeCountAggregateOutputType
+  min: EdgeMinAggregateOutputType
+  max: EdgeMaxAggregateOutputType
+}
+
+input edgeScalarWhereWithAggregatesInput {
+  AND: edgeScalarWhereWithAggregatesInput
+  OR: [edgeScalarWhereWithAggregatesInput]
+  NOT: edgeScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  location: StringWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type EdgeGroupByOutputType {
+  id: String!
+  name: String!
+  location: String!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: EdgeCountAggregateOutputType
+  min: EdgeMinAggregateOutputType
+  max: EdgeMaxAggregateOutputType
+}
+
+type EnvironmentCountAggregateOutputType {
+  id: Int!
+  name: Int!
+  namespace_id: Int!
+  primary_hostname: Int!
+  hostnames: Int!
+  primary: Int!
+}
+
+type EnvironmentMinAggregateOutputType {
+  id: String
+  name: String
+  namespace_id: String
+  primary_hostname: String
+  primary: Boolean
+}
+
+type EnvironmentMaxAggregateOutputType {
+  id: String
+  name: String
+  namespace_id: String
+  primary_hostname: String
+  primary: Boolean
+}
+
+type AggregateEnvironment {
+  count: EnvironmentCountAggregateOutputType
+  min: EnvironmentMinAggregateOutputType
+  max: EnvironmentMaxAggregateOutputType
+}
+
+input NestedBoolWithAggregatesFilter {
+  equals: Boolean
+  not: NestedBoolWithAggregatesFilter
+  count: NestedIntFilter
+  min: NestedBoolFilter
+  max: NestedBoolFilter
+}
+
+input BoolWithAggregatesFilter {
+  equals: Boolean
+  not: NestedBoolWithAggregatesFilter
+  count: NestedIntFilter
+  min: NestedBoolFilter
+  max: NestedBoolFilter
+}
+
+input environmentScalarWhereWithAggregatesInput {
+  AND: environmentScalarWhereWithAggregatesInput
+  OR: [environmentScalarWhereWithAggregatesInput]
+  NOT: environmentScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  namespace_id: StringWithAggregatesFilter
+  primary_hostname: StringWithAggregatesFilter
+  hostnames: StringNullableListFilter
+  primary: BoolWithAggregatesFilter
+}
+
+type EnvironmentGroupByOutputType {
+  id: String!
+  name: String!
+  namespace_id: String!
+  primary_hostname: String!
+  hostnames: [String]
+  primary: Boolean!
+  count: EnvironmentCountAggregateOutputType
+  min: EnvironmentMinAggregateOutputType
+  max: EnvironmentMaxAggregateOutputType
+}
+
+type Environment_edgesCountAggregateOutputType {
+  environment_id: Int!
+  edge_id: Int!
+}
+
+type Environment_edgesMinAggregateOutputType {
+  environment_id: String
+  edge_id: String
+}
+
+type Environment_edgesMaxAggregateOutputType {
+  environment_id: String
+  edge_id: String
+}
+
+type AggregateEnvironment_edges {
+  count: Environment_edgesCountAggregateOutputType
+  min: Environment_edgesMinAggregateOutputType
+  max: Environment_edgesMaxAggregateOutputType
+}
+
+input environment_edgesScalarWhereWithAggregatesInput {
+  AND: environment_edgesScalarWhereWithAggregatesInput
+  OR: [environment_edgesScalarWhereWithAggregatesInput]
+  NOT: environment_edgesScalarWhereWithAggregatesInput
+  environment_id: StringWithAggregatesFilter
+  edge_id: StringWithAggregatesFilter
+}
+
+type Environment_edgesGroupByOutputType {
+  environment_id: String!
+  edge_id: String!
+  count: Environment_edgesCountAggregateOutputType
+  min: Environment_edgesMinAggregateOutputType
+  max: Environment_edgesMaxAggregateOutputType
+}
+
+input JsonNullableFilter {
+  equals: DateTime
+  not: DateTime
+}
+
+input Letsencrypt_certificateListRelationFilter {
+  every: letsencrypt_certificateWhereInput
+  some: letsencrypt_certificateWhereInput
+  none: letsencrypt_certificateWhereInput
+}
+
+input letsencrypt_userWhereInput {
+  AND: letsencrypt_userWhereInput
+  OR: [letsencrypt_userWhereInput]
+  NOT: letsencrypt_userWhereInput
+  zone: StringFilter
+  email: StringFilter
+  dns_provider_name: StringFilter
+  dns_provider_token: StringFilter
+  private_key: StringNullableFilter
+  registration_resource: JsonNullableFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  letsencrypt_certificate: Letsencrypt_certificateListRelationFilter
+}
+
+input Letsencrypt_userRelationFilter {
+  is: letsencrypt_userWhereInput
+  isNot: letsencrypt_userWhereInput
+}
+
+input letsencrypt_certificateWhereInput {
+  AND: letsencrypt_certificateWhereInput
+  OR: [letsencrypt_certificateWhereInput]
+  NOT: letsencrypt_certificateWhereInput
+  common_name: StringFilter
+  zone: StringFilter
+  additional_domains: StringNullableListFilter
+  issued: DateTimeNullableFilter
+  renewal: DateTimeNullableFilter
+  certificate: StringNullableFilter
+  private_key: StringNullableFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+  letsencrypt_user: Letsencrypt_userRelationFilter
+}
+
+input letsencrypt_certificateOrderByInput {
+  common_name: SortOrder
+  zone: SortOrder
+  additional_domains: SortOrder
+  issued: SortOrder
+  renewal: SortOrder
+  certificate: SortOrder
+  private_key: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input letsencrypt_certificateWhereUniqueInput {
+  common_name: String
+}
+
+enum Letsencrypt_certificateScalarFieldEnum {
+  common_name
+  zone
+  additional_domains
+  issued
+  renewal
+  certificate
+  private_key
+  created_at
+  updated_at
+}
+
+type letsencrypt_user {
+  zone: String!
+  email: String!
+  dns_provider_name: String!
+  dns_provider_token: String!
+  private_key: String
+  registration_resource: Json
+  created_at: DateTime!
+  updated_at: DateTime
+  letsencrypt_certificate(where: letsencrypt_certificateWhereInput, orderBy: [letsencrypt_certificateOrderByInput], cursor: letsencrypt_certificateWhereUniqueInput, take: Int, skip: Int, distinct: [Letsencrypt_certificateScalarFieldEnum]): [letsencrypt_certificate]
+}
+
+type letsencrypt_certificate {
+  common_name: String!
+  zone: String!
+  additional_domains: [String]
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime!
+  updated_at: DateTime
+  letsencrypt_user: letsencrypt_user!
+}
+
+type Letsencrypt_certificateCountAggregateOutputType {
+  common_name: Int!
+  zone: Int!
+  additional_domains: Int!
+  issued: Int!
+  renewal: Int!
+  certificate: Int!
+  private_key: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type Letsencrypt_certificateMinAggregateOutputType {
+  common_name: String
+  zone: String
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Letsencrypt_certificateMaxAggregateOutputType {
+  common_name: String
+  zone: String
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateLetsencrypt_certificate {
+  count: Letsencrypt_certificateCountAggregateOutputType
+  min: Letsencrypt_certificateMinAggregateOutputType
+  max: Letsencrypt_certificateMaxAggregateOutputType
+}
+
+input NestedStringNullableWithAggregatesFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  not: NestedStringNullableWithAggregatesFilter
+  count: NestedIntNullableFilter
+  min: NestedStringNullableFilter
+  max: NestedStringNullableFilter
+}
+
+input StringNullableWithAggregatesFilter {
+  equals: String
+  in: [String]
+  notIn: [String]
+  lt: String
+  lte: String
+  gt: String
+  gte: String
+  contains: String
+  startsWith: String
+  endsWith: String
+  mode: QueryMode
+  not: NestedStringNullableWithAggregatesFilter
+  count: NestedIntNullableFilter
+  min: NestedStringNullableFilter
+  max: NestedStringNullableFilter
+}
+
+input letsencrypt_certificateScalarWhereWithAggregatesInput {
+  AND: letsencrypt_certificateScalarWhereWithAggregatesInput
+  OR: [letsencrypt_certificateScalarWhereWithAggregatesInput]
+  NOT: letsencrypt_certificateScalarWhereWithAggregatesInput
+  common_name: StringWithAggregatesFilter
+  zone: StringWithAggregatesFilter
+  additional_domains: StringNullableListFilter
+  issued: DateTimeNullableWithAggregatesFilter
+  renewal: DateTimeNullableWithAggregatesFilter
+  certificate: StringNullableWithAggregatesFilter
+  private_key: StringNullableWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type Letsencrypt_certificateGroupByOutputType {
+  common_name: String!
+  zone: String!
+  additional_domains: [String]
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime!
+  updated_at: DateTime
+  count: Letsencrypt_certificateCountAggregateOutputType
+  min: Letsencrypt_certificateMinAggregateOutputType
+  max: Letsencrypt_certificateMaxAggregateOutputType
+}
+
+input letsencrypt_userOrderByInput {
+  zone: SortOrder
+  email: SortOrder
+  dns_provider_name: SortOrder
+  dns_provider_token: SortOrder
+  private_key: SortOrder
+  registration_resource: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input letsencrypt_userWhereUniqueInput {
+  zone: String
+}
+
+enum Letsencrypt_userScalarFieldEnum {
+  zone
+  email
+  dns_provider_name
+  dns_provider_token
+  private_key
+  registration_resource
+  created_at
+  updated_at
+}
+
+type Letsencrypt_userCountAggregateOutputType {
+  zone: Int!
+  email: Int!
+  dns_provider_name: Int!
+  dns_provider_token: Int!
+  private_key: Int!
+  registration_resource: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type Letsencrypt_userMinAggregateOutputType {
+  zone: String
+  email: String
+  dns_provider_name: String
+  dns_provider_token: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Letsencrypt_userMaxAggregateOutputType {
+  zone: String
+  email: String
+  dns_provider_name: String
+  dns_provider_token: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateLetsencrypt_user {
+  count: Letsencrypt_userCountAggregateOutputType
+  min: Letsencrypt_userMinAggregateOutputType
+  max: Letsencrypt_userMaxAggregateOutputType
+}
+
+input NestedJsonNullableFilter {
+  equals: DateTime
+  not: DateTime
+}
+
+input JsonNullableWithAggregatesFilter {
+  equals: DateTime
+  not: DateTime
+  count: NestedIntNullableFilter
+  min: NestedJsonNullableFilter
+  max: NestedJsonNullableFilter
+}
+
+input letsencrypt_userScalarWhereWithAggregatesInput {
+  AND: letsencrypt_userScalarWhereWithAggregatesInput
+  OR: [letsencrypt_userScalarWhereWithAggregatesInput]
+  NOT: letsencrypt_userScalarWhereWithAggregatesInput
+  zone: StringWithAggregatesFilter
+  email: StringWithAggregatesFilter
+  dns_provider_name: StringWithAggregatesFilter
+  dns_provider_token: StringWithAggregatesFilter
+  private_key: StringNullableWithAggregatesFilter
+  registration_resource: JsonNullableWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type Letsencrypt_userGroupByOutputType {
+  zone: String!
+  email: String!
+  dns_provider_name: String!
+  dns_provider_token: String!
+  private_key: String
+  registration_resource: Json
+  created_at: DateTime!
+  updated_at: DateTime
+  count: Letsencrypt_userCountAggregateOutputType
+  min: Letsencrypt_userMinAggregateOutputType
+  max: Letsencrypt_userMaxAggregateOutputType
+}
+
+input NestedBigIntNullableFilter {
+  equals: BigInt
+  in: [BigInt]
+  notIn: [BigInt]
+  lt: BigInt
+  lte: BigInt
+  gt: BigInt
+  gte: BigInt
+  not: NestedBigIntNullableFilter
+}
+
+input BigIntNullableFilter {
+  equals: BigInt
+  in: [BigInt]
+  notIn: [BigInt]
+  lt: BigInt
+  lte: BigInt
+  gt: BigInt
+  gte: BigInt
+  not: NestedBigIntNullableFilter
+}
+
+input locksWhereInput {
+  AND: locksWhereInput
+  OR: [locksWhereInput]
+  NOT: locksWhereInput
+  name: StringFilter
+  record_version_number: BigIntNullableFilter
+  data: StringNullableFilter
+  owner: StringNullableFilter
+}
+
+input locksOrderByInput {
+  name: SortOrder
+  record_version_number: SortOrder
+  data: SortOrder
+  owner: SortOrder
+}
+
+input locksWhereUniqueInput {
+  name: String
+}
+
+enum LocksScalarFieldEnum {
+  name
+  record_version_number
+  data
+  owner
+}
+
+type locks {
+  name: String!
+  record_version_number: BigInt
+  data: String
+  owner: String
+}
+
+type LocksCountAggregateOutputType {
+  name: Int!
+  record_version_number: Int!
+  data: Int!
+  owner: Int!
+}
+
+type LocksAvgAggregateOutputType {
+  record_version_number: Float
+}
+
+type LocksSumAggregateOutputType {
+  record_version_number: BigInt
+}
+
+type LocksMinAggregateOutputType {
+  name: String
+  record_version_number: BigInt
+  data: String
+  owner: String
+}
+
+type LocksMaxAggregateOutputType {
+  name: String
+  record_version_number: BigInt
+  data: String
+  owner: String
+}
+
+type AggregateLocks {
+  count: LocksCountAggregateOutputType
+  avg: LocksAvgAggregateOutputType
+  sum: LocksSumAggregateOutputType
+  min: LocksMinAggregateOutputType
+  max: LocksMaxAggregateOutputType
+}
+
+input NestedFloatNullableFilter {
+  equals: Float
+  in: [Float]
+  notIn: [Float]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: NestedFloatNullableFilter
+}
+
+input NestedBigIntNullableWithAggregatesFilter {
+  equals: BigInt
+  in: [BigInt]
+  notIn: [BigInt]
+  lt: BigInt
+  lte: BigInt
+  gt: BigInt
+  gte: BigInt
+  not: NestedBigIntNullableWithAggregatesFilter
+  count: NestedIntNullableFilter
+  avg: NestedFloatNullableFilter
+  sum: NestedBigIntNullableFilter
+  min: NestedBigIntNullableFilter
+  max: NestedBigIntNullableFilter
+}
+
+input BigIntNullableWithAggregatesFilter {
+  equals: BigInt
+  in: [BigInt]
+  notIn: [BigInt]
+  lt: BigInt
+  lte: BigInt
+  gt: BigInt
+  gte: BigInt
+  not: NestedBigIntNullableWithAggregatesFilter
+  count: NestedIntNullableFilter
+  avg: NestedFloatNullableFilter
+  sum: NestedBigIntNullableFilter
+  min: NestedBigIntNullableFilter
+  max: NestedBigIntNullableFilter
+}
+
+input locksScalarWhereWithAggregatesInput {
+  AND: locksScalarWhereWithAggregatesInput
+  OR: [locksScalarWhereWithAggregatesInput]
+  NOT: locksScalarWhereWithAggregatesInput
+  name: StringWithAggregatesFilter
+  record_version_number: BigIntNullableWithAggregatesFilter
+  data: StringNullableWithAggregatesFilter
+  owner: StringNullableWithAggregatesFilter
+}
+
+type LocksGroupByOutputType {
+  name: String!
+  record_version_number: BigInt
+  data: String
+  owner: String
+  count: LocksCountAggregateOutputType
+  avg: LocksAvgAggregateOutputType
+  sum: LocksSumAggregateOutputType
+  min: LocksMinAggregateOutputType
+  max: LocksMaxAggregateOutputType
+}
+
+type NamespaceCountAggregateOutputType {
+  id: Int!
+  name: Int!
+  price_plan_id: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type NamespaceAvgAggregateOutputType {
+  price_plan_id: Float
+}
+
+type NamespaceSumAggregateOutputType {
+  price_plan_id: Int
+}
+
+type NamespaceMinAggregateOutputType {
+  id: String
+  name: String
+  price_plan_id: Int
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type NamespaceMaxAggregateOutputType {
+  id: String
+  name: String
+  price_plan_id: Int
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateNamespace {
+  count: NamespaceCountAggregateOutputType
+  avg: NamespaceAvgAggregateOutputType
+  sum: NamespaceSumAggregateOutputType
+  min: NamespaceMinAggregateOutputType
+  max: NamespaceMaxAggregateOutputType
+}
+
+input NestedFloatFilter {
+  equals: Float
+  in: [Float]
+  notIn: [Float]
+  lt: Float
+  lte: Float
+  gt: Float
+  gte: Float
+  not: NestedFloatFilter
+}
+
+input NestedIntWithAggregatesFilter {
+  equals: Int
+  in: [Int]
+  notIn: [Int]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: NestedIntWithAggregatesFilter
+  count: NestedIntFilter
+  avg: NestedFloatFilter
+  sum: NestedIntFilter
+  min: NestedIntFilter
+  max: NestedIntFilter
+}
+
+input IntWithAggregatesFilter {
+  equals: Int
+  in: [Int]
+  notIn: [Int]
+  lt: Int
+  lte: Int
+  gt: Int
+  gte: Int
+  not: NestedIntWithAggregatesFilter
+  count: NestedIntFilter
+  avg: NestedFloatFilter
+  sum: NestedIntFilter
+  min: NestedIntFilter
+  max: NestedIntFilter
+}
+
+input namespaceScalarWhereWithAggregatesInput {
+  AND: namespaceScalarWhereWithAggregatesInput
+  OR: [namespaceScalarWhereWithAggregatesInput]
+  NOT: namespaceScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  price_plan_id: IntWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type NamespaceGroupByOutputType {
+  id: String!
+  name: String!
+  price_plan_id: Int!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: NamespaceCountAggregateOutputType
+  avg: NamespaceAvgAggregateOutputType
+  sum: NamespaceSumAggregateOutputType
+  min: NamespaceMinAggregateOutputType
+  max: NamespaceMaxAggregateOutputType
+}
+
+type Namespace_membersCountAggregateOutputType {
+  user_id: Int!
+  namespace_id: Int!
+  membership: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type Namespace_membersMinAggregateOutputType {
+  user_id: String
+  namespace_id: String
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type Namespace_membersMaxAggregateOutputType {
+  user_id: String
+  namespace_id: String
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateNamespace_members {
+  count: Namespace_membersCountAggregateOutputType
+  min: Namespace_membersMinAggregateOutputType
+  max: Namespace_membersMaxAggregateOutputType
+}
+
+input NestedEnummembershipFilter {
+  equals: membership
+  in: [membership]
+  notIn: [membership]
+  not: membership
+}
+
+input EnummembershipWithAggregatesFilter {
+  equals: membership
+  in: [membership]
+  notIn: [membership]
+  not: membership
+  count: NestedIntFilter
+  min: NestedEnummembershipFilter
+  max: NestedEnummembershipFilter
+}
+
+input namespace_membersScalarWhereWithAggregatesInput {
+  AND: namespace_membersScalarWhereWithAggregatesInput
+  OR: [namespace_membersScalarWhereWithAggregatesInput]
+  NOT: namespace_membersScalarWhereWithAggregatesInput
+  user_id: StringWithAggregatesFilter
+  namespace_id: StringWithAggregatesFilter
+  membership: EnummembershipWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type Namespace_membersGroupByOutputType {
+  user_id: String!
+  namespace_id: String!
+  membership: membership!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: Namespace_membersCountAggregateOutputType
+  min: Namespace_membersMinAggregateOutputType
+  max: Namespace_membersMaxAggregateOutputType
+}
+
+type NodepoolCountAggregateOutputType {
+  id: Int!
+  wundernode_id: Int!
+  shared: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type NodepoolMinAggregateOutputType {
+  id: String
+  wundernode_id: String
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type NodepoolMaxAggregateOutputType {
+  id: String
+  wundernode_id: String
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateNodepool {
+  count: NodepoolCountAggregateOutputType
+  min: NodepoolMinAggregateOutputType
+  max: NodepoolMaxAggregateOutputType
+}
+
+input nodepoolScalarWhereWithAggregatesInput {
+  AND: nodepoolScalarWhereWithAggregatesInput
+  OR: [nodepoolScalarWhereWithAggregatesInput]
+  NOT: nodepoolScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  wundernode_id: StringWithAggregatesFilter
+  shared: BoolWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type NodepoolGroupByOutputType {
+  id: String!
+  wundernode_id: String!
+  shared: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: NodepoolCountAggregateOutputType
+  min: NodepoolMinAggregateOutputType
+  max: NodepoolMaxAggregateOutputType
+}
+
+type Nodepool_environmentCountAggregateOutputType {
+  nodepool_id: Int!
+  environment_id: Int!
+}
+
+type Nodepool_environmentMinAggregateOutputType {
+  nodepool_id: String
+  environment_id: String
+}
+
+type Nodepool_environmentMaxAggregateOutputType {
+  nodepool_id: String
+  environment_id: String
+}
+
+type AggregateNodepool_environment {
+  count: Nodepool_environmentCountAggregateOutputType
+  min: Nodepool_environmentMinAggregateOutputType
+  max: Nodepool_environmentMaxAggregateOutputType
+}
+
+input nodepool_environmentScalarWhereWithAggregatesInput {
+  AND: nodepool_environmentScalarWhereWithAggregatesInput
+  OR: [nodepool_environmentScalarWhereWithAggregatesInput]
+  NOT: nodepool_environmentScalarWhereWithAggregatesInput
+  nodepool_id: StringWithAggregatesFilter
+  environment_id: StringWithAggregatesFilter
+}
+
+type Nodepool_environmentGroupByOutputType {
+  nodepool_id: String!
+  environment_id: String!
+  count: Nodepool_environmentCountAggregateOutputType
+  min: Nodepool_environmentMinAggregateOutputType
+  max: Nodepool_environmentMaxAggregateOutputType
+}
+
+input price_planOrderByInput {
+  id: SortOrder
+  name: SortOrder
+  quota_daily_requests: SortOrder
+  quota_environments: SortOrder
+  quota_members: SortOrder
+  quota_apis: SortOrder
+  allow_secondary_environments: SortOrder
+}
+
+input price_planWhereUniqueInput {
+  id: Int
+}
+
+enum Price_planScalarFieldEnum {
+  id
+  name
+  quota_daily_requests
+  quota_environments
+  quota_members
+  quota_apis
+  allow_secondary_environments
+}
+
+type Price_planCountAggregateOutputType {
+  id: Int!
+  name: Int!
+  quota_daily_requests: Int!
+  quota_environments: Int!
+  quota_members: Int!
+  quota_apis: Int!
+  allow_secondary_environments: Int!
+}
+
+type Price_planAvgAggregateOutputType {
+  id: Float
+  quota_daily_requests: Float
+  quota_environments: Float
+  quota_members: Float
+  quota_apis: Float
+}
+
+type Price_planSumAggregateOutputType {
+  id: Int
+  quota_daily_requests: Int
+  quota_environments: Int
+  quota_members: Int
+  quota_apis: Int
+}
+
+type Price_planMinAggregateOutputType {
+  id: Int
+  name: String
+  quota_daily_requests: Int
+  quota_environments: Int
+  quota_members: Int
+  quota_apis: Int
+  allow_secondary_environments: Boolean
+}
+
+type Price_planMaxAggregateOutputType {
+  id: Int
+  name: String
+  quota_daily_requests: Int
+  quota_environments: Int
+  quota_members: Int
+  quota_apis: Int
+  allow_secondary_environments: Boolean
+}
+
+type AggregatePrice_plan {
+  count: Price_planCountAggregateOutputType
+  avg: Price_planAvgAggregateOutputType
+  sum: Price_planSumAggregateOutputType
+  min: Price_planMinAggregateOutputType
+  max: Price_planMaxAggregateOutputType
+}
+
+input price_planScalarWhereWithAggregatesInput {
+  AND: price_planScalarWhereWithAggregatesInput
+  OR: [price_planScalarWhereWithAggregatesInput]
+  NOT: price_planScalarWhereWithAggregatesInput
+  id: IntWithAggregatesFilter
+  name: StringWithAggregatesFilter
+  quota_daily_requests: IntWithAggregatesFilter
+  quota_environments: IntWithAggregatesFilter
+  quota_members: IntWithAggregatesFilter
+  quota_apis: IntWithAggregatesFilter
+  allow_secondary_environments: BoolWithAggregatesFilter
+}
+
+type Price_planGroupByOutputType {
+  id: Int!
+  name: String!
+  quota_daily_requests: Int!
+  quota_environments: Int!
+  quota_members: Int!
+  quota_apis: Int!
+  allow_secondary_environments: Boolean!
+  count: Price_planCountAggregateOutputType
+  avg: Price_planAvgAggregateOutputType
+  sum: Price_planSumAggregateOutputType
+  min: Price_planMinAggregateOutputType
+  max: Price_planMaxAggregateOutputType
+}
+
+input usersOrderByInput {
+  id: SortOrder
+  name: SortOrder
+  email: SortOrder
+  role: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input usersWhereUniqueInput {
+  id: String
+  email: String
+}
+
+enum UsersScalarFieldEnum {
+  id
+  name
+  email
+  role
+  created_at
+  updated_at
+}
+
+type UsersCountAggregateOutputType {
+  id: Int!
+  name: Int!
+  email: Int!
+  role: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type UsersMinAggregateOutputType {
+  id: String
+  name: String
+  email: String
+  role: user_role
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type UsersMaxAggregateOutputType {
+  id: String
+  name: String
+  email: String
+  role: user_role
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateUsers {
+  count: UsersCountAggregateOutputType
+  min: UsersMinAggregateOutputType
+  max: UsersMaxAggregateOutputType
+}
+
+input NestedEnumuser_roleFilter {
+  equals: user_role
+  in: [user_role]
+  notIn: [user_role]
+  not: user_role
+}
+
+input Enumuser_roleWithAggregatesFilter {
+  equals: user_role
+  in: [user_role]
+  notIn: [user_role]
+  not: user_role
+  count: NestedIntFilter
+  min: NestedEnumuser_roleFilter
+  max: NestedEnumuser_roleFilter
+}
+
+input usersScalarWhereWithAggregatesInput {
+  AND: usersScalarWhereWithAggregatesInput
+  OR: [usersScalarWhereWithAggregatesInput]
+  NOT: usersScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  name: StringNullableWithAggregatesFilter
+  email: StringWithAggregatesFilter
+  role: Enumuser_roleWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type UsersGroupByOutputType {
+  id: String!
+  name: String
+  email: String!
+  role: user_role!
+  created_at: DateTime!
+  updated_at: DateTime
+  count: UsersCountAggregateOutputType
+  min: UsersMinAggregateOutputType
+  max: UsersMaxAggregateOutputType
+}
+
+input wundernodeOrderByInput {
+  id: SortOrder
+  etag: SortOrder
+  config: SortOrder
+  ipv4: SortOrder
+  ipv6: SortOrder
+  created_at: SortOrder
+  updated_at: SortOrder
+}
+
+input wundernodeWhereUniqueInput {
+  id: String
+}
+
+enum WundernodeScalarFieldEnum {
+  id
+  etag
+  config
+  ipv4
+  ipv6
+  created_at
+  updated_at
+}
+
+type WundernodeCountAggregateOutputType {
+  id: Int!
+  etag: Int!
+  config: Int!
+  ipv4: Int!
+  ipv6: Int!
+  created_at: Int!
+  updated_at: Int!
+}
+
+type WundernodeMinAggregateOutputType {
+  id: String
+  etag: String
+  ipv4: String
+  ipv6: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type WundernodeMaxAggregateOutputType {
+  id: String
+  etag: String
+  ipv4: String
+  ipv6: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type AggregateWundernode {
+  count: WundernodeCountAggregateOutputType
+  min: WundernodeMinAggregateOutputType
+  max: WundernodeMaxAggregateOutputType
+}
+
+input wundernodeScalarWhereWithAggregatesInput {
+  AND: wundernodeScalarWhereWithAggregatesInput
+  OR: [wundernodeScalarWhereWithAggregatesInput]
+  NOT: wundernodeScalarWhereWithAggregatesInput
+  id: StringWithAggregatesFilter
+  etag: StringWithAggregatesFilter
+  config: JsonWithAggregatesFilter
+  ipv4: StringNullableWithAggregatesFilter
+  ipv6: StringNullableWithAggregatesFilter
+  created_at: DateTimeWithAggregatesFilter
+  updated_at: DateTimeNullableWithAggregatesFilter
+}
+
+type WundernodeGroupByOutputType {
+  id: String!
+  etag: String!
+  config: Json!
+  ipv4: String
+  ipv6: String
+  created_at: DateTime!
+  updated_at: DateTime
+  count: WundernodeCountAggregateOutputType
+  min: WundernodeMinAggregateOutputType
+  max: WundernodeMaxAggregateOutputType
+}
+
+type Query {
+  findFirstaccess_token(where: access_tokenWhereInput, orderBy: [access_tokenOrderByInput], cursor: access_tokenWhereUniqueInput, take: Int, skip: Int, distinct: [Access_tokenScalarFieldEnum]): access_token
+  findManyaccess_token(where: access_tokenWhereInput, orderBy: [access_tokenOrderByInput], cursor: access_tokenWhereUniqueInput, take: Int, skip: Int, distinct: [Access_tokenScalarFieldEnum]): [access_token]!
+  aggregateaccess_token(where: access_tokenWhereInput, orderBy: [access_tokenOrderByInput], cursor: access_tokenWhereUniqueInput, take: Int, skip: Int): AggregateAccess_token!
+  groupByaccess_token(where: access_tokenWhereInput, orderBy: [access_tokenOrderByInput], by: [Access_tokenScalarFieldEnum]!, having: access_tokenScalarWhereWithAggregatesInput, take: Int, skip: Int): [Access_tokenGroupByOutputType]!
+  findUniqueaccess_token(where: access_tokenWhereUniqueInput!): access_token
+  findFirstadmin_config(where: admin_configWhereInput, orderBy: [admin_configOrderByInput], cursor: admin_configWhereUniqueInput, take: Int, skip: Int, distinct: [Admin_configScalarFieldEnum]): admin_config
+  findManyadmin_config(where: admin_configWhereInput, orderBy: [admin_configOrderByInput], cursor: admin_configWhereUniqueInput, take: Int, skip: Int, distinct: [Admin_configScalarFieldEnum]): [admin_config]!
+  aggregateadmin_config(where: admin_configWhereInput, orderBy: [admin_configOrderByInput], cursor: admin_configWhereUniqueInput, take: Int, skip: Int): AggregateAdmin_config!
+  groupByadmin_config(where: admin_configWhereInput, orderBy: [admin_configOrderByInput], by: [Admin_configScalarFieldEnum]!, having: admin_configScalarWhereWithAggregatesInput, take: Int, skip: Int): [Admin_configGroupByOutputType]!
+  findUniqueadmin_config(where: admin_configWhereUniqueInput!): admin_config
+  findFirstapi(where: apiWhereInput, orderBy: [apiOrderByInput], cursor: apiWhereUniqueInput, take: Int, skip: Int, distinct: [ApiScalarFieldEnum]): api
+  findManyapi(where: apiWhereInput, orderBy: [apiOrderByInput], cursor: apiWhereUniqueInput, take: Int, skip: Int, distinct: [ApiScalarFieldEnum]): [api]!
+  aggregateapi(where: apiWhereInput, orderBy: [apiOrderByInput], cursor: apiWhereUniqueInput, take: Int, skip: Int): AggregateApi!
+  groupByapi(where: apiWhereInput, orderBy: [apiOrderByInput], by: [ApiScalarFieldEnum]!, having: apiScalarWhereWithAggregatesInput, take: Int, skip: Int): [ApiGroupByOutputType]!
+  findUniqueapi(where: apiWhereUniqueInput!): api
+  findFirstdeployment(where: deploymentWhereInput, orderBy: [deploymentOrderByInput], cursor: deploymentWhereUniqueInput, take: Int, skip: Int, distinct: [DeploymentScalarFieldEnum]): deployment
+  findManydeployment(where: deploymentWhereInput, orderBy: [deploymentOrderByInput], cursor: deploymentWhereUniqueInput, take: Int, skip: Int, distinct: [DeploymentScalarFieldEnum]): [deployment]!
+  aggregatedeployment(where: deploymentWhereInput, orderBy: [deploymentOrderByInput], cursor: deploymentWhereUniqueInput, take: Int, skip: Int): AggregateDeployment!
+  groupBydeployment(where: deploymentWhereInput, orderBy: [deploymentOrderByInput], by: [DeploymentScalarFieldEnum]!, having: deploymentScalarWhereWithAggregatesInput, take: Int, skip: Int): [DeploymentGroupByOutputType]!
+  findUniquedeployment(where: deploymentWhereUniqueInput!): deployment
+  findFirstdeployment_environment(where: deployment_environmentWhereInput, orderBy: [deployment_environmentOrderByInput], cursor: deployment_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Deployment_environmentScalarFieldEnum]): deployment_environment
+  findManydeployment_environment(where: deployment_environmentWhereInput, orderBy: [deployment_environmentOrderByInput], cursor: deployment_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Deployment_environmentScalarFieldEnum]): [deployment_environment]!
+  aggregatedeployment_environment(where: deployment_environmentWhereInput, orderBy: [deployment_environmentOrderByInput], cursor: deployment_environmentWhereUniqueInput, take: Int, skip: Int): AggregateDeployment_environment!
+  groupBydeployment_environment(where: deployment_environmentWhereInput, orderBy: [deployment_environmentOrderByInput], by: [Deployment_environmentScalarFieldEnum]!, having: deployment_environmentScalarWhereWithAggregatesInput, take: Int, skip: Int): [Deployment_environmentGroupByOutputType]!
+  findUniquedeployment_environment(where: deployment_environmentWhereUniqueInput!): deployment_environment
+  findFirstedge(where: edgeWhereInput, orderBy: [edgeOrderByInput], cursor: edgeWhereUniqueInput, take: Int, skip: Int, distinct: [EdgeScalarFieldEnum]): edge
+  findManyedge(where: edgeWhereInput, orderBy: [edgeOrderByInput], cursor: edgeWhereUniqueInput, take: Int, skip: Int, distinct: [EdgeScalarFieldEnum]): [edge]!
+  aggregateedge(where: edgeWhereInput, orderBy: [edgeOrderByInput], cursor: edgeWhereUniqueInput, take: Int, skip: Int): AggregateEdge!
+  groupByedge(where: edgeWhereInput, orderBy: [edgeOrderByInput], by: [EdgeScalarFieldEnum]!, having: edgeScalarWhereWithAggregatesInput, take: Int, skip: Int): [EdgeGroupByOutputType]!
+  findUniqueedge(where: edgeWhereUniqueInput!): edge
+  findFirstenvironment(where: environmentWhereInput, orderBy: [environmentOrderByInput], cursor: environmentWhereUniqueInput, take: Int, skip: Int, distinct: [EnvironmentScalarFieldEnum]): environment
+  findManyenvironment(where: environmentWhereInput, orderBy: [environmentOrderByInput], cursor: environmentWhereUniqueInput, take: Int, skip: Int, distinct: [EnvironmentScalarFieldEnum]): [environment]!
+  aggregateenvironment(where: environmentWhereInput, orderBy: [environmentOrderByInput], cursor: environmentWhereUniqueInput, take: Int, skip: Int): AggregateEnvironment!
+  groupByenvironment(where: environmentWhereInput, orderBy: [environmentOrderByInput], by: [EnvironmentScalarFieldEnum]!, having: environmentScalarWhereWithAggregatesInput, take: Int, skip: Int): [EnvironmentGroupByOutputType]!
+  findUniqueenvironment(where: environmentWhereUniqueInput!): environment
+  findFirstenvironment_edges(where: environment_edgesWhereInput, orderBy: [environment_edgesOrderByInput], cursor: environment_edgesWhereUniqueInput, take: Int, skip: Int, distinct: [Environment_edgesScalarFieldEnum]): environment_edges
+  findManyenvironment_edges(where: environment_edgesWhereInput, orderBy: [environment_edgesOrderByInput], cursor: environment_edgesWhereUniqueInput, take: Int, skip: Int, distinct: [Environment_edgesScalarFieldEnum]): [environment_edges]!
+  aggregateenvironment_edges(where: environment_edgesWhereInput, orderBy: [environment_edgesOrderByInput], cursor: environment_edgesWhereUniqueInput, take: Int, skip: Int): AggregateEnvironment_edges!
+  groupByenvironment_edges(where: environment_edgesWhereInput, orderBy: [environment_edgesOrderByInput], by: [Environment_edgesScalarFieldEnum]!, having: environment_edgesScalarWhereWithAggregatesInput, take: Int, skip: Int): [Environment_edgesGroupByOutputType]!
+  findUniqueenvironment_edges(where: environment_edgesWhereUniqueInput!): environment_edges
+  findFirstletsencrypt_certificate(where: letsencrypt_certificateWhereInput, orderBy: [letsencrypt_certificateOrderByInput], cursor: letsencrypt_certificateWhereUniqueInput, take: Int, skip: Int, distinct: [Letsencrypt_certificateScalarFieldEnum]): letsencrypt_certificate
+  findManyletsencrypt_certificate(where: letsencrypt_certificateWhereInput, orderBy: [letsencrypt_certificateOrderByInput], cursor: letsencrypt_certificateWhereUniqueInput, take: Int, skip: Int, distinct: [Letsencrypt_certificateScalarFieldEnum]): [letsencrypt_certificate]!
+  aggregateletsencrypt_certificate(where: letsencrypt_certificateWhereInput, orderBy: [letsencrypt_certificateOrderByInput], cursor: letsencrypt_certificateWhereUniqueInput, take: Int, skip: Int): AggregateLetsencrypt_certificate!
+  groupByletsencrypt_certificate(where: letsencrypt_certificateWhereInput, orderBy: [letsencrypt_certificateOrderByInput], by: [Letsencrypt_certificateScalarFieldEnum]!, having: letsencrypt_certificateScalarWhereWithAggregatesInput, take: Int, skip: Int): [Letsencrypt_certificateGroupByOutputType]!
+  findUniqueletsencrypt_certificate(where: letsencrypt_certificateWhereUniqueInput!): letsencrypt_certificate
+  findFirstletsencrypt_user(where: letsencrypt_userWhereInput, orderBy: [letsencrypt_userOrderByInput], cursor: letsencrypt_userWhereUniqueInput, take: Int, skip: Int, distinct: [Letsencrypt_userScalarFieldEnum]): letsencrypt_user
+  findManyletsencrypt_user(where: letsencrypt_userWhereInput, orderBy: [letsencrypt_userOrderByInput], cursor: letsencrypt_userWhereUniqueInput, take: Int, skip: Int, distinct: [Letsencrypt_userScalarFieldEnum]): [letsencrypt_user]!
+  aggregateletsencrypt_user(where: letsencrypt_userWhereInput, orderBy: [letsencrypt_userOrderByInput], cursor: letsencrypt_userWhereUniqueInput, take: Int, skip: Int): AggregateLetsencrypt_user!
+  groupByletsencrypt_user(where: letsencrypt_userWhereInput, orderBy: [letsencrypt_userOrderByInput], by: [Letsencrypt_userScalarFieldEnum]!, having: letsencrypt_userScalarWhereWithAggregatesInput, take: Int, skip: Int): [Letsencrypt_userGroupByOutputType]!
+  findUniqueletsencrypt_user(where: letsencrypt_userWhereUniqueInput!): letsencrypt_user
+  findFirstlocks(where: locksWhereInput, orderBy: [locksOrderByInput], cursor: locksWhereUniqueInput, take: Int, skip: Int, distinct: [LocksScalarFieldEnum]): locks
+  findManylocks(where: locksWhereInput, orderBy: [locksOrderByInput], cursor: locksWhereUniqueInput, take: Int, skip: Int, distinct: [LocksScalarFieldEnum]): [locks]!
+  aggregatelocks(where: locksWhereInput, orderBy: [locksOrderByInput], cursor: locksWhereUniqueInput, take: Int, skip: Int): AggregateLocks!
+  groupBylocks(where: locksWhereInput, orderBy: [locksOrderByInput], by: [LocksScalarFieldEnum]!, having: locksScalarWhereWithAggregatesInput, take: Int, skip: Int): [LocksGroupByOutputType]!
+  findUniquelocks(where: locksWhereUniqueInput!): locks
+  findFirstnamespace(where: namespaceWhereInput, orderBy: [namespaceOrderByInput], cursor: namespaceWhereUniqueInput, take: Int, skip: Int, distinct: [NamespaceScalarFieldEnum]): namespace
+  findManynamespace(where: namespaceWhereInput, orderBy: [namespaceOrderByInput], cursor: namespaceWhereUniqueInput, take: Int, skip: Int, distinct: [NamespaceScalarFieldEnum]): [namespace]!
+  aggregatenamespace(where: namespaceWhereInput, orderBy: [namespaceOrderByInput], cursor: namespaceWhereUniqueInput, take: Int, skip: Int): AggregateNamespace!
+  groupBynamespace(where: namespaceWhereInput, orderBy: [namespaceOrderByInput], by: [NamespaceScalarFieldEnum]!, having: namespaceScalarWhereWithAggregatesInput, take: Int, skip: Int): [NamespaceGroupByOutputType]!
+  findUniquenamespace(where: namespaceWhereUniqueInput!): namespace
+  findFirstnamespace_members(where: namespace_membersWhereInput, orderBy: [namespace_membersOrderByInput], cursor: namespace_membersWhereUniqueInput, take: Int, skip: Int, distinct: [Namespace_membersScalarFieldEnum]): namespace_members
+  findManynamespace_members(where: namespace_membersWhereInput, orderBy: [namespace_membersOrderByInput], cursor: namespace_membersWhereUniqueInput, take: Int, skip: Int, distinct: [Namespace_membersScalarFieldEnum]): [namespace_members]!
+  aggregatenamespace_members(where: namespace_membersWhereInput, orderBy: [namespace_membersOrderByInput], cursor: namespace_membersWhereUniqueInput, take: Int, skip: Int): AggregateNamespace_members!
+  groupBynamespace_members(where: namespace_membersWhereInput, orderBy: [namespace_membersOrderByInput], by: [Namespace_membersScalarFieldEnum]!, having: namespace_membersScalarWhereWithAggregatesInput, take: Int, skip: Int): [Namespace_membersGroupByOutputType]!
+  findUniquenamespace_members(where: namespace_membersWhereUniqueInput!): namespace_members
+  findFirstnodepool(where: nodepoolWhereInput, orderBy: [nodepoolOrderByInput], cursor: nodepoolWhereUniqueInput, take: Int, skip: Int, distinct: [NodepoolScalarFieldEnum]): nodepool
+  findManynodepool(where: nodepoolWhereInput, orderBy: [nodepoolOrderByInput], cursor: nodepoolWhereUniqueInput, take: Int, skip: Int, distinct: [NodepoolScalarFieldEnum]): [nodepool]!
+  aggregatenodepool(where: nodepoolWhereInput, orderBy: [nodepoolOrderByInput], cursor: nodepoolWhereUniqueInput, take: Int, skip: Int): AggregateNodepool!
+  groupBynodepool(where: nodepoolWhereInput, orderBy: [nodepoolOrderByInput], by: [NodepoolScalarFieldEnum]!, having: nodepoolScalarWhereWithAggregatesInput, take: Int, skip: Int): [NodepoolGroupByOutputType]!
+  findUniquenodepool(where: nodepoolWhereUniqueInput!): nodepool
+  findFirstnodepool_environment(where: nodepool_environmentWhereInput, orderBy: [nodepool_environmentOrderByInput], cursor: nodepool_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Nodepool_environmentScalarFieldEnum]): nodepool_environment
+  findManynodepool_environment(where: nodepool_environmentWhereInput, orderBy: [nodepool_environmentOrderByInput], cursor: nodepool_environmentWhereUniqueInput, take: Int, skip: Int, distinct: [Nodepool_environmentScalarFieldEnum]): [nodepool_environment]!
+  aggregatenodepool_environment(where: nodepool_environmentWhereInput, orderBy: [nodepool_environmentOrderByInput], cursor: nodepool_environmentWhereUniqueInput, take: Int, skip: Int): AggregateNodepool_environment!
+  groupBynodepool_environment(where: nodepool_environmentWhereInput, orderBy: [nodepool_environmentOrderByInput], by: [Nodepool_environmentScalarFieldEnum]!, having: nodepool_environmentScalarWhereWithAggregatesInput, take: Int, skip: Int): [Nodepool_environmentGroupByOutputType]!
+  findUniquenodepool_environment(where: nodepool_environmentWhereUniqueInput!): nodepool_environment
+  findFirstprice_plan(where: price_planWhereInput, orderBy: [price_planOrderByInput], cursor: price_planWhereUniqueInput, take: Int, skip: Int, distinct: [Price_planScalarFieldEnum]): price_plan
+  findManyprice_plan(where: price_planWhereInput, orderBy: [price_planOrderByInput], cursor: price_planWhereUniqueInput, take: Int, skip: Int, distinct: [Price_planScalarFieldEnum]): [price_plan]!
+  aggregateprice_plan(where: price_planWhereInput, orderBy: [price_planOrderByInput], cursor: price_planWhereUniqueInput, take: Int, skip: Int): AggregatePrice_plan!
+  groupByprice_plan(where: price_planWhereInput, orderBy: [price_planOrderByInput], by: [Price_planScalarFieldEnum]!, having: price_planScalarWhereWithAggregatesInput, take: Int, skip: Int): [Price_planGroupByOutputType]!
+  findUniqueprice_plan(where: price_planWhereUniqueInput!): price_plan
+  findFirstusers(where: usersWhereInput, orderBy: [usersOrderByInput], cursor: usersWhereUniqueInput, take: Int, skip: Int, distinct: [UsersScalarFieldEnum]): users
+  findManyusers(where: usersWhereInput, orderBy: [usersOrderByInput], cursor: usersWhereUniqueInput, take: Int, skip: Int, distinct: [UsersScalarFieldEnum]): [users]!
+  aggregateusers(where: usersWhereInput, orderBy: [usersOrderByInput], cursor: usersWhereUniqueInput, take: Int, skip: Int): AggregateUsers!
+  groupByusers(where: usersWhereInput, orderBy: [usersOrderByInput], by: [UsersScalarFieldEnum]!, having: usersScalarWhereWithAggregatesInput, take: Int, skip: Int): [UsersGroupByOutputType]!
+  findUniqueusers(where: usersWhereUniqueInput!): users
+  findFirstwundernode(where: wundernodeWhereInput, orderBy: [wundernodeOrderByInput], cursor: wundernodeWhereUniqueInput, take: Int, skip: Int, distinct: [WundernodeScalarFieldEnum]): wundernode
+  findManywundernode(where: wundernodeWhereInput, orderBy: [wundernodeOrderByInput], cursor: wundernodeWhereUniqueInput, take: Int, skip: Int, distinct: [WundernodeScalarFieldEnum]): [wundernode]!
+  aggregatewundernode(where: wundernodeWhereInput, orderBy: [wundernodeOrderByInput], cursor: wundernodeWhereUniqueInput, take: Int, skip: Int): AggregateWundernode!
+  groupBywundernode(where: wundernodeWhereInput, orderBy: [wundernodeOrderByInput], by: [WundernodeScalarFieldEnum]!, having: wundernodeScalarWhereWithAggregatesInput, take: Int, skip: Int): [WundernodeGroupByOutputType]!
+  findUniquewundernode(where: wundernodeWhereUniqueInput!): wundernode
+  posts: [Post]
+  postComments(postID: String!): [Comment]
+  users: [User]
+  userPosts(userID: String!): [Post]
+}
+
+input price_planCreateWithoutNamespaceInput {
+  name: String!
+  quota_daily_requests: Int!
+  quota_environments: Int!
+  quota_members: Int
+  quota_apis: Int
+  allow_secondary_environments: Boolean
+}
+
+input price_planCreateOrConnectWithoutNamespaceInput {
+  where: price_planWhereUniqueInput!
+  create: price_planCreateWithoutNamespaceInput!
+}
+
+input price_planCreateNestedOneWithoutNamespaceInput {
+  create: price_planCreateWithoutNamespaceInput
+  connectOrCreate: price_planCreateOrConnectWithoutNamespaceInput
+  connect: price_planWhereUniqueInput
+}
+
+input environmentCreatehostnamesInput {
+  set: [String]!
+}
+
+input access_tokenCreateWithoutUsersInput {
+  id: String
+  token: String
+  name: String!
+  created_at: DateTime
+}
+
+input access_tokenCreateOrConnectWithoutUsersInput {
+  where: access_tokenWhereUniqueInput!
+  create: access_tokenCreateWithoutUsersInput!
+}
+
+input access_tokenCreateManyUsersInput {
+  id: String
+  token: String
+  name: String!
+  created_at: DateTime
+}
+
+input access_tokenCreateManyUsersInputEnvelope {
+  data: [access_tokenCreateManyUsersInput]!
+  skipDuplicates: Boolean
+}
+
+input access_tokenCreateNestedManyWithoutUsersInput {
+  create: access_tokenCreateWithoutUsersInput
+  connectOrCreate: access_tokenCreateOrConnectWithoutUsersInput
+  createMany: access_tokenCreateManyUsersInputEnvelope
+  connect: access_tokenWhereUniqueInput
+}
+
+input usersCreateWithoutNamespace_membersInput {
+  id: String
+  name: String
+  email: String!
+  role: user_role
+  created_at: DateTime
+  updated_at: DateTime
+  access_token: access_tokenCreateNestedManyWithoutUsersInput
+}
+
+input usersCreateOrConnectWithoutNamespace_membersInput {
+  where: usersWhereUniqueInput!
+  create: usersCreateWithoutNamespace_membersInput!
+}
+
+input usersCreateNestedOneWithoutNamespace_membersInput {
+  create: usersCreateWithoutNamespace_membersInput
+  connectOrCreate: usersCreateOrConnectWithoutNamespace_membersInput
+  connect: usersWhereUniqueInput
+}
+
+input namespace_membersCreateWithoutNamespaceInput {
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+  users: usersCreateNestedOneWithoutNamespace_membersInput!
+}
+
+input namespace_membersCreateOrConnectWithoutNamespaceInput {
+  where: namespace_membersWhereUniqueInput!
+  create: namespace_membersCreateWithoutNamespaceInput!
+}
+
+input namespace_membersCreateManyNamespaceInput {
+  user_id: String!
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input namespace_membersCreateManyNamespaceInputEnvelope {
+  data: [namespace_membersCreateManyNamespaceInput]!
+  skipDuplicates: Boolean
+}
+
+input namespace_membersCreateNestedManyWithoutNamespaceInput {
+  create: namespace_membersCreateWithoutNamespaceInput
+  connectOrCreate: namespace_membersCreateOrConnectWithoutNamespaceInput
+  createMany: namespace_membersCreateManyNamespaceInputEnvelope
+  connect: namespace_membersWhereUniqueInput
+}
+
+input namespaceCreateWithoutEnvironmentInput {
+  id: String
+  name: String!
+  created_at: DateTime
+  updated_at: DateTime
+  price_plan: price_planCreateNestedOneWithoutNamespaceInput
+  api: apiCreateNestedManyWithoutNamespaceInput
+  namespace_members: namespace_membersCreateNestedManyWithoutNamespaceInput
+}
+
+input namespaceCreateOrConnectWithoutEnvironmentInput {
+  where: namespaceWhereUniqueInput!
+  create: namespaceCreateWithoutEnvironmentInput!
+}
+
+input namespaceCreateNestedOneWithoutEnvironmentInput {
+  create: namespaceCreateWithoutEnvironmentInput
+  connectOrCreate: namespaceCreateOrConnectWithoutEnvironmentInput
+  connect: namespaceWhereUniqueInput
+}
+
+input edgeCreateWithoutEnvironment_edgesInput {
+  id: String
+  name: String!
+  location: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input edgeCreateOrConnectWithoutEnvironment_edgesInput {
+  where: edgeWhereUniqueInput!
+  create: edgeCreateWithoutEnvironment_edgesInput!
+}
+
+input edgeCreateNestedOneWithoutEnvironment_edgesInput {
+  create: edgeCreateWithoutEnvironment_edgesInput
+  connectOrCreate: edgeCreateOrConnectWithoutEnvironment_edgesInput
+  connect: edgeWhereUniqueInput
+}
+
+input environment_edgesCreateWithoutEnvironmentInput {
+  edge: edgeCreateNestedOneWithoutEnvironment_edgesInput!
+}
+
+input environment_edgesCreateOrConnectWithoutEnvironmentInput {
+  where: environment_edgesWhereUniqueInput!
+  create: environment_edgesCreateWithoutEnvironmentInput!
+}
+
+input environment_edgesCreateManyEnvironmentInput {
+  edge_id: String!
+}
+
+input environment_edgesCreateManyEnvironmentInputEnvelope {
+  data: [environment_edgesCreateManyEnvironmentInput]!
+  skipDuplicates: Boolean
+}
+
+input environment_edgesCreateNestedManyWithoutEnvironmentInput {
+  create: environment_edgesCreateWithoutEnvironmentInput
+  connectOrCreate: environment_edgesCreateOrConnectWithoutEnvironmentInput
+  createMany: environment_edgesCreateManyEnvironmentInputEnvelope
+  connect: environment_edgesWhereUniqueInput
+}
+
+input wundernodeCreateWithoutNodepoolInput {
+  id: String
+  etag: String!
+  config: DateTime!
+  ipv4: String
+  ipv6: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input wundernodeCreateOrConnectWithoutNodepoolInput {
+  where: wundernodeWhereUniqueInput!
+  create: wundernodeCreateWithoutNodepoolInput!
+}
+
+input wundernodeCreateNestedOneWithoutNodepoolInput {
+  create: wundernodeCreateWithoutNodepoolInput
+  connectOrCreate: wundernodeCreateOrConnectWithoutNodepoolInput
+  connect: wundernodeWhereUniqueInput
+}
+
+input nodepoolCreateWithoutNodepool_environmentInput {
+  id: String
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+  wundernode: wundernodeCreateNestedOneWithoutNodepoolInput!
+}
+
+input nodepoolCreateOrConnectWithoutNodepool_environmentInput {
+  where: nodepoolWhereUniqueInput!
+  create: nodepoolCreateWithoutNodepool_environmentInput!
+}
+
+input nodepoolCreateNestedOneWithoutNodepool_environmentInput {
+  create: nodepoolCreateWithoutNodepool_environmentInput
+  connectOrCreate: nodepoolCreateOrConnectWithoutNodepool_environmentInput
+  connect: nodepoolWhereUniqueInput
+}
+
+input nodepool_environmentCreateWithoutEnvironmentInput {
+  nodepool: nodepoolCreateNestedOneWithoutNodepool_environmentInput!
+}
+
+input nodepool_environmentCreateOrConnectWithoutEnvironmentInput {
+  where: nodepool_environmentWhereUniqueInput!
+  create: nodepool_environmentCreateWithoutEnvironmentInput!
+}
+
+input nodepool_environmentCreateManyEnvironmentInput {
+  nodepool_id: String!
+}
+
+input nodepool_environmentCreateManyEnvironmentInputEnvelope {
+  data: [nodepool_environmentCreateManyEnvironmentInput]!
+  skipDuplicates: Boolean
+}
+
+input nodepool_environmentCreateNestedManyWithoutEnvironmentInput {
+  create: nodepool_environmentCreateWithoutEnvironmentInput
+  connectOrCreate: nodepool_environmentCreateOrConnectWithoutEnvironmentInput
+  createMany: nodepool_environmentCreateManyEnvironmentInputEnvelope
+  connect: nodepool_environmentWhereUniqueInput
+}
+
+input environmentCreateWithoutDeployment_environmentInput {
+  id: String
+  name: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreatehostnamesInput
+  namespace: namespaceCreateNestedOneWithoutEnvironmentInput!
+  environment_edges: environment_edgesCreateNestedManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentCreateNestedManyWithoutEnvironmentInput
+}
+
+input environmentCreateOrConnectWithoutDeployment_environmentInput {
+  where: environmentWhereUniqueInput!
+  create: environmentCreateWithoutDeployment_environmentInput!
+}
+
+input environmentCreateNestedOneWithoutDeployment_environmentInput {
+  create: environmentCreateWithoutDeployment_environmentInput
+  connectOrCreate: environmentCreateOrConnectWithoutDeployment_environmentInput
+  connect: environmentWhereUniqueInput
+}
+
+input deployment_environmentCreateWithoutDeploymentInput {
+  environment: environmentCreateNestedOneWithoutDeployment_environmentInput!
+}
+
+input deployment_environmentCreateOrConnectWithoutDeploymentInput {
+  where: deployment_environmentWhereUniqueInput!
+  create: deployment_environmentCreateWithoutDeploymentInput!
+}
+
+input deployment_environmentCreateManyDeploymentInput {
+  environment_id: String!
+}
+
+input deployment_environmentCreateManyDeploymentInputEnvelope {
+  data: [deployment_environmentCreateManyDeploymentInput]!
+  skipDuplicates: Boolean
+}
+
+input deployment_environmentCreateNestedManyWithoutDeploymentInput {
+  create: deployment_environmentCreateWithoutDeploymentInput
+  connectOrCreate: deployment_environmentCreateOrConnectWithoutDeploymentInput
+  createMany: deployment_environmentCreateManyDeploymentInputEnvelope
+  connect: deployment_environmentWhereUniqueInput
+}
+
+input deploymentCreateWithoutApiInput {
+  id: String
+  name: String!
+  config: DateTime!
+  created_at: DateTime
+  updated_at: DateTime
+  deployment_environment: deployment_environmentCreateNestedManyWithoutDeploymentInput
+}
+
+input deploymentCreateOrConnectWithoutApiInput {
+  where: deploymentWhereUniqueInput!
+  create: deploymentCreateWithoutApiInput!
+}
+
+input deploymentCreateManyApiInput {
+  id: String
+  name: String!
+  config: DateTime!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input deploymentCreateManyApiInputEnvelope {
+  data: [deploymentCreateManyApiInput]!
+  skipDuplicates: Boolean
+}
+
+input deploymentCreateNestedManyWithoutApiInput {
+  create: deploymentCreateWithoutApiInput
+  connectOrCreate: deploymentCreateOrConnectWithoutApiInput
+  createMany: deploymentCreateManyApiInputEnvelope
+  connect: deploymentWhereUniqueInput
+}
+
+input apiCreateWithoutNamespaceInput {
+  id: String
+  name: String!
+  markdown_description: String!
+  created_at: DateTime
+  updated_at: DateTime
+  deployment: deploymentCreateNestedManyWithoutApiInput
+}
+
+input apiCreateOrConnectWithoutNamespaceInput {
+  where: apiWhereUniqueInput!
+  create: apiCreateWithoutNamespaceInput!
+}
+
+input apiCreateManyNamespaceInput {
+  id: String
+  name: String!
+  markdown_description: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input apiCreateManyNamespaceInputEnvelope {
+  data: [apiCreateManyNamespaceInput]!
+  skipDuplicates: Boolean
+}
+
+input apiCreateNestedManyWithoutNamespaceInput {
+  create: apiCreateWithoutNamespaceInput
+  connectOrCreate: apiCreateOrConnectWithoutNamespaceInput
+  createMany: apiCreateManyNamespaceInputEnvelope
+  connect: apiWhereUniqueInput
+}
+
+input namespaceCreateWithoutApiInput {
+  id: String
+  name: String!
+  created_at: DateTime
+  updated_at: DateTime
+  price_plan: price_planCreateNestedOneWithoutNamespaceInput
+  environment: environmentCreateNestedManyWithoutNamespaceInput
+  namespace_members: namespace_membersCreateNestedManyWithoutNamespaceInput
+}
+
+input namespaceCreateOrConnectWithoutApiInput {
+  where: namespaceWhereUniqueInput!
+  create: namespaceCreateWithoutApiInput!
+}
+
+input namespaceCreateNestedOneWithoutApiInput {
+  create: namespaceCreateWithoutApiInput
+  connectOrCreate: namespaceCreateOrConnectWithoutApiInput
+  connect: namespaceWhereUniqueInput
+}
+
+input apiCreateWithoutDeploymentInput {
+  id: String
+  name: String!
+  markdown_description: String!
+  created_at: DateTime
+  updated_at: DateTime
+  namespace: namespaceCreateNestedOneWithoutApiInput!
+}
+
+input apiCreateOrConnectWithoutDeploymentInput {
+  where: apiWhereUniqueInput!
+  create: apiCreateWithoutDeploymentInput!
+}
+
+input apiCreateNestedOneWithoutDeploymentInput {
+  create: apiCreateWithoutDeploymentInput
+  connectOrCreate: apiCreateOrConnectWithoutDeploymentInput
+  connect: apiWhereUniqueInput
+}
+
+input deploymentCreateWithoutDeployment_environmentInput {
+  id: String
+  name: String!
+  config: DateTime!
+  created_at: DateTime
+  updated_at: DateTime
+  api: apiCreateNestedOneWithoutDeploymentInput!
+}
+
+input deploymentCreateOrConnectWithoutDeployment_environmentInput {
+  where: deploymentWhereUniqueInput!
+  create: deploymentCreateWithoutDeployment_environmentInput!
+}
+
+input deploymentCreateNestedOneWithoutDeployment_environmentInput {
+  create: deploymentCreateWithoutDeployment_environmentInput
+  connectOrCreate: deploymentCreateOrConnectWithoutDeployment_environmentInput
+  connect: deploymentWhereUniqueInput
+}
+
+input deployment_environmentCreateWithoutEnvironmentInput {
+  deployment: deploymentCreateNestedOneWithoutDeployment_environmentInput!
+}
+
+input deployment_environmentCreateOrConnectWithoutEnvironmentInput {
+  where: deployment_environmentWhereUniqueInput!
+  create: deployment_environmentCreateWithoutEnvironmentInput!
+}
+
+input deployment_environmentCreateManyEnvironmentInput {
+  deployment_id: String!
+}
+
+input deployment_environmentCreateManyEnvironmentInputEnvelope {
+  data: [deployment_environmentCreateManyEnvironmentInput]!
+  skipDuplicates: Boolean
+}
+
+input deployment_environmentCreateNestedManyWithoutEnvironmentInput {
+  create: deployment_environmentCreateWithoutEnvironmentInput
+  connectOrCreate: deployment_environmentCreateOrConnectWithoutEnvironmentInput
+  createMany: deployment_environmentCreateManyEnvironmentInputEnvelope
+  connect: deployment_environmentWhereUniqueInput
+}
+
+input environmentCreateWithoutNamespaceInput {
+  id: String
+  name: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreatehostnamesInput
+  deployment_environment: deployment_environmentCreateNestedManyWithoutEnvironmentInput
+  environment_edges: environment_edgesCreateNestedManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentCreateNestedManyWithoutEnvironmentInput
+}
+
+input environmentCreateOrConnectWithoutNamespaceInput {
+  where: environmentWhereUniqueInput!
+  create: environmentCreateWithoutNamespaceInput!
+}
+
+input environmentCreateManyhostnamesInput {
+  set: [String]!
+}
+
+input environmentCreateManyNamespaceInput {
+  id: String
+  name: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreateManyhostnamesInput
+}
+
+input environmentCreateManyNamespaceInputEnvelope {
+  data: [environmentCreateManyNamespaceInput]!
+  skipDuplicates: Boolean
+}
+
+input environmentCreateNestedManyWithoutNamespaceInput {
+  create: environmentCreateWithoutNamespaceInput
+  connectOrCreate: environmentCreateOrConnectWithoutNamespaceInput
+  createMany: environmentCreateManyNamespaceInputEnvelope
+  connect: environmentWhereUniqueInput
+}
+
+input namespaceCreateWithoutNamespace_membersInput {
+  id: String
+  name: String!
+  created_at: DateTime
+  updated_at: DateTime
+  price_plan: price_planCreateNestedOneWithoutNamespaceInput
+  api: apiCreateNestedManyWithoutNamespaceInput
+  environment: environmentCreateNestedManyWithoutNamespaceInput
+}
+
+input namespaceCreateOrConnectWithoutNamespace_membersInput {
+  where: namespaceWhereUniqueInput!
+  create: namespaceCreateWithoutNamespace_membersInput!
+}
+
+input namespaceCreateNestedOneWithoutNamespace_membersInput {
+  create: namespaceCreateWithoutNamespace_membersInput
+  connectOrCreate: namespaceCreateOrConnectWithoutNamespace_membersInput
+  connect: namespaceWhereUniqueInput
+}
+
+input namespace_membersCreateWithoutUsersInput {
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+  namespace: namespaceCreateNestedOneWithoutNamespace_membersInput!
+}
+
+input namespace_membersCreateOrConnectWithoutUsersInput {
+  where: namespace_membersWhereUniqueInput!
+  create: namespace_membersCreateWithoutUsersInput!
+}
+
+input namespace_membersCreateManyUsersInput {
+  namespace_id: String!
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input namespace_membersCreateManyUsersInputEnvelope {
+  data: [namespace_membersCreateManyUsersInput]!
+  skipDuplicates: Boolean
+}
+
+input namespace_membersCreateNestedManyWithoutUsersInput {
+  create: namespace_membersCreateWithoutUsersInput
+  connectOrCreate: namespace_membersCreateOrConnectWithoutUsersInput
+  createMany: namespace_membersCreateManyUsersInputEnvelope
+  connect: namespace_membersWhereUniqueInput
+}
+
+input usersCreateWithoutAccess_tokenInput {
+  id: String
+  name: String
+  email: String!
+  role: user_role
+  created_at: DateTime
+  updated_at: DateTime
+  namespace_members: namespace_membersCreateNestedManyWithoutUsersInput
+}
+
+input usersCreateOrConnectWithoutAccess_tokenInput {
+  where: usersWhereUniqueInput!
+  create: usersCreateWithoutAccess_tokenInput!
+}
+
+input usersCreateNestedOneWithoutAccess_tokenInput {
+  create: usersCreateWithoutAccess_tokenInput
+  connectOrCreate: usersCreateOrConnectWithoutAccess_tokenInput
+  connect: usersWhereUniqueInput
+}
+
+input access_tokenCreateInput {
+  id: String
+  token: String
+  name: String!
+  created_at: DateTime
+  users: usersCreateNestedOneWithoutAccess_tokenInput!
+}
+
+input StringFieldUpdateOperationsInput {
+  set: String
+}
+
+input DateTimeFieldUpdateOperationsInput {
+  set: DateTime
+}
+
+input NullableStringFieldUpdateOperationsInput {
+  set: String
+}
+
+input NullableDateTimeFieldUpdateOperationsInput {
+  set: DateTime
+}
+
+input IntFieldUpdateOperationsInput {
+  set: Int
+  increment: Int
+  decrement: Int
+  multiply: Int
+  divide: Int
+}
+
+input BoolFieldUpdateOperationsInput {
+  set: Boolean
+}
+
+input price_planUpdateWithoutNamespaceInput {
+  name: StringFieldUpdateOperationsInput
+  quota_daily_requests: IntFieldUpdateOperationsInput
+  quota_environments: IntFieldUpdateOperationsInput
+  quota_members: IntFieldUpdateOperationsInput
+  quota_apis: IntFieldUpdateOperationsInput
+  allow_secondary_environments: BoolFieldUpdateOperationsInput
+}
+
+input price_planUpsertWithoutNamespaceInput {
+  update: price_planUpdateWithoutNamespaceInput!
+  create: price_planCreateWithoutNamespaceInput!
+}
+
+input price_planUpdateOneRequiredWithoutNamespaceInput {
+  create: price_planCreateWithoutNamespaceInput
+  connectOrCreate: price_planCreateOrConnectWithoutNamespaceInput
+  upsert: price_planUpsertWithoutNamespaceInput
+  connect: price_planWhereUniqueInput
+  update: price_planUpdateWithoutNamespaceInput
+}
+
+input environmentUpdatehostnamesInput {
+  set: [String]
+  push: [String]
+}
+
+input access_tokenUpdateWithoutUsersInput {
+  id: StringFieldUpdateOperationsInput
+  token: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+}
+
+input access_tokenUpsertWithWhereUniqueWithoutUsersInput {
+  where: access_tokenWhereUniqueInput!
+  update: access_tokenUpdateWithoutUsersInput!
+  create: access_tokenCreateWithoutUsersInput!
+}
+
+input access_tokenUpdateWithWhereUniqueWithoutUsersInput {
+  where: access_tokenWhereUniqueInput!
+  data: access_tokenUpdateWithoutUsersInput!
+}
+
+input access_tokenScalarWhereInput {
+  AND: access_tokenScalarWhereInput
+  OR: [access_tokenScalarWhereInput]
+  NOT: access_tokenScalarWhereInput
+  id: StringFilter
+  token: StringFilter
+  user_id: StringFilter
+  name: StringFilter
+  created_at: DateTimeFilter
+}
+
+input access_tokenUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  token: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+}
+
+input access_tokenUpdateManyWithWhereWithoutUsersInput {
+  where: access_tokenScalarWhereInput!
+  data: access_tokenUpdateManyMutationInput!
+}
+
+input access_tokenUpdateManyWithoutUsersInput {
+  create: access_tokenCreateWithoutUsersInput
+  connectOrCreate: access_tokenCreateOrConnectWithoutUsersInput
+  upsert: access_tokenUpsertWithWhereUniqueWithoutUsersInput
+  createMany: access_tokenCreateManyUsersInputEnvelope
+  connect: access_tokenWhereUniqueInput
+  set: access_tokenWhereUniqueInput
+  disconnect: access_tokenWhereUniqueInput
+  delete: access_tokenWhereUniqueInput
+  update: access_tokenUpdateWithWhereUniqueWithoutUsersInput
+  updateMany: access_tokenUpdateManyWithWhereWithoutUsersInput
+  deleteMany: access_tokenScalarWhereInput
+}
+
+input usersUpdateWithoutNamespace_membersInput {
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  role: user_role
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  access_token: access_tokenUpdateManyWithoutUsersInput
+}
+
+input usersUpsertWithoutNamespace_membersInput {
+  update: usersUpdateWithoutNamespace_membersInput!
+  create: usersCreateWithoutNamespace_membersInput!
+}
+
+input usersUpdateOneRequiredWithoutNamespace_membersInput {
+  create: usersCreateWithoutNamespace_membersInput
+  connectOrCreate: usersCreateOrConnectWithoutNamespace_membersInput
+  upsert: usersUpsertWithoutNamespace_membersInput
+  connect: usersWhereUniqueInput
+  update: usersUpdateWithoutNamespace_membersInput
+}
+
+input namespace_membersUpdateWithoutNamespaceInput {
+  membership: membership
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  users: usersUpdateOneRequiredWithoutNamespace_membersInput
+}
+
+input namespace_membersUpsertWithWhereUniqueWithoutNamespaceInput {
+  where: namespace_membersWhereUniqueInput!
+  update: namespace_membersUpdateWithoutNamespaceInput!
+  create: namespace_membersCreateWithoutNamespaceInput!
+}
+
+input namespace_membersUpdateWithWhereUniqueWithoutNamespaceInput {
+  where: namespace_membersWhereUniqueInput!
+  data: namespace_membersUpdateWithoutNamespaceInput!
+}
+
+input namespace_membersScalarWhereInput {
+  AND: namespace_membersScalarWhereInput
+  OR: [namespace_membersScalarWhereInput]
+  NOT: namespace_membersScalarWhereInput
+  user_id: StringFilter
+  namespace_id: StringFilter
+  membership: EnummembershipFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input namespace_membersUpdateManyMutationInput {
+  membership: membership
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input namespace_membersUpdateManyWithWhereWithoutNamespaceInput {
+  where: namespace_membersScalarWhereInput!
+  data: namespace_membersUpdateManyMutationInput!
+}
+
+input namespace_membersUpdateManyWithoutNamespaceInput {
+  create: namespace_membersCreateWithoutNamespaceInput
+  connectOrCreate: namespace_membersCreateOrConnectWithoutNamespaceInput
+  upsert: namespace_membersUpsertWithWhereUniqueWithoutNamespaceInput
+  createMany: namespace_membersCreateManyNamespaceInputEnvelope
+  connect: namespace_membersWhereUniqueInput
+  set: namespace_membersWhereUniqueInput
+  disconnect: namespace_membersWhereUniqueInput
+  delete: namespace_membersWhereUniqueInput
+  update: namespace_membersUpdateWithWhereUniqueWithoutNamespaceInput
+  updateMany: namespace_membersUpdateManyWithWhereWithoutNamespaceInput
+  deleteMany: namespace_membersScalarWhereInput
+}
+
+input namespaceUpdateWithoutEnvironmentInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  price_plan: price_planUpdateOneRequiredWithoutNamespaceInput
+  api: apiUpdateManyWithoutNamespaceInput
+  namespace_members: namespace_membersUpdateManyWithoutNamespaceInput
+}
+
+input namespaceUpsertWithoutEnvironmentInput {
+  update: namespaceUpdateWithoutEnvironmentInput!
+  create: namespaceCreateWithoutEnvironmentInput!
+}
+
+input namespaceUpdateOneRequiredWithoutEnvironmentInput {
+  create: namespaceCreateWithoutEnvironmentInput
+  connectOrCreate: namespaceCreateOrConnectWithoutEnvironmentInput
+  upsert: namespaceUpsertWithoutEnvironmentInput
+  connect: namespaceWhereUniqueInput
+  update: namespaceUpdateWithoutEnvironmentInput
+}
+
+input edgeUpdateWithoutEnvironment_edgesInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  location: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input edgeUpsertWithoutEnvironment_edgesInput {
+  update: edgeUpdateWithoutEnvironment_edgesInput!
+  create: edgeCreateWithoutEnvironment_edgesInput!
+}
+
+input edgeUpdateOneRequiredWithoutEnvironment_edgesInput {
+  create: edgeCreateWithoutEnvironment_edgesInput
+  connectOrCreate: edgeCreateOrConnectWithoutEnvironment_edgesInput
+  upsert: edgeUpsertWithoutEnvironment_edgesInput
+  connect: edgeWhereUniqueInput
+  update: edgeUpdateWithoutEnvironment_edgesInput
+}
+
+input environment_edgesUpdateWithoutEnvironmentInput {
+  edge: edgeUpdateOneRequiredWithoutEnvironment_edgesInput
+}
+
+input environment_edgesUpsertWithWhereUniqueWithoutEnvironmentInput {
+  where: environment_edgesWhereUniqueInput!
+  update: environment_edgesUpdateWithoutEnvironmentInput!
+  create: environment_edgesCreateWithoutEnvironmentInput!
+}
+
+input environment_edgesUpdateWithWhereUniqueWithoutEnvironmentInput {
+  where: environment_edgesWhereUniqueInput!
+  data: environment_edgesUpdateWithoutEnvironmentInput!
+}
+
+input environment_edgesScalarWhereInput {
+  AND: environment_edgesScalarWhereInput
+  OR: [environment_edgesScalarWhereInput]
+  NOT: environment_edgesScalarWhereInput
+  environment_id: StringFilter
+  edge_id: StringFilter
+}
+
+input environment_edgesUpdateManyWithWhereWithoutEnvironmentInput {
+  where: environment_edgesScalarWhereInput!
+}
+
+input environment_edgesUpdateManyWithoutEnvironmentInput {
+  create: environment_edgesCreateWithoutEnvironmentInput
+  connectOrCreate: environment_edgesCreateOrConnectWithoutEnvironmentInput
+  upsert: environment_edgesUpsertWithWhereUniqueWithoutEnvironmentInput
+  createMany: environment_edgesCreateManyEnvironmentInputEnvelope
+  connect: environment_edgesWhereUniqueInput
+  set: environment_edgesWhereUniqueInput
+  disconnect: environment_edgesWhereUniqueInput
+  delete: environment_edgesWhereUniqueInput
+  update: environment_edgesUpdateWithWhereUniqueWithoutEnvironmentInput
+  updateMany: environment_edgesUpdateManyWithWhereWithoutEnvironmentInput
+  deleteMany: environment_edgesScalarWhereInput
+}
+
+input wundernodeUpdateWithoutNodepoolInput {
+  id: StringFieldUpdateOperationsInput
+  etag: StringFieldUpdateOperationsInput
+  config: DateTime
+  ipv4: NullableStringFieldUpdateOperationsInput
+  ipv6: NullableStringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input wundernodeUpsertWithoutNodepoolInput {
+  update: wundernodeUpdateWithoutNodepoolInput!
+  create: wundernodeCreateWithoutNodepoolInput!
+}
+
+input wundernodeUpdateOneRequiredWithoutNodepoolInput {
+  create: wundernodeCreateWithoutNodepoolInput
+  connectOrCreate: wundernodeCreateOrConnectWithoutNodepoolInput
+  upsert: wundernodeUpsertWithoutNodepoolInput
+  connect: wundernodeWhereUniqueInput
+  update: wundernodeUpdateWithoutNodepoolInput
+}
+
+input nodepoolUpdateWithoutNodepool_environmentInput {
+  id: StringFieldUpdateOperationsInput
+  shared: BoolFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  wundernode: wundernodeUpdateOneRequiredWithoutNodepoolInput
+}
+
+input nodepoolUpsertWithoutNodepool_environmentInput {
+  update: nodepoolUpdateWithoutNodepool_environmentInput!
+  create: nodepoolCreateWithoutNodepool_environmentInput!
+}
+
+input nodepoolUpdateOneRequiredWithoutNodepool_environmentInput {
+  create: nodepoolCreateWithoutNodepool_environmentInput
+  connectOrCreate: nodepoolCreateOrConnectWithoutNodepool_environmentInput
+  upsert: nodepoolUpsertWithoutNodepool_environmentInput
+  connect: nodepoolWhereUniqueInput
+  update: nodepoolUpdateWithoutNodepool_environmentInput
+}
+
+input nodepool_environmentUpdateWithoutEnvironmentInput {
+  nodepool: nodepoolUpdateOneRequiredWithoutNodepool_environmentInput
+}
+
+input nodepool_environmentUpsertWithWhereUniqueWithoutEnvironmentInput {
+  where: nodepool_environmentWhereUniqueInput!
+  update: nodepool_environmentUpdateWithoutEnvironmentInput!
+  create: nodepool_environmentCreateWithoutEnvironmentInput!
+}
+
+input nodepool_environmentUpdateWithWhereUniqueWithoutEnvironmentInput {
+  where: nodepool_environmentWhereUniqueInput!
+  data: nodepool_environmentUpdateWithoutEnvironmentInput!
+}
+
+input nodepool_environmentScalarWhereInput {
+  AND: nodepool_environmentScalarWhereInput
+  OR: [nodepool_environmentScalarWhereInput]
+  NOT: nodepool_environmentScalarWhereInput
+  nodepool_id: StringFilter
+  environment_id: StringFilter
+}
+
+input nodepool_environmentUpdateManyWithWhereWithoutEnvironmentInput {
+  where: nodepool_environmentScalarWhereInput!
+}
+
+input nodepool_environmentUpdateManyWithoutEnvironmentInput {
+  create: nodepool_environmentCreateWithoutEnvironmentInput
+  connectOrCreate: nodepool_environmentCreateOrConnectWithoutEnvironmentInput
+  upsert: nodepool_environmentUpsertWithWhereUniqueWithoutEnvironmentInput
+  createMany: nodepool_environmentCreateManyEnvironmentInputEnvelope
+  connect: nodepool_environmentWhereUniqueInput
+  set: nodepool_environmentWhereUniqueInput
+  disconnect: nodepool_environmentWhereUniqueInput
+  delete: nodepool_environmentWhereUniqueInput
+  update: nodepool_environmentUpdateWithWhereUniqueWithoutEnvironmentInput
+  updateMany: nodepool_environmentUpdateManyWithWhereWithoutEnvironmentInput
+  deleteMany: nodepool_environmentScalarWhereInput
+}
+
+input environmentUpdateWithoutDeployment_environmentInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  primary_hostname: StringFieldUpdateOperationsInput
+  primary: BoolFieldUpdateOperationsInput
+  hostnames: environmentUpdatehostnamesInput
+  namespace: namespaceUpdateOneRequiredWithoutEnvironmentInput
+  environment_edges: environment_edgesUpdateManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentUpdateManyWithoutEnvironmentInput
+}
+
+input environmentUpsertWithoutDeployment_environmentInput {
+  update: environmentUpdateWithoutDeployment_environmentInput!
+  create: environmentCreateWithoutDeployment_environmentInput!
+}
+
+input environmentUpdateOneRequiredWithoutDeployment_environmentInput {
+  create: environmentCreateWithoutDeployment_environmentInput
+  connectOrCreate: environmentCreateOrConnectWithoutDeployment_environmentInput
+  upsert: environmentUpsertWithoutDeployment_environmentInput
+  connect: environmentWhereUniqueInput
+  update: environmentUpdateWithoutDeployment_environmentInput
+}
+
+input deployment_environmentUpdateWithoutDeploymentInput {
+  environment: environmentUpdateOneRequiredWithoutDeployment_environmentInput
+}
+
+input deployment_environmentUpsertWithWhereUniqueWithoutDeploymentInput {
+  where: deployment_environmentWhereUniqueInput!
+  update: deployment_environmentUpdateWithoutDeploymentInput!
+  create: deployment_environmentCreateWithoutDeploymentInput!
+}
+
+input deployment_environmentUpdateWithWhereUniqueWithoutDeploymentInput {
+  where: deployment_environmentWhereUniqueInput!
+  data: deployment_environmentUpdateWithoutDeploymentInput!
+}
+
+input deployment_environmentScalarWhereInput {
+  AND: deployment_environmentScalarWhereInput
+  OR: [deployment_environmentScalarWhereInput]
+  NOT: deployment_environmentScalarWhereInput
+  deployment_id: StringFilter
+  environment_id: StringFilter
+}
+
+input deployment_environmentUpdateManyWithWhereWithoutDeploymentInput {
+  where: deployment_environmentScalarWhereInput!
+}
+
+input deployment_environmentUpdateManyWithoutDeploymentInput {
+  create: deployment_environmentCreateWithoutDeploymentInput
+  connectOrCreate: deployment_environmentCreateOrConnectWithoutDeploymentInput
+  upsert: deployment_environmentUpsertWithWhereUniqueWithoutDeploymentInput
+  createMany: deployment_environmentCreateManyDeploymentInputEnvelope
+  connect: deployment_environmentWhereUniqueInput
+  set: deployment_environmentWhereUniqueInput
+  disconnect: deployment_environmentWhereUniqueInput
+  delete: deployment_environmentWhereUniqueInput
+  update: deployment_environmentUpdateWithWhereUniqueWithoutDeploymentInput
+  updateMany: deployment_environmentUpdateManyWithWhereWithoutDeploymentInput
+  deleteMany: deployment_environmentScalarWhereInput
+}
+
+input deploymentUpdateWithoutApiInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  config: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  deployment_environment: deployment_environmentUpdateManyWithoutDeploymentInput
+}
+
+input deploymentUpsertWithWhereUniqueWithoutApiInput {
+  where: deploymentWhereUniqueInput!
+  update: deploymentUpdateWithoutApiInput!
+  create: deploymentCreateWithoutApiInput!
+}
+
+input deploymentUpdateWithWhereUniqueWithoutApiInput {
+  where: deploymentWhereUniqueInput!
+  data: deploymentUpdateWithoutApiInput!
+}
+
+input deploymentScalarWhereInput {
+  AND: deploymentScalarWhereInput
+  OR: [deploymentScalarWhereInput]
+  NOT: deploymentScalarWhereInput
+  id: StringFilter
+  api_id: StringFilter
+  name: StringFilter
+  config: JsonFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input deploymentUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  config: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input deploymentUpdateManyWithWhereWithoutApiInput {
+  where: deploymentScalarWhereInput!
+  data: deploymentUpdateManyMutationInput!
+}
+
+input deploymentUpdateManyWithoutApiInput {
+  create: deploymentCreateWithoutApiInput
+  connectOrCreate: deploymentCreateOrConnectWithoutApiInput
+  upsert: deploymentUpsertWithWhereUniqueWithoutApiInput
+  createMany: deploymentCreateManyApiInputEnvelope
+  connect: deploymentWhereUniqueInput
+  set: deploymentWhereUniqueInput
+  disconnect: deploymentWhereUniqueInput
+  delete: deploymentWhereUniqueInput
+  update: deploymentUpdateWithWhereUniqueWithoutApiInput
+  updateMany: deploymentUpdateManyWithWhereWithoutApiInput
+  deleteMany: deploymentScalarWhereInput
+}
+
+input apiUpdateWithoutNamespaceInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  markdown_description: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  deployment: deploymentUpdateManyWithoutApiInput
+}
+
+input apiUpsertWithWhereUniqueWithoutNamespaceInput {
+  where: apiWhereUniqueInput!
+  update: apiUpdateWithoutNamespaceInput!
+  create: apiCreateWithoutNamespaceInput!
+}
+
+input apiUpdateWithWhereUniqueWithoutNamespaceInput {
+  where: apiWhereUniqueInput!
+  data: apiUpdateWithoutNamespaceInput!
+}
+
+input apiScalarWhereInput {
+  AND: apiScalarWhereInput
+  OR: [apiScalarWhereInput]
+  NOT: apiScalarWhereInput
+  id: StringFilter
+  namespace_id: StringFilter
+  name: StringFilter
+  markdown_description: StringFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input apiUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  markdown_description: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input apiUpdateManyWithWhereWithoutNamespaceInput {
+  where: apiScalarWhereInput!
+  data: apiUpdateManyMutationInput!
+}
+
+input apiUpdateManyWithoutNamespaceInput {
+  create: apiCreateWithoutNamespaceInput
+  connectOrCreate: apiCreateOrConnectWithoutNamespaceInput
+  upsert: apiUpsertWithWhereUniqueWithoutNamespaceInput
+  createMany: apiCreateManyNamespaceInputEnvelope
+  connect: apiWhereUniqueInput
+  set: apiWhereUniqueInput
+  disconnect: apiWhereUniqueInput
+  delete: apiWhereUniqueInput
+  update: apiUpdateWithWhereUniqueWithoutNamespaceInput
+  updateMany: apiUpdateManyWithWhereWithoutNamespaceInput
+  deleteMany: apiScalarWhereInput
+}
+
+input namespaceUpdateWithoutApiInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  price_plan: price_planUpdateOneRequiredWithoutNamespaceInput
+  environment: environmentUpdateManyWithoutNamespaceInput
+  namespace_members: namespace_membersUpdateManyWithoutNamespaceInput
+}
+
+input namespaceUpsertWithoutApiInput {
+  update: namespaceUpdateWithoutApiInput!
+  create: namespaceCreateWithoutApiInput!
+}
+
+input namespaceUpdateOneRequiredWithoutApiInput {
+  create: namespaceCreateWithoutApiInput
+  connectOrCreate: namespaceCreateOrConnectWithoutApiInput
+  upsert: namespaceUpsertWithoutApiInput
+  connect: namespaceWhereUniqueInput
+  update: namespaceUpdateWithoutApiInput
+}
+
+input apiUpdateWithoutDeploymentInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  markdown_description: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  namespace: namespaceUpdateOneRequiredWithoutApiInput
+}
+
+input apiUpsertWithoutDeploymentInput {
+  update: apiUpdateWithoutDeploymentInput!
+  create: apiCreateWithoutDeploymentInput!
+}
+
+input apiUpdateOneRequiredWithoutDeploymentInput {
+  create: apiCreateWithoutDeploymentInput
+  connectOrCreate: apiCreateOrConnectWithoutDeploymentInput
+  upsert: apiUpsertWithoutDeploymentInput
+  connect: apiWhereUniqueInput
+  update: apiUpdateWithoutDeploymentInput
+}
+
+input deploymentUpdateWithoutDeployment_environmentInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  config: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  api: apiUpdateOneRequiredWithoutDeploymentInput
+}
+
+input deploymentUpsertWithoutDeployment_environmentInput {
+  update: deploymentUpdateWithoutDeployment_environmentInput!
+  create: deploymentCreateWithoutDeployment_environmentInput!
+}
+
+input deploymentUpdateOneRequiredWithoutDeployment_environmentInput {
+  create: deploymentCreateWithoutDeployment_environmentInput
+  connectOrCreate: deploymentCreateOrConnectWithoutDeployment_environmentInput
+  upsert: deploymentUpsertWithoutDeployment_environmentInput
+  connect: deploymentWhereUniqueInput
+  update: deploymentUpdateWithoutDeployment_environmentInput
+}
+
+input deployment_environmentUpdateWithoutEnvironmentInput {
+  deployment: deploymentUpdateOneRequiredWithoutDeployment_environmentInput
+}
+
+input deployment_environmentUpsertWithWhereUniqueWithoutEnvironmentInput {
+  where: deployment_environmentWhereUniqueInput!
+  update: deployment_environmentUpdateWithoutEnvironmentInput!
+  create: deployment_environmentCreateWithoutEnvironmentInput!
+}
+
+input deployment_environmentUpdateWithWhereUniqueWithoutEnvironmentInput {
+  where: deployment_environmentWhereUniqueInput!
+  data: deployment_environmentUpdateWithoutEnvironmentInput!
+}
+
+input deployment_environmentUpdateManyWithWhereWithoutEnvironmentInput {
+  where: deployment_environmentScalarWhereInput!
+}
+
+input deployment_environmentUpdateManyWithoutEnvironmentInput {
+  create: deployment_environmentCreateWithoutEnvironmentInput
+  connectOrCreate: deployment_environmentCreateOrConnectWithoutEnvironmentInput
+  upsert: deployment_environmentUpsertWithWhereUniqueWithoutEnvironmentInput
+  createMany: deployment_environmentCreateManyEnvironmentInputEnvelope
+  connect: deployment_environmentWhereUniqueInput
+  set: deployment_environmentWhereUniqueInput
+  disconnect: deployment_environmentWhereUniqueInput
+  delete: deployment_environmentWhereUniqueInput
+  update: deployment_environmentUpdateWithWhereUniqueWithoutEnvironmentInput
+  updateMany: deployment_environmentUpdateManyWithWhereWithoutEnvironmentInput
+  deleteMany: deployment_environmentScalarWhereInput
+}
+
+input environmentUpdateWithoutNamespaceInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  primary_hostname: StringFieldUpdateOperationsInput
+  primary: BoolFieldUpdateOperationsInput
+  hostnames: environmentUpdatehostnamesInput
+  deployment_environment: deployment_environmentUpdateManyWithoutEnvironmentInput
+  environment_edges: environment_edgesUpdateManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentUpdateManyWithoutEnvironmentInput
+}
+
+input environmentUpsertWithWhereUniqueWithoutNamespaceInput {
+  where: environmentWhereUniqueInput!
+  update: environmentUpdateWithoutNamespaceInput!
+  create: environmentCreateWithoutNamespaceInput!
+}
+
+input environmentUpdateWithWhereUniqueWithoutNamespaceInput {
+  where: environmentWhereUniqueInput!
+  data: environmentUpdateWithoutNamespaceInput!
+}
+
+input environmentScalarWhereInput {
+  AND: environmentScalarWhereInput
+  OR: [environmentScalarWhereInput]
+  NOT: environmentScalarWhereInput
+  id: StringFilter
+  name: StringFilter
+  namespace_id: StringFilter
+  primary_hostname: StringFilter
+  hostnames: StringNullableListFilter
+  primary: BoolFilter
+}
+
+input environmentUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  primary_hostname: StringFieldUpdateOperationsInput
+  primary: BoolFieldUpdateOperationsInput
+  hostnames: environmentUpdatehostnamesInput
+}
+
+input environmentUpdateManyWithWhereWithoutNamespaceInput {
+  where: environmentScalarWhereInput!
+  data: environmentUpdateManyMutationInput!
+}
+
+input environmentUpdateManyWithoutNamespaceInput {
+  create: environmentCreateWithoutNamespaceInput
+  connectOrCreate: environmentCreateOrConnectWithoutNamespaceInput
+  upsert: environmentUpsertWithWhereUniqueWithoutNamespaceInput
+  createMany: environmentCreateManyNamespaceInputEnvelope
+  connect: environmentWhereUniqueInput
+  set: environmentWhereUniqueInput
+  disconnect: environmentWhereUniqueInput
+  delete: environmentWhereUniqueInput
+  update: environmentUpdateWithWhereUniqueWithoutNamespaceInput
+  updateMany: environmentUpdateManyWithWhereWithoutNamespaceInput
+  deleteMany: environmentScalarWhereInput
+}
+
+input namespaceUpdateWithoutNamespace_membersInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  price_plan: price_planUpdateOneRequiredWithoutNamespaceInput
+  api: apiUpdateManyWithoutNamespaceInput
+  environment: environmentUpdateManyWithoutNamespaceInput
+}
+
+input namespaceUpsertWithoutNamespace_membersInput {
+  update: namespaceUpdateWithoutNamespace_membersInput!
+  create: namespaceCreateWithoutNamespace_membersInput!
+}
+
+input namespaceUpdateOneRequiredWithoutNamespace_membersInput {
+  create: namespaceCreateWithoutNamespace_membersInput
+  connectOrCreate: namespaceCreateOrConnectWithoutNamespace_membersInput
+  upsert: namespaceUpsertWithoutNamespace_membersInput
+  connect: namespaceWhereUniqueInput
+  update: namespaceUpdateWithoutNamespace_membersInput
+}
+
+input namespace_membersUpdateWithoutUsersInput {
+  membership: membership
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  namespace: namespaceUpdateOneRequiredWithoutNamespace_membersInput
+}
+
+input namespace_membersUpsertWithWhereUniqueWithoutUsersInput {
+  where: namespace_membersWhereUniqueInput!
+  update: namespace_membersUpdateWithoutUsersInput!
+  create: namespace_membersCreateWithoutUsersInput!
+}
+
+input namespace_membersUpdateWithWhereUniqueWithoutUsersInput {
+  where: namespace_membersWhereUniqueInput!
+  data: namespace_membersUpdateWithoutUsersInput!
+}
+
+input namespace_membersUpdateManyWithWhereWithoutUsersInput {
+  where: namespace_membersScalarWhereInput!
+  data: namespace_membersUpdateManyMutationInput!
+}
+
+input namespace_membersUpdateManyWithoutUsersInput {
+  create: namespace_membersCreateWithoutUsersInput
+  connectOrCreate: namespace_membersCreateOrConnectWithoutUsersInput
+  upsert: namespace_membersUpsertWithWhereUniqueWithoutUsersInput
+  createMany: namespace_membersCreateManyUsersInputEnvelope
+  connect: namespace_membersWhereUniqueInput
+  set: namespace_membersWhereUniqueInput
+  disconnect: namespace_membersWhereUniqueInput
+  delete: namespace_membersWhereUniqueInput
+  update: namespace_membersUpdateWithWhereUniqueWithoutUsersInput
+  updateMany: namespace_membersUpdateManyWithWhereWithoutUsersInput
+  deleteMany: namespace_membersScalarWhereInput
+}
+
+input usersUpdateWithoutAccess_tokenInput {
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  role: user_role
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  namespace_members: namespace_membersUpdateManyWithoutUsersInput
+}
+
+input usersUpsertWithoutAccess_tokenInput {
+  update: usersUpdateWithoutAccess_tokenInput!
+  create: usersCreateWithoutAccess_tokenInput!
+}
+
+input usersUpdateOneRequiredWithoutAccess_tokenInput {
+  create: usersCreateWithoutAccess_tokenInput
+  connectOrCreate: usersCreateOrConnectWithoutAccess_tokenInput
+  upsert: usersUpsertWithoutAccess_tokenInput
+  connect: usersWhereUniqueInput
+  update: usersUpdateWithoutAccess_tokenInput
+}
+
+input access_tokenUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  token: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  users: usersUpdateOneRequiredWithoutAccess_tokenInput
+}
+
+input access_tokenCreateManyInput {
+  id: String
+  token: String
+  user_id: String!
+  name: String!
+  created_at: DateTime
+}
+
+type AffectedRowsOutput {
+  count: Int!
+}
+
+input admin_configCreateInput {
+  id: String
+  wundernode_image_tag: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input admin_configUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  wundernode_image_tag: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input admin_configCreateManyInput {
+  id: String
+  wundernode_image_tag: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input admin_configUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  wundernode_image_tag: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input apiCreateInput {
+  id: String
+  name: String!
+  markdown_description: String!
+  created_at: DateTime
+  updated_at: DateTime
+  namespace: namespaceCreateNestedOneWithoutApiInput!
+  deployment: deploymentCreateNestedManyWithoutApiInput
+}
+
+input apiUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  markdown_description: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  namespace: namespaceUpdateOneRequiredWithoutApiInput
+  deployment: deploymentUpdateManyWithoutApiInput
+}
+
+input apiCreateManyInput {
+  id: String
+  namespace_id: String!
+  name: String!
+  markdown_description: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input deploymentCreateInput {
+  id: String
+  name: String!
+  config: DateTime!
+  created_at: DateTime
+  updated_at: DateTime
+  api: apiCreateNestedOneWithoutDeploymentInput!
+  deployment_environment: deployment_environmentCreateNestedManyWithoutDeploymentInput
+}
+
+input deploymentUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  config: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  api: apiUpdateOneRequiredWithoutDeploymentInput
+  deployment_environment: deployment_environmentUpdateManyWithoutDeploymentInput
+}
+
+input deploymentCreateManyInput {
+  id: String
+  api_id: String!
+  name: String!
+  config: DateTime!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input deployment_environmentCreateInput {
+  deployment: deploymentCreateNestedOneWithoutDeployment_environmentInput!
+  environment: environmentCreateNestedOneWithoutDeployment_environmentInput!
+}
+
+input deployment_environmentUpdateInput {
+  deployment: deploymentUpdateOneRequiredWithoutDeployment_environmentInput
+  environment: environmentUpdateOneRequiredWithoutDeployment_environmentInput
+}
+
+input deployment_environmentCreateManyInput {
+  deployment_id: String!
+  environment_id: String!
+}
+
+input environmentCreateWithoutEnvironment_edgesInput {
+  id: String
+  name: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreatehostnamesInput
+  namespace: namespaceCreateNestedOneWithoutEnvironmentInput!
+  deployment_environment: deployment_environmentCreateNestedManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentCreateNestedManyWithoutEnvironmentInput
+}
+
+input environmentCreateOrConnectWithoutEnvironment_edgesInput {
+  where: environmentWhereUniqueInput!
+  create: environmentCreateWithoutEnvironment_edgesInput!
+}
+
+input environmentCreateNestedOneWithoutEnvironment_edgesInput {
+  create: environmentCreateWithoutEnvironment_edgesInput
+  connectOrCreate: environmentCreateOrConnectWithoutEnvironment_edgesInput
+  connect: environmentWhereUniqueInput
+}
+
+input environment_edgesCreateWithoutEdgeInput {
+  environment: environmentCreateNestedOneWithoutEnvironment_edgesInput!
+}
+
+input environment_edgesCreateOrConnectWithoutEdgeInput {
+  where: environment_edgesWhereUniqueInput!
+  create: environment_edgesCreateWithoutEdgeInput!
+}
+
+input environment_edgesCreateManyEdgeInput {
+  environment_id: String!
+}
+
+input environment_edgesCreateManyEdgeInputEnvelope {
+  data: [environment_edgesCreateManyEdgeInput]!
+  skipDuplicates: Boolean
+}
+
+input environment_edgesCreateNestedManyWithoutEdgeInput {
+  create: environment_edgesCreateWithoutEdgeInput
+  connectOrCreate: environment_edgesCreateOrConnectWithoutEdgeInput
+  createMany: environment_edgesCreateManyEdgeInputEnvelope
+  connect: environment_edgesWhereUniqueInput
+}
+
+input edgeCreateInput {
+  id: String
+  name: String!
+  location: String!
+  created_at: DateTime
+  updated_at: DateTime
+  environment_edges: environment_edgesCreateNestedManyWithoutEdgeInput
+}
+
+input environmentUpdateWithoutEnvironment_edgesInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  primary_hostname: StringFieldUpdateOperationsInput
+  primary: BoolFieldUpdateOperationsInput
+  hostnames: environmentUpdatehostnamesInput
+  namespace: namespaceUpdateOneRequiredWithoutEnvironmentInput
+  deployment_environment: deployment_environmentUpdateManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentUpdateManyWithoutEnvironmentInput
+}
+
+input environmentUpsertWithoutEnvironment_edgesInput {
+  update: environmentUpdateWithoutEnvironment_edgesInput!
+  create: environmentCreateWithoutEnvironment_edgesInput!
+}
+
+input environmentUpdateOneRequiredWithoutEnvironment_edgesInput {
+  create: environmentCreateWithoutEnvironment_edgesInput
+  connectOrCreate: environmentCreateOrConnectWithoutEnvironment_edgesInput
+  upsert: environmentUpsertWithoutEnvironment_edgesInput
+  connect: environmentWhereUniqueInput
+  update: environmentUpdateWithoutEnvironment_edgesInput
+}
+
+input environment_edgesUpdateWithoutEdgeInput {
+  environment: environmentUpdateOneRequiredWithoutEnvironment_edgesInput
+}
+
+input environment_edgesUpsertWithWhereUniqueWithoutEdgeInput {
+  where: environment_edgesWhereUniqueInput!
+  update: environment_edgesUpdateWithoutEdgeInput!
+  create: environment_edgesCreateWithoutEdgeInput!
+}
+
+input environment_edgesUpdateWithWhereUniqueWithoutEdgeInput {
+  where: environment_edgesWhereUniqueInput!
+  data: environment_edgesUpdateWithoutEdgeInput!
+}
+
+input environment_edgesUpdateManyWithWhereWithoutEdgeInput {
+  where: environment_edgesScalarWhereInput!
+}
+
+input environment_edgesUpdateManyWithoutEdgeInput {
+  create: environment_edgesCreateWithoutEdgeInput
+  connectOrCreate: environment_edgesCreateOrConnectWithoutEdgeInput
+  upsert: environment_edgesUpsertWithWhereUniqueWithoutEdgeInput
+  createMany: environment_edgesCreateManyEdgeInputEnvelope
+  connect: environment_edgesWhereUniqueInput
+  set: environment_edgesWhereUniqueInput
+  disconnect: environment_edgesWhereUniqueInput
+  delete: environment_edgesWhereUniqueInput
+  update: environment_edgesUpdateWithWhereUniqueWithoutEdgeInput
+  updateMany: environment_edgesUpdateManyWithWhereWithoutEdgeInput
+  deleteMany: environment_edgesScalarWhereInput
+}
+
+input edgeUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  location: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  environment_edges: environment_edgesUpdateManyWithoutEdgeInput
+}
+
+input edgeCreateManyInput {
+  id: String
+  name: String!
+  location: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input edgeUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  location: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input environmentCreateInput {
+  id: String
+  name: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreatehostnamesInput
+  namespace: namespaceCreateNestedOneWithoutEnvironmentInput!
+  deployment_environment: deployment_environmentCreateNestedManyWithoutEnvironmentInput
+  environment_edges: environment_edgesCreateNestedManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentCreateNestedManyWithoutEnvironmentInput
+}
+
+input environmentUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  primary_hostname: StringFieldUpdateOperationsInput
+  primary: BoolFieldUpdateOperationsInput
+  hostnames: environmentUpdatehostnamesInput
+  namespace: namespaceUpdateOneRequiredWithoutEnvironmentInput
+  deployment_environment: deployment_environmentUpdateManyWithoutEnvironmentInput
+  environment_edges: environment_edgesUpdateManyWithoutEnvironmentInput
+  nodepool_environment: nodepool_environmentUpdateManyWithoutEnvironmentInput
+}
+
+input environmentCreateManyInput {
+  id: String
+  name: String!
+  namespace_id: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreateManyhostnamesInput
+}
+
+input environment_edgesCreateInput {
+  edge: edgeCreateNestedOneWithoutEnvironment_edgesInput!
+  environment: environmentCreateNestedOneWithoutEnvironment_edgesInput!
+}
+
+input environment_edgesUpdateInput {
+  edge: edgeUpdateOneRequiredWithoutEnvironment_edgesInput
+  environment: environmentUpdateOneRequiredWithoutEnvironment_edgesInput
+}
+
+input environment_edgesCreateManyInput {
+  environment_id: String!
+  edge_id: String!
+}
+
+input letsencrypt_certificateCreateadditional_domainsInput {
+  set: [String]!
+}
+
+input letsencrypt_userCreateWithoutLetsencrypt_certificateInput {
+  zone: String!
+  email: String!
+  dns_provider_name: String!
+  dns_provider_token: String!
+  private_key: String
+  registration_resource: DateTime
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input letsencrypt_userCreateOrConnectWithoutLetsencrypt_certificateInput {
+  where: letsencrypt_userWhereUniqueInput!
+  create: letsencrypt_userCreateWithoutLetsencrypt_certificateInput!
+}
+
+input letsencrypt_userCreateNestedOneWithoutLetsencrypt_certificateInput {
+  create: letsencrypt_userCreateWithoutLetsencrypt_certificateInput
+  connectOrCreate: letsencrypt_userCreateOrConnectWithoutLetsencrypt_certificateInput
+  connect: letsencrypt_userWhereUniqueInput
+}
+
+input letsencrypt_certificateCreateInput {
+  common_name: String!
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+  additional_domains: letsencrypt_certificateCreateadditional_domainsInput
+  letsencrypt_user: letsencrypt_userCreateNestedOneWithoutLetsencrypt_certificateInput!
+}
+
+input letsencrypt_certificateUpdateadditional_domainsInput {
+  set: [String]
+  push: [String]
+}
+
+input letsencrypt_userUpdateWithoutLetsencrypt_certificateInput {
+  zone: StringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  dns_provider_name: StringFieldUpdateOperationsInput
+  dns_provider_token: StringFieldUpdateOperationsInput
+  private_key: NullableStringFieldUpdateOperationsInput
+  registration_resource: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input letsencrypt_userUpsertWithoutLetsencrypt_certificateInput {
+  update: letsencrypt_userUpdateWithoutLetsencrypt_certificateInput!
+  create: letsencrypt_userCreateWithoutLetsencrypt_certificateInput!
+}
+
+input letsencrypt_userUpdateOneRequiredWithoutLetsencrypt_certificateInput {
+  create: letsencrypt_userCreateWithoutLetsencrypt_certificateInput
+  connectOrCreate: letsencrypt_userCreateOrConnectWithoutLetsencrypt_certificateInput
+  upsert: letsencrypt_userUpsertWithoutLetsencrypt_certificateInput
+  connect: letsencrypt_userWhereUniqueInput
+  update: letsencrypt_userUpdateWithoutLetsencrypt_certificateInput
+}
+
+input letsencrypt_certificateUpdateInput {
+  common_name: StringFieldUpdateOperationsInput
+  issued: NullableDateTimeFieldUpdateOperationsInput
+  renewal: NullableDateTimeFieldUpdateOperationsInput
+  certificate: NullableStringFieldUpdateOperationsInput
+  private_key: NullableStringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  additional_domains: letsencrypt_certificateUpdateadditional_domainsInput
+  letsencrypt_user: letsencrypt_userUpdateOneRequiredWithoutLetsencrypt_certificateInput
+}
+
+input letsencrypt_certificateCreateManyadditional_domainsInput {
+  set: [String]!
+}
+
+input letsencrypt_certificateCreateManyInput {
+  common_name: String!
+  zone: String!
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+  additional_domains: letsencrypt_certificateCreateManyadditional_domainsInput
+}
+
+input letsencrypt_certificateUpdateManyMutationInput {
+  common_name: StringFieldUpdateOperationsInput
+  issued: NullableDateTimeFieldUpdateOperationsInput
+  renewal: NullableDateTimeFieldUpdateOperationsInput
+  certificate: NullableStringFieldUpdateOperationsInput
+  private_key: NullableStringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  additional_domains: letsencrypt_certificateUpdateadditional_domainsInput
+}
+
+input letsencrypt_certificateCreateWithoutLetsencrypt_userInput {
+  common_name: String!
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+  additional_domains: letsencrypt_certificateCreateadditional_domainsInput
+}
+
+input letsencrypt_certificateCreateOrConnectWithoutLetsencrypt_userInput {
+  where: letsencrypt_certificateWhereUniqueInput!
+  create: letsencrypt_certificateCreateWithoutLetsencrypt_userInput!
+}
+
+input letsencrypt_certificateCreateManyLetsencrypt_userInput {
+  common_name: String!
+  issued: DateTime
+  renewal: DateTime
+  certificate: String
+  private_key: String
+  created_at: DateTime
+  updated_at: DateTime
+  additional_domains: letsencrypt_certificateCreateManyadditional_domainsInput
+}
+
+input letsencrypt_certificateCreateManyLetsencrypt_userInputEnvelope {
+  data: [letsencrypt_certificateCreateManyLetsencrypt_userInput]!
+  skipDuplicates: Boolean
+}
+
+input letsencrypt_certificateCreateNestedManyWithoutLetsencrypt_userInput {
+  create: letsencrypt_certificateCreateWithoutLetsencrypt_userInput
+  connectOrCreate: letsencrypt_certificateCreateOrConnectWithoutLetsencrypt_userInput
+  createMany: letsencrypt_certificateCreateManyLetsencrypt_userInputEnvelope
+  connect: letsencrypt_certificateWhereUniqueInput
+}
+
+input letsencrypt_userCreateInput {
+  zone: String!
+  email: String!
+  dns_provider_name: String!
+  dns_provider_token: String!
+  private_key: String
+  registration_resource: DateTime
+  created_at: DateTime
+  updated_at: DateTime
+  letsencrypt_certificate: letsencrypt_certificateCreateNestedManyWithoutLetsencrypt_userInput
+}
+
+input letsencrypt_certificateUpdateWithoutLetsencrypt_userInput {
+  common_name: StringFieldUpdateOperationsInput
+  issued: NullableDateTimeFieldUpdateOperationsInput
+  renewal: NullableDateTimeFieldUpdateOperationsInput
+  certificate: NullableStringFieldUpdateOperationsInput
+  private_key: NullableStringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  additional_domains: letsencrypt_certificateUpdateadditional_domainsInput
+}
+
+input letsencrypt_certificateUpsertWithWhereUniqueWithoutLetsencrypt_userInput {
+  where: letsencrypt_certificateWhereUniqueInput!
+  update: letsencrypt_certificateUpdateWithoutLetsencrypt_userInput!
+  create: letsencrypt_certificateCreateWithoutLetsencrypt_userInput!
+}
+
+input letsencrypt_certificateUpdateWithWhereUniqueWithoutLetsencrypt_userInput {
+  where: letsencrypt_certificateWhereUniqueInput!
+  data: letsencrypt_certificateUpdateWithoutLetsencrypt_userInput!
+}
+
+input letsencrypt_certificateScalarWhereInput {
+  AND: letsencrypt_certificateScalarWhereInput
+  OR: [letsencrypt_certificateScalarWhereInput]
+  NOT: letsencrypt_certificateScalarWhereInput
+  common_name: StringFilter
+  zone: StringFilter
+  additional_domains: StringNullableListFilter
+  issued: DateTimeNullableFilter
+  renewal: DateTimeNullableFilter
+  certificate: StringNullableFilter
+  private_key: StringNullableFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input letsencrypt_certificateUpdateManyWithWhereWithoutLetsencrypt_userInput {
+  where: letsencrypt_certificateScalarWhereInput!
+  data: letsencrypt_certificateUpdateManyMutationInput!
+}
+
+input letsencrypt_certificateUpdateManyWithoutLetsencrypt_userInput {
+  create: letsencrypt_certificateCreateWithoutLetsencrypt_userInput
+  connectOrCreate: letsencrypt_certificateCreateOrConnectWithoutLetsencrypt_userInput
+  upsert: letsencrypt_certificateUpsertWithWhereUniqueWithoutLetsencrypt_userInput
+  createMany: letsencrypt_certificateCreateManyLetsencrypt_userInputEnvelope
+  connect: letsencrypt_certificateWhereUniqueInput
+  set: letsencrypt_certificateWhereUniqueInput
+  disconnect: letsencrypt_certificateWhereUniqueInput
+  delete: letsencrypt_certificateWhereUniqueInput
+  update: letsencrypt_certificateUpdateWithWhereUniqueWithoutLetsencrypt_userInput
+  updateMany: letsencrypt_certificateUpdateManyWithWhereWithoutLetsencrypt_userInput
+  deleteMany: letsencrypt_certificateScalarWhereInput
+}
+
+input letsencrypt_userUpdateInput {
+  zone: StringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  dns_provider_name: StringFieldUpdateOperationsInput
+  dns_provider_token: StringFieldUpdateOperationsInput
+  private_key: NullableStringFieldUpdateOperationsInput
+  registration_resource: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  letsencrypt_certificate: letsencrypt_certificateUpdateManyWithoutLetsencrypt_userInput
+}
+
+input letsencrypt_userCreateManyInput {
+  zone: String!
+  email: String!
+  dns_provider_name: String!
+  dns_provider_token: String!
+  private_key: String
+  registration_resource: DateTime
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input letsencrypt_userUpdateManyMutationInput {
+  zone: StringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  dns_provider_name: StringFieldUpdateOperationsInput
+  dns_provider_token: StringFieldUpdateOperationsInput
+  private_key: NullableStringFieldUpdateOperationsInput
+  registration_resource: DateTime
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input locksCreateInput {
+  name: String!
+  record_version_number: BigInt
+  data: String
+  owner: String
+}
+
+input NullableBigIntFieldUpdateOperationsInput {
+  set: BigInt
+  increment: BigInt
+  decrement: BigInt
+  multiply: BigInt
+  divide: BigInt
+}
+
+input locksUpdateInput {
+  name: StringFieldUpdateOperationsInput
+  record_version_number: NullableBigIntFieldUpdateOperationsInput
+  data: NullableStringFieldUpdateOperationsInput
+  owner: NullableStringFieldUpdateOperationsInput
+}
+
+input locksCreateManyInput {
+  name: String!
+  record_version_number: BigInt
+  data: String
+  owner: String
+}
+
+input locksUpdateManyMutationInput {
+  name: StringFieldUpdateOperationsInput
+  record_version_number: NullableBigIntFieldUpdateOperationsInput
+  data: NullableStringFieldUpdateOperationsInput
+  owner: NullableStringFieldUpdateOperationsInput
+}
+
+input namespaceCreateInput {
+  id: String
+  name: String!
+  created_at: DateTime
+  updated_at: DateTime
+  price_plan: price_planCreateNestedOneWithoutNamespaceInput
+  api: apiCreateNestedManyWithoutNamespaceInput
+  environment: environmentCreateNestedManyWithoutNamespaceInput
+  namespace_members: namespace_membersCreateNestedManyWithoutNamespaceInput
+}
+
+input namespaceUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  price_plan: price_planUpdateOneRequiredWithoutNamespaceInput
+  api: apiUpdateManyWithoutNamespaceInput
+  environment: environmentUpdateManyWithoutNamespaceInput
+  namespace_members: namespace_membersUpdateManyWithoutNamespaceInput
+}
+
+input namespaceCreateManyInput {
+  id: String
+  name: String!
+  price_plan_id: Int
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input namespaceUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input namespace_membersCreateInput {
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+  namespace: namespaceCreateNestedOneWithoutNamespace_membersInput!
+  users: usersCreateNestedOneWithoutNamespace_membersInput!
+}
+
+input namespace_membersUpdateInput {
+  membership: membership
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  namespace: namespaceUpdateOneRequiredWithoutNamespace_membersInput
+  users: usersUpdateOneRequiredWithoutNamespace_membersInput
+}
+
+input namespace_membersCreateManyInput {
+  user_id: String!
+  namespace_id: String!
+  membership: membership
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input environmentCreateWithoutNodepool_environmentInput {
+  id: String
+  name: String!
+  primary_hostname: String
+  primary: Boolean
+  hostnames: environmentCreatehostnamesInput
+  namespace: namespaceCreateNestedOneWithoutEnvironmentInput!
+  deployment_environment: deployment_environmentCreateNestedManyWithoutEnvironmentInput
+  environment_edges: environment_edgesCreateNestedManyWithoutEnvironmentInput
+}
+
+input environmentCreateOrConnectWithoutNodepool_environmentInput {
+  where: environmentWhereUniqueInput!
+  create: environmentCreateWithoutNodepool_environmentInput!
+}
+
+input environmentCreateNestedOneWithoutNodepool_environmentInput {
+  create: environmentCreateWithoutNodepool_environmentInput
+  connectOrCreate: environmentCreateOrConnectWithoutNodepool_environmentInput
+  connect: environmentWhereUniqueInput
+}
+
+input nodepool_environmentCreateWithoutNodepoolInput {
+  environment: environmentCreateNestedOneWithoutNodepool_environmentInput!
+}
+
+input nodepool_environmentCreateOrConnectWithoutNodepoolInput {
+  where: nodepool_environmentWhereUniqueInput!
+  create: nodepool_environmentCreateWithoutNodepoolInput!
+}
+
+input nodepool_environmentCreateManyNodepoolInput {
+  environment_id: String!
+}
+
+input nodepool_environmentCreateManyNodepoolInputEnvelope {
+  data: [nodepool_environmentCreateManyNodepoolInput]!
+  skipDuplicates: Boolean
+}
+
+input nodepool_environmentCreateNestedManyWithoutNodepoolInput {
+  create: nodepool_environmentCreateWithoutNodepoolInput
+  connectOrCreate: nodepool_environmentCreateOrConnectWithoutNodepoolInput
+  createMany: nodepool_environmentCreateManyNodepoolInputEnvelope
+  connect: nodepool_environmentWhereUniqueInput
+}
+
+input nodepoolCreateInput {
+  id: String
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+  wundernode: wundernodeCreateNestedOneWithoutNodepoolInput!
+  nodepool_environment: nodepool_environmentCreateNestedManyWithoutNodepoolInput
+}
+
+input environmentUpdateWithoutNodepool_environmentInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  primary_hostname: StringFieldUpdateOperationsInput
+  primary: BoolFieldUpdateOperationsInput
+  hostnames: environmentUpdatehostnamesInput
+  namespace: namespaceUpdateOneRequiredWithoutEnvironmentInput
+  deployment_environment: deployment_environmentUpdateManyWithoutEnvironmentInput
+  environment_edges: environment_edgesUpdateManyWithoutEnvironmentInput
+}
+
+input environmentUpsertWithoutNodepool_environmentInput {
+  update: environmentUpdateWithoutNodepool_environmentInput!
+  create: environmentCreateWithoutNodepool_environmentInput!
+}
+
+input environmentUpdateOneRequiredWithoutNodepool_environmentInput {
+  create: environmentCreateWithoutNodepool_environmentInput
+  connectOrCreate: environmentCreateOrConnectWithoutNodepool_environmentInput
+  upsert: environmentUpsertWithoutNodepool_environmentInput
+  connect: environmentWhereUniqueInput
+  update: environmentUpdateWithoutNodepool_environmentInput
+}
+
+input nodepool_environmentUpdateWithoutNodepoolInput {
+  environment: environmentUpdateOneRequiredWithoutNodepool_environmentInput
+}
+
+input nodepool_environmentUpsertWithWhereUniqueWithoutNodepoolInput {
+  where: nodepool_environmentWhereUniqueInput!
+  update: nodepool_environmentUpdateWithoutNodepoolInput!
+  create: nodepool_environmentCreateWithoutNodepoolInput!
+}
+
+input nodepool_environmentUpdateWithWhereUniqueWithoutNodepoolInput {
+  where: nodepool_environmentWhereUniqueInput!
+  data: nodepool_environmentUpdateWithoutNodepoolInput!
+}
+
+input nodepool_environmentUpdateManyWithWhereWithoutNodepoolInput {
+  where: nodepool_environmentScalarWhereInput!
+}
+
+input nodepool_environmentUpdateManyWithoutNodepoolInput {
+  create: nodepool_environmentCreateWithoutNodepoolInput
+  connectOrCreate: nodepool_environmentCreateOrConnectWithoutNodepoolInput
+  upsert: nodepool_environmentUpsertWithWhereUniqueWithoutNodepoolInput
+  createMany: nodepool_environmentCreateManyNodepoolInputEnvelope
+  connect: nodepool_environmentWhereUniqueInput
+  set: nodepool_environmentWhereUniqueInput
+  disconnect: nodepool_environmentWhereUniqueInput
+  delete: nodepool_environmentWhereUniqueInput
+  update: nodepool_environmentUpdateWithWhereUniqueWithoutNodepoolInput
+  updateMany: nodepool_environmentUpdateManyWithWhereWithoutNodepoolInput
+  deleteMany: nodepool_environmentScalarWhereInput
+}
+
+input nodepoolUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  shared: BoolFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  wundernode: wundernodeUpdateOneRequiredWithoutNodepoolInput
+  nodepool_environment: nodepool_environmentUpdateManyWithoutNodepoolInput
+}
+
+input nodepoolCreateManyInput {
+  id: String
+  wundernode_id: String!
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input nodepoolUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  shared: BoolFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input nodepool_environmentCreateInput {
+  environment: environmentCreateNestedOneWithoutNodepool_environmentInput!
+  nodepool: nodepoolCreateNestedOneWithoutNodepool_environmentInput!
+}
+
+input nodepool_environmentUpdateInput {
+  environment: environmentUpdateOneRequiredWithoutNodepool_environmentInput
+  nodepool: nodepoolUpdateOneRequiredWithoutNodepool_environmentInput
+}
+
+input nodepool_environmentCreateManyInput {
+  nodepool_id: String!
+  environment_id: String!
+}
+
+input namespaceCreateWithoutPrice_planInput {
+  id: String
+  name: String!
+  created_at: DateTime
+  updated_at: DateTime
+  api: apiCreateNestedManyWithoutNamespaceInput
+  environment: environmentCreateNestedManyWithoutNamespaceInput
+  namespace_members: namespace_membersCreateNestedManyWithoutNamespaceInput
+}
+
+input namespaceCreateOrConnectWithoutPrice_planInput {
+  where: namespaceWhereUniqueInput!
+  create: namespaceCreateWithoutPrice_planInput!
+}
+
+input namespaceCreateManyPrice_planInput {
+  id: String
+  name: String!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input namespaceCreateManyPrice_planInputEnvelope {
+  data: [namespaceCreateManyPrice_planInput]!
+  skipDuplicates: Boolean
+}
+
+input namespaceCreateNestedManyWithoutPrice_planInput {
+  create: namespaceCreateWithoutPrice_planInput
+  connectOrCreate: namespaceCreateOrConnectWithoutPrice_planInput
+  createMany: namespaceCreateManyPrice_planInputEnvelope
+  connect: namespaceWhereUniqueInput
+}
+
+input price_planCreateInput {
+  name: String!
+  quota_daily_requests: Int!
+  quota_environments: Int!
+  quota_members: Int
+  quota_apis: Int
+  allow_secondary_environments: Boolean
+  namespace: namespaceCreateNestedManyWithoutPrice_planInput
+}
+
+input namespaceUpdateWithoutPrice_planInput {
+  id: StringFieldUpdateOperationsInput
+  name: StringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  api: apiUpdateManyWithoutNamespaceInput
+  environment: environmentUpdateManyWithoutNamespaceInput
+  namespace_members: namespace_membersUpdateManyWithoutNamespaceInput
+}
+
+input namespaceUpsertWithWhereUniqueWithoutPrice_planInput {
+  where: namespaceWhereUniqueInput!
+  update: namespaceUpdateWithoutPrice_planInput!
+  create: namespaceCreateWithoutPrice_planInput!
+}
+
+input namespaceUpdateWithWhereUniqueWithoutPrice_planInput {
+  where: namespaceWhereUniqueInput!
+  data: namespaceUpdateWithoutPrice_planInput!
+}
+
+input namespaceScalarWhereInput {
+  AND: namespaceScalarWhereInput
+  OR: [namespaceScalarWhereInput]
+  NOT: namespaceScalarWhereInput
+  id: StringFilter
+  name: StringFilter
+  price_plan_id: IntFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input namespaceUpdateManyWithWhereWithoutPrice_planInput {
+  where: namespaceScalarWhereInput!
+  data: namespaceUpdateManyMutationInput!
+}
+
+input namespaceUpdateManyWithoutPrice_planInput {
+  create: namespaceCreateWithoutPrice_planInput
+  connectOrCreate: namespaceCreateOrConnectWithoutPrice_planInput
+  upsert: namespaceUpsertWithWhereUniqueWithoutPrice_planInput
+  createMany: namespaceCreateManyPrice_planInputEnvelope
+  connect: namespaceWhereUniqueInput
+  set: namespaceWhereUniqueInput
+  disconnect: namespaceWhereUniqueInput
+  delete: namespaceWhereUniqueInput
+  update: namespaceUpdateWithWhereUniqueWithoutPrice_planInput
+  updateMany: namespaceUpdateManyWithWhereWithoutPrice_planInput
+  deleteMany: namespaceScalarWhereInput
+}
+
+input price_planUpdateInput {
+  name: StringFieldUpdateOperationsInput
+  quota_daily_requests: IntFieldUpdateOperationsInput
+  quota_environments: IntFieldUpdateOperationsInput
+  quota_members: IntFieldUpdateOperationsInput
+  quota_apis: IntFieldUpdateOperationsInput
+  allow_secondary_environments: BoolFieldUpdateOperationsInput
+  namespace: namespaceUpdateManyWithoutPrice_planInput
+}
+
+input price_planCreateManyInput {
+  id: Int
+  name: String!
+  quota_daily_requests: Int!
+  quota_environments: Int!
+  quota_members: Int
+  quota_apis: Int
+  allow_secondary_environments: Boolean
+}
+
+input price_planUpdateManyMutationInput {
+  name: StringFieldUpdateOperationsInput
+  quota_daily_requests: IntFieldUpdateOperationsInput
+  quota_environments: IntFieldUpdateOperationsInput
+  quota_members: IntFieldUpdateOperationsInput
+  quota_apis: IntFieldUpdateOperationsInput
+  allow_secondary_environments: BoolFieldUpdateOperationsInput
+}
+
+input usersCreateInput {
+  id: String
+  name: String
+  email: String!
+  role: user_role
+  created_at: DateTime
+  updated_at: DateTime
+  access_token: access_tokenCreateNestedManyWithoutUsersInput
+  namespace_members: namespace_membersCreateNestedManyWithoutUsersInput
+}
+
+input usersUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  role: user_role
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  access_token: access_tokenUpdateManyWithoutUsersInput
+  namespace_members: namespace_membersUpdateManyWithoutUsersInput
+}
+
+input usersCreateManyInput {
+  id: String
+  name: String
+  email: String!
+  role: user_role
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input usersUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  name: NullableStringFieldUpdateOperationsInput
+  email: StringFieldUpdateOperationsInput
+  role: user_role
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+input nodepoolCreateWithoutWundernodeInput {
+  id: String
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+  nodepool_environment: nodepool_environmentCreateNestedManyWithoutNodepoolInput
+}
+
+input nodepoolCreateOrConnectWithoutWundernodeInput {
+  where: nodepoolWhereUniqueInput!
+  create: nodepoolCreateWithoutWundernodeInput!
+}
+
+input nodepoolCreateManyWundernodeInput {
+  id: String
+  shared: Boolean
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input nodepoolCreateManyWundernodeInputEnvelope {
+  data: [nodepoolCreateManyWundernodeInput]!
+  skipDuplicates: Boolean
+}
+
+input nodepoolCreateNestedManyWithoutWundernodeInput {
+  create: nodepoolCreateWithoutWundernodeInput
+  connectOrCreate: nodepoolCreateOrConnectWithoutWundernodeInput
+  createMany: nodepoolCreateManyWundernodeInputEnvelope
+  connect: nodepoolWhereUniqueInput
+}
+
+input wundernodeCreateInput {
+  id: String
+  etag: String!
+  config: DateTime!
+  ipv4: String
+  ipv6: String
+  created_at: DateTime
+  updated_at: DateTime
+  nodepool: nodepoolCreateNestedManyWithoutWundernodeInput
+}
+
+input nodepoolUpdateWithoutWundernodeInput {
+  id: StringFieldUpdateOperationsInput
+  shared: BoolFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  nodepool_environment: nodepool_environmentUpdateManyWithoutNodepoolInput
+}
+
+input nodepoolUpsertWithWhereUniqueWithoutWundernodeInput {
+  where: nodepoolWhereUniqueInput!
+  update: nodepoolUpdateWithoutWundernodeInput!
+  create: nodepoolCreateWithoutWundernodeInput!
+}
+
+input nodepoolUpdateWithWhereUniqueWithoutWundernodeInput {
+  where: nodepoolWhereUniqueInput!
+  data: nodepoolUpdateWithoutWundernodeInput!
+}
+
+input nodepoolScalarWhereInput {
+  AND: nodepoolScalarWhereInput
+  OR: [nodepoolScalarWhereInput]
+  NOT: nodepoolScalarWhereInput
+  id: StringFilter
+  wundernode_id: StringFilter
+  shared: BoolFilter
+  created_at: DateTimeFilter
+  updated_at: DateTimeNullableFilter
+}
+
+input nodepoolUpdateManyWithWhereWithoutWundernodeInput {
+  where: nodepoolScalarWhereInput!
+  data: nodepoolUpdateManyMutationInput!
+}
+
+input nodepoolUpdateManyWithoutWundernodeInput {
+  create: nodepoolCreateWithoutWundernodeInput
+  connectOrCreate: nodepoolCreateOrConnectWithoutWundernodeInput
+  upsert: nodepoolUpsertWithWhereUniqueWithoutWundernodeInput
+  createMany: nodepoolCreateManyWundernodeInputEnvelope
+  connect: nodepoolWhereUniqueInput
+  set: nodepoolWhereUniqueInput
+  disconnect: nodepoolWhereUniqueInput
+  delete: nodepoolWhereUniqueInput
+  update: nodepoolUpdateWithWhereUniqueWithoutWundernodeInput
+  updateMany: nodepoolUpdateManyWithWhereWithoutWundernodeInput
+  deleteMany: nodepoolScalarWhereInput
+}
+
+input wundernodeUpdateInput {
+  id: StringFieldUpdateOperationsInput
+  etag: StringFieldUpdateOperationsInput
+  config: DateTime
+  ipv4: NullableStringFieldUpdateOperationsInput
+  ipv6: NullableStringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+  nodepool: nodepoolUpdateManyWithoutWundernodeInput
+}
+
+input wundernodeCreateManyInput {
+  id: String
+  etag: String!
+  config: DateTime!
+  ipv4: String
+  ipv6: String
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+input wundernodeUpdateManyMutationInput {
+  id: StringFieldUpdateOperationsInput
+  etag: StringFieldUpdateOperationsInput
+  config: DateTime
+  ipv4: NullableStringFieldUpdateOperationsInput
+  ipv6: NullableStringFieldUpdateOperationsInput
+  created_at: DateTimeFieldUpdateOperationsInput
+  updated_at: NullableDateTimeFieldUpdateOperationsInput
+}
+
+type Mutation {
+  createOneaccess_token(data: access_tokenCreateInput!): access_token!
+  upsertOneaccess_token(where: access_tokenWhereUniqueInput!, create: access_tokenCreateInput!, update: access_tokenUpdateInput!): access_token!
+  createManyaccess_token(data: [access_tokenCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneaccess_token(where: access_tokenWhereUniqueInput!): access_token
+  updateOneaccess_token(data: access_tokenUpdateInput!, where: access_tokenWhereUniqueInput!): access_token
+  updateManyaccess_token(data: access_tokenUpdateManyMutationInput!, where: access_tokenWhereInput): AffectedRowsOutput!
+  deleteManyaccess_token(where: access_tokenWhereInput): AffectedRowsOutput!
+  createOneadmin_config(data: admin_configCreateInput!): admin_config!
+  upsertOneadmin_config(where: admin_configWhereUniqueInput!, create: admin_configCreateInput!, update: admin_configUpdateInput!): admin_config!
+  createManyadmin_config(data: [admin_configCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneadmin_config(where: admin_configWhereUniqueInput!): admin_config
+  updateOneadmin_config(data: admin_configUpdateInput!, where: admin_configWhereUniqueInput!): admin_config
+  updateManyadmin_config(data: admin_configUpdateManyMutationInput!, where: admin_configWhereInput): AffectedRowsOutput!
+  deleteManyadmin_config(where: admin_configWhereInput): AffectedRowsOutput!
+  createOneapi(data: apiCreateInput!): api!
+  upsertOneapi(where: apiWhereUniqueInput!, create: apiCreateInput!, update: apiUpdateInput!): api!
+  createManyapi(data: [apiCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneapi(where: apiWhereUniqueInput!): api
+  updateOneapi(data: apiUpdateInput!, where: apiWhereUniqueInput!): api
+  updateManyapi(data: apiUpdateManyMutationInput!, where: apiWhereInput): AffectedRowsOutput!
+  deleteManyapi(where: apiWhereInput): AffectedRowsOutput!
+  createOnedeployment(data: deploymentCreateInput!): deployment!
+  upsertOnedeployment(where: deploymentWhereUniqueInput!, create: deploymentCreateInput!, update: deploymentUpdateInput!): deployment!
+  createManydeployment(data: [deploymentCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnedeployment(where: deploymentWhereUniqueInput!): deployment
+  updateOnedeployment(data: deploymentUpdateInput!, where: deploymentWhereUniqueInput!): deployment
+  updateManydeployment(data: deploymentUpdateManyMutationInput!, where: deploymentWhereInput): AffectedRowsOutput!
+  deleteManydeployment(where: deploymentWhereInput): AffectedRowsOutput!
+  createOnedeployment_environment(data: deployment_environmentCreateInput!): deployment_environment!
+  upsertOnedeployment_environment(where: deployment_environmentWhereUniqueInput!, create: deployment_environmentCreateInput!, update: deployment_environmentUpdateInput!): deployment_environment!
+  createManydeployment_environment(data: [deployment_environmentCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnedeployment_environment(where: deployment_environmentWhereUniqueInput!): deployment_environment
+  updateOnedeployment_environment(data: deployment_environmentUpdateInput!, where: deployment_environmentWhereUniqueInput!): deployment_environment
+  updateManydeployment_environment(where: deployment_environmentWhereInput): AffectedRowsOutput!
+  deleteManydeployment_environment(where: deployment_environmentWhereInput): AffectedRowsOutput!
+  createOneedge(data: edgeCreateInput!): edge!
+  upsertOneedge(where: edgeWhereUniqueInput!, create: edgeCreateInput!, update: edgeUpdateInput!): edge!
+  createManyedge(data: [edgeCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneedge(where: edgeWhereUniqueInput!): edge
+  updateOneedge(data: edgeUpdateInput!, where: edgeWhereUniqueInput!): edge
+  updateManyedge(data: edgeUpdateManyMutationInput!, where: edgeWhereInput): AffectedRowsOutput!
+  deleteManyedge(where: edgeWhereInput): AffectedRowsOutput!
+  createOneenvironment(data: environmentCreateInput!): environment!
+  upsertOneenvironment(where: environmentWhereUniqueInput!, create: environmentCreateInput!, update: environmentUpdateInput!): environment!
+  createManyenvironment(data: [environmentCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneenvironment(where: environmentWhereUniqueInput!): environment
+  updateOneenvironment(data: environmentUpdateInput!, where: environmentWhereUniqueInput!): environment
+  updateManyenvironment(data: environmentUpdateManyMutationInput!, where: environmentWhereInput): AffectedRowsOutput!
+  deleteManyenvironment(where: environmentWhereInput): AffectedRowsOutput!
+  createOneenvironment_edges(data: environment_edgesCreateInput!): environment_edges!
+  upsertOneenvironment_edges(where: environment_edgesWhereUniqueInput!, create: environment_edgesCreateInput!, update: environment_edgesUpdateInput!): environment_edges!
+  createManyenvironment_edges(data: [environment_edgesCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneenvironment_edges(where: environment_edgesWhereUniqueInput!): environment_edges
+  updateOneenvironment_edges(data: environment_edgesUpdateInput!, where: environment_edgesWhereUniqueInput!): environment_edges
+  updateManyenvironment_edges(where: environment_edgesWhereInput): AffectedRowsOutput!
+  deleteManyenvironment_edges(where: environment_edgesWhereInput): AffectedRowsOutput!
+  createOneletsencrypt_certificate(data: letsencrypt_certificateCreateInput!): letsencrypt_certificate!
+  upsertOneletsencrypt_certificate(where: letsencrypt_certificateWhereUniqueInput!, create: letsencrypt_certificateCreateInput!, update: letsencrypt_certificateUpdateInput!): letsencrypt_certificate!
+  createManyletsencrypt_certificate(data: [letsencrypt_certificateCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneletsencrypt_certificate(where: letsencrypt_certificateWhereUniqueInput!): letsencrypt_certificate
+  updateOneletsencrypt_certificate(data: letsencrypt_certificateUpdateInput!, where: letsencrypt_certificateWhereUniqueInput!): letsencrypt_certificate
+  updateManyletsencrypt_certificate(data: letsencrypt_certificateUpdateManyMutationInput!, where: letsencrypt_certificateWhereInput): AffectedRowsOutput!
+  deleteManyletsencrypt_certificate(where: letsencrypt_certificateWhereInput): AffectedRowsOutput!
+  createOneletsencrypt_user(data: letsencrypt_userCreateInput!): letsencrypt_user!
+  upsertOneletsencrypt_user(where: letsencrypt_userWhereUniqueInput!, create: letsencrypt_userCreateInput!, update: letsencrypt_userUpdateInput!): letsencrypt_user!
+  createManyletsencrypt_user(data: [letsencrypt_userCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneletsencrypt_user(where: letsencrypt_userWhereUniqueInput!): letsencrypt_user
+  updateOneletsencrypt_user(data: letsencrypt_userUpdateInput!, where: letsencrypt_userWhereUniqueInput!): letsencrypt_user
+  updateManyletsencrypt_user(data: letsencrypt_userUpdateManyMutationInput!, where: letsencrypt_userWhereInput): AffectedRowsOutput!
+  deleteManyletsencrypt_user(where: letsencrypt_userWhereInput): AffectedRowsOutput!
+  createOnelocks(data: locksCreateInput!): locks!
+  upsertOnelocks(where: locksWhereUniqueInput!, create: locksCreateInput!, update: locksUpdateInput!): locks!
+  createManylocks(data: [locksCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnelocks(where: locksWhereUniqueInput!): locks
+  updateOnelocks(data: locksUpdateInput!, where: locksWhereUniqueInput!): locks
+  updateManylocks(data: locksUpdateManyMutationInput!, where: locksWhereInput): AffectedRowsOutput!
+  deleteManylocks(where: locksWhereInput): AffectedRowsOutput!
+  createOnenamespace(data: namespaceCreateInput!): namespace!
+  upsertOnenamespace(where: namespaceWhereUniqueInput!, create: namespaceCreateInput!, update: namespaceUpdateInput!): namespace!
+  createManynamespace(data: [namespaceCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnenamespace(where: namespaceWhereUniqueInput!): namespace
+  updateOnenamespace(data: namespaceUpdateInput!, where: namespaceWhereUniqueInput!): namespace
+  updateManynamespace(data: namespaceUpdateManyMutationInput!, where: namespaceWhereInput): AffectedRowsOutput!
+  deleteManynamespace(where: namespaceWhereInput): AffectedRowsOutput!
+  createOnenamespace_members(data: namespace_membersCreateInput!): namespace_members!
+  upsertOnenamespace_members(where: namespace_membersWhereUniqueInput!, create: namespace_membersCreateInput!, update: namespace_membersUpdateInput!): namespace_members!
+  createManynamespace_members(data: [namespace_membersCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnenamespace_members(where: namespace_membersWhereUniqueInput!): namespace_members
+  updateOnenamespace_members(data: namespace_membersUpdateInput!, where: namespace_membersWhereUniqueInput!): namespace_members
+  updateManynamespace_members(data: namespace_membersUpdateManyMutationInput!, where: namespace_membersWhereInput): AffectedRowsOutput!
+  deleteManynamespace_members(where: namespace_membersWhereInput): AffectedRowsOutput!
+  createOnenodepool(data: nodepoolCreateInput!): nodepool!
+  upsertOnenodepool(where: nodepoolWhereUniqueInput!, create: nodepoolCreateInput!, update: nodepoolUpdateInput!): nodepool!
+  createManynodepool(data: [nodepoolCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnenodepool(where: nodepoolWhereUniqueInput!): nodepool
+  updateOnenodepool(data: nodepoolUpdateInput!, where: nodepoolWhereUniqueInput!): nodepool
+  updateManynodepool(data: nodepoolUpdateManyMutationInput!, where: nodepoolWhereInput): AffectedRowsOutput!
+  deleteManynodepool(where: nodepoolWhereInput): AffectedRowsOutput!
+  createOnenodepool_environment(data: nodepool_environmentCreateInput!): nodepool_environment!
+  upsertOnenodepool_environment(where: nodepool_environmentWhereUniqueInput!, create: nodepool_environmentCreateInput!, update: nodepool_environmentUpdateInput!): nodepool_environment!
+  createManynodepool_environment(data: [nodepool_environmentCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnenodepool_environment(where: nodepool_environmentWhereUniqueInput!): nodepool_environment
+  updateOnenodepool_environment(data: nodepool_environmentUpdateInput!, where: nodepool_environmentWhereUniqueInput!): nodepool_environment
+  updateManynodepool_environment(where: nodepool_environmentWhereInput): AffectedRowsOutput!
+  deleteManynodepool_environment(where: nodepool_environmentWhereInput): AffectedRowsOutput!
+  createOneprice_plan(data: price_planCreateInput!): price_plan!
+  upsertOneprice_plan(where: price_planWhereUniqueInput!, create: price_planCreateInput!, update: price_planUpdateInput!): price_plan!
+  createManyprice_plan(data: [price_planCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneprice_plan(where: price_planWhereUniqueInput!): price_plan
+  updateOneprice_plan(data: price_planUpdateInput!, where: price_planWhereUniqueInput!): price_plan
+  updateManyprice_plan(data: price_planUpdateManyMutationInput!, where: price_planWhereInput): AffectedRowsOutput!
+  deleteManyprice_plan(where: price_planWhereInput): AffectedRowsOutput!
+  createOneusers(data: usersCreateInput!): users!
+  upsertOneusers(where: usersWhereUniqueInput!, create: usersCreateInput!, update: usersUpdateInput!): users!
+  createManyusers(data: [usersCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOneusers(where: usersWhereUniqueInput!): users
+  updateOneusers(data: usersUpdateInput!, where: usersWhereUniqueInput!): users
+  updateManyusers(data: usersUpdateManyMutationInput!, where: usersWhereInput): AffectedRowsOutput!
+  deleteManyusers(where: usersWhereInput): AffectedRowsOutput!
+  createOnewundernode(data: wundernodeCreateInput!): wundernode!
+  upsertOnewundernode(where: wundernodeWhereUniqueInput!, create: wundernodeCreateInput!, update: wundernodeUpdateInput!): wundernode!
+  createManywundernode(data: [wundernodeCreateManyInput]!, skipDuplicates: Boolean): AffectedRowsOutput!
+  deleteOnewundernode(where: wundernodeWhereUniqueInput!): wundernode
+  updateOnewundernode(data: wundernodeUpdateInput!, where: wundernodeWhereUniqueInput!): wundernode
+  updateManywundernode(data: wundernodeUpdateManyMutationInput!, where: wundernodeWhereInput): AffectedRowsOutput!
+  deleteManywundernode(where: wundernodeWhereInput): AffectedRowsOutput!
+}
+
+scalar DateTime
+
+scalar Json
+
+scalar UUID
+
+scalar BigInt
+
+type Post {
+  id: Int
+  userId: Int
+  title: String
+  body: String
+}
+
+type Comment {
+  id: Int
+  name: String
+  email: String
+  body: String
+  postId: Int
+}
+
+type User {
+  id: Int
+  name: String
+  username: String
+  email: String
+  address: Address
+  phone: String
+  website: String
+  company: Company
+}
+
+type Address {
+  street: String
+  suite: String
+  city: String
+  zipcode: String
+  geo: Geo
+}
+
+type Geo {
+  lat: String
+  lng: String
+}
+
+type Company {
+  name: String
+  catchPhrase: String
+  bs: String
+}

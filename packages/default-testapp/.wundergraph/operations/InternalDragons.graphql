@@ -1,0 +1,7 @@
+{
+    spacex_dragons {
+        name
+        active
+        crew_capacity
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "source": ["./dist/darwin_amd64_darwin_amd64/wunderctl"],
+  "bundle_id": "com.wundergraph.wunderctl",
+  "apple_id": {
+    "username": "@env:AC_USERNAME",
+    "password": "@env:AC_PASSWORD",
+    "provider": "@env:AC_PROVIDER"
+  },
+  "sign": {
+    "application_identity": "FA783902CFC5942A88024B5CC0FCB9062B491160"
+  },
+  "zip": {
+    "output_path": "wunderctl_notarized_Darwin_x86_64.zip"
+  }
+}

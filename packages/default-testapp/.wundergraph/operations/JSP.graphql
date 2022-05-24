@@ -1,0 +1,6 @@
+{
+    jsp_postsList {
+        id
+        title
+    }
+}

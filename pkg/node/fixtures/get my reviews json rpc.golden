@@ -1,0 +1,64 @@
+{
+  "data": {
+    "me": {
+      "id": "1234",
+      "reviews": [
+        {
+          "author": {
+            "id": "1234",
+            "username": "Me"
+          },
+          "body": "A highly effective form of birth control.",
+          "product": {
+            "name": "Trilby",
+            "price": 456,
+            "reviews": [
+              {
+                "author": {
+                  "id": "1234",
+                  "username": "Me"
+                },
+                "body": "A highly effective form of birth control."
+              },
+              {
+                "author": {
+                  "id": "1234",
+                  "username": "Me"
+                },
+                "body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits."
+              }
+            ]
+          }
+        },
+        {
+          "author": {
+            "id": "1234",
+            "username": "Me"
+          },
+          "body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.",
+          "product": {
+            "name": "Trilby",
+            "price": 456,
+            "reviews": [
+              {
+                "author": {
+                  "id": "1234",
+                  "username": "Me"
+                },
+                "body": "A highly effective form of birth control."
+              },
+              {
+                "author": {
+                  "id": "1234",
+                  "username": "Me"
+                },
+                "body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits."
+              }
+            ]
+          }
+        }
+      ],
+      "username": "Me"
+    }
+  }
+}

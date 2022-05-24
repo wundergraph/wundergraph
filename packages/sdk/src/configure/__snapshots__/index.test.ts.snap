@@ -1,0 +1,264 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`resolveIntegration 1`] = `
+"{
+  \\"DefaultFlushInterval\\": 500,
+  \\"Schema\\": \\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ndirective @countries_countries_cacheControl(maxAge: Int, scope: countries_countries_CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\nThe directive @internal marks a variable definition as internal so that clients can't access it.\\\\nThe field is also not visible in the public API.\\\\nIt's only being used as an internal variable to export fields into.\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\ndirective @countries_internal on VARIABLE_DEFINITION\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\nThe @transform directive allows to apply transformations to the response.\\\\nBy applying the directive, the shape of the response can be altered,\\\\nwhich will also modify the JSON-Schema of the response.\\\\nThat is, you will keep full type safety and code-generation for transformed fields.\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\ndirective @countries_transform(\\\\n  \\\\\\"\\\\\\"\\\\\\"\\\\n  Using the 'get' transformation allows you to extract a nested field using a JSON path.\\\\n  This is useful to unnest data, e.g. when using the '_join' field, which adds an extra layer of nesting.\\\\n  \\\\n  Example:\\\\n  \\\\n  query GetName {\\\\n      name: me @transform(get: \\\\\\"info.name\\\\\\") {\\\\n          info {\\\\n              name\\\\n          }\\\\n      }\\\\n  }\\\\n  \\\\n  Before the transformation, the resolve looks like this:\\\\n  \\\\n  {\\\\n      \\\\\\"name\\\\\\": {\\\\n          \\\\\\"info\\\\\\": {\\\\n              \\\\\\"name\\\\\\": \\\\\\"John Doe\\\\\\"\\\\n          }\\\\n      }\\\\n  }\\\\n  \\\\n  With the transformation applied, the response will be reshaped like this:\\\\n  \\\\n  {\\\\n      \\\\\\"name\\\\\\": \\\\\\"John Doe\\\\\\"\\\\n  }\\\\n  \\\\\\"\\\\\\"\\\\\\"\\\\n  get: String\\\\n) on FIELD\\\\n\\\\ntype Query {\\\\n  countries_countries_continents(filter: countries_countries_ContinentFilterInput): [countries_countries_Continent!]!\\\\n  countries_countries_continent(code: ID!): countries_countries_Continent\\\\n  countries_countries_countries(filter: countries_countries_CountryFilterInput): [countries_countries_Country!]!\\\\n  countries_countries_country(code: ID!): countries_countries_Country\\\\n  countries_countries_languages(filter: countries_countries_LanguageFilterInput): [countries_countries_Language!]!\\\\n  countries_countries_language(code: ID!): countries_countries_Language\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput countries_countries_ContinentFilterInput {\\\\n  code: countries_countries_StringQueryOperatorInput\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput countries_countries_StringQueryOperatorInput {\\\\n  eq: String\\\\n  ne: String\\\\n  in: [String]\\\\n  nin: [String]\\\\n  regex: String\\\\n  glob: String\\\\n}\\\\n\\\\ntype countries_countries_Continent {\\\\n  code: ID!\\\\n  name: String!\\\\n  countries: [countries_countries_Country!]!\\\\n}\\\\n\\\\ntype countries_countries_Country {\\\\n  code: ID!\\\\n  name: String!\\\\n  native: String!\\\\n  phone: String!\\\\n  continent: countries_countries_Continent!\\\\n  capital: String\\\\n  currency: String\\\\n  languages: [countries_countries_Language!]!\\\\n  emoji: String!\\\\n  emojiU: String!\\\\n  states: [countries_countries_State!]!\\\\n}\\\\n\\\\ntype countries_countries_Language {\\\\n  code: ID!\\\\n  name: String\\\\n  native: String\\\\n  rtl: Boolean!\\\\n}\\\\n\\\\ntype countries_countries_State {\\\\n  code: String\\\\n  name: String!\\\\n  country: countries_countries_Country!\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput countries_countries_CountryFilterInput {\\\\n  code: countries_countries_StringQueryOperatorInput\\\\n  currency: countries_countries_StringQueryOperatorInput\\\\n  continent: countries_countries_StringQueryOperatorInput\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput countries_countries_LanguageFilterInput {\\\\n  code: countries_countries_StringQueryOperatorInput\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\nenum countries_countries_CacheControlScope {\\\\n  \\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\n  PUBLIC\\\\n  \\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\n  PRIVATE\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"The \`Upload\` scalar type represents a file upload.\\\\\\"\\\\\\"\\\\\\"\\\\nscalar countries_countries_Upload\\",
+  \\"DataSources\\": [
+    {
+      \\"ChildNodes\\": [
+        {
+          \\"typeName\\": \\"countries_countries_Continent\\",
+          \\"fieldNames\\": [
+            \\"code\\",
+            \\"name\\",
+            \\"countries\\"
+          ]
+        },
+        {
+          \\"typeName\\": \\"countries_countries_Country\\",
+          \\"fieldNames\\": [
+            \\"code\\",
+            \\"name\\",
+            \\"native\\",
+            \\"phone\\",
+            \\"continent\\",
+            \\"capital\\",
+            \\"currency\\",
+            \\"languages\\",
+            \\"emoji\\",
+            \\"emojiU\\",
+            \\"states\\"
+          ]
+        },
+        {
+          \\"typeName\\": \\"countries_countries_Language\\",
+          \\"fieldNames\\": [
+            \\"code\\",
+            \\"name\\",
+            \\"native\\",
+            \\"rtl\\"
+          ]
+        },
+        {
+          \\"typeName\\": \\"countries_countries_State\\",
+          \\"fieldNames\\": [
+            \\"code\\",
+            \\"name\\",
+            \\"country\\"
+          ]
+        }
+      ],
+      \\"Custom\\": {
+        \\"Federation\\": {
+          \\"Enabled\\": false,
+          \\"ServiceSDL\\": \\"\\"
+        },
+        \\"Fetch\\": {
+          \\"body\\": {
+            \\"environmentVariableDefaultValue\\": \\"\\",
+            \\"environmentVariableName\\": \\"\\",
+            \\"kind\\": 0,
+            \\"placeholderVariableName\\": \\"\\",
+            \\"staticVariableContent\\": \\"\\"
+          },
+          \\"header\\": {},
+          \\"method\\": 1,
+          \\"query\\": [],
+          \\"url\\": {
+            \\"kind\\": 0,
+            \\"environmentVariableDefaultValue\\": \\"\\",
+            \\"environmentVariableName\\": \\"\\",
+            \\"placeholderVariableName\\": \\"\\",
+            \\"staticVariableContent\\": \\"https://countries.trevorblades.com/\\"
+          }
+        },
+        \\"Subscription\\": {
+          \\"Enabled\\": false,
+          \\"URL\\": {
+            \\"environmentVariableDefaultValue\\": \\"\\",
+            \\"environmentVariableName\\": \\"\\",
+            \\"kind\\": 0,
+            \\"placeholderVariableName\\": \\"\\",
+            \\"staticVariableContent\\": \\"\\"
+          }
+        },
+        \\"UpstreamSchema\\": \\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ndirective @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ntype Query {\\\\n  continents(filter: ContinentFilterInput): [Continent!]!\\\\n  continent(code: ID!): Continent\\\\n  countries(filter: CountryFilterInput): [Country!]!\\\\n  country(code: ID!): Country\\\\n  languages(filter: LanguageFilterInput): [Language!]!\\\\n  language(code: ID!): Language\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput ContinentFilterInput {\\\\n  code: StringQueryOperatorInput\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput StringQueryOperatorInput {\\\\n  eq: String\\\\n  ne: String\\\\n  in: [String]\\\\n  nin: [String]\\\\n  regex: String\\\\n  glob: String\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ntype Continent {\\\\n  code: ID!\\\\n  name: String!\\\\n  countries: [Country!]!\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ntype Country {\\\\n  code: ID!\\\\n  name: String!\\\\n  native: String!\\\\n  phone: String!\\\\n  continent: Continent!\\\\n  capital: String\\\\n  currency: String\\\\n  languages: [Language!]!\\\\n  emoji: String!\\\\n  emojiU: String!\\\\n  states: [State!]!\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ntype Language {\\\\n  code: ID!\\\\n  name: String\\\\n  native: String\\\\n  rtl: Boolean!\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ntype State {\\\\n  code: String\\\\n  name: String!\\\\n  country: Country!\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput CountryFilterInput {\\\\n  code: StringQueryOperatorInput\\\\n  currency: StringQueryOperatorInput\\\\n  continent: StringQueryOperatorInput\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\ninput LanguageFilterInput {\\\\n  code: StringQueryOperatorInput\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\nenum CacheControlScope {\\\\n  \\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\n  PUBLIC\\\\n  \\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\\\"\\\\n  PRIVATE\\\\n}\\\\n\\\\n\\\\\\"\\\\\\"\\\\\\"The \`Upload\` scalar type represents a file upload.\\\\\\"\\\\\\"\\\\\\"\\\\nscalar Upload\\\\n\\"
+      },
+      \\"Directives\\": [
+        {
+          \\"directiveName\\": \\"countries_cacheControl\\",
+          \\"renameTo\\": \\"cacheControl\\"
+        }
+      ],
+      \\"Kind\\": 2,
+      \\"RootNodes\\": [
+        {
+          \\"typeName\\": \\"Query\\",
+          \\"fieldNames\\": [
+            \\"countries_countries_continents\\",
+            \\"countries_countries_continent\\",
+            \\"countries_countries_countries\\",
+            \\"countries_countries_country\\",
+            \\"countries_countries_languages\\",
+            \\"countries_countries_language\\"
+          ]
+        }
+      ]
+    }
+  ],
+  \\"Fields\\": [
+    {
+      \\"argumentsConfiguration\\": [
+        {
+          \\"name\\": \\"filter\\",
+          \\"renderConfiguration\\": 0,
+          \\"sourcePath\\": [],
+          \\"sourceType\\": 1
+        }
+      ],
+      \\"disableDefaultFieldMapping\\": false,
+      \\"fieldName\\": \\"countries_countries_continents\\",
+      \\"path\\": [
+        \\"continents\\"
+      ],
+      \\"requiresFields\\": [],
+      \\"typeName\\": \\"Query\\",
+      \\"unescapeResponseJson\\": false
+    },
+    {
+      \\"argumentsConfiguration\\": [
+        {
+          \\"name\\": \\"code\\",
+          \\"renderConfiguration\\": 0,
+          \\"sourcePath\\": [],
+          \\"sourceType\\": 1
+        }
+      ],
+      \\"disableDefaultFieldMapping\\": false,
+      \\"fieldName\\": \\"countries_countries_continent\\",
+      \\"path\\": [
+        \\"continent\\"
+      ],
+      \\"requiresFields\\": [],
+      \\"typeName\\": \\"Query\\",
+      \\"unescapeResponseJson\\": false
+    },
+    {
+      \\"argumentsConfiguration\\": [
+        {
+          \\"name\\": \\"filter\\",
+          \\"renderConfiguration\\": 0,
+          \\"sourcePath\\": [],
+          \\"sourceType\\": 1
+        }
+      ],
+      \\"disableDefaultFieldMapping\\": false,
+      \\"fieldName\\": \\"countries_countries_countries\\",
+      \\"path\\": [
+        \\"countries\\"
+      ],
+      \\"requiresFields\\": [],
+      \\"typeName\\": \\"Query\\",
+      \\"unescapeResponseJson\\": false
+    },
+    {
+      \\"argumentsConfiguration\\": [
+        {
+          \\"name\\": \\"code\\",
+          \\"renderConfiguration\\": 0,
+          \\"sourcePath\\": [],
+          \\"sourceType\\": 1
+        }
+      ],
+      \\"disableDefaultFieldMapping\\": false,
+      \\"fieldName\\": \\"countries_countries_country\\",
+      \\"path\\": [
+        \\"country\\"
+      ],
+      \\"requiresFields\\": [],
+      \\"typeName\\": \\"Query\\",
+      \\"unescapeResponseJson\\": false
+    },
+    {
+      \\"argumentsConfiguration\\": [
+        {
+          \\"name\\": \\"filter\\",
+          \\"renderConfiguration\\": 0,
+          \\"sourcePath\\": [],
+          \\"sourceType\\": 1
+        }
+      ],
+      \\"disableDefaultFieldMapping\\": false,
+      \\"fieldName\\": \\"countries_countries_languages\\",
+      \\"path\\": [
+        \\"languages\\"
+      ],
+      \\"requiresFields\\": [],
+      \\"typeName\\": \\"Query\\",
+      \\"unescapeResponseJson\\": false
+    },
+    {
+      \\"argumentsConfiguration\\": [
+        {
+          \\"name\\": \\"code\\",
+          \\"renderConfiguration\\": 0,
+          \\"sourcePath\\": [],
+          \\"sourceType\\": 1
+        }
+      ],
+      \\"disableDefaultFieldMapping\\": false,
+      \\"fieldName\\": \\"countries_countries_language\\",
+      \\"path\\": [
+        \\"language\\"
+      ],
+      \\"requiresFields\\": [],
+      \\"typeName\\": \\"Query\\",
+      \\"unescapeResponseJson\\": false
+    }
+  ],
+  \\"Types\\": [
+    {
+      \\"renameTo\\": \\"ContinentFilterInput\\",
+      \\"typeName\\": \\"countries_countries_ContinentFilterInput\\"
+    },
+    {
+      \\"renameTo\\": \\"StringQueryOperatorInput\\",
+      \\"typeName\\": \\"countries_countries_StringQueryOperatorInput\\"
+    },
+    {
+      \\"renameTo\\": \\"Continent\\",
+      \\"typeName\\": \\"countries_countries_Continent\\"
+    },
+    {
+      \\"renameTo\\": \\"Country\\",
+      \\"typeName\\": \\"countries_countries_Country\\"
+    },
+    {
+      \\"renameTo\\": \\"Language\\",
+      \\"typeName\\": \\"countries_countries_Language\\"
+    },
+    {
+      \\"renameTo\\": \\"State\\",
+      \\"typeName\\": \\"countries_countries_State\\"
+    },
+    {
+      \\"renameTo\\": \\"CountryFilterInput\\",
+      \\"typeName\\": \\"countries_countries_CountryFilterInput\\"
+    },
+    {
+      \\"renameTo\\": \\"LanguageFilterInput\\",
+      \\"typeName\\": \\"countries_countries_LanguageFilterInput\\"
+    },
+    {
+      \\"renameTo\\": \\"CacheControlScope\\",
+      \\"typeName\\": \\"countries_countries_CacheControlScope\\"
+    },
+    {
+      \\"renameTo\\": \\"Upload\\",
+      \\"typeName\\": \\"countries_countries_Upload\\"
+    }
+  ],
+  \\"interpolateVariableDefinitionAsJSON\\": []
+}"
+`;

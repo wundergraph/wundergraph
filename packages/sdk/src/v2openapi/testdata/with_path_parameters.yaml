@@ -1,0 +1,381 @@
+openapi: 3.1.0
+info:
+  title: Example API
+  version: 1.31.0
+servers:
+  - url: https://example.com/api
+paths:
+  /passwordless/start:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: string
+                loginId:
+                  type: string
+                state:
+                  type: object
+                  additionalProperties: true
+              required:
+                - applicationId
+                - loginId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: NoAuthProvided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: UserNotFound
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: InternalError
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /passwordless/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                ipAddress:
+                  type: string
+                metaData:
+                  type: object
+                  properties:
+                    device:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                            [
+                              BROWSER,
+                              DESKTOP,
+                              LAPTOP,
+                              MOBILE,
+                              OTHER,
+                              SERVER,
+                              TABLET,
+                              TV,
+                              UNKNOWN,
+                            ]
+              required:
+                - code
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                  state:
+                    type: object
+                    additionalProperties: true
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                      usernameStatus:
+                        type: string
+                        enum: [ACTIVE, PENDING, REJECTED]
+                      verified:
+                        type: boolean
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                      mobilePhone:
+                        type: string
+                      timezone:
+                        type: string
+        '202':
+          description: NotRegisteredForApp
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '203':
+          description: PasswordChangeRequested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  changePasswordReason:
+                    type: string
+        '212':
+          description: EmailNotVerified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '213':
+          description: RegistrationNotVerified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '242':
+          description: TwoFactorEnabled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  methods:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                  twoFactorId:
+                    type: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: InternalError
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /jwt/refresh:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                token:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                  token:
+                    type: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: NoAuthProvided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: TokenNotFound
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: InternalError
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '503':
+          description: InternalError
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /logout:
+    post:
+      parameters:
+        - in: query
+          name: refreshToken
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: OK
+        500:
+          description: InternalError
+  /user/{userId}:
+    post:
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: string
+                user:
+                  type: object
+                  properties:
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    email:
+                      type: string
+                    birthDate:
+                      type: string
+                    mobilePhone:
+                      type: string
+                    imageUrl:
+                      type: string
+              required:
+                - applicationId
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                      birthDate:
+                        type: string
+                      mobilePhone:
+                        type: string
+                      imageUrl:
+                        type: string
+                      id:
+                        type: string
+                      username:
+                        type: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          description: NoAuthProvided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: InternalError
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

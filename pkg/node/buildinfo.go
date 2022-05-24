@@ -1,0 +1,10 @@
+package node
+
+type BuildInfo struct {
+	Version, Commit, Date, BuiltBy string
+}
+
+type GitHubAuthDemo struct {
+	ClientID     string
+	ClientSecret string
+}

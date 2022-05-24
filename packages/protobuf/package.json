@@ -1,0 +1,40 @@
+{
+  "name": "@wundergraph/protobuf",
+  "version": "0.90.0",
+  "license": "Apache-2.0",
+  "main": "./dist/wundernode_config.js",
+  "description": "WunderGraph protobuf descriptions",
+  "types": "./dist/wundernode_config.d.ts",
+  "files": [
+    "./dist"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wundergraph/wundergraph.git"
+  },
+  "homepage": "https://wundergraph.com",
+  "author": {
+    "name": "WunderGraph Maintainers",
+    "email": "info@wundergraph.com"
+  },
+  "bugs": {
+    "url": "https://github.com/wundergraph/wundergraph/issues"
+  },
+  "scripts": {
+    "build": "./generate.sh && tsc"
+  },
+  "dependencies": {
+    "long": "^5.2.0",
+    "protobufjs": "^6.11.2",
+    "ts-proto": "^1.112.1"
+  },
+  "devDependencies": {
+    "cpy-cli": "^4.1.0",
+    "typescript": "^4.6.4"
+  },
+  "sideEffects": false
+}

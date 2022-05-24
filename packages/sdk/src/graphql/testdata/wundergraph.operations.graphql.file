@@ -1,0 +1,22 @@
+query FirstAPI($id: String!) {
+    findFirstapi(where: {id: {equals: $id}}) {
+        id
+        name
+        namespace {
+            id
+            name
+        }
+    }
+}
+
+query FirstNamespace($id: StringFilter!) {
+    findFirstnamespace(where: {id: $id}) {
+        id
+        name
+        api {
+            id
+            name
+            created_at
+        }
+    }
+}

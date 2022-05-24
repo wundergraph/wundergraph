@@ -1,0 +1,28 @@
+{
+  "name": "nextjs-starter",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "wundergraph": "cd .wundergraph && wunderctl up --debug",
+    "build": "next build",
+    "database": "docker-compose up",
+    "dev": "next dev",
+    "start": "next start",
+    "migrate": "prisma format && prisma migrate dev --name",
+    "wunderctl": "wunderctl"
+  },
+  "dependencies": {
+    "@wundergraph/sdk": "^1.0.0-next.26",
+    "next": "^12.1.5",
+    "react": "^18.0.0",
+    "graphql": "^16.3.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.15",
+    "@types/react": "^18.0.6",
+    "concurrently": "^6.0.0",
+    "prisma": "^2.28.0",
+    "typescript": "^4.2.3"
+  }
+}

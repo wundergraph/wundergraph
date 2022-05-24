@@ -1,0 +1,516 @@
+syntax = "proto3";
+package wgpb;
+
+option go_package = "./go/wgpb";
+
+message WunderNodeConfig {
+	Server server = 1;
+	Logging logging = 2;
+	repeated Api apis = 3;
+}
+
+message Server {
+	int64 gracefulShutdownTimeout = 1;
+	int64 keepAlive = 2;
+	int64 readTimeout = 3;
+	int64 writeTimeout = 4;
+	int64 idleTimeout = 5;
+	repeated Certificate certificates = 6;
+}
+
+message Certificate {
+	string keyPem = 2;
+	string certPem = 3;
+}
+
+message Logging {
+	LogLevel level = 1;
+}
+
+enum LogLevel {
+	DEBUG = 0;
+	INFO = 1;
+	ERROR = 2;
+	WARNING = 3;
+	PANIC = 4;
+	FATAL = 5;
+}
+
+message Api {
+	repeated string hosts = 1;
+	string pathPrefix = 2;
+	EngineConfiguration engineConfiguration = 3;
+	bool enableSingleFlight = 4;
+	bool enableGraphqlEndpoint = 5;
+	repeated Operation operations = 6;
+	CorsConfiguration corsConfiguration = 7;
+	string primaryHost = 8;
+	string deploymentId = 9;
+	ApiCacheConfig cacheConfig = 10;
+	string apiConfigHash = 11;
+	ApiAuthenticationConfig authenticationConfig = 12;
+	repeated S3UploadConfiguration s3UploadConfiguration = 13;
+}
+
+message ApiAuthenticationConfig {
+	CookieBasedAuthentication cookieBased = 1;
+	ApiAuthenticationHooks hooks = 2;
+	JwksBasedAuthentication jwksBased = 3;
+}
+
+message JwksBasedAuthentication {
+	repeated JwksAuthProvider providers = 1;
+}
+
+message JwksAuthProvider {
+	ConfigurationVariable jwksUrl = 1;
+	ConfigurationVariable jwksJson = 2;
+	ConfigurationVariable userInfoEndpoint = 3;
+	int64 userInfoCacheTtlSeconds = 4;
+}
+
+message ApiAuthenticationHooks {
+	bool postAuthentication = 1;
+	bool mutatingPostAuthentication = 2;
+	bool revalidateAuthentication = 3;
+}
+
+message CookieBasedAuthentication {
+	repeated AuthProvider providers = 1;
+	repeated ConfigurationVariable authorizedRedirectUris = 2;
+	repeated ConfigurationVariable authorizedRedirectUriRegexes = 3;
+	ConfigurationVariable hashKey = 4;
+	ConfigurationVariable blockKey = 5;
+	ConfigurationVariable csrfSecret = 6;
+}
+
+message AuthProvider {
+	string id = 1;
+	AuthProviderKind kind = 2;
+	GithubAuthProviderConfig githubConfig = 3;
+	OpenIDConnectAuthProviderConfig oidcConfig = 4;
+}
+
+enum AuthProviderKind {
+	AuthProviderGithub = 0;
+	AuthProviderOIDC = 1;
+}
+
+message GithubAuthProviderConfig {
+	ConfigurationVariable clientId = 1;
+	ConfigurationVariable clientSecret = 2;
+}
+
+message OpenIDConnectAuthProviderConfig {
+	ConfigurationVariable issuer = 1;
+	ConfigurationVariable clientId = 2;
+	ConfigurationVariable clientSecret = 3;
+}
+
+message ApiCacheConfig {
+	ApiCacheKind kind = 1;
+	InMemoryCacheConfig inMemoryConfig = 2;
+	RedisCacheConfig redisConfig = 3;
+}
+
+enum ApiCacheKind {
+	NO_CACHE = 0;
+	IN_MEMORY_CACHE = 1;
+	REDIS_CACHE = 2;
+}
+
+message InMemoryCacheConfig {
+	int64 maxSize = 1;
+}
+
+message RedisCacheConfig {
+	string redisUrlEnvVar = 1;
+}
+
+message Operation {
+	string name = 1;
+	string content = 2;
+	OperationType operationType = 3;
+	string variablesSchema = 4;
+	string responseSchema = 5;
+	OperationCacheConfig cacheConfig = 7;
+	OperationAuthenticationConfig authenticationConfig = 8;
+	OperationLiveQueryConfig liveQueryConfig = 9;
+	OperationAuthorizationConfig authorizationConfig = 10;
+	OperationHooksConfiguration hooksConfiguration = 11;
+	OperationVariablesConfiguration variablesConfiguration = 12;
+	// internal operations are only accessible internally, e.g. to hooks
+	// they cannot be reached from the public surface of the API
+	bool internal = 13;
+	string interpolationVariablesSchema = 14;
+	repeated PostResolveTransformation postResolveTransformations = 15;
+}
+
+message PostResolveTransformation {
+	PostResolveTransformationKind kind = 1;
+	int64 depth = 2;
+	PostResolveGetTransformation get = 3;
+}
+
+message PostResolveGetTransformation {
+	repeated string from = 1;
+	repeated string to = 2;
+}
+
+enum PostResolveTransformationKind {
+	GET_POST_RESOLVE_TRANSFORMATION = 0;
+}
+
+message OperationVariablesConfiguration {
+	repeated VariableInjectionConfiguration injectVariables = 1;
+}
+
+message VariableInjectionConfiguration {
+	string variableName = 1;
+	InjectVariableKind variableKind = 2;
+	string dateFormat = 3;
+	string environmentVariableName = 4;
+}
+
+enum InjectVariableKind {
+	UUID = 0;
+	DATE_TIME = 1;
+	ENVIRONMENT_VARIABLE = 2;
+}
+
+message OperationHooksConfiguration {
+	bool preResolve = 1;
+	bool postResolve = 2;
+	bool mutatingPreResolve = 3;
+	bool mutatingPostResolve = 4;
+	MockResolveHookConfiguration mockResolve = 5;
+	bool httpTransportOnRequest = 6;
+	bool httpTransportOnResponse = 7;
+	bool customResolve = 8;
+}
+
+message MockResolveHookConfiguration {
+	bool enable = 1;
+	int64 subscriptionPollingIntervalMillis = 2;
+}
+
+message OperationAuthorizationConfig {
+	repeated ClaimConfig claims = 1;
+	OperationRoleConfig roleConfig = 2;
+}
+
+message OperationRoleConfig {
+	// the user must match all roles
+	repeated string requireMatchAll = 1;
+	// the user must match at least one of the roles
+	repeated string requireMatchAny = 2;
+	// the user must not match all of the roles
+	repeated string denyMatchAll = 3;
+	// the user must not match any of the roles
+	repeated string denyMatchAny = 4;
+}
+
+message ClaimConfig {
+	string variableName = 1;
+	Claim claim = 2;
+}
+
+enum Claim {
+	EMAIL = 0;
+	EMAIL_VERIFIED = 1;
+	NAME = 2;
+	NICKNAME = 3;
+	LOCATION = 4;
+	PROVIDER = 5;
+}
+
+message OperationLiveQueryConfig {
+	bool enable = 1;
+	int64 pollingIntervalSeconds = 2;
+}
+
+message OperationAuthenticationConfig {
+	bool authRequired = 1;
+}
+
+message OperationCacheConfig {
+	bool enable = 1;
+	int64 maxAge = 2;
+	bool public = 3;
+	int64 staleWhileRevalidate = 4;
+}
+
+enum OperationType {
+	QUERY = 0;
+	MUTATION = 1;
+	SUBSCRIPTION = 2;
+}
+
+message EngineConfiguration {
+	int64 defaultFlushInterval = 1;
+	repeated DataSourceConfiguration datasourceConfigurations = 2;
+	repeated FieldConfiguration fieldConfigurations = 3;
+	string graphqlSchema = 4;
+	repeated TypeConfiguration typeConfigurations = 5;
+}
+
+message DataSourceConfiguration {
+	DataSourceKind kind = 1;
+	repeated TypeField rootNodes = 2;
+	repeated TypeField childNodes = 3;
+	bool overrideFieldPathFromAlias = 4;
+	DataSourceCustom_REST customRest = 5;
+	DataSourceCustom_GraphQL customGraphql = 6;
+	DataSourceCustom_Static customStatic = 7;
+	DataSourceCustom_Database customDatabase = 8;
+	repeated DirectiveConfiguration directives = 9;
+}
+
+message DirectiveConfiguration {
+	string directiveName = 1;
+	string renameTo = 2;
+}
+
+enum DataSourceKind {
+	STATIC = 0;
+	REST = 1;
+	GRAPHQL = 2;
+	POSTGRESQL = 3;
+	MYSQL = 4;
+	SQLSERVER = 5;
+	MONGODB = 6;
+	SQLITE = 7;
+}
+
+message DataSourceCustom_REST {
+	FetchConfiguration fetch = 1;
+	RESTSubscriptionConfiguration subscription = 2;
+	repeated StatusCodeTypeMapping statusCodeTypeMappings = 3;
+	string defaultTypeName = 4;
+}
+
+message StatusCodeTypeMapping {
+	int64 statusCode = 1;
+	string typeName = 2;
+	bool injectStatusCodeIntoBody = 3;
+}
+
+message DataSourceCustom_GraphQL {
+	FetchConfiguration fetch = 1;
+	GraphQLSubscriptionConfiguration subscription = 2;
+	GraphQLFederationConfiguration federation = 3;
+	string upstreamSchema = 4;
+}
+
+message DataSourceCustom_Database {
+	ConfigurationVariable databaseURL = 1;
+	string prismaSchema = 2;
+	string graphqlSchema = 3;
+	// closeTimeoutSeconds define that the database connection will be closed after the given amount of seconds of inactivity
+	int64 closeTimeoutSeconds = 4;
+	repeated SingleTypeField jsonTypeFields = 5;
+	repeated string jsonInputVariables = 6;
+}
+
+message GraphQLFederationConfiguration {
+	bool enabled = 1;
+	string serviceSdl = 2;
+}
+
+message DataSourceCustom_Static {
+	ConfigurationVariable data = 1;
+}
+
+message GraphQLSubscriptionConfiguration {
+	bool enabled = 1;
+	ConfigurationVariable url = 2;
+}
+
+message FetchConfiguration {
+	// You should either configure url OR a combination of baseURL and path
+	// If url resolves to a non empty string, it takes precedence over baseURL and path
+	// If url resolves to an empty string, the url will be configured as "{{baseURL}}{{path}}"
+	ConfigurationVariable url = 1;
+	HTTPMethod method = 2;
+	map<string, HTTPHeader> header = 3;
+	ConfigurationVariable body = 4;
+	repeated URLQueryConfiguration query = 5;
+	UpstreamAuthentication upstreamAuthentication = 6;
+	// urlEncodeBody defines whether the body should be URL encoded or not
+	// by default, the body will be JSON encoded
+	// setting urlEncodeBody to true will render the body empty,
+	// the Header Content-Type will be set to application/x-www-form-urlencoded,
+	// and the body will be URL encoded and set as the URL Query String
+	bool urlEncodeBody = 7;
+	MTLSConfiguration mTLS = 8;
+	ConfigurationVariable baseUrl = 9;
+	ConfigurationVariable path = 10;
+}
+
+message MTLSConfiguration {
+	ConfigurationVariable key = 1;
+	ConfigurationVariable cert = 2;
+	bool insecureSkipVerify = 3;
+}
+
+message UpstreamAuthentication {
+	UpstreamAuthenticationKind kind = 1;
+	JwtUpstreamAuthenticationConfig jwtConfig = 2;
+	JwtUpstreamAuthenticationWithAccessTokenExchange jwtWithAccessTokenExchangeConfig = 3;
+}
+
+enum UpstreamAuthenticationKind {
+	UpstreamAuthenticationJWT = 0;
+	UpstreamAuthenticationJWTWithAccessTokenExchange = 1;
+}
+
+message JwtUpstreamAuthenticationConfig {
+	ConfigurationVariable secret = 1;
+	SigningMethod signingMethod = 2;
+}
+
+message JwtUpstreamAuthenticationWithAccessTokenExchange {
+	ConfigurationVariable secret = 1;
+	SigningMethod signingMethod = 2;
+	ConfigurationVariable accessTokenExchangeEndpoint = 3;
+}
+
+enum SigningMethod {
+	SigningMethodHS256 = 0;
+}
+
+message RESTSubscriptionConfiguration {
+	bool enabled = 1;
+	int64 pollingIntervalMillis = 2;
+	bool skipPublishSameResponse = 3;
+}
+
+message URLQueryConfiguration {
+	string name = 1;
+	string value = 2;
+}
+
+message HTTPHeader {
+	repeated ConfigurationVariable values = 1;
+}
+
+enum HTTPMethod {
+	GET = 0;
+	POST = 1;
+	PUT = 2;
+	DELETE = 3;
+	OPTIONS = 4;
+}
+
+message TypeConfiguration {
+	string typeName = 1;
+	string renameTo = 2;
+}
+
+message FieldConfiguration {
+	string typeName = 1;
+	string fieldName = 2;
+	bool disableDefaultFieldMapping = 3;
+	repeated string path = 4;
+	repeated ArgumentConfiguration argumentsConfiguration = 6;
+	repeated string requiresFields = 7;
+	bool unescapeResponseJson = 8;
+}
+
+message TypeField {
+	string typeName = 1;
+	repeated string fieldNames = 2;
+}
+
+message SingleTypeField {
+	string typeName = 1;
+	string fieldName = 2;
+}
+
+enum ArgumentSource {
+	OBJECT_FIELD = 0;
+	FIELD_ARGUMENT = 1;
+}
+
+message ArgumentConfiguration {
+	string name = 1;
+	ArgumentSource sourceType = 2;
+	repeated string sourcePath = 3;
+	ArgumentRenderConfiguration renderConfiguration = 4;
+}
+
+enum ArgumentRenderConfiguration {
+	RENDER_ARGUMENT_DEFAULT = 0;
+	RENDER_ARGUMENT_AS_GRAPHQL_VALUE = 1;
+	RENDER_ARGUMENT_AS_ARRAY_CSV = 2;
+}
+
+message WunderGraphConfiguration {
+	UserDefinedApi api = 1;
+	string apiId = 2;
+	string deploymentName = 3;
+	repeated string environmentIds = 4;
+	string apiName = 5;
+	bool dangerouslyEnableGraphQLEndpoint = 6;
+}
+
+message S3UploadConfiguration {
+	string name = 1;
+	ConfigurationVariable endpoint = 2;
+	ConfigurationVariable accessKeyID = 3;
+	ConfigurationVariable secretAccessKey = 4;
+	ConfigurationVariable bucketName = 5;
+	ConfigurationVariable bucketLocation = 6;
+	bool useSSL = 7;
+}
+
+message UserDefinedApi {
+	EngineConfiguration engineConfiguration = 3;
+	bool enableGraphqlEndpoint = 5;
+	repeated Operation operations = 6;
+	CorsConfiguration corsConfiguration = 7;
+	ApiAuthenticationConfig authenticationConfig = 8;
+	repeated S3UploadConfiguration s3UploadConfiguration = 9;
+	repeated ConfigurationVariable allowedHostNames = 11;
+}
+
+message CorsConfiguration {
+	// AllowedOrigins is a list of origins a cross-domain request can be executed from.
+	// If the special "*" value is present in the list, all origins will be allowed.
+	// An origin may contain a wildcard (*) to replace 0 or more characters
+	// (i.e.: http://*.domain.com). Usage of wildcards implies a small performance penalty.
+	// Only one wildcard can be used per origin.
+	// Default value is ["*"]
+	repeated ConfigurationVariable allowedOrigins = 1;
+	// AllowedMethods is a list of methods the client is allowed to use with
+	// cross-domain requests. Default value is simple methods (HEAD, GET and POST).
+	repeated string allowedMethods = 2;
+	// AllowedHeaders is list of non simple headers the client is allowed to use with
+	// cross-domain requests.
+	// If the special "*" value is present in the list, all headers will be allowed.
+	// Default value is [] but "Origin" is always appended to the list.
+	repeated string allowedHeaders = 3;
+	// ExposedHeaders indicates which headers are safe to expose to the API of a CORS
+	// API specification
+	repeated string exposedHeaders = 4;
+	// MaxAge indicates how long (in seconds) the results of a preflight request
+	// can be cached
+	int64 maxAge = 5;
+	// AllowCredentials indicates whether the request can include user credentials like
+	// cookies, HTTP authentication or client side SSL certificates.
+	bool allowCredentials = 6;
+}
+
+message ConfigurationVariable {
+	ConfigurationVariableKind kind = 1;
+	string staticVariableContent = 2;
+	string environmentVariableName = 3;
+	string environmentVariableDefaultValue = 4;
+	string placeholderVariableName = 5;
+};
+
+enum ConfigurationVariableKind {
+	STATIC_CONFIGURATION_VARIABLE = 0;
+	ENV_CONFIGURATION_VARIABLE = 1;
+	PLACEHOLDER_CONFIGURATION_VARIABLE = 2;
+}

@@ -1,0 +1,46 @@
+name: Wunderctl Changesets
+
+on:
+  release:
+    types: [released]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  CI: true
+
+jobs:
+  # Update package versions from changesets.
+  version:
+    timeout-minutes: 14
+    runs-on: ubuntu-latest
+    # run only for engine release
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          
+      - name: Add changeset to release wunderctl ${{ github.event.release.tag_name }}
+        env: 
+          WUNDERCTL_VERSION: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}\n${RELEASE_BODY}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
+
+      - run: pnpm boot --ignore-scripts
+
+      - run: pnpm build
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm ci:version
+          publish: pnpm ci:publish
+          commit: '[ci] wunderctl release'
+          title: '[ci] wunderctl release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

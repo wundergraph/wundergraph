@@ -1,0 +1,115 @@
+openapi: 3.0.2
+info:
+  title: FusionAuth API
+  version: 1.31.0
+servers:
+  - url: http://localhost:8111
+paths:
+  /passwordless/start:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                applicationId:
+                  type: string
+                loginId:
+                  type: string
+                state:
+                  type: object
+                  additionalProperties: true
+              required:
+                - applicationId
+                - loginId
+      responses:
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+  /passwordless/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                ipAddress:
+                  type: string
+                metaData:
+                  type: object
+                  properties:
+                    device:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                            [
+                                BROWSER,
+                                DESKTOP,
+                                LAPTOP,
+                                MOBILE,
+                                OTHER,
+                                SERVER,
+                                TABLET,
+                                TV,
+                                UNKNOWN,
+                            ]
+              required:
+                - code
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                  state:
+                    type: object
+                    additionalProperties: true
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                      usernameStatus:
+                        type: string
+                        enum: [ACTIVE, PENDING, REJECTED]
+                      verified:
+                        type: boolean
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      email:
+                        type: string
+                      mobilePhone:
+                        type: string
+                      timezone:
+                        type: string

@@ -1,0 +1,53 @@
+{
+  "private": true,
+  "name": "@test/nextjs-starter",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wundergraph/wundergraph.git"
+  },
+  "homepage": "https://wundergraph.com",
+  "author": {
+    "name": "WunderGraph Maintainers",
+    "email": "info@wundergraph.com"
+  },
+  "bugs": {
+    "url": "https://github.com/wundergraph/wundergraph/issues"
+  },
+  "scripts": {
+    "clean": "rimraf ./.next",
+    "dev": "concurrently \"npm run nextDev\" \"npm run wundergraph\" \"npm run browser\"",
+    "wundergraph": "cd .wundergraph && wunderctl up --debug",
+    "browser": "wait-on \"http-get://localhost:3000\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3000",
+    "build": "next build",
+    "check": "tsc --noEmit",
+    "nextDev": "next dev",
+    "start": "next start",
+    "wunderctl": "wunderctl"
+  },
+  "dependencies": {
+    "@wundergraph/nextjs": "workspace:*",
+    "@wundergraph/sdk": "workspace:*",
+    "next": "^12.1.6",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependenciesMeta": {
+    "@wundergraph/sdk": {
+      "injected": true
+    },
+    "@wundergraph/nextjs": {
+      "injected": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.27",
+    "@types/react": "^18.0.7",
+    "concurrently": "^6.0.0",
+    "graphql": "^16.3.0",
+    "open-cli": "^7.0.1",
+    "typescript": "^4.3.5",
+    "wait-on": "^6.0.0"
+  },
+  "sideEffects": false
+}

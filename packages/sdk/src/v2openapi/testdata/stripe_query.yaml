@@ -1,0 +1,103 @@
+---
+openapi: 3.0.3
+info:
+  title: Dubai Winners
+  version: 1.0.0
+  contact: {}
+servers:
+  - url: "http://localhost:8111"
+paths:
+  /v1/checkout/sessions:
+    post:
+      summary: Checkout session
+      description: Create Checkout session
+      operationId: checkoutSession
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                line_items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      price:
+                        type: string
+                      quantity:
+                        type: number
+                success_url:
+                  type: string
+                cancel_url:
+                  type: string
+                mode:
+                  type: string
+                  default: "payment"
+              required:
+                - line_items
+                - success_url
+                - cancel_url
+                - mode
+      responses:
+        '200':
+          description: Successfully Linked
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  id:
+                    type: string
+                  object:
+                    type: string
+                  expires_at:
+                    type: string
+                  livemode:
+                    type: boolean
+                  mode:
+                    type: string
+                  payment_intent:
+                    type: string
+                  payment_status:
+                    type: string
+                  status:
+                    type: string
+                  url:
+                    type: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      doc_url:
+                        type: string
+                      message:
+                        type: string
+                      param:
+                        type: string
+                      type:
+                        type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      type:
+                        type: string
+tags: []
