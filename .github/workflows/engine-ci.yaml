@@ -5,7 +5,7 @@ on:
       - main
       - next
     tags-ignore:
-      - '**'
+      - '*'
     paths-ignore:
       - 'packages/**'
       - '*.md'
