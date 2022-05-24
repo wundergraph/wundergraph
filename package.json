@@ -22,7 +22,7 @@
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "changeset:check": "changeset status --since-main",
     "ci:version": "pnpm changeset version && pnpm ci:version:install",
-    "ci:version:install": "pnpm install --no-frozen-lockfile",
+    "ci:version:install": "pnpm install --no-frozen-lockfile --ignore-scripts",
     "ci:publish": "pnpm changeset publish",
     "enter-next": "pnpm changeset pre enter next",
     "exit-next": "pnpm changeset pre exit",
