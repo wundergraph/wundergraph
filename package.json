@@ -43,11 +43,25 @@
     },
     "npm": {
       "publish": false
+    },
+    "hooks":{
+      "after:bump": "pnpm ci:version:install"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": [
+          {
+            "file": "packages/wunderctl/package.json",
+            "path": "version"
+          }
+        ]
+      }
     }
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.4",
     "@changesets/cli": "^2.22.0",
+    "@release-it/bumper": "^4.0.0",
     "prettier": "^2.6.2",
     "release-it": "^15.0.0",
     "rimraf": "^3.0.2"

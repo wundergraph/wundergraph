@@ -1,4 +1,4 @@
-name: Wunderctl Changesets
+name: Wunderctl release
 
 on:
   release:
@@ -21,23 +21,12 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
-          
-      - name: Add changeset to release wunderctl ${{ github.event.release.tag_name }}
-        env: 
-          WUNDERCTL_VERSION: ${{ github.event.release.tag_name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-        run: |
-          echo -e "---\n'@wundergraph/wunderctl': patch\n---\n\nRelease ${WUNDERCTL_VERSION}\n${RELEASE_BODY}" > .changeset/wunderctl-${WUNDERCTL_VERSION}.md
 
       - run: pnpm boot
 
-      - run: pnpm build
-          
-      - run: pnpm ci:version 
+      - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          title: Release wunderctl to ${{ github.event.release.tag_name }}
-          base: main
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: pnpm publish --access public --tag latest --no-git-checks
+        working-directory: packages/wunderctl
