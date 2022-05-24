@@ -84,7 +84,7 @@ importers:
       wait-on: ^6.0.0
     dependencies:
       '@wundergraph/nextjs': file:packages/nextjs_u7zcnojxlpf2ppvvgd7yijop4e
-      '@wundergraph/sdk': file:packages/sdk_react@18.1.0
+      '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
@@ -123,7 +123,6 @@ importers:
       '@apollo/federation': ^0.36.2
       '@graphql-tools/schema': ^8.3.10
       '@prisma/generator-helper': ^3.9.2
-      '@rjsf/core': ^4.1.0
       '@types/chai': ^4.2.22
       '@types/colors': ^1.2.1
       '@types/cors': ^2.8.10
@@ -162,7 +161,6 @@ importers:
       '@apollo/federation': 0.36.2_graphql@16.4.0
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
-      '@rjsf/core': 4.1.1
       '@wundergraph/protobuf': link:../protobuf
       axios: 0.26.1
       colors: 1.4.0
@@ -1492,6 +1490,7 @@ packages:
   /@rjsf/core/4.1.1:
     resolution: {integrity: sha512-/R37fLwnhAavQVlYoILwYIha0ymgKtMWdtehgiODcf++rl4/jq38RjXhqF5wQT9uOYAHmtutokJsTFei1VY4bw==}
     engines: {node: '>=12'}
+    requiresBuild: true
     peerDependencies:
       react: '>=16 || >=17'
     dependencies:
@@ -1503,24 +1502,6 @@ packages:
       lodash: 4.17.21
       nanoid: 3.3.3
       prop-types: 15.8.1
-      react-is: 16.13.1
-    dev: false
-
-  /@rjsf/core/4.1.1_react@18.1.0:
-    resolution: {integrity: sha512-/R37fLwnhAavQVlYoILwYIha0ymgKtMWdtehgiODcf++rl4/jq38RjXhqF5wQT9uOYAHmtutokJsTFei1VY4bw==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      react: '>=16 || >=17'
-    dependencies:
-      '@types/json-schema': 7.0.11
-      ajv: 6.12.6
-      core-js-pure: 3.22.3
-      json-schema-merge-allof: 0.6.0
-      jsonpointer: 5.0.0
-      lodash: 4.17.21
-      nanoid: 3.3.3
-      prop-types: 15.8.1
-      react: 18.1.0
       react-is: 16.13.1
     dev: false
 
@@ -8909,7 +8890,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.2 || ^18.0.0
     dependencies:
       '@wundergraph/protobuf': link:packages/protobuf
-      '@wundergraph/sdk': file:packages/sdk_react@18.1.0
+      '@wundergraph/sdk': file:packages/sdk
       handlebars: 4.7.7
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       object-hash: 2.2.0
@@ -8956,47 +8937,10 @@ packages:
       protobufjs: 6.11.2
       react-ssr-prepass: 1.5.0
       swagger2openapi: 7.0.8
+    optionalDependencies:
+      '@rjsf/core': 4.1.1
     transitivePeerDependencies:
       - debug
       - encoding
-      - react
-      - supports-color
-    dev: false
-
-  file:packages/sdk_react@18.1.0:
-    resolution: {directory: packages/sdk, type: directory}
-    id: file:packages/sdk
-    name: '@wundergraph/sdk'
-    version: 0.90.0
-    dependencies:
-      '@apollo/composition': 2.0.2_graphql@16.4.0
-      '@apollo/federation': 0.36.2_graphql@16.4.0
-      '@graphql-tools/schema': 8.3.10_graphql@16.4.0
-      '@prisma/generator-helper': 3.13.0
-      '@rjsf/core': 4.1.1_react@18.1.0
-      '@wundergraph/protobuf': link:packages/protobuf
-      axios: 0.26.1
-      colors: 1.4.0
-      cross-spawn: 7.0.3
-      fastify: 3.29.0
-      fastify-plugin: 3.0.1
-      graphql: 16.4.0
-      graphql-helix: 1.12.0_graphql@16.4.0
-      handlebars: 4.7.7
-      js-yaml: 4.1.0
-      json-schema: 0.4.0
-      lodash: 4.17.21
-      long: 5.2.0
-      object-hash: 2.2.0
-      openapi-types: 10.0.0
-      postman-collection: 4.1.2
-      prettier: 2.6.2
-      protobufjs: 6.11.2
-      react: 18.1.0
-      swagger2openapi: 7.0.8
-    transitivePeerDependencies:
-      - debug
-      - encoding
-      - react
       - supports-color
     dev: false
