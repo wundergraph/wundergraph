@@ -84,21 +84,6 @@ configureWunderGraphApplication({
 	application: myApplication,
 	server,
 	operations,
-	// S3 Server
-	// 1. Run `./minio/setup.sh` to create a S3 server.
-	// 2. Comment out the section below and save!
-
-	// Enable file upload functionality in your generated client
-	// Minio credentials: minio / minio123
-	// s3UploadProvider: [{
-	//     name: "minio",
-	//     endpoint: "127.0.0.1:9000",
-	//     accessKeyID: "test",
-	//     secretAccessKey: "12345678",
-	//     bucketLocation: "eu-central-1",
-	//     bucketName: "uploads",
-	//     useSSL: false
-	// }],
 	codeGenerators: [
 		{
 			templates: [
@@ -125,7 +110,6 @@ configureWunderGraphApplication({
 		hasDotWunderGraphDirectory: false,
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
-		allowedHosts: ['localhost', '127.0.0.1'],
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production'
 	},
 });
