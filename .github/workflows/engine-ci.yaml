@@ -8,6 +8,7 @@ on:
       - '*'
     paths-ignore:
       - 'packages/**'
+      - 'package.json'
       - '*.md'
   pull_request:
     branches:
@@ -15,6 +16,7 @@ on:
       - next
     paths-ignore:
       - 'packages/**'
+      - 'package.json'
       - '*.md'
 
 concurrency:
