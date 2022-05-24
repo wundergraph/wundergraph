@@ -10,6 +10,7 @@ on:
       - 'packages/**'
       - 'package.json'
       - '*.md'
+      - '**/*.md'
   pull_request:
     branches:
       - main
@@ -18,6 +19,7 @@ on:
       - 'packages/**'
       - 'package.json'
       - '*.md'
+      - '**/*.md'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
