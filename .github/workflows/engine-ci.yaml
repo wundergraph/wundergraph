@@ -9,6 +9,7 @@ on:
     paths-ignore:
       - 'packages/**/*'
       - 'package.json'
+      - 'examples/**/*'
       - '*.md'
       - '**/*.md'
   pull_request:
@@ -18,6 +19,7 @@ on:
     paths-ignore:
       - 'packages/**/*'
       - 'package.json'
+      - 'examples/**/*'
       - '*.md'
       - '**/*.md'
 

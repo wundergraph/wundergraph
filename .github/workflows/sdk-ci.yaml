@@ -10,6 +10,7 @@ on:
       - 'packages/**/*'
       - '.github/workflows/sdk-ci.yaml'
       - '!packages/*-testapp/**'
+      - 'examples/**/*'
       - '!*.md'
       - '!**/*.md'
   pull_request:
@@ -20,6 +21,7 @@ on:
       - 'packages/sdk/**/*'
       - '.github/workflows/sdk-ci.yaml'
       - '!packages/*-testapp/**'
+      - 'examples/**/*'
       - '!*.md'
       - '!**/*.md'
 
