@@ -1,10 +1,8 @@
 name: Wunderctl Changesets
 
 on:
-  release:
-    types: [released]
-
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+  push:
+    tags: ['v*']
 
 env:
   CI: true
