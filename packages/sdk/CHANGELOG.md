@@ -1,5 +1,11 @@
 # @wundergraph/sdk
 
+## 0.90.3
+
+### Patch Changes
+
+- [`a27e9f5`](https://github.com/wundergraph/wundergraph/commit/a27e9f50093f7b4775f4d6a1d2f03a56398bc169) Thanks [@jensneuse](https://github.com/jensneuse)! - trigger ci
+
 ## 0.90.2
 
 ### Patch Changes
