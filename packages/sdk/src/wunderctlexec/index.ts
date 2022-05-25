@@ -53,12 +53,12 @@ export const wunderctlExec = (args: WunderCtlExecArgs): SpawnSyncReturns<string>
 	return result;
 };
 
-export const wunderctlExecAsync = (args: WunderCtlExecArgs): Promise<string> => {
+export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		const child = spawn.spawn('wunderctl', args.cmd, {
 			cwd: process.cwd(),
 			timeout: args.timeout,
-			stdio: 'inherit',
+			stdio: 'pipe',
 			env: {
 				...process.env,
 			},

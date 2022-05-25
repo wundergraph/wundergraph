@@ -33,7 +33,7 @@ const introspectPrismaDatabase = async (
 		fs.mkdirSync(introspectionDir, { recursive: true });
 	}
 	const introspectionFilePath = path.join('generated', 'introspection', `${id}.json`);
-	const result = wunderctlExecAsync({
+	const result = await wunderctlExecAsync({
 		cmd: ['introspect', databaseSchema, databaseURL, `--outfile=${introspectionFilePath}`, '--debug'],
 	});
 	if (result === undefined) {
