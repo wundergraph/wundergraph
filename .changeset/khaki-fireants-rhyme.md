@@ -2,4 +2,4 @@
 '@wundergraph/sdk': patch
 ---
 
-fix rest path resolving
+fix oas path resolving
