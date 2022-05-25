@@ -1,5 +1,12 @@
 # @wundergraph/nextjs
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`a27e9f5`](https://github.com/wundergraph/wundergraph/commit/a27e9f50093f7b4775f4d6a1d2f03a56398bc169)]:
+  - @wundergraph/sdk@0.90.3
+
 ## 0.0.5
 
 ### Patch Changes
