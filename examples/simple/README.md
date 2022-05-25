@@ -1,4 +1,4 @@
-# WunderGraph example
+# WunderGraph simple example
 
 #### Getting started
 ```shell

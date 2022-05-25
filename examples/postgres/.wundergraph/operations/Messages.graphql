@@ -1,0 +1,7 @@
+{
+	db_findManymessages {
+		id
+		message
+		user_id
+	}
+}
