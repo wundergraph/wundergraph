@@ -1,0 +1,7 @@
+{
+	db_findFirstusers {
+		id
+		name
+		email
+	}
+}
