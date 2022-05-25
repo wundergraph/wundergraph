@@ -19,3 +19,5 @@ dist
 types/go/wgpb
 .next
 *.log
+
+.DS_Store
