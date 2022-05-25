@@ -426,6 +426,7 @@ func (b *Bundler) runCmd(ctx context.Context, cmd *exec.Cmd) {
 			return
 		}
 		b.log.Error("Config Bundler: error executing script", abstractlogger.String("bundler", b.name), abstractlogger.Error(err))
+		os.Exit(1)
 		return
 	}
 	b.log.Debug("Config Bundler: script executed", abstractlogger.String("bundler", b.name))
