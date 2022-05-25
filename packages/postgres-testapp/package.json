@@ -1,5 +1,5 @@
 {
-  "name": "wundergraph-example-postgresql",
+  "name": "@test/wundergraph-testapp-postgres",
   "version": "1.0.1",
   "description": "",
   "scripts": {
