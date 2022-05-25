@@ -2,7 +2,7 @@ import {
 	Application,
 	authProviders,
 	configureWunderGraphApplication,
-	cors,
+	cors, EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -11,7 +11,19 @@ import operations from './wundergraph.operations';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+	url: "https://api.spacex.land/graphql/",
+});
+
+const jsp = introspect.openApi({
+	source: {
+		kind: "file",
+		filePath: "../json_placeholder.json"
+	},
+	mTLS: {
+		cert: new EnvironmentVariable("CERT"),
+		key: new EnvironmentVariable("KEY"),
+		insecureSkipVerify: false,
+	}
 });
 
 const countries = introspect.graphql({
@@ -26,7 +38,7 @@ const db = introspect.postgresql({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, countries, db],
+	apis: [spaceX, countries, db,jsp],
 });
 
 // configureWunderGraph emits the configuration
