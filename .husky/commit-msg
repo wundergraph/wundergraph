@@ -5,4 +5,3 @@ pnpx --no commitlint --edit "${1}"
 
 pnpm run pre-commit
 
-# ci

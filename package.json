@@ -29,7 +29,8 @@
     "current-tag": "svu current",
     "engine:release": "release-it --git.requireBranch=main",
     "engine:release-next": "release-it --git.requireBranch=next --preRelease=next",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "prepare": "husky install"
   },
   "engines": {
     "node": ">=16.0.0",
