@@ -18,6 +18,7 @@ jobs:
     if: ${{ startsWith(github.event.release.tag_name, 'v') }}
     steps:
       - uses: actions/checkout@v3
+
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}

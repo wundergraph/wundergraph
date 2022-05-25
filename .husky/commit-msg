@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+pnpx --no commitlint --edit "${1}"
+
+pnpm run pre-commit
