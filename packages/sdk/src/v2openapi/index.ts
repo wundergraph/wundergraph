@@ -323,9 +323,9 @@ class RESTApiBuilder {
 					};
 					break;
 				case 'path':
-					this.dataSources[this.dataSources.length - 1].Custom.Fetch.url!.staticVariableContent = this.dataSources[
+					this.dataSources[this.dataSources.length - 1].Custom.Fetch.path!.staticVariableContent = this.dataSources[
 						this.dataSources.length - 1
-					].Custom.Fetch.url!.staticVariableContent.replace(`{${param.name}}`, `{{ .arguments.${param.name} }}`);
+					].Custom.Fetch.path!.staticVariableContent.replace(`{${param.name}}`, `{{ .arguments.${param.name} }}`);
 					if ((param.schema as OpenAPIV3.SchemaObject).type === 'array') {
 						const rootNode = this.dataSources[this.dataSources.length - 1].RootNodes[0];
 						const fieldConfiguration = this.fields.find(
