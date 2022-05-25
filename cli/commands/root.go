@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"path"
@@ -64,7 +65,13 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 
 		err := godotenv.Load(DotEnvFile)
 		if err != nil {
-			log.Debug("starting without env file")
+			if _, ok := err.(*fs.PathError); ok {
+				log.Debug("starting without env file")
+				return
+			}
+			log.Fatal("error loading env file",
+				abstractlogger.Error(err),
+			)
 		} else {
 			log.Debug("env file successfully loaded",
 				abstractlogger.String("file", DotEnvFile),
