@@ -73,6 +73,8 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.4.4",
     "@changesets/cli": "^2.22.0",
+    "@commitlint/cli": "^17.0.1",
+    "@commitlint/config-conventional": "^17.0.0",
     "@release-it/bumper": "^4.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",

@@ -47,3 +47,27 @@ make test
 
 Ready! You can now start contributing to the WunderGraph repository. Feel free to open an issue or pull request to add a new feature or fix a bug.
 If you run into any onboarding issue, please open an issue as well or visit the [WunderGraph Discord](https://discord.gg/Jjmc8TC) to get help. 
+
+## Conventional Commit Standard
+
+We use [conventionalcommits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) for changelog generation and more structured commit messages.
+
+In order to enforce this standard we use a linter on pre-commit hook. This functionality is provided by [husky](https://typicode.github.io/husky/#/). If you use a Node version manager like `nvm` you need tell husky where to find `pnpm`.
+Here is a snippet for `nvm`:
+
+```bash
+echo "export NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm" > ~/.huskyrc
+```
+
+### For JetBrains users
+
+[This](https://plugins.jetbrains.com/plugin/13389-conventional-commit) plugins simplifies the commit message creation process.
+
+```bash
+
+### Pull Requests
+
+We merge all pull requests with a `squash merge`. The title must follow the [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits).
+You're not enforced to use this standard, across all your commits, but it's a good practice and avoid mistakes. At the end the squashed commit message must follow the standard.
+
+
