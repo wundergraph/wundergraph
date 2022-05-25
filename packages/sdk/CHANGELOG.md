@@ -1,5 +1,11 @@
 # @wundergraph/sdk
 
+## 0.90.5
+
+### Patch Changes
+
+- [`e68d101`](https://github.com/wundergraph/wundergraph/commit/e68d101f5af39918fc810c68ec0cde606009d40c) Thanks [@jensneuse](https://github.com/jensneuse)! - fix oas path resolving
+
 ## 0.90.4
 
 ### Patch Changes
