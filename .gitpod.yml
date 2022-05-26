@@ -5,6 +5,9 @@ tasks:
   - init: cd examples/simple && npm install
     command: npm start
     name: 'Start app'
+  - command: curl "https://9991-$GITPOD_WORKSPACE_ID.$GITPOD_WORKSPACE_CLUSTER_HOST/app/main/operations/Dragons"
+    openMode: split-right
+    name: 'Get Dragons'
 # Ports to expose on workspace startup
 ports:
   - port: 9991
