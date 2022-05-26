@@ -81,17 +81,19 @@ applications and microservices).
 
 > **Note**: [WunderHub](https://hub.wundergraph.com/) is our vision of the Package Manager for APIs. Like npm, but for APIs. Sign up for free!
 
+## Getting started
+
+The fastest way to get started with WunderGraph is to open a Gitpod:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
+
+You can also following the [**Quickstart (5
+min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
+
 ## Learn more about WunderGraph
 
 If you'd like to get a quick overview,
 have a look at these [annotated example snippets](docs/at-a-glance/README.md).
-
-## Getting started
-
-Try the most simple example of WunderGraph in just a click [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
-
-The fastest way to get started with WunderGraph is by following the [**Quickstart (5
-min)**](https://wundergraph.com/docs/guides/getting_started/quickstart).
 
 ## How does WunderGraph work
 
