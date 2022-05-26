@@ -1,9 +1,8 @@
 import {
-	buildUpstreamAuthentication,
 	buildMTLSConfiguration,
+	buildUpstreamAuthentication,
 	DataSource,
 	HeadersBuilder,
-	HTTPUpstream,
 	OpenAPIIntrospection,
 	RESTApi,
 	RESTApiCustom,
@@ -28,8 +27,8 @@ import {
 	UnionTypeDefinitionNode,
 	visit,
 } from 'graphql';
-import { JSONSchema7 as JSONSchema, JSONSchema7Type } from 'json-schema';
-import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
+import {JSONSchema7 as JSONSchema, JSONSchema7Type} from 'json-schema';
+import {ListTypeNode, NamedTypeNode} from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
@@ -42,13 +41,13 @@ import {
 	hTTPMethodToJSON,
 } from '@wundergraph/protobuf';
 import yaml from 'js-yaml';
-import { OpenAPIV3 } from 'openapi-types';
+import {OpenAPIV3} from 'openapi-types';
 import {
 	applyNamespaceToExistingRootFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
-import { mapInputVariable } from '../configure';
+import {mapInputVariable} from '../configure';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -103,41 +102,41 @@ class RESTApiBuilder {
 		this.introspection = introspection;
 		this.apiNamespace = introspection.apiNamespace;
 		introspection.headers !== undefined &&
-			(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
-				const values: ConfigurationVariable[] = [];
-				switch (config.valueSource) {
-					case 'clientRequest':
-						values.push({
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: `{{ .request.headers.${config.value} }}`,
-							environmentVariableName: '',
-							environmentVariableDefaultValue: '',
-							placeholderVariableName: '',
-						});
-						break;
-					case 'static':
-						values.push({
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: config.value,
-							environmentVariableDefaultValue: '',
-							environmentVariableName: '',
-							placeholderVariableName: '',
-						});
-						break;
-					case 'env':
-						values.push({
-							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-							staticVariableContent: '',
-							environmentVariableDefaultValue: '',
-							environmentVariableName: config.value,
-							placeholderVariableName: '',
-						});
-						break;
-				}
-				this.headers[config.key] = {
-					values,
-				};
-			});
+		(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
+			const values: ConfigurationVariable[] = [];
+			switch (config.valueSource) {
+				case 'clientRequest':
+					values.push({
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: `{{ .request.headers.${config.value} }}`,
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					});
+					break;
+				case 'static':
+					values.push({
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: config.value,
+						environmentVariableDefaultValue: '',
+						environmentVariableName: '',
+						placeholderVariableName: '',
+					});
+					break;
+				case 'env':
+					values.push({
+						kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+						staticVariableContent: '',
+						environmentVariableDefaultValue: '',
+						environmentVariableName: config.value,
+						placeholderVariableName: '',
+					});
+					break;
+			}
+			this.headers[config.key] = {
+				values,
+			};
+		});
 	}
 
 	private statusCodeUnions: boolean;
@@ -168,7 +167,6 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		//const filtered = this.graphQLSchema;
 		//const debug = print(filtered);
 		const schema = buildASTSchema(filtered);
 		const schemaString = printSchema(schema);
@@ -324,8 +322,8 @@ class RESTApiBuilder {
 					break;
 				case 'path':
 					this.dataSources[this.dataSources.length - 1].Custom.Fetch.path!.staticVariableContent = this.dataSources[
-						this.dataSources.length - 1
-					].Custom.Fetch.path!.staticVariableContent.replace(`{${param.name}}`, `{{ .arguments.${param.name} }}`);
+					this.dataSources.length - 1
+						].Custom.Fetch.path!.staticVariableContent.replace(`{${param.name}}`, `{{ .arguments.${param.name} }}`);
 					if ((param.schema as OpenAPIV3.SchemaObject).type === 'array') {
 						const rootNode = this.dataSources[this.dataSources.length - 1].RootNodes[0];
 						const fieldConfiguration = this.fields.find(
@@ -396,13 +394,14 @@ class RESTApiBuilder {
 			responseObjectDescription,
 		} = options;
 		schema = this.resolveSingleSchemaOneOf(schema);
-		const ref = this.resolveSchemaRef(schema);
+		let ref = this.resolveSchemaRef(schema);
 		if (ref) {
-			const componentSchema =
-				this.spec.components && this.spec.components.schemas && (this.spec.components.schemas[ref] as JSONSchema);
-			if (!componentSchema) {
+			const resolved = this.jsonSchemaFromRef(ref,enclosingTypes);
+			if (!resolved){
 				return;
 			}
+			const componentSchema = resolved.schema;
+			ref = resolved.ref;
 			let fieldTypeName = ref;
 			if (objectKind === 'input') {
 				fieldTypeName = `${fieldTypeName}Input`;
@@ -1033,6 +1032,22 @@ class RESTApiBuilder {
 			return refPath[2];
 		}
 	};
+	private jsonSchemaFromRef = (ref: string, enclosingTypes: EnclosingType[]): ({ schema: JSONSchema, ref: string } | undefined) => {
+		if (this.spec.components && this.spec.components.schemas && this.spec.components.schemas[ref]) {
+			const schema = this.spec.components.schemas[ref] as JSONSchema;
+			if (schema.type === "array") {
+				enclosingTypes.push("list")
+				const itemsSchema = schema.items as JSONSchema;
+				const itemsRef = this.resolveSchemaRef(itemsSchema);
+				if (itemsRef) {
+					return this.jsonSchemaFromRef(itemsRef, enclosingTypes)
+				}
+				return {schema: itemsSchema, ref};
+			}
+			return {schema, ref};
+		}
+		return undefined
+	}
 	private mergeJSONSchemas = (previous: JSONSchema, next: JSONSchema): JSONSchema => {
 		if (previous.type !== next.type) {
 			return previous;
@@ -1103,6 +1118,7 @@ class RESTApiBuilder {
 			});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0].toUpperCase() + formattedPath.substring(1);
 	};
+
 	private resolveArgumentName(schema: JSONSchema, path: string, verb: HTTPMethod): string {
 		if (schema.title) {
 			return schema.title.replace(' ', '') + 'Input';
@@ -1116,6 +1132,7 @@ class RESTApiBuilder {
 		});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0] + formattedPath.substring(1) + 'Input';
 	}
+
 	private sanitizeName = (name: string): string => {
 		return name.replace(/\[\]/g, '');
 	};

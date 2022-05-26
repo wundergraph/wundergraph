@@ -73,3 +73,7 @@ test('with url encoded params', async () => {
 test('petstore', async () => {
 	await runTest('src/v2openapi/testdata/petstore.yaml', 'petstore');
 });
+
+test('json placeholder array', async () => {
+	await runTest('src/v2openapi/testdata/json_placeholder.json', 'jsp_array');
+});

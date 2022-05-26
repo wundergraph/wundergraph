@@ -17780,6 +17780,156 @@ type Mutation {
 scalar JSON"
 `;
 
+exports[`json placeholder array: jsp_array_data_sources 1`] = `
+"[
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_getPosts\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/posts\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"\\",
+      \\"StatusCodeTypeMappings\\": []
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
+  },
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_getPost\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/posts/{{ .arguments.id }}\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"\\",
+      \\"StatusCodeTypeMappings\\": []
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
+  }
+]"
+`;
+
+exports[`json placeholder array: jsp_array_fields 1`] = `
+"[
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_getPosts\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_getPost\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
+  }
+]"
+`;
+
+exports[`json placeholder array: jsp_array_schema 1`] = `
+"type Query {
+  api_getPosts: [api_Post]
+  api_getPost(id: Int!): api_Post
+}
+
+type api_Post {
+  id: Int!
+  userId: Int!
+  title: String!
+  completed: String!
+}"
+`;
+
 exports[`json placeholder: json_placeholder_data_sources 1`] = `
 "[
   {
