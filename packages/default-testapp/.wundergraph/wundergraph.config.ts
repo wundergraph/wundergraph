@@ -12,19 +12,19 @@ import operations from './wundergraph.operations';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: "https://api.spacex.land/graphql/",
+	url: 'https://api.spacex.land/graphql/',
 });
 
 const jsp = introspect.openApi({
 	source: {
-		kind: "file",
-		filePath: "./../json_placeholder.json"
+		kind: 'file',
+		filePath: './../json_placeholder.json',
 	},
 	mTLS: {
-		cert: new EnvironmentVariable("CERT"),
-		key: new EnvironmentVariable("KEY"),
+		cert: new EnvironmentVariable('CERT'),
+		key: new EnvironmentVariable('KEY'),
 		insecureSkipVerify: false,
-	}
+	},
 });
 
 const countries = introspect.graphql({
@@ -57,9 +57,9 @@ configureWunderGraphApplication({
 		allowedOrigins:
 			process.env.NODE_ENV === 'production'
 				? [
-					// change this before deploying to production to the actual domain where you're deploying your app
-					'http://localhost:3000',
-				]
+						// change this before deploying to production to the actual domain where you're deploying your app
+						'http://localhost:3000',
+				  ]
 				: ['http://localhost:3000'],
 	},
 	authentication: {

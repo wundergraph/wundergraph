@@ -1,10 +1,10 @@
-mutation (
-	$email: String!
-	$name: String!
-	$message: String!
-) @internalOperation
-{
-	createOnemessages: db_createOnemessages(data: {message: $message users: {connectOrCreate: {create: {name: $name email: $email} where: {email: $email}}}}){
+mutation ($email: String!, $name: String!, $message: String!) @internalOperation {
+	createOnemessages: db_createOnemessages(
+		data: {
+			message: $message
+			users: { connectOrCreate: { create: { name: $name, email: $email }, where: { email: $email } } }
+		}
+	) {
 		id
 		message
 	}
