@@ -1,0 +1,14 @@
+# Define where Gitpod checks out the project’s code, relative to /workspace.
+checkoutLocation: examples/simple
+# Commands to start on workspace startup
+tasks:
+  - before: curl -s -L https://github.com/wundergraph/wundergraph/releases/download/v0.90.17/wunderctl_0.90.17_Linux_x86_64.tar.gz | tar xzvf - && chmod +x wunderctl
+    name: "Download Wunderctl"
+  - init: npm install
+    command: npm start
+    name: "Start app"
+# Ports to expose on workspace startup
+ports:
+  - port: 9991
+    onOpen: open-preview
+    visibility: public
