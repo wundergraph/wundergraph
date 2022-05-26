@@ -10,6 +10,7 @@
   "dependencies": {
     "@types/node": "^14.14.37",
     "@wundergraph/sdk": "^0.90.4",
+    "@wundergraph/wunderctl": "^0.90.17",
     "graphql": "^16.3.0",
     "typescript": "^4.1.3"
   }
