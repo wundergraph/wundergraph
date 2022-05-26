@@ -6,22 +6,24 @@ on:
       - next
     tags-ignore:
       - '*'
-    paths-ignore:
-      - 'packages/**/*'
-      - 'package.json'
-      - 'examples/**/*'
-      - '*.md'
-      - '**/*.md'
+    paths:
+      - '**/*.go'
+      - 'types/**/*'
+      - 'go.mod'
+      - 'go.sum'
+      - '!examples/**/*'
+      - '!**/*.md'
   pull_request:
     branches:
       - main
       - next
-    paths-ignore:
-      - 'packages/**/*'
-      - 'package.json'
-      - 'examples/**/*'
-      - '*.md'
-      - '**/*.md'
+    paths:
+      - '**/*.go'
+      - 'types/**/*'
+      - 'go.mod'
+      - 'go.sum'
+      - '!examples/**/*'
+      - '!**/*.md'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
