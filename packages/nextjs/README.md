@@ -14,7 +14,7 @@ npm install @wundergraph/nextjs
 
 ```ts
 // .wundergraph/wundergraph.config.ts
-import {NextJsTemplate} from '@wundergraph/nextjs/template';
+import {NextJsTemplate} from '@wundergraph/nextjs/dist/template';
 
 configureWunderGraphApplication({
   // ...

@@ -10,7 +10,7 @@ We use [changesets](https://github.com/changesets/changesets) to manage the publ
 If you want to publish a new version of an NPM package, you can do so by following:
 
 1. On `main` or on a PR run `pnpm changeset:add` to define which packages were changed with which [semver](https://semver.org/lang/de/).
-2. Commit and merge the changes. The workflow `changesets` is triggered and creates a PR `[ci] release` with the changes.
+2. Commit and merge the changes. The workflow `changesets` is triggered and creates a PR `ci: release` with the changes.
 3. Approve the PR and merge to `main`. The changes are detected by the `changesets` workflow and deployed to the NPM registry. It also creates a Github Release for each npm package.
 
 > **Note**: The NPM package `wunderctl` is a wrapper for the wunderctl binary. We use a different deployment workflow to make the deployment of both applications atomic. Don't publish the `@wundergraph/wunderctl` package manually.

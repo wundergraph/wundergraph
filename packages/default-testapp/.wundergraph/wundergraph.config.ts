@@ -3,6 +3,7 @@ import {
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -25,11 +26,6 @@ const jsp = introspect.openApi({
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
 	url: 'https://countries.trevorblades.com/',
-});
-
-const db = introspect.postgresql({
-	apiNamespace: 'db',
-	databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
 });
 
 const myApplication = new Application({

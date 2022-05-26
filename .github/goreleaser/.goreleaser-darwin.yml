@@ -58,10 +58,10 @@ changelog:
   # Default is no groups.
   groups:
     - title: Features
-      regexp: "^.*feat[(\\w)]*:+.*$"
+      regexp: "^.*feat.*:+.*$"
       order: 0
     - title: 'Bug fixes'
-      regexp: "^.*fix[(\\w)]*:+.*$"
+      regexp: "^.*fix.*:+.*$"
       order: 1
 
   filters:
@@ -71,6 +71,7 @@ changelog:
     exclude:
       - '^docs:'
       - chore
+      - typo
 release:
   github:
     owner: wundergraph

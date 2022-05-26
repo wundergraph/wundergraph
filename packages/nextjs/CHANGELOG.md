@@ -1,5 +1,11 @@
 # @wundergraph/nextjs
 
+## 0.0.10
+
+### Patch Changes
+
+- [`e1bb2ec`](https://github.com/wundergraph/wundergraph/commit/e1bb2ecfff2e684c0caa370ea9aee021804e42c1) Thanks [@StarpTech](https://github.com/StarpTech)! - Remove conditional export
+
 ## 0.0.9
 
 ### Patch Changes

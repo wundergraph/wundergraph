@@ -425,9 +425,9 @@ func (b *Bundler) runCmd(ctx context.Context, cmd *exec.Cmd) {
 		if ctx.Err() == context.Canceled {
 			return
 		}
-		b.log.Error("Config Bundler: error executing script", abstractlogger.String("bundler", b.name), abstractlogger.Error(err))
-		os.Exit(1)
-		return
+		// If the command was killed, we exit the wundernode process as well
+		// on production we will never start a bundler
+		b.log.Fatal("Config Bundler: error executing script", abstractlogger.String("bundler", b.name), abstractlogger.Error(err))
 	}
 	b.log.Debug("Config Bundler: script executed", abstractlogger.String("bundler", b.name))
 }
