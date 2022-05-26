@@ -1,6 +1,6 @@
 # Commands to start on workspace startup
 tasks:
-  - before: curl -s -L https://github.com/wundergraph/wundergraph/releases/download/v0.90.17/wunderctl_0.90.17_Linux_x86_64.tar.gz | tar xzvf - && chmod +x wunderctl && mv wunderctl examples/simple
+  - before: curl -s -L https://github.com/wundergraph/wundergraph/releases/download/v0.90.17/wunderctl_0.90.17_Linux_x86_64.tar.gz | tar xzvf - && chmod +x wunderctl && mv wunderctl examples/simple/.wundergraph
     name: 'Download Wunderctl'
   - init: cd examples/simple && npm install
     command: npm start
