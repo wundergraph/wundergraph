@@ -3,7 +3,7 @@ tasks:
   - before: curl -s -L https://github.com/wundergraph/wundergraph/releases/download/v0.90.17/wunderctl_0.90.17_Linux_x86_64.tar.gz | tar xzvf - && chmod +x wunderctl && mv wunderctl examples/simple
     name: 'Download Wunderctl'
   - init: cd examples/simple && npm install
-    command: cd examples/simple && npm start
+    command: npm start
     name: 'Start app'
 # Ports to expose on workspace startup
 ports:
