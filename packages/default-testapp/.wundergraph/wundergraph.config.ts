@@ -2,7 +2,8 @@ import {
 	Application,
 	authProviders,
 	configureWunderGraphApplication,
-	cors, EnvironmentVariable,
+	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -17,7 +18,7 @@ const spaceX = introspect.graphql({
 const jsp = introspect.openApi({
 	source: {
 		kind: "file",
-		filePath: "../json_placeholder.json"
+		filePath: "./../json_placeholder.json"
 	},
 	mTLS: {
 		cert: new EnvironmentVariable("CERT"),
@@ -31,14 +32,9 @@ const countries = introspect.graphql({
 	url: 'https://countries.trevorblades.com/',
 });
 
-const db = introspect.postgresql({
-	apiNamespace: 'db',
-	databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
-});
-
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, countries, db,jsp],
+	apis: [spaceX, countries, jsp],
 });
 
 // configureWunderGraph emits the configuration
@@ -61,9 +57,9 @@ configureWunderGraphApplication({
 		allowedOrigins:
 			process.env.NODE_ENV === 'production'
 				? [
-						// change this before deploying to production to the actual domain where you're deploying your app
-						'http://localhost:3000',
-				  ]
+					// change this before deploying to production to the actual domain where you're deploying your app
+					'http://localhost:3000',
+				]
 				: ['http://localhost:3000'],
 	},
 	authentication: {

@@ -5,7 +5,8 @@
   "description": "",
   "scripts": {
     "start-database": "docker-compose up",
-    "dev": "cd .wundergraph && wunderctl up --debug"
+    "dev": "cd .wundergraph && wunderctl up --debug",
+    "cleanup": "docker-compose down"
   },
   "author": "",
   "license": "ISC",

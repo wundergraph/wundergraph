@@ -37,21 +37,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 				},
 			},
 		},
-		mutations: {
-			InternalAddMessage: {
-				customResolve: async (ctx, input) => {
-					ctx.log.info(`customResolve_clientRequest: ${JSON.stringify(ctx.clientRequest)}`);
-					return {
-						data: {
-							createOnemessages: {
-								id: 1,
-								message: 'Hello World',
-							},
-						},
-					};
-				},
-			},
-		},
 	},
 	graphqlServers: [
 		{
