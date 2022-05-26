@@ -1,5 +1,11 @@
 # @wundergraph/sdk
 
+## 0.90.6
+
+### Patch Changes
+
+- [`ad2e3a6`](https://github.com/wundergraph/wundergraph/commit/ad2e3a6fa97441b49ab477e47463a9ce2d561049) Thanks [@jensneuse](https://github.com/jensneuse)! - fix openapi transformation when array contained ref
+
 ## 0.90.5
 
 ### Patch Changes
