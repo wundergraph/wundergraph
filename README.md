@@ -44,6 +44,10 @@ all your applications, that's the WunderGraph Experience.
 
 ## Architecture & Key Differentiators
 
+<div align="center">
+    <img src="./assets/wundergraph_architecture_overview_light_transparent.png" height="auto"/>
+</div>
+
 WunderGraph is unique in its design,
 as we're not directly exposing GraphQL,
 but JSON-RPC. Combined with a generated Type-Safe client,
