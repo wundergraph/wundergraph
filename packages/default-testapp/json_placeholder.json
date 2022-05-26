@@ -14,9 +14,7 @@
     "/posts": {
       "get": {
         "description": "Returns all posts",
-        "tags": [
-          "Posts"
-        ],
+        "tags": ["Posts"],
         "operationId": "getPosts",
         "responses": {
           "200": {
@@ -35,9 +33,7 @@
     "/users": {
       "get": {
         "description": "Returns all users",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "operationId": "getUsers",
         "responses": {
           "200": {
@@ -56,9 +52,7 @@
     "/users/{id}": {
       "get": {
         "description": "Returns a user by id",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "operationId": "getUser",
         "parameters": [
           {
@@ -92,9 +86,7 @@
     "/posts/{id}": {
       "get": {
         "description": "Returns a post by id",
-        "tags": [
-          "Posts"
-        ],
+        "tags": ["Posts"],
         "operationId": "getPost",
         "parameters": [
           {
@@ -142,12 +134,7 @@
       },
       "Post": {
         "type": "object",
-        "required": [
-          "id",
-          "userId",
-          "title",
-          "completed"
-        ],
+        "required": ["id", "userId", "title", "completed"],
         "properties": {
           "id": {
             "type": "integer"

@@ -1,6 +1,6 @@
 {
-    jsp_getPosts {
-        id
-        title
-    }
+	jsp_getPosts {
+		id
+		title
+	}
 }
