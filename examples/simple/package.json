@@ -9,7 +9,6 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^14.14.37",
-    "wait-on": "^6.0.1",
     "@wundergraph/sdk": "^0.90.4",
     "@wundergraph/wunderctl": "^0.90.17",
     "graphql": "^16.3.0",
