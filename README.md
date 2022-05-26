@@ -88,6 +88,8 @@ have a look at these [annotated example snippets](docs/at-a-glance/README.md).
 
 ## Getting started
 
+Try the most simple example of WunderGraph in just a click [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph-demo)
+
 The fastest way to get started with WunderGraph is by following the [**Quickstart (5
 min)**](https://wundergraph.com/docs/guides/getting_started/quickstart).
 
