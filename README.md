@@ -45,7 +45,7 @@ all your applications, that's the WunderGraph Experience.
 ## Architecture & Key Differentiators
 
 <div align="center">
-    <img src="./assets/wundergraph_architecture_overview.png" height="auto"/>
+    <img src="./assets/wundergraph_architecture_overview_light_transparent.png" height="auto"/>
 </div>
 
 WunderGraph is unique in its design,
