@@ -55,8 +55,8 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 	},
 	graphqlServers: [
 		{
-			apiNamespace: 'jsp',
-			serverName: 'jsp',
+			apiNamespace: 'ibm_jsp',
+			serverName: 'ibm_jsp',
 			schema: createGraphQLSchema([jsonPlaceholder]).then((r) => r.schema),
 		},
 		{
