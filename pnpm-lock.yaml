@@ -62,14 +62,13 @@ importers:
       react: ^18.1.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
-      typescript: ^4.6.4
+      typescript: ^4.7.2
     dependencies:
       '@wundergraph/protobuf': link:../protobuf
       handlebars: 4.7.7
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       object-hash: 2.2.0
       react-ssr-prepass: 1.5.0_react@18.1.0
-      typescript: 4.6.4
     devDependencies:
       '@types/node': 17.0.32
       '@types/object-hash': 1.3.4
@@ -77,6 +76,7 @@ importers:
       '@wundergraph/sdk': link:../sdk
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
+      typescript: 4.7.2
 
   packages/nextjs-testapp:
     specifiers:
@@ -90,10 +90,10 @@ importers:
       open-cli: ^7.0.1
       react: ^18.0.0
       react-dom: ^18.0.0
-      typescript: ^4.3.5
+      typescript: ^4.7.2
       wait-on: ^6.0.0
     dependencies:
-      '@wundergraph/nextjs': file:packages/nextjs_zeops35mggfn5qwoyviv2r35ku
+      '@wundergraph/nextjs': file:packages/nextjs_nmyounys246mkivef6ehnvvk6a
       '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
@@ -104,7 +104,7 @@ importers:
       concurrently: 6.5.1
       graphql: 16.4.0
       open-cli: 7.0.1
-      typescript: 4.6.4
+      typescript: 4.7.2
       wait-on: 6.0.1
     dependenciesMeta:
       '@wundergraph/nextjs':
@@ -117,12 +117,12 @@ importers:
       '@types/node': ^14.14.37
       '@wundergraph/sdk': workspace:*
       graphql: ^16.3.0
-      typescript: ^4.1.3
+      typescript: ^4.7.2
     dependencies:
       '@types/node': 14.18.16
       '@wundergraph/sdk': file:packages/sdk
       graphql: 16.4.0
-      typescript: 4.6.4
+      typescript: 4.7.2
     dependenciesMeta:
       '@wundergraph/sdk':
         injected: true
@@ -133,14 +133,14 @@ importers:
       long: ^5.2.0
       protobufjs: ^6.11.2
       ts-proto: ^1.112.1
-      typescript: ^4.6.4
+      typescript: ^4.7.2
     dependencies:
       long: 5.2.0
       protobufjs: 6.11.2
       ts-proto: 1.112.1
     devDependencies:
       cpy-cli: 4.1.0
-      typescript: 4.6.4
+      typescript: 4.7.2
 
   packages/sdk:
     specifiers:
@@ -180,7 +180,7 @@ importers:
       protobufjs: ^6.11.2
       swagger2openapi: ^7.0.8
       ts-jest: ^26.4.4
-      typescript: ^4.5.2
+      typescript: ^4.7.2
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
@@ -218,8 +218,8 @@ importers:
       '@types/object-hash': 1.3.4
       chai: 4.3.6
       jest: 26.6.3
-      ts-jest: 26.5.6_ip4jai7pxkumsngma2fb7ud2tm
-      typescript: 4.6.4
+      ts-jest: 26.5.6_f76bpxtbiaefn23m64irtgzxbe
+      typescript: 4.7.2
 
   packages/wunderctl:
     specifiers:
@@ -231,7 +231,7 @@ importers:
       execa: ^5.1.1
       rimraf: ^3.0.2
       tar: ^6.1.11
-      typescript: ^4.5.3
+      typescript: ^4.7.2
     dependencies:
       axios: 0.27.2
       execa: 5.1.1
@@ -242,7 +242,7 @@ importers:
       '@types/node': 14.18.16
       '@types/rimraf': 3.0.2
       '@types/tar': 4.0.5
-      typescript: 4.6.4
+      typescript: 4.7.2
 
 packages:
 
@@ -8856,7 +8856,7 @@ packages:
     resolution: {integrity: sha512-3fTPO+G6bSQNvMh/XQQzyiahVLMMj9kqYO99ivUraNJ3Wp05HZOOVtRhi6w9hq7+laP1MKHjLBtGWqTeb1fcpg==}
     dev: false
 
-  /ts-jest/26.5.6_ip4jai7pxkumsngma2fb7ud2tm:
+  /ts-jest/26.5.6_f76bpxtbiaefn23m64irtgzxbe:
     resolution: {integrity: sha512-rua+rCP8DxpA8b4DQD/6X2HQS8Zy/xzViVYfEs2OQu68tkCuKLV0Md8pmX55+W24uRIyAsf/BajRfxOs+R2MKA==}
     engines: {node: '>= 10'}
     hasBin: true
@@ -8874,7 +8874,7 @@ packages:
       make-error: 1.3.6
       mkdirp: 1.0.4
       semver: 7.3.7
-      typescript: 4.6.4
+      typescript: 4.7.2
       yargs-parser: 20.2.9
     dev: true
 
@@ -9032,6 +9032,11 @@ packages:
 
   /typescript/4.6.4:
     resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+
+  /typescript/4.7.2:
+    resolution: {integrity: sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==}
     engines: {node: '>=4.2.0'}
     hasBin: true
 
@@ -9525,13 +9530,13 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  file:packages/nextjs_zeops35mggfn5qwoyviv2r35ku:
+  file:packages/nextjs_nmyounys246mkivef6ehnvvk6a:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.0.4
+    version: 0.0.9
     peerDependencies:
-      '@wundergraph/sdk': workspace:0.90.1
+      '@wundergraph/sdk': workspace:0.90.6
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.2 || ^18.0.0
     dependencies:
@@ -9543,7 +9548,7 @@ packages:
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
       react-ssr-prepass: 1.5.0_react@18.1.0
-      typescript: 4.6.4
+      typescript: 4.7.2
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
@@ -9555,7 +9560,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.90.1
+    version: 0.90.6
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0

@@ -8,10 +8,6 @@
     "dist"
   ],
   "description": "WunderGraph Next.js integration",
-  "exports": {
-    ".": "./dist/index.js",
-    "./*": "./dist/*.js"
-  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -37,7 +33,8 @@
     "@types/react": "^18.0.5",
     "@wundergraph/sdk": "workspace:0.90.6",
     "react": "^18.1.0",
-    "react-dom": "^18.1.0"
+    "react-dom": "^18.1.0",
+    "typescript": "^4.7.2"
   },
   "peerDependencies": {
     "@wundergraph/sdk": "workspace:0.90.6",
@@ -49,8 +46,7 @@
     "handlebars": "^4.7.7",
     "next": "^12.1.6",
     "object-hash": "^2.2.0",
-    "react-ssr-prepass": "^1.5.0",
-    "typescript": "^4.6.4"
+    "react-ssr-prepass": "^1.5.0"
   },
   "sideEffects": false
 }
