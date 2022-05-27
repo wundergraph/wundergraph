@@ -1,5 +1,11 @@
 # @wundergraph/nextjs
 
+## 0.0.11
+
+### Patch Changes
+
+- [#13](https://github.com/wundergraph/wundergraph/pull/13) [`901fc5f`](https://github.com/wundergraph/wundergraph/commit/901fc5f75f73ceaa447eac76014b0e8f99ea0961) Thanks [@StarpTech](https://github.com/StarpTech)! - allow custom baseUrl
+
 ## 0.0.10
 
 ### Patch Changes
