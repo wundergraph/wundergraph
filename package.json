@@ -41,6 +41,7 @@
     "git": {
       "tagMatch": "[!@]*",
       "tagName": "v${version}",
+      "commitMessage": "ci(release): release ${version}",
       "requireCleanWorkingDir": true
     },
     "npm": {
