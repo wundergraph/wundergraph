@@ -976,16 +976,14 @@ func (e *LazyEngine) Execute(ctx context.Context, request []byte, out io.Writer)
 		e.m.RUnlock()
 		return e.initEngineAndExecute(ctx, request, out)
 	}
-	defer e.m.RUnlock()
-	return e.execute(ctx, request, out)
+	err := e.execute(ctx, request, out)
+	e.m.RUnlock()
+	return err
 }
 
 func (e *LazyEngine) initEngineAndExecute(ctx context.Context, request []byte, out io.Writer) error {
 	e.m.Lock()
 	defer e.m.Unlock()
-	if e.closed {
-		return fmt.Errorf("engine closed")
-	}
 	var err error
 	e.engine, err = NewHybridEngine(e.prismaSchema, abstractlogger.NoopLogger)
 	if err != nil {

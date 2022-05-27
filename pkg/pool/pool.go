@@ -117,7 +117,7 @@ func (p *Pool) GetShared(ctx context.Context, planConfig plan.Configuration, cfg
 	}
 }
 
-func (p *Pool) GetSharedFromRequest(r *http.Request, planConfig plan.Configuration, cfg Config) *Shared {
+func (p *Pool) GetSharedFromRequest(ctx context.Context, r *http.Request, planConfig plan.Configuration, cfg Config) *Shared {
 	shared := p.pool.Get()
 	c := context.WithValue(r.Context(), ClientRequestKey, r)
 	if shared != nil {
@@ -128,12 +128,12 @@ func (p *Pool) GetSharedFromRequest(r *http.Request, planConfig plan.Configurati
 		s.Ctx.RenameTypeNames = cfg.RenameTypeNames
 		return s
 	}
-	ctx := resolve.NewContext(c)
-	ctx.Request.Header = r.Header
-	ctx.RenameTypeNames = cfg.RenameTypeNames
+	resolveCtx := resolve.NewContext(c)
+	resolveCtx.Request.Header = r.Header
+	resolveCtx.RenameTypeNames = cfg.RenameTypeNames
 	return &Shared{
 		Doc:         ast.NewDocument(),
-		Planner:     plan.NewPlanner(r.Context(), planConfig),
+		Planner:     plan.NewPlanner(ctx, planConfig),
 		Parser:      astparser.NewParser(),
 		Printer:     &astprinter.Printer{},
 		Hash:        xxhash.New(),
@@ -141,7 +141,7 @@ func (p *Pool) GetSharedFromRequest(r *http.Request, planConfig plan.Configurati
 		Normalizer:  astnormalization.NewNormalizer(true, true),
 		Postprocess: postprocess.DefaultProcessor(),
 		Report:      &operationreport.Report{},
-		Ctx:         ctx,
+		Ctx:         resolveCtx,
 	}
 }
 
