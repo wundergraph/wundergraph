@@ -1,5 +1,11 @@
 # @wundergraph/nextjs
 
+## 0.0.12
+
+### Patch Changes
+
+- [`91847b5`](https://github.com/wundergraph/wundergraph/commit/91847b5c8f529a0e94f3f0c8bd00c327ed70ffe0) Thanks [@jensneuse](https://github.com/jensneuse)! - fix server side rendering
+
 ## 0.0.11
 
 ### Patch Changes
