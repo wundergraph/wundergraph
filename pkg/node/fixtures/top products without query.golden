@@ -1,0 +1,16 @@
+{
+  "data": {
+    "topProducts": [
+      {
+        "name": "A",
+        "price": 1,
+        "upc": "1"
+      },
+      {
+        "name": "B",
+        "price": 2,
+        "upc": "2"
+      }
+    ]
+  }
+}

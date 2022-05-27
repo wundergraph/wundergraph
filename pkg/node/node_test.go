@@ -1,6 +1,7 @@
 package node
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -43,7 +44,19 @@ func TestNode(t *testing.T) {
 	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		_, _ = w.Write([]byte(`{"data":{"_entities":[{"name": "Trilby","price":456}]}}`))
+		if bytes.Contains(req, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`))
+			return
+		}
+		if bytes.Contains(req, []byte(`{"variables":{"first":1},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"topProducts":[{"upc":"1","name":"A","price":1}]}}`))
+			return
+		}
+		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"Product","upc":"top-1"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){... on Product {name price}}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"_entities":[{"name":"Trilby","price":456}]}}`))
+			return
+		}
+		w.WriteHeader(500)
 	}))
 	defer productService.Close()
 
@@ -95,6 +108,20 @@ func TestNode(t *testing.T) {
 							RoleConfig: &wgpb.OperationRoleConfig{},
 						},
 					},
+					{
+						Name:          "TopProducts",
+						Content:       topProductsQuery,
+						OperationType: wgpb.OperationType_QUERY,
+						HooksConfiguration: &wgpb.OperationHooksConfiguration{
+							MockResolve: &wgpb.MockResolveHookConfiguration{},
+						},
+						VariablesSchema:              `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
+						ResponseSchema:               `{}`,
+						InterpolationVariablesSchema: `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
+						AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
+							RoleConfig: &wgpb.OperationRoleConfig{},
+						},
+					},
 				},
 				AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 					CookieBased: &wgpb.CookieBasedAuthentication{},
@@ -116,7 +143,7 @@ func TestNode(t *testing.T) {
 		BaseURL: "http://" + nodeURL,
 		Client: &http.Client{
 			Jar:     httpexpect.NewJar(),
-			Timeout: time.Second * 1,
+			Timeout: time.Second * 30,
 		},
 		Reporter: httpexpect.NewRequireReporter(t),
 	})
@@ -128,8 +155,20 @@ func TestNode(t *testing.T) {
 		request.WithHeader("Host", "jens.wundergraph.dev")
 	})
 
-	myReviews := withHeaders.GET("/myApi/main/operations/MyReviews").Expect().Status(http.StatusOK).Body().Raw()
+	myReviews := withHeaders.GET("/myApi/main/operations/MyReviews").
+		WithQuery("unknown", 123).
+		Expect().Status(http.StatusOK).Body().Raw()
 	goldie.Assert(t, "get my reviews json rpc", prettyJSON(myReviews))
+
+	topProductsWithoutQuery := withHeaders.GET("/myApi/main/operations/TopProducts").
+		Expect().Status(http.StatusOK).Body().Raw()
+	goldie.Assert(t, "top products without query", prettyJSON(topProductsWithoutQuery))
+
+	topProductsWithQuery := withHeaders.GET("/myApi/main/operations/TopProducts").
+		WithQuery("first", 1).
+		WithQuery("unknown", 123).
+		Expect().Status(http.StatusOK).Body().Raw()
+	goldie.Assert(t, "top products with query", prettyJSON(topProductsWithQuery))
 
 	request := GraphQLRequest{
 		OperationName: "MyReviews",
@@ -254,6 +293,15 @@ type GraphQLRequest struct {
 }
 
 var (
+	topProductsQuery = `
+		query TopProducts ($first: Int){
+    topProducts: topProducts(first: $first) {
+        upc
+        name
+        price
+    }
+}
+`
 	federationTestQuery = `query MyReviews {
 						me {
 							id
