@@ -2,7 +2,8 @@ import {
 	Application,
 	configurePublishWunderGraphAPI,
 	configureWunderGraphApplication,
-	cors, EnvironmentVariable,
+	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -104,12 +105,12 @@ configureWunderGraphApplication({
 						// change this before deploying to production to the actual domain where you're deploying your app
 						'http://localhost:3000',
 				  ]
-				: ['http://localhost:3000', new EnvironmentVariable("WG_ALLOWED_ORIGIN")],
+				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
 	},
 	dotGraphQLConfig: {
 		hasDotWunderGraphDirectory: false,
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined,
 	},
 });
