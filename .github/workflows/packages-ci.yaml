@@ -1,4 +1,4 @@
-name: sdk-ci
+name: packages-ci
 on:
   push:
     branches:
@@ -18,7 +18,7 @@ on:
       - main
       - next
     paths:
-      - 'packages/sdk/**/*'
+      - 'packages/**/*'
       - '.github/workflows/sdk-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
