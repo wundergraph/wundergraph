@@ -35,6 +35,8 @@ env:
 
 jobs:
   build_test:
+    # don't run on changeset publish
+    if: "!contains(github.event.pull_request.title, 'ci:')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
