@@ -512,13 +512,13 @@ function withWunderGraphContextWrapper<Role>(
 	return <C extends NextPage<any> | NextApp>(Page: C, options?: WithWunderGraphOptions) => {
 		// initialize the client
 		if (defaultContextProperties.client === null) {
-			const baseOptions = {...defaultContextProperties.clientConfig}
+			const baseOptions = { ...defaultContextProperties.clientConfig };
 			if (options?.baseURL) {
 				baseOptions.baseURL = options.baseURL;
 			}
 			defaultContextProperties.client = new Client(baseOptions);
 		}
-		
+
 		const WithWunderGraph: NextPage<any> = (props: any) => {
 			const isClient = typeof window !== 'undefined';
 			if (isClient) {
