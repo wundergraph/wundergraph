@@ -383,6 +383,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return err
 	}
 
+	queryParamsAllowList := r.generateQueryArgumentsAllowList(operation.VariablesSchema)
+
 	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
@@ -418,6 +420,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			jsonStringInterpolator: jsonStringInterpolator,
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
+			queryParamsAllowList:   queryParamsAllowList,
 		}
 
 		if operation.LiveQueryConfig != nil && operation.LiveQueryConfig.Enable {
@@ -513,6 +516,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			jsonStringInterpolator: jsonStringInterpolator,
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
+			queryParamsAllowList:   queryParamsAllowList,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -539,6 +543,16 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	}
 
 	return nil
+}
+
+func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
+	var allowList []string
+	schema = r.cleanupJsonSchema(schema)
+	_ = jsonparser.ObjectEach([]byte(schema), func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+		allowList = append(allowList, string(key))
+		return nil
+	}, "properties")
+	return allowList
 }
 
 func (r *Builder) cleanupJsonSchema(schema string) string {
@@ -908,12 +922,15 @@ func buildHooksConfig(operation *wgpb.Operation) hooksConfig {
 	}
 }
 
-func parseQueryVariables(r *http.Request) []byte {
+func parseQueryVariables(r *http.Request, allowList []string) []byte {
 	rawVariables := r.URL.Query().Get(WG_VARIABLES)
 	if rawVariables == "" {
 		rawVariables = "{}"
 		for name, val := range r.URL.Query() {
 			if len(val) > 0 && !strings.HasPrefix(name, WG_PREFIX) {
+				if !stringSliceContainsValue(allowList, name) {
+					continue
+				}
 				// check if the user work with JSON values
 				if gjson.Valid(val[0]) {
 					rawVariables, _ = sjson.SetRaw(rawVariables, name, val[0])
@@ -924,6 +941,15 @@ func parseQueryVariables(r *http.Request) []byte {
 		}
 	}
 	return unsafebytes.StringToBytes(rawVariables)
+}
+
+func stringSliceContainsValue(list []string, value string) bool {
+	for i := range list {
+		if list[i] == value {
+			return true
+		}
+	}
+	return false
 }
 
 type QueryHandler struct {
@@ -945,6 +971,7 @@ type QueryHandler struct {
 	jsonStringInterpolator *interpolate.StringInterpolator
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
+	queryParamsAllowList   []string
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -983,7 +1010,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		pool.PutBytesBuffer(buf)
 	}()
 
-	ctx.Variables = parseQueryVariables(r)
+	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
 	valid := h.variablesValidator.Validate(ctx, ctx.Variables)
@@ -1467,6 +1494,7 @@ type SubscriptionHandler struct {
 	jsonStringInterpolator *interpolate.StringInterpolator
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
+	queryParamsAllowList   []string
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1515,7 +1543,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		flushWriter.close = closeFunc
 	}
 
-	ctx.Variables = parseQueryVariables(r)
+	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 	valid := h.variablesValidator.Validate(ctx, ctx.Variables)
 	if !valid {

@@ -25,12 +25,72 @@ import (
 type FakeResolver struct {
 	invocations int
 	response    []byte
+	validate    func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte)
 }
 
 func (f *FakeResolver) ResolveGraphQLResponse(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte, writer io.Writer) (err error) {
+	if f.validate != nil {
+		f.validate(ctx, response, data)
+	}
 	f.invocations++
 	_, err = writer.Write(f.response)
 	return
+}
+
+func TestQueryHandler_VariablesIgnore(t *testing.T) {
+
+	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	assert.NoError(t, err)
+
+	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
+
+	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
+	assert.NoError(t, err)
+
+	validateCalled := false
+
+	handler := &QueryHandler{
+		resolver: &FakeResolver{
+			response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
+			validate: func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte) {
+				assert.Equal(t, `{"id":123}`, string(ctx.Variables))
+				validateCalled = true
+			},
+		},
+		log: &abstractlogger.Noop{},
+		preparedPlan: &plan.SynchronousResponsePlan{
+			Response: &resolve.GraphQLResponse{},
+		},
+		pool: pool.New(),
+		operation: &wgpb.Operation{
+			Name:          "test",
+			OperationType: wgpb.OperationType_QUERY,
+		},
+		rbacEnforcer:           &authentication.RBACEnforcer{},
+		stringInterpolator:     interpoalteNothing,
+		jsonStringInterpolator: interpoalteNothing,
+		variablesValidator:     validateNothing,
+		postResolveTransformer: &postresolvetransform.Transformer{},
+		queryParamsAllowList:   []string{"id"},
+	}
+
+	srv := httptest.NewServer(handler)
+	defer srv.Close()
+
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  srv.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	res := e.GET("/api/main/operations").
+		WithQuery("id", `123`).
+		WithQuery("unknown", `456`).
+		Expect()
+
+	res.Status(http.StatusOK)
+	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
+
+	assert.True(t, validateCalled)
 }
 
 func TestQueryHandler_ETag(t *testing.T) {
