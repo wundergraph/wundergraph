@@ -73,6 +73,9 @@ changelog:
       - chore
       - typo
 release:
+  name_template: "Release {{.ProjectName}} {{.Tag}}"
+  header: |
+    ## New {{.ProjectName}} release, ({{ .Date }})
   github:
     owner: wundergraph
     name: wundergraph
