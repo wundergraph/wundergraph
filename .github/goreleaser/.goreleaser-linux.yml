@@ -60,7 +60,9 @@ changelog:
 release:
   name_template: "Release {{.ProjectName}} {{.Tag}}"
   header: |
-    ## New {{.ProjectName}} release, ({{ .Date }})
+    This is a new release of the command-line interface (CLI) {{.ProjectName}}.
+    It allows you to create, deploy and manage your WunderGraph application.
+    Please check the [readme](https://github.com/wundergraph/wundergraph) or [documentation](https://wundergraph.com/docs) if you want to learn more.
   github:
     owner: wundergraph
     name: wundergraph
