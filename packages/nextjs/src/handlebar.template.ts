@@ -26,12 +26,13 @@ export enum S3Provider {
 
 const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = {
     ssrCache: {},
-    client: new Client({
-        applicationHash: "{{applicationHash}}",
-        applicationPath: "{{applicationPath}}",
-        baseURL: "{{baseURL}}",
-        sdkVersion: "{{sdkVersion}}",
-    }),
+		client: null,
+    clientConfig: {
+			applicationHash: "{{applicationHash}}",
+			applicationPath: "{{applicationPath}}",
+			baseURL: "{{baseURL}}",
+			sdkVersion: "{{sdkVersion}}",
+    },
     user: null,
     setUser: value => {},
     isWindowFocused: "pristine",

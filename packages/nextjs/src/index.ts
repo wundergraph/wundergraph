@@ -31,6 +31,7 @@ export interface LogoutOptions {
 
 export interface WunderGraphContextProperties<Role> {
 	ssrCache: { [key: string]: Promise<any> | {} };
+	clientConfig: ClientConfig<Role>;
 	client: Client<Role>;
 	user: User<Role> | null;
 	setUser: Dispatch<SetStateAction<User<Role> | null>>;
@@ -493,6 +494,7 @@ export class Client<Role> {
 }
 
 export interface WithWunderGraphOptions {
+	baseURL?: string;
 	logPrerenderTime?: boolean;
 	disableFetchUserServerSide?: boolean;
 	disableFetchUserClientSide?: boolean;
@@ -508,6 +510,15 @@ function withWunderGraphContextWrapper<Role>(
 	defaultContextProperties: WunderGraphContextProperties<Role>
 ) {
 	return <C extends NextPage<any> | NextApp>(Page: C, options?: WithWunderGraphOptions) => {
+		// initialize the client
+		if (defaultContextProperties.client === null) {
+			const baseOptions = { ...defaultContextProperties.clientConfig };
+			if (options?.baseURL) {
+				baseOptions.baseURL = options.baseURL;
+			}
+			defaultContextProperties.client = new Client(baseOptions);
+		}
+
 		const WithWunderGraph: NextPage<any> = (props: any) => {
 			const isClient = typeof window !== 'undefined';
 			if (isClient) {
