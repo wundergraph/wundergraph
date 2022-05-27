@@ -1,5 +1,5 @@
 query ($id: Int!, $userID: Int! @internal) {
-	jsp_getPost(id: $id) {
+	post: jsp_getPost(id: $id) {
 		id
 		title
 		userId @export(as: "userID")

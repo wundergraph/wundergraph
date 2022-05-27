@@ -30,7 +30,7 @@ const countries = introspect.graphql({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, countries, db, jsp],
+	apis: [spaceX, countries, jsp],
 });
 
 // configureWunderGraph emits the configuration
