@@ -9,7 +9,7 @@ tasks:
       npm run start
     name: 'Start app'
   - init: cd examples/simple && npx --yes wait-on http://localhost:9991
-    command: gp preview $(gp url 9991)app/main/operations/Dragons
+    command: gp preview $(gp url 9991)/app/main/operations/Dragons
     openMode: tab-after
     name: 'Example: Get Dragons'
 # Ports to expose on workspace startup
