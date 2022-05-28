@@ -6,12 +6,8 @@ tasks:
     command: |
       export WG_ALLOWED_ORIGIN="https://9991-$GITPOD_WORKSPACE_ID.$GITPOD_WORKSPACE_CLUSTER_HOST"
       echo "$WG_ALLOWED_ORIGIN"
-      npm run start
+      npx --yes concurrently "npm start" "npx --yes wait-on $(gp url 9991) && gp preview $(gp url 9991)/app/main/operations/Dragons"
     name: 'Start app'
-  - init: cd examples/simple && npx --yes wait-on http://localhost:9991
-    command: gp preview $(gp url 9991)/app/main/operations/Dragons
-    openMode: tab-after
-    name: 'Example: Get Dragons'
 # Ports to expose on workspace startup
 ports:
   - port: 9991
