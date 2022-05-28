@@ -85,7 +85,7 @@ applications and microservices).
 
 The fastest way to get started with WunderGraph is to open a Gitpod:
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io#snapshot/7b0059de-5679-452c-bb7d-341d1041d698)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
 
 You can also following the [**Quickstart (5
 min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
