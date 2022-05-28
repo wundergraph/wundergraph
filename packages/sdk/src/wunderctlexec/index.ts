@@ -1,6 +1,6 @@
 import path from 'path';
-import execa from "execa";
-import fs from "fs";
+import execa from 'execa';
+import fs from 'fs';
 
 export interface WunderCtlExecArgs {
 	cmd: string[];
@@ -41,7 +41,7 @@ export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<strin
 	});
 	subprocess.stdout?.pipe(process.stdout);
 	subprocess.stderr?.pipe(process.stderr);
-	
-	const {stdout} = await subprocess;
+
+	const { stdout } = await subprocess;
 	return stdout;
 };

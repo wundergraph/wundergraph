@@ -1273,7 +1273,7 @@ export const loadOperations = (): string => {
 	if (result?.failed) {
 		return '';
 	}
-	const output = result?.stdout
+	const output = result?.stdout;
 	if (output) {
 		const out = JSON.parse(output) as LoadOperationsOutput;
 		out.info?.forEach((info) => console.log(JSON.stringify({ level: 'info', message: info })));
