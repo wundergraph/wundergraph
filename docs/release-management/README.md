@@ -13,7 +13,10 @@ If you want to publish a new version of an NPM package, you can do so by followi
 2. Commit and merge the changes. The workflow `changesets` is triggered and creates a PR `ci: release` with the changes.
 3. Approve the PR and merge to `main`. The changes are detected by the `changesets` workflow and deployed to the NPM registry. It also creates a Github Release for each npm package.
 
-> **Note**: The NPM package `@wundergraph/wunderctl` is a wrapper for the wunderctl binary. We release it with the wunderctl Go binary to make the deployment of both applications atomic. **Don't publish** this package manually.
+### Wunderctl wrapper
+
+The NPM package `@wundergraph/wunderctl` is a wrapper for the wunderctl binary. We release it with the wunderctl Go binary to make the deployment of both applications atomic. **Don't publish** this package manually.
+The package is released as soon as the wunderctl binary is published.
 
 ### Wunderctl & SDK
 
