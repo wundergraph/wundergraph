@@ -15,5 +15,7 @@ tasks:
 # Ports to expose on workspace startup
 ports:
   - port: 9991
-    onOpen: open-preview
     visibility: public
+    onOpen: ignore
+  - port: 9992
+    visibility: private
