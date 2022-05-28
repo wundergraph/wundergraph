@@ -7,6 +7,8 @@ on:
       - next
     paths:
       -  '.changeset/*'
+      # allows to publish new npm packages
+      - 'packages/**/package.json'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
