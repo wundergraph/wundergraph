@@ -1270,14 +1270,17 @@ export const loadOperations = (): string => {
 	const result = wunderctlExec({
 		cmd: ['loadoperations', operationsPath],
 	});
-	if (result === undefined || result.status !== 0) {
+	if (result?.failed) {
 		return '';
 	}
-	const output = result.output.join('');
-	const out = JSON.parse(output) as LoadOperationsOutput;
-	out.info?.forEach((info) => console.log(JSON.stringify({ level: 'info', message: info })));
-	out.errors?.forEach((info) => console.log(JSON.stringify({ level: 'error', message: info })));
-	return out.files?.map((file) => file.content).join(' ') || '';
+	const output = result?.stdout
+	if (output) {
+		const out = JSON.parse(output) as LoadOperationsOutput;
+		out.info?.forEach((info) => console.log(JSON.stringify({ level: 'info', message: info })));
+		out.errors?.forEach((info) => console.log(JSON.stringify({ level: 'error', message: info })));
+		return out.files?.map((file) => file.content).join(' ') || '';
+	}
+	return '';
 };
 
 export const removeHookVariables = (operation: string): string => {

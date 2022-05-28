@@ -48,5 +48,5 @@ export const wunderctlPath = (): string => {
 };
 
 export const wunderGraphDir = (): string => {
-	return path.join(os.homedir(), '.wundergraph');
+	return path.join(__dirname, '..', '..', 'bin');
 };

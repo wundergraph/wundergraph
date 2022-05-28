@@ -148,21 +148,26 @@ importers:
       '@apollo/federation': ^0.36.2
       '@graphql-tools/schema': ^8.3.10
       '@prisma/generator-helper': ^3.9.2
+      '@types/axios': ^0.14.0
       '@types/chai': ^4.2.22
       '@types/colors': ^1.2.1
       '@types/cors': ^2.8.10
       '@types/cross-spawn': ^6.0.2
+      '@types/debug': ^4.1.7
       '@types/jest': ^26.0.19
       '@types/js-yaml': ^4.0.0
       '@types/json-schema': ^7.0.6
       '@types/lodash': ^4.14.178
-      '@types/node': ^14.14.10
+      '@types/node': ^14.18.16
       '@types/object-hash': ^1.3.4
+      '@types/rimraf': ^3.0.0
+      '@types/tar': ^4.0.4
       '@wundergraph/protobuf': workspace:0.90.1
       axios: ^0.26.1
       chai: ^4.3.4
       colors: ^1.4.0
-      cross-spawn: ^7.0.3
+      debug: ^4.3.4
+      execa: 5.1.1
       fastify: ^3.27.1
       fastify-plugin: ^3.0.1
       graphql: ^16.3.0
@@ -178,7 +183,9 @@ importers:
       postman-collection: ^4.1.1
       prettier: ^2.5.0
       protobufjs: ^6.11.2
+      rimraf: ^3.0.2
       swagger2openapi: ^7.0.8
+      tar: ^6.1.11
       ts-jest: ^26.4.4
       typescript: ^4.7.2
     dependencies:
@@ -187,9 +194,10 @@ importers:
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
       '@wundergraph/protobuf': link:../protobuf
-      axios: 0.26.1
+      axios: 0.26.1_debug@4.3.4
       colors: 1.4.0
-      cross-spawn: 7.0.3
+      debug: 4.3.4
+      execa: 5.1.1
       fastify: 3.29.0
       fastify-plugin: 3.0.1
       graphql: 16.4.0
@@ -204,44 +212,27 @@ importers:
       postman-collection: 4.1.2
       prettier: 2.6.2
       protobufjs: 6.11.2
+      rimraf: 3.0.2
       swagger2openapi: 7.0.8
+      tar: 6.1.11
     devDependencies:
+      '@types/axios': 0.14.0_debug@4.3.4
       '@types/chai': 4.3.1
       '@types/colors': 1.2.1
       '@types/cors': 2.8.12
       '@types/cross-spawn': 6.0.2
+      '@types/debug': 4.1.7
       '@types/jest': 26.0.24
       '@types/js-yaml': 4.0.5
       '@types/json-schema': 7.0.11
       '@types/lodash': 4.14.182
       '@types/node': 14.18.16
       '@types/object-hash': 1.3.4
+      '@types/rimraf': 3.0.2
+      '@types/tar': 4.0.5
       chai: 4.3.6
       jest: 26.6.3
       ts-jest: 26.5.6_f76bpxtbiaefn23m64irtgzxbe
-      typescript: 4.7.2
-
-  packages/wunderctl:
-    specifiers:
-      '@types/axios': ^0.14.0
-      '@types/node': ^14.18.16
-      '@types/rimraf': ^3.0.0
-      '@types/tar': ^4.0.4
-      axios: ^0.27.2
-      execa: ^5.1.1
-      rimraf: ^3.0.2
-      tar: ^6.1.11
-      typescript: ^4.7.2
-    dependencies:
-      axios: 0.27.2
-      execa: 5.1.1
-      rimraf: 3.0.2
-      tar: 6.1.11
-    devDependencies:
-      '@types/axios': 0.14.0
-      '@types/node': 14.18.16
-      '@types/rimraf': 3.0.2
-      '@types/tar': 4.0.5
       typescript: 4.7.2
 
 packages:
@@ -1125,7 +1116,7 @@ packages:
     engines: {node: '>= 10.14.2'}
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       chalk: 4.1.2
       jest-message-util: 26.6.2
       jest-util: 26.6.2
@@ -1141,7 +1132,7 @@ packages:
       '@jest/test-result': 26.6.2
       '@jest/transform': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       exit: 0.1.2
@@ -1178,7 +1169,7 @@ packages:
     dependencies:
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       jest-mock: 26.6.2
     dev: true
 
@@ -1188,7 +1179,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@sinonjs/fake-timers': 6.0.1
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       jest-message-util: 26.6.2
       jest-mock: 26.6.2
       jest-util: 26.6.2
@@ -1302,7 +1293,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       '@types/yargs': 15.0.14
       chalk: 4.1.2
     dev: true
@@ -1772,11 +1763,11 @@ packages:
     resolution: {integrity: sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==}
     dev: true
 
-  /@types/axios/0.14.0:
-    resolution: {integrity: sha1-7CMA++fX3d1+udOr+HmZlkyvzkY=}
+  /@types/axios/0.14.0_debug@4.3.4:
+    resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
     deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
     dependencies:
-      axios: 0.27.2
+      axios: 0.27.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: true
@@ -1837,25 +1828,24 @@ packages:
   /@types/cross-spawn/6.0.2:
     resolution: {integrity: sha512-KuwNhp3eza+Rhu8IFI5HUXRP0LIhqH5cAjubUvGXXthh4YYBuP2ntwEX+Cz8GJoZUHlKo247wPWOfA9LYEq4cw==}
     dependencies:
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
 
   /@types/debug/4.1.7:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
     dependencies:
       '@types/ms': 0.7.31
-    dev: false
 
   /@types/glob/7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 3.0.5
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
     dev: true
 
   /@types/graceful-fs/4.1.5:
     resolution: {integrity: sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==}
     dependencies:
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
     dev: true
 
   /@types/http-cache-semantics/4.0.1:
@@ -1937,12 +1927,11 @@ packages:
   /@types/minipass/3.1.2:
     resolution: {integrity: sha512-foLGjgrJkUjLG/o2t2ymlZGEoBNBa/TfoUZ7oCTkOjP1T43UGBJspovJou/l3ZuHvye2ewR5cZNtp2zyWgILMA==}
     dependencies:
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
     dev: true
 
   /@types/ms/0.7.31:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
-    dev: false
 
   /@types/node/10.17.60:
     resolution: {integrity: sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==}
@@ -1960,7 +1949,6 @@ packages:
 
   /@types/node/17.0.32:
     resolution: {integrity: sha512-eAIcfAvhf/BkHcf4pkLJ7ECpBAhh9kcxRBpip9cTiO+hf+aJrsxYxBeS6OXvOd9WqNAJmavXVpZvY1rBjNsXmw==}
-    dev: true
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -2007,7 +1995,7 @@ packages:
     resolution: {integrity: sha512-F3OznnSLAUxFrCEu/L5PY8+ny8DtcFRjx7fZZ9bycvXRi3KPTRS9HOitGZwvPg0juRhXFWIeKX58cnX5YqLohQ==}
     dependencies:
       '@types/glob': 7.2.0
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
     dev: true
 
   /@types/scheduler/0.16.2:
@@ -2026,7 +2014,7 @@ packages:
     resolution: {integrity: sha512-cgwPhNEabHaZcYIy5xeMtux2EmYBitfqEceBUi2t5+ETy4dW6kswt6WX4+HqLeiiKOo42EXbGiDmVJ2x+vi37Q==}
     dependencies:
       '@types/minipass': 3.1.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
     dev: true
 
   /@types/ws/7.4.7:
@@ -2371,7 +2359,7 @@ packages:
       - debug
     dev: true
 
-  /axios/0.26.1:
+  /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
       follow-redirects: 1.14.9
@@ -2379,13 +2367,14 @@ packages:
       - debug
     dev: false
 
-  /axios/0.27.2:
+  /axios/0.27.2_debug@4.3.4:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
       follow-redirects: 1.14.9
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
+    dev: true
 
   /babel-jest/26.6.3_@babel+core@7.17.10:
     resolution: {integrity: sha512-pl4Q+GAVOHwvjrck6jKjvmGhnO3jHX/xuB9d27f+EJZ/6k+6nMuPjorrYp7s++bKKdANwzElBWnLWaObvTnaZA==}
@@ -5376,7 +5365,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       jest-mock: 26.6.2
       jest-util: 26.6.2
       jsdom: 16.7.0
@@ -5394,7 +5383,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/fake-timers': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       jest-mock: 26.6.2
       jest-util: 26.6.2
     dev: true
@@ -5410,7 +5399,7 @@ packages:
     dependencies:
       '@jest/types': 26.6.2
       '@types/graceful-fs': 4.1.5
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       anymatch: 3.1.2
       fb-watchman: 2.0.1
       graceful-fs: 4.2.10
@@ -5436,7 +5425,7 @@ packages:
       '@jest/source-map': 26.6.2
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       chalk: 4.1.2
       co: 4.6.0
       expect: 26.6.2
@@ -5495,7 +5484,7 @@ packages:
     engines: {node: '>= 10.14.2'}
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
     dev: true
 
   /jest-pnp-resolver/1.2.2_jest-resolve@26.6.2:
@@ -5548,7 +5537,7 @@ packages:
       '@jest/environment': 26.6.2
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       chalk: 4.1.2
       emittery: 0.7.2
       exit: 0.1.2
@@ -5616,7 +5605,7 @@ packages:
     resolution: {integrity: sha512-S5wqyz0DXnNJPd/xfIzZ5Xnp1HrJWBczg8mMfMpN78OJ5eDxXyf+Ygld9wX1DnUWbIbhM1YDY95NjR4CBXkb2g==}
     engines: {node: '>= 10.14.2'}
     dependencies:
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       graceful-fs: 4.2.10
     dev: true
 
@@ -5649,7 +5638,7 @@ packages:
     engines: {node: '>= 10.14.2'}
     dependencies:
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       chalk: 4.1.2
       graceful-fs: 4.2.10
       is-ci: 2.0.0
@@ -5674,7 +5663,7 @@ packages:
     dependencies:
       '@jest/test-result': 26.6.2
       '@jest/types': 26.6.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       jest-util: 26.6.2
@@ -5685,7 +5674,7 @@ packages:
     resolution: {integrity: sha512-KWYVV1c4i+jbMpaBC+U++4Va0cp8OisU185o73T1vo99hqi7w8tSJfUXYswwqqrjzwxa6KpRK54WhPvwf5w6PQ==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       merge-stream: 2.0.0
       supports-color: 7.2.0
     dev: true
@@ -7510,7 +7499,7 @@ packages:
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.2
-      '@types/node': 17.0.30
+      '@types/node': 17.0.32
       long: 4.0.0
     dev: false
 
@@ -7884,7 +7873,6 @@ packages:
   /resolve-from/5.0.0:
     resolution: {integrity: sha512-qYg9KP24dD5qka9J47d0aVky0N+b4fTU89LN9iDnjB5waksiC49rvMB0PrUJQGoTmH50XPiqOvAjDfaijGxYZw==}
     engines: {node: '>=8'}
-    dev: true
 
   /resolve-global/1.0.0:
     resolution: {integrity: sha512-zFa12V4OLtT5XUX/Q4VLvTfBf+Ok0SPc1FNGM/z9ctUdiU618qwKpWnd0CHs3+RqROfyEg/DhuHbMWYqcgljEw==}
@@ -7892,6 +7880,13 @@ packages:
     dependencies:
       global-dirs: 0.1.1
     dev: true
+
+  /resolve-pkg/2.0.0:
+    resolution: {integrity: sha512-+1lzwXehGCXSeryaISr6WujZzowloigEofRB+dj75y9RRa/obVcYgbHJd53tdYw8pvZj8GojXaaENws8Ktw/hQ==}
+    engines: {node: '>=8'}
+    dependencies:
+      resolve-from: 5.0.0
+    dev: false
 
   /resolve-url/0.2.1:
     resolution: {integrity: sha1-LGN/53yJOv0qZj/iGqkIAGjiBSo=}
@@ -9534,7 +9529,7 @@ packages:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.0.9
+    version: 0.0.12
     peerDependencies:
       '@wundergraph/sdk': workspace:0.90.6
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
@@ -9561,6 +9556,9 @@ packages:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
     version: 0.90.6
+    engines: {wundergraph: 0.90.23}
+    hasBin: true
+    requiresBuild: true
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
@@ -9568,9 +9566,12 @@ packages:
       '@prisma/generator-helper': 3.13.0
       '@rjsf/core': 4.1.1
       '@wundergraph/protobuf': link:packages/protobuf
-      axios: 0.26.1
+      '@wundergraph/wunderctl': link:packages/wunderctl
+      axios: 0.26.1_debug@4.3.4
       colors: 1.4.0
       cross-spawn: 7.0.3
+      debug: 4.3.4
+      execa: 5.1.1
       fastify: 3.29.0
       fastify-plugin: 3.0.1
       graphql: 16.4.0
@@ -9587,11 +9588,13 @@ packages:
       prettier: 2.6.2
       protobufjs: 6.11.2
       react-ssr-prepass: 1.5.0
+      resolve-pkg: 2.0.0
+      rimraf: 3.0.2
       swagger2openapi: 7.0.8
+      tar: 6.1.11
     optionalDependencies:
       '@rjsf/core': 4.1.1
     transitivePeerDependencies:
-      - debug
       - encoding
       - supports-color
     dev: false

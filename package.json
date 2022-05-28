@@ -54,8 +54,8 @@
       "@release-it/bumper": {
         "out": [
           {
-            "file": "packages/wunderctl/package.json",
-            "path": "version"
+            "file": "packages/sdk/package.json",
+            "path": "engines.wundergraph"
           }
         ]
       }

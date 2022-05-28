@@ -15,6 +15,7 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
+    "wunderctl": "wunderctl",
     "dev": "cd .wundergraph && wunderctl up --debug",
     "check": "tsc"
   },
