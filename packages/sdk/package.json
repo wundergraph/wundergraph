@@ -10,7 +10,7 @@
     "bin"
   ],
   "bin": {
-    "wunderctl": "./bin/run.js"
+    "wunderctl": "./dist/wunderctl/bin/run.js"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -55,8 +55,6 @@
     "@types/axios": "^0.14.0",
     "@types/debug": "^4.1.7",
     "@types/node": "^14.18.16",
-    "@types/rimraf": "^3.0.0",
-    "@types/tar": "^4.0.4",
     "chai": "^4.3.4",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
@@ -67,6 +65,7 @@
     "@apollo/federation": "^0.36.2",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
+    "@wundergraph/tools": "workspace:0.0.0",
     "@wundergraph/protobuf": "workspace:0.90.1",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
@@ -85,10 +84,7 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8",
-    "debug": "^4.3.4",
-    "rimraf": "^3.0.2",
-    "tar": "^6.1.11"
+    "swagger2openapi": "^7.0.8"
   },
   "jest": {
     "preset": "ts-jest",

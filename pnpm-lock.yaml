@@ -49,6 +49,29 @@ importers:
       '@wundergraph/sdk':
         injected: true
 
+  packages/helper:
+    specifiers:
+      '@types/debug': ^4.1.7
+      '@types/node': ^14.18.16
+      '@types/rimraf': ^3.0.0
+      '@types/tar': ^4.0.4
+      axios: ^0.26.1
+      debug: ^4.3.4
+      rimraf: ^3.0.2
+      tar: ^6.1.11
+      typescript: ^4.7.2
+    dependencies:
+      axios: 0.26.1_debug@4.3.4
+      debug: 4.3.4
+      rimraf: 3.0.2
+      tar: 6.1.11
+    devDependencies:
+      '@types/debug': 4.1.7
+      '@types/node': 14.18.16
+      '@types/rimraf': 3.0.2
+      '@types/tar': 4.0.5
+      typescript: 4.7.2
+
   packages/nextjs:
     specifiers:
       '@types/node': ^17.0.32
@@ -160,13 +183,11 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^14.18.16
       '@types/object-hash': ^1.3.4
-      '@types/rimraf': ^3.0.0
-      '@types/tar': ^4.0.4
       '@wundergraph/protobuf': workspace:0.90.1
+      '@wundergraph/tools': workspace:0.0.0
       axios: ^0.26.1
       chai: ^4.3.4
       colors: ^1.4.0
-      debug: ^4.3.4
       execa: 5.1.1
       fastify: ^3.27.1
       fastify-plugin: ^3.0.1
@@ -183,9 +204,7 @@ importers:
       postman-collection: ^4.1.1
       prettier: ^2.5.0
       protobufjs: ^6.11.2
-      rimraf: ^3.0.2
       swagger2openapi: ^7.0.8
-      tar: ^6.1.11
       ts-jest: ^26.4.4
       typescript: ^4.7.2
     dependencies:
@@ -194,9 +213,9 @@ importers:
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
       '@wundergraph/protobuf': link:../protobuf
-      axios: 0.26.1_debug@4.3.4
+      '@wundergraph/tools': link:../tools
+      axios: 0.26.1
       colors: 1.4.0
-      debug: 4.3.4
       execa: 5.1.1
       fastify: 3.29.0
       fastify-plugin: 3.0.1
@@ -212,11 +231,9 @@ importers:
       postman-collection: 4.1.2
       prettier: 2.6.2
       protobufjs: 6.11.2
-      rimraf: 3.0.2
       swagger2openapi: 7.0.8
-      tar: 6.1.11
     devDependencies:
-      '@types/axios': 0.14.0_debug@4.3.4
+      '@types/axios': 0.14.0
       '@types/chai': 4.3.1
       '@types/colors': 1.2.1
       '@types/cors': 2.8.12
@@ -228,11 +245,51 @@ importers:
       '@types/lodash': 4.14.182
       '@types/node': 14.18.16
       '@types/object-hash': 1.3.4
-      '@types/rimraf': 3.0.2
-      '@types/tar': 4.0.5
       chai: 4.3.6
       jest: 26.6.3
       ts-jest: 26.5.6_f76bpxtbiaefn23m64irtgzxbe
+      typescript: 4.7.2
+
+  packages/tools:
+    specifiers:
+      '@types/debug': ^4.1.7
+      '@types/node': ^14.18.16
+      '@types/rimraf': ^3.0.0
+      '@types/tar': ^4.0.4
+      axios: ^0.26.1
+      debug: ^4.3.4
+      rimraf: ^3.0.2
+      tar: ^6.1.11
+      typescript: ^4.7.2
+    dependencies:
+      axios: 0.26.1_debug@4.3.4
+      debug: 4.3.4
+      rimraf: 3.0.2
+      tar: 6.1.11
+    devDependencies:
+      '@types/debug': 4.1.7
+      '@types/node': 14.18.16
+      '@types/rimraf': 3.0.2
+      '@types/tar': 4.0.5
+      typescript: 4.7.2
+
+  packages/wunderctl:
+    specifiers:
+      '@types/debug': ^4.1.7
+      '@types/node': ^14.18.16
+      '@types/rimraf': ^3.0.0
+      '@wundergraph/tools': workspace:0.0.0
+      debug: ^4.3.4
+      execa: 5.1.1
+      typescript: ^4.7.2
+    dependencies:
+      debug: 4.3.4
+      execa: 5.1.1
+    devDependencies:
+      '@types/debug': 4.1.7
+      '@types/node': 14.18.16
+      '@types/rimraf': 3.0.2
+      '@wundergraph/tools': link:../tools
       typescript: 4.7.2
 
 packages:
@@ -1763,11 +1820,11 @@ packages:
     resolution: {integrity: sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==}
     dev: true
 
-  /@types/axios/0.14.0_debug@4.3.4:
+  /@types/axios/0.14.0:
     resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
     deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
     dependencies:
-      axios: 0.27.2_debug@4.3.4
+      axios: 0.27.2
     transitivePeerDependencies:
       - debug
     dev: true
@@ -2359,7 +2416,7 @@ packages:
       - debug
     dev: true
 
-  /axios/0.26.1_debug@4.3.4:
+  /axios/0.26.1:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
       follow-redirects: 1.14.9
@@ -2367,7 +2424,15 @@ packages:
       - debug
     dev: false
 
-  /axios/0.27.2_debug@4.3.4:
+  /axios/0.26.1_debug@4.3.4:
+    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
+    dependencies:
+      follow-redirects: 1.14.9_debug@4.3.4
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /axios/0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
       follow-redirects: 1.14.9
@@ -4046,6 +4111,18 @@ packages:
       debug:
         optional: true
 
+  /follow-redirects/1.14.9_debug@4.3.4:
+    resolution: {integrity: sha512-MQDfihBQYMcyy5dhRDJUHcw7lb2Pv/TuE6xP1vyraLukNDHKbDxDNaOE3NbCAdKQApno+GPRyo1YAp89yCjK4w==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
+
   /for-in/1.0.2:
     resolution: {integrity: sha1-gQaNKVqBQuwKxybG4iAMMPttXoA=}
     engines: {node: '>=0.10.0'}
@@ -4132,7 +4209,7 @@ packages:
     dev: false
 
   /fs.realpath/1.0.0:
-    resolution: {integrity: sha1-FQStJSMVjKpA20onh8sBQRmU6k8=}
+    resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
   /fsevents/2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
@@ -9565,9 +9642,10 @@ packages:
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
       '@rjsf/core': 4.1.1
+      '@wundergraph/helper': link:packages/helper
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/wunderctl': link:packages/wunderctl
-      axios: 0.26.1_debug@4.3.4
+      axios: 0.26.1
       colors: 1.4.0
       cross-spawn: 7.0.3
       debug: 4.3.4
@@ -9595,6 +9673,7 @@ packages:
     optionalDependencies:
       '@rjsf/core': 4.1.1
     transitivePeerDependencies:
+      - debug
       - encoding
       - supports-color
     dev: false

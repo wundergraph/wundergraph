@@ -1,0 +1,6 @@
+src
+node_modules
+.gitignore
+.npmignore
+dist/wunderctl
+dist/tsconfig.tsbuildinfo

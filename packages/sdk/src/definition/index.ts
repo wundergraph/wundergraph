@@ -1,5 +1,5 @@
-import {federationServiceSDL, isFederationService} from '../graphql/federation';
-import {configuration} from '../graphql/configuration';
+import { federationServiceSDL, isFederationService } from '../graphql/federation';
+import { configuration } from '../graphql/configuration';
 import {
 	buildClientSchema,
 	buildSchema,
@@ -10,11 +10,11 @@ import {
 	print,
 	printSchema,
 } from 'graphql';
-import {mergeApis} from './merge';
+import { mergeApis } from './merge';
 import * as fs from 'fs';
-import {openApiSpecificationToRESTApiObject} from '../v2openapi';
-import {renameTypeFields, renameTypes} from '../graphql/renametypes';
-import axios, {AxiosRequestConfig} from 'axios';
+import { openApiSpecificationToRESTApiObject } from '../v2openapi';
+import { renameTypeFields, renameTypes } from '../graphql/renametypes';
+import axios, { AxiosRequestConfig } from 'axios';
 import {
 	ArgumentSource,
 	ConfigurationVariable,
@@ -34,9 +34,9 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import {cleanupSchema} from '../graphql/schema';
+import { cleanupSchema } from '../graphql/schema';
 import path from 'path';
-import {DatabaseSchema, introspectPrismaDatabaseWithRetries} from '../db/introspection';
+import { DatabaseSchema, introspectPrismaDatabaseWithRetries } from '../db/introspection';
 import {
 	applyNamespaceToDirectiveConfiguration,
 	applyNameSpaceToFieldConfigurations,
@@ -44,10 +44,10 @@ import {
 	applyNameSpaceToTypeFields,
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
-import {EnvironmentVariable, InputVariable, mapInputVariable, PlaceHolder, resolveVariable} from '../configure';
-import {loadFile} from '../codegen/templates/typescript';
-import {composeServices} from '@apollo/composition';
-import {buildSubgraphSchema, ServiceDefinition} from '@apollo/federation';
+import { EnvironmentVariable, InputVariable, mapInputVariable, PlaceHolder, resolveVariable } from '../configure';
+import { loadFile } from '../codegen/templates/typescript';
+import { composeServices } from '@apollo/composition';
+import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
 
 export interface ApplicationConfig {
@@ -202,29 +202,21 @@ export const createMockApi = async (sdl: string, apiNamespace?: string): Promise
 	return new GraphQLApi(applyNameSpaceToGraphQLSchema(schema, [], apiNamespace), [], [], [], []);
 };
 
-export class GraphQLApi extends Api<GraphQLApiCustom> {
-}
+export class GraphQLApi extends Api<GraphQLApiCustom> {}
 
-export class RESTApi extends Api<RESTApiCustom> {
-}
+export class RESTApi extends Api<RESTApiCustom> {}
 
-export class PostgresqlApi extends Api<DatabaseApiCustom> {
-}
+export class PostgresqlApi extends Api<DatabaseApiCustom> {}
 
-export class MySQLApi extends Api<DatabaseApiCustom> {
-}
+export class MySQLApi extends Api<DatabaseApiCustom> {}
 
-export class PlanetscaleApi extends Api<DatabaseApiCustom> {
-}
+export class PlanetscaleApi extends Api<DatabaseApiCustom> {}
 
-export class SQLiteApi extends Api<DatabaseApiCustom> {
-}
+export class SQLiteApi extends Api<DatabaseApiCustom> {}
 
-export class SQLServerApi extends Api<DatabaseApiCustom> {
-}
+export class SQLServerApi extends Api<DatabaseApiCustom> {}
 
-export class MongoDBApi extends Api<DatabaseApiCustom> {
-}
+export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
 export interface DataSource<Custom = unknown> {
 	Kind: DataSourceKind;
@@ -510,7 +502,7 @@ const introspectDatabase = async (
 	}
 	const schemaDocumentNode = parse(graphql_schema);
 	const schema = print(schemaDocumentNode);
-	const {RootNodes, ChildNodes, Fields} = configuration(schemaDocumentNode);
+	const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode);
 	const jsonFields = [...jsonTypeFields, ...jsonResponseFields];
 	jsonFields.forEach((field) => {
 		const fieldConfig = Fields.find((f) => f.typeName == field.typeName && f.fieldName == field.fieldName);
@@ -588,7 +580,7 @@ const applyNameSpaceToTypeNames = (typeNames: string[], namespace?: string): str
 };
 
 export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration): Promise<GraphQLApi> => {
-	const {schema, ...rest} = introspection;
+	const { schema, ...rest } = introspection;
 	const resolvedSchema = (await schema) as GraphQLSchema;
 
 	return introspect.graphql({
@@ -602,50 +594,50 @@ export const introspect = {
 	graphql: async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
 		const headers: { [key: string]: HTTPHeader } = {};
 		introspection.headers !== undefined &&
-		(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
-			const values: ConfigurationVariable[] = [];
-			switch (config.valueSource) {
-				case 'placeholder':
-					values.push({
-						kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,
-						staticVariableContent: '',
-						environmentVariableDefaultValue: '',
-						environmentVariableName: '',
-						placeholderVariableName: config.value,
-					});
-					break;
-				case 'clientRequest':
-					values.push({
-						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-						staticVariableContent: `{{ .request.headers.${config.value} }}`,
-						environmentVariableName: '',
-						environmentVariableDefaultValue: '',
-						placeholderVariableName: '',
-					});
-					break;
-				case 'static':
-					values.push({
-						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-						staticVariableContent: config.value,
-						environmentVariableDefaultValue: '',
-						environmentVariableName: '',
-						placeholderVariableName: '',
-					});
-					break;
-				case 'env':
-					values.push({
-						kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-						staticVariableContent: '',
-						environmentVariableDefaultValue: config.defaultValue || '',
-						environmentVariableName: config.value,
-						placeholderVariableName: '',
-					});
-					break;
-			}
-			headers[config.key] = {
-				values,
-			};
-		});
+			(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
+				const values: ConfigurationVariable[] = [];
+				switch (config.valueSource) {
+					case 'placeholder':
+						values.push({
+							kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableDefaultValue: '',
+							environmentVariableName: '',
+							placeholderVariableName: config.value,
+						});
+						break;
+					case 'clientRequest':
+						values.push({
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: `{{ .request.headers.${config.value} }}`,
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						});
+						break;
+					case 'static':
+						values.push({
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: config.value,
+							environmentVariableDefaultValue: '',
+							environmentVariableName: '',
+							placeholderVariableName: '',
+						});
+						break;
+					case 'env':
+						values.push({
+							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableDefaultValue: config.defaultValue || '',
+							environmentVariableName: config.value,
+							placeholderVariableName: '',
+						});
+						break;
+				}
+				headers[config.key] = {
+					values,
+				};
+			});
 		const schema = await introspectGraphQLSchema(introspection, headers);
 		const federationEnabled = isFederationService(schema);
 		const schemaSDL = cleanupSchema(
@@ -657,7 +649,7 @@ export const introspect = {
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
-		const {RootNodes, ChildNodes, Fields} = configuration(schemaDocumentNode, serviceDocumentNode);
+		const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
 		const subscriptionsEnabled = hasSubscriptions(schema);
 		if (introspection.internal === true) {
 			headers['X-WG-Internal-GraphQL-API'] = {
@@ -698,8 +690,8 @@ export const introspect = {
 								introspection.subscriptionsURL !== undefined
 									? mapInputVariable(introspection.subscriptionsURL)
 									: typeof introspection.url === 'string'
-										? mapInputVariable(subscriptionsURL(introspection.url))
-										: mapInputVariable(''),
+									? mapInputVariable(subscriptionsURL(introspection.url))
+									: mapInputVariable(''),
 						},
 						Federation: {
 							Enabled: federationEnabled,
@@ -721,7 +713,7 @@ export const introspect = {
 		);
 	},
 	postgresql: async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
-		const {schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON} = await introspectDatabase(
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			'postgresql',
 			5
@@ -729,7 +721,7 @@ export const introspect = {
 		return new PostgresqlApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 	},
 	mysql: async (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
-		const {schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON} = await introspectDatabase(
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			'mysql',
 			5
@@ -737,7 +729,7 @@ export const introspect = {
 		return new MySQLApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 	},
 	planetscale: async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
-		const {schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON} = await introspectDatabase(
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			'planetscale',
 			5
@@ -745,7 +737,7 @@ export const introspect = {
 		return new PlanetscaleApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 	},
 	sqlite: async (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
-		const {schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON} = await introspectDatabase(
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			'sqlite',
 			5
@@ -753,7 +745,7 @@ export const introspect = {
 		return new SQLiteApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 	},
 	sqlserver: async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
-		const {schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON} = await introspectDatabase(
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			'sqlserver',
 			5
@@ -761,7 +753,7 @@ export const introspect = {
 		return new SQLServerApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 	},
 	mongodb: async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
-		const {schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON} = await introspectDatabase(
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 			introspection,
 			'mongodb',
 			5
@@ -846,17 +838,17 @@ export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAut
 		jwtConfig:
 			upstream.authentication.kind === 'jwt'
 				? {
-					secret: mapInputVariable(upstream.authentication.secret),
-					signingMethod: upstreamAuthenticationSigningMethod(upstream.authentication.signingMethod),
-				}
+						secret: mapInputVariable(upstream.authentication.secret),
+						signingMethod: upstreamAuthenticationSigningMethod(upstream.authentication.signingMethod),
+				  }
 				: undefined,
 		jwtWithAccessTokenExchangeConfig:
 			upstream.authentication.kind === 'jwt_with_access_token_exchange'
 				? {
-					accessTokenExchangeEndpoint: mapInputVariable(upstream.authentication.accessTokenExchangeEndpoint),
-					secret: mapInputVariable(upstream.authentication.secret),
-					signingMethod: upstreamAuthenticationSigningMethod(upstream.authentication.signingMethod),
-				}
+						accessTokenExchangeEndpoint: mapInputVariable(upstream.authentication.accessTokenExchangeEndpoint),
+						secret: mapInputVariable(upstream.authentication.secret),
+						signingMethod: upstreamAuthenticationSigningMethod(upstream.authentication.signingMethod),
+				  }
 				: undefined,
 	};
 };

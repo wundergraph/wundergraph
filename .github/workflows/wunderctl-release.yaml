@@ -1,0 +1,35 @@
+name: Wunderctl release
+
+on:
+  release:
+    types: [released]
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  CI: true
+
+jobs:
+  # Update package versions from changesets.
+  version:
+    timeout-minutes: 14
+    runs-on: ubuntu-latest
+    # run only for engine release
+    if: ${{ startsWith(github.event.release.tag_name, 'v') }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - run: pnpm boot
+
+      - run: pnpm run build
+
+      - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - run: pnpm publish --access public --tag latest --no-git-checks
+        working-directory: packages/wunderctl

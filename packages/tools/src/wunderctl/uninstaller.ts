@@ -1,14 +1,12 @@
 import * as fs from 'fs';
 import rimraf from 'rimraf';
-import { wunderctlPath } from './binarypath';
-import { logger } from './logger';
+import {logger} from './logger';
 
-const uninstall = () => {
+export const uninstaller = (binaryPath: string) => {
 	const log = logger.extend('install');
 	const error = logger.extend('error:install');
 
 	log('uninstalling wunderctl');
-	const binaryPath = wunderctlPath();
 	const exists = fs.existsSync(binaryPath);
 	if (!exists) {
 		log('wunderctl not found at install dir, skipping uninstall');
@@ -22,5 +20,3 @@ const uninstall = () => {
 		log('wunderctl uninstalled');
 	});
 };
-
-export default uninstall();
