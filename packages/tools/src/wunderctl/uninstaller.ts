@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import rimraf from 'rimraf';
-import {logger} from './logger';
+import { logger } from './logger';
 
 export const uninstaller = (binaryPath: string) => {
 	const log = logger.extend('install');

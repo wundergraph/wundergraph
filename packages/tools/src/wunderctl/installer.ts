@@ -4,7 +4,7 @@ import { downloadURL } from './binarypath';
 import * as fs from 'fs';
 import rimraf from 'rimraf';
 import { logger } from './logger';
-import path from "path";
+import path from 'path';
 
 export const installer = async (version: string, installDir: string, binaryName: string) => {
 	const log = logger.extend('install');

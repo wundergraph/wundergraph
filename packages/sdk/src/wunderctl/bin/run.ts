@@ -1,6 +1,6 @@
-import run from "./../exec";
+import run from './../exec';
 
-run().catch(err => {
+run().catch((err) => {
 	console.error(err);
 	process.exit(1);
 });

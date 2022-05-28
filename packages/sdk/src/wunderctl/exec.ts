@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import execa from 'execa';
-import {wunderctlBinaryPath} from "./helper";
+import { wunderctlBinaryPath } from './helper';
 
 const exec = async () => {
 	const executablePath = wunderctlBinaryPath();

@@ -1,6 +1,6 @@
-import execa from "execa";
-import fs from "fs";
-import {wunderctlBinaryPath} from "./binarypath";
+import execa from 'execa';
+import fs from 'fs';
+import { wunderctlBinaryPath } from './binarypath';
 
 const run = async () => {
 	const file = wunderctlBinaryPath();
