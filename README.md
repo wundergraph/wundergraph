@@ -125,8 +125,8 @@ security concerns to WunderGraph.
 ## Community & Support
 
 - [GitHub Issues](https://github.com/wundergraph/wundergraph/issues). Best for: bugs and errors you encounter using WunderGraph.
-- [Email Support](<info@wundergraph.com>). Best for: specific questions around WunderGraph as an early enterprise adopter.
-- [Slack Support](<info@wundergraph.com>). Best for: problems with WunderGraph as an enterprise customer.
+- [Email Support](mailto:info@wundergraph.com). Best for: specific questions around WunderGraph as an early enterprise adopter.
+- [Slack Support](mailto:info@wundergraph.com). Best for: problems with WunderGraph as an enterprise customer.
 - [Discord](https://discord.gg/Jjmc8TC). Best for: sharing your applications and hanging out with the community.
 
 ## Enterprise
@@ -136,7 +136,6 @@ with APIs. Our Support Plans are tailored to help your teams get the most out of
 with our customers, allowing us to continuously improve the product and iterate fast. Our sales team is available to talk with you about your project needs, pricing information, support plans, and
 custom-built features.
 
-Use
-this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
+Use this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
 to contact our sales team for a demo.
 
