@@ -9,17 +9,10 @@ In this scenario, we're using a local PostgreSQL database via docker-compose.
 
 ## Getting started
 
-Install the dependencies and run the database.
+Install the dependencies and run the application.
 
 ```shell
-npm install
-npm run start-database
-```
-
-Then start your WunderGraph instance.
-
-```
-npm run dev
+npm install && npm start
 ```
 
 ## Checkout the generated Schema

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "cd .wundergraph && wunderctl up --debug"
+    "start": "cd .wundergraph && wunderctl up --debug",
+    "check": "tsc"
   },
   "author": "",
   "license": "ISC",
