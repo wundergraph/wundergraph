@@ -7,7 +7,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "bin"
+    "download"
   ],
   "bin": {
     "wunderctl": "./dist/bin/cli.js"

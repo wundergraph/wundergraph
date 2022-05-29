@@ -47,8 +47,8 @@ export const wunderctlName = (): string => {
 	return binaryName;
 };
 
-export const wunderctlDir = path.join(__dirname, '..', 'bin');
+export const binaryDir = path.join(__dirname, '..', 'download');
 
 export const wunderctlBinaryPath = (): string => {
-	return path.join(wunderctlDir, wunderctlName());
+	return path.join(binaryDir, wunderctlName());
 };
