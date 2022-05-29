@@ -1,4 +1,4 @@
-import { wunderctlExec, wunderctlExecAsync } from '../wunderctlexec';
+import { wunderctlExecAsync } from '../wunderctlexec';
 import { resolveVariable } from '../configure';
 import { InputValueDefinitionNode, parse, parseType, print, TypeNode, visit } from 'graphql';
 import { DatabaseIntrospection, ReplaceJSONTypeFieldConfiguration } from '../definition';
