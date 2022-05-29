@@ -2,7 +2,7 @@ import execa from 'execa';
 import fs from 'fs';
 import { wunderctlBinaryPath } from './binarypath';
 
-export const exec = async () => {
+export const cli = async () => {
 	const file = wunderctlBinaryPath();
 	if (!fs.existsSync(file)) {
 		console.error(`Could not find binary in ${file}.\nEnsure that you did not ignore post-install hooks.`);

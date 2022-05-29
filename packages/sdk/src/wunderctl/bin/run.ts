@@ -1,6 +1,6 @@
-import { exec } from '@wundergraph/wunderctl';
+import { cli } from '@wundergraph/wunderctl';
 
-exec().catch((err) => {
+cli().catch((err: any) => {
 	console.error(err);
 	process.exit(1);
 });

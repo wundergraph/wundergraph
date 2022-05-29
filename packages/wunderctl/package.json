@@ -10,7 +10,7 @@
     "bin"
   ],
   "bin": {
-    "wunderctl": "./dist/bin/run.js"
+    "wunderctl": "./dist/bin/cli.js"
   },
   "scripts": {
     "build": "tsc",
