@@ -25,7 +25,7 @@ import {
 	validate,
 	DirectiveNode,
 	stripIgnoredCharacters,
-	UnionTypeDefinitionNode
+	UnionTypeDefinitionNode,
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';

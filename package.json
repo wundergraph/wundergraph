@@ -68,7 +68,7 @@
   },
   "lint-staged": {
     "**/*": [
-      "pretty-quick --staged --no-restage"
+      "pretty-quick --staged"
     ]
   },
   "devDependencies": {
