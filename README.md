@@ -44,7 +44,7 @@ all your applications, that's the WunderGraph Experience.
 
 ## Getting started
 
-The fastest way to get started with WunderGraph is to open a Gitpod:
+The fastest way to get started with WunderGraph is to open a Gitpod. After bootstrapping the [examples/simple](examples/simple) is started.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
 
