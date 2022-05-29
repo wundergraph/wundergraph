@@ -32,7 +32,9 @@ type Bundler struct {
 	outFile                     string
 	log                         abstractlogger.Logger
 	scriptEnv                   []string
-	stopChan                    chan struct{}
+	cmd                         *exec.Cmd
+	stopFileWatchChan           chan struct{}
+	stopCmdChan                 chan struct{}
 	onFirstRun                  chan struct{}
 	stopped                     bool
 	cancel                      func()
@@ -72,7 +74,8 @@ func NewBundler(name string, config Config, log abstractlogger.Logger) (*Bundler
 		scriptEnv:                   config.ScriptEnv,
 		outFile:                     config.OutFile,
 		log:                         log,
-		stopChan:                    make(chan struct{}),
+		stopFileWatchChan:           make(chan struct{}),
+		stopCmdChan:                 make(chan struct{}),
 		onFirstRun:                  config.OnFirstRun,
 		fileLoaders:                 []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
 		skipBuild:                   config.SkipBuild,
@@ -83,15 +86,24 @@ func NewBundler(name string, config Config, log abstractlogger.Logger) (*Bundler
 	}, nil
 }
 
-func (b *Bundler) Stop() {
+func (b *Bundler) Stop(ctx context.Context) {
 	if b.stopped {
 		return
 	}
-	close(b.stopChan)
+
 	if b.cancel != nil {
 		b.cancel()
+		b.stopped = true
 	}
-	b.stopped = true
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-b.stopCmdChan:
+			return
+		}
+	}
 }
 
 func (b *Bundler) Run() {
@@ -346,7 +358,7 @@ func (b *Bundler) watch(rebuild func() api.BuildResult) {
 	go func() {
 		for {
 			select {
-			case <-b.stopChan:
+			case <-b.stopFileWatchChan:
 				return
 			case event, ok := <-watcher.Events:
 				if !ok {
@@ -382,7 +394,7 @@ func (b *Bundler) watch(rebuild func() api.BuildResult) {
 		}
 	}
 
-	<-b.stopChan
+	<-b.stopFileWatchChan
 	b.log.Debug("Config Bundler: stopped watching", abstractlogger.String("bundler", b.name))
 }
 
@@ -395,17 +407,18 @@ func (b *Bundler) skip(changedPath string) bool {
 	return false
 }
 
-func (b *Bundler) RunScript(blocking bool) {
-	b.run(blocking)
-}
-
 func (b *Bundler) run(blocking bool) {
-	b.log.Debug("Bundler: execute script", abstractlogger.String("bundler", b.name))
-	ctx, cancel := context.WithCancel(context.Background())
 	if b.cancel != nil {
 		b.cancel()
 	}
+
+	b.stopCmdChan = make(chan struct{})
+
+	b.log.Debug("Config Bundler: execute script", abstractlogger.String("bundler", b.name))
+
+	ctx, cancel := context.WithCancel(context.Background())
 	b.cancel = cancel
+
 	cmd := exec.CommandContext(ctx, "node", b.outFile)
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, b.scriptEnv...)
@@ -420,14 +433,22 @@ func (b *Bundler) run(blocking bool) {
 }
 
 func (b *Bundler) runCmd(ctx context.Context, cmd *exec.Cmd) {
+	defer close(b.stopCmdChan)
+
 	err := cmd.Run()
 	if err != nil {
 		if ctx.Err() == context.Canceled {
+			b.log.Debug("Config Bundler: script exited due to context cancelling", abstractlogger.Error(err), abstractlogger.String("bundler", b.name))
 			return
 		}
-		// If the command was killed, we exit the wundernode process as well
-		// on production we will never start a bundler
-		b.log.Fatal("Config Bundler: error executing script", abstractlogger.String("bundler", b.name), abstractlogger.Error(err))
+		// If the command was killed, we exit the main process as well
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			b.log.Fatal("Config Bundler: error executing script", abstractlogger.Error(err), abstractlogger.String("bundler", b.name), abstractlogger.Int("exitCode", exitErr.ExitCode()))
+		} else {
+			b.log.Fatal("Config Bundler: error executing script", abstractlogger.Error(err), abstractlogger.String("bundler", b.name))
+		}
+		return
 	}
+
 	b.log.Debug("Config Bundler: script executed", abstractlogger.String("bundler", b.name))
 }

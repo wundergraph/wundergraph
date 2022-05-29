@@ -151,12 +151,6 @@ func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	}
 }
 
-func WithDisableGracefulshutdown() Option {
-	return func(options *options) {
-		options.disableGracefulShutdown = true
-	}
-}
-
 func (n *Node) StartBlocking(opts ...Option) error {
 	var options options
 	for i := range opts {
@@ -183,12 +177,21 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	select {
 	case err := <-n.errCh:
 		return err
-	case <-n.ctx.Done():
-		if n.server != nil {
-			_ = n.server.Shutdown(context.Background())
-		}
-		return nil
 	}
+}
+
+func (n *Node) Shutdown(ctx context.Context) error {
+	if n.server != nil {
+		return n.server.Shutdown(ctx)
+	}
+	return nil
+}
+
+func (n *Node) Close() error {
+	if n.server != nil {
+		return n.server.Close()
+	}
+	return nil
 }
 
 func (n *Node) newListeners() ([]net.Listener, error) {
@@ -355,18 +358,6 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 		_, _ = w.Write([]byte("WunderNode Status: OK\n"))
 		_, _ = w.Write([]byte(fmt.Sprintf("BuildInfo: %+v\n", n.info)))
 	}))
-
-	if n.server != nil {
-		if n.options.disableGracefulShutdown {
-			err = n.server.Close()
-			if err != nil {
-				n.log.Error("Error closing old server", abstractlogger.Error(err))
-			}
-		} else {
-			// blocking
-			n.shutdownServerGracefully(n.server)
-		}
-	}
 
 	n.server = &http.Server{
 		Handler: router,
