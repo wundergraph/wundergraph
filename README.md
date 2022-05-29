@@ -127,7 +127,7 @@ security concerns to WunderGraph.
 - [GitHub Issues](https://github.com/wundergraph/wundergraph/issues). Best for: bugs and errors you encounter using WunderGraph.
 - [Email Support](<info@wundergraph.com>). Best for: specific questions around WunderGraph as an early enterprise adopter.
 - [Slack Support](<info@wundergraph.com>). Best for: problems with WunderGraph as an enterprise customer.
-- [Discord](https://github.com/wundergraph/wundergraph/discussions). Best for: sharing your applications and hanging out with the community.
+- [Discord](https://discord.gg/Jjmc8TC). Best for: sharing your applications and hanging out with the community.
 
 ## Enterprise
 
