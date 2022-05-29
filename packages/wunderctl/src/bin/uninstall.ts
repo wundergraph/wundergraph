@@ -1,6 +1,6 @@
 import { logger } from './../logger';
 import { uninstaller } from './../uninstaller';
-import {binaryDir, wunderctlBinaryPath} from './../binarypath';
+import { binaryDir, wunderctlBinaryPath } from './../binarypath';
 
 export const uninstall = () => {
 	const log = logger.extend('uninstall');
