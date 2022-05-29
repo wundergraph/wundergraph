@@ -97,8 +97,8 @@ github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.m
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/evanphx/json-patch/v5 v5.1.0 h1:B0aXl1o/1cP8NbviYiBMkcHBtUjIJ1/Ccg6b+SwCLQg=
-github.com/evanw/esbuild v0.14.27 h1:flPbSFFXiuX2V886WmwJnu9itv5clDXcLCX5jNK6/W8=
-github.com/evanw/esbuild v0.14.27/go.mod h1:GG+zjdi59yh3ehDn4ZWfPcATxjPDUH53iU4ZJbp7dkY=
+github.com/evanw/esbuild v0.14.42 h1:QnzHQLVCTDbzjrBfB5/MNveeEwIhjgYfAG5GZxjXCVc=
+github.com/evanw/esbuild v0.14.42/go.mod h1:GG+zjdi59yh3ehDn4ZWfPcATxjPDUH53iU4ZJbp7dkY=
 github.com/fasthttp/websocket v1.4.3 h1:qjhRJ/rTy4KB8oBxljEC00SDt6HUY9jLRfM601SUdS4=
 github.com/fasthttp/websocket v1.4.3/go.mod h1:5r4oKssgS7W6Zn6mPWap3NWzNPJNzUUh3baWTOhcYQk=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
