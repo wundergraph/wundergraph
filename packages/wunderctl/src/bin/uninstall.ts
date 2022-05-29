@@ -1,6 +1,6 @@
-import { logger } from './logger';
-import { uninstaller } from '@wundergraph/tools';
-import { wunderctlBinaryPath } from './binarypath';
+import { logger } from './../logger';
+import { uninstaller } from './../uninstaller';
+import { wunderctlBinaryPath } from './../binarypath';
 
 export const uninstall = () => {
 	const log = logger.extend('uninstall');

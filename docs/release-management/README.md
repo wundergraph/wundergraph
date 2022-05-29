@@ -21,8 +21,7 @@ The package is released as soon as the wunderctl binary is published.
 ### Wunderctl & SDK
 
 We use [GoReleaser](https://goreleaser.com/) to release the wunderctl application and [release-it](https://github.com/release-it/release-it) only for tagging.
-The [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package is required for all WunderGraph applications. After installing this package, it will download the compatible `wunderctl` version. This relationship makes it necessary to release the wunderctl binary first before releasing an incompatible SDK change.
-You can define what `wunderctl` version is required for the SDK by modifying the `engines.wundergraph` property in the `package.json`.
+The [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package is required for all WunderGraph applications. After installing this package, it will download the compatible `wunderctl` version. This relationship makes it necessary to release the wunderctl binary first before upgrading the [`@wundergraph/wunderctl`](https://github.com/wundergraph/wundergraph/tree/main/packages/wunderctl) package.
 
 If you want to publish a new version of Wunderctl, you can do so by following:
 

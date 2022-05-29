@@ -6,8 +6,7 @@
   "types": "./dist/index.d.ts",
   "description": "WunderGraph SDK",
   "files": [
-    "dist",
-    "bin"
+    "dist"
   ],
   "bin": {
     "wunderctl": "./dist/wunderctl/bin/run.js"
@@ -28,19 +27,11 @@
   "bugs": {
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
-  "engines": {
-    "wundergraph": "0.90.23"
-  },
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
     "test": "jest",
-    "test:int": "TEST_INTEGRATION=true jest",
-    "postinstall": "node dist/wunderctl/install.js",
-    "postuninstall": "node dist/wunderctl/uninstall.js",
-    "dev:install": "node dist/wunderctl/install.js",
-    "dev:uninstall": "node dist/wunderctl/uninstall.js",
-    "dev:run": "node run.js"
+    "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
     "@types/chai": "^4.2.22",
@@ -65,8 +56,8 @@
     "@apollo/federation": "^0.36.2",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
-    "@wundergraph/tools": "workspace:0.0.0",
-    "@wundergraph/protobuf": "workspace:0.90.1",
+    "@wundergraph/wunderctl": "workspace:^0.90.23",
+    "@wundergraph/protobuf": "workspace:^0.90.1",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",

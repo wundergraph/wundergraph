@@ -2,5 +2,5 @@ src
 node_modules
 .gitignore
 .npmignore
-dist/wunderctl
+bin/wunderctl
 dist/tsconfig.tsbuildinfo
