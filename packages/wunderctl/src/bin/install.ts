@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { logger } from './../logger';
-import {wunderctlName, wunderctlDir} from "./../binarypath";
-import {installer} from "./../installer";
+import { wunderctlName, wunderctlDir } from './../binarypath';
+import { installer } from './../installer';
 
 const install = async () => {
 	const log = logger.extend('install');

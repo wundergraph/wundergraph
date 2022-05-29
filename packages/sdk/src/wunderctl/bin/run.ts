@@ -1,4 +1,4 @@
-import {exec} from '@wundergraph/wunderctl';
+import { exec } from '@wundergraph/wunderctl';
 
 exec().catch((err) => {
 	console.error(err);

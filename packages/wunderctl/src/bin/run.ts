@@ -1,4 +1,4 @@
-import {exec} from './../exec';
+import { exec } from './../exec';
 
 exec().catch((err) => {
 	console.error(err);

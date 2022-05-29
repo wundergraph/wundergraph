@@ -1,5 +1,5 @@
 import path from 'path';
-import os from "os";
+import os from 'os';
 
 const isWin = process.platform === 'win32';
 
@@ -47,8 +47,7 @@ export const wunderctlName = (): string => {
 	return binaryName;
 };
 
-
-export const wunderctlDir = path.join(__dirname, '..', 'bin')
+export const wunderctlDir = path.join(__dirname, '..', 'bin');
 
 export const wunderctlBinaryPath = (): string => {
 	return path.join(wunderctlDir, wunderctlName());

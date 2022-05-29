@@ -5,7 +5,10 @@
   "description": "WunderGraph Command Line Interface",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "bin"],
+  "files": [
+    "dist",
+    "bin"
+  ],
   "bin": {
     "wunderctl": "./dist/bin/run.js"
   },
