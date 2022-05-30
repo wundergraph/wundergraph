@@ -8,7 +8,7 @@ on:
       - '*'
     paths:
       - 'packages/**/*'
-      - '.github/workflows/sdk-ci.yaml'
+      - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
       - '!*.md'
@@ -20,7 +20,7 @@ on:
     paths:
       -  '.changeset/*'
       - 'packages/**/*'
-      - '.github/workflows/sdk-ci.yaml'
+      - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
       - '!*.md'
