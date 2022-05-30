@@ -1,7 +1,19 @@
-import { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import {GraphQLEnumType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString} from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
+
+const testEnum = new GraphQLEnumType({
+	name: "TestEnum",
+	values: {
+		EnumValueA: {
+			value: "EnumValueA"
+		},
+		EnumValueB: {
+			value: "EnumValueA"
+		}
+	}
+})
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>((serverContext) => ({
 	hooks: {
@@ -40,6 +52,30 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 							resolve() {
 								return 'world';
 							},
+						},
+						testField: {
+							type: new GraphQLObjectType({
+								name: "TestResponse",
+								fields: {
+									enumList: {
+										type: new GraphQLNonNull(new GraphQLList(testEnum))
+									},
+									stringList: {
+										type: new GraphQLList(GraphQLString),
+									},
+								}
+							}),
+							args: {
+								inputEnum: {
+									type: new GraphQLNonNull(new GraphQLList(testEnum)),
+								},
+							},
+							resolve: (source, args, context, info) => {
+								return {
+									enumList: args.inputEnum,
+									stringList: ["a","b","c"]
+								}
+							}
 						},
 					},
 				}),

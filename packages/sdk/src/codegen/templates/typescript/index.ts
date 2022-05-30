@@ -207,7 +207,7 @@ const JSONSchemaToTypescriptInterface = (schema: JSONSchema, interfaceName: stri
 			if (enumValues !== undefined) {
 				const values = enumValues.map((v) => `"${v}"`).join(' | ');
 				if (isArray) {
-					out += values;
+					out += (" ("+values+") ");
 				} else {
 					writeType(name, isRequired, values);
 				}
