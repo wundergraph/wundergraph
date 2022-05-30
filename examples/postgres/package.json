@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start-database": "docker-compose up",
-    "dev": "cd .wundergraph && wunderctl up --debug",
-    "wunderctl": "wunderctl",
-    "cleanup": "docker-compose down -v"
+    "start": "npm run start:services && npm run start:api",
+    "start:services": "docker-compose up -d",
+    "start:api": "cd .wundergraph && wunderctl up --debug",
+    "cleanup": "docker-compose down -v",
+    "check": "tsc"
   },
   "author": "",
   "license": "ISC",

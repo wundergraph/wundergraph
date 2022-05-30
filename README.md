@@ -42,17 +42,14 @@ into your own Firebase-like Developer Toolkit, without getting locked into a spe
 Imagine that each of your applications could have its own dedicated BFF, while being able to share common logic across
 all your applications, that's the WunderGraph Experience.
 
-## Architecture & Key Differentiators
+## Getting started
 
-<div align="center">
-    <img src="./assets/wundergraph_architecture_simple_overview_light_transparent.png" height="auto"/>
-</div>
+The fastest way to get started with WunderGraph is to open a Gitpod. After bootstrapping the [examples/simple](examples/simple) is started.
 
-WunderGraph is unique in its design,
-as we're not directly exposing GraphQL,
-but JSON-RPC. Combined with a generated Type-Safe client,
-this leads to a unique Developer Experience.
-You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture/README.md).
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
+
+You can also following the [**Quickstart (5
+min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
 
 ## The WunderGraph Stack
 
@@ -81,14 +78,18 @@ applications and microservices).
 
 > **Note**: [WunderHub](https://hub.wundergraph.com/) is our vision of the Package Manager for APIs. Like npm, but for APIs. Sign up for free!
 
-## Getting started
+## Architecture & Key Differentiators
 
-The fastest way to get started with WunderGraph is to open a Gitpod:
+<div align="center">
+    <img src="./assets/wundergraph_architecture_overview_light_transparent.png" height="auto"/>
+</div>
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
+WunderGraph is unique in its design,
+as we're not directly exposing GraphQL,
+but JSON-RPC. Combined with a generated Type-Safe client,
+this leads to a unique Developer Experience.
+You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture/README.md).
 
-You can also following the [**Quickstart (5
-min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
 
 ## Learn more about WunderGraph
 
@@ -121,25 +122,20 @@ Read the [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute to Wunder
 We are thankful for any and all security reports. Please read the [SECURITY.md](SECURITY.md) to learn how to report any
 security concerns to WunderGraph.
 
-## Support
+## Community & Support
 
-Please visit [Github Discussions](https://github.com/wundergraph/wundergraph/discussions)
-or [Discord](https://discord.gg/Jjmc8TC) to view prior support issues and to ask new support questions.
-
-We also provide enterprise support. Please contact us at <info@wundergraph.com> for more information.
+- [GitHub Issues](https://github.com/wundergraph/wundergraph/issues). Best for: bugs and errors you encounter using WunderGraph.
+- [Email Support](mailto:info@wundergraph.com). Best for: specific questions around WunderGraph as an early enterprise adopter.
+- [Slack Support](mailto:info@wundergraph.com). Best for: problems with WunderGraph as an enterprise customer.
+- [Discord](https://discord.gg/Jjmc8TC). Best for: sharing your applications and hanging out with the community.
 
 ## Enterprise
 
 We're a small but growing team of API Enthusiasts, thrilled to help you get the best Developer Experience of working
-with APIs.
-
-Our Support Plans are tailored to help your teams get the most out of WunderGraph. We love building close relationships
-with our customers, allowing us to continuously improve the product and iterate fast.
-
-Our sales team is available to talk with you about your project needs, pricing information, support plans, and
+with APIs. Our Support Plans are tailored to help your teams get the most out of WunderGraph. We love building close relationships
+with our customers, allowing us to continuously improve the product and iterate fast. Our sales team is available to talk with you about your project needs, pricing information, support plans, and
 custom-built features.
 
-Use
-this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
+Use this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
 to contact our sales team for a demo.
 

@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
+	"time"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/bundleconfig"
@@ -32,6 +35,8 @@ just running the engine as efficiently as possible without the dev overhead.
 If used without --exclude-server, make sure the server is available in this directory:
 {entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
@@ -43,6 +48,8 @@ If used without --exclude-server, make sure the server is available in this dire
 			return err
 		}
 
+		var hooksBundler *bundleconfig.Bundler
+
 		if !excludeServer {
 			wd, err := os.Getwd()
 			if err != nil {
@@ -53,7 +60,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			if startServerEntryPoint != "" {
 				hooksFile = startServerEntryPoint
 			}
-			hooksBundler, err := bundleconfig.NewBundler("server", bundleconfig.Config{
+			hooksBundler, err = bundleconfig.NewBundler("server", bundleconfig.Config{
 				EntryPoint: serverEntryPoint,
 				OutFile:    hooksFile,
 				ScriptEnv: append(os.Environ(),
@@ -72,22 +79,50 @@ If used without --exclude-server, make sure the server is available in this dire
 			go hooksBundler.Run()
 		}
 
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{
 				ListenAddr: listenAddr,
 			},
 		}
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
 		n := node.New(ctx, BuildInfo, cfg, log)
-		return n.StartBlocking(
-			node.WithFileSystemConfig(path.Join(wundergraphDir, "generated", "wundergraph.config.json")),
-			node.WithHooksSecret(secret),
-			node.WithDebugMode(enableDebugMode),
-			node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
-			node.WithIntrospection(enableIntrospection),
-			node.WithGitHubAuthDemo(GitHubAuthDemo),
-		)
+
+		go func() {
+			err := n.StartBlocking(
+				node.WithFileSystemConfig(path.Join(wundergraphDir, "generated", "wundergraph.config.json")),
+				node.WithHooksSecret(secret),
+				node.WithDebugMode(enableDebugMode),
+				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
+				node.WithIntrospection(enableIntrospection),
+				node.WithGitHubAuthDemo(GitHubAuthDemo),
+			)
+			if err != nil {
+				log.Fatal("startBlocking", abstractlogger.Error(err))
+			}
+		}()
+		<-quit
+
+		log.Info("shutting down WunderNode ...")
+
+		ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+
+		if hooksBundler != nil {
+			log.Debug("shutting down hook server ...")
+			hooksBundler.Stop(ctx)
+			log.Debug("hook server shutdown complete")
+		}
+
+		err = n.Shutdown(ctx)
+		if err != nil {
+			log.Error("error during wunderNode shutdown", abstractlogger.Error(err))
+		}
+
+		log.Info("wunderNode shutdown complete")
+
+		return nil
 	},
 }
 

@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "cd .wundergraph && wunderctl up --debug",
-    "wunderctl": "wunderctl"
+    "check": "tsc"
   },
   "author": "",
   "license": "ISC",

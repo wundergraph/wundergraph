@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
-	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -32,7 +31,6 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
 			return err
@@ -51,14 +49,6 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("date", BuildInfo.Date),
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
-		cfg := &wundernodeconfig.Config{
-			Server: &wundernodeconfig.ServerConfig{
-				ListenAddr: listenAddr,
-			},
-		}
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		n := node.New(ctx, BuildInfo, cfg, log)
 		configBundler, err := bundleconfig.NewBundler("config", bundleconfig.Config{
 			EntryPoint: entryPoint,
 			WatchPaths: []string{
@@ -80,6 +70,9 @@ var upCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 
 		go configBundler.Run()
 
@@ -113,13 +106,19 @@ var upCmd = &cobra.Command{
 		}
 		go hooksBundler.Run()
 
-		signalChannel := make(chan os.Signal, 2)
-		signal.Notify(signalChannel, os.Interrupt, syscall.SIGINT)
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+
+		cfg := &wundernodeconfig.Config{
+			Server: &wundernodeconfig.ServerConfig{
+				ListenAddr: listenAddr,
+			},
+		}
+		n := node.New(ctx, BuildInfo, cfg, log)
 		go func() {
 			err := n.StartBlocking(
 				node.WithFileSystemConfig(wunderGraphConfigFile),
 				node.WithDebugMode(enableDebugMode),
-				node.WithDisableGracefulshutdown(),
 				node.WithInsecureCookies(),
 				node.WithHooksSecret(secret),
 				node.WithIntrospection(true),
@@ -129,10 +128,25 @@ var upCmd = &cobra.Command{
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
-		<-signalChannel
-		log.Info("stopping WunderNode")
-		configBundler.Stop()
-		hooksBundler.Stop()
+		<-quit
+
+		log.Info("shutting down WunderNode ...")
+
+		configBundler.Stop(ctx)
+
+		log.Debug("shutting down hook server ...")
+		hooksBundler.Stop(ctx)
+		log.Debug("hook server shutdown complete")
+
+		fmt.Println("WunderNode stopped")
+
+		err = n.Shutdown(ctx)
+		if err != nil {
+			log.Error("error during wunderNode shutdown", abstractlogger.Error(err))
+		}
+
+		log.Info("wunderNode shutdown complete")
+
 		return nil
 	},
 }
