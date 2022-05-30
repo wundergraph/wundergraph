@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.90.6",
+  "version": "0.91.0",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -57,7 +57,7 @@
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@wundergraph/wunderctl": "workspace:^0.90.23",
-    "@wundergraph/protobuf": "workspace:^0.90.1",
+    "@wundergraph/protobuf": "workspace:^0.91.0",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",

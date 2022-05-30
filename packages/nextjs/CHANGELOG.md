@@ -1,5 +1,13 @@
 # @wundergraph/nextjs
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [[`afea237`](https://github.com/wundergraph/wundergraph/commit/afea23771191e049aab5ce56ce775775389e8770), [`93cf9e1`](https://github.com/wundergraph/wundergraph/commit/93cf9e1cd3b2a30ad79d434f13f84596dd0b3607)]:
+  - @wundergraph/protobuf@0.91.0
+  - @wundergraph/sdk@0.91.0
+
 ## 0.0.12
 
 ### Patch Changes
