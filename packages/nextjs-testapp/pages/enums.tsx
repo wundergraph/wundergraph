@@ -1,17 +1,17 @@
-import {useQuery, withWunderGraph} from "../components/generated/nextjs";
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Enums = () => {
 	const data = useQuery.Test({
 		input: {
-			input: ["EnumValueA"]
-		}
+			input: ['EnumValueA'],
+		},
 	});
 	return (
 		<div>
 			<h1>Enums</h1>
 			<p>{JSON.stringify(data)}</p>
 		</div>
-	)
-}
+	);
+};
 
 export default withWunderGraph(Enums);
