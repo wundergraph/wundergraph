@@ -18,6 +18,7 @@
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run nextDev\" \"npm run wundergraph\" \"npm run browser\"",
     "wundergraph": "cd .wundergraph && wunderctl up --debug",
+    "generate": "cd .wundergraph && wunderctl generate",
     "browser": "wait-on \"http-get://localhost:3000\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3000",
     "build": "next build",
     "check": "tsc --noEmit",
