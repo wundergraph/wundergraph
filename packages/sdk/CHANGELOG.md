@@ -1,5 +1,11 @@
 # @wundergraph/sdk
 
+## 0.91.2
+
+### Patch Changes
+
+- [`b5dbe92`](https://github.com/wundergraph/wundergraph/commit/b5dbe92e6c9d3160bfba3713c43594790cb2effd) Thanks [@StarpTech](https://github.com/StarpTech)! - sync wunderctl version
+
 ## 0.91.1
 
 ### Patch Changes
