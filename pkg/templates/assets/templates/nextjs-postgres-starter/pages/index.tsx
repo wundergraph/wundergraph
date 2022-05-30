@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
-import { useQuery, withWunderGraph } from '../components/generated/wundergraph.nextjs.integration';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
 	const hello = useQuery.Hello();

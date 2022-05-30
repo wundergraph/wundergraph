@@ -6,6 +6,7 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -29,7 +30,7 @@ configureWunderGraphApplication({
 			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
 		},
 		{
-			templates: [...templates.typescript.nextjs],
+			templates: [new NextJsTemplate()],
 			path: '../components/generated',
 		},
 	],
