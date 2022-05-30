@@ -48,7 +48,7 @@
       "publish": false
     },
     "hooks": {
-      "after:bump": "pnpm ci:version:install"
+      "after:bump": "pnpm ci:version:install && pnpm update --filter ./packages/sdk --workspace @wundergraph/wunderctl@${version}"
     },
     "plugins": {
       "@release-it/bumper": {

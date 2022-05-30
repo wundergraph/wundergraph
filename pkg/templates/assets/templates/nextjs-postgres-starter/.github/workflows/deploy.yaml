@@ -9,7 +9,6 @@ jobs:
     if: "false"
     steps:
       - uses: actions/checkout@v2
-      - run: yarn global add @wundergraph/wunderctl@latest
       - run: yarn
         working-directory: ".wundergraph"
       - run: yarn deploy

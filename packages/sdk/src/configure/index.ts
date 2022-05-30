@@ -1045,13 +1045,15 @@ export const configurePublishWunderGraphAPI = (configuration: PublishConfigurati
 			);
 			if (process.env.WUNDERGRAPH_PUBLISH_API === 'true') {
 				try {
-					const out = wunderctlExec({
+					const result = wunderctlExec({
 						cmd: ['publish', configuration.organization + '/' + configuration.name],
 						timeout: 1000 * 5,
 					});
-					out?.output.filter(Boolean).forEach((line) => console.log(line));
+					if (result?.failed) {
+						console.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
+					}
 				} catch (e) {
-					console.log(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
+					console.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
 				}
 			} else {
 				console.log(colors.blue(`You can now publish the API using the following command:`));

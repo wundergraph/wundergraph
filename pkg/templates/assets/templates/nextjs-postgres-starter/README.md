@@ -5,7 +5,6 @@
 Install the dependencies and run the example:
 
 ```shell
-npm install -g @wundergraph/wunderctl@latest
 npm install
 ```
 

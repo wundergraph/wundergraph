@@ -118,7 +118,7 @@ brews:
     # Default for github is "https://github.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     # Default for gitlab is "https://gitlab.com/<repo_owner>/<repo_name>/-/releases/{{ .Tag }}/downloads/{{ .ArtifactName }}"
     # Default for gitea is "https://gitea.com/<repo_owner>/<repo_name>/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
-    # https://github.com/wundergraph/wunderctl/releases/download/v0.40.0/wunderctl_0.40.0_Darwin_x86_64.tar.gz
+    # https://github.com/wundergraph/wundergraph/releases/download/v0.40.0/wunderctl_0.40.0_Darwin_x86_64.tar.gz
     # url_template: "http://github.com/foo/bar/releases/{{ .Tag }}/{{ .ArtifactName }}"
     url_template: "https://github.com/wundergraph/wundergraph/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
 

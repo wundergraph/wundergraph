@@ -125,6 +125,6 @@ configureWunderGraphApplication({
 		hasDotWunderGraphDirectory: false,
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production'
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
 	},
 });

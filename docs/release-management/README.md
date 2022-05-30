@@ -13,17 +13,21 @@ If you want to publish a new version of an NPM package, you can do so by followi
 2. Commit and merge the changes. The workflow `changesets` is triggered and creates a PR `ci: release` with the changes.
 3. Approve the PR and merge to `main`. The changes are detected by the `changesets` workflow and deployed to the NPM registry. It also creates a Github Release for each npm package.
 
-> **Note**: The NPM package `wunderctl` is a wrapper for the wunderctl binary. We use a different deployment workflow to make the deployment of both applications atomic. Don't publish the `@wundergraph/wunderctl` package manually.
+### Wunderctl wrapper
 
-### Wunderctl & Wrapper
+The NPM package `@wundergraph/wunderctl` is a wrapper for the wunderctl binary. We release it with the wunderctl Go binary to make the deployment of both applications atomic. **Don't publish** this package manually.
+The package is released as soon as the wunderctl binary is published.
+
+### Wunderctl & SDK
 
 We use [GoReleaser](https://goreleaser.com/) to release the wunderctl application and [release-it](https://github.com/release-it/release-it) only for tagging.
+The [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package is required for all WunderGraph applications. After installing this package, it will download the compatible `wunderctl` version. This relationship makes it necessary to release the wunderctl binary first before upgrading the [`@wundergraph/wunderctl`](https://github.com/wundergraph/wundergraph/tree/main/packages/wunderctl) package.
 
 If you want to publish a new version of Wunderctl, you can do so by following:
 
 1. Create a tag with `pnpm engine:release` and follow the instructions (all yes).
 2. [GoReleaser](https://goreleaser.com/) workflows are triggered and creates a Github Release with the changes.
-3. The `wunderctl-release` workflow is triggered and publish the `wunderctl` package to npm.
+3. Did you introduce a breaking-change between wunderctl and SDK? Follow [NPM packages](https://github.com/wundergraph/wundergraph/tree/main/docs/release-management#npm-packages) to publish the [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package.
 
 ## Next Releases
 
