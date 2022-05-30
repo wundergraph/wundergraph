@@ -1,5 +1,11 @@
 # @wundergraph/protobuf
 
+## 0.91.0
+
+### Minor Changes
+
+- [#18](https://github.com/wundergraph/wundergraph/pull/18) [`afea237`](https://github.com/wundergraph/wundergraph/commit/afea23771191e049aab5ce56ce775775389e8770) Thanks [@StarpTech](https://github.com/StarpTech)! - move wunderctl / go binary into local node_modules
+
 ## 0.90.1
 
 ### Patch Changes
