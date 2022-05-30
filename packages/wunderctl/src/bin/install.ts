@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from 'fs';
 import { logger } from './../logger';
 import { wunderctlName, binaryDir } from './../binarypath';

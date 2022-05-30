@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { logger } from './../logger';
 import { uninstaller } from './../uninstaller';
 import { binaryDir, wunderctlBinaryPath } from './../binarypath';
