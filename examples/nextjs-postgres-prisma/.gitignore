@@ -39,4 +39,4 @@ yarn-error.log*
 # vercel
 .vercel
 
-./migrations/
+migrations

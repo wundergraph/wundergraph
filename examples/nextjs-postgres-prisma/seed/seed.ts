@@ -10,7 +10,7 @@ const seed = async () => {
 			email: 'jens@wundergraph.com',
 		},
 	});
-	if (user.status === 'ok' && user.body.data.db_findFirstUser !== null) {
+	if (user.status === 'ok' && user.body.data.db_findFirstUser) {
 		return;
 	}
 	const out = await client.mutation.CreateUser({
