@@ -51,6 +51,11 @@ The fastest way to get started with WunderGraph is to open a Gitpod. After boots
 You can also following the [**Quickstart (5
 min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
 
+Examples:
+- [Simple Starter](/examples/simple)
+- [PostgreSQL](/examples/postgres)
+- [NextJS PostgreSQL Prisma](/examples/nextjs-postgres-prisma)
+
 ## The WunderGraph Stack
 
 WunderGraph is made up of the three core components:
