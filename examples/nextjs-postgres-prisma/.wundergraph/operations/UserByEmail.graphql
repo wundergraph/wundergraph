@@ -1,12 +1,12 @@
-query ($email: String!){
-	db_findFirstUser(where: {email: {equals: $email}}){
+query ($email: String!) {
+	db_findFirstUser(where: { email: { equals: $email } }) {
 		id
 		email
 		name
 		Profile {
 			bio
 		}
-		Post(take: 10, orderBy: [{createdAt: desc}]) {
+		Post(take: 10, orderBy: [{ createdAt: desc }]) {
 			id
 			title
 			content

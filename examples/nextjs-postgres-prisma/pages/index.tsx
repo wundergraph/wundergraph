@@ -1,12 +1,12 @@
-import {NextPage} from 'next';
+import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
-import {useQuery, withWunderGraph} from '../components/generated/nextjs';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
 	const user = useQuery.UserByEmail({
 		input: {
-			email: "jens@wundergraph.com"
-		}
+			email: 'jens@wundergraph.com',
+		},
 	});
 	return (
 		<div className={styles.examplesContainer}>

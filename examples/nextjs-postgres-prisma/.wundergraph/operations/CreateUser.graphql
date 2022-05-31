@@ -7,24 +7,14 @@ mutation (
 	$published: Boolean!
 	$now: DateTime! @injectCurrentDateTime
 ) {
-	db_createOneUser(data: {
-		email: $email
-		name: $name
-		Profile: {
-			create: {
-				bio: $bio
-			}
+	db_createOneUser(
+		data: {
+			email: $email
+			name: $name
+			Profile: { create: { bio: $bio } }
+			Post: { create: { title: $title, content: $content, published: $published, createdAt: $now, updatedAt: $now } }
 		}
-		Post: {
-			create: {
-				title: $title
-				content: $content
-				published: $published
-				createdAt: $now
-				updatedAt: $now
-			}
-		}
-	}) {
+	) {
 		id
 	}
 }
