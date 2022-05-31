@@ -40,7 +40,7 @@ If you want to publish a new version of Wunderctl, you can do so by following:
 ### Wunderctl & Wrapper
 
 1. Run `pnpm engine:release-next` and follow the instructions.
-2. Follow the same instruction as in [Wunderctl & Wrapper](#wunderctl--wrapper) starting with Step 2).
+2. Follow the same instruction as in [Wunderctl & SDK](#wunderctl--sdk) starting with Step 2).
 
 
 ## Limits
