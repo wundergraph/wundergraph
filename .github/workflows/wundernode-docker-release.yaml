@@ -12,7 +12,8 @@ jobs:
     if: "false"
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
       - name: Docker build and publish
         run: |
           VERSION=$(make version)
