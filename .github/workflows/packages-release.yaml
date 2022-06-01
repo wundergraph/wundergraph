@@ -1,6 +1,7 @@
 name: Packages Release
         
-on: [push]
+on:
+  workflow_dispatch:
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
@@ -33,11 +34,11 @@ jobs:
 
       - name: Publish packages & Create Github Releases
         run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor}}@users.noreply.github.com"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           pnpm run publish:packages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           
 #      - name: Generate Notification
