@@ -14,7 +14,6 @@ jobs:
   version:
     timeout-minutes: 10
     runs-on: ubuntu-latest
-    if: "contains(github.event.head_commit.message, 'chore(release): Publish')"
     steps:
       - uses: actions/checkout@v3
         with:
