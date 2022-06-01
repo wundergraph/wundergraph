@@ -20,10 +20,12 @@
     "list": "lerna list -l",
     "format": "prettier --write --loglevel silent --end-of-line=auto \"./**/*.{cjs,js,jsx,ts,tsx,html,css,json}\" --ignore-path .gitignore",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
-    "test:version": "lerna version --conventional-commits --git-dry-run",
-    "ci:version:install": "pnpm install --filter='!./packages/*-testapp' --lockfile-only",
-    "publish:packages": "lerna publish --no-git-reset --yes",
-    "publish:packages-next": "lerna publish prerelease --pre-dist-tag=next --preid=next --allow-branch=next --message=\"chore(release): Publish next\"",
+    "test:version:packages": "pnpm run version:packages --git-dry-run",
+    "version:packages": "lerna version",
+    "publish:packages": "lerna publish --no-git-tag-version --no-changelog --create-release github --yes --message=\"chore(release): Publish\"",
+    "test:version:packages-next": "pnpm run version:packages-next --git-dry-run",
+    "version:packages-next": "lerna version prerelease --pre-dist-tag=next --preid=next --allow-branch=next",
+    "publish:packages-next": "lerna publish prerelease --no-git-tag-version --no-changelog --create-release github --yes --pre-dist-tag=next --preid=next --message=\"chore(release): Publish next\"",
     "publish:engine": "release-it --git.requireBranch=main",
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
     "pre-commit": "lint-staged",
@@ -55,7 +57,7 @@
       "publish": false
     },
     "hooks": {
-      "after:bump": "pnpm ci:version:install && pnpm update --filter ./packages/sdk --workspace @wundergraph/wunderctl@${version}"
+      "after:bump": "pnpm update --filter ./packages/sdk --workspace @wundergraph/wunderctl@${version} && pnpm install --lockfile-only"
     },
     "plugins": {
       "@release-it/bumper": {
@@ -69,7 +71,6 @@
     }
   },
   "devDependencies": {
-    "@changesets/cli": "^2.22.0",
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "^1.4.0",

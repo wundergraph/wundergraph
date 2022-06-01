@@ -1,4 +1,4 @@
-name: Packges Release
+name: Packages Release
         
 on:
   push:
@@ -34,7 +34,9 @@ jobs:
 
       - name: Publish packages & Create Github Releases
         run: |
-          pnpm publish:packages
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor}}@users.noreply.github.com"
+          pnpm run publish:packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

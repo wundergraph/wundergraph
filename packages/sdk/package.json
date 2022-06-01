@@ -29,6 +29,7 @@
   },
   "scripts": {
     "clean": "rimraf ./dist",
+    "version": "pnpm install --filter=\"@wundergraph/sdk\" --lockfile-only && git add ../../pnpm-lock.yaml",
     "build": "tsc",
     "test": "jest",
     "test:int": "TEST_INTEGRATION=true jest"

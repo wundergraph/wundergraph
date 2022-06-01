@@ -1,17 +1,15 @@
 {
   "command": {
     "version": {
-      "allowBranch": ["main", "next"],
       "conventionalCommits": true
     },
     "publish": {
       "conventionalCommits": true,
       "ignoreChanges": ["*.md"],
-      "message": "chore(release): Publish",
       "registry": "https://registry.npmjs.org"
     }
   },
-  "packages": ["packages/*"],
+  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf"],
   "npmClient": "pnpm",
   "version": "independent"
 }
