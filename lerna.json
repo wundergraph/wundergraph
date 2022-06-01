@@ -5,7 +5,7 @@
     },
     "publish": {
       "conventionalCommits": true,
-      "ignoreChanges": ["*.md"],
+      "ignoreChanges": [],
       "registry": "https://registry.npmjs.org"
     }
   },
