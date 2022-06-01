@@ -7,7 +7,6 @@
 
 # Directories
 .github
-.changeset
 generated
 .wundergraph/generated
 .next
