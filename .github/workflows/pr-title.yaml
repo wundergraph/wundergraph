@@ -11,11 +11,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: aslafy-z/conventional-pr-title-action@v2.2.5
-        with:
-          success-state: Title follows the specification.
-          failure-state: Title does not follow the specification.
-          context-name: conventional-pr-title
-          preset: conventional-changelog-angular@latest
+      - name: Check if PR title follows conventional commit guidelines
+        run: echo "${{ github.event.pull_request.title }}" | npx commitlint
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
