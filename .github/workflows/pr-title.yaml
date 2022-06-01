@@ -15,7 +15,5 @@ jobs:
         uses: actions/checkout@v3
       - name: Check if PR title follows conventional commit guidelines
         run: |
-          pnpm add -g @commitlint/cli @commitlint/config-conventional
-          echo "${{ github.event.pull_request.title }}" | pnpm commitlint
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npm i -g @commitlint/cli @commitlint/config-conventional
+          echo "${{ github.event.pull_request.title }}" | commitlint
