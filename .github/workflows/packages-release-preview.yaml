@@ -1,0 +1,31 @@
+name: Packages Release Preview
+
+on:
+  pull_request:
+      
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
+
+env:
+  CI: true
+
+jobs:
+  version:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - run: pnpm boot --ignore-scripts
+
+      - name: Generate next release (dry-run)
+        run: pnpm run preview:version:packages --yes
+
+      - name: Show CHANGELOG.md
+        run: git diff ./packages/*/CHANGELOG.md
