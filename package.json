@@ -26,7 +26,6 @@
     "ci:publish": "pnpm changeset publish",
     "enter-next": "pnpm changeset pre enter next",
     "exit-next": "pnpm changeset pre exit",
-    "current-tag": "svu current",
     "engine:release": "release-it --git.requireBranch=main",
     "engine:release-next": "release-it --git.requireBranch=next --preRelease=next",
     "pre-commit": "lint-staged",
@@ -68,7 +67,7 @@
   },
   "lint-staged": {
     "**/*": [
-      "pretty-quick --staged"
+      "prettier --ignore-unknown --write"
     ]
   },
   "devDependencies": {
