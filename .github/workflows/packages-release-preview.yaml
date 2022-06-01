@@ -28,4 +28,6 @@ jobs:
         run: pnpm run preview:version:packages --yes
 
       - name: Show CHANGELOG.md
-        run: git diff ./packages/*/CHANGELOG.md
+        run: |
+          - name: Adding markdown
+            run: echo "\`\`\`diff\\n$(git --no-pager diff '.**/*.yaml')\\n\`\`\`" >> $GITHUB_STEP_SUMMARY
