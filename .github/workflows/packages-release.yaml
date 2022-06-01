@@ -3,7 +3,7 @@ name: Packages Release
 on:
   push:
     tags:
-      - '*@*'
+      - '@*'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
