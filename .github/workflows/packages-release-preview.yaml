@@ -28,4 +28,4 @@ jobs:
         run: pnpm run preview:version:packages --yes
 
       - name: Show CHANGELOG.md
-        run: echo "\`\`\`diff\\n$(git --no-pager diff './packages/*/CHANGELOG.md')\\n\`\`\`" >> $GITHUB_STEP_SUMMARY
+        run: echo -e "\`\`\`diff\n$(git --no-pager diff './packages/*/CHANGELOG.md')\n\`\`\`" >> $GITHUB_STEP_SUMMARY
