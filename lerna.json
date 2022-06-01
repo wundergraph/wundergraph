@@ -1,8 +1,5 @@
 {
   "command": {
-    "version": {
-      "conventionalCommits": true
-    },
     "publish": {
       "conventionalCommits": true,
       "ignoreChanges": [],

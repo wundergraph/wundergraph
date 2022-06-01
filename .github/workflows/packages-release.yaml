@@ -1,20 +1,19 @@
 name: Packages Release
         
-on:
-  push:
-    tags:
-      - '@*'
+on: [push]
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
 
 env:
   CI: true
 
 jobs:
-  # Update package versions from changesets.
   version:
-    timeout-minutes: 14
+    timeout-minutes: 10
     runs-on: ubuntu-latest
+    if: "contains(github.event.head_commit.message, 'chore(release): Publish')"
     steps:
       - uses: actions/checkout@v3
         with:
