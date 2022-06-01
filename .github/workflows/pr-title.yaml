@@ -11,6 +11,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
       - name: Check if PR title follows conventional commit guidelines
         run: echo "${{ github.event.pull_request.title }}" | npx commitlint
         env:
