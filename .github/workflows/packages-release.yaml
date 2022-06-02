@@ -1,0 +1,77 @@
+name: Packages Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      type:
+        description: 'Release type: "stable" or "next". Versions are determined automatically via conventional commits.'
+        required: false
+        default: 'stable'
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
+
+env:
+  CI: true
+
+jobs:
+  stable-version:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.type == 'stable' }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - run: pnpm boot --ignore-scripts
+
+      - run: pnpm build
+
+      - name: Publish packages & Create Github Releases
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          pnpm run ci:publish:packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  next-version:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.type == 'next' }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - run: pnpm boot --ignore-scripts
+
+      - run: pnpm build
+
+      - name: Publish packages & Create Github Releases
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          pnpm run ci:publish:packages-next
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

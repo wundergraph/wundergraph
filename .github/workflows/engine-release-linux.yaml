@@ -6,6 +6,10 @@ on:
 env:
   CI: true
   WORKING_DIRECTORY: '.'
+  
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
 
 jobs:
     goreleaser:

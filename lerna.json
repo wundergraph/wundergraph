@@ -1,0 +1,15 @@
+{
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "ignoreChanges": [],
+      "registry": "https://registry.npmjs.org"
+    },
+    "version": {
+      "changelogPreset": "conventionalcommits"
+    }
+  },
+  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf"],
+  "npmClient": "pnpm",
+  "version": "independent"
+}

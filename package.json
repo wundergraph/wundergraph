@@ -16,24 +16,25 @@
     "boot": "pnpm install --filter='!./packages/*-testapp' --ignore-scripts",
     "build": "pnpm -r run --filter='!./packages/*-testapp' build",
     "test": "pnpm run -r test",
-    "changeset:add": "pnpm changeset",
-    "format": "prettier --write --loglevel silent --end-of-line=auto \"./**/*.{cjs,js,jsx,ts,tsx,html,css,json}\" --ignore-path .gitignore",
-    "changeset": "changeset",
+    "lerna": "lerna",
+    "format": "prettier --write --ignore-unknown --loglevel silent --ignore-path .gitignore",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
-    "changeset:check": "changeset status --since-main",
-    "ci:version": "pnpm changeset version && pnpm ci:version:install",
-    "ci:version:install": "pnpm install --filter='!./packages/*-testapp' --lockfile-only",
-    "ci:publish": "pnpm changeset publish",
-    "enter-next": "pnpm changeset pre enter next",
-    "exit-next": "pnpm changeset pre exit",
-    "engine:release": "release-it --git.requireBranch=main",
-    "engine:release-next": "release-it --git.requireBranch=next --preRelease=next",
-    "pre-commit": "lint-staged",
+    "preview:version:packages": "lerna version --conventional-commits --git-dry-run",
+    "preview:version:packages-next": "lerna version prerelease --conventional-commits --git-dry-run",
+    "ci:publish:packages": "lerna publish --no-verify-access --conventional-commits --create-release github --allow-branch main --yes --message=\"chore(release): Publish\"",
+    "ci:publish:packages-next": "lerna publish prerelease --no-verify-access --conventional-commits --create-release github --allow-branch next --yes --message=\"chore(release): Publish next\"",
+    "publish:engine": "release-it --git.requireBranch=main",
+    "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
     "prepare": "husky install"
   },
   "engines": {
     "node": ">=16.0.0",
     "pnpm": ">=7.0.0"
+  },
+  "lint-staged": {
+    "**/*": [
+      "prettier --ignore-unknown --write --ignore-path .gitignore"
+    ]
   },
   "release-it": {
     "dry-run": false,
@@ -47,7 +48,7 @@
       "publish": false
     },
     "hooks": {
-      "after:bump": "pnpm ci:version:install && pnpm update --filter ./packages/sdk --workspace @wundergraph/wunderctl@${version}"
+      "after:bump": "pnpm update --filter ./packages/sdk --workspace @wundergraph/wunderctl@${version} && pnpm install --lockfile-only"
     },
     "plugins": {
       "@release-it/bumper": {
@@ -60,26 +61,15 @@
       }
     }
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "**/*": [
-      "prettier --ignore-unknown --write"
-    ]
-  },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.4.4",
-    "@changesets/cli": "^2.22.0",
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
+    "@lerna-lite/cli": "^1.4.0",
+    "@lerna-lite/list": "^1.4.0",
     "@release-it/bumper": "^4.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
     "prettier": "^2.6.2",
-    "pretty-quick": "^3.1.3",
     "release-it": "^15.0.0",
     "rimraf": "^3.0.2"
   }

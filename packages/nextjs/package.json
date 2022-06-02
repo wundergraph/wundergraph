@@ -25,13 +25,14 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
+    "version": "pnpm install --filter=\"@wundergraph/nextjs\" --lockfile-only && git add ../../pnpm-lock.yaml",
     "build": "tsc"
   },
   "devDependencies": {
     "@types/node": "^17.0.32",
     "@types/object-hash": "^1.3.4",
     "@types/react": "^18.0.5",
-    "@wundergraph/sdk": "workspace:>=0.91.0",
+    "@wundergraph/sdk": "workspace:^0.91.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "typescript": "^4.7.2"

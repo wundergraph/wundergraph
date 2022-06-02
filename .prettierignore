@@ -1,17 +1,1 @@
-# Deep Directories
-**/dist
-**/.output
-**/node_modules
-**/fixtures
-**/vendor
-
-# Directories
-.github
-.changeset
-generated
-.wundergraph/generated
-.next
-
-# Files
-README.md
 pnpm-lock.yaml

@@ -15,3 +15,4 @@ npx @wundergraph/wunderctl --help
 ```
 
 > **Warning**: Please use the Go [release](https://github.com/wundergraph/wundergraph/releases) binary to start the wundergraph server in production.
+

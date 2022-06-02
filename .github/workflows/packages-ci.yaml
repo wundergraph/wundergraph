@@ -18,7 +18,6 @@ on:
       - main
       - next
     paths:
-      -  '.changeset/*'
       - 'packages/**/*'
       - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'

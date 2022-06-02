@@ -1,23 +1,62 @@
+# IDE
 .vscode
 .idea
-.wundergraph/generated
-vendor
+
+# Deep Directories
 node_modules
 generated
-*.zip
-
 pkg/templates/assets/templates/**/*.lock
 pkg/templates/assets/templates/**/*lock.json
 !pkg/templates/assets/templates/**/.wundergraph
+
+# Directories
+dist
+types/go/wgpb
+
+# Next.js build output
+.next
+out
+
+# Files
+*.tsbuildinfo
+.DS_Store
+.eslintcache
+*.logs
+examples/**/*lock*
 /wunderctl
 
-examples/**/*lock*
-
-demo
-dist
-*.logs
-types/go/wgpb
-.next
+# Logs
+logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
 
-.DS_Store
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out

@@ -5,44 +5,53 @@ This monorepo is a collection of NPM packages and a single go application.
 
 ### NPM Packages
 
-We use [changesets](https://github.com/changesets/changesets) to manage the publication and versioning of our packages.
+We use [Lerna-lite](https://github.com/ghiscoding/lerna-lite) to manage the publication and versioning of our packages.
 
 If you want to publish a new version of an NPM package, you can do so by following:
 
-1. On `main` or on a PR run `pnpm changeset:add` to define which packages were changed with which [semver](https://semver.org/lang/de/).
-2. Commit and merge the changes. The workflow `changesets` is triggered and creates a PR `ci: release` with the changes.
-3. Approve the PR and merge to `main`. The changes are detected by the `changesets` workflow and deployed to the NPM registry. It also creates a Github Release for each npm package.
+1. Check the
+   workflow [Releases Preview](https://github.com/wundergraph/wundergraph/actions/workflows/packages-release-preview.yaml)
+   to see an preview of the release ([example](https://github.com/wundergraph/wundergraph/actions/runs/2425016891))
+   .
+2. Trigger the
+   workflow [Packages Release](https://github.com/wundergraph/wundergraph/actions/workflows/packages-release.yaml)
+   manually in the UI or by running the following command:
 
-### Wunderctl wrapper
+```sh
+gh workflow list
+gh workflow run <workflow> --ref branch-name
+```
 
-The NPM package `@wundergraph/wunderctl` is a wrapper for the wunderctl binary. We release it with the wunderctl Go binary to make the deployment of both applications atomic. **Don't publish** this package manually.
-The package is released as soon as the wunderctl binary is published.
+_\* Requires the github cli and write access to the repository_
 
-### Wunderctl & SDK
+### Wunderctl
 
-We use [GoReleaser](https://goreleaser.com/) to release the wunderctl application and [release-it](https://github.com/release-it/release-it) only for tagging.
-The [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package is required for all WunderGraph applications. After installing this package, it will download the compatible `wunderctl` version. This relationship makes it necessary to release the wunderctl binary first before upgrading the [`@wundergraph/wunderctl`](https://github.com/wundergraph/wundergraph/tree/main/packages/wunderctl) package.
+The release process is triggered locally. The root package version represent the Wunderctl version. We use [GoReleaser](https://goreleaser.com/) to release the wunderctl application
+and [release-it](https://github.com/release-it/release-it) only for tagging.
 
-If you want to publish a new version of Wunderctl, you can do so by following:
+### Wunderctl Wrapper
 
-1. Create a tag with `pnpm engine:release` and follow the instructions (all yes).
-2. [GoReleaser](https://goreleaser.com/) workflows are triggered and creates a Github Release with the changes.
-3. Did you introduce a breaking-change between wunderctl and SDK? Follow [NPM packages](https://github.com/wundergraph/wundergraph/tree/main/docs/release-management#npm-packages) to publish the [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package.
+The NPM package `@wundergraph/wunderctl` is a wrapper for the wunderctl binary. We release it with the wunderctl Go
+binary to make the deployment of both applications atomic. **Don't publish** this package with Lerna.
+The package is released automatically as soon as the wunderctl binary is published.
 
-## Next Releases
+### SDK
 
-### NPM Packages
+The [`@wundergraph/sdk`](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk) package is required for all
+WunderGraph applications. After installing this package, it will download the compatible `wunderctl` version. This
+relationship makes it necessary to release the wunderctl binary first before upgrading
+the [`@wundergraph/wunderctl`](https://github.com/wundergraph/wundergraph/tree/main/packages/wunderctl) package.
 
-1. Run `pnpm enter-next`
-2. Follow the same instruction as in [NPM packages](#npm-packages) starting with Step 1).
-3. Leave the next mode to switch to stable releases with `pnpm exit-next`.
+## How to select the version?
 
-### Wunderctl & Wrapper
+We use lerna conventional commit integration to calculate the version. If you create a PR, we also enforce a proper PR title which decide upon the semver change.
 
-1. Run `pnpm engine:release-next` and follow the instructions.
-2. Follow the same instruction as in [Wunderctl & SDK](#wunderctl--sdk) starting with Step 2).
+## Release Cheat Sheet
 
+| Component           | Stable Release                             | Next Release                             |
+| ------------------- | ------------------------------------------ | ---------------------------------------- |
+| WunderCtl           | pnpm publish:engine                        | pnpm publish:engine-next                 |
+| WunderCtl (Wrapper) | Automated after WunderCtl                  | -                                        |
+| NPM Packages        | Trigger via Workflow run (Select `stable`) | Trigger via Workflow run (Select `next`) |
 
-## Limits
-
-- Only one NPM release can be running at a time.
+Next releases must be done on a branch with the name `next`. Regular "stable" releases are done on the `main` branch.
