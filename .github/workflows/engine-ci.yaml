@@ -24,7 +24,7 @@ on:
       - 'go.sum'
       - '!examples/**/*'
       - '!**/*.md'
-        
+
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
   cancel-in-progress: true
@@ -54,7 +54,7 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - run: pnpm boot
       - run: make engine-dev
       - run: make test-go
