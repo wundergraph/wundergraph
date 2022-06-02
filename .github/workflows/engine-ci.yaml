@@ -24,6 +24,10 @@ on:
       - 'go.sum'
       - '!examples/**/*'
       - '!**/*.md'
+        
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: true
 
 env:
   WORKING_DIRECTORY: '.'
