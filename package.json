@@ -25,17 +25,11 @@
     "publish:packages-next": "lerna publish prerelease --no-verify-access --conventional-commits --create-release github --yes --message=\"chore(release): Publish next\"",
     "publish:engine": "release-it --git.requireBranch=main",
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
-    "pre-commit": "lint-staged",
     "prepare": "husky install"
   },
   "engines": {
     "node": ">=16.0.0",
     "pnpm": ">=7.0.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "lint-staged": {
     "**/*": [

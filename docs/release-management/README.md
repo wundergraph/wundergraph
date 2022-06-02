@@ -22,7 +22,7 @@ gh workflow list
 gh workflow run <workflow> --ref branch-name
 ```
 
-_*Requires the github cli and write access to the repository_
+_\*Requires the github cli and write access to the repository_
 
 ### Wunderctl
 
@@ -48,8 +48,8 @@ We use lerna conventional commit integration to calculate the version. If you cr
 
 ## Release Cheat Sheet
 
-| Component             | Stable Release                             | Next Release                             |
-|-----------------------|--------------------------------------------|------------------------------------------|
-| WunderCtl             | pnpm publish:engine                        | pnpm publish:engine-next                 | 
-| WunderCtl (Wrapper)   | Automated after WunderCtl                  | -                                        |  
-| NPM Packages          | Trigger via Workflow run (Select `stable`) | Trigger via Workflow run (Select `next`) |  
+| Component           | Stable Release                             | Next Release                             |
+| ------------------- | ------------------------------------------ | ---------------------------------------- |
+| WunderCtl           | pnpm publish:engine                        | pnpm publish:engine-next                 |
+| WunderCtl (Wrapper) | Automated after WunderCtl                  | -                                        |
+| NPM Packages        | Trigger via Workflow run (Select `stable`) | Trigger via Workflow run (Select `next`) |

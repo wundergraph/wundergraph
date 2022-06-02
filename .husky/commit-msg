@@ -3,4 +3,4 @@
 
 pnpm exec commitlint --edit "${1}"
 
-pnpm run pre-commit
+pnpm exec lint-staged
