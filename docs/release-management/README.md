@@ -11,7 +11,7 @@ If you want to publish a new version of an NPM package, you can do so by followi
 
 1. Check the
    workflow [Releases Preview](https://github.com/wundergraph/wundergraph/actions/workflows/packages-release-preview.yaml)
-   to see an preview of the next release ([example](https://github.com/wundergraph/wundergraph/actions/runs/2425016891))
+   to see an preview of the release ([example](https://github.com/wundergraph/wundergraph/actions/runs/2425016891))
    .
 2. Trigger the
    workflow [Packages Release](https://github.com/wundergraph/wundergraph/actions/workflows/packages-release.yaml)
@@ -22,7 +22,7 @@ gh workflow list
 gh workflow run <workflow> --ref branch-name
 ```
 
-_\*Requires the github cli and write access to the repository_
+_\* Requires the github cli and write access to the repository_
 
 ### Wunderctl
 
@@ -53,3 +53,5 @@ We use lerna conventional commit integration to calculate the version. If you cr
 | WunderCtl           | pnpm publish:engine                        | pnpm publish:engine-next                 |
 | WunderCtl (Wrapper) | Automated after WunderCtl                  | -                                        |
 | NPM Packages        | Trigger via Workflow run (Select `stable`) | Trigger via Workflow run (Select `next`) |
+
+Next releases must be done on a branch with the name `next`. Regular "stable" releases are done on the `main` branch.

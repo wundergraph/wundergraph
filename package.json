@@ -21,8 +21,8 @@
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --conventional-commits --git-dry-run",
     "preview:version:packages-next": "lerna version prerelease --conventional-commits --git-dry-run",
-    "publish:packages": "lerna publish --no-verify-access --conventional-commits --create-release github --yes --message=\"chore(release): Publish\"",
-    "publish:packages-next": "lerna publish prerelease --no-verify-access --conventional-commits --create-release github --yes --message=\"chore(release): Publish next\"",
+    "publish:packages": "lerna publish --no-verify-access --conventional-commits --create-release github --allow-branch main --yes --message=\"chore(release): Publish\"",
+    "publish:packages-next": "lerna publish prerelease --no-verify-access --conventional-commits --create-release github --allow-branch next --yes --message=\"chore(release): Publish next\"",
     "publish:engine": "release-it --git.requireBranch=main",
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
     "prepare": "husky install"
