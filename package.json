@@ -17,8 +17,7 @@
     "build": "pnpm -r run --filter='!./packages/*-testapp' build",
     "test": "pnpm run -r test",
     "lerna": "lerna",
-    "list": "lerna list -l",
-    "format": "prettier --write --loglevel silent --end-of-line=auto \"./**/*.{cjs,js,jsx,ts,tsx,html,css,json}\" --ignore-path .gitignore",
+    "format": "prettier --write --ignore-unknown --loglevel silent --ignore-path .gitignore",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --conventional-commits --git-dry-run",
     "preview:version:packages-next": "lerna version prerelease --conventional-commits --git-dry-run",
@@ -40,7 +39,7 @@
   },
   "lint-staged": {
     "**/*": [
-      "prettier --ignore-unknown --write"
+      "prettier --ignore-unknown --write --ignore-path .gitignore"
     ]
   },
   "release-it": {
