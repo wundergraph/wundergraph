@@ -2,73 +2,74 @@ name: engine-release-darwin
 on:
   push:
     tags: ['v*']
-    
+
 env:
   CI: true
   WORKING_DIRECTORY: '.'
-  
+
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
   cancel-in-progress: false
 
 jobs:
-    goreleaser:
-      name: run goreleaser
-      runs-on: 'macos-latest'
-      steps:
-        - name: checkout
-          uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
-        - uses: ./.github/actions/go
-          with:
-            working-directory: ${{ env.WORKING_DIRECTORY }}
+  goreleaser:
+    name: run goreleaser
+    runs-on: 'macos-latest'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/go
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
 
-        - name: Install Protoc
-          uses: arduino/setup-protoc@v1
-          with:
-            version: '3.x'
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          version: '3.x'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-        - name: Install Gon
-          run: |
-            pushd .
-            cd /usr/local/Homebrew
-            git fetch --tags
-            git checkout 3.3.9
-            popd
-            brew tap mitchellh/gon
-            brew install mitchellh/gon/gon
+      - name: Install Gon
+        run: |
+          pushd .
+          cd /usr/local/Homebrew
+          git fetch --tags
+          git checkout 3.3.9
+          popd
+          brew tap mitchellh/gon
+          brew install mitchellh/gon/gon
 
-        - name: Import Code-Signing Certificates
-          uses: Apple-Actions/import-codesign-certs@v1
-          with:
-            p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
-            p12-password: ${{ secrets.AC_PASSWORD }}
+      - name: Import Code-Signing Certificates
+        uses: Apple-Actions/import-codesign-certs@v1
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
+          p12-password: ${{ secrets.AC_PASSWORD }}
 
-        - name: setup sdk 2
-          run: xcodebuild -showsdks
+      - name: setup sdk 2
+        run: xcodebuild -showsdks
 
-        - name: setup sdk 3
-          run: xcrun -sdk macosx12.1 --show-sdk-path
+      - name: setup sdk 3
+        run: xcrun -sdk macosx12.1 --show-sdk-path
 
-        - name: setup sdk 3
-          run: xcrun -sdk macosx12.1 --show-sdk-platform-version
+      - name: setup sdk 3
+        run: xcrun -sdk macosx12.1 --show-sdk-platform-version
 
-        - name: generate go types based on protobuf definitions
-          run: make codegen
-          
-        - name: Get the previous version of the release tag
-          run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+      - name: generate go types based on protobuf definitions
+        run: make codegen
 
-        - name: Run GoReleaser
-          uses: goreleaser/goreleaser-action@v2
-          with:
-            version: latest
-            workdir: './cmd/wunderctl'
-            args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-darwin.yml
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
-            GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
-            GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+      - name: Get the previous version of the release tag
+        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          workdir: './cmd/wunderctl'
+          args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-darwin.yml
+        env:
+          # custom PAT to push in https://github.com/wundergraph/homebrew-wundergraph
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
+          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
+          GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
+          GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
