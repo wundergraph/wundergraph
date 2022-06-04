@@ -36,6 +36,9 @@ jobs:
         - name: generate go types based on protobuf definitions
           run: make codegen
 
+        - name: Get the previous version of the release tag
+          run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+
         - name: Run GoReleaser
           uses: goreleaser/goreleaser-action@v2
           with:
