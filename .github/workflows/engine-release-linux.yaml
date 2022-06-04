@@ -43,7 +43,7 @@ jobs:
             workdir: './cmd/wunderctl'
             args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-linux.yml
           env:
-            GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
             GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
             GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
