@@ -5,7 +5,7 @@ This monorepo is a collection of NPM packages and a single go application.
 
 ### NPM Packages
 
-We use [Lerna-lite](https://github.com/ghiscoding/lerna-lite) to manage the publication and versioning of our packages.
+We use [Lerna](https://github.com/lerna/lerna) to manage the publication and versioning of our packages.
 
 If you want to publish a new version of an NPM package, you can do so by following:
 
