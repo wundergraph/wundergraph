@@ -16,7 +16,6 @@
     "boot": "pnpm install --filter='!./packages/*-testapp' --ignore-scripts",
     "build": "pnpm -r run --filter='!./packages/*-testapp' build",
     "test": "pnpm run -r test",
-    "lerna": "lerna",
     "format": "prettier --write --ignore-unknown --loglevel silent --ignore-path .gitignore",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --conventional-commits --no-git-tag-version --no-push",
