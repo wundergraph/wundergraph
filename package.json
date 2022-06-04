@@ -47,7 +47,7 @@
       "publish": false
     },
     "hooks": {
-      "after:bump": "pnpm update --filter ./packages/sdk --workspace @wundergraph/wunderctl@${version} && pnpm install --lockfile-only"
+      "after:bump": "pnpm install --lockfile-only"
     },
     "plugins": {
       "@release-it/bumper": {
