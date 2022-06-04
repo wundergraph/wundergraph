@@ -2,7 +2,9 @@ name: Packages Release Preview
 
 on:
   push:
-      
+    tags-ignore:
+      - '*'
+
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
   cancel-in-progress: false
