@@ -47,7 +47,7 @@
       "publish": false
     },
     "hooks": {
-      "after:bump": "pnpm install --lockfile-only"
+      "after:bump": "pnpm install --filter ./packages/wunderctl --lockfile-only"
     },
     "plugins": {
       "@release-it/bumper": {
