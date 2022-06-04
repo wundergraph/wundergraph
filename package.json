@@ -16,7 +16,7 @@
     "boot": "pnpm install --filter='!./packages/*-testapp' --ignore-scripts",
     "build": "pnpm -r run --filter='!./packages/*-testapp' build",
     "test": "pnpm run -r test",
-    "format": "prettier --write --ignore-unknown --loglevel silent --ignore-path .gitignore",
+    "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --conventional-commits --no-git-tag-version --no-push",
     "preview:version:packages-next": "lerna version prerelease --no-git-tag-version --no-push",
@@ -31,8 +31,8 @@
     "pnpm": ">=7.0.0"
   },
   "lint-staged": {
-    "**/*": [
-      "pnpm exec prettier --ignore-unknown --write --ignore-path .gitignore"
+    "*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}": [
+      "pnpm exec prettier --write"
     ]
   },
   "release-it": {
