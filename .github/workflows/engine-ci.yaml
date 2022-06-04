@@ -1,4 +1,4 @@
-name: engine-ci
+name: Engine CI
 on:
   push:
     branches:

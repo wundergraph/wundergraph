@@ -1,4 +1,4 @@
-name: engine-release
+name: Engine Release
 on:
   push:
     tags: ['v*']

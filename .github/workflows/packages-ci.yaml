@@ -1,4 +1,4 @@
-name: packages-ci
+name: NPM Packages CI
 on:
   push:
     branches:
