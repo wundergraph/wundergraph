@@ -1,4 +1,2 @@
-prefer-workspace-packages: true
-save-workspace-protocol: false
 packages:
   - 'packages/*'
