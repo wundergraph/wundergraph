@@ -40,6 +40,8 @@ jobs:
 
       - name: Publish packages & Create Github Releases
         run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           pnpm run ci:version:packages
           pnpm install --lockfile-only
           pnpm -r publish --filter='!./packages/wunderctl' --no-git-checks --report-summary
@@ -77,6 +79,8 @@ jobs:
 
       - name: Publish packages & Create Github Releases
         run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           pnpm run ci:version:packages-next
           pnpm install --lockfile-only
           pnpm -r publish --filter='!./packages/wunderctl' --no-git-checks --report-summary
