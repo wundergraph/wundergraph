@@ -40,12 +40,18 @@ jobs:
 
       - name: Publish packages & Create Github Releases
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          pnpm run ci:publish:packages
+          pnpm run ci:version:packages
+          pnpm install --lockfile-only
+          pnpm -r publish --filter='!./packages/wunderctl' --no-git-checks --report-summary
+          echo -e "\`\`\`json\n$(cat pnpm-publish-summary.json)\n\`\`\`" >> $GITHUB_STEP_SUMMARY
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_WORKFLOW_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'chore(release): Sync git changes after release [skip ci]'
+          file_pattern: 'pnpm-lock.yaml package.json CHANGELOG.md'
 
   next-version:
     timeout-minutes: 10
@@ -71,9 +77,15 @@ jobs:
 
       - name: Publish packages & Create Github Releases
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          pnpm run ci:publish:packages-next
+          pnpm run ci:version:packages-next
+          pnpm install --lockfile-only
+          pnpm -r publish --filter='!./packages/wunderctl' --no-git-checks --report-summary
+          echo -e "\`\`\`json\n$(cat pnpm-publish-summary.json)\n\`\`\`" >> $GITHUB_STEP_SUMMARY
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_WORKFLOW_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 'chore(release): Sync git changes after release [skip ci]'
+          file_pattern: 'pnpm-lock.yaml package.json CHANGELOG.md'
