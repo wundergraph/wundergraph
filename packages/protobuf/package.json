@@ -25,6 +25,7 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
+    "version": "pnpm install --filter=\"@wundergraph/protobuf\" --lockfile-only && git add ../../pnpm-lock.yaml",
     "build": "./generate.sh && tsc"
   },
   "dependencies": {
