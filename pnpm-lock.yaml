@@ -50,7 +50,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.5
-      '@wundergraph/protobuf': ^0.91.1
+      '@wundergraph/protobuf': workspace:^0.91.1
       '@wundergraph/sdk': ^0.91.5
       handlebars: ^4.7.7
       next: ^12.1.6
@@ -156,8 +156,8 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^14.18.16
       '@types/object-hash': ^1.3.4
-      '@wundergraph/protobuf': ^0.91.1
-      '@wundergraph/wunderctl': ^0.90.27
+      '@wundergraph/protobuf': workspace:^0.91.1
+      '@wundergraph/wunderctl': workspace:^0.90.27
       axios: ^0.26.1
       chai: ^4.3.4
       colors: ^1.4.0
@@ -2703,28 +2703,6 @@ packages:
     dependencies:
       '@types/yargs-parser': 21.0.0
     dev: true
-
-  /@wundergraph/protobuf/0.91.1:
-    resolution: {integrity: sha512-0DxS3nP0KxZdLAqKf5gd23YBqIdz5H3VvOkPRaWrhccVSpm1CY7MLwQWWS10X/qFXT3x0LQQ2gNor39LbIunMQ==}
-    dependencies:
-      long: 5.2.0
-      protobufjs: 6.11.2
-      ts-proto: 1.112.1
-    dev: false
-
-  /@wundergraph/wunderctl/0.90.27:
-    resolution: {integrity: sha512-8XGmGMQubixdk6yqmTVXRbrnr1NKNUauQ361lsG0bnZC22gJwiQ6pNa/JeZxFWq0YuDFCh8EgM27u/qAtp/7fw==}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      axios: 0.26.1_debug@4.3.4
-      debug: 4.3.4
-      execa: 5.1.1
-      rimraf: 3.0.2
-      tar: 6.1.11
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
 
   /JSONStream/1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -11440,11 +11418,11 @@ packages:
     name: '@wundergraph/nextjs'
     version: 0.0.16
     peerDependencies:
-      '@wundergraph/sdk': '>=0.91.0'
+      '@wundergraph/sdk': workspace:>=0.91.0
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.2 || ^18.0.0
     dependencies:
-      '@wundergraph/protobuf': 0.91.1
+      '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/sdk': file:packages/sdk
       handlebars: 4.7.7
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
@@ -11473,8 +11451,8 @@ packages:
       '@prisma/generator-helper': 3.13.0
       '@rjsf/core': 4.1.1
       '@wundergraph/helper': link:packages/helper
-      '@wundergraph/protobuf': 0.91.1
-      '@wundergraph/wunderctl': 0.90.27
+      '@wundergraph/protobuf': link:packages/protobuf
+      '@wundergraph/wunderctl': link:packages/wunderctl
       axios: 0.26.1
       colors: 1.4.0
       cross-spawn: 7.0.3

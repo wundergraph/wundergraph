@@ -50,10 +50,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN_WORKFLOW_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: EndBug/add-and-commit@v9
         with:
-          commit_message: 'chore(release): Sync git changes after release [skip ci]'
-          file_pattern: 'pnpm-lock.yaml package.json CHANGELOG.md'
+          message: 'chore(release): Sync pnpm-lock.yaml after release'
+          add: 'pnpm-lock.yaml'
+          pull: '--rebase --autostash'
 
   next-version:
     timeout-minutes: 10
@@ -89,7 +90,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN_WORKFLOW_PUBLISH }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: EndBug/add-and-commit@v9
         with:
-          commit_message: 'chore(release): Sync git changes after release [skip ci]'
-          file_pattern: 'pnpm-lock.yaml package.json CHANGELOG.md'
+          message: 'chore(release): Sync pnpm-lock.yaml after release'
+          add: 'pnpm-lock.yaml'
+          pull: '--rebase --autostash'
