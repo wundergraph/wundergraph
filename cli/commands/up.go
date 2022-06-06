@@ -41,6 +41,8 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
+		var hooksBundler *bundleconfig.Bundler
+
 		onFirstRunChan := make(chan struct{})
 
 		log.Info("starting WunderNode",
@@ -83,28 +85,32 @@ var upCmd = &cobra.Command{
 			log.Fatal("could not get your current working directory")
 		}
 
-		hooksBundler, err := bundleconfig.NewBundler("server", bundleconfig.Config{
-			EntryPoint: serverEntryPoint,
-			WatchPaths: []string{
-				// the server relies on wundergraph.config.json
-				// the file is produced by the config bundler
-				filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
-			},
-			IgnorePaths:           []string{"node_modules"},
-			SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
-			OutFile:               path.Join(wundergraphDir, "generated", "bundle", "server.js"),
-			ScriptEnv: append(os.Environ(),
-				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
-				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
-			),
-		}, log)
-		if err != nil {
-			return err
+		if _, err := os.Stat(serverEntryPoint); err == nil {
+			hooksBundler, err = bundleconfig.NewBundler("server", bundleconfig.Config{
+				EntryPoint: serverEntryPoint,
+				WatchPaths: []string{
+					// the server relies on wundergraph.config.json
+					// the file is produced by the config bundler
+					filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
+				},
+				IgnorePaths:           []string{"node_modules"},
+				SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
+				OutFile:               path.Join(wundergraphDir, "generated", "bundle", "server.js"),
+				ScriptEnv: append(os.Environ(),
+					"START_HOOKS_SERVER=true",
+					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
+					fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
+					fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+				),
+			}, log)
+			if err != nil {
+				return err
+			}
+			go hooksBundler.Run()
+		} else {
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
 		}
-		go hooksBundler.Run()
 
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, os.Interrupt)
@@ -134,9 +140,11 @@ var upCmd = &cobra.Command{
 
 		configBundler.Stop(ctx)
 
-		log.Debug("shutting down hook server ...")
-		hooksBundler.Stop(ctx)
-		log.Debug("hook server shutdown complete")
+		if hooksBundler != nil {
+			log.Debug("shutting down hook server ...")
+			hooksBundler.Stop(ctx)
+			log.Debug("hook server shutdown complete")
+		}
 
 		fmt.Println("WunderNode stopped")
 
