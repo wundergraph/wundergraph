@@ -147,10 +147,6 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 
 	operation := string(p.printOperation())
 
-	if operation == `{findManyusers(where: {messages: {some: {message: {contains: $text}}}}, orderBy: $a, take: $b){id name messages {id message}}}` {
-		fmt.Println("TEST")
-	}
-
 	input := fetchInput{
 		Query:     operation,
 		Variables: p.upstreamVariables,
