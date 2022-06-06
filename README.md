@@ -28,6 +28,8 @@
   <hr />
 </div>
 
+> **Note**: 🚀 WunderGraph is now Open Source! Read the [announcement](https://wundergraph.com/blog/wundergraph_the_next_generation_api_developer_platform_is_open_source).
+
 ## What is WunderGraph?
 
 WunderGraph is the **Next-Generation API Developer Platform** with a focus on Developer Experience.
@@ -52,10 +54,13 @@ You can also following the [**Quickstart (5
 min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
 
 Examples:
+
 - [Simple Starter](/examples/simple)
 - [PostgreSQL](/examples/postgres)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
+- [Publish & Consume APIs from the Hub](./examples/publish-install-api)
+-
 
 ## The WunderGraph Stack
 
@@ -95,7 +100,6 @@ as we're not directly exposing GraphQL,
 but JSON-RPC. Combined with a generated Type-Safe client,
 this leads to a unique Developer Experience.
 You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture/README.md).
-
 
 ## Learn more about WunderGraph
 
@@ -144,4 +148,3 @@ custom-built features.
 
 Use this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
 to contact our sales team for a demo.
-
