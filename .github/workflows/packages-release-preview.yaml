@@ -2,6 +2,10 @@ name: Packages Release Preview
 
 on:
   push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}

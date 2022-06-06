@@ -59,8 +59,7 @@ Examples:
 - [PostgreSQL](/examples/postgres)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
-- [Publish & Consume APIs from the Hub](./examples/publish-install-api)
--
+- [Publish & Install APIs](./examples/publish-install-api)
 
 ## The WunderGraph Stack
 
