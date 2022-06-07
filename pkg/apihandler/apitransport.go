@@ -112,10 +112,6 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 		_, onResponseHook = t.onResponseHook[metaData.OperationName]
 	}
 
-	if t.debugMode && onRequestHook {
-
-	}
-
 	if onRequestHook {
 		request, err = t.handleOnRequestHook(request, metaData)
 		if err != nil {
