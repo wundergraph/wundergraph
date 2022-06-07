@@ -214,13 +214,14 @@ export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, 
 	);
 
 	fastify.register(FastifyGraceful);
-	fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
 	await fastify.after();
-	fastify.log.info('Hooks plugin registered');
 	fastify.gracefulShutdown((signal, next) => {
 		fastify.log.info('graceful shutdown', { signal });
 		next();
 	});
+	fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
+	await fastify.after();
+	fastify.log.info('Hooks plugin registered');
 
 	if (hooksConfig.graphqlServers) {
 		for await (const server of hooksConfig.graphqlServers) {
