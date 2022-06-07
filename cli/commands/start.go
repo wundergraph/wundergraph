@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"time"
 
+	cmd2 "github.com/go-cmd/cmd"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
-	"github.com/wundergraph/wundergraph/pkg/bundleconfig"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
@@ -48,7 +48,12 @@ If used without --exclude-server, make sure the server is available in this dire
 			return err
 		}
 
-		var hooksBundler *bundleconfig.Bundler
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, os.Interrupt)
+
+		var hookServerCmd *cmd2.Cmd
+		var hookServerStatusChan <-chan cmd2.Status
+		var hooksServerDone chan struct{}
 
 		if !excludeServer {
 			wd, err := os.Getwd()
@@ -60,27 +65,48 @@ If used without --exclude-server, make sure the server is available in this dire
 			if startServerEntryPoint != "" {
 				hooksFile = startServerEntryPoint
 			}
-			hooksBundler, err = bundleconfig.NewBundler("server", bundleconfig.Config{
-				EntryPoint: serverEntryPoint,
-				OutFile:    hooksFile,
-				ScriptEnv: append(os.Environ(),
-					"START_HOOKS_SERVER=true",
-					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
-					fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
-					fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
-				),
-				SkipBuild: true,
-				SkipWatch: true,
-			}, log)
-			if err != nil {
-				return err
-			}
-			go hooksBundler.Run()
-		}
 
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+			cmdOptions := cmd2.Options{
+				Buffered:  false,
+				Streaming: true,
+			}
+
+			hookServerCmd = cmd2.NewCmdOptions(cmdOptions, "node", hooksFile)
+			hookServerCmd.Env = append(hookServerCmd.Env, os.Environ()...)
+			hookServerCmd.Env = append(hookServerCmd.Env,
+				"START_HOOKS_SERVER=true",
+				fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
+				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
+				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			)
+
+			hooksServerDone = make(chan struct{})
+
+			go func() {
+				defer close(hooksServerDone)
+				// Done when both channels have been closed
+				// https://dave.cheney.net/2013/04/30/curious-channels
+				for hookServerCmd.Stdout != nil || hookServerCmd.Stderr != nil {
+					select {
+					case line, open := <-hookServerCmd.Stdout:
+						if !open {
+							hookServerCmd.Stdout = nil
+							continue
+						}
+						fmt.Println(line)
+					case line, open := <-hookServerCmd.Stderr:
+						if !open {
+							hookServerCmd.Stderr = nil
+							continue
+						}
+						fmt.Fprintln(os.Stderr, line)
+					}
+				}
+			}()
+
+			hookServerStatusChan = hookServerCmd.Start()
+		}
 
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{
@@ -102,18 +128,36 @@ If used without --exclude-server, make sure the server is available in this dire
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
-		<-quit
+
+		select {
+		case status := <-hookServerStatusChan:
+			log.Info("hooks server exited",
+				abstractlogger.Int("exit", status.Exit),
+				abstractlogger.Error(status.Error),
+				abstractlogger.Any("startTs", status.StartTs),
+				abstractlogger.Any("stopTs", status.StopTs),
+				abstractlogger.Bool("complete", status.Complete),
+			)
+		case signal := <-quit:
+			log.Info("received interrupt, shutting down", abstractlogger.String("signal", signal.String()))
+		}
+
+		if hooksServerDone != nil {
+			if hookServerCmd != nil {
+				log.Info("shutting down hooks server ...")
+				if err := hookServerCmd.Stop(); err != nil {
+					log.Error("error during hooks server shutdown", abstractlogger.Error(err))
+				}
+				log.Info("hooks server shutdown complete")
+			}
+			// wait for goroutine to print all logs from the hooks server
+			<-hooksServerDone
+		}
 
 		log.Info("shutting down WunderNode ...")
 
 		ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
-
-		if hooksBundler != nil {
-			log.Debug("shutting down hook server ...")
-			hooksBundler.Stop(ctx)
-			log.Debug("hook server shutdown complete")
-		}
 
 		err = n.Shutdown(ctx)
 		if err != nil {

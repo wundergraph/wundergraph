@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/fsnotify/fsnotify"
@@ -86,7 +87,10 @@ func NewBundler(name string, config Config, log abstractlogger.Logger) (*Bundler
 	}, nil
 }
 
-func (b *Bundler) Stop(ctx context.Context) {
+func (b *Bundler) Stop(parentCtx context.Context) {
+	ctx, cancel := context.WithTimeout(parentCtx, 10*time.Second)
+	defer cancel()
+
 	if b.stopped {
 		return
 	}
@@ -443,9 +447,9 @@ func (b *Bundler) runCmd(ctx context.Context, cmd *exec.Cmd) {
 		}
 		// If the command was killed, we exit the main process as well
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			b.log.Fatal("Config Bundler: error executing script", abstractlogger.Error(err), abstractlogger.String("bundler", b.name), abstractlogger.Int("exitCode", exitErr.ExitCode()))
+			b.log.Fatal("Config Bundler: error executing script. Exit server ...", abstractlogger.Error(err), abstractlogger.String("bundler", b.name), abstractlogger.Int("exitCode", exitErr.ExitCode()))
 		} else {
-			b.log.Fatal("Config Bundler: error executing script", abstractlogger.Error(err), abstractlogger.String("bundler", b.name))
+			b.log.Fatal("Config Bundler: error executing script. Exit server ..", abstractlogger.Error(err), abstractlogger.String("bundler", b.name))
 		}
 		return
 	}
