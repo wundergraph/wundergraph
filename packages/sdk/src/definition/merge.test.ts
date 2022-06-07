@@ -417,7 +417,7 @@ test('Should collide because weather and countries API has an enum called Langua
 	expect(() => {
 		mergeApis([], weatherApi, countriesAPI);
 	}).toThrowError(
-		'Schemas could not be merged. Try to define a namespace on the API to avoid collisions. Error: Language.af defined in resolvers, but not in schema'
+		'Schemas could not be merged. Define namespaces on the APIs to avoid type collisions. Error: Language.af defined in resolvers, but not in schema'
 	);
 });
 

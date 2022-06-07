@@ -420,7 +420,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 		});
 	} catch (e: any) {
 		throw new Error(
-			`Schemas could not be merged. Try to define a namespace on the API to avoid collisions. Error: ${e.message}`
+			`Schemas could not be merged. Define namespaces on the APIs to avoid type collisions. Error: ${e.message}`
 		);
 	}
 
