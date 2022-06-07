@@ -129,6 +129,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 		}()
 
+		// either wait for interrupt or wait for server to exit
 		select {
 		case status := <-hookServerStatusChan:
 			log.Info("hooks server exited",
@@ -142,6 +143,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			log.Info("received interrupt, shutting down", abstractlogger.String("signal", signal.String()))
 		}
 
+		// if we received an interrupt, we need to kill the server
 		if hooksServerDone != nil {
 			if hookServerCmd != nil {
 				log.Info("shutting down hooks server ...")
