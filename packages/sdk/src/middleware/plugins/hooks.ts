@@ -5,12 +5,7 @@ import { HooksConfiguration } from '../../configure';
 import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 
 export interface BodyResponse {
-	data?: {
-		spacex_dragons?: {
-			name?: string;
-			active?: boolean;
-		}[];
-	};
+	data?: any;
 	errors?: ReadonlyArray<GraphQLError>;
 }
 

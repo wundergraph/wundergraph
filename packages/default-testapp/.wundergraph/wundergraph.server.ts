@@ -22,6 +22,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 		global: {
 			httpTransport: {
 				onRequest: {
+					enableForAllOperations: true,
 					hook: async (ctx, request) => {
 						return {
 							...request,
