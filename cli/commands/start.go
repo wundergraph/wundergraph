@@ -7,9 +7,10 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"syscall"
 	"time"
 
-	cmd2 "github.com/go-cmd/cmd"
+	gocmd "github.com/go-cmd/cmd"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
@@ -48,11 +49,11 @@ If used without --exclude-server, make sure the server is available in this dire
 			return err
 		}
 
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+		quit := make(chan os.Signal, 2)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
-		var hookServerCmd *cmd2.Cmd
-		var hookServerStatusChan <-chan cmd2.Status
+		var hookServerCmd *gocmd.Cmd
+		var hookServerStatusChan <-chan gocmd.Status
 		var hooksServerDone chan struct{}
 
 		if !excludeServer {
@@ -66,12 +67,12 @@ If used without --exclude-server, make sure the server is available in this dire
 				hooksFile = startServerEntryPoint
 			}
 
-			cmdOptions := cmd2.Options{
+			cmdOptions := gocmd.Options{
 				Buffered:  false,
 				Streaming: true,
 			}
 
-			hookServerCmd = cmd2.NewCmdOptions(cmdOptions, "node", hooksFile)
+			hookServerCmd = gocmd.NewCmdOptions(cmdOptions, "node", hooksFile)
 			hookServerCmd.Env = append(hookServerCmd.Env, os.Environ()...)
 			hookServerCmd.Env = append(hookServerCmd.Env,
 				"START_HOOKS_SERVER=true",
@@ -129,16 +130,27 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 		}()
 
-		// either wait for interrupt or wait for server to exit
+		// either wait for interrupt, wunderNode context cancellation or script to exit
 		select {
 		case status := <-hookServerStatusChan:
-			log.Info("hooks server exited",
-				abstractlogger.Int("exit", status.Exit),
-				abstractlogger.Error(status.Error),
-				abstractlogger.Any("startTs", status.StartTs),
-				abstractlogger.Any("stopTs", status.StopTs),
-				abstractlogger.Bool("complete", status.Complete),
-			)
+			if status.Error != nil {
+				log.Error("hooks server exited with an error",
+					abstractlogger.Int("exit", status.Exit),
+					abstractlogger.Error(status.Error),
+					abstractlogger.Any("startTs", status.StartTs),
+					abstractlogger.Any("stopTs", status.StopTs),
+					abstractlogger.Bool("complete", status.Complete),
+				)
+			} else {
+				log.Error("hooks server exited",
+					abstractlogger.Int("exit", status.Exit),
+					abstractlogger.Any("startTs", status.StartTs),
+					abstractlogger.Any("stopTs", status.StopTs),
+					abstractlogger.Bool("complete", status.Complete),
+				)
+			}
+		case <-ctx.Done():
+			log.Debug("wunderNode, context cancelled")
 		case signal := <-quit:
 			log.Info("received interrupt, shutting down", abstractlogger.String("signal", signal.String()))
 		}
