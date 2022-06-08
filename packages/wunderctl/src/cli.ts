@@ -11,7 +11,7 @@ export const cli = async () => {
 
 	const [, , ...args] = process.argv;
 
-	const subprocess = execa(file, args);
+	const subprocess = execa(file, args, {windowsHide: false});
 	subprocess.stdout?.pipe(process.stdout);
 	subprocess.stderr?.pipe(process.stderr);
 
