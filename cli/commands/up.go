@@ -38,6 +38,9 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
+		quit := make(chan os.Signal, 2)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 		hooksJWT, err := apihandler.CreateHooksJWT(secret)
 		if err != nil {
 			return err
@@ -135,11 +138,10 @@ var upCmd = &cobra.Command{
 			}
 
 			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-				Name:        "hooks-server-runner",
-				Executable:  "node",
-				ScriptArgs:  []string{serverOutFile},
-				FatalOnStop: true,
-				Logger:      log,
+				Name:       "hooks-server-runner",
+				Executable: "node",
+				ScriptArgs: []string{serverOutFile},
+				Logger:     log,
 				ScriptEnv: append(os.Environ(),
 					"START_HOOKS_SERVER=true",
 					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
@@ -165,9 +167,6 @@ var upCmd = &cobra.Command{
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
 		}
 
-		quit := make(chan os.Signal, 2)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{
 				ListenAddr: listenAddr,
@@ -188,7 +187,13 @@ var upCmd = &cobra.Command{
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
-		<-quit
+
+		select {
+		case <-quit:
+			log.Info("received interrupt signal, stopping...")
+		case <-ctx.Done():
+			log.Info("context was canceled, shutdown ...")
+		}
 
 		log.Info("shutting down WunderNode ...")
 

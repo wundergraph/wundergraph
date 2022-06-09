@@ -60,11 +60,10 @@ If used without --exclude-server, make sure the server is available in this dire
 
 			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
 			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-				Name:        "hooks-server-runner",
-				Executable:  "node",
-				ScriptArgs:  []string{serverOutFile},
-				FatalOnStop: true,
-				Logger:      log,
+				Name:       "hooks-server-runner",
+				Executable: "node",
+				ScriptArgs: []string{serverOutFile},
+				Logger:     log,
 				ScriptEnv: append(os.Environ(),
 					"START_HOOKS_SERVER=true",
 					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
@@ -75,7 +74,11 @@ If used without --exclude-server, make sure the server is available in this dire
 			})
 			defer runner.Stop()
 
-			go runner.Run(ctx)
+			go func() {
+				<-runner.Run(ctx)
+				// cancel context when hook server stopped
+				cancel()
+			}()
 		}
 
 		cfg := &wundernodeconfig.Config{
@@ -105,7 +108,12 @@ If used without --exclude-server, make sure the server is available in this dire
 		// load config file once
 		configFileChangeChan <- struct{}{}
 
-		<-quit
+		select {
+		case <-quit:
+			log.Info("received interrupt signal, stopping...")
+		case <-ctx.Done():
+			log.Info("context was canceled, shutdown ...")
+		}
 
 		log.Info("shutting down WunderNode ...")
 

@@ -93,7 +93,9 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 	trigger := func(path string) {
 		pathset.Add(path)
 		debounce(func() {
-			if err := fn(pathset.Flush()); err != nil {
+			paths := pathset.Flush()
+			b.log.Debug("File change detected", abstractlogger.Strings("paths", paths))
+			if err := fn(paths); err != nil {
 				errorCh <- err
 			}
 		})

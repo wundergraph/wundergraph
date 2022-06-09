@@ -10,12 +10,11 @@ import (
 )
 
 type Config struct {
-	Name        string
-	Executable  string
-	ScriptArgs  []string
-	ScriptEnv   []string
-	FatalOnStop bool
-	Logger      abstractlogger.Logger
+	Name       string
+	Executable string
+	ScriptArgs []string
+	ScriptEnv  []string
+	Logger     abstractlogger.Logger
 }
 
 type ScriptRunner struct {
@@ -31,12 +30,11 @@ type ScriptRunner struct {
 
 func NewScriptRunner(config *Config) *ScriptRunner {
 	return &ScriptRunner{
-		name:        config.Name,
-		log:         config.Logger,
-		fatalOnStop: config.FatalOnStop,
-		executable:  config.Executable,
-		scriptArgs:  config.ScriptArgs,
-		scriptEnv:   config.ScriptEnv,
+		name:       config.Name,
+		log:        config.Logger,
+		executable: config.Executable,
+		scriptArgs: config.ScriptArgs,
+		scriptEnv:  config.ScriptEnv,
 	}
 }
 
@@ -61,13 +59,13 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-ctx.Done():
 			err := b.cmd.Stop()
 			if err != nil {
-				b.log.Error("Config Bundler: stopping script",
+				b.log.Error("Script Runner: stopping script",
 					abstractlogger.String("bundler", b.name),
 					abstractlogger.Error(err),
 				)
 			}
 			status := b.cmd.Status()
-			b.log.Debug("Config Bundler: context cancelled",
+			b.log.Debug("Script Runner: context cancelled",
 				abstractlogger.String("bundler", b.name),
 				abstractlogger.Int("exit", status.Exit),
 				abstractlogger.Any("startTs", status.StartTs),
@@ -77,8 +75,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-b.cmd.Done():
 			status := b.cmd.Status()
 			if status.Error != nil {
-				// exit server because bundler script is required
-				b.log.Fatal("Config Bundler: script exited with error",
+				b.log.Error("Script Runner: script exited with error",
 					abstractlogger.String("bundler", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
@@ -87,24 +84,13 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 					abstractlogger.Bool("complete", status.Complete),
 				)
 			} else {
-				b.log.Debug("Config Bundler: script done",
+				b.log.Debug("Script Runner: script done",
 					abstractlogger.String("bundler", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Any("startTs", status.StartTs),
 					abstractlogger.Any("stopTs", status.StopTs),
 					abstractlogger.Bool("complete", status.Complete),
 				)
-				// exit server even when the script has exited without an error
-				// because bundler script is required as long running process
-				if b.fatalOnStop && status.Exit != 0 {
-					b.log.Fatal("Config Bundler: Script has stopped. Server is exited because script is required as long running process",
-						abstractlogger.String("bundler", b.name),
-						abstractlogger.Int("exit", status.Exit),
-						abstractlogger.Any("startTs", status.StartTs),
-						abstractlogger.Any("stopTs", status.StopTs),
-						abstractlogger.Bool("complete", status.Complete),
-					)
-				}
 			}
 		}
 	}()
