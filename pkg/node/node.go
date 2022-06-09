@@ -9,12 +9,10 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"path"
 	"strings"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
@@ -82,6 +80,7 @@ type options struct {
 	enableDebugMode     bool
 	forceHttpsRedirects bool
 	enableIntrospection bool
+	configFileChange    chan struct{}
 	globalRateLimit     struct {
 		enable      bool
 		requests    int
@@ -139,6 +138,12 @@ func WithHooksSecret(secret []byte) Option {
 	}
 }
 
+func WithConfigFileChange(event chan struct{}) Option {
+	return func(options *options) {
+		options.configFileChange = event
+	}
+}
+
 func WithDebugMode(enable bool) Option {
 	return func(options *options) {
 		options.enableDebugMode = enable
@@ -166,8 +171,10 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		n.log.Info("api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
-		go n.reconfigureOnConfigUpdate()
-		go n.filePollConfig(*options.fileSystemConfig)
+		if options.configFileChange != nil {
+			go n.reconfigureOnConfigUpdate()
+			go n.filePollConfig(*options.fileSystemConfig)
+		}
 	} else {
 		n.log.Info("api config: network polling")
 		go n.reconfigureOnConfigUpdate()
@@ -552,50 +559,19 @@ func (n *Node) netPollConfig() {
 }
 
 func (n *Node) filePollConfig(filePath string) {
-
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		n.log.Debug("filePollConfig - config file not found, retrying in 5s",
-			abstractlogger.String("config_path", filePath),
-		)
-		<-time.After(time.Second * 5)
-		n.filePollConfig(filePath)
-		return
-	}
-
-	n.reloadFileConfig(filePath)
-
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		n.log.Fatal("filePollConfig fsnotify.NewWatcher", abstractlogger.Error(err))
-	}
-	defer watcher.Close()
-
 	go func() {
 		for {
 			select {
 			case <-n.ctx.Done():
 				return
-			case event, ok := <-watcher.Events:
+			case _, ok := <-n.options.configFileChange:
 				if !ok {
 					return
 				}
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					n.log.Debug("filePollConfig watcher.Events: Write")
-					n.reloadFileConfig(filePath)
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				n.log.Debug("filePollConfig watcher.Errors", abstractlogger.Error(err))
+				n.reloadFileConfig(filePath)
 			}
 		}
 	}()
-
-	err = watcher.Add(filePath)
-	if err != nil {
-		n.log.Fatal("filePollConfig watcher.Add", abstractlogger.Error(err))
-	}
 
 	<-n.ctx.Done()
 }

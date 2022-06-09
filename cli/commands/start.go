@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	gocmd "github.com/go-cmd/cmd"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
@@ -39,6 +39,9 @@ If used without --exclude-server, make sure the server is available in this dire
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
+		quit := make(chan os.Signal, 2)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
 			return err
@@ -49,64 +52,30 @@ If used without --exclude-server, make sure the server is available in this dire
 			return err
 		}
 
-		quit := make(chan os.Signal, 2)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-		var hookServerCmd *gocmd.Cmd
-		var hookServerStatusChan <-chan gocmd.Status
-		var hooksServerDone chan struct{}
-
 		if !excludeServer {
 			wd, err := os.Getwd()
 			if err != nil {
 				log.Fatal("could not get your current working directory")
 			}
 
-			hooksFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
-			if startServerEntryPoint != "" {
-				hooksFile = startServerEntryPoint
-			}
+			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
+			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+				Name:        "hooks-server-runner",
+				Executable:  "node",
+				ScriptArgs:  []string{serverOutFile},
+				FatalOnStop: true,
+				Logger:      log,
+				ScriptEnv: append(os.Environ(),
+					"START_HOOKS_SERVER=true",
+					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
+					fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
+					fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+				),
+			})
+			defer runner.Stop()
 
-			cmdOptions := gocmd.Options{
-				Buffered:  false,
-				Streaming: true,
-			}
-
-			hookServerCmd = gocmd.NewCmdOptions(cmdOptions, "node", hooksFile)
-			hookServerCmd.Env = append(hookServerCmd.Env, os.Environ()...)
-			hookServerCmd.Env = append(hookServerCmd.Env,
-				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
-				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
-			)
-
-			hooksServerDone = make(chan struct{})
-
-			go func() {
-				defer close(hooksServerDone)
-				// Done when both channels have been closed
-				// https://dave.cheney.net/2013/04/30/curious-channels
-				for hookServerCmd.Stdout != nil || hookServerCmd.Stderr != nil {
-					select {
-					case line, open := <-hookServerCmd.Stdout:
-						if !open {
-							hookServerCmd.Stdout = nil
-							continue
-						}
-						fmt.Println(line)
-					case line, open := <-hookServerCmd.Stderr:
-						if !open {
-							hookServerCmd.Stderr = nil
-							continue
-						}
-						fmt.Fprintln(os.Stderr, line)
-					}
-				}
-			}()
-
-			hookServerStatusChan = hookServerCmd.Start()
+			go runner.Run(ctx)
 		}
 
 		cfg := &wundernodeconfig.Config{
@@ -114,11 +83,14 @@ If used without --exclude-server, make sure the server is available in this dire
 				ListenAddr: listenAddr,
 			},
 		}
+
+		configFileChangeChan := make(chan struct{})
 		n := node.New(ctx, BuildInfo, cfg, log)
 
 		go func() {
 			err := n.StartBlocking(
-				node.WithFileSystemConfig(path.Join(wundergraphDir, "generated", "wundergraph.config.json")),
+				node.WithConfigFileChange(configFileChangeChan),
+				node.WithFileSystemConfig(wunderGraphConfigFile),
 				node.WithHooksSecret(secret),
 				node.WithDebugMode(enableDebugMode),
 				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
@@ -130,43 +102,10 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 		}()
 
-		// either wait for interrupt, wunderNode context cancellation or script to exit
-		select {
-		case status := <-hookServerStatusChan:
-			if status.Error != nil {
-				log.Error("hooks server exited with an error",
-					abstractlogger.Int("exit", status.Exit),
-					abstractlogger.Error(status.Error),
-					abstractlogger.Any("startTs", status.StartTs),
-					abstractlogger.Any("stopTs", status.StopTs),
-					abstractlogger.Bool("complete", status.Complete),
-				)
-			} else {
-				log.Error("hooks server exited",
-					abstractlogger.Int("exit", status.Exit),
-					abstractlogger.Any("startTs", status.StartTs),
-					abstractlogger.Any("stopTs", status.StopTs),
-					abstractlogger.Bool("complete", status.Complete),
-				)
-			}
-		case <-ctx.Done():
-			log.Debug("wunderNode, context cancelled")
-		case signal := <-quit:
-			log.Info("received interrupt, shutting down", abstractlogger.String("signal", signal.String()))
-		}
+		// load config file once
+		configFileChangeChan <- struct{}{}
 
-		// if we received an interrupt, we need to kill the server
-		if hooksServerDone != nil {
-			if hookServerCmd != nil {
-				log.Info("shutting down hooks server ...")
-				if err := hookServerCmd.Stop(); err != nil {
-					log.Error("error during hooks server shutdown", abstractlogger.Error(err))
-				}
-				log.Info("hooks server shutdown complete")
-			}
-			// wait for goroutine to print all logs from the hooks server
-			<-hooksServerDone
-		}
+		<-quit
 
 		log.Info("shutting down WunderNode ...")
 
