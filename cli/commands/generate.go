@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -62,9 +61,7 @@ Use this command if you only want to generate the configuration`,
 				EntryPoint: serverEntryPoint,
 				OutFile:    serverOutFile,
 				Logger:     log,
-				WatchPaths: []string{
-					filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
-				},
+				WatchPaths: []string{},
 			})
 
 			go hooksBundler.Bundle(ctx)
