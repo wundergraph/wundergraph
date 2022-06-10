@@ -486,6 +486,7 @@ func (n *Node) reconfigureOnConfigUpdate() {
 		select {
 		case config := <-n.configCh:
 			n.log.Debug("updated config -> (re-)configuring server")
+			_ = n.Close()
 			go n.startServer(config)
 		case <-n.ctx.Done():
 			return
