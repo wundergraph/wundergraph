@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/andybalholm/brotli v1.0.2
+	github.com/bep/debounce v1.2.1
 	github.com/buger/jsonparser v1.1.1
 	github.com/cespare/xxhash v1.1.0
 	github.com/coreos/go-oidc/v3 v3.0.0
@@ -14,6 +15,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gavv/httpexpect/v2 v2.3.0
+	github.com/go-cmd/cmd v1.4.1
 	github.com/go-redis/cache/v8 v8.4.1
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/golang-jwt/jwt/v4 v4.2.0
@@ -55,13 +57,11 @@ require (
 
 require (
 	github.com/ajg/form v1.5.1 // indirect
-	github.com/bep/debounce v1.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/go-cmd/cmd v1.4.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect

@@ -11,9 +11,13 @@ export const cli = async () => {
 
 	const [, , ...args] = process.argv;
 
-	const subprocess = execa(file, args, {windowsHide: false});
+	const subprocess = execa(file, args, { windowsHide: false });
 	subprocess.stdout?.pipe(process.stdout);
 	subprocess.stderr?.pipe(process.stderr);
+
+	process.once('SIGINT', () => {
+		subprocess.cancel();
+	});
 
 	try {
 		await subprocess;
