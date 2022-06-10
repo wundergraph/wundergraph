@@ -19,6 +19,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+// build upon https://github.com/livebud/bud/blob/main/package/watcher/watcher.go
+
 var Stop = errors.New("stop watching")
 
 // Arbitrarily picked after some manual testing. OSX is pretty fast, but Ubuntu
@@ -94,7 +96,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		pathset.Add(path)
 		debounce(func() {
 			paths := pathset.Flush()
-			b.log.Debug("File change detected", abstractlogger.Strings("paths", paths))
+			b.log.Debug("File change detected", abstractlogger.String("watcherName", b.name), abstractlogger.Strings("paths", paths))
 			if err := fn(paths); err != nil {
 				errorCh <- err
 			}

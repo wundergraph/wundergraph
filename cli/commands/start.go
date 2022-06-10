@@ -76,6 +76,7 @@ If used without --exclude-server, make sure the server is available in this dire
 
 			go func() {
 				<-runner.Run(ctx)
+				log.Error("hook server excited. Initialize WunderNode shutdown")
 				// cancel context when hook server stopped
 				cancel()
 			}()
@@ -110,22 +111,22 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		select {
 		case <-quit:
-			log.Info("received interrupt signal, stopping...")
+			log.Info("received interrupt signal. Initialize WunderNode shutdown ...")
 		case <-ctx.Done():
-			log.Info("context was canceled, shutdown ...")
+			log.Info("context was canceled. Initialize WunderNode shutdown ....")
 		}
 
 		log.Info("shutting down WunderNode ...")
 
-		ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
+		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 
 		err = n.Shutdown(ctx)
 		if err != nil {
-			log.Error("error during wunderNode shutdown", abstractlogger.Error(err))
+			log.Error("error during WunderNode shutdown", abstractlogger.Error(err))
 		}
 
-		log.Info("wunderNode shutdown complete")
+		log.Info("WunderNode shutdown complete")
 
 		return nil
 	},

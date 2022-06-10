@@ -57,7 +57,7 @@ var upCmd = &cobra.Command{
 		)
 
 		configFileChangeChan := make(chan struct{})
-		configWatcher := watcher.NewWatcher("wundergraph config", &watcher.Config{
+		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []string{
 				filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
 			},
@@ -190,19 +190,19 @@ var upCmd = &cobra.Command{
 
 		select {
 		case <-quit:
-			log.Info("received interrupt signal, stopping...")
+			log.Info("received interrupt signal. Initialize WunderNode shutdown ...")
 		case <-ctx.Done():
-			log.Info("context was canceled, shutdown ...")
+			log.Info("context was canceled. Initialize WunderNode shutdown ....")
 		}
 
 		log.Info("shutting down WunderNode ...")
 
 		err = n.Shutdown(ctx)
 		if err != nil {
-			log.Error("error during wunderNode shutdown", abstractlogger.Error(err))
+			log.Error("error during WunderNode shutdown", abstractlogger.Error(err))
 		}
 
-		log.Info("wunderNode shutdown complete")
+		log.Info("WunderNode shutdown complete")
 
 		return nil
 	},
