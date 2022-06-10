@@ -59,17 +59,17 @@ func NewBundler(config Config) *Bundler {
 func (b *Bundler) Bundle(ctx context.Context) {
 	result := b.initialBuild()
 	if len(result.Errors) != 0 {
-		b.log.Fatal("Bundler: initial build failed",
-			abstractlogger.String("bundler", b.name),
+		b.log.Fatal("Initial build failed",
+			abstractlogger.String("bundlerName", b.name),
 			abstractlogger.Any("errors", result.Errors),
 		)
 	} else {
-		b.log.Debug("Bundler: initial build successful", abstractlogger.String("bundler", b.name))
+		b.log.Debug("Initial build successful", abstractlogger.String("bundlerName", b.name))
 		b.BuildDoneChan <- struct{}{}
 	}
 	if len(b.watchPaths) > 0 {
-		b.log.Debug("Bundler: watching for file changes",
-			abstractlogger.String("bundler", b.name),
+		b.log.Debug("Watching for file changes",
+			abstractlogger.String("bundlerName", b.name),
 			abstractlogger.String("outFile", b.outFile),
 			abstractlogger.Strings("externalImports", b.externalImports),
 			abstractlogger.Strings("fileLoaders", b.fileLoaders),
@@ -136,9 +136,8 @@ func (b *Bundler) initialBuild() api.BuildResult {
 					defer b.mu.Unlock()
 					b.watchPaths = append(b.watchPaths, file)
 				} else {
-					b.log.Fatal("Bundler: watching limit exceeded", abstractlogger.String("bundler", b.name), abstractlogger.Int("limit", watchFileLimit), abstractlogger.Error(err))
+					b.log.Error("Bundler watching limit exceeded", abstractlogger.String("bundlerName", b.name), abstractlogger.Int("limit", watchFileLimit), abstractlogger.Error(err))
 				}
-
 			}
 		}
 	}
@@ -187,8 +186,8 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 			return nil
 		})
 		if err != nil {
-			b.log.Error("watcher",
-				abstractlogger.String("watcher", b.name),
+			b.log.Error("Could not watch files",
+				abstractlogger.String("watcherName", b.name),
 				abstractlogger.Error(err),
 			)
 		}

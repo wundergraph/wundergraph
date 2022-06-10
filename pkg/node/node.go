@@ -165,10 +165,10 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	n.options = options
 
 	if options.staticConfig != nil {
-		n.log.Info("api config: static")
+		n.log.Info("Api config: static")
 		go n.startServer(*options.staticConfig)
 	} else if options.fileSystemConfig != nil {
-		n.log.Info("api config: file polling",
+		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
 		if options.configFileChange != nil {
@@ -176,7 +176,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			go n.filePollConfig(*options.fileSystemConfig)
 		}
 	} else {
-		n.log.Info("api config: network polling")
+		n.log.Info("Api config: network polling")
 		go n.reconfigureOnConfigUpdate()
 		go n.netPollConfig()
 	}
@@ -485,7 +485,7 @@ func (n *Node) reconfigureOnConfigUpdate() {
 	for {
 		select {
 		case config := <-n.configCh:
-			n.log.Debug("updated config -> (re-)configuring server")
+			n.log.Debug("Updated config -> (re-)configuring server")
 			_ = n.Close()
 			go n.startServer(config)
 		case <-n.ctx.Done():

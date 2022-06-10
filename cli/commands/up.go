@@ -49,7 +49,7 @@ var upCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		log.Info("starting WunderNode",
+		log.Info("Starting WunderNode",
 			abstractlogger.String("version", BuildInfo.Version),
 			abstractlogger.String("commit", BuildInfo.Commit),
 			abstractlogger.String("date", BuildInfo.Date),
@@ -134,7 +134,7 @@ var upCmd = &cobra.Command{
 
 			wd, err := os.Getwd()
 			if err != nil {
-				log.Fatal("could not get your current working directory")
+				log.Fatal("Could not get your current working directory")
 			}
 
 			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
@@ -190,16 +190,16 @@ var upCmd = &cobra.Command{
 
 		select {
 		case <-quit:
-			log.Info("received interrupt signal. Initialize WunderNode shutdown ...")
+			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...")
 		case <-ctx.Done():
-			log.Info("context was canceled. Initialize WunderNode shutdown ....")
+			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
 
-		log.Info("shutting down WunderNode ...")
+		log.Info("Shutting down WunderNode ...")
 
 		err = n.Shutdown(ctx)
 		if err != nil {
-			log.Error("error during WunderNode shutdown", abstractlogger.Error(err))
+			log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
 		}
 
 		log.Info("WunderNode shutdown complete")

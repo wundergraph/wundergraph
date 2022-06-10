@@ -59,14 +59,14 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-ctx.Done():
 			err := b.cmd.Stop()
 			if err != nil {
-				b.log.Error("Script Runner: stopping script",
-					abstractlogger.String("bundler", b.name),
+				b.log.Error("Stopping script runner",
+					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Error(err),
 				)
 			}
 			status := b.cmd.Status()
-			b.log.Debug("Script Runner: context cancelled",
-				abstractlogger.String("bundler", b.name),
+			b.log.Debug("Script runner context cancelled",
+				abstractlogger.String("runnerName", b.name),
 				abstractlogger.Int("exit", status.Exit),
 				abstractlogger.Any("startTs", status.StartTs),
 				abstractlogger.Any("stopTs", status.StopTs),
@@ -75,8 +75,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-b.cmd.Done():
 			status := b.cmd.Status()
 			if status.Error != nil {
-				b.log.Error("Script Runner: script exited with error",
-					abstractlogger.String("bundler", b.name),
+				b.log.Error("Script runner exited with error",
+					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
 					abstractlogger.Any("startTs", status.StartTs),
@@ -84,8 +84,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 					abstractlogger.Bool("complete", status.Complete),
 				)
 			} else {
-				b.log.Debug("Script Runner: script done",
-					abstractlogger.String("bundler", b.name),
+				b.log.Debug("Script runner is done",
+					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Any("startTs", status.StartTs),
 					abstractlogger.Any("stopTs", status.StopTs),
