@@ -7,13 +7,14 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
-	"github.com/wundergraph/wundergraph/pkg/bundleconfig"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
@@ -38,6 +39,9 @@ If used without --exclude-server, make sure the server is available in this dire
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
+		quit := make(chan os.Signal, 2)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
 			return err
@@ -48,21 +52,18 @@ If used without --exclude-server, make sure the server is available in this dire
 			return err
 		}
 
-		var hooksBundler *bundleconfig.Bundler
-
 		if !excludeServer {
 			wd, err := os.Getwd()
 			if err != nil {
-				log.Fatal("could not get your current working directory")
+				log.Fatal("Could not get your current working directory")
 			}
 
-			hooksFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
-			if startServerEntryPoint != "" {
-				hooksFile = startServerEntryPoint
-			}
-			hooksBundler, err = bundleconfig.NewBundler("server", bundleconfig.Config{
-				EntryPoint: serverEntryPoint,
-				OutFile:    hooksFile,
+			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
+			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+				Name:       "hooks-server-runner",
+				Executable: "node",
+				ScriptArgs: []string{serverOutFile},
+				Logger:     log,
 				ScriptEnv: append(os.Environ(),
 					"START_HOOKS_SERVER=true",
 					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
@@ -70,28 +71,30 @@ If used without --exclude-server, make sure the server is available in this dire
 					fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 				),
-				SkipBuild: true,
-				SkipWatch: true,
-			}, log)
-			if err != nil {
-				return err
-			}
-			go hooksBundler.Run()
-		}
+			})
+			defer runner.Stop()
 
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
+			go func() {
+				<-runner.Run(ctx)
+				log.Error("Hook server excited. Initialize WunderNode shutdown")
+				// cancel context when hook server stopped
+				cancel()
+			}()
+		}
 
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{
 				ListenAddr: listenAddr,
 			},
 		}
+
+		configFileChangeChan := make(chan struct{})
 		n := node.New(ctx, BuildInfo, cfg, log)
 
 		go func() {
 			err := n.StartBlocking(
-				node.WithFileSystemConfig(path.Join(wundergraphDir, "generated", "wundergraph.config.json")),
+				node.WithConfigFileChange(configFileChangeChan),
+				node.WithFileSystemConfig(wunderGraphConfigFile),
 				node.WithHooksSecret(secret),
 				node.WithDebugMode(enableDebugMode),
 				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
@@ -102,25 +105,28 @@ If used without --exclude-server, make sure the server is available in this dire
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
-		<-quit
 
-		log.Info("shutting down WunderNode ...")
+		// load config file once
+		configFileChangeChan <- struct{}{}
 
-		ctx, cancel = context.WithTimeout(context.Background(), 60*time.Second)
-		defer cancel()
-
-		if hooksBundler != nil {
-			log.Debug("shutting down hook server ...")
-			hooksBundler.Stop(ctx)
-			log.Debug("hook server shutdown complete")
+		select {
+		case <-quit:
+			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...")
+		case <-ctx.Done():
+			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
+
+		log.Info("Shutting down WunderNode ...")
+
+		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
+		defer cancel()
 
 		err = n.Shutdown(ctx)
 		if err != nil {
-			log.Error("error during wunderNode shutdown", abstractlogger.Error(err))
+			log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
 		}
 
-		log.Info("wunderNode shutdown complete")
+		log.Info("WunderNode shutdown complete")
 
 		return nil
 	},

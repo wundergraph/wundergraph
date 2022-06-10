@@ -7,13 +7,15 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
-
-	"github.com/wundergraph/wundergraph/pkg/bundleconfig"
+	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
@@ -36,39 +38,10 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
+		quit := make(chan os.Signal, 2)
+		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+
 		hooksJWT, err := apihandler.CreateHooksJWT(secret)
-		if err != nil {
-			return err
-		}
-
-		var hooksBundler *bundleconfig.Bundler
-
-		onFirstRunChan := make(chan struct{})
-
-		log.Info("starting WunderNode",
-			abstractlogger.String("version", BuildInfo.Version),
-			abstractlogger.String("commit", BuildInfo.Commit),
-			abstractlogger.String("date", BuildInfo.Date),
-			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
-		)
-		configBundler, err := bundleconfig.NewBundler("config", bundleconfig.Config{
-			EntryPoint: entryPoint,
-			WatchPaths: []string{
-				path.Join(wundergraphDir, "operations"),
-			},
-			BlockOnBuild: true,
-			IgnorePaths: []string{
-				"generated",
-				"node_modules",
-			},
-			OutFile: path.Join(wundergraphDir, "generated", "bundle", "config.js"),
-			ScriptEnv: append(os.Environ(),
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
-			),
-			OnFirstRun:                  onFirstRunChan,
-			EnableProcessEnvUsagePlugin: true,
-		}, log)
 		if err != nil {
 			return err
 		}
@@ -76,26 +49,99 @@ var upCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		go configBundler.Run()
+		log.Info("Starting WunderNode",
+			abstractlogger.String("version", BuildInfo.Version),
+			abstractlogger.String("commit", BuildInfo.Commit),
+			abstractlogger.String("date", BuildInfo.Date),
+			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
+		)
 
-		<-onFirstRunChan
+		configFileChangeChan := make(chan struct{})
+		configWatcher := watcher.NewWatcher("config", &watcher.Config{
+			WatchPaths: []string{
+				filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
+			},
+		}, log)
 
-		wd, err := os.Getwd()
-		if err != nil {
-			log.Fatal("could not get your current working directory")
-		}
+		go func() {
+			err := configWatcher.Watch(ctx, func(paths []string) error {
+				configFileChangeChan <- struct{}{}
+				return nil
+			})
+			if err != nil {
+				log.Error("watcher",
+					abstractlogger.String("watcher", "wundergraph config"),
+					abstractlogger.Error(err),
+				)
+			}
+		}()
+
+		configOutFile := path.Join(wundergraphDir, "generated", "bundle", "config.js")
+		configBundler := bundler.NewBundler(bundler.Config{
+			Name:       "config-bundler",
+			EntryPoint: entryPoint,
+			OutFile:    configOutFile,
+			Logger:     log,
+			WatchPaths: []string{
+				path.Join(wundergraphDir, "operations"),
+			},
+			IgnorePaths: []string{
+				"generated",
+				"node_modules",
+			},
+		})
+
+		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+			Name:       "config-runner",
+			Executable: "node",
+			ScriptArgs: []string{configOutFile},
+			Logger:     log,
+			ScriptEnv: append(os.Environ(),
+				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			),
+		})
+		defer configRunner.Stop()
+
+		go configBundler.Bundle(ctx)
+
+		<-configBundler.BuildDoneChan
+
+		<-configRunner.Run(ctx)
+
+		go func() {
+			for {
+				select {
+				case <-configBundler.BuildDoneChan:
+					log.Debug("Configuration change detected")
+					<-configRunner.Run(ctx)
+				}
+			}
+		}()
 
 		if _, err := os.Stat(serverEntryPoint); err == nil {
-			hooksBundler, err = bundleconfig.NewBundler("server", bundleconfig.Config{
-				EntryPoint: serverEntryPoint,
+			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
+			hooksBundler := bundler.NewBundler(bundler.Config{
+				Name:                  "server-bundler",
+				EntryPoint:            serverEntryPoint,
+				OutFile:               serverOutFile,
+				SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
+				Logger:                log,
 				WatchPaths: []string{
-					// the server relies on wundergraph.config.json
-					// the file is produced by the config bundler
 					filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
 				},
-				IgnorePaths:           []string{"node_modules"},
-				SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
-				OutFile:               path.Join(wundergraphDir, "generated", "bundle", "server.js"),
+			})
+
+			wd, err := os.Getwd()
+			if err != nil {
+				log.Fatal("Could not get your current working directory")
+			}
+
+			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+				Name:       "hooks-server-runner",
+				Executable: "node",
+				ScriptArgs: []string{serverOutFile},
+				Logger:     log,
 				ScriptEnv: append(os.Environ(),
 					"START_HOOKS_SERVER=true",
 					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
@@ -103,17 +149,23 @@ var upCmd = &cobra.Command{
 					fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 				),
-			}, log)
-			if err != nil {
-				return err
-			}
-			go hooksBundler.Run()
+			})
+			defer runner.Stop()
+
+			go func() {
+				for {
+					select {
+					case <-hooksBundler.BuildDoneChan:
+						log.Debug("Hook server change detected -> (re-)configuring server\n")
+						runner.Run(ctx)
+					}
+				}
+			}()
+
+			hooksBundler.Bundle(ctx)
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
 		}
-
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, os.Interrupt)
 
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{
@@ -123,6 +175,7 @@ var upCmd = &cobra.Command{
 		n := node.New(ctx, BuildInfo, cfg, log)
 		go func() {
 			err := n.StartBlocking(
+				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(wunderGraphConfigFile),
 				node.WithDebugMode(enableDebugMode),
 				node.WithInsecureCookies(),
@@ -134,26 +187,22 @@ var upCmd = &cobra.Command{
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
-		<-quit
 
-		log.Info("shutting down WunderNode ...")
-
-		configBundler.Stop(ctx)
-
-		if hooksBundler != nil {
-			log.Debug("shutting down hook server ...")
-			hooksBundler.Stop(ctx)
-			log.Debug("hook server shutdown complete")
+		select {
+		case <-quit:
+			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...")
+		case <-ctx.Done():
+			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
 
-		fmt.Println("WunderNode stopped")
+		log.Info("Shutting down WunderNode ...")
 
 		err = n.Shutdown(ctx)
 		if err != nil {
-			log.Error("error during wunderNode shutdown", abstractlogger.Error(err))
+			log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
 		}
 
-		log.Info("wunderNode shutdown complete")
+		log.Info("WunderNode shutdown complete")
 
 		return nil
 	},

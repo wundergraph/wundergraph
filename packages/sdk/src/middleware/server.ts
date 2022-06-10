@@ -1,3 +1,6 @@
+import { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import FastifyGraceful from 'fastify-graceful-shutdown';
+import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
 import Fastify, {
@@ -10,7 +13,6 @@ import Fastify, {
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import { buildInternalClient } from './internal-client';
-import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import path from 'path';
 import fs from 'fs';
 import { middlewarePort } from '../env';
@@ -211,6 +213,12 @@ export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, 
 		}
 	);
 
+	fastify.register(FastifyGraceful);
+	await fastify.after();
+	fastify.gracefulShutdown((signal, next) => {
+		fastify.log.info('graceful shutdown', { signal });
+		next();
+	});
 	fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
 	await fastify.after();
 	fastify.log.info('Hooks plugin registered');
@@ -227,3 +235,7 @@ export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, 
 
 	return fastify.listen(SERVER_PORT, '127.0.0.1');
 };
+
+process.on('uncaughtExceptionMonitor', (err, origin) => {
+	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
+});
