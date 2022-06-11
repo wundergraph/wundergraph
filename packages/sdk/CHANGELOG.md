@@ -3,35 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.92.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.92.1...@wundergraph/sdk@0.92.2) (2022-06-11)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
 ## [0.92.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.92.0...@wundergraph/sdk@0.92.1) (2022-06-10)
 
 **Note:** Version bump only for package @wundergraph/sdk
 
-
-
-
-
 ## [0.92.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.91.5...@wundergraph/sdk@0.92.0) (2022-06-10)
-
 
 ### Features
 
 * **server:** reimplement bundling, watcher, script runner ([#32](https://github.com/wundergraph/wundergraph/issues/32)) ([594af1d](https://github.com/wundergraph/wundergraph/commit/594af1d3b53c1e9b12dd21bd79a4cc8a51784c3a))
 
-
 ### Bug Fixes
 
 * add test for schema merge conflict, improve error message ([#27](https://github.com/wundergraph/wundergraph/issues/27)) ([7f41a65](https://github.com/wundergraph/wundergraph/commit/7f41a651eb0975c92fb2b8fbe345fe7062c35824))
 
-
-
 ## [0.91.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.91.4...@wundergraph/sdk@0.91.5) (2022-06-04)
 
 **Note:** Version bump only for package @wundergraph/sdk
-
-
-
-
 
 ## [0.91.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.91.3...@wundergraph/sdk@0.91.4) (2022-06-02)
 
