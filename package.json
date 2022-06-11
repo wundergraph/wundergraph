@@ -24,8 +24,7 @@
     "ci:publish:packages-next": "lerna publish prerelease --sync-workspace-lock --conventional-commits --create-release github --allow-branch next --yes --message=\"chore(release): Publish next [skip ci]\"",
     "publish:engine": "release-it --git.requireBranch=main",
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
-    "prepare": "husky install",
-    "lerna": "lerna"
+    "prepare": "husky install"
   },
   "engines": {
     "node": ">=16.0.0",
