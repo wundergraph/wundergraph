@@ -243,12 +243,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			async (request, reply) => {
 				reply.type('application/json').code(200);
 				try {
-					const hooksArgs: any[] = [request.ctx];
-					if (request.body.input && Object.keys(request.body.input).length > 0) {
-						hooksArgs.push(request.body.input);
-					}
-					hooksArgs.push(request.body.response);
-					const mutatedResponse = await config?.queries?.[operationName]?.mutatingPostResolve?.(...hooksArgs);
+					const hasInput = request.body.input && Object.keys(request.body.input).length > 0;
+					const hooksArgs = hasInput ? [request.body.input, request.body.response] : [request.body.response];
+					const mutatedResponse = await config?.queries?.[operationName]?.mutatingPostResolve?.(
+						request.ctx,
+						...hooksArgs
+					);
 					return {
 						op: operationName,
 						hook: 'mutatingPostResolve',
@@ -327,12 +327,9 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			async (request, reply) => {
 				reply.type('application/json').code(200);
 				try {
-					const hooksArgs: any[] = [request.ctx];
-					if (request.body.input && Object.keys(request.body.input).length > 0) {
-						hooksArgs.push(request.body.input);
-					}
-					hooksArgs.push(request.body.response);
-					await config?.mutations?.[operationName]?.postResolve?.(...hooksArgs);
+					const hasInput = request.body.input && Object.keys(request.body.input).length > 0;
+					const hooksArgs = hasInput ? [request.body.input, request.body.response] : [request.body.response];
+					await config?.mutations?.[operationName]?.postResolve?.(request.ctx, ...hooksArgs);
 					return {
 						op: operationName,
 						hook: 'postResolve',
@@ -373,12 +370,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			async (request, reply) => {
 				reply.type('application/json').code(200);
 				try {
-					const hooksArgs: any[] = [request.ctx];
-					if (request.body.input && Object.keys(request.body.input).length > 0) {
-						hooksArgs.push(request.body.input);
-					}
-					hooksArgs.push(request.body.response);
-					const mutatedResponse = await config?.mutations?.[operationName]?.mutatingPostResolve?.(...hooksArgs);
+					const hasInput = request.body.input && Object.keys(request.body.input).length > 0;
+					const hooksArgs = hasInput ? [request.body.input, request.body.response] : [request.body.response];
+					const mutatedResponse = await config?.mutations?.[operationName]?.mutatingPostResolve?.(
+						request.ctx,
+						...hooksArgs
+					);
 					return {
 						op: operationName,
 						hook: 'mutatingPostResolve',
