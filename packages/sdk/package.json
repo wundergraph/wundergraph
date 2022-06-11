@@ -29,7 +29,6 @@
   },
   "scripts": {
     "clean": "rimraf ./dist",
-    "version": "pnpm install --filter=\"@wundergraph/sdk\" --lockfile-only && git add ../../pnpm-lock.yaml",
     "build": "tsc",
     "test": "jest",
     "test:int": "TEST_INTEGRATION=true jest"
@@ -56,8 +55,8 @@
     "@apollo/federation": "^0.36.2",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
-    "@wundergraph/protobuf": "^0.91.1",
-    "@wundergraph/wunderctl": "^0.91.1",
+    "@wundergraph/protobuf": "workspace:^0.91.1",
+    "@wundergraph/wunderctl": "workspace:^0.91.1",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
