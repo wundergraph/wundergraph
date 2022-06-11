@@ -110,8 +110,10 @@ If used without --exclude-server, make sure the server is available in this dire
 		configFileChangeChan <- struct{}{}
 
 		select {
-		case <-quit:
-			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...")
+		case signal := <-quit:
+			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...",
+				abstractlogger.String("signal", signal.String()),
+			)
 		case <-ctx.Done():
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}

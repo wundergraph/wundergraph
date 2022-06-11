@@ -189,8 +189,10 @@ var upCmd = &cobra.Command{
 		}()
 
 		select {
-		case <-quit:
-			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...")
+		case signal := <-quit:
+			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...",
+				abstractlogger.String("signal", signal.String()),
+			)
 		case <-ctx.Done():
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
