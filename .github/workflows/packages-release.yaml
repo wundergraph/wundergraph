@@ -43,6 +43,7 @@ jobs:
           # we don't want to publish wunderctl wrapper with lerna but it is required for lerna to work
           # otherwise lerna will not remove the workspace: protocol prefix from packages that use wunderctl
           cat <<< "$(jq -r 'del(.packages[] | select(. == "packages/wunderctl"))' lerna.json)" > lerna.json
+          git update-index --assume-unchanged lerna.json
 
       - name: Publish packages & Create Github Releases
         run: |
@@ -80,6 +81,7 @@ jobs:
           # we don't want to publish wunderctl wrapper with lerna but it is required for lerna to work
           # otherwise lerna will not remove the workspace: protocol prefix from packages that use wunderctl
           cat <<< "$(jq -r 'del(.packages[] | select(. == "packages/wunderctl"))' lerna.json)" > lerna.json
+          git update-index --assume-unchanged lerna.json
 
       - name: Publish packages & Create Github Releases
         run: |
