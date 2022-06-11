@@ -9,7 +9,7 @@
       "changelogPreset": "conventionalcommits"
     }
   },
-  "ignoreChanges": ["packages/wunderctl/**"],
+  "ignoreChanges": ["packages/wunderctl/**", "lerna.json"],
   "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf", "packages/wunderctl"],
   "npmClient": "pnpm",
   "version": "independent"
