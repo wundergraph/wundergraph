@@ -8,7 +8,6 @@
       "changelogPreset": "conventionalcommits"
     }
   },
-  "ignoreChanges": ["packages/wunderctl/**"],
   "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf", "packages/wunderctl"],
   "npmClient": "pnpm",
   "version": "independent"
