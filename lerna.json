@@ -8,7 +8,7 @@
       "changelogPreset": "conventionalcommits"
     }
   },
-  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf", "packages/wunderctl"],
+  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf"],
   "npmClient": "pnpm",
   "version": "independent"
 }
