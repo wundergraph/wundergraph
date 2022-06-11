@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.92.3",
+  "version": "0.92.4",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -31,6 +31,7 @@
     "clean": "rimraf ./dist",
     "build": "tsc",
     "test": "jest",
+    "version": "pnpm install --filter=\"@wundergraph/sdk\" --lockfile-only && git add ../../pnpm-lock.yaml",
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
@@ -55,8 +56,8 @@
     "@apollo/federation": "^0.36.2",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
-    "@wundergraph/protobuf": "workspace:^0.91.1",
-    "@wundergraph/wunderctl": "workspace:^0.91.3",
+    "@wundergraph/protobuf": "^0.91.1",
+    "@wundergraph/wunderctl": "^0.91.3",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
