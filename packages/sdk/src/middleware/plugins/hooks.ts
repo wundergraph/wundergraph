@@ -220,11 +220,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		fastify.post<{ Body: { input: any } }>(`/operation/${operationName}/mutatingPreResolve`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const mutated = await config?.queries?.[operationName]?.mutatingPreResolve?.(request.ctx, request.body.input);
+				const mutatedInput = await config?.queries?.[operationName]?.mutatingPreResolve?.(
+					request.ctx,
+					request.body.input
+				);
 				return {
 					op: operationName,
 					hook: 'mutatingPreResolve',
-					input: mutated,
+					input: mutatedInput,
 					setClientRequestHeaders: request.setClientRequestHeaders,
 				};
 			} catch (err) {
@@ -240,15 +243,16 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			async (request, reply) => {
 				reply.type('application/json').code(200);
 				try {
-					const mutated = await config?.queries?.[operationName]?.mutatingPostResolve?.(
-						request.ctx,
-						request.body.input,
-						request.body.response
-					);
+					const hooksArgs: any[] = [request.ctx];
+					if (request.body.input && Object.keys(request.body.input).length > 0) {
+						hooksArgs.push(request.body.input);
+					}
+					hooksArgs.push(request.body.response);
+					const mutatedResponse = await config?.queries?.[operationName]?.mutatingPostResolve?.(...hooksArgs);
 					return {
 						op: operationName,
 						hook: 'mutatingPostResolve',
-						input: mutated,
+						response: mutatedResponse,
 						setClientRequestHeaders: request.setClientRequestHeaders,
 					};
 				} catch (err) {
@@ -283,11 +287,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		fastify.post<{ Body: { input: any } }>(`/operation/${operationName}/mockResolve`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const mutated = await config?.mutations?.[operationName]?.mockResolve?.(request.ctx, request.body.input);
+				const mutatedResponse = await config?.mutations?.[operationName]?.mockResolve?.(
+					request.ctx,
+					request.body.input
+				);
 				return {
 					op: operationName,
 					hook: 'mock',
-					response: mutated,
+					response: mutatedResponse,
 					setClientRequestHeaders: request.setClientRequestHeaders,
 				};
 			} catch (err) {
@@ -320,11 +327,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			async (request, reply) => {
 				reply.type('application/json').code(200);
 				try {
-					await config?.mutations?.[operationName]?.postResolve?.(
-						request.ctx,
-						request.body.input,
-						request.body.response
-					);
+					const hooksArgs: any[] = [request.ctx];
+					if (request.body.input && Object.keys(request.body.input).length > 0) {
+						hooksArgs.push(request.body.input);
+					}
+					hooksArgs.push(request.body.response);
+					await config?.mutations?.[operationName]?.postResolve?.(...hooksArgs);
 					return {
 						op: operationName,
 						hook: 'postResolve',
@@ -342,11 +350,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		fastify.post<{ Body: { input: any } }>(`/operation/${operationName}/mutatingPreResolve`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const mutated = await config?.mutations?.[operationName]?.mutatingPreResolve?.(request.ctx, request.body.input);
+				const mutatedInput = await config?.mutations?.[operationName]?.mutatingPreResolve?.(
+					request.ctx,
+					request.body.input
+				);
 				return {
 					op: operationName,
 					hook: 'mutatingPreResolve',
-					input: mutated,
+					input: mutatedInput,
 					setClientRequestHeaders: request.setClientRequestHeaders,
 				};
 			} catch (err) {
@@ -362,15 +373,16 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			async (request, reply) => {
 				reply.type('application/json').code(200);
 				try {
-					const mutated = await config?.mutations?.[operationName]?.mutatingPostResolve?.(
-						request.ctx,
-						request.body.input,
-						request.body.response
-					);
+					const hooksArgs: any[] = [request.ctx];
+					if (request.body.input && Object.keys(request.body.input).length > 0) {
+						hooksArgs.push(request.body.input);
+					}
+					hooksArgs.push(request.body.response);
+					const mutatedResponse = await config?.mutations?.[operationName]?.mutatingPostResolve?.(...hooksArgs);
 					return {
 						op: operationName,
 						hook: 'mutatingPostResolve',
-						response: mutated,
+						response: mutatedResponse,
 						setClientRequestHeaders: request.setClientRequestHeaders,
 					};
 				} catch (err) {

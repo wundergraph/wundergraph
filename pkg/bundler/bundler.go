@@ -182,6 +182,16 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 			result := rebuild()
 			if len(result.Errors) == 0 {
 				b.BuildDoneChan <- struct{}{}
+			} else {
+				for _, message := range result.Errors {
+					b.log.Error("Bundler build error",
+						abstractlogger.String("watcherName", b.name),
+						abstractlogger.String("file", message.Location.File),
+						abstractlogger.Int("line", message.Location.Line),
+						abstractlogger.Int("column", message.Location.Column),
+						abstractlogger.String("message", message.Text),
+					)
+				}
 			}
 			return nil
 		})
