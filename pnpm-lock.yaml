@@ -51,7 +51,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.5
       '@wundergraph/protobuf': workspace:^0.91.1
-      '@wundergraph/sdk': workspace:^0.92.3
+      '@wundergraph/sdk': workspace:^0.92.4
       handlebars: ^4.7.7
       next: ^12.1.6
       object-hash: ^2.2.0
@@ -89,7 +89,7 @@ importers:
       typescript: ^4.7.2
       wait-on: ^6.0.0
     dependencies:
-      '@wundergraph/nextjs': file:packages/nextjs_ockgpowh5ylvcwetdvrlqkfbby
+      '@wundergraph/nextjs': file:packages/nextjs_bpgonbflgx2j63skunhvflddga
       '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
@@ -156,7 +156,7 @@ importers:
       '@types/node': ^14.18.16
       '@types/object-hash': ^1.3.4
       '@wundergraph/protobuf': workspace:^0.91.1
-      '@wundergraph/wunderctl': workspace:^0.91.3
+      '@wundergraph/wunderctl': ^0.91.3
       axios: ^0.26.1
       chai: ^4.3.4
       colors: ^1.4.0
@@ -2129,6 +2129,20 @@ packages:
     dependencies:
       '@types/yargs-parser': 21.0.0
     dev: true
+
+  /@wundergraph/wunderctl/0.91.3:
+    resolution: {integrity: sha512-oPq5ELSRfhlYDGT78N4CN5Fm1DW+229emd66rnJALzVxq2kDD3TXtszM20ns/0LQqtehgE/et2Tush/oNfEtGw==}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      axios: 0.26.1_debug@4.3.4
+      debug: 4.3.4
+      execa: 5.1.1
+      rimraf: 3.0.2
+      tar: 6.1.11
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /JSONStream/1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -9510,11 +9524,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  file:packages/nextjs_ockgpowh5ylvcwetdvrlqkfbby:
+  file:packages/nextjs_bpgonbflgx2j63skunhvflddga:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.0.20
+    version: 0.0.21
     peerDependencies:
       '@wundergraph/sdk': '>=0.91.0'
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
@@ -9539,7 +9553,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.92.3
+    version: 0.92.4
     hasBin: true
     requiresBuild: true
     dependencies:
@@ -9550,7 +9564,7 @@ packages:
       '@rjsf/core': 4.1.1
       '@wundergraph/helper': link:packages/helper
       '@wundergraph/protobuf': link:packages/protobuf
-      '@wundergraph/wunderctl': link:packages/wunderctl
+      '@wundergraph/wunderctl': 0.91.3
       axios: 0.26.1
       colors: 1.4.0
       cross-spawn: 7.0.3
