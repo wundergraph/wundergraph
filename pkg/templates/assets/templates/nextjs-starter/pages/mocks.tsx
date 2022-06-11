@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { useQuery, withWunderGraph } from '../components/generated/wundergraph.nextjs.integration';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 import styles from '../styles/Home.module.css';
 
 const Mocks: NextPage = () => {

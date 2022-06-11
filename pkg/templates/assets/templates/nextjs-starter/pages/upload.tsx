@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import { useState } from 'react';
 import styles from '../styles/Home.module.css';
-import { S3Provider, useWunderGraph, withWunderGraph } from '../components/generated/wundergraph.nextjs.integration';
+import { S3Provider, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
 
 const UploadPage: NextPage = () => {
 	const [files, setFiles] = useState<FileList>();
