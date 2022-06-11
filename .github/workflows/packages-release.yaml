@@ -40,8 +40,8 @@ jobs:
 
       - name: Remove workspace protocol from wunderctl dependency in SDK package.json
         run: |
-          # we don't want to publish wunderctl wrapper with lerna but it is required for lerna to work
-          # otherwise lerna will not remove the workspace: protocol prefix from packages that use wunderctl
+          # we need to remove the workspace: protocol prefix from packages that use wunderctl
+          # this is required because wunderctl is not managed / versioned with lerna
           cat <<< "$(jq -r '.dependencies."@wundergraph/wunderctl" |= sub("^workspace:"; "")' packages/sdk/package.json)" > packages/sdk/package.json
           git update-index --assume-unchanged packages/sdk/package.json
 
@@ -78,8 +78,8 @@ jobs:
 
       - name: Remove workspace protocol from wunderctl dependency in SDK package.json
         run: |
-          # we don't want to publish wunderctl wrapper with lerna but it is required for lerna to work
-          # otherwise lerna will not remove the workspace: protocol prefix from packages that use wunderctl
+          # we need to remove the workspace: protocol prefix from packages that use wunderctl
+          # this is required because wunderctl is not managed / versioned with lerna
           cat <<< "$(jq -r '.dependencies."@wundergraph/wunderctl" |= sub("^workspace:"; "")' packages/sdk/package.json)" > packages/sdk/package.json
           git update-index --assume-unchanged packages/sdk/package.json
 
