@@ -59,7 +59,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 
 			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
-			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:       "hooks-server-runner",
 				Executable: "node",
 				ScriptArgs: []string{serverOutFile},
@@ -72,10 +72,20 @@ If used without --exclude-server, make sure the server is available in this dire
 					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 				),
 			})
-			defer runner.Stop()
+
+			defer func() {
+				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
+				err := hookServerRunner.Stop()
+				if err != nil {
+					log.Error("Stopping runner failed",
+						abstractlogger.String("runnerName", "hooks-server-runner"),
+						abstractlogger.Error(err),
+					)
+				}
+			}()
 
 			go func() {
-				<-runner.Run(ctx)
+				<-hookServerRunner.Run(ctx)
 				log.Error("Hook server excited. Initialize WunderNode shutdown")
 				// cancel context when hook server stopped
 				cancel()

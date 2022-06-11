@@ -38,16 +38,26 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 	}
 }
 
-func (b *ScriptRunner) Stop() {
+func (b *ScriptRunner) Stop() error {
 	if b.cmd != nil {
-		b.cmd.Stop()
+		err := b.cmd.Stop()
+
 		// blocking until the script is done
 		<-b.cmdDoneChan
+
+		return err
 	}
+	return nil
 }
 
 func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
-	b.Stop()
+	err := b.Stop()
+	if err != nil {
+		b.log.Debug("Stopping runner failed",
+			abstractlogger.String("runnerName", b.name),
+			abstractlogger.Error(err),
+		)
+	}
 
 	cmd, doneChan := newCmd(b.executable, b.scriptArgs, b.scriptEnv)
 	b.cmd = cmd
@@ -59,7 +69,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-ctx.Done():
 			err := b.cmd.Stop()
 			if err != nil {
-				b.log.Error("Stopping script runner",
+				b.log.Error("Stopping runner failed",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Error(err),
 				)

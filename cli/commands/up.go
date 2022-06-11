@@ -101,7 +101,16 @@ var upCmd = &cobra.Command{
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 			),
 		})
-		defer configRunner.Stop()
+		defer func() {
+			log.Debug("Stopping config-runner after WunderNode shutdown")
+			err := configRunner.Stop()
+			if err != nil {
+				log.Error("Stopping runner failed",
+					abstractlogger.String("runnerName", "config-runner"),
+					abstractlogger.Error(err),
+				)
+			}
+		}()
 
 		go configBundler.Bundle(ctx)
 
@@ -137,7 +146,7 @@ var upCmd = &cobra.Command{
 				log.Fatal("Could not get your current working directory")
 			}
 
-			runner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:       "hooks-server-runner",
 				Executable: "node",
 				ScriptArgs: []string{serverOutFile},
@@ -150,14 +159,23 @@ var upCmd = &cobra.Command{
 					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 				),
 			})
-			defer runner.Stop()
+			defer func() {
+				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
+				err := hookServerRunner.Stop()
+				if err != nil {
+					log.Error("Stopping runner failed",
+						abstractlogger.String("runnerName", "hooks-server-runner"),
+						abstractlogger.Error(err),
+					)
+				}
+			}()
 
 			go func() {
 				for {
 					select {
 					case <-hooksBundler.BuildDoneChan:
 						log.Debug("Hook server change detected -> (re-)configuring server\n")
-						runner.Run(ctx)
+						hookServerRunner.Run(ctx)
 					}
 				}
 			}()

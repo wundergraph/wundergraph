@@ -7,6 +7,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
@@ -46,7 +47,16 @@ Use this command if you only want to generate the configuration`,
 			Logger:     log,
 			ScriptEnv:  append(os.Environ(), fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish)),
 		})
-		defer configRunner.Stop()
+		defer func() {
+			log.Debug("Stopping config-runner after WunderNode shutdown")
+			err := configRunner.Stop()
+			if err != nil {
+				log.Error("Stopping runner failed",
+					abstractlogger.String("runnerName", "config-runner"),
+					abstractlogger.Error(err),
+				)
+			}
+		}()
 
 		go configBundler.Bundle(ctx)
 
