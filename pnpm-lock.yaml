@@ -51,7 +51,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.5
       '@wundergraph/protobuf': workspace:^0.91.1
-      '@wundergraph/sdk': workspace:^0.92.5
+      '@wundergraph/sdk': workspace:^0.92.6
       handlebars: ^4.7.7
       next: ^12.1.6
       object-hash: ^2.2.0
@@ -89,7 +89,7 @@ importers:
       typescript: ^4.7.2
       wait-on: ^6.0.0
     dependencies:
-      '@wundergraph/nextjs': file:packages/nextjs_gopndgtyd5htds7tvr2pn6vyle
+      '@wundergraph/nextjs': file:packages/nextjs_coyjdsznnqvvqmxpd6refzzd5i
       '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
@@ -9511,11 +9511,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  file:packages/nextjs_gopndgtyd5htds7tvr2pn6vyle:
+  file:packages/nextjs_coyjdsznnqvvqmxpd6refzzd5i:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.0.22
+    version: 0.0.23
     peerDependencies:
       '@wundergraph/sdk': '>=0.91.0'
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
@@ -9540,7 +9540,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.92.5
+    version: 0.92.6
     hasBin: true
     requiresBuild: true
     dependencies:
