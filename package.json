@@ -24,7 +24,7 @@
     "publish:engine": "release-it --git.requireBranch=main",
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
     "postinstall": "husky install && pnpm run patch",
-    "patch": "node scripts/patch-lerna.js"
+    "patch": "patch-package"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -64,6 +64,8 @@
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "1.5.1",
+    "@lerna-lite/core": "1.5.1",
+    "@milahu/patch-package-with-pnpm-support": "6.4.10",
     "@release-it/bumper": "^4.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
