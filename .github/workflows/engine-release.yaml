@@ -168,7 +168,7 @@ jobs:
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
 
-      - run: pnpm boot
+      - run: pnpm install --ignore-scripts
 
       - run: pnpm run build
 

@@ -7,6 +7,7 @@ Welcome to the WunderGraph Community contributing guide. We are excited to havin
 This guide assumes you have already installed the following software:
 
 - make (should be installed on all linux / IOS systems)
+- [protoc](https://grpc.io/docs/protoc-installation/)
 - golang `>= 1.18`
 - Node.js [LTS](https://nodejs.org/en/about/releases/)
 - pnpm `7`

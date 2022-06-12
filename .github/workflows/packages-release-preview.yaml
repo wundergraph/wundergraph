@@ -26,7 +26,10 @@ jobs:
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
 
-      - run: pnpm boot --ignore-scripts
+      - name: Install
+        run: |
+          pnpm install --ignore-scripts
+          pnpm run patch
 
       - name: Generate next release (dry-run)
         run: pnpm run preview:version:packages --yes

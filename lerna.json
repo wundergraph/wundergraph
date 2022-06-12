@@ -1,13 +1,11 @@
 {
   "command": {
     "publish": {
-      "conventionalCommits": true,
       "registry": "https://registry.npmjs.org"
-    },
-    "version": {
-      "changelogPreset": "conventionalcommits"
     }
   },
+  "loglevel": "verbose",
+  "changelogPreset": "conventional-changelog-conventionalcommits",
   "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf"],
   "npmClient": "pnpm",
   "version": "independent"

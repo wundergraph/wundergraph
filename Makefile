@@ -1,10 +1,13 @@
-all: engine-dev
-	pnpm boot
+all: check-setup engine-dev
+	pnpm install
 	pnpm run build
 
 engine-dev: codegen
 	go mod tidy
 	go mod download
+
+check-setup:
+	$(shell ./scripts/check-setup.sh)
 
 test-go:
 	go test ./...
@@ -36,4 +39,4 @@ install:
 update-examples:
 	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
 
-.PHONY: codegen build run tag install-proto format-templates dev all
+.PHONY: codegen build run tag install-proto format-templates dev all check-local

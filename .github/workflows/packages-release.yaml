@@ -34,7 +34,10 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - run: pnpm boot --ignore-scripts
+      - name: Install
+        run: |
+          pnpm install --ignore-scripts
+          pnpm run patch
 
       - run: pnpm build
 
@@ -65,7 +68,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - run: pnpm boot --ignore-scripts
+      - run: pnpm install --ignore-scripts
 
       - run: pnpm build
 
