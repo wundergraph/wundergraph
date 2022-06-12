@@ -28,12 +28,6 @@ jobs:
 
       - run: pnpm boot --ignore-scripts
 
-      - name: Remove wunderctl from lerna.json packages
-        run: |
-          # we don't want to publish wunderctl wrapper with lerna but it is required for lerna to work
-          # otherwise lerna will not remove the workspace: protocol prefix from packages that use wunderctl
-          cat <<< "$(jq -r 'del(.packages[] | select(. == "packages/wunderctl"))' lerna.json)" > lerna.json
-
       - name: Generate next release (dry-run)
         run: pnpm run preview:version:packages --yes
 
