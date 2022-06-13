@@ -60,3 +60,5 @@ Incoming Request
                                     │
                                     └─▶ Outgoing Response
 ```
+
+For more information about the hooks, check the official [documentation](https://wundergraph.com/docs/reference/wundergraph_hooks_ts/overview).
