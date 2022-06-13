@@ -8,7 +8,7 @@ By default, the server will listen on the address(es) (IPv4 and IPv6) resolved b
 listen on all IPv4 addresses. This is useful especially in environments like Kubernetes to make the application reachable to
 readiness probes.
 
-__Don't forget to use brackets `[::]:port` when specifying a IPv6 IP.__
+**Don't forget to use brackets `[::]:port` when specifying a IPv6 IP.**
 
 _Using `[::]` for the address will listen on all IPv6 addresses and, depending on OS, may also listen
 on all IPv4 addresses._

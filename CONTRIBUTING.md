@@ -70,4 +70,4 @@ We merge all pull requests in `squash merge` mode. You're not enforced to use [c
 
 ## Releases
 
-See the [Release Guide](docs/release-management) for more information.
+See the [Release Guide](docs/releasing.md) for more information.

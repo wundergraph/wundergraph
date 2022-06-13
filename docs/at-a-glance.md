@@ -11,26 +11,26 @@ WunderGraph's Infrastructure-as-code approach makes it super easy to get from ze
 // The tables of the schema will be analyzed and turned into a GraphQL Schema
 // Alternatively, you can also use MySQL, MongoDB, SQLite, SQLServer, Planetscale and more...
 const db = introspect.postgresql({
-  apiNamespace: "db",
-  databaseURL: "postgresql://admin:admin@localhost:54322/example?schema=public",
+  apiNamespace: 'db',
+  databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
 });
 
 // Introspect a GraphQL Microservice
 const ms = introspect.graphql({
-  apiNamespace: "ms",
-  url: "https://microservice.example.com/",
+  apiNamespace: 'ms',
+  url: 'https://microservice.example.com/',
 });
 
 // Introspect the Stripe API by reading an OpenAPI Specification
 // The REST API is automatically converted into a GraphQL Schema,
 // you don't have to worry about writing resolvers.
 const stripe = introspect.openApi({
-  apiNamespace: "stripe",
+  apiNamespace: 'stripe',
   source: {
-    kind: "file",
-    filePath: "stripe.yaml",
+    kind: 'file',
+    filePath: 'stripe.yaml',
   },
-})
+});
 
 // combine all three APIs into a unified GraphQL Schema
 const myApplication = new Application({
@@ -47,12 +47,12 @@ configureWunderGraphApplication({
         // our frontend-application can delegate authentication to a 3rd party identity provider like:
         // Keycloak, Auth0, Okta, etc...
         authProviders.openIDConnect({
-          id: "myAuth", // you have to choose this ID
-          clientId: "XXX", // client ID from the OIDC provider
-          clientSecret: "XXX" // client secret from the OIDC provider
+          id: 'myAuth', // you have to choose this ID
+          clientId: 'XXX', // client ID from the OIDC provider
+          clientSecret: 'XXX', // client secret from the OIDC provider
         }),
       ],
-    }
+    },
   },
   codeGenerators: [
     {
@@ -71,17 +71,17 @@ configureWunderGraphApplication({
 # UserInfo.graphql
 
 query (
-    # the @fromClaim injects the Email address into the GraphQL Operation
-    # by doing so, we're forcing the user to authenticate against our OpenID Connect provider
-    # the user cannot set the email variable by themselves, it's being injected from the OIDC claims 
-    $email: String! @fromClaim(name: EMAIL)
+  # the @fromClaim injects the Email address into the GraphQL Operation
+  # by doing so, we're forcing the user to authenticate against our OpenID Connect provider
+  # the user cannot set the email variable by themselves, it's being injected from the OIDC claims
+  $email: String! @fromClaim(name: EMAIL)
 ) {
-    userInfo: db_findFirstusers(where: {email: {equals: $email}}){
-        id
-        email
-        name
-        lastlogin
-    }
+  userInfo: db_findFirstusers(where: { email: { equals: $email } }) {
+    id
+    email
+    name
+    lastlogin
+  }
 }
 ```
 
@@ -90,13 +90,12 @@ Let's add some business logic to enhance the application.
 ```typescript
 // wundergraph.server.ts
 
-export default configureWunderGraphServer<HooksConfig,
-  InternalClient>((serverContext) => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient>((serverContext) => ({
   hooks: {
     authentication: {
       postAuthentication: async (user) => {
         // let's add a custom hook to update the last login field for the user
-        serverContext.internalClient.mutations.SetLastLogin({email: user.email});
+        serverContext.internalClient.mutations.SetLastLogin({ email: user.email });
       },
     },
   },
@@ -113,11 +112,11 @@ const UserInfo = () => {
   return (
     <div>
       <h1>UserInfo</h1>
-      <p>Name: {userInfo.result.status === "ok" && userInfo.result.data.userInfo.name}</p>
-      <p>Last Login: {userInfo.result.status === "ok" && userInfo.result.data.userInfo.lastlogin}</p>
+      <p>Name: {userInfo.result.status === 'ok' && userInfo.result.data.userInfo.name}</p>
+      <p>Last Login: {userInfo.result.status === 'ok' && userInfo.result.data.userInfo.lastlogin}</p>
     </div>
-  )
-}
+  );
+};
 ```
 
 That's it! The user can now login via OpenID Connect,

@@ -65,8 +65,8 @@ Examples:
 
 WunderGraph is made up of the three core components:
 
-- [**wunderctl**](./docs/wunderctl): A command line tool to create, deploy and manage your WunderGraph application.
-- [**SDK**](./docs/sdk): Auto-generated and type-safe client to configure and interact with your WunderGraph.
+- [**wunderctl**](packages/wunderctl): A command line tool to create, deploy and manage your WunderGraph application.
+- [**SDK**](packages/sdk): Auto-generated and type-safe client to configure and interact with your WunderGraph.
 - [**WunderHub**](https://hub.wundergraph.com/) The Package Manager for APIs that allows you to share and integrate your
   API's in a few clicks.
 
@@ -98,12 +98,12 @@ WunderGraph is unique in its design,
 as we're not directly exposing GraphQL,
 but JSON-RPC. Combined with a generated Type-Safe client,
 this leads to a unique Developer Experience.
-You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture/README.md).
+You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture.md).
 
 ## Learn more about WunderGraph
 
 If you'd like to get a quick overview,
-have a look at these [annotated example snippets](docs/at-a-glance/README.md).
+have a look at these [annotated example snippets](docs/at-a-glance.md).
 
 ## How does WunderGraph work
 
