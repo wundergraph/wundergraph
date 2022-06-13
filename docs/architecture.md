@@ -3,7 +3,7 @@
 </div>
 
 <div align="center">
-  <img src="../../assets/wundergraph_architecture_comparison.png" height="auto"/>
+  <img src="../assets/wundergraph_architecture_comparison.png" height="auto"/>
 </div>
 
 ## What it takes to build a web application these days
