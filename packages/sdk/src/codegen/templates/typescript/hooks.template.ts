@@ -1,11 +1,11 @@
 //language=handlebars
 export const template = `
 import { {{ modelImports }} } from "./models"
-import type { Context, WunderGraphRequest, WunderGraphResponse } from "@wundergraph/sdk";
+import type { BaseContext, WunderGraphRequest, WunderGraphResponse } from "@wundergraph/sdk";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 
-export interface AuthenticationHooksRequest extends Context<User, InternalClient> {}
+export interface AuthenticationHooksRequest extends BaseContext<User, InternalClient> {}
 
 export type AuthenticationResponse = AuthenticationOK | AuthenticationDeny;
 
@@ -28,14 +28,14 @@ export type CANCEL = "cancel";
 
 export type WUNDERGRAPH_OPERATION = {{{operationNamesUnion}}};
 
-export interface HttpTransportHooksRequest extends Context<User,InternalClient> {
+export interface HttpTransportHooksRequest extends BaseContext<User,InternalClient> {
 		request: WunderGraphRequest;
 		operation: {
 				name: WUNDERGRAPH_OPERATION;
 				type: 'mutation' | 'query' | 'subscription';
 		}
 }
-export interface HttpTransportHooksRequestWithResponse extends Context<User,InternalClient> {
+export interface HttpTransportHooksRequestWithResponse extends BaseContext<User,InternalClient> {
 		response: WunderGraphResponse;
     operation: {
         name: string;
@@ -82,7 +82,7 @@ export type JSONValue =
 
 export type JSONObject = { [key: string]: JSONValue };
 										
-export interface HooksRequest extends Context<User,InternalClient> {}
+export interface HooksRequest extends BaseContext<User,InternalClient> {}
 
 export interface HooksRequestWithResponse<Response> extends HooksRequest {
 		response: Response;

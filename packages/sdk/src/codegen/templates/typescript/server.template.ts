@@ -2,7 +2,7 @@
 export const template = `
 import type { HooksConfig, JSONObject } from "./wundergraph.hooks";
 import type { InternalClient } from "./wundergraph.internal.client"
-import type { GraphQLServerConfig, Context, FastifyLoggerInstance } from "@wundergraph/sdk";
+import type { GraphQLServerConfig, BaseContext, FastifyLoggerInstance } from "@wundergraph/sdk";
 
 export type Role = {{{ roleDefinitions }}};
 
@@ -40,6 +40,6 @@ export interface OutputConfig {
 }
 
 export interface GraphQLExecutionContext {
-    wgContext: Context<User, InternalClient>;
+    wgContext: BaseContext<User, InternalClient>;
 }
 `;

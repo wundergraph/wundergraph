@@ -7,6 +7,25 @@
 1. All hooks share now the same signature. We also ensured that base properties like `clientRequest` are available to all hooks. Depending on the hook type some properties differs as before. Here is an example of how the new interface looks like:
 
 ```ts
+global: {
+  httpTransport: {
+    onOriginResponse: {
+      enableForAllOperations: true,
+        hook: async ({ user, internalClient, clientReqeust }) => {
+          // let's add a custom hook to count every user request for billing purposes
+          internalClient.mutations.AddRequestAudit({ email: user.user_id, request: clientReqeust });
+        }
+    }
+  }
+}
+
+authentication: {
+  postAuthentication: async ({ user, internalClient }) => {
+    // let's add a custom hook to update the last login field for the user
+    internalClient.mutations.SetLastLogin({ email: user.email });
+  }
+}
+
 queries: {
   Dragons: {
     // A single argument. Here we use object destructuring for better readability.
