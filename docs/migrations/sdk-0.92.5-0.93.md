@@ -11,9 +11,9 @@ global: {
   httpTransport: {
     onOriginResponse: {
       enableForAllOperations: true,
-        hook: async ({ user, internalClient, clientReqeust }) => {
+        hook: async ({ user, internalClient, clientRequest }) => {
           // let's add a custom hook to count every user request for billing purposes
-          internalClient.mutations.AddRequestAudit({ email: user.user_id, request: clientReqeust });
+          internalClient.mutations.AddRequestAudit({ email: user.user_id, request: clientRequest });
         }
     }
   }
