@@ -4,7 +4,7 @@
 | ------------- | -------------------- | -------------------- |
 | 0.92.5-0.93   | low                  | Unify hook interface |
 
-1. All hooks share now the same signature. We also ensured that base properties like `clientRequest` are available to all hooks. Depending on the hook type some properties differs as before. Here is an example of how the new interface looks like:
+1. All hooks share now the same signature. We also ensured that base properties like `clientRequest`, `user`, `log`... are available to all hooks. Depending on the hook type some properties differs as before. Here is an example of how the new interface looks like:
 
 ```ts
 global: {
