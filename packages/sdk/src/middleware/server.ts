@@ -3,7 +3,7 @@ import FastifyGraceful from 'fastify-graceful-shutdown';
 import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
-import Fastify, { FastifyLoggerInstance } from 'fastify';
+import Fastify, { FastifyInstance, FastifyLoggerInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
@@ -12,15 +12,15 @@ import fs from 'fs';
 import { middlewarePort } from '../env';
 
 declare module 'fastify' {
-	interface FastifyRequest extends RequestContext {}
+	interface FastifyRequest extends FastifyRequestContext {}
 }
 
-export interface RequestContext<User = any, IC = InternalClient> {
+export interface FastifyRequestContext<User = any, IC = InternalClient> {
 	clientRequestHeaders: { [key: string]: string };
-	ctx: Context<User, IC>;
+	ctx: BaseContext<User, IC>;
 }
 
-export interface Context<User = any, IC = InternalClient> {
+export interface BaseContext<User = any, IC = InternalClient> {
 	user?: User;
 	clientRequest: ClientRequest;
 	setClientRequestHeader: (name: string, value: string) => void;
@@ -93,10 +93,6 @@ process.on('uncaughtExceptionMonitor', (err, origin) => {
 	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
 });
 
-const fastify = Fastify({
-	logger: true,
-});
-
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
 
@@ -113,11 +109,11 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 			WG_CONFIG = JSON.parse(configContent);
 			clientFactory = internalClientFactory(WG_CONFIG);
 		} catch (err: any) {
-			fastify.log.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
+			console.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
 			process.exit(1);
 		}
 	} catch {
-		fastify.log.error('Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+		console.error('Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
@@ -156,9 +152,10 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		fastify.decorateRequest('ctx', null);
-		fastify.decorateRequest('clientRequestHeaders', null);
-		startServer(hooksConfig, WG_CONFIG).catch((err) => {
+		const fastify = Fastify({
+			logger: true,
+		});
+		startServer(fastify, hooksConfig, WG_CONFIG).catch((err) => {
 			fastify.log.error(err, 'Could not start the hook server');
 			process.exit(1);
 		});
@@ -167,7 +164,14 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	return hooksConfig;
 };
 
-export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, config: WunderGraphConfiguration) => {
+export const startServer = async (
+	fastify: FastifyInstance,
+	hooksConfig: WunderGraphHooksAndServerConfig,
+	config: WunderGraphConfiguration
+) => {
+	fastify.decorateRequest('ctx', null);
+	fastify.decorateRequest('clientRequestHeaders', null);
+
 	fastify.addHook<{ Body: { __wg?: { user: User; client_request: ClientRequest } } }>(
 		'preHandler',
 		async (req, reply) => {
@@ -175,8 +179,7 @@ export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, 
 			req.ctx = {
 				log: req.log.child({ plugin: 'hooks' }),
 				user: req?.body?.__wg?.user,
-				// clientRequest represents usually the original client request that was sent to the server
-				// but on internal requests, it is the request that was sent from the hook to the WunderGraph server
+				// clientRequest represents the original client request that was sent initially to the server.
 				clientRequest: req?.body?.__wg?.client_request || {
 					headers: {},
 					requestURI: '',

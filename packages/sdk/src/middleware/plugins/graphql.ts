@@ -9,7 +9,7 @@ import {
 	shouldRenderGraphiQL,
 	ExecutionContext as HelixExecutionContext,
 } from 'graphql-helix';
-import { Context } from '../server';
+import { BaseContext } from '../server';
 import { InternalClient } from '../internal-client';
 
 export interface GraphQLServerConfig {
@@ -31,7 +31,7 @@ export interface GraphQLServerConfig {
 }
 
 interface ExecutionContext {
-	wgContext: Context;
+	wgContext: BaseContext;
 }
 
 const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {
