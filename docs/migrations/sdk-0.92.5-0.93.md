@@ -13,7 +13,7 @@ global: {
       enableForAllOperations: true,
       hook: async ({ user, internalClient, clientRequest }) => {
         // let's add a custom hook to count every outgoing user request for analytics purposes
-        internalClient.mutations.countOriginRequest({ email: user.user_id, request: clientRequest });
+        internalClient.mutations.countOriginRequest({ request: clientRequest });
       }
     }
   }
