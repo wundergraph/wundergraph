@@ -9,7 +9,7 @@
 ```ts
 global: {
   httpTransport: {
-    onOriginResponse: {
+    onOriginRequest: {
       enableForAllOperations: true,
       hook: async ({ user, internalClient, clientRequest }) => {
         // let's add a custom hook to count every outgoing user request for analytics purposes
