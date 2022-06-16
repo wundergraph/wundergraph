@@ -257,7 +257,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return nil
 		}, "__wg", "client_request", "headers")
 		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not create get request headers from client_request",
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not get request headers from client_request",
 				abstractlogger.Error(err),
 				abstractlogger.String("url", r.RequestURI),
 			)
