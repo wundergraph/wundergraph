@@ -109,26 +109,26 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 
 type User struct {
 	ProviderName     string          `json:"provider,omitempty"`
-	ProviderID       string          `json:"provider_id,omitempty"`
+	ProviderID       string          `json:"providerId,omitempty"`
 	Email            string          `json:"email,omitempty"`
-	EmailVerified    bool            `json:"email_verified,omitempty"`
+	EmailVerified    bool            `json:"emailVerified,omitempty"`
 	Name             string          `json:"name,omitempty"`
-	FirstName        string          `json:"first_name,omitempty"`
-	LastName         string          `json:"last_name,omitempty"`
-	NickName         string          `json:"nick_name,omitempty"`
+	FirstName        string          `json:"firstName,omitempty"`
+	LastName         string          `json:"lastName,omitempty"`
+	NickName         string          `json:"nickName,omitempty"`
 	Description      string          `json:"description,omitempty"`
-	UserID           string          `json:"user_id,omitempty"`
-	AvatarURL        string          `json:"avatar_url,omitempty"`
+	UserID           string          `json:"userId,omitempty"`
+	AvatarURL        string          `json:"avatarUrl,omitempty"`
 	Location         string          `json:"location,omitempty"`
-	CustomClaims     json.RawMessage `json:"custom_claims,omitempty"`
-	CustomAttributes []string        `json:"custom_attributes,omitempty"`
+	CustomClaims     json.RawMessage `json:"customClaims,omitempty"`
+	CustomAttributes []string        `json:"customAttributes,omitempty"`
 	Roles            []string        `json:"roles"`
 	ExpiresAt        time.Time       `json:"-"`
 	ETag             string          `json:"etag,omitempty"`
-	FromCookie       bool            `json:"from_cookie,omitempty"`
-	AccessToken      json.RawMessage `json:"access_token,omitempty"`
-	IdToken          json.RawMessage `json:"id_token,omitempty"`
-	RawIDToken       string          `json:"raw_id_token,omitempty"`
+	FromCookie       bool            `json:"fromCookie,omitempty"`
+	AccessToken      json.RawMessage `json:"accessToken,omitempty"`
+	IdToken          json.RawMessage `json:"idToken,omitempty"`
+	RawIDToken       string          `json:"rawIdToken,omitempty"`
 }
 
 // RemoveInternalFields should be used before sending the user to the client to not expose internal fields

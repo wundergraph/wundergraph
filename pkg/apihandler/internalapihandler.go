@@ -226,18 +226,18 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// internal requests transmit the client request as a JSON object
 	// this makes it possible to expose the original client request to hooks triggered by internal requests
-	clientRequest, _, _, _ := jsonparser.Get(body, "__wg", "client_request")
+	clientRequest, _, _, _ := jsonparser.Get(body, "__wg", "clientRequest")
 	if clientRequest != nil {
-		method, err := jsonparser.GetString(body, "__wg", "client_request", "method")
+		method, err := jsonparser.GetString(body, "__wg", "clientRequest", "method")
 		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.client_request.method",
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.clientRequest.method",
 				abstractlogger.Error(err),
 				abstractlogger.String("url", r.RequestURI),
 			)
 		}
-		requestURI, err := jsonparser.GetString(body, "__wg", "client_request", "requestURI")
+		requestURI, err := jsonparser.GetString(body, "__wg", "clientRequest", "requestURI")
 		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.client_request.requestURI",
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.clientRequest.requestURI",
 				abstractlogger.Error(err),
 				abstractlogger.String("url", r.RequestURI),
 			)
@@ -246,7 +246,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// create a new request from the client request
 		request, err = http.NewRequestWithContext(r.Context(), method, requestURI, nil)
 		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not create new request from client_request",
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not create new request from clientRequest",
 				abstractlogger.Error(err),
 				abstractlogger.String("url", r.RequestURI),
 			)
@@ -255,9 +255,9 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			request.Header.Set(string(key), string(value))
 			return nil
-		}, "__wg", "client_request", "headers")
+		}, "__wg", "clientRequest", "headers")
 		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not get request headers from client_request",
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not get request headers from clientRequest",
 				abstractlogger.Error(err),
 				abstractlogger.String("url", r.RequestURI),
 			)

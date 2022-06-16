@@ -27,6 +27,7 @@ export { configureWunderGraphServer } from './middleware/server';
 export type {
 	WunderGraphRequest,
 	WunderGraphResponse,
+	WunderGraphUser,
 	BaseContext,
 	ClientRequest,
 	WunderGraphHooksAndServerConfig,
@@ -41,7 +42,6 @@ export type {
 	CachedResponse,
 	UploadResponse,
 	ClientConfig,
-	User,
 	RequiresAuthentication,
 	Error,
 	Headers,

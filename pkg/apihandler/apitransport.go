@@ -203,7 +203,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 		if err != nil {
 			return nil, err
 		}
-		requestBody, err = jsonparser.Set(requestBody, requestJSON, "__wg", "client_request")
+		requestBody, err = jsonparser.Set(requestBody, requestJSON, "__wg", "clientRequest")
 	}
 
 	req, err := http.NewRequestWithContext(request.Context(), request.Method, request.URL.String(), ioutil.NopCloser(bytes.NewReader(requestBody)))
@@ -275,7 +275,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		if err != nil {
 			return nil, err
 		}
-		hookData, _ = jsonparser.Set(hookData, requestJSON, "__wg", "client_request")
+		hookData, _ = jsonparser.Set(hookData, requestJSON, "__wg", "clientRequest")
 	}
 
 	out, err := t.hooksClient.DoGlobalRequest(r.Context(), middlewareclient.HttpTransportOnRequest, hookData)
@@ -365,7 +365,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 		if err != nil {
 			return nil, err
 		}
-		hookData, _ = jsonparser.Set(hookData, requestJSON, "__wg", "client_request")
+		hookData, _ = jsonparser.Set(hookData, requestJSON, "__wg", "clientRequest")
 	}
 
 	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), middlewareclient.HttpTransportOnResponse, hookData)

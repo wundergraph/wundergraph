@@ -42,7 +42,7 @@ export const internalClientFactory = (config: WunderGraphConfiguration): Interna
 					...(extraHeaders || {}),
 				}
 			);
-			const res = await axios.post(url, JSON.stringify({ input, __wg: { client_request: clientRequest } }), {
+			const res = await axios.post(url, JSON.stringify({ input, __wg: { clientRequest: clientRequest } }), {
 				headers,
 			});
 			return res.data;

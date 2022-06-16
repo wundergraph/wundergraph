@@ -1979,7 +1979,7 @@ func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte
 		}
 	}
 	if clientRequestData, err := HttpRequestToWunderGraphRequestJSON(r, false); err == nil {
-		buf, _ = jsonparser.Set(buf, clientRequestData, "__wg", "client_request")
+		buf, _ = jsonparser.Set(buf, clientRequestData, "__wg", "clientRequest")
 	}
 	// TODO don't pass empty object '{}' to hooks server when no variables are passed
 	if len(variables) != 0 {

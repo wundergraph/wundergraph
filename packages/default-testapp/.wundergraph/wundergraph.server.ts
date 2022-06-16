@@ -206,7 +206,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 								})
 							),
 							async resolve(root, args, ctx, info) {
-								ctx.wgContext.log.info(`resolve_client_request: ${JSON.stringify(ctx.wgContext.clientRequest)}`);
+								ctx.wgContext.log.info(`resolve_clientRequest: ${JSON.stringify(ctx.wgContext.clientRequest)}`);
 
 								const data = await ctx.wgContext.internalClient.queries.InternalDragons();
 								const posts = await ctx.wgContext.internalClient.queries.JSP();

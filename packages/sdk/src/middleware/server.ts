@@ -54,27 +54,27 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
-export interface User<Role = any> {
+export interface WunderGraphUser<Role = any> {
 	provider?: string;
-	provider_id?: string;
+	providerId?: string;
 	email?: string;
-	email_verified?: boolean;
+	emailVerified?: boolean;
 	name?: string;
-	first_name?: string;
-	last_name?: string;
-	nick_name?: string;
+	firstName?: string;
+	lastName?: string;
+	nickName?: string;
 	description?: string;
-	user_id?: string;
-	avatar_url?: string;
+	userId?: string;
+	avatarUrl?: string;
 	location?: string;
 	roles?: Role[];
-	custom_attributes?: string[];
-	custom_claims?: {
+	customAttributes?: string[];
+	customClaims?: {
 		[key: string]: any;
 	};
-	access_token?: JSONObject;
-	id_token?: JSONObject;
-	raw_id_token?: string;
+	accessToken?: JSONObject;
+	idToken?: JSONObject;
+	rawIdToken?: string;
 }
 
 export interface WunderGraphServerConfig<GeneratedHooksConfig = HooksConfiguration> {
@@ -172,7 +172,7 @@ export const startServer = async (
 	fastify.decorateRequest('ctx', null);
 	fastify.decorateRequest('clientRequestHeaders', null);
 
-	fastify.addHook<{ Body: { __wg?: { user: User; client_request: ClientRequest } } }>(
+	fastify.addHook<{ Body: { __wg?: { user: WunderGraphUser; clientRequest: ClientRequest } } }>(
 		'preHandler',
 		async (req, reply) => {
 			req.clientRequestHeaders = {};
@@ -180,13 +180,13 @@ export const startServer = async (
 				log: req.log.child({ plugin: 'hooks' }),
 				user: req?.body?.__wg?.user,
 				// clientRequest represents the original client request that was sent initially to the server.
-				clientRequest: req?.body?.__wg?.client_request || {
+				clientRequest: req?.body?.__wg?.clientRequest || {
 					headers: {},
 					requestURI: '',
 					method: 'GET',
 				},
 				setClientRequestHeader: (name: string, value: string) => (req.clientRequestHeaders[name] = value),
-				internalClient: clientFactory({}, req?.body?.__wg?.client_request),
+				internalClient: clientFactory({}, req?.body?.__wg?.clientRequest),
 			};
 		}
 	);
