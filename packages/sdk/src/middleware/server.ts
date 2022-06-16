@@ -21,10 +21,23 @@ export interface FastifyRequestContext<User = any, IC = InternalClient> {
 }
 
 export interface BaseContext<User = any, IC = InternalClient> {
+	/**
+	 * The user that is currently logged in.
+	 */
 	user?: User;
 	clientRequest: ClientRequest;
+	/**
+	 * setClientRequestHeader allows you to set additional headers to the client request.
+	 * This might impact the behavior of the next hooks. This method has no effect for the global hooks.
+	 */
 	setClientRequestHeader: (name: string, value: string) => void;
+	/**
+	 * The request logger.
+	 */
 	log: FastifyLoggerInstance;
+	/**
+	 * The internal client that is used to communicate with the server.
+	 */
 	internalClient: IC;
 }
 

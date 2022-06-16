@@ -50,7 +50,7 @@ Incoming Request
                     │
                     └─▶ onOriginRequest (For each external data-source call)
                     │   │
-                    │   └─▶ onOriginResponse
+                    │   └─▶ onOriginResponse (Companion to onOriginRequest)
                     │
                     └─▶ postResolve
                         │

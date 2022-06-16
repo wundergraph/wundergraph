@@ -283,8 +283,6 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		return nil, err
 	}
 
-	handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
-
 	var response OnRequestHookResponse
 	err = json.Unmarshal(out.Response, &response)
 	if err != nil {
@@ -372,8 +370,6 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 	if err != nil {
 		return nil, err
 	}
-
-	handleSetClientRequestHeaders(r.Request, out.SetClientRequestHeaders)
 
 	var response OnResponseHookResponse
 	err = json.Unmarshal(out.Response, &response)
