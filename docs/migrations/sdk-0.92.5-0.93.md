@@ -29,4 +29,4 @@ queries: {
 }
 ```
 
-> **Info:** Many changes can be easily picked up by typescript type inferrer.
+> **Note**: Many changes can be easily picked up by typescript type inferrer.
