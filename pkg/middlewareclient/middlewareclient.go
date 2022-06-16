@@ -32,8 +32,11 @@ const (
 	PostAuthentication         MiddlewareHook = "postAuthentication"
 	MutatingPostAuthentication MiddlewareHook = "mutatingPostAuthentication"
 	RevalidateAuthentication   MiddlewareHook = "revalidateAuthentication"
-	HttpTransportOnRequest     MiddlewareHook = "onRequest"
-	HttpTransportOnResponse    MiddlewareHook = "onResponse"
+
+	// HttpTransportOnRequest to the origin
+	HttpTransportOnRequest MiddlewareHook = "onOriginRequest"
+	// HttpTransportOnResponse from the origin
+	HttpTransportOnResponse MiddlewareHook = "onOriginResponse"
 )
 
 type MiddlewareClient struct {

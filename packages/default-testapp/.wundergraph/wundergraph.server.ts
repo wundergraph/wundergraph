@@ -16,26 +16,66 @@ import {
 } from 'graphql';
 import { createGraphQLSchema } from 'openapi-to-graphql';
 import jsonPlaceholder from './../json_placeholder.json';
+import { DragonsResponse, SDLResponse } from './generated/models';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>((serverContext) => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
+		authentication: {
+			postAuthentication: async (hook) => {},
+			mutatingPostAuthentication: async (hook) => {
+				return {
+					user: {
+						name: 'John Doe',
+					},
+					status: 'ok',
+				};
+			},
+			revalidate: async (hook) => {
+				return {
+					user: {
+						name: 'John Doe',
+					},
+					status: 'ok',
+				};
+			},
+		},
 		global: {
 			httpTransport: {
-				onRequest: {
+				onOriginResponse: {
 					enableForAllOperations: true,
-					hook: async (ctx, request) => {
-						return {
-							...request,
-						};
+					hook: async (hook) => {
+						console.log('########onResponse##########', hook.clientRequest);
+					},
+				},
+				onOriginRequest: {
+					enableForAllOperations: true,
+					hook: async (hook) => {
+						console.log('########onRequest##########', hook.clientRequest);
 					},
 				},
 			},
 		},
 		queries: {
 			Dragons: {
-				preResolve: async (ctx) => {
-					ctx.log.info(`preResolve_clientRequest: ${JSON.stringify(ctx.clientRequest)}`);
+				preResolve: async (hook) => {},
+			},
+		},
+		mutations: {
+			SDL: {
+				mutatingPreResolve: async (hook) => {
+					return hook.input;
 				},
+				mockResolve: async (hook): Promise<SDLResponse> => {
+					return {
+						data: null as any,
+					};
+				},
+				postResolve: async (hook) => {},
+				customResolve: async (hook) => {},
+				mutatingPostResolve: async (hook) => {
+					return hook.response;
+				},
+				preResolve: async (hook) => {},
 			},
 		},
 	},
@@ -166,14 +206,15 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 								})
 							),
 							async resolve(root, args, ctx, info) {
-								ctx.log.info(`resolve_client_request: ${JSON.stringify(ctx.requestContext.clientRequest)}`);
-								const data = await serverContext.internalClient.queries.InternalDragons();
-								const posts = await serverContext.internalClient.queries.JSP();
+								ctx.wgContext.log.info(`resolve_client_request: ${JSON.stringify(ctx.wgContext.clientRequest)}`);
+
+								const data = await ctx.wgContext.internalClient.queries.InternalDragons();
+								const posts = await ctx.wgContext.internalClient.queries.JSP();
 								return data.data?.spacex_dragons?.map((d) => ({
 									name: d.name,
 									crewCapacity: d.crew_capacity,
 									active: d.active,
-									posts: posts.data?.jsp_postsList?.map((p) => ({
+									posts: posts.data?.jsp_getPosts?.map((p) => ({
 										id: p.id,
 										title: p.title,
 									})),

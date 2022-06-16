@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/buger/jsonparser"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
@@ -211,24 +212,68 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.bearerCache.Store(authorizationHeader, struct{}{})
 	}
 
-	variablesBuf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(variablesBuf)
+	bodyBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(bodyBuf)
+	_, err := io.Copy(bodyBuf, r.Body)
+	if err != nil && !errors.Is(err, io.EOF) {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
 
-	ctx := pool.GetCtx(r, pool.Config{
+	var request *http.Request
+
+	body := bodyBuf.Bytes()
+
+	// internal requests transmit the client request as a JSON object
+	// this makes it possible to expose the original client request to hooks triggered by internal requests
+	clientRequest, _, _, _ := jsonparser.Get(body, "__wg", "client_request")
+	if clientRequest != nil {
+		method, err := jsonparser.GetString(body, "__wg", "client_request", "method")
+		if err != nil {
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.client_request.method",
+				abstractlogger.Error(err),
+				abstractlogger.String("url", r.RequestURI),
+			)
+		}
+		requestURI, err := jsonparser.GetString(body, "__wg", "client_request", "requestURI")
+		if err != nil {
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.client_request.requestURI",
+				abstractlogger.Error(err),
+				abstractlogger.String("url", r.RequestURI),
+			)
+		}
+
+		// create a new request from the client request
+		request, err = http.NewRequestWithContext(r.Context(), method, requestURI, nil)
+		if err != nil {
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not create new request from client_request",
+				abstractlogger.Error(err),
+				abstractlogger.String("url", r.RequestURI),
+			)
+		}
+
+		err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			request.Header.Set(string(key), string(value))
+			return nil
+		}, "__wg", "client_request", "headers")
+		if err != nil {
+			h.log.Error("InternalApiHandler.ServeHTTP: Could not create get request headers from client_request",
+				abstractlogger.Error(err),
+				abstractlogger.String("url", r.RequestURI),
+			)
+		}
+	}
+
+	ctx := pool.GetCtx(request, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
 
-	_, err := io.Copy(variablesBuf, r.Body)
-	if err != nil && !errors.Is(err, io.EOF) {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	ctx.Variables = variablesBuf.Bytes()
-
-	if len(ctx.Variables) == 0 {
+	variablesBuf, _, _, _ := jsonparser.Get(body, "input")
+	if len(variablesBuf) == 0 {
 		ctx.Variables = []byte("{}")
+	} else {
+		ctx.Variables = variablesBuf
 	}
 
 	compactBuf := pool.GetBytesBuffer()

@@ -15,11 +15,11 @@ const testEnum = new GraphQLEnumType({
 	},
 });
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>((serverContext) => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
 		queries: {
 			FakeWeather: {
-				mockResolve: async (hookContext) => {
+				mockResolve: async (hook) => {
 					return {
 						data: {
 							getCityByName: {

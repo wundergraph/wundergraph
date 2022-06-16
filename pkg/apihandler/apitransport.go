@@ -265,10 +265,26 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 			hookData, _ = jsonparser.Set(hookData, userJson, "user")
 		}
 	}
+
+	/**
+	Transmit the original client request to the hook
+	*/
+
+	if clientRequest, ok := r.Context().Value(pool2.ClientRequestKey).(*http.Request); ok {
+		requestJSON, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false)
+		if err != nil {
+			return nil, err
+		}
+		hookData, _ = jsonparser.Set(hookData, requestJSON, "__wg", "client_request")
+	}
+
 	out, err := t.hooksClient.DoGlobalRequest(r.Context(), middlewareclient.HttpTransportOnRequest, hookData)
 	if err != nil {
 		return nil, err
 	}
+
+	handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+
 	var response OnRequestHookResponse
 	err = json.Unmarshal(out.Response, &response)
 	if err != nil {
@@ -339,10 +355,26 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 			hookData, _ = jsonparser.Set(hookData, userJson, "user")
 		}
 	}
+
+	/**
+	Transmit the original client request to the hook
+	*/
+
+	if clientRequest, ok := r.Request.Context().Value(pool2.ClientRequestKey).(*http.Request); ok {
+		requestJSON, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false)
+		if err != nil {
+			return nil, err
+		}
+		hookData, _ = jsonparser.Set(hookData, requestJSON, "__wg", "client_request")
+	}
+
 	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), middlewareclient.HttpTransportOnResponse, hookData)
 	if err != nil {
 		return nil, err
 	}
+
+	handleSetClientRequestHeaders(r.Request, out.SetClientRequestHeaders)
+
 	var response OnResponseHookResponse
 	err = json.Unmarshal(out.Response, &response)
 	if err != nil {

@@ -26,7 +26,6 @@ export type { GraphQLOperation } from './graphql/operations';
 export { configureWunderGraphServer } from './middleware/server';
 export type {
 	WunderGraphRequest,
-	WunderGraphRequestContext,
 	WunderGraphResponse,
 	Context,
 	ClientRequest,

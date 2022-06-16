@@ -992,6 +992,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := pool.GetCtx(r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
+
 	defer func() {
 
 		if cacheIsStale {

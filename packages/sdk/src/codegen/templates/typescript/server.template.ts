@@ -40,8 +40,6 @@ export interface OutputConfig {
 }
 
 export interface GraphQLExecutionContext {
-    internalClient: InternalClient;
-    requestContext: Context<User>;
-    log: FastifyLoggerInstance;
+    wgContext: Context<User, InternalClient>;
 }
 `;

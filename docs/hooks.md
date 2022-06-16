@@ -12,25 +12,25 @@ Hooks Overview
 │
 └─▶ Global Hooks
 │   │
-│   └─▶ onRequest (e.g. Request manipulation, early return)
+│   └─▶ onOriginRequest (e.g. Request manipulation, early return, for each external data-source call)
 │   │
-│   └─▶ onResponse (e.g. Response manipulation, cancelling)
+│   └─▶ onOriginResponse (e.g. Response manipulation, cancelling)
 │
-└─▶ Operation Hooks
-│
-└─▶ preResolve (e.g. Logging)
-│
-└─▶ mutatingPreResolve (e.g. Input manipulation)
-│
-└─▶ customResolve (e.g. Early return, custom response)
-│
-└─▶ WunderGraph Engine (Resolve operation from data-source)
-│
-└─▶ postResolve (e.g. Logging)
-│
-└─▶ mutatingPostResolve (e.g. Input manipulation, custom response)
-│
-└─▶ mutatingPostAuthentication (e.g. Validation)
+└─▶ Operational Hooks
+    │
+    └─▶ preResolve (e.g. Logging)
+    │
+    └─▶ mutatingPreResolve (e.g. Input manipulation)
+    │
+    └─▶ customResolve (e.g. Early return, custom response)
+    │
+    └─▶ WunderGraph Engine (Resolve operation from data-source)
+    │
+    └─▶ postResolve (e.g. Logging)
+    │
+    └─▶ mutatingPostResolve (e.g. Input manipulation, custom response)
+    │
+    └─▶ mutatingPostAuthentication (e.g. Validation)
 ```
 
 ## Hooks request lifecycle
@@ -40,25 +40,27 @@ This section describes the lifecycle of a single request.
 ```
 Incoming Request
         │
- exit ◀─┴─▶ onRequest
+        └─▶ preResolve
             │
-            └─▶ preResolve
+            └─▶ mutatingPreResolve
                 │
-                └─▶ mutatingPreResolve
+         exit ◀─┴─▶ customResolve
+                │
+                └─▶ WunderGraph Engine (Resolve Operation)
                     │
-             exit ◀─┴─▶ customResolve
+                    └─▶ onOriginRequest (For each external data-source call)
+                    │   │
+                    │   └─▶ onOriginResponse
                     │
-                    └─▶ WunderGraph Engine (Resolve Operation)
+                    └─▶ postResolve
                         │
-                        └─▶ postResolve
+                        └─▶ mutatingPostResolve
                             │
-                            └─▶ mutatingPostResolve
+                     exit ◀─┴─▶ mutatingPostAuthentication
                                 │
-                         exit ◀─┴─▶ mutatingPostAuthentication
-                                    │
-                             exit ◀─┴─▶ onResponse
-                                    │
-                                    └─▶ Outgoing Response
+                         exit ◀─┴─▶ onResponse
+                                │
+                                └─▶ Outgoing Response
 ```
 
 For more information about the hooks, check the official [documentation](https://wundergraph.com/docs/reference/wundergraph_hooks_ts/overview).
