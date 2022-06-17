@@ -1,4 +1,4 @@
-import { FastifyLoggerInstance, FastifyPluginAsync } from 'fastify';
+import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { GraphQLSchema } from 'graphql';
 import {
@@ -10,7 +10,6 @@ import {
 	ExecutionContext as HelixExecutionContext,
 } from 'graphql-helix';
 import { BaseContext } from '../server';
-import { InternalClient } from '../internal-client';
 
 export interface GraphQLServerConfig {
 	serverName: string;
@@ -31,7 +30,7 @@ export interface GraphQLServerConfig {
 }
 
 interface ExecutionContext {
-	wgContext: BaseContext;
+	wundergraph: BaseContext;
 }
 
 const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {
@@ -80,7 +79,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 							contextFactory: (): ExecutionContext => ({
 								...baseContext,
 								...ctx,
-								wgContext: {
+								wundergraph: {
 									...req.ctx,
 									log: pluginLogger,
 								},
@@ -103,7 +102,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 					rootValueFactory: config.customResolverFactory,
 					contextFactory: (): ExecutionContext => ({
 						...baseContext,
-						wgContext: {
+						wundergraph: {
 							...req.ctx,
 							log: pluginLogger,
 						},

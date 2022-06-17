@@ -56,11 +56,13 @@ Incoming Request
                         │
                         └─▶ mutatingPostResolve
                             │
-                     exit ◀─┴─▶ mutatingPostAuthentication
-                                │
-                         exit ◀─┴─▶ onResponse
-                                │
-                                └─▶ Outgoing Response
+                            └─▶ postAuthentication
+                              │
+                       exit ◀─┴─▶ mutatingPostAuthentication
+                                  │
+                           exit ◀─┴─▶ onResponse
+                                  │
+                                  └─▶ Outgoing Response
 ```
 
 For more information about the hooks, check the official [documentation](https://wundergraph.com/docs/reference/wundergraph_hooks_ts/overview).

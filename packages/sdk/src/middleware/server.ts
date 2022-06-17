@@ -120,7 +120,12 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		});
 		try {
 			WG_CONFIG = JSON.parse(configContent);
-			clientFactory = internalClientFactory(WG_CONFIG);
+			if (WG_CONFIG.api) {
+				clientFactory = internalClientFactory(WG_CONFIG.apiName, WG_CONFIG.deploymentName, WG_CONFIG.api.operations);
+			} else {
+				console.error('Could not get user defined api. Try `wunderctl generate`');
+				process.exit(1);
+			}
 		} catch (err: any) {
 			console.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
 			process.exit(1);

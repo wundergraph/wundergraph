@@ -220,48 +220,24 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var request *http.Request
+	request := r
 
 	body := bodyBuf.Bytes()
 
 	// internal requests transmit the client request as a JSON object
 	// this makes it possible to expose the original client request to hooks triggered by internal requests
-	clientRequest, _, _, _ := jsonparser.Get(body, "__wg", "clientRequest")
+	clientRequest, err := NewRequestFromWunderGraphClientRequest(r.Context(), body)
+	if err != nil {
+		h.log.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+			abstractlogger.Error(err),
+			abstractlogger.String("url", r.RequestURI),
+		)
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
 	if clientRequest != nil {
-		method, err := jsonparser.GetString(body, "__wg", "clientRequest", "method")
-		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.clientRequest.method",
-				abstractlogger.Error(err),
-				abstractlogger.String("url", r.RequestURI),
-			)
-		}
-		requestURI, err := jsonparser.GetString(body, "__wg", "clientRequest", "requestURI")
-		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not get __wg.clientRequest.requestURI",
-				abstractlogger.Error(err),
-				abstractlogger.String("url", r.RequestURI),
-			)
-		}
-
-		// create a new request from the client request
-		request, err = http.NewRequestWithContext(r.Context(), method, requestURI, nil)
-		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not create new request from clientRequest",
-				abstractlogger.Error(err),
-				abstractlogger.String("url", r.RequestURI),
-			)
-		}
-
-		err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-			request.Header.Set(string(key), string(value))
-			return nil
-		}, "__wg", "clientRequest", "headers")
-		if err != nil {
-			h.log.Error("InternalApiHandler.ServeHTTP: Could not get request headers from clientRequest",
-				abstractlogger.Error(err),
-				abstractlogger.String("url", r.RequestURI),
-			)
-		}
+		request = clientRequest
 	}
 
 	ctx := pool.GetCtx(request, pool.Config{
@@ -303,4 +279,36 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = buf.WriteTo(w)
+}
+
+func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*http.Request, error) {
+	clientRequest, _, _, _ := jsonparser.Get(body, "__wg", "clientRequest")
+	if clientRequest != nil {
+		method, err := jsonparser.GetString(body, "__wg", "clientRequest", "method")
+		if err != nil {
+			return nil, err
+		}
+		requestURI, err := jsonparser.GetString(body, "__wg", "clientRequest", "requestURI")
+		if err != nil {
+			return nil, err
+		}
+
+		// create a new request from the client request
+		request, err := http.NewRequestWithContext(ctx, method, requestURI, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			request.Header.Set(string(key), string(value))
+			return nil
+		}, "__wg", "clientRequest", "headers")
+		if err != nil {
+			return nil, err
+		}
+
+		return request, nil
+	}
+
+	return nil, nil
 }

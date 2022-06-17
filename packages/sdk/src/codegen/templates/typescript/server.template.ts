@@ -19,6 +19,6 @@ export interface OutputConfig {
 }
 
 export interface GraphQLExecutionContext {
-    wgContext: BaseContext<User, InternalClient>;
+    wundergraph: BaseContext<User, InternalClient>;
 }
 `;

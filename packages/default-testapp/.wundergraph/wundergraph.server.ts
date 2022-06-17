@@ -206,10 +206,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 								})
 							),
 							async resolve(root, args, ctx, info) {
-								ctx.wgContext.log.info(`resolve_clientRequest: ${JSON.stringify(ctx.wgContext.clientRequest)}`);
+								ctx.wundergraph.log.info(`resolve_clientRequest: ${JSON.stringify(ctx.wundergraph.clientRequest)}`);
 
-								const data = await ctx.wgContext.internalClient.queries.InternalDragons();
-								const posts = await ctx.wgContext.internalClient.queries.JSP();
+								const data = await ctx.wundergraph.internalClient.queries.InternalDragons();
+								const posts = await ctx.wundergraph.internalClient.queries.JSP();
 								return data.data?.spacex_dragons?.map((d) => ({
 									name: d.name,
 									crewCapacity: d.crew_capacity,

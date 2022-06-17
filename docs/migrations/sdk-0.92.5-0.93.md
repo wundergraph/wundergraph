@@ -37,13 +37,13 @@ queries: {
 2. We removed the `ServerContext` from the signature of the `configureWunderGraphServer` function because it introduced another internal client that has no access to the request. This behavior is hard to understand and we want to avoid it.
 3. Rename `onRequest` hook to `onOriginRequest`. This makes it more clear that this hook is not called a single time per operation.
 4. Rename `onResponse` hook to `onOriginResponse`. This is the companion hook to the `onOriginRequest` hook.
-5. We unified the GraphQLContext `ctx.wgContext` to the new hook interface (see 1).
+5. We unified the GraphQLContext `ctx.wundergraph` to the new hook interface (see 1).
 
 ```ts
 {
   async resolve(root, args, ctx, info) {
-    ctx.wgContext.log.info("Resolving query");
-    const data = await ctx.wgContext.internalClient.queries.InternalDragons();
+    ctx.wundergraph.log.info("Resolving query");
+    const data = await ctx.wundergraph.internalClient.queries.InternalDragons();
   }
 }
 ```

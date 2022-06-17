@@ -1,6 +1,6 @@
 import { GraphQLEnumType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk';
-import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { AuthenticationResponse, HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 
 const testEnum = new GraphQLEnumType({
@@ -17,6 +17,26 @@ const testEnum = new GraphQLEnumType({
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
+		authentication: {
+			async revalidate(): Promise<AuthenticationResponse> {
+				return {
+					status: 'ok',
+					user: {
+						name: 'test',
+					},
+				};
+			},
+
+			async postAuthentication(hook) {},
+			async mutatingPostAuthentication(hook): Promise<AuthenticationResponse> {
+				return {
+					status: 'ok',
+					user: {
+						name: 'test',
+					},
+				};
+			},
+		},
 		queries: {
 			FakeWeather: {
 				mockResolve: async (hook) => {
