@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
 
+const operationRequestContext: unique symbol = Symbol('operationRequestContext');
+
 interface ClientRequestContext {
 	// used as "context" in operation methods to access request based properties
-	__wg: {
+	[operationRequestContext]: {
 		extraHeaders?: { [key: string]: string };
 		clientRequest?: any;
 	};
@@ -45,13 +47,13 @@ export const internalClientFactory = (
 ): InternalClientFactory => {
 	const baseOperations: Operations = {
 		queries: {
-			__wg: {
+			[operationRequestContext]: {
 				clientRequest: {},
 				extraHeaders: {},
 			},
 		},
 		mutations: {
-			__wg: {
+			[operationRequestContext]: {
 				clientRequest: {},
 				extraHeaders: {},
 			},
@@ -64,8 +66,8 @@ export const internalClientFactory = (
 			if (baseOperations.queries) {
 				baseOperations.queries[op.name] = async function (this: ClientRequestContext, input?: any) {
 					return internalRequest({
-						extraHeaders: this.__wg.extraHeaders,
-						clientRequest: this.__wg.clientRequest,
+						extraHeaders: this[operationRequestContext].extraHeaders,
+						clientRequest: this[operationRequestContext].clientRequest,
 						operationName: op.name,
 						input,
 					});
@@ -79,8 +81,8 @@ export const internalClientFactory = (
 			if (baseOperations.mutations) {
 				baseOperations.mutations[op.name] = async function (this: ClientRequestContext, input?: any) {
 					return internalRequest({
-						extraHeaders: this.__wg.extraHeaders,
-						clientRequest: this.__wg.clientRequest,
+						extraHeaders: this[operationRequestContext].extraHeaders,
+						clientRequest: this[operationRequestContext].clientRequest,
 						operationName: op.name,
 						input,
 					});
@@ -126,11 +128,11 @@ export const internalClientFactory = (
 		// Set new context for each new client instance.
 		// Assign request variables to the query/mutation object
 		// so that every operation has access through "this" to __wg
-		operations.queries.__wg = {
+		operations.queries[operationRequestContext] = {
 			clientRequest,
 			extraHeaders,
 		};
-		operations.mutations.__wg = {
+		operations.mutations[operationRequestContext] = {
 			clientRequest,
 			extraHeaders,
 		};
