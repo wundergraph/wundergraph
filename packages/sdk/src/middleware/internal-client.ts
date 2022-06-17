@@ -1,14 +1,14 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
 
-export interface ClientRequestContext {
+interface ClientRequestContext {
 	// used as "context" in operation methods to access request based properties
 	__wg: {
 		extraHeaders?: { [key: string]: string };
 		clientRequest?: any;
 	};
 }
-export interface Operations {
+interface Operations {
 	queries: {
 		[operationName: string]: any;
 	} & ClientRequestContext;
