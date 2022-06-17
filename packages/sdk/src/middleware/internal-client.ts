@@ -61,7 +61,6 @@ export const internalClientFactory = (
 		.forEach((op) => {
 			if (baseOperations.queries) {
 				baseOperations.queries[op.name] = async function (this: ClientRequestContext, input?: any) {
-					// dynamic dispatch based on the client instance per request
 					return internalRequest({
 						extraHeaders: this.__wg.extraHeaders,
 						clientRequest: this.__wg.clientRequest,
