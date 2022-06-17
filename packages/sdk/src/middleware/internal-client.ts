@@ -36,6 +36,8 @@ export interface InternalClientFactory {
 	(extraHeaders?: { [p: string]: string } | undefined, clientRequest?: any): InternalClient;
 }
 
+// internalClientFactory is a factory function that creates an internal client.
+// this function should be only called once on startup.
 export const internalClientFactory = (
 	apiName: string,
 	deploymentName: string,
@@ -112,6 +114,7 @@ export const internalClientFactory = (
 	};
 
 	// build creates a new client instance. We create a new instance per request.
+	// this function is cheap because we only create objects.
 	return function build(extraHeaders?: { [key: string]: string }, clientRequest?: any): InternalClient {
 		// let's inherit the base operation methods from the base client
 		// but create a new object to avoid mutating the base client
