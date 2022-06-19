@@ -1,0 +1,7 @@
+query AllStores {
+	faunaDB_allStores {
+		data {
+			_id
+		}
+	}
+}

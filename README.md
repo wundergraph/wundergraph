@@ -56,6 +56,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 Examples:
 
 - [Simple Starter](/examples/simple)
+- [FaunaDB Starter](/examples/faunadb-nextjs)
 - [PostgreSQL](/examples/postgres)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
