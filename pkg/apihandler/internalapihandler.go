@@ -220,7 +220,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	request := r
+	internalRequest := r
 
 	body := bodyBuf.Bytes()
 
@@ -237,10 +237,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if clientRequest != nil {
-		request = clientRequest
+		internalRequest = clientRequest
 	}
 
-	ctx := pool.GetCtx(request, pool.Config{
+	ctx := pool.GetCtx(internalRequest, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
@@ -294,6 +294,7 @@ func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*
 		}
 
 		// create a new request from the client request
+		// excluding the body because the body is the graphql operation query
 		request, err := http.NewRequestWithContext(ctx, method, requestURI, nil)
 		if err != nil {
 			return nil, err
