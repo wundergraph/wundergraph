@@ -278,12 +278,15 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
 		)
 
-		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
-			log:           r.log,
-			html:          graphiql.GetGraphiqlPlaygroundHTML(),
-			apiPathPrefix: api.GetPathPrefix(),
+		if err := registerGraphqlPlaygroundHandler(r.router, api.PathPrefix, apiPath); err != nil {
+			graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
+				log:           r.log,
+				html:          graphiql.GetGraphiqlPlaygroundHTML(),
+				apiPathPrefix: api.GetPathPrefix(),
+			}
+			r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		}
-		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
+
 		r.log.Debug("registered GraphQLPlaygroundHandler",
 			abstractlogger.String("method", http.MethodGet),
 			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
