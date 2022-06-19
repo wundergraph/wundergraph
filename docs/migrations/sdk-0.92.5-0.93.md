@@ -58,7 +58,7 @@ queries: {
 }
 ```
 
-8. `setClientRequestHeader` has been removed. You can use `hook.clientRequest.headers` interface to manipulate headers. This interface implements [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers).
+8. `setClientRequestHeader` has been removed. You can use `hook.clientRequest.headers` interface to manipulate headers. This interface implements the fetch standard [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers).
 
 ```ts
 {
