@@ -1,14 +1,4 @@
-export { default as templates } from './codegen/templates';
-export { Application, introspect, createMockApi, Api } from './definition';
-export {
-	configureWunderGraphApplication,
-	configurePublishWunderGraphAPI,
-	resolveIntegration,
-	EnvironmentVariable,
-	PlaceHolder,
-} from './configure';
 export type { ResolvedWunderGraphConfig } from './configure';
-export { configureWunderGraphOperations, enableAuth, enableCaching, disableAuth } from './configure/operations';
 export type {
 	BaseOperationConfiguration,
 	QueryConfiguration,
@@ -23,7 +13,6 @@ export type {
 	CustomizeSubscription,
 } from './configure/operations';
 export type { GraphQLOperation } from './graphql/operations';
-export { configureWunderGraphServer } from './middleware/server';
 export type {
 	WunderGraphRequest,
 	WunderGraphResponse,
@@ -32,6 +21,7 @@ export type {
 	ClientRequest,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
+	ClientRequestHeaders,
 } from './middleware/server';
 export type {
 	SubscriptionRequestOptions,
@@ -55,6 +45,20 @@ export type {
 } from './middleware/client';
 export type { OperationArgsWithInput, InternalClient } from './middleware/internal-client';
 export type { GraphQLServerConfig } from './middleware/plugins/graphql';
+export type { FastifyLoggerInstance } from 'fastify';
+export type { Template, TemplateOutputFile } from './codegen/index';
+
+export { default as templates } from './codegen/templates';
+export { Application, introspect, createMockApi, Api } from './definition';
+export {
+	configureWunderGraphApplication,
+	configurePublishWunderGraphAPI,
+	resolveIntegration,
+	EnvironmentVariable,
+	PlaceHolder,
+} from './configure';
+export { configureWunderGraphOperations, enableAuth, enableCaching, disableAuth } from './configure/operations';
+export { configureWunderGraphServer } from './middleware/server';
 
 export { default as cors } from './cors';
 export { authProviders } from './configure/authentication';
@@ -67,7 +71,4 @@ export {
 	TypeScriptResponseModels,
 } from './codegen/templates/typescript/index';
 export { modelImports } from './codegen/templates/typescript/web.client';
-export type { Template, TemplateOutputFile } from './codegen/index';
 export { listenAddrHttp, middlewarePort, middlewarePortString, listenAddr } from './env/index';
-
-export type { FastifyLoggerInstance } from 'fastify';
