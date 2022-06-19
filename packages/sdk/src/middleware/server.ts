@@ -1,7 +1,7 @@
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
-import { objectToHeaders } from 'headers-polyfill';
-import type { Headers as HeadersPolyfill } from 'headers-polyfill';
+import { HeadersObject, objectToHeaders } from 'headers-polyfill';
+import { Headers } from 'headers-polyfill';
 import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
@@ -37,7 +37,7 @@ export interface BaseContext<User = any, IC = InternalClient> {
 	internalClient: IC;
 }
 
-export interface ClientRequestHeaders extends HeadersPolyfill {}
+export interface ClientRequestHeaders extends Headers {}
 
 export interface ClientRequest<H = ClientRequestHeaders> {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -49,7 +49,7 @@ export interface ClientRequest<H = ClientRequestHeaders> {
 	headers: H;
 }
 
-interface OriginalClientRequest extends ClientRequest<{ [key: string]: string }> {}
+interface OriginalClientRequest extends ClientRequest<HeadersObject> {}
 
 export interface WunderGraphRequest {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -199,7 +199,7 @@ export const startServer = async (
 				user: req?.body?.__wg?.user,
 				// clientRequest represents the original client request that was sent initially to the server.
 				clientRequest: {
-					headers: objectToHeaders(req?.body?.__wg?.clientRequest.headers || {}),
+					headers: new Headers(req?.body?.__wg?.clientRequest.headers),
 					requestURI: req?.body?.__wg?.clientRequest.requestURI || '',
 					method: req?.body?.__wg?.clientRequest.method || 'GET',
 				},

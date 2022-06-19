@@ -1,9 +1,10 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
 import fp from 'fastify-plugin';
-import { WunderGraphRequest, WunderGraphResponse } from '../server';
+import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../server';
 import { HooksConfiguration } from '../../configure';
 import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
+import { flattenHeadersObject } from 'headers-polyfill';
 
 export interface BodyResponse {
 	data?: any;
@@ -20,6 +21,10 @@ export interface FastifyHooksOptions extends HooksConfiguration {
 }
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
+	const flattenHeaders = (headers: ClientRequestHeaders) => {
+		return flattenHeadersObject(headers.all());
+	};
+
 	// authentication
 	fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
 		reply.type('application/json').code(200);
@@ -44,7 +49,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'mutatingPostAuthentication',
 					response: out,
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -61,7 +66,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'revalidateAuthentication',
 					response: out,
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -164,7 +169,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mock',
 					response: mutated,
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -192,7 +197,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'preResolve',
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -221,7 +226,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'postResolve',
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -250,7 +255,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPreResolve',
 					input: mutatedInput,
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -280,7 +285,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPostResolve',
 					response: mutatedResponse,
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -309,7 +314,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'customResolve',
 					response: out || null,
-					setClientRequestHeaders: request.ctx.clientRequest.headers,
+					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);

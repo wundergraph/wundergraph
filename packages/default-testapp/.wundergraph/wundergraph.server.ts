@@ -57,7 +57,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 		},
 		queries: {
 			Dragons: {
-				preResolve: async ({ user, log, clientRequest, internalClient }) => {},
+				preResolve: async ({ user, log, clientRequest, internalClient }) => {
+					clientRequest.headers.append('X-Wundergraph', 'foo');
+					clientRequest.headers.delete('Cache-Control');
+				},
 			},
 		},
 		mutations: {
