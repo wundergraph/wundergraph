@@ -51,6 +51,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 		});
 		outStream.addListener('error', (err) => {
 			error('Error installing wunderctl: ' + err.message);
+			locker.remove();
 		});
 	} catch (e: any) {
 		locker.remove();
