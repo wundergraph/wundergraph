@@ -24,11 +24,13 @@ Hooks Overview
     │
     └─▶ customResolve (e.g. Early return, custom response)
     │
-    └─▶ WunderGraph Engine (Resolve operation from data-source)
+    └─▶ (Internal) WunderGraph Engine - Resolve operation
     │
     └─▶ postResolve (e.g. Logging)
     │
     └─▶ mutatingPostResolve (e.g. Input manipulation, custom response)
+    │
+    └─▶ postAuthentication (e.g. Logging)
     │
     └─▶ mutatingPostAuthentication (e.g. Validation)
 ```
@@ -46,7 +48,7 @@ Incoming Request
                 │
          exit ◀─┴─▶ customResolve
                 │
-                └─▶ WunderGraph Engine (Resolve Operation)
+                └─▶ (Internal) WunderGraph Engine - Resolve operation
                     │
                     └─▶ onOriginRequest (For each external data-source call)
                     │   │
