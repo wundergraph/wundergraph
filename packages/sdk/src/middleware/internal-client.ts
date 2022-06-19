@@ -1,34 +1,23 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
 
-const operationRequestContext: unique symbol = Symbol('operationRequestContext');
-
 interface ClientRequestContext {
 	// used as "context" in operation methods to access request based properties
-	[operationRequestContext]: {
+	context: {
 		extraHeaders?: { [key: string]: string };
 		clientRequest?: any;
 	};
 }
-interface Operations {
+interface Operations extends ClientRequestContext {
 	queries: {
 		[operationName: string]: any;
-	} & ClientRequestContext;
-	mutations: {
-		[operationName: string]: any;
-	} & ClientRequestContext;
-}
-
-export interface BaseInternalClient {
-	queries: {
-		[operationName: string]: (input: any) => Promise<any>;
 	};
 	mutations: {
-		[operationName: string]: (input: any) => Promise<any>;
+		[operationName: string]: any;
 	};
 }
 
-export interface InternalClient extends BaseInternalClient {
+export interface InternalClient extends Operations {
 	withHeaders: (headers: { [key: string]: string }) => InternalClient;
 }
 
@@ -46,19 +35,16 @@ export const internalClientFactory = (
 	operations: Operation[]
 ): InternalClientFactory => {
 	const baseOperations: Operations = {
-		queries: {
-			[operationRequestContext]: {
-				clientRequest: {},
-				extraHeaders: {},
-			},
+		context: {
+			clientRequest: {},
+			extraHeaders: {},
 		},
-		mutations: {
-			[operationRequestContext]: {
-				clientRequest: {},
-				extraHeaders: {},
-			},
-		},
+		queries: {},
+		mutations: {},
 	};
+
+	Object.setPrototypeOf(baseOperations.queries, baseOperations);
+	Object.setPrototypeOf(baseOperations.mutations, baseOperations);
 
 	operations
 		.filter((op) => op.operationType == OperationType.QUERY)
@@ -66,8 +52,8 @@ export const internalClientFactory = (
 			if (baseOperations.queries) {
 				baseOperations.queries[op.name] = async function (this: ClientRequestContext, input?: any) {
 					return internalRequest({
-						extraHeaders: this[operationRequestContext].extraHeaders,
-						clientRequest: this[operationRequestContext].clientRequest,
+						extraHeaders: this.context.extraHeaders,
+						clientRequest: this.context.clientRequest,
 						operationName: op.name,
 						input,
 					});
@@ -81,8 +67,8 @@ export const internalClientFactory = (
 			if (baseOperations.mutations) {
 				baseOperations.mutations[op.name] = async function (this: ClientRequestContext, input?: any) {
 					return internalRequest({
-						extraHeaders: this[operationRequestContext].extraHeaders,
-						clientRequest: this[operationRequestContext].clientRequest,
+						extraHeaders: this.context.extraHeaders,
+						clientRequest: this.context.clientRequest,
 						operationName: op.name,
 						input,
 					});
@@ -120,30 +106,12 @@ export const internalClientFactory = (
 	return function build(extraHeaders?: { [key: string]: string }, clientRequest?: any): InternalClient {
 		// let's inherit the base operation methods from the base client
 		// but create a new object to avoid mutating the base client
-		const operations: Operations = {
-			queries: Object.create(baseOperations.queries),
-			mutations: Object.create(baseOperations.mutations),
+		const client: InternalClient = Object.create(baseOperations);
+		client.withHeaders = (headers: { [key: string]: string }) => {
+			return build(headers, clientRequest);
 		};
-
-		// Set new context for each new client instance.
-		// Assign request variables to the query/mutation object
-		// so that every operation has access through "this" to __wg
-		operations.queries[operationRequestContext] = {
-			clientRequest,
-			extraHeaders,
-		};
-		operations.mutations[operationRequestContext] = {
-			clientRequest,
-			extraHeaders,
-		};
-
-		const client: InternalClient = {
-			queries: operations.queries,
-			mutations: operations.mutations,
-			withHeaders: (headers: { [key: string]: string }) => {
-				return build(headers, clientRequest);
-			},
-		};
+		client.context.clientRequest = clientRequest;
+		client.context.extraHeaders = extraHeaders || {};
 
 		return client;
 	};
