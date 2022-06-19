@@ -171,6 +171,7 @@ importers:
       graphql: ^16.3.0
       graphql-helix: ^1.12.0
       handlebars: ^4.7.7
+      headers-polyfill: ^3.0.7
       jest: ^28.1.0
       js-yaml: ^4.1.0
       json-schema: ^0.4.0
@@ -200,6 +201,7 @@ importers:
       graphql: 16.4.0
       graphql-helix: 1.12.0_graphql@16.4.0
       handlebars: 4.7.7
+      headers-polyfill: 3.0.7
       js-yaml: 4.1.0
       json-schema: 0.4.0
       lodash: 4.17.21
@@ -4607,6 +4609,10 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
+
+  /headers-polyfill/3.0.7:
+    resolution: {integrity: sha512-JoLCAdCEab58+2/yEmSnOlficyHFpIl0XJqwu3l+Unkm1gXpFUYsThz6Yha3D6tNhocWkCPfyW0YVIGWFqTi7w==}
+    dev: false
 
   /hosted-git-info/2.8.9:
     resolution: {integrity: sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==}

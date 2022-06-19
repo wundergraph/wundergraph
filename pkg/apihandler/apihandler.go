@@ -1065,7 +1065,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		_, _ = w.Write(out.Response)
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("MockResolve queries hook response is empty")
+		}
 		return
 	}
 
@@ -1122,7 +1126,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			h.log.Error("PreResolve queries hook", abstractlogger.Error(err))
 		}
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("PreResolve queries hook response is empty")
+		}
 	}
 
 	if h.hooksConfig.mutatingPreResolve {
@@ -1134,7 +1142,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		ctx.Variables = out.Input
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("MutatingPostResolve queries hook response is empty")
+		}
 	}
 
 	if h.hooksConfig.customResolve {
@@ -1143,7 +1155,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			h.log.Error("customResolve queries hook", abstractlogger.Error(err))
 		}
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("CustomResolve queries hook response is empty")
+		}
 		if !bytes.Equal(out.Response, literal.NULL) {
 			_, _ = w.Write(out.Response)
 			return
@@ -1414,7 +1430,9 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
 		}
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		}
 	}
 
 	if h.hooksConfig.mutatingPreResolve {
@@ -1426,16 +1444,24 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		ctx.Variables = out.Input
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("PreResolve queries hook response is empty")
+		}
 	}
 
 	if h.hooksConfig.customResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, middlewareclient.CustomResolve, hookData)
 		if err != nil {
-			h.log.Error("customResolve queries hook", abstractlogger.Error(err))
+			h.log.Error("CustomResolve queries hook", abstractlogger.Error(err))
 		}
-		handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		if out != nil {
+			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("CustomResolve queries hook response is empty")
+		}
 		if !bytes.Equal(out.Response, literal.NULL) {
 			_, _ = w.Write(out.Response)
 			return
@@ -1445,7 +1471,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if resolveErr != nil {
 		h.log.Error("ResolveGraphQLResponse", abstractlogger.Error(resolveErr))
-		http.Error(w, "byd request", http.StatusInternalServerError)
+		http.Error(w, "bad request", http.StatusInternalServerError)
 		return
 	}
 
@@ -1931,9 +1957,12 @@ func handleSetClientRequestHeaders(req *http.Request, headers map[string]string)
 	if headers == nil || len(headers) == 0 {
 		return
 	}
-	for s := range headers {
-		req.Header.Set(s, headers[s])
+	hookHeaders := http.Header{}
+	for name := range headers {
+		hookHeaders.Set(name, headers[name])
 	}
+
+	req.Header = hookHeaders
 }
 
 type OperationMetaData struct {

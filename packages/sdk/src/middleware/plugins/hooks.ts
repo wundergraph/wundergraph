@@ -44,7 +44,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'mutatingPostAuthentication',
 					response: out,
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -61,7 +61,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'revalidateAuthentication',
 					response: out,
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -164,7 +164,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mock',
 					response: mutated,
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -192,7 +192,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'preResolve',
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -221,7 +221,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'postResolve',
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -250,7 +250,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPreResolve',
 					input: mutatedInput,
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -280,7 +280,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPostResolve',
 					response: mutatedResponse,
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -309,7 +309,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'customResolve',
 					response: out || null,
-					setClientRequestHeaders: request.clientRequestHeaders,
+					setClientRequestHeaders: request.ctx.clientRequest.headers,
 				};
 			} catch (err) {
 				request.log.error(err);

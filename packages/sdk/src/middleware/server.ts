@@ -1,5 +1,7 @@
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
+import { objectToHeaders } from 'headers-polyfill';
+import type { Headers as HeadersPolyfill } from 'headers-polyfill';
 import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
@@ -16,7 +18,6 @@ declare module 'fastify' {
 }
 
 export interface FastifyRequestContext<User = any, IC = InternalClient> {
-	clientRequestHeaders: { [key: string]: string };
 	ctx: BaseContext<User, IC>;
 }
 
@@ -27,11 +28,6 @@ export interface BaseContext<User = any, IC = InternalClient> {
 	user?: User;
 	clientRequest: ClientRequest;
 	/**
-	 * setClientRequestHeader allows you to set additional headers to the client request.
-	 * This might impact the behavior of the next hooks. This method has no effect for the global hooks.
-	 */
-	setClientRequestHeader: (name: string, value: string) => void;
-	/**
 	 * The request logger.
 	 */
 	log: FastifyLoggerInstance;
@@ -41,13 +37,19 @@ export interface BaseContext<User = any, IC = InternalClient> {
 	internalClient: IC;
 }
 
-export interface ClientRequest {
+export interface ClientRequestHeaders extends HeadersPolyfill {}
+
+export interface ClientRequest<H = ClientRequestHeaders> {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 	requestURI: string;
-	headers: {
-		[key: string]: string;
-	};
+	/**
+	 * Contains all client request headers. You can manipulate the map to add or remove headers.
+	 * This might impact upstream hooks. Global hooks don't take changes into account.
+	 */
+	headers: H;
 }
+
+interface OriginalClientRequest extends ClientRequest<{ [key: string]: string }> {}
 
 export interface WunderGraphRequest {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -188,22 +190,19 @@ export const startServer = async (
 	config: WunderGraphConfiguration
 ) => {
 	fastify.decorateRequest('ctx', null);
-	fastify.decorateRequest('clientRequestHeaders', null);
 
-	fastify.addHook<{ Body: { __wg?: { user: WunderGraphUser; clientRequest: ClientRequest } } }>(
+	fastify.addHook<{ Body: { __wg?: { user: WunderGraphUser; clientRequest: OriginalClientRequest } } }>(
 		'preHandler',
 		async (req, reply) => {
-			req.clientRequestHeaders = {};
 			req.ctx = {
 				log: req.log.child({ plugin: 'hooks' }),
 				user: req?.body?.__wg?.user,
 				// clientRequest represents the original client request that was sent initially to the server.
-				clientRequest: req?.body?.__wg?.clientRequest || {
-					headers: {},
-					requestURI: '',
-					method: 'GET',
+				clientRequest: {
+					headers: objectToHeaders(req?.body?.__wg?.clientRequest.headers || {}),
+					requestURI: req?.body?.__wg?.clientRequest.requestURI || '',
+					method: req?.body?.__wg?.clientRequest.method || 'GET',
 				},
-				setClientRequestHeader: (name: string, value: string) => (req.clientRequestHeaders[name] = value),
 				internalClient: clientFactory({}, req?.body?.__wg?.clientRequest),
 			};
 		}

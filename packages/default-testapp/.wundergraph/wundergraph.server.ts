@@ -50,14 +50,14 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				onOriginRequest: {
 					enableForAllOperations: true,
 					hook: async (hook) => {
-						console.log('########onRequest##########', hook.clientRequest);
+						console.log('########onRequest##########', hook.clientRequest.method);
 					},
 				},
 			},
 		},
 		queries: {
 			Dragons: {
-				preResolve: async ({ user, log, clientRequest, setClientRequestHeader, internalClient }) => {},
+				preResolve: async ({ user, log, clientRequest, internalClient }) => {},
 			},
 		},
 		mutations: {

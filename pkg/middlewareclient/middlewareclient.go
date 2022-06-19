@@ -17,7 +17,7 @@ type MiddlewareHookResponse struct {
 	Hook                    string            `json:"hook"`
 	Response                json.RawMessage   `json:"response"`
 	Input                   json.RawMessage   `json:"input"`
-	SetClientRequestHeaders map[string]string `json:"SetClientRequestHeaders"`
+	SetClientRequestHeaders map[string]string `json:"setClientRequestHeaders"`
 }
 
 type MiddlewareHook string

@@ -58,7 +58,18 @@ queries: {
 }
 ```
 
-7. All properties in the hooks `user` object are now camelCase. This aligns with the typescript ecosystem standards.
-8. We also camelCase the properties of the `user` object in the web client.
+8. `setClientRequestHeader` has been removed. You can use `hook.clientRequest.headers` interface to manipulate headers. This interface implements [Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers).
+
+```ts
+{
+  preResolve: async ({ clientRequest }) => {
+    clientRequest.headers.set('x-sample', 'foo');
+    clientRequest.headers.delete('Cache-Control');
+  };
+}
+```
+
+9. All properties in the hooks `user` object are now camelCase. This aligns with the typescript ecosystem standards.
+10. We also camelCase the properties of the `user` object in the web client.
 
 > **Note**: Many changes can be easily picked up by typescript type inferrer.
