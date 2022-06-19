@@ -1,13 +1,13 @@
 import { GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk';
-import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { HooksConfig, HooksRequest } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
 		queries: {
 			FakeWeather: {
-				mockResolve: async (hook) => {
+				mockResolve: async (hook: HooksRequest) => {
 					return {
 						data: {
 							getCityByName: {
