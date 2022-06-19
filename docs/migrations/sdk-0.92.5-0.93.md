@@ -58,7 +58,7 @@ queries: {
 }
 ```
 
-8. `setClientRequestHeader` has been removed. You can use `hook.clientRequest.headers` interface to manipulate headers. This interface implements the fetch standard [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers).
+8. `setClientRequestHeader` has been removed. You can use `clientRequest.headers` interface to manipulate headers. This interface implements the fetch standard [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers).
 
 ```ts
 {
@@ -72,4 +72,4 @@ queries: {
 9. All properties in the hooks `user` object are now camelCase. This aligns with the typescript ecosystem standards.
 10. We also camelCase the properties of the `user` object in the web client.
 
-> **Note**: Many changes can be easily picked up by typescript type inferrer.
+> **Note**: Many changes can be easily picked up by typescript type inferior.
