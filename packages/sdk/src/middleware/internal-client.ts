@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
+import { ClientRequest } from './server';
 
 export interface OperationArgsWithInput<T = void> {
 	input: T;
@@ -9,7 +10,7 @@ interface InternalClientRequestContext {
 	// used as "context" in operation methods to access request based properties
 	context: {
 		extraHeaders?: { [key: string]: string };
-		clientRequest?: any;
+		clientRequest?: ClientRequest;
 	};
 }
 interface Operations {
@@ -40,8 +41,8 @@ export const internalClientFactory = (
 ): InternalClientFactory => {
 	const baseOperations: Operations & InternalClientRequestContext = {
 		context: {
-			clientRequest: {},
-			extraHeaders: {},
+			clientRequest: undefined,
+			extraHeaders: undefined,
 		},
 		queries: {},
 		mutations: {},
@@ -113,7 +114,7 @@ export const internalClientFactory = (
 
 	// build creates a new client instance. We create a new instance per request.
 	// this function is cheap because we only create objects.
-	return function build(extraHeaders?: { [key: string]: string }, clientRequest?: any): InternalClient {
+	return function build(extraHeaders?: { [key: string]: string }, clientRequest?: ClientRequest): InternalClient {
 		// let's inherit the base operation methods from the base client
 		// but create a new object to avoid mutating the base client
 		const client: InternalClient & InternalClientRequestContext = Object.create(baseOperations);
@@ -121,7 +122,7 @@ export const internalClientFactory = (
 			return build(headers, clientRequest);
 		};
 		client.context.clientRequest = clientRequest;
-		client.context.extraHeaders = extraHeaders || {};
+		client.context.extraHeaders = extraHeaders;
 
 		return client;
 	};
