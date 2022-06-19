@@ -53,7 +53,7 @@ export type {
 	Aborted,
 	FetchConfig,
 } from './middleware/client';
-
+export type { OperationArgsWithInput, InternalClient } from './middleware/internal-client';
 export type { GraphQLServerConfig } from './middleware/plugins/graphql';
 
 export { default as cors } from './cors';

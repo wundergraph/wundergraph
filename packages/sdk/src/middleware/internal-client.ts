@@ -1,14 +1,18 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
 
-interface ClientRequestContext {
+export interface OperationArgsWithInput<T = void> {
+	input: T;
+}
+
+interface InternalClientRequestContext {
 	// used as "context" in operation methods to access request based properties
 	context: {
 		extraHeaders?: { [key: string]: string };
 		clientRequest?: any;
 	};
 }
-interface Operations extends ClientRequestContext {
+interface Operations {
 	queries: {
 		[operationName: string]: any;
 	};
@@ -34,7 +38,7 @@ export const internalClientFactory = (
 	deploymentName: string,
 	operations: Operation[]
 ): InternalClientFactory => {
-	const baseOperations: Operations = {
+	const baseOperations: Operations & InternalClientRequestContext = {
 		context: {
 			clientRequest: {},
 			extraHeaders: {},
@@ -50,12 +54,15 @@ export const internalClientFactory = (
 		.filter((op) => op.operationType == OperationType.QUERY)
 		.forEach((op) => {
 			if (baseOperations.queries) {
-				baseOperations.queries[op.name] = async function (this: ClientRequestContext, input?: any) {
+				baseOperations.queries[op.name] = async function (
+					this: InternalClientRequestContext,
+					options?: OperationArgsWithInput<any>
+				) {
 					return internalRequest({
 						extraHeaders: this.context.extraHeaders,
 						clientRequest: this.context.clientRequest,
 						operationName: op.name,
-						input,
+						input: options?.input,
 					});
 				};
 			}
@@ -65,12 +72,15 @@ export const internalClientFactory = (
 		.filter((op) => op.operationType == OperationType.MUTATION)
 		.forEach((op) => {
 			if (baseOperations.mutations) {
-				baseOperations.mutations[op.name] = async function (this: ClientRequestContext, input?: any) {
+				baseOperations.mutations[op.name] = async function (
+					this: InternalClientRequestContext,
+					options?: OperationArgsWithInput<any>
+				) {
 					return internalRequest({
 						extraHeaders: this.context.extraHeaders,
 						clientRequest: this.context.clientRequest,
 						operationName: op.name,
-						input,
+						input: options?.input,
 					});
 				};
 			}
@@ -106,7 +116,7 @@ export const internalClientFactory = (
 	return function build(extraHeaders?: { [key: string]: string }, clientRequest?: any): InternalClient {
 		// let's inherit the base operation methods from the base client
 		// but create a new object to avoid mutating the base client
-		const client: InternalClient = Object.create(baseOperations);
+		const client: InternalClient & InternalClientRequestContext = Object.create(baseOperations);
 		client.withHeaders = (headers: { [key: string]: string }) => {
 			return build(headers, clientRequest);
 		};

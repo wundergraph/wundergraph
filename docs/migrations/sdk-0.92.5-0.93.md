@@ -48,7 +48,17 @@ queries: {
 }
 ```
 
-6. All properties in the hooks `user` object are now camelCase. This aligns with the typescript defaults.
-7. We also camelCase the properties of the `user` object in the web client.
+6. Internal operation calls accept an object as argument. This makes it easier to introduce new options.
+
+```ts
+{
+  ctx.wundergraph.internalClient.queries.InternalDragons({
+    input,
+  });
+}
+```
+
+7. All properties in the hooks `user` object are now camelCase. This aligns with the typescript ecosystem standards.
+8. We also camelCase the properties of the `user` object in the web client.
 
 > **Note**: Many changes can be easily picked up by typescript type inferrer.
