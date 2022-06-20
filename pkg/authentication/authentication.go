@@ -95,8 +95,8 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		ETag:          "",
 		AccessToken:   mustBearerTokenToJSON(token),
 	}
-	u.hooks.handlePostAuthentication(nil, tempUser)
-	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(nil, tempUser)
+	u.hooks.handlePostAuthentication(context.Background(), tempUser)
+	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
 	if !proceed {
 		return fmt.Errorf("access denied")
 	}

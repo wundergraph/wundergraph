@@ -2,13 +2,88 @@ package hooks
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 )
+
+type WunderGraphRequest struct {
+	Method     string            `json:"method"`
+	RequestURI string            `json:"requestURI"`
+	Headers    map[string]string `json:"headers"`
+	Body       json.RawMessage   `json:"body,omitempty"`
+}
+
+type WunderGraphResponse struct {
+	StatusCode int               `json:"statusCode"`
+	Status     string            `json:"status"`
+	Method     string            `json:"method"`
+	RequestURI string            `json:"requestURI"`
+	Headers    map[string]string `json:"headers"`
+	Body       json.RawMessage   `json:"body,omitempty"`
+}
+
+func HttpRequestToWunderGraphRequestJSON(r *http.Request, withBody bool) ([]byte, error) {
+	var body []byte
+	if withBody {
+		body, _ = ioutil.ReadAll(r.Body)
+		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	}
+	return json.Marshal(WunderGraphRequest{
+		Method:     r.Method,
+		RequestURI: r.URL.String(),
+		Headers:    HeaderSliceToCSV(r.Header),
+		Body:       body,
+	})
+}
+
+func HeaderSliceToCSV(headers map[string][]string) map[string]string {
+	result := make(map[string]string, len(headers))
+	for k, v := range headers {
+		result[k] = strings.Join(v, ",")
+	}
+	return result
+}
+
+func HeaderCSVToSlice(headers map[string]string) map[string][]string {
+	result := make(map[string][]string, len(headers))
+	for k, v := range headers {
+		result[k] = []string{v}
+	}
+	return result
+}
+
+type OnRequestHookPayload struct {
+	Request       WunderGraphRequest `json:"request"`
+	OperationName string             `json:"operationName"`
+	OperationType string             `json:"operationType"`
+}
+
+type OnRequestHookResponse struct {
+	Skip    bool                `json:"skip"`
+	Cancel  bool                `json:"cancel"`
+	Request *WunderGraphRequest `json:"request"`
+}
+
+type OnResponseHookPayload struct {
+	Response      WunderGraphResponse `json:"response"`
+	OperationName string              `json:"operationName"`
+	OperationType string              `json:"operationType"`
+}
+
+type OnResponseHookResponse struct {
+	Skip     bool                 `json:"skip"`
+	Cancel   bool                 `json:"cancel"`
+	Response *WunderGraphResponse `json:"response"`
+}
 
 type MiddlewareHookResponse struct {
 	Error                   string            `json:"error,omitempty"`
@@ -53,25 +128,34 @@ func NewClient(serverUrl string) *Client {
 	}
 }
 
-func (c *Client) DoGlobalRequest(clientRequest *http.Request, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(clientRequest, "global/httpTransport", hook, jsonData)
+func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(ctx, "global/httpTransport", hook, jsonData)
 }
 
-func (c *Client) DoOperationRequest(clientRequest *http.Request, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(clientRequest, "operation/"+operationName, hook, jsonData)
+func (c *Client) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(ctx, "operation/"+operationName, hook, jsonData)
 }
 
-func (c *Client) DoAuthenticationRequest(clientRequest *http.Request, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(clientRequest, "authentication", hook, jsonData)
+func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(ctx, "authentication", hook, jsonData)
 }
 
-func (c *Client) setInternalHookData(clientRequest *http.Request, jsonData []byte) []byte {
+func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byte {
+	if len(jsonData) == 0 {
+		jsonData = []byte(`{}`)
+	}
+	if clientRequest, ok := ctx.Value(pool.ClientRequestKey).(*http.Request); ok {
+		_, wgClientRequestType, _, _ := jsonparser.Get(jsonData, "__wg", "clientRequest")
+		if clientRequestData, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false); err == nil && wgClientRequestType == jsonparser.NotExist {
+			jsonData, _ = jsonparser.Set(jsonData, clientRequestData, "__wg", "clientRequest")
+		}
+	}
 	return jsonData
 }
 
-func (c *Client) doRequest(clientRequest *http.Request, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	jsonData = c.setInternalHookData(clientRequest, jsonData)
-	r, err := http.NewRequest("POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
+func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	jsonData = c.setInternalHookData(ctx, jsonData)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +164,6 @@ func (c *Client) doRequest(clientRequest *http.Request, action string, hook Midd
 	if err != nil {
 		return nil, err
 	}
-	req.WithContext(clientRequest.Context())
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
