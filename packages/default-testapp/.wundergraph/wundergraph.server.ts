@@ -16,7 +16,7 @@ import {
 } from 'graphql';
 import { createGraphQLSchema } from 'openapi-to-graphql';
 import jsonPlaceholder from './../json_placeholder.json';
-import { DragonsResponse, SDLResponse } from './generated/models';
+import type { SDLResponse } from './generated/models';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
