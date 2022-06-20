@@ -29,7 +29,7 @@ authentication: {
 queries: {
   Dragons: {
     // A single argument. Here we use object destructuring for better readability.
-    preResolve: async ({ user, log, clientRequest, setClientRequestHeader, internalClient, ...others }) => {};
+    preResolve: async ({ user, log, clientRequest, internalClient, ...others }) => {};
   }
 }
 ```
