@@ -24,7 +24,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
-	"github.com/wundergraph/wundergraph/pkg/middlewareclient"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 )
 
 func init() {
@@ -95,8 +95,8 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		ETag:          "",
 		AccessToken:   mustBearerTokenToJSON(token),
 	}
-	u.hooks.handlePostAuthentication(context.Background(), tempUser)
-	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
+	u.hooks.handlePostAuthentication(nil, tempUser)
+	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(nil, tempUser)
 	if !proceed {
 		return fmt.Errorf("access denied")
 	}
@@ -207,7 +207,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 }
 
 type Hooks struct {
-	Client                     *middlewareclient.MiddlewareClient
+	Client                     *hooks.Client
 	Log                        abstractlogger.Logger
 	PostAuthentication         bool
 	MutatingPostAuthentication bool
@@ -221,7 +221,7 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 	if userJson, err := json.Marshal(user); err == nil {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	_, err := h.Client.DoAuthenticationRequest(ctx, middlewareclient.PostAuthentication, hookData)
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
 	if err != nil {
 		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
 		return
@@ -242,7 +242,7 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	if userJson, err := json.Marshal(user); err == nil {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	out, err := h.Client.DoAuthenticationRequest(ctx, middlewareclient.MutatingPostAuthentication, hookData)
+	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
 		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
 		return
@@ -616,7 +616,7 @@ func (_ TokenUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CookieUserHandler struct {
 	HasRevalidateHook bool
-	MWClient          *middlewareclient.MiddlewareClient
+	MWClient          *hooks.Client
 	Log               abstractlogger.Logger
 	Host              string
 	InsecureCookies   bool
@@ -640,7 +640,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if user.IdToken != nil {
 			hookData, _ = jsonparser.Set(hookData, user.IdToken, "id_token")
 		}
-		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), middlewareclient.RevalidateAuthentication, hookData)
+		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication", abstractlogger.Error(err))
 			return

@@ -1,8 +1,7 @@
-package middlewareclient
+package hooks
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -39,34 +38,39 @@ const (
 	HttpTransportOnResponse MiddlewareHook = "onOriginResponse"
 )
 
-type MiddlewareClient struct {
+type Client struct {
 	serverUrl  string
 	httpClient *retryablehttp.Client
 }
 
-func NewMiddlewareClient(serverUrl string) *MiddlewareClient {
+func NewClient(serverUrl string) *Client {
 	httpClient := retryablehttp.NewClient()
 	httpClient.RetryMax = 5
 	httpClient.HTTPClient.Timeout = time.Minute * 1
-	return &MiddlewareClient{
+	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,
 	}
 }
 
-func (c *MiddlewareClient) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "global/httpTransport", hook, jsonData)
+func (c *Client) DoGlobalRequest(clientRequest *http.Request, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(clientRequest, "global/httpTransport", hook, jsonData)
 }
 
-func (c *MiddlewareClient) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "operation/"+operationName, hook, jsonData)
+func (c *Client) DoOperationRequest(clientRequest *http.Request, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(clientRequest, "operation/"+operationName, hook, jsonData)
 }
 
-func (c *MiddlewareClient) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "authentication", hook, jsonData)
+func (c *Client) DoAuthenticationRequest(clientRequest *http.Request, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(clientRequest, "authentication", hook, jsonData)
 }
 
-func (c *MiddlewareClient) doRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+func (c *Client) setInternalHookData(clientRequest *http.Request, jsonData []byte) []byte {
+	return jsonData
+}
+
+func (c *Client) doRequest(clientRequest *http.Request, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	jsonData = c.setInternalHookData(clientRequest, jsonData)
 	r, err := http.NewRequest("POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
@@ -76,7 +80,7 @@ func (c *MiddlewareClient) doRequest(ctx context.Context, action string, hook Mi
 	if err != nil {
 		return nil, err
 	}
-	req.WithContext(ctx)
+	req.WithContext(clientRequest.Context())
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
