@@ -169,12 +169,12 @@ export interface DotGraphQLConfig {
 export interface HooksConfiguration<AsyncFn = (...args: any[]) => Promise<any>> {
 	global?: {
 		httpTransport?: {
-			onRequest?: {
+			onOriginRequest?: {
 				hook: AsyncFn;
 				enableForOperations?: string[];
 				enableForAllOperations?: boolean;
 			};
-			onResponse?: {
+			onOriginResponse?: {
 				hook: AsyncFn;
 				enableForOperations?: string[];
 				enableForAllOperations?: boolean;
@@ -701,15 +701,16 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			});
 		}
 
-		if (config.server?.hooks?.global?.httpTransport?.onRequest) {
-			const enableForAllOperations = config.server?.hooks?.global?.httpTransport?.onRequest.enableForAllOperations;
+		if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
+			const enableForAllOperations =
+				config.server?.hooks?.global?.httpTransport?.onOriginRequest.enableForAllOperations;
 			if (enableForAllOperations === true) {
 				app.Operations = app.Operations.map((op) => ({
 					...op,
 					HooksConfiguration: { ...op.HooksConfiguration, httpTransportOnRequest: true },
 				}));
 			} else {
-				const enableForOperations = config.server?.hooks?.global?.httpTransport?.onRequest.enableForOperations;
+				const enableForOperations = config.server?.hooks?.global?.httpTransport?.onOriginRequest.enableForOperations;
 				if (enableForOperations) {
 					app.Operations = app.Operations.map((op) => {
 						if (enableForOperations.includes(op.Name)) {
@@ -721,15 +722,16 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			}
 		}
 
-		if (config.server?.hooks?.global?.httpTransport?.onResponse) {
-			const enableForAllOperations = config.server?.hooks?.global?.httpTransport?.onResponse.enableForAllOperations;
+		if (config.server?.hooks?.global?.httpTransport?.onOriginResponse) {
+			const enableForAllOperations =
+				config.server?.hooks?.global?.httpTransport?.onOriginResponse.enableForAllOperations;
 			if (enableForAllOperations === true) {
 				app.Operations = app.Operations.map((op) => ({
 					...op,
 					HooksConfiguration: { ...op.HooksConfiguration, httpTransportOnResponse: true },
 				}));
 			} else {
-				const enableForOperations = config.server?.hooks?.global?.httpTransport?.onResponse.enableForOperations;
+				const enableForOperations = config.server?.hooks?.global?.httpTransport?.onOriginResponse.enableForOperations;
 				if (enableForOperations) {
 					app.Operations = app.Operations.map((op) => {
 						if (enableForOperations.includes(op.Name)) {

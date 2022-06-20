@@ -18,8 +18,8 @@ import (
 	"github.com/valyala/fasthttp"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/middlewareclient"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
@@ -312,7 +312,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			TLSHandshakeTimeout: 10 * time.Second,
 		}
 
-		hooksClient := middlewareclient.NewMiddlewareClient("http://127.0.0.1:9992")
+		hooksClient := hooks.NewClient("http://127.0.0.1:9992")
 
 		transport := apihandler.NewApiTransport(httpTransport, api, hooksClient, n.options.enableDebugMode)
 

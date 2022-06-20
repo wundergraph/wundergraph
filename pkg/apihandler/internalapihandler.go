@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/buger/jsonparser"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
@@ -211,24 +212,44 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		h.bearerCache.Store(authorizationHeader, struct{}{})
 	}
 
-	variablesBuf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(variablesBuf)
+	bodyBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(bodyBuf)
+	_, err := io.Copy(bodyBuf, r.Body)
+	if err != nil && !errors.Is(err, io.EOF) {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
 
-	ctx := pool.GetCtx(r, pool.Config{
+	internalRequest := r
+
+	body := bodyBuf.Bytes()
+
+	// internal requests transmit the client request as a JSON object
+	// this makes it possible to expose the original client request to hooks triggered by internal requests
+	clientRequest, err := NewRequestFromWunderGraphClientRequest(r.Context(), body)
+	if err != nil {
+		h.log.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+			abstractlogger.Error(err),
+			abstractlogger.String("url", r.RequestURI),
+		)
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	if clientRequest != nil {
+		internalRequest = clientRequest
+	}
+
+	ctx := pool.GetCtx(internalRequest, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
 
-	_, err := io.Copy(variablesBuf, r.Body)
-	if err != nil && !errors.Is(err, io.EOF) {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	ctx.Variables = variablesBuf.Bytes()
-
-	if len(ctx.Variables) == 0 {
+	variablesBuf, _, _, _ := jsonparser.Get(body, "input")
+	if len(variablesBuf) == 0 {
 		ctx.Variables = []byte("{}")
+	} else {
+		ctx.Variables = variablesBuf
 	}
 
 	compactBuf := pool.GetBytesBuffer()
@@ -258,4 +279,37 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = buf.WriteTo(w)
+}
+
+func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*http.Request, error) {
+	clientRequest, _, _, _ := jsonparser.Get(body, "__wg", "clientRequest")
+	if clientRequest != nil {
+		method, err := jsonparser.GetString(body, "__wg", "clientRequest", "method")
+		if err != nil {
+			return nil, err
+		}
+		requestURI, err := jsonparser.GetString(body, "__wg", "clientRequest", "requestURI")
+		if err != nil {
+			return nil, err
+		}
+
+		// create a new request from the client request
+		// excluding the body because the body is the graphql operation query
+		request, err := http.NewRequestWithContext(ctx, method, requestURI, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		err = jsonparser.ObjectEach(body, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
+			request.Header.Set(string(key), string(value))
+			return nil
+		}, "__wg", "clientRequest", "headers")
+		if err != nil {
+			return nil, err
+		}
+
+		return request, nil
+	}
+
+	return nil, nil
 }

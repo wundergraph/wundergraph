@@ -1,12 +1,13 @@
 //language=handlebars
 export const template = `
+import type { OperationArgsWithInput } from "@wundergraph/sdk";
 import { {{ modelImports }} } from "./models"
 
 export interface InternalClient {
     {{#if hasInternalQueries}}
     queries: {
         {{#each internalQueries}}
-            {{operationName}}: ({{#if hasInternalInput}}input: Internal{{operationName}}Input{{/if}}) => Promise<{{operationName}}Response>;
+            {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<Internal{{operationName}}Input>{{/if}}) => Promise<{{operationName}}Response>;
         {{/each}}
     };
     {{else}}
@@ -15,7 +16,7 @@ export interface InternalClient {
     {{#if hasInternalMutations}}
         mutations: {
         {{#each internalMutations}}
-            {{operationName}}: ({{#if hasInternalInput}}input: Internal{{operationName}}Input{{/if}}) => Promise<{{operationName}}Response>;
+            {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<{{operationName}}Input>{{/if}}) => Promise<{{operationName}}Response>;
         {{/each}}
         };
     {{else}}
