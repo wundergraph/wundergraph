@@ -1,5 +1,5 @@
 query AllStores {
-	faunaDB_allStores {
+	allStores: faunaDB_allStores {
 		data {
 			_id
 		}
