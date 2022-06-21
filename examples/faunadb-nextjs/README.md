@@ -25,7 +25,7 @@ Install the dependencies and run the complete example in one command:
 npm install && npm start
 ```
 
-### 3. Fetch All Stores & Products
+### 3. Fetch All Stores
 
 Visit [http://localhost:3000/](http://localhost:3000/).
 
