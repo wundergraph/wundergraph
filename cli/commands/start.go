@@ -116,7 +116,8 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 		}()
 
-		// load config file once
+		// trigger server reload after initial config build
+		// because no fs event is fired as build is already done
 		configFileChangeChan <- struct{}{}
 
 		select {
