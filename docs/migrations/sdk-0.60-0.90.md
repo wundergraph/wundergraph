@@ -1,3 +1,9 @@
+# Migration steps
+
+| Version range | Migration complexity | Info                                          |
+| ------------- | -------------------- | --------------------------------------------- |
+| 0.60-0.90.x   | low                  | Type-safe hooks, Non-blocking code generation |
+
 ## 1. Comment the imports of `wundergraph.hooks.ts` and `wundergraph.operations.ts` in `wundergraph.config.ts`
 
 ## 2. Update the SDK to the latest version.
@@ -11,15 +17,12 @@
 to match the signature
 
 ```ts
-configureWunderGraphServerWithClient<
-    HooksConfig,
-    InternalClient
-    >((serverContext) => ({
-    hooks: {
-        queries: {},
-        mutations: {},
-    },
-}))
+configureWunderGraphServerWithClient<HooksConfig, InternalClient>((serverContext) => ({
+  hooks: {
+    queries: {},
+    mutations: {},
+  },
+}));
 ```
 
 _Import all required types._
@@ -30,7 +33,7 @@ to match the signature
 
 ```ts
 configureWunderGraphOperations<OperationsConfiguration>({
-    operations: {}
+  operations: {},
 });
 ```
 
@@ -41,16 +44,15 @@ _Import all required types._
 From
 
 ```ts
-import hooks from "./wundergraph.hooks";
-import operations from "./wundergraph.operations";
-
+import hooks from './wundergraph.hooks';
+import operations from './wundergraph.operations';
 ```
 
 To
 
 ```ts
-import server from "./wundergraph.server";
-import operations from "./wundergraph.operations";
+import server from './wundergraph.server';
+import operations from './wundergraph.operations';
 ```
 
 ## 8. Update the `configureWunderGraphApplication` config object in `wundergraph.config.ts`.
@@ -59,20 +61,20 @@ From
 
 ```ts
 configureWunderGraphApplication({
-    application: myApplication,
-    hooks: hooks,
-    operations: operations
-})
+  application: myApplication,
+  hooks: hooks,
+  operations: operations,
+});
 ```
 
 To
 
 ```ts
 configureWunderGraphApplication({
-    application: myApplication,
-    hooks: server.hooks,
-    operations
-})
+  application: myApplication,
+  hooks: server.hooks,
+  operations,
+});
 ```
 
 ## 9. Run the server with `wunderctl up`

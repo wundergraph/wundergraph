@@ -1,0 +1,7 @@
+### load users
+GET http://localhost:9991/app/main/operations/Users
+Accept: application/json
+
+### load messages
+GET http://localhost:9991/app/main/operations/Messages
+Accept: application/json

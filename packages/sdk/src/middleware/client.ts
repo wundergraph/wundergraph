@@ -83,24 +83,6 @@ export interface SubscriptionRequestOptions<Input = never> {
 
 export type UserListener<User> = (user: User | null) => void;
 
-export interface User {
-	provider: string;
-	provider_id: string;
-	email: string;
-	email_verified: boolean;
-	name: string;
-	first_name: string;
-	last_name: string;
-	nick_name: string;
-	description: string;
-	user_id: string;
-	avatar_url: string;
-	location: string;
-	roles?: string[];
-	custom_claims?: { [key: string]: any };
-	custom_attributes?: string[];
-}
-
 export type Headers = { [key: string]: string };
 
 export interface ClientConfig {

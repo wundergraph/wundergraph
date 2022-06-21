@@ -1,4 +1,4 @@
-import { FastifyLoggerInstance, FastifyPluginAsync } from 'fastify';
+import { FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { GraphQLSchema } from 'graphql';
 import {
@@ -9,8 +9,7 @@ import {
 	shouldRenderGraphiQL,
 	ExecutionContext as HelixExecutionContext,
 } from 'graphql-helix';
-import { Context } from '../server';
-import { InternalClient } from '../internal-client';
+import { BaseContext } from '../server';
 
 export interface GraphQLServerConfig {
 	serverName: string;
@@ -31,14 +30,13 @@ export interface GraphQLServerConfig {
 }
 
 interface ExecutionContext {
-	wunderGraphClient: InternalClient;
-	requestContext: Context;
-	log: FastifyLoggerInstance;
+	wundergraph: BaseContext;
 }
 
 const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {
 	const schema = await config.schema;
 	const baseContext = await config.baseContext;
+
 	fastify.route({
 		method: ['GET', 'POST'],
 		url: config.routeUrl,
@@ -49,6 +47,8 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 				method: req.method,
 				query: req.query,
 			};
+
+			const pluginLogger = req.ctx.log.child({ server: config.serverName, plugin: 'graphql' });
 
 			if (config.enableGraphQLEndpoint && shouldRenderGraphiQL(request)) {
 				res.type('text/html');
@@ -79,9 +79,10 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 							contextFactory: (): ExecutionContext => ({
 								...baseContext,
 								...ctx,
-								requestContext: req.ctx,
-								wunderGraphClient: fastify.wunderGraphClient,
-								log: req.log.child({ server: config.serverName, plugin: 'graphql' }),
+								wundergraph: {
+									...req.ctx,
+									log: pluginLogger,
+								},
 							}),
 						});
 
@@ -101,9 +102,10 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 					rootValueFactory: config.customResolverFactory,
 					contextFactory: (): ExecutionContext => ({
 						...baseContext,
-						requestContext: req.ctx,
-						wunderGraphClient: fastify.wunderGraphClient,
-						log: req.log.child({ server: config.serverName, plugin: 'graphql' }),
+						wundergraph: {
+							...req.ctx,
+							log: pluginLogger,
+						},
 					}),
 				});
 

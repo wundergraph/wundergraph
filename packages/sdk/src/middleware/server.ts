@@ -1,64 +1,55 @@
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
+import { HeadersObject } from 'headers-polyfill';
+import { Headers } from 'headers-polyfill';
 import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
-import Fastify, {
-	FastifyLoggerInstance,
-	RawReplyDefaultExpression,
-	RawRequestDefaultExpression,
-	RawServerBase,
-	RawServerDefault,
-} from 'fastify';
+import Fastify, { FastifyInstance, FastifyLoggerInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
-import { buildInternalClient } from './internal-client';
+import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
 import fs from 'fs';
 import { middlewarePort } from '../env';
 
 declare module 'fastify' {
-	interface FastifyInstance<
-		RawServer extends RawServerBase = RawServerDefault,
-		RawRequest extends RawRequestDefaultExpression<RawServer> = RawRequestDefaultExpression<RawServer>,
-		RawReply extends RawReplyDefaultExpression<RawServer> = RawReplyDefaultExpression<RawServer>,
-		Logger = FastifyLoggerInstance
-	> {
-		wunderGraphClient: InternalClient;
-	}
-
-	interface FastifyRequest extends RequestContext {}
+	interface FastifyRequest extends FastifyRequestContext {}
 }
 
-export interface RequestContext {
-	ctx: Context;
-	log: FastifyLoggerInstance;
-	setClientRequestHeaders: {
-		[key: string]: string;
-	};
+export interface FastifyRequestContext<User = any, IC = InternalClient> {
+	ctx: BaseContext<User, IC>;
 }
 
-export interface WunderGraphRequestContext<User> {
-	user?: User;
-	operationName: string;
-	operationType: 'mutation' | 'query' | 'subscription';
-}
-
-export interface Context<User = any, IC = InternalClient> {
+export interface BaseContext<User = any, IC = InternalClient> {
+	/**
+	 * The user that is currently logged in.
+	 */
 	user?: User;
 	clientRequest: ClientRequest;
-	setClientRequestHeader: (name: string, value: string) => void;
+	/**
+	 * The request logger.
+	 */
 	log: FastifyLoggerInstance;
+	/**
+	 * The internal client that is used to communicate with the server.
+	 */
 	internalClient: IC;
 }
 
-export interface ClientRequest {
+export interface ClientRequestHeaders extends Headers {}
+
+export interface ClientRequest<H = ClientRequestHeaders> {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 	requestURI: string;
-	headers: {
-		[key: string]: string;
-	};
+	/**
+	 * Contains all client request headers. You can manipulate the map to add or remove headers.
+	 * This might impact upstream hooks. Global hooks don't take changes into account.
+	 */
+	headers: H;
 }
+
+interface OriginalClientRequest extends ClientRequest<HeadersObject> {}
 
 export interface WunderGraphRequest {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -78,27 +69,27 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
-export interface User<Role = any> {
+export interface WunderGraphUser<Role = any> {
 	provider?: string;
-	provider_id?: string;
+	providerId?: string;
 	email?: string;
-	email_verified?: boolean;
+	emailVerified?: boolean;
 	name?: string;
-	first_name?: string;
-	last_name?: string;
-	nick_name?: string;
+	firstName?: string;
+	lastName?: string;
+	nickName?: string;
 	description?: string;
-	user_id?: string;
-	avatar_url?: string;
+	userId?: string;
+	avatarUrl?: string;
 	location?: string;
 	roles?: Role[];
-	custom_attributes?: string[];
-	custom_claims?: {
+	customAttributes?: string[];
+	customClaims?: {
 		[key: string]: any;
 	};
-	access_token?: JSONObject;
-	id_token?: JSONObject;
-	raw_id_token?: string;
+	accessToken?: JSONObject;
+	idToken?: JSONObject;
+	rawIdToken?: string;
 }
 
 export interface WunderGraphServerConfig<GeneratedHooksConfig = HooksConfiguration> {
@@ -111,27 +102,14 @@ export interface WunderGraphHooksAndServerConfig<GeneratedHooksConfig = HooksCon
 	graphqlServers?: (GraphQLServerConfig & { url: string })[];
 }
 
-export interface ServerContext<GeneratedClient> {
-	internalClient: GeneratedClient;
-}
-
 export const SERVER_PORT = middlewarePort;
 
-const fastify = Fastify({
-	logger: true,
+process.on('uncaughtExceptionMonitor', (err, origin) => {
+	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
 });
 
-const HOOKS_CONTEXT: ServerContext<InternalClient> = {
-	internalClient: {
-		queries: {},
-		mutations: {},
-		withHeaders: (headers) => {
-			return buildInternalClient(WG_CONFIG, headers);
-		},
-	},
-};
-
 let WG_CONFIG: WunderGraphConfiguration;
+let clientFactory: InternalClientFactory;
 
 if (process.env.START_HOOKS_SERVER === 'true') {
 	if (!process.env.WG_ABS_DIR) {
@@ -144,13 +122,18 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		});
 		try {
 			WG_CONFIG = JSON.parse(configContent);
-			HOOKS_CONTEXT.internalClient = buildInternalClient(WG_CONFIG);
+			if (WG_CONFIG.api) {
+				clientFactory = internalClientFactory(WG_CONFIG.apiName, WG_CONFIG.deploymentName, WG_CONFIG.api.operations);
+			} else {
+				console.error('Could not get user defined api. Try `wunderctl generate`');
+				process.exit(1);
+			}
 		} catch (err: any) {
-			fastify.log.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
+			console.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
 			process.exit(1);
 		}
 	} catch {
-		fastify.log.error('Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+		console.error('Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
@@ -159,9 +142,9 @@ export const configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
 	GeneratedClient extends InternalClient
 >(
-	configWrapper: (serverContext: ServerContext<GeneratedClient>) => WunderGraphServerConfig<GeneratedHooksConfig>
+	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig>
 ): WunderGraphHooksAndServerConfig => {
-	return _configureWunderGraphServer(configWrapper(HOOKS_CONTEXT as ServerContext<GeneratedClient>));
+	return _configureWunderGraphServer(configWrapper());
 };
 
 const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfiguration>(
@@ -169,6 +152,9 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 ): WunderGraphHooksAndServerConfig => {
 	const hooksConfig = config as WunderGraphHooksAndServerConfig;
 
+	/**
+	 * Configure the custom GraphQL servers
+	 */
 	if (hooksConfig.graphqlServers) {
 		let seenServer: { [key: string]: boolean } = {};
 		hooksConfig.graphqlServers.forEach((server) => {
@@ -182,10 +168,14 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 		}
 	}
 
+	/**
+	 * This environment variable is used to determine if the server should start the hooks server.
+	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		fastify.decorate('internalClient', HOOKS_CONTEXT.internalClient);
-
-		startServer(hooksConfig, WG_CONFIG).catch((err) => {
+		const fastify = Fastify({
+			logger: true,
+		});
+		startServer(fastify, hooksConfig, WG_CONFIG).catch((err) => {
 			fastify.log.error(err, 'Could not start the hook server');
 			process.exit(1);
 		});
@@ -194,40 +184,42 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	return hooksConfig;
 };
 
-export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, config: WunderGraphConfiguration) => {
-	fastify.addHook<{ Body: { __wg?: { user: User; client_request: ClientRequest } } }>(
+export const startServer = async (
+	fastify: FastifyInstance,
+	hooksConfig: WunderGraphHooksAndServerConfig,
+	config: WunderGraphConfiguration
+) => {
+	fastify.decorateRequest('ctx', null);
+
+	fastify.addHook<{ Body: { __wg: { user: WunderGraphUser; clientRequest?: OriginalClientRequest } } }>(
 		'preHandler',
 		async (req, reply) => {
-			req.setClientRequestHeaders = {};
 			req.ctx = {
 				log: req.log.child({ plugin: 'hooks' }),
-				user: req?.body?.__wg?.user,
-				clientRequest: req?.body?.__wg?.client_request || {
-					headers: {},
-					requestURI: '',
-					method: 'GET',
+				user: req.body.__wg.user,
+				// clientRequest represents the original client request that was sent initially to the server.
+				clientRequest: {
+					headers: new Headers(req.body.__wg.clientRequest?.headers),
+					requestURI: req.body.__wg.clientRequest?.requestURI || '',
+					method: req.body.__wg.clientRequest?.method || 'GET',
 				},
-				setClientRequestHeader: (name, value) => (req.setClientRequestHeaders[name] = value),
-				internalClient: HOOKS_CONTEXT.internalClient,
+				internalClient: clientFactory({}, req.body.__wg.clientRequest),
 			};
 		}
 	);
 
-	fastify.register(FastifyGraceful);
-	await fastify.after();
+	await fastify.register(FastifyGraceful);
 	fastify.gracefulShutdown((signal, next) => {
 		fastify.log.info('graceful shutdown', { signal });
 		next();
 	});
-	fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
-	await fastify.after();
+	await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
 	fastify.log.info('Hooks plugin registered');
 
 	if (hooksConfig.graphqlServers) {
 		for await (const server of hooksConfig.graphqlServers) {
 			const routeUrl = `/gqls/${server.serverName}/graphql`;
-			fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
-			await fastify.after();
+			await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
 			fastify.log.info('GraphQL plugin registered');
 			fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
 		}
@@ -235,7 +227,3 @@ export const startServer = async (hooksConfig: WunderGraphHooksAndServerConfig, 
 
 	return fastify.listen(SERVER_PORT, '127.0.0.1');
 };
-
-process.on('uncaughtExceptionMonitor', (err, origin) => {
-	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
-});
