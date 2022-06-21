@@ -207,6 +207,7 @@ var upCmd = &cobra.Command{
 		}()
 
 		// trigger server reload after initial config build
+		// because no fs event is fired as build is already done
 		configFileChangeChan <- struct{}{}
 
 		select {
