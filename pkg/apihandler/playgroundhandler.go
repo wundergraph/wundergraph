@@ -2,6 +2,7 @@ package apihandler
 
 import (
 	"net/http"
+	"path"
 
 	"github.com/gorilla/mux"
 	"github.com/wundergraph/graphql-go-tools/pkg/playground"
@@ -11,8 +12,8 @@ func registerGraphqlPlaygroundHandler(router *mux.Router, pathPrefix string, api
 	p := playground.New(playground.Config{
 		PathPrefix:                      "",
 		PlaygroundPath:                  apiPath,
-		GraphqlEndpointPath:             apiPath,
-		GraphQLSubscriptionEndpointPath: apiPath,
+		GraphqlEndpointPath:             path.Join("/", pathPrefix, apiPath),
+		GraphQLSubscriptionEndpointPath: path.Join("/", pathPrefix, apiPath),
 	})
 
 	handlers, err := p.Handlers()

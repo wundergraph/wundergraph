@@ -21,7 +21,6 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-uuid"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
-	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/middlewareclient"
@@ -278,15 +277,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
 		)
 
-		if err := registerGraphqlPlaygroundHandler(r.router, api.PathPrefix, apiPath); err != nil {
-			graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
-				log:           r.log,
-				html:          graphiql.GetGraphiqlPlaygroundHTML(),
-				apiPathPrefix: api.GetPathPrefix(),
-			}
-			r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
-		}
-
+		registerGraphqlPlaygroundHandler(r.router, api.PathPrefix, apiPath)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
 			abstractlogger.String("method", http.MethodGet),
 			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
