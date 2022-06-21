@@ -30,7 +30,7 @@ e.g. `npm run migrate "add pets"`.
 Once you've defined one or more Mutations in `./wundergraph/operations` (see CreateUser.graphql as an example),
 you're able to use the generated TypeScript client to seed the Database.
 
-Modify `./seed/seed.ts` and run `npm run seed`. 
+Modify `./seed/seed.ts` and run `npm run seed`.
 
 ## Cleanup
 

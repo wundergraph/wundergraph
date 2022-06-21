@@ -6,6 +6,7 @@
   "scripts": {
     "start-database": "docker-compose up",
     "dev": "cd .wundergraph && wunderctl up --debug",
+    "generate": "cd .wundergraph && wunderctl generate --debug",
     "cleanup": "docker-compose down"
   },
   "author": "",
