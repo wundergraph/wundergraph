@@ -1,15 +1,40 @@
 import { NextPage } from 'next';
-import styles from '../styles/Home.module.css';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
 	const stores = useQuery.AllStores();
 	return (
-		<div className={styles.examplesContainer}>
-			<h1 className={styles.title}>Hello FaunaDB!</h1>
-			<p>
-				<code className={styles.code}>{JSON.stringify(stores)}</code>
-			</p>
+		<div>
+			<nav>
+				<ul>
+					<li>
+						<a href="#" className="secondary">
+							WunderGraph
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<li>
+						<strong>FaunaDB & Next.js</strong>
+					</li>
+				</ul>
+				<li>
+					<a>Github</a>
+				</li>
+			</nav>
+
+			<div className="grid pt-8">
+				<div>All Stores:</div>
+				<div>
+					<code>{JSON.stringify(stores, null, 2)}</code>
+				</div>
+			</div>
+
+			<style jsx>{`
+				.pt-8 {
+					padding-top: 2rem;
+				}
+			`}</style>
 		</div>
 	);
 };

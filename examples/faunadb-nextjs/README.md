@@ -6,9 +6,16 @@ This example demonstrates how to use WunderGraph with [FaunaDB](https://fauna.co
 
 ### 1. Get FaunaDB credentials:
 
-- Create a FaunaDB account.
-- Create a API token.
-- Rename `example.env` to `.env` and fill it with your FaunaDB credentials.
+1. Create a FaunaDB account.
+2. Create a database with the following options:
+   - Name: `test`
+   - RegionGroup: `Classic (C)`
+   - [x] Use demo data.
+3. Create a API token under `Security`.
+   - Database: `test`
+   - Role: `Admin`
+   - Key Name: `test`
+4. Rename the file `example.env` to `.env` and fill it with your FaunaDB credentials.
 
 ### 2. Install & Start
 
@@ -17,6 +24,10 @@ Install the dependencies and run the complete example in one command:
 ```shell
 npm install && npm start
 ```
+
+### 3. Fetch All Stores & Products
+
+Visit [http://localhost:3000/](http://localhost:3000/).
 
 ## Learn More
 
