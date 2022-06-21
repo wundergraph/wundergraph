@@ -11,6 +11,7 @@
     "dev": "next dev",
     "migrate": "prisma format && prisma migrate dev --name",
     "cleanup": "docker-compose down -v",
+    "generate": "cd .wundergraph && wunderctl generate --debug",
     "wunderctl": "wunderctl"
   },
   "dependencies": {

@@ -9,6 +9,7 @@
     "build": "next build",
     "nextDev": "next dev",
     "nextStart": "next start",
+    "generate": "cd .wundergraph && wunderctl generate --debug",
     "wunderctl": "wunderctl"
   },
   "dependencies": {
