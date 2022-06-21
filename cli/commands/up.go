@@ -56,26 +56,6 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		configFileChangeChan := make(chan struct{})
-		configWatcher := watcher.NewWatcher("config", &watcher.Config{
-			WatchPaths: []string{
-				filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
-			},
-		}, log)
-
-		go func() {
-			err := configWatcher.Watch(ctx, func(paths []string) error {
-				configFileChangeChan <- struct{}{}
-				return nil
-			})
-			if err != nil {
-				log.Error("watcher",
-					abstractlogger.String("watcher", "wundergraph config"),
-					abstractlogger.Error(err),
-				)
-			}
-		}()
-
 		configOutFile := path.Join(wundergraphDir, "generated", "bundle", "config.js")
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:       "config-bundler",
@@ -117,6 +97,26 @@ var upCmd = &cobra.Command{
 		<-configBundler.BuildDoneChan
 
 		<-configRunner.Run(ctx)
+
+		configFileChangeChan := make(chan struct{})
+		configWatcher := watcher.NewWatcher("config", &watcher.Config{
+			WatchPaths: []string{
+				filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
+			},
+		}, log)
+
+		go func() {
+			err := configWatcher.Watch(ctx, func(paths []string) error {
+				configFileChangeChan <- struct{}{}
+				return nil
+			})
+			if err != nil {
+				log.Error("watcher",
+					abstractlogger.String("watcher", "wundergraph config"),
+					abstractlogger.Error(err),
+				)
+			}
+		}()
 
 		go func() {
 			for {
@@ -205,6 +205,9 @@ var upCmd = &cobra.Command{
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
+
+		// trigger server reload after initial config build
+		configFileChangeChan <- struct{}{}
 
 		select {
 		case signal := <-quit:

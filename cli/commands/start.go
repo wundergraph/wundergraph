@@ -116,7 +116,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 		}()
 
-		// load config file once
+		// trigger server reload after initial config build
 		configFileChangeChan <- struct{}{}
 
 		select {
