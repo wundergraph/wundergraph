@@ -660,8 +660,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	body := buf.Bytes()
 
 	requestQuery, _ := jsonparser.GetString(body, "query")
-	requestOperationName, _, _, _ := jsonparser.Get(body, "operationName")
+	requestOperationName, parsedOperationNameDataType, _, _ := jsonparser.Get(body, "operationName")
 	requestVariables, _, _, _ := jsonparser.Get(body, "variables")
+
+	if parsedOperationNameDataType == jsonparser.Null {
+		requestOperationName = nil
+	}
 
 	shared := h.pool.GetSharedFromRequest(context.Background(), r, h.planConfig, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
