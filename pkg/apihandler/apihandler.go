@@ -663,6 +663,8 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestOperationName, parsedOperationNameDataType, _, _ := jsonparser.Get(body, "operationName")
 	requestVariables, _, _, _ := jsonparser.Get(body, "variables")
 
+	// An operationName set to { "operationName": null } has a byte length. In that case, we need to reset the length
+	// to ensure that the operationName is only set, if it is not null.
 	if parsedOperationNameDataType == jsonparser.Null {
 		requestOperationName = nil
 	}
