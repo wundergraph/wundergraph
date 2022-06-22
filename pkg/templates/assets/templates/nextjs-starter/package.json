@@ -13,7 +13,7 @@
     "wunderctl": "wunderctl"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.92.5",
+    "@wundergraph/sdk": "^0.93.0",
     "@wundergraph/nextjs": "^0.0.22",
     "next": "^12.1.6",
     "react": "^18.0.0",

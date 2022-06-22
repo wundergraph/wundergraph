@@ -1,25 +1,25 @@
 openapi: 3.0.0
 info:
   title: jsonplaceholder
-  version: "1.0"
+  version: '1.0'
 servers:
-  - url: "https://jsonplaceholder.typicode.com"
+  - url: 'https://jsonplaceholder.typicode.com'
 paths:
   /posts:
     get:
       summary: Your GET endpoint
       tags: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Post"
+                  $ref: '#/components/schemas/Post'
       operationId: posts
-  "/posts/{postID}/comments":
+  '/posts/{postID}/comments':
     parameters:
       - schema:
           type: string
@@ -30,30 +30,30 @@ paths:
       summary: Your GET endpoint
       tags: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Comment"
+                  $ref: '#/components/schemas/Comment'
       operationId: postComments
   /users:
     get:
       summary: Your GET endpoint
       tags: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/User"
+                  $ref: '#/components/schemas/User'
       operationId: users
-  "/users/{userID}/posts":
+  '/users/{userID}/posts':
     parameters:
       - schema:
           type: string
@@ -64,14 +64,14 @@ paths:
       summary: Your GET endpoint
       tags: []
       responses:
-        "200":
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Post"
+                  $ref: '#/components/schemas/Post'
       operationId: userPosts
 components:
   schemas:
@@ -114,13 +114,13 @@ components:
         email:
           type: string
         address:
-          $ref: "#/components/schemas/Address"
+          $ref: '#/components/schemas/Address'
         phone:
           type: string
         website:
           type: string
         company:
-          $ref: "#/components/schemas/Company"
+          $ref: '#/components/schemas/Company'
     Company:
       title: Company
       type: object
@@ -152,4 +152,4 @@ components:
         zipcode:
           type: string
         geo:
-          $ref: "#/components/schemas/Geo"
+          $ref: '#/components/schemas/Geo'
