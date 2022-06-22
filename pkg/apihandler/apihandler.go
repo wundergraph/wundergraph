@@ -665,7 +665,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// An operationName set to { "operationName": null } will be parsed by 'jsonparser' to "null" string
 	// and this will make the planner unable to find the operation to execute in selectOperation step.
-	// to ensure that the operationName match what planner expect we set it not null.
+	// to ensure that the operationName match what planner expect we set it to null.
 	if parsedOperationNameDataType == jsonparser.Null {
 		requestOperationName = nil
 	}
