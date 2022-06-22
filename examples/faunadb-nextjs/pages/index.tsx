@@ -10,7 +10,7 @@ const Home: NextPage = () => {
 		<div>
 			<div className="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32">
 				<div className="flex justify-center">
-					<div className="w-40 text-black dark:text-white">
+					<div className="w-40 text-cyan-400 dark:text-white">
 						<svg
 							version="1.1"
 							id="Layer_1"
@@ -41,7 +41,7 @@ const Home: NextPage = () => {
 				<p className="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400">
 					Use{' '}
 					<code className="font-mono font-medium text-sky-500 dark:text-sky-400">
-						<a className="text-sky-500 hover:text-sky-800" target="_blank" href="https://wundergraph.com">
+						<a className="text-cyan-400 hover:text-cyan-600" target="_blank" href="https://wundergraph.com">
 							WunderGraph
 						</a>
 					</code>{' '}
@@ -82,7 +82,7 @@ const Home: NextPage = () => {
 					<p className="pt-3">
 						Visit{' '}
 						<a
-							className="text-sky-500 hover:text-sky-800"
+							className="text-cyan-400 hover:text-cyan-600"
 							target="_blank"
 							href="https://github.com/wundergraph/wundergraph"
 						>
