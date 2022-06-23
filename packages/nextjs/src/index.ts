@@ -1085,12 +1085,12 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 			};
 		}
 	}
-	const [stop, setStop] = useState(false);
 	const [invalidate, setInvalidate] = useState<number>(0);
-	const [stopOnWindowBlur] = useState(args?.stopOnWindowBlur === true);
 	const [subscriptionResult, setSubscriptionResult] = useState<SubscriptionResult<Data> | undefined>(
 		(ssrCache[cacheKey] as SubscriptionResult<Data>) || { status: 'none' }
 	);
+	const stopOnWindowBlur = args?.stopOnWindowBlur === true;
+	const stop = !stopOnWindowBlur || isWindowFocused === 'focused' ? false : true;
 	useEffect(() => {
 		if (subscription.requiresAuthentication && user === null) {
 			setSubscriptionResult({
@@ -1126,17 +1126,6 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 			abort.abort();
 		};
 	}, [stop, refetchMountedOperations, invalidate, user]);
-	useEffect(() => {
-		if (!stopOnWindowBlur) {
-			return;
-		}
-		if (isWindowFocused === 'focused') {
-			setStop(false);
-		}
-		if (isWindowFocused === 'blurred') {
-			setStop(true);
-		}
-	}, [stopOnWindowBlur, isWindowFocused]);
 	useEffect(() => {
 		if (args?.debounceMillis === undefined) {
 			setInvalidate((prev) => prev + 1);
