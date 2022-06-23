@@ -10,7 +10,7 @@ Here you can see the list of hooks that WunderGraph provides.
 ```
 Hooks Overview
 │
-└─▶ Global Hooks
+└─▶ Global HTTP Hooks
 │   │
 │   └─▶ onOriginRequest (e.g. Request manipulation, early return, for each external data-source call)
 │   │
@@ -35,6 +35,8 @@ Hooks Overview
     └─▶ mutatingPostAuthentication (e.g. Validation)
 ```
 
+> **Note**: Global HTTP hooks as the name suggests, only fires for HTTP data-sources.
+
 ## Hooks request lifecycle
 
 This section describes the lifecycle of a single request.
@@ -50,7 +52,7 @@ Incoming Request
                 │
                 └─▶ (Internal) WunderGraph Engine - Resolve operation
                     │
-                    └─▶ onOriginRequest (For each external data-source call)
+                    └─▶ onOriginRequest (For each external HTTP data-source call)
                     │   │
                     │   └─▶ onOriginResponse (Companion to onOriginRequest)
                     │
