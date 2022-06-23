@@ -17,13 +17,10 @@ var mongoDbCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		databaseURL := args[0]
 		introspectionSchema := fmt.Sprintf(`datasource db {
-			provider = "mongodb"
-			url      = "%s"
-		}
-		generator client {
-			provider = "mongodb"
-  			previewFeatures = ["mongoDb"]
-		}`, databaseURL)
+  provider = "mongodb"
+  url      = "%s"
+}
+`, databaseURL)
 		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, log)
 		if err != nil {
 			return err

@@ -97,8 +97,8 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (str
 		JSONRPC: "2.0",
 		Params: []map[string]interface{}{
 			{
-				"schema": introspectionSchema,
-				"force":  true,
+				"schema":             introspectionSchema,
+				"compositeTypeDepth": -1,
 			},
 		},
 	}
