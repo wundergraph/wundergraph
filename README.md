@@ -53,9 +53,10 @@ The fastest way to get started with WunderGraph is to open a Gitpod. After boots
 You can also following the [**Quickstart (5
 min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
 
-Examples:
+## Examples:
 
 - [Simple Starter](/examples/simple)
+- [FaunaDB Starter](/examples/faunadb-nextjs)
 - [PostgreSQL](/examples/postgres)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)

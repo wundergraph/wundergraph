@@ -24,7 +24,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
-	"github.com/wundergraph/wundergraph/pkg/middlewareclient"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 )
 
 func init() {
@@ -109,26 +109,26 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 
 type User struct {
 	ProviderName     string          `json:"provider,omitempty"`
-	ProviderID       string          `json:"provider_id,omitempty"`
+	ProviderID       string          `json:"providerId,omitempty"`
 	Email            string          `json:"email,omitempty"`
-	EmailVerified    bool            `json:"email_verified,omitempty"`
+	EmailVerified    bool            `json:"emailVerified,omitempty"`
 	Name             string          `json:"name,omitempty"`
-	FirstName        string          `json:"first_name,omitempty"`
-	LastName         string          `json:"last_name,omitempty"`
-	NickName         string          `json:"nick_name,omitempty"`
+	FirstName        string          `json:"firstName,omitempty"`
+	LastName         string          `json:"lastName,omitempty"`
+	NickName         string          `json:"nickName,omitempty"`
 	Description      string          `json:"description,omitempty"`
-	UserID           string          `json:"user_id,omitempty"`
-	AvatarURL        string          `json:"avatar_url,omitempty"`
+	UserID           string          `json:"userId,omitempty"`
+	AvatarURL        string          `json:"avatarUrl,omitempty"`
 	Location         string          `json:"location,omitempty"`
-	CustomClaims     json.RawMessage `json:"custom_claims,omitempty"`
-	CustomAttributes []string        `json:"custom_attributes,omitempty"`
+	CustomClaims     json.RawMessage `json:"customClaims,omitempty"`
+	CustomAttributes []string        `json:"customAttributes,omitempty"`
 	Roles            []string        `json:"roles"`
 	ExpiresAt        time.Time       `json:"-"`
 	ETag             string          `json:"etag,omitempty"`
-	FromCookie       bool            `json:"from_cookie,omitempty"`
-	AccessToken      json.RawMessage `json:"access_token,omitempty"`
-	IdToken          json.RawMessage `json:"id_token,omitempty"`
-	RawIDToken       string          `json:"raw_id_token,omitempty"`
+	FromCookie       bool            `json:"fromCookie,omitempty"`
+	AccessToken      json.RawMessage `json:"accessToken,omitempty"`
+	IdToken          json.RawMessage `json:"idToken,omitempty"`
+	RawIDToken       string          `json:"rawIdToken,omitempty"`
 }
 
 // RemoveInternalFields should be used before sending the user to the client to not expose internal fields
@@ -207,7 +207,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 }
 
 type Hooks struct {
-	Client                     *middlewareclient.MiddlewareClient
+	Client                     *hooks.Client
 	Log                        abstractlogger.Logger
 	PostAuthentication         bool
 	MutatingPostAuthentication bool
@@ -221,7 +221,7 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 	if userJson, err := json.Marshal(user); err == nil {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	_, err := h.Client.DoAuthenticationRequest(ctx, middlewareclient.PostAuthentication, hookData)
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
 	if err != nil {
 		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
 		return
@@ -242,7 +242,7 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	if userJson, err := json.Marshal(user); err == nil {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	out, err := h.Client.DoAuthenticationRequest(ctx, middlewareclient.MutatingPostAuthentication, hookData)
+	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
 		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
 		return
@@ -616,7 +616,7 @@ func (_ TokenUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type CookieUserHandler struct {
 	HasRevalidateHook bool
-	MWClient          *middlewareclient.MiddlewareClient
+	MWClient          *hooks.Client
 	Log               abstractlogger.Logger
 	Host              string
 	InsecureCookies   bool
@@ -640,7 +640,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if user.IdToken != nil {
 			hookData, _ = jsonparser.Set(hookData, user.IdToken, "id_token")
 		}
-		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), middlewareclient.RevalidateAuthentication, hookData)
+		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication", abstractlogger.Error(err))
 			return

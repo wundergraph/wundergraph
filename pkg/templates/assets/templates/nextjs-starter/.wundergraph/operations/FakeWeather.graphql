@@ -1,12 +1,12 @@
 {
-  getCityByName: weather_getCityByName(name: "Berlin") {
-    id
-    name
-    weather {
-      summary {
-        title
-        description
-      }
-    }
-  }
+	getCityByName: weather_getCityByName(name: "Berlin") {
+		id
+		name
+		weather {
+			summary {
+				title
+				description
+			}
+		}
+	}
 }
