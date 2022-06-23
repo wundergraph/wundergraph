@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.93.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.93.0...@wundergraph/sdk@0.93.1) (2022-06-23)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
 ## [0.93.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.92.6...@wundergraph/sdk@0.93.0) (2022-06-20)
 
 ### ⚠ BREAKING CHANGES
