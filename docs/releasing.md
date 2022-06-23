@@ -50,7 +50,7 @@ We use lerna conventional commit integration to calculate the version. If you cr
 
 | Component           | Stable Release                             | Next Release                             |
 | ------------------- | ------------------------------------------ | ---------------------------------------- |
-| WunderCtl           | pnpm publish:engine                        | pnpm publish:engine-next                 |
+| WunderCtl           | `pnpm publish:engine`                      | `pnpm publish:engine-next`             |
 | WunderCtl (Wrapper) | Automated after WunderCtl                  | -                                        |
 | NPM Packages        | Trigger via Workflow run (Select `stable`) | Trigger via Workflow run (Select `next`) |
 
