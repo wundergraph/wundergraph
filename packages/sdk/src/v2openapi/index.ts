@@ -1117,7 +1117,7 @@ class RESTApiBuilder {
 					const trimmed = current.substring(1, current.length - 1);
 					return prev + 'By' + trimmed[0].toUpperCase() + trimmed.substring(1);
 				}
-				return prev + (current[0] || '').toUpperCase() + current.substring(1);
+				return prev + current[0]?.toUpperCase() + current.substring(1);
 			});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0].toUpperCase() + formattedPath.substring(1);
 	};
