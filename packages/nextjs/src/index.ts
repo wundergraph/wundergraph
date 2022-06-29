@@ -454,7 +454,7 @@ export class Client<Role> {
 		const query = this.queryString({
 			redirect_uri: redirectURI || window.location.toString(),
 		});
-		window.location.replace(`${this.baseURL}/${this.applicationPath}/auth/cookie/authorize/${authProviderID}${query}`);
+		window.location.assign(`${this.baseURL}/${this.applicationPath}/auth/cookie/authorize/${authProviderID}${query}`);
 	};
 
 	public logout = async (options?: LogoutOptions): Promise<boolean> => {

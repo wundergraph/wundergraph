@@ -142,7 +142,7 @@ configureWunderGraphApplication({
 	authentication: {
 		cookieBased: {
 			providers: [authProviders.demo()],
-			authorizedRedirectUris: ['http://localhost:3000/authentication'],
+			authorizedRedirectUris: ['http://localhost:3000/authentication', 'http://localhost:3003/auth-test'],
 		},
 	},
 	/*links: [
