@@ -14,7 +14,7 @@ import { mergeApis } from './merge';
 import * as fs from 'fs';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
 	ArgumentSource,
 	ConfigurationVariable,
@@ -928,9 +928,30 @@ const introspectGraphQLAPI = async (
 	}
 
 	// TODO single place where a HTTP client is configured for all data sources
-	const res = await axios.post(resolveVariable(introspection.url), data, opts);
+	let res: AxiosResponse | undefined;
+	try {
+		res = await axios.post(resolveVariable(introspection.url), data, opts);
+	} catch (e: any) {
+		console.log(
+			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${
+				e.message
+			}`
+		);
+		process.exit(1);
+	}
+	if (res === undefined) {
+		console.log(
+			"introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), no response"
+		);
+		process.exit(1);
+	}
 	if (res.status !== 200) {
-		return Promise.reject(`introspection failed, response code: ${res.status}, message: ${res.statusText}`);
+		console.log(
+			`introspection failed (url: ${introspection.url}, namespace: ${
+				introspection.apiNamespace || ''
+			}), response code: ${res.status}, message: ${res.statusText}`
+		);
+		process.exit(1);
 	}
 	return buildClientSchema(res.data.data);
 };
