@@ -46,6 +46,7 @@ export interface ClientConfig<Role> {
 	applicationPath: string;
 	baseURL: string;
 	sdkVersion: string;
+	authenticationEnabled: boolean;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	user?: User<Role>;
@@ -526,7 +527,9 @@ function withWunderGraphContextWrapper<Role>(
 				const [isWindowFocused, setIsWindowFocused] = useState<'pristine' | 'focused' | 'blurred'>('pristine');
 				const [refetchMountedOperations, setRefetchMountedOperations] = useState<number>(0);
 				windowHooks(setIsWindowFocused);
-				clientUserHooks<Role>(user, setUser, isWindowFocused, defaultContextProperties, options);
+				if (defaultContextProperties.clientConfig.authenticationEnabled) {
+					clientUserHooks<Role>(user, setUser, isWindowFocused, defaultContextProperties, options);
+				}
 				const clientProps: WunderGraphContextProperties<Role> = {
 					...defaultContextProperties,
 					ssrCache: props.ssrCache || { _client_defined_cache: true },
@@ -576,7 +579,7 @@ function withWunderGraphContextWrapper<Role>(
 
 			let ssrUser: User<Role> | null = null;
 
-			if (options?.disableFetchUserServerSide !== true) {
+			if (options?.disableFetchUserServerSide !== true && defaultContextProperties.clientConfig.authenticationEnabled) {
 				try {
 					ssrUser = await defaultContextProperties.client.fetchUser();
 				} catch (e) {}
@@ -655,12 +658,8 @@ const clientUserHooks = <Role>(
 	ctx: WunderGraphContextProperties<Role>,
 	options?: WithWunderGraphOptions
 ) => {
-	const [disableFetchUserClientSide, setDisableFetchUserClientSide] = useState(
-		options?.disableFetchUserClientSide === true
-	);
-	const [disableFetchUserOnWindowFocus, setDisableFetchUserOnWindowFocus] = useState(
-		options?.disableFetchUserOnWindowFocus === true
-	);
+	const [disableFetchUserClientSide] = useState(options?.disableFetchUserClientSide === true);
+	const [disableFetchUserOnWindowFocus] = useState(options?.disableFetchUserOnWindowFocus === true);
 	useEffect(() => {
 		if (disableFetchUserClientSide) {
 			return;

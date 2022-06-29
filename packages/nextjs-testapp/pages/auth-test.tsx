@@ -1,6 +1,11 @@
-import { AuthProvider, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { AuthProvider, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
 
 const Page = () => {
+	const weather = useQuery.ProtectedWeather({
+		input: {
+			forCity: 'Berlin',
+		},
+	});
 	const { user, login, logout } = useWunderGraph();
 	return (
 		<div>
@@ -11,6 +16,8 @@ const Page = () => {
 			<button onClick={() => login(AuthProvider.github)}>Login</button>
 			<br />
 			<button onClick={() => logout()}>Logout</button>
+			<br />
+			<p>{JSON.stringify(weather)}</p>
 		</div>
 	);
 };
