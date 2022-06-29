@@ -996,7 +996,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	)
 
 	buf := pool.GetBytesBuffer()
-	ctx := pool.GetCtx(r, pool.Config{
+	ctx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 
@@ -1368,7 +1368,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	variablesBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(variablesBuf)
 
-	ctx := pool.GetCtx(r, pool.Config{
+	ctx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
@@ -1556,7 +1556,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 	flusher.Flush()
 
-	ctx := pool.GetCtx(r, pool.Config{
+	ctx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
