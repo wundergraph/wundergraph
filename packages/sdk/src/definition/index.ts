@@ -932,15 +932,25 @@ const introspectGraphQLAPI = async (
 	try {
 		res = await axios.post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
-		console.log(`introspection failed, error: ${e.message}`);
+		console.log(
+			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${
+				e.message
+			}`
+		);
 		process.exit(1);
 	}
 	if (res === undefined) {
-		console.log('introspection failed, no response');
+		console.log(
+			"introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), no response"
+		);
 		process.exit(1);
 	}
 	if (res.status !== 200) {
-		console.log(`introspection failed, response code: ${res.status}, message: ${res.statusText}`);
+		console.log(
+			`introspection failed (url: ${introspection.url}, namespace: ${
+				introspection.apiNamespace || ''
+			}), response code: ${res.status}, message: ${res.statusText}`
+		);
 		process.exit(1);
 	}
 	return buildClientSchema(res.data.data);
