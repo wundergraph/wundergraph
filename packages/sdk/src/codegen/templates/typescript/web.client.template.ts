@@ -252,48 +252,24 @@ export class Client {
             };
         }
     };
-    private inflight: { [key: string]: { reject: (reason?: any) => void, resolve: (value: globalThis.Response | PromiseLike<globalThis.Response>) => void }[] } = {};
-    private fetch = (input: globalThis.RequestInfo, init?: RequestInit): Promise<any> => {
-        const key = JSON.stringify({input,init});
-        return new Promise<any>(async (resolve, reject) => {
-            if (this.inflight[key]){
-                this.inflight[key].push({resolve,reject});
-                return
-            }
-            if (init?.method === "GET"){
-            	this.inflight[key] = [{resolve,reject}];
-            }
-            try {
-                const f = this.customFetch || fetch;
-                const res = await f(input,init);
-                const inflight = this.inflight[key] || [{resolve,reject}];
-                delete this.inflight[key];
-                if (res.status === 200){
-                    const json = await res.json();
-                    inflight.forEach(cb => cb.resolve(json));
-                    return;
-                }
-                if (res.status === 400) {
-                    inflight.forEach(cb => cb.reject("bad request"))
-                    return;
-                }
-                if (res.status >= 401 && res.status <= 499){
-                    this.csrfToken = undefined;
-                    inflight.forEach(cb => cb.reject("unauthorized"));
-                    this.fetchUser();
-                    return;
-                }
-                if (res.status >= 500 && res.status <= 599){
-                    inflight.forEach(cb => cb.reject("server error"));
-                    return;
-                }
-                inflight.forEach(cb => cb.reject("unknown error"));
-            } catch (e: any){
-                const inflight = this.inflight[key];
-                delete this.inflight[key];
-                inflight.forEach(cb => cb.reject(e))
-            }
-        })
+    private fetch = async (input: globalThis.RequestInfo, init?: RequestInit): Promise<any> => {
+				const makeRequest = this.customFetch || fetch;
+				const res = await makeRequest(input,init);
+				
+				if (res.status === 200){
+						return res.json();
+				} else if (res.status === 400) {
+						throw new Error("bad request");
+				} else if (res.status >= 401 && res.status <= 499){
+						this.csrfToken = undefined;
+						// invalidate user session
+						this.fetchUser().catch(() => console.error("failed to invalidate user session"));
+						throw new Error("unauthorized");
+				} else if (res.status >= 500 && res.status <= 599){
+						throw new Error("server error");
+				}
+				
+				throw new Error(\`unhandled status code: \${res.status}\`);
     }
     {{#if hasSubscriptionsOrLiveQueries }}{{#unless reactNative}}
     private startSubscription = <T>(fetchConfig: FetchConfig, cb: (response: Response<T>) => void) => {

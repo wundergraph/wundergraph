@@ -25,7 +25,7 @@ const jsp = introspect.openApi({
 
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
-	url: 'https://countries.trevorblades.com/',
+	url: 'https://countries.trevorblades.comm/',
 });
 
 const myApplication = new Application({

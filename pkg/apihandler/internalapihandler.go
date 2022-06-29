@@ -220,8 +220,6 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	internalRequest := r
-
 	body := bodyBuf.Bytes()
 
 	// internal requests transmit the client request as a JSON object
@@ -236,11 +234,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if clientRequest != nil {
-		internalRequest = clientRequest
-	}
-
-	ctx := pool.GetCtx(internalRequest, pool.Config{
+	ctx := pool.GetCtx(r, clientRequest, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
