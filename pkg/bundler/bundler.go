@@ -92,7 +92,8 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		Color:    api.ColorAlways,
 		External: append(b.externalImports, "./node_modules/*"),
 		Engines: []api.Engine{
-			{Name: api.EngineNode, Version: "12"}, // Maintenance
+			// https://nodejs.org/en/about/releases/
+			{Name: api.EngineNode, Version: "14"}, // Maintenance
 			{Name: api.EngineNode, Version: "16"}, // LTS
 		},
 		Write:       true,
