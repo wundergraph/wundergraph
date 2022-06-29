@@ -18,3 +18,5 @@ The WunderGraph SDK works best in combination with the WunderGraph CLI, wunderct
 npm install @wundergraph/wunderctl
 npx -p @wundergraph/wunderctl wunderctl init
 ```
+
+test
