@@ -248,7 +248,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 	}
 	if user := authentication.UserFromContext(r.Context()); user != nil {
 		if userJson, err := json.Marshal(user); err == nil {
-			hookData, _ = jsonparser.Set(hookData, userJson, "user")
+			hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 		}
 	}
 
@@ -303,7 +303,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 	}
 	if user := authentication.UserFromContext(r.Request.Context()); user != nil {
 		if userJson, err := json.Marshal(user); err == nil {
-			hookData, _ = jsonparser.Set(hookData, userJson, "user")
+			hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 		}
 	}
 
