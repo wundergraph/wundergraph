@@ -13,7 +13,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 							...request,
 							headers: {
 								...request.headers,
-								Authorization: `Bearer ${user.accessToken}`,
+								Authorization: `Bearer ${user.rawIdToken}`,
 							},
 						};
 					},
