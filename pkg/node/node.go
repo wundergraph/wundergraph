@@ -302,7 +302,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			KeepAlive: 90 * time.Second,
 		}
 
-		httpTransport := &http.Transport{
+		defaultTransport := &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return dialer.DialContext(ctx, network, addr)
 			},
@@ -314,18 +314,13 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 
 		hooksClient := hooks.NewClient("http://127.0.0.1:9992")
 
-		transport := apihandler.NewApiTransport(httpTransport, api, hooksClient, n.options.enableDebugMode)
-
-		client := &http.Client{
-			Timeout:   time.Second * 10,
-			Transport: transport,
-		}
+		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
 
 		n.log.Debug("http.Client.Transport",
 			abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
 		)
 
-		loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(client, n.options.enableDebugMode, n.log))
+		loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
 
 		builderConfig := apihandler.BuilderConfig{
 			InsecureCookies:            n.options.insecureCookies,
