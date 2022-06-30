@@ -13,7 +13,7 @@ const Page = () => {
 			<p>This is a test page for the auth component.</p>
 			<p>{'user: ' + JSON.stringify(user)}</p>
 			<br />
-			<button onClick={() => login(AuthProvider.github)}>Login</button>
+			<button onClick={() => login(AuthProvider.auth0)}>Login</button>
 			<br />
 			<button onClick={() => logout()}>Logout</button>
 			<br />

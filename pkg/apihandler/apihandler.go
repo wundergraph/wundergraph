@@ -9,8 +9,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -1816,6 +1818,18 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		}
 		issuer := loadvariable.String(provider.OidcConfig.Issuer)
 		if issuer == "" {
+			r.log.Error("oidc issuer must not be empty",
+				abstractlogger.String("providerID", provider.Id),
+			)
+			continue
+		}
+		_, urlErr := url.ParseRequestURI(issuer)
+		if urlErr != nil {
+			r.log.Error("invalid oidc issuer, must be a valid URL",
+				abstractlogger.String("providerID", provider.Id),
+				abstractlogger.String("issuer", issuer),
+				abstractlogger.Error(urlErr),
+			)
 			continue
 		}
 		if strings.HasSuffix(issuer, "/") {
@@ -1842,8 +1856,16 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			)
 			continue
 		}
+		defer resp.Body.Close()
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			r.log.Error("failed to read openid-configuration",
+				abstractlogger.Error(err),
+			)
+			continue
+		}
 		var config OpenIDConnectConfiguration
-		err = json.NewDecoder(resp.Body).Decode(&config)
+		err = json.Unmarshal(data, &config)
 		if err != nil {
 			r.log.Error("failed to decode openid-configuration",
 				abstractlogger.Error(err),
