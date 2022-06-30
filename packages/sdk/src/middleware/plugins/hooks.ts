@@ -35,7 +35,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	};
 
 	fastify.addHook('onRoute', (routeOptions) => {
-		const routeConfig = routeOptions.config as RouteConfig;
+		const routeConfig = routeOptions.config as RouteConfig | undefined;
 		if (routeConfig?.operationName) {
 			fastify.log.debug(
 				`Registered Operation Hook '${routeConfig.operationName}' with (${routeOptions.method}) '${routeOptions.url}'`
