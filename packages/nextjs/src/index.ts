@@ -145,24 +145,47 @@ export class Client<Role> {
 				credentials: 'include',
 				mode: 'cors',
 			});
-			const responseJSON = await response.json();
-			if (responseJSON.errors && !responseJSON.data) {
-				return {
-					status: 'error',
-					errors: responseJSON.errors,
-				};
+			switch (true) {
+				case response.status === 200:
+					const responseJSON = await response.json();
+					if (responseJSON.errors && !responseJSON.data) {
+						return {
+							status: 'error',
+							errors: responseJSON.errors,
+						};
+					}
+					if (responseJSON.errors && responseJSON.data) {
+						return {
+							status: 'partial',
+							errors: responseJSON.errors,
+							data: responseJSON.data,
+						};
+					}
+					return {
+						status: 'ok',
+						data: responseJSON.data,
+					};
+				case response.status === 400:
+					return {
+						status: 'error',
+						errors: [{ message: 'Bad Request' }],
+					};
+				case response.status >= 401 && response.status <= 499:
+					return {
+						status: 'error',
+						errors: [{ message: 'Unauthorized' }],
+					};
+				case response.status >= 500 && response.status <= 599:
+					return {
+						status: 'error',
+						errors: [{ message: 'Internal Server Error' }],
+					};
+				default:
+					return {
+						status: 'error',
+						errors: [{ message: 'Unknown Error' }],
+					};
 			}
-			if (responseJSON.errors && responseJSON.data) {
-				return {
-					status: 'partial',
-					errors: responseJSON.errors,
-					data: responseJSON.data,
-				};
-			}
-			return {
-				status: 'ok',
-				data: responseJSON.data,
-			};
 		} catch (e: any) {
 			return {
 				status: 'error',
