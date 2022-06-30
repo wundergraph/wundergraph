@@ -339,16 +339,19 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			const mockResolveOp = operationHooks[operationName].mockResolve;
 			if (mockResolveOp) {
 				fastify.post(`/operation/${operationName}/mockResolve`, mockResolve(operationName, mockResolveOp));
+				fastify.log.debug(`Registered 'mockResolve' hook for operation '${operationName}'`);
 			}
 
 			const preResolveOp = operationHooks[operationName].preResolve;
 			if (preResolveOp) {
 				fastify.post(`/operation/${operationName}/preResolve`, preResolve(operationName, preResolveOp));
+				fastify.log.debug(`Registered 'preResolve' hook for operation '${operationName}'`);
 			}
 
 			const postResolveOp = operationHooks[operationName].postResolve;
 			if (postResolveOp) {
 				fastify.post(`/operation/${operationName}/postResolve`, postResolve(operationName, postResolveOp));
+				fastify.log.debug(`Registered 'postResolve' hook for operation '${operationName}'`);
 			}
 
 			const mutatingPreResolveOp = operationHooks[operationName].mutatingPreResolve;
@@ -357,6 +360,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					`/operation/${operationName}/mutatingPreResolve`,
 					mutatingPreResolve(operationName, mutatingPreResolveOp)
 				);
+				fastify.log.debug(`Registered 'mutatingPreResolve' hook for operation '${operationName}'`);
 			}
 
 			const mutatingPostResolveOp = operationHooks[operationName].mutatingPostResolve;
@@ -365,11 +369,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					`/operation/${operationName}/mutatingPostResolve`,
 					mutatingPostResolve(operationName, mutatingPostResolveOp)
 				);
+				fastify.log.debug(`Registered 'mutatingPostResolve' hook for operation '${operationName}'`);
 			}
 
 			const customResolveOp = operationHooks[operationName].customResolve;
 			if (customResolveOp) {
 				fastify.post(`/operation/${operationName}/customResolve`, customResolve(operationName, customResolveOp));
+				fastify.log.debug(`Registered 'customResolve' hook for operation '${operationName}'`);
 			}
 		});
 	}
@@ -378,12 +384,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	const queryOperations = config?.[HooksConfigurationOperationType.Queries];
 	if (queryOperations) {
 		registerOperationHooks(queries, queryOperations);
+		fastify.log.debug(`Registered ${queries.length} query operations`);
 	}
 
 	// mutations
 	const mutationOperations = config?.[HooksConfigurationOperationType.Mutations];
 	if (mutationOperations) {
-		registerOperationHooks(queries, mutationOperations);
+		registerOperationHooks(mutations, mutationOperations);
+		fastify.log.debug(`Registered ${queries.length} mutation operations`);
 	}
 };
 

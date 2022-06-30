@@ -146,18 +146,24 @@ var upCmd = &cobra.Command{
 				log.Fatal("Could not get your current working directory")
 			}
 
+			hooksEnv := []string{
+				"START_HOOKS_SERVER=true",
+				fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
+				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
+				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			}
+
+			if enableDebugMode {
+				hooksEnv = append(hooksEnv, "LOG_LEVEL=debug")
+			}
+
 			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:       "hooks-server-runner",
 				Executable: "node",
 				ScriptArgs: []string{serverOutFile},
 				Logger:     log,
-				ScriptEnv: append(os.Environ(),
-					"START_HOOKS_SERVER=true",
-					fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
-					fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
-					fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-					fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
-				),
+				ScriptEnv:  append(os.Environ(), hooksEnv...),
 			})
 			defer func() {
 				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")

@@ -173,7 +173,9 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
 		const fastify = Fastify({
-			logger: true,
+			logger: {
+				level: process.env.LOG_LEVEL || 'info',
+			},
 		});
 		startServer(fastify, hooksConfig, WG_CONFIG).catch((err) => {
 			fastify.log.error(err, 'Could not start the hook server');
