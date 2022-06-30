@@ -1,4 +1,4 @@
-import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
+import { FastifyContextConfig, FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
 import fp from 'fastify-plugin';
 import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../server';
 import {
@@ -25,10 +25,25 @@ export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
 }
 
+export interface RouteConfig {
+	operationName?: string;
+}
+
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
 	const flattenHeaders = (headers: ClientRequestHeaders) => {
 		return flattenHeadersObject(headers.all());
 	};
+
+	fastify.addHook('onRoute', (routeOptions) => {
+		const routeConfig = routeOptions.config as RouteConfig;
+		if (routeConfig?.operationName) {
+			fastify.log.debug(
+				`Registered Operation Hook '${routeConfig.operationName}' with (${routeOptions.method}) '${routeOptions.url}'`
+			);
+		} else {
+			fastify.log.debug(`Registered Global Hook (${routeOptions.method}) '${routeOptions.url}'`);
+		}
+	});
 
 	// authentication
 	fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
@@ -338,44 +353,56 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		operations.forEach((operationName) => {
 			const mockResolveOp = operationHooks[operationName].mockResolve;
 			if (mockResolveOp) {
-				fastify.post(`/operation/${operationName}/mockResolve`, mockResolve(operationName, mockResolveOp));
-				fastify.log.debug(`Registered 'mockResolve' hook for operation '${operationName}'`);
+				fastify.post(
+					`/operation/${operationName}/mockResolve`,
+					{ config: { operationName } },
+					mockResolve(operationName, mockResolveOp)
+				);
 			}
 
 			const preResolveOp = operationHooks[operationName].preResolve;
 			if (preResolveOp) {
-				fastify.post(`/operation/${operationName}/preResolve`, preResolve(operationName, preResolveOp));
-				fastify.log.debug(`Registered 'preResolve' hook for operation '${operationName}'`);
+				fastify.post(
+					`/operation/${operationName}/preResolve`,
+					{ config: { operationName } },
+					preResolve(operationName, preResolveOp)
+				);
 			}
 
 			const postResolveOp = operationHooks[operationName].postResolve;
 			if (postResolveOp) {
-				fastify.post(`/operation/${operationName}/postResolve`, postResolve(operationName, postResolveOp));
-				fastify.log.debug(`Registered 'postResolve' hook for operation '${operationName}'`);
+				fastify.post(
+					`/operation/${operationName}/postResolve`,
+					{ config: { operationName } },
+					postResolve(operationName, postResolveOp)
+				);
 			}
 
 			const mutatingPreResolveOp = operationHooks[operationName].mutatingPreResolve;
 			if (mutatingPreResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/mutatingPreResolve`,
+					{ config: { operationName } },
 					mutatingPreResolve(operationName, mutatingPreResolveOp)
 				);
-				fastify.log.debug(`Registered 'mutatingPreResolve' hook for operation '${operationName}'`);
 			}
 
 			const mutatingPostResolveOp = operationHooks[operationName].mutatingPostResolve;
 			if (mutatingPostResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/mutatingPostResolve`,
+					{ config: { operationName } },
 					mutatingPostResolve(operationName, mutatingPostResolveOp)
 				);
-				fastify.log.debug(`Registered 'mutatingPostResolve' hook for operation '${operationName}'`);
 			}
 
 			const customResolveOp = operationHooks[operationName].customResolve;
 			if (customResolveOp) {
-				fastify.post(`/operation/${operationName}/customResolve`, customResolve(operationName, customResolveOp));
-				fastify.log.debug(`Registered 'customResolve' hook for operation '${operationName}'`);
+				fastify.post(
+					`/operation/${operationName}/customResolve`,
+					{ config: { operationName } },
+					customResolve(operationName, customResolveOp)
+				);
 			}
 		});
 	}
@@ -384,14 +411,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	const queryOperations = config?.[HooksConfigurationOperationType.Queries];
 	if (queryOperations) {
 		registerOperationHooks(queries, queryOperations);
-		fastify.log.debug(`Registered ${queries.length} query operations`);
+		fastify.log.debug(`Registered (${queries.length}) query operations`);
 	}
 
 	// mutations
 	const mutationOperations = config?.[HooksConfigurationOperationType.Mutations];
 	if (mutationOperations) {
 		registerOperationHooks(mutations, mutationOperations);
-		fastify.log.debug(`Registered ${queries.length} mutation operations`);
+		fastify.log.debug(`Registered (${queries.length}) mutation operations`);
 	}
 };
 
