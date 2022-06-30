@@ -3,6 +3,7 @@ import {
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -11,25 +12,16 @@ import operations from './wundergraph.operations';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
-});
-
-const jsp = introspect.openApi({
-	apiNamespace: 'jsp',
-	source: {
-		kind: 'file',
-		filePath: '../json_placeholder.json',
+	url: 'https://localhost:8443',
+	mTLS: {
+		key: new EnvironmentVariable('KEY'),
+		cert: new EnvironmentVariable('CERT'),
+		insecureSkipVerify: true,
 	},
 });
-
-const countries = introspect.graphql({
-	apiNamespace: 'countries',
-	url: 'https://countries.trevorblades.com/',
-});
-
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, countries, jsp],
+	apis: [spaceX],
 });
 
 // configureWunderGraph emits the configuration
@@ -49,13 +41,7 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins:
-			process.env.NODE_ENV === 'production'
-				? [
-						// change this before deploying to production to the actual domain where you're deploying your app
-						'http://localhost:3000',
-				  ]
-				: ['http://localhost:3000'],
+		allowedOrigins: ['http://localhost:3000'],
 	},
 	authentication: {
 		cookieBased: {
