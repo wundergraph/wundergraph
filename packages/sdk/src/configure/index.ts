@@ -166,7 +166,25 @@ export interface DotGraphQLConfig {
 	hasDotWunderGraphDirectory?: boolean;
 }
 
-export interface HooksConfiguration<AsyncFn = (...args: any[]) => Promise<any>> {
+export enum HooksConfigurationOperationType {
+	Queries = 'queries',
+	Mutations = 'mutations',
+}
+
+export interface OperationHookFunction {
+	(...args: any[]): Promise<any>;
+}
+
+export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
+	mockResolve?: AsyncFn;
+	preResolve?: AsyncFn;
+	postResolve?: AsyncFn;
+	mutatingPreResolve?: AsyncFn;
+	mutatingPostResolve?: AsyncFn;
+	customResolve?: AsyncFn;
+}
+
+export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
 	global?: {
 		httpTransport?: {
 			onOriginRequest?: {
@@ -186,25 +204,11 @@ export interface HooksConfiguration<AsyncFn = (...args: any[]) => Promise<any>> 
 		mutatingPostAuthentication?: AsyncFn;
 		revalidate?: AsyncFn;
 	};
-	queries?: {
-		[operationName: string]: {
-			mockResolve?: AsyncFn;
-			preResolve?: AsyncFn;
-			postResolve?: AsyncFn;
-			mutatingPreResolve?: AsyncFn;
-			mutatingPostResolve?: AsyncFn;
-			customResolve?: AsyncFn;
-		};
+	[HooksConfigurationOperationType.Queries]?: {
+		[operationName: string]: OperationHooksConfiguration<AsyncFn>;
 	};
-	mutations?: {
-		[operationName: string]: {
-			mockResolve?: AsyncFn;
-			preResolve?: AsyncFn;
-			postResolve?: AsyncFn;
-			mutatingPreResolve?: AsyncFn;
-			mutatingPostResolve?: AsyncFn;
-			customResolve?: AsyncFn;
-		};
+	[HooksConfigurationOperationType.Mutations]?: {
+		[operationName: string]: OperationHooksConfiguration<AsyncFn>;
 	};
 }
 

@@ -22,7 +22,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 		},
 		queries: {
 			Dragons: {
-				preResolve: async (hook) => {},
+				preResolve: async (hook) => {
+					console.log('########preResolve##########', hook);
+				},
 				postResolve: async (hook) => {},
 			},
 		},
