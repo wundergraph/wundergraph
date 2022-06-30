@@ -32,9 +32,7 @@ type ApiTransport struct {
 	hooksClient                *hooks.Client
 }
 
-type ApiTransportFactory func(tripper http.RoundTripper) http.RoundTripper
-
-func NewApiTransportFactory(api *wgpb.Api, hooksClient *hooks.Client, enableDebugMode bool) ApiTransportFactory {
+func NewApiTransportFactory(api *wgpb.Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper) http.RoundTripper {
 	return func(tripper http.RoundTripper) http.RoundTripper {
 		return NewApiTransport(tripper, api, hooksClient, enableDebugMode)
 	}

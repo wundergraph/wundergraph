@@ -16,7 +16,6 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
-	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
@@ -32,16 +31,18 @@ type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
+type ApiTransportFactory func(tripper http.RoundTripper) http.RoundTripper
+
 type DefaultFactoryResolver struct {
 	baseTransport    http.RoundTripper
-	transportFactory apihandler.ApiTransportFactory
+	transportFactory ApiTransportFactory
 	graphql          *graphql_datasource.Factory
 	rest             *oas_datasource.Factory
 	static           *staticdatasource.Factory
 	database         *database.Factory
 }
 
-func NewDefaultFactoryResolver(transportFactory apihandler.ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
+func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
 	defaultHttpClient := &http.Client{
 		Timeout:   time.Second * 10,
 		Transport: transportFactory(baseTransport),
