@@ -351,7 +351,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 	function registerOperationHooks(operations: string[], operationHooks: { [p: string]: OperationHooksConfiguration }) {
 		operations.forEach((operationName) => {
-			const mockResolveOp = operationHooks[operationName].mockResolve;
+			const mockResolveOp = operationHooks?.[operationName]?.mockResolve;
 			if (mockResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/mockResolve`,
@@ -360,7 +360,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				);
 			}
 
-			const preResolveOp = operationHooks[operationName].preResolve;
+			const preResolveOp = operationHooks?.[operationName]?.preResolve;
 			if (preResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/preResolve`,
@@ -369,7 +369,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				);
 			}
 
-			const postResolveOp = operationHooks[operationName].postResolve;
+			const postResolveOp = operationHooks?.[operationName]?.postResolve;
 			if (postResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/postResolve`,
@@ -378,7 +378,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				);
 			}
 
-			const mutatingPreResolveOp = operationHooks[operationName].mutatingPreResolve;
+			const mutatingPreResolveOp = operationHooks?.[operationName]?.mutatingPreResolve;
 			if (mutatingPreResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/mutatingPreResolve`,
@@ -387,7 +387,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				);
 			}
 
-			const mutatingPostResolveOp = operationHooks[operationName].mutatingPostResolve;
+			const mutatingPostResolveOp = operationHooks?.[operationName]?.mutatingPostResolve;
 			if (mutatingPostResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/mutatingPostResolve`,
@@ -396,7 +396,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				);
 			}
 
-			const customResolveOp = operationHooks[operationName].customResolve;
+			const customResolveOp = operationHooks?.[operationName]?.customResolve;
 			if (customResolveOp) {
 				fastify.post(
 					`/operation/${operationName}/customResolve`,
