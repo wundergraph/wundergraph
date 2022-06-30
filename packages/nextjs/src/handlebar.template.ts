@@ -32,6 +32,7 @@ const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = 
 			applicationPath: "{{applicationPath}}",
 			baseURL: "{{baseURL}}",
 			sdkVersion: "{{sdkVersion}}",
+    	authenticationEnabled: {{hasAuthProviders}},
     },
     user: null,
     setUser: value => {},

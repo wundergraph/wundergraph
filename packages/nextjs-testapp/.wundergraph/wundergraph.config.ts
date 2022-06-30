@@ -137,12 +137,12 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
+		allowedOrigins: ['http://localhost:3003'],
 	},
 	authentication: {
 		cookieBased: {
 			providers: [authProviders.demo()],
-			authorizedRedirectUris: ['http://localhost:3000/authentication'],
+			authorizedRedirectUris: ['http://localhost:3000/authentication', 'http://localhost:3003/auth-test'],
 		},
 	},
 	/*links: [
