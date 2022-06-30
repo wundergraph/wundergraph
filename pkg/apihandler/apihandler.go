@@ -1073,7 +1073,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		_, _ = w.Write(out.Response)
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("MockResolve queries hook response is empty")
 		}
@@ -1134,7 +1134,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.log.Error("PreResolve queries hook", abstractlogger.Error(err))
 		}
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("PreResolve queries hook response is empty")
 		}
@@ -1150,7 +1150,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		ctx.Variables = out.Input
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("MutatingPostResolve queries hook response is empty")
 		}
@@ -1163,7 +1163,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.log.Error("customResolve queries hook", abstractlogger.Error(err))
 		}
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("CustomResolve queries hook response is empty")
 		}
@@ -1438,7 +1438,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
 		}
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		}
 	}
 
@@ -1452,7 +1452,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		ctx.Variables = out.Input
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("PreResolve queries hook response is empty")
 		}
@@ -1465,7 +1465,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.log.Error("CustomResolve queries hook", abstractlogger.Error(err))
 		}
 		if out != nil {
-			handleSetClientRequestHeaders(r, out.SetClientRequestHeaders)
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("CustomResolve queries hook response is empty")
 		}
@@ -1960,16 +1960,22 @@ func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, _ *http.Re
 	http.Error(w, fmt.Sprintf("Endpoint not available for Operation: %s, please check the logs.", m.OperationName), http.StatusServiceUnavailable)
 }
 
-func handleSetClientRequestHeaders(req *http.Request, headers map[string]string) {
+func updateContextHeaders(ctx *resolve.Context, headers map[string]string) {
 	if headers == nil || len(headers) == 0 {
 		return
 	}
-	hookHeaders := http.Header{}
+	httpHeader := http.Header{}
 	for name := range headers {
-		hookHeaders.Set(name, headers[name])
+		httpHeader.Set(name, headers[name])
 	}
-
-	req.Header = hookHeaders
+	ctx.Request.Header = httpHeader
+	clientRequest := ctx.Context.Value(pool.ClientRequestKey)
+	if clientRequest == nil {
+		return
+	}
+	if cr, ok := clientRequest.(*http.Request); ok {
+		cr.Header = httpHeader
+	}
 }
 
 type OperationMetaData struct {
