@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.28](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.27...@wundergraph/nextjs@0.0.28) (2022-06-30)
+
+### Bug Fixes
+
+* don't (re-)fetch user server & client-side when authentication is disabled ([#56](https://github.com/wundergraph/wundergraph/issues/56)) ([2d4bc4a](https://github.com/wundergraph/wundergraph/commit/2d4bc4a7e1823652f047703435282f12ace5ce7e))
+
 ## [0.0.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.26...@wundergraph/nextjs@0.0.27) (2022-06-29)
 
 **Note:** Version bump only for package @wundergraph/nextjs
