@@ -17,7 +17,17 @@ const testEnum = new GraphQLEnumType({
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
-		authentication: {},
+		authentication: {
+			mutatingPostAuthentication: async (hook) => {
+				return {
+					status: 'ok',
+					user: {
+						...hook.user,
+						roles: ['user', 'admin'],
+					},
+				};
+			},
+		},
 		queries: {
 			FakeWeather: {
 				mockResolve: async (hook) => {

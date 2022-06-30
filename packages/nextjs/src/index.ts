@@ -145,47 +145,7 @@ export class Client<Role> {
 				credentials: 'include',
 				mode: 'cors',
 			});
-			switch (true) {
-				case response.status === 200:
-					const responseJSON = await response.json();
-					if (responseJSON.errors && !responseJSON.data) {
-						return {
-							status: 'error',
-							errors: responseJSON.errors,
-						};
-					}
-					if (responseJSON.errors && responseJSON.data) {
-						return {
-							status: 'partial',
-							errors: responseJSON.errors,
-							data: responseJSON.data,
-						};
-					}
-					return {
-						status: 'ok',
-						data: responseJSON.data,
-					};
-				case response.status === 400:
-					return {
-						status: 'error',
-						errors: [{ message: 'Bad Request' }],
-					};
-				case response.status >= 401 && response.status <= 499:
-					return {
-						status: 'error',
-						errors: [{ message: 'Unauthorized' }],
-					};
-				case response.status >= 500 && response.status <= 599:
-					return {
-						status: 'error',
-						errors: [{ message: 'Internal Server Error' }],
-					};
-				default:
-					return {
-						status: 'error',
-						errors: [{ message: 'Unknown Error' }],
-					};
-			}
+			return this.httpResponseToQueryResult(response);
 		} catch (e: any) {
 			return {
 				status: 'error',
@@ -231,24 +191,7 @@ export class Client<Role> {
 				mode: 'cors',
 				body,
 			});
-			const responseJSON = await response.json();
-			if (responseJSON.errors && !responseJSON.data) {
-				return {
-					status: 'error',
-					errors: responseJSON.errors,
-				};
-			}
-			if (responseJSON.errors && responseJSON.data) {
-				return {
-					status: 'partial',
-					errors: responseJSON.errors,
-					data: responseJSON.data,
-				};
-			}
-			return {
-				status: 'ok',
-				data: responseJSON.data,
-			};
+			return this.httpResponseToMutationResult(response);
 		} catch (e: any) {
 			return {
 				status: 'error',
@@ -290,27 +233,7 @@ export class Client<Role> {
 					withCredentials: true,
 				});
 				eventSource.addEventListener('message', (ev) => {
-					const responseJSON = JSON.parse(ev.data);
-					if (responseJSON.errors && !responseJSON.data) {
-						cb({
-							status: 'error',
-							errors: responseJSON.errors,
-						});
-					}
-					if (responseJSON.errors && responseJSON.data) {
-						cb({
-							status: 'partial',
-							errors: responseJSON.errors,
-							data: responseJSON.data,
-						});
-					}
-					if (responseJSON.data) {
-						cb({
-							status: 'ok',
-							streamState: 'streaming',
-							data: responseJSON.data,
-						});
-					}
+					cb(this.jsonToSubscriptionResponse(ev.data));
 				});
 				if (args?.abortSignal) {
 					args.abortSignal.addEventListener('abort', () => eventSource.close());
@@ -354,11 +277,32 @@ export class Client<Role> {
 						mode: 'cors',
 					}
 				);
-				if (response.status === 401) {
-					this.csrfToken = undefined;
+				if (response.status === 400) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Bad Request' }],
+					});
+					return;
+				}
+				if (response.status >= 401 && response.status <= 499) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Unauthorized' }],
+					});
+					return;
+				}
+				if (response.status >= 500 && response.status <= 599) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Server Error' }],
+					});
 					return;
 				}
 				if (response.status !== 200 || response.body == null) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Unknown Error' }],
+					});
 					return;
 				}
 				const reader = response.body.getReader();
@@ -370,11 +314,8 @@ export class Client<Role> {
 					if (!value) continue;
 					message += decoder.decode(value);
 					if (message.endsWith('\n\n')) {
-						cb({
-							status: 'ok',
-							streamState: 'streaming',
-							data: JSON.parse(message.substring(0, message.length - 2)),
-						});
+						const responseJSON = message.substring(0, message.length - 2);
+						cb(this.jsonToSubscriptionResponse(responseJSON));
 						message = '';
 					}
 				}
@@ -434,6 +375,24 @@ export class Client<Role> {
 				credentials: 'include',
 				mode: 'cors',
 			});
+			if (res.status === 400) {
+				return {
+					status: 'error',
+					message: 'Bad Request',
+				};
+			}
+			if (res.status >= 401 && res.status <= 499) {
+				return {
+					status: 'error',
+					message: 'Unauthorized',
+				};
+			}
+			if (res.status >= 500 && res.status <= 599) {
+				return {
+					status: 'error',
+					message: 'Server Error',
+				};
+			}
 			if (res.status === 200) {
 				const json = (await res.json()) as { key: string }[];
 				return {
@@ -441,13 +400,132 @@ export class Client<Role> {
 					fileKeys: json.map((x) => x.key),
 				};
 			}
-			throw new Error(`could not upload files, status: ${res.status}`);
+			return {
+				status: 'error',
+				message: 'Unknown Error',
+			};
 		} catch (e: any) {
 			return {
 				status: 'error',
 				message: e.message,
 			};
 		}
+	};
+
+	private httpResponseToQueryResult = async <Data>(response: Response): Promise<QueryResult<Data>> => {
+		switch (true) {
+			case response.status === 200:
+				const responseJSON = await response.json();
+				if (responseJSON.errors && !responseJSON.data) {
+					return {
+						status: 'error',
+						errors: responseJSON.errors,
+					};
+				}
+				if (responseJSON.errors && responseJSON.data) {
+					return {
+						status: 'partial',
+						errors: responseJSON.errors,
+						data: responseJSON.data,
+					};
+				}
+				return {
+					status: 'ok',
+					data: responseJSON.data,
+				};
+			case response.status === 400:
+				return {
+					status: 'error',
+					errors: [{ message: 'Bad Request' }],
+				};
+			case response.status >= 401 && response.status <= 499:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unauthorized' }],
+				};
+			case response.status >= 500 && response.status <= 599:
+				return {
+					status: 'error',
+					errors: [{ message: 'Internal Server Error' }],
+				};
+			default:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unknown Error' }],
+				};
+		}
+	};
+
+	private httpResponseToMutationResult = async <Data>(response: Response): Promise<MutationResult<Data>> => {
+		switch (true) {
+			case response.status === 200:
+				const responseJSON = await response.json();
+				if (responseJSON.errors && !responseJSON.data) {
+					return {
+						status: 'error',
+						errors: responseJSON.errors,
+					};
+				}
+				if (responseJSON.errors && responseJSON.data) {
+					return {
+						status: 'partial',
+						errors: responseJSON.errors,
+						data: responseJSON.data,
+					};
+				}
+				return {
+					status: 'ok',
+					data: responseJSON.data,
+				};
+			case response.status === 400:
+				return {
+					status: 'error',
+					errors: [{ message: 'Bad Request' }],
+				};
+			case response.status >= 401 && response.status <= 499:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unauthorized' }],
+				};
+			case response.status >= 500 && response.status <= 599:
+				return {
+					status: 'error',
+					errors: [{ message: 'Internal Server Error' }],
+				};
+			default:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unknown Error' }],
+				};
+		}
+	};
+
+	private jsonToSubscriptionResponse = <Data>(json: any): SubscriptionResult<Data> => {
+		const responseJSON = JSON.parse(json);
+		if (responseJSON.errors && !responseJSON.data) {
+			return {
+				status: 'error',
+				errors: responseJSON.errors,
+			};
+		}
+		if (responseJSON.errors && responseJSON.data) {
+			return {
+				status: 'partial',
+				errors: responseJSON.errors,
+				data: responseJSON.data,
+			};
+		}
+		if (responseJSON.data) {
+			return {
+				status: 'ok',
+				streamState: 'streaming',
+				data: responseJSON.data,
+			};
+		}
+		return {
+			status: 'error',
+			errors: [{ message: 'Unexpected response' }],
+		};
 	};
 
 	public fetchUser = async (abortSignal?: AbortSignal, revalidate?: boolean): Promise<User<Role> | null> => {
