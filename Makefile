@@ -1,5 +1,5 @@
 all: check-setup engine-dev
-	pnpm install
+	pnpm install --ignore-scripts
 	pnpm run build
 
 engine-dev: codegen
