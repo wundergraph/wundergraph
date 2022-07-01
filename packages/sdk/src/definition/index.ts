@@ -49,6 +49,7 @@ import { loadFile } from '../codegen/templates/typescript';
 import { composeServices } from '@apollo/composition';
 import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
+import objectHash from 'object-hash';
 
 export interface ApplicationConfig {
 	name: string;
@@ -243,12 +244,12 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 	isFederation?: boolean;
 }
 
-export interface GraphQLFederationUpstream extends Omit<GraphQLUpstream, 'apiNamespace'> {
+export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
 }
 
-export interface GraphQLFederationIntrospection {
+export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
 	upstreams: GraphQLFederationUpstream[];
 	apiNamespace?: string;
 }
@@ -265,7 +266,7 @@ export interface ReplaceJSONTypeFieldConfiguration {
 	responseTypeReplacement: string;
 }
 
-export interface DatabaseIntrospection {
+export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	databaseURL: InputVariable;
 	apiNamespace?: string;
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
@@ -274,7 +275,14 @@ export interface DatabaseIntrospection {
 	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
 }
 
-export interface HTTPUpstream {
+export interface IntrospectionConfiguration {
+	introspection?: {
+		disableCache?: boolean;
+		pollingIntervalSeconds?: number;
+	};
+}
+
+export interface HTTPUpstream extends IntrospectionConfiguration {
 	apiNamespace?: string;
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
@@ -418,7 +426,6 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
-
 	baseURL?: InputVariable;
 }
 
@@ -590,221 +597,254 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 	});
 };
 
+const introspectWithCache = async <Introspection extends IntrospectionConfiguration, Api>(
+	introspection: Introspection,
+	generator: (introspection: Introspection) => Promise<Api>
+): Promise<Api> => {
+	if (introspection.introspection?.disableCache === true) {
+		return generator(introspection);
+	}
+	const cacheKey = objectHash(introspection);
+	const cacheDirectory = path.join('generated', 'introspection', 'cache');
+	if (!fs.existsSync(cacheDirectory)) {
+		fs.mkdirSync(cacheDirectory, { recursive: true });
+	}
+	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
+	if (fs.existsSync(cacheFile)) {
+		return JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+	}
+	const result = await generator(introspection);
+	fs.writeFileSync(cacheFile, JSON.stringify(result));
+	return result;
+};
+
 export const introspect = {
 	graphql: async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
-		const headers: { [key: string]: HTTPHeader } = {};
-		introspection.headers !== undefined &&
-			(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
-				const values: ConfigurationVariable[] = [];
-				switch (config.valueSource) {
-					case 'placeholder':
-						values.push({
-							kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,
-							staticVariableContent: '',
-							environmentVariableDefaultValue: '',
-							environmentVariableName: '',
-							placeholderVariableName: config.value,
-						});
-						break;
-					case 'clientRequest':
-						values.push({
+		return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
+			const headers: { [key: string]: HTTPHeader } = {};
+			introspection.headers !== undefined &&
+				(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
+					const values: ConfigurationVariable[] = [];
+					switch (config.valueSource) {
+						case 'placeholder':
+							values.push({
+								kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,
+								staticVariableContent: '',
+								environmentVariableDefaultValue: '',
+								environmentVariableName: '',
+								placeholderVariableName: config.value,
+							});
+							break;
+						case 'clientRequest':
+							values.push({
+								kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+								staticVariableContent: `{{ .request.headers.${config.value} }}`,
+								environmentVariableName: '',
+								environmentVariableDefaultValue: '',
+								placeholderVariableName: '',
+							});
+							break;
+						case 'static':
+							values.push({
+								kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+								staticVariableContent: config.value,
+								environmentVariableDefaultValue: '',
+								environmentVariableName: '',
+								placeholderVariableName: '',
+							});
+							break;
+						case 'env':
+							values.push({
+								kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+								staticVariableContent: '',
+								environmentVariableDefaultValue: config.defaultValue || '',
+								environmentVariableName: config.value,
+								placeholderVariableName: '',
+							});
+							break;
+					}
+					headers[config.key] = {
+						values,
+					};
+				});
+			const schema = await introspectGraphQLSchema(introspection, headers);
+			const federationEnabled = isFederationService(schema);
+			const schemaSDL = cleanupSchema(
+				schema,
+				introspection.customFloatScalars || [],
+				introspection.customIntScalars || []
+			);
+			const serviceSDL = !federationEnabled
+				? undefined
+				: await federationServiceSDL(resolveVariable(introspection.url));
+			const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
+			const schemaDocumentNode = parse(schemaSDL);
+			const graphQLSchema = buildSchema(schemaSDL);
+			const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
+			const subscriptionsEnabled = hasSubscriptions(schema);
+			if (introspection.internal === true) {
+				headers['X-WG-Internal-GraphQL-API'] = {
+					values: [
+						{
 							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: `{{ .request.headers.${config.value} }}`,
+							staticVariableContent: 'true',
 							environmentVariableName: '',
 							environmentVariableDefaultValue: '',
 							placeholderVariableName: '',
-						});
-						break;
-					case 'static':
-						values.push({
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: config.value,
-							environmentVariableDefaultValue: '',
-							environmentVariableName: '',
-							placeholderVariableName: '',
-						});
-						break;
-					case 'env':
-						values.push({
-							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-							staticVariableContent: '',
-							environmentVariableDefaultValue: config.defaultValue || '',
-							environmentVariableName: config.value,
-							placeholderVariableName: '',
-						});
-						break;
-				}
-				headers[config.key] = {
-					values,
+						},
+					],
 				};
-			});
-		const schema = await introspectGraphQLSchema(introspection, headers);
-		const federationEnabled = isFederationService(schema);
-		const schemaSDL = cleanupSchema(
-			schema,
-			introspection.customFloatScalars || [],
-			introspection.customIntScalars || []
-		);
-		const serviceSDL = !federationEnabled ? undefined : await federationServiceSDL(resolveVariable(introspection.url));
-		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
-		const schemaDocumentNode = parse(schemaSDL);
-		const graphQLSchema = buildSchema(schemaSDL);
-		const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
-		const subscriptionsEnabled = hasSubscriptions(schema);
-		if (introspection.internal === true) {
-			headers['X-WG-Internal-GraphQL-API'] = {
-				values: [
+			}
+			return new GraphQLApi(
+				applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
+				[
 					{
-						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-						staticVariableContent: 'true',
-						environmentVariableName: '',
-						environmentVariableDefaultValue: '',
-						placeholderVariableName: '',
+						Kind: DataSourceKind.GRAPHQL,
+						RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
+						ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
+						Custom: {
+							Fetch: {
+								url: mapInputVariable(introspection.url),
+								baseUrl: mapInputVariable(''),
+								path: mapInputVariable(''),
+								method: HTTPMethod.POST,
+								body: mapInputVariable(''),
+								header: headers,
+								query: [],
+								upstreamAuthentication: buildUpstreamAuthentication(introspection),
+								mTLS: buildMTLSConfiguration(introspection),
+								urlEncodeBody: false,
+							},
+							Subscription: {
+								Enabled: subscriptionsEnabled,
+								URL:
+									introspection.subscriptionsURL !== undefined
+										? mapInputVariable(introspection.subscriptionsURL)
+										: typeof introspection.url === 'string'
+										? mapInputVariable(subscriptionsURL(introspection.url))
+										: mapInputVariable(''),
+							},
+							Federation: {
+								Enabled: federationEnabled,
+								ServiceSDL: serviceSDL || '',
+							},
+							UpstreamSchema: schemaSDL,
+						},
+						Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
 					},
 				],
-			};
-		}
-		return new GraphQLApi(
-			applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
-			[
-				{
-					Kind: DataSourceKind.GRAPHQL,
-					RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
-					ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
-					Custom: {
-						Fetch: {
-							url: mapInputVariable(introspection.url),
-							baseUrl: mapInputVariable(''),
-							path: mapInputVariable(''),
-							method: HTTPMethod.POST,
-							body: mapInputVariable(''),
-							header: headers,
-							query: [],
-							upstreamAuthentication: buildUpstreamAuthentication(introspection),
-							mTLS: buildMTLSConfiguration(introspection),
-							urlEncodeBody: false,
-						},
-						Subscription: {
-							Enabled: subscriptionsEnabled,
-							URL:
-								introspection.subscriptionsURL !== undefined
-									? mapInputVariable(introspection.subscriptionsURL)
-									: typeof introspection.url === 'string'
-									? mapInputVariable(subscriptionsURL(introspection.url))
-									: mapInputVariable(''),
-						},
-						Federation: {
-							Enabled: federationEnabled,
-							ServiceSDL: serviceSDL || '',
-						},
-						UpstreamSchema: schemaSDL,
-					},
-					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
-				},
-			],
-			applyNameSpaceToFieldConfigurations(
-				Fields,
-				graphQLSchema,
-				introspection.skipRenameRootFields || [],
-				introspection.apiNamespace
-			),
-			generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
-			[]
-		);
-	},
-	postgresql: async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			'postgresql',
-			5
-		);
-		return new PostgresqlApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	},
-	mysql: async (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			'mysql',
-			5
-		);
-		return new MySQLApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	},
-	planetscale: async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			'planetscale',
-			5
-		);
-		return new PlanetscaleApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	},
-	sqlite: async (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			'sqlite',
-			5
-		);
-		return new SQLiteApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	},
-	sqlserver: async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			'sqlserver',
-			5
-		);
-		return new SQLServerApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	},
-	mongodb: async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			'mongodb',
-			5
-		);
-		return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	},
-	federation: async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
-		const upstreams = introspection.upstreams.map(async (upstream, i) => {
-			let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
-
-			const name = upstream.name ?? i.toString();
-
-			if (schema === '' && upstream.url) {
-				schema = await federationServiceSDL(resolveVariable(upstream.url));
-			}
-
-			if (schema == '') {
-				throw new Error(`Subgraph ${name} has not provided a schema`);
-			}
-
-			return {
-				name,
-				typeDefs: parse(schema),
-			};
-		});
-		const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
-		const compositionResult = composeServices(serviceList);
-		const errors = compositionResult.errors;
-
-		if (errors && errors?.length > 0) {
-			console.log(
-				`\nService composition of federated subgraph failed:\n\n${errors[0]}\n\nMake sure all subgraphs can be composed to a supergaph.\n\n`
+				applyNameSpaceToFieldConfigurations(
+					Fields,
+					graphQLSchema,
+					introspection.skipRenameRootFields || [],
+					introspection.apiNamespace
+				),
+				generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
+				[]
 			);
-			process.exit(1);
-		}
-
-		const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
-			isFederation: true,
-			url: upstream.url,
-			headers: upstream.headers,
-			apiNamespace: introspection.apiNamespace,
-			loadSchemaFromString: upstream.loadSchemaFromString,
-		}));
-
-		const apis = await Promise.all(graphQLIntrospections.map((i) => introspect.graphql(i)));
-		return mergeApis([], ...apis) as GraphQLApi;
+		});
 	},
-	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-		const spec = loadOpenApi(introspection);
-		return await openApiSpecificationToRESTApiObject(spec, introspection);
-	},
+	postgresql: async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> =>
+		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				introspection,
+				'postgresql',
+				5
+			);
+			return new PostgresqlApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	mysql: async (introspection: DatabaseIntrospection): Promise<MySQLApi> =>
+		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				introspection,
+				'mysql',
+				5
+			);
+			return new MySQLApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	planetscale: async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> =>
+		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				introspection,
+				'planetscale',
+				5
+			);
+			return new PlanetscaleApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	sqlite: async (introspection: DatabaseIntrospection): Promise<SQLiteApi> =>
+		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				introspection,
+				'sqlite',
+				5
+			);
+			return new SQLiteApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	sqlserver: async (introspection: DatabaseIntrospection): Promise<SQLServerApi> =>
+		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				introspection,
+				'sqlserver',
+				5
+			);
+			return new SQLServerApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	mongodb: async (introspection: DatabaseIntrospection): Promise<MongoDBApi> =>
+		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<MongoDBApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				introspection,
+				'mongodb',
+				5
+			);
+			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	federation: async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> =>
+		introspectWithCache(introspection, async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
+			const upstreams = introspection.upstreams.map(async (upstream, i) => {
+				let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
+
+				const name = upstream.name ?? i.toString();
+
+				if (schema === '' && upstream.url) {
+					schema = await federationServiceSDL(resolveVariable(upstream.url));
+				}
+
+				if (schema == '') {
+					throw new Error(`Subgraph ${name} has not provided a schema`);
+				}
+
+				return {
+					name,
+					typeDefs: parse(schema),
+				};
+			});
+			const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
+			const compositionResult = composeServices(serviceList);
+			const errors = compositionResult.errors;
+
+			if (errors && errors?.length > 0) {
+				console.log(
+					`\nService composition of federated subgraph failed:\n\n${errors[0]}\n\nMake sure all subgraphs can be composed to a supergaph.\n\n`
+				);
+				process.exit(1);
+			}
+
+			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
+				isFederation: true,
+				url: upstream.url,
+				headers: upstream.headers,
+				apiNamespace: introspection.apiNamespace,
+				loadSchemaFromString: upstream.loadSchemaFromString,
+			}));
+
+			const apis = await Promise.all(graphQLIntrospections.map((i) => introspect.graphql(i)));
+			return mergeApis([], ...apis) as GraphQLApi;
+		}),
+	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> =>
+		introspectWithCache(introspection, async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+			const spec = loadOpenApi(introspection);
+			return await openApiSpecificationToRESTApiObject(spec, introspection);
+		}),
 };
 
 const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, headers: { [key: string]: HTTPHeader }) => {

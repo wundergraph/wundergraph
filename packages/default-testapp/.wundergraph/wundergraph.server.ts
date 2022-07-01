@@ -56,6 +56,21 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			},
 		},
 		queries: {
+			Demo: {
+				mockResolve: async (hook) => {
+					return {
+						data: {
+							mgo_findManylistingsAndReviews: [
+								{
+									id: 'test',
+									name: 'test',
+									bedrooms: 5,
+								},
+							],
+						},
+					};
+				},
+			},
 			Dragons: {
 				mutatingPostResolve: async (hook) => {
 					console.log('########mutatingPostResolve##########', hook.clientRequest.method);

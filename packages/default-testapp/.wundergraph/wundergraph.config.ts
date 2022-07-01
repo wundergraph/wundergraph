@@ -3,6 +3,7 @@ import {
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -12,6 +13,9 @@ import operations from './wundergraph.operations';
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://api.spacex.land/graphql/',
+	introspection: {
+		pollingIntervalSeconds: 5,
+	},
 });
 
 const jsp = introspect.openApi({
