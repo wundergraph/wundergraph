@@ -51,7 +51,7 @@ import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
 import objectHash from 'object-hash';
 
-export const DataSourcePollingMode = process.env['WUNDERGRAPH_DATA_SOURCE_POLLING_MODE'] === 'true';
+export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 
 export interface ApplicationConfig {
 	name: string;
@@ -604,7 +604,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	generator: (introspection: Introspection) => Promise<Api>
 ): Promise<Api> => {
 	if (
-		DataSourcePollingMode &&
+		DataSourcePollingModeEnabled &&
 		introspection.introspection?.pollingIntervalSeconds !== undefined &&
 		introspection.introspection?.pollingIntervalSeconds > 0
 	) {
@@ -659,9 +659,9 @@ const introspectAfterTimeout = async <Introspection extends IntrospectionConfigu
 		try {
 			await updateIntrospectionCache(introspection, generator);
 		} catch (e) {
-			console.error(e);
+			console.error('Error during introspection cache update', e);
 		}
-		introspectAfterTimeout(introspection, generator).catch((e) => console.error(e));
+		introspectAfterTimeout(introspection, generator).catch((e) => console.error('Error during polling', e));
 	}, introspection.introspection!.pollingIntervalSeconds! * 1000);
 };
 

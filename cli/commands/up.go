@@ -64,9 +64,11 @@ var upCmd = &cobra.Command{
 			Logger:     log,
 			WatchPaths: []string{
 				path.Join(wundergraphDir, "operations"),
+				// a new cache is generated as soon as the introspection "poller" detects a change
+				// in that case we want to rerun the script to build a new config
+				path.Join(wundergraphDir, "generated", "introspection", "cache"),
 			},
 			IgnorePaths: []string{
-				"generated",
 				"node_modules",
 			},
 		})
@@ -98,6 +100,23 @@ var upCmd = &cobra.Command{
 
 		<-configRunner.Run(ctx)
 
+		// responsible for executing the config in "polling" mode
+		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+			Name:       "config-introspection-runner",
+			Executable: "node",
+			ScriptArgs: []string{configOutFile},
+			Logger:     log,
+			ScriptEnv: append(os.Environ(),
+				fmt.Sprintf("WG_DATA_SOURCE_POLLING_MODE=true"),
+				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			),
+		})
+
+		go func() {
+			<-configIntrospectionRunner.Run(ctx)
+		}()
+
 		configFileChangeChan := make(chan struct{})
 		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []string{
@@ -124,6 +143,10 @@ var upCmd = &cobra.Command{
 				case <-configBundler.BuildDoneChan:
 					log.Debug("Configuration change detected")
 					<-configRunner.Run(ctx)
+					configIntrospectionRunner.Stop()
+					go func() {
+						<-configIntrospectionRunner.Run(ctx)
+					}()
 				}
 			}
 		}()
