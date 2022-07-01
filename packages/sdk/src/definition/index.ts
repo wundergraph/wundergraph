@@ -51,6 +51,8 @@ import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
 import objectHash from 'object-hash';
 
+export const DataSourcePollingMode = process.env['WUNDERGRAPH_DATA_SOURCE_POLLING_MODE'] === 'true';
+
 export interface ApplicationConfig {
 	name: string;
 	apis: Promise<Api<any>>[];
@@ -601,6 +603,14 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api>
 ): Promise<Api> => {
+	if (
+		DataSourcePollingMode &&
+		introspection.introspection?.pollingIntervalSeconds !== undefined &&
+		introspection.introspection?.pollingIntervalSeconds > 0
+	) {
+		introspectAfterTimeout(introspection, generator).catch((e) => console.error(e));
+		return Promise.resolve({} as Api);
+	}
 	if (introspection.introspection?.disableCache === true) {
 		return generator(introspection);
 	}
@@ -616,6 +626,43 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	const result = await generator(introspection);
 	fs.writeFileSync(cacheFile, JSON.stringify(result));
 	return result;
+};
+
+const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, Api>(
+	introspection: Introspection,
+	generator: (introspection: Introspection) => Promise<Api>
+) => {
+	console.log(`Updating introspection cache`);
+	const cacheKey = objectHash(introspection);
+	const cacheDirectory = path.join('generated', 'introspection', 'cache');
+	if (!fs.existsSync(cacheDirectory)) {
+		fs.mkdirSync(cacheDirectory, { recursive: true });
+	}
+	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
+	const actual = JSON.stringify(await generator(introspection));
+	if (fs.existsSync(cacheFile)) {
+		const existing = fs.readFileSync(cacheFile, 'utf8');
+		if (actual === existing) {
+			console.log(`Updating introspection cache - no change`);
+			return;
+		}
+	}
+	console.log(`Updating introspection cache - writing new cache file`);
+	fs.writeFileSync(cacheFile, actual);
+};
+
+const introspectAfterTimeout = async <Introspection extends IntrospectionConfiguration, Api>(
+	introspection: Introspection,
+	generator: (introspection: Introspection) => Promise<Api>
+) => {
+	setTimeout(async () => {
+		try {
+			await updateIntrospectionCache(introspection, generator);
+		} catch (e) {
+			console.error(e);
+		}
+		introspectAfterTimeout(introspection, generator).catch((e) => console.error(e));
+	}, introspection.introspection!.pollingIntervalSeconds! * 1000);
 };
 
 export const introspect = {
