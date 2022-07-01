@@ -4,7 +4,7 @@ all: check-setup engine-dev
 	pnpm install --ignore-scripts
 	pnpm run build
   # run postinstall script
-	pnpm install --filter='./packages/wunderctl'
+	pnpm install
 
 engine-dev: codegen
 	go mod tidy
