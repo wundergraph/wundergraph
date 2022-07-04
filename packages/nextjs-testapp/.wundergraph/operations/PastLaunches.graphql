@@ -1,5 +1,5 @@
-query ($limit: Int! @injectEnvironmentVariable(name: "NEXUS_GAME_ID")) {
-	launchesPast: spacex_launchesPast(limit: $limit) {
+{
+	launchesPast: spacex_launchesPast(limit: 10) {
 		mission_name
 		launch_date_local
 		launch_site {
