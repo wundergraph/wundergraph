@@ -3,7 +3,6 @@ import {
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
-	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -23,6 +22,9 @@ const jsp = introspect.openApi({
 	source: {
 		kind: 'file',
 		filePath: '../json_placeholder.json',
+	},
+	introspection: {
+		pollingIntervalSeconds: 2,
 	},
 });
 

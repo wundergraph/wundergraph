@@ -603,28 +603,31 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api>
 ): Promise<Api> => {
+	if (DataSourcePollingModeEnabled && introspection.introspection?.disableCache === true) {
+		// simply return nothing, we're not doing anything with it
+		// that's ideal because we don't want to trigger a cache fill in the poller
+		// when we're dismissing the cache entry
+		return Promise.resolve({} as Api);
+	}
 	if (
 		DataSourcePollingModeEnabled &&
 		introspection.introspection?.pollingIntervalSeconds !== undefined &&
 		introspection.introspection?.pollingIntervalSeconds > 0
 	) {
 		introspectAfterTimeout(introspection, generator).catch((e) => console.error(e));
+		// dismiss result here, we're not doing anything with it
 		return Promise.resolve({} as Api);
 	}
 	if (introspection.introspection?.disableCache === true) {
 		return generator(introspection);
 	}
 	const cacheKey = objectHash(introspection);
-	const cacheDirectory = path.join('generated', 'introspection', 'cache');
-	if (!fs.existsSync(cacheDirectory)) {
-		fs.mkdirSync(cacheDirectory, { recursive: true });
-	}
 	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
 	if (fs.existsSync(cacheFile)) {
 		return JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
 	}
 	const result = await generator(introspection);
-	fs.writeFileSync(cacheFile, JSON.stringify(result));
+	fs.writeFileSync(cacheFile, JSON.stringify(result), { encoding: 'utf8' });
 	return result;
 };
 
@@ -632,22 +635,16 @@ const updateIntrospectionCache = async <Introspection extends IntrospectionConfi
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api>
 ) => {
-	console.log(`Updating introspection cache`);
 	const cacheKey = objectHash(introspection);
-	const cacheDirectory = path.join('generated', 'introspection', 'cache');
-	if (!fs.existsSync(cacheDirectory)) {
-		fs.mkdirSync(cacheDirectory, { recursive: true });
-	}
 	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	const actual = JSON.stringify(await generator(introspection));
+	const result = await generator(introspection);
+	const actual = JSON.stringify(result);
 	if (fs.existsSync(cacheFile)) {
 		const existing = fs.readFileSync(cacheFile, 'utf8');
 		if (actual === existing) {
-			console.log(`Updating introspection cache - no change`);
 			return;
 		}
 	}
-	console.log(`Updating introspection cache - writing new cache file`);
 	fs.writeFileSync(cacheFile, actual);
 };
 
@@ -655,6 +652,9 @@ const introspectAfterTimeout = async <Introspection extends IntrospectionConfigu
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api>
 ) => {
+	if (introspection.introspection?.pollingIntervalSeconds === undefined) {
+		return;
+	}
 	setTimeout(async () => {
 		try {
 			await updateIntrospectionCache(introspection, generator);
@@ -662,7 +662,7 @@ const introspectAfterTimeout = async <Introspection extends IntrospectionConfigu
 			console.error('Error during introspection cache update', e);
 		}
 		introspectAfterTimeout(introspection, generator).catch((e) => console.error('Error during polling', e));
-	}, introspection.introspection!.pollingIntervalSeconds! * 1000);
+	}, introspection.introspection.pollingIntervalSeconds * 1000);
 };
 
 export const introspect = {

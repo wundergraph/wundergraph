@@ -57,7 +57,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 		},
 		queries: {
 			Demo: {
-				mockResolve: async (hook) => {
+				mockResolve: async () => {
 					return {
 						data: {
 							mgo_findManylistingsAndReviews: [
@@ -105,6 +105,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 		{
 			apiNamespace: 'ibm_jsp',
 			serverName: 'ibm_jsp',
+			// @ts-ignore
 			schema: createGraphQLSchema([jsonPlaceholder]).then((r) => r.schema),
 		},
 		{

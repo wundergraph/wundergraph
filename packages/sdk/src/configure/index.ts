@@ -631,7 +631,13 @@ const resolveApplications = async (
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
 export const configureWunderGraphApplication = (config: WunderGraphConfigApplicationConfig) => {
 	if (DataSourcePollingModeEnabled) {
-		Promise.all(config.application.apis).catch((e) => console.error(e));
+		// if the DataSourcePolling environment variable is set to 'true',
+		// we don't run the regular config build process which would generate the whole config
+		// instead, we only resolve all Promises of the API Introspection
+		// This will keep polling the (configured) DataSources until `wunderctl up` stops the polling process
+		// If a change is detected in the DataSource, the cache is updated,
+		// which will trigger a re-run
+		Promise.all(config.application.apis).catch();
 		return;
 	}
 	resolveConfig(config).then(async (resolved) => {
@@ -800,11 +806,21 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			console.log(`${new Date().toLocaleTimeString()}: Code generation completed.`);
 		}
 
-		fs.writeFileSync(path.join('generated', 'wundergraph.config.json'), ResolvedWunderGraphConfigToJSON(resolved), {
-			encoding: 'utf8',
-		});
+		const configJsonPath = path.join('generated', 'wundergraph.config.json');
+		const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
+		// config json exists
+		if (fs.existsSync(configJsonPath)) {
+			const existing = fs.readFileSync(configJsonPath, 'utf8');
+			if (configJSON !== existing) {
+				fs.writeFileSync(configJsonPath, configJSON, { encoding: 'utf8' });
+				console.log(`${new Date().toLocaleTimeString()}: wundergraph.config.json updated`);
+			}
+		} else {
+			fs.writeFileSync(configJsonPath, configJSON, { encoding: 'utf8' });
+			console.log(`${new Date().toLocaleTimeString()}: wundergraph.config.json created`);
+		}
+
 		done();
-		console.log(`${new Date().toLocaleTimeString()}: wundergraph.config.json updated`);
 
 		const dotGraphQLNested =
 			config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined

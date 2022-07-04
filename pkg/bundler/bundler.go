@@ -30,6 +30,7 @@ type Bundler struct {
 	fileLoaders           []string
 	BuildDoneChan         chan struct{}
 	mu                    sync.Mutex
+	deferWatchUntilClose  chan struct{}
 }
 
 type Config struct {
@@ -40,6 +41,7 @@ type Config struct {
 	WatchPaths            []string
 	IgnorePaths           []string
 	OutFile               string
+	DeferWatchUntilClose  chan struct{}
 }
 
 func NewBundler(config Config) *Bundler {
@@ -53,6 +55,7 @@ func NewBundler(config Config) *Bundler {
 		BuildDoneChan:         make(chan struct{}),
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
+		deferWatchUntilClose:  config.DeferWatchUntilClose,
 	}
 }
 
@@ -172,6 +175,9 @@ func (b *Bundler) initialBuild() api.BuildResult {
 }
 
 func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
+	if b.deferWatchUntilClose != nil {
+		<-b.deferWatchUntilClose
+	}
 	w := watcher.NewWatcher(b.name, &watcher.Config{
 		IgnorePaths: b.ignorePaths,
 		WatchPaths:  b.watchPaths,

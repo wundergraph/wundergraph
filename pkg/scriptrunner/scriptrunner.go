@@ -84,7 +84,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 			)
 		case <-b.cmd.Done():
 			status := b.cmd.Status()
-			if status.Error != nil {
+			if status.Error != nil && status.Exit > 0 {
 				b.log.Error("Script runner exited with error",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
