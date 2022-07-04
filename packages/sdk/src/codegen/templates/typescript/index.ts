@@ -2,7 +2,7 @@ import { Template, TemplateOutputFile, visitJSONSchema } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import prettier from 'prettier';
 import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
-import { hasInput, hasInternalInput } from './react';
+import { hasInput, hasInternalInput, hasInjectedInput } from './react';
 import fs from 'fs';
 import path from 'path';
 
@@ -55,9 +55,10 @@ export class TypeScriptInternalInputModels implements Template {
 
 export class TypeScriptInjectedInputModels implements Template {
 	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(hasInternalInput)
+		const content = config.application.Operations.filter(hasInjectedInput)
 			.map((op) => JSONSchemaToTypescriptInterface(op.InjectedVariablesSchema, 'Injected' + op.Name + 'Input', false))
 			.join('\n\n');
+
 		return Promise.resolve([
 			{
 				path: 'models.ts',

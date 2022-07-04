@@ -1,5 +1,6 @@
 //language=handlebars
 export const template = `
+// @ts-ignore: no-types available		
 import {JSONSchema7} from "json-schema";
 
 interface Schema {
