@@ -156,6 +156,7 @@ func init() {
 	}
 
 	defaultConfigJSONPath := path.Join(wundergraphDir, "generated", "wundergraph.config.json")
+
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "sets the log level")
 	rootCmd.PersistentFlags().StringVarP(&wunderGraphConfigFile, "config", "c", defaultConfigJSONPath, "config is the path to the wundergraph config")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")

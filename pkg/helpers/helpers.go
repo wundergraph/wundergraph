@@ -38,3 +38,10 @@ func FindDirectory(wd string, name string) (string, error) {
 	}
 	return dirPath, nil
 }
+
+func FileExists(filePath string) bool {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
