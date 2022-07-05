@@ -14,6 +14,7 @@ import { Forms } from './typescript/forms';
 import { WunderGraphServer } from './typescript/server';
 import { WunderGraphHooksPlugin } from './typescript/hooks';
 import { AuthenticationProviderConfiguration } from './markdown/authentication';
+import { GolangInputModels, GolangResponseModels, GolangClient } from './golang';
 
 const typescriptModels = [
 	new TypeScriptInputModels(),
@@ -31,7 +32,14 @@ const typescriptAll = [
 	new JsonSchema(),
 ];
 
+const golangAll = [new GolangInputModels(), new GolangResponseModels()];
+
 const templates = {
+	golang: {
+		all: golangAll,
+		models: [new GolangInputModels(), new GolangResponseModels()],
+		client: [new GolangInputModels(), new GolangResponseModels(), new GolangClient()],
+	},
 	typescript: {
 		// models generates all models for input and output
 		models: typescriptModels,

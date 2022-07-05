@@ -48,6 +48,7 @@ configureWunderGraphApplication({
 				...templates.typescript.all,
 				templates.typescript.operations,
 				templates.typescript.linkBuilder,
+				...templates.golang.client,
 			],
 		},
 	],
