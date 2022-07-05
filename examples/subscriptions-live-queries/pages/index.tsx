@@ -37,7 +37,7 @@ const Home: NextPage = () => {
 					</div>
 				</div>
 				<h1 className="text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-					WunderGraph & Next.js
+					Live Queries
 				</h1>
 				<p className="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400">
 					Use{' '}
@@ -46,7 +46,7 @@ const Home: NextPage = () => {
 							WunderGraph
 						</a>
 					</code>{' '}
-					to stream the result of operation through JSON-RPC over HTTP/2.
+					to stream the result of your operation over HTTP/2.
 				</p>
 			</div>
 			<div className="relative flex flex-col items-center overflow-hidden p-8 sm:p-12">
