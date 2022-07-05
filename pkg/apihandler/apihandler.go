@@ -1247,71 +1247,127 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, buf *bytes.Buffer, flusher http.Flusher) {
-
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
-
+func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, buf *bytes.Buffer) ([]byte, error) {
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
 
+	if h.hooksConfig.preResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
+		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
+		if err != nil {
+			return nil, fmt.Errorf("LiveQueryHandler.PreResolve queries hook: %w", err)
+		}
+		if out != nil {
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
+		} else {
+			return nil, errors.New("LiveQueryHandler.PreResolve queries hook response is empty")
+		}
+	}
+
+	if h.hooksConfig.mutatingPreResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
+		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
+		if err != nil {
+			return nil, fmt.Errorf("LiveQueryHandler.mutatingPostResolve hook failed: %w", err)
+		}
+		ctx.Variables = out.Input
+		if out != nil {
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("LiveQueryHandler.MutatingPostResolve queries hook response is empty")
+		}
+	}
+
+	if h.hooksConfig.customResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
+		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
+		if err != nil {
+			return nil, fmt.Errorf("LiveQueryHandler.customResolve queries hook: %w", err)
+		}
+		if out != nil {
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
+		} else {
+			return nil, errors.New("LiveQueryHandler.CustomResolve queries hook response is empty")
+		}
+		if !bytes.Equal(out.Response, literal.NULL) {
+			return out.Response, nil
+		}
+	}
+
+	buf.Reset()
+	err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("LiveQueryHandler.ResolveGraphQLResponse queries hook: %w", err)
+	}
+
+	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
+	if err != nil {
+		return nil, fmt.Errorf("LiveQueryHandler.Transform: %w", err)
+	}
+	if h.hooksConfig.postResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
+		_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
+		if err != nil {
+			return nil, fmt.Errorf("LiveQueryHandler.PostResolve queries hook: %w", err)
+		}
+	}
+
+	if h.hooksConfig.mutatingPostResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
+		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
+		if err != nil {
+			h.log.Error("LiveQueryHandler.MutatingPostResolve queries hook", abstractlogger.Error(err))
+			return nil, fmt.Errorf("LiveQueryHandler.MutatingPostResolve queries hook: %w", err)
+		}
+		transformed = out.Response
+	}
+
+	return transformed, nil
+}
+
+func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, buf *bytes.Buffer, flusher http.Flusher) {
+	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
+	sse := r.URL.Query().Get("wg_sse") == "true"
+
 	done := ctx.Context.Done()
 	hash := xxhash.New()
+
 	var lastHash uint64
 	for {
-		buf.Reset()
-		err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
+		response, err := h.handleLiveQueryEvent(ctx, r, buf)
 		if err != nil {
-			if errors.Is(err, context.Canceled) {
-				return
-			}
-			h.log.Error("ResolveGraphQLResponse", abstractlogger.Error(err))
-			return
-		}
-		hash.Reset()
-		_, _ = hash.Write(buf.Bytes())
-		nextHash := hash.Sum64()
-		if nextHash != lastHash {
-			lastHash = nextHash
-			transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
-			if err != nil {
-				h.log.Error("QueryHandler.Transform failed", abstractlogger.Error(err))
-				return
-			}
-			if h.hooksConfig.postResolve {
-				hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-				_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-				if err != nil {
-					h.log.Error("PostResolve queries hook", abstractlogger.Error(err))
-				}
-			}
+			h.log.Error("LiveQueryHandler.handleLiveQueryEvent failed", abstractlogger.Error(err))
+			http.Error(w, "LiveQueryHandler hook failed", http.StatusInternalServerError)
+		} else {
+			hash.Reset()
+			_, _ = hash.Write(response)
+			nextHash := hash.Sum64()
 
-			if h.hooksConfig.mutatingPostResolve {
-				hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-				out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
-				if err != nil {
-					h.log.Error("MutatingPostResolve queries hook", abstractlogger.Error(err))
-					http.Error(w, "mutatingPostResolve hook failed", http.StatusInternalServerError)
+			// only send the response if the content has changed
+			if nextHash != lastHash {
+				lastHash = nextHash
+
+				reader := bytes.NewReader(response)
+				if sse {
+					_, _ = w.Write([]byte("data: "))
+				}
+				_, err := reader.WriteTo(w)
+				if subscribeOnce {
+					flusher.Flush()
 					return
 				}
-				transformed = out.Response
-			}
-			reader := bytes.NewReader(transformed)
-			if sse {
-				_, _ = w.Write([]byte("data: "))
-			}
-			_, err = reader.WriteTo(w)
-			if subscribeOnce {
+				_, err = w.Write(literal.LINETERMINATOR)
+				_, err = w.Write(literal.LINETERMINATOR)
+				if err != nil {
+					return
+				}
 				flusher.Flush()
-				return
 			}
-			_, err = w.Write(literal.LINETERMINATOR)
-			_, err = w.Write(literal.LINETERMINATOR)
-			if err != nil {
-				return
-			}
-			flusher.Flush()
 		}
+
 		select {
 		case <-done:
 			return

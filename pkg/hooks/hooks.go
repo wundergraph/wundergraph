@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/jensneuse/abstractlogger"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
@@ -116,12 +118,17 @@ const (
 type Client struct {
 	serverUrl  string
 	httpClient *retryablehttp.Client
+	log        abstractlogger.Logger
 }
 
-func NewClient(serverUrl string) *Client {
+func NewClient(serverUrl string, logger abstractlogger.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
 	httpClient.RetryMax = 5
 	httpClient.HTTPClient.Timeout = time.Minute * 1
+	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
+	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
+		logger.Debug("hook request call", abstractlogger.Int("attempt", attempt), abstractlogger.String("url", req.URL.String()))
+	}
 	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,

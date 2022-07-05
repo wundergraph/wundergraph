@@ -142,8 +142,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
 
-		log.Info("Shutting down WunderNode ...")
-
+		log.Info("Shutting down WunderNode with graceful period of 10s ...")
 		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
 

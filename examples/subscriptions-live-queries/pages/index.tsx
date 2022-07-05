@@ -1,19 +1,12 @@
 import { NextPage } from 'next';
-import { useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const user = useQuery.UserByEmail({
+	const country = useLiveQuery.FakeWeather({
 		input: {
-			email: 'jens@wundergraph.com',
+			forCity: 'Berlin',
 		},
 	});
-	const refresh = () => {
-		user.refetch({
-			input: {
-				email: 'jens@wundergraph.com',
-			},
-		});
-	};
 	return (
 		<div>
 			<div className="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32">
@@ -44,7 +37,7 @@ const Home: NextPage = () => {
 					</div>
 				</div>
 				<h1 className="text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-					Postgres & Next.js
+					WunderGraph & Next.js
 				</h1>
 				<p className="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400">
 					Use{' '}
@@ -53,7 +46,7 @@ const Home: NextPage = () => {
 							WunderGraph
 						</a>
 					</code>{' '}
-					to make your database accessible through JSON-RPC to your Next.js app.
+					to stream the result of operation through JSON-RPC over HTTP/2.
 				</p>
 			</div>
 			<div className="relative flex flex-col items-center overflow-hidden p-8 sm:p-12">
@@ -61,29 +54,10 @@ const Home: NextPage = () => {
 					<div className="mx-auto flex max-w-sm flex-col items-center">
 						<p className="mt-3 mb-8 text-center text-black/80">
 							This is the result of your{' '}
-							<code className="font-mono font-medium text-amber-500 font-bold">UserByEmail</code> operation.
+							<code className="font-mono font-medium text-amber-500 font-bold">FakeWeather</code> operation. The client
+							only updates when the data changes.
 						</p>
-						<code className="p-3">{JSON.stringify(user, null, 2)}</code>
-					</div>
-					<div className="flex justify-center mt-8">
-						<button
-							onClick={refresh}
-							className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
-						>
-							<svg
-								stroke="currentColor"
-								fill="currentColor"
-								stroke-width="0"
-								viewBox="0 0 24 24"
-								className="w-6 h-6 mr-2 -ml-1"
-								height="1em"
-								width="1em"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path d="M10 11H7.101l.001-.009a4.956 4.956 0 0 1 .752-1.787 5.054 5.054 0 0 1 2.2-1.811c.302-.128.617-.226.938-.291a5.078 5.078 0 0 1 2.018 0 4.978 4.978 0 0 1 2.525 1.361l1.416-1.412a7.036 7.036 0 0 0-2.224-1.501 6.921 6.921 0 0 0-1.315-.408 7.079 7.079 0 0 0-2.819 0 6.94 6.94 0 0 0-1.316.409 7.04 7.04 0 0 0-3.08 2.534 6.978 6.978 0 0 0-1.054 2.505c-.028.135-.043.273-.063.41H2l4 4 4-4zm4 2h2.899l-.001.008a4.976 4.976 0 0 1-2.103 3.138 4.943 4.943 0 0 1-1.787.752 5.073 5.073 0 0 1-2.017 0 4.956 4.956 0 0 1-1.787-.752 5.072 5.072 0 0 1-.74-.61L7.05 16.95a7.032 7.032 0 0 0 2.225 1.5c.424.18.867.317 1.315.408a7.07 7.07 0 0 0 2.818 0 7.031 7.031 0 0 0 4.395-2.945 6.974 6.974 0 0 0 1.053-2.503c.027-.135.043-.273.063-.41H22l-4-4-4 4z"></path>
-							</svg>
-							Refresh
-						</button>
+						<code className="p-3">{JSON.stringify(country, null, 2)}</code>
 					</div>
 				</div>
 				<footer className="flex justify-between text-gray-400">

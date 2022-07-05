@@ -19,7 +19,7 @@ const Home: NextPage = () => {
 							x="0px"
 							y="0px"
 							viewBox="0 0 1000 1000"
-							enable-background="new 0 0 1000 1000"
+							enableBackground="new 0 0 1000 1000"
 							xmlSpace="preserve"
 						>
 							<path
@@ -45,7 +45,7 @@ const Home: NextPage = () => {
 							WunderGraph
 						</a>
 					</code>{' '}
-					to make your database accessible through JSON-RPC to your Next.js app.
+					to make your data-source accessible through JSON-RPC to your Next.js app.
 				</p>
 			</div>
 			<div className="relative flex flex-col items-center overflow-hidden p-8 sm:p-12">
