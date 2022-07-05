@@ -1247,7 +1247,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, buf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
+func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
 	if h.hooksConfig.preResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
@@ -1291,8 +1291,8 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		}
 	}
 
-	buf.Reset()
-	err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
+	requestBuf.Reset()
+	err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, requestBuf)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return nil, err
@@ -1300,7 +1300,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		return nil, fmt.Errorf("LiveQueryHandler.ResolveGraphQLResponse queries hook: %w", err)
 	}
 
-	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
+	transformed, err := h.postResolveTransformer.Transform(requestBuf.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("LiveQueryHandler.Transform: %w", err)
 	}
@@ -1325,7 +1325,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 	return transformed, nil
 }
 
-func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, buf *bytes.Buffer, flusher http.Flusher) {
+func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher) {
 	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
 	sse := r.URL.Query().Get("wg_sse") == "true"
 
@@ -1337,7 +1337,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 
 	var lastHash uint64
 	for {
-		response, err := h.handleLiveQueryEvent(ctx, r, buf, hookBuf)
+		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
 		if err != nil {
 			h.log.Error("LiveQueryHandler.handleLiveQueryEvent failed", abstractlogger.Error(err))
 			http.Error(w, "LiveQueryHandler hook failed", http.StatusInternalServerError)
