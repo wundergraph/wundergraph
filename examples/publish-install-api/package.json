@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/node": "^14.14.37",
-    "@wundergraph/sdk": "^0.94.2",
+    "@wundergraph/sdk": "^0.94.4",
     "typescript": "^4.1.3"
   }
 }
