@@ -56,10 +56,12 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 ## Examples:
 
 - [Simple Starter](/examples/simple)
+- [NextJS](/examples/nextjs)
 - [FaunaDB Starter](/examples/faunadb-nextjs)
 - [PostgreSQL](/examples/postgres)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
+- [Cross API joins across data-sources](/examples/cross-api-joins)
 - [Publish & Install APIs](./examples/publish-install-api)
 
 ## The WunderGraph Stack
