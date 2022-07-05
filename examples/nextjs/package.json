@@ -1,15 +1,13 @@
 {
-  "name": "faunadb-starter",
+  "name": "nextjs-starter",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "wundergraph": "cd .wundergraph && wunderctl up -e ./../.env --debug",
-    "generate": "cd .wundergraph && wunderctl generate -e ./../.env --debug",
-    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
+    "wundergraph": "cd .wundergraph && wunderctl up --debug",
+    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "build": "next build",
-    "dev": "next dev --port 3003",
-    "wunderctl": "wunderctl"
+    "dev": "next dev"
   },
   "dependencies": {
     "@wundergraph/nextjs": "^0.0.31",
