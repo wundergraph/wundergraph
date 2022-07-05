@@ -1,11 +1,12 @@
 query Dragons {
-    dragons: public_dragons {
-        name
-        active
-        crewCapacity
-        posts {
-            id
-            title
-        }
-    }
+	dragons: public_dragons {
+		__typename
+		name
+		active
+		crewCapacity
+		posts {
+			id
+			title
+		}
+	}
 }

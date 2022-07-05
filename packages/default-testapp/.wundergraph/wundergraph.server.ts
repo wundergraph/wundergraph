@@ -39,23 +39,23 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				};
 			},
 		},
-		global: {
-			httpTransport: {
-				onOriginResponse: {
-					enableForAllOperations: true,
-					hook: async (hook) => {
-						console.log('########onResponse##########', hook.clientRequest);
-					},
-				},
-				onOriginRequest: {
-					enableForAllOperations: true,
-					hook: async (hook) => {
-						console.log('########onRequest##########', hook.clientRequest.method);
-					},
+		global: {},
+		queries: {
+			Demo: {
+				mockResolve: async () => {
+					return {
+						data: {
+							mgo_findManylistingsAndReviews: [
+								{
+									id: 'test',
+									name: 'test',
+									bedrooms: 5,
+								},
+							],
+						},
+					};
 				},
 			},
-		},
-		queries: {
 			Dragons: {
 				mutatingPostResolve: async (hook) => {
 					console.log('########mutatingPostResolve##########', hook.clientRequest.method);
@@ -90,6 +90,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 		{
 			apiNamespace: 'ibm_jsp',
 			serverName: 'ibm_jsp',
+			// @ts-ignore
 			schema: createGraphQLSchema([jsonPlaceholder]).then((r) => r.schema),
 		},
 		{

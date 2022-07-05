@@ -28,11 +28,11 @@ const introspectPrismaDatabase = async (
 	databaseSchema: DatabaseSchema
 ): Promise<PrismaDatabaseIntrospectionResult> => {
 	const id = hash({ databaseURL, databaseSchema });
-	const introspectionDir = path.join('generated', 'introspection');
+	const introspectionDir = path.join('generated', 'introspection', 'database');
 	if (!fs.existsSync(introspectionDir)) {
 		fs.mkdirSync(introspectionDir, { recursive: true });
 	}
-	const introspectionFilePath = path.join('generated', 'introspection', `${id}.json`);
+	const introspectionFilePath = path.join('generated', 'introspection', 'database', `${id}.json`);
 	const result = await wunderctlExecAsync({
 		cmd: ['introspect', databaseSchema, databaseURL, `--outfile=${introspectionFilePath}`, '--debug'],
 	});
