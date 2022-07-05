@@ -134,7 +134,7 @@
       },
       "Post": {
         "type": "object",
-        "required": ["id", "userId", "title", "completed"],
+        "required": ["id", "userId", "title"],
         "properties": {
           "id": {
             "type": "integer"
@@ -143,9 +143,6 @@
             "type": "integer"
           },
           "title": {
-            "type": "string"
-          },
-          "completed": {
             "type": "string"
           }
         }
