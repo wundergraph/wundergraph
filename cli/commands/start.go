@@ -13,7 +13,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
-	"github.com/wundergraph/wundergraph/pkg/helpers"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
@@ -40,7 +40,7 @@ If used without --exclude-server, make sure the server is available in this dire
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		if !helpers.FileExists(wunderGraphConfigFile) {
+		if !files.FileExists(wunderGraphConfigFile) {
 			log.Fatal(`could not find wundergraph.config.json. Either you didn't run the command inside .wundergraph directory or you forget to run "wunderctl generate" ?`,
 				abstractlogger.String("path", wunderGraphConfigFile),
 			)

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/wundergraph/wundergraph/pkg/helpers"
+	"github.com/wundergraph/wundergraph/pkg/files"
 
 	"github.com/spf13/viper"
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
@@ -142,7 +142,7 @@ func init() {
 
 	wgDefaultDir := "."
 
-	dir, err := helpers.FindDirectory(wd, ".wundergraph")
+	dir, err := files.FindDirectory(wd, ".wundergraph")
 	if err != nil {
 		log.Fatal("could not find .wundergraph directory from your current working directory", abstractlogger.String("wd", wd), abstractlogger.Error(err))
 	}
