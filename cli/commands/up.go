@@ -100,6 +100,7 @@ var upCmd = &cobra.Command{
 			ScriptArgs: []string{configOutFile},
 			Logger:     log,
 			ScriptEnv: append(os.Environ(),
+				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 			),
@@ -131,7 +132,7 @@ var upCmd = &cobra.Command{
 			Logger:     log,
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
-				fmt.Sprintf("WG_DATA_SOURCE_POLLING_MODE=true"),
+				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 			),

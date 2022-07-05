@@ -52,6 +52,7 @@ import * as https from 'https';
 import objectHash from 'object-hash';
 
 export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
+export const IntrospectionCacheEnabled = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
 
 export interface ApplicationConfig {
 	name: string;
@@ -618,7 +619,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 		// dismiss result here, we're not doing anything with it
 		return Promise.resolve({} as Api);
 	}
-	if (introspection.introspection?.disableCache === true) {
+	if (!IntrospectionCacheEnabled || introspection.introspection?.disableCache === true) {
 		return generator(introspection);
 	}
 	const cacheKey = objectHash(introspection);
