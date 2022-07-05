@@ -1247,10 +1247,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, buf *bytes.Buffer) ([]byte, error) {
-	hookBuf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(hookBuf)
-
+func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, buf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
 	if h.hooksConfig.preResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
@@ -1268,13 +1265,13 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("LiveQueryHandler.mutatingPostResolve hook failed: %w", err)
+			return nil, fmt.Errorf("LiveQueryHandler.MutatingPreResolve hook failed: %w", err)
 		}
 		ctx.Variables = out.Input
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("LiveQueryHandler.MutatingPostResolve queries hook response is empty")
+			h.log.Error("LiveQueryHandler.MutatingPreResolve queries hook response is empty")
 		}
 	}
 
@@ -1335,9 +1332,12 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	done := ctx.Context.Done()
 	hash := xxhash.New()
 
+	hookBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(hookBuf)
+
 	var lastHash uint64
 	for {
-		response, err := h.handleLiveQueryEvent(ctx, r, buf)
+		response, err := h.handleLiveQueryEvent(ctx, r, buf, hookBuf)
 		if err != nil {
 			h.log.Error("LiveQueryHandler.handleLiveQueryEvent failed", abstractlogger.Error(err))
 			http.Error(w, "LiveQueryHandler hook failed", http.StatusInternalServerError)

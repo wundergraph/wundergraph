@@ -8,7 +8,6 @@ import (
 	"path"
 	"path/filepath"
 	"syscall"
-	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -273,13 +272,9 @@ var upCmd = &cobra.Command{
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
 
-		log.Info("Shutting down WunderNode with graceful period of 10s ...")
-		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
-		defer cancel()
-
-		err = n.Shutdown(ctx)
+		err = n.Close()
 		if err != nil {
-			log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
+			log.Error("Error during WunderNode close", abstractlogger.Error(err))
 		}
 
 		log.Info("WunderNode shutdown complete")
