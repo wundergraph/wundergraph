@@ -30,7 +30,7 @@ type Bundler struct {
 	fileLoaders           []string
 	BuildDoneChan         chan struct{}
 	mu                    sync.Mutex
-	deferWatchUntilClose  chan struct{}
+	initialResult         api.BuildResult
 }
 
 type Config struct {
@@ -41,7 +41,6 @@ type Config struct {
 	WatchPaths            []string
 	IgnorePaths           []string
 	OutFile               string
-	DeferWatchUntilClose  chan struct{}
 }
 
 func NewBundler(config Config) *Bundler {
@@ -55,11 +54,41 @@ func NewBundler(config Config) *Bundler {
 		BuildDoneChan:         make(chan struct{}),
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
-		deferWatchUntilClose:  config.DeferWatchUntilClose,
 	}
 }
 
-func (b *Bundler) Bundle(ctx context.Context) {
+func (b *Bundler) Bundle() {
+	b.initialResult = b.initialBuild()
+	if len(b.initialResult.Errors) != 0 {
+		b.log.Fatal("Initial build failed",
+			abstractlogger.String("bundlerName", b.name),
+			abstractlogger.Any("errors", b.initialResult.Errors),
+		)
+	} else {
+		b.log.Debug("Initial build successful", abstractlogger.String("bundlerName", b.name))
+		b.BuildDoneChan <- struct{}{}
+	}
+}
+
+func (b *Bundler) Watch(ctx context.Context) {
+	if len(b.watchPaths) == 0 {
+		return
+	}
+	if b.initialResult.Rebuild == nil {
+		return
+	}
+	if len(b.watchPaths) > 0 {
+		b.log.Debug("Watching for file changes",
+			abstractlogger.String("bundlerName", b.name),
+			abstractlogger.String("outFile", b.outFile),
+			abstractlogger.Strings("externalImports", b.externalImports),
+			abstractlogger.Strings("fileLoaders", b.fileLoaders),
+		)
+		b.watch(ctx, b.initialResult.Rebuild)
+	}
+}
+
+func (b *Bundler) BundleAndWatch(ctx context.Context) {
 	result := b.initialBuild()
 	if len(result.Errors) != 0 {
 		b.log.Fatal("Initial build failed",
@@ -175,9 +204,6 @@ func (b *Bundler) initialBuild() api.BuildResult {
 }
 
 func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
-	if b.deferWatchUntilClose != nil {
-		<-b.deferWatchUntilClose
-	}
 	w := watcher.NewWatcher(b.name, &watcher.Config{
 		IgnorePaths: b.ignorePaths,
 		WatchPaths:  b.watchPaths,

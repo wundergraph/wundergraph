@@ -39,22 +39,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				};
 			},
 		},
-		global: {
-			httpTransport: {
-				onOriginResponse: {
-					enableForAllOperations: true,
-					hook: async (hook) => {
-						console.log('########onResponse##########', hook.clientRequest);
-					},
-				},
-				onOriginRequest: {
-					enableForAllOperations: true,
-					hook: async (hook) => {
-						console.log('########onRequest##########', hook.clientRequest.method);
-					},
-				},
-			},
-		},
+		global: {},
 		queries: {
 			Demo: {
 				mockResolve: async () => {

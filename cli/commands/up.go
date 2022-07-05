@@ -50,8 +50,6 @@ var upCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		deferWatchConfigBuilder := make(chan struct{})
-
 		log.Info("Starting WunderNode",
 			abstractlogger.String("version", BuildInfo.Version),
 			abstractlogger.String("commit", BuildInfo.Commit),
@@ -91,7 +89,6 @@ var upCmd = &cobra.Command{
 			IgnorePaths: []string{
 				"node_modules",
 			},
-			DeferWatchUntilClose: deferWatchConfigBuilder,
 		})
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
@@ -116,13 +113,14 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		go configBundler.Bundle(ctx)
+		go configBundler.Bundle()
 
 		<-configBundler.BuildDoneChan
 
 		<-configRunner.Run(ctx)
+
 		// only start watching in the builder once the initial config was built and written to the filesystem
-		close(deferWatchConfigBuilder)
+		go configBundler.Watch(ctx)
 
 		// responsible for executing the config in "polling" mode
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
@@ -235,7 +233,7 @@ var upCmd = &cobra.Command{
 				}
 			}()
 
-			hooksBundler.Bundle(ctx)
+			hooksBundler.BundleAndWatch(ctx)
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
 		}
