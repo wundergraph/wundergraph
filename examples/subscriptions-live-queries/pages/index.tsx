@@ -2,7 +2,7 @@ import { NextPage } from 'next';
 import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const country = useLiveQuery.FakeWeather({
+	const country = useLiveQuery.Weather({
 		input: {
 			forCity: 'Berlin',
 		},
@@ -53,9 +53,8 @@ const Home: NextPage = () => {
 				<div className="w-full max-w-xl rounded-2xl bg-blue-50 px-20 py-14">
 					<div className="mx-auto flex max-w-sm flex-col items-center">
 						<p className="mt-3 mb-8 text-center text-black/80">
-							This is the result of your{' '}
-							<code className="font-mono font-medium text-amber-500 font-bold">FakeWeather</code> operation. The client
-							only updates when the data changes.
+							This is the result of your <code className="font-mono font-medium text-amber-500 font-bold">Weather</code>{' '}
+							operation. The client only updates when the data changes.
 						</p>
 						<code className="p-3">{JSON.stringify(country, null, 2)}</code>
 					</div>
