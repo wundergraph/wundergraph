@@ -21,11 +21,12 @@ import (
 )
 
 var (
-	wunderGraphConfigFile string
-	listenAddr            string
-	middlewareListenPort  int
-	entryPoint            string
-	serverEntryPoint      string
+	wunderGraphConfigFile   string
+	listenAddr              string
+	middlewareListenPort    int
+	entryPoint              string
+	serverEntryPoint        string
+	clearIntrospectionCache bool
 )
 
 // upCmd represents the up command
@@ -57,6 +58,23 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
+		introspectionCacheDir := path.Join(wundergraphDir, "generated", "introspection", "cache")
+		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
+		if errIntrospectionDir == nil {
+			if clearIntrospectionCache {
+				err = os.RemoveAll(introspectionCacheDir)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		err = os.MkdirAll(introspectionCacheDir, os.ModePerm)
+		if err != nil {
+			return err
+		}
+
+		configJsonPath := path.Join(wundergraphDir, "generated", "wundergraph.config.json")
+
 		configOutFile := path.Join(wundergraphDir, "generated", "bundle", "config.js")
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:       "config-bundler",
@@ -65,9 +83,11 @@ var upCmd = &cobra.Command{
 			Logger:     log,
 			WatchPaths: []string{
 				path.Join(wundergraphDir, "operations"),
+				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
+				// in that case we want to rerun the script to build a new config
+				introspectionCacheDir,
 			},
 			IgnorePaths: []string{
-				"generated",
 				"node_modules",
 			},
 		})
@@ -78,6 +98,7 @@ var upCmd = &cobra.Command{
 			ScriptArgs: []string{configOutFile},
 			Logger:     log,
 			ScriptEnv: append(os.Environ(),
+				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 			),
@@ -93,16 +114,37 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		go configBundler.Bundle(ctx)
+		go configBundler.Bundle()
 
 		<-configBundler.BuildDoneChan
 
 		<-configRunner.Run(ctx)
 
+		// only start watching in the builder once the initial config was built and written to the filesystem
+		go configBundler.Watch(ctx)
+
+		// responsible for executing the config in "polling" mode
+		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+			Name:       "config-introspection-runner",
+			Executable: "node",
+			ScriptArgs: []string{configOutFile},
+			Logger:     log,
+			ScriptEnv: append(os.Environ(),
+				// this environment variable starts the config runner in "Polling Mode"
+				"WG_DATA_SOURCE_POLLING_MODE=true",
+				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			),
+		})
+
+		go func() {
+			<-configIntrospectionRunner.Run(ctx)
+		}()
+
 		configFileChangeChan := make(chan struct{})
 		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []string{
-				filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
+				configJsonPath,
 			},
 		}, log)
 
@@ -124,7 +166,14 @@ var upCmd = &cobra.Command{
 				select {
 				case <-configBundler.BuildDoneChan:
 					log.Debug("Configuration change detected")
+					// re-run the regular config runner
 					<-configRunner.Run(ctx)
+					// stop the introspection poller
+					_ = configIntrospectionRunner.Stop()
+					go func() {
+						// re-start the introspection poller
+						<-configIntrospectionRunner.Run(ctx)
+					}()
 				}
 			}
 		}()
@@ -137,9 +186,7 @@ var upCmd = &cobra.Command{
 				OutFile:               serverOutFile,
 				SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
 				Logger:                log,
-				WatchPaths: []string{
-					filepath.Join(wundergraphDir, "generated", "wundergraph.config.json"),
-				},
+				WatchPaths:            []string{configJsonPath},
 			})
 
 			wd, err := os.Getwd()
@@ -187,7 +234,7 @@ var upCmd = &cobra.Command{
 				}
 			}()
 
-			hooksBundler.Bundle(ctx)
+			hooksBundler.BundleAndWatch(ctx)
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
 		}
@@ -245,6 +292,7 @@ func init() {
 	rootCmd.AddCommand(upCmd)
 	upCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
 	upCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
+	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
 	upCmd.Flags().StringVar(&entryPoint, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
 	upCmd.Flags().StringVar(&serverEntryPoint, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
 }

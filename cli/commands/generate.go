@@ -58,7 +58,7 @@ Use this command if you only want to generate the configuration`,
 			}
 		}()
 
-		go configBundler.Bundle(ctx)
+		go configBundler.BundleAndWatch(ctx)
 
 		<-configBundler.BuildDoneChan
 
@@ -74,7 +74,7 @@ Use this command if you only want to generate the configuration`,
 				WatchPaths: []string{},
 			})
 
-			go hooksBundler.Bundle(ctx)
+			go hooksBundler.BundleAndWatch(ctx)
 
 			<-hooksBundler.BuildDoneChan
 		} else {
