@@ -6,6 +6,7 @@ import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { template } from './web.client.template';
 import { listenAddrHttp } from '../../../env';
+import { hasInjectedInput, hasInternalInput, hasInput } from './react';
 
 export class TypeScriptWebClient implements Template {
 	constructor(reactNative?: boolean) {
@@ -58,24 +59,26 @@ const filteredOperations = (application: ResolvedApplication, includeInternal: b
 export const operations = (application: ResolvedApplication, operationType: OperationType, includeInternal: boolean) =>
 	filteredOperations(application, includeInternal)
 		.filter((op) => op.OperationType === operationType)
-		.map((op) => ({
-			operationName: op.Name,
-			path: op.Name,
-			hasInput: op.VariablesSchema.properties && Object.keys(op.VariablesSchema.properties).length !== 0,
-			hasInternalInput:
-				op.InjectedVariablesSchema.properties && Object.keys(op.InjectedVariablesSchema.properties).length !== 0,
-		}));
+		.map((op) => {
+			return {
+				operationName: op.Name,
+				path: op.Name,
+				hasInput: hasInput(op),
+				hasInternalInput: hasInternalInput(op),
+			};
+		});
 
 export const liveQueries = (application: ResolvedApplication, includeInternal: boolean) =>
 	filteredOperations(application, includeInternal)
 		.filter((op) => op.OperationType === OperationType.QUERY && op.LiveQuery && op.LiveQuery.enable)
-		.map((op) => ({
-			operationName: op.Name,
-			path: op.Name,
-			hasInput: op.VariablesSchema.properties && Object.keys(op.VariablesSchema.properties).length !== 0,
-			hasInternalInput:
-				op.InjectedVariablesSchema.properties && Object.keys(op.InjectedVariablesSchema.properties).length !== 0,
-		}));
+		.map((op) => {
+			return {
+				operationName: op.Name,
+				path: op.Name,
+				hasInput: hasInput(op),
+				hasInternalInput: hasInternalInput(op),
+			};
+		});
 
 export const modelImports = (
 	application: ResolvedApplication,
@@ -85,21 +88,13 @@ export const modelImports = (
 	return filteredOperations(application, includeInternal)
 		.map((op) => {
 			let out = `${op.Name}Response`;
-			if (op.VariablesSchema.properties && Object.keys(op.VariablesSchema.properties).length !== 0) {
+			if (hasInput(op)) {
 				out += `,${op.Name}Input`;
 			}
-			if (
-				includeInternal &&
-				op.InternalVariablesSchema.properties &&
-				Object.keys(op.InternalVariablesSchema.properties).length !== 0
-			) {
+			if (includeInternal && hasInternalInput(op)) {
 				out += `,Internal${op.Name}Input`;
 			}
-			if (
-				includeInternal &&
-				op.InjectedVariablesSchema.properties &&
-				Object.keys(op.InjectedVariablesSchema.properties).length !== 0
-			) {
+			if (includeInternal && hasInjectedInput(op)) {
 				out += `,Injected${op.Name}Input`;
 			}
 			if (includeResponseData === true) {
