@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-	"github.com/wundergraph/wundergraph/pkg/helpers"
+	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
 var configDir string
@@ -44,7 +44,7 @@ func initConfigDir() error {
 
 	dir := filepath.Join(homeDir, ".wundergraph")
 
-	if !helpers.DirectoryExists(dir) {
+	if !files.DirectoryExists(dir) {
 		if err := os.MkdirAll(dir, 0700); err != nil {
 			return err
 		}
