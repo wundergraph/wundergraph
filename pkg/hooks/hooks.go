@@ -123,7 +123,11 @@ type Client struct {
 
 func NewClient(serverUrl string, logger abstractlogger.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
-	httpClient.RetryMax = 5
+	// retry timeout is a power of 2, use 3 to have a reasonable timeout of 6 seconds
+	// INFO: retryablehttp also handles retry-after headers
+	httpClient.RetryMax = 3
+	httpClient.RetryWaitMin = time.Second * 1
+	httpClient.RetryWaitMax = time.Second * 30
 	httpClient.HTTPClient.Timeout = time.Minute * 1
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
 	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
@@ -173,7 +177,7 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("middleware hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("middleware hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)

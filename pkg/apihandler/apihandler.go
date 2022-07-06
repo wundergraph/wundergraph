@@ -23,6 +23,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-uuid"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
+	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
@@ -1279,7 +1280,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("LiveQueryHandler.customResolve queries hook: %w", err)
+			return nil, fmt.Errorf("LiveQueryHandler.CustomResolve queries hook: %w", err)
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
@@ -1337,35 +1338,56 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 
 	var lastHash uint64
 	for {
+		var hookError bool
 		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
 		if err != nil {
+			hookError = true
 			h.log.Error("LiveQueryHandler.handleLiveQueryEvent failed", abstractlogger.Error(err))
-			http.Error(w, "LiveQueryHandler hook failed", http.StatusInternalServerError)
-		} else {
-			hash.Reset()
-			_, _ = hash.Write(response)
-			nextHash := hash.Sum64()
-
-			// only send the response if the content has changed
-			if nextHash != lastHash {
-				lastHash = nextHash
-
-				reader := bytes.NewReader(response)
-				if sse {
-					_, _ = w.Write([]byte("data: "))
-				}
-				_, err := reader.WriteTo(w)
-				if subscribeOnce {
-					flusher.Flush()
-					return
-				}
-				_, err = w.Write(literal.LINETERMINATOR)
-				_, err = w.Write(literal.LINETERMINATOR)
-				if err != nil {
-					return
-				}
-				flusher.Flush()
+			graphqlError := graphql.Response{
+				Errors: graphql.RequestErrors{
+					graphql.RequestError{
+						Message: err.Error(),
+					},
+				},
 			}
+			graphqlErrorPayload, marshalErr := graphqlError.Marshal()
+			if marshalErr != nil {
+				h.log.Error("LiveQueryHandler.handleLiveQueryEvent could not marshal graphql error", abstractlogger.Error(marshalErr))
+			} else {
+				response = graphqlErrorPayload
+			}
+		}
+
+		hash.Reset()
+		_, _ = hash.Write(response)
+		nextHash := hash.Sum64()
+
+		// only send the response if the content has changed
+		if nextHash != lastHash {
+			lastHash = nextHash
+
+			reader := bytes.NewReader(response)
+			if sse {
+				_, _ = w.Write([]byte("data: "))
+			}
+			_, err := reader.WriteTo(w)
+			if subscribeOnce {
+				flusher.Flush()
+				return
+			}
+			_, err = w.Write(literal.LINETERMINATOR)
+			_, err = w.Write(literal.LINETERMINATOR)
+			if err != nil {
+				return
+			}
+			flusher.Flush()
+		}
+
+		// After hook error we return the graphql compatible error to the client
+		// and abort the stream
+		if hookError {
+			h.log.Error("LiveQueryHandler.handleLiveQueryEvent cancel due to hook error", abstractlogger.Error(err))
+			return
 		}
 
 		select {
