@@ -13,6 +13,9 @@ import { integrations } from './generated/wundergraph.integrations';
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://api.spacex.land/graphql/',
+	introspection: {
+		pollingIntervalSeconds: 5,
+	},
 });
 
 const jsp = introspect.openApi({
@@ -20,6 +23,9 @@ const jsp = introspect.openApi({
 	source: {
 		kind: 'file',
 		filePath: '../json_placeholder.json',
+	},
+	introspection: {
+		pollingIntervalSeconds: 2,
 	},
 });
 
