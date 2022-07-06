@@ -24,6 +24,7 @@ var (
 	excludeServer              bool
 	disableForceHttpsRedirects bool
 	enableIntrospection        bool
+	gracefulTimeout            int
 )
 
 // startCmd represents the start command
@@ -142,9 +143,9 @@ If used without --exclude-server, make sure the server is available in this dire
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 		}
 
-		log.Info("Shutting down WunderNode ...")
-
-		ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
+		gracefulTimeoutDur := time.Duration(gracefulTimeout) * time.Second
+		log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
+		ctx, cancel = context.WithTimeout(ctx, gracefulTimeoutDur)
 		defer cancel()
 
 		err = n.Shutdown(ctx)
@@ -160,8 +161,9 @@ If used without --exclude-server, make sure the server is available in this dire
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
+	startCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen-addr is the host:port combination, WunderGraph should listen on.")
 	startCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
+	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", 10, "graceful-timeout is the time in seconds the server has to graceful shutdown")
 	startCmd.Flags().StringVar(&startServerEntryPoint, "server-entrypoint", "", "entrypoint to start the server")
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")

@@ -47,7 +47,7 @@ export const
 
 export const withWunderGraph = hooks.withWunderGraphContextWrapper(WunderGraphContext,defaultWunderGraphContextProperties);
 
-export const useWunderGraph = hooks.useWunderGraph<Role,AuthProvider,S3Provider>(WunderGraphContext);
+export const useWunderGraph = hooks.useWunderGraph<Role,AuthProvider,keyof S3Provider>(WunderGraphContext);
         
 export const useQuery = {
 {{#each queriesWithInput}}

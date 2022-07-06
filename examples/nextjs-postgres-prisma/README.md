@@ -2,6 +2,10 @@
 
 This example demonstrates how to use WunderGraph with Next.js & Postgres. We are going to make your database accessible through JSON-RPC to your Next.js app.
 
+This example also make use of Subscriptions & Live Queries.
+Subscriptions and Live Queries are a fundamental feature to build modern, reactive applications.
+WunderGraph supports GraphQL Subscriptions and Live Queries (via server-side polling) out of the box, no additional configuration is required.
+
 ## Getting Started
 
 Install the dependencies and run the complete example in one command:
