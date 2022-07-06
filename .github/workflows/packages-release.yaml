@@ -39,7 +39,7 @@ jobs:
           pnpm install --ignore-scripts
           pnpm run patch
 
-      - run: pnpm build
+      - run: pnpm build:libs
 
       - name: Publish packages & Create Github Releases
         run: |
@@ -70,7 +70,7 @@ jobs:
 
       - run: pnpm install --ignore-scripts
 
-      - run: pnpm build
+      - run: pnpm build:libs
 
       - name: Publish packages & Create Github Releases
         run: |

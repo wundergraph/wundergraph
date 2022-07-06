@@ -147,6 +147,8 @@ var upCmd = &cobra.Command{
 			},
 		}, log)
 
+		var hooksBundler *bundler.Bundler
+
 		go func() {
 			err := configWatcher.Watch(ctx, func(paths []string) error {
 				configFileChangeChan <- struct{}{}
@@ -160,27 +162,10 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		go func() {
-			for {
-				select {
-				case <-configBundler.BuildDoneChan:
-					log.Debug("Configuration change detected")
-					// re-run the regular config runner
-					<-configRunner.Run(ctx)
-					// stop the introspection poller
-					_ = configIntrospectionRunner.Stop()
-					go func() {
-						// re-start the introspection poller
-						<-configIntrospectionRunner.Run(ctx)
-					}()
-				}
-			}
-		}()
-
 		if _, err := os.Stat(serverEntryPoint); err == nil {
 			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
-			hooksBundler := bundler.NewBundler(bundler.Config{
-				Name:                  "server-bundler",
+			hooksBundler = bundler.NewBundler(bundler.Config{
+				Name:                  "hooks-bundler",
 				EntryPoint:            serverEntryPoint,
 				OutFile:               serverOutFile,
 				SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
@@ -237,6 +222,31 @@ var upCmd = &cobra.Command{
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
 		}
+
+		go func() {
+			for {
+				select {
+				case <-configBundler.BuildDoneChan:
+					log.Debug("Configuration change detected")
+					// re-run the regular config runner
+					<-configRunner.Run(ctx)
+
+					// rebuild the hooks server
+					// the script is already restarted by the select statement
+					// in the <-hooksBundler.BuildDoneChan case
+					if hooksBundler != nil {
+						hooksBundler.Bundle()
+					}
+
+					// stop the introspection poller
+					_ = configIntrospectionRunner.Stop()
+					go func() {
+						// re-start the introspection poller
+						<-configIntrospectionRunner.Run(ctx)
+					}()
+				}
+			}
+		}()
 
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{

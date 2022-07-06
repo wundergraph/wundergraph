@@ -29,7 +29,7 @@ export interface InternalClient extends Operations {
 const hooksToken = `Bearer ${process.env.HOOKS_TOKEN}`;
 
 export interface InternalClientFactory {
-	(extraHeaders?: { [p: string]: string } | undefined, clientRequest?: any): InternalClient;
+	(extraHeaders?: { [p: string]: string } | undefined, clientRequest?: ClientRequest): InternalClient;
 }
 
 // internalClientFactory is a factory function that creates an internal client.

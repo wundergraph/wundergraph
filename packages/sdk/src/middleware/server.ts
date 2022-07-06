@@ -49,8 +49,6 @@ export interface ClientRequest<H = ClientRequestHeaders> {
 	headers: H;
 }
 
-interface OriginalClientRequest extends ClientRequest<HeadersObject> {}
-
 export interface WunderGraphRequest {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 	requestURI: string;
@@ -193,19 +191,19 @@ export const startServer = async (
 ) => {
 	fastify.decorateRequest('ctx', null);
 
-	fastify.addHook<{ Body: { __wg: { user: WunderGraphUser; clientRequest?: OriginalClientRequest } } }>(
+	fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
 		'preHandler',
 		async (req, reply) => {
 			req.ctx = {
 				log: req.log.child({ plugin: 'hooks' }),
-				user: req.body.__wg.user,
+				user: req.body.__wg?.user,
 				// clientRequest represents the original client request that was sent initially to the server.
 				clientRequest: {
 					headers: new Headers(req.body.__wg.clientRequest?.headers),
-					requestURI: req.body.__wg.clientRequest?.requestURI || '',
-					method: req.body.__wg.clientRequest?.method || 'GET',
+					requestURI: req.body.__wg?.clientRequest?.requestURI || '',
+					method: req.body.__wg?.clientRequest?.method || 'GET',
 				},
-				internalClient: clientFactory({}, req.body.__wg.clientRequest),
+				internalClient: clientFactory({}, req.body.__wg?.clientRequest),
 			};
 		}
 	);

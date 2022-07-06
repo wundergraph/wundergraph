@@ -192,6 +192,11 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 
 	requestBody := buf.Bytes()
 
+	requestBody, err = jsonparser.Set(requestBody, []byte("{}"), "__wg")
+	if err != nil {
+		return nil, err
+	}
+
 	if user != nil {
 		userData, err := json.Marshal(*user)
 		if err != nil {
