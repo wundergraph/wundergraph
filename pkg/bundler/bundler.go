@@ -28,9 +28,9 @@ type Bundler struct {
 	outFile               string
 	externalImports       []string
 	fileLoaders           []string
-	BuildDoneChan         chan struct{}
 	mu                    sync.Mutex
 	buildResult           *api.BuildResult
+	onAfter               func()
 }
 
 type Config struct {
@@ -41,6 +41,7 @@ type Config struct {
 	WatchPaths            []string
 	IgnorePaths           []string
 	OutFile               string
+	OnAfter               func()
 }
 
 func NewBundler(config Config) *Bundler {
@@ -51,7 +52,7 @@ func NewBundler(config Config) *Bundler {
 		watchPaths:            config.WatchPaths,
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
-		BuildDoneChan:         make(chan struct{}),
+		onAfter:               config.OnAfter,
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
 	}
@@ -81,7 +82,9 @@ func (b *Bundler) Bundle() {
 		}
 		b.log.Debug("Initial Build successful", abstractlogger.String("bundlerName", b.name))
 	}
-	b.BuildDoneChan <- struct{}{}
+	if b.onAfter != nil {
+		b.onAfter()
+	}
 }
 
 func (b *Bundler) Watch(ctx context.Context) {
@@ -216,11 +219,12 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 	}, b.log)
 
 	go func() {
-		defer close(b.BuildDoneChan)
 		err := w.Watch(ctx, func(paths []string) error {
 			result := rebuild()
 			if len(result.Errors) == 0 {
-				b.BuildDoneChan <- struct{}{}
+				if b.onAfter != nil {
+					b.onAfter()
+				}
 			} else {
 				for _, message := range result.Errors {
 					b.log.Error("Bundler build error",

@@ -42,6 +42,11 @@ var upCmd = &cobra.Command{
 		quit := make(chan os.Signal, 2)
 		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal("Could not get your current working directory")
+		}
+
 		hooksJWT, err := apihandler.CreateHooksJWT(secret)
 		if err != nil {
 			return err
@@ -73,23 +78,8 @@ var upCmd = &cobra.Command{
 		}
 
 		configJsonPath := path.Join(wundergraphDir, "generated", "wundergraph.config.json")
-
 		configOutFile := path.Join(wundergraphDir, "generated", "bundle", "config.js")
-		configBundler := bundler.NewBundler(bundler.Config{
-			Name:       "config-bundler",
-			EntryPoint: entryPoint,
-			OutFile:    configOutFile,
-			Logger:     log,
-			WatchPaths: []string{
-				path.Join(wundergraphDir, "operations"),
-				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
-				// in that case we want to rerun the script to build a new config
-				introspectionCacheDir,
-			},
-			IgnorePaths: []string{
-				"node_modules",
-			},
-		})
+		serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:       "config-runner",
@@ -113,15 +103,6 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		go configBundler.Bundle()
-
-		<-configBundler.BuildDoneChan
-
-		<-configRunner.Run(ctx)
-
-		// only start watching in the builder once the initial config was built and written to the filesystem
-		go configBundler.Watch(ctx)
-
 		// responsible for executing the config in "polling" mode
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:       "config-introspection-runner",
@@ -140,43 +121,16 @@ var upCmd = &cobra.Command{
 			<-configIntrospectionRunner.Run(ctx)
 		}()
 
-		configFileChangeChan := make(chan struct{})
-		configWatcher := watcher.NewWatcher("config", &watcher.Config{
-			WatchPaths: []string{
-				configJsonPath,
-			},
-		}, log)
-
-		var hooksBundler *bundler.Bundler
-
-		go func() {
-			err := configWatcher.Watch(ctx, func(paths []string) error {
-				configFileChangeChan <- struct{}{}
-				return nil
-			})
-			if err != nil {
-				log.Error("watcher",
-					abstractlogger.String("watcher", "wundergraph config"),
-					abstractlogger.Error(err),
-				)
-			}
-		}()
+		var onAfterBuild func()
 
 		if _, err := os.Stat(serverEntryPoint); err == nil {
-			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
-			hooksBundler = bundler.NewBundler(bundler.Config{
-				Name:                  "hooks-bundler",
-				EntryPoint:            serverEntryPoint,
-				OutFile:               serverOutFile,
-				SkipWatchOnEntryPoint: true, // the config bundle is already listening on all import paths
-				Logger:                log,
-				WatchPaths:            []string{configJsonPath},
+			hooksBundler := bundler.NewBundler(bundler.Config{
+				Name:       "hooks-bundler",
+				EntryPoint: serverEntryPoint,
+				OutFile:    serverOutFile,
+				Logger:     log,
+				WatchPaths: []string{configJsonPath},
 			})
-
-			wd, err := os.Getwd()
-			if err != nil {
-				log.Fatal("Could not get your current working directory")
-			}
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
@@ -197,54 +151,67 @@ var upCmd = &cobra.Command{
 				Logger:     log,
 				ScriptEnv:  append(os.Environ(), hooksEnv...),
 			})
-			defer func() {
-				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
-				err := hookServerRunner.Stop()
-				if err != nil {
-					log.Error("Stopping runner failed",
-						abstractlogger.String("runnerName", "hooks-server-runner"),
-						abstractlogger.Error(err),
-					)
-				}
-			}()
 
-			go func() {
-				for {
-					select {
-					case <-hooksBundler.BuildDoneChan:
-						log.Debug("Hook server change detected -> (re-)configuring server\n")
-						hookServerRunner.Run(ctx)
-					}
-				}
-			}()
+			onAfterBuild = func() {
+				log.Debug("Configuration change detected")
+				// generate new config
+				<-configRunner.Run(ctx)
 
-			hooksBundler.BundleAndWatch(ctx)
+				// bundle server
+				hooksBundler.Bundle()
+				go func() {
+					// run or restart server
+					hookServerRunner.Run(ctx)
+				}()
+
+				go func() {
+					// run or restart the introspection poller
+					<-configIntrospectionRunner.Run(ctx)
+				}()
+			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", serverEntryPoint)
 		}
 
+		configBundler := bundler.NewBundler(bundler.Config{
+			Name:       "config-bundler",
+			EntryPoint: entryPoint,
+			OutFile:    configOutFile,
+			Logger:     log,
+			WatchPaths: []string{
+				path.Join(wundergraphDir, "operations"),
+				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
+				// in that case we want to rerun the script to build a new config
+				introspectionCacheDir,
+			},
+			IgnorePaths: []string{
+				"node_modules",
+			},
+			OnAfter: onAfterBuild,
+		})
+
+		configBundler.Bundle()
+
+		// only start watching in the builder once the initial config was built and written to the filesystem
+		go configBundler.Watch(ctx)
+
+		configFileChangeChan := make(chan struct{})
+		configWatcher := watcher.NewWatcher("config", &watcher.Config{
+			WatchPaths: []string{
+				configJsonPath,
+			},
+		}, log)
+
 		go func() {
-			for {
-				select {
-				case <-configBundler.BuildDoneChan:
-					log.Debug("Configuration change detected")
-					// re-run the regular config runner
-					<-configRunner.Run(ctx)
-
-					// rebuild the hooks server
-					// the script is already restarted by the select statement
-					// in the <-hooksBundler.BuildDoneChan case
-					if hooksBundler != nil {
-						hooksBundler.Bundle()
-					}
-
-					// stop the introspection poller
-					_ = configIntrospectionRunner.Stop()
-					go func() {
-						// re-start the introspection poller
-						<-configIntrospectionRunner.Run(ctx)
-					}()
-				}
+			err := configWatcher.Watch(ctx, func(paths []string) error {
+				configFileChangeChan <- struct{}{}
+				return nil
+			})
+			if err != nil {
+				log.Error("watcher",
+					abstractlogger.String("watcher", "wundergraph config"),
+					abstractlogger.Error(err),
+				)
 			}
 		}()
 
