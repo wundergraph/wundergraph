@@ -92,16 +92,6 @@ var upCmd = &cobra.Command{
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
 			),
 		})
-		defer func() {
-			log.Debug("Stopping config-runner after WunderNode shutdown")
-			err := configRunner.Stop()
-			if err != nil {
-				log.Error("Stopping runner failed",
-					abstractlogger.String("runnerName", "config-runner"),
-					abstractlogger.Error(err),
-				)
-			}
-		}()
 
 		// responsible for executing the config in "polling" mode
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
@@ -117,10 +107,7 @@ var upCmd = &cobra.Command{
 			),
 		})
 
-		go func() {
-			<-configIntrospectionRunner.Run(ctx)
-		}()
-
+		var hookServerRunner *scriptrunner.ScriptRunner
 		var onAfterBuild func()
 
 		if _, err := os.Stat(serverEntryPoint); err == nil {
@@ -144,7 +131,7 @@ var upCmd = &cobra.Command{
 				hooksEnv = append(hooksEnv, "LOG_LEVEL=debug")
 			}
 
-			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
+			hookServerRunner = scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:       "hooks-server-runner",
 				Executable: "node",
 				ScriptArgs: []string{serverOutFile},
@@ -161,7 +148,7 @@ var upCmd = &cobra.Command{
 				hooksBundler.Bundle()
 				go func() {
 					// run or restart server
-					hookServerRunner.Run(ctx)
+					<-hookServerRunner.Run(ctx)
 				}()
 
 				go func() {
@@ -245,8 +232,18 @@ var upCmd = &cobra.Command{
 			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...",
 				abstractlogger.String("signal", signal.String()),
 			)
+			configRunner.Stop()
+			configIntrospectionRunner.Stop()
+			if hookServerRunner != nil {
+				hookServerRunner.Stop()
+			}
 		case <-ctx.Done():
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+			configRunner.Stop()
+			configIntrospectionRunner.Stop()
+			if hookServerRunner != nil {
+				hookServerRunner.Stop()
+			}
 		}
 
 		err = n.Close()
