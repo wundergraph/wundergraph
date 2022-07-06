@@ -163,11 +163,18 @@ export class GolangModelsBase implements Template {
 }
 
 export class GolangClient implements Template {
+	constructor({ packageName }: { packageName: string } = { packageName: 'client' }) {
+		this.packageName = packageName;
+	}
+
+	private readonly packageName: string;
+
 	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		return Promise.resolve([
 			{
 				path: 'client.go',
 				content: '',
+				header: golangHeader(this.packageName),
 			},
 		]);
 	}
@@ -185,39 +192,57 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 				if (withErrors) {
 					out += `\terrors []GraphQLError \`json:"errors"\``;
 				}
-				out += '}\n';
+				out += '\n}\n';
 			},
 		},
 		number: (name, isRequired, isArray) => {
-			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}float64 \`json:"${name}"\`\n`;
+			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${
+				isRequired ? '' : '*'
+			}float64 \`json:"${name},omitempty"\`\n`;
 		},
 		array: {
 			enter: (name, isRequired, isArray) => {
 				out += `\t${capitalize(name)}`;
 			},
-			leave: (name, isRequired, isArray) => {},
+			leave: (name, isRequired, isArray) => {
+				if (name) {
+					out += `\`json:"${name},omitempty"\` `;
+				}
+			},
 		},
 		string: (name, isRequired, isArray, enumValues) => {
-			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}string \`json:"${name}"\`\n`;
+			if (isArray) {
+				out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}string `;
+			} else {
+				out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${
+					isRequired ? '' : '*'
+				}string \`json:"${name},omitempty"\`\n`;
+			}
 		},
 		object: {
 			enter: (name, isRequired, isArray) => {
 				out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}struct {\n`;
 			},
 			leave: (name, isRequired, isArray) => {
-				out += `\t} \`json:"${name}"\`\n`;
+				if (isArray) {
+					out += ' } ';
+					return;
+				}
+				out += `\t} \`json:"${name},omitempty"\`\n`;
 			},
 		},
 		boolean: (name, isRequired, isArray) => {
-			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}bool \`json:"${name}"\`\n`;
+			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}bool \`json:"${name},omitempty"\`\n`;
 		},
 		any: (name, isRequired, isArray) => {
-			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${isRequired ? '' : '*'}interface{} \`json:"${name}"\`\n`;
+			out += `\t${capitalize(name)} ${isArray ? '[]' : ''}${
+				isRequired ? '' : '*'
+			}interface{} \`json:"${name},omitempty"\`\n`;
 		},
 		customType: (name, typeName, isRequired, isArray) => {
 			out += `\t${capitalize(name)} ${isArray ? '[]' : ''} ${isRequired ? '' : '*'}${capitalize(
 				typeName
-			)} \`json:"${name}"\`\n`;
+			)} \`json:"${name},omitempty"\`\n`;
 		},
 	});
 	return out;
