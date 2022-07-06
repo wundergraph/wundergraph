@@ -61,7 +61,9 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [PostgreSQL](/examples/postgres)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
+- [Subscriptions & Live Queries](./examples/nextjs-postgres-prisma)
 - [Cross API joins across data-sources](/examples/cross-api-joins)
+- [Inject a Bearer Token with Auth0](./examples/inject-bearer)
 - [Publish & Install APIs](./examples/publish-install-api)
 
 ## The WunderGraph Stack

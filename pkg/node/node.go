@@ -312,7 +312,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			TLSHandshakeTimeout: 10 * time.Second,
 		}
 
-		hooksClient := hooks.NewClient("http://127.0.0.1:9992")
+		hooksClient := hooks.NewClient("http://127.0.0.1:9992", n.log)
 
 		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
 
