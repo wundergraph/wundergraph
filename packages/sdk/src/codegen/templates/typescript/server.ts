@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
@@ -16,7 +16,7 @@ export class WunderGraphServer implements Template {
 			{
 				path: 'wundergraph.server.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

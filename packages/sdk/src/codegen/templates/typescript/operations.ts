@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
@@ -21,7 +21,7 @@ export class Operations implements Template {
 			{
 				path: 'wundergraph.operations.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

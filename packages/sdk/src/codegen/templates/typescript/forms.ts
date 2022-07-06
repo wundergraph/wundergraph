@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
@@ -78,7 +78,7 @@ export class Forms implements Template {
 			{
 				path: 'forms.tsx',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
