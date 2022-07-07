@@ -31,6 +31,7 @@ importers:
   packages/default-testapp:
     specifiers:
       '@types/node': ^14.14.37
+      '@wundergraph/golang-client': workspace:*
       '@wundergraph/sdk': workspace:*
       graphql: ^16.3.0
       openapi-to-graphql: ^2.2.5
@@ -39,6 +40,7 @@ importers:
       typescript: ^4.1.3
     dependencies:
       '@types/node': 14.18.16
+      '@wundergraph/golang-client': file:packages/golang-client_@wundergraph+sdk@0.94.4
       '@wundergraph/sdk': file:packages/sdk
       graphql: 16.4.0
       openapi-to-graphql: 2.6.3_graphql@16.4.0
@@ -46,8 +48,49 @@ importers:
       postgraphile: 4.12.9
       typescript: 4.6.4
     dependenciesMeta:
+      '@wundergraph/golang-client':
+        injected: true
       '@wundergraph/sdk':
         injected: true
+
+  packages/golang-client:
+    specifiers:
+      '@types/json-schema': ^7.0.6
+      '@types/lodash': ^4.14.178
+      '@types/node': ^17.0.32
+      '@types/object-hash': ^1.3.4
+      '@types/react': ^18.0.5
+      '@wundergraph/protobuf': workspace:^0.91.1
+      '@wundergraph/sdk': workspace:^0.94.4
+      execa: 5.1.1
+      handlebars: ^4.7.7
+      json-schema: ^0.4.0
+      lodash: ^4.17.21
+      next: ^12.1.6
+      object-hash: ^2.2.0
+      react: ^18.1.0
+      react-dom: ^18.1.0
+      react-ssr-prepass: ^1.5.0
+      typescript: ^4.7.2
+    dependencies:
+      '@wundergraph/protobuf': link:../protobuf
+      execa: 5.1.1
+      handlebars: 4.7.7
+      json-schema: 0.4.0
+      lodash: 4.17.21
+      next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
+      object-hash: 2.2.0
+      react-ssr-prepass: 1.5.0_react@18.1.0
+    devDependencies:
+      '@types/json-schema': 7.0.11
+      '@types/lodash': 4.14.182
+      '@types/node': 17.0.32
+      '@types/object-hash': 1.3.4
+      '@types/react': 18.0.8
+      '@wundergraph/sdk': link:../sdk
+      react: 18.1.0
+      react-dom: 18.1.0_react@18.1.0
+      typescript: 4.7.2
 
   packages/mtls-testapp:
     specifiers:
@@ -5179,7 +5222,7 @@ packages:
     resolution: {integrity: sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==}
 
   /isexe/2.0.0:
-    resolution: {integrity: sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=}
+    resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
   /isobject/3.0.1:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
@@ -9575,6 +9618,33 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  file:packages/golang-client_@wundergraph+sdk@0.94.4:
+    resolution: {directory: packages/golang-client, type: directory}
+    id: file:packages/golang-client
+    name: '@wundergraph/golang-client'
+    version: 0.0.1
+    peerDependencies:
+      '@wundergraph/sdk': '>=0.91.0'
+      react: ^16.8.0 || ^17.0.2 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.2 || ^18.0.0
+    dependencies:
+      '@wundergraph/protobuf': link:packages/protobuf
+      '@wundergraph/sdk': file:packages/sdk
+      execa: 5.1.1
+      handlebars: 4.7.7
+      json-schema: 0.4.0
+      lodash: 4.17.21
+      next: 12.1.6
+      object-hash: 2.2.0
+      react-ssr-prepass: 1.5.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+      - fibers
+      - node-sass
+      - sass
+    dev: false
 
   file:packages/nextjs_xmbr4xweqexa4igb6otsam6ppe:
     resolution: {directory: packages/nextjs, type: directory}

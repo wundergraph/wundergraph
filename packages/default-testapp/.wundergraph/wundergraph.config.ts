@@ -9,6 +9,7 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import { integrations } from './generated/wundergraph.integrations';
+import { golangClient } from '@wundergraph/golang-client';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -54,8 +55,11 @@ configureWunderGraphApplication({
 				...templates.typescript.all,
 				templates.typescript.operations,
 				templates.typescript.linkBuilder,
-				...templates.golang.client,
 			],
+		},
+		{
+			templates: [...golangClient.all()],
+			path: './generated/golang/client',
 		},
 	],
 	cors: {
