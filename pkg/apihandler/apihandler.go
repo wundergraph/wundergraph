@@ -2114,7 +2114,7 @@ func getOperationMetaData(r *http.Request) *OperationMetaData {
 
 func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte) []byte {
 	buf = buf[:0]
-	buf = append(buf, []byte(`{ "__wg": {} }`)...)
+	buf = append(buf, []byte(`{"__wg":{}}`)...)
 	if user := authentication.UserFromContext(r.Context()); user != nil {
 		if userJson, err := json.Marshal(user); err == nil {
 			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")

@@ -174,7 +174,7 @@ var upCmd = &cobra.Command{
 			IgnorePaths: []string{
 				"node_modules",
 			},
-			OnAfter: onAfterBuild,
+			OnAfterBundle: onAfterBuild,
 		})
 
 		configBundler.Bundle()
@@ -232,18 +232,14 @@ var upCmd = &cobra.Command{
 			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...",
 				abstractlogger.String("signal", signal.String()),
 			)
-			configRunner.Stop()
-			configIntrospectionRunner.Stop()
-			if hookServerRunner != nil {
-				hookServerRunner.Stop()
-			}
 		case <-ctx.Done():
 			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
-			configRunner.Stop()
-			configIntrospectionRunner.Stop()
-			if hookServerRunner != nil {
-				hookServerRunner.Stop()
-			}
+		}
+
+		configRunner.Stop()
+		configIntrospectionRunner.Stop()
+		if hookServerRunner != nil {
+			hookServerRunner.Stop()
 		}
 
 		err = n.Close()

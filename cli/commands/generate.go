@@ -77,7 +77,7 @@ Use this command if you only want to generate the configuration`,
 				"generated",
 				"node_modules",
 			},
-			OnAfter: onAfterBuild,
+			OnAfterBundle: onAfterBuild,
 		})
 
 		configBundler.Bundle()
