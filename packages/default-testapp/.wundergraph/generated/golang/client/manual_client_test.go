@@ -52,13 +52,21 @@ func TestLiveQueries_Weather(t *testing.T) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	res, _, err := client.LiveQueries().Weather(ctx, WeatherInput{
+	stream, err := client.LiveQueries().Weather(ctx, WeatherInput{
 		Code: "DE",
 	})
 	assert.NoError(t, err)
+	defer stream.Close()
 
-	// pretty print res as json
-	b, err := json.MarshalIndent(res, "", "  ")
-	assert.NoError(t, err)
-	t.Log(string(b))
+	for {
+		res, closed, err := stream.Next(ctx)
+		assert.NoError(t, err)
+		if closed {
+			break
+		}
+		// pretty print res as json
+		b, err := json.MarshalIndent(res, "", "  ")
+		assert.NoError(t, err)
+		t.Log(string(b))
+	}
 }
