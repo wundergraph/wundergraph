@@ -1186,6 +1186,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
+			h.log.Debug("CustomResolve is skipped and empty response is written")
 			_, _ = w.Write(out.Response)
 			return
 		}
@@ -1309,6 +1310,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
+			h.log.Debug("CustomResolve is skipped and empty response is written")
 			return out.Response, nil
 		}
 	}
@@ -1583,6 +1585,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
+			h.log.Debug("CustomResolve is skipped and empty response is written")
 			_, _ = w.Write(out.Response)
 			return
 		}
