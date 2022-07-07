@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.31...@wundergraph/nextjs@0.0.32) (2022-07-07)
+
+### Bug Fixes
+
+* ensure all hooks are called for live queries ([#67](https://github.com/wundergraph/wundergraph/issues/67)) ([e58dea4](https://github.com/wundergraph/wundergraph/commit/e58dea4d12ff51ea1ef5c338ef9f105343b09694))
+
 ## [0.0.31](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.30...@wundergraph/nextjs@0.0.31) (2022-07-05)
 
 **Note:** Version bump only for package @wundergraph/nextjs
