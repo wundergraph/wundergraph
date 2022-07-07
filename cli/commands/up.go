@@ -144,7 +144,7 @@ var upCmd = &cobra.Command{
 				// generate new config
 				<-configRunner.Run(ctx)
 
-				// bundle server
+				// bundle hooks
 				hooksBundler.Bundle()
 				go func() {
 					// run or restart server
