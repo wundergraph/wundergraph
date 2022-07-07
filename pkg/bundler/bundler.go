@@ -28,9 +28,9 @@ type Bundler struct {
 	outFile               string
 	externalImports       []string
 	fileLoaders           []string
-	BuildDoneChan         chan struct{}
 	mu                    sync.Mutex
-	initialResult         api.BuildResult
+	buildResult           *api.BuildResult
+	onAfterBundle         func()
 }
 
 type Config struct {
@@ -41,6 +41,7 @@ type Config struct {
 	WatchPaths            []string
 	IgnorePaths           []string
 	OutFile               string
+	OnAfterBundle         func()
 }
 
 func NewBundler(config Config) *Bundler {
@@ -51,22 +52,38 @@ func NewBundler(config Config) *Bundler {
 		watchPaths:            config.WatchPaths,
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
-		BuildDoneChan:         make(chan struct{}),
+		onAfterBundle:         config.OnAfterBundle,
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
 	}
 }
 
 func (b *Bundler) Bundle() {
-	b.initialResult = b.initialBuild()
-	if len(b.initialResult.Errors) != 0 {
-		b.log.Fatal("Initial build failed",
-			abstractlogger.String("bundlerName", b.name),
-			abstractlogger.Any("errors", b.initialResult.Errors),
-		)
+	if b.buildResult != nil {
+		buildResult := b.buildResult.Rebuild()
+		b.buildResult = &buildResult
+		if len(b.buildResult.Errors) != 0 {
+			b.log.Fatal("Build failed",
+				abstractlogger.String("bundlerName", b.name),
+				abstractlogger.Any("errors", b.buildResult.Errors),
+			)
+			return
+		}
+		b.log.Debug("Build successful", abstractlogger.String("bundlerName", b.name))
 	} else {
-		b.log.Debug("Initial build successful", abstractlogger.String("bundlerName", b.name))
-		b.BuildDoneChan <- struct{}{}
+		buildResult := b.initialBuild()
+		b.buildResult = &buildResult
+		if len(b.buildResult.Errors) != 0 {
+			b.log.Fatal("Initial Build failed",
+				abstractlogger.String("bundlerName", b.name),
+				abstractlogger.Any("errors", b.buildResult.Errors),
+			)
+			return
+		}
+		b.log.Debug("Initial Build successful", abstractlogger.String("bundlerName", b.name))
+	}
+	if b.onAfterBundle != nil {
+		b.onAfterBundle()
 	}
 }
 
@@ -74,7 +91,7 @@ func (b *Bundler) Watch(ctx context.Context) {
 	if len(b.watchPaths) == 0 {
 		return
 	}
-	if b.initialResult.Rebuild == nil {
+	if b.buildResult.Rebuild == nil {
 		return
 	}
 	if len(b.watchPaths) > 0 {
@@ -82,23 +99,15 @@ func (b *Bundler) Watch(ctx context.Context) {
 			abstractlogger.String("bundlerName", b.name),
 			abstractlogger.String("outFile", b.outFile),
 			abstractlogger.Strings("externalImports", b.externalImports),
+			abstractlogger.Strings("watchPaths", b.watchPaths),
 			abstractlogger.Strings("fileLoaders", b.fileLoaders),
 		)
-		b.watch(ctx, b.initialResult.Rebuild)
+		b.watch(ctx, b.buildResult.Rebuild)
 	}
 }
 
 func (b *Bundler) BundleAndWatch(ctx context.Context) {
-	result := b.initialBuild()
-	if len(result.Errors) != 0 {
-		b.log.Fatal("Initial build failed",
-			abstractlogger.String("bundlerName", b.name),
-			abstractlogger.Any("errors", result.Errors),
-		)
-	} else {
-		b.log.Debug("Initial build successful", abstractlogger.String("bundlerName", b.name))
-		b.BuildDoneChan <- struct{}{}
-	}
+	b.Bundle()
 	if len(b.watchPaths) > 0 {
 		b.log.Debug("Watching for file changes",
 			abstractlogger.String("bundlerName", b.name),
@@ -106,7 +115,7 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 			abstractlogger.Strings("externalImports", b.externalImports),
 			abstractlogger.Strings("fileLoaders", b.fileLoaders),
 		)
-		b.watch(ctx, result.Rebuild)
+		b.watch(ctx, b.buildResult.Rebuild)
 	}
 }
 
@@ -210,11 +219,12 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 	}, b.log)
 
 	go func() {
-		defer close(b.BuildDoneChan)
 		err := w.Watch(ctx, func(paths []string) error {
 			result := rebuild()
 			if len(result.Errors) == 0 {
-				b.BuildDoneChan <- struct{}{}
+				if b.onAfterBundle != nil {
+					b.onAfterBundle()
+				}
 			} else {
 				for _, message := range result.Errors {
 					b.log.Error("Bundler build error",
