@@ -119,7 +119,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	}()
 
 	b.cmd.Start()
-	b.log.Error("Start runner",
+	b.log.Debug("Start runner",
 		abstractlogger.String("runnerName", b.name),
 		abstractlogger.Error(err),
 	)
