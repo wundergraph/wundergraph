@@ -28,17 +28,6 @@ Use this command if you only want to generate the configuration`,
 		defer cancel()
 
 		configOutFile := path.Join(wundergraphDir, "generated", "bundle", "config.js")
-		configBundler := bundler.NewBundler(bundler.Config{
-			Name:       "config-bundler",
-			EntryPoint: entryPoint,
-			OutFile:    configOutFile,
-			Logger:     log,
-			WatchPaths: []string{},
-			IgnorePaths: []string{
-				"generated",
-				"node_modules",
-			},
-		})
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:       "config-runner",
@@ -58,11 +47,7 @@ Use this command if you only want to generate the configuration`,
 			}
 		}()
 
-		go configBundler.BundleAndWatch(ctx)
-
-		<-configBundler.BuildDoneChan
-
-		<-configRunner.Run(ctx)
+		var onAfterBuild func()
 
 		if _, err := os.Stat(serverEntryPoint); err == nil {
 			serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
@@ -74,12 +59,28 @@ Use this command if you only want to generate the configuration`,
 				WatchPaths: []string{},
 			})
 
-			go hooksBundler.BundleAndWatch(ctx)
-
-			<-hooksBundler.BuildDoneChan
+			onAfterBuild = func() {
+				<-configRunner.Run(ctx)
+				hooksBundler.Bundle()
+			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Source: %s\n", serverEntryPoint)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", serverEntryPoint)
 		}
+
+		configBundler := bundler.NewBundler(bundler.Config{
+			Name:       "config-bundler",
+			EntryPoint: entryPoint,
+			OutFile:    configOutFile,
+			Logger:     log,
+			WatchPaths: []string{},
+			IgnorePaths: []string{
+				"generated",
+				"node_modules",
+			},
+			OnAfterBundle: onAfterBuild,
+		})
+
+		configBundler.Bundle()
 
 		return nil
 	},
