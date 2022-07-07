@@ -1184,6 +1184,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "CustomResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
+		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
 			_, _ = w.Write(out.Response)
 			return
@@ -1306,6 +1307,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		} else {
 			return nil, errors.New("CustomResolve liveQuery hook response is empty")
 		}
+		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
 			return out.Response, nil
 		}
@@ -1579,6 +1581,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "CustomResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
+		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
 			_, _ = w.Write(out.Response)
 			return
