@@ -170,7 +170,7 @@ jobs:
 
       - run: pnpm install --ignore-scripts
 
-      - run: pnpm run build
+      - run: pnpm run build:libs
 
       - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
         env:
