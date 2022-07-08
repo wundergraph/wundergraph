@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.33](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.32...@wundergraph/nextjs@0.0.33) (2022-07-07)
+
+### Bug Fixes
+
+* **codegen:** auth / s3 code generation ([75a3a61](https://github.com/wundergraph/wundergraph/commit/75a3a61916617d1d62460225c9d179ec7c8e4798))
+
 ## [0.0.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.31...@wundergraph/nextjs@0.0.32) (2022-07-07)
 
 ### Bug Fixes
