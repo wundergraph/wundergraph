@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { FC, useState } from 'react';
-import { useLiveQuery, withWunderGraph } from '../components/generated/wundergraph.nextjs.integration';
+import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const RealtimePage: NextPage = () => {
 	const [city, setCity] = useState<string>('Berlin');

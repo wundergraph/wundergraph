@@ -1,4 +1,4 @@
-name: engine-ci
+name: Engine CI
 on:
   push:
     branches:
@@ -38,6 +38,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: ./.github/actions/go
         with:
@@ -52,8 +54,8 @@ jobs:
         with:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - run: pnpm boot
+
+      - run: pnpm install --ignore-scripts
       - run: make engine-dev
       - run: make test-go
       - run: make build

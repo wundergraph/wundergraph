@@ -1,4 +1,4 @@
-name: packages-ci
+name: NPM Packages CI
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
       - '*'
     paths:
       - 'packages/**/*'
-      - '.github/workflows/sdk-ci.yaml'
+      - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
       - '!*.md'
@@ -19,7 +19,7 @@ on:
       - next
     paths:
       - 'packages/**/*'
-      - '.github/workflows/sdk-ci.yaml'
+      - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
       - '!*.md'
@@ -35,12 +35,11 @@ env:
 
 jobs:
   build_test:
-    # don't run on changeset publish
-    if: "!contains(github.event.pull_request.title, 'ci:')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -51,8 +50,8 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm boot
+      - run: pnpm install --ignore-scripts
 
-      - run: pnpm build
+      - run: pnpm build:libs
 
       - run: pnpm test --filter '@wundergraph/sdk'

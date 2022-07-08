@@ -1,0 +1,38 @@
+name: Packages Release Preview
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
+
+env:
+  CI: true
+
+jobs:
+  version:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Install
+        run: |
+          pnpm install --ignore-scripts
+          pnpm run patch
+
+      - name: Generate next release (dry-run)
+        run: pnpm run preview:version:packages --yes
+
+      - name: Show CHANGELOG.md
+        run: echo -e "\`\`\`diff\n$(git --no-pager diff './packages/*/CHANGELOG.md')\n\`\`\`" >> $GITHUB_STEP_SUMMARY

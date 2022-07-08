@@ -28,6 +28,8 @@
   <hr />
 </div>
 
+> **Note**: 🚀 WunderGraph is now Open Source! Read the [announcement](https://wundergraph.com/blog/wundergraph_the_next_generation_api_developer_platform_is_open_source).
+
 ## What is WunderGraph?
 
 WunderGraph is the **Next-Generation API Developer Platform** with a focus on Developer Experience.
@@ -42,24 +44,34 @@ into your own Firebase-like Developer Toolkit, without getting locked into a spe
 Imagine that each of your applications could have its own dedicated BFF, while being able to share common logic across
 all your applications, that's the WunderGraph Experience.
 
-## Architecture & Key Differentiators
+## Getting started
 
-<div align="center">
-    <img src="./assets/wundergraph_architecture_simple_overview_light_transparent.png" height="auto"/>
-</div>
+The fastest way to get started with WunderGraph is to open a Gitpod. After bootstrapping the [examples/simple](examples/simple) is started.
 
-WunderGraph is unique in its design,
-as we're not directly exposing GraphQL,
-but JSON-RPC. Combined with a generated Type-Safe client,
-this leads to a unique Developer Experience.
-You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture/README.md).
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
+
+You can also following the [**Quickstart (5
+min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
+
+## Examples:
+
+- [Simple Starter](/examples/simple)
+- [NextJS](/examples/nextjs)
+- [FaunaDB Starter](/examples/faunadb-nextjs)
+- [PostgreSQL](/examples/postgres)
+- [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
+- [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
+- [Subscriptions & Live Queries](./examples/nextjs-postgres-prisma)
+- [Cross API joins across data-sources](/examples/cross-api-joins)
+- [Inject a Bearer Token with Auth0](./examples/inject-bearer)
+- [Publish & Install APIs](./examples/publish-install-api)
 
 ## The WunderGraph Stack
 
 WunderGraph is made up of the three core components:
 
-- [**wunderctl**](./docs/wunderctl): A command line tool to create, deploy and manage your WunderGraph application.
-- [**SDK**](./docs/sdk): Auto-generated and type-safe client to configure and interact with your WunderGraph.
+- [**wunderctl**](packages/wunderctl): A command line tool to create, deploy and manage your WunderGraph application.
+- [**SDK**](packages/sdk): Auto-generated and type-safe client to configure and interact with your WunderGraph.
 - [**WunderHub**](https://hub.wundergraph.com/) The Package Manager for APIs that allows you to share and integrate your
   API's in a few clicks.
 
@@ -81,19 +93,22 @@ applications and microservices).
 
 > **Note**: [WunderHub](https://hub.wundergraph.com/) is our vision of the Package Manager for APIs. Like npm, but for APIs. Sign up for free!
 
-## Getting started
+## Architecture & Key Differentiators
 
-The fastest way to get started with WunderGraph is to open a Gitpod:
+<div align="center">
+    <img src="./assets/wundergraph_architecture_overview_light_transparent.png" height="auto"/>
+</div>
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
-
-You can also following the [**Quickstart (5
-min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
+WunderGraph is unique in its design,
+as we're not directly exposing GraphQL,
+but JSON-RPC. Combined with a generated Type-Safe client,
+this leads to a unique Developer Experience.
+You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture.md).
 
 ## Learn more about WunderGraph
 
 If you'd like to get a quick overview,
-have a look at these [annotated example snippets](docs/at-a-glance/README.md).
+have a look at these [annotated example snippets](docs/at-a-glance.md).
 
 ## How does WunderGraph work
 
@@ -121,25 +136,19 @@ Read the [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to contribute to Wunder
 We are thankful for any and all security reports. Please read the [SECURITY.md](SECURITY.md) to learn how to report any
 security concerns to WunderGraph.
 
-## Support
+## Community & Support
 
-Please visit [Github Discussions](https://github.com/wundergraph/wundergraph/discussions)
-or [Discord](https://discord.gg/Jjmc8TC) to view prior support issues and to ask new support questions.
-
-We also provide enterprise support. Please contact us at <info@wundergraph.com> for more information.
+- [GitHub Issues](https://github.com/wundergraph/wundergraph/issues). Best for: bugs and errors you encounter using WunderGraph.
+- [Email Support](mailto:info@wundergraph.com). Best for: specific questions around WunderGraph as an early enterprise adopter.
+- [Slack Support](mailto:info@wundergraph.com). Best for: problems with WunderGraph as an enterprise customer.
+- [Discord](https://discord.gg/Jjmc8TC). Best for: sharing your applications and hanging out with the community.
 
 ## Enterprise
 
 We're a small but growing team of API Enthusiasts, thrilled to help you get the best Developer Experience of working
-with APIs.
-
-Our Support Plans are tailored to help your teams get the most out of WunderGraph. We love building close relationships
-with our customers, allowing us to continuously improve the product and iterate fast.
-
-Our sales team is available to talk with you about your project needs, pricing information, support plans, and
+with APIs. Our Support Plans are tailored to help your teams get the most out of WunderGraph. We love building close relationships
+with our customers, allowing us to continuously improve the product and iterate fast. Our sales team is available to talk with you about your project needs, pricing information, support plans, and
 custom-built features.
 
-Use
-this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
+Use this [Link](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=9220606329610526&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
 to contact our sales team for a demo.
-

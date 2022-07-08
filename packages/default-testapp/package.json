@@ -16,6 +16,7 @@
   },
   "scripts": {
     "dev": "cd .wundergraph && wunderctl up --debug",
+    "generate": "cd .wundergraph && wunderctl generate --debug",
     "check": "tsc"
   },
   "dependencies": {

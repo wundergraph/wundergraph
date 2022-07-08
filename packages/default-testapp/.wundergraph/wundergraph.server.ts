@@ -16,25 +16,58 @@ import {
 } from 'graphql';
 import { createGraphQLSchema } from 'openapi-to-graphql';
 import jsonPlaceholder from './../json_placeholder.json';
+import type { SDLResponse } from './generated/models';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>((serverContext) => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
-		global: {
-			httpTransport: {
-				onRequest: {
-					hook: async (ctx, request) => {
-						return {
-							...request,
-						};
+		authentication: {
+			postAuthentication: async (hook) => {},
+			mutatingPostAuthentication: async (hook) => {
+				return {
+					user: {
+						name: 'John Doe',
 					},
+					status: 'ok',
+				};
+			},
+			revalidate: async (hook) => {
+				return {
+					user: {
+						name: 'John Doe',
+					},
+					status: 'ok',
+				};
+			},
+		},
+		global: {},
+		queries: {
+			Dragons: {
+				mutatingPostResolve: async (hook) => {
+					console.log('########mutatingPostResolve##########', hook.clientRequest.method);
+					return hook.response;
+				},
+				preResolve: async ({ user, log, clientRequest, internalClient }) => {
+					clientRequest.headers.append('X-Wundergraph', 'foo');
+					clientRequest.headers.delete('Cache-Control');
 				},
 			},
 		},
-		queries: {
-			Dragons: {
-				preResolve: async (ctx) => {
-					ctx.log.info(`preResolve_clientRequest: ${JSON.stringify(ctx.clientRequest)}`);
+		mutations: {
+			SDL: {
+				mutatingPreResolve: async (hook) => {
+					return hook.input;
 				},
+				mockResolve: async (hook): Promise<SDLResponse> => {
+					return {
+						data: null as any,
+					};
+				},
+				postResolve: async (hook) => {},
+				customResolve: async (hook) => {},
+				mutatingPostResolve: async (hook) => {
+					return hook.response;
+				},
+				preResolve: async (hook) => {},
 			},
 		},
 	},
@@ -42,6 +75,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 		{
 			apiNamespace: 'ibm_jsp',
 			serverName: 'ibm_jsp',
+			// @ts-ignore
 			schema: createGraphQLSchema([jsonPlaceholder]).then((r) => r.schema),
 		},
 		{
@@ -165,14 +199,15 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>((serverCo
 								})
 							),
 							async resolve(root, args, ctx, info) {
-								ctx.log.info(`resolve_client_request: ${JSON.stringify(ctx.requestContext.clientRequest)}`);
-								const data = await serverContext.internalClient.queries.InternalDragons();
-								const posts = await serverContext.internalClient.queries.JSP();
+								ctx.wundergraph.log.info(`resolve_clientRequest: ${JSON.stringify(ctx.wundergraph.clientRequest)}`);
+
+								const data = await ctx.wundergraph.internalClient.queries.InternalDragons();
+								const posts = await ctx.wundergraph.internalClient.queries.JSP();
 								return data.data?.spacex_dragons?.map((d) => ({
 									name: d.name,
 									crewCapacity: d.crew_capacity,
 									active: d.active,
-									posts: posts.data?.jsp_postsList?.map((p) => ({
+									posts: posts.data?.jsp_getPosts?.map((p) => ({
 										id: p.id,
 										title: p.title,
 									})),

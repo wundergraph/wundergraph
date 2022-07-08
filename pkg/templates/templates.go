@@ -16,16 +16,12 @@ var (
 	//go:embed assets/templates/publish-api/.wundergraph/*
 	//go:embed assets/templates/publish-api/.gitignore
 
-	//go:embed assets/templates/github-deploy-action/.github/workflows/deploy.yaml
-
 	//go:embed assets/templates/nextjs-starter/.wundergraph/*
 	//go:embed assets/templates/nextjs-starter/pages/_app.tsx
-	//go:embed assets/templates/nextjs-starter/.github
 	//go:embed assets/templates/nextjs-starter/.gitignore
 
 	//go:embed assets/templates/nextjs-postgres-starter/.wundergraph/*
 	//go:embed assets/templates/nextjs-postgres-starter/pages/_app.tsx
-	//go:embed assets/templates/nextjs-postgres-starter/.github
 	//go:embed assets/templates/nextjs-postgres-starter/.gitignore
 	files     embed.FS
 	templates = []Template{
@@ -36,10 +32,6 @@ var (
 		{
 			Name:     "publish-api",
 			InputDir: "assets/templates/publish-api",
-		},
-		{
-			Name:     "github-deploy-action",
-			InputDir: "assets/templates/github-deploy-action",
 		},
 		{
 			Name:     "nextjs-starter",

@@ -1,0 +1,20 @@
+query ($countryCode: String!, $capital: String! @internal) {
+	country: countries_countries(filter: { code: { eq: $countryCode } }) {
+		code
+		name
+		capital @export(as: "capital")
+		weather: _join @transform(get: "weather_getCityByName.weather") {
+			weather_getCityByName(name: $capital) {
+				weather {
+					temperature {
+						max
+					}
+					summary {
+						title
+						description
+					}
+				}
+			}
+		}
+	}
+}

@@ -31,25 +31,35 @@ type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
+type ApiTransportFactory func(tripper http.RoundTripper) http.RoundTripper
+
 type DefaultFactoryResolver struct {
-	graphql  *graphql_datasource.Factory
-	rest     *oas_datasource.Factory
-	static   *staticdatasource.Factory
-	database *database.Factory
+	baseTransport    http.RoundTripper
+	transportFactory ApiTransportFactory
+	graphql          *graphql_datasource.Factory
+	rest             *oas_datasource.Factory
+	static           *staticdatasource.Factory
+	database         *database.Factory
 }
 
-func NewDefaultFactoryResolver(client *http.Client, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
+func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
+	defaultHttpClient := &http.Client{
+		Timeout:   time.Second * 10,
+		Transport: transportFactory(baseTransport),
+	}
 	return &DefaultFactoryResolver{
+		baseTransport:    baseTransport,
+		transportFactory: transportFactory,
 		graphql: &graphql_datasource.Factory{
-			HTTPClient:   client,
+			HTTPClient:   defaultHttpClient,
 			BatchFactory: graphql_datasource.NewBatchFactory(),
 		},
 		rest: &oas_datasource.Factory{
-			Client: client,
+			Client: defaultHttpClient,
 		},
 		static: &staticdatasource.Factory{},
 		database: &database.Factory{
-			Client: client,
+			Client: defaultHttpClient,
 			Debug:  debug,
 			Log:    log,
 		},
@@ -81,11 +91,10 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCertData)
 
-	httpTransport := &http.Transport{
+	mtlsTransport := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return dialer.DialContext(ctx, network, addr)
 		},
-		ForceAttemptHTTP2:   true,
 		MaxIdleConns:        1024,
 		IdleConnTimeout:     90 * time.Second,
 		TLSHandshakeTimeout: 10 * time.Second,
@@ -96,9 +105,11 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 		},
 	}
 
+	baseTransportWithMTLS := d.transportFactory(mtlsTransport)
+
 	return &http.Client{
 		Timeout:   time.Second * 10,
-		Transport: httpTransport,
+		Transport: baseTransportWithMTLS,
 	}, nil
 
 }

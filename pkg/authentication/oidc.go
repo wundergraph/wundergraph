@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"path"
 	"strings"
 	"time"
@@ -57,6 +58,14 @@ type Claims struct {
 func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router, config OpenIDConnectConfig, hooks Hooks) {
 
 	ctx := context.Background()
+
+	if !h.isValidIssuer(config.Issuer) {
+		h.log.Error("oidc.Register failed, invalid issuer, must be valid URL",
+			abstractlogger.String("providerID", config.ProviderID),
+			abstractlogger.String("issuer", config.Issuer),
+		)
+		return
+	}
 
 	provider := h.createProvider(ctx, config)
 
@@ -264,6 +273,11 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 		http.Redirect(w, r, redirect, http.StatusFound)
 	})
+}
+
+func (h *OpenIDConnectCookieHandler) isValidIssuer(issuer string) bool {
+	_, urlErr := url.ParseRequestURI(issuer)
+	return urlErr == nil
 }
 
 func (h *OpenIDConnectCookieHandler) createProvider(ctx context.Context, config OpenIDConnectConfig) *oidc.Provider {

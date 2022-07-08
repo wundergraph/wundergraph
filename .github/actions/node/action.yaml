@@ -1,5 +1,5 @@
-name: "Setup Node"
-description: "This action install node and cache modules. It uses pnpm as package manager."
+name: 'Setup Node'
+description: 'This action install node and cache modules. It uses pnpm as package manager.'
 inputs:
   node-version:
     description: 'The node version to install (Default: lts)'
@@ -15,12 +15,12 @@ env:
   PNPM_CACHE_FOLDER: .pnpm-store
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - uses: actions/setup-node@v2
       with:
         node-version: 'lts/*'
-        
+
     - name: Cache pnpm modules
       uses: actions/cache@v2
       with:
@@ -36,7 +36,7 @@ runs:
 
     - uses: pnpm/action-setup@v2.1.0
       with:
-        version: latest
+        version: 7.1.2
 
     - name: setup pnpm config
       run: pnpm config set store-dir $PNPM_CACHE_FOLDER

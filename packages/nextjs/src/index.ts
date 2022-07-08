@@ -46,6 +46,7 @@ export interface ClientConfig<Role> {
 	applicationPath: string;
 	baseURL: string;
 	sdkVersion: string;
+	authenticationEnabled: boolean;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	user?: User<Role>;
@@ -144,24 +145,7 @@ export class Client<Role> {
 				credentials: 'include',
 				mode: 'cors',
 			});
-			const responseJSON = await response.json();
-			if (responseJSON.errors && !responseJSON.data) {
-				return {
-					status: 'error',
-					errors: responseJSON.errors,
-				};
-			}
-			if (responseJSON.errors && responseJSON.data) {
-				return {
-					status: 'partial',
-					errors: responseJSON.errors,
-					data: responseJSON.data,
-				};
-			}
-			return {
-				status: 'ok',
-				data: responseJSON.data,
-			};
+			return this.httpResponseToQueryResult(response);
 		} catch (e: any) {
 			return {
 				status: 'error',
@@ -207,24 +191,7 @@ export class Client<Role> {
 				mode: 'cors',
 				body,
 			});
-			const responseJSON = await response.json();
-			if (responseJSON.errors && !responseJSON.data) {
-				return {
-					status: 'error',
-					errors: responseJSON.errors,
-				};
-			}
-			if (responseJSON.errors && responseJSON.data) {
-				return {
-					status: 'partial',
-					errors: responseJSON.errors,
-					data: responseJSON.data,
-				};
-			}
-			return {
-				status: 'ok',
-				data: responseJSON.data,
-			};
+			return this.httpResponseToMutationResult(response);
 		} catch (e: any) {
 			return {
 				status: 'error',
@@ -266,27 +233,7 @@ export class Client<Role> {
 					withCredentials: true,
 				});
 				eventSource.addEventListener('message', (ev) => {
-					const responseJSON = JSON.parse(ev.data);
-					if (responseJSON.errors && !responseJSON.data) {
-						cb({
-							status: 'error',
-							errors: responseJSON.errors,
-						});
-					}
-					if (responseJSON.errors && responseJSON.data) {
-						cb({
-							status: 'partial',
-							errors: responseJSON.errors,
-							data: responseJSON.data,
-						});
-					}
-					if (responseJSON.data) {
-						cb({
-							status: 'ok',
-							streamState: 'streaming',
-							data: responseJSON.data,
-						});
-					}
+					cb(this.jsonToSubscriptionResponse(ev.data));
 				});
 				if (args?.abortSignal) {
 					args.abortSignal.addEventListener('abort', () => eventSource.close());
@@ -330,11 +277,32 @@ export class Client<Role> {
 						mode: 'cors',
 					}
 				);
-				if (response.status === 401) {
-					this.csrfToken = undefined;
+				if (response.status === 400) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Bad Request' }],
+					});
+					return;
+				}
+				if (response.status >= 401 && response.status <= 499) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Unauthorized' }],
+					});
+					return;
+				}
+				if (response.status >= 500 && response.status <= 599) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Server Error' }],
+					});
 					return;
 				}
 				if (response.status !== 200 || response.body == null) {
+					cb({
+						status: 'error',
+						errors: [{ message: 'Unknown Error' }],
+					});
 					return;
 				}
 				const reader = response.body.getReader();
@@ -346,11 +314,8 @@ export class Client<Role> {
 					if (!value) continue;
 					message += decoder.decode(value);
 					if (message.endsWith('\n\n')) {
-						cb({
-							status: 'ok',
-							streamState: 'streaming',
-							data: JSON.parse(message.substring(0, message.length - 2)),
-						});
+						const responseJSON = message.substring(0, message.length - 2);
+						cb(this.jsonToSubscriptionResponse(responseJSON));
 						message = '';
 					}
 				}
@@ -410,6 +375,24 @@ export class Client<Role> {
 				credentials: 'include',
 				mode: 'cors',
 			});
+			if (res.status === 400) {
+				return {
+					status: 'error',
+					message: 'Bad Request',
+				};
+			}
+			if (res.status >= 401 && res.status <= 499) {
+				return {
+					status: 'error',
+					message: 'Unauthorized',
+				};
+			}
+			if (res.status >= 500 && res.status <= 599) {
+				return {
+					status: 'error',
+					message: 'Server Error',
+				};
+			}
 			if (res.status === 200) {
 				const json = (await res.json()) as { key: string }[];
 				return {
@@ -417,13 +400,132 @@ export class Client<Role> {
 					fileKeys: json.map((x) => x.key),
 				};
 			}
-			throw new Error(`could not upload files, status: ${res.status}`);
+			return {
+				status: 'error',
+				message: 'Unknown Error',
+			};
 		} catch (e: any) {
 			return {
 				status: 'error',
 				message: e.message,
 			};
 		}
+	};
+
+	private httpResponseToQueryResult = async <Data>(response: Response): Promise<QueryResult<Data>> => {
+		switch (true) {
+			case response.status === 200:
+				const responseJSON = await response.json();
+				if (responseJSON.errors && !responseJSON.data) {
+					return {
+						status: 'error',
+						errors: responseJSON.errors,
+					};
+				}
+				if (responseJSON.errors && responseJSON.data) {
+					return {
+						status: 'partial',
+						errors: responseJSON.errors,
+						data: responseJSON.data,
+					};
+				}
+				return {
+					status: 'ok',
+					data: responseJSON.data,
+				};
+			case response.status === 400:
+				return {
+					status: 'error',
+					errors: [{ message: 'Bad Request' }],
+				};
+			case response.status >= 401 && response.status <= 499:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unauthorized' }],
+				};
+			case response.status >= 500 && response.status <= 599:
+				return {
+					status: 'error',
+					errors: [{ message: 'Internal Server Error' }],
+				};
+			default:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unknown Error' }],
+				};
+		}
+	};
+
+	private httpResponseToMutationResult = async <Data>(response: Response): Promise<MutationResult<Data>> => {
+		switch (true) {
+			case response.status === 200:
+				const responseJSON = await response.json();
+				if (responseJSON.errors && !responseJSON.data) {
+					return {
+						status: 'error',
+						errors: responseJSON.errors,
+					};
+				}
+				if (responseJSON.errors && responseJSON.data) {
+					return {
+						status: 'partial',
+						errors: responseJSON.errors,
+						data: responseJSON.data,
+					};
+				}
+				return {
+					status: 'ok',
+					data: responseJSON.data,
+				};
+			case response.status === 400:
+				return {
+					status: 'error',
+					errors: [{ message: 'Bad Request' }],
+				};
+			case response.status >= 401 && response.status <= 499:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unauthorized' }],
+				};
+			case response.status >= 500 && response.status <= 599:
+				return {
+					status: 'error',
+					errors: [{ message: 'Internal Server Error' }],
+				};
+			default:
+				return {
+					status: 'error',
+					errors: [{ message: 'Unknown Error' }],
+				};
+		}
+	};
+
+	private jsonToSubscriptionResponse = <Data>(json: any): SubscriptionResult<Data> => {
+		const responseJSON = JSON.parse(json);
+		if (responseJSON.errors && !responseJSON.data) {
+			return {
+				status: 'error',
+				errors: responseJSON.errors,
+			};
+		}
+		if (responseJSON.errors && responseJSON.data) {
+			return {
+				status: 'partial',
+				errors: responseJSON.errors,
+				data: responseJSON.data,
+			};
+		}
+		if (responseJSON.data) {
+			return {
+				status: 'ok',
+				streamState: 'streaming',
+				data: responseJSON.data,
+			};
+		}
+		return {
+			status: 'error',
+			errors: [{ message: 'Unexpected response' }],
+		};
 	};
 
 	public fetchUser = async (abortSignal?: AbortSignal, revalidate?: boolean): Promise<User<Role> | null> => {
@@ -454,7 +556,7 @@ export class Client<Role> {
 		const query = this.queryString({
 			redirect_uri: redirectURI || window.location.toString(),
 		});
-		window.location.replace(`${this.baseURL}/${this.applicationPath}/auth/cookie/authorize/${authProviderID}${query}`);
+		window.location.assign(`${this.baseURL}/${this.applicationPath}/auth/cookie/authorize/${authProviderID}${query}`);
 	};
 
 	public logout = async (options?: LogoutOptions): Promise<boolean> => {
@@ -526,7 +628,9 @@ function withWunderGraphContextWrapper<Role>(
 				const [isWindowFocused, setIsWindowFocused] = useState<'pristine' | 'focused' | 'blurred'>('pristine');
 				const [refetchMountedOperations, setRefetchMountedOperations] = useState<number>(0);
 				windowHooks(setIsWindowFocused);
-				clientUserHooks<Role>(user, setUser, isWindowFocused, defaultContextProperties, options);
+				if (defaultContextProperties.clientConfig.authenticationEnabled) {
+					clientUserHooks<Role>(user, setUser, isWindowFocused, defaultContextProperties, options);
+				}
 				const clientProps: WunderGraphContextProperties<Role> = {
 					...defaultContextProperties,
 					ssrCache: props.ssrCache || { _client_defined_cache: true },
@@ -576,7 +680,7 @@ function withWunderGraphContextWrapper<Role>(
 
 			let ssrUser: User<Role> | null = null;
 
-			if (options?.disableFetchUserServerSide !== true) {
+			if (options?.disableFetchUserServerSide !== true && defaultContextProperties.clientConfig.authenticationEnabled) {
 				try {
 					ssrUser = await defaultContextProperties.client.fetchUser();
 				} catch (e) {}
@@ -655,12 +759,8 @@ const clientUserHooks = <Role>(
 	ctx: WunderGraphContextProperties<Role>,
 	options?: WithWunderGraphOptions
 ) => {
-	const [disableFetchUserClientSide, setDisableFetchUserClientSide] = useState(
-		options?.disableFetchUserClientSide === true
-	);
-	const [disableFetchUserOnWindowFocus, setDisableFetchUserOnWindowFocus] = useState(
-		options?.disableFetchUserOnWindowFocus === true
-	);
+	const [disableFetchUserClientSide] = useState(options?.disableFetchUserClientSide === true);
+	const [disableFetchUserOnWindowFocus] = useState(options?.disableFetchUserOnWindowFocus === true);
 	useEffect(() => {
 		if (disableFetchUserClientSide) {
 			return;
@@ -1085,12 +1185,12 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 			};
 		}
 	}
-	const [stop, setStop] = useState(false);
 	const [invalidate, setInvalidate] = useState<number>(0);
-	const [stopOnWindowBlur] = useState(args?.stopOnWindowBlur === true);
 	const [subscriptionResult, setSubscriptionResult] = useState<SubscriptionResult<Data> | undefined>(
 		(ssrCache[cacheKey] as SubscriptionResult<Data>) || { status: 'none' }
 	);
+	const stopOnWindowBlur = args?.stopOnWindowBlur === true;
+	const stop = !stopOnWindowBlur || isWindowFocused === 'focused' ? false : true;
 	useEffect(() => {
 		if (subscription.requiresAuthentication && user === null) {
 			setSubscriptionResult({
@@ -1126,17 +1226,6 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 			abort.abort();
 		};
 	}, [stop, refetchMountedOperations, invalidate, user]);
-	useEffect(() => {
-		if (!stopOnWindowBlur) {
-			return;
-		}
-		if (isWindowFocused === 'focused') {
-			setStop(false);
-		}
-		if (isWindowFocused === 'blurred') {
-			setStop(true);
-		}
-	}, [stopOnWindowBlur, isWindowFocused]);
 	useEffect(() => {
 		if (args?.debounceMillis === undefined) {
 			setInvalidate((prev) => prev + 1);

@@ -1,5 +1,15 @@
 import { Api, DataSource, StaticApiCustom } from './index';
-import { ASTNode, buildSchema, Kind, ObjectTypeDefinitionNode, parse, print, printSchema, visit } from 'graphql';
+import {
+	ASTNode,
+	buildSchema,
+	GraphQLSchema,
+	Kind,
+	ObjectTypeDefinitionNode,
+	parse,
+	print,
+	printSchema,
+	visit,
+} from 'graphql';
 import { mergeSchemas } from '@graphql-tools/schema';
 import {
 	ConfigurationVariableKind,
@@ -402,10 +412,17 @@ const mergeApiSchemas = <T extends {} = {}>(
 	graphQLSchemas.push(buildSchema(exportSchema, { assumeValidSDL: true }));
 	graphQLSchemas.push(buildSchema(transformSchema, { assumeValidSDL: true }));
 
-	const mergedGraphQLSchema = mergeSchemas({
-		schemas: graphQLSchemas,
-		assumeValid: true,
-	});
+	let mergedGraphQLSchema: GraphQLSchema;
+	try {
+		mergedGraphQLSchema = mergeSchemas({
+			schemas: graphQLSchemas,
+			assumeValid: true,
+		});
+	} catch (e: any) {
+		throw new Error(
+			`Schemas could not be merged. Define namespaces on the APIs to avoid type collisions. Error: ${e.message}`
+		);
+	}
 
 	const queryTypeName = mergedGraphQLSchema.getQueryType()?.name;
 	const mutationTypeName = mergedGraphQLSchema.getMutationType()?.name;

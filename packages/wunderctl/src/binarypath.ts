@@ -1,5 +1,5 @@
-import * as os from 'os';
 import path from 'path';
+import os from 'os';
 
 const isWin = process.platform === 'win32';
 
@@ -39,14 +39,16 @@ export const downloadURL = (version: string): string => {
 	}
 };
 
-export const wunderctlPath = (): string => {
+export const wunderctlName = (): string => {
 	let binaryName = 'wunderctl';
 	if (isWin) {
 		binaryName = 'wunderctl.exe';
 	}
-	return path.join(wunderGraphDir(), binaryName);
+	return binaryName;
 };
 
-export const wunderGraphDir = (): string => {
-	return path.join(os.homedir(), '.wundergraph');
+export const binaryDir = path.join(__dirname, '..', 'download');
+
+export const wunderctlBinaryPath = (): string => {
+	return path.join(binaryDir, wunderctlName());
 };

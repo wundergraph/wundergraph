@@ -1,12 +1,7 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { FC, useState } from 'react';
-import {
-	AuthProviders,
-	useLiveQuery,
-	useWunderGraph,
-	withWunderGraph,
-} from '../components/generated/wundergraph.nextjs.integration';
+import { AuthProviders, useLiveQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
 
 const JobsPage: NextPage = () => {
 	const { user, login, logout } = useWunderGraph();

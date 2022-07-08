@@ -1,62 +1,129 @@
 import axios from 'axios';
-import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { Operation, OperationType } from '@wundergraph/protobuf';
+import { ClientRequest } from './server';
 
-export interface InternalClient {
+export interface OperationArgsWithInput<T = void> {
+	input: T;
+}
+
+interface InternalClientRequestContext {
+	// used as "context" in operation methods to access request based properties
+	context: {
+		extraHeaders?: { [key: string]: string };
+		clientRequest?: ClientRequest;
+	};
+}
+interface Operations {
 	queries: {
-		[operationName: string]: (input: any) => Promise<any>;
+		[operationName: string]: any;
 	};
 	mutations: {
-		[operationName: string]: (input: any) => Promise<any>;
+		[operationName: string]: any;
 	};
+}
+
+export interface InternalClient extends Operations {
 	withHeaders: (headers: { [key: string]: string }) => InternalClient;
 }
 
 const hooksToken = `Bearer ${process.env.HOOKS_TOKEN}`;
 
-export const buildInternalClient = (
-	config: WunderGraphConfiguration,
-	extraHeaders?: { [key: string]: string }
-): InternalClient => {
-	const client: InternalClient = {
+export interface InternalClientFactory {
+	(extraHeaders?: { [p: string]: string } | undefined, clientRequest?: ClientRequest): InternalClient;
+}
+
+// internalClientFactory is a factory function that creates an internal client.
+// this function should be only called once on startup.
+export const internalClientFactory = (
+	apiName: string,
+	deploymentName: string,
+	operations: Operation[]
+): InternalClientFactory => {
+	const baseOperations: Operations & InternalClientRequestContext = {
+		context: {
+			clientRequest: undefined,
+			extraHeaders: undefined,
+		},
 		queries: {},
 		mutations: {},
-		withHeaders: (headers: { [key: string]: string }) => {
-			return buildInternalClient(config, headers);
-		},
 	};
 
-	const headers = Object.assign(
-		{},
-		{
-			'Content-Type': 'application/json',
-			'X-WG-Authorization': hooksToken,
-			...(extraHeaders || {}),
-		}
-	);
+	Object.setPrototypeOf(baseOperations.queries, baseOperations);
+	Object.setPrototypeOf(baseOperations.mutations, baseOperations);
 
-	const internalRequest = async (operationName: string, input?: any): Promise<any> => {
-		const url = `http://localhost:9991/internal/${config.apiName}/${config.deploymentName}/operations/` + operationName;
-		const res = await axios.post(url, JSON.stringify(input || {}), {
-			headers,
+	operations
+		.filter((op) => op.operationType == OperationType.QUERY)
+		.forEach((op) => {
+			if (baseOperations.queries) {
+				baseOperations.queries[op.name] = async function (
+					this: InternalClientRequestContext,
+					options?: OperationArgsWithInput<any>
+				) {
+					return internalRequest({
+						extraHeaders: this.context.extraHeaders,
+						clientRequest: this.context.clientRequest,
+						operationName: op.name,
+						input: options?.input,
+					});
+				};
+			}
 		});
+
+	operations
+		.filter((op) => op.operationType == OperationType.MUTATION)
+		.forEach((op) => {
+			if (baseOperations.mutations) {
+				baseOperations.mutations[op.name] = async function (
+					this: InternalClientRequestContext,
+					options?: OperationArgsWithInput<any>
+				) {
+					return internalRequest({
+						extraHeaders: this.context.extraHeaders,
+						clientRequest: this.context.clientRequest,
+						operationName: op.name,
+						input: options?.input,
+					});
+				};
+			}
+		});
+
+	const internalRequest = async (options: {
+		operationName: string;
+		input?: any;
+		extraHeaders?: { [key: string]: string };
+		clientRequest: any;
+	}): Promise<any> => {
+		const url = `http://localhost:9991/internal/${apiName}/${deploymentName}/operations/` + options.operationName;
+		const headers = Object.assign(
+			{},
+			{
+				'Content-Type': 'application/json',
+				'X-WG-Authorization': hooksToken,
+				...(options.extraHeaders || {}),
+			}
+		);
+		const res = await axios.post(
+			url,
+			JSON.stringify({ input: options.input, __wg: { clientRequest: options.clientRequest } }),
+			{
+				headers,
+			}
+		);
 		return res.data;
 	};
 
-	config.api?.operations
-		.filter((op) => op.operationType == OperationType.QUERY)
-		.forEach((op) => {
-			if (client.queries) {
-				client.queries[op.name] = (input?: any) => internalRequest(op.name, input);
-			}
-		});
+	// build creates a new client instance. We create a new instance per request.
+	// this function is cheap because we only create objects.
+	return function build(extraHeaders?: { [key: string]: string }, clientRequest?: ClientRequest): InternalClient {
+		// let's inherit the base operation methods from the base client
+		// but create a new object to avoid mutating the base client
+		const client: InternalClient & InternalClientRequestContext = Object.create(baseOperations);
+		client.withHeaders = (headers: { [key: string]: string }) => {
+			return build(headers, clientRequest);
+		};
+		client.context.clientRequest = clientRequest;
+		client.context.extraHeaders = extraHeaders;
 
-	config.api?.operations
-		.filter((op) => op.operationType == OperationType.MUTATION)
-		.forEach((op) => {
-			if (client.mutations) {
-				client.mutations[op.name] = (input?: any) => internalRequest(op.name, input);
-			}
-		});
-
-	return client;
+		return client;
+	};
 };

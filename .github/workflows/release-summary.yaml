@@ -1,0 +1,25 @@
+name: Release Summary
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+env:
+  WORKING_DIRECTORY: '.'
+  CI: true
+
+jobs:
+  release-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: release-lab/setup-whatchanged@v1
+        with:
+          version: v0.5.7
+      - run: |
+          whatchanged --preset=full >> $GITHUB_STEP_SUMMARY

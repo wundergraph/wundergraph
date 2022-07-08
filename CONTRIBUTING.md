@@ -7,6 +7,7 @@ Welcome to the WunderGraph Community contributing guide. We are excited to have 
 This guide assumes you have already installed the following software:
 
 - make (should be installed on all linux / IOS systems)
+- [protoc](https://grpc.io/docs/protoc-installation/)
 - golang `>= 1.18`
 - Node.js [LTS](https://nodejs.org/en/about/releases/)
 - pnpm `7`
@@ -66,3 +67,7 @@ echo "export NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.
 ### Pull Requests
 
 We merge all pull requests in `squash merge` mode. You're not enforced to use [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) across all your commits but it's a good practice and avoid mistakes. At the end it's important that the squashed commit message follow the standard.
+
+## Releases
+
+See the [Release Guide](docs/releasing.md) for more information.

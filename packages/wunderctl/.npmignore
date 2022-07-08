@@ -1,5 +1,6 @@
 src
-.cache
 node_modules
 .gitignore
 .npmignore
+download
+dist/tsconfig.tsbuildinfo

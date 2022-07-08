@@ -9,19 +9,17 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"path"
 	"strings"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/middlewareclient"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
@@ -82,6 +80,7 @@ type options struct {
 	enableDebugMode     bool
 	forceHttpsRedirects bool
 	enableIntrospection bool
+	configFileChange    chan struct{}
 	globalRateLimit     struct {
 		enable      bool
 		requests    int
@@ -139,6 +138,12 @@ func WithHooksSecret(secret []byte) Option {
 	}
 }
 
+func WithConfigFileChange(event chan struct{}) Option {
+	return func(options *options) {
+		options.configFileChange = event
+	}
+}
+
 func WithDebugMode(enable bool) Option {
 	return func(options *options) {
 		options.enableDebugMode = enable
@@ -151,12 +156,6 @@ func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	}
 }
 
-func WithDisableGracefulshutdown() Option {
-	return func(options *options) {
-		options.disableGracefulShutdown = true
-	}
-}
-
 func (n *Node) StartBlocking(opts ...Option) error {
 	var options options
 	for i := range opts {
@@ -166,16 +165,18 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	n.options = options
 
 	if options.staticConfig != nil {
-		n.log.Info("api config: static")
+		n.log.Info("Api config: static")
 		go n.startServer(*options.staticConfig)
 	} else if options.fileSystemConfig != nil {
-		n.log.Info("api config: file polling",
+		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
-		go n.reconfigureOnConfigUpdate()
-		go n.filePollConfig(*options.fileSystemConfig)
+		if options.configFileChange != nil {
+			go n.reconfigureOnConfigUpdate()
+			go n.filePollConfig(*options.fileSystemConfig)
+		}
 	} else {
-		n.log.Info("api config: network polling")
+		n.log.Info("Api config: network polling")
 		go n.reconfigureOnConfigUpdate()
 		go n.netPollConfig()
 	}
@@ -183,12 +184,21 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	select {
 	case err := <-n.errCh:
 		return err
-	case <-n.ctx.Done():
-		if n.server != nil {
-			_ = n.server.Shutdown(context.Background())
-		}
-		return nil
 	}
+}
+
+func (n *Node) Shutdown(ctx context.Context) error {
+	if n.server != nil {
+		return n.server.Shutdown(ctx)
+	}
+	return nil
+}
+
+func (n *Node) Close() error {
+	if n.server != nil {
+		return n.server.Close()
+	}
+	return nil
 }
 
 func (n *Node) newListeners() ([]net.Listener, error) {
@@ -292,7 +302,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			KeepAlive: 90 * time.Second,
 		}
 
-		httpTransport := &http.Transport{
+		defaultTransport := &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return dialer.DialContext(ctx, network, addr)
 			},
@@ -302,20 +312,15 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			TLSHandshakeTimeout: 10 * time.Second,
 		}
 
-		hooksClient := middlewareclient.NewMiddlewareClient("http://127.0.0.1:9992")
+		hooksClient := hooks.NewClient("http://127.0.0.1:9992", n.log)
 
-		transport := apihandler.NewApiTransport(httpTransport, api, hooksClient, n.options.enableDebugMode)
-
-		client := &http.Client{
-			Timeout:   time.Second * 10,
-			Transport: transport,
-		}
+		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
 
 		n.log.Debug("http.Client.Transport",
 			abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
 		)
 
-		loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(client, n.options.enableDebugMode, n.log))
+		loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
 
 		builderConfig := apihandler.BuilderConfig{
 			InsecureCookies:            n.options.insecureCookies,
@@ -355,18 +360,6 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 		_, _ = w.Write([]byte("WunderNode Status: OK\n"))
 		_, _ = w.Write([]byte(fmt.Sprintf("BuildInfo: %+v\n", n.info)))
 	}))
-
-	if n.server != nil {
-		if n.options.disableGracefulShutdown {
-			err = n.server.Close()
-			if err != nil {
-				n.log.Error("Error closing old server", abstractlogger.Error(err))
-			}
-		} else {
-			// blocking
-			n.shutdownServerGracefully(n.server)
-		}
-	}
 
 	n.server = &http.Server{
 		Handler: router,
@@ -487,7 +480,8 @@ func (n *Node) reconfigureOnConfigUpdate() {
 	for {
 		select {
 		case config := <-n.configCh:
-			n.log.Debug("updated config -> (re-)configuring server")
+			n.log.Debug("Updated config -> (re-)configuring server")
+			_ = n.Close()
 			go n.startServer(config)
 		case <-n.ctx.Done():
 			return
@@ -561,50 +555,19 @@ func (n *Node) netPollConfig() {
 }
 
 func (n *Node) filePollConfig(filePath string) {
-
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		n.log.Debug("filePollConfig - config file not found, retrying in 5s",
-			abstractlogger.String("config_path", filePath),
-		)
-		<-time.After(time.Second * 5)
-		n.filePollConfig(filePath)
-		return
-	}
-
-	n.reloadFileConfig(filePath)
-
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		n.log.Fatal("filePollConfig fsnotify.NewWatcher", abstractlogger.Error(err))
-	}
-	defer watcher.Close()
-
 	go func() {
 		for {
 			select {
 			case <-n.ctx.Done():
 				return
-			case event, ok := <-watcher.Events:
+			case _, ok := <-n.options.configFileChange:
 				if !ok {
 					return
 				}
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					n.log.Debug("filePollConfig watcher.Events: Write")
-					n.reloadFileConfig(filePath)
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				n.log.Debug("filePollConfig watcher.Errors", abstractlogger.Error(err))
+				n.reloadFileConfig(filePath)
 			}
 		}
 	}()
-
-	err = watcher.Add(filePath)
-	if err != nil {
-		n.log.Fatal("filePollConfig watcher.Add", abstractlogger.Error(err))
-	}
 
 	<-n.ctx.Done()
 }

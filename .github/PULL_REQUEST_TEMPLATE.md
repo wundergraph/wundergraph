@@ -34,12 +34,10 @@ By making a contribution to this project, I certify that:
 #### Checklist
 
 - [ ] run `make test`
+- [ ] PR title must follow [conventional-commit-standard](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md#conventional-commit-standard)
 - [ ] tests and/or benchmarks are included
 - [ ] documentation is changed or added
 - [ ] commit message and code follows the [Code of conduct](https://github.com/wundergraph/wundergraph/blob/main/CODE_OF_CONDUCT.md)
-
-#### Before merge
-- [ ] Squashed commit must follow [conventional-commit-standard](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md#conventional-commit-standard)
 
 <!--
 Squashed commit must follow https://www.conventionalcommits.org/en/v1.0.0/ so we can generate the changelog.

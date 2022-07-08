@@ -6,6 +6,7 @@ import { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput, hooks,
 
 export type Role = {{{ roleDefinitions }}};
 
+{{#if hasAuthProviders}}
 export enum AuthProvider {
 {{#each authProviders}}
     "{{.}}" = "{{.}}",
@@ -17,12 +18,16 @@ export const AuthProviders = {
     "{{.}}": AuthProvider.{{.}},
 {{/each}}
 };
+{{/if}}
 
+{{#if hasS3Providers}}
 export enum S3Provider {
 {{#each s3Providers}}
     "{{.}}" = "{{.}}",
 {{/each}}
 }
+{{/if}}
+
 
 const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = {
     ssrCache: {},
@@ -32,6 +37,7 @@ const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = 
 			applicationPath: "{{applicationPath}}",
 			baseURL: "{{baseURL}}",
 			sdkVersion: "{{sdkVersion}}",
+    	authenticationEnabled: {{hasAuthProviders}},
     },
     user: null,
     setUser: value => {},
@@ -45,8 +51,8 @@ export const
     WunderGraphContext = createContext<WunderGraphContextProperties<Role>>(defaultWunderGraphContextProperties);
 
 export const withWunderGraph = hooks.withWunderGraphContextWrapper(WunderGraphContext,defaultWunderGraphContextProperties);
-
-export const useWunderGraph = hooks.useWunderGraph<Role,AuthProvider,S3Provider>(WunderGraphContext);
+				
+export const useWunderGraph = hooks.useWunderGraph<Role,{{#if hasAuthProviders}}AuthProvider{{else}}""{{/if}},{{#if hasS3Providers}}S3Provider{{/if}}>(WunderGraphContext);
         
 export const useQuery = {
 {{#each queriesWithInput}}

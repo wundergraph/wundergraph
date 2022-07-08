@@ -2,5 +2,3 @@
 . "$(dirname "$0")/_/husky.sh"
 
 pnpm exec commitlint --edit "${1}"
-
-pnpm run pre-commit

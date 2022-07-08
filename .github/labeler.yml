@@ -1,0 +1,19 @@
+npm:
+  - 'packages/**/*'
+  - 'pnpm-lock.yaml'
+  - 'pnpm-workspace.yaml'
+sdk:
+  - 'packages/sdk/**/*'
+wunderctl:
+  - 'packages/wunderctl/**/*'
+nextjs:
+  - 'packages/nextjs/**/*'
+types:
+  - 'packages/protobuf/**/*'
+engine:
+  - 'pkg/**/*'
+  - 'internal/*/*'
+  - 'cmd/**/*'
+  - 'cli/**/*'
+  - 'go.mod'
+  - 'go.sum'

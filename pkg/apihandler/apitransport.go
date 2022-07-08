@@ -9,14 +9,13 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/middlewareclient"
 	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
@@ -30,10 +29,16 @@ type ApiTransport struct {
 	upstreamAuthConfigurations map[string]*wgpb.UpstreamAuthentication
 	onRequestHook              map[string]struct{}
 	onResponseHook             map[string]struct{}
-	hooksClient                *middlewareclient.MiddlewareClient
+	hooksClient                *hooks.Client
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *wgpb.Api, hooksClient *middlewareclient.MiddlewareClient, enableDebugMode bool) http.RoundTripper {
+func NewApiTransportFactory(api *wgpb.Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper) http.RoundTripper {
+	return func(tripper http.RoundTripper) http.RoundTripper {
+		return NewApiTransport(tripper, api, hooksClient, enableDebugMode)
+	}
+}
+
+func NewApiTransport(tripper http.RoundTripper, api *wgpb.Api, hooksClient *hooks.Client, enableDebugMode bool) http.RoundTripper {
 	transport := &ApiTransport{
 		roundTripper:               tripper,
 		debugMode:                  enableDebugMode,
@@ -112,10 +117,6 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 		_, onResponseHook = t.onResponseHook[metaData.OperationName]
 	}
 
-	if t.debugMode && onRequestHook {
-
-	}
-
 	if onRequestHook {
 		request, err = t.handleOnRequestHook(request, metaData)
 		if err != nil {
@@ -191,6 +192,11 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 
 	requestBody := buf.Bytes()
 
+	requestBody, err = jsonparser.Set(requestBody, []byte("{}"), "__wg")
+	if err != nil {
+		return nil, err
+	}
+
 	if user != nil {
 		userData, err := json.Marshal(*user)
 		if err != nil {
@@ -203,11 +209,11 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	}
 
 	if clientRequest, ok := request.Context().Value(pool2.ClientRequestKey).(*http.Request); ok {
-		requestJSON, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false)
+		requestJSON, err := hooks.HttpRequestToWunderGraphRequestJSON(clientRequest, false)
 		if err != nil {
 			return nil, err
 		}
-		requestBody, err = jsonparser.Set(requestBody, requestJSON, "__wg", "client_request")
+		requestBody, err = jsonparser.Set(requestBody, requestJSON, "__wg", "clientRequest")
 	}
 
 	req, err := http.NewRequestWithContext(request.Context(), request.Method, request.URL.String(), ioutil.NopCloser(bytes.NewReader(requestBody)))
@@ -218,25 +224,6 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	req.Header = request.Header.Clone()
 
 	return t.roundTripper.RoundTrip(req)
-}
-
-type WunderGraphRequest struct {
-	Method     string            `json:"method"`
-	RequestURI string            `json:"requestURI"`
-	Headers    map[string]string `json:"headers"`
-	Body       json.RawMessage   `json:"body,omitempty"`
-}
-
-type OnRequestHookPayload struct {
-	Request       WunderGraphRequest `json:"request"`
-	OperationName string             `json:"operationName"`
-	OperationType string             `json:"operationType"`
-}
-
-type OnRequestHookResponse struct {
-	Skip    bool                `json:"skip"`
-	Cancel  bool                `json:"cancel"`
-	Request *WunderGraphRequest `json:"request"`
 }
 
 func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData) (*http.Request, error) {
@@ -250,11 +237,11 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 			return nil, err
 		}
 	}
-	payload := OnRequestHookPayload{
-		Request: WunderGraphRequest{
+	payload := hooks.OnRequestHookPayload{
+		Request: hooks.WunderGraphRequest{
 			Method:     r.Method,
 			RequestURI: r.URL.String(),
-			Headers:    headerSliceToCSV(r.Header),
+			Headers:    hooks.HeaderSliceToCSV(r.Header),
 			Body:       body,
 		},
 		OperationName: metaData.OperationName,
@@ -266,14 +253,16 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 	}
 	if user := authentication.UserFromContext(r.Context()); user != nil {
 		if userJson, err := json.Marshal(user); err == nil {
-			hookData, _ = jsonparser.Set(hookData, userJson, "user")
+			hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 		}
 	}
-	out, err := t.hooksClient.DoGlobalRequest(r.Context(), middlewareclient.HttpTransportOnRequest, hookData)
+
+	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hooks.HttpTransportOnRequest, hookData)
 	if err != nil {
 		return nil, err
 	}
-	var response OnRequestHookResponse
+
+	var response hooks.OnRequestHookResponse
 	err = json.Unmarshal(out.Response, &response)
 	if err != nil {
 		return nil, err
@@ -290,31 +279,10 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		if err != nil {
 			return nil, err
 		}
-		req.Header = headerCSVToSlice(response.Request.Headers)
+		req.Header = hooks.HeaderCSVToSlice(response.Request.Headers)
 		return req, nil
 	}
 	return r, nil
-}
-
-type WunderGraphResponse struct {
-	StatusCode int               `json:"statusCode"`
-	Status     string            `json:"status"`
-	Method     string            `json:"method"`
-	RequestURI string            `json:"requestURI"`
-	Headers    map[string]string `json:"headers"`
-	Body       json.RawMessage   `json:"body,omitempty"`
-}
-
-type OnResponseHookPayload struct {
-	Response      WunderGraphResponse `json:"response"`
-	OperationName string              `json:"operationName"`
-	OperationType string              `json:"operationType"`
-}
-
-type OnResponseHookResponse struct {
-	Skip     bool                 `json:"skip"`
-	Cancel   bool                 `json:"cancel"`
-	Response *WunderGraphResponse `json:"response"`
 }
 
 func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData) (*http.Response, error) {
@@ -322,11 +290,11 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 	if err != nil {
 		return nil, err
 	}
-	payload := OnResponseHookPayload{
-		Response: WunderGraphResponse{
+	payload := hooks.OnResponseHookPayload{
+		Response: hooks.WunderGraphResponse{
 			Method:     r.Request.Method,
 			RequestURI: r.Request.URL.String(),
-			Headers:    headerSliceToCSV(r.Header),
+			Headers:    hooks.HeaderSliceToCSV(r.Header),
 			Body:       body,
 			StatusCode: r.StatusCode,
 			Status:     r.Status,
@@ -340,14 +308,16 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 	}
 	if user := authentication.UserFromContext(r.Request.Context()); user != nil {
 		if userJson, err := json.Marshal(user); err == nil {
-			hookData, _ = jsonparser.Set(hookData, userJson, "user")
+			hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 		}
 	}
-	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), middlewareclient.HttpTransportOnResponse, hookData)
+
+	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), hooks.HttpTransportOnResponse, hookData)
 	if err != nil {
 		return nil, err
 	}
-	var response OnResponseHookResponse
+
+	var response hooks.OnResponseHookResponse
 	err = json.Unmarshal(out.Response, &response)
 	if err != nil {
 		return nil, err
@@ -362,7 +332,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 	if response.Response != nil {
 		r.StatusCode = response.Response.StatusCode
 		r.Body = ioutil.NopCloser(bytes.NewBuffer(response.Response.Body))
-		r.Header = headerCSVToSlice(response.Response.Headers)
+		r.Header = hooks.HeaderCSVToSlice(response.Response.Headers)
 	}
 	return r, nil
 }
@@ -410,34 +380,4 @@ func (t *ApiTransport) handleUpstreamAuthentication(request *http.Request, auth 
 		return fmt.Errorf("not implemented")
 	}
 	return nil
-}
-
-func HttpRequestToWunderGraphRequestJSON(r *http.Request, withBody bool) ([]byte, error) {
-	var body []byte
-	if withBody {
-		body, _ = ioutil.ReadAll(r.Body)
-		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-	}
-	return json.Marshal(WunderGraphRequest{
-		Method:     r.Method,
-		RequestURI: r.URL.String(),
-		Headers:    headerSliceToCSV(r.Header),
-		Body:       body,
-	})
-}
-
-func headerSliceToCSV(headers map[string][]string) map[string]string {
-	result := make(map[string]string, len(headers))
-	for k, v := range headers {
-		result[k] = strings.Join(v, ",")
-	}
-	return result
-}
-
-func headerCSVToSlice(headers map[string]string) map[string][]string {
-	result := make(map[string][]string, len(headers))
-	for k, v := range headers {
-		result[k] = []string{v}
-	}
-	return result
 }

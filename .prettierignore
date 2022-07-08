@@ -1,17 +1,20 @@
-# Deep Directories
-**/dist
-**/.output
-**/node_modules
-**/fixtures
-**/vendor
+node_modules
 
-# Directories
-.github
-.changeset
-generated
-.wundergraph/generated
-.next
-
-# Files
-README.md
+# Package manager
 pnpm-lock.yaml
+*lock.json
+
+# WunderGraph
+generated
+
+# Next.js build output
+.next
+out
+
+# Logs
+logs
+*.log
+
+# IDE
+.vscode
+.idea

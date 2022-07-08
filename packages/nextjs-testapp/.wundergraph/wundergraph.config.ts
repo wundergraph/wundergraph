@@ -3,6 +3,7 @@ import {
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -137,12 +138,20 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
+		allowedOrigins: ['http://localhost:3003'],
 	},
 	authentication: {
 		cookieBased: {
-			providers: [authProviders.demo()],
-			authorizedRedirectUris: ['http://localhost:3000/authentication'],
+			providers: [
+				authProviders.demo(),
+				authProviders.openIdConnect({
+					id: 'auth0',
+					issuer: new EnvironmentVariable('AUTH0_ISSUER'),
+					clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
+					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
+				}),
+			],
+			authorizedRedirectUris: ['http://localhost:3000/authentication', 'http://localhost:3003/auth-test'],
 		},
 	},
 	/*links: [

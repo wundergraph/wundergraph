@@ -1,4 +1,4 @@
-name: wundernode-docker-release
+name: Engine Docker Release
 on:
   push:
     tags: ['v*']
@@ -9,10 +9,11 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
-    if: "false"
+    if: 'false'
     steps:
       - uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0
       - name: Docker build and publish
         run: |
           VERSION=$(make version)

@@ -9,17 +9,10 @@ In this scenario, we're using a local PostgreSQL database via docker-compose.
 
 ## Getting started
 
-Install the dependencies and run the database.
+Install the dependencies and run the application.
 
 ```shell
-npm install
-npm run start-database
-```
-
-Then start your WunderGraph instance.
-
-```
-npm run dev
+npm install && npm start
 ```
 
 ## Checkout the generated Schema
@@ -27,11 +20,11 @@ npm run dev
 Once the introspection is complete,
 you can have a look at the generated GraphQL Schema:
 
-```examples/postgres/.wundergraph/generated/wundergraph.app.schema.graphql```
+`examples/postgres/.wundergraph/generated/wundergraph.app.schema.graphql`
 
 We've pre-defined two GraphQL Operations in the operations directory for you:
 
-```examples/postgres/.wundergraph/operations```
+`examples/postgres/.wundergraph/operations`
 
 ## Interacting with the API
 

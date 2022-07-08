@@ -3,3 +3,4 @@ src
 tsconfig.json
 .gitignore
 dist/tsconfig.tsbuildinfo
+bin/wunderctl

@@ -43,9 +43,9 @@ const (
 	ClientRequestKey = "__wg_clientRequest"
 )
 
-func GetCtx(r *http.Request, cfg Config) *resolve.Context {
+func GetCtx(r, clientRequest *http.Request, cfg Config) *resolve.Context {
 	next := ctxPool.Get()
-	ctx := context.WithValue(r.Context(), ClientRequestKey, r)
+	ctx := context.WithValue(r.Context(), ClientRequestKey, clientRequest)
 	if next == nil {
 		resolveCtx := resolve.NewContext(ctx)
 		resolveCtx.Request.Header = r.Header
