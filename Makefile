@@ -1,10 +1,8 @@
 all: check-setup engine-dev
-  # avoid running postinstall script
-  # because the build is not there yet
-	pnpm install --ignore-scripts
-	pnpm run build
-  # run postinstall script
+	pnpm -r run --filter="./packages/wunderctl" build
+	pnpm -r run --filter="./packages/wunderctl" postinstall
 	pnpm install
+	pnpm run build
 
 engine-dev: codegen
 	go mod tidy
