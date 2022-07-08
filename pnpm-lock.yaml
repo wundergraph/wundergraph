@@ -28,6 +28,53 @@ importers:
       release-it: 15.1.1
       rimraf: 3.0.2
 
+  docs-website:
+    specifiers:
+      '@docsearch/react': ^3.1.1
+      '@headlessui/react': ^1.6.5
+      '@markdoc/markdoc': ^0.1.3
+      '@markdoc/next.js': ^0.1.6
+      '@sindresorhus/slugify': ^2.1.0
+      '@tailwindcss/typography': ^0.5.2
+      '@types/node': ^18.0.3
+      autoprefixer: ^10.4.7
+      clsx: ^1.2.0
+      eslint: 8.19.0
+      eslint-config-next: 12.2.0
+      focus-visible: ^5.2.0
+      next: 12.2.0
+      postcss-focus-visible: ^6.0.4
+      postcss-import: ^14.1.0
+      prettier: ^2.7.1
+      prettier-plugin-tailwindcss: ^0.1.11
+      prism-react-renderer: ^1.3.5
+      react: 18.2.0
+      react-dom: 18.2.0
+      tailwindcss: ^3.1.4
+    dependencies:
+      '@docsearch/react': 3.1.1_biqbaboplfbrettd7655fr4n2y
+      '@headlessui/react': 1.6.6_biqbaboplfbrettd7655fr4n2y
+      '@markdoc/markdoc': 0.1.3
+      '@markdoc/next.js': 0.1.6_lwqxoh3rgnuyv5dvpdzsgpfajq
+      '@sindresorhus/slugify': 2.1.0
+      '@tailwindcss/typography': 0.5.3_tailwindcss@3.1.5
+      autoprefixer: 10.4.7
+      clsx: 1.2.1
+      focus-visible: 5.2.0
+      next: 12.2.0_biqbaboplfbrettd7655fr4n2y
+      postcss-focus-visible: 6.0.4
+      postcss-import: 14.1.0
+      prism-react-renderer: 1.3.5_react@18.2.0
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      tailwindcss: 3.1.5
+    devDependencies:
+      '@types/node': 18.0.3
+      eslint: 8.19.0
+      eslint-config-next: 12.2.0_eslint@8.19.0
+      prettier: 2.7.1
+      prettier-plugin-tailwindcss: 0.1.12_prettier@2.7.1
+
   packages/default-testapp:
     specifiers:
       '@types/node': ^14.14.37
@@ -274,51 +321,6 @@ importers:
       '@types/rimraf': 3.0.2
       '@types/tar': 4.0.5
       typescript: 4.7.2
-
-  website:
-    specifiers:
-      '@docsearch/react': ^3.1.1
-      '@headlessui/react': ^1.6.5
-      '@markdoc/markdoc': ^0.1.3
-      '@markdoc/next.js': ^0.1.6
-      '@sindresorhus/slugify': ^2.1.0
-      '@tailwindcss/typography': ^0.5.2
-      autoprefixer: ^10.4.7
-      clsx: ^1.2.0
-      eslint: 8.19.0
-      eslint-config-next: 12.2.0
-      focus-visible: ^5.2.0
-      next: 12.2.0
-      postcss-focus-visible: ^6.0.4
-      postcss-import: ^14.1.0
-      prettier: ^2.7.1
-      prettier-plugin-tailwindcss: ^0.1.11
-      prism-react-renderer: ^1.3.5
-      react: 18.2.0
-      react-dom: 18.2.0
-      tailwindcss: ^3.1.4
-    dependencies:
-      '@docsearch/react': 3.1.1_biqbaboplfbrettd7655fr4n2y
-      '@headlessui/react': 1.6.5_biqbaboplfbrettd7655fr4n2y
-      '@markdoc/markdoc': 0.1.3
-      '@markdoc/next.js': 0.1.6_lwqxoh3rgnuyv5dvpdzsgpfajq
-      '@sindresorhus/slugify': 2.1.0
-      '@tailwindcss/typography': 0.5.2_tailwindcss@3.1.4
-      autoprefixer: 10.4.7
-      clsx: 1.2.1
-      focus-visible: 5.2.0
-      next: 12.2.0_biqbaboplfbrettd7655fr4n2y
-      postcss-focus-visible: 6.0.4
-      postcss-import: 14.1.0
-      prism-react-renderer: 1.3.5_react@18.2.0
-      react: 18.2.0
-      react-dom: 18.2.0_react@18.2.0
-      tailwindcss: 3.1.4
-    devDependencies:
-      eslint: 8.19.0
-      eslint-config-next: 12.2.0_eslint@8.19.0
-      prettier: 2.7.1
-      prettier-plugin-tailwindcss: 0.1.11_prettier@2.7.1
 
 packages:
 
@@ -1141,8 +1143,8 @@ packages:
       '@hapi/hoek': 9.2.1
     dev: true
 
-  /@headlessui/react/1.6.5_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-3VkKteDxlxf3fE0KbfO9t60KC1lM7YNpZggLpwzVNg1J/zwL+h+4N7MBlFDVpInZI3rKlZGpNx0PWsG/9c2vQg==}
+  /@headlessui/react/1.6.6_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-MFJtmj9Xh/hhBMhLccGbBoSk+sk61BlP6sJe4uQcVMtXZhCgGqd2GyIQzzmsdPdTEWGSF434CBi8mnhR6um46Q==}
     engines: {node: '>=10'}
     peerDependencies:
       react: ^16 || ^17 || ^18
@@ -2299,15 +2301,15 @@ packages:
       defer-to-connect: 2.0.1
     dev: true
 
-  /@tailwindcss/typography/0.5.2_tailwindcss@3.1.4:
-    resolution: {integrity: sha512-coq8DBABRPFcVhVIk6IbKyyHUt7YTEC/C992tatFB+yEx5WGBQrCgsSFjxHUr8AWXphWckadVJbominEduYBqw==}
+  /@tailwindcss/typography/0.5.3_tailwindcss@3.1.5:
+    resolution: {integrity: sha512-Cn4MufL/xiTh2Npw26xiL7gP3GFkJH+zWM8DAm/NNEr4gF5N9D6gY9zMNNQUu27m8g0IIk665BUuoU92wVUBkA==}
     peerDependencies:
-      tailwindcss: '>=3.0.0 || >= 3.0.0-alpha.1 || insiders'
+      tailwindcss: '>=3.0.0 || insiders'
     dependencies:
       lodash.castarray: 4.4.0
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
-      tailwindcss: 3.1.4
+      tailwindcss: 3.1.5
     dev: false
 
   /@tokenizer/token/0.3.0:
@@ -2525,6 +2527,10 @@ packages:
 
   /@types/node/17.0.32:
     resolution: {integrity: sha512-eAIcfAvhf/BkHcf4pkLJ7ECpBAhh9kcxRBpip9cTiO+hf+aJrsxYxBeS6OXvOd9WqNAJmavXVpZvY1rBjNsXmw==}
+
+  /@types/node/18.0.3:
+    resolution: {integrity: sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ==}
+    dev: true
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -4545,7 +4551,7 @@ packages:
     resolution: {integrity: sha512-0En0w03NRVMn9Uiyn8YRPDKvWjxCWkslUEhGNTdGx15RvPJYQ+lbOlqrlNI2vEAs4pDYK4f/HN2TbDmk5TP0iw==}
     dependencies:
       debug: 3.2.7
-      resolve: 1.22.0
+      resolve: 1.22.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4562,7 +4568,7 @@ packages:
       eslint-plugin-import: 2.26.0_6o2fuefo7gfpbr7nbqwgu7w4mq
       glob: 7.2.0
       is-glob: 4.0.3
-      resolve: 1.22.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.1
     transitivePeerDependencies:
       - supports-color
@@ -4618,7 +4624,7 @@ packages:
       is-glob: 4.0.3
       minimatch: 3.1.2
       object.values: 1.1.5
-      resolve: 1.22.0
+      resolve: 1.22.1
       tsconfig-paths: 3.14.1
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -5792,7 +5798,7 @@ packages:
     dev: true
 
   /imurmurhash/0.1.4:
-    resolution: {integrity: sha1-khi5srkoojixPcT7a21XbyMUU+o=}
+    resolution: {integrity: sha512-JmXMZ6wuvDmLiHEml9ykzqO6lwFbof0GG4IkcGaENdCRDDmMVnny7s5HsIgHCbaq0w2MyPhDqkhTUgS2LU2PHA==}
     engines: {node: '>=0.8.19'}
     dev: true
 
@@ -5960,7 +5966,7 @@ packages:
     dev: true
 
   /is-extglob/2.1.1:
-    resolution: {integrity: sha1-qIwCU1eR8C7TfHahueqXc8gz+MI=}
+    resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
     engines: {node: '>=0.10.0'}
 
   /is-fullwidth-code-point/3.0.0:
@@ -7672,12 +7678,57 @@ packages:
     dependencies:
       '@next/env': 12.2.0
       '@swc/helpers': 0.4.2
-      caniuse-lite: 1.0.30001334
+      caniuse-lite: 1.0.30001363
       postcss: 8.4.5
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       styled-jsx: 5.0.2_react@18.2.0
       use-sync-external-store: 1.1.0_react@18.2.0
+    optionalDependencies:
+      '@next/swc-android-arm-eabi': 12.2.0
+      '@next/swc-android-arm64': 12.2.0
+      '@next/swc-darwin-arm64': 12.2.0
+      '@next/swc-darwin-x64': 12.2.0
+      '@next/swc-freebsd-x64': 12.2.0
+      '@next/swc-linux-arm-gnueabihf': 12.2.0
+      '@next/swc-linux-arm64-gnu': 12.2.0
+      '@next/swc-linux-arm64-musl': 12.2.0
+      '@next/swc-linux-x64-gnu': 12.2.0
+      '@next/swc-linux-x64-musl': 12.2.0
+      '@next/swc-win32-arm64-msvc': 12.2.0
+      '@next/swc-win32-ia32-msvc': 12.2.0
+      '@next/swc-win32-x64-msvc': 12.2.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - babel-plugin-macros
+    dev: false
+
+  /next/12.2.0_ef5jwxihqo6n7gxfmzogljlgcm:
+    resolution: {integrity: sha512-B4j7D3SHYopLYx6/Ark0fenwIar9tEaZZFAaxmKjgcMMexhVJzB3jt7X+6wcdXPPMeUD6r09weUtnDpjox/vIA==}
+    engines: {node: '>=12.22.0'}
+    hasBin: true
+    peerDependencies:
+      fibers: '>= 3.1.0'
+      node-sass: ^6.0.0 || ^7.0.0
+      react: ^17.0.2 || ^18.0.0-0
+      react-dom: ^17.0.2 || ^18.0.0-0
+      sass: ^1.3.0
+    peerDependenciesMeta:
+      fibers:
+        optional: true
+      node-sass:
+        optional: true
+      sass:
+        optional: true
+    dependencies:
+      '@next/env': 12.2.0
+      '@swc/helpers': 0.4.2
+      caniuse-lite: 1.0.30001363
+      postcss: 8.4.5
+      react: 18.1.0
+      react-dom: 18.1.0_react@18.1.0
+      styled-jsx: 5.0.2_react@18.1.0
+      use-sync-external-store: 1.1.0_react@18.1.0
     optionalDependencies:
       '@next/swc-android-arm-eabi': 12.2.0
       '@next/swc-android-arm64': 12.2.0
@@ -8653,9 +8704,9 @@ packages:
       postcss: 8.4.14
     dev: false
 
-  /postcss-load-config/3.1.4_postcss@8.4.14:
-    resolution: {integrity: sha512-6DiM4E7v4coTE4uzA8U//WhtPwyhiim3eyjEMFCnUpzbrkK9wJHgKDT2mR+HbtSrd/NubVaYTOpSpjUl8NQeRg==}
-    engines: {node: '>= 10'}
+  /postcss-load-config/4.0.1_postcss@8.4.14:
+    resolution: {integrity: sha512-vEJIc8RdiBRu3oRAI0ymerOn+7rPuMvRXslTvZUKZonDHFIczxztIyJ1urxM1x9JXEikvpWWTUUqal5j/8QgvA==}
+    engines: {node: '>= 14'}
     peerDependencies:
       postcss: '>=8.0.9'
       ts-node: '>=9.0.0'
@@ -8667,7 +8718,7 @@ packages:
     dependencies:
       lilconfig: 2.0.5
       postcss: 8.4.14
-      yaml: 1.10.2
+      yaml: 2.1.1
     dev: false
 
   /postcss-nested/5.0.6_postcss@8.4.14:
@@ -8821,8 +8872,8 @@ packages:
     engines: {node: '>= 0.8.0'}
     dev: true
 
-  /prettier-plugin-tailwindcss/0.1.11_prettier@2.7.1:
-    resolution: {integrity: sha512-a28+1jvpIZQdZ/W97wOXb6VqI762MKE/TxMMuibMEHhyYsSxQA8Ek30KObd5kJI2HF1ldtSYprFayXJXi3pz8Q==}
+  /prettier-plugin-tailwindcss/0.1.12_prettier@2.7.1:
+    resolution: {integrity: sha512-pEZ6tppwknCeq3ObR9g8t61AhWtVRRR3I0EQNeiRrrJ3D42FJGeUDxiFc/LJRYEeAx5JOxagsF0MICwuWOJa+w==}
     engines: {node: '>=12.17.0'}
     peerDependencies:
       prettier: '>=2.2.0'
@@ -8839,7 +8890,6 @@ packages:
     resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
     engines: {node: '>=10.13.0'}
     hasBin: true
-    dev: true
 
   /pretty-format/27.5.1:
     resolution: {integrity: sha512-Qb1gy5OrP5+zDf2Bvnzdl3jsTf1qXVMazbvCoKhtKqVs4/YK4ozX4gKQJJVyNe+cajNPn0KoC0MC3FUmaHWEmQ==}
@@ -9390,6 +9440,14 @@ packages:
 
   /resolve/1.22.0:
     resolution: {integrity: sha512-Hhtrw0nLeSrFQ7phPp4OOcVjLPIeMnRlr5mcnVuMe7M/7eBn98A3hmFRLoFo3DLZkivSYwhRUJTyPyWAk56WLw==}
+    hasBin: true
+    dependencies:
+      is-core-module: 2.9.0
+      path-parse: 1.0.7
+      supports-preserve-symlinks-flag: 1.0.0
+
+  /resolve/1.22.1:
+    resolution: {integrity: sha512-nBpuuYuY5jFsli/JIs1oldw6fOQCBioohqWZg/2hiaOybXOft4lonv85uDOKXdf8rhyK159cxU5cDcK/NKk8zw==}
     hasBin: true
     dependencies:
       is-core-module: 2.9.0
@@ -10115,8 +10173,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /tailwindcss/3.1.4:
-    resolution: {integrity: sha512-NrxbFV4tYsga/hpWbRyUfIaBrNMXDxx5BsHgBS4v5tlyjf+sDsgBg5m9OxjrXIqAS/uR9kicxLKP+bEHI7BSeQ==}
+  /tailwindcss/3.1.5:
+    resolution: {integrity: sha512-bC/2dy3dGPqxMWAqFSRgQxVCfmO/31ZbeEp8s9DMDh4zgPZ5WW1gxRJkbBkXcTUIzaSUdhWrcsrSOe32ccgB4w==}
     engines: {node: '>=12.13.0'}
     hasBin: true
     dependencies:
@@ -10136,12 +10194,12 @@ packages:
       postcss: 8.4.14
       postcss-import: 14.1.0_postcss@8.4.14
       postcss-js: 4.0.0_postcss@8.4.14
-      postcss-load-config: 3.1.4_postcss@8.4.14
+      postcss-load-config: 4.0.1_postcss@8.4.14
       postcss-nested: 5.0.6_postcss@8.4.14
       postcss-selector-parser: 6.0.10
       postcss-value-parser: 4.2.0
       quick-lru: 5.1.1
-      resolve: 1.22.0
+      resolve: 1.22.1
     transitivePeerDependencies:
       - ts-node
     dev: false
@@ -10607,6 +10665,14 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: true
 
+  /use-sync-external-store/1.1.0_react@18.1.0:
+    resolution: {integrity: sha512-SEnieB2FPKEVne66NpXPd1Np4R1lTNKfjuy3XdIoPQKYBAFdzbzSZlSn1KJZUiihQLQC5Znot4SBz1EOTBwQAQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.1.0
+    dev: false
+
   /use-sync-external-store/1.1.0_react@18.2.0:
     resolution: {integrity: sha512-SEnieB2FPKEVne66NpXPd1Np4R1lTNKfjuy3XdIoPQKYBAFdzbzSZlSn1KJZUiihQLQC5Znot4SBz1EOTBwQAQ==}
     peerDependencies:
@@ -10946,6 +11012,11 @@ packages:
     resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
     engines: {node: '>= 6'}
 
+  /yaml/2.1.1:
+    resolution: {integrity: sha512-o96x3OPo8GjWeSLF+wOAbrPfhFOGY0W00GNaxCDv+9hkcDJEnev1yh8S7pgHF0ik6zc8sQLuL8hjHjJULZp8bw==}
+    engines: {node: '>= 14'}
+    dev: false
+
   /yargs-parser/20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
     engines: {node: '>=10'}
@@ -11003,7 +11074,7 @@ packages:
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/sdk': file:packages/sdk
       handlebars: 4.7.7
-      next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
+      next: 12.2.0_ef5jwxihqo6n7gxfmzogljlgcm
       object-hash: 2.2.0
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
@@ -11051,7 +11122,7 @@ packages:
       object-hash: 2.2.0
       openapi-types: 10.0.0
       postman-collection: 4.1.2
-      prettier: 2.6.2
+      prettier: 2.7.1
       protobufjs: 6.11.2
       react-ssr-prepass: 1.5.0
       resolve-pkg: 2.0.0

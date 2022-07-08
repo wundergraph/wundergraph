@@ -14,7 +14,7 @@
   "homepage": "https://wundergraph.com",
   "scripts": {
     "build": "pnpm -r run build",
-    "build:libs": "pnpm -r run --filter='!./packages/*-testapp' build",
+    "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
