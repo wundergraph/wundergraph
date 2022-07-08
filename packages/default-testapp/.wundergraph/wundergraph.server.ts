@@ -39,7 +39,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				};
 			},
 		},
-		global: {},
 		queries: {
 			Dragons: {
 				mutatingPostResolve: async (hook) => {
