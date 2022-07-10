@@ -66,6 +66,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Cross API joins across data-sources](/examples/cross-api-joins)
 - [Inject a Bearer Token with Auth0](./examples/inject-bearer)
 - [Publish & Install APIs](./examples/publish-install-api)
+- [Dockerize WunderGraph](https://github.com/wundergraph/docker)
 
 ## The WunderGraph Stack
 
