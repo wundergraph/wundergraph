@@ -1,0 +1,18 @@
+version: '2'
+services:
+  accounts:
+    build: ./services/accounts
+    ports:
+      - '4001:4001'
+  reviews:
+    build: ./services/reviews
+    ports:
+      - '4002:4002'
+  products:
+    build: ./services/products
+    ports:
+      - '4003:4003'
+  inventory:
+    build: ./services/inventory
+    ports:
+      - '4004:4004'

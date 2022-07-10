@@ -61,7 +61,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [PostgreSQL](/examples/postgres)
 - [HTTP & Server-Side Caching](/examples/caching)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
-- [Apollo Federation, REST/OpenAPI, NextJS](https://github.com/wundergraph/wundergraph-demo)
+- [Apollo Federation](/examples/apollo-federation)
 - [Subscriptions & Live Queries](./examples/nextjs-postgres-prisma)
 - [Cross API joins across data-sources](/examples/cross-api-joins)
 - [Inject a Bearer Token with Auth0](./examples/inject-bearer)

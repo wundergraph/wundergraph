@@ -1,7 +1,6 @@
 all: check-setup engine-dev
 	pnpm install --ignore-scripts
 	pnpm -r run --filter="./packages/wunderctl" build
-
 	pnpm -r run --filter="./packages/wunderctl" postinstall
 	pnpm run build
 

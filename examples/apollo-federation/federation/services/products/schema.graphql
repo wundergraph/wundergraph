@@ -1,0 +1,18 @@
+type Query @extends {
+	topProducts(first: Int = 5, random: Boolean): [Product]
+}
+
+type Product @key(fields: "upc") {
+	upc: String!
+	name: String
+	price: Int
+	weight: Int
+}
+
+type Subscription @extends {
+	updatedPrice: Product!
+}
+
+type Mutation @extends {
+	setPrice(upc: String!, price: Int!): Product
+}
