@@ -59,6 +59,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [NextJS](/examples/nextjs)
 - [FaunaDB Starter](/examples/faunadb-nextjs)
 - [PostgreSQL](/examples/postgres)
+- [Hook into the request lifecycle](/examples/hooks)
 - [HTTP & Server-Side Caching](/examples/caching)
 - [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
 - [Apollo Federation](/examples/apollo-federation)
