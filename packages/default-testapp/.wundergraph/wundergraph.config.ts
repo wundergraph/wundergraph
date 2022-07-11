@@ -8,6 +8,7 @@ import {
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import { golangClient } from '@wundergraph/golang-client';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -38,9 +39,27 @@ const weather = introspect.graphql({
 	url: 'https://graphql-weather-api.herokuapp.com/',
 });
 
+const federatedApi = introspect.federation({
+	apiNamespace: 'federated',
+	upstreams: [
+		{
+			url: 'http://localhost:4001/graphql',
+		},
+		{
+			url: 'http://localhost:4002/graphql',
+		},
+		{
+			url: 'http://localhost:4003/graphql',
+		},
+		{
+			url: 'http://localhost:4004/graphql',
+		},
+	],
+});
+
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, jsp, weather, countries],
+	apis: [spaceX, jsp, weather, countries, federatedApi],
 });
 
 // configureWunderGraph emits the configuration
@@ -56,6 +75,10 @@ configureWunderGraphApplication({
 				templates.typescript.operations,
 				templates.typescript.linkBuilder,
 			],
+		},
+		{
+			templates: [...golangClient.all({ packageName: 'client' })],
+			path: './generated/golang/client',
 		},
 	],
 	cors: {

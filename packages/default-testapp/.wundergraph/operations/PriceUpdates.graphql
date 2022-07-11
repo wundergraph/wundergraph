@@ -1,0 +1,14 @@
+subscription {
+	federated_updatedPrice {
+		name
+		inStock
+		price
+		reviews {
+			id
+			author {
+				id
+				name
+			}
+		}
+	}
+}
