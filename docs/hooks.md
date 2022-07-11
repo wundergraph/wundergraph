@@ -3,8 +3,6 @@
 WunderGraph Hooks are an essential part to customize the Request Lifecycle of WunderGraph Applications.
 All hooks are defined in the `wuundergraph.config.ts` file with type-safety and autocompletion.
 
-> **Note**: Currently, hooks are limited to HTTP data-sources.
-
 ## Hooks summary
 
 Here you can see the list of hooks that WunderGraph provides.
