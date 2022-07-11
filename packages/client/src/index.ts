@@ -572,7 +572,7 @@ export interface WithWunderGraphOptions {
 	disableFetchUserOnWindowFocus?: boolean;
 }
 
-interface InternalQueryArgs {
+export interface InternalQueryArgs {
 	input?: any;
 	abortSignal?: AbortSignal;
 	subscribeOnce?: boolean;
@@ -589,7 +589,7 @@ export interface QueryArgs {
 	refetchOnWindowFocus?: boolean;
 }
 
-interface InternalQueryArgsWithInput<Input> extends InternalQueryArgs {
+export interface InternalQueryArgsWithInput<Input> extends InternalQueryArgs {
 	input: Input;
 }
 
@@ -608,7 +608,7 @@ export interface SubscriptionProps {
 	requiresAuthentication: boolean;
 }
 
-interface InternalSubscriptionArgs {
+export interface InternalSubscriptionArgs {
 	input?: any;
 	abortSignal?: AbortSignal;
 	subscribeOnce?: boolean;
@@ -623,7 +623,7 @@ export interface SubscriptionArgs {
 	disableSSR?: boolean;
 }
 
-interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscriptionArgs {
+export interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscriptionArgs {
 	input: Input;
 }
 
@@ -636,7 +636,7 @@ export interface MutationProps {
 	requiresAuthentication: boolean;
 }
 
-interface InternalMutationArgs {
+export interface InternalMutationArgs {
 	abortSignal?: AbortSignal;
 	refetchMountedOperationsOnSuccess?: boolean;
 }
@@ -645,7 +645,7 @@ export interface MutationArgs {
 	refetchMountedOperationsOnSuccess?: boolean;
 }
 
-interface InternalMutationArgsWithInput<Input> extends InternalMutationArgs {
+export interface InternalMutationArgsWithInput<Input> extends InternalMutationArgs {
 	input: Input;
 }
 

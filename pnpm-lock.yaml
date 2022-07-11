@@ -28,6 +28,23 @@ importers:
       release-it: 15.1.1
       rimraf: 3.0.2
 
+  packages/client:
+    specifiers:
+      '@types/node': ^17.0.32
+      '@types/object-hash': ^1.3.4
+      '@wundergraph/protobuf': workspace:^0.91.1
+      '@wundergraph/sdk': workspace:^0.95.0
+      object-hash: ^2.2.0
+      typescript: ^4.7.2
+    dependencies:
+      '@wundergraph/protobuf': link:../protobuf
+      object-hash: 2.2.0
+    devDependencies:
+      '@types/node': 17.0.32
+      '@types/object-hash': 1.3.4
+      '@wundergraph/sdk': link:../sdk
+      typescript: 4.7.2
+
   packages/default-testapp:
     specifiers:
       '@types/node': ^14.14.37
@@ -75,6 +92,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.5
+      '@wundergraph/client': workspace:^0.0.1
       '@wundergraph/protobuf': workspace:^0.91.1
       '@wundergraph/sdk': workspace:^0.95.0
       handlebars: ^4.7.7
@@ -85,6 +103,7 @@ importers:
       react-ssr-prepass: ^1.5.0
       typescript: ^4.7.2
     dependencies:
+      '@wundergraph/client': link:../client
       '@wundergraph/protobuf': link:../protobuf
       handlebars: 4.7.7
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
@@ -9586,6 +9605,7 @@ packages:
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.2 || ^18.0.0
     dependencies:
+      '@wundergraph/client': link:packages/client
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/sdk': file:packages/sdk
       handlebars: 4.7.7
