@@ -1,6 +1,6 @@
 # WunderGraph Hooks
 
-This example demonstrates how to use the `mutatingPostResolve` hook to change the response of the `Dragons` operation. Hooks are the type-safe way to write custom middleware functions. If you need an overview about all possible hooks, please refer to the [WunderGraph Hooks documentation](docs/hooks.md).
+This example demonstrates how to use the `mutatingPostResolve` hook to change the response of the `Dragons` operation. Hooks are the type-safe way to write custom middleware functions. If you need an overview about all possible hooks, please refer to the [WunderGraph Hooks documentation](/docs/hooks.md).
 
 ## Getting Started
 
