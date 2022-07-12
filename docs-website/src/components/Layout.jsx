@@ -358,48 +358,29 @@ const navigation = [
 		],
 	},
 	{
-		title:
-			'A principled approach to building an Enterprise-Grade Data Platform',
-		links: [
-			{
-				title: 'Introduction',
-				href: '/docs/enterprise-grade-data-platform/introduction',
-			},
-			{
-				title: 'The benefits of building',
-				href: '/docs/enterprise-grade-data-platform/why-api-first-matters',
-			},
-			{
-				title: 'Why API first matters',
-				href: '/docs/enterprise-grade-data-platform/why-api-first-matters',
-			},
-			{
-				title: 'Scaling your business with an API first data platform',
-				href: '/docs/enterprise-grade-data-platform/scaling-your-business-with-an-api-first-data-platform',
-			},
-		],
-	},
-	{
-		title: 'The 8 Principles of building an API first data platform',
-		links: [
-			{
-				title: 'Introduction',
-				href: '/docs/api-first-data-platform/introduction',
-			},
-		],
-	},
-	{
 		title: 'Core Concepts',
 		links: [
-			{ title: 'API Namespacing', href: '/docs/core-concepts/api-namespacing' },
-			{ title: 'Virtual Graph', href: '/docs/core-concepts/virtual-graph' },
-			{ title: 'The `__join` field', href: '/docs/core-concepts/__join-field' },
+			{
+				title: 'API Namespacing',
+				href: '/docs/core-concepts/api-namespacing',
+			},
+			{
+				title: 'Virtual Graph',
+				href: '/docs/core-concepts/virtual-graph',
+			},
+			{
+				title: 'The `__join` field',
+				href: '/docs/core-concepts/__join-field',
+			},
 		],
 	},
 	{
 		title: 'Components of WunderGraph',
 		links: [
-			{ title: 'wunderctl', href: '/docs/components-of-wundergraph/wunderctl' },
+			{
+				title: 'wunderctl',
+				href: '/docs/components-of-wundergraph/wunderctl',
+			},
 			{
 				title: 'WunderGraph SDK',
 				href: '/docs/components-of-wundergraph/wundergraph-sdk',
@@ -421,7 +402,10 @@ const navigation = [
 				title: 'wunderctl init',
 				href: '/docs/wunderctl-reference/wunderctl-init',
 			},
-			{ title: 'wunderctl up', href: '/docs/wunderctl-reference/wunderctl-up' },
+			{
+				title: 'wunderctl up',
+				href: '/docs/wunderctl-reference/wunderctl-up',
+			},
 			{
 				title: 'wunderctl generate',
 				href: '/docs/wunderctl-reference/wunderctl-generate',
@@ -462,7 +446,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'WunderGraph Directives Reference',
+		title: 'Directives Reference',
 		links: [
 			{
 				title: '@fromClaim directive',
@@ -470,56 +454,62 @@ const navigation = [
 			},
 			{
 				title: '@jsonSchema directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/json-schema-directive',
 			},
 			{
 				title: '@hooksVariable directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/hooks-variable-directive',
 			},
 			{
 				title: '@rbac directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/rbac-directive',
 			},
 			{
 				title: '@injectUUID directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/inject-uuid-directive',
 			},
 			{
 				title: '@injectCurrentDateTime directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/inject-current-datetime-directive',
 			},
 			{
 				title: '@injectEnvironmentVariable directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/inject-environment-variable-directive',
 			},
 			{
 				title: '@internalOperation directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/internal-operation-directive',
 			},
 			{
 				title: '@export directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/export-directive',
 			},
 			{
 				title: '@internal directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/internal-directive',
 			},
 			{
 				title: '@transform directive',
-				href: '/docs/directives-reference/from-claim-directive',
+				href: '/docs/directives-reference/transform-directive',
 			},
 		],
 	},
 	{
 		title: 'wundergraph.config.ts Reference',
 		links: [
-			{ title: 'Overview', href: '/docs/wundergraph-config-ts-reference/' },
+			{
+				title: 'Overview',
+				href: '/docs/wundergraph-config-ts-reference',
+			},
 		],
 	},
 	{
 		title: 'wundergraph.server.ts Reference',
 		links: [
-			{ title: 'Overview', href: '/docs/wundergraph-server-ts-reference/' },
+			{
+				title: 'Overview',
+				href: '/docs/wundergraph-server-ts-reference',
+			},
 			{
 				title: 'preResolve hook',
 				href: '/docs/wundergraph-server-ts-reference/pre-resolve-hook',
@@ -573,7 +563,10 @@ const navigation = [
 	{
 		title: 'wundergraph.operations.ts Reference',
 		links: [
-			{ title: 'Overview', href: '/docs/wundergraph-operations-ts-reference/' },
+			{
+				title: 'Overview',
+				href: '/docs/wundergraph-operations-ts-reference',
+			},
 			{
 				title: 'configure Defaults',
 				href: '/docs/wundergraph-operations-ts-reference/configure-defaults',
@@ -599,7 +592,10 @@ const navigation = [
 	{
 		title: 'wundergraph.manifest.json Reference',
 		links: [
-			{ title: 'Overview', href: '/docs/wundergraph-manifest-json-reference/' },
+			{
+				title: 'Overview',
+				href: '/docs/wundergraph-manifest-json-reference',
+			},
 		],
 	},
 	{
@@ -607,7 +603,21 @@ const navigation = [
 		links: [
 			{
 				title: 'Does WunderGraph support Postman Collections?',
-				href: '/docs/faq/support-postman-collections',
+				href: '/docs/frequently-asked-questions/does-wundergraph-support-postman-collections',
+			},
+			{
+				title:
+					'How is WunderGraph faster and more secure than other GraphQL solutions?',
+				href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
+			},
+			{
+				title: 'How is the developer experience different from legacy GraphQL?',
+				href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
+			},
+			{
+				title:
+					'How is server-side only GraphQL different from client-side GraphQL?',
+				href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
 			},
 		],
 	},
