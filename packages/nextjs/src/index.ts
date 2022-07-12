@@ -19,7 +19,7 @@ import {
 import ssrPrepass from 'react-ssr-prepass';
 import hash from 'object-hash';
 
-import { WundergraphClient } from '@wundergraph/client';
+import { WunderGraphClient } from '@wundergraph/client';
 
 import type {
 	ClientConfig,
@@ -38,11 +38,11 @@ import type {
 	SubscriptionProps,
 	SubscriptionResult,
 	User,
-	UploadResponse,
-	UploadResponseOk,
-	UploadResponseError,
 	UploadConfig,
 } from '@wundergraph/client';
+
+// These are used in the template. Re-export them here so the main project doesn't need to add the client package.
+export { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput };
 
 export type Headers = { [key: string]: string };
 
@@ -57,7 +57,7 @@ export interface LogoutOptions {
 export interface WunderGraphContextProperties<Role> {
 	ssrCache: { [key: string]: Promise<any> | {} };
 	clientConfig: ClientConfig<Role>;
-	client: WundergraphClient<Role>;
+	client: WunderGraphClient<Role>;
 	user: User<Role> | null;
 	setUser: Dispatch<SetStateAction<User<Role> | null>>;
 	isWindowFocused: 'pristine' | 'focused' | 'blurred';
@@ -89,7 +89,7 @@ function withWunderGraphContextWrapper<Role>(
 			if (options?.baseURL) {
 				baseOptions.baseURL = options.baseURL;
 			}
-			defaultContextProperties.client = new WundergraphClient(baseOptions);
+			defaultContextProperties.client = new WunderGraphClient(baseOptions);
 		}
 
 		const WithWunderGraph: NextPage<any> = (props: any) => {

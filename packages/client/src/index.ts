@@ -62,7 +62,7 @@ export interface UploadConfig<Provider extends string> {
 	abortSignal?: AbortSignal;
 }
 
-export class WundergraphClient<Role> {
+export class WunderGraphClient<Role> {
 	constructor(config: ClientConfig<Role>) {
 		this.applicationHash = config.applicationHash;
 		this.applicationPath = config.applicationPath;
