@@ -1013,6 +1013,33 @@ export interface MutationResultError {
 	errors: ReadonlyArray<GraphQLError>;
 }
 
+interface UseWunderGraphContextOptions {
+	strict?: boolean;
+	errorMessage?: string;
+	name?: string;
+}
+
+function useWunderGraphContext<Role>(
+	context: Context<WunderGraphContextProperties<Role>>,
+	options: UseWunderGraphContextOptions = {}
+) {
+	const {
+		strict = true,
+		name = 'useQuery',
+		errorMessage = `${name} 'client' is undefined. Did you forget to wrap your app or page with 'withWunderGraph'?`,
+	} = options;
+	const ctx = useContext(context);
+
+	if ((!ctx || !ctx.client) && strict) {
+		const error = new Error(errorMessage);
+		error.name = 'ContextError';
+		Error.captureStackTrace?.(error, useWunderGraphContext);
+		throw error;
+	}
+
+	return ctx;
+}
+
 function useQueryContextWrapper<Input, Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	query: QueryProps,
@@ -1021,7 +1048,8 @@ function useQueryContextWrapper<Input, Data, Role>(
 	result: QueryResult<Data>;
 	refetch: (args?: InternalQueryArgsWithInput<Input>) => void;
 } {
-	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useContext(wunderGraphContext);
+	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } =
+		useWunderGraphContext<Role>(wunderGraphContext);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true && args?.lazy !== true;
 	const cacheKey = client.cacheKey(query, args);
@@ -1154,7 +1182,10 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 ): {
 	result: SubscriptionResult<Data>;
 } {
-	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useContext(wunderGraphContext);
+	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useWunderGraphContext(
+		wunderGraphContext,
+		{ name: 'useSubscription' }
+	);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true;
 	const cacheKey = client.cacheKey(subscription, args);
@@ -1250,7 +1281,9 @@ function useMutationContextWrapper<Role, Input = never, Data = never>(
 	result: MutationResult<Data>;
 	mutate: (args?: InternalMutationArgsWithInput<Input>) => Promise<MutationResult<Data>>;
 } {
-	const { client, setRefetchMountedOperations, user } = useContext(wunderGraphContext);
+	const { client, setRefetchMountedOperations, user } = useWunderGraphContext(wunderGraphContext, {
+		name: 'useMutation',
+	});
 	const [result, setResult] = useState<MutationResult<Data>>(
 		mutation.requiresAuthentication && user === null ? { status: 'requires_authentication' } : { status: 'none' }
 	);
@@ -1293,7 +1326,7 @@ function useWunderGraph<Role, AuthProviders extends string = '', S3Providers ext
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>
 ) {
 	return function () {
-		const { user, client, setUser } = useContext(wunderGraphContext);
+		const { user, client, setUser } = useWunderGraphContext(wunderGraphContext, { name: 'useWunderGraph' });
 		const login = useCallback(
 			(provider: AuthProviders, redirectUri?: string) => {
 				client.login(provider, redirectUri);
