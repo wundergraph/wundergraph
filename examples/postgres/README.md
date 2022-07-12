@@ -92,3 +92,11 @@ If you want to clean up the environment, run the following code.
 ```shell
 npm run cleanup
 ```
+
+## Learn More
+
+Read the [Docs](https://wundergraph.com/docs).
+
+## Got Questions?
+
+Join us on [Discord](https://wundergraph.com/discord)!

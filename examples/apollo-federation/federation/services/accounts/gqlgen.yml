@@ -1,0 +1,20 @@
+# .gqlgen.yml example
+#
+# Refer to https://gqlgen.com/config/
+# for detailed .gqlgen.yml documentation.
+
+# Where are all the schema files located? globs are supported eg  src/**/*.graphql
+schema:
+  - schema.graphql
+# Enable Apollo federation support
+federation:
+  filename: federation.go
+# Where should the generated server code go?
+exec:
+  filename: generated.go
+model:
+  filename: models_gen.go
+# Where should the resolver implementations go?
+resolver:
+  filename: resolver.go
+  type: Resolver
