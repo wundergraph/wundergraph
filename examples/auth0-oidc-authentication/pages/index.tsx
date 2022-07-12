@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { AuthProvider, AuthProviders, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { AuthProvider, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
 	const { user, login, logout } = useWunderGraph();
