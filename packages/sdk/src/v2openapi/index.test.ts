@@ -77,3 +77,7 @@ test('petstore', async () => {
 test('json placeholder array', async () => {
 	await runTest('src/v2openapi/testdata/json_placeholder.json', 'jsp_array');
 });
+
+test('moviedb', async () => {
+	await runTest('src/v2openapi/testdata/moviedb.json', 'moviedb');
+});
