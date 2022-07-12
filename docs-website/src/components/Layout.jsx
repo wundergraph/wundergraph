@@ -39,13 +39,17 @@ const navigation = [
 				href: '/docs/use-cases/api-composition-and-integration',
 			},
 			{
+				title: 'Multi Database, Multi Schema ORM',
+				href: '/docs/use-cases/multi-database-multi-schema-orm',
+			},
+			{
 				title: 'Generate SDKs for all your APIs',
 				href: '/docs/use-cases/generate-sdks-for-all-your-apis',
 			},
 			{
 				title:
-					'Centralized Governance, Monitoring, Access Controls and Logging',
-				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging',
+					'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
+				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
 			},
 		],
 	},
