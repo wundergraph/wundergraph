@@ -299,12 +299,24 @@ const navigation = [
 		title: 'Supported Frontend Frameworks',
 		links: [
 			{
-				title: 'React',
-				href: '/docs/supported-frontend-frameworks/react',
+				title: 'React-JS',
+				href: '/docs/supported-frontend-frameworks/react-js',
+			},
+			{
+				title: 'React Native',
+				href: '/docs/supported-frontend-frameworks/react-native',
 			},
 			{
 				title: 'NextJS',
 				href: '/docs/supported-frontend-frameworks/nextjs',
+			},
+			{
+				title: 'iOS / Swift / Objective-C',
+				href: '/docs/supported-frontend-frameworks/ios-swift-objective-c',
+			},
+			{
+				title: 'Android / Kotlin / Java',
+				href: '/docs/supported-frontend-frameworks/android-kotlin-java',
 			},
 			{
 				title: 'Remix',
@@ -317,6 +329,31 @@ const navigation = [
 			{
 				title: 'Vue',
 				href: '/docs/supported-frontend-frameworks/vue',
+			},
+			{
+				title: 'SolidJS',
+				href: '/docs/supported-frontend-frameworks/solidjs',
+			},
+		],
+	},
+	{
+		title: 'Supported Backend Languages & Frameworks',
+		links: [
+			{
+				title: 'NodeJS / TypeScript',
+				href: '/docs/supported-backend-languages-frameworks/nodejs-typescript',
+			},
+			{
+				title: 'Golang / Go',
+				href: '/docs/supported-backend-languages-frameworks/golang-go',
+			},
+			{
+				title: 'Python',
+				href: '/docs/supported-backend-languages-frameworks/python',
+			},
+			{
+				title: 'Java',
+				href: '/docs/supported-backend-languages-frameworks/java',
 			},
 		],
 	},
