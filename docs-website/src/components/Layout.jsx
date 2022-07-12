@@ -58,6 +58,22 @@ const navigation = [
 				title: 'Enable autocompletion in your IDE',
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
+			{
+				title: 'Inject Short-Lived Token into Upstream Requests',
+				href: '/docs/guides/inject-short-lived-token-into-upstream-requests',
+			},
+			{
+				title: 'Expose a GraphQL API from WunderGraph',
+				href: '/docs/guides/expose-a-graphql-api-from-wundergraph',
+			},
+			{
+				title: 'Extend JSON fields with more specific types',
+				href: '/docs/guides/extend-json-fields-with-more-specific-types',
+			},
+			{
+				title: 'Signing Requests',
+				href: '/docs/guides/signing-requests',
+			},
 		],
 	},
 	{
@@ -182,6 +198,37 @@ const navigation = [
 			{ title: 'Remix', href: '/docs/supported-frontend-frameworks/remix' },
 			{ title: 'Svelte', href: '/docs/supported-frontend-frameworks/svelte' },
 			{ title: 'Vue', href: '/docs/supported-frontend-frameworks/vue' },
+		],
+	},
+	{
+		title:
+			'A principled approach to building an Enterprise-Grade Data Platform',
+		links: [
+			{
+				title: 'Introduction',
+				href: '/docs/enterprise-grade-data-platform/introduction',
+			},
+			{
+				title: 'The benefits of building',
+				href: '/docs/enterprise-grade-data-platform/why-api-first-matters',
+			},
+			{
+				title: 'Why API first matters',
+				href: '/docs/enterprise-grade-data-platform/why-api-first-matters',
+			},
+			{
+				title: 'Scaling your business with an API first data platform',
+				href: '/docs/enterprise-grade-data-platform/scaling-your-business-with-an-api-first-data-platform',
+			},
+		],
+	},
+	{
+		title: 'The 8 Principles of building an API first data platform',
+		links: [
+			{
+				title: 'Introduction',
+				href: '/docs/api-first-data-platform/introduction',
+			},
 		],
 	},
 	{
