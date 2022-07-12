@@ -22,7 +22,14 @@ const navigation = [
 	{
 		title: 'Use Cases',
 		links: [
-			{ title: 'API Gateway', href: '/docs/use-cases/api-gateway' },
+			{
+				title: 'Programmable API Gateway',
+				href: '/docs/use-cases/programmable-api-gateway',
+			},
+			{
+				title: 'API Management',
+				href: '/docs/use-cases/api-management',
+			},
 			{
 				title: 'Backend for Frontend',
 				href: '/docs/use-cases/backend-for-frontend',
@@ -32,22 +39,30 @@ const navigation = [
 				href: '/docs/use-cases/api-composition-and-integration',
 			},
 			{
-				title: "Customizable SDK's",
-				href: '/docs/use-cases/customizable-sdks',
+				title: 'Generate SDKs for all your APIs',
+				href: '/docs/use-cases/generate-sdks-for-all-your-apis',
+			},
+			{
+				title:
+					'Centralized Governance, Monitoring, Access Controls and Logging',
+				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging',
 			},
 		],
 	},
 	{
 		title: 'Architecture',
 		links: [
-			{ title: 'Overview', href: '/docs/architecture/' },
+			{
+				title: 'Overview',
+				href: '/docs/architecture',
+			},
 			{
 				title: 'Architecture Diagram',
 				href: '/docs/architecture/architecture-diagram',
 			},
 			{
 				title: 'WunderGraph Explained in one Sequence Diagram',
-				href: '/docs/architecture/architecture-diagram',
+				href: '/docs/architecture/wundergraph-explained-in-one-sequence-diagram',
 			},
 		],
 	},
