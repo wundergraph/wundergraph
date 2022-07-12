@@ -54,3 +54,11 @@ npm run wunderctl publish <organization/api>
 ```
 
 🚀 After few minutes, your API will be available on the [WunderHub Catalog](https://hub.wundergraph.com/catalog).
+
+## Learn More
+
+Read the [Docs](https://wundergraph.com/docs).
+
+## Got Questions?
+
+Join us on [Discord](https://wundergraph.com/discord)!
