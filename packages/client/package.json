@@ -7,7 +7,7 @@
   "files": [
     "dist"
   ],
-  "description": "WunderGraph Client library",
+  "description": "WunderGraph TypeScript client",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -30,14 +30,9 @@
   "devDependencies": {
     "@types/node": "^17.0.32",
     "@types/object-hash": "^1.3.4",
-    "@wundergraph/sdk": "workspace:^0.95.0",
     "typescript": "^4.7.2"
   },
-  "peerDependencies": {
-    "@wundergraph/sdk": ">=0.91.0"
-  },
   "dependencies": {
-    "@wundergraph/protobuf": "workspace:^0.91.1",
     "object-hash": "^2.2.0"
   },
   "sideEffects": false

@@ -1,4 +1,4 @@
-# Wundergraph TypeScript Client
+# Wundergraph TypeScript client
 
 ![wundergraph-client](https://img.shields.io/npm/v/@wundergraph/client.svg)
 
