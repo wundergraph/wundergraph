@@ -68,6 +68,10 @@ const navigation = [
 				title: 'WunderGraph Explained in one Sequence Diagram',
 				href: '/docs/architecture/wundergraph-explained-in-one-sequence-diagram',
 			},
+			{
+				title: 'WunderGraph RPC Protocol explained',
+				href: '/docs/architecture/wundergraph-rpc-protocol-explained',
+			},
 		],
 	},
 	{
