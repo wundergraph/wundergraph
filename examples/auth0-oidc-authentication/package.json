@@ -1,5 +1,5 @@
 {
-  "name": "wundergraph-inject-bearer",
+  "name": "wundergraph-auth0-oidc",
   "version": "0.1.0",
   "private": true,
   "scripts": {
