@@ -724,28 +724,7 @@ type UserLogoutHandler struct {
 }
 
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	userCookie := &http.Cookie{
-		Name:     "user",
-		Value:    "",
-		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(r.Host)),
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   !u.InsecureCookies,
-	}
-	http.SetCookie(w, userCookie)
-	idCookie := &http.Cookie{
-		Name:     "id",
-		Value:    "",
-		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(r.Host)),
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   !u.InsecureCookies,
-	}
-	http.SetCookie(w, idCookie)
+	resetUserCookies(w, r, !u.InsecureCookies)
 	logoutOpenIDConnectProvider := r.URL.Query().Get("logout_openid_connect_provider") == "true"
 	if !logoutOpenIDConnectProvider {
 		return
@@ -790,28 +769,7 @@ type CSRFErrorHandler struct {
 }
 
 func (u *CSRFErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	userCookie := &http.Cookie{
-		Name:     "user",
-		Value:    "",
-		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(r.Host)),
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   !u.InsecureCookies,
-	}
-	http.SetCookie(w, userCookie)
-	idCookie := &http.Cookie{
-		Name:     "id",
-		Value:    "",
-		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(r.Host)),
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   !u.InsecureCookies,
-	}
-	http.SetCookie(w, idCookie)
+	resetUserCookies(w, r, !u.InsecureCookies)
 	http.Error(w, "forbidden", http.StatusForbidden)
 }
 
@@ -872,4 +830,20 @@ func RequiresAuthentication(handler http.Handler) http.Handler {
 		}
 		handler.ServeHTTP(w, r)
 	})
+}
+
+func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
+	for _, name := range []string{"user", "id"} {
+		userCookie := &http.Cookie{
+			Name:     name,
+			Value:    "",
+			Path:     "/",
+			Domain:   removeSubdomain(sanitizeDomain(r.Host)),
+			MaxAge:   -1,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+			Secure:   secure,
+		}
+		http.SetCookie(w, userCookie)
+	}
 }
