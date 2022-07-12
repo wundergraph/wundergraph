@@ -249,27 +249,75 @@ const navigation = [
 	{
 		title: 'Supported Data Sources',
 		links: [
-			{ title: 'GraphQL', href: '/data-sources/graphql' },
-			{ title: 'Apollo Federation', href: '/data-sources/apollo-federation' },
-			{ title: 'REST / OpenAPI', href: '/data-sources/rest-openapi' },
-			{ title: 'PostgreSQL', href: '/data-sources/postgresql' },
-			{ title: 'MySQL', href: '/data-sources/mysql' },
-			{ title: 'SQLite', href: '/data-sources/sqlite' },
-			{ title: 'SQLServer', href: '/data-sources/sqlserver' },
-			{ title: 'MongoDB + Atlas', href: '/data-sources/mongodb-atlas' },
-			{ title: 'Planetscale', href: '/data-sources/planetscale' },
-			{ title: 'Yugabyte', href: '/data-sources/yugabyte' },
-			{ title: 'Oracle DB', href: '/data-sources/oracle-db' },
+			{
+				title: 'GraphQL',
+				href: '/docs/supported-data-sources/graphql',
+			},
+			{
+				title: 'Apollo Federation',
+				href: '/docs/supported-data-sources/apollo-federation',
+			},
+			{
+				title: 'REST / OpenAPI',
+				href: '/docs/supported-data-sources/rest-openapi',
+			},
+			{
+				title: 'PostgreSQL',
+				href: '/docs/supported-data-sources/postgresql',
+			},
+			{
+				title: 'MySQL',
+				href: '/docs/supported-data-sources/mysql',
+			},
+			{
+				title: 'SQLite',
+				href: '/docs/supported-data-sources/sqlite',
+			},
+			{
+				title: 'SQLServer',
+				href: '/docs/supported-data-sources/sqlserver',
+			},
+			{
+				title: 'MongoDB + Atlas',
+				href: '/docs/supported-data-sources/mongodb-atlas',
+			},
+			{
+				title: 'Planetscale',
+				href: '/docs/supported-data-sources/planetscale',
+			},
+			{
+				title: 'Yugabyte',
+				href: '/docs/supported-data-sources/yugabyte',
+			},
+			{
+				title: 'Oracle DB',
+				href: '/docs/supported-data-sources/oracle-db',
+			},
 		],
 	},
 	{
 		title: 'Supported Frontend Frameworks',
 		links: [
-			{ title: 'React', href: '/docs/supported-frontend-frameworks/react' },
-			{ title: 'NextJS', href: '/docs/supported-frontend-frameworks/nextjs' },
-			{ title: 'Remix', href: '/docs/supported-frontend-frameworks/remix' },
-			{ title: 'Svelte', href: '/docs/supported-frontend-frameworks/svelte' },
-			{ title: 'Vue', href: '/docs/supported-frontend-frameworks/vue' },
+			{
+				title: 'React',
+				href: '/docs/supported-frontend-frameworks/react',
+			},
+			{
+				title: 'NextJS',
+				href: '/docs/supported-frontend-frameworks/nextjs',
+			},
+			{
+				title: 'Remix',
+				href: '/docs/supported-frontend-frameworks/remix',
+			},
+			{
+				title: 'Svelte',
+				href: '/docs/supported-frontend-frameworks/svelte',
+			},
+			{
+				title: 'Vue',
+				href: '/docs/supported-frontend-frameworks/vue',
+			},
 		],
 	},
 	{
