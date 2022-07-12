@@ -1,54 +1,103 @@
-# Wundergraph Next.js integration
+# Wundergraph TypeScript Client
 
-![wunderctl](https://img.shields.io/npm/v/@wundergraph/nextjs.svg)
+![wundergraph-client](https://img.shields.io/npm/v/@wundergraph/client.svg)
 
-WunderGraph codegen template plugin to add deep Next.js integration.
+WunderGraph TypeScript client library.
 
 ## Getting Started
 
 ```shell
-npm install @wundergraph/nextjs
+npm install @wundergraph/client
 ```
 
-### 1. Register the codegen template
+### Create the client
 
 ```ts
-// .wundergraph/wundergraph.config.ts
-import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+import { WunderGraphClient } from '@wundergraph/client';
 
-configureWunderGraphApplication({
-  // ...
-  // omitted for brevity
-  codeGenerators: [
-    {
-      templates: [new NextJsTemplate()],
-    },
-  ],
+const client = new WunderGraphClient({
+  applicationHash: '1f7dac83',
+  applicationPath: 'api/main',
+  baseURL: 'http://localhost:9991',
+  sdkVersion: '0.95.0',
+  authenticationEnabled: true,
 });
 ```
 
-### 2. Import the package
+### Run a query
 
-```tsx
-// pages/authentication.ts
-import { useQuery, useMutation, useLiveQuery, AuthProviders } from '.wundergraph/generated/nextjs';
+```ts
+const result = await client.query(
+  {
+    operationName: 'Hello',
+    requiresAuthentication: false,
+  },
+  {
+    input: {
+      hello: 'World',
+    },
+  }
+);
+```
 
-const Example: ExamplePage = () => {
-  const { user, login, logout } = useWunderGraph();
-  const onClick = () => {
-    if (user === null || user === undefined) {
-      login(AuthProviders.github);
-    } else {
-      logout();
-    }
-  };
-  return (
-    <div>
-      <h1>Authentication</h1>
-      <button onClick={onClick}>${user ? logout : login}</button>
-      <p>{JSON.stringify(user)}</p>
-    </div>
-  );
-};
-export default withWunderGraph(Example);
+### Mutation
+
+```ts
+const result = await client.mutate(
+  {
+    operationName: 'SetName',
+    requiresAuthentication: false,
+  },
+  {
+    input: {
+      name: 'WunderGraph',
+    },
+  }
+);
+```
+
+### LiveQuery
+
+```ts
+const result = await client.subscribe(
+  {
+    operationName: 'Hello',
+    isLiveQuery: true,
+    requiresAuthentication: false,
+  },
+  {
+    input: {
+      name: 'World',
+    },
+  }
+);
+```
+
+### Upload files
+
+```ts
+const result = await client.uploadFiles({
+  provider: S3Provider.minio,
+  files,
+});
+```
+
+## Auth
+
+### Login
+
+```ts
+client.login(AuthProviders.github);
+```
+
+### Log out
+
+```ts
+client.logout();
+```
+
+### Fetch user
+
+```ts
+const user = await client.fetchUser();
 ```
