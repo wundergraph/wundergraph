@@ -107,26 +107,53 @@ const navigation = [
 	{
 		title: 'Examples',
 		links: [
-			{ title: 'Hello World', href: '/docs/examples/hello-world' },
+			{
+				title: 'Hello World',
+				href: '/docs/examples/hello-world',
+			},
 			{
 				title: 'Cross API Joins',
-				href: '/docs/guides/nextjs-full-stack-tutorial',
+				href: '/docs/examples/cross-api-joins',
+			},
+			{
+				title: 'NextJS',
+				href: '/docs/examples/nextjs',
+			},
+			{
+				title: 'Hooks',
+				href: '/docs/examples/hooks',
+			},
+			{
+				title: 'Caching',
+				href: '/docs/examples/caching',
 			},
 			{
 				title: 'FauneDB NextJS',
-				href: '/docs/guides/nextjs-full-stack-tutorial',
+				href: '/docs/examples/fauna-db-nextjs',
 			},
 			{
 				title: 'Inject Bearer Token',
-				href: '/docs/guides/nextjs-full-stack-tutorial',
+				href: '/docs/examples/inject-bearer-token',
+			},
+			{
+				title: 'PostgreSQL',
+				href: '/docs/examples/postgresql',
 			},
 			{
 				title: 'PostgreSQL & Prisma',
-				href: '/docs/guides/nextjs-full-stack-tutorial',
+				href: '/docs/examples/postgresql-prisma',
 			},
 			{
-				title: 'Publish Install API',
-				href: '/docs/guides/nextjs-full-stack-tutorial',
+				title: 'Publish Install API using WunderHub',
+				href: '/docs/examples/publish-install-api',
+			},
+			{
+				title: 'Apollo Federation',
+				href: '/docs/examples/apollo-federation',
+			},
+			{
+				title: 'Auth0 OpenID Connect Authentication',
+				href: '/docs/examples/auth0-openid-connect-authentication',
 			},
 		],
 	},
