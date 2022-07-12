@@ -23,3 +23,11 @@ curl -X GET http://localhost:9991/app/main/operations/Missions
 ```shell
 curl -X GET http://localhost:9991/app/main/operations/Hello
 ```
+
+## Learn More
+
+Read the [Docs](https://wundergraph.com/docs).
+
+## Got Questions?
+
+Join us on [Discord](https://wundergraph.com/discord)!

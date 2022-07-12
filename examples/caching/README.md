@@ -11,3 +11,11 @@ On subsequent requests, the client will automatically attach the ETag to the req
 ```shell
 npm install && npm start
 ```
+
+## Learn More
+
+Read the [Docs](https://wundergraph.com/docs).
+
+## Got Questions?
+
+Join us on [Discord](https://wundergraph.com/discord)!
