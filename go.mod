@@ -14,11 +14,13 @@ require (
 	github.com/evanw/esbuild v0.14.47
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.1
+	github.com/fullstorydev/grpcurl v1.8.6
 	github.com/gavv/httpexpect/v2 v2.3.0
 	github.com/go-cmd/cmd v1.4.1
 	github.com/go-redis/cache/v8 v8.4.1
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/golang-jwt/jwt/v4 v4.2.0
+	github.com/golang/protobuf v1.5.2
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/securecookie v1.1.1
@@ -27,6 +29,7 @@ require (
 	github.com/hetiansu5/urlquery v1.2.7
 	github.com/jensneuse/abstractlogger v0.0.4
 	github.com/jensneuse/goprisma v0.2.0
+	github.com/jhump/protoreflect v1.12.0
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/klauspost/compress v1.14.4
@@ -53,6 +56,8 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
+	google.golang.org/grpc v1.44.0
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
@@ -66,10 +71,9 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
@@ -134,7 +138,7 @@ require (
 	golang.org/x/tools v0.0.0-20210106214847-113979e3529a // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

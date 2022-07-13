@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option go_package = "github.com/wundergraph/wundergraph/pkg/datasources/grpc/testdata/starwars";
+
+package starwars;
+
+message Character {
+  string id = 1;
+  string name = 2;
+  repeated Character friends = 3;
+  repeated Episode appears_in = 4;
+  string home_planet = 5;
+  string primary_function = 6;
+  Type type = 7;
+}
+
+enum Type {
+  HUMAN = 0;
+  DROID = 1;
+}
+
+enum Episode {
+  _ = 0;
+  NEWHOPE = 1;
+  EMPIRE = 2;
+  JEDI = 3;
+}
+
+message GetHeroRequest {
+  Episode episode = 1;
+}
+
+message GetHumanRequest {
+  string id = 1;
+}
+
+message GetDroidRequest {
+  string id = 1;
+}
+
+message ListEmptyRequest {
+}
+
+message ListHumansResponse {
+  repeated Character humans = 1;
+}
+
+message ListDroidsResponse {
+  repeated Character droids = 1;
+}
+
+service StarwarsService {
+  rpc GetHero(GetHeroRequest) returns (Character);
+
+  rpc GetHuman(GetHumanRequest) returns (Character);
+
+  rpc GetDroid(GetDroidRequest) returns (Character);
+
+  rpc ListHumans(ListEmptyRequest) returns (ListHumansResponse);
+
+  rpc ListDroids(ListEmptyRequest) returns (ListDroidsResponse);
+}
