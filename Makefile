@@ -4,6 +4,9 @@ all: check-setup engine-dev
 	pnpm -r run --filter="./packages/wunderctl" postinstall
 	pnpm run build
 
+docs:
+	cd docs-website && npm install && npm run dev
+
 engine-dev: codegen
 	go mod tidy
 	go mod download
@@ -41,4 +44,4 @@ install:
 update-examples:
 	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs
