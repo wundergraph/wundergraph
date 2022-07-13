@@ -1,0 +1,6 @@
+query Dragons @rbac(requireMatchAll: [stargazer]) {
+	spacex_dragons {
+		name
+		active
+	}
+}
