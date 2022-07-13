@@ -21,7 +21,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				// Only allow the user to access the server if they have starred the repo
 				if (
 					// Error are communicated via GraphQL unions
-					data.github_checkRepoIsStarred.__typename === 'github_BasicErrorRequiresAuthentication'
+					data.github_checkRepoIsStarred.statusCode !== 204
 				) {
 					log.error(`Could not authorize user ${user.name}`, data.github_checkRepoIsStarred.message);
 				} else {

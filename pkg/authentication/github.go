@@ -291,9 +291,9 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			AvatarURL:      userInfo.AvatarURL,
 			Location:       userInfo.Location,
 			ExpiresAt:      oauth2Token.Expiry,
-			AccessToken:    tryParseJWTPayload(accessToken),
+			AccessToken:    tryParseJWT(accessToken),
 			RawAccessToken: accessToken,
-			IdToken:        tryParseJWTPayload(idToken),
+			IdToken:        tryParseJWT(idToken),
 			RawIDToken:     idToken,
 		}
 

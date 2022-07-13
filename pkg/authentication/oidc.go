@@ -226,8 +226,8 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		accessTokenJSON := tryParseJWTPayload(accessToken)
-		idTokenJSON := tryParseJWTPayload(idToken)
+		accessTokenJSON := tryParseJWT(accessToken)
+		idTokenJSON := tryParseJWT(idToken)
 
 		user := User{
 			ProviderName:   "oidc",

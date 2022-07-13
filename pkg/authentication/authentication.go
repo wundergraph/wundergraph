@@ -93,7 +93,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		AvatarURL:     claims.Picture,
 		Location:      claims.Locale,
 		ETag:          "",
-		AccessToken:   tryParseJWTPayload(token),
+		AccessToken:   tryParseJWT(token),
 	}
 	u.hooks.handlePostAuthentication(context.Background(), tempUser)
 	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
@@ -232,7 +232,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		return err
 	}
 	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
-	u.IdToken = tryParseJWTPayload(u.RawIDToken)
+	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
 }
 
@@ -303,7 +303,7 @@ func bearerTokenToJSON(token string) ([]byte, error) {
 	return payload, nil
 }
 
-func tryParseJWTPayload(token string) []byte {
+func tryParseJWT(token string) []byte {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return nil
