@@ -111,6 +111,7 @@ export class WunderGraphClient<Role> {
 				method: 'GET',
 				credentials: 'include',
 				mode: 'cors',
+				signal: args?.abortSignal,
 			});
 			return this.httpResponseToQueryResult(response);
 		} catch (e: any) {
@@ -156,6 +157,7 @@ export class WunderGraphClient<Role> {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'cors',
+				signal: args?.abortSignal,
 				body,
 			});
 			return this.httpResponseToMutationResult(response);
