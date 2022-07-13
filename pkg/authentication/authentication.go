@@ -227,13 +227,12 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 	if err == nil {
 		u.FromCookie = true
 	}
-	u.IdToken = tryParseJWTPayload(u.RawIDToken)
 	cookie, err = r.Cookie("id")
 	if err != nil {
 		return err
 	}
 	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
-	u.IdToken = mustBearerTokenToJSON(u.RawIDToken)
+	u.IdToken = tryParseJWTPayload(u.RawIDToken)
 	return err
 }
 
