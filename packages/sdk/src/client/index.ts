@@ -10,15 +10,13 @@ export interface LogoutOptions {
 	logout_openid_connect_provider?: boolean;
 }
 
-export interface ClientConfig<Role> {
+export interface ClientConfig {
 	applicationHash: string;
 	applicationPath: string;
 	baseURL: string;
 	sdkVersion: string;
-	authenticationEnabled: boolean;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
-	user?: User<Role>;
 }
 
 export interface User<Role> {
@@ -63,7 +61,7 @@ export interface UploadConfig<Provider extends string> {
 }
 
 export class WunderGraphClient<Role> {
-	constructor(config: ClientConfig<Role>) {
+	constructor(config: ClientConfig) {
 		this.applicationHash = config.applicationHash;
 		this.applicationPath = config.applicationPath;
 		this.baseURL = config.baseURL;

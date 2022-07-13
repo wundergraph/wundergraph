@@ -17,9 +17,8 @@ import {
 	useState,
 } from 'react';
 import ssrPrepass from 'react-ssr-prepass';
-import hash from 'object-hash';
 
-import { WunderGraphClient } from '@wundergraph/client';
+import { WunderGraphClient } from '@wundergraph/sdk/client';
 
 import type {
 	ClientConfig,
@@ -39,10 +38,7 @@ import type {
 	SubscriptionResult,
 	User,
 	UploadConfig,
-} from '@wundergraph/client';
-
-// These are used in the template. Re-export them here so the main project doesn't need to add the client package.
-export { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput };
+} from '@wundergraph/sdk/client';
 
 export type Headers = { [key: string]: string };
 
@@ -56,7 +52,7 @@ export interface LogoutOptions {
 
 export interface WunderGraphContextProperties<Role> {
 	ssrCache: { [key: string]: Promise<any> | {} };
-	clientConfig: ClientConfig<Role>;
+	clientConfig: ClientConfig & { authenticationEnabled?: boolean };
 	client: WunderGraphClient<Role>;
 	user: User<Role> | null;
 	setUser: Dispatch<SetStateAction<User<Role> | null>>;

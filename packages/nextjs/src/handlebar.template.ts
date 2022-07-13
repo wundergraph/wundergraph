@@ -2,7 +2,8 @@
 export const handlebarTemplate = `
 import type { {{ modelImports }} } from "./models";
 import {createContext} from "react";
-import { hooks, WunderGraphContextProperties, QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from "@wundergraph/nextjs";
+import { hooks, WunderGraphContextProperties } from "@wundergraph/nextjs";
+import { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from "@wundergraph/sdk/client";
 export type Role = {{{ roleDefinitions }}};
 
 {{#if hasAuthProviders}}
