@@ -16,11 +16,12 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
+
+	"github.com/wundergraph/wundergraph/pkg/datasources/database"
+	grpcdatasource "github.com/wundergraph/wundergraph/pkg/datasources/grpc"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-
-	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
 type EngineConfigLoader struct {
@@ -40,6 +41,7 @@ type DefaultFactoryResolver struct {
 	rest             *oas_datasource.Factory
 	static           *staticdatasource.Factory
 	database         *database.Factory
+	grpc             *grpcdatasource.Factory
 }
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
@@ -63,6 +65,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			Debug:  debug,
 			Log:    log,
 		},
+		grpc: grpcdatasource.NewFactory(),
 	}
 }
 
@@ -149,6 +152,8 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		wgpb.DataSourceKind_MONGODB,
 		wgpb.DataSourceKind_SQLITE:
 		return d.database, nil
+	case wgpb.DataSourceKind_GRPC:
+		return d.grpc, nil
 	default:
 		return nil, fmt.Errorf("invalid datasource kind %q", ds.Kind)
 	}
@@ -303,6 +308,22 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					URL: url,
 				},
 				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
+			})
+		case wgpb.DataSourceKind_GRPC:
+			out.Custom = grpcdatasource.ConfigJson(grpcdatasource.Configuration{
+				Server: grpcdatasource.ServerConfiguration{
+					Protoset: in.CustomGrpc.Server.Protoset,
+					Target:   in.CustomGrpc.Server.Target.String(),
+				},
+				Endpoint: grpcdatasource.EndpointConfiguration{
+					Package: in.CustomGrpc.Endpoint.Package,
+					Service: in.CustomGrpc.Endpoint.Service,
+					Method:  in.CustomGrpc.Endpoint.Method,
+				},
+				Request: grpcdatasource.RequestConfiguration{
+					Header: http.Header{},
+					Body:   in.CustomGrpc.Request.Body,
+				},
 			})
 		case wgpb.DataSourceKind_POSTGRESQL,
 			wgpb.DataSourceKind_MYSQL,

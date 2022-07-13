@@ -264,6 +264,7 @@ message DataSourceConfiguration {
 	DataSourceCustom_Static customStatic = 7;
 	DataSourceCustom_Database customDatabase = 8;
 	repeated DirectiveConfiguration directives = 9;
+	DataSourceCustom_Grpc customGrpc = 10;
 }
 
 message DirectiveConfiguration {
@@ -280,6 +281,7 @@ enum DataSourceKind {
 	SQLSERVER = 5;
 	MONGODB = 6;
 	SQLITE = 7;
+	GRPC = 8;
 }
 
 message DataSourceCustom_REST {
@@ -310,6 +312,28 @@ message DataSourceCustom_Database {
 	int64 closeTimeoutSeconds = 4;
 	repeated SingleTypeField jsonTypeFields = 5;
 	repeated string jsonInputVariables = 6;
+}
+
+message DataSourceCustom_Grpc {
+	GrpcServerConfiguration server = 1;
+	GrpcEndpointConfiguration endpoint = 2;
+	GrpcRequestConfiguration request = 3;
+}
+
+message GrpcServerConfiguration {
+	bytes protoset = 1;
+	ConfigurationVariable target = 2;
+}
+
+message GrpcEndpointConfiguration {
+	string package = 1;
+	string service = 2;
+	string method = 3;
+}
+
+message GrpcRequestConfiguration {
+	map<string, HTTPHeader> header = 1;
+	string body = 2;
 }
 
 message GraphQLFederationConfiguration {

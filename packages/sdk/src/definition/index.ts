@@ -23,6 +23,9 @@ import {
 	DirectiveConfiguration,
 	FetchConfiguration,
 	FieldConfiguration,
+	GrpcEndpointConfiguration,
+	GrpcRequestConfiguration,
+	GrpcServerConfiguration,
 	HTTPHeader,
 	HTTPMethod,
 	MTLSConfiguration,
@@ -50,6 +53,7 @@ import { composeServices } from '@apollo/composition';
 import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
 import objectHash from 'object-hash';
+import { protosetToGrpcApiObject } from '../grpc';
 
 export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const IntrospectionCacheEnabled = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
@@ -209,6 +213,8 @@ export const createMockApi = async (sdl: string, apiNamespace?: string): Promise
 export class GraphQLApi extends Api<GraphQLApiCustom> {}
 
 export class RESTApi extends Api<RESTApiCustom> {}
+
+export class GrpcApi extends Api<GrpcApiCustom> {}
 
 export class PostgresqlApi extends Api<DatabaseApiCustom> {}
 
@@ -408,6 +414,13 @@ export type OpenAPIIntrospectionSource =
 	| OpenAPIIntrospectionString
 	| OpenAPIIntrospectionObject;
 
+export interface GrpcIntrospectionFile {
+	kind: 'file';
+	filePath: string;
+}
+
+export type GrpcIntrospectionSource = GrpcIntrospectionFile;
+
 export interface HeaderConfiguration {
 	// key is the name of the Header that will be sent to the upstream, e.g. Authorization
 	key: string;
@@ -430,6 +443,10 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
 	baseURL?: InputVariable;
+}
+
+export interface GrpcIntrospection extends IntrospectionConfiguration {
+	source: GrpcIntrospectionSource;
 }
 
 export interface StaticApiCustom {
@@ -468,6 +485,12 @@ export interface GraphQLApiCustom {
 		URL: ConfigurationVariable;
 	};
 	UpstreamSchema: string;
+}
+
+export interface GrpcApiCustom {
+	server: GrpcServerConfiguration;
+	endpoint: GrpcEndpointConfiguration;
+	request: GrpcRequestConfiguration;
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {
@@ -893,6 +916,11 @@ export const introspect = {
 			const spec = loadOpenApi(introspection);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
 		}),
+	grpc: async (introspection: GrpcIntrospection): Promise<GrpcApi> =>
+		introspectWithCache(introspection, async (introspection: GrpcIntrospection): Promise<GrpcApi> => {
+			const spec = loadGrpcApi(introspection);
+			return await protosetToGrpcApiObject(spec);
+		}),
 };
 
 const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, headers: { [key: string]: HTTPHeader }) => {
@@ -1068,3 +1096,13 @@ const hasSubscriptions = (schema: GraphQLSchema): boolean => {
 };
 
 const subscriptionsURL = (url: string) => url.replace('https://', 'wss://').replace('http://', 'ws://');
+
+const loadGrpcApi = (introspection: GrpcIntrospection): Buffer | null => {
+	switch (introspection.source.kind) {
+		case 'file':
+			const filePath = path.resolve(process.cwd(), introspection.source.filePath);
+			return fs.readFileSync(filePath);
+		default:
+			return null;
+	}
+};

@@ -6,6 +6,7 @@ import {
 	DataSource,
 	DataSourcePollingModeEnabled,
 	GraphQLApiCustom,
+	GrpcApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
 	StaticApiCustom,
@@ -978,6 +979,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		customStatic: undefined,
 		overrideFieldPathFromAlias: source.Kind === DataSourceKind.GRAPHQL,
 		customDatabase: undefined,
+		customGrpc: undefined,
 		directives: source.Directives,
 	};
 	switch (source.Kind) {
@@ -1029,6 +1031,15 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 				jsonTypeFields: database.jsonTypeFields,
 				jsonInputVariables: database.jsonInputVariables,
 			};
+			break;
+		case DataSourceKind.GRPC:
+			const grpc = source.Custom as GrpcApiCustom;
+			out.customGrpc = {
+				server: grpc.server,
+				endpoint: grpc.endpoint,
+				request: grpc.request,
+			};
+			break;
 	}
 
 	return out;
