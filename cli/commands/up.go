@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path"
 	"path/filepath"
+	"runtime"
 	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
@@ -34,6 +36,9 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		killExistingMiddlewareProcess()
+
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
 			return err
@@ -260,4 +265,32 @@ func init() {
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
 	upCmd.Flags().StringVar(&entryPoint, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
 	upCmd.Flags().StringVar(&serverEntryPoint, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
+}
+
+func killExistingMiddlewareProcess() {
+	if runtime.GOOS == "windows" {
+		command := fmt.Sprintf("(Get-NetTCPConnection -LocalPort %d).OwningProcess -Force", middlewareListenPort)
+		execCmd(exec.Command("Stop-Process", "-Id", command))
+	} else {
+		command := fmt.Sprintf("lsof -i tcp:%d | grep LISTEN | awk '{print $2}' | xargs kill -9", middlewareListenPort)
+		execCmd(exec.Command("bash", "-c", command))
+	}
+}
+
+func execCmd(cmd *exec.Cmd) {
+	var waitStatus syscall.WaitStatus
+	if err := cmd.Run(); err != nil {
+		if err != nil {
+			os.Stderr.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
+		}
+		if exitError, ok := err.(*exec.ExitError); ok {
+			waitStatus = exitError.Sys().(syscall.WaitStatus)
+			log.Info(fmt.Sprintf("Error during port killing (exit code: %s)\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus()))))
+		}
+	} else {
+		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
+		log.Info("Successfully killed existing middleware process",
+			abstractlogger.Int("port", middlewareListenPort),
+		)
+	}
 }
