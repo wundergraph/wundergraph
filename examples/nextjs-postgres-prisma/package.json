@@ -12,7 +12,8 @@
     "dev": "next dev",
     "migrate": "prisma format && prisma migrate dev --name",
     "cleanup": "docker-compose down -v",
-    "wunderctl": "wunderctl"
+    "wunderctl": "wunderctl",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@wundergraph/nextjs": "^0.0.32",

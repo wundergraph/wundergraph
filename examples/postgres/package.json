@@ -7,7 +7,7 @@
     "start:services": "docker-compose up -d",
     "start:api": "cd .wundergraph && wunderctl up --debug",
     "cleanup": "docker-compose down -v",
-    "check": "tsc"
+    "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",

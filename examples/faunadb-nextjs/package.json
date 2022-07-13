@@ -9,7 +9,8 @@
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "build": "next build",
     "dev": "next dev",
-    "wunderctl": "wunderctl"
+    "wunderctl": "wunderctl",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@wundergraph/nextjs": "^0.0.32",

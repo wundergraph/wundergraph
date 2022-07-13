@@ -11,7 +11,8 @@
     "generate": "cd .wundergraph && wunderctl generate --debug",
     "generate:api": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004 && npm run generate",
     "start:api": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004 && cd npm run wundergraph",
-    "cleanup": "cd federation && docker-compose down"
+    "cleanup": "cd federation && docker-compose down",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@wundergraph/nextjs": "^0.0.32",
