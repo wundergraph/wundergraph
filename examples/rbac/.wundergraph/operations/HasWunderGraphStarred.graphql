@@ -1,0 +1,9 @@
+query {
+	github_checkRepoIsStarred(owner: "wundergraph", repo: "wundergraph") {
+		__typename
+		... on github_BasicErrorRequiresAuthentication {
+			status
+			message
+		}
+	}
+}

@@ -86,6 +86,7 @@ export interface WunderGraphUser<Role = any> {
 		[key: string]: any;
 	};
 	accessToken?: JSONObject;
+	rawAccessToken?: string;
 	idToken?: JSONObject;
 	rawIdToken?: string;
 }

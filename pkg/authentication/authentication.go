@@ -93,7 +93,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		AvatarURL:     claims.Picture,
 		Location:      claims.Locale,
 		ETag:          "",
-		AccessToken:   mustBearerTokenToJSON(token),
+		AccessToken:   tryParseJWTPayload(token),
 	}
 	u.hooks.handlePostAuthentication(context.Background(), tempUser)
 	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
@@ -127,6 +127,7 @@ type User struct {
 	ETag             string          `json:"etag,omitempty"`
 	FromCookie       bool            `json:"fromCookie,omitempty"`
 	AccessToken      json.RawMessage `json:"accessToken,omitempty"`
+	RawAccessToken   string          `json:"rawAccessToken,omitempty"`
 	IdToken          json.RawMessage `json:"idToken,omitempty"`
 	RawIDToken       string          `json:"rawIdToken,omitempty"`
 }
@@ -136,7 +137,9 @@ func (u *User) RemoveInternalFields() {
 	u.ETag = ""
 	u.FromCookie = false
 	u.AccessToken = nil
+	u.RawAccessToken = ""
 	u.IdToken = nil
+	u.RawIDToken = ""
 }
 
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
@@ -145,6 +148,7 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 	// raw_id_token can be used to extract the id token
 	u.IdToken = nil
 	u.AccessToken = nil
+	u.RawAccessToken = ""
 
 	hash := xxhash.New()
 	err := gob.NewEncoder(hash).Encode(*u)
@@ -202,7 +206,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 	if err == nil {
 		u.FromCookie = true
 	}
-	u.IdToken = mustBearerTokenToJSON(u.RawIDToken)
+	u.IdToken = tryParseJWTPayload(u.RawIDToken)
 	return err
 }
 
@@ -273,7 +277,7 @@ func bearerTokenToJSON(token string) ([]byte, error) {
 	return payload, nil
 }
 
-func mustBearerTokenToJSON(token string) []byte {
+func tryParseJWTPayload(token string) []byte {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return nil

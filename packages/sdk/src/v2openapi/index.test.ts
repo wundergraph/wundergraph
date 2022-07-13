@@ -1,7 +1,7 @@
 import { openApiSpecificationToRESTApiObject } from './index';
 import * as fs from 'fs';
 
-const runTest = async (testFile: string, snapShot: string, statusCodeUnions?: boolean) => {
+const runTest = async (testFile: string, snapShot: string) => {
 	const exists = fs.existsSync(testFile);
 	if (!exists) {
 		return;
@@ -15,7 +15,6 @@ const runTest = async (testFile: string, snapShot: string, statusCodeUnions?: bo
 			kind: 'string',
 			openAPISpec: fileContents,
 		},
-		statusCodeUnions,
 	});
 	expect(actual.Schema).toMatchSnapshot(snapShot + '_' + 'schema');
 	expect(JSON.stringify(actual.DataSources, null, 2)).toMatchSnapshot(snapShot + '_' + 'data_sources');
@@ -50,12 +49,8 @@ test('fusion', async () => {
 	await runTest('src/v2openapi/testdata/fusion.yaml', 'fusion');
 });
 
-test('fusion with statusCodeUnions', async () => {
-	await runTest('src/v2openapi/testdata/fusion.yaml', 'fusion', true);
-});
-
-test('fusion v2 with statusCodeUnions', async () => {
-	await runTest('src/v2openapi/testdata/fusionauth_v2.yml', 'fusion_v2', true);
+test('fusion v2', async () => {
+	await runTest('src/v2openapi/testdata/fusionauth_v2.yml', 'fusion_v2');
 });
 
 test('weather', async () => {
@@ -76,4 +71,8 @@ test('petstore', async () => {
 
 test('json placeholder array', async () => {
 	await runTest('src/v2openapi/testdata/json_placeholder.json', 'jsp_array');
+});
+
+test('json github starred', async () => {
+	await runTest('src/v2openapi/testdata/github.json', 'github_starred');
 });

@@ -98,7 +98,6 @@ class RESTApiBuilder {
 				this.buildObjectTypeDefinitionNode('Subscription', []),
 			],
 		};
-		this.statusCodeUnions = introspection.statusCodeUnions || false;
 		this.introspection = introspection;
 		this.apiNamespace = introspection.apiNamespace;
 		introspection.headers !== undefined &&
@@ -139,7 +138,6 @@ class RESTApiBuilder {
 			});
 	}
 
-	private statusCodeUnions: boolean;
 	private apiNamespace?: string;
 	private introspection: OpenAPIIntrospection;
 	private spec: OpenAPIV3.Document;
@@ -167,7 +165,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		//const debug = print(filtered);
+		const debug = print(filtered);
 		const schema = buildASTSchema(filtered);
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -220,7 +218,7 @@ class RESTApiBuilder {
 				Subscription: {
 					Enabled: false,
 				},
-				DefaultTypeName: this.statusCodeUnions ? 'UnspecifiedHttpResponse' : '',
+				DefaultTypeName: 'UnspecifiedHttpResponse',
 				StatusCodeTypeMappings: [],
 			},
 			ChildNodes: [],
@@ -240,26 +238,26 @@ class RESTApiBuilder {
 			this.addField(parentType, 'type', fieldName, 'JSON', []);
 		}
 		Object.keys(operationObject.responses).forEach((statusCode) => {
-			if (!this.statusCodeUnions && statusCode !== '200') {
-				return;
-			}
+			// if (!this.statusCodeUnions && statusCode !== '200') {
+			// 	return;
+			// }
 			const responseObject = this.resolveResponseObject(operationObject.responses![statusCode]);
 			if (!responseObject) {
 				return;
 			}
 			if (!responseObject.content || !responseObject.content['application/json']) {
-				if (this.statusCodeUnions) {
-					const fieldTypeName = this.buildFieldTypeName(
-						fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1),
-						responseObject.description || '',
-						statusCode || ''
-					);
-					this.ensureStatusCodeObject(fieldTypeName);
-					this.addResponseUnionField(parentType, 'type', fieldName, fieldTypeName, statusCode, true);
-				} else {
-					this.ensureType('scalar', 'JSON');
-					this.addField(parentType, 'type', fieldName, 'JSON', []);
-				}
+				// if (this.statusCodeUnions) {
+				const fieldTypeName = this.buildFieldTypeName(
+					fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1),
+					responseObject.description || '',
+					statusCode || ''
+				);
+				this.ensureStatusCodeObject(fieldTypeName);
+				this.addResponseUnionField(parentType, 'type', fieldName, fieldTypeName, statusCode, true);
+				// } else {
+				// 	this.ensureType('scalar', 'JSON');
+				// 	this.addField(parentType, 'type', fieldName, 'JSON', []);
+				// }
 				return;
 			}
 			const mediaTypeObject = responseObject.content['application/json'];
@@ -408,7 +406,7 @@ class RESTApiBuilder {
 			}
 			if (argumentName) {
 				this.addArgument(parentTypeName, fieldName, argumentName, fieldTypeName, enclosingTypes);
-			} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
+			} else if (isRootField && objectKind === 'type') {
 				fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
 				this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
 			} else {
@@ -534,7 +532,7 @@ class RESTApiBuilder {
 						typeName += 'Input';
 					}
 					let fieldTypeName = typeName;
-					if (this.statusCodeUnions && isRootField && objectKind === 'type') {
+					if (isRootField && objectKind === 'type') {
 						fieldTypeName = this.buildFieldTypeName(typeName, responseObjectDescription || '', statusCode || '');
 						this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
 					} else {
@@ -782,6 +780,10 @@ class RESTApiBuilder {
 				if (node.name.value !== parentName) {
 					return;
 				}
+				// const fieldExists = node.fields?.some((f) => f.name.value === fieldName);
+				// if (fieldExists) {
+				// 	return;
+				// }
 				const updated: ObjectTypeDefinitionNode = {
 					...node,
 					fields: [
@@ -1099,8 +1101,9 @@ class RESTApiBuilder {
 		};
 	};
 	private prettyFieldName = (input: string): string => {
-		const underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
-		return underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		let underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		underscore = underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		return underscore.replace(/\/+/g, '_');
 	};
 	private resolveFieldName = (operationObject: OpenAPIV3.OperationObject, path: string, verb: HTTPMethod): string => {
 		if (operationObject.operationId) {
