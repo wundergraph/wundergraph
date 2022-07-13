@@ -8,11 +8,12 @@
     "generate": "cd .wundergraph && wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000/authentication",
     "build": "next build",
+    "check": "tsc --noEmit",
     "dev": "next dev"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "workspace:*",
-    "@wundergraph/sdk": "workspace:*",
+    "@wundergraph/nextjs": "^0.0.33",
+    "@wundergraph/sdk": "^0.95.0",
     "graphql": "^16.3.0",
     "next": "^12.1.6",
     "react": "^18.0.0",

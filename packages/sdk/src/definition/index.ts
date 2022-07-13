@@ -424,6 +424,11 @@ export interface HeaderConfiguration {
 
 export interface OpenAPIIntrospection extends HTTPUpstream {
 	source: OpenAPIIntrospectionSource;
+	// statusCodeUnions set to true will make all responses return a union type of all possible response objects,
+	// mapped by status code
+	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
+	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
+	statusCodeUnions?: boolean;
 	baseURL?: InputVariable;
 }
 
