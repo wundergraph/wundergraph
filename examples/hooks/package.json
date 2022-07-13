@@ -7,7 +7,8 @@
     "wundergraph": "cd .wundergraph && wunderctl up --debug",
     "generate": "cd .wundergraph && wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/app/main/operations/Dragons",
-    "wunderctl": "wunderctl"
+    "wunderctl": "wunderctl",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@wundergraph/sdk": "^0.95.0",

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "cd .wundergraph && wunderctl up --debug",
     "generate": "cd .wundergraph && wunderctl generate --debug",
-    "wunderctl": "wunderctl"
+    "wunderctl": "wunderctl",
+    "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
