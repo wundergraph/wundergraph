@@ -94,8 +94,8 @@ const navigation = [
 				href: '/docs/guides/extend-json-fields-with-more-specific-types',
 			},
 			{
-				title: 'Signing Requests',
-				href: '/docs/guides/signing-requests',
+				title: 'Signing Origin Requests',
+				href: '/docs/guides/signing-origin-requests',
 			},
 		],
 	},
@@ -257,6 +257,10 @@ const navigation = [
 	{
 		title: 'Supported Data Sources',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/supported-data-sources',
+			},
 			{
 				title: 'GraphQL',
 				href: '/docs/supported-data-sources/graphql',
@@ -456,6 +460,10 @@ const navigation = [
 	{
 		title: 'Directives Reference',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/directives-reference',
+			},
 			{
 				title: '@fromClaim directive',
 				href: '/docs/directives-reference/from-claim-directive',

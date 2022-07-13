@@ -12,4 +12,8 @@ const nextConfig = {
 	},
 }
 
-module.exports = withMarkdoc()(nextConfig)
+const production = process.env.NODE_ENV === 'production'
+
+module.exports = withMarkdoc({ mode: production ? 'static' : 'server' })(
+	nextConfig
+)
