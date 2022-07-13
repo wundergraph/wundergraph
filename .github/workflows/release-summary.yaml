@@ -22,4 +22,4 @@ jobs:
         with:
           version: v0.5.7
       - run: |
-          whatchanged --preset=full >> $GITHUB_STEP_SUMMARY
+          whatchanged HEAD~@0 --preset=full >> $GITHUB_STEP_SUMMARY
