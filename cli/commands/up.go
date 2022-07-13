@@ -37,7 +37,11 @@ var upCmd = &cobra.Command{
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		killExistingMiddlewareProcess()
+		// some IDEs, like Goland, don't kill sub-processes when the main process is killed
+		// this leads to the middleware hooks server (sub-process) not being killed
+		// on subsequent runs of the up command, we're not able to listen on the same port
+		// so we kill the existing hooks process before we start the new one
+		killExistingHooksProcess()
 
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
@@ -267,7 +271,7 @@ func init() {
 	upCmd.Flags().StringVar(&serverEntryPoint, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
 }
 
-func killExistingMiddlewareProcess() {
+func killExistingHooksProcess() {
 	if runtime.GOOS == "windows" {
 		command := fmt.Sprintf("(Get-NetTCPConnection -LocalPort %d).OwningProcess -Force", middlewareListenPort)
 		execCmd(exec.Command("Stop-Process", "-Id", command))
@@ -285,11 +289,11 @@ func execCmd(cmd *exec.Cmd) {
 		}
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			log.Info(fmt.Sprintf("Error during port killing (exit code: %s)\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus()))))
+			log.Debug(fmt.Sprintf("Error during port killing (exit code: %s)\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus()))))
 		}
 	} else {
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
-		log.Info("Successfully killed existing middleware process",
+		log.Debug("Successfully killed existing middleware process",
 			abstractlogger.Int("port", middlewareListenPort),
 		)
 	}
