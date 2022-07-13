@@ -144,11 +144,13 @@ func (u *User) RemoveInternalFields() {
 
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
 
-	// we don't want to save id and access token for to the cookie
-	// raw_id_token can be used to extract the id token
+	rawIdToken := u.RawIDToken
+
+	// we remove these from the cookie to save space
 	u.IdToken = nil
 	u.AccessToken = nil
 	u.RawAccessToken = ""
+	u.RawIDToken = ""
 
 	hash := xxhash.New()
 	err := gob.NewEncoder(hash).Encode(*u)
@@ -175,6 +177,25 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 	}
 
 	http.SetCookie(w, cookie)
+
+	encoded, err = s.Encode("id", rawIdToken)
+	if err != nil {
+		return err
+	}
+
+	cookie = &http.Cookie{
+		Name:     "id",
+		Value:    encoded,
+		Path:     "/",
+		Domain:   removeSubdomain(sanitizeDomain(domain)),
+		MaxAge:   int((time.Hour * 24 * 30).Seconds()),
+		Secure:   !insecureCookies,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, cookie)
+
 	return nil
 }
 
@@ -207,6 +228,12 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		u.FromCookie = true
 	}
 	u.IdToken = tryParseJWTPayload(u.RawIDToken)
+	cookie, err = r.Cookie("id")
+	if err != nil {
+		return err
+	}
+	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
+	u.IdToken = mustBearerTokenToJSON(u.RawIDToken)
 	return err
 }
 
@@ -701,17 +728,7 @@ type UserLogoutHandler struct {
 }
 
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c := &http.Cookie{
-		Name:     "user",
-		Value:    "",
-		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(r.Host)),
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   !u.InsecureCookies,
-	}
-	http.SetCookie(w, c)
+	resetUserCookies(w, r, !u.InsecureCookies)
 	logoutOpenIDConnectProvider := r.URL.Query().Get("logout_openid_connect_provider") == "true"
 	if !logoutOpenIDConnectProvider {
 		return
@@ -756,17 +773,7 @@ type CSRFErrorHandler struct {
 }
 
 func (u *CSRFErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c := &http.Cookie{
-		Name:     "user",
-		Value:    "",
-		Path:     "/",
-		Domain:   removeSubdomain(sanitizeDomain(r.Host)),
-		MaxAge:   -1,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   !u.InsecureCookies,
-	}
-	http.SetCookie(w, c)
+	resetUserCookies(w, r, !u.InsecureCookies)
 	http.Error(w, "forbidden", http.StatusForbidden)
 }
 
@@ -827,4 +834,20 @@ func RequiresAuthentication(handler http.Handler) http.Handler {
 		}
 		handler.ServeHTTP(w, r)
 	})
+}
+
+func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
+	for _, name := range []string{"user", "id"} {
+		userCookie := &http.Cookie{
+			Name:     name,
+			Value:    "",
+			Path:     "/",
+			Domain:   removeSubdomain(sanitizeDomain(r.Host)),
+			MaxAge:   -1,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+			Secure:   secure,
+		}
+		http.SetCookie(w, userCookie)
+	}
 }
