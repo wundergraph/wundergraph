@@ -1,5 +1,5 @@
 ---
-title: @transform Directive
+title: '@transform Directive'
 pageTitle: WunderGraph - Directives - @transform
 description:
 ---

@@ -1,5 +1,5 @@
 ---
-title: @injectCurrentDatetime Directive
+title: '@injectCurrentDatetime Directive'
 pageTitle: WunderGraph - Directives - @injectCurrentDatetime
 description:
 ---

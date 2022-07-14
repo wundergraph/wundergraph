@@ -1,5 +1,5 @@
 ---
-title: @export Directive
+title: '@export Directive'
 pageTitle: WunderGraph - Directives - @export
 description:
 ---

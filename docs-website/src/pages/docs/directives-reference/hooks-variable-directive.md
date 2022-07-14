@@ -1,5 +1,5 @@
 ---
-title: @hooksVariable Directive
+title: '@hooksVariable Directive'
 pageTitle: WunderGraph - Directives - @hooksVariable
 description:
 ---
