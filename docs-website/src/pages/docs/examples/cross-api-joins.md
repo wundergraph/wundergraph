@@ -1,5 +1,5 @@
 ---
-title: Getting started
+title:
 pageTitle: WunderGraph -
 description:
 ---
