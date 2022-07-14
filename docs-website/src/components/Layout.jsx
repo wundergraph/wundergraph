@@ -72,6 +72,10 @@ const navigation = [
 				title: 'WunderGraph RPC Protocol explained',
 				href: '/docs/architecture/wundergraph-rpc-protocol-explained',
 			},
+			{
+				title: 'WunderGraph Conventions',
+				href: '/docs/architecture/wundergraph-conventions',
+			},
 		],
 	},
 	{
