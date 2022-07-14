@@ -1,5 +1,5 @@
 ---
 title: Getting started
-pageTitle: CacheAdvance - Never miss the cache again.
+pageTitle: WunderGraph -
 description:
 ---

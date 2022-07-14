@@ -1,5 +1,5 @@
 ---
-title: Getting started
-pageTitle: CacheAdvance - Never miss the cache again.
+title: Configure Authentication
+pageTitle: WunderGraph - Configure Authentication
 description:
 ---
