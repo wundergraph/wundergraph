@@ -1,7 +1,6 @@
 package files
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -62,39 +61,4 @@ func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverE
 	}
 
 	return files, nil
-}
-
-func GetWunderGraphDirAbs() (string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	wundergraphDirectory := ""
-
-	// next to it
-	dirPath := path.Join(wd, ".wundergraph")
-
-	// inside .wundergraph
-	dirPath2 := path.Join(wd, "..", ".wundergraph")
-
-	exists := DirectoryExists(dirPath)
-	exists2 := DirectoryExists(dirPath2)
-
-	if exists {
-		wundergraphDirectory = dirPath
-	} else if exists2 {
-		wundergraphDirectory = dirPath2
-	}
-
-	if wundergraphDirectory == "" {
-		return "", errors.New(".wundergraph directory not found")
-	}
-
-	absDir, err := filepath.Abs(wundergraphDirectory)
-	if err != nil {
-		return "", err
-	}
-
-	return absDir, nil
 }
