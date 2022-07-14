@@ -10,31 +10,34 @@ import (
 )
 
 type Config struct {
-	Name       string
-	Executable string
-	ScriptArgs []string
-	ScriptEnv  []string
-	Logger     abstractlogger.Logger
+	Name          string
+	Executable    string
+	ScriptArgs    []string
+	ScriptEnv     []string
+	AbsWorkingDir string
+	Logger        abstractlogger.Logger
 }
 
 type ScriptRunner struct {
-	name        string
-	fatalOnStop bool
-	executable  string
-	scriptArgs  []string
-	scriptEnv   []string
-	cmdDoneChan chan struct{}
-	log         abstractlogger.Logger
-	cmd         *gocmd.Cmd
+	name          string
+	fatalOnStop   bool
+	executable    string
+	scriptArgs    []string
+	scriptEnv     []string
+	absWorkingDir string
+	cmdDoneChan   chan struct{}
+	log           abstractlogger.Logger
+	cmd           *gocmd.Cmd
 }
 
 func NewScriptRunner(config *Config) *ScriptRunner {
 	return &ScriptRunner{
-		name:       config.Name,
-		log:        config.Logger,
-		executable: config.Executable,
-		scriptArgs: config.ScriptArgs,
-		scriptEnv:  config.ScriptEnv,
+		name:          config.Name,
+		log:           config.Logger,
+		absWorkingDir: config.AbsWorkingDir,
+		executable:    config.Executable,
+		scriptArgs:    config.ScriptArgs,
+		scriptEnv:     config.ScriptEnv,
 	}
 }
 
@@ -59,7 +62,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		)
 	}
 
-	cmd, doneChan := newCmd(b.executable, b.scriptArgs, b.scriptEnv)
+	cmd, doneChan := newCmd(b.executable, b.absWorkingDir, b.scriptArgs, b.scriptEnv)
 	b.cmd = cmd
 	b.cmdDoneChan = doneChan
 
@@ -130,12 +133,13 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 // newCmd creates a new command to run the bundler script.
 // it returns a channel that is closed when the command is done.
 // this is necessary to make sure the IO was flushed after the script is stopped.
-func newCmd(executable string, scriptArgs []string, scriptEnv []string) (*gocmd.Cmd, chan struct{}) {
+func newCmd(executable string, cmdDir string, scriptArgs []string, scriptEnv []string) (*gocmd.Cmd, chan struct{}) {
 	cmdOptions := gocmd.Options{
 		Buffered:  false,
 		Streaming: true,
 	}
 	cmd := gocmd.NewCmdOptions(cmdOptions, executable, scriptArgs...)
+	cmd.Dir = cmdDir
 	cmd.Env = append(cmd.Env, scriptEnv...)
 
 	doneChan := make(chan struct{})

@@ -3,7 +3,9 @@ package commands
 import (
 	"strings"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/manifest"
 )
 
@@ -15,6 +17,10 @@ var addCmd = &cobra.Command{
 	Long:    `wunderctl add spacex/spacex jens/weather stripe/stripe`,
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, dependencies []string) {
+		if !files.DirectoryExists(wundergraphDir) {
+			log.Fatal(`could not find base directory`, abstractlogger.String("dir", wundergraphDir))
+		}
+
 		client := InitWunderGraphApiClient()
 		man := manifest.New(log, client, wundergraphDir)
 		err := man.Load()

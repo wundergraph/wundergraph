@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
@@ -22,6 +23,10 @@ The APIs to publish need to be generated into the .wundergraph/generated directo
 	Example: `wunderctl publish organization/api`,
 	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		if wundergraphDir == "" {
+			log.Fatal(`could not find base directory`, abstractlogger.String("dir", wundergraphDir))
+		}
+
 		var client *v2wundergraphapi.Client
 		if serviceToken != "" {
 			client = InitWunderGraphApiClientWithToken(serviceToken)

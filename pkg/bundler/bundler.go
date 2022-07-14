@@ -21,6 +21,7 @@ var NonNodeModuleReg = regexp.MustCompile(`^[^./]|^\.[^./]|^\.\.[^/]`) // Must n
 type Bundler struct {
 	name                  string
 	entryPoint            string
+	absWorkingDir         string
 	watchPaths            []string
 	ignorePaths           []string
 	log                   abstractlogger.Logger
@@ -36,6 +37,7 @@ type Bundler struct {
 type Config struct {
 	Name                  string
 	Logger                abstractlogger.Logger
+	AbsWorkingDir         string
 	SkipWatchOnEntryPoint bool
 	EntryPoint            string
 	WatchPaths            []string
@@ -47,6 +49,7 @@ type Config struct {
 func NewBundler(config Config) *Bundler {
 	return &Bundler{
 		name:                  config.Name,
+		absWorkingDir:         config.AbsWorkingDir,
 		outFile:               config.OutFile,
 		entryPoint:            config.EntryPoint,
 		watchPaths:            config.WatchPaths,
@@ -121,11 +124,12 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 
 func (b *Bundler) initialBuild() api.BuildResult {
 	options := api.BuildOptions{
-		Outfile:     b.outFile,
-		EntryPoints: []string{b.entryPoint},
-		Bundle:      true,
-		Incremental: true,
-		Platform:    api.PlatformNode,
+		Outfile:       b.outFile,
+		EntryPoints:   []string{b.entryPoint},
+		Bundle:        true,
+		Incremental:   true,
+		Platform:      api.PlatformNode,
+		AbsWorkingDir: b.absWorkingDir,
 		Loader: map[string]api.Loader{
 			".json": api.LoaderJSON,
 		},
