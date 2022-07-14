@@ -23,6 +23,7 @@ var (
 	disableForceHttpsRedirects bool
 	enableIntrospection        bool
 	gracefulTimeout            int
+	configJsonFilename         string
 )
 
 // startCmd represents the start command
@@ -43,7 +44,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			)
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDir, "generated", "wundergraph.config.json")
+		configFile := path.Join(entryPoints.WunderGraphDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			log.Fatal(`could not find configuration file`,
 				abstractlogger.Error(err),
@@ -165,11 +166,12 @@ If used without --exclude-server, make sure the server is available in this dire
 func init() {
 	rootCmd.AddCommand(startCmd)
 	startCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen-addr is the host:port combination, WunderGraph should listen on.")
+	startCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
 	startCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
 	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", 10, "graceful-timeout is the time in seconds the server has to graceful shutdown")
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
-	startCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
-	startCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
+	startCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "filename of node config")
+	startCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "filename of the server config")
 }
