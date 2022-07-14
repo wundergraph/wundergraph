@@ -41,7 +41,7 @@ Use this command if you only want to generate the configuration`,
 			Name:          "config-runner",
 			Executable:    "node",
 			ScriptArgs:    []string{configOutFile},
-			AbsWorkingDir: entryPoints.WunderGraphDir,
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			Logger:        log,
 			ScriptEnv:     append(os.Environ(), fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish)),
 		})
@@ -58,11 +58,11 @@ Use this command if you only want to generate the configuration`,
 
 		var onAfterBuild func()
 
-		if _, err := os.Stat(entryPoints.HooksServerEntryPoint); err == nil {
-			serverOutFile := path.Join(entryPoints.WunderGraphDir, "generated", "bundle", "server.js")
+		if _, err := os.Stat(entryPoints.ServerEntryPointAbs); err == nil {
+			serverOutFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
-				AbsWorkingDir: entryPoints.WunderGraphDir,
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 				EntryPoint:    serverEntryPointFilename,
 				OutFile:       serverOutFile,
 				Logger:        log,
@@ -74,12 +74,12 @@ Use this command if you only want to generate the configuration`,
 				hooksBundler.Bundle()
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", entryPoints.HooksServerEntryPoint)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", entryPoints.ServerEntryPointAbs)
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
-			AbsWorkingDir: entryPoints.WunderGraphDir,
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			EntryPoint:    configEntryPointFilename,
 			OutFile:       configOutFile,
 			Logger:        log,

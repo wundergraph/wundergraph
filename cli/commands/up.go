@@ -69,7 +69,7 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		introspectionCacheDir := path.Join(entryPoints.WunderGraphDir, "generated", "introspection", "cache")
+		introspectionCacheDir := path.Join(entryPoints.WunderGraphDirAbs, "generated", "introspection", "cache")
 		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
 		if errIntrospectionDir == nil {
 			if clearIntrospectionCache {
@@ -91,7 +91,7 @@ var upCmd = &cobra.Command{
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
-			AbsWorkingDir: entryPoints.WunderGraphDir,
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
@@ -105,7 +105,7 @@ var upCmd = &cobra.Command{
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-introspection-runner",
 			Executable:    "node",
-			AbsWorkingDir: entryPoints.WunderGraphDir,
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
@@ -119,11 +119,11 @@ var upCmd = &cobra.Command{
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var onAfterBuild func()
 
-		if _, err := os.Stat(entryPoints.HooksServerEntryPoint); err == nil {
+		if _, err := os.Stat(entryPoints.ServerEntryPointAbs); err == nil {
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoint:    serverEntryPointFilename,
-				AbsWorkingDir: entryPoints.WunderGraphDir,
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 				OutFile:       serverOutFile,
 				Logger:        log,
 				WatchPaths:    []string{configJsonPath},
@@ -131,7 +131,7 @@ var upCmd = &cobra.Command{
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDir),
+				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -144,7 +144,7 @@ var upCmd = &cobra.Command{
 			hookServerRunner = scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:          "hooks-server-runner",
 				Executable:    "node",
-				AbsWorkingDir: entryPoints.WunderGraphDir,
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 				ScriptArgs:    []string{serverOutFile},
 				Logger:        log,
 				ScriptEnv:     append(os.Environ(), hooksEnv...),
@@ -168,13 +168,13 @@ var upCmd = &cobra.Command{
 				}()
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", entryPoints.HooksServerEntryPoint)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", entryPoints.ServerEntryPointAbs)
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
 			EntryPoint:    configEntryPointFilename,
-			AbsWorkingDir: entryPoints.WunderGraphDir,
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			OutFile:       configOutFile,
 			Logger:        log,
 			WatchPaths: []string{
@@ -221,7 +221,7 @@ var upCmd = &cobra.Command{
 		}
 		n := node.New(ctx, BuildInfo, cfg, log)
 		go func() {
-			configFile := path.Join(entryPoints.WunderGraphDir, "generated", "wundergraph.config.json")
+			configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "wundergraph.config.json")
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),

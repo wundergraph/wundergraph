@@ -44,7 +44,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			)
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDir, "generated", configJsonFilename)
+		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			log.Fatal(`could not find configuration file`,
 				abstractlogger.Error(err),
@@ -71,7 +71,7 @@ If used without --exclude-server, make sure the server is available in this dire
 		if !excludeServer {
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDir),
+				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -85,7 +85,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:          "hooks-server-runner",
 				Executable:    "node",
-				AbsWorkingDir: entryPoints.WunderGraphDir,
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 				ScriptArgs:    []string{serverOutFile},
 				Logger:        log,
 				ScriptEnv:     append(os.Environ(), hooksEnv...),

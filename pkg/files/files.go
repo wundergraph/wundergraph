@@ -23,9 +23,9 @@ func FileExists(filePath string) bool {
 }
 
 type WunderGraphEntryPoints struct {
-	WunderGraphDir        string
-	HooksServerEntryPoint string
-	ConfigEntryPoint      string
+	WunderGraphDirAbs   string
+	ServerEntryPointAbs string
+	ConfigEntryPointAbs string
 }
 
 // GetWunderGraphEntryPoints validates and resolves all code entry points and base directory to build a WunderGraph.
@@ -41,13 +41,13 @@ func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverE
 	}
 
 	files := &WunderGraphEntryPoints{
-		WunderGraphDir: wundergraphAbsDir,
+		WunderGraphDirAbs: wundergraphAbsDir,
 	}
 
 	configEntryPoint := path.Join(wundergraphDir, configEntryPointFilename)
 
 	if FileExists(configEntryPoint) {
-		files.ConfigEntryPoint = configEntryPoint
+		files.ConfigEntryPointAbs = configEntryPoint
 	} else {
 		return nil, fmt.Errorf(`code file "%s" not found`, configEntryPoint)
 	}
@@ -55,7 +55,7 @@ func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverE
 	hooksEntryPoint := path.Join(wundergraphDir, serverEntryPointFilename)
 
 	if FileExists(hooksEntryPoint) {
-		files.HooksServerEntryPoint = hooksEntryPoint
+		files.ServerEntryPointAbs = hooksEntryPoint
 	} else {
 		return nil, fmt.Errorf(`code file "%s" not found`, hooksEntryPoint)
 	}
