@@ -1025,7 +1025,7 @@ function useWunderGraphContext<Role>(
 ) {
 	const {
 		strict = true,
-		name = 'useQuery',
+		name = 'useWunderGraph',
 		errorMessage = `${name} 'client' is undefined. Did you forget to wrap your app or page with 'withWunderGraph'?`,
 	} = options;
 	const ctx = useContext(context);
@@ -1048,8 +1048,10 @@ function useQueryContextWrapper<Input, Data, Role>(
 	result: QueryResult<Data>;
 	refetch: (args?: InternalQueryArgsWithInput<Input>) => void;
 } {
-	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } =
-		useWunderGraphContext<Role>(wunderGraphContext);
+	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useWunderGraphContext<Role>(
+		wunderGraphContext,
+		{ name: 'useQuery' }
+	);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true && args?.lazy !== true;
 	const cacheKey = client.cacheKey(query, args);
