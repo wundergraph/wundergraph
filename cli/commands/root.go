@@ -80,7 +80,7 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if !files.DirectoryExists(wundergraphDir) {
-			_, _ = red.Printf("unable to find %s directory", wundergraphDir)
+			_, _ = red.Printf(`unable to find "%s" directory`, wundergraphDir)
 			return
 		}
 		client := InitWunderGraphApiClient()
