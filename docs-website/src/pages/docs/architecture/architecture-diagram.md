@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Architecture Diagram
+pageTitle: WunderGraph - Architecture - Diagram
 description:
 ---

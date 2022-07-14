@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: API Management
+pageTitle: WunderGraph - API Management
 description:
 ---

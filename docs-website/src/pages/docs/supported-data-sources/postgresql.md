@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: PostgreSQL
+pageTitle: WunderGraph - PostgreSQL
 description:
 ---

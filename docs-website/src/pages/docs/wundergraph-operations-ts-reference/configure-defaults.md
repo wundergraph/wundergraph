@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Configure Defaults
+pageTitle: WunderGraph - Configure Defaults
 description:
 ---

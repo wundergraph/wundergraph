@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: WunderGraph Client
+pageTitle: WunderGraph - Components - Client
 description:
 ---

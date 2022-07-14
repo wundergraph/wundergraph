@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: @fromClaim Directive
+pageTitle: WunderGraph - Directives - @fromClaim
 description:
 ---

@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Java
+pageTitle: WunderGraph - Java
 description:
 ---

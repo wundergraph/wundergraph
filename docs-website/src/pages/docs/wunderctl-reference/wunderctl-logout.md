@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: wunderctl logout
+pageTitle: WunderGraph - wunderctl logout
 description:
 ---

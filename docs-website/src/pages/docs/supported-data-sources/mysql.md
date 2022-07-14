@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: MySQL
+pageTitle: WunderGraph - MySQL
 description:
 ---

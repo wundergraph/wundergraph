@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Hooks Example
+pageTitle: WunderGraph - Examples - Hooks
 description:
 ---

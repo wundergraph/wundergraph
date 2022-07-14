@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Solid.js
+pageTitle: WunderGraph - Solid.js
 description:
 ---

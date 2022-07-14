@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Apollo Federation
+pageTitle: WunderGraph - Apollo Federation
 description:
 ---

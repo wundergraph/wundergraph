@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Planetscale
+pageTitle: WunderGraph - Planetscale
 description:
 ---

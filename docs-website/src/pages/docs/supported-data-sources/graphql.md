@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: GraphQL
+pageTitle: WunderGraph - GraphQL
 description:
 ---

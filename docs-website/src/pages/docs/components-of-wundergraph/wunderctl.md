@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: wunderctl
+pageTitle: WunderGraph - Components - wunderctl
 description:
 ---

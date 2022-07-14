@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: @injectEnvironmentVariable Directive
+pageTitle: WunderGraph - Directives - @injectEnvironmentVariable
 description:
 ---

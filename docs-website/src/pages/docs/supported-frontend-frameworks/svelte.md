@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Svelte
+pageTitle: WunderGraph - Svelte
 description:
 ---

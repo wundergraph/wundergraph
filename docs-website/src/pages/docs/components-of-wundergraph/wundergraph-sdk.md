@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: SDK
+pageTitle: WunderGraph - Components - SDK
 description:
 ---

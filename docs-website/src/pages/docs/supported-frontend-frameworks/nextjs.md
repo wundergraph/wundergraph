@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Next.js
+pageTitle: WunderGraph - Next.js
 description:
 ---

@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: @internal Directive
+pageTitle: WunderGraph - Directives - @internal
 description:
 ---

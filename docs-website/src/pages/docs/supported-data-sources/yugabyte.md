@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: Yugabyte
+pageTitle: WunderGraph - Yugabyte
 description:
 ---

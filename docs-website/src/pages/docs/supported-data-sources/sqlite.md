@@ -1,5 +1,5 @@
 ---
-title:
-pageTitle: WunderGraph -
+title: SQLite
+pageTitle: WunderGraph - SQLite
 description:
 ---
