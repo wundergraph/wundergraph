@@ -1,0 +1,146 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "1.1.4",
+    "title": "GitHub v3 REST API",
+    "description": "GitHub's v3 REST API.",
+    "license": {
+      "name": "MIT",
+      "url": "https://spdx.org/licenses/MIT"
+    },
+    "termsOfService": "https://docs.github.com/articles/github-terms-of-service",
+    "contact": {
+      "name": "Support",
+      "url": "https://support.github.com/contact?tags=dotcom-rest-api"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.github.com"
+    }
+  ],
+  "paths": {
+    "/user/starred/{owner}/{repo}": {
+      "get": {
+        "summary": "Check if a repository is starred by the authenticated user",
+        "description": "",
+        "tags": ["activity"],
+        "operationId": "check-repo-is-starred",
+        "externalDocs": {
+          "description": "API method documentation",
+          "url": "https://docs.github.com/rest/reference/activity#check-if-a-repository-is-starred-by-the-authenticated-user"
+        },
+        "parameters": [
+          {
+            "name": "owner",
+            "description": "The account owner of the repository. The name is not case sensitive.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repo",
+            "description": "The name of the repository. The name is not case sensitive.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "starred"
+          },
+          "404": {
+            "description": "NotFound",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Basic Error",
+                  "description": "Basic Error",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "documentation_url": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Requires authentication",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Basic Error",
+                  "description": "Basic Error",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "documentation_url": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "304": {},
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Basic Error",
+                  "description": "Basic Error",
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "documentation_url": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-github": {
+          "githubCloudOnly": false,
+          "enabledForGitHubApps": false,
+          "category": "activity",
+          "subcategory": "starring"
+        }
+      }
+    }
+  }
+}

@@ -226,24 +226,25 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		accessTokenJSON := mustBearerTokenToJSON(accessToken)
-		idTokenJSON := mustBearerTokenToJSON(idToken)
+		accessTokenJSON := tryParseJWT(accessToken)
+		idTokenJSON := tryParseJWT(idToken)
 
 		user := User{
-			ProviderName:  "oidc",
-			ProviderID:    config.ProviderID,
-			Email:         claims.Email,
-			EmailVerified: claims.EmailVerified,
-			Name:          claims.Name,
-			FirstName:     claims.GivenName,
-			LastName:      claims.FamilyName,
-			UserID:        claims.Sub,
-			AvatarURL:     claims.Picture,
-			Location:      claims.Locale,
-			ExpiresAt:     oauth2Token.Expiry,
-			IdToken:       idTokenJSON,
-			AccessToken:   accessTokenJSON,
-			RawIDToken:    idToken,
+			ProviderName:   "oidc",
+			ProviderID:     config.ProviderID,
+			Email:          claims.Email,
+			EmailVerified:  claims.EmailVerified,
+			Name:           claims.Name,
+			FirstName:      claims.GivenName,
+			LastName:       claims.FamilyName,
+			UserID:         claims.Sub,
+			AvatarURL:      claims.Picture,
+			Location:       claims.Locale,
+			ExpiresAt:      oauth2Token.Expiry,
+			AccessToken:    accessTokenJSON,
+			RawAccessToken: accessToken,
+			RawIDToken:     idToken,
+			IdToken:        idTokenJSON,
 		}
 
 		hooks.handlePostAuthentication(r.Context(), user)
