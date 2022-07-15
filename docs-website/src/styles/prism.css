@@ -2,6 +2,13 @@ pre[class*='language-'] {
 	color: theme('colors.slate.50');
 }
 
+.token {
+	color: theme('colors.black');
+}
+.dark .token {
+	color: theme('colors.white');
+}
+
 .token.tag,
 .token.class-name,
 .token.selector,
@@ -16,6 +23,14 @@ pre[class*='language-'] {
 .token.rule,
 .token.pseudo-class,
 .token.important {
+	color: theme('colors.slate.500');
+}
+
+.dark .token.attr-name,
+.dark .token.keyword,
+.dark .token.rule,
+.dark .token.pseudo-class,
+.dark .token.important {
 	color: theme('colors.slate.300');
 }
 
@@ -27,6 +42,13 @@ pre[class*='language-'] {
 .token.class,
 .token.string,
 .token.property {
+	color: theme('colors.sky.700');
+}
+
+.dark .token.attr-value,
+.dark .token.class,
+.dark .token.string,
+.dark .token.property {
 	color: theme('colors.sky.300');
 }
 

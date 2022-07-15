@@ -2,7 +2,7 @@ const defaultTheme = require('tailwindcss/defaultTheme')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-	content: ['./src/**/*.{js,jsx}'],
+	content: ['./src/**/*.{js,ts,jsx,tsx}', './content/**/*.{md,mdx}'],
 	darkMode: 'class',
 	theme: {
 		fontSize: {
@@ -25,10 +25,16 @@ module.exports = {
 				sans: ['Inter', ...defaultTheme.fontFamily.sans],
 				display: ['Lexend', ...defaultTheme.fontFamily.sans],
 			},
+			colors: {
+				gray: {
+					850: '#18202F',
+					950: '#0b0f1a',
+				},
+			},
 			maxWidth: {
 				'8xl': '88rem',
 			},
 		},
 	},
-	plugins: [require('@tailwindcss/typography')],
+	plugins: [require('tailwindcss-radix')(), require('@tailwindcss/typography')],
 }
