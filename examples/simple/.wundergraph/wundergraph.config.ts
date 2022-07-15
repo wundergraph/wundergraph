@@ -6,7 +6,7 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
-// import server from './wundergraph.server';
+import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
 /*
@@ -82,6 +82,7 @@ const myApplication = new Application({
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
 	application: myApplication,
+	server,
 	operations,
 	codeGenerators: [
 		{
