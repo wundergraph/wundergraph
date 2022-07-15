@@ -44,10 +44,7 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
-			log.Fatal(`could not find configuration file`,
-				abstractlogger.Error(err),
-				abstractlogger.String("file", configFile),
-			)
+			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
