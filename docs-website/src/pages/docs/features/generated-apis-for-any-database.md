@@ -1,5 +1,5 @@
 ---
-title: Auto-generated APIs for your database
+title: Generated APIs for any database
 pageTitle: WunderGraph - Features - Auto-generated APIs for your database
 description:
 ---

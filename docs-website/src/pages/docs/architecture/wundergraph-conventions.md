@@ -9,3 +9,5 @@ description:
   - `wundergraph.config.ts`
   - `wundergraph.server.ts`
   - `wundergraph.operations.ts`
+
+## Everything you need to know about using Environment Variables
