@@ -35,9 +35,7 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
 		if err != nil {
-			log.Fatal(`could not find file or directory`,
-				abstractlogger.Error(err),
-			)
+			return fmt.Errorf("could not find file or directory: %s", err)
 		}
 
 		// some IDEs, like Goland, don't send a SIGINT to the process group
