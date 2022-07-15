@@ -21,8 +21,8 @@ import type { SDLResponse } from './generated/models';
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
 		authentication: {
-			postAuthentication: async (hook) => {},
-			mutatingPostAuthentication: async (hook) => {
+			postAuthentication: async ({ user }) => {},
+			mutatingPostAuthentication: async ({ user }) => {
 				return {
 					user: {
 						name: 'John Doe',
