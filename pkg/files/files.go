@@ -41,7 +41,7 @@ func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverE
 	}
 
 	if !DirectoryExists(wundergraphAbsDir) {
-		return nil, fmt.Errorf(`base directory "%s" not found`)
+		return nil, fmt.Errorf(`base directory "%s" not found`, wundergraphAbsDir)
 	} else {
 		files.WunderGraphDirAbs = wundergraphAbsDir
 	}
