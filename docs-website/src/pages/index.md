@@ -1,7 +1,7 @@
 ---
 title: Getting started
-pageTitle: CacheAdvance - Never miss the cache again.
-description: Cache every single thing your app could ever do ahead of time, so your code never even has to run at all.
+pageTitle: WunderGraph - The best Developer Experience to compose & integrate APIs.
+description: The Next Generation API Developer Platform. Connect any number of APIs and merge them into a single unified API. Built-in Security, Authentication, Authorization and Caching.
 ---
 
 Learn how to use and configure WunderGraph. {% .lead %}
