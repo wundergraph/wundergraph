@@ -33,7 +33,7 @@ importers:
       '@docsearch/react': ^3.1.1
       '@headlessui/react': ^1.6.5
       '@markdoc/markdoc': ^0.1.3
-      '@markdoc/next.js': ^0.1.6
+      '@markdoc/next.js': ^0.1.7-0
       '@sindresorhus/slugify': ^2.1.0
       '@tailwindcss/typography': ^0.5.2
       '@types/node': ^18.0.3
@@ -56,7 +56,7 @@ importers:
       '@docsearch/react': 3.1.1_biqbaboplfbrettd7655fr4n2y
       '@headlessui/react': 1.6.6_biqbaboplfbrettd7655fr4n2y
       '@markdoc/markdoc': 0.1.3
-      '@markdoc/next.js': 0.1.6_lwqxoh3rgnuyv5dvpdzsgpfajq
+      '@markdoc/next.js': 0.1.7-0_lwqxoh3rgnuyv5dvpdzsgpfajq
       '@sindresorhus/slugify': 2.1.0
       '@tailwindcss/typography': 0.5.3_tailwindcss@3.1.5
       autoprefixer: 10.4.7
@@ -1620,8 +1620,8 @@ packages:
     engines: {node: '>=14.7.0'}
     dev: false
 
-  /@markdoc/next.js/0.1.6_lwqxoh3rgnuyv5dvpdzsgpfajq:
-    resolution: {integrity: sha512-AkILWoOg3zMrTPDubQgq5lRZ22UuFQsRn/J8oaYUYx/w8RtZ3ZACDNwX9hWVVDT3AcGokNSXaFRsQeWbmpPoFQ==}
+  /@markdoc/next.js/0.1.7-0_lwqxoh3rgnuyv5dvpdzsgpfajq:
+    resolution: {integrity: sha512-Mi3N+KuamGve3GEe2fVXdLnnEvbPC82kQeG9iZffmAD3CqkGUJXSfIfSQqeoEAERE4MZH0j5pfc3Z/5iF711jg==}
     peerDependencies:
       '@markdoc/markdoc': ^0.1.1
       next: '*'
