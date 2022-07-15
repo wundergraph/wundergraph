@@ -1,7 +1,7 @@
 ---
 title: Getting started
-pageTitle: WunderGraph - The best Developer Experience to compose & integrate APIs.
-description: The Next Generation API Developer Platform. Connect any number of APIs and merge them into a single unified API. Built-in Security, Authentication, Authorization and Caching.
+pageTitle: WunderGraph Documentation
+description: Explore our guides and examples to integrate WunderGraph.
 ---
 
 Learn how to use and configure WunderGraph. {% .lead %}
