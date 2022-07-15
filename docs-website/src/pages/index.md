@@ -1,7 +1,7 @@
 ---
 title: Getting started
-pageTitle: CacheAdvance - Never miss the cache again.
-description: Cache every single thing your app could ever do ahead of time, so your code never even has to run at all.
+pageTitle: WunderGraph Documentation
+description: Explore our guides and examples to integrate WunderGraph.
 ---
 
 Learn how to use and configure WunderGraph. {% .lead %}
