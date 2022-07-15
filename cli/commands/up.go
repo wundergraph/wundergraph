@@ -84,7 +84,7 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		configJsonPath := path.Join("generated", "wundergraph.config.json")
+		configJsonPath := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
 		configOutFile := path.Join("generated", "bundle", "config.js")
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 
@@ -119,7 +119,7 @@ var upCmd = &cobra.Command{
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var onAfterBuild func()
 
-		if _, err := os.Stat(entryPoints.ServerEntryPointAbs); err == nil {
+		if entryPoints.ServerEntryPointAbs != "" {
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoint:    serverEntryPointFilename,
@@ -168,7 +168,17 @@ var upCmd = &cobra.Command{
 				}()
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", entryPoints.ServerEntryPointAbs)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
+			onAfterBuild = func() {
+				log.Debug("Configuration change detected")
+				// generate new config
+				<-configRunner.Run(ctx)
+
+				go func() {
+					// run or restart the introspection poller
+					<-configIntrospectionRunner.Run(ctx)
+				}()
+			}
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{
@@ -208,7 +218,7 @@ var upCmd = &cobra.Command{
 			})
 			if err != nil {
 				log.Error("watcher",
-					abstractlogger.String("watcher", "wundergraph config"),
+					abstractlogger.String("watcher", "config"),
 					abstractlogger.Error(err),
 				)
 			}
@@ -271,6 +281,7 @@ func init() {
 	upCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
 	upCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
+	upCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
 	upCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
 	upCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
 }

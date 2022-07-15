@@ -62,7 +62,12 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		)
 	}
 
-	cmd, doneChan := newCmd(b.executable, b.absWorkingDir, b.scriptArgs, b.scriptEnv)
+	cmd, doneChan := newCmd(CmdOptions{
+		executable: b.executable,
+		cmdDir:     b.absWorkingDir,
+		scriptArgs: b.scriptArgs,
+		scriptEnv:  b.scriptEnv,
+	})
 	b.cmd = cmd
 	b.cmdDoneChan = doneChan
 
@@ -130,17 +135,24 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	return doneChan
 }
 
+type CmdOptions struct {
+	executable string
+	cmdDir     string
+	scriptArgs []string
+	scriptEnv  []string
+}
+
 // newCmd creates a new command to run the bundler script.
 // it returns a channel that is closed when the command is done.
 // this is necessary to make sure the IO was flushed after the script is stopped.
-func newCmd(executable string, cmdDir string, scriptArgs []string, scriptEnv []string) (*gocmd.Cmd, chan struct{}) {
+func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 	cmdOptions := gocmd.Options{
 		Buffered:  false,
 		Streaming: true,
 	}
-	cmd := gocmd.NewCmdOptions(cmdOptions, executable, scriptArgs...)
-	cmd.Dir = cmdDir
-	cmd.Env = append(cmd.Env, scriptEnv...)
+	cmd := gocmd.NewCmdOptions(cmdOptions, options.executable, options.scriptArgs...)
+	cmd.Dir = options.cmdDir
+	cmd.Env = append(cmd.Env, options.scriptEnv...)
 
 	doneChan := make(chan struct{})
 

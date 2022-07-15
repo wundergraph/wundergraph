@@ -10,7 +10,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
-	files "github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 )
 
@@ -27,9 +27,7 @@ Use this command if you only want to generate the configuration`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
 		if err != nil {
-			log.Fatal(`could not find file or directory`,
-				abstractlogger.Error(err),
-			)
+			return fmt.Errorf("could not find file or directory: %s", err)
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -58,7 +56,7 @@ Use this command if you only want to generate the configuration`,
 
 		var onAfterBuild func()
 
-		if _, err := os.Stat(entryPoints.ServerEntryPointAbs); err == nil {
+		if entryPoints.ServerEntryPointAbs != "" {
 			serverOutFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
@@ -74,7 +72,10 @@ Use this command if you only want to generate the configuration`,
 				hooksBundler.Bundle()
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", entryPoints.ServerEntryPointAbs)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
+			onAfterBuild = func() {
+				<-configRunner.Run(ctx)
+			}
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{

@@ -78,29 +78,26 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			)
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !files.DirectoryExists(wundergraphDir) {
-			_, _ = red.Printf(`unable to find "%s" directory`, wundergraphDir)
-			return
+			return fmt.Errorf("unable to find %s directory", wundergraphDir)
 		}
 		client := InitWunderGraphApiClient()
 		man := manifest.New(log, client, wundergraphDir)
 		err := man.Load()
 		if err != nil {
-			_, _ = red.Printf("unable to load wundergraph.manifest.json")
-			return
+			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}
 		err = man.PersistChanges()
 		if err != nil {
-			_, _ = red.Printf("unable to persist manifest changes")
-			return
+			return fmt.Errorf("unable to persist manifest changes")
 		}
 		err = man.WriteIntegrationsFile()
 		if err != nil {
-			_, _ = red.Printf("unable to write integrations file")
-			return
+			return fmt.Errorf("unable to write integrations file")
 		}
 		_, _ = green.Printf("API dependencies updated\n")
+		return nil
 	},
 }
 

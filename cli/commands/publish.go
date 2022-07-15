@@ -7,7 +7,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
@@ -23,9 +22,9 @@ This command should be executed from your project root directory.
 The APIs to publish need to be generated into the .wundergraph/generated directory.`,
 	Example: `wunderctl publish organization/api`,
 	Args:    cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if !files.DirectoryExists(wundergraphDir) {
-			log.Fatal(`could not find base directory`, abstractlogger.String("dir", wundergraphDir))
+			return fmt.Errorf("could not find wundergraph directory: %s", wundergraphDir)
 		}
 
 		var client *v2wundergraphapi.Client
@@ -73,6 +72,8 @@ The APIs to publish need to be generated into the .wundergraph/generated directo
 
 			_, _ = green.Printf("API '%s' has been published successfully!\n", apiName)
 		}
+
+		return nil
 	},
 }
 
