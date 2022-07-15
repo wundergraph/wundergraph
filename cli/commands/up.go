@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
-	"path/filepath"
 	"runtime"
 	"syscall"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
@@ -22,11 +22,8 @@ import (
 )
 
 var (
-	wunderGraphConfigFile   string
 	listenAddr              string
 	middlewareListenPort    int
-	entryPoint              string
-	serverEntryPoint        string
 	clearIntrospectionCache bool
 )
 
@@ -36,8 +33,12 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		if err != nil {
+			return fmt.Errorf("could not find file or directory: %s", err)
+		}
 
-		// some IDEs, like Goland, don't kill sub-processes when the main process is killed
+		// some IDEs, like Goland, don't send a SIGINT to the process group
 		// this leads to the middleware hooks server (sub-process) not being killed
 		// on subsequent runs of the up command, we're not able to listen on the same port
 		// so we kill the existing hooks process before we start the new one
@@ -50,11 +51,6 @@ var upCmd = &cobra.Command{
 
 		quit := make(chan os.Signal, 2)
 		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-		wd, err := os.Getwd()
-		if err != nil {
-			log.Fatal("Could not get your current working directory")
-		}
 
 		hooksJWT, err := apihandler.CreateHooksJWT(secret)
 		if err != nil {
@@ -71,7 +67,7 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		introspectionCacheDir := path.Join(wundergraphDir, "generated", "introspection", "cache")
+		introspectionCacheDir := path.Join(entryPoints.WunderGraphDirAbs, "generated", "introspection", "cache")
 		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
 		if errIntrospectionDir == nil {
 			if clearIntrospectionCache {
@@ -86,15 +82,16 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		configJsonPath := path.Join(wundergraphDir, "generated", "wundergraph.config.json")
-		configOutFile := path.Join(wundergraphDir, "generated", "bundle", "config.js")
-		serverOutFile := path.Join(wundergraphDir, "generated", "bundle", "server.js")
+		configJsonPath := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		configOutFile := path.Join("generated", "bundle", "config.js")
+		serverOutFile := path.Join("generated", "bundle", "server.js")
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-			Name:       "config-runner",
-			Executable: "node",
-			ScriptArgs: []string{configOutFile},
-			Logger:     log,
+			Name:          "config-runner",
+			Executable:    "node",
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+			ScriptArgs:    []string{configOutFile},
+			Logger:        log,
 			ScriptEnv: append(os.Environ(),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
@@ -104,10 +101,11 @@ var upCmd = &cobra.Command{
 
 		// responsible for executing the config in "polling" mode
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-			Name:       "config-introspection-runner",
-			Executable: "node",
-			ScriptArgs: []string{configOutFile},
-			Logger:     log,
+			Name:          "config-introspection-runner",
+			Executable:    "node",
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+			ScriptArgs:    []string{configOutFile},
+			Logger:        log,
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
@@ -119,18 +117,19 @@ var upCmd = &cobra.Command{
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var onAfterBuild func()
 
-		if _, err := os.Stat(serverEntryPoint); err == nil {
+		if entryPoints.ServerEntryPointAbs != "" {
 			hooksBundler := bundler.NewBundler(bundler.Config{
-				Name:       "hooks-bundler",
-				EntryPoint: serverEntryPoint,
-				OutFile:    serverOutFile,
-				Logger:     log,
-				WatchPaths: []string{configJsonPath},
+				Name:          "hooks-bundler",
+				EntryPoint:    serverEntryPointFilename,
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+				OutFile:       serverOutFile,
+				Logger:        log,
+				WatchPaths:    []string{configJsonPath},
 			})
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", filepath.Join(wd, wundergraphDir)),
+				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -141,11 +140,12 @@ var upCmd = &cobra.Command{
 			}
 
 			hookServerRunner = scriptrunner.NewScriptRunner(&scriptrunner.Config{
-				Name:       "hooks-server-runner",
-				Executable: "node",
-				ScriptArgs: []string{serverOutFile},
-				Logger:     log,
-				ScriptEnv:  append(os.Environ(), hooksEnv...),
+				Name:          "hooks-server-runner",
+				Executable:    "node",
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+				ScriptArgs:    []string{serverOutFile},
+				Logger:        log,
+				ScriptEnv:     append(os.Environ(), hooksEnv...),
 			})
 
 			onAfterBuild = func() {
@@ -166,14 +166,25 @@ var upCmd = &cobra.Command{
 				}()
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. Path: %s\n", serverEntryPoint)
+			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
+			onAfterBuild = func() {
+				log.Debug("Configuration change detected")
+				// generate new config
+				<-configRunner.Run(ctx)
+
+				go func() {
+					// run or restart the introspection poller
+					<-configIntrospectionRunner.Run(ctx)
+				}()
+			}
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{
-			Name:       "config-bundler",
-			EntryPoint: entryPoint,
-			OutFile:    configOutFile,
-			Logger:     log,
+			Name:          "config-bundler",
+			EntryPoint:    configEntryPointFilename,
+			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+			OutFile:       configOutFile,
+			Logger:        log,
 			WatchPaths: []string{
 				path.Join(wundergraphDir, "operations"),
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
@@ -205,7 +216,7 @@ var upCmd = &cobra.Command{
 			})
 			if err != nil {
 				log.Error("watcher",
-					abstractlogger.String("watcher", "wundergraph config"),
+					abstractlogger.String("watcher", "config"),
 					abstractlogger.Error(err),
 				)
 			}
@@ -218,9 +229,10 @@ var upCmd = &cobra.Command{
 		}
 		n := node.New(ctx, BuildInfo, cfg, log)
 		go func() {
+			configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "wundergraph.config.json")
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
-				node.WithFileSystemConfig(wunderGraphConfigFile),
+				node.WithFileSystemConfig(configFile),
 				node.WithDebugMode(enableDebugMode),
 				node.WithInsecureCookies(),
 				node.WithHooksSecret(secret),
@@ -267,8 +279,9 @@ func init() {
 	upCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
 	upCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
-	upCmd.Flags().StringVar(&entryPoint, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
-	upCmd.Flags().StringVar(&serverEntryPoint, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
+	upCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
+	upCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
+	upCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
 }
 
 func killExistingHooksProcess() {

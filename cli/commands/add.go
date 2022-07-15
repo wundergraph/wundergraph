@@ -1,9 +1,11 @@
 package commands
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/manifest"
 )
 
@@ -14,29 +16,31 @@ var addCmd = &cobra.Command{
 	Example: `wunderctl add spacex/spacex`,
 	Long:    `wunderctl add spacex/spacex jens/weather stripe/stripe`,
 	Args:    cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, dependencies []string) {
+	RunE: func(cmd *cobra.Command, dependencies []string) error {
+		if !files.DirectoryExists(wundergraphDir) {
+			return fmt.Errorf(`wundergraph directory "%s" does not exist`, wundergraphDir)
+		}
+
 		client := InitWunderGraphApiClient()
 		man := manifest.New(log, client, wundergraphDir)
 		err := man.Load()
 		if err != nil {
-			_, _ = red.Printf("unable to load wundergraph.manifest.json")
-			return
+			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}
 		err = man.AddDependencies(dependencies)
 		if err != nil {
-			_, _ = red.Printf("unable to add dependencies to manifest: %s", strings.Join(dependencies, ","))
-			return
+			return fmt.Errorf("unable to add dependencies %s to manifest", strings.Join(dependencies, ","))
 		}
 		err = man.PersistChanges()
 		if err != nil {
-			_, _ = red.Printf("unable to persist manifest changes")
-			return
+			return fmt.Errorf("unable to persist manifest changes")
 		}
 		err = man.WriteIntegrationsFile()
 		if err != nil {
-			_, _ = red.Printf("unable to write integrations file")
-			return
+			return fmt.Errorf("unable to write integrations file")
 		}
+
+		return nil
 	},
 }
 
