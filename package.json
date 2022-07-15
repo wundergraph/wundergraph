@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.94.1",
+  "version": "0.94.2",
   "name": "wundergraph-env",
   "license": "Apache-2.0",
   "author": {
@@ -16,6 +16,8 @@
     "build": "pnpm -r run build",
     "build:libs": "pnpm -r run --filter='!./packages/*-testapp' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
+    "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' build --watch",
+    "watch:sdk": "pnpm -r run --filter='./packages/sdk' build --watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql} pkg/templates/assets/templates/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",

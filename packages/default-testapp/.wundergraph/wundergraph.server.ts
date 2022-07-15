@@ -39,7 +39,25 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				};
 			},
 		},
-		global: {},
+		global: {
+			httpTransport: {
+				onOriginRequest: {
+					enableForAllOperations: true,
+					hook: async ({ request }) => {
+						request.headers.set('X-Wundergraph-Test', 'test');
+						console.log('onOriginRequest', request.headers);
+						return request;
+					},
+				},
+				onOriginResponse: {
+					enableForAllOperations: true,
+					hook: async ({ response }) => {
+						console.log('onOriginResponse', response.headers.all());
+						return 'skip';
+					},
+				},
+			},
+		},
 		queries: {
 			Dragons: {
 				mutatingPostResolve: async (hook) => {

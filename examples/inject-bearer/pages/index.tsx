@@ -68,7 +68,7 @@ const Home: NextPage = () => {
 							<svg
 								stroke="currentColor"
 								fill="currentColor"
-								stroke-width="0"
+								strokeWidth="0"
 								viewBox="0 0 24 24"
 								className="w-6 h-6 mr-2 -ml-1"
 								height="1em"

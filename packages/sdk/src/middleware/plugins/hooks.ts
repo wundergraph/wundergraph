@@ -9,7 +9,7 @@ import {
 } from '../../configure';
 import { WunderGraphConfiguration, OperationType } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
-import { flattenHeadersObject } from 'headers-polyfill';
+import { flattenHeadersObject, Headers } from 'headers-polyfill';
 
 export interface BodyResponse {
 	data?: any;
@@ -111,7 +111,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					name: request.body.operationName,
 					type: request.body.operationType,
 				},
-				request: request.body.request,
+				request: {
+					...request.body.request,
+					headers: new Headers(request.body.request.headers),
+				},
 			});
 			const hookOut = maybeHookOut || 'skip';
 			return {
@@ -120,7 +123,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				response: {
 					skip: hookOut === 'skip',
 					cancel: hookOut === 'cancel',
-					request: hookOut !== 'skip' && hookOut !== 'cancel' ? hookOut : undefined,
+					request:
+						hookOut !== 'skip' && hookOut !== 'cancel'
+							? { ...hookOut, headers: flattenHeaders(hookOut.headers) }
+							: undefined,
 				},
 			};
 		} catch (err) {
@@ -141,7 +147,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		try {
 			const maybeHookOut = await config.global?.httpTransport?.onOriginResponse?.hook({
 				...request.ctx,
-				response: request.body.response,
+				response: {
+					...request.body.response,
+					headers: new Headers(request.body.response.headers),
+				},
 				operation: {
 					name: request.body.operationName,
 					type: request.body.operationType,
@@ -154,7 +163,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				response: {
 					skip: hookOut === 'skip',
 					cancel: hookOut === 'cancel',
-					response: hookOut !== 'skip' && hookOut !== 'cancel' ? hookOut : undefined,
+					response:
+						hookOut !== 'skip' && hookOut !== 'cancel'
+							? { ...hookOut, headers: flattenHeaders(hookOut.headers) }
+							: undefined,
 				},
 			};
 		} catch (err) {
