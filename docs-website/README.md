@@ -1,4 +1,4 @@
-# Syntax
+# WunderGraph Documentation
 
 WunderGraph documentation site built using [Tailwind CSS](https://tailwindcss.com) and [Next.js](https://nextjs.org).
 
