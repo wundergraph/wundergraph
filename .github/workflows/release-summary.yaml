@@ -5,6 +5,9 @@ on:
       - '**'
     tags-ignore:
       - '**'
+    paths-ignore:
+      - 'docs*/**'
+      - '*.md'
 
 env:
   WORKING_DIRECTORY: '.'
