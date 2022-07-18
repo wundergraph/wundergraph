@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 )
 
+const WunderGraphDir = ".wundergraph"
+
 func DirectoryExists(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -40,13 +42,24 @@ func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverE
 		return nil, err
 	}
 
+	// 1. Check if the ."wundergraph" directory exists
 	if !DirectoryExists(wundergraphAbsDir) {
-		return nil, fmt.Errorf(`base directory "%s" not found`, wundergraphAbsDir)
+		// 2. If not, check if we already operate inside .wundergraph directory
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, fmt.Errorf("could not get your current working directory")
+		}
+		parentWunderGraphDir := path.Join(wd, "..", WunderGraphDir)
+		if DirectoryExists(parentWunderGraphDir) {
+			files.WunderGraphDirAbs = parentWunderGraphDir
+		} else {
+			return nil, fmt.Errorf(`base directory "%s" not found`, wundergraphAbsDir)
+		}
 	} else {
 		files.WunderGraphDirAbs = wundergraphAbsDir
 	}
 
-	configEntryPoint := path.Join(wundergraphDir, configEntryPointFilename)
+	configEntryPoint := path.Join(files.WunderGraphDirAbs, configEntryPointFilename)
 
 	if FileExists(configEntryPoint) {
 		files.ConfigEntryPointAbs = configEntryPoint
@@ -54,7 +67,7 @@ func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverE
 		return nil, fmt.Errorf(`code file "%s" not found`, configEntryPoint)
 	}
 
-	hooksEntryPoint := path.Join(wundergraphDir, serverEntryPointFilename)
+	hooksEntryPoint := path.Join(files.WunderGraphDirAbs, serverEntryPointFilename)
 
 	if FileExists(hooksEntryPoint) {
 		files.ServerEntryPointAbs = hooksEntryPoint

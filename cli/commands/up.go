@@ -186,7 +186,7 @@ var upCmd = &cobra.Command{
 			OutFile:       configOutFile,
 			Logger:        log,
 			WatchPaths: []string{
-				path.Join(wundergraphDir, "operations"),
+				path.Join(entryPoints.WunderGraphDirAbs, "operations"),
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
 				// in that case we want to rerun the script to build a new config
 				introspectionCacheDir,
