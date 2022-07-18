@@ -23,6 +23,10 @@ const navigation = [
 		title: 'Use Cases',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/use-cases',
+			},
+			{
 				title: 'Programmable API Gateway',
 				href: '/docs/use-cases/programmable-api-gateway',
 			},
@@ -82,6 +86,10 @@ const navigation = [
 		title: 'Guides',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/guides',
+			},
+			{
 				title: 'Enable autocompletion in your IDE',
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
@@ -119,6 +127,10 @@ const navigation = [
 	{
 		title: 'Examples',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/examples/wundergraph-examples',
+			},
 			{
 				title: 'Hello World',
 				href: '/docs/examples/hello-world',
@@ -422,6 +434,10 @@ const navigation = [
 	{
 		title: 'wunderctl Reference',
 		links: [
+			{
+				title: 'wunderctl Overview',
+				href: '/docs/wunderctl-reference',
+			},
 			{
 				title: 'wunderctl init',
 				href: '/docs/wunderctl-reference/wunderctl-init',
