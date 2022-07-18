@@ -93,7 +93,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		AvatarURL:     claims.Picture,
 		Location:      claims.Locale,
 		ETag:          "",
-		AccessToken:   mustBearerTokenToJSON(token),
+		AccessToken:   tryParseJWT(token),
 	}
 	u.hooks.handlePostAuthentication(context.Background(), tempUser)
 	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
@@ -127,6 +127,7 @@ type User struct {
 	ETag             string          `json:"etag,omitempty"`
 	FromCookie       bool            `json:"fromCookie,omitempty"`
 	AccessToken      json.RawMessage `json:"accessToken,omitempty"`
+	RawAccessToken   string          `json:"rawAccessToken,omitempty"`
 	IdToken          json.RawMessage `json:"idToken,omitempty"`
 	RawIDToken       string          `json:"rawIdToken,omitempty"`
 }
@@ -136,6 +137,7 @@ func (u *User) RemoveInternalFields() {
 	u.ETag = ""
 	u.FromCookie = false
 	u.AccessToken = nil
+	u.RawAccessToken = ""
 	u.IdToken = nil
 	u.RawIDToken = ""
 }
@@ -147,6 +149,7 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 	// we remove these from the cookie to save space
 	u.IdToken = nil
 	u.AccessToken = nil
+	u.RawAccessToken = ""
 	u.RawIDToken = ""
 
 	hash := xxhash.New()
@@ -229,7 +232,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		return err
 	}
 	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
-	u.IdToken = mustBearerTokenToJSON(u.RawIDToken)
+	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
 }
 
@@ -300,7 +303,7 @@ func bearerTokenToJSON(token string) ([]byte, error) {
 	return payload, nil
 }
 
-func mustBearerTokenToJSON(token string) []byte {
+func tryParseJWT(token string) []byte {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return nil

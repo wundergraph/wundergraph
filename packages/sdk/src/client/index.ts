@@ -42,24 +42,6 @@ export interface User<Role> {
 	raw_id_token?: string;
 }
 
-export type UploadResponse = UploadResponseOk | UploadResponseError;
-
-export interface UploadResponseOk {
-	status: 'ok';
-	fileKeys: string[];
-}
-
-export interface UploadResponseError {
-	status: 'error';
-	message: string;
-}
-
-export interface UploadConfig<Provider extends string> {
-	provider: Provider;
-	files: FileList;
-	abortSignal?: AbortSignal;
-}
-
 export class WunderGraphClient<Role> {
 	constructor(config: ClientConfig) {
 		this.applicationHash = config.applicationHash;
@@ -186,7 +168,7 @@ export class WunderGraphClient<Role> {
 
 	private subscribeWithSSE = <S extends SubscriptionProps, Input, Data>(
 		subscription: S,
-		cb: (response: SubscriptionResult<Data>) => void,
+		cb: (result: SubscriptionResult<Data>) => void,
 		args?: InternalSubscriptionArgs
 	) => {
 		(async () => {
@@ -202,7 +184,7 @@ export class WunderGraphClient<Role> {
 					withCredentials: true,
 				});
 				eventSource.addEventListener('message', (ev) => {
-					cb(this.jsonToSubscriptionResponse(ev.data));
+					cb(this.jsonToSubscriptionResult(ev.data));
 				});
 				if (args?.abortSignal) {
 					args.abortSignal.addEventListener('abort', () => eventSource.close());
@@ -222,7 +204,7 @@ export class WunderGraphClient<Role> {
 
 	private subscribeWithFetch = <S extends SubscriptionProps, Input, Data>(
 		subscription: S,
-		cb: (response: SubscriptionResult<Data>) => void,
+		cb: (result: SubscriptionResult<Data>) => void,
 		args?: InternalSubscriptionArgs
 	) => {
 		(async () => {
@@ -246,34 +228,12 @@ export class WunderGraphClient<Role> {
 						mode: 'cors',
 					}
 				);
-				if (response.status === 400) {
-					cb({
-						status: 'error',
-						errors: [{ message: 'Bad Request' }],
-					});
+
+				if (!this.isOK(response) || response.body == null) {
+					cb(this.errorResult(response));
 					return;
 				}
-				if (response.status >= 401 && response.status <= 499) {
-					cb({
-						status: 'error',
-						errors: [{ message: 'Unauthorized' }],
-					});
-					return;
-				}
-				if (response.status >= 500 && response.status <= 599) {
-					cb({
-						status: 'error',
-						errors: [{ message: 'Server Error' }],
-					});
-					return;
-				}
-				if (response.status !== 200 || response.body == null) {
-					cb({
-						status: 'error',
-						errors: [{ message: 'Unknown Error' }],
-					});
-					return;
-				}
+
 				const reader = response.body.getReader();
 				const decoder = new TextDecoder();
 				let message: string = '';
@@ -284,7 +244,7 @@ export class WunderGraphClient<Role> {
 					message += decoder.decode(value);
 					if (message.endsWith('\n\n')) {
 						const responseJSON = message.substring(0, message.length - 2);
-						cb(this.jsonToSubscriptionResponse(responseJSON));
+						cb(this.jsonToSubscriptionResult(responseJSON));
 						message = '';
 					}
 				}
@@ -301,7 +261,7 @@ export class WunderGraphClient<Role> {
 		})();
 	};
 
-	public uploadFiles = async <Provider extends string>(config: UploadConfig<Provider>): Promise<UploadResponse> => {
+	public uploadFiles = async <Provider extends string>(config: UploadConfig<Provider>): Promise<UploadResult> => {
 		try {
 			const formData = new FormData();
 			for (const [key, file] of Object.entries(config.files)) {
@@ -336,72 +296,39 @@ export class WunderGraphClient<Role> {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
 			const f = this.customFetch || fetch;
-			const res = await f(this.baseURL + '/' + this.applicationPath + '/s3/' + config.provider + '/upload' + params, {
-				headers,
-				body: formData,
-				method: 'POST',
-				signal: config.abortSignal,
-				credentials: 'include',
-				mode: 'cors',
-			});
-			if (res.status === 400) {
-				return {
-					status: 'error',
-					message: 'Bad Request',
-				};
-			}
-			if (res.status >= 401 && res.status <= 499) {
-				return {
-					status: 'error',
-					message: 'Unauthorized',
-				};
-			}
-			if (res.status >= 500 && res.status <= 599) {
-				return {
-					status: 'error',
-					message: 'Server Error',
-				};
-			}
-			if (res.status === 200) {
-				const json = (await res.json()) as { key: string }[];
+			const response = await f(
+				this.baseURL + '/' + this.applicationPath + '/s3/' + config.provider + '/upload' + params,
+				{
+					headers,
+					body: formData,
+					method: 'POST',
+					signal: config.abortSignal,
+					credentials: 'include',
+					mode: 'cors',
+				}
+			);
+			if (this.isOK(response)) {
+				const json = (await response.json()) as { key: string }[];
 				return {
 					status: 'ok',
 					fileKeys: json.map((x) => x.key),
 				};
 			}
-			return {
-				status: 'error',
-				message: 'Unknown Error',
-			};
+			return this.errorResult(response);
 		} catch (e: any) {
 			return {
 				status: 'error',
-				message: e.message,
+				errors: [{ message: e.message }],
 			};
 		}
 	};
 
-	private httpResponseToQueryResult = async <Data>(response: Response): Promise<QueryResult<Data>> => {
+	private isOK(response: Response) {
+		return response.status === 200;
+	}
+
+	private errorResult(response: Response): ResultError {
 		switch (true) {
-			case response.status === 200:
-				const responseJSON = await response.json();
-				if (responseJSON.errors && !responseJSON.data) {
-					return {
-						status: 'error',
-						errors: responseJSON.errors,
-					};
-				}
-				if (responseJSON.errors && responseJSON.data) {
-					return {
-						status: 'partial',
-						errors: responseJSON.errors,
-						data: responseJSON.data,
-					};
-				}
-				return {
-					status: 'ok',
-					data: responseJSON.data,
-				};
 			case response.status === 400:
 				return {
 					status: 'error',
@@ -423,53 +350,59 @@ export class WunderGraphClient<Role> {
 					errors: [{ message: 'Unknown Error' }],
 				};
 		}
+	}
+
+	private httpResponseToQueryResult = async <Data>(response: Response): Promise<QueryResult<Data>> => {
+		if (this.isOK(response)) {
+			const responseJSON = await response.json();
+			if (responseJSON.errors && !responseJSON.data) {
+				return {
+					status: 'error',
+					errors: responseJSON.errors,
+				};
+			}
+			if (responseJSON.errors && responseJSON.data) {
+				return {
+					status: 'partial',
+					errors: responseJSON.errors,
+					data: responseJSON.data,
+				};
+			}
+			return {
+				status: 'ok',
+				data: responseJSON.data,
+			};
+		}
+
+		return this.errorResult(response);
 	};
 
 	private httpResponseToMutationResult = async <Data>(response: Response): Promise<MutationResult<Data>> => {
-		switch (true) {
-			case response.status === 200:
-				const responseJSON = await response.json();
-				if (responseJSON.errors && !responseJSON.data) {
-					return {
-						status: 'error',
-						errors: responseJSON.errors,
-					};
-				}
-				if (responseJSON.errors && responseJSON.data) {
-					return {
-						status: 'partial',
-						errors: responseJSON.errors,
-						data: responseJSON.data,
-					};
-				}
+		if (this.isOK(response)) {
+			const responseJSON = await response.json();
+			if (responseJSON.errors && !responseJSON.data) {
 				return {
-					status: 'ok',
+					status: 'error',
+					errors: responseJSON.errors,
+				};
+			}
+			if (responseJSON.errors && responseJSON.data) {
+				return {
+					status: 'partial',
+					errors: responseJSON.errors,
 					data: responseJSON.data,
 				};
-			case response.status === 400:
-				return {
-					status: 'error',
-					errors: [{ message: 'Bad Request' }],
-				};
-			case response.status >= 401 && response.status <= 499:
-				return {
-					status: 'error',
-					errors: [{ message: 'Unauthorized' }],
-				};
-			case response.status >= 500 && response.status <= 599:
-				return {
-					status: 'error',
-					errors: [{ message: 'Internal Server Error' }],
-				};
-			default:
-				return {
-					status: 'error',
-					errors: [{ message: 'Unknown Error' }],
-				};
+			}
+			return {
+				status: 'ok',
+				data: responseJSON.data,
+			};
 		}
+
+		return this.errorResult(response);
 	};
 
-	private jsonToSubscriptionResponse = <Data>(json: any): SubscriptionResult<Data> => {
+	private jsonToSubscriptionResult = <Data>(json: any): SubscriptionResult<Data> => {
 		const responseJSON = JSON.parse(json);
 		if (responseJSON.errors && !responseJSON.data) {
 			return {
@@ -514,7 +447,7 @@ export class WunderGraphClient<Role> {
 					signal: abortSignal,
 				}
 			);
-			if (response.status === 200) {
+			if (this.isOK(response)) {
 				return response.json();
 			}
 		} catch {}
@@ -542,7 +475,7 @@ export class WunderGraphClient<Role> {
 				mode: 'cors',
 			}
 		);
-		return response.status === 200;
+		return this.isOK(response);
 	};
 
 	private queryString = (input?: Object): string => {
@@ -653,127 +586,96 @@ export interface MutationArgsWithInput<Input> extends MutationArgs {
 	input: Input;
 }
 
-export type SubscriptionResult<Data> =
-	| SubscriptionResultOK<Data>
-	| SubscriptionResultError
-	| SubscriptionResultPartial<Data>
-	| SubscriptionResultLoading
-	| SubscriptionResultNone
-	| SubscriptionResultRequiresAuthentication;
-
-export interface SubscriptionResultOK<Data> {
-	status: 'ok';
-	streamState: 'streaming' | 'stopped' | 'restarting';
-	data: Data;
-}
-
-export interface SubscriptionResultRequiresAuthentication {
-	status: 'requires_authentication';
-}
-
-export interface SubscriptionResultNone {
-	status: 'none';
-}
-
-export interface SubscriptionResultLoading {
-	status: 'loading';
-}
-
-export interface SubscriptionResultError {
-	status: 'error';
-	errors: ReadonlyArray<GraphQLError>;
-}
-
-export interface SubscriptionResultPartial<Data> {
-	status: 'partial';
-	data: Data;
-	errors: ReadonlyArray<GraphQLError>;
-}
-
 export interface GraphQLError {
 	message: string;
 	path?: ReadonlyArray<string | number>;
 }
 
-export type QueryResult<Data> =
-	| QueryResultOK<Data>
-	| QueryResultPartial<Data>
-	| QueryResultLazy
-	| QueryResultError
-	| QueryResultLoading
-	| QueryResultCancelled
-	| QueryResultNone
-	| QueryResultRequiresAuthentication;
-
-export interface QueryResultOK<Data> {
+export interface ResultOK<Data> {
 	status: 'ok';
 	refetching?: boolean;
 	data: Data;
 }
 
-export interface QueryResultRequiresAuthentication {
+export interface ResultRequiresAuthentication {
 	status: 'requires_authentication';
 }
 
-export interface QueryResultNone {
+export interface ResultNone {
 	status: 'none';
 }
 
-export interface QueryResultLazy {
+export interface ResultLazy {
 	status: 'lazy';
 }
 
-export interface QueryResultCancelled {
+export interface ResultCancelled {
 	status: 'cancelled';
 }
 
-export interface QueryResultLoading {
+export interface ResultLoading {
 	status: 'loading';
 }
 
-export interface QueryResultPartial<Data> {
+export interface ResultPartial<Data> {
 	status: 'partial';
 	data: Data;
 	errors: ReadonlyArray<GraphQLError>;
 }
 
-export interface QueryResultError {
+export interface ResultError {
 	status: 'error';
 	errors: ReadonlyArray<GraphQLError>;
+}
+
+export type SubscriptionResult<Data> =
+	| SubscriptionResultOK<Data>
+	| ResultError
+	| ResultPartial<Data>
+	| ResultLoading
+	| ResultNone
+	| ResultRequiresAuthentication;
+
+export interface SubscriptionResultOK<Data> extends ResultOK<Data> {
+	streamState: 'streaming' | 'stopped' | 'restarting';
+}
+
+export type QueryResult<Data> =
+	| QueryResultOK<Data>
+	| ResultPartial<Data>
+	| ResultLazy
+	| ResultError
+	| ResultLoading
+	| ResultCancelled
+	| ResultNone
+	| ResultRequiresAuthentication;
+
+export interface QueryResultOK<Data> extends ResultOK<Data> {
+	refetching?: boolean;
 }
 
 export type MutationResult<Data> =
-	| MutationResultNone
-	| MutationResultLoading
-	| MutationResultOK<Data>
-	| MutationResultPartial<Data>
-	| MutationResultError
-	| MutationResultRequiresAuthentication;
+	| ResultNone
+	| ResultLoading
+	| ResultOK<Data>
+	| ResultPartial<Data>
+	| ResultError
+	| ResultRequiresAuthentication;
 
-export interface MutationResultOK<Data> {
+export type UploadResult = UploadResultOK | ResultError;
+
+export interface UploadResultOK {
 	status: 'ok';
-	data: Data;
+	fileKeys: string[];
 }
 
-export interface MutationResultRequiresAuthentication {
-	status: 'requires_authentication';
-}
-
-export interface MutationResultNone {
-	status: 'none';
-}
-
-export interface MutationResultLoading {
-	status: 'loading';
-}
-
-export interface MutationResultPartial<Data> {
-	status: 'partial';
-	data: Data;
-	errors: ReadonlyArray<GraphQLError>;
-}
-
-export interface MutationResultError {
+export interface UploadResponseError {
 	status: 'error';
-	errors: ReadonlyArray<GraphQLError>;
+	message: string;
+}
+
+export interface UploadConfig<Provider extends string> {
+	provider: Provider;
+	files: FileList;
+	abortSignal?: AbortSignal;
 }
