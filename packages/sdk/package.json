@@ -3,8 +3,13 @@
   "version": "0.96.0",
   "license": "Apache-2.0",
   "exports": {
-    ".": "./dist/index.js",
-    "./client": "./dist/client/index.js"
+    ".": {
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "default": "./dist/client/index.js"
+    },
+    "./dist/*": "./dist/*.js"
   },
   "typesVersions": {
     "*": {
