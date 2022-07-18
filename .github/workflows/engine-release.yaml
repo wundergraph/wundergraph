@@ -12,9 +12,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Avoid failing releases when the pnpm-lock.yaml was not updated
+  check-pnpm:
+    name: Check PNPM lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+      - run: pnpm i --frozen-lockfile --ignore-scripts
+
   goreleaser-darwin:
     name: Release MacOS build
     runs-on: 'macos-latest'
+    needs:
+      - check-pnpm
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -77,6 +92,8 @@ jobs:
   goreleaser-linux:
     name: Release Linux build
     runs-on: 'ubuntu-latest'
+    needs:
+      - check-pnpm
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -116,6 +133,8 @@ jobs:
   goreleaser-win:
     name: Release Windows build
     runs-on: 'windows-latest'
+    needs:
+      - check-pnpm
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -154,7 +173,6 @@ jobs:
 
   release-wunderctl:
     name: Release wunderctl wrapper
-    timeout-minutes: 10
     needs:
       - goreleaser-linux
       - goreleaser-win
