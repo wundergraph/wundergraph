@@ -188,7 +188,10 @@ export class Client {
 			};
 		}
 
-		return result
+        return {
+			status: result.status,
+			message: result.errors[0].message
+		};
     };
     {{/if}}
    
