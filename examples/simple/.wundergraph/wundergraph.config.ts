@@ -1,6 +1,5 @@
 import {
 	Application,
-	configurePublishWunderGraphAPI,
 	configureWunderGraphApplication,
 	cors,
 	EnvironmentVariable,

@@ -1099,8 +1099,9 @@ class RESTApiBuilder {
 		};
 	};
 	private prettyFieldName = (input: string): string => {
-		const underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
-		return underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		let underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		underscore = underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		return underscore.replace(/\/+/g, '_');
 	};
 	private resolveFieldName = (operationObject: OpenAPIV3.OperationObject, path: string, verb: HTTPMethod): string => {
 		if (operationObject.operationId) {

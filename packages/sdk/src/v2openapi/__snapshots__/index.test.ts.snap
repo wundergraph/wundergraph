@@ -16411,6 +16411,146 @@ input api_DeviceInput {
 }"
 `;
 
+exports[`github starred with unions: github_starred_data_sources 1`] = `
+"[
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_activity_checkRepoIsStarredByAuthenticatedUser\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/user/starred/{{ .arguments.owner }}/{{ .arguments.repo }}\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"https://api.github.com\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"UnspecifiedHttpResponse\\",
+      \\"StatusCodeTypeMappings\\": [
+        {
+          \\"typeName\\": \\"api_Activity_checkRepoIsStarredByAuthenticatedUser204\\",
+          \\"statusCode\\": 204,
+          \\"injectStatusCodeIntoBody\\": true
+        },
+        {
+          \\"typeName\\": \\"api_Activity_checkRepoIsStarredByAuthenticatedUser304\\",
+          \\"statusCode\\": 304,
+          \\"injectStatusCodeIntoBody\\": true
+        },
+        {
+          \\"typeName\\": \\"api_BasicErrorRequiresAuthentication\\",
+          \\"statusCode\\": 401,
+          \\"injectStatusCodeIntoBody\\": false
+        },
+        {
+          \\"typeName\\": \\"api_BasicErrorForbidden\\",
+          \\"statusCode\\": 403,
+          \\"injectStatusCodeIntoBody\\": false
+        },
+        {
+          \\"typeName\\": \\"api_BasicErrorNotFoundIfThisRepositoryIsNotStarredByYou\\",
+          \\"statusCode\\": 404,
+          \\"injectStatusCodeIntoBody\\": false
+        }
+      ]
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
+  }
+]"
+`;
+
+exports[`github starred with unions: github_starred_fields 1`] = `
+"[
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_activity_checkRepoIsStarredByAuthenticatedUser\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
+  }
+]"
+`;
+
+exports[`github starred with unions: github_starred_schema 1`] = `
+"type Query {
+  api_activity_checkRepoIsStarredByAuthenticatedUser(owner: String!, repo: String!): api_Activity_checkRepoIsStarredByAuthenticatedUserResponse
+}
+
+type api_Activity_checkRepoIsStarredByAuthenticatedUser204 {
+  statusCode: Int!
+}
+
+union api_Activity_checkRepoIsStarredByAuthenticatedUserResponse = UnspecifiedHttpResponse | api_Activity_checkRepoIsStarredByAuthenticatedUser204 | api_Activity_checkRepoIsStarredByAuthenticatedUser304 | api_BasicErrorRequiresAuthentication | api_BasicErrorForbidden | api_BasicErrorNotFoundIfThisRepositoryIsNotStarredByYou
+
+type UnspecifiedHttpResponse {
+  statusCode: Int!
+}
+
+type api_Activity_checkRepoIsStarredByAuthenticatedUser304 {
+  statusCode: Int!
+}
+
+type api_BasicErrorRequiresAuthentication {
+  message: String
+  documentation_url: String
+  url: String
+  status: String
+}
+
+type api_BasicErrorForbidden {
+  message: String
+  documentation_url: String
+  url: String
+  status: String
+}
+
+type api_BasicErrorNotFoundIfThisRepositoryIsNotStarredByYou {
+  message: String
+  documentation_url: String
+  url: String
+  status: String
+}"
+`;
+
 exports[`httpbin: httpbin_data_sources 1`] = `
 "[
   {
