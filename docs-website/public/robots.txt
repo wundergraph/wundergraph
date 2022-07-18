@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://docs.wundergraph.com
+
+# Sitemaps
+Sitemap: https://docs.wundergraph.com/sitemap.xml
