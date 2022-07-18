@@ -79,7 +79,7 @@ const result = await client.subscribe(
 ### Upload files
 
 ```ts
-const result = await client.uploadFiles({
+const { fileKeys } = await client.uploadFiles({
   provider: S3Provider.minio,
   files,
 });
