@@ -13,10 +13,10 @@
   },
   "homepage": "https://wundergraph.com",
   "scripts": {
-    "build": "pnpm -r run build",
+    "build": "pnpm -r run build --filter='!./packages/*-testapp' --filter='!./docs-website'",
     "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
-    "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' build --watch",
+    "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' --filter='!./docs-website' build --watch",
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' build --watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
