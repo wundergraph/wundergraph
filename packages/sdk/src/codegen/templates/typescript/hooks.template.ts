@@ -48,7 +48,6 @@ export interface GlobalHooksConfig {
         // it can be used to modify the request
         // you can return SKIP to skip the hook and continue the request chain without modifying the request
         // you can return CANCEL to cancel the request chain and return a 500 error
-        // not returning anything or undefined has the same effect as returning SKIP
         onOriginRequest?: {
             hook: (hook: HttpTransportHookRequest) => Promise<WunderGraphRequest | SKIP | CANCEL>;
             // calling the httpTransport hooks has a case, because the custom httpTransport hooks have to be called for each request
@@ -61,7 +60,6 @@ export interface GlobalHooksConfig {
         // it can be used to modify the response
         // you can return SKIP to skip the hook and continue the response chain without modifying the response
         // you can return CANCEL to cancel the response chain and return a 500 error
-        // not returning anything or undefined has the same effect as returning SKIP
         onOriginResponse?: {
             hook: (hook: HttpTransportHookRequestWithResponse) => Promise<WunderGraphResponse | SKIP | CANCEL>;
             // calling the httpTransport hooks has a case, because the custom httpTransport hooks have to be called for each request
