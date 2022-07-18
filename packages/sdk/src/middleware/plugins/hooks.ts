@@ -1,4 +1,4 @@
-import { FastifyContextConfig, FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
+import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
 import fp from 'fastify-plugin';
 import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../server';
 import {
@@ -9,7 +9,7 @@ import {
 } from '../../configure';
 import { WunderGraphConfiguration, OperationType } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
-import { flattenHeadersObject, Headers } from 'headers-polyfill';
+import { Headers } from '@web-std/fetch';
 
 export interface BodyResponse {
 	data?: any;
@@ -31,7 +31,11 @@ export interface RouteConfig {
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
 	const flattenHeaders = (headers: ClientRequestHeaders) => {
-		return flattenHeadersObject(headers.all());
+		const headersObj: Record<string, string> = {};
+		for (const [key, value] of headers.entries()) {
+			headersObj[key] = value;
+		}
+		return headersObj;
 	};
 
 	fastify.addHook('onRoute', (routeOptions) => {
