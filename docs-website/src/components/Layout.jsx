@@ -388,6 +388,10 @@ const navigation = [
 		title: 'Supported Backend Languages & Frameworks',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/supported-backend-languages-frameworks',
+			},
+			{
 				title: 'NodeJS / TypeScript',
 				href: '/docs/supported-backend-languages-frameworks/nodejs-typescript',
 			},
@@ -400,14 +404,18 @@ const navigation = [
 				href: '/docs/supported-backend-languages-frameworks/python',
 			},
 			{
-				title: 'Java',
-				href: '/docs/supported-backend-languages-frameworks/java',
+				title: 'Java / Kotlin',
+				href: '/docs/supported-backend-languages-frameworks/java-kotlin',
 			},
 		],
 	},
 	{
 		title: 'Core Concepts',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/core-concepts',
+			},
 			{
 				title: 'API Namespacing',
 				href: '/docs/core-concepts/api-namespacing',
