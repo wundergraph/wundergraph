@@ -1,8 +1,10 @@
 all: check-setup engine-dev
+# install workspace without scripts
 	pnpm install --ignore-scripts
+# Build wunderctl before run postinstall
 	pnpm -r run --filter="./packages/wunderctl" build
-	pnpm -r run --filter="./packages/wunderctl" postinstall
-	pnpm run build
+# Build all libs, run scripts and link all packages
+	pnpm build:libs && pnpm install
 
 docs:
 	cd docs-website && npm install && npm run dev
