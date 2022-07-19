@@ -11,3 +11,82 @@ description:
   - `wundergraph.operations.ts`
 
 ## Everything you need to know about using Environment Variables
+
+WunderGraph is a bit special in terms of how you can use environment variables.
+This section explains why that is and how you can use them.
+
+### wundergraph.config.ts
+
+Early on, we've made the decision that you should not configure your API Gateway using YAML, JSON or similar ways.
+Instead, you should use TypeScript to "generate" the configuration.
+
+Using TypeScript to generate the configuration has many advantages,
+like it's possible to re-use the same configuration for multiple APIs,
+and you're able to leverage the rich type system of TypeScript to make sure that your configuration is valid.
+
+When writing your configuration in `wundergraph.config.ts`,
+you might be tempted to use `process.env.{VARIABLE_NAME}` to get the value of an environment variable.
+Apparently, this will not work.
+
+When you run `wunderctl up`,
+we will compile `wundergraph.config.ts` and execute it to generate the final configuration (`wundergraph.config.json`).
+
+The API Gateway will then load the configuration from `wundergraph.config.json`.
+If you were using `process.env.{VARIABLE_NAME}`, how would the API Gateway know what value to use?
+
+That's why we've added the `EnvironmentVariable` class to the WunderGraph SDK.
+Here's an example:
+
+```typescript
+// wundergraph.config.ts
+
+import { EnvironmentVariable } from '@wundergraph/sdk'
+
+configureWunderGraphApplication({
+  authentication: {
+    cookieBased: {
+      providers: [
+        authProviders.openIdConnect({
+          id: 'keycloak',
+          clientId: EnvironmentVariable.from('KEYCLOAK_CLIENT_ID'),
+          clientSecret: new EnvironmentVariable('KEYCLOAK_CLIENT_SECRET'),
+          issuer: new EnvironmentVariable('KEYCLOAK_ISSUER'),
+        }),
+      ],
+      authorizedRedirectUris: ['http://localhost:3000'],
+    },
+  },
+})
+```
+
+Once we generate the configuration,
+the `EnvironmentVariable` name will be encoded in the configuration.
+When the API Gateway loads the configuration,
+it will use the `EnvironmentVariable` name to get the value of the environment variable.
+
+This way, you can define variables in your TypeScript configuration,
+and the API Gateway can load the values at runtime,
+giving you the flexibility to change the values through the environment.
+
+Most importantly,
+this approach allows you to keep secrets and API keys out of the generated configuration.
+You can safely commit the generated configuration to your repository,
+if you're using Environment Variables this way.
+
+If you were using `process.env.{VARIABLE_NAME}`,
+the environment variable would resolve during the build process of the configuration,
+so the value would be statically encoded in the configuration.
+
+### wundergraph.server.ts
+
+The section above talked about how we're using TypeScript to generate the configuration and why we've introduced the `EnvironmentVariable` class.
+In contrast to generating the configuration,
+the `wundergraph.server.ts` file is actually compiled and executed at runtime.
+
+So, you're safe to use `process.env.{VARIABLE_NAME}` in your `wundergraph.server.ts` file.
+
+### Summary
+
+- wundergraph.config.ts: Runs at build time, use `EnvironmentVariable` to inject environment variables into your configuration
+- variables defined using `EnvironmentVariable` will be resolved by the API Gateway at runtime
+- wundergraph.server.ts: Runs at runtime, use `process.env.{VARIABLE_NAME}` to access environment variables
