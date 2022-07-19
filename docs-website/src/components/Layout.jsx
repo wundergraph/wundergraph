@@ -65,6 +65,10 @@ const navigation = [
 				href: '/docs/architecture',
 			},
 			{
+				title: 'Introduction',
+				href: '/docs/architecture/introduction',
+			},
+			{
 				title: 'Architecture Diagram',
 				href: '/docs/architecture/architecture-diagram',
 			},
@@ -115,6 +119,10 @@ const navigation = [
 		title: 'Tutorials',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/tutorials',
+			},
+			{
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
@@ -129,7 +137,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/examples/wundergraph-examples',
+				href: '/docs/examples',
 			},
 			{
 				title: 'Hello World',
@@ -335,6 +343,10 @@ const navigation = [
 		title: 'Supported Frontend Frameworks',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/supported-frontend-frameworks',
+			},
+			{
 				title: 'React-JS',
 				href: '/docs/supported-frontend-frameworks/react-js',
 			},
@@ -376,6 +388,10 @@ const navigation = [
 		title: 'Supported Backend Languages & Frameworks',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/supported-backend-languages-frameworks',
+			},
+			{
 				title: 'NodeJS / TypeScript',
 				href: '/docs/supported-backend-languages-frameworks/nodejs-typescript',
 			},
@@ -388,14 +404,18 @@ const navigation = [
 				href: '/docs/supported-backend-languages-frameworks/python',
 			},
 			{
-				title: 'Java',
-				href: '/docs/supported-backend-languages-frameworks/java',
+				title: 'Java / Kotlin',
+				href: '/docs/supported-backend-languages-frameworks/java-kotlin',
 			},
 		],
 	},
 	{
 		title: 'Core Concepts',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/core-concepts',
+			},
 			{
 				title: 'API Namespacing',
 				href: '/docs/core-concepts/api-namespacing',

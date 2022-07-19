@@ -25,8 +25,10 @@ You can also easily integrate WunderGraph into your existing projects.
 npx -y @wundergraph/wunderctl init
 ```
 
-## Next Steps
+## More Examples
 
 Have a look at [other examples](/docs/examples) we provide, to get a better understanding of WunderGraph.
+
+## Understanding the WunderGraph Architecture
 
 You might also be interested to learn more about the [architecture](/docs/architecture) of WunderGraph.
