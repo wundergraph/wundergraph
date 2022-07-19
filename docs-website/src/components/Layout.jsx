@@ -343,6 +343,10 @@ const navigation = [
 		title: 'Supported Frontend Frameworks',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/supported-frontend-frameworks',
+			},
+			{
 				title: 'React-JS',
 				href: '/docs/supported-frontend-frameworks/react-js',
 			},
