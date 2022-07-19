@@ -65,6 +65,10 @@ const navigation = [
 				href: '/docs/architecture',
 			},
 			{
+				title: 'Introduction',
+				href: '/docs/architecture/introduction',
+			},
+			{
 				title: 'Architecture Diagram',
 				href: '/docs/architecture/architecture-diagram',
 			},
@@ -115,6 +119,10 @@ const navigation = [
 		title: 'Tutorials',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/tutorials',
+			},
+			{
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
@@ -129,7 +137,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/examples/wundergraph-examples',
+				href: '/docs/examples',
 			},
 			{
 				title: 'Hello World',
