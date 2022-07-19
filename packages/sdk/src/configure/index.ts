@@ -1035,7 +1035,10 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		case DataSourceKind.GRPC:
 			const grpc = source.Custom as GrpcApiCustom;
 			out.customGrpc = {
-				server: grpc.server,
+				server: {
+					protoset: grpc.server.protoset,
+					target: grpc.server.target,
+				},
 				endpoint: grpc.endpoint,
 				request: grpc.request,
 			};
