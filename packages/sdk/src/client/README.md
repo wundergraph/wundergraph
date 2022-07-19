@@ -33,7 +33,6 @@ const client = new WunderGraphClient({
 const result = await client.query(
   {
     operationName: 'Hello',
-    requiresAuthentication: false,
   },
   {
     input: {
@@ -49,7 +48,6 @@ const result = await client.query(
 const result = await client.mutate(
   {
     operationName: 'SetName',
-    requiresAuthentication: false,
   },
   {
     input: {
@@ -65,10 +63,9 @@ const result = await client.mutate(
 const result = await client.subscribe(
   {
     operationName: 'Hello',
-    isLiveQuery: true,
-    requiresAuthentication: false,
   },
   {
+    isLiveQuery: true,
     input: {
       name: 'World',
     },

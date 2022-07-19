@@ -173,7 +173,7 @@ export class WunderGraphClient<Role> {
 			try {
 				const params = this.queryString({
 					wg_variables: args?.input,
-					wg_live: subscription.isLiveQuery ? true : undefined,
+					wg_live: args?.isLiveQuery ? true : undefined,
 					wg_sse: true,
 					wg_sdk_version: this.sdkVersion,
 				});
@@ -209,7 +209,7 @@ export class WunderGraphClient<Role> {
 			try {
 				const params = this.queryString({
 					wg_variables: args?.input,
-					wg_live: subscription.isLiveQuery ? true : undefined,
+					wg_live: args?.isLiveQuery ? true : undefined,
 				});
 				const f = this.customFetch || fetch;
 				const response = await f(
@@ -503,21 +503,17 @@ export interface WithWunderGraphOptions {
 	disableFetchUserOnWindowFocus?: boolean;
 }
 
-export interface InternalQueryArgs {
-	input?: any;
-	abortSignal?: AbortSignal;
-	subscribeOnce?: boolean;
+export interface QueryArgs {
 	disableSSR?: boolean;
 	lazy?: boolean;
 	debounceMillis?: number;
 	refetchOnWindowFocus?: boolean;
 }
 
-export interface QueryArgs {
-	disableSSR?: boolean;
-	lazy?: boolean;
-	debounceMillis?: number;
-	refetchOnWindowFocus?: boolean;
+export interface InternalQueryArgs extends QueryArgs {
+	input?: any;
+	abortSignal?: AbortSignal;
+	subscribeOnce?: boolean;
 }
 
 export interface InternalQueryArgsWithInput<Input> extends InternalQueryArgs {
@@ -530,28 +526,23 @@ export interface QueryArgsWithInput<Input> extends QueryArgs {
 
 export interface QueryProps {
 	operationName: string;
-	requiresAuthentication: boolean;
 }
 
 export interface SubscriptionProps {
 	operationName: string;
-	isLiveQuery: boolean;
-	requiresAuthentication: boolean;
-}
-
-export interface InternalSubscriptionArgs {
-	input?: any;
-	abortSignal?: AbortSignal;
-	subscribeOnce?: boolean;
-	stopOnWindowBlur?: boolean;
-	debounceMillis?: number;
-	disableSSR?: boolean;
 }
 
 export interface SubscriptionArgs {
 	stopOnWindowBlur?: boolean;
 	debounceMillis?: number;
 	disableSSR?: boolean;
+}
+
+export interface InternalSubscriptionArgs extends SubscriptionArgs {
+	input?: any;
+	abortSignal?: AbortSignal;
+	subscribeOnce?: boolean;
+	isLiveQuery?: boolean;
 }
 
 export interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscriptionArgs {
@@ -564,16 +555,14 @@ export interface SubscriptionArgsWithInput<Input> extends SubscriptionArgs {
 
 export interface MutationProps {
 	operationName: string;
-	requiresAuthentication: boolean;
-}
-
-export interface InternalMutationArgs {
-	abortSignal?: AbortSignal;
-	refetchMountedOperationsOnSuccess?: boolean;
 }
 
 export interface MutationArgs {
 	refetchMountedOperationsOnSuccess?: boolean;
+}
+
+export interface InternalMutationArgs extends MutationArgs {
+	abortSignal?: AbortSignal;
 }
 
 export interface InternalMutationArgsWithInput<Input> extends InternalMutationArgs {
