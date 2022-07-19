@@ -6,28 +6,42 @@ description:
 
 [The FaunaDB example](https://github.com/wundergraph/wundergraph/tree/main/examples/faunadb-nextjs) shows how you can use WunderGraph with FaunaDB and Next.js.
 
-WunderGraph integrates with [FaunaDB](/docs/supported-data-sources/faunadb) out of the box,
-no complex configuration is required.
+WunderGraph integrates with [FaunaDB](/docs/supported-data-sources/faunadb) out of the box, no complex configuration is required.
 
 ## Prerequisites
 
 Before we can start, you've got to set up a FaunaDB account and create a database.
 Please follow the steps below.
 
-1. Create a FaunaDB account.
-2. Create a database with the following options:
+1.  Create a FaunaDB account.
 
-- Name: `test`
-- RegionGroup: `Classic (C)`
-- [x] Use demo data.
+2.  Create a database with the following options:
+
+    - Name: `test`
+    - Region Group: Choose the one that works best for you.
+    - [x] Use demo data.
 
 3. Create a API token under `Security`.
 
-- Database: `test`
-- Role: `Admin`
-- Key Name: `test`
+    - Database: `test`
+    - Role: `Admin`
+    - Key Name: `test`
 
-4. Rename the file `example.env` to `.env` and fill it with your FaunaDB credentials.
+4.  Write down the secret displayed: if you lose it, you have to create
+    a new one (the secret is only ever displayed once).
+
+5. Rename the file `example.env` to `.env`.
+
+6. In `.env`:
+   - Replace `<replace-with-your-token>` with the secret from step 4.
+
+   - If you selected a Region Group other than Classic,
+     replace `https://graphql.fauna.com/graphql` with the GraphQL API
+     endpoint suitable for your selected region group:
+
+     - EU: `https://graphql.eu.fauna.com/graphql`
+     - US: `https://graphql.us.fauna.com/graphql`
+     - Preview: `https://graphql.fauna-preview.com/graphql`
 
 ## Configuration
 
@@ -37,7 +51,7 @@ Once the environment is set up, we're ready to configure our application.
 // wundergraph.config.ts
 const faunaDB = introspect.graphql({
   apiNamespace: 'faunaDB',
-  url: 'https://graphql.fauna.com/graphql',
+  url: new EnvironmentVariable('FAUNADB_GRAPHQL_URL'),
   headers: (builder) =>
     builder.addStaticHeader(
       'Authorization',
@@ -51,9 +65,8 @@ const myApplication = new Application({
 })
 ```
 
-This configuration will add faunaDB as a data source and configures the API key to be used.
-The API key of your faunaDB instance is not exposed to the client,
-making it a perfect fit to secure your API.
+This configuration adds `faunaDB` as a data source and configures the API key to be used.
+The API key of your FaunaDB instance is not exposed to the client, making it a perfect fit to secure your API.
 
 ## Add an Operation
 
