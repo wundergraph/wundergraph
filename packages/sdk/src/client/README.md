@@ -73,6 +73,21 @@ const result = await client.subscribe(
 );
 ```
 
+### Subscription
+
+```ts
+const result = await client.subscribe(
+  {
+    operationName: 'Countdown',
+  },
+  {
+    input: {
+      from: 100,
+    },
+  }
+);
+```
+
 ### Upload files
 
 ```ts
