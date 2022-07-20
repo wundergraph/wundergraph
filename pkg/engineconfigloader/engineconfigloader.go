@@ -313,7 +313,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			out.Custom = grpcdatasource.ConfigJson(grpcdatasource.Configuration{
 				Server: grpcdatasource.ServerConfiguration{
 					Protoset: in.CustomGrpc.Server.Protoset,
-					Target:   in.CustomGrpc.Server.Target.String(),
+					Target:   loadvariable.String(in.CustomGrpc.Server.Target),
 				},
 				Endpoint: grpcdatasource.EndpointConfiguration{
 					Package: in.CustomGrpc.Endpoint.Package,
