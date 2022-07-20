@@ -47,7 +47,7 @@ const navigation = [
 				href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
 			},
 			{
-				title: 'Multi Database, Multi Schema ORM',
+				title: 'Multi Database, multi schema ORM',
 				href: '/docs/use-cases/multi-database-multi-schema-orm',
 			},
 			{
