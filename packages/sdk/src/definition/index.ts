@@ -1098,12 +1098,12 @@ const hasSubscriptions = (schema: GraphQLSchema): boolean => {
 
 const subscriptionsURL = (url: string) => url.replace('https://', 'wss://').replace('http://', 'ws://');
 
-const loadGrpcApi = (introspection: GrpcIntrospection): Buffer => {
+const loadGrpcApi = (introspection: GrpcIntrospection): string => {
 	switch (introspection.source.kind) {
 		case 'file':
 			const filePath = path.resolve(process.cwd(), introspection.source.filePath);
-			return fs.readFileSync(filePath);
+			return fs.readFileSync(filePath).toString('base64');
 		default:
-			return Buffer.from('');
+			return '';
 	}
 };

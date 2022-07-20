@@ -3,6 +3,7 @@ package grpc
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 
 	"github.com/fullstorydev/grpcurl"
@@ -58,7 +59,14 @@ func (p *Planner) configureInput() []byte {
 func (p *Planner) descriptorSource() grpcurl.DescriptorSource {
 	files := &descriptorpb.FileDescriptorSet{}
 	var fs descriptorpb.FileDescriptorSet
-	if err := proto.Unmarshal(p.config.Server.Protoset, &fs); err != nil {
+
+	protoset, err := base64.StdEncoding.DecodeString(p.config.Server.Protoset)
+	if err != nil {
+		p.v.Walker.StopWithInternalErr(err)
+		return nil
+	}
+
+	if err := proto.Unmarshal(protoset, &fs); err != nil {
 		p.v.Walker.StopWithInternalErr(err)
 		return nil
 	}

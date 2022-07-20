@@ -18,7 +18,7 @@ type Configuration struct {
 }
 
 type ServerConfiguration struct {
-	Protoset []byte
+	Protoset string
 	Target   string
 }
 

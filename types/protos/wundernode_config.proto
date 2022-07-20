@@ -321,7 +321,7 @@ message DataSourceCustom_Grpc {
 }
 
 message GrpcServerConfiguration {
-	bytes protoset = 1;
+	string protoset = 1;
 	ConfigurationVariable target = 2;
 }
 

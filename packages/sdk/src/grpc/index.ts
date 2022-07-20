@@ -6,7 +6,7 @@ import {
 } from '../definition/namespacing';
 import { parse, buildASTSchema } from 'graphql';
 
-export const protosetToGrpcApiObject = async (protoset: Buffer): Promise<GrpcApi> => {
+export const protosetToGrpcApiObject = async (protoset: string): Promise<GrpcApi> => {
 	try {
 		return mockGrpcApiObject(protoset);
 	} catch (e) {
@@ -14,7 +14,7 @@ export const protosetToGrpcApiObject = async (protoset: Buffer): Promise<GrpcApi
 	}
 };
 
-const mockGrpcApiObject = (protoset: Buffer): GrpcApi => {
+const mockGrpcApiObject = (protoset: string): GrpcApi => {
 	const apiNamespace = 'grpc';
 
 	const ast = parse(schemaString);
