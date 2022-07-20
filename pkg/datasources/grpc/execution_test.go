@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"net"
 	"net/http"
@@ -127,7 +128,7 @@ func TestExecutionEngineV2_Execute(t *testing.T) {
 								Method:  "GetHero",
 							},
 							Server: ServerConfiguration{
-								Protoset: starwarsGrpc.ProtoSet(t, "./testdata/starwars"),
+								Protoset: protoSetString(t),
 								Target:   fmt.Sprintf("127.0.0.1:%d", grpcPort),
 							},
 						}),
@@ -145,6 +146,11 @@ func TestExecutionEngineV2_Execute(t *testing.T) {
 			},
 		))
 	})
+}
+
+func protoSetString(t require.TestingT) string {
+	protosetBytes := starwarsGrpc.ProtoSet(t, "../../datasources/grpc/testdata/starwars")
+	return base64.StdEncoding.EncodeToString(protosetBytes)
 }
 
 func BenchmarkExecutionEngineV2_GRPC(b *testing.B) {
@@ -192,9 +198,8 @@ func BenchmarkExecutionEngineV2_GRPC(b *testing.B) {
 						Method:  "GetHero",
 					},
 					Server: ServerConfiguration{
-						Protoset: starwarsGrpc.ProtoSet(b, "../engine/datasource/grpc_datasource/testdata/starwars"),
+						Protoset: protoSetString(b),
 						Target:   fmt.Sprintf("127.0.0.1:%d", grpcPort),
-						// Target: "127.0.0.1:9090",
 					},
 				}),
 				Factory: NewFactory(),

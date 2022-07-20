@@ -45,7 +45,7 @@ func TestSource_Load(t *testing.T) {
 	sourceProtoFiles, err := grpcurl.DescriptorSourceFromProtoFiles([]string{"testdata/starwars"}, "starwars.proto")
 	require.NoError(t, err)
 
-	conn, err := grpc.DialContext(context.Background(), "bufnet",
+	conn, err := grpc.DialContext(context.Background(), "127.0.0.1:9095",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 		grpc.WithContextDialer(bufDialer),
