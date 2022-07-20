@@ -1,4 +1,6 @@
 import { Fence } from '@/components/Fence'
+import Link from 'next/link'
+import { ExternalLinkIcon } from '../src/components/icons/ExternalLinkIcon'
 
 const nodes = {
 	document: {
@@ -17,6 +19,33 @@ const nodes = {
 		render: Fence,
 		attributes: {
 			language: {
+				type: String,
+			},
+		},
+	},
+	link: {
+		render: ({ children, href, ...rest }) => {
+			const isExternal = href.match(/^http/)
+
+			let target
+			if (isExternal) {
+				target = '_blank'
+			}
+
+			return (
+				<Link href={href} target={target} {...rest}>
+					{children}
+					{isExternal && (
+						<>
+							{' '}
+							<ExternalLinkIcon className="-mt-1" />
+						</>
+					)}
+				</Link>
+			)
+		},
+		attributes: {
+			href: {
 				type: String,
 			},
 		},
