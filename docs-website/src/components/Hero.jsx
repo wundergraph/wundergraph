@@ -67,7 +67,7 @@ export function Hero() {
 							/>
 							<div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-sky-300 via-sky-300/70 to-blue-300 opacity-10 blur-lg" />
 							<div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-sky-300 via-sky-300/70 to-blue-300 opacity-10" />
-							<div className="relative rounded-2xl bg-white ring-1 ring-gray-200 dark:bg-[#0A101F]/80 dark:ring-white/10">
+							<div className="relative rounded-2xl bg-slate-800 ring-1 ring-gray-200 dark:bg-[#0A101F]/80 dark:ring-white/10">
 								<div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-sky-300/0 via-sky-300/70 to-sky-300/0" />
 								<div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-blue-400/0 via-blue-400 to-blue-400/0" />
 								<div className="pl-4 pt-4">
@@ -87,7 +87,7 @@ export function Hero() {
 													className={clsx(
 														'flex items-center rounded-full px-2.5',
 														tab.isActive &&
-															'bg-sky-500/30 text-white dark:bg-sky-800 dark:text-sky-200/80'
+															'bg-sky-800 text-sky-200/80 dark:bg-sky-800 dark:text-sky-200/80'
 													)}
 												>
 													{tab.name}
