@@ -60,10 +60,11 @@ const result = await client.mutate(
 ### LiveQuery
 
 ```ts
-const result = await client.subscribe(
+client.subscribe(
   {
     operationName: 'Hello',
   },
+  (result) => {},
   {
     isLiveQuery: true,
     input: {
@@ -76,10 +77,11 @@ const result = await client.subscribe(
 ### Subscription
 
 ```ts
-const result = await client.subscribe(
+client.subscribe(
   {
     operationName: 'Countdown',
   },
+  (result) => {},
   {
     input: {
       from: 100,
