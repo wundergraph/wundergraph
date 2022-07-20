@@ -43,6 +43,10 @@ const navigation = [
 				href: '/docs/use-cases/api-composition-and-integration',
 			},
 			{
+				title: 'Versionless APIs: Easily build backwards compatible APIs',
+				href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
+			},
+			{
 				title: 'Multi Database, Multi Schema ORM',
 				href: '/docs/use-cases/multi-database-multi-schema-orm',
 			},
