@@ -42,6 +42,13 @@ the API Gateway is already part of the stack,
 so you're using the gateway from the first line of code of your application.
 There's almost no difference between running your application locally or in production.
 
+Instead of creating security policies using point and click,
+you can define all of this using code.
+This is not just super convenient,
+but it also comes with versioning out of the box.
+Made a mistake? You'll probably see in a preview environment.
+If it slipped through, you can easily switch back to another commit.
+
 All of this is fully integrated into frontend frameworks,
 like Next.js or React.
 
