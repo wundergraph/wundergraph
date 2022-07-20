@@ -35,7 +35,7 @@ const mockGrpcApiObject = (protoset: string): GrpcApi => {
 					protoset: protoset,
 					target: {
 						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-						staticVariableContent: `'127.0.0.1:9095'`,
+						staticVariableContent: '127.0.0.1:9095',
 						environmentVariableName: '',
 						environmentVariableDefaultValue: '',
 						placeholderVariableName: '',
