@@ -38,9 +38,17 @@ const weather = introspect.graphql({
 	url: 'https://graphql-weather-api.herokuapp.com/',
 });
 
+const starwars = introspect.grpc({
+	source: {
+		kind: 'file',
+		filePath: '../../../pkg/datasources/grpc/testdata/starwars/starwars.protoset',
+	},
+	url: '127.0.0.1:9095',
+});
+
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, jsp, weather, countries],
+	apis: [spaceX, jsp, weather, countries, starwars],
 });
 
 // configureWunderGraph emits the configuration

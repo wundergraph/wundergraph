@@ -1,0 +1,6 @@
+query ($episode: grpc_starwars_Episode) {
+	hero: grpc_starwars_StarwarsService_GetHero(input: { episode: $episode }) {
+		id
+		name
+	}
+}
