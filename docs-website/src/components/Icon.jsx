@@ -8,13 +8,38 @@ import { PresetsIcon } from '@/components/icons/PresetsIcon'
 import { ThemingIcon } from '@/components/icons/ThemingIcon'
 import { WarningIcon } from '@/components/icons/WarningIcon'
 
+import {
+	BookOpenIcon,
+	CollectionIcon,
+	QuestionMarkCircleIcon,
+	FlagIcon,
+	UserIcon,
+	ViewGridIcon,
+	CloudIcon,
+	CubeTransparentIcon,
+	CubeIcon,
+	TerminalIcon,
+	AtSymbolIcon,
+	ServerIcon,
+	CogIcon,
+	DocumentTextIcon,
+} from '@heroicons/react/outline'
+
 const icons = {
-	installation: InstallationIcon,
-	presets: PresetsIcon,
-	plugins: PluginsIcon,
-	theming: ThemingIcon,
-	lightbulb: LightbulbIcon,
-	warning: WarningIcon,
+	installation: FlagIcon,
+	examples: CollectionIcon,
+	tutorials: QuestionMarkCircleIcon,
+	guides: BookOpenIcon,
+	usecases: UserIcon,
+	features: ViewGridIcon,
+	architecture: CubeTransparentIcon,
+	datasources: CloudIcon,
+	core: CubeIcon,
+	wunderctl: TerminalIcon,
+	config: DocumentTextIcon,
+	directives: AtSymbolIcon,
+	server: ServerIcon,
+	operations: CogIcon,
 }
 
 const iconStyles = {
@@ -27,7 +52,7 @@ export function Icon({ color = 'blue', icon, className, ...props }) {
 	let id = useId()
 	let IconComponent = icons[icon]
 
-	return (
+	return IconComponent ? (
 		<svg
 			aria-hidden="true"
 			viewBox="0 0 32 32"
@@ -35,9 +60,17 @@ export function Icon({ color = 'blue', icon, className, ...props }) {
 			className={clsx(className, iconStyles[color])}
 			{...props}
 		>
-			<IconComponent id={id} color={color} />
+			<defs>
+				<Gradient
+					id={`${id}-gradient`}
+					color={color}
+					gradientTransform="matrix(0 21 -21 0 20 11)"
+				/>
+			</defs>
+			<circle cx={20} cy={20} r={12} fill={`url(#${id}-gradient)`} />
+			<IconComponent id={id} color="black" strokeWidth="1.8" width="1.6em" />
 		</svg>
-	)
+	) : null
 }
 
 const gradients = {
