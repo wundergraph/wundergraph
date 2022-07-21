@@ -75,6 +75,10 @@ const navigation = [
 				title: 'WunderGraph Conventions',
 				href: '/docs/architecture/wundergraph-conventions',
 			},
+			{
+				title: 'Manage API Dependencies explicitly',
+				href: '/docs/architecture/manage-api-dependencies-explicitly',
+			},
 		],
 	},
 	{

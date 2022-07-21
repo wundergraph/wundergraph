@@ -24,6 +24,7 @@ const tags = {
 		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'Architecture Introduction': '/docs/architecture/introduction',
 	'Cross API JOIN': '/docs/features/cross-api-joins-to-compose-apis',
+	JOINs: '/docs/features/cross-api-joins-to-compose-apis',
 	'GraphQL to JSON RPC compiler': '/docs/features/graphql-to-json-rpc-compiler',
 	'GraphQL to JSON RPC': '/docs/features/graphql-to-json-rpc-compiler',
 	'JSON RPC': '/docs/features/graphql-to-json-rpc-compiler',
