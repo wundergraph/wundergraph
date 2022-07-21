@@ -12,7 +12,7 @@ you don't have to manually code a backend.
 
 That said,
 you can always use hooks to add additional business logic,
-or even add [custom GraphQL resolvers](/docs/features/custom-graphql-resolvers) to decouple the clients from the database.
+or even add custom GraphQL resolvers to decouple the clients from the database.
 
 ## Configuration
 

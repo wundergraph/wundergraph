@@ -117,6 +117,10 @@ const navigation = [
 				title: 'Signing Origin Requests',
 				href: '/docs/guides/signing-origin-requests',
 			},
+			{
+				title: 'Configure Authorization',
+				href: '/docs/guides/configure-authorization',
+			},
 		],
 	},
 	{
@@ -499,6 +503,10 @@ const navigation = [
 	{
 		title: 'WunderHub Reference',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/wunderhub-reference',
+			},
 			{
 				title: 'Publish an API to WunderHub',
 				href: '/docs/wunderhub-reference/publish-api-to-wunderhub',

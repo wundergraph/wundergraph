@@ -5,7 +5,7 @@ description:
 ---
 
 As described in another chapter, WunderGraph compiles GraphQL Operations into
-efficient [JSON RPC](/docs/features/graphql-to-json-rpc-compiler) endpoints.
+efficient JSON RPC endpoints.
 This is not just good for security and performance reasons but also allows for efficient Caching.
 
 By turning Queries into GET Requests, instead of sending GraphQL Operations over HTTP POST,

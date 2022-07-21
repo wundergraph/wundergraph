@@ -40,7 +40,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
 })
 ```
 
-On the [WunderNode](/docs/components-of-wundergraph/wundernode-wundergraph-server) we would keep polling the origin every two seconds.
+On the WunderNode we would keep polling the origin every two seconds.
 If there's new data, we'd update all clients who subscribed to this live query.
 Calling this Live-Query from the clients looks very similar to a regular Query:
 

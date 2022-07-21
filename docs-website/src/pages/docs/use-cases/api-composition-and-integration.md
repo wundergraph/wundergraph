@@ -33,7 +33,7 @@ like GraphQL, Apollo Federation, OpenAPI, gRPC, PostgreSQL, MySQL, etc...
 
 Once introspected, we translate all these introspections into a GraphQL Schema.
 Next, we put each of the APIs into their own namespace,
-which is done using our [Namespacing](/docs/features/api-namespacing) feature.
+which is done using our Namespacing feature.
 
 Being able to namespace APIs is a core essential capability to be able to automatically compose APIs.
 Without namespacing, you'd easily run into naming collisions,

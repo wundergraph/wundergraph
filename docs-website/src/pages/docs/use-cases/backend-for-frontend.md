@@ -68,7 +68,7 @@ const myApplication = new Application({
 
 This code snipped creates a WunderGraph application that depends on two APIs.
 They are automatically combined into a single API,
-we call it the [Virtual Graph](/docs/core-concepts/virtual-graph).
+we call it the Virtual Graph.
 
 You're not limited to just GraphQL APIs,
 but also databases, like PostgreSQL, MySQL, MongoDB, OpenAPI / REST or even gRPC.
@@ -76,7 +76,7 @@ but also databases, like PostgreSQL, MySQL, MongoDB, OpenAPI / REST or even gRPC
 In the second step,
 you define GraphQL operations against the Virtual Graph.
 Each operation will be compiled into a dedicated API Endpoint,
-using WunderGraph's [GraphQL to JSON RPC compiler](/docs/features/graphql-to-json-rpc-compiler).
+using WunderGraph's GraphQL to JSON RPC compiler.
 
 So, you've added two API dependencies to your application,
 defined a GraphQL Operation,

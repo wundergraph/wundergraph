@@ -80,7 +80,7 @@ If the user logs out, the Subscription will immediately stop and set the UI to a
 
 All this magic is hidden behind `useSubscription.PriceUpdates()` so that all you have to do is configure if authentication is required or not.
 
-Check out the [Getting Started Guide](/getting-started) if you want to see this in action.
+Check out the Getting Started Guide if you want to see this in action.
 
 Ok, we have seen that authentication with WunderGraph is supers easy in the last chapter.
 This chapter showed authentication aware data fetching, but what about making write operations secure? Read on in the next chapter.

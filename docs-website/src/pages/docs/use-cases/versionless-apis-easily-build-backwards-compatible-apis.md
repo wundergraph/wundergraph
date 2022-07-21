@@ -35,7 +35,7 @@ Versionless APIs allow you to continuously evolve your API design without breaki
 ### How it works
 
 When composing multiple API dependencies into a single API,
-we call this creating a [virtual graph](/docs/core-concepts/virtual-graph).
+we call this creating a Virtual Graph.
 Virtual Graph, because it doesn't really exist, only virtually.
 It's a virtual composition of the API dependencies,
 a GraphQL Schema that is composed of all your APIs.

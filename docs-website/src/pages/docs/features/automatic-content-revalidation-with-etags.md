@@ -41,7 +41,7 @@ First, we generate [ETags](https://developer.mozilla.org/en-US/docs/Web/HTTP/Hea
 That is, we're sending an ETag header alongside the response for each Query.
 The next time, the client makes the same request to the same endpoint, it's going to send a "If-None-Match" header.
 If this header matches the existing ETag,
-which we revalidate on the [WunderNode](/docs/components-of-wundergraph/wundernode-wundergraph-server),
+which we revalidate on the WunderNode,
 we simply return a 304 "Not Modified" response.
 This saves bandwidth, time and compute, making clien-side revalidation of content very cheap.
 

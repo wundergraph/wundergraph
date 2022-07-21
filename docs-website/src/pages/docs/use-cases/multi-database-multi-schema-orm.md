@@ -5,7 +5,7 @@ description:
 ---
 
 As you might know,
-WunderGraph comes with a rich set of supported [data sources](/docs/supported-data-sources),
+WunderGraph comes with a rich set of supported data sources,
 like MySQL, PostgreSQL, SQLite, and more...
 
 WunderGraph introspects all the data sources you've configured and generates a GraphQL schema for you.
@@ -31,7 +31,7 @@ This means, you can add multiple databases to your API layer,
 and even join data across databases.
 
 WunderGraph comes with a special feature, allowing you to nest your queries.
-Using the [\_\_join field](/docs/core-concepts/__join-field) you can query data from one database,
+Using the \_\_join field you can query data from one database,
 and then join it with data from a second database, or even other APIs.
 
 ## Turn your database into an API instantly
