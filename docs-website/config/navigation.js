@@ -575,12 +575,111 @@ const navigation = [
 			},
 		],
 	},
+	/*
+		graphql: (introspection: GraphQLIntrospection) => Promise<GraphQLApi>;
+    postgresql: (introspection: DatabaseIntrospection) => Promise<PostgresqlApi>;
+    mysql: (introspection: DatabaseIntrospection) => Promise<MySQLApi>;
+    planetscale: (introspection: DatabaseIntrospection) => Promise<PlanetscaleApi>;
+    sqlite: (introspection: DatabaseIntrospection) => Promise<SQLiteApi>;
+    sqlserver: (introspection: DatabaseIntrospection) => Promise<SQLServerApi>;
+    mongodb: (introspection: DatabaseIntrospection) => Promise<MongoDBApi>;
+    federation: (introspection: GraphQLFederationIntrospection) => Promise<GraphQLApi>;
+    openApi: (introspection: OpenAPIIntrospection) => Promise<RESTApi>;
+	* */
 	{
 		title: 'wundergraph.config.ts Reference',
 		links: [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-config-ts-reference',
+			},
+			{
+				title: 'GraphQL Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-graphql-data-source',
+			},
+			{
+				title: 'PostgreSQL Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-postgresql-data-source',
+			},
+			{
+				title: 'MySQL Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-mysql-data-source',
+			},
+			{
+				title: 'Planetscale Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-planetscale-data-source',
+			},
+			{
+				title: 'SQLite Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-sqlite-data-source',
+			},
+			{
+				title: 'SQLServer Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source',
+			},
+			{
+				title: 'MongoDB / Atlas Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source',
+			},
+			{
+				title: 'Apollo Federation Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-apollo-federation-data-source',
+			},
+			{
+				title: 'OpenAPI / REST Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source',
+			},
+			{
+				title: 'gRPC Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-grpc-data-source',
+			},
+			{
+				title: 'Headers for HTTP-based Data Sources',
+				href: '/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources',
+			},
+			{
+				title: 'mTLS for HTTP-based Data Sources',
+				href: '/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
+			},
+			{
+				title: 'Introspection',
+				href: '/docs/wundergraph-config-ts-reference/configure-introspection',
+			},
+			{
+				title: 'WunderGraph Application',
+				href: '/docs/wundergraph-config-ts-reference/configure-wundergraph-application',
+			},
+			{
+				title: 'Code Generation',
+				href: '/docs/wundergraph-config-ts-reference/configure-code-generation',
+			},
+			{
+				title: 'CORS',
+				href: '/docs/wundergraph-config-ts-reference/configure-cors',
+			},
+			{
+				title: 'Cookie-based Authentication',
+				href: '/docs/wundergraph-config-ts-reference/configure-cookie-based-authentication',
+			},
+			{
+				title: 'Token-based Authentication',
+				href: '/docs/wundergraph-config-ts-reference/configure-token-based-authentication',
+			},
+			{
+				title: 'Authorization',
+				href: '/docs/wundergraph-config-ts-reference/configure-authorization',
+			},
+			{
+				title: 'S3 file upload providers',
+				href: '/docs/wundergraph-config-ts-reference/configure-s3-file-upload-providers',
+			},
+			{
+				title: 'advanced Security',
+				href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
+			},
+			{
+				title: '.graphqlconfig',
+				href: '/docs/wundergraph-config-ts-reference/configure-graphqlconfig',
 			},
 		],
 	},
@@ -649,19 +748,19 @@ const navigation = [
 				href: '/docs/wundergraph-operations-ts-reference',
 			},
 			{
-				title: 'configure Defaults',
+				title: 'Defaults',
 				href: '/docs/wundergraph-operations-ts-reference/configure-defaults',
 			},
 			{
-				title: 'configure Authentication',
+				title: 'Authentication',
 				href: '/docs/wundergraph-operations-ts-reference/configure-authentication',
 			},
 			{
-				title: 'configure Caching',
+				title: 'Caching',
 				href: '/docs/wundergraph-operations-ts-reference/configure-caching',
 			},
 			{
-				title: 'configure Live Queries',
+				title: 'Live Queries',
 				href: '/docs/wundergraph-operations-ts-reference/configure-live-queries',
 			},
 			{

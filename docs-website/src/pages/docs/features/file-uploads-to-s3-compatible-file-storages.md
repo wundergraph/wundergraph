@@ -122,4 +122,4 @@ const UploadPage: NextPage = () => {
 
 ## Reference
 
-Learn more on how to [configure and use your S3 storage with WunderGraph in the reference](/docs/wundergraph-config-ts-reference/configure_s3_file_upload_providers).
+Learn more on how to [configure and use your S3 storage with WunderGraph in the reference](/docs/wundergraph-config-ts-reference/configure-s3-file-upload-providers).
