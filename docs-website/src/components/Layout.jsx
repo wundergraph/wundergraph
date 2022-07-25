@@ -178,7 +178,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 					</article>
 					<dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
 						{previousPage && (
-							<div>
+							<div className="max-w-[50%]">
 								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">
 									Previous
 								</dt>
@@ -193,7 +193,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 							</div>
 						)}
 						{nextPage && (
-							<div className="ml-auto text-right">
+							<div className="ml-auto max-w-[50%] text-right">
 								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">
 									Next
 								</dt>
