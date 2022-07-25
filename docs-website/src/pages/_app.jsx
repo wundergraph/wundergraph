@@ -67,7 +67,11 @@ export default function App({ Component, pageProps }) {
 				<title>{pageTitle}</title>
 				{description && <meta name="description" content={description} />}
 			</Head>
-			<Layout title={title} tableOfContents={tableOfContents}>
+			<Layout
+				title={title}
+				tableOfContents={tableOfContents}
+				frontmatter={pageProps.markdoc?.frontmatter}
+			>
 				<Component {...pageProps} />
 			</Layout>
 		</>

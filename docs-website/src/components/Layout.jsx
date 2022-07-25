@@ -116,7 +116,7 @@ function useTableOfContents(tableOfContents) {
 	return currentSection
 }
 
-export function Layout({ children, title, tableOfContents }) {
+export function Layout({ children, title, tableOfContents, frontmatter }) {
 	let router = useRouter()
 	let isHomePage = router.pathname === '/'
 	let allLinks = navigation.flatMap((section) => section.links)
@@ -127,6 +127,8 @@ export function Layout({ children, title, tableOfContents }) {
 		section.links.find((link) => link.href === router.pathname)
 	)
 	let currentSection = useTableOfContents(tableOfContents)
+
+	const hideTableOfContents = frontmatter?.hideTableOfContents
 
 	function isActive(section) {
 		if (section.id === currentSection) {
@@ -207,7 +209,13 @@ export function Layout({ children, title, tableOfContents }) {
 						)}
 					</dl>
 				</div>
-				<div className="hidden xl:sticky xl:top-[4.5rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.5rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
+
+				<div
+					className={clsx(
+						'hidden xl:sticky xl:top-[4.5rem] xl:-mr-6 xl:h-[calc(100vh-4.5rem)]  xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6',
+						{ 'xl:block': !hideTableOfContents }
+					)}
+				>
 					<nav aria-labelledby="on-this-page-title" className="w-56">
 						{tableOfContents.length > 0 && (
 							<>
