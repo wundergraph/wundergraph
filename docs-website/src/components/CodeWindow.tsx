@@ -73,7 +73,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
 						</div>
 					)}
 				</Tabs.List>
-				<div className="max-h-[600px] overflow-y-auto">
+				<div>
 					{snippets.map(({ filename, content, language }, index) => (
 						<Tabs.Content
 							key={index}
