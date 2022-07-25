@@ -2,8 +2,18 @@ const navigation = [
 	{
 		title: 'Introduction',
 		links: [
-			{ title: 'Overview', href: '/' },
-			{ title: 'Getting Started', href: '/getting-started' },
+			{
+				title: 'Overview',
+				href: '/',
+			},
+			{
+				title: 'Getting Started',
+				href: '/getting-started',
+			},
+			{
+				title: 'Manifesto',
+				href: '/manifesto',
+			},
 		],
 	},
 	{
@@ -45,6 +55,10 @@ const navigation = [
 				title:
 					'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
 				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
+			},
+			{
+				title: 'Enabling your Organization to become API first',
+				href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
 			},
 		],
 	},

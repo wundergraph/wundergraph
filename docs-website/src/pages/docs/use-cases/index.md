@@ -1,7 +1,8 @@
 ---
 title: Use Cases
 pageTitle: WunderGraph - Use Cases
-description:
+description: ''
+hideTableOfContents: true
 ---
 
 Find below a list of the most common use cases for WunderGraph.
@@ -62,3 +63,9 @@ giving you type-safety and a great developer experience from end to end.
 Piping all your APIs, services, databases, and other resources through a single unified API layer allows you to apply security policies,
 monitoring and logging across all your APIs.
 WunderGraph gives you a single pane of glass to manage all your resources.
+
+## [Enabling your Organization to become API First](/docs/use-cases/enabling-your-organization-to-become-api-first)
+
+Becoming API First is a great way to get your organization to the next level,
+enabling new ways of collaboration and help developers do more meaningful work.
+Check out how WunderGraph can help your organization to become API First.
