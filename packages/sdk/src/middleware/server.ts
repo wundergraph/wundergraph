@@ -1,6 +1,6 @@
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
-import { Headers } from 'headers-polyfill';
+import { Headers } from '@web-std/fetch';
 import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
