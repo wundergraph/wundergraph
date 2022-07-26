@@ -5,6 +5,10 @@ description: ''
 hideTableOfContents: true
 ---
 
+## Input Variables
+
+## Environment Variables
+
 ## [GraphQL Data Source](/docs/wundergraph-config-ts-reference/configure-graphql-data-source)
 
 ## [PostgreSQL Data Source](/docs/wundergraph-config-ts-reference/configure-postgresql-data-source)

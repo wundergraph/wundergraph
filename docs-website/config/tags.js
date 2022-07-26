@@ -82,6 +82,7 @@ const tags = {
 	authorization: '/docs/features/authorization-role-based-access-control-rbac',
 	Authorization: '/docs/features/authorization-role-based-access-control-rbac',
 	rbac: '/docs/features/authorization-role-based-access-control-rbac',
+	RBAC: '/docs/features/authorization-role-based-access-control-rbac',
 	'Role Based Access Control':
 		'/docs/features/authorization-role-based-access-control-rbac',
 	'role based access control':
@@ -229,6 +230,14 @@ const tags = {
 		'/docs/architecture/wundergraph-rpc-protocol-explained',
 	'WunderGraph Protocol':
 		'/docs/architecture/wundergraph-rpc-protocol-explained',
+	'Discord Server': 'https://wundergraph.com/discord',
+	Discord: 'https://wundergraph.com/discord',
+	EnvironmentVariables:
+		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	'EnvironmentVariable class':
+		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	EnvironmentVariable:
+		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
 }
 
 export default tags

@@ -666,7 +666,7 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-token-based-authentication',
 			},
 			{
-				title: 'Authorization',
+				title: 'Authorization / RBAC',
 				href: '/docs/wundergraph-config-ts-reference/configure-authorization',
 			},
 			{
@@ -674,7 +674,7 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-s3-file-upload-providers',
 			},
 			{
-				title: 'advanced Security',
+				title: 'Advanced Security',
 				href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
 			},
 			{
