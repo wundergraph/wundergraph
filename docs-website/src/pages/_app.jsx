@@ -1,10 +1,19 @@
 import Head from 'next/head'
 import { slugifyWithCounter } from '@sindresorhus/slugify'
-
 import { Layout } from '@/components/Layout'
-
 import 'focus-visible'
 import '@/styles/tailwind.css'
+import Plausible from 'plausible-tracker'
+import { useEffect } from 'react'
+
+export const plausible = Plausible({
+	domain: 'docs.wundergraph.com',
+	trackLocalhost: false,
+})
+
+export const trackOutboundLinkClick = (url) => {
+	plausible.trackEvent('Outbound Link: Click', { props: { url } })
+}
 
 function getNodeText(node) {
 	let text = ''
@@ -49,6 +58,10 @@ function collectHeadings(nodes, slugify = slugifyWithCounter()) {
 }
 
 export default function App({ Component, pageProps }) {
+	useEffect(() => {
+		plausible.enableAutoPageviews()
+	}, [])
+
 	let title = pageProps.markdoc?.frontmatter.title
 
 	let pageTitle =
