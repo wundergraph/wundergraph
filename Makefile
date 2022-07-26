@@ -9,6 +9,9 @@ all: check-setup engine-dev
 docs:
 	cd docs-website && npm install && npm run dev
 
+build-docs:
+	cd docs-website && npm install && npm run build
+
 engine-dev: codegen
 	go mod tidy
 	go mod download
@@ -53,4 +56,4 @@ update-examples:
 	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
 
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs

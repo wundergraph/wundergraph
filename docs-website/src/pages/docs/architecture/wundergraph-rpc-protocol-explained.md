@@ -15,7 +15,7 @@ you'll need to implement the protocol.
 ### URL structure
 
 As you might already know,
-WunderGraph uses a [GraphQL to JSON RPC compiler](/docs/features/graphql-to-json-rpc-compiler) which turns GraphQL Operations into JSON RPC calls.
+WunderGraph uses a GraphQL to JSON RPC compiler which turns GraphQL Operations into JSON RPC calls.
 
 The basic URL structure for WunderGraph Operations is:
 

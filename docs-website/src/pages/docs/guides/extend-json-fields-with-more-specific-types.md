@@ -5,7 +5,7 @@ description: Some APIs expose JSON fields, which limits type safety. This guide 
 ---
 
 You might already know that WunderGraph uses Prisma to let you connect to a database such as SQLite, MySQL, PostgreSQL, SQL Server or MongoDB.
-The full list of supported DataSources can be found [here](/docs/supported-data-sources).
+The full list of supported DataSources can be found in the supported DataSources section.
 
 Thanks to the feedback from our lively community, we've realised that it's a common use case to store JSON columns in your database.
 If you're using a database like PostgreSQL, you can use the `json` or `jsonb` type to store JSON columns.
@@ -76,7 +76,7 @@ The `$payload` variable is of type JSON, so there's no way to validate the input
 The user could send any valid JSON object.
 
 If you're wondering how the `@fromClaim` directive works,
-have a look at the [directives section](/docs/directives-reference) of the reference.
+have a look at the `@directives` section of the reference.
 
 ```graphql
 {

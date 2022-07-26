@@ -8,7 +8,7 @@ With this example, our goal is to explain how WunderGraph processes requests,
 and how the different middlewares work.
 
 We're assuming that you've got some basic understanding of how to configure WunderGraph.
-If not, please have a look at the [Introduction](/docs/architecture/introduction) section.
+If not, please have a look at the Architecture Introduction section.
 
 ## Data Source Configuration
 
@@ -29,7 +29,7 @@ const countries = introspect.graphql({
 
 ## Operation Definition
 
-Next, we'll define a GraphQL Operation that uses the [Cross API JOIN feature](/docs/features/cross-api-joins-to-compose-apis) of WunderGraph.
+Next, we'll define a GraphQL Operation that uses the Cross API JOIN feature of WunderGraph.
 It takes away a lot of complexity,
 which is also quite handy to illustrate different capabilities of WunderGraph.
 
@@ -73,7 +73,7 @@ query (
 
 ### Step-by-step explanation
 
-As WunderGraph uses a [GraphQL to JSON RPC compiler](/docs/features/graphql-to-json-rpc-compiler),
+As WunderGraph uses a GraphQL to JSON RPC compiler,
 the client starts by requesting the Resource `/api/main/operations/Weather?continent=Europe`,
 so we're essentially asking to execute the `Weather` operation with the `continent` parameter set to `Europe`.
 
@@ -88,7 +88,7 @@ There's also a [video that explains how the input validation works](https://www.
 Once the input validation is successful,
 the server will start by sending the root query to the origin API.
 You'll notice that the server automatically rewrites the operation,
-e.g. the prefixes from [namespacing](/docs/features/api-namespacing) the API are removed.
+e.g. the prefixes from namespacing the API are removed.
 Namespacing is a very important feature of WunderGraph,
 allowing you to combine APIs without naming conflicts.
 

@@ -17,6 +17,6 @@ This way, it's possible to prevent attackers to make actions on behalf of a user
 
 In reality, many developers might not be aware of this problem or don't know how to address it.
 
-If you're using WunderGraph, both the server side component ([WunderNode](/docs/components-of-wundergraph/wundernode-wundergraph-server)) and the generated client are implemented to protect you from CSRF attacks.
+If you're using WunderGraph, both the server side component (WunderNode) and the generated client are implemented to protect you from CSRF attacks.
 
 One problem less to worry about! =)

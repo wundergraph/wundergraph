@@ -29,3 +29,5 @@ This guide helps you to extend these fields with more specific types to increase
 Similarly to injecting a short-lived token,
 this guide helps you to sign requests,
 which is a requirement for some APIs.
+
+## [Configure Authorization](/docs/guides/configure-authorization)

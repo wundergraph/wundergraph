@@ -17,4 +17,4 @@ As this Data source is HTTP-based, you can also enable mTLS.
 ## Authorization
 
 For authenticated users, WunderGraph might be making requests on behalf of a user.
-You're able to [inject claims](/docs/features/authorization-injecting-claims), or [set headers based on the user's identity](/docs/examples/inject-bearer-token) into the request.
+You're able to inject claims, or [set headers based on the user's identity](/docs/examples/inject-bearer-token) into the request.
