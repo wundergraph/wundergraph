@@ -5,8 +5,6 @@ export function Heading({ id = '', level = 1, children, className }) {
 	const router = useRouter()
 	const Component = `h${level}`
 
-	const isDocs = router.pathname.startsWith('/docs')
-
 	const link = (
 		// @ts-ignore
 		<Component
@@ -29,7 +27,7 @@ export function Heading({ id = '', level = 1, children, className }) {
 		</Component>
 	)
 
-	return isDocs && level !== 1 ? (
+	return id && level !== 1 ? (
 		<a href={`#${id}`}>
 			{link}
 			<style jsx>
