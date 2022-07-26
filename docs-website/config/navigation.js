@@ -315,6 +315,22 @@ const navigation = [
 				href: '/docs/supported-data-sources/rest-openapi',
 			},
 			{
+				title: 'gRPC',
+				href: '/docs/supported-data-sources/grpc',
+			},
+			{
+				title: 'SOAP',
+				href: '/docs/supported-data-sources/soap',
+			},
+			{
+				title: 'OData',
+				href: '/docs/supported-data-sources/odata',
+			},
+			{
+				title: 'Apache Thrift',
+				href: '/docs/supported-data-sources/apache-thrift',
+			},
+			{
 				title: 'PostgreSQL',
 				href: '/docs/supported-data-sources/postgresql',
 			},
@@ -337,6 +353,14 @@ const navigation = [
 			{
 				title: 'Planetscale',
 				href: '/docs/supported-data-sources/planetscale',
+			},
+			{
+				title: 'FaunaDB',
+				href: '/docs/supported-data-sources/faunadb',
+			},
+			{
+				title: 'Neo4j',
+				href: '/docs/supported-data-sources/neo4j',
 			},
 			{
 				title: 'Yugabyte',

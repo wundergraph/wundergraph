@@ -22,7 +22,7 @@ const tags = {
 	WunderNode: '/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'WunderGraph Server':
 		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
-	'Architecture Introduction': '/docs/architecture/introduction',
+	'Architecture Introduction': '/docs/architecture/architecture-diagram',
 	'Cross API JOIN': '/docs/features/cross-api-joins-to-compose-apis',
 	JOINs: '/docs/features/cross-api-joins-to-compose-apis',
 	'GraphQL to JSON RPC compiler': '/docs/features/graphql-to-json-rpc-compiler',
@@ -238,6 +238,12 @@ const tags = {
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
 	EnvironmentVariable:
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	'reach out to our Sales Team':
+		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
+	'Sales Team':
+		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
+	Sales:
+		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
 }
 
 export default tags
