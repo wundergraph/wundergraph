@@ -2,6 +2,27 @@
   "name": "@wundergraph/sdk",
   "version": "0.96.1",
   "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./dist/*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "client": [
+        "./dist/client"
+      ]
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "WunderGraph SDK",
