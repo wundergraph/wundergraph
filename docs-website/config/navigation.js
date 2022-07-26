@@ -70,10 +70,6 @@ const navigation = [
 				href: '/docs/architecture',
 			},
 			{
-				title: 'Introduction',
-				href: '/docs/architecture/introduction',
-			},
-			{
 				title: 'Architecture Diagram',
 				href: '/docs/architecture/architecture-diagram',
 			},
