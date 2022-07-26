@@ -51,31 +51,6 @@ export function Hero() {
 							</div>
 						</div>
 					</div>
-					<div className="relative lg:static xl:pl-10">
-						<div className="absolute inset-x-[-50vw] -top-32 -bottom-48 [mask-image:linear-gradient(transparent,white,white)] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:left-[calc(50%+14rem)] lg:right-0 lg:-top-32 lg:-bottom-32 lg:[mask-image:none] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
-							<HeroBackground className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 lg:translate-y-[-60%]" />
-						</div>
-						<div className="relative">
-							<Image
-								className="absolute -bottom-40 -right-44"
-								src={blurIndigoImage}
-								alt=""
-								width={567}
-								height={567}
-								unoptimized
-								priority
-							/>
-							<div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-sky-300 via-sky-300/70 to-blue-300 opacity-10 blur-lg" />
-							<div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-sky-300 via-sky-300/70 to-blue-300 opacity-10" />
-							<div className="relative rounded-2xl bg-slate-800 ring-1 ring-gray-200 dark:bg-[#0A101F]/80 dark:ring-white/10">
-								<div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-sky-300/0 via-sky-300/70 to-sky-300/0" />
-								<div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-blue-400/0 via-blue-400 to-blue-400/0" />
-								<CodeBlock filename="Getting Started" language="bash">
-									{code}
-								</CodeBlock>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>

@@ -21,12 +21,12 @@ function collectHeadings(nodes, slugify = slugifyWithCounter()) {
 	let sections = []
 
 	for (let node of nodes) {
-		if (node.name === 'h2' || node.name === 'h3') {
+		if (node.name === 'Heading') {
 			let title = getNodeText(node)
 			if (title) {
 				let id = slugify(title)
 				node.attributes.id = id
-				if (node.name === 'h3') {
+				if (node.attributes.level === 3) {
 					if (!sections[sections.length - 1]) {
 						throw new Error(
 							'Cannot add `h3` to table of contents without a preceding `h2`'

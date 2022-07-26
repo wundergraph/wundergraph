@@ -8,8 +8,13 @@ export function Heading({ id = '', level = 1, children, className }) {
 	const isDocs = router.pathname.startsWith('/docs')
 
 	const link = (
-		<Component className={['heading', className].filter(Boolean).join(' ')}>
-			<div id={id} />
+		// @ts-ignore
+		<Component
+			className={['heading', 'scroll-mt-2.5', className]
+				.filter(Boolean)
+				.join(' ')}
+			id={id}
+		>
 			{children}
 			<style jsx>
 				{`
@@ -18,10 +23,6 @@ export function Heading({ id = '', level = 1, children, className }) {
 					}
 					a:hover {
 						opacity: 1;
-					}
-					div {
-						position: absolute;
-						top: calc(-1 * (var(--nav-height) + 44px));
 					}
 				`}
 			</style>
