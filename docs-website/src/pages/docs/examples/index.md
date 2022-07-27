@@ -6,50 +6,17 @@ description:
 
 Here's an overview of all the available examples.
 
-## [Hello world](/docs/examples/hello-world)
-
-The simplest example of WunderGraph.
-
-## [Cross API Joins](/docs/examples/cross-api-joins)
-
-An example demonstrating how to join data across two APIs.
-
-## [Next.js](/docs/examples/nextjs)
-
-This example integrates WunderGraph with Next.js.
-
-## [Hooks](/docs/examples/hooks)
-
-This example demonstrates how to use hooks in WunderGraph.
-
-## [Caching](/docs/examples/caching)
-
-This example demonstrates how to use caching in WunderGraph.
-
-## [FaunaDB Next.js](/docs/examples/fauna-db-nextjs)
-
-This example demonstrates how to integrate FaunaDB into your WunderGraph applications.
-
-## [Inject Bearer Token](/docs/examples/inject-bearer-token)
-
-This example demonstrates how to inject a bearer token into your upstream requests.
-
-## [PostgreSQL](/docs/examples/postgresql)
-
-This example demonstrates how to use PostgreSQL in WunderGraph.
-
-## [PostgreSQL Prisma](/docs/examples/postgresql-prisma)
-
-This example demonstrates how to use PostgreSQL and Prisma in WunderGraph.
-
-## [Publish & Install API using WunderHub](/docs/examples/publish-install-api)
-
-This example demonstrates how to publish and install an API using WunderHub.
-
-## [Apollo Federation](/docs/examples/apollo-federation)
-
-This example demonstrates how to use Apollo Federation in WunderGraph.
-
-## [Auth0 OpenID Connect Authentication](/docs/examples/auth0-openid-connect-authentication)
-
-This example demonstrates how to use Auth0 OpenID Connect Authentication in WunderGraph.
+{% quick-links %}
+{% quick-link title="Hello world" icon="core" href="/docs/examples/hello-world" description="The simplest example of WunderGraph." /%}
+{% quick-link title="Cross API Joins" icon="core" href="/docs/examples/cross-api-joins" description="An example demonstrating how to join data across two APIs." /%}
+{% quick-link title="Next.js" icon="core" href="/docs/examples/nextjs" description="This example integrates WunderGraph with Next.js." /%}
+{% quick-link title="Hooks" icon="core" href="/docs/examples/hooks" description="This example demonstrates how to use hooks in WunderGraph." /%}
+{% quick-link title="Caching" icon="core" href="/docs/examples/caching" description="This example demonstrates how to use caching in WunderGraph." /%}
+{% quick-link title="FaunaDB Next.js" icon="core" href="/docs/examples/fauna-db-nextjs" description="This example demonstrates how to integrate FaunaDB into your WunderGraph applications." /%}
+{% quick-link title="Inject Bearer Token" icon="core" href="/docs/examples/inject-bearer-token" description="This example demonstrates how to inject a bearer token into your upstream requests." /%}
+{% quick-link title="PostgreSQL" icon="core" href="/docs/examples/postgresql" description="This example demonstrates how to use PostgreSQL in WunderGraph." /%}
+{% quick-link title="PostgreSQL Prisma" icon="core" href="/docs/examples/postgresql-prisma" description="This example demonstrates how to use PostgreSQL and Prisma in WunderGraph." /%}
+{% quick-link title="Publish & Install API using WunderHub" icon="core" href="/docs/examples/publish-install-api" description="This example demonstrates how to publish and install an API using WunderHub." /%}
+{% quick-link title="Apollo Federation" icon="core" href="/docs/examples/apollo-federation" description="This example demonstrates how to use Apollo Federation in WunderGraph." /%}
+{% quick-link title="Auth0 OpenID Connect Authentication" icon="core" href="/docs/examples/auth0-openid-connect-authentication" description="This example demonstrates how to use Auth0 OpenID Connect Authentication in WunderGraph." /%}
+{% /quick-links %}

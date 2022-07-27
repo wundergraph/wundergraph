@@ -22,7 +22,7 @@ const tags = {
 	WunderNode: '/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'WunderGraph Server':
 		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
-	'Architecture Introduction': '/docs/architecture/introduction',
+	'Architecture Introduction': '/docs/architecture/architecture-diagram',
 	'Cross API JOIN': '/docs/features/cross-api-joins-to-compose-apis',
 	JOINs: '/docs/features/cross-api-joins-to-compose-apis',
 	'GraphQL to JSON RPC compiler': '/docs/features/graphql-to-json-rpc-compiler',
@@ -82,6 +82,7 @@ const tags = {
 	authorization: '/docs/features/authorization-role-based-access-control-rbac',
 	Authorization: '/docs/features/authorization-role-based-access-control-rbac',
 	rbac: '/docs/features/authorization-role-based-access-control-rbac',
+	RBAC: '/docs/features/authorization-role-based-access-control-rbac',
 	'Role Based Access Control':
 		'/docs/features/authorization-role-based-access-control-rbac',
 	'role based access control':
@@ -229,6 +230,20 @@ const tags = {
 		'/docs/architecture/wundergraph-rpc-protocol-explained',
 	'WunderGraph Protocol':
 		'/docs/architecture/wundergraph-rpc-protocol-explained',
+	'Discord Server': 'https://wundergraph.com/discord',
+	Discord: 'https://wundergraph.com/discord',
+	EnvironmentVariables:
+		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	'EnvironmentVariable class':
+		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	EnvironmentVariable:
+		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	'reach out to our Sales Team':
+		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
+	'Sales Team':
+		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
+	Sales:
+		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
 }
 
 export default tags
