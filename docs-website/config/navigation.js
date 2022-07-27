@@ -458,8 +458,8 @@ const navigation = [
 				href: '/docs/core-concepts/virtual-graph',
 			},
 			{
-				title: 'The `__join` field',
-				href: '/docs/core-concepts/__join-field',
+				title: 'The `_join` field',
+				href: '/docs/core-concepts/_join-field',
 			},
 		],
 	},
