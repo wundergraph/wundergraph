@@ -18,3 +18,7 @@ you can use WunderHub to do so.
 
 If you want to learn more, check out the reference on how to [publish APIs to the Hub](/docs/wunderhub-reference/publish-api-to-wunderhub),
 and how to [integrate APIs from the Hub](/docs/wunderhub-reference/integrate-api-from-wunderhub) into your application.
+
+## Go to the Hub
+
+If you want to check out the hub, [follow this link](https://hub.wundergraph.com).
