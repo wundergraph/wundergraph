@@ -7,10 +7,10 @@ all: check-setup engine-dev
 	pnpm build:libs && pnpm install
 
 docs:
-	cd docs-website && npm install && npm run dev
+	pnpm --filter="./docs-website" dev
 
 build-docs:
-	cd docs-website && npm install && npm run build
+	cd docs-website && pnpm build
 
 engine-dev: codegen
 	go mod tidy
