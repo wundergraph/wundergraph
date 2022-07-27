@@ -169,7 +169,7 @@ const navigation = [
 				href: '/docs/examples/caching',
 			},
 			{
-				title: 'FauneDB NextJS',
+				title: 'FaunaDB NextJS',
 				href: '/docs/examples/fauna-db-nextjs',
 			},
 			{
@@ -755,7 +755,7 @@ const navigation = [
 				href: '/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
 			},
 			{
-				title: 'custom GraphQL Servers',
+				title: 'Custom GraphQL Servers',
 				href: '/docs/wundergraph-server-ts-reference/custom-graphql-servers',
 			},
 		],
