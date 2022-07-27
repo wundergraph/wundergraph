@@ -467,6 +467,10 @@ const navigation = [
 		title: 'Components of WunderGraph',
 		links: [
 			{
+				title: 'Overview',
+				href: '/docs/components-of-wundergraph',
+			},
+			{
 				title: 'wunderctl',
 				href: '/docs/components-of-wundergraph/wunderctl',
 			},
@@ -482,13 +486,17 @@ const navigation = [
 				title: 'WunderGraph Client',
 				href: '/docs/components-of-wundergraph/wundergraph-client',
 			},
+			{
+				title: 'WunderHub',
+				href: '/docs/components-of-wundergraph/wunderhub',
+			},
 		],
 	},
 	{
 		title: 'wunderctl Reference',
 		links: [
 			{
-				title: 'wunderctl Overview',
+				title: 'Overview',
 				href: '/docs/wunderctl-reference',
 			},
 			{
