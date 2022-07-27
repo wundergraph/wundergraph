@@ -77,6 +77,8 @@ const tags = {
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	hooks:
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
+	Hooks:
+		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	'configure authorization': '/docs/guides/configure-authorization',
 	'configure Authorization': '/docs/guides/configure-authorization',
 	authorization: '/docs/features/authorization-role-based-access-control-rbac',
@@ -118,7 +120,9 @@ const tags = {
 		'/docs/directives-reference/inject-current-date-time-directive',
 	'@injectEnvironmentVariable':
 		'/docs/directives-reference/inject-environment-variable-directive',
-	'@injectUUID': '/docs/directives-reference/inject-uuid-directive',
+	'@injectGeneratedUUID':
+		'/docs/directives-reference/inject-generated-uuid-directive',
+	'@injectdUUID': '/docs/directives-reference/inject-generated-uuid-directive',
 	'@internal': '/docs/directives-reference/internal-directive',
 	'@internalOperation':
 		'/docs/directives-reference/internal-operation-directive',

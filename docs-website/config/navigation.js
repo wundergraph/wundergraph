@@ -574,8 +574,8 @@ const navigation = [
 				href: '/docs/directives-reference/rbac-directive',
 			},
 			{
-				title: '@injectUUID directive',
-				href: '/docs/directives-reference/inject-uuid-directive',
+				title: '@injectGeneratedUUID directive',
+				href: '/docs/directives-reference/inject-generated-uuid-directive',
 			},
 			{
 				title: '@injectCurrentDateTime directive',
