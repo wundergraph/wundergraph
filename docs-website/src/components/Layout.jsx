@@ -129,6 +129,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 	let currentSection = useTableOfContents(tableOfContents)
 
 	const hideTableOfContents = frontmatter?.hideTableOfContents
+	const fullWidthContent = frontmatter?.fullWidthContent
 
 	function isActive(section) {
 		if (section.id === currentSection) {
@@ -212,8 +213,11 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 
 				<div
 					className={clsx(
-						'hidden xl:sticky xl:top-[4.5rem] xl:-mr-6 xl:h-[calc(100vh-4.5rem)]  xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6',
-						{ 'xl:block': !hideTableOfContents }
+						'hidden xl:sticky xl:top-[4.5rem] xl:-mr-6 xl:h-[calc(100vh-4.5rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6',
+						{
+							'xl:block': !hideTableOfContents,
+							'xl:invisible xl:block': hideTableOfContents && !fullWidthContent,
+						}
 					)}
 				>
 					<nav aria-labelledby="on-this-page-title" className="w-56">
