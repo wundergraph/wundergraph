@@ -1,5 +1,5 @@
-import { GrpcApi } from '../definition';
-import { ConfigurationVariableKind, DataSourceKind } from '@wundergraph/protobuf';
+import { DataSource, GrpcApi, GrpcApiCustom } from '../definition';
+import { ConfigurationVariableKind, DataSourceKind, FieldConfiguration } from '@wundergraph/protobuf';
 import {
 	applyNamespaceToExistingRootFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
@@ -20,7 +20,7 @@ const mockGrpcApiObject = (protoset: string): GrpcApi => {
 	const ast = parse(schemaString);
 	const astSchema = buildASTSchema(ast);
 
-	let dataSources = [
+	let dataSources: DataSource<GrpcApiCustom>[] = [
 		{
 			Kind: DataSourceKind.GRPC,
 			RootNodes: [
@@ -55,7 +55,7 @@ const mockGrpcApiObject = (protoset: string): GrpcApi => {
 		},
 	];
 
-	let fields = [
+	let fields: FieldConfiguration[] = [
 		{
 			typeName: 'Query',
 			fieldName: 'starwars_StarwarsService_GetHero',

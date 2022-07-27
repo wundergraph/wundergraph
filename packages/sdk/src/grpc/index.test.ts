@@ -6,7 +6,7 @@ const runTest = async (testFile: string, snapShot: string) => {
 	if (!exists) {
 		return;
 	}
-	const fileContents = fs.readFileSync(testFile);
+	const fileContents = fs.readFileSync(testFile).toString('base64');
 
 	const actual = await protosetToGrpcApiObject(fileContents);
 
