@@ -70,10 +70,6 @@ const navigation = [
 				href: '/docs/architecture',
 			},
 			{
-				title: 'Introduction',
-				href: '/docs/architecture/introduction',
-			},
-			{
 				title: 'Architecture Diagram',
 				href: '/docs/architecture/architecture-diagram',
 			},
@@ -319,6 +315,22 @@ const navigation = [
 				href: '/docs/supported-data-sources/rest-openapi',
 			},
 			{
+				title: 'gRPC',
+				href: '/docs/supported-data-sources/grpc',
+			},
+			{
+				title: 'SOAP',
+				href: '/docs/supported-data-sources/soap',
+			},
+			{
+				title: 'OData',
+				href: '/docs/supported-data-sources/odata',
+			},
+			{
+				title: 'Apache Thrift',
+				href: '/docs/supported-data-sources/apache-thrift',
+			},
+			{
 				title: 'PostgreSQL',
 				href: '/docs/supported-data-sources/postgresql',
 			},
@@ -341,6 +353,14 @@ const navigation = [
 			{
 				title: 'Planetscale',
 				href: '/docs/supported-data-sources/planetscale',
+			},
+			{
+				title: 'FaunaDB',
+				href: '/docs/supported-data-sources/faunadb',
+			},
+			{
+				title: 'Neo4j',
+				href: '/docs/supported-data-sources/neo4j',
 			},
 			{
 				title: 'Yugabyte',
@@ -666,7 +686,7 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-token-based-authentication',
 			},
 			{
-				title: 'Authorization',
+				title: 'Authorization / RBAC',
 				href: '/docs/wundergraph-config-ts-reference/configure-authorization',
 			},
 			{
@@ -674,7 +694,7 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-s3-file-upload-providers',
 			},
 			{
-				title: 'advanced Security',
+				title: 'Advanced Security',
 				href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
 			},
 			{

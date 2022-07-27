@@ -2,24 +2,22 @@
 title: Versionless APIs - Easily build backwards compatible APIs
 pageTitle: WunderGraph - Use Cases - Versionless APIs - Easily build backwards compatible APIs
 description:
+hideTableOfContents: true
 ---
 
 Versioning is a very common problem when building APIs.
 It's not always easy to manage versioning, and it's not always easy to manage backwards compatibility.
-
 You first have to understand when and what to version,
 so you need to know if you're breaking any client if you're making a change.
 
 Once you're aware of the breaking change,
 you need to implement a way to version your API.
-
 Finally, you have to implement a way of notifying your API consumers about the change,
 so they can update their clients.
 
 While this is a big cost,
 it's often necessary and important,
 because you want to move forward and improve your APIs.
-
 What was a good API design on day one is no longer valid,
 because you've learned from your API consumers and want to improve your API design.
 

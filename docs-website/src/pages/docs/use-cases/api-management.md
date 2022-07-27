@@ -2,6 +2,7 @@
 title: API Management
 pageTitle: WunderGraph - API Management
 description:
+hideTableOfContents: true
 ---
 
 Managing APIs is the classic use case supported by WunderGraph.
