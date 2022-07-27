@@ -9,21 +9,9 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const db = introspect.postgresql({
-	apiNamespace: 'wundergraph',
-	databaseURL: 'postgres://postgres:postgres@localhost:5432/wundergraph',
-	introspection: {
-		pollingIntervalSeconds: 5,
-	},
-});
-
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://api.spacex.land/graphql/',
-	introspection: {
-		pollingIntervalSeconds: 5,
-		disableCache: true,
-	},
 });
 
 const jsp = introspect.openApi({
@@ -86,7 +74,6 @@ configureWunderGraphApplication({
 	},
 	security: {
 		enableGraphQLEndpoint: true,
-		allowedHosts: ['localhost:3000'],
 	},
 	dotGraphQLConfig: {
 		hasDotWunderGraphDirectory: false,
