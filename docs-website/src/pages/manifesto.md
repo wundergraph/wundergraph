@@ -150,7 +150,7 @@ The drawback is that you can't easily integrate all of them.
 The big problem with these small solutions is that they don't usually understand the big picture.
 There's a company that offers a solution to make GraphQL APIs more secure.
 If you follow one of our paradigms,
-you'd realize that most companies should never expose their GraphQL APIs,
+you'll realize that most companies should never expose their GraphQL APIs,
 so you don't really need such a solution.
 
 This is the result of inexperienced developers trying to build smart solutions without investing into research and learning the basics.
@@ -191,14 +191,14 @@ Imagine a service that depends on 10 REST APIs,
 3 gRPC services, and 7 GraphQL microservices using Federation.
 
 All these 20 services will evolve over time.
-Could they introduce braking changes?
+Could they introduce breaking changes?
 Will they deprecate old APIs?
 How will you communicate all that?
 What's your process for keeping up to date with the latest changes?
 
 Using a package manager like npm,
 you could use semantic versioning and upgrade or replace dependencies continually.
-With APIs, there seems to be no easy way to do it, does it?
+With APIs, there seems to be no easy way to do it, doesn't it?
 
 ### Versioning APIs is an unsolved problem
 
@@ -215,7 +215,7 @@ What works for REST APIs in terms of versioning, is not applicable to GraphQL, g
 
 ### API Gateways are not flexible enough, Backends for Frontends lack API Gateway capabilities
 
-API Gateways work best when your use-case is very basic, and you don't need to customize it.
+API Gateways work best when your use case is very basic, and you don't need to customize it.
 The moment you need to add custom middleware, it usually gets super complicated.
 You have to write plugins in Rust or Go, compile them on your own,
 upload them to some service and manually add them into the middleware chain.
@@ -225,11 +225,11 @@ all you can do is add `console.log` statements to your code and see what happens
 That's not how software development works.
 
 The reason for this is that API Gateways are not integrated well into the rest of the stack,
-they are not part of you application.
+they are not part of your application.
 You also don't usually use them during development, but also in production.
 That's because they are not designed to run alongside the application in development.
 
-Backends for Frontends on the other hand give us all the flexibility we need,
+Backends for frontends on the other hand give us all the flexibility we need,
 but they lack critical features offered by API Gateways,
 like authentication, authorization, API composition, and so on.
 
@@ -260,15 +260,15 @@ The second one is that it's simply too hard to add OpenID Connect to your applic
 Our goal is to make this as easy as possible,
 helping you to separate concerns and make your application more secure.
 
-### The evolution of GraphQL: From data-fetching to API composition
+### The evolution of GraphQL: from data-fetching to API composition
 
 GraphQL is a very powerful query language.
 When I first learned about GraphQL,
 I thought that Fragments are the most powerful feature of GraphQL.
 Fragments allow you to define reusable parts of your queries and attach them to user interface components.
 
-As time went by, many of us realised that GraphQL is a great tool, but comes also with a cost.
-One of the most popular clients, Relay, did never get mass adoption, as it was just too hard to use.
+As time went by, many of us realized that GraphQL is a great tool, but also comes with a cost.
+One of the most popular clients, Relay, never got mass adoption, as it was just too hard to use.
 So, outside of Facebook/Meta, the use of the Relay client seems small,
 the same goes for Fragments.
 
@@ -293,7 +293,7 @@ the client can only receive the data it needs.
 
 If you're familiar with GraphQL already,
 you might know that this is one of the main selling points of GraphQL,
-specially when it comes to binding APIs to user interfaces.
+especially when it comes to binding APIs to user interfaces.
 It's a requirement to send as little data as possible to the client,
 so the SelectionSet plays a big role here.
 
@@ -488,7 +488,7 @@ only exchanging the data they need.
 
 Additionally, by moving some parts of the client to the server,
 the client is much more lightweight.
-The server has much more powerful resources and can apply caching much more efficient than the client.
+The server has much more powerful resources and can apply caching much more efficiently than the client.
 
 ### Making the API Gateway part of the application
 
@@ -502,7 +502,7 @@ Most clients are generated independently of the API,
 not to mention the API Gateway,
 which is usually a completely separate unit.
 With WunderGraph, you can define your API dependencies explicitly,
-and both API Gateway and client will be moulded as a single piece.
+and both API Gateway and client will be molded as a single piece.
 
 ## The road ahead of us
 
@@ -513,7 +513,7 @@ from design, to implementation and deployment.
 We want to enable new ways of collaborative work between API providers and consumers.
 
 We believe that API first is the best way to build and scale your business.
-We want to help companies to go on this journey,
+We want to help companies to embark on this journey,
 generating new opportunities through API collaboration.
 
 With each new API made available to others,
