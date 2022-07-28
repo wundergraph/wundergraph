@@ -461,6 +461,10 @@ const navigation = [
 				title: 'The `_join` field',
 				href: '/docs/core-concepts/_join-field',
 			},
+			{
+				title: 'Persisted Queries / Persisted Operations',
+				href: '/docs/core-concepts/persisted-queries-persisted-operations',
+			},
 		],
 	},
 	{
