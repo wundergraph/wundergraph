@@ -25,7 +25,7 @@ Each new wave will enable new ways for businesses to collaborate.
 
 ### It's a challenge to create a successful API strategy
 
-Just creating an API doesn't mean its adding value to the world.
+Just creating an API doesn't mean it's adding value to the world.
 
 APIs need to be discoverable.
 To make APIs discoverable, you have to document them.
@@ -36,7 +36,7 @@ What API style should you use?
 You need to follow best practices for API design and implementation,
 otherwise your API might be hard to use.
 Your API needs to be secured.
-you should have monitoring to understand your API consumers.
+You should have monitoring to understand your API consumers.
 
 As you can see, there is a lot more than just implementing an API.
 
@@ -50,7 +50,7 @@ What they completely lack is a way of embedding API management into the software
 We keep talking about the "API Management lifecycle",
 but the tools that we use are completely disconnected from how we develop software.
 
-Here's an example: The typical way of building a Next.js app is to connect a git repository containing a Next.js application with Vercel.
+Here's an example: the typical way of building a Next.js app is to connect a git repository containing a Next.js application with Vercel.
 On each commit on the main branch, the latest version gets deployed.
 When you're opening a PR on a second branch, a preview environment gets deployed.
 This preview can be reviewed manually, or tested with automated tests.
@@ -67,7 +67,7 @@ API Management tries too hard to solve their own problems,
 and forget to understand how it needs to blend into the rest of the stack.
 We're here to change this.
 
-### API Management solutions favour API producers over API consumers
+### API Management solutions favor API producers over API consumers
 
 When we talk about API Management,
 what people usually mean is "API Gateways",
@@ -80,7 +80,7 @@ API Management shouldn't end at the API Gateway layer.
 When exposing APIs through API Gateways,
 there's a lot of useful information thrown away when it comes to API consumers.
 
-If an API Gateway is aware of all the configured Endpoints,
+If an API Gateway is aware of all the configured endpoints,
 authentication methods, and other configuration,
 why can't we automatically generate API clients that make it easy for API consumers to use the APIs?
 
@@ -128,7 +128,7 @@ Next, we'd like to add event driven APIs to our tool belt,
 with AsyncAPI, Kafka and the like.
 At this point, we're no longer in the realm of HTTP-based APIs.
 How should you manage these APIs with a single set of tools,
-when the underlying protocols work completely differently?
+when the underlying protocols work completely different?
 
 ### The trend of niche API solutions turns the API Management landscape into a chaotic mess
 
