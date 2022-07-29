@@ -47,7 +47,7 @@ function Header({ navigation }) {
 				<MobileNavigation navigation={navigation} />
 			</div>
 			<div className="relative flex flex-grow basis-0 items-center">
-				<Link href="/" aria-label="Home page">
+				<Link href="https://wundergraph.com/" aria-label="WunderGraph landing page">
 					<div className="flex">
 						<Logomark className="h-10 w-10 text-black dark:text-white lg:hidden" />
 						<Logo className="hidden h-8 text-black dark:text-white lg:flex" />
