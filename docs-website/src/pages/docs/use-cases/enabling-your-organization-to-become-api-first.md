@@ -1,7 +1,7 @@
 ---
 title: Enabling your organization to become API First
 pageTitle: WunderGraph - Enabling your organization to become API First
-description: 'It's pivotal for organizations to understand the importance of API First, how to implement it, and how to make it work for your team.'
+description: 'It is pivotal for organizations to understand the importance of API First, how to implement it, and how to make it work for your team.'
 ---
 
 Before we talk about how to enable your organization to become API First,
