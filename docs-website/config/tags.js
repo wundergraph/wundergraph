@@ -244,12 +244,9 @@ const tags = {
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
 	EnvironmentVariable:
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
-	'reach out to our Sales Team':
-		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
-	'Sales Team':
-		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
-	Sales:
-		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
+	'reach out to our Sales Team': 'https://wundergraph.com/contact/sales',
+	'Sales Team': 'https://wundergraph.com/contact/sales',
+	Sales: 'https://wundergraph.com/contact/sales',
 }
 
 export default tags
