@@ -28,11 +28,11 @@
   <hr />
 </div>
 
-> **Note**: 🚀 WunderGraph is now Open Source! Read the [announcement](https://wundergraph.com/blog/wundergraph_the_next_generation_api_developer_platform_is_open_source).
+> **Note**: 🌍 We are working on a serverless version of WunderGraph. If you're interested, please see [here](https://wundergraph.com/pricing).
 
 ## What is WunderGraph?
 
-WunderGraph is the **Next-Generation API Developer Platform** with a focus on Developer Experience.
+WunderGraph is the **Serverless API Developer Platform** with a focus on Developer Experience.
 
 At its core, WunderGraph combines the [API Gateway pattern](https://microservices.io/patterns/apigateway.html) with
 the [Backend for Frontend (BFF)](https://samnewman.io/patterns/architectural/bff/) pattern to create the perfect
