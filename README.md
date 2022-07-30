@@ -28,7 +28,7 @@
   <hr />
 </div>
 
-> **Note**: :earth_africa: We are working on a serverless version of WunderGraph. If you're interested, please see [here](https://wundergraph.com/pricing).
+> **Note**: 🌍 We are working on a serverless version of WunderGraph. If you're interested, please see [here](https://wundergraph.com/pricing).
 
 ## What is WunderGraph?
 
