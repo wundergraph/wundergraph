@@ -2,7 +2,6 @@
 title: Configure MySQL Datasource
 pageTitle: WunderGraph - Configure MySQL Datasource
 description:
-hideTableOfContents: true
 ---
 
 The MySQL data source introspects the database and generates a GraphQL schema.

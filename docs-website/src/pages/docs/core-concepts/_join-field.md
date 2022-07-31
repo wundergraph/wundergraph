@@ -2,7 +2,6 @@
 title: The _join field explained
 pageTitle: WunderGraph - Core Concepts - The _join field explained
 description:
-hideTableOfContents: true
 ---
 
 It's quite likely that you've already seen the `_join` field in one of the examples.

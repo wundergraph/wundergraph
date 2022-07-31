@@ -3,6 +3,8 @@ title: Use Cases
 pageTitle: WunderGraph - Use Cases
 description: ''
 hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Find below a list of the most common use cases for WunderGraph.

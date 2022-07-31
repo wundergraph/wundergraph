@@ -2,7 +2,6 @@
 title: Configure Planetscale Data Source
 pageTitle: WunderGraph - Configure Planetscale Data Source
 description:
-hideTableOfContents: true
 ---
 
 The Planetscale data source introspects the database and generates a GraphQL schema.

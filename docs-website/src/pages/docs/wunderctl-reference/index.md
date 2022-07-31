@@ -2,6 +2,9 @@
 title: wunderctl Reference Overview
 pageTitle: WunderGraph - wunderctl Reference Overview
 description:
+hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Here's an overview of all available wunderctl commands.

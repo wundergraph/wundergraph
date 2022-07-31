@@ -3,6 +3,7 @@ title: Manifesto
 pageTitle: WunderGraph - Manifesto
 description: ''
 hideTableOfContents: true
+fullWidthContent: true
 ---
 
 This manifesto is a collection of principles that WunderGraph follows.

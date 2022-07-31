@@ -2,7 +2,6 @@
 title: Configure mutual TLS (mTLS) for HTTP based data sources
 pageTitle: WunderGraph - Configure mutual TLS (mTLS) for HTTP based data sources
 description:
-hideTableOfContents: true
 ---
 
 This section describes how to configure mutual TLS (mTLS) for HTTP based data sources,

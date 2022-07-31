@@ -2,6 +2,9 @@
 title: wundergraph.server.ts reference
 pageTitle: WunderGraph - wundergraph.server.ts reference
 description:
+hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Here's an overview of all the different options to extend your WunderGraph Server using custom hooks and custom GraphQL resolvers.

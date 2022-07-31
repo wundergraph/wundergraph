@@ -2,6 +2,9 @@
 title: Overview
 pageTitle: WunderGraph - Features - Overview
 description:
+hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Here's an overview of the most important features of WunderGraph.

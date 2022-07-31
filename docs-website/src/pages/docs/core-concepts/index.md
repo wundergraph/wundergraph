@@ -2,6 +2,9 @@
 title: Core Concepts
 pageTitle: WunderGraph - Core Concepts
 description:
+hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Here's an overview of the core concepts of WunderGraph.

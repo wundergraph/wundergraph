@@ -3,6 +3,8 @@ title: Architecture Overview of WunderGraph
 pageTitle: WunderGraph - Architecture - Overview
 description:
 hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 This section will cover the architecture of WunderGraph.

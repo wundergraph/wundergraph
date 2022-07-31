@@ -2,7 +2,6 @@
 title: Multi-database multi-schema ORM
 pageTitle: WunderGraph - Multi-database Multi-schema ORM
 description:
-hideTableOfContents: true
 ---
 
 As you might know,

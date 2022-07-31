@@ -65,6 +65,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
 						<div className="flex h-10 w-10 items-center justify-center">
 							<button
 								onClick={() => setCopied(true)}
+								title="Copy to clipboard"
 								className="h-5 w-5 flex-shrink-0 text-slate-300 dark:text-slate-300"
 								aria-hidden="true"
 							>

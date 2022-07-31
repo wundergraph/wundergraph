@@ -2,7 +2,6 @@
 title: Configure Authorization
 pageTitle: WunderGraph - Configure Authorization
 description:
-hideTableOfContents: true
 ---
 
 This section explains the `authorization` property of `configureWunderGraphApplication`.
