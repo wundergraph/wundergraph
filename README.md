@@ -11,7 +11,7 @@
   <a href="https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next"><img src="https://img.shields.io/badge/enterprise-support-blue.svg" /></a>
   <br />
   <br />
-  <a href="https://docs.wundergraph.com/getting_started">Quickstart</a>
+  <a href="https://docs.wundergraph.com/getting-started">Quickstart</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="https://wundergraph.com/">Website</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
