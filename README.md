@@ -11,13 +11,13 @@
   <a href="https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next"><img src="https://img.shields.io/badge/enterprise-support-blue.svg" /></a>
   <br />
   <br />
-  <a href="https://wundergraph.com/docs/guides/getting_started/quickstart">Quickstart</a>
+  <a href="https://docs.wundergraph.com/getting-started">Quickstart</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="https://wundergraph.com/">Website</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://wundergraph.com/docs">Docs</a>
+  <a href="https://docs.wundergraph.com">Docs</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://wundergraph.com/docs/examples/nextjs_typescript_postgresql_realtime_chat">Examples</a>
+  <a href="https://docs.wundergraph.com/docs/examples">Examples</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="https://wundergraph.com/blog">Blog</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
@@ -28,11 +28,11 @@
   <hr />
 </div>
 
-> **Note**: 🚀 WunderGraph is now Open Source! Read the [announcement](https://wundergraph.com/blog/wundergraph_the_next_generation_api_developer_platform_is_open_source).
+> **Note**: 🌍 We are working on a serverless version of WunderGraph. If you're interested, please see [here](https://wundergraph.com/pricing).
 
 ## What is WunderGraph?
 
-WunderGraph is the **Next-Generation API Developer Platform** with a focus on Developer Experience.
+WunderGraph is the **Serverless API Developer Platform** with a focus on Developer Experience.
 
 At its core, WunderGraph combines the [API Gateway pattern](https://microservices.io/patterns/apigateway.html) with
 the [Backend for Frontend (BFF)](https://samnewman.io/patterns/architectural/bff/) pattern to create the perfect

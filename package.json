@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.94.1",
+  "version": "0.94.5",
   "name": "wundergraph-env",
   "license": "Apache-2.0",
   "author": {
@@ -13,9 +13,11 @@
   },
   "homepage": "https://wundergraph.com",
   "scripts": {
-    "build": "pnpm -r run build",
-    "build:libs": "pnpm -r run --filter='!./packages/*-testapp' build",
+    "build": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
+    "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
+    "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' --filter='!./docs-website' build --watch",
+    "watch:sdk": "pnpm -r run --filter='./packages/sdk' build --watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql} pkg/templates/assets/templates/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
@@ -27,11 +29,12 @@
     "publish:engine": "release-it --git.requireBranch=main",
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
     "postinstall": "husky install && pnpm run patch",
-    "patch": "patch-package"
+    "patch": "patch-package",
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' +"
   },
   "engines": {
     "node": ">=16.0.0",
-    "pnpm": ">=7.0.0 < 7.4.0"
+    "pnpm": ">=7.0.0 < 7.4.0 || >= 7.5.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}": [

@@ -3,17 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.35](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.34...@wundergraph/nextjs@0.0.35) (2022-07-18)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.0.34](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.33...@wundergraph/nextjs@0.0.34) (2022-07-13)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.0.33](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.32...@wundergraph/nextjs@0.0.33) (2022-07-07)
 
 ### Bug Fixes
 
-* **codegen:** auth / s3 code generation ([75a3a61](https://github.com/wundergraph/wundergraph/commit/75a3a61916617d1d62460225c9d179ec7c8e4798))
+- **codegen:** auth / s3 code generation ([75a3a61](https://github.com/wundergraph/wundergraph/commit/75a3a61916617d1d62460225c9d179ec7c8e4798))
 
 ## [0.0.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.31...@wundergraph/nextjs@0.0.32) (2022-07-07)
 
 ### Bug Fixes
 
-* ensure all hooks are called for live queries ([#67](https://github.com/wundergraph/wundergraph/issues/67)) ([e58dea4](https://github.com/wundergraph/wundergraph/commit/e58dea4d12ff51ea1ef5c338ef9f105343b09694))
+- ensure all hooks are called for live queries ([#67](https://github.com/wundergraph/wundergraph/issues/67)) ([e58dea4](https://github.com/wundergraph/wundergraph/commit/e58dea4d12ff51ea1ef5c338ef9f105343b09694))
 
 ## [0.0.31](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.30...@wundergraph/nextjs@0.0.31) (2022-07-05)
 
@@ -31,7 +39,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### Bug Fixes
 
-* don't (re-)fetch user server & client-side when authentication is disabled ([#56](https://github.com/wundergraph/wundergraph/issues/56)) ([2d4bc4a](https://github.com/wundergraph/wundergraph/commit/2d4bc4a7e1823652f047703435282f12ace5ce7e))
+- don't (re-)fetch user server & client-side when authentication is disabled ([#56](https://github.com/wundergraph/wundergraph/issues/56)) ([2d4bc4a](https://github.com/wundergraph/wundergraph/commit/2d4bc4a7e1823652f047703435282f12ace5ce7e))
 
 ## [0.0.27](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.26...@wundergraph/nextjs@0.0.27) (2022-06-29)
 
