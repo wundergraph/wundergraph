@@ -44,6 +44,7 @@ const starwars = introspect.grpc({
 		filePath: '../../../pkg/datasources/grpc/testdata/starwars/starwars.protoset',
 	},
 	url: '127.0.0.1:9095',
+	apiNamespace: 'grpc',
 });
 
 const myApplication = new Application({
