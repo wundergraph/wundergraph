@@ -26,7 +26,7 @@ As mentioned in other places, we're using WunderGraph to build WunderGraph.
 We didn't want to make yet another messy client side integration where we have to cobble together various open source tools to achieve something that should be simple.
 
 If you've read through the previous sections,
-you should be aware that WunderGraph has a lot of information to generate the configuration for the [WunderNodes](/docs/components-of-wundergraph/wundernode-wundergraph-server) that run your APIs on the Edge.
+you should be aware that WunderGraph has a lot of information to generate the configuration for the WunderNodes that run your APIs on the Edge.
 
 This is information about the GraphQL schema, all operations including JSON schemas for both variables and the response objects.
 We know the available authentication providers.

@@ -41,4 +41,4 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 ```
 
 If you want to learn more about http transport hooks,
-have a look at the [reference documentation](/docs/wundergraph-server-ts-reference/on-origin-request-hook).
+have a look at the onOriginRequest hook reference.

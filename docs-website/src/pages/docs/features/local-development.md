@@ -17,8 +17,7 @@ Once you have a WunderGraph application initialized you're able to start your lo
 
 ```shell
 wunderctl init
-cd .wundergraph
-wunderctl up --debug
+npm install && npm start
 ```
 
 That's all it takes to run your own WunderGraph dev environment.

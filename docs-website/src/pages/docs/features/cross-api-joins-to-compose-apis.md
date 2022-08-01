@@ -5,7 +5,7 @@ description:
 ---
 
 Imagine you'd like to access Data from multiple APIs and combine the results into a single dataset.
-WunderGraph supports a rich set of [DataSources](/docs/supported-data-sources), so we wanted to add a simple way to achieve JOINs across APIs.
+WunderGraph supports a rich set of DataSources, so we wanted to add a simple way to achieve JOINs across APIs.
 
 ## Example: Joining Capitals with Weather Data
 
@@ -140,4 +140,6 @@ It simply returns the Query type, so you can join a response of one API with ano
 ## Reference Documentation
 
 If you want to learn more about how JOINs work,
-you can read the [Reference Docs on the export directive](/docs/directives-reference/export-directive).
+you can read the reference docs on the `@export` directive,
+the `@internal` directive,
+as well as the `_join` field.

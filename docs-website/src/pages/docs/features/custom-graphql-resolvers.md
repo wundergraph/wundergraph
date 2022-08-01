@@ -29,7 +29,7 @@ Below, you'll find two examples,
 one using a schema first approach,
 the second one using code first.
 
-Both schemas are automatically added to your [virtual Graph](/docs/core-concepts/virtual-graph).
+Both schemas are automatically added to your virtual Graph.
 
 ```typescript
 // wundergraph.server.ts

@@ -9,7 +9,7 @@ description:
 ## Configuration
 
 If you want to get the full picture of what's possible with hooks,
-please have a look into the [wundergraph.server.ts reference](/docs/wundergraph-server-ts-reference).
+please have a look into the wundergraph.server.ts reference.
 
 In this case, we're keeping it simple and implement a `mutatingPostResolve` hook to inject a custom rocket into the response.
 This hook allows us to modify the response object before it is sent back to the client.

@@ -7,7 +7,10 @@ all: check-setup engine-dev
 	pnpm build:libs && pnpm install
 
 docs:
-	cd docs-website && npm install && npm run dev
+	pnpm --filter="./docs-website" dev
+
+build-docs:
+	cd docs-website && pnpm build
 
 engine-dev: codegen
 	go mod tidy
@@ -53,4 +56,4 @@ update-examples:
 	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
 
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs

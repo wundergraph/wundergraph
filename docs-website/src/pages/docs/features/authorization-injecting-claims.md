@@ -51,7 +51,7 @@ By using the `@fromClaim` directive, we're enforcing three things.
 First, we're requiring the user to be authenticated using OpenID Connect.
 Second, we'll disallow the user to use the field `name` on the variables object, so they cannot manipulate the input.
 Third, we inject the Claim value for the field `name` into the variables.
-For the variable `email`, we're doing the same. `message` is using a [different directive, responsible for adding a JSON-Schema to the field](/docs/directives-reference/json-schema-directive).
+For the variable `email`, we're doing the same. `message` is using `@jsonSchema` directive.
 
 As you can see, you can save yourself a lot of time using these powerful directives.
-If you want to learn more, [have a look at the reference documentation](/docs/directives-reference/from-claim-directive).
+If you want to learn more, have a look at the `@fromClaim` reference.

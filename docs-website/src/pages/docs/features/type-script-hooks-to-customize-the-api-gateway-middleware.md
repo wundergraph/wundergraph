@@ -29,7 +29,7 @@ query Missions($find: MissionsFind) {
 }
 ```
 
-This Operation will generate a [JSON RPC](/docs/features/graphql-to-json-rpc-compiler) Endpoint as well as TypeScript models for both Inputs and the Response.
+This Operation will generate a JSON RPC Endpoint as well as TypeScript models for both Inputs and the Response.
 
 With Hooks, we're extending this with one addition, we're scaffolding a TypeSafe Hooks Configuration that allows you to write your Hooks using TypeScript.
 Here's how it looks like for the Operation above:
@@ -63,7 +63,14 @@ export interface HooksConfig {
 }
 ```
 
-You're able to define 5 distinct hooks: `mockResolve`, `preResolve`, `mutatingPreResolve`, `postResolve` and `mutatingPostResolve`.
+You're able to define 5 distinct hooks:
+
+1. `mockResolve`
+2. `preResolve`
+3. `mutatingPreResolve`
+4. `postResolve`
+5. `mutatingPostResolve`.
+
 The pre- and postResolve hooks are good for logging or side effects, e.g. sending an E-Mail after a mutation.
 Mutating Hooks can be used to "mutate" the Request, e.g. change the input variables (preResolve) or modify the response (postResolve).
 
@@ -170,7 +177,7 @@ we upsert the user object in the database.
 No extra database client is required as the database is already accessible through the mutations.
 
 Making all Operations accessible from the hooks environment simplifies app development a lot.
-In combination with the [@internalOperation directive](/docs/directives-reference/internal-operation-directive),
+In combination with the `@internalOperation` directive,
 it's possible to define Operations exclusively for internal purposes.
 This way, there's no need for an additional ORM or database client as the database is already accessible through Queries and Mutations.
 You stack becomes less complex, you have to deal with less complexity and your workflows are simplified.
@@ -178,4 +185,4 @@ You stack becomes less complex, you have to deal with less complexity and your w
 ## How to
 
 If you're looking for more specific information on how to use Hooks,
-have a look [at the reference](/docs/wundergraph-server-ts-reference).
+have a look at the wundergraph.server.ts reference.
