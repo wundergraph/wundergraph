@@ -221,7 +221,6 @@ importers:
       '@apollo/composition': ^2.0.2
       '@apollo/federation': ^0.36.2
       '@graphql-tools/schema': ^8.3.10
-      '@grpc/proto-loader': ^0.7.0
       '@prisma/generator-helper': ^3.9.2
       '@types/axios': ^0.14.0
       '@types/chai': ^4.2.22
@@ -259,7 +258,7 @@ importers:
       openapi-types: ^10.0.0
       postman-collection: ^4.1.1
       prettier: ^2.5.0
-      protobufjs: ^6.11.2
+      protobufjs: 6.11.3
       swagger2openapi: ^7.0.8
       ts-jest: ^28.0.4
       typescript: ^4.7.2
@@ -267,7 +266,6 @@ importers:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
-      '@grpc/proto-loader': 0.7.0
       '@prisma/generator-helper': 3.13.0
       '@wundergraph/protobuf': link:../protobuf
       '@wundergraph/wunderctl': link:../wunderctl
@@ -292,7 +290,7 @@ importers:
       openapi-types: 10.0.0
       postman-collection: 4.1.2
       prettier: 2.6.2
-      protobufjs: 6.11.2
+      protobufjs: 6.11.3
       swagger2openapi: 7.0.8
     devDependencies:
       '@types/axios': 0.14.0
@@ -1151,15 +1149,15 @@ packages:
       tslib: 2.3.1
     dev: false
 
-  /@grpc/proto-loader/0.7.0:
-    resolution: {integrity: sha512-SGPZtVmqOvNfPFOA/nNPn+0Weqa5wubBgQ56+JgTbeLY2VezwtMjwPPFzh0kvQccwWT3a2TXT0ZGK/pJoOTk1A==}
+  /@grpc/proto-loader/0.6.13:
+    resolution: {integrity: sha512-FjxPYDRTn6Ec3V0arm1FtSpmP6V50wuph2yILpyvTKzjc76oDdoihXqM1DzOW5ubvCC8GivfCnNtfaRE8myJ7g==}
     engines: {node: '>=6'}
     hasBin: true
     dependencies:
       '@types/long': 4.0.2
       lodash.camelcase: 4.3.0
       long: 4.0.0
-      protobufjs: 7.0.0
+      protobufjs: 6.11.3
       yargs: 16.2.0
     dev: false
 
@@ -2192,26 +2190,26 @@ packages:
     dev: false
 
   /@protobufjs/eventemitter/1.1.0:
-    resolution: {integrity: sha1-NVy8mLr61ZePntCV85diHx0Ga3A=}
+    resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==}
     dev: false
 
   /@protobufjs/fetch/1.1.0:
-    resolution: {integrity: sha1-upn7WYYUr2VwDBYZ/wbUVLDYTEU=}
+    resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==}
     dependencies:
       '@protobufjs/aspromise': 1.1.2
       '@protobufjs/inquire': 1.1.0
     dev: false
 
   /@protobufjs/float/1.0.2:
-    resolution: {integrity: sha1-Xp4avctz/Ap8uLKR33jIy9l7h9E=}
+    resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==}
     dev: false
 
   /@protobufjs/inquire/1.1.0:
-    resolution: {integrity: sha1-/yAOPnzyQp4tyvwRQIKOjMY48Ik=}
+    resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==}
     dev: false
 
   /@protobufjs/path/1.1.2:
-    resolution: {integrity: sha1-bMKyDFya1q0NzP0hynZz2Nf79o0=}
+    resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==}
     dev: false
 
   /@protobufjs/pool/1.1.0:
@@ -2459,7 +2457,7 @@ packages:
   /@types/graceful-fs/4.1.5:
     resolution: {integrity: sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==}
     dependencies:
-      '@types/node': 17.0.32
+      '@types/node': 18.0.3
     dev: true
 
   /@types/http-cache-semantics/4.0.1:
@@ -2587,6 +2585,13 @@ packages:
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
     dev: true
+
+  /@types/protobufjs/6.0.0:
+    resolution: {integrity: sha512-A27RDExpAf3rdDjIrHKiJK6x8kqqJ4CmoChwtipfhVAn1p7+wviQFFP7dppn8FslSbHtQeVPvi8wNKkDjSYjHw==}
+    deprecated: This is a stub types definition for protobufjs (https://github.com/dcodeIO/ProtoBuf.js). protobufjs provides its own type definitions, so you don't need @types/protobufjs installed!
+    dependencies:
+      protobufjs: 7.0.0
+    dev: false
 
   /@types/react/18.0.8:
     resolution: {integrity: sha512-+j2hk9BzCOrrOSJASi5XiOyBbERk9jG5O73Ya4M0env5Ixi6vUNli4qy994AINcEF+1IEHISYFfIT4zwr++LKw==}
@@ -9083,6 +9088,26 @@ packages:
       long: 4.0.0
     dev: false
 
+  /protobufjs/6.11.3:
+    resolution: {integrity: sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==}
+    hasBin: true
+    requiresBuild: true
+    dependencies:
+      '@protobufjs/aspromise': 1.1.2
+      '@protobufjs/base64': 1.1.2
+      '@protobufjs/codegen': 2.0.4
+      '@protobufjs/eventemitter': 1.1.0
+      '@protobufjs/fetch': 1.1.0
+      '@protobufjs/float': 1.0.2
+      '@protobufjs/inquire': 1.1.0
+      '@protobufjs/path': 1.1.2
+      '@protobufjs/pool': 1.1.0
+      '@protobufjs/utf8': 1.1.0
+      '@types/long': 4.0.2
+      '@types/node': 18.0.3
+      long: 4.0.0
+    dev: false
+
   /protobufjs/7.0.0:
     resolution: {integrity: sha512-ffNIEm+quOcYtQvHdW406v1NQmZSuqVklxsXk076BtuFnlYZfigLU+JOMrTD8TUOyqHYbRI/fSVNvgd25YeN3w==}
     engines: {node: '>=12.0.0'}
@@ -11198,8 +11223,10 @@ packages:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
+      '@grpc/proto-loader': 0.6.13
       '@prisma/generator-helper': 3.13.0
       '@rjsf/core': 4.1.1
+      '@types/protobufjs': 6.0.0
       '@wundergraph/helper': link:packages/helper
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/wunderctl': link:packages/wunderctl
@@ -11212,19 +11239,22 @@ packages:
       fastify-graceful-shutdown: 3.1.0
       fastify-plugin: 3.0.1
       graphql: 16.4.0
+      graphql-compose: 9.0.8_graphql@16.4.0
       graphql-helix: 1.12.0_graphql@16.4.0
+      graphql-scalars: 1.17.0_graphql@16.4.0
       handlebars: 4.7.7
       headers-polyfill: 3.0.7
       js-yaml: 4.1.0
       json-schema: 0.4.0
       lodash: 4.17.21
+      lodash.has: 4.5.2
       long: 5.2.0
       next: 12.1.6
       object-hash: 2.2.0
       openapi-types: 10.0.0
       postman-collection: 4.1.2
       prettier: 2.7.1
-      protobufjs: 6.11.2
+      protobufjs: 6.11.3
       react-ssr-prepass: 1.5.0
       resolve-pkg: 2.0.0
       rimraf: 3.0.2

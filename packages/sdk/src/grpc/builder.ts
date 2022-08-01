@@ -1,11 +1,24 @@
 import { ObjectTypeComposerFieldConfigAsObjectDefinition, SchemaComposer } from 'graphql-compose';
 import { GraphQLBigInt, GraphQLByte, GraphQLJSON, GraphQLUnsignedInt, GraphQLVoid } from 'graphql-scalars';
 import { has as lodashHas } from 'lodash';
-import protobufjs, { AnyNestedObject, Message, Root, RootConstructor } from 'protobufjs';
+import protobufjs, { AnyNestedObject, Message, Root } from 'protobufjs';
 import { FileDescriptorSet, IFileDescriptorSet } from 'protobufjs/ext/descriptor';
-import { GraphQLEnumTypeConfig, specifiedDirectives } from 'graphql';
+import { GraphQLEnumTypeConfig, GraphQLSchema, specifiedDirectives } from 'graphql';
 
 import { getGraphQLScalar, isScalarType } from './scalars';
+
+type DecodedDescriptorSet = Message<IFileDescriptorSet> & IFileDescriptorSet;
+
+export declare type Options = protobufjs.IParseOptions &
+	protobufjs.IConversionOptions & {
+		includeDirs?: string[];
+	};
+
+interface RootConstructor {
+	new (options?: Options): Root;
+	fromDescriptor(descriptorSet: IFileDescriptorSet | protobufjs.Reader | Uint8Array): Root;
+	fromJSON(json: protobufjs.INamespace, root?: Root): Root;
+}
 
 function getTypeName(schemaComposer: SchemaComposer, pathWithName: string[] | undefined, isInput: boolean) {
 	if (pathWithName?.length) {
@@ -22,22 +35,22 @@ function getTypeName(schemaComposer: SchemaComposer, pathWithName: string[] | un
 	return 'Void';
 }
 
-type DecodedDescriptorSet = Message<IFileDescriptorSet> & IFileDescriptorSet;
+export default class GrpcSchemaBuilder {
+	private readonly protoSet: Buffer;
+	private schemaComposer = new SchemaComposer();
 
-export default class GrpcHandler {
-	async getRootPromiseFromDescriptorFilePath() {
-		const descriptorSetBuffer = Buffer.from('');
+	constructor(protoSet: Buffer) {
+		this.protoSet = protoSet;
+	}
 
-		let decodedDescriptorSet: DecodedDescriptorSet;
-		decodedDescriptorSet = FileDescriptorSet.decode(descriptorSetBuffer) as DecodedDescriptorSet;
+	async getRootPromiseFromDescriptorFilePath(): Promise<protobufjs.Root> {
+		const decodedDescriptorSet = FileDescriptorSet.decode(this.protoSet) as DecodedDescriptorSet;
 
 		return (Root as RootConstructor).fromDescriptor(decodedDescriptorSet);
 	}
 
 	async getCachedDescriptorSets() {
 		const rootPromises: Promise<protobufjs.Root>[] = [];
-		console.log(`Building Roots`);
-
 		const rootPromise = this.getRootPromiseFromDescriptorFilePath();
 		rootPromises.push(rootPromise);
 
@@ -45,9 +58,7 @@ export default class GrpcHandler {
 			rootPromises.map(async (root$, i) => {
 				const root = await root$;
 				const rootName = root.name || `Root${i}`;
-				console.log(`Resolving entire the root tree`);
 				root.resolveAll();
-				console.log(`Creating artifacts from descriptor set and root`);
 				return {
 					name: rootName,
 					rootJson: root.toJSON({
@@ -68,6 +79,12 @@ export default class GrpcHandler {
 		}
 		return currentWalkingPath.concat(baseTypePath);
 	}
+
+	processEnum() {}
+
+	processMessage() {}
+
+	processService() {}
 
 	visit({
 		nested,
@@ -108,6 +125,7 @@ export default class GrpcHandler {
 					description: commentMap?.[key],
 				};
 			}
+			// @ts-ignore
 			this.schemaComposer.createEnumTC(enumTypeConfig);
 		} else if ('fields' in nested) {
 			const inputTypeName = typeName + '_Input';
@@ -176,7 +194,9 @@ export default class GrpcHandler {
 					},
 					description: method.comment,
 				};
+
 				fieldConfig.args = {
+					// @ts-ignore
 					input: () => {
 						if (method.requestStream) {
 							return 'File';
@@ -208,9 +228,7 @@ export default class GrpcHandler {
 		}
 	}
 
-	private schemaComposer = new SchemaComposer();
-
-	async getMeshSource() {
+	async Schema(): Promise<GraphQLSchema> {
 		this.schemaComposer.add(GraphQLBigInt);
 		this.schemaComposer.add(GraphQLByte);
 		this.schemaComposer.add(GraphQLUnsignedInt);
@@ -232,10 +250,6 @@ export default class GrpcHandler {
 		specifiedDirectives.forEach((directive) => this.schemaComposer.addDirective(directive));
 
 		console.log(`Building the final GraphQL Schema`);
-		const schema = this.schemaComposer.buildSchema();
-
-		return {
-			schema,
-		};
+		return this.schemaComposer.buildSchema();
 	}
 }

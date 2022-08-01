@@ -54,7 +54,6 @@
     "@apollo/composition": "^2.0.2",
     "@apollo/federation": "^0.36.2",
     "@graphql-tools/schema": "^8.3.10",
-    "@grpc/proto-loader": "^0.7.0",
     "@prisma/generator-helper": "^3.9.2",
     "@wundergraph/protobuf": "workspace:^0.91.1",
     "@wundergraph/wunderctl": "workspace:^0.94.5",
@@ -79,7 +78,7 @@
     "openapi-types": "^10.0.0",
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
-    "protobufjs": "^6.11.2",
+    "protobufjs": "6.11.3",
     "swagger2openapi": "^7.0.8"
   },
   "jest": {
