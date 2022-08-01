@@ -2,7 +2,6 @@
 title: API Composition and Integration
 pageTitle: WunderGraph - API Composition and Integration
 description:
-hideTableOfContents: true
 ---
 
 One of the motivations of starting to build WunderGraph was that we've found ourselves in a situation where we had to compose a lot of APIs together.

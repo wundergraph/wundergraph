@@ -3,6 +3,8 @@ title: wundergraph.config.ts reference
 pageTitle: WunderGraph - wundergraph.config.ts reference
 description: ''
 hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 ## Input Variables

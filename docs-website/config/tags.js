@@ -7,9 +7,9 @@ const tags = {
 	'WunderGraph CLI': '/docs/components-of-wundergraph/wunderctl',
 	CLI: '/docs/components-of-wundergraph/wunderctl',
 	wunderctl: '/docs/components-of-wundergraph/wunderctl',
-	'__join field': '/docs/core-concepts/api-namespacing',
-	'__join Field': '/docs/core-concepts/api-namespacing',
-	__join: '/docs/core-concepts/api-namespacing',
+	'_join field': '/docs/core-concepts/_join-field',
+	'_join Field': '/docs/core-concepts/_join-field',
+	_join: '/docs/core-concepts/_join-field',
 	'Virtual Graph': '/docs/core-concepts/virtual-graph',
 	'virtual Graph': '/docs/core-concepts/virtual-graph',
 	'API Namespacing': '/docs/core-concepts/api-namespacing',
@@ -77,6 +77,8 @@ const tags = {
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	hooks:
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
+	Hooks:
+		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	'configure authorization': '/docs/guides/configure-authorization',
 	'configure Authorization': '/docs/guides/configure-authorization',
 	authorization: '/docs/features/authorization-role-based-access-control-rbac',
@@ -98,7 +100,9 @@ const tags = {
 	'wundergraph.server.ts reference': '/docs/wundergraph-server-ts-reference',
 	'wundergraph.server.ts': '/docs/wundergraph-server-ts-reference',
 	'WunderHub reference': '/docs/wunderhub-reference',
-	WunderHub: '/docs/wunderhub-reference',
+	WunderHub: '/docs/components-of-wundergraph/wunderhub',
+	'WunderGraph Hub': '/docs/components-of-wundergraph/wunderhub',
+	Hub: '/docs/components-of-wundergraph/wunderhub',
 	'wunderctl up': '/docs/wunderctl-reference/wunderctl-up',
 	'wunderctl add': '/docs/wunderctl-reference/wunderctl-add',
 	'wunderctl generate': '/docs/wunderctl-reference/wunderctl-generate',
@@ -116,7 +120,9 @@ const tags = {
 		'/docs/directives-reference/inject-current-date-time-directive',
 	'@injectEnvironmentVariable':
 		'/docs/directives-reference/inject-environment-variable-directive',
-	'@injectUUID': '/docs/directives-reference/inject-uuid-directive',
+	'@injectGeneratedUUID':
+		'/docs/directives-reference/inject-generated-uuid-directive',
+	'@injectdUUID': '/docs/directives-reference/inject-generated-uuid-directive',
 	'@internal': '/docs/directives-reference/internal-directive',
 	'@internalOperation':
 		'/docs/directives-reference/internal-operation-directive',
@@ -238,12 +244,9 @@ const tags = {
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
 	EnvironmentVariable:
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
-	'reach out to our Sales Team':
-		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
-	'Sales Team':
-		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
-	Sales:
-		'https://8bxwlo3ot55.typeform.com/to/DtVtXGVi?typeform-source=docs.wundergraph.com',
+	'reach out to our Sales Team': 'https://wundergraph.com/contact/sales',
+	'Sales Team': 'https://wundergraph.com/contact/sales',
+	Sales: 'https://wundergraph.com/contact/sales',
 }
 
 export default tags

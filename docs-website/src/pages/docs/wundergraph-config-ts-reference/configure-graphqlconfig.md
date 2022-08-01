@@ -2,7 +2,6 @@
 title: Configure .graphqlconfig
 pageTitle: 'WunderGraph - Configure .graphqlconfig'
 description:
-hideTableOfContents: true
 ---
 
 This section describes how to set up the configuration for generating the `.graphqlconfig` file.

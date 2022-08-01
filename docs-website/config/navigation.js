@@ -458,14 +458,22 @@ const navigation = [
 				href: '/docs/core-concepts/virtual-graph',
 			},
 			{
-				title: 'The `__join` field',
-				href: '/docs/core-concepts/__join-field',
+				title: 'The `_join` field',
+				href: '/docs/core-concepts/_join-field',
+			},
+			{
+				title: 'Persisted Queries / Persisted Operations',
+				href: '/docs/core-concepts/persisted-queries-persisted-operations',
 			},
 		],
 	},
 	{
 		title: 'Components of WunderGraph',
 		links: [
+			{
+				title: 'Overview',
+				href: '/docs/components-of-wundergraph',
+			},
 			{
 				title: 'wunderctl',
 				href: '/docs/components-of-wundergraph/wunderctl',
@@ -482,13 +490,17 @@ const navigation = [
 				title: 'WunderGraph Client',
 				href: '/docs/components-of-wundergraph/wundergraph-client',
 			},
+			{
+				title: 'WunderHub',
+				href: '/docs/components-of-wundergraph/wunderhub',
+			},
 		],
 	},
 	{
 		title: 'wunderctl Reference',
 		links: [
 			{
-				title: 'wunderctl Overview',
+				title: 'Overview',
 				href: '/docs/wunderctl-reference',
 			},
 			{
@@ -566,8 +578,8 @@ const navigation = [
 				href: '/docs/directives-reference/rbac-directive',
 			},
 			{
-				title: '@injectUUID directive',
-				href: '/docs/directives-reference/inject-uuid-directive',
+				title: '@injectGeneratedUUID directive',
+				href: '/docs/directives-reference/inject-generated-uuid-directive',
 			},
 			{
 				title: '@injectCurrentDateTime directive',

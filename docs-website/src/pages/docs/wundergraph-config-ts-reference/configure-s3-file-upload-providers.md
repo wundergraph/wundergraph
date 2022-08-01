@@ -2,7 +2,6 @@
 title: Configure S3 File Upload Providers
 pageTitle: WunderGraph - Configure S3 File Upload Providers
 description:
-hideTableOfContents: true
 ---
 
 WunderGraph supports S3 compatible storage providers so that users of WunderGraph Applications can easily upload files.

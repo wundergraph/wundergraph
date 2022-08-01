@@ -2,7 +2,6 @@
 title: Backend for Frontend
 pageTitle: WunderGraph - Backend for Frontend
 description:
-hideTableOfContents: true
 ---
 
 One way to think about WunderGraph is to understand it as an API Gateway,
