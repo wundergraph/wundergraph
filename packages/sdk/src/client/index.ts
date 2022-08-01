@@ -60,6 +60,15 @@ export class WunderGraphClient<Role> {
 	private extraHeaders?: Headers;
 	private readonly customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 
+	private fetch(input: RequestInfo, init: RequestInit = {}): Promise<globalThis.Response> {
+		const defaultOrCustomFetch = this.customFetch || globalThis.fetch;
+		return defaultOrCustomFetch(input, {
+			credentials: 'include',
+			mode: 'cors',
+			...init,
+		});
+	}
+
 	public setExtraHeaders(headers: Headers) {
 		this.extraHeaders = headers;
 	}
@@ -86,13 +95,10 @@ export class WunderGraphClient<Role> {
 				Accept: 'application/json',
 				'WG-SDK-Version': this.sdkVersion,
 			};
-			const defaultOrCustomFetch = this.customFetch || globalThis.fetch;
 			const url = this.baseURL + '/' + this.applicationPath + '/operations/' + query.operationName + params;
-			const response = await defaultOrCustomFetch(url, {
+			const response = await this.fetch(url, {
 				headers,
 				method: 'GET',
-				credentials: 'include',
-				mode: 'cors',
 			});
 			return this.httpResponseToQueryResult(response);
 		} catch (e: any) {
@@ -120,12 +126,8 @@ export class WunderGraphClient<Role> {
 				Accept: 'application/json',
 				'WG-SDK-Version': this.sdkVersion,
 			};
-			const defaultOrCustomFetch = this.customFetch || globalThis.fetch;
 			if (this.csrfToken === undefined) {
-				const res = await defaultOrCustomFetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf', {
-					credentials: 'include',
-					mode: 'cors',
-				});
+				const res = await this.fetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf');
 				this.csrfToken = await res.text();
 			}
 			if (this.csrfToken !== undefined) {
@@ -133,11 +135,9 @@ export class WunderGraphClient<Role> {
 			}
 			const url = this.baseURL + '/' + this.applicationPath + '/operations/' + mutation.operationName + params;
 			const body = args?.input !== undefined ? JSON.stringify(args.input) : '{}';
-			const response = await defaultOrCustomFetch(url, {
+			const response = await this.fetch(url, {
 				headers,
 				method: 'POST',
-				credentials: 'include',
-				mode: 'cors',
 				body,
 			});
 			return this.httpResponseToMutationResult(response);
@@ -211,8 +211,7 @@ export class WunderGraphClient<Role> {
 					wg_variables: args?.input,
 					wg_live: args?.isLiveQuery ? true : undefined,
 				});
-				const f = this.customFetch || fetch;
-				const response = await f(
+				const response = await this.fetch(
 					this.baseURL + '/' + this.applicationPath + '/operations/' + subscription.operationName + params,
 					{
 						headers: {
@@ -222,8 +221,6 @@ export class WunderGraphClient<Role> {
 						},
 						method: 'GET',
 						signal: args?.abortSignal,
-						credentials: 'include',
-						mode: 'cors',
 					}
 				);
 
@@ -275,13 +272,11 @@ export class WunderGraphClient<Role> {
 				wg_api_hash: this.applicationHash,
 			});
 			if (this.csrfToken === undefined) {
-				const res = await fetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf', {
+				const res = await this.fetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf', {
 					headers: {
 						...baseHeaders,
 						Accept: 'text/plain',
 					},
-					credentials: 'include',
-					mode: 'cors',
 				});
 				this.csrfToken = await res.text();
 			}
@@ -293,16 +288,13 @@ export class WunderGraphClient<Role> {
 			if (this.csrfToken) {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
-			const f = this.customFetch || fetch;
-			const response = await f(
+			const response = await this.fetch(
 				this.baseURL + '/' + this.applicationPath + '/s3/' + config.provider + '/upload' + params,
 				{
 					headers,
 					body: formData,
 					method: 'POST',
 					signal: config.abortSignal,
-					credentials: 'include',
-					mode: 'cors',
 				}
 			);
 			if (this.isOK(response)) {
@@ -431,7 +423,7 @@ export class WunderGraphClient<Role> {
 	public fetchUser = async (abortSignal?: AbortSignal, revalidate?: boolean): Promise<User<Role> | null> => {
 		try {
 			const revalidateTrailer = revalidate === undefined ? '' : '?revalidate=true';
-			const response = await fetch(
+			const response = await this.fetch(
 				this.baseURL + '/' + this.applicationPath + '/auth/cookie/user' + revalidateTrailer,
 				{
 					headers: {
@@ -440,8 +432,6 @@ export class WunderGraphClient<Role> {
 						'WG-SDK-Version': this.sdkVersion,
 					},
 					method: 'GET',
-					credentials: 'include',
-					mode: 'cors',
 					signal: abortSignal,
 				}
 			);
@@ -453,6 +443,11 @@ export class WunderGraphClient<Role> {
 	};
 
 	public login = (authProviderID: string, redirectURI?: string) => {
+		// not implemented on server
+		if (typeof window === 'undefined') {
+			return;
+		}
+
 		const query = this.queryString({
 			redirect_uri: redirectURI || window.location.toString(),
 		});
@@ -460,7 +455,7 @@ export class WunderGraphClient<Role> {
 	};
 
 	public logout = async (options?: LogoutOptions): Promise<boolean> => {
-		const response = await fetch(
+		const response = await this.fetch(
 			this.baseURL + '/' + this.applicationPath + '/auth/cookie/user/logout' + this.queryString(options),
 			{
 				headers: {
@@ -469,8 +464,6 @@ export class WunderGraphClient<Role> {
 					'WG-SDK-Version': this.sdkVersion,
 				},
 				method: 'GET',
-				credentials: 'include',
-				mode: 'cors',
 			}
 		);
 		return this.isOK(response);
