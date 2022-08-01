@@ -5,13 +5,31 @@ import { ObjectTypeComposerFieldConfigAsObjectDefinition, SchemaComposer } from 
 import { getGraphQLScalar, isScalarType } from './scalars';
 import { has as lodashHas } from 'lodash';
 
+enum QueryType {
+	query = 1,
+	mutation = 2,
+	subscription = 3,
+}
+
+export interface MethodInfo {
+	type: QueryType;
+	package: string;
+	service: string;
+	method: string;
+	fieldName: string;
+}
+
 export default class DescriptorVisitor {
 	private readonly schemaComposer: SchemaComposer;
 	private readonly rootNamespace: protobufjs.INamespace;
+	private readonly enableSubscriptions: boolean;
+	private readonly methods: MethodInfo[];
 
-	constructor(schemaComposer: SchemaComposer, rootNamespace: protobufjs.INamespace) {
+	constructor(schemaComposer: SchemaComposer, rootNamespace: protobufjs.INamespace, enableSubscriptions: boolean) {
 		this.schemaComposer = schemaComposer;
 		this.rootNamespace = rootNamespace;
+		this.enableSubscriptions = enableSubscriptions;
+		this.methods = [];
 	}
 
 	getTypeName(pathWithName: string[] | undefined, isInput: boolean) {
@@ -115,6 +133,16 @@ export default class DescriptorVisitor {
 		for (const methodName in nested.methods) {
 			const method = nested.methods[methodName];
 			const rootFieldName = [...pathWithName, methodName].join('_');
+
+			const [packageName, serviceName] = pathWithName;
+			const methodInfo: MethodInfo = {
+				package: packageName,
+				service: serviceName,
+				method: methodName,
+				fieldName: rootFieldName,
+				type: QueryType.query,
+			};
+
 			const fieldConfig: ObjectTypeComposerFieldConfigAsObjectDefinition<any, any> = {
 				type: () => {
 					const baseResponseTypePath = method.responseType?.split('.');
@@ -141,12 +169,20 @@ export default class DescriptorVisitor {
 					return undefined;
 				},
 			};
+
 			if (method.responseStream) {
+				if (!this.enableSubscriptions) {
+					continue;
+				}
+
 				this.schemaComposer.Subscription.addFields({
 					[rootFieldName]: {
 						...fieldConfig,
 					},
 				});
+
+				methodInfo.type = QueryType.subscription;
+				this.methods.push(methodInfo);
 			} else {
 				const rootTypeComposer = this.schemaComposer.Query;
 				rootTypeComposer.addFields({
@@ -154,17 +190,18 @@ export default class DescriptorVisitor {
 						...fieldConfig,
 					},
 				});
+				this.methods.push(methodInfo);
 			}
 		}
 	}
 
-	visit({ nested, name, currentPath }: { nested: AnyNestedObject; name: string; currentPath: string[] }) {
+	Visit({ nested, name, currentPath }: { nested: AnyNestedObject; name: string; currentPath: string[] }) {
 		const pathWithName = [...currentPath, ...name.split('.')].filter(Boolean);
 		if ('nested' in nested) {
 			for (const key in nested.nested) {
-				console.log(`Visiting ${currentPath}.nested[${key}]`);
+				// console.log(`Visiting ${currentPath}.nested[${key}]`);
 				const currentNested = nested.nested[key];
-				this.visit({
+				this.Visit({
 					nested: currentNested,
 					name: key,
 					currentPath: pathWithName,
@@ -179,5 +216,9 @@ export default class DescriptorVisitor {
 		} else if ('methods' in nested) {
 			this.visitService(nested, pathWithName);
 		}
+	}
+
+	Methods(): MethodInfo[] {
+		return this.methods;
 	}
 }

@@ -1,14 +1,14 @@
 import { protosetToGrpcApiObject } from './index';
 import * as fs from 'fs';
 
-const runTest = async (testFile: string, snapShot: string) => {
+const runTest = async (testFile: string, snapShot: string, apiNamespace?: string) => {
 	const exists = fs.existsSync(testFile);
 	if (!exists) {
 		return;
 	}
-	const fileContents = fs.readFileSync(testFile).toString('base64');
+	const fileContents = fs.readFileSync(testFile);
 
-	const actual = await protosetToGrpcApiObject(fileContents);
+	const actual = await protosetToGrpcApiObject(fileContents, '', apiNamespace);
 
 	expect(actual.Schema).toMatchSnapshot(snapShot + '_' + 'schema');
 	expect(JSON.stringify(actual.DataSources, null, 2)).toMatchSnapshot(snapShot + '_' + 'data_sources');
@@ -20,4 +20,8 @@ const runTest = async (testFile: string, snapShot: string) => {
 
 test('starwars grpc', async () => {
 	await runTest('../../pkg/datasources/grpc/testdata/starwars/starwars.protoset', 'starwars_grpc');
+});
+
+test('starwars grpc namespaced', async () => {
+	await runTest('../../pkg/datasources/grpc/testdata/starwars/starwars.protoset', 'starwars_grpc_namespaced', 'gprc');
 });

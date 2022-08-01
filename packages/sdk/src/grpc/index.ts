@@ -1,139 +1,42 @@
-import { DataSource, GrpcApi, GrpcApiCustom } from '../definition';
-import { ConfigurationVariableKind, DataSourceKind, FieldConfiguration } from '@wundergraph/protobuf';
+import { GrpcApi } from '../definition';
 import {
 	applyNamespaceToExistingRootFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
+	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
-import { parse, buildASTSchema } from 'graphql';
+import { printSchema } from 'graphql';
+import GrpcSchemaBuilder from './builder';
+import { InputVariable } from '../configure';
 
-export const protosetToGrpcApiObject = async (protoset: string): Promise<GrpcApi> => {
+export const protosetToGrpcApiObject = async (
+	protoset: Buffer,
+	url: InputVariable,
+	apiNamespace?: string
+): Promise<GrpcApi> => {
 	try {
-		return mockGrpcApiObject(protoset);
+		const builder = new GrpcSchemaBuilder(protoset, url);
+		const schema = await builder.Schema();
+		const schemaString = printSchema(schema);
+
+		const { dataSources, fields } = builder.BuildDatasources();
+
+		if (!apiNamespace) {
+			return new GrpcApi(schemaString, dataSources, fields, [], []);
+		}
+
+		const dataSourcesNS = dataSources.map((ds) => ({
+			...ds,
+			RootNodes: applyNameSpaceToTypeFields(ds.RootNodes, schema, apiNamespace),
+		}));
+
+		return new GrpcApi(
+			applyNameSpaceToGraphQLSchema(schemaString, [], apiNamespace),
+			dataSourcesNS,
+			applyNamespaceToExistingRootFieldConfigurations(fields, schema, apiNamespace),
+			[],
+			[]
+		);
 	} catch (e) {
 		throw new Error('cannot read Grpc Protoset:' + e);
 	}
 };
-
-const mockGrpcApiObject = (protoset: string): GrpcApi => {
-	const apiNamespace = 'grpc';
-
-	const ast = parse(schemaString);
-	const astSchema = buildASTSchema(ast);
-
-	let dataSources: DataSource<GrpcApiCustom>[] = [
-		{
-			Kind: DataSourceKind.GRPC,
-			RootNodes: [
-				{
-					typeName: 'Query',
-					fieldNames: ['grpc_starwars_StarwarsService_GetHero'],
-				},
-			],
-			ChildNodes: [],
-			Custom: {
-				server: {
-					protoset: protoset,
-					target: {
-						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-						staticVariableContent: '127.0.0.1:9095',
-						environmentVariableName: '',
-						environmentVariableDefaultValue: '',
-						placeholderVariableName: '',
-					},
-				},
-				endpoint: {
-					package: 'starwars',
-					service: 'StarwarsService',
-					method: 'GetHero',
-				},
-				request: {
-					header: {},
-					body: '{{ .arguments.input }}',
-				},
-			},
-			Directives: [],
-		},
-	];
-
-	let fields: FieldConfiguration[] = [
-		{
-			typeName: 'Query',
-			fieldName: 'starwars_StarwarsService_GetHero',
-			disableDefaultFieldMapping: true,
-			path: [],
-			argumentsConfiguration: [],
-			requiresFields: [],
-			unescapeResponseJson: false,
-		},
-	];
-
-	return new GrpcApi(
-		applyNameSpaceToGraphQLSchema(schemaString, [], apiNamespace),
-		dataSources,
-		applyNamespaceToExistingRootFieldConfigurations(fields, astSchema, apiNamespace),
-		[],
-		[]
-	);
-};
-
-const schemaString = `
-type Query {
-  starwars_StarwarsService_GetHero(input: starwars_GetHeroRequest_Input): starwars_Character
-  starwars_StarwarsService_GetHuman(input: starwars_GetHumanRequest_Input): starwars_Character
-  starwars_StarwarsService_GetDroid(input: starwars_GetDroidRequest_Input): starwars_Character
-  starwars_StarwarsService_ListHumans(input: starwars_ListEmptyRequest_Input): starwars_ListHumansResponse
-  starwars_StarwarsService_ListDroids(input: starwars_ListEmptyRequest_Input): starwars_ListDroidsResponse
-  starwars_StarwarsService_connectivityState(tryToConnect: Boolean): ConnectivityState
-}
-
-type starwars_Character {
-  id: String
-  name: String
-  friends: [starwars_Character]
-  appears_in: [starwars_Episode]
-  home_planet: String
-  primary_function: String
-  type: starwars_Type
-}
-
-enum starwars_Episode {
-  _
-  NEWHOPE
-  EMPIRE
-  JEDI
-}
-
-enum starwars_Type {
-  HUMAN
-  DROID
-}
-
-input starwars_GetHeroRequest_Input {
-  episode: starwars_Episode
-}
-
-input starwars_GetHumanRequest_Input {
-  id: String
-}
-
-input starwars_GetDroidRequest_Input {
-  id: String
-}
-
-type starwars_ListHumansResponse {
-  humans: [starwars_Character]
-}
-
-scalar starwars_ListEmptyRequest_Input @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
-
-type starwars_ListDroidsResponse {
-  droids: [starwars_Character]
-}
-
-enum ConnectivityState {
-  IDLE
-  CONNECTING
-  READY
-  TRANSIENT_FAILURE
-  SHUTDOWN
-}`;

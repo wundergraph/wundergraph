@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`starwars grpc: starwars_grpc_data_sources 1`] = `
+exports[`starwars grpc namespaced: starwars_grpc_namespaced_data_sources 1`] = `
 "[
   {
     \\"Kind\\": 8,
@@ -8,7 +8,7 @@ exports[`starwars grpc: starwars_grpc_data_sources 1`] = `
       {
         \\"typeName\\": \\"Query\\",
         \\"fieldNames\\": [
-          \\"grpc_starwars_StarwarsService_GetHero\\"
+          \\"gprc_starwars_StarwarsService_GetHero\\"
         ]
       }
     ],
@@ -18,16 +18,431 @@ exports[`starwars grpc: starwars_grpc_data_sources 1`] = `
         \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
         \\"target\\": {
           \\"kind\\": 0,
-          \\"staticVariableContent\\": \\"127.0.0.1:9095\\",
-          \\"environmentVariableName\\": \\"\\",
           \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\"
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
         }
       },
       \\"endpoint\\": {
         \\"package\\": \\"starwars\\",
         \\"service\\": \\"StarwarsService\\",
         \\"method\\": \\"GetHero\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"gprc_starwars_StarwarsService_GetHuman\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"GetHuman\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"gprc_starwars_StarwarsService_GetDroid\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"GetDroid\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"gprc_starwars_StarwarsService_ListHumans\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"ListHumans\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"gprc_starwars_StarwarsService_ListDroids\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"ListDroids\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  }
+]"
+`;
+
+exports[`starwars grpc namespaced: starwars_grpc_namespaced_fields 1`] = `
+"[
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"gprc_starwars_StarwarsService_GetHero\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"gprc_starwars_StarwarsService_GetHuman\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"gprc_starwars_StarwarsService_GetDroid\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"gprc_starwars_StarwarsService_ListHumans\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"gprc_starwars_StarwarsService_ListDroids\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  }
+]"
+`;
+
+exports[`starwars grpc namespaced: starwars_grpc_namespaced_schema 1`] = `
+"type Query {
+  gprc_starwars_StarwarsService_GetHero(input: gprc_starwars_GetHeroRequest_Input): gprc_starwars_Character
+  gprc_starwars_StarwarsService_GetHuman(input: gprc_starwars_GetHumanRequest_Input): gprc_starwars_Character
+  gprc_starwars_StarwarsService_GetDroid(input: gprc_starwars_GetDroidRequest_Input): gprc_starwars_Character
+  gprc_starwars_StarwarsService_ListHumans(input: gprc_starwars_ListEmptyRequest_Input): gprc_starwars_ListHumansResponse
+  gprc_starwars_StarwarsService_ListDroids(input: gprc_starwars_ListEmptyRequest_Input): gprc_starwars_ListDroidsResponse
+}
+
+type gprc_starwars_Character {
+  id: String
+  name: String
+  friends: [gprc_starwars_Character]
+  appears_in: [gprc_starwars_Episode]
+  home_planet: String
+  primary_function: String
+  type: gprc_starwars_Type
+}
+
+enum gprc_starwars_Episode {
+  _
+  NEWHOPE
+  EMPIRE
+  JEDI
+}
+
+enum gprc_starwars_Type {
+  HUMAN
+  DROID
+}
+
+input gprc_starwars_GetHeroRequest_Input {
+  episode: gprc_starwars_Episode
+}
+
+input gprc_starwars_GetHumanRequest_Input {
+  id: String
+}
+
+input gprc_starwars_GetDroidRequest_Input {
+  id: String
+}
+
+type gprc_starwars_ListHumansResponse {
+  humans: [gprc_starwars_Character]
+}
+
+scalar gprc_starwars_ListEmptyRequest_Input @specifiedBy(url: \\"http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf\\")
+
+type gprc_starwars_ListDroidsResponse {
+  droids: [gprc_starwars_Character]
+}"
+`;
+
+exports[`starwars grpc: starwars_grpc_data_sources 1`] = `
+"[
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"starwars_StarwarsService_GetHero\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"GetHero\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"starwars_StarwarsService_GetHuman\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"GetHuman\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"starwars_StarwarsService_GetDroid\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"GetDroid\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"starwars_StarwarsService_ListHumans\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"ListHumans\\"
+      },
+      \\"request\\": {
+        \\"header\\": {},
+        \\"body\\": \\"{{ .arguments.input }}\\"
+      }
+    },
+    \\"Directives\\": []
+  },
+  {
+    \\"Kind\\": 8,
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"starwars_StarwarsService_ListDroids\\"
+        ]
+      }
+    ],
+    \\"ChildNodes\\": [],
+    \\"Custom\\": {
+      \\"server\\": {
+        \\"protoset\\": \\"CroICg5zdGFyd2Fycy5wcm90bxIIc3RhcndhcnMigAIKCUNoYXJhY3RlchIOCgJpZBgBIAEoCVICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRItCgdmcmllbmRzGAMgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgdmcmllbmRzEjAKCmFwcGVhcnNfaW4YBCADKA4yES5zdGFyd2Fycy5FcGlzb2RlUglhcHBlYXJzSW4SHwoLaG9tZV9wbGFuZXQYBSABKAlSCmhvbWVQbGFuZXQSKQoQcHJpbWFyeV9mdW5jdGlvbhgGIAEoCVIPcHJpbWFyeUZ1bmN0aW9uEiIKBHR5cGUYByABKA4yDi5zdGFyd2Fycy5UeXBlUgR0eXBlIj0KDkdldEhlcm9SZXF1ZXN0EisKB2VwaXNvZGUYASABKA4yES5zdGFyd2Fycy5FcGlzb2RlUgdlcGlzb2RlIiEKD0dldEh1bWFuUmVxdWVzdBIOCgJpZBgBIAEoCVICaWQiIQoPR2V0RHJvaWRSZXF1ZXN0Eg4KAmlkGAEgASgJUgJpZCISChBMaXN0RW1wdHlSZXF1ZXN0IkEKEkxpc3RIdW1hbnNSZXNwb25zZRIrCgZodW1hbnMYASADKAsyEy5zdGFyd2Fycy5DaGFyYWN0ZXJSBmh1bWFucyJBChJMaXN0RHJvaWRzUmVzcG9uc2USKwoGZHJvaWRzGAEgAygLMhMuc3RhcndhcnMuQ2hhcmFjdGVyUgZkcm9pZHMqHAoEVHlwZRIJCgVIVU1BThAAEgkKBURST0lEEAEqMwoHRXBpc29kZRIFCgFfEAASCwoHTkVXSE9QRRABEgoKBkVNUElSRRACEggKBEpFREkQAzLTAgoPU3RhcndhcnNTZXJ2aWNlEjgKB0dldEhlcm8SGC5zdGFyd2Fycy5HZXRIZXJvUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXRIdW1hbhIZLnN0YXJ3YXJzLkdldEh1bWFuUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchI6CghHZXREcm9pZBIZLnN0YXJ3YXJzLkdldERyb2lkUmVxdWVzdBoTLnN0YXJ3YXJzLkNoYXJhY3RlchJGCgpMaXN0SHVtYW5zEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3RIdW1hbnNSZXNwb25zZRJGCgpMaXN0RHJvaWRzEhouc3RhcndhcnMuTGlzdEVtcHR5UmVxdWVzdBocLnN0YXJ3YXJzLkxpc3REcm9pZHNSZXNwb25zZUJLWklnaXRodWIuY29tL3d1bmRlcmdyYXBoL3d1bmRlcmdyYXBoL3BrZy9kYXRhc291cmNlcy9ncnBjL3Rlc3RkYXRhL3N0YXJ3YXJzYgZwcm90bzM=\\",
+        \\"target\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        }
+      },
+      \\"endpoint\\": {
+        \\"package\\": \\"starwars\\",
+        \\"service\\": \\"StarwarsService\\",
+        \\"method\\": \\"ListDroids\\"
       },
       \\"request\\": {
         \\"header\\": {},
@@ -43,7 +458,43 @@ exports[`starwars grpc: starwars_grpc_fields 1`] = `
 "[
   {
     \\"typeName\\": \\"Query\\",
-    \\"fieldName\\": \\"grpc_starwars_StarwarsService_GetHero\\",
+    \\"fieldName\\": \\"starwars_StarwarsService_GetHero\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"starwars_StarwarsService_GetHuman\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"starwars_StarwarsService_GetDroid\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"starwars_StarwarsService_ListHumans\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"path\\": [],
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"starwars_StarwarsService_ListDroids\\",
     \\"disableDefaultFieldMapping\\": true,
     \\"path\\": [],
     \\"argumentsConfiguration\\": [],
@@ -55,63 +506,54 @@ exports[`starwars grpc: starwars_grpc_fields 1`] = `
 
 exports[`starwars grpc: starwars_grpc_schema 1`] = `
 "type Query {
-  grpc_starwars_StarwarsService_GetHero(input: grpc_starwars_GetHeroRequest_Input): grpc_starwars_Character
-  grpc_starwars_StarwarsService_GetHuman(input: grpc_starwars_GetHumanRequest_Input): grpc_starwars_Character
-  grpc_starwars_StarwarsService_GetDroid(input: grpc_starwars_GetDroidRequest_Input): grpc_starwars_Character
-  grpc_starwars_StarwarsService_ListHumans(input: grpc_starwars_ListEmptyRequest_Input): grpc_starwars_ListHumansResponse
-  grpc_starwars_StarwarsService_ListDroids(input: grpc_starwars_ListEmptyRequest_Input): grpc_starwars_ListDroidsResponse
-  grpc_starwars_StarwarsService_connectivityState(tryToConnect: Boolean): grpc_ConnectivityState
+  starwars_StarwarsService_GetHero(input: starwars_GetHeroRequest_Input): starwars_Character
+  starwars_StarwarsService_GetHuman(input: starwars_GetHumanRequest_Input): starwars_Character
+  starwars_StarwarsService_GetDroid(input: starwars_GetDroidRequest_Input): starwars_Character
+  starwars_StarwarsService_ListHumans(input: starwars_ListEmptyRequest_Input): starwars_ListHumansResponse
+  starwars_StarwarsService_ListDroids(input: starwars_ListEmptyRequest_Input): starwars_ListDroidsResponse
 }
 
-type grpc_starwars_Character {
+type starwars_Character {
   id: String
   name: String
-  friends: [grpc_starwars_Character]
-  appears_in: [grpc_starwars_Episode]
+  friends: [starwars_Character]
+  appears_in: [starwars_Episode]
   home_planet: String
   primary_function: String
-  type: grpc_starwars_Type
+  type: starwars_Type
 }
 
-enum grpc_starwars_Episode {
+enum starwars_Episode {
   _
   NEWHOPE
   EMPIRE
   JEDI
 }
 
-enum grpc_starwars_Type {
+enum starwars_Type {
   HUMAN
   DROID
 }
 
-input grpc_starwars_GetHeroRequest_Input {
-  episode: grpc_starwars_Episode
+input starwars_GetHeroRequest_Input {
+  episode: starwars_Episode
 }
 
-input grpc_starwars_GetHumanRequest_Input {
+input starwars_GetHumanRequest_Input {
   id: String
 }
 
-input grpc_starwars_GetDroidRequest_Input {
+input starwars_GetDroidRequest_Input {
   id: String
 }
 
-type grpc_starwars_ListHumansResponse {
-  humans: [grpc_starwars_Character]
+type starwars_ListHumansResponse {
+  humans: [starwars_Character]
 }
 
-scalar grpc_starwars_ListEmptyRequest_Input @specifiedBy(url: \\"http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf\\")
+scalar starwars_ListEmptyRequest_Input @specifiedBy(url: \\"http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf\\")
 
-type grpc_starwars_ListDroidsResponse {
-  droids: [grpc_starwars_Character]
-}
-
-enum grpc_ConnectivityState {
-  IDLE
-  CONNECTING
-  READY
-  TRANSIENT_FAILURE
-  SHUTDOWN
+type starwars_ListDroidsResponse {
+  droids: [starwars_Character]
 }"
 `;

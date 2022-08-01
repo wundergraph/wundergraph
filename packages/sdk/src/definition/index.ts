@@ -448,6 +448,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 export interface GrpcIntrospection extends IntrospectionConfiguration {
 	source: GrpcIntrospectionSource;
 	url: InputVariable;
+	apiNamespace?: string;
 }
 
 export interface StaticApiCustom {
@@ -920,7 +921,7 @@ export const introspect = {
 	grpc: async (introspection: GrpcIntrospection): Promise<GrpcApi> =>
 		introspectWithCache(introspection, async (introspection: GrpcIntrospection): Promise<GrpcApi> => {
 			const spec = loadGrpcApi(introspection);
-			return await protosetToGrpcApiObject(spec);
+			return await protosetToGrpcApiObject(spec, introspection.url, introspection.apiNamespace);
 		}),
 };
 
@@ -1098,12 +1099,12 @@ const hasSubscriptions = (schema: GraphQLSchema): boolean => {
 
 const subscriptionsURL = (url: string) => url.replace('https://', 'wss://').replace('http://', 'ws://');
 
-const loadGrpcApi = (introspection: GrpcIntrospection): string => {
+const loadGrpcApi = (introspection: GrpcIntrospection): Buffer => {
 	switch (introspection.source.kind) {
 		case 'file':
 			const filePath = path.resolve(process.cwd(), introspection.source.filePath);
-			return fs.readFileSync(filePath).toString('base64');
+			return fs.readFileSync(filePath);
 		default:
-			return '';
+			return Buffer.from('');
 	}
 };

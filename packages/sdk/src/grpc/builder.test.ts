@@ -9,13 +9,13 @@ const runTest = async (testFile: string, snapShot: string) => {
 	}
 	const fileContents = fs.readFileSync(testFile);
 
-	const gprc = new GrpcSchemaBuilder(fileContents);
+	const gprc = new GrpcSchemaBuilder(fileContents, '');
 	const Schema = await gprc.Schema();
 
 	const printedSchema = printSchema(Schema);
 	expect(printedSchema).toMatchSnapshot(snapShot + '_' + 'schema');
 
-	fs.writeFileSync('src/grpc/' + snapShot + '.grapqhl', printedSchema);
+	// fs.writeFileSync('src/grpc/' + snapShot + '.grapqhl', printedSchema);
 };
 
 test('starwars grpc', async () => {
