@@ -43,15 +43,15 @@ export default class GrpcSchemaBuilder {
 		this.protoSet = protoSet;
 	}
 
-	async getRootPromiseFromDescriptorFilePath(): Promise<protobufjs.Root> {
+	async getRootPromiseFromDescriptorProtoSet(): Promise<protobufjs.Root> {
 		const decodedDescriptorSet = FileDescriptorSet.decode(this.protoSet) as DecodedDescriptorSet;
 
 		return (Root as RootConstructor).fromDescriptor(decodedDescriptorSet);
 	}
 
-	async getCachedDescriptorSets() {
+	async getDescriptorsSet() {
 		const rootPromises: Promise<protobufjs.Root>[] = [];
-		const rootPromise = this.getRootPromiseFromDescriptorFilePath();
+		const rootPromise = this.getRootPromiseFromDescriptorProtoSet();
 		rootPromises.push(rootPromise);
 
 		return Promise.all(
@@ -61,7 +61,7 @@ export default class GrpcSchemaBuilder {
 				root.resolveAll();
 				return {
 					name: rootName,
-					rootJson: root.toJSON({
+					rootNamespace: root.toJSON({
 						keepComments: true,
 					}),
 				};
@@ -80,22 +80,133 @@ export default class GrpcSchemaBuilder {
 		return currentWalkingPath.concat(baseTypePath);
 	}
 
-	processEnum() {}
+	visitEnum(nested: protobufjs.IEnum, typeName: string) {
+		const enumTypeConfig: GraphQLEnumTypeConfig = {
+			name: typeName,
+			values: {},
+			description: (nested as any).comment,
+		};
+		const commentMap = (nested as any).comments;
+		for (const [key, value] of Object.entries(nested.values)) {
+			enumTypeConfig.values[key] = {
+				value,
+				description: commentMap?.[key],
+			};
+		}
+		// @ts-ignore
+		this.schemaComposer.createEnumTC(enumTypeConfig);
+	}
 
-	processMessage() {}
+	visitType(nested: protobufjs.IType, typeName: string, rootNamespace: protobufjs.INamespace, pathWithName: string[]) {
+		const inputTypeName = typeName + '_Input';
+		const outputTypeName = typeName;
+		const description = (nested as any).comment;
+		const fieldEntries = Object.entries(nested.fields) as [string, protobufjs.IField & { comment: string }][];
+		if (fieldEntries.length) {
+			const inputTC = this.schemaComposer.createInputTC({
+				name: inputTypeName,
+				description,
+				fields: {},
+			});
+			const outputTC = this.schemaComposer.createObjectTC({
+				name: outputTypeName,
+				description,
+				fields: {},
+			});
+			for (const [fieldName, { type, rule, comment }] of fieldEntries) {
+				console.log(`Visiting ${currentPath}.nested.fields[${fieldName}]`);
+				const baseFieldTypePath = type.split('.');
+				inputTC.addFields({
+					[fieldName]: {
+						type: () => {
+							const fieldTypePath = this.walkToFindTypePath(rootNamespace, pathWithName, baseFieldTypePath);
+							const fieldInputTypeName = getTypeName(this.schemaComposer, fieldTypePath, true);
+							return rule === 'repeated' ? `[${fieldInputTypeName}]` : fieldInputTypeName;
+						},
+						description: comment,
+					},
+				});
+				outputTC.addFields({
+					[fieldName]: {
+						type: () => {
+							const fieldTypePath = this.walkToFindTypePath(rootNamespace, pathWithName, baseFieldTypePath);
+							const fieldTypeName = getTypeName(this.schemaComposer, fieldTypePath, false);
+							return rule === 'repeated' ? `[${fieldTypeName}]` : fieldTypeName;
+						},
+						description: comment,
+					},
+				});
+			}
+		} else {
+			this.schemaComposer.createScalarTC({
+				...GraphQLJSON.toConfig(),
+				name: inputTypeName,
+				description,
+			});
+			this.schemaComposer.createScalarTC({
+				...GraphQLJSON.toConfig(),
+				name: outputTypeName,
+				description,
+			});
+		}
+	}
 
-	processService() {}
+	visitService(nested: protobufjs.IService, rootNamespace: protobufjs.INamespace, pathWithName: string[]) {
+		for (const methodName in nested.methods) {
+			const method = nested.methods[methodName];
+			const rootFieldName = [...pathWithName, methodName].join('_');
+			const fieldConfig: ObjectTypeComposerFieldConfigAsObjectDefinition<any, any> = {
+				type: () => {
+					const baseResponseTypePath = method.responseType?.split('.');
+					if (baseResponseTypePath) {
+						const responseTypePath = this.walkToFindTypePath(rootNamespace, pathWithName, baseResponseTypePath);
+						return getTypeName(this.schemaComposer, responseTypePath, false);
+					}
+					return 'Void';
+				},
+				description: method.comment,
+			};
 
+			fieldConfig.args = {
+				// @ts-ignore
+				input: () => {
+					if (method.requestStream) {
+						return 'File';
+					}
+					const baseRequestTypePath = method.requestType?.split('.');
+					if (baseRequestTypePath) {
+						const requestTypePath = this.walkToFindTypePath(rootNamespace, pathWithName, baseRequestTypePath);
+						return getTypeName(this.schemaComposer, requestTypePath, true);
+					}
+					return undefined;
+				},
+			};
+			if (method.responseStream) {
+				this.schemaComposer.Subscription.addFields({
+					[rootFieldName]: {
+						...fieldConfig,
+					},
+				});
+			} else {
+				const rootTypeComposer = this.schemaComposer.Query;
+				rootTypeComposer.addFields({
+					[rootFieldName]: {
+						...fieldConfig,
+					},
+				});
+			}
+		}
+	}
 	visit({
 		nested,
 		name,
 		currentPath,
-		rootJson,
+		rootNamespace,
 	}: {
 		nested: AnyNestedObject;
 		name: string;
 		currentPath: string[];
-		rootJson: protobufjs.INamespace;
+		rootNamespace: protobufjs.INamespace;
 	}) {
 		const pathWithName = [...currentPath, ...name.split('.')].filter(Boolean);
 		if ('nested' in nested) {
@@ -106,125 +217,17 @@ export default class GrpcSchemaBuilder {
 					nested: currentNested,
 					name: key,
 					currentPath: pathWithName,
-					rootJson,
+					rootNamespace: rootNamespace,
 				});
 			}
 		}
 		const typeName = pathWithName.join('_');
 		if ('values' in nested) {
-			const enumTypeConfig: GraphQLEnumTypeConfig = {
-				name: typeName,
-				values: {},
-				description: (nested as any).comment,
-			};
-			const commentMap = (nested as any).comments;
-			for (const [key, value] of Object.entries(nested.values)) {
-				console.log(`Visiting ${currentPath}.nested.values[${key}]`);
-				enumTypeConfig.values[key] = {
-					value,
-					description: commentMap?.[key],
-				};
-			}
-			// @ts-ignore
-			this.schemaComposer.createEnumTC(enumTypeConfig);
+			this.visitEnum(nested, typeName);
 		} else if ('fields' in nested) {
-			const inputTypeName = typeName + '_Input';
-			const outputTypeName = typeName;
-			const description = (nested as any).comment;
-			const fieldEntries = Object.entries(nested.fields) as [string, protobufjs.IField & { comment: string }][];
-			if (fieldEntries.length) {
-				const inputTC = this.schemaComposer.createInputTC({
-					name: inputTypeName,
-					description,
-					fields: {},
-				});
-				const outputTC = this.schemaComposer.createObjectTC({
-					name: outputTypeName,
-					description,
-					fields: {},
-				});
-				for (const [fieldName, { type, rule, comment }] of fieldEntries) {
-					console.log(`Visiting ${currentPath}.nested.fields[${fieldName}]`);
-					const baseFieldTypePath = type.split('.');
-					inputTC.addFields({
-						[fieldName]: {
-							type: () => {
-								const fieldTypePath = this.walkToFindTypePath(rootJson, pathWithName, baseFieldTypePath);
-								const fieldInputTypeName = getTypeName(this.schemaComposer, fieldTypePath, true);
-								return rule === 'repeated' ? `[${fieldInputTypeName}]` : fieldInputTypeName;
-							},
-							description: comment,
-						},
-					});
-					outputTC.addFields({
-						[fieldName]: {
-							type: () => {
-								const fieldTypePath = this.walkToFindTypePath(rootJson, pathWithName, baseFieldTypePath);
-								const fieldTypeName = getTypeName(this.schemaComposer, fieldTypePath, false);
-								return rule === 'repeated' ? `[${fieldTypeName}]` : fieldTypeName;
-							},
-							description: comment,
-						},
-					});
-				}
-			} else {
-				this.schemaComposer.createScalarTC({
-					...GraphQLJSON.toConfig(),
-					name: inputTypeName,
-					description,
-				});
-				this.schemaComposer.createScalarTC({
-					...GraphQLJSON.toConfig(),
-					name: outputTypeName,
-					description,
-				});
-			}
+			this.visitType(nested, typeName, rootNamespace, pathWithName);
 		} else if ('methods' in nested) {
-			for (const methodName in nested.methods) {
-				const method = nested.methods[methodName];
-				const rootFieldName = [...pathWithName, methodName].join('_');
-				const fieldConfig: ObjectTypeComposerFieldConfigAsObjectDefinition<any, any> = {
-					type: () => {
-						const baseResponseTypePath = method.responseType?.split('.');
-						if (baseResponseTypePath) {
-							const responseTypePath = this.walkToFindTypePath(rootJson, pathWithName, baseResponseTypePath);
-							return getTypeName(this.schemaComposer, responseTypePath, false);
-						}
-						return 'Void';
-					},
-					description: method.comment,
-				};
-
-				fieldConfig.args = {
-					// @ts-ignore
-					input: () => {
-						if (method.requestStream) {
-							return 'File';
-						}
-						const baseRequestTypePath = method.requestType?.split('.');
-						if (baseRequestTypePath) {
-							const requestTypePath = this.walkToFindTypePath(rootJson, pathWithName, baseRequestTypePath);
-							const requestTypeName = getTypeName(this.schemaComposer, requestTypePath, true);
-							return requestTypeName;
-						}
-						return undefined;
-					},
-				};
-				if (method.responseStream) {
-					this.schemaComposer.Subscription.addFields({
-						[rootFieldName]: {
-							...fieldConfig,
-						},
-					});
-				} else {
-					const rootTypeComposer = this.schemaComposer.Query;
-					rootTypeComposer.addFields({
-						[rootFieldName]: {
-							...fieldConfig,
-						},
-					});
-				}
-			}
+			this.visitService(nested, rootNamespace, pathWithName);
 		}
 	}
 
@@ -238,18 +241,15 @@ export default class GrpcSchemaBuilder {
 			name: 'File',
 		});
 
-		console.log(`Getting stored root and decoded descriptor set objects`);
-		const artifacts = await this.getCachedDescriptorSets();
+		const namespaces = await this.getDescriptorsSet();
 
-		for (const { name, rootJson } of artifacts) {
-			console.log(`Building the schema structure based on the root object`);
-			this.visit({ nested: rootJson, name: '', currentPath: [], rootJson });
+		for (const { name, rootNamespace } of namespaces) {
+			this.visit({ nested: rootNamespace, name: '', currentPath: [], rootNamespace: rootNamespace });
 		}
 
 		// graphql-compose doesn't add @defer and @stream to the schema
 		specifiedDirectives.forEach((directive) => this.schemaComposer.addDirective(directive));
 
-		console.log(`Building the final GraphQL Schema`);
 		return this.schemaComposer.buildSchema();
 	}
 }
