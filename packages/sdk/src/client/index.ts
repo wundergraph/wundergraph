@@ -469,17 +469,15 @@ export class WunderGraphClient<Role> {
 		return this.isOK(response);
 	};
 
-	private queryString = (input?: Object): string => {
+	private queryString = (input?: object): string => {
 		if (!input) {
 			return '';
 		}
 		const query = (Object.keys(input) as Array<keyof typeof input>)
-			// @ts-ignore
 			.filter((key) => input[key] !== undefined && input[key] !== '')
 			.map((key) => {
 				const value = typeof input[key] === 'object' ? JSON.stringify(input[key]) : input[key];
 				const encodedKey = encodeURIComponent(key);
-				// @ts-ignore
 				const encodedValue = encodeURIComponent(value);
 				return `${encodedKey}=${encodedValue}`;
 			})
