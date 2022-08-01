@@ -27,7 +27,7 @@ export const DocsFooter = ({ isIndexFile = false }) => {
 				<p className="m-0 text-right">
 					<a
 						href={`${githubBaseUrl}${router.pathname}${
-							isIndexFile ? 'index.md' : '.md'
+							isIndexFile ? '/index.md' : '.md'
 						}`}
 						target="_blank"
 						rel="noreferrer"
