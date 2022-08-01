@@ -11,13 +11,13 @@
   <a href="https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next"><img src="https://img.shields.io/badge/enterprise-support-blue.svg" /></a>
   <br />
   <br />
-  <a href="https://wundergraph.com/docs/guides/getting_started/quickstart">Quickstart</a>
+  <a href="https://docs.wundergraph.com/getting_started">Quickstart</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="https://wundergraph.com/">Website</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://wundergraph.com/docs">Docs</a>
+  <a href="https://docs.wundergraph.com">Docs</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  <a href="https://wundergraph.com/docs/examples/nextjs_typescript_postgresql_realtime_chat">Examples</a>
+  <a href="https://docs.wundergraph.com/docs/examples">Examples</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="https://wundergraph.com/blog">Blog</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
