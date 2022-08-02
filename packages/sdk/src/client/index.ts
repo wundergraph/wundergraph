@@ -73,22 +73,18 @@ export class WunderGraphClient<Role> {
 		this.extraHeaders = headers;
 	}
 
-	public cacheKey<Q extends QueryProps, Args extends InternalQueryArgs, Data>(query: Q, args?: Args): string {
-		return hash({
-			query,
-			args,
-		});
+	public cacheKey<Q extends QueryProps<any>>(query: Q): string {
+		return hash(query);
 	}
 
-	public async query<Q extends QueryProps, Input, Data>(
-		query: Q,
-		args?: InternalQueryArgs
+	public async query<Input, Data>(
+		query: QueryProps<Partial<InternalQueryArgsWithInput<Input>>>
 	): Promise<QueryResult<Data>> {
 		try {
 			const params = this.queryString({
-				wg_variables: args?.input,
+				wg_variables: query.input,
 				wg_api_hash: this.applicationHash,
-				wg_subscribe_once: args?.subscribeOnce,
+				wg_subscribe_once: query.subscribeOnce,
 			});
 			const headers: Headers = {
 				...this.extraHeaders,
@@ -113,9 +109,8 @@ export class WunderGraphClient<Role> {
 		}
 	}
 
-	public async mutate<P extends MutationProps, Data, Input = never>(
-		mutation: P,
-		args?: InternalMutationArgsWithInput<Input>
+	public async mutate<Input, Data>(
+		mutation: MutationProps<Partial<InternalMutationArgsWithInput<Input>>>
 	): Promise<MutationResult<Data>> {
 		try {
 			const params = this.queryString({
@@ -134,7 +129,7 @@ export class WunderGraphClient<Role> {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
 			const url = this.baseURL + '/' + this.applicationPath + '/operations/' + mutation.operationName + params;
-			const body = args?.input !== undefined ? JSON.stringify(args.input) : '{}';
+			const body = mutation?.input !== undefined ? JSON.stringify(mutation.input) : '{}';
 			const response = await this.fetch(url, {
 				headers,
 				method: 'POST',
@@ -153,27 +148,25 @@ export class WunderGraphClient<Role> {
 		}
 	}
 
-	public subscribe = <S extends SubscriptionProps, Input, Data>(
-		subscription: S,
-		cb: (response: SubscriptionResult<Data>) => void,
-		args?: InternalSubscriptionArgs
+	public subscribe = <Input, Data>(
+		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
+		cb: (response: SubscriptionResult<Data>) => void
 	) => {
 		if ('EventSource' in global) {
-			return this.subscribeWithSSE(subscription, cb, args);
+			return this.subscribeWithSSE(subscription, cb);
 		}
-		return this.subscribeWithFetch(subscription, cb, args);
+		return this.subscribeWithFetch(subscription, cb);
 	};
 
-	private subscribeWithSSE = <S extends SubscriptionProps, Input, Data>(
-		subscription: S,
-		cb: (result: SubscriptionResult<Data>) => void,
-		args?: InternalSubscriptionArgs
+	private subscribeWithSSE = <Input, Data>(
+		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
+		cb: (result: SubscriptionResult<Data>) => void
 	) => {
 		(async () => {
 			try {
 				const params = this.queryString({
-					wg_variables: args?.input,
-					wg_live: args?.isLiveQuery ? true : undefined,
+					wg_variables: subscription?.input,
+					wg_live: subscription?.isLiveQuery ? true : undefined,
 					wg_sse: true,
 					wg_sdk_version: this.sdkVersion,
 				});
@@ -184,8 +177,8 @@ export class WunderGraphClient<Role> {
 				eventSource.addEventListener('message', (ev) => {
 					cb(this.jsonToSubscriptionResult(ev.data));
 				});
-				if (args?.abortSignal) {
-					args.abortSignal.addEventListener('abort', () => eventSource.close());
+				if (subscription?.abortSignal) {
+					subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
 				}
 			} catch (e: any) {
 				cb({
@@ -200,16 +193,15 @@ export class WunderGraphClient<Role> {
 		})();
 	};
 
-	private subscribeWithFetch = <S extends SubscriptionProps, Input, Data>(
-		subscription: S,
-		cb: (result: SubscriptionResult<Data>) => void,
-		args?: InternalSubscriptionArgs
+	private subscribeWithFetch = <Input, Data>(
+		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
+		cb: (result: SubscriptionResult<Data>) => void
 	) => {
 		(async () => {
 			try {
 				const params = this.queryString({
-					wg_variables: args?.input,
-					wg_live: args?.isLiveQuery ? true : undefined,
+					wg_variables: subscription?.input,
+					wg_live: subscription?.isLiveQuery ? true : undefined,
 				});
 				const response = await this.fetch(
 					this.baseURL + '/' + this.applicationPath + '/operations/' + subscription.operationName + params,
@@ -220,7 +212,7 @@ export class WunderGraphClient<Role> {
 							'WG-SDK-Version': this.sdkVersion,
 						},
 						method: 'GET',
-						signal: args?.abortSignal,
+						signal: subscription?.abortSignal,
 					}
 				);
 
@@ -504,7 +496,6 @@ export interface QueryArgs {
 }
 
 export interface InternalQueryArgs extends QueryArgs {
-	input?: any;
 	abortSignal?: AbortSignal;
 	subscribeOnce?: boolean;
 }
@@ -517,13 +508,25 @@ export interface QueryArgsWithInput<Input> extends QueryArgs {
 	input: Input;
 }
 
-export interface QueryProps {
-	operationName: string;
-}
+// export interface QueryProps<Input, Args = QueryArgs> {
+// 	operationName: string;
+// 	input?: Input;
+// 	options?: Args;
+// }
 
-export interface SubscriptionProps {
+export type QueryProps<Args extends QueryArgs = QueryArgs> = Args & {
 	operationName: string;
-}
+};
+
+// export interface SubscriptionProps<Input, Args = SubscriptionArgs> {
+// 	operationName: string;
+// 	input?: Input;
+// 	options?: Args;
+// }
+
+export type SubscriptionProps<Args extends SubscriptionArgs = SubscriptionArgs> = Args & {
+	operationName: string;
+};
 
 export interface SubscriptionArgs {
 	stopOnWindowBlur?: boolean;
@@ -532,7 +535,6 @@ export interface SubscriptionArgs {
 }
 
 export interface InternalSubscriptionArgs extends SubscriptionArgs {
-	input?: any;
 	abortSignal?: AbortSignal;
 	subscribeOnce?: boolean;
 	isLiveQuery?: boolean;
@@ -546,9 +548,15 @@ export interface SubscriptionArgsWithInput<Input> extends SubscriptionArgs {
 	input: Input;
 }
 
-export interface MutationProps {
+// export interface MutationProps<Input, Args = MutationArgs> {
+// 	operationName: string;
+// 	input?: Input;
+// 	options?: Args;
+// }
+
+export type MutationProps<Args extends MutationArgs = MutationArgs> = Args & {
 	operationName: string;
-}
+};
 
 export interface MutationArgs {
 	refetchMountedOperationsOnSuccess?: boolean;

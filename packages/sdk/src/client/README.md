@@ -88,31 +88,23 @@ const client = new WunderGraphClient({
 ### Run a query
 
 ```ts
-const result = await client.query(
-  {
-    operationName: 'Hello',
+const result = await client.query({
+  operationName: 'Hello',
+  input: {
+    hello: 'World',
   },
-  {
-    input: {
-      hello: 'World',
-    },
-  }
-);
+});
 ```
 
 ### Mutation
 
 ```ts
-const result = await client.mutate(
-  {
-    operationName: 'SetName',
+const result = await client.mutate({
+  operationName: 'SetName',
+  input: {
+    name: 'WunderGraph',
   },
-  {
-    input: {
-      name: 'WunderGraph',
-    },
-  }
-);
+});
 ```
 
 ### LiveQuery
@@ -121,14 +113,12 @@ const result = await client.mutate(
 client.subscribe(
   {
     operationName: 'Hello',
-  },
-  (result) => {},
-  {
-    isLiveQuery: true,
     input: {
       name: 'World',
     },
-  }
+    isLiveQuery: true,
+  },
+  (result) => {}
 );
 ```
 
@@ -138,13 +128,11 @@ client.subscribe(
 client.subscribe(
   {
     operationName: 'Countdown',
-  },
-  (result) => {},
-  {
     input: {
       from: 100,
     },
-  }
+  },
+  (result) => {}
 );
 ```
 
