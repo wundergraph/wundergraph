@@ -438,7 +438,9 @@ export class WunderGraphClient<Role> {
 			if (this.isOK(response)) {
 				return response.json();
 			}
-		} catch {}
+		} catch (e: any) {
+			throw e;
+		}
 		return null;
 	};
 
