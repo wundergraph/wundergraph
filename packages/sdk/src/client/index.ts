@@ -60,40 +60,42 @@ export class WunderGraphClient<Role> {
 	private extraHeaders?: Headers;
 	private readonly customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 
+	private fetch(input: RequestInfo, init: RequestInit = {}): Promise<globalThis.Response> {
+		const defaultOrCustomFetch = this.customFetch || globalThis.fetch;
+		return defaultOrCustomFetch(input, {
+			credentials: 'include',
+			mode: 'cors',
+			...init,
+		});
+	}
+
 	public setExtraHeaders(headers: Headers) {
 		this.extraHeaders = headers;
 	}
 
-	public cacheKey<Q extends QueryProps, Args extends InternalQueryArgs, Data>(query: Q, args?: Args): string {
-		return hash({
-			query,
-			args,
-		});
+	public cacheKey<Q extends QueryProps<any>>(query: Q): string {
+		return hash(query);
 	}
 
-	public async query<Q extends QueryProps, Input, Data>(
-		query: Q,
-		args?: InternalQueryArgs
+	public async query<Input, Data>(
+		query: QueryProps<Partial<InternalQueryArgsWithInput<Input>>>
 	): Promise<QueryResult<Data>> {
 		try {
 			const params = this.queryString({
-				wg_variables: args?.input,
+				wg_variables: query.input,
 				wg_api_hash: this.applicationHash,
-				wg_subscribe_once: args?.subscribeOnce,
+				wg_subscribe_once: query.subscribeOnce,
 			});
 			const headers: Headers = {
 				...this.extraHeaders,
 				Accept: 'application/json',
 				'WG-SDK-Version': this.sdkVersion,
 			};
-			const defaultOrCustomFetch = this.customFetch || globalThis.fetch;
 			const url = this.baseURL + '/' + this.applicationPath + '/operations/' + query.operationName + params;
-			const response = await defaultOrCustomFetch(url, {
+			const response = await this.fetch(url, {
 				headers,
 				method: 'GET',
-				credentials: 'include',
-				mode: 'cors',
-				signal: args?.abortSignal,
+				signal: query.abortSignal,
 			});
 			return this.httpResponseToQueryResult(response);
 		} catch (e: any) {
@@ -108,9 +110,8 @@ export class WunderGraphClient<Role> {
 		}
 	}
 
-	public async mutate<P extends MutationProps, Data, Input = never>(
-		mutation: P,
-		args?: InternalMutationArgsWithInput<Input>
+	public async mutate<Input, Data>(
+		mutation: MutationProps<Partial<InternalMutationArgsWithInput<Input>>>
 	): Promise<MutationResult<Data>> {
 		try {
 			const params = this.queryString({
@@ -121,25 +122,19 @@ export class WunderGraphClient<Role> {
 				Accept: 'application/json',
 				'WG-SDK-Version': this.sdkVersion,
 			};
-			const defaultOrCustomFetch = this.customFetch || globalThis.fetch;
 			if (this.csrfToken === undefined) {
-				const res = await defaultOrCustomFetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf', {
-					credentials: 'include',
-					mode: 'cors',
-				});
+				const res = await this.fetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf');
 				this.csrfToken = await res.text();
 			}
 			if (this.csrfToken !== undefined) {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
 			const url = this.baseURL + '/' + this.applicationPath + '/operations/' + mutation.operationName + params;
-			const body = args?.input !== undefined ? JSON.stringify(args.input) : '{}';
-			const response = await defaultOrCustomFetch(url, {
+			const body = mutation.input !== undefined ? JSON.stringify(mutation.input) : '{}';
+			const response = await this.fetch(url, {
 				headers,
 				method: 'POST',
-				credentials: 'include',
-				mode: 'cors',
-				signal: args?.abortSignal,
+				signal: mutation.abortSignal,
 				body,
 			});
 			return this.httpResponseToMutationResult(response);
@@ -155,27 +150,25 @@ export class WunderGraphClient<Role> {
 		}
 	}
 
-	public subscribe = <S extends SubscriptionProps, Input, Data>(
-		subscription: S,
-		cb: (response: SubscriptionResult<Data>) => void,
-		args?: InternalSubscriptionArgs
+	public subscribe = <Input, Data>(
+		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
+		cb: (response: SubscriptionResult<Data>) => void
 	) => {
 		if ('EventSource' in global) {
-			return this.subscribeWithSSE(subscription, cb, args);
+			return this.subscribeWithSSE(subscription, cb);
 		}
-		return this.subscribeWithFetch(subscription, cb, args);
+		return this.subscribeWithFetch(subscription, cb);
 	};
 
-	private subscribeWithSSE = <S extends SubscriptionProps, Input, Data>(
-		subscription: S,
-		cb: (result: SubscriptionResult<Data>) => void,
-		args?: InternalSubscriptionArgs
+	private subscribeWithSSE = <Input, Data>(
+		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
+		cb: (result: SubscriptionResult<Data>) => void
 	) => {
 		(async () => {
 			try {
 				const params = this.queryString({
-					wg_variables: args?.input,
-					wg_live: subscription.isLiveQuery ? true : undefined,
+					wg_variables: subscription?.input,
+					wg_live: subscription?.isLiveQuery ? true : undefined,
 					wg_sse: true,
 					wg_sdk_version: this.sdkVersion,
 				});
@@ -186,8 +179,8 @@ export class WunderGraphClient<Role> {
 				eventSource.addEventListener('message', (ev) => {
 					cb(this.jsonToSubscriptionResult(ev.data));
 				});
-				if (args?.abortSignal) {
-					args.abortSignal.addEventListener('abort', () => eventSource.close());
+				if (subscription?.abortSignal) {
+					subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
 				}
 			} catch (e: any) {
 				cb({
@@ -202,19 +195,17 @@ export class WunderGraphClient<Role> {
 		})();
 	};
 
-	private subscribeWithFetch = <S extends SubscriptionProps, Input, Data>(
-		subscription: S,
-		cb: (result: SubscriptionResult<Data>) => void,
-		args?: InternalSubscriptionArgs
+	private subscribeWithFetch = <Input, Data>(
+		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
+		cb: (result: SubscriptionResult<Data>) => void
 	) => {
 		(async () => {
 			try {
 				const params = this.queryString({
-					wg_variables: args?.input,
-					wg_live: subscription.isLiveQuery ? true : undefined,
+					wg_variables: subscription?.input,
+					wg_live: subscription?.isLiveQuery ? true : undefined,
 				});
-				const f = this.customFetch || fetch;
-				const response = await f(
+				const response = await this.fetch(
 					this.baseURL + '/' + this.applicationPath + '/operations/' + subscription.operationName + params,
 					{
 						headers: {
@@ -223,9 +214,7 @@ export class WunderGraphClient<Role> {
 							'WG-SDK-Version': this.sdkVersion,
 						},
 						method: 'GET',
-						signal: args?.abortSignal,
-						credentials: 'include',
-						mode: 'cors',
+						signal: subscription?.abortSignal,
 					}
 				);
 
@@ -277,13 +266,11 @@ export class WunderGraphClient<Role> {
 				wg_api_hash: this.applicationHash,
 			});
 			if (this.csrfToken === undefined) {
-				const res = await fetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf', {
+				const res = await this.fetch(this.baseURL + '/' + this.applicationPath + '/auth/cookie/csrf', {
 					headers: {
 						...baseHeaders,
 						Accept: 'text/plain',
 					},
-					credentials: 'include',
-					mode: 'cors',
 				});
 				this.csrfToken = await res.text();
 			}
@@ -295,16 +282,13 @@ export class WunderGraphClient<Role> {
 			if (this.csrfToken) {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
-			const f = this.customFetch || fetch;
-			const response = await f(
+			const response = await this.fetch(
 				this.baseURL + '/' + this.applicationPath + '/s3/' + config.provider + '/upload' + params,
 				{
 					headers,
 					body: formData,
 					method: 'POST',
 					signal: config.abortSignal,
-					credentials: 'include',
-					mode: 'cors',
 				}
 			);
 			if (this.isOK(response)) {
@@ -433,7 +417,7 @@ export class WunderGraphClient<Role> {
 	public fetchUser = async (abortSignal?: AbortSignal, revalidate?: boolean): Promise<User<Role> | null> => {
 		try {
 			const revalidateTrailer = revalidate === undefined ? '' : '?revalidate=true';
-			const response = await fetch(
+			const response = await this.fetch(
 				this.baseURL + '/' + this.applicationPath + '/auth/cookie/user' + revalidateTrailer,
 				{
 					headers: {
@@ -442,19 +426,24 @@ export class WunderGraphClient<Role> {
 						'WG-SDK-Version': this.sdkVersion,
 					},
 					method: 'GET',
-					credentials: 'include',
-					mode: 'cors',
 					signal: abortSignal,
 				}
 			);
 			if (this.isOK(response)) {
 				return response.json();
 			}
-		} catch {}
+		} catch (e: any) {
+			throw e;
+		}
 		return null;
 	};
 
 	public login = (authProviderID: string, redirectURI?: string) => {
+		// not implemented on server
+		if (typeof window === 'undefined') {
+			return;
+		}
+
 		const query = this.queryString({
 			redirect_uri: redirectURI || window.location.toString(),
 		});
@@ -462,7 +451,7 @@ export class WunderGraphClient<Role> {
 	};
 
 	public logout = async (options?: LogoutOptions): Promise<boolean> => {
-		const response = await fetch(
+		const response = await this.fetch(
 			this.baseURL + '/' + this.applicationPath + '/auth/cookie/user/logout' + this.queryString(options),
 			{
 				headers: {
@@ -471,24 +460,20 @@ export class WunderGraphClient<Role> {
 					'WG-SDK-Version': this.sdkVersion,
 				},
 				method: 'GET',
-				credentials: 'include',
-				mode: 'cors',
 			}
 		);
 		return this.isOK(response);
 	};
 
-	private queryString = (input?: Object): string => {
+	private queryString = (input?: object): string => {
 		if (!input) {
 			return '';
 		}
 		const query = (Object.keys(input) as Array<keyof typeof input>)
-			// @ts-ignore
 			.filter((key) => input[key] !== undefined && input[key] !== '')
 			.map((key) => {
 				const value = typeof input[key] === 'object' ? JSON.stringify(input[key]) : input[key];
 				const encodedKey = encodeURIComponent(key);
-				// @ts-ignore
 				const encodedValue = encodeURIComponent(value);
 				return `${encodedKey}=${encodedValue}`;
 			})
@@ -505,21 +490,16 @@ export interface WithWunderGraphOptions {
 	disableFetchUserOnWindowFocus?: boolean;
 }
 
-export interface InternalQueryArgs {
-	input?: any;
-	abortSignal?: AbortSignal;
-	subscribeOnce?: boolean;
+export interface QueryArgs {
 	disableSSR?: boolean;
 	lazy?: boolean;
 	debounceMillis?: number;
 	refetchOnWindowFocus?: boolean;
 }
 
-export interface QueryArgs {
-	disableSSR?: boolean;
-	lazy?: boolean;
-	debounceMillis?: number;
-	refetchOnWindowFocus?: boolean;
+export interface InternalQueryArgs extends QueryArgs {
+	abortSignal?: AbortSignal;
+	subscribeOnce?: boolean;
 }
 
 export interface InternalQueryArgsWithInput<Input> extends InternalQueryArgs {
@@ -530,30 +510,36 @@ export interface QueryArgsWithInput<Input> extends QueryArgs {
 	input: Input;
 }
 
-export interface QueryProps {
-	operationName: string;
-	requiresAuthentication: boolean;
-}
+// export interface QueryProps<Input, Args = QueryArgs> {
+// 	operationName: string;
+// 	input?: Input;
+// 	options?: Args;
+// }
 
-export interface SubscriptionProps {
+export type QueryProps<Args extends QueryArgs = QueryArgs> = Args & {
 	operationName: string;
-	isLiveQuery: boolean;
-	requiresAuthentication: boolean;
-}
+};
 
-export interface InternalSubscriptionArgs {
-	input?: any;
-	abortSignal?: AbortSignal;
-	subscribeOnce?: boolean;
-	stopOnWindowBlur?: boolean;
-	debounceMillis?: number;
-	disableSSR?: boolean;
-}
+// export interface SubscriptionProps<Input, Args = SubscriptionArgs> {
+// 	operationName: string;
+// 	input?: Input;
+// 	options?: Args;
+// }
+
+export type SubscriptionProps<Args extends SubscriptionArgs = SubscriptionArgs> = Args & {
+	operationName: string;
+};
 
 export interface SubscriptionArgs {
 	stopOnWindowBlur?: boolean;
 	debounceMillis?: number;
 	disableSSR?: boolean;
+}
+
+export interface InternalSubscriptionArgs extends SubscriptionArgs {
+	abortSignal?: AbortSignal;
+	subscribeOnce?: boolean;
+	isLiveQuery?: boolean;
 }
 
 export interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscriptionArgs {
@@ -564,18 +550,22 @@ export interface SubscriptionArgsWithInput<Input> extends SubscriptionArgs {
 	input: Input;
 }
 
-export interface MutationProps {
-	operationName: string;
-	requiresAuthentication: boolean;
-}
+// export interface MutationProps<Input, Args = MutationArgs> {
+// 	operationName: string;
+// 	input?: Input;
+// 	options?: Args;
+// }
 
-export interface InternalMutationArgs {
-	abortSignal?: AbortSignal;
-	refetchMountedOperationsOnSuccess?: boolean;
-}
+export type MutationProps<Args extends MutationArgs = MutationArgs> = Args & {
+	operationName: string;
+};
 
 export interface MutationArgs {
 	refetchMountedOperationsOnSuccess?: boolean;
+}
+
+export interface InternalMutationArgs extends MutationArgs {
+	abortSignal?: AbortSignal;
 }
 
 export interface InternalMutationArgsWithInput<Input> extends InternalMutationArgs {

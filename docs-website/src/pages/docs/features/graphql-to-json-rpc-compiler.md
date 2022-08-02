@@ -68,7 +68,7 @@ Nothing new, boring.
 You would have been right.
 We do a lot more than just persisted queries and JSON-RPC:
 
-- turn any persisted Query into a [Live-Query](/docs/features/live-queries) to keep the UI updated as new data becomes available
+- turn any persisted Query into a Live-Query to keep the UI updated as new data becomes available
 - generate a [typesafe client](/docs/features/generated-clients-sdks) for all Operations
 - generate typesafe [Mocks](/docs/features/type-safe-mocking) for all Operations
 - [authentication aware](/docs/features/authentication-aware-data-fetching) data fetching

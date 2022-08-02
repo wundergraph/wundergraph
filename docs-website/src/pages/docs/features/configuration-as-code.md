@@ -19,7 +19,7 @@ Each of your applications will have a dedicated `.wundergraph` folder where you 
 
 To make the configuration as easy as possible, we've chosen TypeScript as our language of choice.
 Of course, you don't have to start from scratch,
-instead, you can make use of our [TypeScript SDK](https://www.npmjs.com/package/@wundergraph/sdk) which makes the configuration not just type safe but super easy.
+instead, you can make use of our TypeScript SDK which makes the configuration not just type safe but super easy.
 
 The benefit of using a TypeScript SDK is that you'll get a lot of flexibility and can any npm package available to customize your configuration.
 E.g. if you want to modify the generated GraphQL schema, just import the graphql-js library and modify the AST.
@@ -85,4 +85,4 @@ is scaffolds all required files:
 wunderctl init
 ```
 
-More documentation on the configuration [can be found in the reference](/docs/wundergraph-config-ts-reference).
+More documentation on the configuration wundergraph.config.ts reference.

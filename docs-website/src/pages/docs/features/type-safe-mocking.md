@@ -75,4 +75,4 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 ## How to
 
 If you'd like to get more info on how to configure mocks,
-[have a look at the reference](/docs/wundergraph-server-ts-reference/mock-resolve-hook).
+have a look at the mockResolve hook reference.

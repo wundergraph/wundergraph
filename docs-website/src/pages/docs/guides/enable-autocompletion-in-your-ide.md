@@ -15,7 +15,7 @@ Additionally, we're generating a GraphQL Schema file in `.wundergraph/generated/
 
 We're doing this on purpose, because it helps your IDE understand the possible fields and types of your WunderGraph application.
 When you define your API Dependencies / Data Sources using the `introspect` API from the SDK,
-WunderGraph generates a [virtual Graph](/docs/core-concepts/virtual-graph),
+WunderGraph generates a virtual Graph,
 which is a composed GraphQL Schema of all your API Dependencies.
 
 We're then generating a schema file, as described above, and the `.graphqlconfig` file, pointing to this schema file.

@@ -1,11 +1,16 @@
 all: check-setup engine-dev
+# install workspace without scripts
 	pnpm install --ignore-scripts
+# Build wunderctl before run postinstall
 	pnpm -r run --filter="./packages/wunderctl" build
-	pnpm -r run --filter="./packages/wunderctl" postinstall
-	pnpm run build
+# Build all libs, run scripts and link all packages
+	pnpm build:libs && pnpm install
 
 docs:
-	cd docs-website && npm install && npm run dev
+	pnpm --filter="./docs-website" dev
+
+build-docs:
+	cd docs-website && pnpm build
 
 engine-dev: codegen
 	go mod tidy
@@ -51,4 +56,4 @@ update-examples:
 	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
 
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs

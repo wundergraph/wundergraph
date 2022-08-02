@@ -19,9 +19,9 @@ but don't know how to create a backend themselves.
 
 For these use cases, we've got a solution.
 WunderGraph is able to introspect your database and generates a ready-to-use API from them.
-It can be automatically secured, with [authentication](/docs/features/openid-connect-based-authentication) and [authorization incl. role based access control](/docs/features/authorization-role-based-access-control)
-and a mechanism to [inject claims](/docs/features/authorization-injecting-claims) into operations,
-while you can add custom business logic using [hooks](/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware).
+It can be automatically secured, with authentication and authorization incl. role based access control
+and a mechanism to inject claims into operations,
+while you can add custom business logic using hooks.
 
 All this means, you probably don't need to build your own custom backend but can rely on the standards we establish.
 Instead of spending days on researching the best technologies and putting it all together,

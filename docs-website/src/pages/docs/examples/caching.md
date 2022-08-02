@@ -68,4 +68,4 @@ which means that Browsers, Proxies and CDNs will be able to cache the response.
 
 On top of that, we'll also generate an `ETag` for the response.
 This makes it very efficient to re-validate content.
-You can read more about this in the [ETag](/docs/features/automatic-content-revalidation-with-etags) documentation.
+You can read more about this in the ETag documentation.

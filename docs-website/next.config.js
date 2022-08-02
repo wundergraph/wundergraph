@@ -10,6 +10,15 @@ const nextConfig = {
 			allowFutureImage: true,
 		},
 	},
+	async redirects() {
+		return [
+			{
+				source: '/docs',
+				destination: '/',
+				permanent: true,
+			},
+		]
+	},
 }
 
 const production = process.env.NODE_ENV === 'production'

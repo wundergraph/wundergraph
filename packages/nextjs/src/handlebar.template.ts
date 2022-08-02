@@ -88,14 +88,12 @@ export const useSubscription = {
 {{#each subscriptionsWithInput}}
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: false,
         requiresAuthentication: {{requiresAuthentication}},
     })(args),
 {{/each}}
 {{#each subscriptionsWithoutInput}}
     {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: false,
         requiresAuthentication: {{requiresAuthentication}},
     })(args),
 {{/each}}
@@ -105,15 +103,15 @@ export const useLiveQuery = {
 {{#each liveQueriesWithInput}}
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: true,
         requiresAuthentication: {{requiresAuthentication}},
+        isLiveQuery: true,
     })(args),
 {{/each}}
 {{#each liveQueriesWithoutInput}}
     {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: true,
         requiresAuthentication: {{requiresAuthentication}},
+        isLiveQuery: true,
     })(args),
 {{/each}}
 };

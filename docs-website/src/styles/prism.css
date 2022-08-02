@@ -3,9 +3,6 @@ pre[class*='language-'] {
 }
 
 .token {
-	color: theme('colors.black');
-}
-.dark .token {
 	color: theme('colors.white');
 }
 
@@ -23,7 +20,7 @@ pre[class*='language-'] {
 .token.rule,
 .token.pseudo-class,
 .token.important {
-	color: theme('colors.slate.500');
+	color: theme('colors.slate.400');
 }
 
 .dark .token.attr-name,
@@ -42,7 +39,7 @@ pre[class*='language-'] {
 .token.class,
 .token.string,
 .token.property {
-	color: theme('colors.sky.700');
+	color: theme('colors.sky.500');
 }
 
 .dark .token.attr-value,

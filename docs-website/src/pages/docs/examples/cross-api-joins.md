@@ -4,7 +4,7 @@ pageTitle: WunderGraph - Examples - Cross-API Joins
 description:
 ---
 
-[The Cross-API Joins example](https://github.com/wundergraph/wundergraph/tree/main/examples/cross-api-joins) shows one of the most powerful features of WunderGraph,
+[The Cross API Joins example](https://github.com/wundergraph/wundergraph/tree/main/examples/cross-api-joins) shows one of the most powerful features of WunderGraph,
 being able to join data from different APIs without having to stitch or federate the APIs.
 
 ## Data source configuration

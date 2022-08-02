@@ -12,9 +12,6 @@ import operations from './wundergraph.operations';
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
 	url: 'https://api.spacex.land/graphql/',
-	introspection: {
-		pollingIntervalSeconds: 5,
-	},
 });
 
 const jsp = introspect.openApi({
@@ -23,9 +20,7 @@ const jsp = introspect.openApi({
 		kind: 'file',
 		filePath: '../json_placeholder.json',
 	},
-	introspection: {
-		pollingIntervalSeconds: 2,
-	},
+	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
 const countries = introspect.graphql({
@@ -48,6 +43,9 @@ configureWunderGraphApplication({
 	application: myApplication,
 	server,
 	operations,
+	authorization: {
+		roles: ['admin', 'user'],
+	},
 	codeGenerators: [
 		{
 			templates: [

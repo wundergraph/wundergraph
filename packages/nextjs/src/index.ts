@@ -18,7 +18,7 @@ import {
 } from 'react';
 import ssrPrepass from 'react-ssr-prepass';
 
-import { WunderGraphClient } from '@wundergraph/sdk/client';
+import { InternalSubscriptionArgs, WunderGraphClient } from '@wundergraph/sdk/client';
 
 import type {
 	ClientConfig,
@@ -26,15 +26,10 @@ import type {
 	InternalQueryArgsWithInput,
 	InternalSubscriptionArgsWithInput,
 	MutationArgsWithInput,
-	MutationProps,
 	MutationResult,
 	QueryArgs,
 	QueryArgsWithInput,
-	QueryProps,
 	QueryResult,
-	SubscriptionArgs,
-	SubscriptionArgsWithInput,
-	SubscriptionProps,
 	SubscriptionResult,
 	User,
 	UploadConfig,
@@ -266,7 +261,9 @@ const clientUserHooks = <Role>(
 					return;
 				}
 				setUser(nextUser);
-			} catch (e) {}
+			} catch (e) {
+				setUser(null);
+			}
 		})();
 		return () => {
 			abort.abort();
@@ -274,9 +271,17 @@ const clientUserHooks = <Role>(
 	}, [isWindowFocused, disableFetchUserClientSide, disableFetchUserOnWindowFocus]);
 };
 
+interface ContextWrapperOptions {
+	requiresAuthentication: boolean;
+}
+
+interface UseQueryProps extends ContextWrapperOptions {
+	operationName: string;
+}
+
 function useQueryContextWrapper<Input, Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	query: QueryProps,
+	query: UseQueryProps,
 	args?: InternalQueryArgsWithInput<Input>
 ): {
 	result: QueryResult<Data>;
@@ -285,9 +290,12 @@ function useQueryContextWrapper<Input, Data, Role>(
 	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useContext(wunderGraphContext);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true && args?.lazy !== true;
-	const cacheKey = client.cacheKey(query, args);
+	const cacheKey = client.cacheKey({
+		...query,
+		...args,
+	});
 	if (isServer) {
-		if (query.requiresAuthentication && user === null) {
+		if (query?.requiresAuthentication && user === null) {
 			ssrCache[cacheKey] = {
 				status: 'requires_authentication',
 			};
@@ -303,7 +311,10 @@ function useQueryContextWrapper<Input, Data, Role>(
 					refetch: () => Promise.resolve(ssrCache[cacheKey] as QueryResult<Data>),
 				};
 			}
-			const promise = client.query(query, args);
+			const promise = client.query<Input, Data>({
+				...query,
+				...args,
+			});
 			ssrCache[cacheKey] = promise;
 			throw promise;
 		} else {
@@ -357,7 +368,7 @@ function useQueryContextWrapper<Input, Data, Role>(
 		setInvalidate((prev) => prev + 1);
 	}, [refetchMountedOperations]);
 	useEffect(() => {
-		if (query.requiresAuthentication && user === null) {
+		if (query?.requiresAuthentication && user === null) {
 			setQueryResult({
 				status: 'requires_authentication',
 			});
@@ -376,7 +387,8 @@ function useQueryContextWrapper<Input, Data, Role>(
 			setQueryResult({ status: 'loading' });
 		}
 		(async () => {
-			const result = await client.query(query, {
+			const result = await client.query<Input, Data>({
+				...query,
 				...statefulArgs,
 				abortSignal: abort.signal,
 			});
@@ -408,9 +420,14 @@ function useQueryContextWrapper<Input, Data, Role>(
 	};
 }
 
+interface UseSubscriptionProps extends ContextWrapperOptions {
+	operationName: string;
+	isLiveQuery?: boolean;
+}
+
 function useSubscriptionContextWrapper<Input, Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	subscription: SubscriptionProps,
+	subscription: UseSubscriptionProps,
 	args?: InternalSubscriptionArgsWithInput<Input>
 ): {
 	result: SubscriptionResult<Data>;
@@ -418,9 +435,12 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useContext(wunderGraphContext);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true;
-	const cacheKey = client.cacheKey(subscription, args);
+	const cacheKey = client.cacheKey({
+		...subscription,
+		...args,
+	});
 	if (isServer) {
-		if (subscription.requiresAuthentication && user === null) {
+		if (subscription?.requiresAuthentication && user === null) {
 			ssrCache[cacheKey] = {
 				status: 'requires_authentication',
 			};
@@ -434,7 +454,7 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 					result: ssrCache[cacheKey] as SubscriptionResult<Data>,
 				};
 			}
-			const promise = client.query(subscription, { ...args, subscribeOnce: true });
+			const promise = client.query({ ...subscription, ...args, subscribeOnce: true });
 			ssrCache[cacheKey] = promise;
 			throw promise;
 		} else {
@@ -453,7 +473,7 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 	const stopOnWindowBlur = args?.stopOnWindowBlur === true;
 	const stop = !stopOnWindowBlur || isWindowFocused === 'focused' ? false : true;
 	useEffect(() => {
-		if (subscription.requiresAuthentication && user === null) {
+		if (subscription?.requiresAuthentication && user === null) {
 			setSubscriptionResult({
 				status: 'requires_authentication',
 			});
@@ -474,13 +494,13 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 		}
 		const abort = new AbortController();
 		client.subscribe(
-			subscription,
-			(response: SubscriptionResult<Data>) => {
-				setSubscriptionResult(response as any);
-			},
 			{
+				...subscription,
 				...args,
 				abortSignal: abort.signal,
+			},
+			(result: SubscriptionResult<Data>) => {
+				setSubscriptionResult(result);
 			}
 		);
 		return () => {
@@ -504,24 +524,28 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 	};
 }
 
+interface UseMutationProps extends ContextWrapperOptions {
+	operationName: string;
+}
+
 function useMutationContextWrapper<Role, Input = never, Data = never>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	mutation: MutationProps
+	mutation: UseMutationProps
 ): {
 	result: MutationResult<Data>;
 	mutate: (args?: InternalMutationArgsWithInput<Input>) => Promise<MutationResult<Data>>;
 } {
 	const { client, setRefetchMountedOperations, user } = useContext(wunderGraphContext);
 	const [result, setResult] = useState<MutationResult<Data>>(
-		mutation.requiresAuthentication && user === null ? { status: 'requires_authentication' } : { status: 'none' }
+		mutation?.requiresAuthentication && user === null ? { status: 'requires_authentication' } : { status: 'none' }
 	);
 	const mutate = useCallback(
 		async (args?: InternalMutationArgsWithInput<Input>): Promise<MutationResult<Data>> => {
-			if (mutation.requiresAuthentication && user === null) {
+			if (mutation?.requiresAuthentication && user === null) {
 				return { status: 'requires_authentication' };
 			}
 			setResult({ status: 'loading' });
-			const result = await client.mutate(mutation, args);
+			const result = await client.mutate({ ...mutation, ...args });
 			setResult(result as any);
 			if (result.status === 'ok' && args?.refetchMountedOperationsOnSuccess === true) {
 				setRefetchMountedOperations((prev) => prev + 1);
@@ -531,7 +555,7 @@ function useMutationContextWrapper<Role, Input = never, Data = never>(
 		[user]
 	);
 	useEffect(() => {
-		if (!mutation.requiresAuthentication) {
+		if (!mutation?.requiresAuthentication) {
 			return;
 		}
 		if (user === null) {
@@ -572,9 +596,14 @@ function useWunderGraph<Role, AuthProviders extends string = '', S3Providers ext
 			[client]
 		);
 		const fetchUser = useCallback(async () => {
-			const user = await client.fetchUser();
-			setUser(user);
-			return user;
+			try {
+				const user = await client.fetchUser();
+				setUser(user);
+				return user;
+			} catch {
+				setUser(null);
+				return null;
+			}
 		}, [client]);
 		const uploadFiles = useCallback(
 			async (config: UploadConfig<S3Providers>) => {
@@ -594,7 +623,7 @@ function useWunderGraph<Role, AuthProviders extends string = '', S3Providers ext
 
 function useQueryWithInput<Input, Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	query: QueryProps
+	query: UseQueryProps
 ) {
 	return (args: QueryArgsWithInput<Input>) =>
 		useQueryContextWrapper(wunderGraphContext, query, args) as {
@@ -605,7 +634,7 @@ function useQueryWithInput<Input, Data, Role>(
 
 function useQueryWithoutInput<Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	query: QueryProps
+	query: UseQueryProps
 ) {
 	return (args?: QueryArgs) =>
 		useQueryContextWrapper(wunderGraphContext, query, args as QueryArgsWithInput<never>) as {
@@ -616,7 +645,7 @@ function useQueryWithoutInput<Data, Role>(
 
 function useMutationWithInput<Input, Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	mutation: MutationProps
+	mutation: UseMutationProps
 ) {
 	return useMutationContextWrapper<Role, Input, Data>(wunderGraphContext, mutation) as {
 		result: MutationResult<Data>;
@@ -626,7 +655,7 @@ function useMutationWithInput<Input, Data, Role>(
 
 function useMutationWithoutInput<Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	mutation: MutationProps
+	mutation: UseMutationProps
 ) {
 	return useMutationContextWrapper<Role, never, Data>(wunderGraphContext, mutation) as {
 		result: MutationResult<Data>;
@@ -636,9 +665,9 @@ function useMutationWithoutInput<Data, Role>(
 
 function useSubscriptionWithInput<Input, Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	subscription: SubscriptionProps
+	subscription: UseSubscriptionProps
 ) {
-	return (args: SubscriptionArgsWithInput<Input>) =>
+	return (args: InternalSubscriptionArgsWithInput<Input>) =>
 		useSubscriptionContextWrapper(wunderGraphContext, subscription, args) as {
 			result: SubscriptionResult<Data>;
 		};
@@ -646,9 +675,9 @@ function useSubscriptionWithInput<Input, Data, Role>(
 
 function useSubscriptionWithoutInput<Data, Role>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	subscription: SubscriptionProps
+	subscription: UseSubscriptionProps
 ) {
-	return (args?: SubscriptionArgs) =>
+	return (args?: InternalSubscriptionArgs) =>
 		useSubscriptionContextWrapper(
 			wunderGraphContext,
 			subscription,

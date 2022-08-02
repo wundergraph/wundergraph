@@ -19,7 +19,7 @@ In the second case, as the request is unauthenticated, it needs to be signed usi
 Our intention to solve this problem was to build a very generic solution to modify the Request-Response chain,
 so that our users can use any signing algorithm they want or use the solution for other purposes.
 
-So, we've added two new hooks, the [`onOriginRequest`](/docs/wundergraph-server-ts-reference/on-origin-request-hook) as well as the [`onOriginResponse Hook`](/docs/wundergraph-server-ts-reference/on-origin-response-hook),
+So, we've added two new hooks, the onOriginRequest hook as well as the onOriginResponse hook,
 both can be used to completely modify the request and response chain.
 
 Here's an example of how the AWS request signing could be implemented:
