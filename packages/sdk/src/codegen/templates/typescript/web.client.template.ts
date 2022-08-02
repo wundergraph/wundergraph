@@ -80,13 +80,13 @@ export class Client {
             }
         }
     };
-	private resultToResponse = <Data>(result: Result<Data>): Response<Data> => {
+	private resultToResponse = <TResponse>(result: Result<any>): Response<TResponse> => {
 		switch (result.status) {
 			case 'ok':
 				return {
 					status: 'ok',
-					body: result.data
-				}
+					body: { data: result.data }
+				} as Response<any>
 			case 'error':
 				return {
 					status: 'error',
@@ -118,8 +118,6 @@ export class Client {
         {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
             const result = await this._client.query({
                 operationName: "{{operationName}}",
-                requiresAuthentication: {{requiresAuthentication}}
-            }, {
                 input: options.input,
                 abortSignal: options.abortSignal,
             })
@@ -134,8 +132,6 @@ export class Client {
         {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
             const result =  await this._client.mutate({
                 operationName: "{{operationName}}",
-                requiresAuthentication: {{requiresAuthentication}}
-            }, {
                 input: options.input,
                 abortSignal: options.abortSignal,
             })
@@ -150,12 +146,10 @@ export class Client {
         {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
             return this._client.subscribe({
                 operationName: "{{operationName}}",
-                requiresAuthentication: {{requiresAuthentication}},
-                isLiveQuery: false
-            }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)), {
+                isLiveQuery: false,
                 input: options.input,
                 abortSignal: options.abortSignal,
-            });
+            }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
         },
     {{/each}}
     }
@@ -166,12 +160,10 @@ export class Client {
             {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
                 return this._client.subscribe({
                     operationName: "{{operationName}}",
-                    requiresAuthentication: {{requiresAuthentication}},
-                    isLiveQuery: true
-                }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)), {
+                    isLiveQuery: true,
                     input: options.input,
                     abortSignal: options.abortSignal,
-                });
+                }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
             },
         {{/each}}
         }
