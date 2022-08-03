@@ -7,12 +7,12 @@
     "start:services": "docker-compose up -d",
     "start:api": "cd .wundergraph && wunderctl up --debug",
     "cleanup": "docker-compose down -v",
-    "check": "tsc"
+    "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.95.0",
+    "@wundergraph/sdk": "^0.96.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

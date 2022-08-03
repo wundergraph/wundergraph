@@ -278,21 +278,23 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		}
 
 		user := User{
-			ProviderName:  "github",
-			ProviderID:    config.ProviderID,
-			Email:         email.Email,
-			EmailVerified: email.Verified,
-			Name:          userInfo.Name,
-			FirstName:     "",
-			LastName:      "",
-			NickName:      userInfo.Login,
-			Description:   "",
-			UserID:        fmt.Sprintf("%d", userInfo.ID),
-			AvatarURL:     userInfo.AvatarURL,
-			Location:      userInfo.Location,
-			ExpiresAt:     oauth2Token.Expiry,
-			AccessToken:   mustBearerTokenToJSON(accessToken),
-			IdToken:       mustBearerTokenToJSON(idToken),
+			ProviderName:   "github",
+			ProviderID:     config.ProviderID,
+			Email:          email.Email,
+			EmailVerified:  email.Verified,
+			Name:           userInfo.Name,
+			FirstName:      "",
+			LastName:       "",
+			NickName:       userInfo.Login,
+			Description:    "",
+			UserID:         fmt.Sprintf("%d", userInfo.ID),
+			AvatarURL:      userInfo.AvatarURL,
+			Location:       userInfo.Location,
+			ExpiresAt:      oauth2Token.Expiry,
+			AccessToken:    tryParseJWT(accessToken),
+			RawAccessToken: accessToken,
+			IdToken:        tryParseJWT(idToken),
+			RawIDToken:     idToken,
 		}
 
 		hooks.handlePostAuthentication(r.Context(), user)

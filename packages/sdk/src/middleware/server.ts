@@ -1,6 +1,5 @@
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
-import { HeadersObject } from 'headers-polyfill';
 import { Headers } from 'headers-polyfill';
 import process from 'node:process';
 import HooksPlugin from './plugins/hooks';
@@ -52,9 +51,7 @@ export interface ClientRequest<H = ClientRequestHeaders> {
 export interface WunderGraphRequest {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
 	requestURI: string;
-	headers: {
-		[key: string]: string;
-	};
+	headers: Headers;
 	body: any;
 }
 
@@ -86,6 +83,7 @@ export interface WunderGraphUser<Role = any> {
 		[key: string]: any;
 	};
 	accessToken?: JSONObject;
+	rawAccessToken?: string;
 	idToken?: JSONObject;
 	rawIdToken?: string;
 }

@@ -9,13 +9,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				onOriginRequest: {
 					enableForAllOperations: true,
 					hook: async ({ request, user }) => {
-						return {
-							...request,
-							headers: {
-								...request.headers,
-								Authorization: `Bearer ${user.rawIdToken}`,
-							},
-						};
+						if (user && user.rawIdToken) {
+							request.headers.set('Authorization', `Bearer ${user.rawIdToken}`);
+						}
+						return request;
 					},
 				},
 			},

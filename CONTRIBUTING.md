@@ -1,6 +1,6 @@
 # Contributing to the WunderGraph Repository
 
-Welcome to the WunderGraph Community contributing guide. We are excited to having you!
+Welcome to the WunderGraph Community contributing guide. We are excited to have you!
 
 ## Prerequisites
 

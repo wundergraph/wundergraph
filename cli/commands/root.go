@@ -5,16 +5,13 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-	"path"
-	"path/filepath"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/wundergraph/wundergraph/pkg/files"
-
 	"github.com/spf13/viper"
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/manifest"
 
 	"github.com/jensneuse/abstractlogger"
@@ -34,8 +31,11 @@ var (
 	log                abstractlogger.Logger
 	enableDebugMode    bool
 	jsonEncodedLogging bool
-	wundergraphDir     string
 	serviceToken       string
+	wundergraphDir     string
+
+	configEntryPointFilename string
+	serverEntryPointFilename string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -78,25 +78,26 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			)
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if !files.DirectoryExists(wundergraphDir) {
+			return fmt.Errorf("unable to find %s directory", wundergraphDir)
+		}
 		client := InitWunderGraphApiClient()
 		man := manifest.New(log, client, wundergraphDir)
 		err := man.Load()
 		if err != nil {
-			_, _ = red.Printf("unable to load wundergraph.manifest.json")
-			return
+			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}
 		err = man.PersistChanges()
 		if err != nil {
-			_, _ = red.Printf("unable to persist manifest changes")
-			return
+			return fmt.Errorf("unable to persist manifest changes")
 		}
 		err = man.WriteIntegrationsFile()
 		if err != nil {
-			_, _ = red.Printf("unable to write integrations file")
-			return
+			return fmt.Errorf("unable to write integrations file")
 		}
 		_, _ = green.Printf("API dependencies updated\n")
+		return nil
 	},
 }
 
@@ -135,34 +136,11 @@ func init() {
 
 	log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
 
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal("could not get your current working directory")
-	}
-
-	wgDefaultDir := "."
-
-	dir, err := files.FindDirectory(wd, ".wundergraph")
-	if err != nil {
-		log.Fatal("could not find .wundergraph directory from your current working directory", abstractlogger.String("wd", wd), abstractlogger.Error(err))
-	}
-
-	if dir != "" {
-		relPath, err := filepath.Rel(wd, dir)
-		if err != nil {
-			log.Fatal("could not calculate relative path from your wundergraph directory", abstractlogger.Error(err))
-		}
-		wgDefaultDir = relPath
-	}
-
-	defaultConfigJSONPath := path.Join(wundergraphDir, "generated", "wundergraph.config.json")
-
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "sets the log level")
-	rootCmd.PersistentFlags().StringVarP(&wunderGraphConfigFile, "config", "c", defaultConfigJSONPath, "config is the path to the wundergraph config")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
-	rootCmd.PersistentFlags().StringVar(&wundergraphDir, "wundergraph-dir", wgDefaultDir, "path to your .wundergraph directory")
+	rootCmd.PersistentFlags().StringVar(&wundergraphDir, "wundergraph-dir", files.WunderGraphDir, "path to your .wundergraph directory")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
