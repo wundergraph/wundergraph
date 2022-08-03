@@ -510,21 +510,9 @@ export interface QueryArgsWithInput<Input> extends QueryArgs {
 	input: Input;
 }
 
-// export interface QueryProps<Input, Args = QueryArgs> {
-// 	operationName: string;
-// 	input?: Input;
-// 	options?: Args;
-// }
-
 export type QueryProps<Args extends QueryArgs = QueryArgs> = Args & {
 	operationName: string;
 };
-
-// export interface SubscriptionProps<Input, Args = SubscriptionArgs> {
-// 	operationName: string;
-// 	input?: Input;
-// 	options?: Args;
-// }
 
 export type SubscriptionProps<Args extends SubscriptionArgs = SubscriptionArgs> = Args & {
 	operationName: string;
@@ -549,12 +537,6 @@ export interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscr
 export interface SubscriptionArgsWithInput<Input> extends SubscriptionArgs {
 	input: Input;
 }
-
-// export interface MutationProps<Input, Args = MutationArgs> {
-// 	operationName: string;
-// 	input?: Input;
-// 	options?: Args;
-// }
 
 export type MutationProps<Args extends MutationArgs = MutationArgs> = Args & {
 	operationName: string;
