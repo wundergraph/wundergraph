@@ -2,7 +2,6 @@
 title: Configure advanced security
 pageTitle: WunderGraph - Configure advanced security
 description:
-hideTableOfContents: true
 ---
 
 This section is about the `security` property of `configureWunderGraphApplication`.

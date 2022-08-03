@@ -2,7 +2,6 @@
 title: Configure Introspection
 pageTitle: WunderGraph - Configure Introspection
 description:
-hideTableOfContents: true
 ---
 
 When running `wunderctl up`,

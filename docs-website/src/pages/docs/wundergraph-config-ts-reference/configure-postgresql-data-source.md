@@ -2,7 +2,6 @@
 title: Configure PostgreSQL Data Source
 pageTitle: WunderGraph - Configure PostgreSQL Data Source
 description:
-hideTableOfContents: true
 ---
 
 The PostgreSQL data source introspects the database and generates a GraphQL schema.

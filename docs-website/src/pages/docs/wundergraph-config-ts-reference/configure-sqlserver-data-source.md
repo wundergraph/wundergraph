@@ -2,7 +2,6 @@
 title: Configure SQLServer Data Source
 pageTitle: WunderGraph - Configure SQLServer Data Source
 description:
-hideTableOfContents: true
 ---
 
 The SQLServer data source introspects the database and generates a GraphQL schema.

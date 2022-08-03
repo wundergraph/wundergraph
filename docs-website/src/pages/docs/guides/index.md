@@ -2,6 +2,9 @@
 title: Guides
 pageTitle: WunderGraph - Guides
 description:
+hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Here's an overview of all the available guides.

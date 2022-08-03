@@ -2,6 +2,7 @@
 title: Tutorials
 pageTitle: WunderGraph - Tutorials
 description:
+isIndexFile: true
 ---
 
 Here's an overview of all available tutorials

@@ -40,6 +40,7 @@ importers:
       '@sindresorhus/slugify': ^2.1.0
       '@tailwindcss/typography': ^0.5.2
       '@types/node': ^18.0.3
+      '@types/react': ^18.0.15
       autoprefixer: ^10.4.7
       clsx: ^1.2.0
       copy-to-clipboard: ^3.3.1
@@ -59,7 +60,7 @@ importers:
       tailwindcss: ^3.1.4
       tailwindcss-radix: ^1.6.0
     dependencies:
-      '@docsearch/react': 3.1.1_biqbaboplfbrettd7655fr4n2y
+      '@docsearch/react': 3.1.1_bb2bxwco6ptpubzwpazr52qf6i
       '@headlessui/react': 1.6.6_biqbaboplfbrettd7655fr4n2y
       '@heroicons/react': 1.0.6_react@18.2.0
       '@markdoc/markdoc': 0.1.3
@@ -84,6 +85,7 @@ importers:
       tailwindcss-radix: 1.6.0
     devDependencies:
       '@types/node': 18.0.3
+      '@types/react': 18.0.15
       eslint: 8.19.0
       eslint-config-next: 12.2.0_eslint@8.19.0
       prettier: 2.7.1
@@ -135,7 +137,7 @@ importers:
     specifiers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
-      '@types/react': ^18.0.5
+      '@types/react': ^18.0.15
       '@wundergraph/protobuf': workspace:^0.91.1
       '@wundergraph/sdk': workspace:^0.96.1
       handlebars: ^4.7.7
@@ -154,7 +156,7 @@ importers:
     devDependencies:
       '@types/node': 17.0.32
       '@types/object-hash': 1.3.4
-      '@types/react': 18.0.8
+      '@types/react': 18.0.15
       '@wundergraph/sdk': link:../sdk
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
@@ -1055,7 +1057,7 @@ packages:
     resolution: {integrity: sha512-utLgg7E1agqQeqCJn05DWC7XXMk4tMUUnL7MZupcknRu2OzGN13qwey2qA/0NAKkVBGugiWtON0+rlU0QIPojg==}
     dev: false
 
-  /@docsearch/react/3.1.1_biqbaboplfbrettd7655fr4n2y:
+  /@docsearch/react/3.1.1_bb2bxwco6ptpubzwpazr52qf6i:
     resolution: {integrity: sha512-cfoql4qvtsVRqBMYxhlGNpvyy/KlCoPqjIsJSZYqYf9AplZncKjLBTcwBu6RXFMVCe30cIFljniI4OjqAU67pQ==}
     peerDependencies:
       '@types/react': '>= 16.8.0 < 19.0.0'
@@ -1065,6 +1067,7 @@ packages:
       '@algolia/autocomplete-core': 1.7.1
       '@algolia/autocomplete-preset-algolia': 1.7.1_algoliasearch@4.13.1
       '@docsearch/css': 3.1.1
+      '@types/react': 18.0.15
       algoliasearch: 4.13.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
@@ -2768,7 +2771,13 @@ packages:
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
-    dev: true
+
+  /@types/react/18.0.15:
+    resolution: {integrity: sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==}
+    dependencies:
+      '@types/prop-types': 15.7.5
+      '@types/scheduler': 0.16.2
+      csstype: 3.0.11
 
   /@types/react/18.0.8:
     resolution: {integrity: sha512-+j2hk9BzCOrrOSJASi5XiOyBbERk9jG5O73Ya4M0env5Ixi6vUNli4qy994AINcEF+1IEHISYFfIT4zwr++LKw==}
@@ -2793,7 +2802,6 @@ packages:
 
   /@types/scheduler/0.16.2:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
-    dev: true
 
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
@@ -4233,7 +4241,6 @@ packages:
 
   /csstype/3.0.11:
     resolution: {integrity: sha512-sa6P2wJ+CAbgyy4KFssIb/JNMLxFvKF1pCYCSXS8ZMuqZnMsrxqI2E5sPyoTpxoPU/gVZMzr2zjOfg8GIZOMsw==}
-    dev: true
 
   /damerau-levenshtein/1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}

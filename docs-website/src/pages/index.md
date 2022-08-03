@@ -2,7 +2,7 @@
 title: Overview
 pageTitle: WunderGraph Documentation
 description: Explore our guides and examples to integrate WunderGraph.
-hideTableOfContents: true
+isIndexFile: true
 ---
 
 Learn how to use and configure WunderGraph. {% .lead %}

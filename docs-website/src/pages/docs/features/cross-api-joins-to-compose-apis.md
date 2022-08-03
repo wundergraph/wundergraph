@@ -140,4 +140,6 @@ It simply returns the Query type, so you can join a response of one API with ano
 ## Reference Documentation
 
 If you want to learn more about how JOINs work,
-you can read the reference docs on the `@export` directive.
+you can read the reference docs on the `@export` directive,
+the `@internal` directive,
+as well as the `_join` field.

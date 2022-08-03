@@ -2,7 +2,6 @@
 title: Configure SQLite Data Source
 pageTitle: WunderGraph - Configure SQLite Data Source
 description:
-hideTableOfContents: true
 ---
 
 The SQLite data source introspects the database and generates a GraphQL schema.

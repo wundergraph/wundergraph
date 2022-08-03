@@ -2,7 +2,6 @@
 title: Configure Apollo Federation Data Source
 pageTitle: WunderGraph - Configure Apollo Federation Data Source
 description:
-hideTableOfContents: true
 ---
 
 With the `Apollo Federation` data source,

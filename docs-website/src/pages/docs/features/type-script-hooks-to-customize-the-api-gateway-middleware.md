@@ -63,7 +63,14 @@ export interface HooksConfig {
 }
 ```
 
-You're able to define 5 distinct hooks: `mockResolve`, `preResolve`, `mutatingPreResolve`, `postResolve` and `mutatingPostResolve`.
+You're able to define 5 distinct hooks:
+
+1. `mockResolve`
+2. `preResolve`
+3. `mutatingPreResolve`
+4. `postResolve`
+5. `mutatingPostResolve`.
+
 The pre- and postResolve hooks are good for logging or side effects, e.g. sending an E-Mail after a mutation.
 Mutating Hooks can be used to "mutate" the Request, e.g. change the input variables (preResolve) or modify the response (postResolve).
 

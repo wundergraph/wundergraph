@@ -2,7 +2,6 @@
 title: Generate SDKs for all your APIs
 pageTitle: WunderGraph - Generate SDKs for all your APIs
 description:
-hideTableOfContents: true
 ---
 
 Imagine you've got to build a new product.

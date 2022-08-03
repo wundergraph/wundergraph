@@ -2,6 +2,9 @@
 title: Overview
 pageTitle: WunderGraph - Supported Backend Languages & Frameworks - Overview
 description:
+hideTableOfContents: true
+fullWidthContent: true
+isIndexFile: true
 ---
 
 Find below an overview of all the supported Backend Languages & Frameworks.
