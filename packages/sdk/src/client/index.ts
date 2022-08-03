@@ -95,6 +95,7 @@ export class WunderGraphClient<Role> {
 			const response = await this.fetch(url, {
 				headers,
 				method: 'GET',
+				signal: query.abortSignal,
 			});
 			return this.httpResponseToQueryResult(response);
 		} catch (e: any) {
@@ -129,10 +130,11 @@ export class WunderGraphClient<Role> {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
 			const url = this.baseURL + '/' + this.applicationPath + '/operations/' + mutation.operationName + params;
-			const body = mutation?.input !== undefined ? JSON.stringify(mutation.input) : '{}';
+			const body = mutation.input !== undefined ? JSON.stringify(mutation.input) : '{}';
 			const response = await this.fetch(url, {
 				headers,
 				method: 'POST',
+				signal: mutation.abortSignal,
 				body,
 			});
 			return this.httpResponseToMutationResult(response);
@@ -508,21 +510,9 @@ export interface QueryArgsWithInput<Input> extends QueryArgs {
 	input: Input;
 }
 
-// export interface QueryProps<Input, Args = QueryArgs> {
-// 	operationName: string;
-// 	input?: Input;
-// 	options?: Args;
-// }
-
 export type QueryProps<Args extends QueryArgs = QueryArgs> = Args & {
 	operationName: string;
 };
-
-// export interface SubscriptionProps<Input, Args = SubscriptionArgs> {
-// 	operationName: string;
-// 	input?: Input;
-// 	options?: Args;
-// }
 
 export type SubscriptionProps<Args extends SubscriptionArgs = SubscriptionArgs> = Args & {
 	operationName: string;
@@ -547,12 +537,6 @@ export interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscr
 export interface SubscriptionArgsWithInput<Input> extends SubscriptionArgs {
 	input: Input;
 }
-
-// export interface MutationProps<Input, Args = MutationArgs> {
-// 	operationName: string;
-// 	input?: Input;
-// 	options?: Args;
-// }
 
 export type MutationProps<Args extends MutationArgs = MutationArgs> = Args & {
 	operationName: string;
