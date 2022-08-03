@@ -84,7 +84,6 @@ for internal and external consumers alike.
 They are able to find the right API for their task
 and integrate it into their software with one single command.
 
-
 There will always be a competitor in the market who understands this and goes API first.
 Those who go API first will leave the competition behind,
 as it will give them a clear advantage.
