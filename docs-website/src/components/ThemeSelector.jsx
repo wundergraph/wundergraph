@@ -50,6 +50,12 @@ export function ThemeSelector(props) {
 	useEffect(() => {
 		if (selectedTheme) {
 			document.documentElement.setAttribute('data-theme', selectedTheme.value)
+			document
+				.querySelector('meta[name="theme-color"]')
+				?.setAttribute(
+					'content',
+					selectedTheme.value === 'dark' ? 'rgb(11, 15, 26)' : '#ffffff'
+				)
 		} else {
 			setSelectedTheme(
 				themes.find(
