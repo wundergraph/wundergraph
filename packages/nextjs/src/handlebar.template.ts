@@ -2,8 +2,8 @@
 export const handlebarTemplate = `
 import type { {{ modelImports }} } from "./models";
 import {createContext} from "react";
-import { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput, hooks, WunderGraphContextProperties, Client } from "@wundergraph/nextjs";
-
+import { hooks, WunderGraphContextProperties } from "@wundergraph/nextjs";
+import { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from "@wundergraph/sdk/client";
 export type Role = {{{ roleDefinitions }}};
 
 {{#if hasAuthProviders}}
@@ -31,13 +31,13 @@ export enum S3Provider {
 
 const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = {
     ssrCache: {},
-		client: null,
+    client: null,
     clientConfig: {
-			applicationHash: "{{applicationHash}}",
-			applicationPath: "{{applicationPath}}",
-			baseURL: "{{baseURL}}",
-			sdkVersion: "{{sdkVersion}}",
-    	authenticationEnabled: {{hasAuthProviders}},
+        applicationHash: "{{applicationHash}}",
+        applicationPath: "{{applicationPath}}",
+        baseURL: "{{baseURL}}",
+        sdkVersion: "{{sdkVersion}}",
+        authenticationEnabled: {{hasAuthProviders}},
     },
     user: null,
     setUser: value => {},
@@ -88,14 +88,12 @@ export const useSubscription = {
 {{#each subscriptionsWithInput}}
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: false,
         requiresAuthentication: {{requiresAuthentication}},
     })(args),
 {{/each}}
 {{#each subscriptionsWithoutInput}}
     {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: false,
         requiresAuthentication: {{requiresAuthentication}},
     })(args),
 {{/each}}
@@ -105,15 +103,15 @@ export const useLiveQuery = {
 {{#each liveQueriesWithInput}}
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: true,
         requiresAuthentication: {{requiresAuthentication}},
+        isLiveQuery: true,
     })(args),
 {{/each}}
 {{#each liveQueriesWithoutInput}}
     {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
-        isLiveQuery: true,
         requiresAuthentication: {{requiresAuthentication}},
+        isLiveQuery: true,
     })(args),
 {{/each}}
 };
