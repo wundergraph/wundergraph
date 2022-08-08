@@ -46,5 +46,5 @@ query Dragons {
 Now, we can run the application using `npm run start` and access the generated RPC API.
 
 ```bash
-$ curl http://localhost:9991/api/main/operations/Dragons
+$ curl http://localhost:9991/app/main/operations/Dragons
 ```
