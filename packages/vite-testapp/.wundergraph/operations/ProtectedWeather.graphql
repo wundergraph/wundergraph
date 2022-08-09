@@ -1,0 +1,25 @@
+query ($forCity: String!) @rbac(requireMatchAll: [admin]) {
+	getCityByName: weather_getCityByName(name: $forCity) {
+		name
+		coord {
+			lat
+			lon
+		}
+		weather {
+			summary {
+				title
+				description
+				icon
+			}
+			temperature {
+				actual
+				min
+				max
+			}
+			wind {
+				speed
+				deg
+			}
+		}
+	}
+}
