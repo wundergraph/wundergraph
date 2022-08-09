@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"io/fs"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"unicode"
 
+	"github.com/wundergraph/graphql-go-tools/pkg/ast"
+	"github.com/wundergraph/graphql-go-tools/pkg/astnormalization"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/astprinter"
+	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 )
 
 type Loader struct {
@@ -28,13 +32,43 @@ type Output struct {
 	Info   []string  `json:"info"`
 }
 
-func (l *Loader) Load(dirName string) string {
+func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath string) string {
 
 	var (
 		out Output
 	)
 
-	err := filepath.Walk(dirName, func(path string, info fs.FileInfo, err error) error {
+	// check if schema file exists with os.Stat(schemaFilePath)
+	if _, err := os.Stat(schemaFilePath); os.IsNotExist(err) {
+		out.Errors = append(out.Errors, fmt.Sprintf("schema file %s does not exist", schemaFilePath))
+		return ""
+	}
+
+	schemaBytes, err := os.ReadFile(schemaFilePath)
+	if err != nil {
+		out.Errors = append(out.Errors, fmt.Sprintf("error reading schema file %s", schemaFilePath))
+		return ""
+	}
+
+	schemaDocument, report := astparser.ParseGraphqlDocumentBytes(schemaBytes)
+	if report.HasErrors() {
+		out.Errors = append(out.Errors, report.Error())
+		return ""
+	}
+
+	err = asttransform.MergeDefinitionWithBaseSchema(&schemaDocument)
+	if err != nil {
+		out.Errors = append(out.Errors, fmt.Sprintf("error merging schema with base schema %s", schemaFilePath))
+		return ""
+	}
+
+	fragments, err := l.loadFragments(&schemaDocument, fragmentsRootPath)
+	if err != nil {
+		out.Errors = append(out.Errors, fmt.Sprintf("error loading fragments %s", fragmentsRootPath))
+		return ""
+	}
+
+	err = filepath.Walk(operationsRootPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -80,13 +114,15 @@ func (l *Loader) Load(dirName string) string {
 		return string(encodedOutput)
 	}
 
+	normalizer := astnormalization.NewWithOpts(astnormalization.WithRemoveFragmentDefinitions())
+
 	for i, file := range out.Files {
 		content, err := ioutil.ReadFile(file.FilePath)
 		if err != nil {
 			out.Errors = append(out.Errors, fmt.Sprintf("error reading file: %s", err.Error()))
 			continue
 		}
-		doc, report := astparser.ParseGraphqlDocumentBytes(content)
+		doc, report := astparser.ParseGraphqlDocumentString(string(content) + fragments)
 		if report.HasErrors() {
 			out.Errors = append(out.Errors, fmt.Sprintf("error parsing operation: %s", report.Error()))
 			continue
@@ -95,6 +131,13 @@ func (l *Loader) Load(dirName string) string {
 			out.Errors = append(out.Errors, fmt.Sprintf("graphql document must contain exactly one operation: %s\n", file.FilePath))
 			continue
 		}
+
+		normalizer.NormalizeOperation(&doc, &schemaDocument, &report)
+		if report.HasErrors() {
+			out.Errors = append(out.Errors, fmt.Sprintf("error normalizing operation: %s, operationFilePath: %s", report.Error(), file.FilePath))
+			continue
+		}
+
 		nameRef := doc.Input.AppendInputString(file.OperationName)
 		doc.OperationDefinitions[0].Name = nameRef
 		namedOperation, err := astprinter.PrintString(&doc, nil)
@@ -114,6 +157,45 @@ func (l *Loader) Load(dirName string) string {
 		encodedOutput, _ = json.Marshal(out)
 	}
 	return string(encodedOutput)
+}
+
+func (l *Loader) loadFragments(schemaDocument *ast.Document, fragmentsRootPath string) (string, error) {
+	if _, err := os.Stat(fragmentsRootPath); os.IsNotExist(err) {
+		return "", nil
+	}
+	var fragments string
+	err := filepath.Walk(fragmentsRootPath, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".graphql") {
+			return nil
+		}
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		doc, report := astparser.ParseGraphqlDocumentBytes(content)
+		if report.HasErrors() {
+			return fmt.Errorf("error parsing fragment: %s", report.Error())
+		}
+		for i := range doc.RootNodes {
+			if doc.RootNodes[i].Kind != ast.NodeKindFragmentDefinition {
+				doc.RemoveRootNode(doc.RootNodes[i])
+			}
+		}
+		onlyFragments, err := astprinter.PrintStringIndent(&doc, schemaDocument, "  ")
+		if err != nil {
+			return err
+		}
+		fragments += onlyFragments
+		fragments += "\n\n"
+		return nil
+	})
+	return fragments, err
 }
 
 func isValidOperationName(s string) bool {
