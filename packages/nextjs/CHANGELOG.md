@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.35...@wundergraph/nextjs@0.1.0) (2022-08-09)
+
+### Features
+
+- extract typescript client from nextjs ([#72](https://github.com/wundergraph/wundergraph/issues/72)) ([282797d](https://github.com/wundergraph/wundergraph/commit/282797dd4d28dce922cca8a3d5092d68c508f5bd))
+
+### Bug Fixes
+
+- nextjs client fails hard when a page misses "withWunderGraph" ([#73](https://github.com/wundergraph/wundergraph/issues/73)) ([719ad5c](https://github.com/wundergraph/wundergraph/commit/719ad5ce9c3fe68dcf039528a0863fbf5adbdb38))
+
 ## [0.0.35](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.0.34...@wundergraph/nextjs@0.0.35) (2022-07-18)
 
 **Note:** Version bump only for package @wundergraph/nextjs

@@ -66,6 +66,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Subscriptions & Live Queries](./examples/nextjs-postgres-prisma)
 - [Cross API joins across data-sources](/examples/cross-api-joins)
 - [Inject a Bearer Token with Auth0](./examples/inject-bearer)
+- [Migrate from Apollo GraphQL](./examples/migrate-from-apollo)
 - [Publish & Install APIs](./examples/publish-install-api)
 - [Dockerize WunderGraph](https://github.com/wundergraph/docker)
 
