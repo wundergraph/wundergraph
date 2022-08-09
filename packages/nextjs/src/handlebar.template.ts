@@ -1,118 +1,65 @@
 //language=handlebars
 export const handlebarTemplate = `
-import type { {{ modelImports }} } from "./models";
-import {createContext} from "react";
-import { hooks, WunderGraphContextProperties } from "@wundergraph/nextjs";
-import { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from "@wundergraph/sdk/client";
-export type Role = {{{ roleDefinitions }}};
+import { NextComponentType } from "next";
+import { 
+    withWunderGraph as withInternalWunderGraph,
+    WithWunderGraphOptions,
+} from "@wundergraph/nextjs";
 
-{{#if hasAuthProviders}}
-export enum AuthProvider {
-{{#each authProviders}}
-    "{{.}}" = "{{.}}",
-{{/each}}
-}
+import {
+    useWunderGraph,
+    wunderGraphClient,
+    wunderGraphContext,
+    AuthProviders,
+    AuthProvider,
+    S3Provider,
+    Role,
+    {{hookImports}}
+} from './react'
 
-export const AuthProviders = {
-{{#each authProviders}}
-    "{{.}}": AuthProvider.{{.}},
-{{/each}}
-};
-{{/if}}
+// backwardscompatibility
+export { useWunderGraph, AuthProviders, AuthProvider, S3Provider }
 
-{{#if hasS3Providers}}
-export enum S3Provider {
-{{#each s3Providers}}
-    "{{.}}" = "{{.}}",
-{{/each}}
-}
-{{/if}}
+export const withWunderGraph = (Page: NextComponentType<any, any, any>, options?: Partial<WithWunderGraphOptions<Role>>) => withInternalWunderGraph(Page, {
+    client: wunderGraphClient,
+    context: wunderGraphContext,
+    ...options,
+    {{#if hasAuthProviders}}authenticationEnabled: true{{/if}}
+});
 
-
-const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = {
-    ssrCache: {},
-    client: null,
-    clientConfig: {
-        applicationHash: "{{applicationHash}}",
-        applicationPath: "{{applicationPath}}",
-        baseURL: "{{baseURL}}",
-        sdkVersion: "{{sdkVersion}}",
-        authenticationEnabled: {{hasAuthProviders}},
-    },
-    user: null,
-    setUser: value => {},
-    isWindowFocused: "pristine",
-    setIsWindowFocused: value => {},
-    refetchMountedOperations: 0,
-    setRefetchMountedOperations: value => {},
-};
-
-export const
-    WunderGraphContext = createContext<WunderGraphContextProperties<Role>>(defaultWunderGraphContextProperties);
-
-export const withWunderGraph = hooks.withWunderGraphContextWrapper(WunderGraphContext,defaultWunderGraphContextProperties);
-				
-export const useWunderGraph = hooks.useWunderGraph<Role,{{#if hasAuthProviders}}AuthProvider{{else}}""{{/if}},{{#if hasS3Providers}}S3Provider{{/if}}>(WunderGraphContext);
-        
 export const useQuery = {
 {{#each queriesWithInput}}
-    {{name}}: (args: QueryArgsWithInput<{{name}}Input>) => hooks.useQueryWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-    })(args),
+    {{name}}: use{{name}}Query,
 {{/each}}
 {{#each queriesWithoutInput}}
-    {{name}}: hooks.useQueryWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-    }),
+    {{name}}: use{{name}}Query,
 {{/each}}
 };
 
 export const useMutation = {
 {{#each mutationsWithoutInput}}
-    {{name}}: () => hooks.useMutationWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-    }),
+    {{name}}: use{{name}}Mutation,
 {{/each}}
 {{#each mutationsWithInput}}
-    {{name}}: () => hooks.useMutationWithInput<{{name}}Input,{{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-    }),
+    {{name}}: use{{name}}Mutation,
 {{/each}}
 };
 
 export const useSubscription = {
 {{#each subscriptionsWithInput}}
-    {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-    })(args),
+    {{name}}: use{{name}}Subscription,
 {{/each}}
 {{#each subscriptionsWithoutInput}}
-    {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-    })(args),
+    {{name}}: use{{name}}Subscription,
 {{/each}}
 };
             
 export const useLiveQuery = {
 {{#each liveQueriesWithInput}}
-    {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-        isLiveQuery: true,
-    })(args),
+    {{name}}: use{{name}}LiveQuery,
 {{/each}}
 {{#each liveQueriesWithoutInput}}
-    {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
-        operationName: "{{name}}",
-        requiresAuthentication: {{requiresAuthentication}},
-        isLiveQuery: true,
-    })(args),
+    {{name}}: use{{name}}LiveQuery,
 {{/each}}
 };
 `;

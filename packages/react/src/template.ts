@@ -16,13 +16,24 @@ import {
 import hash from 'object-hash';
 import { OperationType } from '@wundergraph/protobuf';
 
-import { ReactTemplate } from '@wundergraph/react/dist/template';
+export interface ReactTemplateOptions {
+	isNextJs?: boolean;
+}
 
-export class NextJsTemplate implements Template {
+export class ReactTemplate implements Template {
+	private isNextJs = false;
+
+	constructor(options?: ReactTemplateOptions) {
+		if (options?.isNextJs) {
+			this.isNextJs = options.isNextJs;
+		}
+	}
+
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
+			packageName: this.isNextJs ? 'nextjs' : 'react',
 			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : listenAddrHttp,
 			sdkVersion: config.sdkVersion,
 			applicationPath: config.deployment.path,
@@ -54,23 +65,13 @@ export class NextJsTemplate implements Template {
 				filterOperation(OperationType.SUBSCRIPTION, false)
 			).map(mapOperation),
 			hasAuthProviders: config.authentication.cookieBased.length !== 0,
-			hookImports: config.application.Operations.filter((op) => !op.Internal)
-				.map((op) => {
-					switch (op.OperationType) {
-						case OperationType.QUERY:
-							const query = `use${op.Name}Query`;
-							return op.LiveQuery?.enable ? `${query}, use${op.Name}LiveQuery` : query;
-						case OperationType.MUTATION:
-							return `use${op.Name}Mutation`;
-						case OperationType.SUBSCRIPTION:
-							return `use${op.Name}Subscription`;
-					}
-				})
-				.join(', '),
+			authProviders: config.authentication.cookieBased.map((provider) => provider.id),
+			hasS3Providers: config.application.S3UploadProvider.length !== 0,
+			s3Providers: config.application.S3UploadProvider.map((provider) => provider.name),
 		});
 		return Promise.resolve([
 			{
-				path: 'nextjs.ts',
+				path: 'react.tsx',
 				content: formatTypeScript(content),
 				doNotEditHeader: true,
 			},
@@ -83,7 +84,6 @@ export class NextJsTemplate implements Template {
 			new TypeScriptResponseModels(),
 			new TypeScriptResponseDataModels(),
 			new BaseTypeScriptDataModel(),
-			new ReactTemplate({ isNextJs: true }),
 		];
 	}
 }
