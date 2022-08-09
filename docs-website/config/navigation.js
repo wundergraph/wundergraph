@@ -196,6 +196,10 @@ const navigation = [
 				title: 'Auth0 OpenID Connect Authentication',
 				href: '/docs/examples/auth0-openid-connect-authentication',
 			},
+			{
+				title: 'GraphQL Fragments',
+				href: '/docs/examples/fragments',
+			},
 		],
 	},
 	{
