@@ -1,0 +1,10 @@
+query Dragons {
+	spacex_dragons {
+		...Dragon
+	}
+}
+
+fragment Dragon on spacex_Dragon {
+	name
+	active
+}
