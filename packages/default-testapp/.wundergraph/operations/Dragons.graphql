@@ -5,8 +5,7 @@ query Dragons {
 		active
 		crewCapacity
 		posts {
-			id
-			title
+			...PostsFragment
 		}
 	}
 }
