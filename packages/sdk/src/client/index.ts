@@ -154,7 +154,7 @@ export class WunderGraphClient<Role> {
 		subscription: SubscriptionProps<Partial<InternalSubscriptionArgsWithInput<Input>>>,
 		cb: (response: SubscriptionResult<Data>) => void
 	) => {
-		if ('EventSource' in global) {
+		if ('EventSource' in globalThis) {
 			return this.subscribeWithSSE(subscription, cb);
 		}
 		return this.subscribeWithFetch(subscription, cb);
