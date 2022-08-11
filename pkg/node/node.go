@@ -182,7 +182,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 		if options.staticConfig != nil {
 			n.log.Info("Api config: loading cached config")
-			n.configCh <- *options.staticConfig
+			go n.startServer(*options.staticConfig)
 		}
 	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
@@ -519,7 +519,7 @@ func (n *Node) netPollConfig() {
 	)
 	for {
 		buf.Reset()
-		req, err := http.NewRequest(http.MethodGet, n.cfg.LoadConfig.URL+"/wundernode/config", nil)
+		req, err := http.NewRequest(http.MethodGet, n.cfg.LoadConfig.URL, nil)
 		if err != nil {
 			n.errCh <- err
 			return

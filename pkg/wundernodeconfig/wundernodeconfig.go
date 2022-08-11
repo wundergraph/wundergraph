@@ -15,14 +15,14 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	ListenAddr string `envconfig:"server_listen_addr" default:"localhost:443"`
-	ListenTLS  bool   `envconfig:"listen_tls" default:"true"`
+	ListenAddr string `envconfig:"server_listen_addr" default:":9991"`
+	ListenTLS  bool   `envconfig:"listen_tls" default:"false"`
 }
 
 type LoadConfig struct {
-	URL              string        `envconfig:"load_config_url" default:"https://api.wundergraph.com"`
+	URL              string        `envconfig:"load_config_url" default:"https://api.wundergraph.com/wundernode/config"`
 	BearerToken      string        `envconfig:"load_config_token" required:"false"`
-	PollingInterval  time.Duration `envconfig:"load_config_polling_interval" default:"10s"`
+	PollingInterval  time.Duration `envconfig:"load_config_polling_interval" default:"5s"`
 	CachedConfigPath string        `envconfig:"load_config_cached_config_path" default:"/tmp/wundernode_config.json"`
 }
 
