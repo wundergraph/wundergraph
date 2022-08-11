@@ -16,6 +16,11 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/net/idna"
+	"golang.org/x/time/rate"
+
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -23,15 +28,13 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/net/idna"
-	"golang.org/x/time/rate"
 
 	"github.com/libp2p/go-reuseport"
 
 	"github.com/gorilla/mux"
 )
+
+const cachedConfigFilePerm = 600 // rw------- Owner rw
 
 func New(ctx context.Context, info BuildInfo, cfg *wundernodeconfig.Config, log abstractlogger.Logger) *Node {
 	return &Node{
@@ -78,6 +81,7 @@ type options struct {
 	staticConfig        *wgpb.WunderNodeConfig
 	fileSystemConfig    *string
 	enableDebugMode     bool
+	enableManagedMode   bool
 	forceHttpsRedirects bool
 	enableIntrospection bool
 	configFileChange    chan struct{}
@@ -150,6 +154,12 @@ func WithDebugMode(enable bool) Option {
 	}
 }
 
+func WithManagedMode(enable bool) Option {
+	return func(options *options) {
+		options.enableManagedMode = enable
+	}
+}
+
 func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	return func(options *options) {
 		options.forceHttpsRedirects = forceHttpsRedirects
@@ -164,10 +174,20 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	n.options = options
 
-	if options.staticConfig != nil {
+	switch {
+	case options.enableManagedMode:
+		n.log.Info("Api config: managed mode")
+		go n.reconfigureOnConfigUpdate()
+		go n.netPollConfig()
+
+		if options.staticConfig != nil {
+			n.log.Info("Api config: loading cached config")
+			n.configCh <- *options.staticConfig
+		}
+	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
 		go n.startServer(*options.staticConfig)
-	} else if options.fileSystemConfig != nil {
+	case options.fileSystemConfig != nil:
 		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
@@ -175,7 +195,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			go n.reconfigureOnConfigUpdate()
 			go n.filePollConfig(*options.fileSystemConfig)
 		}
-	} else {
+	default:
 		n.log.Info("Api config: network polling")
 		go n.reconfigureOnConfigUpdate()
 		go n.netPollConfig()
@@ -378,7 +398,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	if n.cfg.Server.ListenTLS {
 		manager := autocert.Manager{
 			Prompt: autocert.AcceptTOS,
-			//Cache:  certCache,
+			// Cache:  certCache,
 			HostPolicy: func(ctx context.Context, host string) error {
 				for _, allowedHost := range allowedHosts {
 					if allowedHost == host {
@@ -523,14 +543,21 @@ func (n *Node) netPollConfig() {
 				time.Sleep(time.Second * time.Duration(10))
 				continue
 			}
+			data := buf.Bytes()
 			var config wgpb.WunderNodeConfig
-			err = json.Unmarshal(buf.Bytes(), &config)
+			err = json.Unmarshal(data, &config)
 			if err != nil {
 				n.log.Error("netPollConfig json.Unmarshal", abstractlogger.Error(err))
 				time.Sleep(time.Second * time.Duration(10))
 				etag = ""
 				continue
 			}
+
+			if n.cfg.LoadConfig.CachedConfigPath != "" {
+				// do not handle error - fail to cache config is not a problem
+				_ = ioutil.WriteFile(n.cfg.LoadConfig.CachedConfigPath, data, cachedConfigFilePerm)
+			}
+
 			select {
 			case n.configCh <- config:
 			default:
