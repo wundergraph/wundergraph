@@ -1,0 +1,4 @@
+fragment PostsFragment on public_Post {
+	id
+	title
+}

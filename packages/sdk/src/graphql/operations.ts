@@ -1263,13 +1263,15 @@ interface GqlFile {
 	content: string;
 }
 
-export const loadOperations = (): string => {
+export const loadOperations = (schemaFileName: string): string => {
 	const operationsPath = path.join(process.cwd(), 'operations');
+	const fragmentsPath = path.join(process.cwd(), 'fragments');
+	const schemaFilePath = path.join(process.cwd(), 'generated', schemaFileName);
 	const result = wunderctlExec({
-		cmd: ['loadoperations', operationsPath],
+		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath],
 	});
 	if (result?.failed) {
-		return '';
+		throw new Error(result?.stderr);
 	}
 	const output = result?.stdout;
 	if (output) {

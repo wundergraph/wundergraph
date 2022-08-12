@@ -651,7 +651,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		done();
 		console.log(`${new Date().toLocaleTimeString()}: ${schemaFileName} updated`);
 
-		const operationsContent = loadOperations();
+		const operationsContent = loadOperations(schemaFileName);
 		const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
 			keepFromClaimVariables: false,
 			interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
