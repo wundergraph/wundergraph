@@ -20485,7 +20485,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         \\"body\\": {
           \\"kind\\": 0,
-          \\"staticVariableContent\\": \\"{{ .arguments.postJwtRefresh_tokenInput }}\\",
+          \\"staticVariableContent\\": \\"{{ .arguments.postJwtRefreshTokenInput }}\\",
           \\"environmentVariableName\\": \\"\\",
           \\"environmentVariableDefaultValue\\": \\"\\",
           \\"placeholderVariableName\\": \\"\\"
@@ -20673,7 +20673,7 @@ exports[`with_path_parameters: fusion_schema 1`] = `
 "type Mutation {
   api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_PostPasswordlessStart
   api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_PostPasswordlessLogin
-  api_postJwtRefreshToken(postJwtRefresh_tokenInput: api_postJwtRefresh_tokenInput): api_PostJwtRefreshToken
+  api_postJwtRefreshToken(postJwtRefreshTokenInput: api_postJwtRefreshTokenInput): api_PostJwtRefreshToken
   api_postLogout(refreshToken: String!): JSON
   api_postUserByUserId(userId: String!, postUserUserIdInput: api_postUserUserIdInput): api_PostUserByUserId
 }
@@ -20722,7 +20722,7 @@ type api_PostJwtRefreshToken {
   token: String
 }
 
-input api_postJwtRefresh_tokenInput {
+input api_postJwtRefreshTokenInput {
   refreshToken: String
   token: String
 }
