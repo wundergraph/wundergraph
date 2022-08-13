@@ -91,18 +91,7 @@ paths:
                           type: string
                         type:
                           type: string
-                          enum:
-                            [
-                              BROWSER,
-                              DESKTOP,
-                              LAPTOP,
-                              MOBILE,
-                              OTHER,
-                              SERVER,
-                              TABLET,
-                              TV,
-                              UNKNOWN,
-                            ]
+                          enum: [BROWSER, DESKTOP, LAPTOP, MOBILE, OTHER, SERVER, TABLET, TV, UNKNOWN]
               required:
                 - code
       responses:
@@ -208,7 +197,7 @@ paths:
                 properties:
                   message:
                     type: string
-  /jwt/refresh:
+  /jwt/refresh-token:
     post:
       requestBody:
         content:
