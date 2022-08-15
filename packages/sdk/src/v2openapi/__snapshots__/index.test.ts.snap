@@ -20454,7 +20454,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       {
         \\"typeName\\": \\"Mutation\\",
         \\"fieldNames\\": [
-          \\"api_postJwtRefresh\\"
+          \\"api_postJwtRefreshToken\\"
         ]
       }
     ],
@@ -20467,7 +20467,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"environmentVariableDefaultValue\\": \\"\\",
           \\"environmentVariableName\\": \\"\\",
           \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/jwt/refresh\\"
+          \\"staticVariableContent\\": \\"/jwt/refresh-token\\"
         },
         \\"baseUrl\\": {
           \\"kind\\": 0,
@@ -20485,7 +20485,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         \\"body\\": {
           \\"kind\\": 0,
-          \\"staticVariableContent\\": \\"{{ .arguments.postJwtRefreshInput }}\\",
+          \\"staticVariableContent\\": \\"{{ .arguments.postJwtRefreshTokenInput }}\\",
           \\"environmentVariableName\\": \\"\\",
           \\"environmentVariableDefaultValue\\": \\"\\",
           \\"placeholderVariableName\\": \\"\\"
@@ -20641,7 +20641,7 @@ exports[`with_path_parameters: fusion_fields 1`] = `
   },
   {
     \\"typeName\\": \\"Mutation\\",
-    \\"fieldName\\": \\"api_postJwtRefresh\\",
+    \\"fieldName\\": \\"api_postJwtRefreshToken\\",
     \\"disableDefaultFieldMapping\\": true,
     \\"argumentsConfiguration\\": [],
     \\"requiresFields\\": [],
@@ -20673,7 +20673,7 @@ exports[`with_path_parameters: fusion_schema 1`] = `
 "type Mutation {
   api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_PostPasswordlessStart
   api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_PostPasswordlessLogin
-  api_postJwtRefresh(postJwtRefreshInput: api_postJwtRefreshInput): api_PostJwtRefresh
+  api_postJwtRefreshToken(postJwtRefreshTokenInput: api_postJwtRefreshTokenInput): api_PostJwtRefreshToken
   api_postLogout(refreshToken: String!): JSON
   api_postUserByUserId(userId: String!, postUserUserIdInput: api_postUserUserIdInput): api_PostUserByUserId
 }
@@ -20717,12 +20717,12 @@ input api_DeviceInput {
   name: String
 }
 
-type api_PostJwtRefresh {
+type api_PostJwtRefreshToken {
   refreshToken: String
   token: String
 }
 
-input api_postJwtRefreshInput {
+input api_postJwtRefreshTokenInput {
   refreshToken: String
   token: String
 }
