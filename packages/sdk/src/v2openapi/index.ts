@@ -1130,9 +1130,13 @@ class RESTApiBuilder {
 		const formattedPath = path.split('/').reduce((prev, current) => {
 			if (current.startsWith('{') && current.endsWith('}')) {
 				const trimmed = current.substring(1, current.length - 1);
-				return prev + trimmed[0].toUpperCase() + trimmed.substring(1);
+				return (
+					prev + trimmed[0].toUpperCase() + this.prettyFieldName(trimmed.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+				);
 			}
-			return prev + current[0]?.toUpperCase() + current.substring(1);
+			return (
+				prev + current[0]?.toUpperCase() + this.prettyFieldName(current.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+			);
 		});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0] + formattedPath.substring(1) + 'Input';
 	}
