@@ -81,9 +81,9 @@
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
-    "fastify": "^3.27.1",
-    "fastify-graceful-shutdown": "^3.1.0",
-    "fastify-plugin": "^3.0.1",
+    "fastify": "^4.4.0",
+    "fastify-graceful-shutdown": "^3.2.0",
+    "fastify-plugin": "^4.2.0",
     "graphql": "^16.3.0",
     "graphql-helix": "^1.12.0",
     "handlebars": "^4.7.7",
@@ -97,8 +97,7 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8",
-    "tsup": "^6.2.2"
+    "swagger2openapi": "^7.0.8"
   },
   "jest": {
     "preset": "ts-jest",

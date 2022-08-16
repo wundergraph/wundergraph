@@ -118,4 +118,4 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 	});
 };
 
-export default fp(FastifyGraphQLPlugin, '3.x');
+export default fp(FastifyGraphQLPlugin, '4.x');

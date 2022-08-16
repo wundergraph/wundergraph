@@ -2,12 +2,12 @@ import a from './../../foo';
 import { buildSchema } from 'graphql';
 
 export default {
-	handler: async (event) => {
-		buildSchema(`SCALAR DateTime`);
+	handler: async () => {
+		buildSchema(`scalar DateTime`);
 
 		return {
 			statusCode: 200,
-			body: JSON.stringify({ message: 'Hello Worldedd', a }),
+			body: JSON.stringify({ message: 'Hello World', a }),
 		};
 	},
 };

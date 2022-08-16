@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
 	"os"
 	"path"
 	"time"
@@ -58,10 +59,28 @@ Use this command if you only want to generate the configuration`,
 
 		if entryPoints.ServerEntryPointAbs != "" {
 			serverOutFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+
+			webhookPaths, err := webhooks.GetWebhooks(entryPoints.WunderGraphDirAbs)
+			if err != nil {
+				return err
+			}
+
+			webhooksBundler := bundler.NewBundler(bundler.Config{
+				Name:          "webhooks-bundler",
+				EntryPoints:   webhookPaths,
+				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+				OutDir:        webhooksOutDir,
+				Logger:        log,
+				OnAfterBundle: func() {
+					log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+				},
+			})
+
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
 				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-				EntryPoint:    serverEntryPointFilename,
+				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
 				Logger:        log,
 				WatchPaths:    []string{},
@@ -69,19 +88,22 @@ Use this command if you only want to generate the configuration`,
 
 			onAfterBuild = func() {
 				<-configRunner.Run(ctx)
+				webhooksBundler.Bundle()
 				hooksBundler.Bundle()
+				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
 			}
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
 			onAfterBuild = func() {
 				<-configRunner.Run(ctx)
+				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
 			}
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
 			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-			EntryPoint:    configEntryPointFilename,
+			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
 			WatchPaths:    []string{},

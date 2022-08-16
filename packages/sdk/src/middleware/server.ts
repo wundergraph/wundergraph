@@ -2,7 +2,8 @@ import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
 import { Headers } from 'headers-polyfill';
 import process from 'node:process';
-import HooksPlugin from './plugins/hooks';
+import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
+import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
 import Fastify, { FastifyInstance, FastifyLoggerInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
@@ -189,11 +190,34 @@ export const startServer = async (
 ) => {
 	fastify.decorateRequest('ctx', null);
 
+	/**
+	 * Calls per event registration. We use it for debugging only.
+	 */
+	fastify.addHook('onRoute', (routeOptions) => {
+		const routeConfig = routeOptions.config as HooksRouteConfig | WebHookRouteConfig | undefined;
+		if (routeConfig?.kind === 'hook') {
+			if (routeConfig.operationName) {
+				fastify.log.debug(
+					`Registered Operation Hook '${routeConfig.operationName}' with (${routeOptions.method}) '${routeOptions.url}'`
+				);
+			} else {
+				fastify.log.debug(`Registered Global Hook (${routeOptions.method}) '${routeOptions.url}'`);
+			}
+		} else if (routeConfig?.kind === 'webhook') {
+			fastify.log.debug(
+				`Registered Webhook '${routeConfig.webhookName}' with (${routeOptions.method}) '${routeOptions.url}'`
+			);
+		}
+	});
+
+	/**
+	 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
+	 */
 	fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
 		'preHandler',
 		async (req, reply) => {
 			req.ctx = {
-				log: req.log.child({ plugin: 'hooks' }),
+				log: req.log,
 				user: req.body.__wg.user,
 				// clientRequest represents the original client request that was sent initially to the server.
 				clientRequest: {
@@ -206,13 +230,11 @@ export const startServer = async (
 		}
 	);
 
-	await fastify.register(FastifyGraceful);
-	fastify.gracefulShutdown((signal, next) => {
-		fastify.log.info('graceful shutdown', { signal });
-		next();
-	});
 	await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
 	fastify.log.info('Hooks plugin registered');
+
+	await fastify.register(FastifyWebhooksPlugin);
+	fastify.log.info('Webhooks plugin registered');
 
 	if (hooksConfig.graphqlServers) {
 		for await (const server of hooksConfig.graphqlServers) {
@@ -223,5 +245,17 @@ export const startServer = async (
 		}
 	}
 
-	return fastify.listen(SERVER_PORT, '127.0.0.1');
+	// only in production because it slows down watch process in development
+	if (process.env.NODE_ENV === 'production') {
+		await fastify.register(FastifyGraceful);
+		fastify.gracefulShutdown((signal, next) => {
+			fastify.log.info('graceful shutdown', { signal });
+			next();
+		});
+	}
+
+	return fastify.listen({
+		port: SERVER_PORT,
+		host: '127.0.0.1',
+	});
 };
