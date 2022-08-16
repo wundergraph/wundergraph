@@ -210,21 +210,44 @@ export const startServer = async (
 		}
 	});
 
-	await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config, internalClientFactory: clientFactory });
-	fastify.log.info('Hooks plugin registered');
+	await fastify.register(async (fastify) => {
+		/**
+		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
+		 * Registering this handler will only affect child plugins
+		 */
+		fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
+			'preHandler',
+			async (req, reply) => {
+				req.ctx = {
+					log: req.log,
+					user: req.body.__wg.user,
+					// clientRequest represents the original client request that was sent initially to the server.
+					clientRequest: {
+						headers: new Headers(req.body.__wg.clientRequest?.headers),
+						requestURI: req.body.__wg.clientRequest?.requestURI || '',
+						method: req.body.__wg.clientRequest?.method || 'GET',
+					},
+					internalClient: clientFactory({}, req.body.__wg.clientRequest),
+				};
+			}
+		);
+
+		await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
+		fastify.log.info('Hooks plugin registered');
+
+		if (hooksConfig.graphqlServers) {
+			for await (const server of hooksConfig.graphqlServers) {
+				const routeUrl = `/gqls/${server.serverName}/graphql`;
+				await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
+				fastify.log.info('GraphQL plugin registered');
+				fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
+			}
+		}
+	});
 
 	if (config.api) {
 		await fastify.register(FastifyWebhooksPlugin, { webhooks: config.api.webhooks });
 		fastify.log.info('Webhooks plugin registered');
-	}
-
-	if (hooksConfig.graphqlServers) {
-		for await (const server of hooksConfig.graphqlServers) {
-			const routeUrl = `/gqls/${server.serverName}/graphql`;
-			await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
-			fastify.log.info('GraphQL plugin registered');
-			fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
-		}
 	}
 
 	// only in production because it slows down watch process in development
