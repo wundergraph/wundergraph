@@ -51,6 +51,7 @@ message Api {
 	ApiAuthenticationConfig authenticationConfig = 12;
 	repeated S3UploadConfiguration s3UploadConfiguration = 13;
 	repeated WebhookConfiguration webhooks = 14;
+	string hooksServerURL = 15;
 }
 
 message ApiAuthenticationConfig {

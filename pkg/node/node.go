@@ -277,6 +277,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	)
 
 	router := mux.NewRouter()
+
 	internalRouter := router.PathPrefix("/internal").Subrouter()
 
 	if n.options.globalRateLimit.enable {
@@ -297,6 +298,10 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 
 	for _, api := range nodeConfig.Apis {
 
+		if api.HooksServerURL == "" {
+			api.HooksServerURL = "http://127.0.0.1:9992"
+		}
+
 		dialer := &net.Dialer{
 			Timeout:   10 * time.Second,
 			KeepAlive: 90 * time.Second,
@@ -312,7 +317,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			TLSHandshakeTimeout: 10 * time.Second,
 		}
 
-		hooksClient := hooks.NewClient("http://127.0.0.1:9992", n.log)
+		hooksClient := hooks.NewClient(api.HooksServerURL, n.log)
 
 		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
 
@@ -329,7 +334,9 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			EnableIntrospection:        n.options.enableIntrospection,
 			GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 			GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
+			HookServerURL:              api.HooksServerURL,
 		}
+
 		builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
 		internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
 

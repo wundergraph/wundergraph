@@ -182,6 +182,91 @@ func TestNode(t *testing.T) {
 		httpexpect.ContentOpts{MediaType: "text/html"})
 }
 
+func TestWebHooks(t *testing.T) {
+
+	var paths []string
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+		paths = append(paths, r.URL.Path)
+	}))
+	defer testServer.Close()
+
+	port, err := freeport.GetFreePort()
+	assert.NoError(t, err)
+
+	nodeURL := fmt.Sprintf(":%d", port)
+
+	cfg := &wundernodeconfig.Config{
+		Server: &wundernodeconfig.ServerConfig{
+			ListenAddr: nodeURL,
+			ListenTLS:  false,
+			ProxyProto: false,
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	logger := logging.New(abstractlogger.InfoLevel, true)
+	node := New(ctx, BuildInfo{}, cfg, logger)
+
+	nodeConfig := wgpb.WunderNodeConfig{
+		Server: &wgpb.Server{
+			GracefulShutdownTimeout: 0,
+			KeepAlive:               5,
+			ReadTimeout:             5,
+			WriteTimeout:            5,
+			IdleTimeout:             5,
+		},
+		Apis: []*wgpb.Api{
+			{
+				Hosts:                 []string{"localhost"},
+				PathPrefix:            "api/main",
+				HooksServerURL:        testServer.URL,
+				EnableSingleFlight:    true,
+				EnableGraphqlEndpoint: true,
+				AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+					CookieBased: &wgpb.CookieBasedAuthentication{},
+					JwksBased:   &wgpb.JwksBasedAuthentication{},
+					Hooks:       &wgpb.ApiAuthenticationHooks{},
+				},
+				Webhooks: []*wgpb.WebhookConfiguration{
+					{
+						Name: "github",
+					},
+					{
+						Name: "stripe",
+					},
+				},
+			},
+		},
+	}
+
+	go func() {
+		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
+		assert.NoError(t, err)
+	}()
+
+	time.Sleep(time.Second)
+
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL: "http://" + nodeURL,
+		Client: &http.Client{
+			Jar:     httpexpect.NewJar(),
+			Timeout: time.Second * 30,
+		},
+		Reporter: httpexpect.NewRequireReporter(t),
+	})
+
+	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
+	e.GET("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
+	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
+
+	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe"}, paths)
+}
+
 func BenchmarkNode(t *testing.B) {
 
 	logger := logging.New(abstractlogger.InfoLevel, true)
