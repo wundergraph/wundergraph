@@ -1,6 +1,11 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import fp from 'fastify-plugin';
-import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../server';
+import {
+	WunderGraphRequest,
+	WunderGraphResponse,
+	ClientRequestHeaders,
+	WunderGraphUser,
+	ClientRequest,
+} from '../server';
 import {
 	HooksConfiguration,
 	HooksConfigurationOperationType,
@@ -10,6 +15,7 @@ import {
 import { WunderGraphConfiguration, OperationType } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { flattenHeadersObject, Headers } from 'headers-polyfill';
+import { InternalClientFactory } from '../internal-client';
 
 export interface BodyResponse {
 	data?: any;
@@ -23,6 +29,7 @@ export interface GraphQLError {
 
 export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
+	internalClientFactory: InternalClientFactory;
 }
 
 export interface HooksRouteConfig {
@@ -34,6 +41,26 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	const flattenHeaders = (headers: ClientRequestHeaders) => {
 		return flattenHeadersObject(headers.all());
 	};
+
+	/**
+	 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
+	 */
+	fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
+		'preHandler',
+		async (req, reply) => {
+			req.ctx = {
+				log: req.log,
+				user: req.body.__wg.user,
+				// clientRequest represents the original client request that was sent initially to the server.
+				clientRequest: {
+					headers: new Headers(req.body.__wg.clientRequest?.headers),
+					requestURI: req.body.__wg.clientRequest?.requestURI || '',
+					method: req.body.__wg.clientRequest?.method || 'GET',
+				},
+				internalClient: config.internalClientFactory({}, req.body.__wg.clientRequest),
+			};
+		}
+	);
 
 	// authentication
 	fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
@@ -424,4 +451,4 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	}
 };
 
-export default fp(FastifyHooksPlugin, '4.x');
+export default FastifyHooksPlugin;

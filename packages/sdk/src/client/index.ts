@@ -414,7 +414,7 @@ export class WunderGraphClient<Role> {
 		};
 	};
 
-	public fetchUser = async (abortSignal?: AbortSignal, revalidate?: boolean): Promise<User<Role> | null> => {
+	public fetchUser = async (abortSignal?: AbortSignal | null, revalidate?: boolean): Promise<User<Role> | null> => {
 		try {
 			const revalidateTrailer = revalidate === undefined ? '' : '?revalidate=true';
 			const response = await this.fetch(

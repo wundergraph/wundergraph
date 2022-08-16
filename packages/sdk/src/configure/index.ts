@@ -659,7 +659,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 		const webhooksDir = path.join('webhooks');
 		if (fs.existsSync(webhooksDir)) {
-			resolved.webhooks = await getWebhooks(path.join('webhooks'), '.ts');
+			resolved.webhooks = await getWebhooks(path.join('webhooks'));
 		}
 
 		const operationsContent = loadOperations(schemaFileName);

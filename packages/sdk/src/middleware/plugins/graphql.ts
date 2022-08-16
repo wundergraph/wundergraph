@@ -1,5 +1,4 @@
 import { FastifyPluginAsync } from 'fastify';
-import fp from 'fastify-plugin';
 import { GraphQLSchema } from 'graphql';
 import {
 	getGraphQLParameters,
@@ -118,4 +117,4 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 	});
 };
 
-export default fp(FastifyGraphQLPlugin, '4.x');
+export default FastifyGraphQLPlugin;

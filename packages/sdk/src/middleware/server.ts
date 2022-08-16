@@ -210,31 +210,13 @@ export const startServer = async (
 		}
 	});
 
-	/**
-	 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
-	 */
-	fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
-		'preHandler',
-		async (req, reply) => {
-			req.ctx = {
-				log: req.log,
-				user: req.body.__wg.user,
-				// clientRequest represents the original client request that was sent initially to the server.
-				clientRequest: {
-					headers: new Headers(req.body.__wg.clientRequest?.headers),
-					requestURI: req.body.__wg.clientRequest?.requestURI || '',
-					method: req.body.__wg.clientRequest?.method || 'GET',
-				},
-				internalClient: clientFactory({}, req.body.__wg.clientRequest),
-			};
-		}
-	);
-
-	await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
+	await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config, internalClientFactory: clientFactory });
 	fastify.log.info('Hooks plugin registered');
 
-	await fastify.register(FastifyWebhooksPlugin);
-	fastify.log.info('Webhooks plugin registered');
+	if (config.api) {
+		await fastify.register(FastifyWebhooksPlugin, { webhooks: config.api.webhooks });
+		fastify.log.info('Webhooks plugin registered');
+	}
 
 	if (hooksConfig.graphqlServers) {
 		for await (const server of hooksConfig.graphqlServers) {

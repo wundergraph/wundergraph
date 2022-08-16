@@ -47,6 +47,7 @@ export type { OperationArgsWithInput, InternalClient } from './middleware/intern
 export type { GraphQLServerConfig } from './middleware/plugins/graphql';
 export type { FastifyLoggerInstance } from 'fastify';
 export type { Template, TemplateOutputFile } from './codegen/index';
+export type { WebHookRequest, WebHookReply, WebHook } from './webhooks/types';
 
 export { default as templates } from './codegen/templates';
 export { Application, introspect, createMockApi, Api } from './definition';
