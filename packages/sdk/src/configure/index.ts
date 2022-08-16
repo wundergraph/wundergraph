@@ -28,6 +28,7 @@ import {
 	OperationType,
 	PostResolveTransformationKind,
 	TypeConfiguration,
+	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
@@ -292,6 +293,7 @@ export interface ResolvedWunderGraphConfig {
 		allowedHostNames: ConfigurationVariable[];
 	};
 	interpolateVariableDefinitionAsJSON: string[];
+	webhooks: WebhookConfiguration[];
 }
 
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
@@ -404,6 +406,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			allowedHostNames: config.security?.allowedHosts?.map(mapInputVariable) || [],
 		},
 		interpolateVariableDefinitionAsJSON: resolved.EngineConfiguration.interpolateVariableDefinitionAsJSON,
+		webhooks: [],
 	};
 
 	if (config.links) {
@@ -961,6 +964,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				},
 			},
 			allowedHostNames: config.security.allowedHostNames,
+			webhooks: config.webhooks,
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 	};

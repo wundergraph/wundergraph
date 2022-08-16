@@ -50,6 +50,7 @@ message Api {
 	string apiConfigHash = 11;
 	ApiAuthenticationConfig authenticationConfig = 12;
 	repeated S3UploadConfiguration s3UploadConfiguration = 13;
+	repeated WebhookConfiguration webhooks = 14;
 }
 
 message ApiAuthenticationConfig {
@@ -472,6 +473,12 @@ message UserDefinedApi {
 	ApiAuthenticationConfig authenticationConfig = 8;
 	repeated S3UploadConfiguration s3UploadConfiguration = 9;
 	repeated ConfigurationVariable allowedHostNames = 11;
+	repeated WebhookConfiguration webhooks = 12;
+}
+
+message WebhookConfiguration {
+	string name = 1;
+	string filePath = 2;
 }
 
 message CorsConfiguration {
