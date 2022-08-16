@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"path"
 	"runtime"
+	"sync"
 	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
@@ -126,9 +127,7 @@ var upCmd = &cobra.Command{
 				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 				OutFile:       serverOutFile,
 				Logger:        log,
-				WatchPaths: []string{
-					configJsonPath,
-					path.Join(entryPoints.WunderGraphDirAbs, webhooks.WebhookDirectoryName)},
+				WatchPaths:    []string{configJsonPath},
 			})
 
 			webhookPaths, err := webhooks.GetWebhooks(entryPoints.WunderGraphDirAbs)
@@ -174,11 +173,22 @@ var upCmd = &cobra.Command{
 				// generate new config
 				<-configRunner.Run(ctx)
 
-				// bundle hooks
-				hooksBundler.Bundle()
+				var wg sync.WaitGroup
 
-				// bundle webhooks
-				webhooksBundler.Bundle()
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					// bundle hooks
+					hooksBundler.Bundle()
+				}()
+
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					webhooksBundler.Bundle()
+				}()
+
+				wg.Wait()
 
 				go func() {
 					// run or restart hook server
@@ -214,6 +224,8 @@ var upCmd = &cobra.Command{
 			WatchPaths: []string{
 				path.Join(entryPoints.WunderGraphDirAbs, "operations"),
 				path.Join(entryPoints.WunderGraphDirAbs, "fragments"),
+				// all webhook filenames are stored in the config
+				// we are going to create HTTP routes on the node for all of them
 				path.Join(entryPoints.WunderGraphDirAbs, webhooks.WebhookDirectoryName),
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
 				// in that case we want to rerun the script to build a new config
