@@ -607,6 +607,7 @@ func (n *Node) reloadFileConfig(filePath string) {
 					},
 				},
 				AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
+				Webhooks:             graphConfig.Api.Webhooks,
 			},
 		},
 		Server: &wgpb.Server{
