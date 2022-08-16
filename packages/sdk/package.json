@@ -97,7 +97,8 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8"
+    "swagger2openapi": "^7.0.8",
+    "tsup": "^6.2.2"
   },
   "jest": {
     "preset": "ts-jest",

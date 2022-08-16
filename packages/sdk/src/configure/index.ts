@@ -53,6 +53,8 @@ import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { WunderGraphHooksAndServerConfig } from '../middleware/server';
 import { listenAddr } from '../env';
+import { buildFunctions, getFunctionPaths } from '../functions';
+import process from 'node:process';
 
 export class EnvironmentVariable {
 	constructor(name: string, defaultValue?: string) {
@@ -640,6 +642,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		Promise.all(config.application.apis).catch();
 		return;
 	}
+
 	resolveConfig(config).then(async (resolved) => {
 		const app = resolved.application;
 
@@ -650,6 +653,22 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		fs.writeFileSync(path.join('generated', schemaFileName), schemaContent, { encoding: 'utf8' });
 		done();
 		console.log(`${new Date().toLocaleTimeString()}: ${schemaFileName} updated`);
+
+		const functionFiles = await getFunctionPaths(path.join('functions'));
+		const functionOutputDir = path.join('generated', 'bundle', 'functions');
+
+		console.log(functionFiles, functionOutputDir);
+
+		await buildFunctions(functionFiles, functionOutputDir);
+
+		// 1. Determine functions paths
+		// 2. Write the paths to the config (extends protobuf)
+		// 3. Bundle the function in Go before starting the hook server
+
+		// TODO write function paths to wundergraph.config.ts
+
+		// TODO: hook server router has to be configured with those paths
+		// The server can import the function with `import('./functions/<functionName>')`
 
 		const operationsContent = loadOperations(schemaFileName);
 		const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {

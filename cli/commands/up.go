@@ -155,6 +155,9 @@ var upCmd = &cobra.Command{
 
 				// bundle hooks
 				hooksBundler.Bundle()
+
+				// TODO: bundle functions
+
 				go func() {
 					// run or restart server
 					<-hookServerRunner.Run(ctx)
@@ -188,6 +191,7 @@ var upCmd = &cobra.Command{
 			WatchPaths: []string{
 				path.Join(entryPoints.WunderGraphDirAbs, "operations"),
 				path.Join(entryPoints.WunderGraphDirAbs, "fragments"),
+				path.Join(entryPoints.WunderGraphDirAbs, "functions"),
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
 				// in that case we want to rerun the script to build a new config
 				introspectionCacheDir,
