@@ -8,7 +8,7 @@ import {
 	shouldRenderGraphiQL,
 	ExecutionContext as HelixExecutionContext,
 } from 'graphql-helix';
-import { BaseContext } from '../server';
+import { BaseContext } from '../types';
 
 export interface GraphQLServerConfig {
 	serverName: string;

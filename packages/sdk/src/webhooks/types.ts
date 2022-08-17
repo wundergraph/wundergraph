@@ -1,5 +1,5 @@
 import { InternalClient as InternalClientBase } from '../middleware/internal-client';
-import { RequestMethod } from '../middleware/server';
+import { RequestMethod } from '../middleware/types';
 
 export interface Webhook<InternalClient = InternalClientBase, Body = any, ResponseBody = any> {
 	handler: (

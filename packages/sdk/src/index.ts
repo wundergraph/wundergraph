@@ -22,7 +22,7 @@ export type {
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 	ClientRequestHeaders,
-} from './middleware/server';
+} from './middleware/types';
 export type {
 	SubscriptionRequestOptions,
 	Response,

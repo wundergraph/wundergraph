@@ -4,105 +4,27 @@ import { Headers } from 'headers-polyfill';
 import process from 'node:process';
 import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
-import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
-import Fastify, { FastifyInstance, FastifyLoggerInstance } from 'fastify';
+import GraphQLServerPlugin from './plugins/graphql';
+import Fastify, { FastifyInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
 import fs from 'fs';
-import { middlewarePort } from '../env';
+import {
+	ClientRequest,
+	SERVER_PORT,
+	WunderGraphHooksAndServerConfig,
+	WunderGraphServerConfig,
+	WunderGraphUser,
+} from './types';
 
-declare module 'fastify' {
-	interface FastifyRequest extends FastifyRequestContext {}
-}
-
-export interface FastifyRequestContext<User = any, IC = InternalClient> {
-	ctx: BaseContext<User, IC>;
-}
-
-export interface BaseContext<User = any, IC = InternalClient> {
-	/**
-	 * The user that is currently logged in.
-	 */
-	user?: User;
-	clientRequest: ClientRequest;
-	/**
-	 * The request logger.
-	 */
-	log: FastifyLoggerInstance;
-	/**
-	 * The internal client that is used to communicate with the server.
-	 */
-	internalClient: IC;
-}
-
-export interface ClientRequestHeaders extends Headers {}
-
-export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
-
-export interface ClientRequest<H = ClientRequestHeaders> {
-	method: RequestMethod;
-	requestURI: string;
-	/**
-	 * Contains all client request headers. You can manipulate the map to add or remove headers.
-	 * This might impact upstream hooks. Global hooks don't take changes into account.
-	 */
-	headers: H;
-}
-
-export interface WunderGraphRequest {
-	method: RequestMethod;
-	requestURI: string;
-	headers: Headers;
-	body: any;
-}
-
-export interface WunderGraphResponse extends WunderGraphRequest {
-	status: string;
-	statusCode: number;
-}
-
-export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
-
-export type JSONObject = { [key: string]: JSONValue };
-
-export interface WunderGraphUser<Role = any> {
-	provider?: string;
-	providerId?: string;
-	email?: string;
-	emailVerified?: boolean;
-	name?: string;
-	firstName?: string;
-	lastName?: string;
-	nickName?: string;
-	description?: string;
-	userId?: string;
-	avatarUrl?: string;
-	location?: string;
-	roles?: Role[];
-	customAttributes?: string[];
-	customClaims?: {
-		[key: string]: any;
-	};
-	accessToken?: JSONObject;
-	rawAccessToken?: string;
-	idToken?: JSONObject;
-	rawIdToken?: string;
-}
-
-export interface WunderGraphServerConfig<GeneratedHooksConfig = HooksConfiguration> {
-	hooks: GeneratedHooksConfig;
-	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
-}
-
-export interface WunderGraphHooksAndServerConfig<GeneratedHooksConfig = HooksConfiguration>
-	extends WunderGraphServerConfig<GeneratedHooksConfig> {
-	graphqlServers?: (GraphQLServerConfig & { url: string })[];
-}
-
-export const SERVER_PORT = middlewarePort;
-
+/**
+ * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
+ * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
+ * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
+ * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
+ */
 process.on('uncaughtExceptionMonitor', (err, origin) => {
 	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
 });
@@ -110,6 +32,10 @@ process.on('uncaughtExceptionMonitor', (err, origin) => {
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
 
+/**
+ * By default this script will not start the server
+ * You need to pass START_HOOKS_SERVER=true to start the server
+ */
 if (process.env.START_HOOKS_SERVER === 'true') {
 	if (!process.env.WG_ABS_DIR) {
 		console.error('The environment variable `WG_ABS_DIR` is required!');
@@ -249,6 +175,7 @@ export const startServer = async (
 
 	if (config.api) {
 		await fastify.register(FastifyWebhooksPlugin, {
+			wunderGraphDir: process.env.WG_ABS_DIR!,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
 		});

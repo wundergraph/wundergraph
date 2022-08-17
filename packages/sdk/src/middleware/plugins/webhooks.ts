@@ -1,20 +1,20 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
-import process from 'node:process';
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { objectToHeaders } from 'headers-polyfill';
 import { WebhookConfiguration } from '@wundergraph/protobuf';
 import { InternalClientFactory } from '../internal-client';
-import { RequestMethod } from '../server';
+import { RequestMethod } from '../types';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
 	webhookName?: string;
 }
 
-export interface FastifyWebHooksOptions {
+interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
+	wunderGraphDir: string;
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
@@ -22,7 +22,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 
 	for (const hook of config.webhooks) {
 		try {
-			const webhookFilePath = path.join(process.env.WG_ABS_DIR!, 'generated', 'bundle', hook.filePath);
+			const webhookFilePath = path.join(config.wunderGraphDir, 'generated', 'bundle', hook.filePath);
 			const webhook: Webhook = (await import(webhookFilePath)).default;
 
 			fastify.route({
@@ -61,7 +61,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 				},
 			});
 		} catch (err) {
-			fastify.log.error(err, 'Could not load webhook function');
+			fastify.log.child({ webhook: hook.name }).error(err, 'Could not load webhook function');
 		}
 	}
 };
