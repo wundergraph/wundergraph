@@ -353,7 +353,7 @@ func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration, pathPrefix 
 	}
 	webhookPath := fmt.Sprintf("/webhooks/%s", config.Name)
 	r.router.
-		Methods(http.MethodPost, http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodOptions).
+		Methods(http.MethodPost, http.MethodGet).
 		Path(webhookPath).
 		Handler(handler)
 	return nil

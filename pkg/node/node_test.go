@@ -261,7 +261,7 @@ func TestWebHooks(t *testing.T) {
 	})
 
 	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
-	e.GET("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
+	e.POST("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
 	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
 
 	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe"}, paths)
