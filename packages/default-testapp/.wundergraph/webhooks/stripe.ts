@@ -1,15 +1,15 @@
 import type { Webhook } from '@wundergraph/sdk';
 import type { InternalClient } from '../generated/wundergraph.internal.client';
 
-const webhook: Webhook<InternalClient, { id: number }, { title: number }> = {
+const webhook: Webhook<InternalClient> = {
 	handler: async (event, context) => {
 		return {
 			statusCode: 200,
 			body: {
-				title: 1,
+				hello: 'stripe',
 			},
 			headers: {
-				'X-Wundergraph-Test': 'test',
+				'X-header': 'test',
 			},
 		};
 	},

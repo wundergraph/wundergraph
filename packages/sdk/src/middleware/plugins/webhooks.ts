@@ -40,11 +40,14 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 						},
 						{
 							log: request.log.child({ webhook: hook.name }),
-							internalClient: config.internalClientFactory(undefined, {
-								headers: objectToHeaders(request.headers),
-								method: request.method as RequestMethod,
-								requestURI: request.url,
-							}),
+							internalClient: config.internalClientFactory(
+								{},
+								{
+									headers: objectToHeaders(request.headers),
+									method: request.method as RequestMethod,
+									requestURI: request.url,
+								}
+							),
 						}
 					);
 
