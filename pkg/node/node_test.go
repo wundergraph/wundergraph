@@ -3,6 +3,9 @@ package node
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -239,6 +242,17 @@ func TestWebHooks(t *testing.T) {
 					{
 						Name: "stripe",
 					},
+					{
+						Name: "github-protected",
+						Verifiers: []*wgpb.WebhookVerifier{
+							{
+								Kind:                  wgpb.WebhookVerifierKind_WEBHOOK_VERIFIER_SHA256,
+								SignatureHeader:       "X-Hub-Signature",
+								SignatureHeaderPrefix: "sha256=",
+								Secret:                "secret",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -260,11 +274,17 @@ func TestWebHooks(t *testing.T) {
 		Reporter: httpexpect.NewRequireReporter(t),
 	})
 
+	hash := hmac.New(sha256.New, []byte("secret"))
+	_, _ = hash.Write([]byte("ok"))
+	signatureString := hex.EncodeToString(hash.Sum(nil))
+
 	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
 	e.GET("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
 	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
+	e.POST("/api/main/webhooks/github-protected").Expect().Status(http.StatusOK) // this will just be dismissed with 200 OK to not tell the attacker that we're dismissing the webhook
+	e.POST("/api/main/webhooks/github-protected").WithBytes([]byte("ok")).WithHeader("X-Hub-Signature", fmt.Sprintf("sha256=%s", signatureString)).Expect().Status(http.StatusOK)
 
-	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe"}, paths)
+	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe", "/webhooks/github-protected"}, paths)
 }
 
 func BenchmarkNode(t *testing.B) {
