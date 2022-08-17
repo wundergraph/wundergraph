@@ -17,6 +17,7 @@ import {
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 	WunderGraphUser,
+	ServerOptions,
 } from './types';
 
 /**
@@ -97,13 +98,14 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		const fastify = Fastify({
-			logger: {
-				level: process.env.LOG_LEVEL || 'info',
-			},
-		});
-		startServer(fastify, hooksConfig, WG_CONFIG).catch((err) => {
-			fastify.log.error(err, 'Could not start the hook server');
+		startServer({
+			config: WG_CONFIG,
+			hooksConfig,
+			gracefulShutdown: process.env.NODE_ENV === 'production',
+			host: '127.0.0.1',
+			port: SERVER_PORT,
+		}).catch((err) => {
+			console.error('Could not start the hook server', err);
 			process.exit(1);
 		});
 	}
@@ -111,11 +113,25 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	return hooksConfig;
 };
 
-export const startServer = async (
-	fastify: FastifyInstance,
-	hooksConfig: WunderGraphHooksAndServerConfig,
-	config: WunderGraphConfiguration
-) => {
+export const startServer = async (opts: ServerOptions) => {
+	const fastify = await createServer(opts);
+	await fastify.listen({
+		port: opts.port,
+		host: opts.host,
+	});
+};
+
+export const createServer = async ({
+	hooksConfig,
+	config,
+	gracefulShutdown,
+}: ServerOptions): Promise<FastifyInstance> => {
+	const fastify = Fastify({
+		logger: {
+			level: process.env.LOG_LEVEL || 'info',
+		},
+	});
+
 	fastify.decorateRequest('ctx', null);
 
 	/**
@@ -183,7 +199,7 @@ export const startServer = async (
 	}
 
 	// only in production because it slows down watch process in development
-	if (process.env.NODE_ENV === 'production') {
+	if (gracefulShutdown) {
 		await fastify.register(FastifyGraceful);
 		fastify.gracefulShutdown((signal, next) => {
 			fastify.log.info('graceful shutdown', { signal });
@@ -191,8 +207,5 @@ export const startServer = async (
 		});
 	}
 
-	return fastify.listen({
-		port: SERVER_PORT,
-		host: '127.0.0.1',
-	});
+	return fastify;
 };

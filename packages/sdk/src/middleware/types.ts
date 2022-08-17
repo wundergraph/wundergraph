@@ -4,6 +4,7 @@ import { Headers } from 'headers-polyfill';
 import { HooksConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
 import { middlewarePort } from '../env';
+import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 
 export const SERVER_PORT = middlewarePort;
 
@@ -83,6 +84,14 @@ export interface WunderGraphUser<Role = any> {
 	rawAccessToken?: string;
 	idToken?: JSONObject;
 	rawIdToken?: string;
+}
+
+export interface ServerOptions {
+	port: number;
+	host: string;
+	hooksConfig: WunderGraphHooksAndServerConfig;
+	config: WunderGraphConfiguration;
+	gracefulShutdown: boolean;
 }
 
 export interface WunderGraphServerConfig<GeneratedHooksConfig = HooksConfiguration> {

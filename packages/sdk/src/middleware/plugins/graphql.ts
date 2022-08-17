@@ -39,7 +39,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 	fastify.route({
 		method: ['GET', 'POST'],
 		url: config.routeUrl,
-		async handler(req, res) {
+		async handler(req, reply) {
 			const request = {
 				body: req.body,
 				headers: req.headers,
@@ -50,13 +50,18 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 			const pluginLogger = req.ctx.log.child({ server: config.serverName, plugin: 'graphql' });
 
 			if (config.enableGraphQLEndpoint && shouldRenderGraphiQL(request)) {
-				res.type('text/html');
-				res.send(
+				reply.type('text/html');
+				reply.send(
 					renderGraphiQL({
 						endpoint: config.routeUrl,
 					})
 				);
 			} else {
+				// https://www.fastify.io/docs/latest/Reference/Reply/#hijack
+				// We hand over the response handling to "graphql-helix"
+				// No fastify hooks are called for the response.
+				reply.hijack();
+
 				const request = {
 					body: req.body,
 					headers: req.headers,
@@ -85,8 +90,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 							}),
 						});
 
-						await sendResult(result, res.raw);
-						res.sent = true;
+						await sendResult(result, reply.raw);
 					});
 					return;
 				}
@@ -108,10 +112,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 					}),
 				});
 
-				await sendResult(result, res.raw);
-
-				// skip async/await handling because we already sent the result with the raw http socket
-				res.sent = true;
+				await sendResult(result, reply.raw);
 			}
 		},
 	});
