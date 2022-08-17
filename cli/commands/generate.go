@@ -6,6 +6,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 	"os"
 	"path"
+	"sync"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
@@ -88,8 +89,22 @@ Use this command if you only want to generate the configuration`,
 
 			onAfterBuild = func() {
 				<-configRunner.Run(ctx)
-				webhooksBundler.Bundle()
-				hooksBundler.Bundle()
+				var wg sync.WaitGroup
+
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					// bundle hooks
+					hooksBundler.Bundle()
+				}()
+
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					webhooksBundler.Bundle()
+				}()
+
+				wg.Wait()
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
 			}
 		} else {

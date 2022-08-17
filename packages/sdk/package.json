@@ -74,6 +74,7 @@
   "dependencies": {
     "@apollo/composition": "^2.0.2",
     "@apollo/federation": "^0.36.2",
+    "@fastify/formbody": "^7.0.1",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@wundergraph/protobuf": "workspace:^0.91.1",

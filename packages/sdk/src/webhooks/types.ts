@@ -1,19 +1,37 @@
-import { Headers } from 'headers-polyfill';
-import { ParsedUrlQuery } from 'querystring';
+import { InternalClient as InternalClientBase } from '../middleware/internal-client';
+import { RequestMethod } from '../middleware/server';
 
-export interface WebHook {
-	handler: WebHookHandler;
+export interface Webhook<InternalClient = InternalClientBase, Body = any, ResponseBody = any> {
+	handler: (
+		event: WebhookHttpEvent<InternalClient, Body>,
+		context: WebhookRequestContext<InternalClient>
+	) => Promise<WebhookResponse<ResponseBody>>;
 }
-export interface WebHookHandler {
-	(request: WebHookRequest, reply: WebHookReply): Promise<void>;
+export interface WebhookResponse<ResponseBody> {
+	statusCode?: number;
+	body?: ResponseBody;
+	headers?: WebhookHeaders;
 }
-export interface WebHookRequest {
-	headers: Headers;
+export type WebhookHeaders = Record<string, string>;
+export type WebhookQuery = Record<string, string | string[]>;
+export interface WebhookRequestContext<InternalClient = any> {
+	internalClient: InternalClient;
+	log: Logger;
+}
+interface LogFn {
+	<T extends object>(obj: T, msg?: string, ...args: any[]): void;
+	(obj: unknown, msg?: string, ...args: any[]): void;
+	(msg: string, ...args: any[]): void;
+}
+export interface Logger {
+	info: LogFn;
+	debug: LogFn;
+	error: LogFn;
+}
+export interface WebhookHttpEvent<InternalClient, Body> {
+	method: RequestMethod;
 	url: string;
-	query: ParsedUrlQuery | unknown;
-}
-export interface WebHookReply {
-	code(statusCode: number): this;
-	header(key: string, value: string): this;
-	send(value: any): this;
+	headers: WebhookHeaders;
+	query: WebhookQuery;
+	body: Body;
 }

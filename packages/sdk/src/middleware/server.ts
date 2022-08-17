@@ -39,8 +39,10 @@ export interface BaseContext<User = any, IC = InternalClient> {
 
 export interface ClientRequestHeaders extends Headers {}
 
+export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+
 export interface ClientRequest<H = ClientRequestHeaders> {
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+	method: RequestMethod;
 	requestURI: string;
 	/**
 	 * Contains all client request headers. You can manipulate the map to add or remove headers.
@@ -50,7 +52,7 @@ export interface ClientRequest<H = ClientRequestHeaders> {
 }
 
 export interface WunderGraphRequest {
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+	method: RequestMethod;
 	requestURI: string;
 	headers: Headers;
 	body: any;
@@ -246,7 +248,10 @@ export const startServer = async (
 	});
 
 	if (config.api) {
-		await fastify.register(FastifyWebhooksPlugin, { webhooks: config.api.webhooks });
+		await fastify.register(FastifyWebhooksPlugin, {
+			webhooks: config.api.webhooks,
+			internalClientFactory: clientFactory,
+		});
 		fastify.log.info('Webhooks plugin registered');
 	}
 
