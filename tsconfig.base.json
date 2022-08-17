@@ -5,6 +5,7 @@
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "sourceMap": true,
     "skipLibCheck": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
