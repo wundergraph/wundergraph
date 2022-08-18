@@ -3,7 +3,7 @@ import { RequestMethod } from '../middleware/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure';
 
-export interface Webhook<InternalClient = InternalClientBase, Body = any, ResponseBody = any> {
+export interface Webhook<InternalClient = InternalClientBase, Body = unknown, ResponseBody = unknown> {
 	handler: (
 		event: WebhookHttpEvent<InternalClient, Body>,
 		context: WebhookRequestContext<InternalClient>
