@@ -483,6 +483,18 @@ message WebhookConfiguration {
  // The path to the bundled file.
  // The path is relative to the bundle directory.
 	string filePath = 2;
+	repeated WebhookVerifier verifiers = 3;
+}
+
+message WebhookVerifier {
+	WebhookVerifierKind kind = 1;
+	string secret = 2;
+	string signatureHeader = 3;
+	string signatureHeaderPrefix = 4;
+}
+
+enum WebhookVerifierKind {
+	WEBHOOK_VERIFIER_SHA256 = 0;
 }
 
 message CorsConfiguration {

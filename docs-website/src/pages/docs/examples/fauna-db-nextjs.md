@@ -21,7 +21,7 @@ Please follow the steps below.
     - Region Group: Choose the one that works best for you.
     - [x] Use demo data.
 
-3. Create a API token under `Security`.
+3.  Create a API token under `Security`.
 
     - Database: `test`
     - Role: `Admin`
@@ -30,18 +30,19 @@ Please follow the steps below.
 4.  Write down the secret displayed: if you lose it, you have to create
     a new one (the secret is only ever displayed once).
 
-5. Rename the file `example.env` to `.env`.
+5.  Rename the file `example.env` to `.env`.
 
-6. In `.env`:
-   - Replace `<replace-with-your-token>` with the secret from step 4.
+6.  In `.env`:
 
-   - If you selected a Region Group other than Classic,
-     replace `https://graphql.fauna.com/graphql` with the GraphQL API
-     endpoint suitable for your selected region group:
+    - Replace `<replace-with-your-token>` with the secret from step 4.
 
-     - EU: `https://graphql.eu.fauna.com/graphql`
-     - US: `https://graphql.us.fauna.com/graphql`
-     - Preview: `https://graphql.fauna-preview.com/graphql`
+    - If you selected a Region Group other than Classic,
+      replace `https://graphql.fauna.com/graphql` with the GraphQL API
+      endpoint suitable for your selected region group:
+
+      - EU: `https://graphql.eu.fauna.com/graphql`
+      - US: `https://graphql.us.fauna.com/graphql`
+      - Preview: `https://graphql.fauna-preview.com/graphql`
 
 ## Configuration
 
