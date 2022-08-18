@@ -1,0 +1,26 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://admin:admin@localhost:54322/example?schema=public"
+}
+
+model Filter {
+  id                 Int       @id @default(autoincrement())
+  user               User      @relation(fields: [userId], references: [id])
+  userId             Int       @unique
+  node_created_after DateTime?
+}
+
+model User {
+  id     Int     @id @default(autoincrement())
+  email  String  @unique
+  name   String?
+  filter Filter?
+}
+
+model Node {
+  id         Int      @id @default(autoincrement())
+  name       String?
+  created_at DateTime @default(now())
+
+  @@index([created_at(sort: Desc)])
+}
