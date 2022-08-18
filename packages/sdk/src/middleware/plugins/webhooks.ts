@@ -14,7 +14,7 @@ export interface WebHookRouteConfig {
 interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
-	wunderGraphDir: string;
+	wundergraphDir: string;
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
@@ -22,7 +22,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 
 	for (const hook of config.webhooks) {
 		try {
-			const webhookFilePath = path.join(config.wunderGraphDir, 'generated', 'bundle', hook.filePath);
+			const webhookFilePath = path.join(config.wundergraphDir, 'generated', 'bundle', hook.filePath);
 			const webhook: Webhook = (await import(webhookFilePath)).default;
 
 			fastify.route({

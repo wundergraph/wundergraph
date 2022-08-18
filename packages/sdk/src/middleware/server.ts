@@ -99,6 +99,7 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
 		startServer({
+			wundergraphDir: process.env.WG_ABS_DIR!,
 			config: WG_CONFIG,
 			hooksConfig,
 			gracefulShutdown: process.env.NODE_ENV === 'production',
@@ -122,6 +123,7 @@ export const startServer = async (opts: ServerOptions) => {
 };
 
 export const createServer = async ({
+	wundergraphDir,
 	hooksConfig,
 	config,
 	gracefulShutdown,
@@ -191,7 +193,7 @@ export const createServer = async ({
 
 	if (config.api) {
 		await fastify.register(FastifyWebhooksPlugin, {
-			wunderGraphDir: process.env.WG_ABS_DIR!,
+			wundergraphDir,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
 		});

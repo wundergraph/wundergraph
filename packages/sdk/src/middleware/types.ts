@@ -89,6 +89,7 @@ export interface WunderGraphUser<Role = any> {
 export interface ServerOptions {
 	port: number;
 	host: string;
+	wundergraphDir: string;
 	hooksConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
