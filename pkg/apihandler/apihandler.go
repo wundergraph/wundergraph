@@ -347,7 +347,7 @@ func (r *Builder) createSubRouter(router *mux.Router, pathPrefix string) *mux.Ro
 }
 
 func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration, pathPrefix string) error {
-	handler, err := webhookhandler.New(config, pathPrefix, r.hooksServerURL)
+	handler, err := webhookhandler.New(config, pathPrefix, r.hooksServerURL, r.log)
 	if err != nil {
 		return err
 	}

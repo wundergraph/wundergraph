@@ -3,6 +3,9 @@ package node
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -239,6 +242,18 @@ func TestWebHooks(t *testing.T) {
 					{
 						Name: "stripe",
 					},
+					{
+						Name: "github-protected",
+						Verifier: &wgpb.WebhookVerifier{
+							Kind:                  wgpb.WebhookVerifierKind_HMAC_SHA256,
+							SignatureHeader:       "X-Hub-Signature",
+							SignatureHeaderPrefix: "sha256=",
+							Secret: &wgpb.ConfigurationVariable{
+								Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+								StaticVariableContent: "secret",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -260,11 +275,18 @@ func TestWebHooks(t *testing.T) {
 		Reporter: httpexpect.NewRequireReporter(t),
 	})
 
-	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
-	e.POST("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
-	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
+	hash := hmac.New(sha256.New, []byte("secret"))
+	_, _ = hash.Write([]byte("ok"))
+	signatureString := hex.EncodeToString(hash.Sum(nil))
 
-	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe"}, paths)
+	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
+	e.GET("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
+	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
+	// We can't return 200 otherwise we would accept the delivery of the webhook and the publisher might not redeliver it.
+	e.POST("/api/main/webhooks/github-protected").Expect().Status(http.StatusUnauthorized)
+	e.POST("/api/main/webhooks/github-protected").WithBytes([]byte("ok")).WithHeader("X-Hub-Signature", fmt.Sprintf("sha256=%s", signatureString)).Expect().Status(http.StatusOK)
+
+	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe", "/webhooks/github-protected"}, paths)
 }
 
 func BenchmarkNode(t *testing.B) {

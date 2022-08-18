@@ -14,6 +14,7 @@ import { Forms } from './typescript/forms';
 import { WunderGraphServer } from './typescript/server';
 import { WunderGraphHooksPlugin } from './typescript/hooks';
 import { AuthenticationProviderConfiguration } from './markdown/authentication';
+import { WunderGraphWebhooksPlugin } from './typescript/webhooks';
 
 const typescriptModels = [
 	new TypeScriptInputModels(),
@@ -27,6 +28,7 @@ const typescriptAll = [
 	...typescriptModels,
 	new WunderGraphServer(),
 	new WunderGraphHooksPlugin(),
+	new WunderGraphWebhooksPlugin(),
 	new Operations(),
 	new JsonSchema(),
 ];
@@ -41,6 +43,7 @@ const templates = {
 		all: [...typescriptAll, new TypeScriptWebClient(), new AuthenticationProviderConfiguration()],
 		fastifyServer: new WunderGraphServer(),
 		fastifyHooksPlugin: new WunderGraphHooksPlugin(),
+		fastifyWebhookPlugin: new WunderGraphWebhooksPlugin(),
 		react: [
 			...typescriptAll,
 			new TypeScriptWebClient(),

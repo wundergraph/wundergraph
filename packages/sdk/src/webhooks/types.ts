@@ -1,5 +1,7 @@
 import { InternalClient as InternalClientBase } from '../middleware/internal-client';
 import { RequestMethod } from '../middleware/types';
+import { WebhookVerifierKind } from './verifiers';
+import { EnvironmentVariable } from '../configure';
 
 export interface Webhook<InternalClient = InternalClientBase, Body = any, ResponseBody = any> {
 	handler: (
@@ -34,4 +36,17 @@ export interface WebhookHttpEvent<InternalClient, Body> {
 	headers: WebhookHeaders;
 	query: WebhookQuery;
 	body: Body;
+}
+
+export interface WebhookConfiguration {
+	verifier: {
+		kind: WebhookVerifierKind;
+		secret: EnvironmentVariable;
+		signatureHeader: string;
+		signatureHeaderPrefix: string;
+	};
+}
+
+export interface WebhooksConfig {
+	[name: string]: WebhookConfiguration;
 }

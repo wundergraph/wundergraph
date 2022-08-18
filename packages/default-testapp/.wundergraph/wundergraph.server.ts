@@ -1,5 +1,6 @@
-import { configureWunderGraphServer } from '@wundergraph/sdk';
+import { configureWunderGraphServer, EnvironmentVariable, GithubWebhookVerifier } from '@wundergraph/sdk';
 import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { WebhooksConfig } from './generated/wundergraph.webhooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
@@ -18,7 +19,12 @@ import { createGraphQLSchema } from 'openapi-to-graphql';
 import jsonPlaceholder from './../json_placeholder.json';
 import type { SDLResponse } from './generated/models';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+	webhooks: {
+		github: {
+			verifier: GithubWebhookVerifier(new EnvironmentVariable('GITHUB_SECRET')),
+		},
+	},
 	hooks: {
 		authentication: {
 			postAuthentication: async ({ user }) => {},

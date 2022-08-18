@@ -661,10 +661,32 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		if (fs.existsSync(webhooksDir)) {
 			const webhooks = await getWebhooks(path.join('webhooks'));
 			resolved.webhooks = webhooks.map((webhook) => {
-				return {
-					...webhook,
-					verifiers: [],
+				let webhookConfig: WebhookConfiguration = {
+					name: webhook.name,
+					filePath: webhook.filePath,
+					verifier: undefined,
 				};
+
+				if (config.server?.webhooks) {
+					for (const [key, value] of Object.entries(config.server.webhooks)) {
+						if (key === webhook.name) {
+							webhookConfig.verifier = {
+								kind: value.verifier.kind,
+								signatureHeader: value.verifier.signatureHeader,
+								signatureHeaderPrefix: value.verifier.signatureHeaderPrefix,
+								secret: {
+									kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+									staticVariableContent: '',
+									placeholderVariableName: '',
+									environmentVariableDefaultValue: value.verifier.secret.defaultValue || '',
+									environmentVariableName: value.verifier.secret.name,
+								},
+							};
+							break;
+						}
+					}
+				}
+				return webhookConfig;
 			});
 		}
 

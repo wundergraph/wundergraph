@@ -19,6 +19,7 @@ import {
 	WunderGraphUser,
 	ServerOptions,
 } from './types';
+import { WebhooksConfig } from '../webhooks/types';
 
 /**
  * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
@@ -66,17 +67,21 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 
 export const configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedClient extends InternalClient
+	GeneratedClient extends InternalClient,
+	GeneratedWebhooksConfig extends WebhooksConfig
 >(
-	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig>
+	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
 ): WunderGraphHooksAndServerConfig => {
-	return _configureWunderGraphServer(configWrapper());
+	return _configureWunderGraphServer<GeneratedHooksConfig, GeneratedWebhooksConfig>(configWrapper());
 };
 
-const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfiguration>(
-	config: WunderGraphServerConfig<GeneratedHooksConfig>
+const _configureWunderGraphServer = <
+	GeneratedHooksConfig extends HooksConfiguration,
+	GeneratedWebhooksConfig extends WebhooksConfig
+>(
+	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
 ): WunderGraphHooksAndServerConfig => {
-	const hooksConfig = config as WunderGraphHooksAndServerConfig;
+	const hooksConfig = config as WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>;
 
 	/**
 	 * Configure the custom GraphQL servers

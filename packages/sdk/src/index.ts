@@ -55,6 +55,7 @@ export type {
 	Logger,
 	WebhookHeaders,
 	WebhookQuery,
+	WebhookConfiguration,
 } from './webhooks/types';
 
 export { default as templates } from './codegen/templates';
@@ -81,3 +82,4 @@ export {
 } from './codegen/templates/typescript/index';
 export { modelImports } from './codegen/templates/typescript/web.client';
 export { listenAddrHttp, middlewarePort, middlewarePortString, listenAddr } from './env/index';
+export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from './webhooks/verifiers';

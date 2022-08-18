@@ -5,6 +5,7 @@ import { HooksConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
 import { middlewarePort } from '../env';
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { WebhooksConfig } from '../webhooks/types';
 
 export const SERVER_PORT = middlewarePort;
 
@@ -95,12 +96,18 @@ export interface ServerOptions {
 	gracefulShutdown: boolean;
 }
 
-export interface WunderGraphServerConfig<GeneratedHooksConfig = HooksConfiguration> {
+export interface WunderGraphServerConfig<
+	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedWebhooksConfig = WebhooksConfig
+> {
+	webhooks?: GeneratedWebhooksConfig;
 	hooks: GeneratedHooksConfig;
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 }
 
-export interface WunderGraphHooksAndServerConfig<GeneratedHooksConfig = HooksConfiguration>
-	extends WunderGraphServerConfig<GeneratedHooksConfig> {
+export interface WunderGraphHooksAndServerConfig<
+	GeneratedHooksConfig = HooksConfiguration,
+	GeneratedWebhooksConfig = WebhooksConfig
+> extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
 	graphqlServers?: (GraphQLServerConfig & { url: string })[];
 }
