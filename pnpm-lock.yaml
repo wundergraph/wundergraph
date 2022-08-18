@@ -227,6 +227,7 @@ importers:
     specifiers:
       '@apollo/composition': ^2.0.2
       '@apollo/federation': ^0.36.2
+      '@fastify/formbody': ^7.0.1
       '@graphql-tools/schema': ^8.3.10
       '@prisma/generator-helper': ^3.9.2
       '@types/axios': ^0.14.0
@@ -269,6 +270,7 @@ importers:
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
+      '@fastify/formbody': 7.0.1
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
       '@wundergraph/protobuf': link:../protobuf
@@ -1118,6 +1120,12 @@ packages:
     resolution: {integrity: sha512-9pCi6c6tmGt/qfuf2koZQuSIG6ckP9q3mz+JoMmAq9eQ4EtA92sWoK7E0LJUn2FFTS/hp5kag+4+dWsV5ZfcXg==}
     dependencies:
       fast-json-stringify: 5.1.0
+    dev: false
+
+  /@fastify/formbody/7.0.1:
+    resolution: {integrity: sha512-CY6IfzdtidHbZezyyXv7u9dzmb2Lv92HyOZDqANuFb++5ojsqoqIb8bJz11bSgPK0MDoqww/dH6DxZDMM8N4ng==}
+    dependencies:
+      fastify-plugin: 3.0.1
     dev: false
 
   /@gar/promisify/1.1.3:

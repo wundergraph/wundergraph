@@ -1,6 +1,5 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import fp from 'fastify-plugin';
-import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../server';
+import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../types';
 import {
 	HooksConfiguration,
 	HooksConfigurationOperationType,
@@ -424,4 +423,4 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	}
 };
 
-export default fp(FastifyHooksPlugin, '4.x');
+export default FastifyHooksPlugin;

@@ -52,7 +52,7 @@ import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { WunderGraphHooksAndServerConfig } from '../middleware/server';
+import { WunderGraphHooksAndServerConfig } from '../middleware/types';
 import { listenAddr } from '../env';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
@@ -659,7 +659,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 		const webhooksDir = path.join('webhooks');
 		if (fs.existsSync(webhooksDir)) {
-			resolved.webhooks = await getWebhooks(path.join('webhooks'), '.ts');
+			resolved.webhooks = await getWebhooks(path.join('webhooks'));
 		}
 
 		const operationsContent = loadOperations(schemaFileName);

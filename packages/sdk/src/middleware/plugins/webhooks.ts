@@ -1,39 +1,69 @@
 import { FastifyPluginAsync } from 'fastify';
-import fp from 'fastify-plugin';
-import { getWebhooks } from '../../webhooks';
 import path from 'path';
-import process from 'node:process';
-import { WebHook } from '../../webhooks/types';
-import { RouteGenericInterface } from 'fastify/types/route';
+import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
+import { objectToHeaders } from 'headers-polyfill';
+import { WebhookConfiguration } from '@wundergraph/protobuf';
+import { InternalClientFactory } from '../internal-client';
+import { RequestMethod } from '../types';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
 	webhookName?: string;
 }
 
-export interface FastifyWebHooksOptions {}
+interface FastifyWebHooksOptions {
+	webhooks: WebhookConfiguration[];
+	internalClientFactory: InternalClientFactory;
+	wunderGraphDir: string;
+}
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
-	const webhooksBundleDir = path.join(process.env.WG_ABS_DIR!, 'generated', 'bundle', 'webhooks');
-	const hooks = await getWebhooks(webhooksBundleDir, '.js');
+	await fastify.register(require('@fastify/formbody'));
 
-	for (const hook of hooks) {
+	for (const hook of config.webhooks) {
 		try {
-			const webhook: WebHook = (await import(hook.filePath)).default;
+			const webhookFilePath = path.join(config.wunderGraphDir, 'generated', 'bundle', hook.filePath);
+			const webhook: Webhook = (await import(webhookFilePath)).default;
 
-			fastify.route<RouteGenericInterface, WebHookRouteConfig>({
+			fastify.route({
 				url: `/webhooks/${hook.name}`,
 				method: ['GET', 'POST'],
 				config: { webhookName: hook.name, kind: 'webhook' },
 				handler: async (request, reply) => {
-					await webhook.handler();
-					reply.code(200);
+					const eventResponse = await webhook.handler(
+						{
+							method: request.method as RequestMethod,
+							url: request.url,
+							body: request.body,
+							headers: (request.headers as WebhookHeaders) || {},
+							query: (request.query as WebhookQuery) || {},
+						},
+						{
+							log: request.log.child({ webhook: hook.name }),
+							internalClient: config.internalClientFactory(
+								{},
+								{
+									headers: objectToHeaders(request.headers),
+									method: request.method as RequestMethod,
+									requestURI: request.url,
+								}
+							),
+						}
+					);
+
+					if (eventResponse.headers) {
+						reply.headers(eventResponse.headers);
+					}
+					if (eventResponse.body) {
+						reply.send(eventResponse.body);
+					}
+					reply.code(eventResponse.statusCode || 200);
 				},
 			});
 		} catch (err) {
-			fastify.log.error(err, 'Could not load webhook function');
+			fastify.log.child({ webhook: hook.name }).error(err, 'Could not load webhook function');
 		}
 	}
 };
 
-export default fp(FastifyWebhooksPlugin, '4.x');
+export default FastifyWebhooksPlugin;

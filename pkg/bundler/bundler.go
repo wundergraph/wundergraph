@@ -133,6 +133,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		Bundle:        true,
 		Incremental:   true,
 		Platform:      api.PlatformNode,
+		Sourcemap:     api.SourceMapLinked,
 		AbsWorkingDir: b.absWorkingDir,
 		Loader: map[string]api.Loader{
 			".json": api.LoaderJSON,

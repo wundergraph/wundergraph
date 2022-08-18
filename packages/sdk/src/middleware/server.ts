@@ -4,103 +4,28 @@ import { Headers } from 'headers-polyfill';
 import process from 'node:process';
 import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
-import GraphQLServerPlugin, { GraphQLServerConfig } from './plugins/graphql';
-import Fastify, { FastifyInstance, FastifyLoggerInstance } from 'fastify';
+import GraphQLServerPlugin from './plugins/graphql';
+import Fastify, { FastifyInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
 import fs from 'fs';
-import { middlewarePort } from '../env';
+import {
+	ClientRequest,
+	SERVER_PORT,
+	WunderGraphHooksAndServerConfig,
+	WunderGraphServerConfig,
+	WunderGraphUser,
+	ServerOptions,
+} from './types';
 
-declare module 'fastify' {
-	interface FastifyRequest extends FastifyRequestContext {}
-}
-
-export interface FastifyRequestContext<User = any, IC = InternalClient> {
-	ctx: BaseContext<User, IC>;
-}
-
-export interface BaseContext<User = any, IC = InternalClient> {
-	/**
-	 * The user that is currently logged in.
-	 */
-	user?: User;
-	clientRequest: ClientRequest;
-	/**
-	 * The request logger.
-	 */
-	log: FastifyLoggerInstance;
-	/**
-	 * The internal client that is used to communicate with the server.
-	 */
-	internalClient: IC;
-}
-
-export interface ClientRequestHeaders extends Headers {}
-
-export interface ClientRequest<H = ClientRequestHeaders> {
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
-	requestURI: string;
-	/**
-	 * Contains all client request headers. You can manipulate the map to add or remove headers.
-	 * This might impact upstream hooks. Global hooks don't take changes into account.
-	 */
-	headers: H;
-}
-
-export interface WunderGraphRequest {
-	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
-	requestURI: string;
-	headers: Headers;
-	body: any;
-}
-
-export interface WunderGraphResponse extends WunderGraphRequest {
-	status: string;
-	statusCode: number;
-}
-
-export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
-
-export type JSONObject = { [key: string]: JSONValue };
-
-export interface WunderGraphUser<Role = any> {
-	provider?: string;
-	providerId?: string;
-	email?: string;
-	emailVerified?: boolean;
-	name?: string;
-	firstName?: string;
-	lastName?: string;
-	nickName?: string;
-	description?: string;
-	userId?: string;
-	avatarUrl?: string;
-	location?: string;
-	roles?: Role[];
-	customAttributes?: string[];
-	customClaims?: {
-		[key: string]: any;
-	};
-	accessToken?: JSONObject;
-	rawAccessToken?: string;
-	idToken?: JSONObject;
-	rawIdToken?: string;
-}
-
-export interface WunderGraphServerConfig<GeneratedHooksConfig = HooksConfiguration> {
-	hooks: GeneratedHooksConfig;
-	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
-}
-
-export interface WunderGraphHooksAndServerConfig<GeneratedHooksConfig = HooksConfiguration>
-	extends WunderGraphServerConfig<GeneratedHooksConfig> {
-	graphqlServers?: (GraphQLServerConfig & { url: string })[];
-}
-
-export const SERVER_PORT = middlewarePort;
-
+/**
+ * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
+ * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
+ * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
+ * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
+ */
 process.on('uncaughtExceptionMonitor', (err, origin) => {
 	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
 });
@@ -108,6 +33,10 @@ process.on('uncaughtExceptionMonitor', (err, origin) => {
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
 
+/**
+ * By default this script will not start the server
+ * You need to pass START_HOOKS_SERVER=true to start the server
+ */
 if (process.env.START_HOOKS_SERVER === 'true') {
 	if (!process.env.WG_ABS_DIR) {
 		console.error('The environment variable `WG_ABS_DIR` is required!');
@@ -169,13 +98,14 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
-		const fastify = Fastify({
-			logger: {
-				level: process.env.LOG_LEVEL || 'info',
-			},
-		});
-		startServer(fastify, hooksConfig, WG_CONFIG).catch((err) => {
-			fastify.log.error(err, 'Could not start the hook server');
+		startServer({
+			config: WG_CONFIG,
+			hooksConfig,
+			gracefulShutdown: process.env.NODE_ENV === 'production',
+			host: '127.0.0.1',
+			port: SERVER_PORT,
+		}).catch((err) => {
+			console.error('Could not start the hook server', err);
 			process.exit(1);
 		});
 	}
@@ -183,11 +113,25 @@ const _configureWunderGraphServer = <GeneratedHooksConfig extends HooksConfigura
 	return hooksConfig;
 };
 
-export const startServer = async (
-	fastify: FastifyInstance,
-	hooksConfig: WunderGraphHooksAndServerConfig,
-	config: WunderGraphConfiguration
-) => {
+export const startServer = async (opts: ServerOptions) => {
+	const fastify = await createServer(opts);
+	await fastify.listen({
+		port: opts.port,
+		host: opts.host,
+	});
+};
+
+export const createServer = async ({
+	hooksConfig,
+	config,
+	gracefulShutdown,
+}: ServerOptions): Promise<FastifyInstance> => {
+	const fastify = Fastify({
+		logger: {
+			level: process.env.LOG_LEVEL || 'info',
+		},
+	});
+
 	fastify.decorateRequest('ctx', null);
 
 	/**
@@ -210,43 +154,52 @@ export const startServer = async (
 		}
 	});
 
-	/**
-	 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
-	 */
-	fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
-		'preHandler',
-		async (req, reply) => {
-			req.ctx = {
-				log: req.log,
-				user: req.body.__wg.user,
-				// clientRequest represents the original client request that was sent initially to the server.
-				clientRequest: {
-					headers: new Headers(req.body.__wg.clientRequest?.headers),
-					requestURI: req.body.__wg.clientRequest?.requestURI || '',
-					method: req.body.__wg.clientRequest?.method || 'GET',
-				},
-				internalClient: clientFactory({}, req.body.__wg.clientRequest),
-			};
+	await fastify.register(async (fastify) => {
+		/**
+		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
+		 * Registering this handler will only affect child plugins
+		 */
+		fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
+			'preHandler',
+			async (req, reply) => {
+				req.ctx = {
+					log: req.log,
+					user: req.body.__wg.user,
+					// clientRequest represents the original client request that was sent initially to the server.
+					clientRequest: {
+						headers: new Headers(req.body.__wg.clientRequest?.headers),
+						requestURI: req.body.__wg.clientRequest?.requestURI || '',
+						method: req.body.__wg.clientRequest?.method || 'GET',
+					},
+					internalClient: clientFactory({}, req.body.__wg.clientRequest),
+				};
+			}
+		);
+
+		await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
+		fastify.log.info('Hooks plugin registered');
+
+		if (hooksConfig.graphqlServers) {
+			for await (const server of hooksConfig.graphqlServers) {
+				const routeUrl = `/gqls/${server.serverName}/graphql`;
+				await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
+				fastify.log.info('GraphQL plugin registered');
+				fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
+			}
 		}
-	);
+	});
 
-	await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
-	fastify.log.info('Hooks plugin registered');
-
-	await fastify.register(FastifyWebhooksPlugin);
-	fastify.log.info('Webhooks plugin registered');
-
-	if (hooksConfig.graphqlServers) {
-		for await (const server of hooksConfig.graphqlServers) {
-			const routeUrl = `/gqls/${server.serverName}/graphql`;
-			await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
-			fastify.log.info('GraphQL plugin registered');
-			fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
-		}
+	if (config.api) {
+		await fastify.register(FastifyWebhooksPlugin, {
+			wunderGraphDir: process.env.WG_ABS_DIR!,
+			webhooks: config.api.webhooks,
+			internalClientFactory: clientFactory,
+		});
+		fastify.log.info('Webhooks plugin registered');
 	}
 
 	// only in production because it slows down watch process in development
-	if (process.env.NODE_ENV === 'production') {
+	if (gracefulShutdown) {
 		await fastify.register(FastifyGraceful);
 		fastify.gracefulShutdown((signal, next) => {
 			fastify.log.info('graceful shutdown', { signal });
@@ -254,8 +207,5 @@ export const startServer = async (
 		});
 	}
 
-	return fastify.listen({
-		port: SERVER_PORT,
-		host: '127.0.0.1',
-	});
+	return fastify;
 };
