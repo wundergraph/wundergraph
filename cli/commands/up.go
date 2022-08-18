@@ -85,6 +85,7 @@ var upCmd = &cobra.Command{
 		}
 
 		configJsonPath := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		webhooksDir := path.Join(entryPoints.WunderGraphDirAbs, webhooks.WebhookDirectoryName)
 		configOutFile := path.Join("generated", "bundle", "config.js")
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
@@ -118,6 +119,7 @@ var upCmd = &cobra.Command{
 		})
 
 		var hookServerRunner *scriptrunner.ScriptRunner
+		var webhooksBundler *bundler.Bundler
 		var onAfterBuild func()
 
 		if entryPoints.ServerEntryPointAbs != "" {
@@ -130,21 +132,23 @@ var upCmd = &cobra.Command{
 				WatchPaths:    []string{configJsonPath},
 			})
 
-			webhookPaths, err := webhooks.GetWebhooks(entryPoints.WunderGraphDirAbs)
-			if err != nil {
-				return err
-			}
+			if files.DirectoryExists(webhooksDir) {
+				webhookPaths, err := webhooks.GetWebhooks(entryPoints.WunderGraphDirAbs)
+				if err != nil {
+					return err
+				}
 
-			webhooksBundler := bundler.NewBundler(bundler.Config{
-				Name:          "webhooks-bundler",
-				EntryPoints:   webhookPaths,
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-				OutDir:        webhooksOutDir,
-				Logger:        log,
-				OnAfterBundle: func() {
-					log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
-				},
-			})
+				webhooksBundler = bundler.NewBundler(bundler.Config{
+					Name:          "webhooks-bundler",
+					EntryPoints:   webhookPaths,
+					AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+					OutDir:        webhooksOutDir,
+					Logger:        log,
+					OnAfterBundle: func() {
+						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+					},
+				})
+			}
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
@@ -182,11 +186,13 @@ var upCmd = &cobra.Command{
 					hooksBundler.Bundle()
 				}()
 
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					webhooksBundler.Bundle()
-				}()
+				if webhooksBundler != nil {
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						webhooksBundler.Bundle()
+					}()
+				}
 
 				wg.Wait()
 
@@ -226,7 +232,7 @@ var upCmd = &cobra.Command{
 				path.Join(entryPoints.WunderGraphDirAbs, "fragments"),
 				// all webhook filenames are stored in the config
 				// we are going to create HTTP routes on the node for all of them
-				path.Join(entryPoints.WunderGraphDirAbs, webhooks.WebhookDirectoryName),
+				webhooksDir,
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
 				// in that case we want to rerun the script to build a new config
 				introspectionCacheDir,

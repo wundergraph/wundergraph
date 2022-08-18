@@ -61,22 +61,26 @@ Use this command if you only want to generate the configuration`,
 		if entryPoints.ServerEntryPointAbs != "" {
 			serverOutFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
 			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+			webhooksDir := path.Join(entryPoints.WunderGraphDirAbs, webhooks.WebhookDirectoryName)
 
-			webhookPaths, err := webhooks.GetWebhooks(entryPoints.WunderGraphDirAbs)
-			if err != nil {
-				return err
+			var webhooksBundler *bundler.Bundler
+
+			if files.DirectoryExists(webhooksDir) {
+				webhookPaths, err := webhooks.GetWebhooks(entryPoints.WunderGraphDirAbs)
+				if err != nil {
+					return err
+				}
+				webhooksBundler = bundler.NewBundler(bundler.Config{
+					Name:          "webhooks-bundler",
+					EntryPoints:   webhookPaths,
+					AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+					OutDir:        webhooksOutDir,
+					Logger:        log,
+					OnAfterBundle: func() {
+						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+					},
+				})
 			}
-
-			webhooksBundler := bundler.NewBundler(bundler.Config{
-				Name:          "webhooks-bundler",
-				EntryPoints:   webhookPaths,
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-				OutDir:        webhooksOutDir,
-				Logger:        log,
-				OnAfterBundle: func() {
-					log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
-				},
-			})
 
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
@@ -98,11 +102,13 @@ Use this command if you only want to generate the configuration`,
 					hooksBundler.Bundle()
 				}()
 
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					webhooksBundler.Bundle()
-				}()
+				if webhooksBundler != nil {
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						webhooksBundler.Bundle()
+					}()
+				}
 
 				wg.Wait()
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
