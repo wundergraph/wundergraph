@@ -1,4 +1,4 @@
-import a from './../../foo';
+import a from './../../local-import';
 import { buildSchema } from 'graphql';
 import type { Webhook } from '@wundergraph/sdk';
 import type { InternalClient } from '../generated/wundergraph.internal.client';

@@ -91,7 +91,7 @@ export interface ServerOptions {
 	port: number;
 	host: string;
 	wundergraphDir: string;
-	hooksConfig: WunderGraphHooksAndServerConfig;
+	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
 }
@@ -101,13 +101,18 @@ export interface WunderGraphServerConfig<
 	GeneratedWebhooksConfig = WebhooksConfig
 > {
 	webhooks?: GeneratedWebhooksConfig;
-	hooks: GeneratedHooksConfig;
+	hooks?: GeneratedHooksConfig;
+	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
 }
 
+// internal representation of the fully resolved server config
 export interface WunderGraphHooksAndServerConfig<
 	GeneratedHooksConfig = HooksConfiguration,
 	GeneratedWebhooksConfig = WebhooksConfig
 > extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
+	webhooks?: GeneratedWebhooksConfig;
+	hooks?: GeneratedHooksConfig;
+	// url of the server is set internally by the hooks server
 	graphqlServers?: (GraphQLServerConfig & { url: string })[];
 }

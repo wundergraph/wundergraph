@@ -52,7 +52,7 @@ import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { WunderGraphHooksAndServerConfig } from '../middleware/types';
+import { WunderGraphHooksAndServerConfig, WunderGraphServerConfig } from '../middleware/types';
 import { listenAddr } from '../env';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';

@@ -14,10 +14,10 @@ import fs from 'fs';
 import {
 	ClientRequest,
 	SERVER_PORT,
-	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 	WunderGraphUser,
 	ServerOptions,
+	WunderGraphHooksAndServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
 
@@ -81,20 +81,21 @@ const _configureWunderGraphServer = <
 >(
 	config: WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
 ): WunderGraphHooksAndServerConfig => {
-	const hooksConfig = config as WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>;
+	const serverConfig = config as WunderGraphHooksAndServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>;
 
 	/**
 	 * Configure the custom GraphQL servers
 	 */
-	if (hooksConfig.graphqlServers) {
+	if (serverConfig.graphqlServers) {
 		let seenServer: { [key: string]: boolean } = {};
-		hooksConfig.graphqlServers.forEach((server) => {
+		serverConfig.graphqlServers.forEach((server) => {
 			if (seenServer[server.serverName]) {
 				throw new Error(`A server with the name '${server.serverName}' has been already registered!`);
 			}
 			seenServer[server.serverName] = true;
 		});
-		for (const server of hooksConfig.graphqlServers) {
+		// Here we set the server url of the graphqlServers
+		for (const server of serverConfig.graphqlServers) {
 			server.url = `http://127.0.0.1:${SERVER_PORT}/gqls/${server.serverName}/graphql`;
 		}
 	}
@@ -106,7 +107,7 @@ const _configureWunderGraphServer = <
 		startServer({
 			wundergraphDir: process.env.WG_ABS_DIR!,
 			config: WG_CONFIG,
-			hooksConfig,
+			serverConfig,
 			gracefulShutdown: process.env.NODE_ENV === 'production',
 			host: '127.0.0.1',
 			port: SERVER_PORT,
@@ -116,7 +117,7 @@ const _configureWunderGraphServer = <
 		});
 	}
 
-	return hooksConfig;
+	return serverConfig;
 };
 
 export const startServer = async (opts: ServerOptions) => {
@@ -129,7 +130,7 @@ export const startServer = async (opts: ServerOptions) => {
 
 export const createServer = async ({
 	wundergraphDir,
-	hooksConfig,
+	serverConfig,
 	config,
 	gracefulShutdown,
 }: ServerOptions): Promise<FastifyInstance> => {
@@ -161,6 +162,9 @@ export const createServer = async ({
 		}
 	});
 
+	/**
+	 * We encapsulate the preHandler with a fastify plugin "register" to not apply it on other routes.
+	 */
 	await fastify.register(async (fastify) => {
 		/**
 		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
@@ -172,7 +176,7 @@ export const createServer = async ({
 				req.ctx = {
 					log: req.log,
 					user: req.body.__wg.user,
-					// clientRequest represents the original client request that was sent initially to the server.
+					// clientRequest represents the original client request that was sent initially to the WunderNode.
 					clientRequest: {
 						headers: new Headers(req.body.__wg.clientRequest?.headers),
 						requestURI: req.body.__wg.clientRequest?.requestURI || '',
@@ -183,11 +187,13 @@ export const createServer = async ({
 			}
 		);
 
-		await fastify.register(HooksPlugin, { ...hooksConfig.hooks, config });
-		fastify.log.info('Hooks plugin registered');
+		if (serverConfig?.hooks) {
+			await fastify.register(HooksPlugin, { ...serverConfig.hooks, config });
+			fastify.log.info('Hooks plugin registered');
+		}
 
-		if (hooksConfig.graphqlServers) {
-			for await (const server of hooksConfig.graphqlServers) {
+		if (serverConfig.graphqlServers) {
+			for await (const server of serverConfig.graphqlServers) {
 				const routeUrl = `/gqls/${server.serverName}/graphql`;
 				await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');

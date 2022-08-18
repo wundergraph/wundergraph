@@ -27,5 +27,4 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 			}),
 		},
 	},
-	hooks: {},
 }));
