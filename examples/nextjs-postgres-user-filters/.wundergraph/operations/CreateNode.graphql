@@ -1,0 +1,5 @@
+mutation ($data: [db_NodeCreateManyInput]!) {
+	db_createManyNode(data: $data) {
+		count
+	}
+}
