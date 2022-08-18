@@ -12,17 +12,19 @@ export interface WebhookVerifier {
 	signatureHeaderPrefix: string;
 }
 
-export const CreateWebhookVerifier = (
-	kind: typeof WebhookVerifierKind,
-	signatureHeader: string,
-	signatureHeaderPrefix: string,
-	secret: EnvironmentVariable
-): WebhookVerifier => {
+export interface WebhookVerifierConfiguration {
+	kind: WebhookVerifierKind;
+	signatureHeader: string;
+	signatureHeaderPrefix: string;
+	secret: EnvironmentVariable;
+}
+
+export const CreateWebhookVerifier = (config: WebhookVerifierConfiguration): WebhookVerifier => {
 	return {
-		kind: webhookVerifierKindFromJSON(kind),
-		signatureHeader,
-		signatureHeaderPrefix,
-		secret,
+		kind: webhookVerifierKindFromJSON(config.kind),
+		signatureHeader: config.signatureHeader,
+		signatureHeaderPrefix: config.signatureHeaderPrefix,
+		secret: config.secret,
 	};
 };
 

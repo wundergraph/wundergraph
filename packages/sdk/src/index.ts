@@ -57,6 +57,7 @@ export type {
 	WebhookQuery,
 	WebhookConfiguration,
 } from './webhooks/types';
+export type { WebhookVerifierConfiguration } from './webhooks/verifiers';
 
 export { default as templates } from './codegen/templates';
 export { Application, introspect, createMockApi, Api } from './definition';
