@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.97.0",
+  "version": "0.98.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -77,7 +77,7 @@
     "@fastify/formbody": "^7.0.1",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
-    "@wundergraph/protobuf": "workspace:^0.91.1",
+    "@wundergraph/protobuf": "workspace:^0.91.2",
     "@wundergraph/wunderctl": "workspace:^0.99.0",
     "axios": "^0.26.1",
     "colors": "^1.4.0",

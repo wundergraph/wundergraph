@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.91.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.91.1...@wundergraph/protobuf@0.91.2) (2022-08-18)
+
+**Note:** Version bump only for package @wundergraph/protobuf
+
 ## [0.91.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.91.0...@wundergraph/protobuf@0.91.1) (2022-06-02)
 
 **Note:** Version bump only for package @wundergraph/protobuf
