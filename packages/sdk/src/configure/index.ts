@@ -28,6 +28,7 @@ import {
 	OperationType,
 	PostResolveTransformationKind,
 	TypeConfiguration,
+	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
@@ -51,8 +52,10 @@ import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { WunderGraphHooksAndServerConfig } from '../middleware/server';
+import { WunderGraphHooksAndServerConfig, WunderGraphServerConfig } from '../middleware/types';
 import { listenAddr } from '../env';
+import { getWebhooks } from '../webhooks';
+import process from 'node:process';
 
 export class EnvironmentVariable {
 	constructor(name: string, defaultValue?: string) {
@@ -292,6 +295,7 @@ export interface ResolvedWunderGraphConfig {
 		allowedHostNames: ConfigurationVariable[];
 	};
 	interpolateVariableDefinitionAsJSON: string[];
+	webhooks: WebhookConfiguration[];
 }
 
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
@@ -404,6 +408,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			allowedHostNames: config.security?.allowedHosts?.map(mapInputVariable) || [],
 		},
 		interpolateVariableDefinitionAsJSON: resolved.EngineConfiguration.interpolateVariableDefinitionAsJSON,
+		webhooks: [],
 	};
 
 	if (config.links) {
@@ -640,6 +645,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		Promise.all(config.application.apis).catch();
 		return;
 	}
+
 	resolveConfig(config).then(async (resolved) => {
 		const app = resolved.application;
 
@@ -650,6 +656,39 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		fs.writeFileSync(path.join('generated', schemaFileName), schemaContent, { encoding: 'utf8' });
 		done();
 		console.log(`${new Date().toLocaleTimeString()}: ${schemaFileName} updated`);
+
+		const webhooksDir = path.join('webhooks');
+		if (fs.existsSync(webhooksDir)) {
+			const webhooks = await getWebhooks(path.join('webhooks'));
+			resolved.webhooks = webhooks.map((webhook) => {
+				let webhookConfig: WebhookConfiguration = {
+					name: webhook.name,
+					filePath: webhook.filePath,
+					verifier: undefined,
+				};
+
+				if (config.server?.webhooks) {
+					for (const [key, value] of Object.entries(config.server.webhooks)) {
+						if (key === webhook.name) {
+							webhookConfig.verifier = {
+								kind: value.verifier.kind,
+								signatureHeader: value.verifier.signatureHeader,
+								signatureHeaderPrefix: value.verifier.signatureHeaderPrefix,
+								secret: {
+									kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+									staticVariableContent: '',
+									placeholderVariableName: '',
+									environmentVariableDefaultValue: value.verifier.secret.defaultValue || '',
+									environmentVariableName: value.verifier.secret.name,
+								},
+							};
+							break;
+						}
+					}
+				}
+				return webhookConfig;
+			});
+		}
 
 		const operationsContent = loadOperations(schemaFileName);
 		const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
@@ -961,6 +1000,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				},
 			},
 			allowedHostNames: config.security.allowedHostNames,
+			webhooks: config.webhooks,
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 	};

@@ -30,6 +30,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
+	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
 
 	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
@@ -72,6 +73,7 @@ type Builder struct {
 	pool     *pool.Pool
 
 	middlewareClient *hooks.Client
+	hooksServerURL   string
 
 	definition *ast.Document
 
@@ -99,6 +101,7 @@ type BuilderConfig struct {
 	EnableIntrospection        bool
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
+	HookServerURL              string
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -113,6 +116,7 @@ func NewBuilder(pool *pool.Pool,
 		pool:                       pool,
 		insecureCookies:            config.InsecureCookies,
 		middlewareClient:           hooksClient,
+		hooksServerURL:             config.HookServerURL,
 		forceHttpsRedirects:        config.ForceHttpsRedirects,
 		enableDebugMode:            config.EnableDebugMode,
 		enableIntrospection:        config.EnableIntrospection,
@@ -130,8 +134,18 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		}
 	}
 
+	r.router = r.createSubRouter(router, api.PathPrefix)
+
+	for _, webhook := range api.Webhooks {
+		err = r.registerWebhook(webhook, api.PathPrefix)
+		if err != nil {
+			r.log.Error("register webhook", abstractlogger.Error(err))
+		}
+	}
+
 	if api.EngineConfiguration == nil {
-		return streamClosers, fmt.Errorf("engine config must not be nil")
+		// no engine config, skipping configuration
+		return streamClosers, nil
 	}
 	if api.AuthenticationConfig == nil ||
 		api.AuthenticationConfig.Hooks == nil {
@@ -174,8 +188,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		abstractlogger.String("name", api.PathPrefix),
 		abstractlogger.Int("numOfOperations", len(api.Operations)),
 	)
-
-	r.router = r.createSubRouter(router, api.PathPrefix)
 
 	if len(api.Hosts) > 0 {
 		r.router.Use(func(handler http.Handler) http.Handler {
@@ -332,6 +344,19 @@ func (r *Builder) createSubRouter(router *mux.Router, pathPrefix string) *mux.Ro
 	)
 
 	return route.Subrouter()
+}
+
+func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration, pathPrefix string) error {
+	handler, err := webhookhandler.New(config, pathPrefix, r.hooksServerURL, r.log)
+	if err != nil {
+		return err
+	}
+	webhookPath := fmt.Sprintf("/webhooks/%s", config.Name)
+	r.router.
+		Methods(http.MethodPost, http.MethodGet).
+		Path(webhookPath).
+		Handler(handler)
+	return nil
 }
 
 func (r *Builder) registerOperation(operation *wgpb.Operation) error {

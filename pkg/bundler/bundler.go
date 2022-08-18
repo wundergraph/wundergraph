@@ -20,13 +20,14 @@ var NonNodeModuleReg = regexp.MustCompile(`^[^./]|^\.[^./]|^\.\.[^/]`) // Must n
 
 type Bundler struct {
 	name                  string
-	entryPoint            string
+	entryPoints           []string
 	absWorkingDir         string
 	watchPaths            []string
 	ignorePaths           []string
 	log                   abstractlogger.Logger
 	skipWatchOnEntryPoint bool
 	outFile               string
+	outDir                string
 	externalImports       []string
 	fileLoaders           []string
 	mu                    sync.Mutex
@@ -39,10 +40,11 @@ type Config struct {
 	Logger                abstractlogger.Logger
 	AbsWorkingDir         string
 	SkipWatchOnEntryPoint bool
-	EntryPoint            string
+	EntryPoints           []string
 	WatchPaths            []string
 	IgnorePaths           []string
 	OutFile               string
+	OutDir                string
 	OnAfterBundle         func()
 }
 
@@ -51,7 +53,8 @@ func NewBundler(config Config) *Bundler {
 		name:                  config.Name,
 		absWorkingDir:         config.AbsWorkingDir,
 		outFile:               config.OutFile,
-		entryPoint:            config.EntryPoint,
+		outDir:                config.OutDir,
+		entryPoints:           config.EntryPoints,
 		watchPaths:            config.WatchPaths,
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
@@ -125,10 +128,12 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 func (b *Bundler) initialBuild() api.BuildResult {
 	options := api.BuildOptions{
 		Outfile:       b.outFile,
-		EntryPoints:   []string{b.entryPoint},
+		Outdir:        b.outDir,
+		EntryPoints:   b.entryPoints,
 		Bundle:        true,
 		Incremental:   true,
 		Platform:      api.PlatformNode,
+		Sourcemap:     api.SourceMapLinked,
 		AbsWorkingDir: b.absWorkingDir,
 		Loader: map[string]api.Loader{
 			".json": api.LoaderJSON,
