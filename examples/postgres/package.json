@@ -5,14 +5,14 @@
   "scripts": {
     "start": "npm run start:services && wait-on -d 5000 tcp:54322 && npm run start:api",
     "start:services": "docker-compose up -d",
-    "start:api": "cd .wundergraph && wunderctl up --debug",
+    "start:api": "wunderctl up --debug",
     "cleanup": "docker-compose down -v",
     "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.96.1",
+    "@wundergraph/sdk": "^0.98.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

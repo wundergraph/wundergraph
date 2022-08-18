@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "cd .wundergraph && wunderctl up --debug",
+    "start": "wunderctl up --debug",
     "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.96.1",
+    "@wundergraph/sdk": "^0.98.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

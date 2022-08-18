@@ -4,16 +4,16 @@
   "private": true,
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "wundergraph": "cd .wundergraph && wunderctl up --debug",
-    "generate": "cd .wundergraph && wunderctl generate --debug",
+    "wundergraph": "wunderctl up --debug",
+    "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000/authentication",
     "build": "next build",
     "check": "tsc --noEmit",
     "dev": "next dev"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.0.35",
-    "@wundergraph/sdk": "^0.96.1",
+    "@wundergraph/nextjs": "^0.1.2",
+    "@wundergraph/sdk": "^0.98.1",
     "graphql": "^16.3.0",
     "next": "^12.1.6",
     "react": "^18.0.0",

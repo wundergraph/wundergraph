@@ -5,18 +5,18 @@
   "scripts": {
     "start": "npm run start:services && wait-on -d 500 tcp:54322 && npm run migrate init && run-p dev wundergraph open",
     "start:services": "docker-compose up -d",
-    "wundergraph": "cd .wundergraph && wunderctl up --debug",
+    "wundergraph": "wunderctl up --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "build": "next build",
     "dev": "next dev",
     "migrate": "prisma format && prisma migrate dev --name",
     "cleanup": "docker-compose down -v",
-    "generate": "cd .wundergraph && wunderctl generate --debug",
+    "generate": "wunderctl generate --debug",
     "wunderctl": "wunderctl"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.96.1",
-    "@wundergraph/nextjs": "^0.0.35",
+    "@wundergraph/sdk": "^0.98.1",
+    "@wundergraph/nextjs": "^0.1.2",
     "graphql": "^16.3.0",
     "next": "^12.1.6",
     "react": "^18.0.0",
