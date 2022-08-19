@@ -75,6 +75,8 @@ const tags = {
 	'type-safe mocking': '/docs/features/type-safe-mocking',
 	'TypeScript hooks':
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
+	webhooks: 'type-script-webhooks-to-integrate-third-party-applications',
+	Webhooks: 'type-script-webhooks-to-integrate-third-party-applications',
 	hooks:
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	Hooks:
