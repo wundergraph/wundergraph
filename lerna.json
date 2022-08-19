@@ -1,4 +1,5 @@
 {
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
   "command": {
     "publish": {
       "registry": "https://registry.npmjs.org"
