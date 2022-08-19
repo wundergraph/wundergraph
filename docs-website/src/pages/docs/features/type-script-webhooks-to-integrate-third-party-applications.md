@@ -32,6 +32,63 @@ export default webhook
 
 After adding your first webhook, you can test it by calling `http://127.0.0.1:9991/app/main/webhooks/github`. It should return `{ hello: 'github' }`.
 
+## Access the original client request
+
+You have access to the original client request.
+
+```typescript
+// .wundergraph/webhooks/github.ts
+
+import type { Webhook } from '@wundergraph/sdk'
+import type { InternalClient } from '../generated/wundergraph.internal.client'
+
+const webhook: Webhook<InternalClient, { a: number }, { hello: string }> = {
+  handler: async (event, context) => {
+    event.body
+    event.url
+    event.headers
+    event.method
+    event.query
+
+    return {
+      statusCode: 200,
+      body: {
+        hello: 'github',
+      },
+    }
+  },
+}
+
+export default webhook
+```
+
+## Call internal operations
+
+You can call internal operations from webhooks. Ensure to import the generated client to get a type-safe api.
+
+```typescript
+// .wundergraph/webhooks/github.ts
+
+import type { Webhook } from '@wundergraph/sdk'
+import type { InternalClient } from '../generated/wundergraph.internal.client'
+
+const webhook: Webhook<InternalClient, { a: number }, { hello: string }> = {
+  handler: async (event, context) => {
+    const data = context.internalClient.queries.Dragons()
+    console.log(data)
+
+    return {
+      statusCode: 200,
+      body: {
+        hello: 'github',
+      },
+    }
+  },
+}
+
+export default webhook
+```
+
 ## Configure a verifier for your webhook
 
 Implementing a webhook is more than just adding a HTTP handler to your application. In order to securely integrate Github, we have to ensure that only Github is able to call your endpoint. We can solve that by using webhook verifiers. Almost every platform has different requirements.
@@ -104,5 +161,5 @@ export default configureWunderGraphServer<
 
 ## How to
 
-If you're looking for more specific information on how to use Webhooks,
+If you're looking for more specific information on how to configure Webhooks,
 have a look at the wundergraph.server.ts reference.
