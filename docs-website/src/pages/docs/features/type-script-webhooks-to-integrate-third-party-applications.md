@@ -1,7 +1,7 @@
 ---
 title: TypeScript Webhooks
 pageTitle: WunderGraph - Features - TypeScript Webhooks
-description: Webhooks functions make it easy to integrate external services through webhooks. With WunderGraph, you're able to use TypeScript to make this as easy as possible.
+description: TypeScript Webhooks make it easy to integrate third party applications. With WunderGraph, you're able to use TypeScript to make this as easy and secure as possible.
 ---
 
 During building a public platform, you will run into situations where you need to listen to events from external services to automatically trigger your implementation. One common approach are webhooks.
