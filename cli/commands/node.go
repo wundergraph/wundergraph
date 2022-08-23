@@ -2,50 +2,84 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"path"
 
 	"github.com/jensneuse/abstractlogger"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
+	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
 var nodeCmd = &cobra.Command{
 	Use:   "node",
-	Short: "",
-	Long:  ``,
+	Short: "Subcommand to work with WunderGraph node",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
 }
 
+type NodeStartSettings struct {
+	NodeURL   string `envconfig:"NODE_URL" required:"true"`
+	Secret    []byte `envconfig:"SECRET" required:"true"`
+	ServerUrl string `envconfig:"SERVER_URL" required:"true"`
+}
+
 var nodeStartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "",
-	Long:  ``,
+	Short: "Start runs WunderGraph Node in production mode",
+	Long: `
+		Example usage:
+			SECRET=secret SERVER_URL=127.0.0.1 SERVER_PORT=9993 NODE_URL=127.0.0.1:9991 wunderctl node start
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		entryPoints, err := files.GetWunderGraphEntryPoints(files.WunderGraphDir, "wundergraph.config.ts", "wundergraph.server.ts")
 		if err != nil {
 			return fmt.Errorf("could not find file or directory: %s", err)
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "wundergraph.config.json")
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
+		}
+
+		data, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			log.Fatal("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			return err
+		}
+		if len(data) == 0 {
+			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			return nil
+		}
+		var wunderNodeConfig wgpb.WunderNodeConfig
+		err = json.Unmarshal(data, &wunderNodeConfig)
+		if err != nil {
+			log.Fatal("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			return err
+		}
+
+		var settings NodeStartSettings
+		if err := envconfig.Process("", &settings); err != nil {
+			return err
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeout)
+		gracefulTimeoutSeconds := 10
+		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeoutSeconds)
 
 		cfg := &wundernodeconfig.Config{
 			Server: &wundernodeconfig.ServerConfig{
-				ListenAddr: listenAddr,
+				ListenAddr: settings.NodeURL,
 			},
 		}
 
@@ -53,11 +87,8 @@ var nodeStartCmd = &cobra.Command{
 
 		go func() {
 			err := n.StartBlocking(
-				node.WithFileSystemConfig(configFile),
-				node.WithHooksSecret(secret),
-				node.WithDebugMode(enableDebugMode),
-				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
-				node.WithIntrospection(false),
+				node.WithStaticWunderNodeConfig(wunderNodeConfig),
+				node.WithHooksSecret(settings.Secret),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))
@@ -73,14 +104,4 @@ var nodeStartCmd = &cobra.Command{
 func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
 	rootCmd.AddCommand(nodeCmd)
-
-	//	nodeStartCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen-addr is the host:port combination, WunderGraph should listen on.")
-	//	nodeStartCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
-	//	nodeStartCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
-	//	nodeStartCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", 10, "graceful-timeout is the time in seconds the server has to graceful shutdown")
-	//	nodeStartCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
-	//	nodeStartCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
-	//	nodeStartCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
-	//	nodeStartCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "filename of node config")
-	//	nodeStartCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "filename of the server config")
 }

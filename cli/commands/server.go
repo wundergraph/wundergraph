@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
@@ -12,10 +13,15 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
+type ServerStartSettings struct {
+	NodeURL    string `envconfig:"NODE_URL" required:"true"`
+	Secret     []byte `envconfig:"SECRET" required:"true"`
+	ServerPort int    `envconfig:"SERVER_PORT" required:"true"`
+}
+
 var serverCmd = &cobra.Command{
 	Use:   "server",
-	Short: "",
-	Long:  ``,
+	Short: "Subcommand to work with WunderGraph middleware server",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
@@ -23,10 +29,13 @@ var serverCmd = &cobra.Command{
 
 var serverStartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "",
-	Long:  ``,
+	Short: "Start runs WunderGraph Middleware in production mode",
+	Long: `
+		Example usage:
+			SECRET=secret SERVER_PORT=9993 NODE_URL=127.0.0.1:9991 wunderctl node start
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		entryPoints, err := files.GetWunderGraphEntryPoints(files.WunderGraphDir, "wundergraph.config.ts", "wundergraph.server.ts")
 		if err != nil {
 			return fmt.Errorf("could not find file or directory: %s", err)
 		}
@@ -37,7 +46,12 @@ var serverStartCmd = &cobra.Command{
 			return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
 		}
 
-		hooksJWT, err := apihandler.CreateHooksJWT(secret)
+		var settings ServerStartSettings
+		if err := envconfig.Process("", &settings); err != nil {
+			return err
+		}
+
+		hooksJWT, err := apihandler.CreateHooksJWT(settings.Secret)
 		if err != nil {
 			return err
 		}
@@ -49,8 +63,8 @@ var serverStartCmd = &cobra.Command{
 			EnableDebugMode:      enableDebugMode,
 			WunderGraphDirAbs:    entryPoints.WunderGraphDirAbs,
 			HooksJWT:             hooksJWT,
-			MiddlewareListenPort: middlewareListenPort,
-			ListenAddr:           listenAddr,
+			MiddlewareListenPort: settings.ServerPort,
+			ListenAddr:           settings.NodeURL,
 			ServerScriptFile:     serverScriptFile,
 		}
 
