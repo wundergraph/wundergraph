@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
+
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
@@ -48,8 +49,9 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
 	"golang.org/x/sync/singleflight"
+
+	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"

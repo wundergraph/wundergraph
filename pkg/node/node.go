@@ -16,6 +16,11 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/net/idna"
+	"golang.org/x/time/rate"
+
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -23,10 +28,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/net/idna"
-	"golang.org/x/time/rate"
 
 	"github.com/libp2p/go-reuseport"
 
@@ -90,6 +91,8 @@ type options struct {
 	insecureCookies         bool
 	hooksSecret             []byte
 	githubAuthDemo          GitHubAuthDemo
+
+	hooksServerUrl string
 }
 
 type Option func(options *options)
@@ -135,6 +138,12 @@ func WithFileSystemConfig(configFilePath string) Option {
 func WithHooksSecret(secret []byte) Option {
 	return func(options *options) {
 		options.hooksSecret = secret
+	}
+}
+
+func WithHooksServerUrl(url string) Option {
+	return func(options *options) {
+		options.hooksServerUrl = url
 	}
 }
 
@@ -337,6 +346,10 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			HookServerURL:              api.HooksServerURL,
 		}
 
+		if n.options.hooksServerUrl != "" {
+			builderConfig.HookServerURL = n.options.hooksServerUrl
+		}
+
 		builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
 		internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
 
@@ -385,7 +398,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	if n.cfg.Server.ListenTLS {
 		manager := autocert.Manager{
 			Prompt: autocert.AcceptTOS,
-			//Cache:  certCache,
+			// Cache:  certCache,
 			HostPolicy: func(ctx context.Context, host string) error {
 				for _, allowedHost := range allowedHosts {
 					if allowedHost == host {
