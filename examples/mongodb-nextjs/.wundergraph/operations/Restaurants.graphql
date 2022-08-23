@@ -1,0 +1,9 @@
+query Restaurants {
+    mongodb_findManyrestaurants(take: 20) {
+        restaurant_id
+        name
+        address {
+            street
+        }
+    }
+}
