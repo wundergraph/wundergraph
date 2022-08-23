@@ -3,10 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/signal"
 	"path"
-	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -14,6 +11,8 @@ import (
 	"github.com/wundergraph/wundergraph/cli/runners"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
 var (
@@ -47,9 +46,6 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-
-		quit := make(chan os.Signal, 2)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 		secret, err := apihandler.GenSymmetricKey(64)
 		if err != nil {
@@ -97,18 +93,39 @@ If used without --exclude-server, make sure the server is available in this dire
 			}()
 		}
 
-		nodeRunCfg := &runners.NodeRunConfig{
-			BuildInfo:                  BuildInfo,
-			HooksSecret:                secret,
-			ConfigFilePath:             configFile,
-			GracefulTimeoutSeconds:     gracefulTimeout,
-			DisableForceHttpsRedirects: disableForceHttpsRedirects,
-			EnableIntrospection:        enableIntrospection,
-			GitHubAuthDemo:             GitHubAuthDemo,
-		}
-		nodeRunner := runners.NewNodeRunner(log)
+		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeout)
 
-		return nodeRunner.Run(ctx, nodeRunCfg)
+		cfg := &wundernodeconfig.Config{
+			Server: &wundernodeconfig.ServerConfig{
+				ListenAddr: listenAddr,
+			},
+		}
+
+		configFileChangeChan := make(chan struct{})
+		n := node.New(ctx, BuildInfo, cfg, log)
+
+		go func() {
+			err := n.StartBlocking(
+				node.WithConfigFileChange(configFileChangeChan),
+				node.WithFileSystemConfig(configFile),
+				node.WithHooksSecret(secret),
+				node.WithDebugMode(enableDebugMode),
+				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
+				node.WithIntrospection(enableIntrospection),
+				node.WithGitHubAuthDemo(GitHubAuthDemo),
+			)
+			if err != nil {
+				log.Fatal("startBlocking", abstractlogger.Error(err))
+			}
+		}()
+
+		// trigger server reload after initial config build
+		// because no fs event is fired as build is already done
+		configFileChangeChan <- struct{}{}
+
+		shutdownHandler.HandleGracefulShutdown(ctx, n)
+
+		return nil
 	},
 }
 

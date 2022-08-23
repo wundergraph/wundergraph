@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
 var nodeCmd = &cobra.Command{
@@ -38,18 +41,32 @@ var nodeStartCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		nodeRunCfg := &runners.NodeRunConfig{
-			BuildInfo:                  BuildInfo,
-			HooksSecret:                secret,
-			ConfigFilePath:             configFile,
-			GracefulTimeoutSeconds:     gracefulTimeout,
-			DisableForceHttpsRedirects: disableForceHttpsRedirects,
-			EnableIntrospection:        enableIntrospection,
-			GitHubAuthDemo:             GitHubAuthDemo,
-		}
-		nodeRunner := runners.NewNodeRunner(log)
+		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeout)
 
-		return nodeRunner.Run(ctx, nodeRunCfg)
+		cfg := &wundernodeconfig.Config{
+			Server: &wundernodeconfig.ServerConfig{
+				ListenAddr: listenAddr,
+			},
+		}
+
+		n := node.New(ctx, BuildInfo, cfg, log)
+
+		go func() {
+			err := n.StartBlocking(
+				node.WithFileSystemConfig(configFile),
+				node.WithHooksSecret(secret),
+				node.WithDebugMode(enableDebugMode),
+				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
+				node.WithIntrospection(false),
+			)
+			if err != nil {
+				log.Fatal("startBlocking", abstractlogger.Error(err))
+			}
+		}()
+
+		shutdownHandler.HandleGracefulShutdown(ctx, n)
+
+		return nil
 	},
 }
 

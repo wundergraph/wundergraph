@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
+	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
@@ -30,17 +31,17 @@ var serverStartCmd = &cobra.Command{
 			return fmt.Errorf("could not find file or directory: %s", err)
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
-		if !files.FileExists(configFile) {
-			return fmt.Errorf("could not find configuration file: %s", configFile)
-		}
-
 		serverScriptFile := path.Join("generated", "bundle", "server.js")
 		serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
 		if !files.FileExists(serverExecutablePath) {
 			return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
 		}
-		
+
+		hooksJWT, err := apihandler.CreateHooksJWT(secret)
+		if err != nil {
+			return err
+		}
+
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -56,7 +57,7 @@ var serverStartCmd = &cobra.Command{
 		hookServerRunner := runners.NewServerRunner(log, srvCfg)
 
 		<-hookServerRunner.Run(ctx)
-		log.Error("Hook server excited. Initialize WunderNode shutdown")
+		log.Error("Hook server excited")
 
 		return nil
 	},
