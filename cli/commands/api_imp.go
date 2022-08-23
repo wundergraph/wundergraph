@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"fmt"
 	"github.com/wundergraph/wundergraph/cli/commands/sdkArgs"
 	"os"
 )
@@ -17,6 +18,7 @@ func (c *_c) Execute(command sdkArgs.CommandType, opts ...sdkArgs.Option) error 
 	for _, opt := range opts {
 		os.Args = append(os.Args, opt.ConvertToArgs()...)
 	}
-
+	ss := os.Args
+	fmt.Println(ss)
 	return rootCmd.Execute()
 }

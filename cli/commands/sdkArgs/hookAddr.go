@@ -2,8 +2,8 @@ package sdkArgs
 
 type hookAddrOption string
 
-func WitchHookAddrOption(log string) Option {
-	return hookAddrOption(log)
+func WitchHookAddrOption(addr string) Option {
+	return hookAddrOption(addr)
 }
 
 func (h hookAddrOption) ConvertToArgs() []string {

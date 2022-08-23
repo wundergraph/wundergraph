@@ -25,3 +25,18 @@ const (
 type Option interface {
 	ConvertToArgs() []string
 }
+
+func GetWDGCommand(arg string) CommandType {
+	switch arg {
+	case string(UP):
+		return UP
+	case string(Start):
+		return Start
+	case string(Generate):
+		return Generate
+	case string(Introspect):
+		return Introspect
+	default:
+		return Generate
+	}
+}

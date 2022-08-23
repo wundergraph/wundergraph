@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -42,7 +43,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			return fmt.Errorf("could not find file or directory: %s", err)
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		configFile := filepath.ToSlash(path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename))
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
@@ -64,8 +65,8 @@ If used without --exclude-server, make sure the server is available in this dire
 		}
 
 		if !excludeServer {
-			serverScriptFile := path.Join("generated", "bundle", "server.js")
-			serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+			serverScriptFile := filepath.ToSlash(path.Join("generated", "bundle", "server.js"))
+			serverExecutablePath := filepath.ToSlash(path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js"))
 			if !files.FileExists(serverExecutablePath) {
 				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
 			}
