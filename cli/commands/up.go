@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/webhooks"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -12,8 +11,12 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/wundergraph/wundergraph/cli/runners"
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
+
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -150,26 +153,16 @@ var upCmd = &cobra.Command{
 				})
 			}
 
-			hooksEnv := []string{
-				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
-				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			srvCfg := &runners.ServerRunConfig{
+				EnableDebugMode:      enableDebugMode,
+				WunderGraphDirAbs:    entryPoints.WunderGraphDirAbs,
+				HooksJWT:             hooksJWT,
+				MiddlewareListenPort: middlewareListenPort,
+				ListenAddr:           listenAddr,
+				ServerScriptFile:     serverOutFile,
 			}
 
-			if enableDebugMode {
-				hooksEnv = append(hooksEnv, "LOG_LEVEL=debug")
-			}
-
-			hookServerRunner = scriptrunner.NewScriptRunner(&scriptrunner.Config{
-				Name:          "hooks-server-runner",
-				Executable:    "node",
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-				ScriptArgs:    []string{serverOutFile},
-				Logger:        log,
-				ScriptEnv:     append(os.Environ(), hooksEnv...),
-			})
+			hookServerRunner := runners.NewServerRunner(log, srvCfg)
 
 			onAfterBuild = func() {
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))

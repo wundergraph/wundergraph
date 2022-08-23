@@ -7,15 +7,13 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
-	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+
+	"github.com/wundergraph/wundergraph/cli/runners"
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/node"
-	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
 var (
@@ -70,32 +68,21 @@ If used without --exclude-server, make sure the server is available in this dire
 				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
 			}
 
-			hooksEnv := []string{
-				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
-				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+			srvCfg := &runners.ServerRunConfig{
+				EnableDebugMode:      enableDebugMode,
+				WunderGraphDirAbs:    entryPoints.WunderGraphDirAbs,
+				HooksJWT:             hooksJWT,
+				MiddlewareListenPort: middlewareListenPort,
+				ListenAddr:           listenAddr,
+				ServerScriptFile:     serverScriptFile,
 			}
 
-			if enableDebugMode {
-				hooksEnv = append(hooksEnv, "LOG_LEVEL=debug")
-			}
-
-			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-				Name:          "hooks-server-runner",
-				Executable:    "node",
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-				ScriptArgs:    []string{serverScriptFile},
-				Logger:        log,
-				ScriptEnv:     append(os.Environ(), hooksEnv...),
-			})
-
+			hookServerRunner := runners.NewServerRunner(log, srvCfg)
 			defer func() {
 				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
 				err := hookServerRunner.Stop()
 				if err != nil {
-					log.Error("Stopping runner failed",
+					log.Error("Stopping hooks-server-runner failed",
 						abstractlogger.String("runnerName", "hooks-server-runner"),
 						abstractlogger.Error(err),
 					)
@@ -110,56 +97,18 @@ If used without --exclude-server, make sure the server is available in this dire
 			}()
 		}
 
-		cfg := &wundernodeconfig.Config{
-			Server: &wundernodeconfig.ServerConfig{
-				ListenAddr: listenAddr,
-			},
+		nodeRunCfg := &runners.NodeRunConfig{
+			BuildInfo:                  BuildInfo,
+			HooksSecret:                secret,
+			ConfigFilePath:             configFile,
+			GracefulTimeoutSeconds:     gracefulTimeout,
+			DisableForceHttpsRedirects: disableForceHttpsRedirects,
+			EnableIntrospection:        enableIntrospection,
+			GitHubAuthDemo:             GitHubAuthDemo,
 		}
+		nodeRunner := runners.NewNodeRunner(log)
 
-		configFileChangeChan := make(chan struct{})
-		n := node.New(ctx, BuildInfo, cfg, log)
-
-		go func() {
-			err := n.StartBlocking(
-				node.WithConfigFileChange(configFileChangeChan),
-				node.WithFileSystemConfig(configFile),
-				node.WithHooksSecret(secret),
-				node.WithDebugMode(enableDebugMode),
-				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
-				node.WithIntrospection(enableIntrospection),
-				node.WithGitHubAuthDemo(GitHubAuthDemo),
-			)
-			if err != nil {
-				log.Fatal("startBlocking", abstractlogger.Error(err))
-			}
-		}()
-
-		// trigger server reload after initial config build
-		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
-
-		select {
-		case signal := <-quit:
-			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...",
-				abstractlogger.String("signal", signal.String()),
-			)
-		case <-ctx.Done():
-			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
-		}
-
-		gracefulTimeoutDur := time.Duration(gracefulTimeout) * time.Second
-		log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
-		ctx, cancel = context.WithTimeout(ctx, gracefulTimeoutDur)
-		defer cancel()
-
-		err = n.Shutdown(ctx)
-		if err != nil {
-			log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
-		}
-
-		log.Info("WunderNode shutdown complete")
-
-		return nil
+		return nodeRunner.Run(ctx, nodeRunCfg)
 	},
 }
 
