@@ -53,7 +53,7 @@ import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { WunderGraphHooksAndServerConfig, WunderGraphServerConfig } from '../middleware/types';
-import { listenAddr } from '../env';
+import { nodeAddress, nodeUrl } from '../env';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 
@@ -306,7 +306,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 
 	const environment = {
 		id: '',
-		name: listenAddr,
+		name: nodeAddress,
 	};
 
 	const name = 'main';
@@ -867,7 +867,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				: true;
 
 		const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-			baseURL: 'http://localhost:9991',
+			baseURL: nodeUrl,
 			nested: dotGraphQLNested,
 		});
 
@@ -890,7 +890,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 		const postman = PostmanBuilder(app.Operations, {
 			applicationPath: resolved.deployment.path,
-			baseURL: 'http://localhost:9991',
+			baseURL: nodeUrl,
 		});
 		fs.writeFileSync(path.join('generated', 'wundergraph.postman.json'), JSON.stringify(postman.toJSON(), null, '  '), {
 			encoding: 'utf8',

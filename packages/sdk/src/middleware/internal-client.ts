@@ -37,7 +37,8 @@ export interface InternalClientFactory {
 export const internalClientFactory = (
 	apiName: string,
 	deploymentName: string,
-	operations: Operation[]
+	operations: Operation[],
+	baseNodeUrl: string
 ): InternalClientFactory => {
 	const baseOperations: Operations & InternalClientRequestContext = {
 		context: {
@@ -93,7 +94,7 @@ export const internalClientFactory = (
 		extraHeaders?: { [key: string]: string };
 		clientRequest: any;
 	}): Promise<any> => {
-		const url = `http://localhost:9991/internal/${apiName}/${deploymentName}/operations/` + options.operationName;
+		const url = `${baseNodeUrl}/internal/${apiName}/${deploymentName}/operations/` + options.operationName;
 		const headers = Object.assign(
 			{},
 			{

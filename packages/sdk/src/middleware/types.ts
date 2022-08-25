@@ -3,11 +3,8 @@ import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from 'headers-polyfill';
 import { HooksConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
-import { middlewarePort } from '../env';
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { WebhooksConfig } from '../webhooks/types';
-
-export const SERVER_PORT = middlewarePort;
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}

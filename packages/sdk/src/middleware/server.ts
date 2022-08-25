@@ -13,12 +13,12 @@ import path from 'path';
 import fs from 'fs';
 import {
 	ClientRequest,
-	SERVER_PORT,
 	WunderGraphServerConfig,
 	WunderGraphUser,
 	ServerOptions,
 	WunderGraphHooksAndServerConfig,
 } from './types';
+import { serverListenPort, serverHost, nodeUrl } from '../env';
 import { WebhooksConfig } from '../webhooks/types';
 
 /**
@@ -50,7 +50,12 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		try {
 			WG_CONFIG = JSON.parse(configContent);
 			if (WG_CONFIG.api) {
-				clientFactory = internalClientFactory(WG_CONFIG.apiName, WG_CONFIG.deploymentName, WG_CONFIG.api.operations);
+				clientFactory = internalClientFactory(
+					WG_CONFIG.apiName,
+					WG_CONFIG.deploymentName,
+					WG_CONFIG.api.operations,
+					nodeUrl
+				);
 			} else {
 				console.error('Could not get user defined api. Try `wunderctl generate`');
 				process.exit(1);
@@ -96,7 +101,7 @@ const _configureWunderGraphServer = <
 		});
 		// Here we set the server url of the graphqlServers
 		for (const server of serverConfig.graphqlServers) {
-			server.url = `http://127.0.0.1:${SERVER_PORT}/gqls/${server.serverName}/graphql`;
+			server.url = `http://${serverHost}:${serverListenPort}/gqls/${server.serverName}/graphql`;
 		}
 	}
 
@@ -109,8 +114,8 @@ const _configureWunderGraphServer = <
 			config: WG_CONFIG,
 			serverConfig,
 			gracefulShutdown: process.env.NODE_ENV === 'production',
-			host: '127.0.0.1',
-			port: SERVER_PORT,
+			host: serverHost,
+			port: serverListenPort,
 		}).catch((err) => {
 			console.error('Could not start the hook server', err);
 			process.exit(1);
