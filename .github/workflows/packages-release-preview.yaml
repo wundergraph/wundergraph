@@ -37,7 +37,7 @@ jobs:
       - name: Generate next release (dry-run)
         run: pnpm run preview:version:packages --yes
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Show CHANGELOG.md
         run: echo -e "\`\`\`diff\n$(git --no-pager diff './packages/*/CHANGELOG.md')\n\`\`\`" >> $GITHUB_STEP_SUMMARY
