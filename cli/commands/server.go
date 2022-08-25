@@ -16,6 +16,7 @@ import (
 type ServerStartSettings struct {
 	NodeURL    string `envconfig:"NODE_URL" required:"true"`
 	Secret     []byte `envconfig:"SECRET" required:"true"`
+	ServerHost string `envconfig:"SERVER_HOST" required:"true"`
 	ServerPort int    `envconfig:"SERVER_PORT" required:"true"`
 }
 
@@ -32,7 +33,7 @@ var serverStartCmd = &cobra.Command{
 	Short: "Start runs WunderGraph Middleware in production mode",
 	Long: `
 		Example usage:
-			SECRET=secret SERVER_PORT=9993 NODE_URL=127.0.0.1:9991 wunderctl node start
+			SECRET=secret SERVER_PORT=9993 SERVER_HOST=0.0.0.0 NODE_URL=127.0.0.1:9991 wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		entryPoints, err := files.GetWunderGraphEntryPoints(files.WunderGraphDir, "wundergraph.config.ts", "wundergraph.server.ts")
@@ -60,12 +61,13 @@ var serverStartCmd = &cobra.Command{
 		defer cancel()
 
 		srvCfg := &runners.ServerRunConfig{
-			EnableDebugMode:      enableDebugMode,
-			WunderGraphDirAbs:    entryPoints.WunderGraphDirAbs,
-			HooksJWT:             hooksJWT,
-			MiddlewareListenPort: settings.ServerPort,
-			ListenAddr:           settings.NodeURL,
-			ServerScriptFile:     serverScriptFile,
+			EnableDebugMode:   enableDebugMode,
+			WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
+			HooksJWT:          hooksJWT,
+			ServerHost:        settings.ServerHost,
+			ServerListenPort:  settings.ServerPort,
+			NodeAddr:          settings.NodeURL,
+			ServerScriptFile:  serverScriptFile,
 		}
 
 		hookServerRunner := runners.NewServerRunner(log, srvCfg)

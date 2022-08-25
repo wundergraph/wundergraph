@@ -10,12 +10,13 @@ import (
 )
 
 type ServerRunConfig struct {
-	EnableDebugMode      bool
-	WunderGraphDirAbs    string
-	HooksJWT             string
-	MiddlewareListenPort int
-	ListenAddr           string
-	ServerScriptFile     string
+	EnableDebugMode   bool
+	WunderGraphDirAbs string
+	HooksJWT          string
+	ServerListenPort  int
+	ServerHost        string
+	NodeAddr          string
+	ServerScriptFile  string
 }
 
 func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
@@ -23,8 +24,9 @@ func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrun
 		"START_HOOKS_SERVER=true",
 		fmt.Sprintf("WG_ABS_DIR=%s", cfg.WunderGraphDirAbs),
 		fmt.Sprintf("HOOKS_TOKEN=%s", cfg.HooksJWT),
-		fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", cfg.MiddlewareListenPort),
-		fmt.Sprintf("WG_LISTEN_ADDR=%s", cfg.ListenAddr),
+		fmt.Sprintf("WG_SERVER_HOST=%s", cfg.ServerHost),
+		fmt.Sprintf("WG_SERVER_PORT=%d", cfg.ServerListenPort),
+		fmt.Sprintf("WG_NODE_ADDR=%s", cfg.NodeAddr),
 	}
 
 	if cfg.EnableDebugMode {

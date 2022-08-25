@@ -65,12 +65,13 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 
 			srvCfg := &runners.ServerRunConfig{
-				EnableDebugMode:      enableDebugMode,
-				WunderGraphDirAbs:    entryPoints.WunderGraphDirAbs,
-				HooksJWT:             hooksJWT,
-				MiddlewareListenPort: middlewareListenPort,
-				ListenAddr:           listenAddr,
-				ServerScriptFile:     serverScriptFile,
+				EnableDebugMode:   enableDebugMode,
+				WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
+				HooksJWT:          hooksJWT,
+				ServerListenPort:  middlewareListenPort,
+				ServerHost:        middlewareHost,
+				NodeAddr:          listenAddr,
+				ServerScriptFile:  serverScriptFile,
 			}
 
 			hookServerRunner := runners.NewServerRunner(log, srvCfg)
@@ -134,6 +135,7 @@ func init() {
 	startCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen-addr is the host:port combination, WunderGraph should listen on.")
 	startCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
 	startCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
+	startCmd.Flags().StringVar(&middlewareHost, "middleware-host", "127.0.0.1", "middleware-host is the host which the WunderGraph middleware will bind to")
 	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", 10, "graceful-timeout is the time in seconds the server has to graceful shutdown")
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")

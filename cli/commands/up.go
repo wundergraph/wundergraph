@@ -29,6 +29,7 @@ import (
 var (
 	listenAddr              string
 	middlewareListenPort    int
+	middlewareHost          string
 	clearIntrospectionCache bool
 )
 
@@ -101,8 +102,9 @@ var upCmd = &cobra.Command{
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+				fmt.Sprintf("WG_SERVER_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_SERVER_HOST=%s", middlewareHost),
+				fmt.Sprintf("WG_NODE_ADDR=%s", listenAddr),
 			),
 		})
 
@@ -116,8 +118,9 @@ var upCmd = &cobra.Command{
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
-				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
-				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
+				fmt.Sprintf("WG_SERVER_PORT=%d", middlewareListenPort),
+				fmt.Sprintf("WG_SERVER_HOST=%s", middlewareHost),
+				fmt.Sprintf("WG_NODE_ADDR=%s", listenAddr),
 			),
 		})
 
@@ -154,12 +157,13 @@ var upCmd = &cobra.Command{
 			}
 
 			srvCfg := &runners.ServerRunConfig{
-				EnableDebugMode:      enableDebugMode,
-				WunderGraphDirAbs:    entryPoints.WunderGraphDirAbs,
-				HooksJWT:             hooksJWT,
-				MiddlewareListenPort: middlewareListenPort,
-				ListenAddr:           listenAddr,
-				ServerScriptFile:     serverOutFile,
+				EnableDebugMode:   enableDebugMode,
+				WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
+				HooksJWT:          hooksJWT,
+				ServerListenPort:  middlewareListenPort,
+				ServerHost:        middlewareHost,
+				NodeAddr:          listenAddr,
+				ServerScriptFile:  serverOutFile,
 			}
 
 			hookServerRunner := runners.NewServerRunner(log, srvCfg)
@@ -317,6 +321,7 @@ func init() {
 	rootCmd.AddCommand(upCmd)
 	upCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
 	upCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
+	upCmd.Flags().StringVar(&middlewareHost, "middleware-host", "127.0.0.1", "middleware-host is the host which the WunderGraph middleware will bind to")
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
 	upCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
 	upCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
@@ -346,6 +351,7 @@ func execCmd(cmd *exec.Cmd) {
 	} else {
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
 		log.Debug("Successfully killed existing middleware process",
+			abstractlogger.String("host", middlewareHost),
 			abstractlogger.Int("port", middlewareListenPort),
 		)
 	}

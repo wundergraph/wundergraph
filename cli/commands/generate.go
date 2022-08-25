@@ -3,14 +3,16 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/webhooks"
 	"os"
 	"path"
 	"sync"
 	"time"
 
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
+
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
@@ -145,6 +147,7 @@ func init() {
 	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
 	generateCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
 	generateCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
+	generateCmd.Flags().StringVar(&middlewareHost, "middleware-host", "127.0.0.1", "middleware-host is the host which the WunderGraph middleware will bind to")
 	generateCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
 	generateCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
 
