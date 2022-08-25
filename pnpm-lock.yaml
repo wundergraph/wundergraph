@@ -136,7 +136,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
       '@wundergraph/protobuf': workspace:^0.91.2
-      '@wundergraph/sdk': workspace:^0.98.1
+      '@wundergraph/sdk': workspace:^0.98.2
       handlebars: ^4.7.7
       next: ^12.1.6
       object-hash: ^2.2.0
@@ -174,7 +174,7 @@ importers:
       typescript: ^4.7.2
       wait-on: ^6.0.0
     dependencies:
-      '@wundergraph/nextjs': file:packages/nextjs_abyppw5wvlpr3ntsee2t65sig4
+      '@wundergraph/nextjs': file:packages/nextjs_vqvhtvkbj4n42ouitxo6zqdgie
       '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
@@ -2876,6 +2876,7 @@ packages:
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
+    dev: true
 
   /@types/react/18.0.15:
     resolution: {integrity: sha512-iz3BtLuIYH1uWdsv6wXYdhozhqj20oD4/Hk2DNXIn1kFsmp9x8d9QB6FnPhfkbhd2PgEONt9Q1x/ebkwjfFLow==}
@@ -2883,6 +2884,7 @@ packages:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.2
       csstype: 3.0.11
+    dev: true
 
   /@types/react/18.0.8:
     resolution: {integrity: sha512-+j2hk9BzCOrrOSJASi5XiOyBbERk9jG5O73Ya4M0env5Ixi6vUNli4qy994AINcEF+1IEHISYFfIT4zwr++LKw==}
@@ -2907,6 +2909,7 @@ packages:
 
   /@types/scheduler/0.16.2:
     resolution: {integrity: sha512-hppQEBDmlwhFAXKJX2KnWLYu5yMfi91yazPb2l+lbJiwW+wdo1gNeRA+3RgNSO39WYX2euey41KEwnqesU2Jew==}
+    dev: true
 
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
@@ -4170,8 +4173,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      JSONStream: 1.3.5
       is-text-path: 1.0.1
+      JSONStream: 1.3.5
       lodash: 4.17.21
       meow: 8.1.2
       split2: 3.2.2
@@ -4320,6 +4323,7 @@ packages:
 
   /csstype/3.0.11:
     resolution: {integrity: sha512-sa6P2wJ+CAbgyy4KFssIb/JNMLxFvKF1pCYCSXS8ZMuqZnMsrxqI2E5sPyoTpxoPU/gVZMzr2zjOfg8GIZOMsw==}
+    dev: true
 
   /damerau-levenshtein/1.0.8:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
@@ -11289,11 +11293,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  file:packages/nextjs_abyppw5wvlpr3ntsee2t65sig4:
+  file:packages/nextjs_vqvhtvkbj4n42ouitxo6zqdgie:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.1.2
+    version: 0.1.3
     peerDependencies:
       '@wundergraph/sdk': '>=0.91.0'
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
@@ -11318,7 +11322,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.98.1
+    version: 0.98.2
     hasBin: true
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
