@@ -22,3 +22,29 @@ func (c *_c) Execute(command sdkArgs.CommandType, opts ...sdkArgs.Option) error 
 	fmt.Println(ss)
 	return rootCmd.Execute()
 }
+
+func (c *_c) NodeState() bool {
+	if SdkNode.Node == nil {
+		return false
+	}
+	return SdkNode.Node.State()
+}
+
+func (c *_c) Stop() error {
+	if configRunnerSdk != nil {
+		configRunnerSdk.Stop()
+	}
+	if configIntrospectionRunnerSdk != nil {
+		configRunnerSdk.Stop()
+	}
+	if hookServerRunnerSdk != nil {
+		configRunnerSdk.Stop()
+	}
+	if SdkNode.Node != nil {
+		err := SdkNode.Node.Close()
+		SdkNode.Node = nil
+		fmt.Println(err)
+	}
+	
+	return nil
+}

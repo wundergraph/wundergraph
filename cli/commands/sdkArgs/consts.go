@@ -4,7 +4,7 @@ type CommandType string
 
 // TODO add more wunderctl command
 const (
-	UP         CommandType = "up"
+	UP         CommandType = "upsdk"
 	Start      CommandType = "start"
 	Generate   CommandType = "generate"
 	Introspect CommandType = "introspect"
