@@ -1,13 +1,13 @@
 package s3uploadclient
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io"
-	"mime"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -80,33 +80,40 @@ func (s *S3UploadClient) createBucket() error {
 }
 
 func (s *S3UploadClient) uploadToS3(ctx context.Context, part *multipart.Part) (*minio.UploadInfo, error) {
-	contentType := "application/octet-stream"
-
-	// unless we can find type based on file header, try based on extension
 	extension := filepath.Ext(part.FileName())
-	if t := mime.TypeByExtension(extension); t != "" {
-		contentType = t
-	}
 
 	// find type based on file header, populated when *multipart.Part created
-	if t := part.Header.Get("Content-Type"); t != "" {
-		contentType = t
+	// if empty, contentType will be assigned by FPutObject
+	contentType := part.Header.Get("Content-Type")
+
+	// creates a temporary unique file in the temp folder of the OS
+	dst, err := os.CreateTemp("", fmt.Sprintf("wundergraph-upload.*.%s", extension))
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = os.Remove(dst.Name())
+	}()
+
+	_, err = io.Copy(dst, part)
+	if err != nil {
+		return nil, err
 	}
 
-	body, err := io.ReadAll(part)
+	_, err = dst.Seek(0, io.SeekStart)
 	if err != nil {
 		return nil, err
 	}
 
 	hasher := xxhash.New()
-	written, err := io.Copy(hasher, bytes.NewReader(body))
+	written, err := io.Copy(hasher, dst)
 	if err != nil {
 		return nil, err
 	}
 
-	filename := hex.EncodeToString(hasher.Sum(nil)) + extension
+	filename := fmt.Sprintf("%s%s", hex.EncodeToString(hasher.Sum(nil)), extension)
 
-	info, err := s.client.PutObject(ctx, s.bucketName, filename, bytes.NewReader(body), written, minio.PutObjectOptions{
+	info, err := s.client.FPutObject(ctx, s.bucketName, filename, dst.Name(), minio.PutObjectOptions{
 		ContentType: contentType,
 		UserMetadata: map[string]string{
 			"original-filename":  part.FileName(),
