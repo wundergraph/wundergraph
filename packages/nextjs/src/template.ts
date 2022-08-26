@@ -10,7 +10,7 @@ import {
 	TypeScriptResponseModels,
 	ResolvedWunderGraphConfig,
 	modelImports,
-	listenAddrHttp,
+	nodeUrl,
 	GraphQLOperation,
 } from '@wundergraph/sdk';
 import hash from 'object-hash';
@@ -21,7 +21,7 @@ export class NextJsTemplate implements Template {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
-			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : listenAddrHttp,
+			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : nodeUrl,
 			sdkVersion: config.sdkVersion,
 			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),
