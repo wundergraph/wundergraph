@@ -15,7 +15,7 @@ type ServerRunConfig struct {
 	HooksJWT          string
 	ServerListenPort  int
 	ServerHost        string
-	NodeAddr          string
+	NodeUrl           string
 	ServerScriptFile  string
 }
 
@@ -26,7 +26,7 @@ func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrun
 		fmt.Sprintf("HOOKS_TOKEN=%s", cfg.HooksJWT),
 		fmt.Sprintf("WG_SERVER_HOST=%s", cfg.ServerHost),
 		fmt.Sprintf("WG_SERVER_PORT=%d", cfg.ServerListenPort),
-		fmt.Sprintf("WG_NODE_ADDR=%s", cfg.NodeAddr),
+		fmt.Sprintf("WG_NODE_URL=%s", cfg.NodeUrl),
 	}
 
 	if cfg.EnableDebugMode {

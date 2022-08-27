@@ -13,6 +13,8 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
+const EnvVarWGPrefix = "WG"
+
 type ServerStartSettings struct {
 	NodeURL    string `envconfig:"NODE_URL" required:"true"`
 	Secret     []byte `envconfig:"SECRET" required:"true"`
@@ -33,7 +35,7 @@ var serverStartCmd = &cobra.Command{
 	Short: "Start runs WunderGraph Middleware in production mode",
 	Long: `
 		Example usage:
-			SECRET=secret SERVER_PORT=9993 SERVER_HOST=0.0.0.0 NODE_URL=127.0.0.1:9991 wunderctl node start
+			WG_SECRET=secret WG_SERVER_PORT=9993 WG_SERVER_HOST=0.0.0.0 WG_NODE_URL=http://127.0.0.1:9991 wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		entryPoints, err := files.GetWunderGraphEntryPoints(files.WunderGraphDir, "wundergraph.config.ts", "wundergraph.server.ts")
@@ -48,7 +50,7 @@ var serverStartCmd = &cobra.Command{
 		}
 
 		var settings ServerStartSettings
-		if err := envconfig.Process("", &settings); err != nil {
+		if err := envconfig.Process(EnvVarWGPrefix, &settings); err != nil {
 			return err
 		}
 
@@ -66,7 +68,7 @@ var serverStartCmd = &cobra.Command{
 			HooksJWT:          hooksJWT,
 			ServerHost:        settings.ServerHost,
 			ServerListenPort:  settings.ServerPort,
-			NodeAddr:          settings.NodeURL,
+			NodeUrl:           settings.NodeURL,
 			ServerScriptFile:  serverScriptFile,
 		}
 
