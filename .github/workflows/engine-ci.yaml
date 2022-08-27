@@ -36,6 +36,15 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
+    services:
+      minio:
+        image: minio/minio:edge-cicd
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio123
+        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,6 +64,14 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: wget https://dl.min.io/client/mc/release/linux-amd64/mc
+      - run: chmod +x ./mc
+      - run: ./mc alias set minio http://127.0.0.1:9000 minio minio123
+      - run: ./mc admin user add minio test 12345678
+      - run: ./mc admin policy set minio readwrite user=test
+      - run: ./mc admin user info minio test
+      - run: ./mc mb --ignore-existing minio/uploads
+      - run: ./mc policy set public minio/uploads
       - run: pnpm install --ignore-scripts
       - run: make engine-dev
       - run: make test-go
