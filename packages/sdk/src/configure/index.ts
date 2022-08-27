@@ -255,6 +255,7 @@ interface ResolvedDeployment {
 	environment: {
 		id: string;
 		name: string;
+		baseUrl: string;
 	};
 	path: string;
 }
@@ -304,12 +305,13 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		name: config.application.name,
 	};
 
+	const name = 'main';
+
 	const environment = {
 		id: '',
-		name: nodeAddress,
+		name: name,
+		baseUrl: nodeUrl,
 	};
-
-	const name = 'main';
 
 	const deploymentConfiguration: ResolvedDeployment = {
 		api,
