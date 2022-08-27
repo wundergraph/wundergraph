@@ -34,6 +34,11 @@ func newPathSet() *pathSet {
 	}
 }
 
+type WatchPath struct {
+	Optional bool
+	Path     string
+}
+
 // pathset is used to collect paths that have changed and flush them all at once
 // when the watch function is triggered.
 type pathSet struct {
@@ -62,7 +67,7 @@ func (p *pathSet) Flush() (paths []string) {
 
 type Config struct {
 	// WatchPaths is the list of filenames or directories to watch for changes.
-	WatchPaths []string
+	WatchPaths []*WatchPath
 	// IgnorePaths is the list of patterns to ignore for changes.
 	IgnorePaths []string
 }
@@ -209,11 +214,20 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 	}
 
 	// Walk the files, adding files that aren't ignored
-	for _, path := range b.config.WatchPaths {
-		if err := filepath.WalkDir(path, func(path string, de fs.DirEntry, err error) error {
+	for _, wPath := range b.config.WatchPaths {
+		if err := filepath.WalkDir(wPath.Path, func(path string, de fs.DirEntry, err error) error {
 			if err != nil {
+				// Skip errors for optional directories
+				if wPath.Optional && os.IsNotExist(err) {
+					b.log.Debug("skip watch because optional path not found",
+						abstractlogger.String("watcherName", b.name),
+						abstractlogger.String("path", wPath.Path),
+					)
+					return nil
+				}
 				return err
 			}
+
 			if err := shouldIgnore(path, de); err != nil {
 				return err
 			}

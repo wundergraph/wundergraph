@@ -90,7 +90,6 @@ Use this command if you only want to generate the configuration`,
 				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
 				Logger:        log,
-				WatchPaths:    []string{},
 			})
 
 			onAfterBuild = func() {
@@ -129,7 +128,6 @@ Use this command if you only want to generate the configuration`,
 			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
-			WatchPaths:    []string{},
 			IgnorePaths: []string{
 				"generated",
 				"node_modules",

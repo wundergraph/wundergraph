@@ -58,4 +58,3 @@ jobs:
       - run: pnpm install --ignore-scripts
       - run: make engine-dev
       - run: make test-go
-      - run: make build

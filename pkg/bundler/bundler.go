@@ -22,7 +22,7 @@ type Bundler struct {
 	name                  string
 	entryPoints           []string
 	absWorkingDir         string
-	watchPaths            []string
+	watchPaths            []*watcher.WatchPath
 	ignorePaths           []string
 	log                   abstractlogger.Logger
 	skipWatchOnEntryPoint bool
@@ -41,7 +41,7 @@ type Config struct {
 	AbsWorkingDir         string
 	SkipWatchOnEntryPoint bool
 	EntryPoints           []string
-	WatchPaths            []string
+	WatchPaths            []*watcher.WatchPath
 	IgnorePaths           []string
 	OutFile               string
 	OutDir                string
@@ -105,7 +105,7 @@ func (b *Bundler) Watch(ctx context.Context) {
 			abstractlogger.String("bundlerName", b.name),
 			abstractlogger.String("outFile", b.outFile),
 			abstractlogger.Strings("externalImports", b.externalImports),
-			abstractlogger.Strings("watchPaths", b.watchPaths),
+			abstractlogger.Any("watchPaths", b.watchPaths),
 			abstractlogger.Strings("fileLoaders", b.fileLoaders),
 		)
 		b.watch(ctx, b.buildResult.Rebuild)
@@ -175,7 +175,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 			// check if the path already exist
 			exists := false
 			for _, watchPath := range b.watchPaths {
-				if watchPath == file {
+				if watchPath.Path == file {
 					exists = true
 					break
 				}
@@ -185,7 +185,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 					// each plugin runs on a separate go routine
 					b.mu.Lock()
 					defer b.mu.Unlock()
-					b.watchPaths = append(b.watchPaths, file)
+					b.watchPaths = append(b.watchPaths, &watcher.WatchPath{Path: file})
 				} else {
 					b.log.Error("Bundler watching limit exceeded", abstractlogger.String("bundlerName", b.name), abstractlogger.Int("limit", watchFileLimit), abstractlogger.Error(err))
 				}
