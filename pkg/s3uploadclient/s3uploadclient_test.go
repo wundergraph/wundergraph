@@ -7,7 +7,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -66,32 +65,16 @@ func initClient() *s3uploadclient.S3UploadClient {
 }
 
 func prepareRequest() (*httptest.ResponseRecorder, *http.Request) {
-	file, err := os.CreateTemp("", "testdata.*.json")
-	if err != nil {
-		panic(err)
-	}
-	defer os.Remove(file.Name())
-
-	_, err = io.Copy(file, bytes.NewReader([]byte(testData)))
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = file.Seek(0, io.SeekStart)
-	if err != nil {
-		panic(err)
-	}
-
 	// construct multipart form
 	var buff bytes.Buffer
 	w := multipart.NewWriter(&buff)
 
-	fw, err := w.CreateFormFile("files", file.Name())
+	fw, err := w.CreateFormFile("files", "testdata.json")
 	if err != nil {
 		panic(err)
 	}
 
-	if _, err := io.Copy(fw, file); err != nil {
+	if _, err := io.Copy(fw, bytes.NewReader([]byte(testData))); err != nil {
 		panic(err)
 	}
 
