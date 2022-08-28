@@ -95,7 +95,9 @@ Use this command if you only want to generate the configuration`,
 				<-configRunner.Run(ctx)
 
 				if !configRunner.Successful() {
-					return fmt.Errorf("configuration could not be generated. Process exit with code %d", configRunner.ExitCode())
+					return fmt.Errorf("configuration could not be generated. Process exit with code %d",
+						configRunner.ExitCode(),
+					)
 				}
 
 				var wg errgroup.Group
@@ -123,7 +125,9 @@ Use this command if you only want to generate the configuration`,
 				<-configRunner.Run(ctx)
 
 				if !configRunner.Successful() {
-					return fmt.Errorf("config-runner failed")
+					return fmt.Errorf("configuration could not be generated. Process exit with code %d",
+						configRunner.ExitCode(),
+					)
 				}
 
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
