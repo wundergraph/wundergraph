@@ -24,12 +24,6 @@ func FileExists(filePath string) bool {
 	return true
 }
 
-type WunderGraphEntryPoints struct {
-	Error               error
-	ServerEntryPointAbs string
-	ConfigEntryPointAbs string
-}
-
 func findWunderGraphDir() (string, error) {
 	// Check if we already operate inside .wundergraph directory
 	wd, err := os.Getwd()
@@ -64,28 +58,24 @@ func GetWunderGraphDir(wundergraphDir string) (string, error) {
 	return absWgDir, nil
 }
 
-// GetWunderGraphEntryPoints validates and resolves all code entry points to build WunderGraph.
-// If the wundergraph.config.ts can't be found an error is returned. The wundergraph.server.ts is optional.
-func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename string) (*WunderGraphEntryPoints, error) {
-	files := &WunderGraphEntryPoints{}
-
+// GetWunderGraphConfigFilePath returns the absolute path to the wundergraph.config.ts file.
+// If the file can't be found an error is returned.
+func GetWunderGraphConfigFilePath(wundergraphDir, configEntryPointFilename string) (string, error) {
 	configEntryPoint := path.Join(wundergraphDir, configEntryPointFilename)
 
-	// wundergraph.config.ts
 	if FileExists(configEntryPoint) {
-		files.ConfigEntryPointAbs = configEntryPoint
-	} else {
-		return nil, fmt.Errorf(`code file "%s" not found`, configEntryPoint)
+		return configEntryPoint, nil
 	}
+	return "", fmt.Errorf(`code file "%s" not found`, configEntryPoint)
+}
 
+// GetWunderGraphServerFilePath returns the absolute path to the wundergraph.server.ts file.
+// If the file can't be found an error is returned.
+func GetWunderGraphServerFilePath(wundergraphDir, serverEntryPointFilename string) (string, error) {
 	hooksEntryPoint := path.Join(wundergraphDir, serverEntryPointFilename)
 
-	// wundergraph.server.ts
 	if FileExists(hooksEntryPoint) {
-		files.ServerEntryPointAbs = hooksEntryPoint
-	} else {
-		files.Error = fmt.Errorf(`code file "%s" not found`, hooksEntryPoint)
+		return hooksEntryPoint, nil
 	}
-
-	return files, nil
+	return "", fmt.Errorf(`code file "%s" not found`, hooksEntryPoint)
 }

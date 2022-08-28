@@ -32,9 +32,15 @@ Use this command if you only want to generate the configuration`,
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
-		entryPoints, err := files.GetWunderGraphEntryPoints(wgDir, configEntryPointFilename, serverEntryPointFilename)
+		_, err = files.GetWunderGraphConfigFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
+		}
+
+		// optional
+		codeServerFilePath, _ := files.GetWunderGraphServerFilePath(wgDir, configEntryPointFilename)
+		if err != nil {
+			return err
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -63,7 +69,7 @@ Use this command if you only want to generate the configuration`,
 
 		var onAfterBuild func()
 
-		if entryPoints.ServerEntryPointAbs != "" {
+		if codeServerFilePath != "" {
 			serverOutFile := path.Join(wgDir, "generated", "bundle", "server.js")
 			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 			webhooksDir := path.Join(wgDir, webhooks.WebhookDirectoryName)
@@ -128,7 +134,7 @@ Use this command if you only want to generate the configuration`,
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
 			AbsWorkingDir: wgDir,
-			EntryPoints:   []string{configEntryPointFilename},
+			EntryPoints:   []string{serverEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
 			IgnorePaths: []string{

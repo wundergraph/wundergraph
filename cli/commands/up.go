@@ -40,9 +40,15 @@ var upCmd = &cobra.Command{
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
-		entryPoints, err := files.GetWunderGraphEntryPoints(wgDir, configEntryPointFilename, serverEntryPointFilename)
+		_, err = files.GetWunderGraphConfigFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
+		}
+
+		// optional
+		codeServerFilePath, _ := files.GetWunderGraphServerFilePath(wgDir, configEntryPointFilename)
+		if err != nil {
+			return err
 		}
 
 		// some IDEs, like Goland, don't send a SIGINT to the process group
@@ -127,7 +133,7 @@ var upCmd = &cobra.Command{
 		var webhooksBundler *bundler.Bundler
 		var onAfterBuild func()
 
-		if entryPoints.ServerEntryPointAbs != "" {
+		if codeServerFilePath != "" {
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoints:   []string{serverEntryPointFilename},
@@ -216,8 +222,6 @@ var upCmd = &cobra.Command{
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
 			onAfterBuild = func() {
-				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
-
 				// generate new config
 				<-configRunner.Run(ctx)
 
@@ -225,6 +229,8 @@ var upCmd = &cobra.Command{
 					// run or restart the introspection poller
 					<-configIntrospectionRunner.Run(ctx)
 				}()
+
+				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
 			}
 		}
 
@@ -333,8 +339,8 @@ func init() {
 	upCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
 	upCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
-	upCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
-	upCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
+	upCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to the node config")
+	upCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to the server config")
 }
 
 func killExistingHooksProcess() {
