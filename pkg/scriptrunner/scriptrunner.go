@@ -41,6 +41,14 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 	}
 }
 
+func (b *ScriptRunner) ExitCode() int {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		return status.Exit
+	}
+	return 0
+}
+
 func (b *ScriptRunner) Stop() error {
 	if b.cmd != nil {
 		err := b.cmd.Stop()
@@ -51,6 +59,23 @@ func (b *ScriptRunner) Stop() error {
 		return err
 	}
 	return nil
+}
+
+// Successful returns true if the script exited with 0 and without an error
+// this method should only be called after the script is done
+func (b *ScriptRunner) Successful() bool {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		if status.Error != nil || status.Exit != 0 {
+			b.log.Error("Config runner failed",
+				abstractlogger.String("runnerName", "config-runner"),
+				abstractlogger.Int("exit", status.Exit),
+				abstractlogger.Error(status.Error),
+			)
+		}
+		return false
+	}
+	return true
 }
 
 func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
