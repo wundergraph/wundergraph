@@ -37,12 +37,12 @@ just running the engine as efficiently as possible without the dev overhead.
 If used without --exclude-server, make sure the server is available in this directory:
 {entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		configFile := path.Join(wgDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
@@ -65,14 +65,14 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		if !excludeServer {
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
-			serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+			serverExecutablePath := path.Join(wgDir, "generated", "bundle", "server.js")
 			if !files.FileExists(serverExecutablePath) {
-				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
+				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wgDir, serverScriptFile))
 			}
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
+				fmt.Sprintf("WG_ABS_DIR=%s", wgDir),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -85,7 +85,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:          "hooks-server-runner",
 				Executable:    "node",
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+				AbsWorkingDir: wgDir,
 				ScriptArgs:    []string{serverScriptFile},
 				Logger:        log,
 				ScriptEnv:     append(os.Environ(), hooksEnv...),

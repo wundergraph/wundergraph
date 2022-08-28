@@ -23,8 +23,9 @@ The APIs to publish need to be generated into the .wundergraph/generated directo
 	Example: `wunderctl publish organization/api`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if !files.DirectoryExists(wundergraphDir) {
-			return fmt.Errorf("could not find wundergraph directory: %s", wundergraphDir)
+		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		if err != nil {
+			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
 		var client *v2wundergraphapi.Client
@@ -44,7 +45,7 @@ The APIs to publish need to be generated into the .wundergraph/generated directo
 			api := orgAndApi[1]
 			apiName := fmt.Sprintf("%s/%s", org, api)
 			fileName := fmt.Sprintf("%s.%s.api.json", org, api)
-			filePath := path.Join(wundergraphDir, "generated", fileName)
+			filePath := path.Join(wgDir, "generated", fileName)
 
 			if _, err := os.Stat(filePath); os.IsNotExist(err) {
 				_, _ = red.Printf("API file does not exist: %s\n", filePath)

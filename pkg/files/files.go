@@ -26,49 +26,61 @@ func FileExists(filePath string) bool {
 
 type WunderGraphEntryPoints struct {
 	Error               error
-	WunderGraphDirAbs   string
 	ServerEntryPointAbs string
 	ConfigEntryPointAbs string
 }
 
-// GetWunderGraphEntryPoints validates and resolves all code entry points and base directory to build a WunderGraph.
-// If a file or directory can't be found an error is returned. ServerEntryPoint existence is optional.
+func findWunderGraphDir() (string, error) {
+	// Check if we already operate inside .wundergraph directory
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("could not get your current working directory")
+	}
+
+	parentWunderGraphDir := path.Join(wd, "..", WunderGraphDir)
+	if DirectoryExists(parentWunderGraphDir) {
+		return parentWunderGraphDir, nil
+	}
+
+	return "", fmt.Errorf("could not find .wundergraph directory")
+}
+
+// GetWunderGraphDir returns the absolute path to the .wundergraph directory.
+// If the wundergraphDir can't be found we try to find it the parent directory.
+func GetWunderGraphDir(wundergraphDir string) (string, error) {
+	absWgDir, err := filepath.Abs(wundergraphDir)
+	if err != nil {
+		return "", fmt.Errorf("unable to get absolute path from .wundergraph dir: %w", err)
+	}
+
+	if !DirectoryExists(absWgDir) {
+		dir, err := findWunderGraphDir()
+		if err != nil {
+			return "", err
+		}
+		return dir, nil
+	}
+
+	return absWgDir, nil
+}
+
+// GetWunderGraphEntryPoints validates and resolves all code entry points to build WunderGraph.
+// If the wundergraph.config.ts can't be found an error is returned. The wundergraph.server.ts is optional.
 func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename string) (*WunderGraphEntryPoints, error) {
-	wundergraphAbsDir, err := filepath.Abs(wundergraphDir)
 	files := &WunderGraphEntryPoints{}
 
-	if err != nil {
-		files.Error = err
-		return nil, err
-	}
+	configEntryPoint := path.Join(wundergraphDir, configEntryPointFilename)
 
-	// 1. Check if the ."wundergraph" directory exists
-	if !DirectoryExists(wundergraphAbsDir) {
-		// 2. If not, check if we already operate inside .wundergraph directory
-		wd, err := os.Getwd()
-		if err != nil {
-			return nil, fmt.Errorf("could not get your current working directory")
-		}
-		parentWunderGraphDir := path.Join(wd, "..", WunderGraphDir)
-		if DirectoryExists(parentWunderGraphDir) {
-			files.WunderGraphDirAbs = parentWunderGraphDir
-		} else {
-			return nil, fmt.Errorf(`base directory "%s" not found`, wundergraphAbsDir)
-		}
-	} else {
-		files.WunderGraphDirAbs = wundergraphAbsDir
-	}
-
-	configEntryPoint := path.Join(files.WunderGraphDirAbs, configEntryPointFilename)
-
+	// wundergraph.config.ts
 	if FileExists(configEntryPoint) {
 		files.ConfigEntryPointAbs = configEntryPoint
 	} else {
 		return nil, fmt.Errorf(`code file "%s" not found`, configEntryPoint)
 	}
 
-	hooksEntryPoint := path.Join(files.WunderGraphDirAbs, serverEntryPointFilename)
+	hooksEntryPoint := path.Join(wundergraphDir, serverEntryPointFilename)
 
+	// wundergraph.server.ts
 	if FileExists(hooksEntryPoint) {
 		files.ServerEntryPointAbs = hooksEntryPoint
 	} else {

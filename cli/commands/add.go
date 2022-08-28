@@ -17,13 +17,14 @@ var addCmd = &cobra.Command{
 	Long:    `wunderctl add spacex/spacex jens/weather stripe/stripe`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, dependencies []string) error {
-		if !files.DirectoryExists(wundergraphDir) {
-			return fmt.Errorf(`wundergraph directory "%s" does not exist`, wundergraphDir)
+		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		if err != nil {
+			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
 		client := InitWunderGraphApiClient()
-		man := manifest.New(log, client, wundergraphDir)
-		err := man.Load()
+		man := manifest.New(log, client, wgDir)
+		err = man.Load()
 		if err != nil {
 			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}

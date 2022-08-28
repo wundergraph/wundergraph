@@ -79,12 +79,13 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if !files.DirectoryExists(wundergraphDir) {
-			return fmt.Errorf("unable to find %s directory", wundergraphDir)
+		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		if err != nil {
+			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 		client := InitWunderGraphApiClient()
-		man := manifest.New(log, client, wundergraphDir)
-		err := man.Load()
+		man := manifest.New(log, client, wgDir)
+		err = man.Load()
 		if err != nil {
 			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}
