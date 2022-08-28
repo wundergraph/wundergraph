@@ -61,8 +61,8 @@ func (b *ScriptRunner) Stop() error {
 	return nil
 }
 
-// Successful returns true if the script exited with 0 and without an error
-// this method should only be called after the script is done
+// Successful returns true if the script exited with <= 0 and without an error.
+// This method should only be called after the script is done.
 func (b *ScriptRunner) Successful() bool {
 	if b.cmd != nil {
 		status := b.cmd.Status()
