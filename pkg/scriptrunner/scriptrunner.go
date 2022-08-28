@@ -66,14 +66,9 @@ func (b *ScriptRunner) Stop() error {
 func (b *ScriptRunner) Successful() bool {
 	if b.cmd != nil {
 		status := b.cmd.Status()
-		if status.Error != nil || status.Exit != 0 {
-			b.log.Error("Config runner failed",
-				abstractlogger.String("runnerName", "config-runner"),
-				abstractlogger.Int("exit", status.Exit),
-				abstractlogger.Error(status.Error),
-			)
+		if status.Error != nil || status.Exit > 0 {
+			return false
 		}
-		return false
 	}
 	return true
 }
@@ -130,7 +125,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				)
 				return
 			}
-			if status.Error != nil {
+			if status.Error != nil || status.Exit > 0 {
 				b.log.Error("Script runner exited with error",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
