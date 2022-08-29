@@ -88,7 +88,7 @@
     "graphql": "^16.3.0",
     "graphql-helix": "^1.12.0",
     "handlebars": "^4.7.7",
-    "headers-polyfill": "^3.0.7",
+    "@web-std/fetch": "^4.1.0",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
     "lodash": "^4.17.21",
