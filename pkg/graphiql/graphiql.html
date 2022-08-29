@@ -28,15 +28,12 @@
 			If you do not want to rely on a CDN, you can host these files locally or
 			include them directly in your favored resource bundler.
 		-->
-		<!-- Important: Add Subresource Integrity to all scripts see https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity -->
 		<script
-			crossorigin="anonymous"
-			integrity="sha384-xQwCoNcK/7P3Lpv50IZSEbJdpqbToWEODAUyI/RECaRXmOE2apWt7htari8kvKa/"
+			crossorigin
 			src="https://unpkg.com/react@17/umd/react.development.js"
 		></script>
 		<script
-			crossorigin="anonymous"
-			integrity="sha384-E9IgxDsnjKgh0777N3lXen7NwXeTsOpLLJhI01SW7idG046SRqJpsW2rJwsOYk0L"
+			crossorigin
 			src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
 		></script>
 
@@ -50,7 +47,7 @@
 
 	<body>
 		<div id="graphiql">Loading...</div>
-		<script crossorigin="anonymous" src="https://unpkg.com/graphiql/graphiql.min.js" integrity="sha384-AElu/P3ifKqNia9XXhSSZVHcAbdnqFYDtXL1q/jN7dOtt5lqqHsyscch5veWJ9/f" type="application/javascript"></script>
+		<script crossorigin src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
 		<script>
 			function graphQLFetcher(graphQLParams) {
 				return fetch('{{apiURL}}/graphql', {
