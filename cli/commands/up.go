@@ -35,21 +35,21 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
 		// only validate if the file exists
-		_, err = files.GetValidFilePath(wgDir, configEntryPointFilename)
+		_, err = files.CodeFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf(`code file "%s" not found`, configEntryPointFilename)
+			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, configEntryPointFilename)
 		}
 
 		// optional
-		codeServerFilePath, _ := files.GetValidFilePath(wgDir, serverEntryPointFilename)
+		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf(`code file "%s" not found`, serverEntryPointFilename)
+			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, serverEntryPointFilename)
 		}
 
 		// some IDEs, like Goland, don't send a SIGINT to the process group

@@ -37,7 +37,7 @@ just running the engine as efficiently as possible without the dev overhead.
 If used without --exclude-server, make sure the server is available in this directory:
 {entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}

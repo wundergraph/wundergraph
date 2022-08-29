@@ -12,7 +12,7 @@ var ensurePrismaCmd = &cobra.Command{
 	Use:   "installPrismaDependencies",
 	Short: "Installs Prisma Dependency",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}

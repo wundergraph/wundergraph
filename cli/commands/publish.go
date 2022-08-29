@@ -23,7 +23,7 @@ The APIs to publish need to be generated into the .wundergraph/generated directo
 	Example: `wunderctl publish organization/api`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}

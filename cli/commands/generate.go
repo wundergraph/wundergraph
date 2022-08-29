@@ -27,21 +27,21 @@ var generateCmd = &cobra.Command{
 	Long: `In contrast to wunderctl up, it only generates all files in ./generated but doesn't start WunderGraph or the hooks.
 Use this command if you only want to generate the configuration`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
 		// only validate if the file exists
-		_, err = files.GetValidFilePath(wgDir, configEntryPointFilename)
+		_, err = files.CodeFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf(`code file "%s" not found`, configEntryPointFilename)
+			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, configEntryPointFilename)
 		}
 
 		// optional
-		codeServerFilePath, _ := files.GetValidFilePath(wgDir, serverEntryPointFilename)
+		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf(`code file "%s" not found`, serverEntryPointFilename)
+			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, serverEntryPointFilename)
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)

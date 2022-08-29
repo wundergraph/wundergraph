@@ -16,7 +16,7 @@ var removeCmd = &cobra.Command{
 	Example: `wunderctl remove spacex/spacex`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, dependencies []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}

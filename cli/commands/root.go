@@ -79,7 +79,7 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.GetWunderGraphDir(wundergraphDir)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
@@ -141,7 +141,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
-	rootCmd.PersistentFlags().StringVar(&wundergraphDir, "wundergraph-dir", files.WunderGraphDir, "path to your .wundergraph directory")
+	rootCmd.PersistentFlags().StringVar(&wundergraphDir, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
