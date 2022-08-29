@@ -2,6 +2,7 @@ package bundler
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -32,7 +33,7 @@ type Bundler struct {
 	fileLoaders           []string
 	mu                    sync.Mutex
 	buildResult           *api.BuildResult
-	onAfterBundle         func()
+	onAfterBundle         func() error
 }
 
 type Config struct {
@@ -45,7 +46,7 @@ type Config struct {
 	IgnorePaths           []string
 	OutFile               string
 	OutDir                string
-	OnAfterBundle         func()
+	OnAfterBundle         func() error
 }
 
 func NewBundler(config Config) *Bundler {
@@ -64,7 +65,7 @@ func NewBundler(config Config) *Bundler {
 	}
 }
 
-func (b *Bundler) Bundle() {
+func (b *Bundler) Bundle() error {
 	if b.buildResult != nil {
 		buildResult := b.buildResult.Rebuild()
 		b.buildResult = &buildResult
@@ -73,7 +74,7 @@ func (b *Bundler) Bundle() {
 				abstractlogger.String("bundlerName", b.name),
 				abstractlogger.Any("errors", b.buildResult.Errors),
 			)
-			return
+			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
 		b.log.Debug("Build successful", abstractlogger.String("bundlerName", b.name))
 	} else {
@@ -84,13 +85,15 @@ func (b *Bundler) Bundle() {
 				abstractlogger.String("bundlerName", b.name),
 				abstractlogger.Any("errors", b.buildResult.Errors),
 			)
-			return
+			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
 		b.log.Debug("Initial Build successful", abstractlogger.String("bundlerName", b.name))
 	}
 	if b.onAfterBundle != nil {
-		b.onAfterBundle()
+		return b.onAfterBundle()
 	}
+
+	return nil
 }
 
 func (b *Bundler) Watch(ctx context.Context) {

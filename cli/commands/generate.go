@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"path"
-	"sync"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
@@ -56,7 +56,7 @@ Use this command if you only want to generate the configuration`,
 			}
 		}()
 
-		var onAfterBuild func()
+		var onAfterBuild func() error
 
 		if entryPoints.ServerEntryPointAbs != "" {
 			serverOutFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
@@ -76,8 +76,9 @@ Use this command if you only want to generate the configuration`,
 					AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
-					OnAfterBundle: func() {
+					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+						return nil
 					},
 				})
 			}
@@ -90,33 +91,48 @@ Use this command if you only want to generate the configuration`,
 				Logger:        log,
 			})
 
-			onAfterBuild = func() {
+			onAfterBuild = func() error {
 				<-configRunner.Run(ctx)
-				var wg sync.WaitGroup
 
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					// bundle hooks
-					hooksBundler.Bundle()
-				}()
-
-				if webhooksBundler != nil {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
-						webhooksBundler.Bundle()
-					}()
+				if !configRunner.Successful() {
+					return fmt.Errorf("configuration could not be generated. Process exit with code %d",
+						configRunner.ExitCode(),
+					)
 				}
 
-				wg.Wait()
+				var wg errgroup.Group
+
+				wg.Go(func() error {
+					// bundle hooks
+					return hooksBundler.Bundle()
+				})
+
+				if webhooksBundler != nil {
+					wg.Go(func() error {
+						// bundle webhooks
+						return webhooksBundler.Bundle()
+					})
+				}
+
+				err := wg.Wait()
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+
+				return err
 			}
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
-			onAfterBuild = func() {
+			onAfterBuild = func() error {
 				<-configRunner.Run(ctx)
+
+				if !configRunner.Successful() {
+					return fmt.Errorf("configuration could not be generated. Process exit with code %d",
+						configRunner.ExitCode(),
+					)
+				}
+
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+
+				return nil
 			}
 		}
 
@@ -133,9 +149,9 @@ Use this command if you only want to generate the configuration`,
 			OnAfterBundle: onAfterBuild,
 		})
 
-		configBundler.Bundle()
+		err = configBundler.Bundle()
 
-		return nil
+		return err
 	},
 }
 
