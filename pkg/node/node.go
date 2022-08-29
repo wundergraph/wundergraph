@@ -89,7 +89,6 @@ type options struct {
 	}
 	disableGracefulShutdown bool
 	insecureCookies         bool
-	hooksSecret             []byte
 	githubAuthDemo          GitHubAuthDemo
 
 	hooksServerUrl string
@@ -132,12 +131,6 @@ func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 func WithFileSystemConfig(configFilePath string) Option {
 	return func(options *options) {
 		options.fileSystemConfig = &configFilePath
-	}
-}
-
-func WithHooksSecret(secret []byte) Option {
-	return func(options *options) {
-		options.hooksSecret = secret
 	}
 }
 
@@ -359,7 +352,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 		}
 		streamClosers = append(streamClosers, publicClosers...)
 
-		internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, api, n.options.hooksSecret)
+		internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, api)
 		if err != nil {
 			n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
 			err = nil

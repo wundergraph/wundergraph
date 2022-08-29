@@ -88,7 +88,6 @@ var nodeStartCmd = &cobra.Command{
 		go func() {
 			err := n.StartBlocking(
 				node.WithStaticWunderNodeConfig(wunderNodeConfig),
-				node.WithHooksSecret(settings.Secret),
 				node.WithHooksServerUrl(settings.ServerUrl),
 				node.WithDebugMode(enableDebugMode),
 			)

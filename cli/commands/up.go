@@ -17,7 +17,6 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
-	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
@@ -57,18 +56,8 @@ var upCmd = &cobra.Command{
 		// so we kill the existing hooks process before we start the new one
 		killExistingHooksProcess()
 
-		secret, err := apihandler.GenSymmetricKey(64)
-		if err != nil {
-			return err
-		}
-
 		quit := make(chan os.Signal, 2)
 		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-		hooksJWT, err := apihandler.CreateHooksJWT(secret)
-		if err != nil {
-			return err
-		}
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -168,7 +157,6 @@ var upCmd = &cobra.Command{
 			srvCfg := &runners.ServerRunConfig{
 				EnableDebugMode:   enableDebugMode,
 				WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
-				HooksJWT:          hooksJWT,
 				ServerListenPort:  serverListenPort,
 				ServerHost:        serverHost,
 				NodeUrl:           fmt.Sprintf("http://%s", nodeListenAddr),
@@ -289,7 +277,6 @@ var upCmd = &cobra.Command{
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
-				node.WithHooksSecret(secret),
 				node.WithHooksServerUrl(fmt.Sprintf("http://%s:%d", serverHost, serverListenPort)),
 			)
 			if err != nil {

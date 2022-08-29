@@ -12,7 +12,6 @@ import (
 type ServerRunConfig struct {
 	EnableDebugMode   bool
 	WunderGraphDirAbs string
-	HooksJWT          string
 	ServerListenPort  int
 	ServerHost        string
 	NodeUrl           string
@@ -23,7 +22,6 @@ func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrun
 	hooksEnv := []string{
 		"START_HOOKS_SERVER=true",
 		fmt.Sprintf("WG_ABS_DIR=%s", cfg.WunderGraphDirAbs),
-		fmt.Sprintf("WG_SERVER_TOKEN=%s", cfg.HooksJWT),
 		fmt.Sprintf("WG_SERVER_HOST=%s", cfg.ServerHost),
 		fmt.Sprintf("WG_SERVER_PORT=%d", cfg.ServerListenPort),
 		fmt.Sprintf("WG_NODE_URL=%s", cfg.NodeUrl),

@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
-	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
@@ -47,16 +46,6 @@ If used without --exclude-server, make sure the server is available in this dire
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		secret, err := apihandler.GenSymmetricKey(64)
-		if err != nil {
-			return err
-		}
-
-		hooksJWT, err := apihandler.CreateHooksJWT(secret)
-		if err != nil {
-			return err
-		}
-
 		if !excludeServer {
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
 			serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
@@ -67,7 +56,6 @@ If used without --exclude-server, make sure the server is available in this dire
 			srvCfg := &runners.ServerRunConfig{
 				EnableDebugMode:   enableDebugMode,
 				WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
-				HooksJWT:          hooksJWT,
 				ServerListenPort:  serverListenPort,
 				ServerHost:        serverHost,
 				NodeUrl:           fmt.Sprintf("http://%s", nodeListenAddr),
@@ -109,7 +97,6 @@ If used without --exclude-server, make sure the server is available in this dire
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
-				node.WithHooksSecret(secret),
 				node.WithDebugMode(enableDebugMode),
 				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 				node.WithIntrospection(enableIntrospection),
