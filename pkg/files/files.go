@@ -58,24 +58,12 @@ func GetWunderGraphDir(wundergraphDir string) (string, error) {
 	return absWgDir, nil
 }
 
-// GetWunderGraphConfigFilePath returns the absolute path to the wundergraph.config.ts file.
-// If the file can't be found an error is returned.
-func GetWunderGraphConfigFilePath(wundergraphDir, configEntryPointFilename string) (string, error) {
-	configEntryPoint := path.Join(wundergraphDir, configEntryPointFilename)
+// GetValidFilePath returns the absolute path to the file and returns an error if the file does not exist.
+func GetValidFilePath(wundergraphDir, filename string) (string, error) {
+	configEntryPoint := path.Join(wundergraphDir, filename)
 
 	if FileExists(configEntryPoint) {
 		return configEntryPoint, nil
 	}
 	return "", fmt.Errorf(`code file "%s" not found`, configEntryPoint)
-}
-
-// GetWunderGraphServerFilePath returns the absolute path to the wundergraph.server.ts file.
-// If the file can't be found an error is returned.
-func GetWunderGraphServerFilePath(wundergraphDir, serverEntryPointFilename string) (string, error) {
-	hooksEntryPoint := path.Join(wundergraphDir, serverEntryPointFilename)
-
-	if FileExists(hooksEntryPoint) {
-		return hooksEntryPoint, nil
-	}
-	return "", fmt.Errorf(`code file "%s" not found`, hooksEntryPoint)
 }

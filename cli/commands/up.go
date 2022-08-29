@@ -41,15 +41,15 @@ var upCmd = &cobra.Command{
 		}
 
 		// only validate if the file exists
-		_, err = files.GetWunderGraphConfigFilePath(wgDir, configEntryPointFilename)
+		_, err = files.GetValidFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return err
+			return fmt.Errorf(`code file "%s" not found`, configEntryPointFilename)
 		}
 
 		// optional
-		codeServerFilePath, _ := files.GetWunderGraphServerFilePath(wgDir, configEntryPointFilename)
+		codeServerFilePath, _ := files.GetValidFilePath(wgDir, serverEntryPointFilename)
 		if err != nil {
-			return err
+			return fmt.Errorf(`code file "%s" not found`, serverEntryPointFilename)
 		}
 
 		// some IDEs, like Goland, don't send a SIGINT to the process group

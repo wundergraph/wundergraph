@@ -33,15 +33,15 @@ Use this command if you only want to generate the configuration`,
 		}
 
 		// only validate if the file exists
-		_, err = files.GetWunderGraphConfigFilePath(wgDir, configEntryPointFilename)
+		_, err = files.GetValidFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return err
+			return fmt.Errorf(`code file "%s" not found`, configEntryPointFilename)
 		}
 
 		// optional
-		codeServerFilePath, _ := files.GetWunderGraphServerFilePath(wgDir, configEntryPointFilename)
+		codeServerFilePath, _ := files.GetValidFilePath(wgDir, serverEntryPointFilename)
 		if err != nil {
-			return err
+			return fmt.Errorf(`code file "%s" not found`, serverEntryPointFilename)
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
@@ -151,7 +151,7 @@ Use this command if you only want to generate the configuration`,
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
 			AbsWorkingDir: wgDir,
-			EntryPoints:   []string{serverEntryPointFilename},
+			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
 			IgnorePaths: []string{
