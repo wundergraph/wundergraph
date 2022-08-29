@@ -90,6 +90,7 @@ var nodeStartCmd = &cobra.Command{
 				node.WithStaticWunderNodeConfig(wunderNodeConfig),
 				node.WithHooksSecret(settings.Secret),
 				node.WithHooksServerUrl(settings.ServerUrl),
+				node.WithDebugMode(enableDebugMode),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))
