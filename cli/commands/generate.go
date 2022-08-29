@@ -38,11 +38,8 @@ Use this command if you only want to generate the configuration`,
 			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, configEntryPointFilename)
 		}
 
-		// optional
+		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
-		if err != nil {
-			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, serverEntryPointFilename)
-		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()

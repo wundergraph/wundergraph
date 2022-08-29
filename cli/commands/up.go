@@ -46,11 +46,8 @@ var upCmd = &cobra.Command{
 			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, configEntryPointFilename)
 		}
 
-		// optional
+		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
-		if err != nil {
-			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, serverEntryPointFilename)
-		}
 
 		// some IDEs, like Goland, don't send a SIGINT to the process group
 		// this leads to the middleware hooks server (sub-process) not being killed
