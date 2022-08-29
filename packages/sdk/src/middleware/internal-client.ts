@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
 import { ClientRequest } from './types';
+import { serverToken } from '../env';
 
 export interface OperationArgsWithInput<T = void> {
 	input: T;
@@ -26,7 +27,7 @@ export interface InternalClient extends Operations {
 	withHeaders: (headers: { [key: string]: string }) => InternalClient;
 }
 
-const hooksToken = `Bearer ${process.env.HOOKS_TOKEN}`;
+const hooksToken = `Bearer ${serverToken}`;
 
 export interface InternalClientFactory {
 	(extraHeaders?: { [p: string]: string } | undefined, clientRequest?: ClientRequest): InternalClient;
