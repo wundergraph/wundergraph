@@ -18,7 +18,7 @@ var removeCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, dependencies []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
+			return fmt.Errorf(files.WunderGraphDirNotFoundErrorMsg, err)
 		}
 
 		client := InitWunderGraphApiClient()

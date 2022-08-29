@@ -14,7 +14,7 @@ var ensurePrismaCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
+			return fmt.Errorf(files.WunderGraphDirNotFoundErrorMsg, err)
 		}
 
 		return database.InstallPrismaDependencies(log, wgDir)

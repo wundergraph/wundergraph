@@ -7,8 +7,11 @@ import (
 	"path/filepath"
 )
 
-const WunderGraphDirName = ".wundergraph"
-const CodeFileNotFoundErrorMsg = `code file "%s" not found`
+const (
+	WunderGraphDirName             = ".wundergraph"
+	WunderGraphDirNotFoundErrorMsg = `unable to find .wundergraph dir: %w`
+	CodeFileNotFoundErrorMsg       = `code file "%s" not found`
+)
 
 func DirectoryExists(path string) bool {
 	info, err := os.Stat(path)

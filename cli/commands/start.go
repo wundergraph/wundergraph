@@ -39,7 +39,7 @@ If used without --exclude-server, make sure the server is available in this dire
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
+			return fmt.Errorf(files.WunderGraphDirNotFoundErrorMsg, err)
 		}
 
 		configFile := path.Join(wgDir, "generated", configJsonFilename)
