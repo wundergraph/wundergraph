@@ -36,15 +36,15 @@ var serverStartCmd = &cobra.Command{
 			WG_SECRET=secret WG_SERVER_PORT=9992 WG_SERVER_HOST=127.0.0.1 WG_NODE_URL=http://127.0.0.1:9991 wunderctl server start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(files.WunderGraphDir, "wundergraph.config.ts", "wundergraph.server.ts")
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
 		}
 
 		serverScriptFile := path.Join("generated", "bundle", "server.js")
-		serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+		serverExecutablePath := path.Join(wgDir, serverScriptFile)
 		if !files.FileExists(serverExecutablePath) {
-			return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
+			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 		}
 
 		var settings ServerStartSettings
@@ -57,7 +57,7 @@ var serverStartCmd = &cobra.Command{
 
 		srvCfg := &runners.ServerRunConfig{
 			EnableDebugMode:   enableDebugMode,
-			WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
+			WunderGraphDirAbs: wgDir,
 			ServerHost:        settings.ServerHost,
 			ServerListenPort:  settings.ServerPort,
 			NodeUrl:           settings.NodeURL,

@@ -39,12 +39,12 @@ var nodeStartCmd = &cobra.Command{
 			WG_SECRET=secret WG_SERVER_URL=http://127.0.0.1:9992 WG_NODE_ADDR=127.0.0.1:9991 wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(files.WunderGraphDir, "wundergraph.config.ts", "wundergraph.server.ts")
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "wundergraph.config.json")
+		configFile := path.Join(wgDir, "generated", "wundergraph.config.json")
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
