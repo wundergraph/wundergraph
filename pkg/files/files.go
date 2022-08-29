@@ -43,6 +43,7 @@ func findWunderGraphDirInParent() (string, error) {
 
 // FindWunderGraphDir returns the absolute path to the .wundergraph directory.
 // If the wundergraphDir can't be found we try to find it in the parent directory.
+// If no directory is found we return an error.
 func FindWunderGraphDir(wundergraphDir string) (string, error) {
 	absWgDir, err := filepath.Abs(wundergraphDir)
 	if err != nil {
