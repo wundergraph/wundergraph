@@ -1,22 +1,21 @@
 package s3uploadclient
 
 import (
-	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/cespare/xxhash"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"golang.org/x/net/context"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"time"
+
+	"github.com/cespare/xxhash"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"golang.org/x/net/context"
 )
 
 const MaxUploadSize = 20 * 1024 * 1024 // 20MB
@@ -81,23 +80,22 @@ func (s *S3UploadClient) createBucket() error {
 }
 
 func (s *S3UploadClient) uploadToS3(ctx context.Context, part *multipart.Part) (*minio.UploadInfo, error) {
-	contentTypeBuff := make([]byte, 512)
-	_, err := part.Read(contentTypeBuff)
-	if err != nil {
-		return nil, err
-	}
-	filetype := http.DetectContentType(contentTypeBuff)
-	recycled := io.MultiReader(bytes.NewReader(contentTypeBuff), part)
-
 	extension := filepath.Ext(part.FileName())
+
+	// find type based on file header, populated when *multipart.Part created
+	// if empty, contentType will be assigned by FPutObject
+	contentType := part.Header.Get("Content-Type")
+
 	// creates a temporary unique file in the temp folder of the OS
-	dst, err := ioutil.TempFile("", fmt.Sprintf("wundergraph-upload.*.%s", extension))
+	dst, err := os.CreateTemp("", fmt.Sprintf("wundergraph-upload.*.%s", extension))
 	if err != nil {
 		return nil, err
 	}
-	defer os.Remove(dst.Name())
+	defer func() {
+		_ = os.Remove(dst.Name())
+	}()
 
-	_, err = io.Copy(dst, recycled)
+	_, err = io.Copy(dst, part)
 	if err != nil {
 		return nil, err
 	}
@@ -113,15 +111,10 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, part *multipart.Part) (
 		return nil, err
 	}
 
-	_, err = dst.Seek(0, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
+	filename := fmt.Sprintf("%s%s", hex.EncodeToString(hasher.Sum(nil)), extension)
 
-	filename := hex.EncodeToString(hasher.Sum(nil)) + extension
-
-	info, err := s.client.PutObject(ctx, s.bucketName, filename, dst, written, minio.PutObjectOptions{
-		ContentType: filetype,
+	info, err := s.client.FPutObject(ctx, s.bucketName, filename, dst.Name(), minio.PutObjectOptions{
+		ContentType: contentType,
 		UserMetadata: map[string]string{
 			"original-filename":  part.FileName(),
 			"original-extension": extension,
@@ -172,7 +165,7 @@ func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(files)
+	_, _ = w.Write(files)
 }
 
 func (s *S3UploadClient) handlePart(ctx context.Context, part *multipart.Part) (*minio.UploadInfo, error) {

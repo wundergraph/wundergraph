@@ -9,8 +9,13 @@ const webhook: Webhook<InternalClient, { a: number }, { hello: string; a: number
 		// and don't bundle them into the webhook.
 		buildSchema(`scalar DateTime`);
 
+		context.log.info(event.headers);
+
 		return {
 			statusCode: 200,
+			headers: {
+				'X-Wundergraph-Test': 'test',
+			},
 			body: {
 				hello: 'world',
 				a,

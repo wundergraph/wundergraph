@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
-import { objectToHeaders } from 'headers-polyfill';
+import { Headers } from '@web-std/fetch';
 import { WebhookConfiguration } from '@wundergraph/protobuf';
 import { InternalClientFactory } from '../internal-client';
 import { RequestMethod } from '../types';
@@ -43,7 +43,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 							internalClient: config.internalClientFactory(
 								{},
 								{
-									headers: objectToHeaders(request.headers),
+									headers: new Headers(request.headers as Record<string, string>),
 									method: request.method as RequestMethod,
 									requestURI: request.url,
 								}

@@ -24,6 +24,7 @@ out
 *.logs
 examples/**/*lock*
 /wunderctl
+scripts/mc
 
 # Logs
 logs
