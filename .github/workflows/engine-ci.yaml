@@ -36,6 +36,15 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
+    services:
+      minio:
+        image: minio/minio:edge-cicd
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio123
+        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,6 +64,7 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: make bootstrap-minio
       - run: pnpm install --ignore-scripts
       - run: make engine-dev
       - run: make test-go

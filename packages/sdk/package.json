@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.98.3",
+  "version": "0.99.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -69,7 +69,7 @@
     "chai": "^4.3.4",
     "jest": "^28.1.0",
     "ts-jest": "^28.0.4",
-    "typescript": "^4.7.2"
+    "typescript": "^4.8.2"
   },
   "dependencies": {
     "@apollo/composition": "^2.0.2",
@@ -77,8 +77,9 @@
     "@fastify/formbody": "^7.0.1",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
-    "@wundergraph/protobuf": "workspace:^0.91.2",
-    "@wundergraph/wunderctl": "workspace:^0.99.3",
+    "@web-std/fetch": "^4.1.0",
+    "@wundergraph/protobuf": "workspace:^0.91.3",
+    "@wundergraph/wunderctl": "workspace:^0.100.0",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
@@ -88,7 +89,6 @@
     "graphql": "^16.3.0",
     "graphql-helix": "^1.12.0",
     "handlebars": "^4.7.7",
-    "headers-polyfill": "^3.0.7",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
     "lodash": "^4.17.21",

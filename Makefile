@@ -19,6 +19,9 @@ engine-dev: codegen
 check-setup:
 	$(shell ./scripts/check-setup.sh)
 
+bootstrap-minio:
+	./scripts/minio-setup.sh
+
 test-go:
 	go test ./...
 
@@ -56,4 +59,4 @@ update-examples:
 	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
 
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio

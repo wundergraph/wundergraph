@@ -99,7 +99,7 @@ importers:
       openapi-to-graphql: ^2.2.5
       pg: ^8.7.3
       postgraphile: ^4.12.9
-      typescript: ^4.1.3
+      typescript: ^4.8.2
     dependencies:
       '@types/node': 14.18.16
       '@wundergraph/sdk': link:../sdk
@@ -107,7 +107,7 @@ importers:
       openapi-to-graphql: 2.6.3_graphql@16.4.0
       pg: 8.7.3
       postgraphile: 4.12.9
-      typescript: 4.6.4
+      typescript: 4.8.2
 
   packages/mtls-testapp:
     specifiers:
@@ -117,7 +117,7 @@ importers:
       openapi-to-graphql: ^2.2.5
       pg: ^8.7.3
       postgraphile: ^4.12.9
-      typescript: ^4.1.3
+      typescript: ^4.8.2
     dependencies:
       '@types/node': 14.18.16
       '@wundergraph/sdk': file:packages/sdk
@@ -125,7 +125,7 @@ importers:
       openapi-to-graphql: 2.6.3_graphql@16.4.0
       pg: 8.7.3
       postgraphile: 4.12.9
-      typescript: 4.7.2
+      typescript: 4.8.2
     dependenciesMeta:
       '@wundergraph/sdk':
         injected: true
@@ -135,15 +135,15 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
-      '@wundergraph/protobuf': workspace:^0.91.2
-      '@wundergraph/sdk': workspace:^0.98.3
+      '@wundergraph/protobuf': workspace:^0.91.3
+      '@wundergraph/sdk': workspace:^0.99.0
       handlebars: ^4.7.7
       next: ^12.1.6
       object-hash: ^2.2.0
       react: ^18.1.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
-      typescript: ^4.7.2
+      typescript: ^4.8.2
     dependencies:
       '@wundergraph/protobuf': link:../protobuf
       handlebars: 4.7.7
@@ -157,7 +157,7 @@ importers:
       '@wundergraph/sdk': link:../sdk
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
-      typescript: 4.7.2
+      typescript: 4.8.2
 
   packages/nextjs-testapp:
     specifiers:
@@ -171,10 +171,10 @@ importers:
       open-cli: ^7.0.1
       react: ^18.0.0
       react-dom: ^18.0.0
-      typescript: ^4.7.2
+      typescript: ^4.8.2
       wait-on: ^6.0.0
     dependencies:
-      '@wundergraph/nextjs': file:packages/nextjs_heyjckyyxm4ufuhgbrl5zm5yd4
+      '@wundergraph/nextjs': file:packages/nextjs_th6nc773xfc6vbzedgwc7hpmiq
       '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
@@ -185,7 +185,7 @@ importers:
       concurrently: 6.5.1
       graphql: 16.4.0
       open-cli: 7.0.1
-      typescript: 4.7.2
+      typescript: 4.8.2
       wait-on: 6.0.1
     dependenciesMeta:
       '@wundergraph/nextjs':
@@ -198,12 +198,12 @@ importers:
       '@types/node': ^14.14.37
       '@wundergraph/sdk': workspace:*
       graphql: ^16.3.0
-      typescript: ^4.7.2
+      typescript: ^4.8.2
     dependencies:
       '@types/node': 14.18.16
       '@wundergraph/sdk': file:packages/sdk
       graphql: 16.4.0
-      typescript: 4.7.2
+      typescript: 4.8.2
     dependenciesMeta:
       '@wundergraph/sdk':
         injected: true
@@ -214,14 +214,14 @@ importers:
       long: ^5.2.0
       protobufjs: ^6.11.2
       ts-proto: ^1.112.1
-      typescript: ^4.7.2
+      typescript: ^4.8.2
     dependencies:
       long: 5.2.0
       protobufjs: 6.11.2
       ts-proto: 1.112.1
     devDependencies:
       cpy-cli: 4.1.0
-      typescript: 4.7.2
+      typescript: 4.8.2
 
   packages/sdk:
     specifiers:
@@ -241,8 +241,9 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^14.18.16
       '@types/object-hash': ^1.3.4
-      '@wundergraph/protobuf': workspace:^0.91.2
-      '@wundergraph/wunderctl': workspace:^0.99.3
+      '@web-std/fetch': ^4.1.0
+      '@wundergraph/protobuf': workspace:^0.91.3
+      '@wundergraph/wunderctl': workspace:^0.100.0
       axios: ^0.26.1
       chai: ^4.3.4
       colors: ^1.4.0
@@ -253,7 +254,6 @@ importers:
       graphql: ^16.3.0
       graphql-helix: ^1.12.0
       handlebars: ^4.7.7
-      headers-polyfill: ^3.0.7
       jest: ^28.1.0
       js-yaml: ^4.1.0
       json-schema: ^0.4.0
@@ -266,13 +266,14 @@ importers:
       protobufjs: ^6.11.2
       swagger2openapi: ^7.0.8
       ts-jest: ^28.0.4
-      typescript: ^4.7.2
+      typescript: ^4.8.2
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
       '@fastify/formbody': 7.0.1
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
+      '@web-std/fetch': 4.1.0
       '@wundergraph/protobuf': link:../protobuf
       '@wundergraph/wunderctl': link:../wunderctl
       axios: 0.26.1
@@ -284,7 +285,6 @@ importers:
       graphql: 16.4.0
       graphql-helix: 1.12.0_graphql@16.4.0
       handlebars: 4.7.7
-      headers-polyfill: 3.0.7
       js-yaml: 4.1.0
       json-schema: 0.4.0
       lodash: 4.17.21
@@ -309,8 +309,8 @@ importers:
       '@types/object-hash': 1.3.4
       chai: 4.3.6
       jest: 28.1.0_@types+node@14.18.16
-      ts-jest: 28.0.4_3idyv6jqzrc23kpntvtlm4rwnq
-      typescript: 4.7.2
+      ts-jest: 28.0.4_kksdien7pp32tkxg2g5wv4uiki
+      typescript: 4.8.2
 
   packages/wunderctl:
     specifiers:
@@ -323,7 +323,7 @@ importers:
       execa: 5.1.1
       rimraf: ^3.0.2
       tar: ^6.1.11
-      typescript: ^4.7.2
+      typescript: ^4.8.2
     dependencies:
       axios: 0.26.1_debug@4.3.4
       debug: 4.3.4
@@ -335,7 +335,7 @@ importers:
       '@types/node': 14.18.16
       '@types/rimraf': 3.0.2
       '@types/tar': 4.0.5
-      typescript: 4.7.2
+      typescript: 4.8.2
 
 packages:
 
@@ -2551,6 +2551,37 @@ packages:
       semver: 7.3.7
     dev: true
 
+  /@remix-run/web-blob/3.0.4:
+    resolution: {integrity: sha512-AfegzZvSSDc+LwnXV+SwROTrDtoLiPxeFW+jxgvtDAnkuCX1rrzmVJ6CzqZ1Ai0bVfmJadkG5GxtAfYclpPmgw==}
+    dependencies:
+      '@remix-run/web-stream': 1.0.3
+      web-encoding: 1.1.5
+    dev: false
+
+  /@remix-run/web-fetch/4.2.0:
+    resolution: {integrity: sha512-Bll+4Z3CT4ryYKRFTbdanLaXbOjtSuwYcj8s6DSXehVcZWWrz7mA3O394T52iFjvhaJ+ELSstNhVeBQc6NUfGg==}
+    engines: {node: ^10.17 || >=12.3}
+    dependencies:
+      '@remix-run/web-blob': 3.0.4
+      '@remix-run/web-form-data': 3.0.3
+      '@remix-run/web-stream': 1.0.3
+      '@web3-storage/multipart-parser': 1.0.0
+      data-uri-to-buffer: 3.0.1
+      mrmime: 1.0.1
+    dev: false
+
+  /@remix-run/web-form-data/3.0.3:
+    resolution: {integrity: sha512-wL4veBtVPazSpXfPMzrbmeV3IxuxCfcQYPerQ8BXRO5ahAEVw23tv7xS+yoX0XDO5j+vpRaSbhHJK1H5gF7eYQ==}
+    dependencies:
+      web-encoding: 1.1.5
+    dev: false
+
+  /@remix-run/web-stream/1.0.3:
+    resolution: {integrity: sha512-wlezlJaA5NF6SsNMiwQnnAW6tnPzQ5I8qk0Y0pSohm0eHKa2FQ1QhEKLVVcDDu02TmkfHgnux0igNfeYhDOXiA==}
+    dependencies:
+      web-streams-polyfill: 3.2.1
+    dev: false
+
   /@rushstack/eslint-patch/1.1.4:
     resolution: {integrity: sha512-LwzQKA4vzIct1zNZzBmRKI9QuNpLgTQMEjsQLf3BXuGYb3QPTP4Yjf6mkdX+X1mYttZ808QpOwAzZjv28kq7DA==}
     dev: true
@@ -2998,9 +3029,56 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
+  /@web-std/blob/3.0.4:
+    resolution: {integrity: sha512-+dibyiw+uHYK4dX5cJ7HA+gtDAaUUe6JsOryp2ZpAC7h4ICsh49E34JwHoEKPlPvP0llCrNzz45vvD+xX5QDBg==}
+    dependencies:
+      '@web-std/stream': 1.0.0
+      web-encoding: 1.1.5
+    dev: false
+
+  /@web-std/fetch/4.1.0:
+    resolution: {integrity: sha512-ZRizMcP8YyuRlhIsRYNFD9x/w28K7kbUhNGmKM9hDy4qeQ5xMTk//wA89EF+Clbl6EP4ksmCcN+4TqBMSRL8Zw==}
+    engines: {node: ^10.17 || >=12.3}
+    dependencies:
+      '@web-std/blob': 3.0.4
+      '@web-std/form-data': 3.0.2
+      '@web-std/stream': 1.0.1
+      '@web3-storage/multipart-parser': 1.0.0
+      data-uri-to-buffer: 3.0.1
+      mrmime: 1.0.1
+    dev: false
+
+  /@web-std/form-data/3.0.2:
+    resolution: {integrity: sha512-rhc8IRw66sJ0FHcnC84kT3mTN6eACTuNftkt1XSl1Ef6WRKq4Pz65xixxqZymAZl1K3USpwhLci4SKNn4PYxWQ==}
+    dependencies:
+      web-encoding: 1.1.5
+    dev: false
+
+  /@web-std/stream/1.0.0:
+    resolution: {integrity: sha512-jyIbdVl+0ZJyKGTV0Ohb9E6UnxP+t7ZzX4Do3AHjZKxUXKMs9EmqnBDQgHF7bEw0EzbQygOjtt/7gvtmi//iCQ==}
+    dependencies:
+      web-streams-polyfill: 3.2.1
+    dev: false
+
+  /@web-std/stream/1.0.1:
+    resolution: {integrity: sha512-tsz4Y0WNDgFA5jwLSeV7/UV5rfMIlj0cPsSLVfTihjaVW0OJPd5NxJ3le1B3yLyqqzRpeG5OAfJAADLc4VoGTA==}
+    dependencies:
+      web-streams-polyfill: 3.2.1
+    dev: false
+
+  /@web3-storage/multipart-parser/1.0.0:
+    resolution: {integrity: sha512-BEO6al7BYqcnfX15W2cnGR+Q566ACXAT9UQykORCWW80lmkpWsnEob6zJS1ZVBKsSJC8+7vJkHwlp+lXG1UCdw==}
+    dev: false
+
   /@yarnpkg/lockfile/1.1.0:
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
     dev: true
+
+  /@zxing/text-encoding/0.9.0:
+    resolution: {integrity: sha512-U/4aVJ2mxI0aDNI8Uq0wEhMgY+u4CNtEb0om3+y3+niDAsoTCOB33UF0sxpzqzdqXLqmvc+vZyAt4O8pPdfkwA==}
+    requiresBuild: true
+    dev: false
+    optional: true
 
   /JSONStream/1.3.5:
     resolution: {integrity: sha512-E+iruNOY8VV9s4JEbe1aNEm6MiszPRr/UfcHMz0TQh1BXSxHK+ASV1R6W4HpjBhSeS+54PIsAMCBmwD06LLsqQ==}
@@ -4344,7 +4422,6 @@ packages:
   /data-uri-to-buffer/3.0.1:
     resolution: {integrity: sha512-WboRycPNsVw3B3TL559F7kuBUM4d8CgMEvk6xEJlOp7OBPjt6G7z8WMWlD2rOFZLk6OYfFIUGsCOWzcQH9K2og==}
     engines: {node: '>= 6'}
-    dev: true
 
   /dataloader/1.4.0:
     resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
@@ -6307,6 +6384,13 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /is-generator-function/1.0.10:
+    resolution: {integrity: sha512-jsEjy9l3yiXEQ+PsXdmBwEPcOxaXWLspKdplFUVI9vq1iZgIekeC0L167qeu86czQaxed3q/Uzuw0swL0irL8A==}
+    engines: {node: '>= 0.4'}
+    dependencies:
+      has-tostringtag: 1.0.0
+    dev: false
+
   /is-glob/4.0.3:
     resolution: {integrity: sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg==}
     engines: {node: '>=0.10.0'}
@@ -7802,6 +7886,11 @@ packages:
     resolution: {integrity: sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==}
     engines: {node: '>=0.10.0'}
     dev: true
+
+  /mrmime/1.0.1:
+    resolution: {integrity: sha512-hzzEagAgDyoU1Q6yg5uI+AorQgdvMCur3FcKf7NhMKWsaYg+RnbTyHRa/9IlLF9rf455MOCtcqqrQQ83pPP7Uw==}
+    engines: {node: '>=10'}
+    dev: false
 
   /ms/2.0.0:
     resolution: {integrity: sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g=}
@@ -10620,7 +10709,7 @@ packages:
     resolution: {integrity: sha512-3fTPO+G6bSQNvMh/XQQzyiahVLMMj9kqYO99ivUraNJ3Wp05HZOOVtRhi6w9hq7+laP1MKHjLBtGWqTeb1fcpg==}
     dev: false
 
-  /ts-jest/28.0.4_3idyv6jqzrc23kpntvtlm4rwnq:
+  /ts-jest/28.0.4_kksdien7pp32tkxg2g5wv4uiki:
     resolution: {integrity: sha512-S6uRDDdCJBvnZqyGjB4VCnwbQrbgdL8WPeP4jevVSpYsBaeGRQAIS08o3Svav2Ex+oXwLgJ/m7F24TNq62kA1A==}
     engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
     hasBin: true
@@ -10646,7 +10735,7 @@ packages:
       lodash.memoize: 4.1.2
       make-error: 1.3.6
       semver: 7.3.7
-      typescript: 4.7.2
+      typescript: 4.8.2
       yargs-parser: 20.2.9
     dev: true
 
@@ -10823,14 +10912,14 @@ packages:
     resolution: {integrity: sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==}
     dev: true
 
-  /typescript/4.6.4:
-    resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-    dev: false
-
   /typescript/4.7.2:
     resolution: {integrity: sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
+
+  /typescript/4.8.2:
+    resolution: {integrity: sha512-C0I1UsrrDHo2fYI5oaCGbSejwX4ch+9Y5jTQELvovfmFkK3HHSZJB8MSJcWLmCUBzQBchCrZ9rMRV6GuNrvGtw==}
     engines: {node: '>=4.2.0'}
     hasBin: true
 
@@ -10952,6 +11041,17 @@ packages:
       inherits: 2.0.3
     dev: true
 
+  /util/0.12.4:
+    resolution: {integrity: sha512-bxZ9qtSlGUWSOy9Qa9Xgk11kSslpuZwaxCg4sNIDj6FLucDab2JxnHwyNTCpHMtK1MjoQiWQ6DiUMZYbSrO+Sw==}
+    dependencies:
+      inherits: 2.0.4
+      is-arguments: 1.1.1
+      is-generator-function: 1.0.10
+      is-typed-array: 1.1.8
+      safe-buffer: 5.2.1
+      which-typed-array: 1.1.7
+    dev: false
+
   /uuid/8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
@@ -11026,6 +11126,19 @@ packages:
     dependencies:
       defaults: 1.0.3
     dev: true
+
+  /web-encoding/1.1.5:
+    resolution: {integrity: sha512-HYLeVCdJ0+lBYV2FvNZmv3HJ2Nt0QYXqZojk3d9FJOLkwnuhzM9tmamh8d7HPM8QqjKH8DeHkFTx+CFlWpZZDA==}
+    dependencies:
+      util: 0.12.4
+    optionalDependencies:
+      '@zxing/text-encoding': 0.9.0
+    dev: false
+
+  /web-streams-polyfill/3.2.1:
+    resolution: {integrity: sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==}
+    engines: {node: '>= 8'}
+    dev: false
 
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -11293,11 +11406,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  file:packages/nextjs_heyjckyyxm4ufuhgbrl5zm5yd4:
+  file:packages/nextjs_th6nc773xfc6vbzedgwc7hpmiq:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.1.4
+    version: 0.1.5
     peerDependencies:
       '@wundergraph/sdk': '>=0.91.0'
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
@@ -11322,7 +11435,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.98.3
+    version: 0.99.0
     hasBin: true
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
@@ -11330,6 +11443,8 @@ packages:
       '@fastify/formbody': 7.0.1
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
+      '@remix-run/web-fetch': 4.2.0
+      '@web-std/fetch': 4.1.0
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/wunderctl': link:packages/wunderctl
       axios: 0.26.1

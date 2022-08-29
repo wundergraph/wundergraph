@@ -33,12 +33,12 @@ just running the engine as efficiently as possible without the dev overhead.
 If used without --exclude-server, make sure the server is available in this directory:
 {entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		configFile := path.Join(wgDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
@@ -48,14 +48,14 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		if !excludeServer {
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
-			serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+			serverExecutablePath := path.Join(wgDir, "generated", "bundle", "server.js")
 			if !files.FileExists(serverExecutablePath) {
-				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
+				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wgDir, serverScriptFile))
 			}
 
 			srvCfg := &runners.ServerRunConfig{
 				EnableDebugMode:   enableDebugMode,
-				WunderGraphDirAbs: entryPoints.WunderGraphDirAbs,
+				WunderGraphDirAbs: wgDir,
 				ServerListenPort:  serverListenPort,
 				ServerHost:        serverHost,
 				NodeUrl:           fmt.Sprintf("http://%s", nodeListenAddr),
@@ -63,6 +63,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 
 			hookServerRunner := runners.NewServerRunner(log, srvCfg)
+
 			defer func() {
 				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
 				err := hookServerRunner.Stop()
@@ -129,8 +130,8 @@ func init() {
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
-	startCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "filename of node config")
-	startCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "filename of the server config")
+	startCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to the node config")
+	startCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to the server config")
 
 	_ = startCmd.Flags().MarkDeprecated(MiddlewareListenPortFlagName, fmt.Sprintf("%s is deprecated please use %s instead", MiddlewareListenPortFlagName, ServerListenPortFlagName))
 }
