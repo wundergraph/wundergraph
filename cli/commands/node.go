@@ -28,7 +28,6 @@ var nodeCmd = &cobra.Command{
 
 type NodeStartSettings struct {
 	NodeAddr  string `envconfig:"NODE_ADDR" required:"true"`
-	Secret    []byte `envconfig:"SECRET" required:"true"`
 	ServerUrl string `envconfig:"SERVER_URL" required:"true"`
 }
 
@@ -59,8 +58,8 @@ var nodeStartCmd = &cobra.Command{
 			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
 			return nil
 		}
-		var wunderNodeConfig wgpb.WunderNodeConfig
-		err = json.Unmarshal(data, &wunderNodeConfig)
+		var graphConfig wgpb.WunderGraphConfiguration
+		err = json.Unmarshal(data, &graphConfig)
 		if err != nil {
 			log.Fatal("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
 			return err
@@ -82,6 +81,8 @@ var nodeStartCmd = &cobra.Command{
 				ListenAddr: settings.NodeAddr,
 			},
 		}
+
+		wunderNodeConfig := node.CreateConfig(graphConfig, settings.NodeAddr, wgpb.LogLevel_ERROR)
 
 		n := node.New(ctx, BuildInfo, cfg, log)
 

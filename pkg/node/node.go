@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"path"
 	"strings"
 	"time"
 
@@ -24,7 +23,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
@@ -601,39 +599,8 @@ func (n *Node) reloadFileConfig(filePath string) {
 		return
 	}
 
-	config := wgpb.WunderNodeConfig{
-		Apis: []*wgpb.Api{
-			{
-				PrimaryHost:           n.cfg.Server.ListenAddr,
-				Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
-				PathPrefix:            path.Join(graphConfig.ApiName, graphConfig.DeploymentName),
-				EngineConfiguration:   graphConfig.Api.EngineConfiguration,
-				EnableSingleFlight:    true,
-				EnableGraphqlEndpoint: graphConfig.DangerouslyEnableGraphQLEndpoint,
-				Operations:            graphConfig.Api.Operations,
-				CorsConfiguration:     graphConfig.Api.CorsConfiguration,
-				S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
-				CacheConfig: &wgpb.ApiCacheConfig{
-					Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
-					InMemoryConfig: &wgpb.InMemoryCacheConfig{
-						MaxSize: 1e9,
-					},
-				},
-				AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
-				Webhooks:             graphConfig.Api.Webhooks,
-			},
-		},
-		Server: &wgpb.Server{
-			GracefulShutdownTimeout: 0,
-			KeepAlive:               5,
-			ReadTimeout:             5,
-			WriteTimeout:            5,
-			IdleTimeout:             10,
-		},
-		Logging: &wgpb.Logging{
-			Level: wgpb.LogLevel_DEBUG,
-		},
-	}
+	config := CreateConfig(graphConfig, n.cfg.Server.ListenAddr, wgpb.LogLevel_DEBUG)
+
 	n.configCh <- config
 }
 
