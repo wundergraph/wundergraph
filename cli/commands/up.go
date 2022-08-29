@@ -120,7 +120,7 @@ var upCmd = &cobra.Command{
 
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var webhooksBundler *bundler.Bundler
-		var onAfterBuild func()
+		var onAfterBuild func() error
 
 		if entryPoints.ServerEntryPointAbs != "" {
 			hooksBundler := bundler.NewBundler(bundler.Config{
@@ -146,8 +146,9 @@ var upCmd = &cobra.Command{
 					AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
-					OnAfterBundle: func() {
+					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+						return nil
 					},
 				})
 			}
@@ -173,7 +174,7 @@ var upCmd = &cobra.Command{
 				ScriptEnv:     append(os.Environ(), hooksEnv...),
 			})
 
-			onAfterBuild = func() {
+			onAfterBuild = func() error {
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
 
 				// generate new config
@@ -207,10 +208,12 @@ var upCmd = &cobra.Command{
 					// run or restart the introspection poller
 					<-configIntrospectionRunner.Run(ctx)
 				}()
+
+				return nil
 			}
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
-			onAfterBuild = func() {
+			onAfterBuild = func() error {
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
 
 				// generate new config
@@ -220,6 +223,8 @@ var upCmd = &cobra.Command{
 					// run or restart the introspection poller
 					<-configIntrospectionRunner.Run(ctx)
 				}()
+
+				return nil
 			}
 		}
 
@@ -245,7 +250,7 @@ var upCmd = &cobra.Command{
 			OnAfterBundle: onAfterBuild,
 		})
 
-		configBundler.Bundle()
+		_ = configBundler.Bundle()
 
 		// only start watching in the builder once the initial config was built and written to the filesystem
 		go configBundler.Watch(ctx)
