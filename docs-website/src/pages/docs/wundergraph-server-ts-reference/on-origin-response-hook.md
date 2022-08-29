@@ -33,7 +33,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
         onOriginResponse: {
           enableForAllOperations: true,
           hook: async ({ response }) => {
-            console.log('onOriginResponse', response.headers.all())
+            console.log('onOriginResponse', response.headers)
             return 'skip'
           },
         },
