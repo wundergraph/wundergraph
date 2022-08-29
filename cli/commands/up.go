@@ -37,13 +37,13 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf(files.WunderGraphDirNotFoundErrorMsg, err)
+			return files.ErrWunderGraphDirNotFound(err)
 		}
 
 		// only validate if the file exists
 		_, err = files.CodeFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
-			return fmt.Errorf(files.CodeFileNotFoundErrorMsg, configEntryPointFilename)
+			return files.ErrCodeFileNotFound(configEntryPointFilename)
 		}
 
 		// optional, no error check

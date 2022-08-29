@@ -19,7 +19,7 @@ var addCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, dependencies []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf(files.WunderGraphDirNotFoundErrorMsg, err)
+			return files.ErrWunderGraphDirNotFound(err)
 		}
 
 		client := InitWunderGraphApiClient()

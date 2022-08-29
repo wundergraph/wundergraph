@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -14,7 +13,7 @@ var ensurePrismaCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf(files.WunderGraphDirNotFoundErrorMsg, err)
+			return files.ErrWunderGraphDirNotFound(err)
 		}
 
 		return database.InstallPrismaDependencies(log, wgDir)
