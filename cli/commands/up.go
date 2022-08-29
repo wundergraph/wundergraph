@@ -101,17 +101,20 @@ var upCmd = &cobra.Command{
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 
+		wgEnvVars := append(os.Environ(),
+			fmt.Sprintf("WG_SERVER_PORT=%d", serverListenPort),
+			fmt.Sprintf("WG_SERVER_HOST=%s", serverHost),
+			fmt.Sprintf("WG_NODE_URL=%s", fmt.Sprintf("http://%s", nodeListenAddr)),
+		)
+
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
 			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(os.Environ(),
+			ScriptEnv: append(wgEnvVars,
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
-				fmt.Sprintf("WG_SERVER_PORT=%d", serverListenPort),
-				fmt.Sprintf("WG_SERVER_HOST=%s", serverHost),
-				fmt.Sprintf("WG_NODE_ADDR=%s", nodeListenAddr),
 			),
 		})
 
@@ -122,12 +125,9 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(os.Environ(),
+			ScriptEnv: append(wgEnvVars,
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
-				fmt.Sprintf("WG_SERVER_PORT=%d", serverListenPort),
-				fmt.Sprintf("WG_SERVER_HOST=%s", serverHost),
-				fmt.Sprintf("WG_NODE_ADDR=%s", nodeListenAddr),
 			),
 		})
 
