@@ -9,7 +9,7 @@ const webhook: Webhook<InternalClient, { a: number }, { hello: string; a: number
 		// and don't bundle them into the webhook.
 		buildSchema(`scalar DateTime`);
 
-		console.log(event.headers);
+		context.log.info(event.headers);
 
 		return {
 			statusCode: 200,
