@@ -11,14 +11,6 @@ const (
 	WunderGraphDirName = ".wundergraph"
 )
 
-func ErrWunderGraphDirNotFound(err error) error {
-	return fmt.Errorf(`unable to find .wundergraph dir: %w`, err)
-}
-
-func ErrCodeFileNotFound(filename string) error {
-	return fmt.Errorf(`code file "%s" not found`, filename)
-}
-
 func DirectoryExists(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {
@@ -60,7 +52,7 @@ func FindWunderGraphDir(wundergraphDir string) (string, error) {
 	if !DirectoryExists(absWgDir) {
 		dir, err := findWunderGraphDirInParent()
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf(`unable to find .wundergraph dir: %w`, err)
 		}
 		return dir, nil
 	}

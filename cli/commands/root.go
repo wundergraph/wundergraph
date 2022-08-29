@@ -81,7 +81,7 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return files.ErrWunderGraphDirNotFound(err)
+			return err
 		}
 		client := InitWunderGraphApiClient()
 		man := manifest.New(log, client, wgDir)

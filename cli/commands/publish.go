@@ -25,7 +25,7 @@ The APIs to publish need to be generated into the .wundergraph/generated directo
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return files.ErrWunderGraphDirNotFound(err)
+			return err
 		}
 
 		var client *v2wundergraphapi.Client
