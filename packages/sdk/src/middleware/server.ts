@@ -8,6 +8,7 @@ import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
+import Pino from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
 import fs from 'fs';
@@ -21,6 +22,10 @@ import {
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
 
+const logger = Pino({
+	level: process.env.LOG_LEVEL || 'info',
+});
+
 /**
  * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
  * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
@@ -28,7 +33,7 @@ import { WebhooksConfig } from '../webhooks/types';
  * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
  */
 process.on('uncaughtExceptionMonitor', (err, origin) => {
-	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
+	logger.error(err, `uncaught exception, origin: ${origin}`);
 });
 
 let WG_CONFIG: WunderGraphConfiguration;
@@ -40,27 +45,21 @@ let clientFactory: InternalClientFactory;
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
 	if (!process.env.WG_ABS_DIR) {
-		console.error('The environment variable `WG_ABS_DIR` is required!');
+		logger.fatal('The environment variable `WG_ABS_DIR` is required!');
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR, 'generated', 'wundergraph.config.json'), {
+		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR!, 'generated', 'wundergraph.config.json'), {
 			encoding: 'utf8',
 		});
-		try {
-			WG_CONFIG = JSON.parse(configContent);
-			if (WG_CONFIG.api) {
-				clientFactory = internalClientFactory(WG_CONFIG.apiName, WG_CONFIG.deploymentName, WG_CONFIG.api.operations);
-			} else {
-				console.error('Could not get user defined api. Try `wunderctl generate`');
-				process.exit(1);
-			}
-		} catch (err: any) {
-			console.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
-			process.exit(1);
+		WG_CONFIG = JSON.parse(configContent);
+		if (WG_CONFIG.api) {
+			clientFactory = internalClientFactory(WG_CONFIG.apiName, WG_CONFIG.deploymentName, WG_CONFIG.api.operations);
+		} else {
+			throw new Error('User defined api is not set.');
 		}
-	} catch {
-		console.error('Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+	} catch (err: any) {
+		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
@@ -112,7 +111,7 @@ const _configureWunderGraphServer = <
 			host: '127.0.0.1',
 			port: SERVER_PORT,
 		}).catch((err) => {
-			console.error('Could not start the hook server', err);
+			logger.fatal(err, 'Could not start the hook server');
 			process.exit(1);
 		});
 	}
@@ -135,9 +134,7 @@ export const createServer = async ({
 	gracefulShutdown,
 }: ServerOptions): Promise<FastifyInstance> => {
 	const fastify = Fastify({
-		logger: {
-			level: process.env.LOG_LEVEL || 'info',
-		},
+		logger,
 	});
 
 	fastify.decorateRequest('ctx', null);
