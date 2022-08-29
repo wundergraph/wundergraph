@@ -32,6 +32,7 @@ Use this command if you only want to generate the configuration`,
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
+		// only validate if the file exists
 		_, err = files.GetWunderGraphConfigFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
 			return err

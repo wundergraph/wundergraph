@@ -40,6 +40,7 @@ var upCmd = &cobra.Command{
 			return fmt.Errorf("unable to find .wundergraph dir: %w", err)
 		}
 
+		// only validate if the file exists
 		_, err = files.GetWunderGraphConfigFilePath(wgDir, configEntryPointFilename)
 		if err != nil {
 			return err
