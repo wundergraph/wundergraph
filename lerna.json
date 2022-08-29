@@ -9,7 +9,6 @@
       "createRelease": "github",
       "syncWorkspaceLock": true,
       "changelogIncludeCommitsClientLogin": " (@%l)",
-      "changelogHeaderMessage": "## WunderGraph is the Serverless API Developer Platform with a focus on Developer Experience. [Learn more](https://docs.wundergraph.com/) 📦🚀",
       "message": "chore(release): Publish [skip ci]"
     }
   },
