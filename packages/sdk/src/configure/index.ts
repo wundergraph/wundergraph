@@ -52,8 +52,8 @@ import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { WunderGraphHooksAndServerConfig, WunderGraphServerConfig } from '../middleware/types';
-import { nodeAddress, nodeUrl } from '../env';
+import { WunderGraphHooksAndServerConfig } from '../middleware/types';
+import { nodeUrl } from '../env';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 

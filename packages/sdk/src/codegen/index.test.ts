@@ -377,7 +377,8 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						name: 'api',
 					},
 					environment: {
-						name: 'localhost:9991',
+						name: 'main',
+						baseUrl: 'http://localhost:9991',
 						id: '',
 					},
 					name: 'main',
