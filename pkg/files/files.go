@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 )
 
-const WunderGraphDir = ".wundergraph"
+const (
+	WunderGraphDirName = ".wundergraph"
+)
 
 func DirectoryExists(path string) bool {
 	info, err := os.Stat(path)
@@ -24,56 +26,47 @@ func FileExists(filePath string) bool {
 	return true
 }
 
-type WunderGraphEntryPoints struct {
-	Error               error
-	WunderGraphDirAbs   string
-	ServerEntryPointAbs string
-	ConfigEntryPointAbs string
+func findWunderGraphDirInParent() (string, error) {
+	// Check if we already operate inside .wundergraph directory
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("could not get your current working directory")
+	}
+
+	parentWunderGraphDir := path.Join(wd, "..", WunderGraphDirName)
+	if DirectoryExists(parentWunderGraphDir) {
+		return parentWunderGraphDir, nil
+	}
+
+	return "", fmt.Errorf("could not find .wundergraph directory")
 }
 
-// GetWunderGraphEntryPoints validates and resolves all code entry points and base directory to build a WunderGraph.
-// If a file or directory can't be found an error is returned. ServerEntryPoint existence is optional.
-func GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename string) (*WunderGraphEntryPoints, error) {
-	wundergraphAbsDir, err := filepath.Abs(wundergraphDir)
-	files := &WunderGraphEntryPoints{}
-
+// FindWunderGraphDir returns the absolute path to the .wundergraph directory.
+// If the wundergraphDir can't be found we try to find it in the parent directory.
+// If no directory is found we return an error.
+func FindWunderGraphDir(wundergraphDir string) (string, error) {
+	absWgDir, err := filepath.Abs(wundergraphDir)
 	if err != nil {
-		files.Error = err
-		return nil, err
+		return "", fmt.Errorf("unable to get absolute path from .wundergraph dir: %w", err)
 	}
 
-	// 1. Check if the ."wundergraph" directory exists
-	if !DirectoryExists(wundergraphAbsDir) {
-		// 2. If not, check if we already operate inside .wundergraph directory
-		wd, err := os.Getwd()
+	if !DirectoryExists(absWgDir) {
+		dir, err := findWunderGraphDirInParent()
 		if err != nil {
-			return nil, fmt.Errorf("could not get your current working directory")
+			return "", fmt.Errorf(`unable to find .wundergraph dir: %w`, err)
 		}
-		parentWunderGraphDir := path.Join(wd, "..", WunderGraphDir)
-		if DirectoryExists(parentWunderGraphDir) {
-			files.WunderGraphDirAbs = parentWunderGraphDir
-		} else {
-			return nil, fmt.Errorf(`base directory "%s" not found`, wundergraphAbsDir)
-		}
-	} else {
-		files.WunderGraphDirAbs = wundergraphAbsDir
+		return dir, nil
 	}
 
-	configEntryPoint := path.Join(files.WunderGraphDirAbs, configEntryPointFilename)
+	return absWgDir, nil
+}
+
+// CodeFilePath returns the absolute path to the file and returns an error if the file does not exist.
+func CodeFilePath(wundergraphDir, filename string) (string, error) {
+	configEntryPoint := path.Join(wundergraphDir, filename)
 
 	if FileExists(configEntryPoint) {
-		files.ConfigEntryPointAbs = configEntryPoint
-	} else {
-		return nil, fmt.Errorf(`code file "%s" not found`, configEntryPoint)
+		return configEntryPoint, nil
 	}
-
-	hooksEntryPoint := path.Join(files.WunderGraphDirAbs, serverEntryPointFilename)
-
-	if FileExists(hooksEntryPoint) {
-		files.ServerEntryPointAbs = hooksEntryPoint
-	} else {
-		files.Error = fmt.Errorf(`code file "%s" not found`, hooksEntryPoint)
-	}
-
-	return files, nil
+	return "", fmt.Errorf(`code file "%s" not found`, configEntryPoint)
 }
