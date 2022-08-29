@@ -308,7 +308,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	for _, api := range nodeConfig.Apis {
 
 		if api.HooksServerURL == "" {
-			api.HooksServerURL = "http://127.0.0.1:9992"
+			api.HooksServerURL = n.options.hooksServerUrl
 		}
 
 		dialer := &net.Dialer{

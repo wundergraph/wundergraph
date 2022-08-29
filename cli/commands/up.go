@@ -287,9 +287,10 @@ var upCmd = &cobra.Command{
 				node.WithFileSystemConfig(configFile),
 				node.WithDebugMode(enableDebugMode),
 				node.WithInsecureCookies(),
-				node.WithHooksSecret(secret),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
+				node.WithHooksSecret(secret),
+				node.WithHooksServerUrl(fmt.Sprintf("http://%s:%d", serverHost, serverListenPort)),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))
