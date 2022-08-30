@@ -1,4 +1,4 @@
-import { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { ConfigurationVariableKind, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
@@ -6,7 +6,7 @@ import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
-import { HooksConfiguration } from '../configure';
+import { EnvironmentVariable, HooksConfiguration, resolveVariable } from '../configure';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
@@ -18,7 +18,7 @@ import {
 	ServerOptions,
 	WunderGraphHooksAndServerConfig,
 } from './types';
-import { serverListenPort, serverHost, nodeUrl } from '../env';
+import { serverListenPort, serverHost } from '../env';
 import { WebhooksConfig } from '../webhooks/types';
 
 /**
@@ -49,7 +49,30 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		});
 		try {
 			WG_CONFIG = JSON.parse(configContent);
+
 			if (WG_CONFIG.api) {
+				let nodeUrl = '';
+
+				switch (WG_CONFIG.api.node?.publicUrl?.kind) {
+					case ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE:
+						nodeUrl = WG_CONFIG.api.node.publicUrl.staticVariableContent;
+						break;
+					case ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE:
+						nodeUrl = resolveVariable(
+							new EnvironmentVariable(
+								WG_CONFIG.api.node.publicUrl.environmentVariableName,
+								WG_CONFIG.api.node.publicUrl.environmentVariableDefaultValue
+							)
+						);
+						break;
+					case ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE:
+					// don't know
+				}
+
+				if (nodeUrl == '') {
+					console.error("Config doesn't contain node.publicUrl");
+				}
+
 				clientFactory = internalClientFactory(
 					WG_CONFIG.apiName,
 					WG_CONFIG.deploymentName,

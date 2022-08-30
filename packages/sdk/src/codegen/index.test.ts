@@ -46,6 +46,20 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 				webhooks: [],
 				application: {
 					Name: 'Test',
+					NodeConfiguration: {
+						listener: {
+							host: '127.0.0.1',
+							port: '9991',
+						},
+						publicUrl: 'http://localhost:9991',
+					},
+					ServerConfiguration: {
+						listener: {
+							host: '127.0.0.1',
+							port: '9992',
+						},
+						publicUrl: 'http://localhost:9992',
+					},
 					EngineConfiguration: new Api<any>('', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],

@@ -1,7 +1,7 @@
 import { InternalClient } from './internal-client';
 import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from '@web-std/fetch';
-import { HooksConfiguration } from '../configure';
+import { HooksConfiguration, HttpConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { WebhooksConfig } from '../webhooks/types';
@@ -85,8 +85,8 @@ export interface WunderGraphUser<Role = any> {
 }
 
 export interface ServerOptions {
-	port: number;
-	host: string;
+	port: number; // here
+	host: string; // here
 	wundergraphDir: string;
 	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
@@ -101,6 +101,8 @@ export interface WunderGraphServerConfig<
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
+	serverConfiguration: HttpConfiguration;
+	nodeConfiguration: HttpConfiguration;
 }
 
 // internal representation of the fully resolved server config

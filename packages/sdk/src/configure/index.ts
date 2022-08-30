@@ -53,7 +53,6 @@ import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { WunderGraphHooksAndServerConfig } from '../middleware/types';
-import { nodeUrl } from '../env';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 
@@ -106,9 +105,21 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
+export interface HttpConfiguration {
+	listener: HttpListenerConfiguration;
+	publicUrl: InputVariable;
+}
+
+export interface HttpListenerConfiguration {
+	host: InputVariable;
+	port: InputVariable;
+}
+
 export interface WunderGraphConfigApplicationConfig {
 	application: Application;
 	codeGenerators?: CodeGen[];
+	serverConfiguration: HttpConfiguration;
+	nodeConfiguration: HttpConfiguration;
 	server?: WunderGraphHooksAndServerConfig;
 	cors: WunderGraphCorsConfiguration;
 	s3UploadProvider?: S3Provider;
@@ -244,6 +255,8 @@ export interface ResolvedApplication {
 	Operations: GraphQLOperation[];
 	CorsConfiguration: CorsConfiguration;
 	S3UploadProvider: S3Provider;
+	ServerConfiguration: HttpConfiguration;
+	NodeConfiguration: HttpConfiguration;
 }
 
 interface ResolvedDeployment {
@@ -307,6 +320,8 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 
 	const name = 'main';
 
+	const nodeUrl = resolveVariable(config.nodeConfiguration.publicUrl);
+
 	const environment = {
 		id: '',
 		name: name,
@@ -349,7 +364,16 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const apps = [config.application];
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
+	const resolved = (
+		await resolveApplications(
+			roles,
+			apps,
+			cors,
+			config.serverConfiguration,
+			config.nodeConfiguration,
+			config.s3UploadProvider || []
+		)
+	)[0];
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -616,6 +640,8 @@ const resolveApplications = async (
 	roles: string[],
 	applications: Application[],
 	cors: CorsConfiguration,
+	serverConfiguration: HttpConfiguration,
+	nodeConfiguration: HttpConfiguration,
 	s3: S3Provider
 ): Promise<ResolvedApplication[]> => {
 	const out: ResolvedApplication[] = [];
@@ -629,6 +655,8 @@ const resolveApplications = async (
 			Operations: [],
 			CorsConfiguration: cors,
 			S3UploadProvider: s3,
+			ServerConfiguration: serverConfiguration,
+			NodeConfiguration: nodeConfiguration,
 		});
 	}
 	return out;
@@ -863,6 +891,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 		done();
 
+		const nodeUrl = resolveVariable(config.nodeConfiguration.publicUrl);
+
 		const dotGraphQLNested =
 			config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
 				? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
@@ -1003,6 +1033,20 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 			},
 			allowedHostNames: config.security.allowedHostNames,
 			webhooks: config.webhooks,
+			server: {
+				listener: {
+					host: mapInputVariable(config.application.ServerConfiguration.listener.host),
+					port: mapInputVariable(config.application.ServerConfiguration.listener.port),
+				},
+				publicUrl: mapInputVariable(config.application.ServerConfiguration.publicUrl),
+			},
+			node: {
+				listener: {
+					host: mapInputVariable(config.application.NodeConfiguration.listener.host),
+					port: mapInputVariable(config.application.NodeConfiguration.listener.port),
+				},
+				publicUrl: mapInputVariable(config.application.NodeConfiguration.publicUrl),
+			},
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 	};

@@ -585,14 +585,24 @@ export interface Api {
 	enableGraphqlEndpoint: boolean;
 	operations: Operation[];
 	corsConfiguration: CorsConfiguration | undefined;
-	primaryHost: string;
 	deploymentId: string;
 	cacheConfig: ApiCacheConfig | undefined;
 	apiConfigHash: string;
 	authenticationConfig: ApiAuthenticationConfig | undefined;
 	s3UploadConfiguration: S3UploadConfiguration[];
 	webhooks: WebhookConfiguration[];
-	hooksServerURL: string;
+	server: ServerConfiguration | undefined;
+	node: ServerConfiguration | undefined;
+}
+
+export interface ServerConfiguration {
+	listener: ListenerConfiguration | undefined;
+	publicUrl: string;
+}
+
+export interface ListenerConfiguration {
+	host: string;
+	port: number;
 }
 
 export interface ApiAuthenticationConfig {
@@ -952,6 +962,18 @@ export interface UserDefinedApi {
 	s3UploadConfiguration: S3UploadConfiguration[];
 	allowedHostNames: ConfigurationVariable[];
 	webhooks: WebhookConfiguration[];
+	server: ApiServerConfiguration | undefined;
+	node: ApiServerConfiguration | undefined;
+}
+
+export interface ApiServerConfiguration {
+	listener: ApiListenerConfiguration | undefined;
+	publicUrl: ConfigurationVariable | undefined;
+}
+
+export interface ApiListenerConfiguration {
+	host: ConfigurationVariable | undefined;
+	port: ConfigurationVariable | undefined;
 }
 
 export interface WebhookConfiguration {
@@ -1168,14 +1190,14 @@ function createBaseApi(): Api {
 		enableGraphqlEndpoint: false,
 		operations: [],
 		corsConfiguration: undefined,
-		primaryHost: '',
 		deploymentId: '',
 		cacheConfig: undefined,
 		apiConfigHash: '',
 		authenticationConfig: undefined,
 		s3UploadConfiguration: [],
 		webhooks: [],
-		hooksServerURL: '',
+		server: undefined,
+		node: undefined,
 	};
 }
 
@@ -1193,7 +1215,6 @@ export const Api = {
 			corsConfiguration: isSet(object.corsConfiguration)
 				? CorsConfiguration.fromJSON(object.corsConfiguration)
 				: undefined,
-			primaryHost: isSet(object.primaryHost) ? String(object.primaryHost) : '',
 			deploymentId: isSet(object.deploymentId) ? String(object.deploymentId) : '',
 			cacheConfig: isSet(object.cacheConfig) ? ApiCacheConfig.fromJSON(object.cacheConfig) : undefined,
 			apiConfigHash: isSet(object.apiConfigHash) ? String(object.apiConfigHash) : '',
@@ -1206,7 +1227,8 @@ export const Api = {
 			webhooks: Array.isArray(object?.webhooks)
 				? object.webhooks.map((e: any) => WebhookConfiguration.fromJSON(e))
 				: [],
-			hooksServerURL: isSet(object.hooksServerURL) ? String(object.hooksServerURL) : '',
+			server: isSet(object.server) ? ServerConfiguration.fromJSON(object.server) : undefined,
+			node: isSet(object.node) ? ServerConfiguration.fromJSON(object.node) : undefined,
 		};
 	},
 
@@ -1233,7 +1255,6 @@ export const Api = {
 			(obj.corsConfiguration = message.corsConfiguration
 				? CorsConfiguration.toJSON(message.corsConfiguration)
 				: undefined);
-		message.primaryHost !== undefined && (obj.primaryHost = message.primaryHost);
 		message.deploymentId !== undefined && (obj.deploymentId = message.deploymentId);
 		message.cacheConfig !== undefined &&
 			(obj.cacheConfig = message.cacheConfig ? ApiCacheConfig.toJSON(message.cacheConfig) : undefined);
@@ -1254,7 +1275,9 @@ export const Api = {
 		} else {
 			obj.webhooks = [];
 		}
-		message.hooksServerURL !== undefined && (obj.hooksServerURL = message.hooksServerURL);
+		message.server !== undefined &&
+			(obj.server = message.server ? ServerConfiguration.toJSON(message.server) : undefined);
+		message.node !== undefined && (obj.node = message.node ? ServerConfiguration.toJSON(message.node) : undefined);
 		return obj;
 	},
 
@@ -1273,7 +1296,6 @@ export const Api = {
 			object.corsConfiguration !== undefined && object.corsConfiguration !== null
 				? CorsConfiguration.fromPartial(object.corsConfiguration)
 				: undefined;
-		message.primaryHost = object.primaryHost ?? '';
 		message.deploymentId = object.deploymentId ?? '';
 		message.cacheConfig =
 			object.cacheConfig !== undefined && object.cacheConfig !== null
@@ -1287,7 +1309,70 @@ export const Api = {
 		message.s3UploadConfiguration =
 			object.s3UploadConfiguration?.map((e) => S3UploadConfiguration.fromPartial(e)) || [];
 		message.webhooks = object.webhooks?.map((e) => WebhookConfiguration.fromPartial(e)) || [];
-		message.hooksServerURL = object.hooksServerURL ?? '';
+		message.server =
+			object.server !== undefined && object.server !== null
+				? ServerConfiguration.fromPartial(object.server)
+				: undefined;
+		message.node =
+			object.node !== undefined && object.node !== null ? ServerConfiguration.fromPartial(object.node) : undefined;
+		return message;
+	},
+};
+
+function createBaseServerConfiguration(): ServerConfiguration {
+	return { listener: undefined, publicUrl: '' };
+}
+
+export const ServerConfiguration = {
+	fromJSON(object: any): ServerConfiguration {
+		return {
+			listener: isSet(object.listener) ? ListenerConfiguration.fromJSON(object.listener) : undefined,
+			publicUrl: isSet(object.publicUrl) ? String(object.publicUrl) : '',
+		};
+	},
+
+	toJSON(message: ServerConfiguration): unknown {
+		const obj: any = {};
+		message.listener !== undefined &&
+			(obj.listener = message.listener ? ListenerConfiguration.toJSON(message.listener) : undefined);
+		message.publicUrl !== undefined && (obj.publicUrl = message.publicUrl);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<ServerConfiguration>, I>>(object: I): ServerConfiguration {
+		const message = createBaseServerConfiguration();
+		message.listener =
+			object.listener !== undefined && object.listener !== null
+				? ListenerConfiguration.fromPartial(object.listener)
+				: undefined;
+		message.publicUrl = object.publicUrl ?? '';
+		return message;
+	},
+};
+
+function createBaseListenerConfiguration(): ListenerConfiguration {
+	return { host: '', port: 0 };
+}
+
+export const ListenerConfiguration = {
+	fromJSON(object: any): ListenerConfiguration {
+		return {
+			host: isSet(object.host) ? String(object.host) : '',
+			port: isSet(object.port) ? Number(object.port) : 0,
+		};
+	},
+
+	toJSON(message: ListenerConfiguration): unknown {
+		const obj: any = {};
+		message.host !== undefined && (obj.host = message.host);
+		message.port !== undefined && (obj.port = Math.round(message.port));
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<ListenerConfiguration>, I>>(object: I): ListenerConfiguration {
+		const message = createBaseListenerConfiguration();
+		message.host = object.host ?? '';
+		message.port = object.port ?? 0;
 		return message;
 	},
 };
@@ -3448,6 +3533,8 @@ function createBaseUserDefinedApi(): UserDefinedApi {
 		s3UploadConfiguration: [],
 		allowedHostNames: [],
 		webhooks: [],
+		server: undefined,
+		node: undefined,
 	};
 }
 
@@ -3474,6 +3561,8 @@ export const UserDefinedApi = {
 			webhooks: Array.isArray(object?.webhooks)
 				? object.webhooks.map((e: any) => WebhookConfiguration.fromJSON(e))
 				: [],
+			server: isSet(object.server) ? ApiServerConfiguration.fromJSON(object.server) : undefined,
+			node: isSet(object.node) ? ApiServerConfiguration.fromJSON(object.node) : undefined,
 		};
 	},
 
@@ -3514,6 +3603,9 @@ export const UserDefinedApi = {
 		} else {
 			obj.webhooks = [];
 		}
+		message.server !== undefined &&
+			(obj.server = message.server ? ApiServerConfiguration.toJSON(message.server) : undefined);
+		message.node !== undefined && (obj.node = message.node ? ApiServerConfiguration.toJSON(message.node) : undefined);
 		return obj;
 	},
 
@@ -3537,6 +3629,76 @@ export const UserDefinedApi = {
 			object.s3UploadConfiguration?.map((e) => S3UploadConfiguration.fromPartial(e)) || [];
 		message.allowedHostNames = object.allowedHostNames?.map((e) => ConfigurationVariable.fromPartial(e)) || [];
 		message.webhooks = object.webhooks?.map((e) => WebhookConfiguration.fromPartial(e)) || [];
+		message.server =
+			object.server !== undefined && object.server !== null
+				? ApiServerConfiguration.fromPartial(object.server)
+				: undefined;
+		message.node =
+			object.node !== undefined && object.node !== null ? ApiServerConfiguration.fromPartial(object.node) : undefined;
+		return message;
+	},
+};
+
+function createBaseApiServerConfiguration(): ApiServerConfiguration {
+	return { listener: undefined, publicUrl: undefined };
+}
+
+export const ApiServerConfiguration = {
+	fromJSON(object: any): ApiServerConfiguration {
+		return {
+			listener: isSet(object.listener) ? ApiListenerConfiguration.fromJSON(object.listener) : undefined,
+			publicUrl: isSet(object.publicUrl) ? ConfigurationVariable.fromJSON(object.publicUrl) : undefined,
+		};
+	},
+
+	toJSON(message: ApiServerConfiguration): unknown {
+		const obj: any = {};
+		message.listener !== undefined &&
+			(obj.listener = message.listener ? ApiListenerConfiguration.toJSON(message.listener) : undefined);
+		message.publicUrl !== undefined &&
+			(obj.publicUrl = message.publicUrl ? ConfigurationVariable.toJSON(message.publicUrl) : undefined);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<ApiServerConfiguration>, I>>(object: I): ApiServerConfiguration {
+		const message = createBaseApiServerConfiguration();
+		message.listener =
+			object.listener !== undefined && object.listener !== null
+				? ApiListenerConfiguration.fromPartial(object.listener)
+				: undefined;
+		message.publicUrl =
+			object.publicUrl !== undefined && object.publicUrl !== null
+				? ConfigurationVariable.fromPartial(object.publicUrl)
+				: undefined;
+		return message;
+	},
+};
+
+function createBaseApiListenerConfiguration(): ApiListenerConfiguration {
+	return { host: undefined, port: undefined };
+}
+
+export const ApiListenerConfiguration = {
+	fromJSON(object: any): ApiListenerConfiguration {
+		return {
+			host: isSet(object.host) ? ConfigurationVariable.fromJSON(object.host) : undefined,
+			port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined,
+		};
+	},
+
+	toJSON(message: ApiListenerConfiguration): unknown {
+		const obj: any = {};
+		message.host !== undefined && (obj.host = message.host ? ConfigurationVariable.toJSON(message.host) : undefined);
+		message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<ApiListenerConfiguration>, I>>(object: I): ApiListenerConfiguration {
+		const message = createBaseApiListenerConfiguration();
+		message.host =
+			object.host !== undefined && object.host !== null ? ConfigurationVariable.fromPartial(object.host) : undefined;
+		message.port =
+			object.port !== undefined && object.port !== null ? ConfigurationVariable.fromPartial(object.port) : undefined;
 		return message;
 	},
 };

@@ -44,14 +44,24 @@ message Api {
 	bool enableGraphqlEndpoint = 5;
 	repeated Operation operations = 6;
 	CorsConfiguration corsConfiguration = 7;
-	string primaryHost = 8;
 	string deploymentId = 9;
 	ApiCacheConfig cacheConfig = 10;
 	string apiConfigHash = 11;
 	ApiAuthenticationConfig authenticationConfig = 12;
 	repeated S3UploadConfiguration s3UploadConfiguration = 13;
 	repeated WebhookConfiguration webhooks = 14;
-	string hooksServerURL = 15;
+	ServerConfiguration server = 16;
+	ServerConfiguration node = 17;
+}
+
+message ServerConfiguration {
+	ListenerConfiguration listener = 1;
+	string publicUrl = 2;
+}
+
+message ListenerConfiguration {
+	string host  = 1;
+	int64 port = 2;
 }
 
 message ApiAuthenticationConfig {
@@ -475,6 +485,18 @@ message UserDefinedApi {
 	repeated S3UploadConfiguration s3UploadConfiguration = 9;
 	repeated ConfigurationVariable allowedHostNames = 11;
 	repeated WebhookConfiguration webhooks = 12;
+	ApiServerConfiguration server = 14;
+	ApiServerConfiguration node = 15;
+}
+
+message ApiServerConfiguration {
+	ApiListenerConfiguration listener = 1;
+	ConfigurationVariable publicUrl = 2;
+}
+
+message ApiListenerConfiguration {
+	ConfigurationVariable host  = 1;
+	ConfigurationVariable port = 2;
 }
 
 message WebhookConfiguration {
