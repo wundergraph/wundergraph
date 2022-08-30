@@ -67,7 +67,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 export const configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
 	GeneratedClient extends InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig = any
+	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
 >(
 	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
 ): WunderGraphHooksAndServerConfig => {
