@@ -14,6 +14,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"
+
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
@@ -349,11 +350,13 @@ func (t *ApiTransport) handleUpstreamAuthentication(request *http.Request, auth 
 	switch auth.Kind {
 	case wgpb.UpstreamAuthenticationKind_UpstreamAuthenticationJWT:
 
+		primaryHost := fmt.Sprintf("%s:%d", t.api.Node.Listener.Host, t.api.Node.Listener.Port)
+		
 		claims := &Claims{
 			Name: user.Name,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
-				Issuer:    t.api.PrimaryHost,
+				Issuer:    primaryHost,
 				Subject:   user.Email,
 				Audience:  request.Host,
 			},

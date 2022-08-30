@@ -11,7 +11,6 @@ import (
 	"github.com/wundergraph/wundergraph/cli/runners"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
 var (
@@ -85,14 +84,8 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeout)
 
-		cfg := &wundernodeconfig.Config{
-			Server: &wundernodeconfig.ServerConfig{
-				ListenAddr: nodeListenAddr,
-			},
-		}
-
 		configFileChangeChan := make(chan struct{})
-		n := node.New(ctx, BuildInfo, cfg, log)
+		n := node.New(ctx, BuildInfo, log)
 
 		go func() {
 			err := n.StartBlocking(
@@ -102,7 +95,6 @@ If used without --exclude-server, make sure the server is available in this dire
 				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 				node.WithIntrospection(enableIntrospection),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
-				node.WithHooksServerUrl(fmt.Sprintf("http://%s:%d", serverHost, serverListenPort)),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))

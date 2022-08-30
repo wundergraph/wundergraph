@@ -14,7 +14,6 @@ import (
 	"github.com/wundergraph/wundergraph/cli/runners"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
@@ -76,20 +75,13 @@ var nodeStartCmd = &cobra.Command{
 		gracefulTimeoutSeconds := 10
 		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeoutSeconds)
 
-		cfg := &wundernodeconfig.Config{
-			Server: &wundernodeconfig.ServerConfig{
-				ListenAddr: settings.NodeAddr,
-			},
-		}
+		wunderNodeConfig := node.CreateConfig(graphConfig, wgpb.LogLevel_ERROR)
 
-		wunderNodeConfig := node.CreateConfig(graphConfig, settings.NodeAddr, wgpb.LogLevel_ERROR)
-
-		n := node.New(ctx, BuildInfo, cfg, log)
+		n := node.New(ctx, BuildInfo, log)
 
 		go func() {
 			err := n.StartBlocking(
 				node.WithStaticWunderNodeConfig(wunderNodeConfig),
-				node.WithHooksServerUrl(settings.ServerUrl),
 				node.WithDebugMode(enableDebugMode),
 			)
 			if err != nil {

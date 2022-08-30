@@ -7,11 +7,10 @@ import (
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
-func CreateConfig(graphConfig wgpb.WunderGraphConfiguration, primaryHost string, logLevel wgpb.LogLevel) wgpb.WunderNodeConfig {
+func CreateConfig(graphConfig wgpb.WunderGraphConfiguration, logLevel wgpb.LogLevel) wgpb.WunderNodeConfig {
 	config := wgpb.WunderNodeConfig{
 		Apis: []*wgpb.Api{
 			{
-				PrimaryHost:           primaryHost,
 				Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
 				PathPrefix:            path.Join(graphConfig.ApiName, graphConfig.DeploymentName),
 				EngineConfiguration:   graphConfig.Api.EngineConfiguration,
@@ -28,6 +27,20 @@ func CreateConfig(graphConfig wgpb.WunderGraphConfiguration, primaryHost string,
 				},
 				AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
 				Webhooks:             graphConfig.Api.Webhooks,
+				Server: &wgpb.ServerConfiguration{
+					Listener: &wgpb.ListenerConfiguration{
+						Host: loadvariable.String(graphConfig.Api.Server.Listener.Host),
+						Port: loadvariable.Int64(graphConfig.Api.Server.Listener.Port),
+					},
+					PublicUrl: loadvariable.String(graphConfig.Api.Server.PublicUrl),
+				},
+				Node: &wgpb.ServerConfiguration{
+					Listener: &wgpb.ListenerConfiguration{
+						Host: loadvariable.String(graphConfig.Api.Node.Listener.Host),
+						Port: loadvariable.Int64(graphConfig.Api.Node.Listener.Port),
+					},
+					PublicUrl: loadvariable.String(graphConfig.Api.Node.PublicUrl),
+				},
 			},
 		},
 		Server: &wgpb.Server{

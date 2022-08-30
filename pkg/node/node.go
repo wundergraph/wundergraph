@@ -1,10 +1,9 @@
 package node
 
 import (
-	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -15,16 +14,12 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/net/idna"
 	"golang.org/x/time/rate"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/pool"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
 	"github.com/libp2p/go-reuseport"
@@ -32,10 +27,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func New(ctx context.Context, info BuildInfo, cfg *wundernodeconfig.Config, log abstractlogger.Logger) *Node {
+func New(ctx context.Context, info BuildInfo, log abstractlogger.Logger) *Node {
 	return &Node{
 		info:     info,
-		cfg:      cfg,
 		ctx:      ctx,
 		errCh:    make(chan error),
 		configCh: make(chan wgpb.WunderNodeConfig),
@@ -56,8 +50,6 @@ func New(ctx context.Context, info BuildInfo, cfg *wundernodeconfig.Config, log 
 type Node struct {
 	ctx  context.Context
 	info BuildInfo
-
-	cfg *wundernodeconfig.Config
 
 	stopped  bool
 	errCh    chan error
@@ -88,8 +80,6 @@ type options struct {
 	disableGracefulShutdown bool
 	insecureCookies         bool
 	githubAuthDemo          GitHubAuthDemo
-
-	hooksServerUrl string
 }
 
 type Option func(options *options)
@@ -132,12 +122,6 @@ func WithFileSystemConfig(configFilePath string) Option {
 	}
 }
 
-func WithHooksServerUrl(url string) Option {
-	return func(options *options) {
-		options.hooksServerUrl = url
-	}
-}
-
 func WithConfigFileChange(event chan struct{}) Option {
 	return func(options *options) {
 		options.configFileChange = event
@@ -164,10 +148,12 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	n.options = options
 
-	if options.staticConfig != nil {
+	switch {
+
+	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
 		go n.startServer(*options.staticConfig)
-	} else if options.fileSystemConfig != nil {
+	case options.fileSystemConfig != nil:
 		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
@@ -175,10 +161,8 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			go n.reconfigureOnConfigUpdate()
 			go n.filePollConfig(*options.fileSystemConfig)
 		}
-	} else {
-		n.log.Info("Api config: network polling")
-		go n.reconfigureOnConfigUpdate()
-		go n.netPollConfig()
+	default:
+		return errors.New("could not start a node. no config present")
 	}
 
 	select {
@@ -201,13 +185,13 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListeners() ([]net.Listener, error) {
+func (n *Node) newListeners(configuration *wgpb.ListenerConfiguration) ([]net.Listener, error) {
 	cfg := net.ListenConfig{
 		Control:   reuseport.Control,
 		KeepAlive: 90 * time.Second,
 	}
 
-	host, port, _ := net.SplitHostPort(n.cfg.Server.ListenAddr)
+	host, port := configuration.Host, configuration.Port
 
 	var listeners []net.Listener
 	var localhostIPs []net.IP
@@ -221,7 +205,7 @@ func (n *Node) newListeners() ([]net.Listener, error) {
 		nip := ip.String()
 		// isIPv6
 		if strings.Contains(nip, ":") {
-			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%s", nip, port))
+			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%d", nip, port))
 			// in some cases e.g when ipv6 is not enabled in docker, listen will error
 			// in that case we ignore this error and try to listen to next ip
 			if err == nil {
@@ -235,7 +219,7 @@ func (n *Node) newListeners() ([]net.Listener, error) {
 				)
 			}
 		} else {
-			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%s", nip, port))
+			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", nip, port))
 			if err != nil {
 				return nil, err
 			}
@@ -247,7 +231,7 @@ func (n *Node) newListeners() ([]net.Listener, error) {
 
 	// when we didn't listen to additional localhostIPs we will listen only to the host
 	if len(localhostIPs) == 0 {
-		listener, err := cfg.Listen(context.Background(), "tcp", n.cfg.Server.ListenAddr)
+		listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
 		if err != nil {
 			return nil, err
 		}
@@ -297,11 +281,6 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	var allowedHosts []string
 
 	for _, api := range nodeConfig.Apis {
-
-		if api.HooksServerURL == "" {
-			api.HooksServerURL = n.options.hooksServerUrl
-		}
-
 		dialer := &net.Dialer{
 			Timeout:   10 * time.Second,
 			KeepAlive: 90 * time.Second,
@@ -317,7 +296,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			TLSHandshakeTimeout: 10 * time.Second,
 		}
 
-		hooksClient := hooks.NewClient(api.HooksServerURL, n.log)
+		hooksClient := hooks.NewClient(api.Server.PublicUrl, n.log)
 
 		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
 
@@ -334,11 +313,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			EnableIntrospection:        n.options.enableIntrospection,
 			GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 			GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
-			HookServerURL:              api.HooksServerURL,
-		}
-
-		if n.options.hooksServerUrl != "" {
-			builderConfig.HookServerURL = n.options.hooksServerUrl
+			HookServerURL:              api.Server.PublicUrl,
 		}
 
 		builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
@@ -380,92 +355,35 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
 	}
 
-	listeners, err := n.newListeners()
+	// TODO: tmp: support only single api
+	listeners, err := n.newListeners(nodeConfig.Apis[0].Node.Listener)
 	if err != nil {
 		n.errCh <- err
 		return
 	}
 
-	if n.cfg.Server.ListenTLS {
-		manager := autocert.Manager{
-			Prompt: autocert.AcceptTOS,
-			// Cache:  certCache,
-			HostPolicy: func(ctx context.Context, host string) error {
-				for _, allowedHost := range allowedHosts {
-					if allowedHost == host {
-						n.log.Debug("Node.autocert.HostPolicy.allow",
-							abstractlogger.String("host", host),
-						)
-						return nil
-					}
-				}
-				n.log.Debug("Node.autocert.HostPolicy.disallow",
-					abstractlogger.String("host", host),
-				)
-				return fmt.Errorf("autocert hostpolicy disallows host: %s", host)
-			},
-		}
-		n.server.TLSConfig = &tls.Config{
-			GetCertificate: func(info *tls.ClientHelloInfo) (*tls.Certificate, error) {
-				n.log.Debug("Node.tls.GetCertificate",
-					abstractlogger.String("ServerName", info.ServerName),
-				)
-				name, err := idna.Lookup.ToASCII(info.ServerName)
-				if err != nil {
-					n.log.Error("Node.tls.GetCertificate.idna.Lookup",
-						abstractlogger.Error(err),
+	for _, listener := range listeners {
+		l := listener
+		go func() {
+			n.log.Info("listening on",
+				abstractlogger.String("addr", l.Addr().String()),
+			)
+			err = n.server.Serve(l)
+			if err != nil {
+				if err == http.ErrServerClosed {
+					n.log.Debug("listener closed",
+						abstractlogger.String("addr", l.Addr().String()),
 					)
-					return nil, err
+					return
 				}
-				n.log.Debug("Node.tls.GetCertificate",
-					abstractlogger.String("serverName", name),
-				)
-				return manager.GetCertificate(info)
-			},
-			NextProtos: []string{acme.ALPNProto},
-		}
-		for _, listener := range listeners {
-			l := listener
-			go func() {
-				n.log.Info("listening on",
-					abstractlogger.String("addr", l.Addr().String()),
-				)
-				err = n.server.ServeTLS(l, "", "")
-				if err != nil {
-					if err == http.ErrServerClosed {
-						n.log.Debug("listener closed",
-							abstractlogger.String("addr", l.Addr().String()),
-						)
-						return
-					}
-					n.errCh <- err
-				}
-			}()
-		}
-	} else {
-		for _, listener := range listeners {
-			l := listener
-			go func() {
-				n.log.Info("listening on",
-					abstractlogger.String("addr", l.Addr().String()),
-				)
-				err = n.server.Serve(l)
-				if err != nil {
-					if err == http.ErrServerClosed {
-						n.log.Debug("listener closed",
-							abstractlogger.String("addr", l.Addr().String()),
-						)
-						return
-					}
-					n.errCh <- err
-				}
-			}()
-		}
+				n.errCh <- err
+			}
+		}()
 	}
 }
 
 func (n *Node) filterHosts(api *wgpb.Api) []string {
-	hosts := []string{api.PrimaryHost}
+	hosts := []string{fmt.Sprintf("%s:%d", api.Node.Listener.Host, api.Node.Listener.Port)}
 WithNext:
 	for _, host := range api.Hosts {
 		for _, existing := range hosts {
@@ -494,71 +412,6 @@ func (n *Node) reconfigureOnConfigUpdate() {
 			n.log.Debug("Updated config -> (re-)configuring server")
 			_ = n.Close()
 			go n.startServer(config)
-		case <-n.ctx.Done():
-			return
-		}
-	}
-}
-
-func (n *Node) netPollConfig() {
-	buf := &bytes.Buffer{}
-	client := http.Client{
-		Timeout: time.Second * time.Duration(10),
-	}
-	var (
-		etag string
-	)
-	for {
-		buf.Reset()
-		req, err := http.NewRequest(http.MethodGet, n.cfg.LoadConfig.URL+"/wundernode/config", nil)
-		if err != nil {
-			n.errCh <- err
-			return
-		}
-		req.Header.Set("Authorization", "Bearer "+n.cfg.LoadConfig.BearerToken)
-		if etag != "" {
-			req.Header.Set("If-None-Match", etag)
-		}
-		res, err := client.Do(req)
-		if err != nil {
-			n.log.Error("netPollConfig client.Do", abstractlogger.Error(err))
-			time.Sleep(time.Second * time.Duration(10))
-			continue
-		}
-		switch res.StatusCode {
-		case http.StatusOK:
-			etag = res.Header.Get("ETag")
-			_, err = buf.ReadFrom(res.Body)
-			if err != nil {
-				n.log.Error("netPollConfig res.Body read", abstractlogger.Error(err))
-				time.Sleep(time.Second * time.Duration(10))
-				continue
-			}
-			var config wgpb.WunderNodeConfig
-			err = json.Unmarshal(buf.Bytes(), &config)
-			if err != nil {
-				n.log.Error("netPollConfig json.Unmarshal", abstractlogger.Error(err))
-				time.Sleep(time.Second * time.Duration(10))
-				etag = ""
-				continue
-			}
-			select {
-			case n.configCh <- config:
-			default:
-			}
-		case http.StatusNotModified:
-			n.log.Debug("netPollConfig config not modified")
-			break
-		default:
-			n.log.Debug("netPollConfig unexpected status",
-				abstractlogger.Int("status_code", res.StatusCode),
-				abstractlogger.String("status_message", res.Status),
-			)
-		}
-		n.log.Debug("netPollConfig wait 10s")
-		select {
-		case <-time.After(time.Second * time.Duration(10)):
-			continue
 		case <-n.ctx.Done():
 			return
 		}
@@ -599,41 +452,9 @@ func (n *Node) reloadFileConfig(filePath string) {
 		return
 	}
 
-	config := CreateConfig(graphConfig, n.cfg.Server.ListenAddr, wgpb.LogLevel_DEBUG)
+	config := CreateConfig(graphConfig, wgpb.LogLevel_DEBUG)
 
 	n.configCh <- config
-}
-
-func (n *Node) sendMetrics(data []byte, try int) {
-	req, res := fasthttp.AcquireRequest(), fasthttp.AcquireResponse()
-	defer func() {
-		fasthttp.ReleaseRequest(req)
-		fasthttp.ReleaseResponse(res)
-	}()
-
-	req.SetRequestURI("http://localhost:8080/wundernode/metrics")
-	req.Header.SetMethod(http.MethodPost)
-	req.Header.Set("Content-Type", "application/protobuf")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", n.cfg.LoadConfig.BearerToken))
-	req.SetBody(data)
-
-	n.log.Debug("sending metrics")
-
-	err := n.apiClient.DoTimeout(req, res, time.Second*5)
-	if res.StatusCode() != http.StatusOK {
-		n.log.Debug("sendMetrics status", abstractlogger.Int("code", res.StatusCode()))
-	}
-	if err != nil {
-		if try < 4 {
-			n.log.Error("sendMetrics retrying", abstractlogger.Error(err))
-			<-time.After(time.Second * 5 * time.Duration(try))
-			n.sendMetrics(data, try+1)
-			return
-		}
-		n.log.Error("sendMetrics failed", abstractlogger.Error(err))
-		return
-	}
-	n.log.Debug("metrics sent")
 }
 
 func uniqueStrings(slice []string) []string {

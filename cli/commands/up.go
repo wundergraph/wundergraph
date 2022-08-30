@@ -21,7 +21,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
 var (
@@ -275,12 +274,7 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		cfg := &wundernodeconfig.Config{
-			Server: &wundernodeconfig.ServerConfig{
-				ListenAddr: nodeListenAddr,
-			},
-		}
-		n := node.New(ctx, BuildInfo, cfg, log)
+		n := node.New(ctx, BuildInfo, log)
 		go func() {
 			configFile := path.Join(wgDir, "generated", "wundergraph.config.json")
 			err := n.StartBlocking(
@@ -290,7 +284,6 @@ var upCmd = &cobra.Command{
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
-				node.WithHooksServerUrl(fmt.Sprintf("http://%s:%d", serverHost, serverListenPort)),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))
