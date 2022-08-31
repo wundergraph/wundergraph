@@ -186,6 +186,7 @@ export enum Claim {
 	NICKNAME = 3,
 	LOCATION = 4,
 	PROVIDER = 5,
+	USERID = 6,
 }
 
 export function claimFromJSON(object: any): Claim {
@@ -208,6 +209,9 @@ export function claimFromJSON(object: any): Claim {
 		case 5:
 		case 'PROVIDER':
 			return Claim.PROVIDER;
+		case 6:
+		case 'USERID':
+			return Claim.USERID;
 		default:
 			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum Claim');
 	}
@@ -227,6 +231,8 @@ export function claimToJSON(object: Claim): string {
 			return 'LOCATION';
 		case Claim.PROVIDER:
 			return 'PROVIDER';
+		case Claim.USERID:
+			return 'USERID';
 		default:
 			return 'UNKNOWN';
 	}

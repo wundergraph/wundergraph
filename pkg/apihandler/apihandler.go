@@ -861,6 +861,8 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	}
 	for _, claim := range operation.AuthorizationConfig.Claims {
 		switch claim.Claim {
+		case wgpb.Claim_USERID:
+			variables, _ = jsonparser.Set(variables, []byte("\""+user.UserID+"\""), claim.VariableName)
 		case wgpb.Claim_EMAIL:
 			variables, _ = jsonparser.Set(variables, []byte("\""+user.Email+"\""), claim.VariableName)
 		case wgpb.Claim_EMAIL_VERIFIED:
