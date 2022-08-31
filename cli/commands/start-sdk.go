@@ -180,20 +180,21 @@ func (c *_c) WdgStart(parentCtx context.Context, argConfig []byte) error {
 		)
 	case <-ctx.Done():
 		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+		//case <-parentCtx.Done():
+		//	log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+		//
 	}
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeout) * time.Second
 	log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
 	ctx, cancel = context.WithTimeout(ctx, gracefulTimeoutDur)
 	defer cancel()
-	//n.Close()
-	//killExistingHooksProcess()
 	err = n.Shutdown(ctx)
 	if err != nil {
 		log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
 	}
 
-	log.Info("WunderNode shutdown complete")
+	log.Info("9991 and 9992 WunderNode shutdown complete")
 
 	return nil
 }
