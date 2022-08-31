@@ -39,6 +39,7 @@ install-proto:
 
 codegen: install-proto
 	cd types && ./generate.sh
+	pnpm codegen
 
 build: codegen
 	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-w -s -X 'main.commit=$COMMIT' -X 'main.builtBy=ci' -X 'main.version=$VERSION' -X 'main.date=$DATE'" -trimpath
