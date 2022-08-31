@@ -878,11 +878,8 @@ export const introspect = {
 			}
 
 			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
+				...upstream,
 				isFederation: true,
-				url: upstream.url,
-				headers: upstream.headers,
-				apiNamespace: introspection.apiNamespace,
-				loadSchemaFromString: upstream.loadSchemaFromString,
 			}));
 
 			const apis = await Promise.all(graphQLIntrospections.map((i) => introspect.graphql(i)));

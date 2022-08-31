@@ -286,6 +286,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			baseURL := loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl())
 			path := loadvariable.String(in.CustomGraphql.Fetch.GetPath())
 			url := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
+			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
+
 			if url == "" {
 				url = baseURL + path
 			}
@@ -300,7 +302,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					ServiceSDL: in.CustomGraphql.Federation.ServiceSdl,
 				},
 				Subscription: graphql_datasource.SubscriptionConfiguration{
-					URL: url,
+					URL: subscriptionUrl,
 				},
 				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
 			})
