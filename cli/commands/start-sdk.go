@@ -34,7 +34,7 @@ const (
 	wundergraphDir1           = "wundergraph/.wundergraph"
 	configEntryPointFilename1 = "wundergraph.server.ts"
 	serverEntryPointFilename1 = "wundergraph.config.ts"
-	configJsonFilename1       = "wundergraph.config.json "
+	configJsonFilename1       = "wundergraph.config.json"
 )
 
 func initArg(argConfig []byte) (err error) {
