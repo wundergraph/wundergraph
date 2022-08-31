@@ -180,9 +180,6 @@ func (c *_c) WdgStart(parentCtx context.Context, argConfig []byte) error {
 		)
 	case <-ctx.Done():
 		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
-		//case <-parentCtx.Done():
-		//	log.Info("Context was canceled. Initialize WunderNode shutdown ....")
-		//
 	}
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeout) * time.Second
