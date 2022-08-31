@@ -441,6 +441,13 @@ const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: G
 	}
 	const name = nameArg.value.value;
 	switch (name) {
+		case 'USERID':
+			operation.AuthenticationConfig.required = true;
+			operation.AuthorizationConfig.claims.push({
+				variableName,
+				claim: Claim.USERID,
+			});
+			break;
 		case 'EMAIL':
 			operation.AuthenticationConfig.required = true;
 			operation.AuthorizationConfig.claims.push({
