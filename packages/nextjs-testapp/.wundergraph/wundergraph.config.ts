@@ -151,7 +151,7 @@ configureWunderGraphApplication({
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:3003/authentication', 'http://localhost:3003/auth-test'],
+			authorizedRedirectUriRegexes: ['http://localhost:3003*'],
 		},
 	},
 	/*links: [
