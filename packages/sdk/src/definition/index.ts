@@ -984,6 +984,7 @@ const introspectGraphQLAPI = async (
 		'Content-Type': 'application/json',
 		Accept: 'application/json',
 	};
+	console.log(baseHeaders)
 	if (headers !== undefined) {
 		Object.keys(headers).forEach((key) => {
 			if (headers[key].values.length === 1) {
