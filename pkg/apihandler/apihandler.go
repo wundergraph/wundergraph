@@ -2148,6 +2148,8 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
+	// allow unbuffered responses, it's used when it's necessary just to pass response through
+	// setting this to “yes” will allow the response to be cached
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
