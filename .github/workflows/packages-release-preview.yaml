@@ -32,6 +32,8 @@ jobs:
 
       - name: Install
         run: |
+          # Avoid error when bumping to a version which isn't released yet.
+          echo "prefer-workspace-packages=true" >> ./.npmrc
           pnpm install --ignore-scripts
           pnpm run patch
 
