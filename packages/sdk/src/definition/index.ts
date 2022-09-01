@@ -626,7 +626,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	 * By default we try to early return with a cached introspection result.
 	 * When the user runs `wunderctl up` for the first time, we disable the cache
 	 * so the user can be sure that the introspection is up to date. If the API is down
-	 * the cache will not be updated and we will fallback to the old introspection result.
+	 * the cache will not be updated and we will fallback to the old introspection result (if possible).
 	 */
 
 	if (IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true) {
