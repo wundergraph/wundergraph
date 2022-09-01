@@ -65,14 +65,12 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 			},
 		},
 		queries: {
-			Dragons: {
-				mutatingPostResolve: async (hook) => {
-					console.log('########mutatingPostResolve##########', hook.clientRequest.method);
-					return hook.response;
-				},
-				preResolve: async ({ user, log, clientRequest, internalClient }) => {
-					clientRequest.headers.append('X-Wundergraph', 'foo');
-					clientRequest.headers.delete('Cache-Control');
+			OperationWithInternalVariable: {
+				mutatingPreResolve: async ({ input }) => {
+					return {
+						country: 'DE',
+						city: input.city,
+					};
 				},
 			},
 		},
@@ -188,54 +186,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 											name: 'b',
 										};
 								}
-							},
-						},
-						dragons: {
-							type: new GraphQLList(
-								new GraphQLObjectType({
-									name: 'Dragon',
-									fields: {
-										name: {
-											type: GraphQLString,
-										},
-										crewCapacity: {
-											type: GraphQLInt,
-										},
-										active: {
-											type: GraphQLBoolean,
-										},
-										posts: {
-											type: new GraphQLList(
-												new GraphQLObjectType({
-													name: 'Post',
-													fields: {
-														id: {
-															type: GraphQLInt,
-														},
-														title: {
-															type: GraphQLString,
-														},
-													},
-												})
-											),
-										},
-									},
-								})
-							),
-							async resolve(root, args, ctx, info) {
-								ctx.wundergraph.log.info(`resolve_clientRequest: ${JSON.stringify(ctx.wundergraph.clientRequest)}`);
-
-								const data = await ctx.wundergraph.internalClient.queries.InternalDragons();
-								const posts = await ctx.wundergraph.internalClient.queries.JSP();
-								return data.data?.spacex_dragons?.map((d) => ({
-									name: d.name,
-									crewCapacity: d.crew_capacity,
-									active: d.active,
-									posts: posts.data?.jsp_getPosts?.map((p) => ({
-										id: p.id,
-										title: p.title,
-									})),
-								}));
 							},
 						},
 					},

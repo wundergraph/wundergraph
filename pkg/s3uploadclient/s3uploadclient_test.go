@@ -2,6 +2,7 @@ package s3uploadclient_test
 
 import (
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,6 +11,10 @@ import (
 )
 
 func TestS3UploadClient_UploadFile(t *testing.T) {
+	if os.Getenv("INT") != "true" {
+		t.Skip("Skipping testing in local environment")
+	}
+
 	client := initClient()
 	w, r := prepareRequest()
 

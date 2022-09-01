@@ -15,6 +15,7 @@ Here's an example:
 
 ```graphql
 mutation (
+  $userId: String! @fromClaim(name: USERID)
   $name: String! @fromClaim(name: NAME)
   $email: String! @fromClaim(name: EMAIL)
   $message: String! @jsonSchema(pattern: "^[a-zA-Z 0-9]+$")
@@ -25,7 +26,7 @@ mutation (
       user: {
         connectOrCreate: {
           where: { email: $email }
-          create: { email: $email, name: $name }
+          create: { email: $email, name: $name, userID: $userID }
         }
       }
     }

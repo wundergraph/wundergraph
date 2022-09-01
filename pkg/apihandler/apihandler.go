@@ -86,6 +86,7 @@ type Builder struct {
 	forceHttpsRedirects bool
 	enableDebugMode     bool
 	enableIntrospection bool
+	devMode             bool
 
 	renameTypeNames []resolve.RenameTypeName
 
@@ -101,6 +102,7 @@ type BuilderConfig struct {
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
 	HookServerURL              string
+	DevMode                    bool
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -121,6 +123,7 @@ func NewBuilder(pool *pool.Pool,
 		enableIntrospection:        config.EnableIntrospection,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
+		devMode:                    config.DevMode,
 	}
 }
 
@@ -834,6 +837,8 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	}
 	for _, claim := range operation.AuthorizationConfig.Claims {
 		switch claim.Claim {
+		case wgpb.Claim_USERID:
+			variables, _ = jsonparser.Set(variables, []byte("\""+user.UserID+"\""), claim.VariableName)
 		case wgpb.Claim_EMAIL:
 			variables, _ = jsonparser.Set(variables, []byte("\""+user.Email+"\""), claim.VariableName)
 		case wgpb.Claim_EMAIL_VERIFIED:
@@ -1810,22 +1815,28 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		jwksProviders                 []*wgpb.JwksAuthProvider
 	)
 
-	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-		hashKey = []byte(h)
+	if r.devMode {
+		hashKey = r.staticInsecureSecret(11)
+		blockKey = r.staticInsecureSecret(32)
+		csrfSecret = r.staticInsecureSecret(32)
 	} else {
-		hashKey = r.generateSecret(11)
-	}
+		if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
+			hashKey = []byte(h)
+		} else {
+			hashKey = r.generateSecret(11)
+		}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-		blockKey = []byte(b)
-	} else {
-		blockKey = r.generateSecret(32)
-	}
+		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
+			blockKey = []byte(b)
+		} else {
+			blockKey = r.generateSecret(32)
+		}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
-	} else {
-		csrfSecret = r.generateSecret(32)
+		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
+			csrfSecret = []byte(b)
+		} else {
+			csrfSecret = r.generateSecret(32)
+		}
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
@@ -1869,6 +1880,14 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
 	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, pathPrefix)
+}
+
+func (r *Builder) staticInsecureSecret(length int) []byte {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = 'a'
+	}
+	return b
 }
 
 func (r *Builder) generateSecret(length int) []byte {

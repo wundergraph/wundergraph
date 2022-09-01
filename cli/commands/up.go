@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/webhooks"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -11,6 +10,8 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -300,6 +301,7 @@ var upCmd = &cobra.Command{
 				node.WithHooksSecret(secret),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
+				node.WithDevMode(),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))

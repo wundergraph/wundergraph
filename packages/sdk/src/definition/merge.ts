@@ -79,6 +79,7 @@ directive @fromClaim(
 ) on VARIABLE_DEFINITION
 
 enum Claim {
+	USERID
   EMAIL
   EMAIL_VERIFIED
   NAME

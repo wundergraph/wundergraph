@@ -9,11 +9,6 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const spaceX = introspect.graphql({
-	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
-});
-
 const jsp = introspect.openApi({
 	apiNamespace: 'jsp',
 	source: {
@@ -35,7 +30,7 @@ const weather = introspect.graphql({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, jsp, weather, countries],
+	apis: [jsp, weather, countries],
 });
 
 // configureWunderGraph emits the configuration

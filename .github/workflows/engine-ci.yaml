@@ -65,6 +65,12 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: make bootstrap-minio
+
       - run: pnpm install --ignore-scripts
+
       - run: make engine-dev
-      - run: make test-go
+
+      - name: Run unit and integration tests
+        run: make test-go
+        env:
+          INT: true
