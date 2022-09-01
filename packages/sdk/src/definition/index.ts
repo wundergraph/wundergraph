@@ -614,7 +614,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 			introspection.introspection?.pollingIntervalSeconds !== undefined &&
 			introspection.introspection?.pollingIntervalSeconds > 0
 		) {
-			await introspectInInterval(introspection, generator);
+			await introspectInInterval(introspection.introspection?.pollingIntervalSeconds, introspection, generator);
 		}
 		return {} as Api;
 	}
@@ -678,6 +678,7 @@ const updateIntrospectionCache = async <Introspection extends IntrospectionConfi
 };
 
 const introspectInInterval = async <Introspection extends IntrospectionConfiguration, Api>(
+	intervalInSeconds: number,
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api>
 ) => {
@@ -692,7 +693,7 @@ const introspectInInterval = async <Introspection extends IntrospectionConfigura
 		} catch (e) {
 			console.error('Error during introspection cache update', e);
 		}
-	}, introspection.introspection?.pollingIntervalSeconds! * 1000);
+	}, intervalInSeconds * 1000);
 };
 
 export const introspect = {
