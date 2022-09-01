@@ -607,7 +607,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 ): Promise<Api> => {
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
-	 * The return value is ignorable because we don't use it it.
+	 * The return value is ignorable because we don't use it.
 	 */
 	if (DataSourcePollingModeEnabled) {
 		if (
