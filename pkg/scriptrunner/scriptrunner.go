@@ -14,6 +14,7 @@ type Config struct {
 	Executable    string
 	ScriptArgs    []string
 	ScriptEnv     []string
+	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        abstractlogger.Logger
 }
@@ -24,7 +25,9 @@ type ScriptRunner struct {
 	executable    string
 	scriptArgs    []string
 	scriptEnv     []string
+	firstRunEnv   []string
 	absWorkingDir string
+	firstRun      bool
 	cmdDoneChan   chan struct{}
 	log           abstractlogger.Logger
 	cmd           *gocmd.Cmd
@@ -34,10 +37,12 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 	return &ScriptRunner{
 		name:          config.Name,
 		log:           config.Logger,
+		firstRunEnv:   config.FirstRunEnv,
 		absWorkingDir: config.AbsWorkingDir,
 		executable:    config.Executable,
 		scriptArgs:    config.ScriptArgs,
 		scriptEnv:     config.ScriptEnv,
+		firstRun:      true,
 	}
 }
 
@@ -82,12 +87,19 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		)
 	}
 
-	cmd, doneChan := newCmd(CmdOptions{
+	cmdOptions := CmdOptions{
 		executable: b.executable,
 		cmdDir:     b.absWorkingDir,
 		scriptArgs: b.scriptArgs,
 		scriptEnv:  b.scriptEnv,
-	})
+	}
+
+	if b.firstRun {
+		b.firstRun = false
+		cmdOptions.scriptEnv = append(cmdOptions.scriptEnv, b.firstRunEnv...)
+	}
+
+	cmd, doneChan := newCmd(cmdOptions)
 	b.cmd = cmd
 	b.cmdDoneChan = doneChan
 
