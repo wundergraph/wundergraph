@@ -317,7 +317,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 		})
 
 		if !valid {
-			n.log.Error("API config invalid",
+			n.log.Fatal("API config invalid",
 				abstractlogger.Strings("errors", messages),
 			)
 			os.Exit(1)
