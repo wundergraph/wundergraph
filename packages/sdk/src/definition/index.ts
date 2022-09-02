@@ -660,7 +660,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
 		return api;
 	} catch (e) {
-		console.error('Could not introspect the api. Trying to fallback to old introspection result...', e);
+		console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
 		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 		if (cacheEntryString) {
 			console.log('Fallback to old introspection result');
@@ -877,10 +877,9 @@ export const introspect = {
 			const errors = compositionResult.errors;
 
 			if (errors && errors?.length > 0) {
-				console.log(
-					`\nService composition of federated subgraph failed:\n\n${errors[0]}\n\nMake sure all subgraphs can be composed to a supergaph.\n\n`
+				throw new Error(
+					`Service composition of federated subgraph failed: ${errors[0]}. Make sure all subgraphs can be composed to a supergaph.`
 				);
-				process.exit(1);
 			}
 
 			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
@@ -907,17 +906,15 @@ const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, head
 			}
 			return buildSchema(loadFile(introspection.loadSchemaFromString));
 		} catch (e: any) {
-			console.log(
-				`\nLoading schema from string failed for apiNamespace ${introspection.apiNamespace}:\n\n${e}\n\nMake sure the schema is valid and try again.\n\n`
+			throw new Error(
+				`Loading schema from string failed for apiNamespace '${introspection.apiNamespace}'. Make sure the schema is valid and try again: ${e}`
 			);
-			process.exit(1);
 		}
 	}
 	try {
 		return introspectGraphQLAPI(introspection, headers);
 	} catch (e: any) {
-		console.log(`\nIntrospecting GraphQL API failed for apiNamespace ${introspection.apiNamespace}:\n\n${e}\n\n`);
-		process.exit(1);
+		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
 	}
 };
 
@@ -1024,26 +1021,23 @@ const introspectGraphQLAPI = async (
 	try {
 		res = await axios.post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
-		console.log(
+		throw new Error(
 			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${
 				e.message
 			}`
 		);
-		process.exit(1);
 	}
 	if (res === undefined) {
-		console.log(
-			"introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), no response"
+		throw new Error(
+			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), no response`
 		);
-		process.exit(1);
 	}
 	if (res.status !== 200) {
-		console.log(
+		throw new Error(
 			`introspection failed (url: ${introspection.url}, namespace: ${
 				introspection.apiNamespace || ''
 			}), response code: ${res.status}, message: ${res.statusText}`
 		);
-		process.exit(1);
 	}
 	return buildClientSchema(res.data.data);
 };
