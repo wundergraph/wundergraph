@@ -2,7 +2,6 @@ import { Api, ApiType, DataSource, IntrospectionConfiguration } from './index';
 import path from 'path';
 import fs from 'fs';
 import fsP from 'fs/promises';
-import objectHash from 'object-hash';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 
 export interface IntrospectionCacheFile<A extends ApiType> {

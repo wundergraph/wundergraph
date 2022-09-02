@@ -645,8 +645,12 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 
 	if (IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true) {
 		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-		const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-		return fromCacheEntry<A>(cacheEntry);
+		if (cacheEntryString) {
+			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+			return fromCacheEntry<A>(cacheEntry);
+		} else {
+			console.error('Invalid cached introspection result. Revalidate introspection...');
+		}
 	}
 
 	try {
@@ -656,10 +660,15 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
 		return api;
 	} catch (e) {
-		console.error('Could not update cache. Fallback to old introspection result', e);
+		console.error('Could not update cache. Try to fallback to old introspection result', e);
 		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-		const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-		return fromCacheEntry<A>(cacheEntry);
+		if (cacheEntryString) {
+			console.log('Fallback to old introspection result');
+			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+			return fromCacheEntry<A>(cacheEntry);
+		}
+		console.log('Could not fallback to old introspection result');
+		throw e;
 	}
 };
 
