@@ -32,8 +32,7 @@ jobs:
 
       - name: Install
         run: |
-          pnpm install --fix-lockfile --ignore-scripts
-          pnpm run patch
+          pnpm add -g @lerna-lite/cli@1.11.1
 
       - name: Generate next release (dry-run)
         run: pnpm run preview:version:packages --yes
