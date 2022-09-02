@@ -32,7 +32,7 @@ jobs:
 
       - name: Install
         run: |
-          pnpm add -g @lerna-lite/cli@1.11.1
+          pnpm add @lerna-lite/cli@1.11.1 @commitlint/config-conventional@17.0.0
 
       - name: Generate next release (dry-run)
         run: pnpm run preview:version:packages --yes
