@@ -27,6 +27,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/wundergraph/wundergraph/pkg/apiconfig"
 	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -1825,7 +1826,7 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		csrfSecret = []byte(b)
 	}
 
-	if hashKey == nil || blockKey == nil || csrfSecret == nil {
+	if apiconfig.HasCookieAuthEnabled(r.api) && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
 		panic("hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
 	}
 
