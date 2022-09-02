@@ -8,7 +8,7 @@ import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
 import { HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
-import Pino from 'pino';
+import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
 import fs from 'fs';
@@ -22,28 +22,29 @@ import {
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
 
-const logger = Pino({
-	level: process.env.LOG_LEVEL || 'info',
-});
-
-/**
- * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
- * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
- * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
- * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
- */
-process.on('uncaughtExceptionMonitor', (err, origin) => {
-	logger.error(err, `uncaught exception, origin: ${origin}`);
-});
-
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
+let logger: pino.Logger;
 
 /**
  * By default this script will not start the server
  * You need to pass START_HOOKS_SERVER=true to start the server
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
+	logger = Pino({
+		level: process.env.LOG_LEVEL || 'info',
+	});
+
+	/**
+	 * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
+	 * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
+	 * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
+	 * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
+	 */
+	process.on('uncaughtExceptionMonitor', (err, origin) => {
+		logger.error(err, `uncaught exception, origin: ${origin}`);
+	});
+
 	if (!process.env.WG_ABS_DIR) {
 		logger.fatal('The environment variable `WG_ABS_DIR` is required!');
 		process.exit(1);
