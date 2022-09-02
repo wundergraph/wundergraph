@@ -9,10 +9,9 @@ inputs:
     description: 'The working directory of your node package'
     default: '.'
     required: false
-
-env:
-  CI: true
-  PNPM_CACHE_FOLDER: .pnpm-store
+  repo-token:
+    description: 'The github secret'
+    required: true
 
 runs:
   using: 'composite'
@@ -33,6 +32,7 @@ runs:
       uses: arduino/setup-protoc@v1
       with:
         version: '3.x'
+        repo-token: ${{ inputs.repo-token }}
 
     - uses: pnpm/action-setup@v2.1.0
       with:

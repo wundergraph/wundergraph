@@ -90,6 +90,7 @@ type options struct {
 	insecureCookies         bool
 	hooksSecret             []byte
 	githubAuthDemo          GitHubAuthDemo
+	devMode                 bool
 }
 
 type Option func(options *options)
@@ -103,6 +104,15 @@ func WithStaticWunderNodeConfig(config wgpb.WunderNodeConfig) Option {
 func WithGitHubAuthDemo(authDemo GitHubAuthDemo) Option {
 	return func(options *options) {
 		options.githubAuthDemo = authDemo
+	}
+}
+
+// WithDevMode will set cookie secrets to a static, insecure, string
+// This way, you stay logged in during development
+// Should never be used in production
+func WithDevMode() Option {
+	return func(options *options) {
+		options.devMode = true
 	}
 }
 
@@ -335,6 +345,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 			GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
 			HookServerURL:              api.HooksServerURL,
+			DevMode:                    n.options.devMode,
 		}
 
 		builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)

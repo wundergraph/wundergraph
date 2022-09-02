@@ -37,8 +37,10 @@ install-proto:
 	go install github.com/golang/protobuf/proto
 	go install github.com/golang/protobuf/protoc-gen-go
 
-codegen: install-proto
+codegen-go: install-proto
 	cd types && ./generate.sh
+
+codegen: install-proto codegen-go
 	pnpm codegen
 
 build: codegen

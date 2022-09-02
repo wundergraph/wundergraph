@@ -50,6 +50,14 @@ import { composeServices } from '@apollo/composition';
 import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
 import objectHash from 'object-hash';
+import {
+	fromCacheEntry,
+	introspectInInterval,
+	IntrospectionCacheFile,
+	readIntrospectionCacheFile,
+	toCacheEntry,
+	writeIntrospectionCacheFile,
+} from './introspection-cache';
 
 export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const IntrospectionCacheEnabled = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
@@ -88,7 +96,9 @@ export interface RenameTypeFields {
 	renameTypeFields: (rename: RenameTypeField[]) => void;
 }
 
-export class Api<T> implements RenameTypes, RenameTypeFields {
+export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
+
+export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
 		dataSources: DataSource<T>[],
@@ -600,70 +610,66 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 	});
 };
 
-const introspectWithCache = async <Introspection extends IntrospectionConfiguration, Api>(
+const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	introspection: Introspection,
-	generator: (introspection: Introspection) => Promise<Api>
-): Promise<Api> => {
-	if (DataSourcePollingModeEnabled && introspection.introspection?.disableCache === true) {
-		// simply return nothing, we're not doing anything with it
-		// that's ideal because we don't want to trigger a cache fill in the poller
-		// when we're dismissing the cache entry
-		return Promise.resolve({} as Api);
-	}
-	if (
-		DataSourcePollingModeEnabled &&
-		introspection.introspection?.pollingIntervalSeconds !== undefined &&
-		introspection.introspection?.pollingIntervalSeconds > 0
-	) {
-		introspectAfterTimeout(introspection, generator).catch((e) => console.error(e));
-		// dismiss result here, we're not doing anything with it
-		return Promise.resolve({} as Api);
-	}
-	if (!IntrospectionCacheEnabled || introspection.introspection?.disableCache === true) {
-		return generator(introspection);
-	}
+	generator: (introspection: Introspection) => Promise<Api<A>>
+): Promise<Api<A>> => {
 	const cacheKey = objectHash(introspection);
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	if (fs.existsSync(cacheFile)) {
-		return JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
-	}
-	const result = await generator(introspection);
-	fs.writeFileSync(cacheFile, JSON.stringify(result), { encoding: 'utf8' });
-	return result;
-};
 
-const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, Api>(
-	introspection: Introspection,
-	generator: (introspection: Introspection) => Promise<Api>
-) => {
-	const cacheKey = objectHash(introspection);
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	const result = await generator(introspection);
-	const actual = JSON.stringify(result);
-	if (fs.existsSync(cacheFile)) {
-		const existing = fs.readFileSync(cacheFile, 'utf8');
-		if (actual === existing) {
-			return;
+	/**
+	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
+	 * The return value is ignorable because we don't use it.
+	 */
+	if (DataSourcePollingModeEnabled) {
+		if (
+			introspection.introspection?.pollingIntervalSeconds !== undefined &&
+			introspection.introspection?.pollingIntervalSeconds > 0
+		) {
+			await introspectInInterval(
+				introspection.introspection?.pollingIntervalSeconds,
+				cacheKey,
+				introspection,
+				generator
+			);
+		}
+		return {} as Api<A>;
+	}
+
+	/**
+	 * This is the regular path to introspect the API and return the result.
+	 * By default we try to early return with a cached introspection result.
+	 * When the user runs `wunderctl up` for the first time, we disable the cache
+	 * so the user can be sure that the introspection is up to date. If the API is down
+	 * the cache will not be updated and we will fallback to the old introspection result (if possible).
+	 */
+
+	if (IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true) {
+		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+		if (cacheEntryString) {
+			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+			return fromCacheEntry<A>(cacheEntry);
+		} else {
+			console.error('Invalid cached introspection result. Revalidate introspection...');
 		}
 	}
-	fs.writeFileSync(cacheFile, actual);
-};
 
-const introspectAfterTimeout = async <Introspection extends IntrospectionConfiguration, Api>(
-	introspection: Introspection,
-	generator: (introspection: Introspection) => Promise<Api>
-) => {
-	if (introspection.introspection?.pollingIntervalSeconds === undefined) {
-		return;
-	}
-	setTimeout(async () => {
-		try {
-			await updateIntrospectionCache(introspection, generator);
-		} catch (e) {
-			console.error('Error during introspection cache update', e);
+	try {
+		// generate introspection from scratch
+		const api = await generator(introspection);
+		const cacheEntry = toCacheEntry<A>(api);
+		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+		return api;
+	} catch (e) {
+		console.error('Could not introspect the api. Trying to fallback to old introspection result...', e);
+		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+		if (cacheEntryString) {
+			console.log('Fallback to old introspection result');
+			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+			return fromCacheEntry<A>(cacheEntry);
 		}
-		introspectAfterTimeout(introspection, generator).catch((e) => console.error('Error during polling', e));
-	}, introspection.introspection.pollingIntervalSeconds * 1000);
+		console.log('Could not fallback to old introspection result');
+		throw e;
+	}
 };
 
 export const introspect = {

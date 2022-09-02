@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/webhooks"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -11,6 +10,8 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -105,6 +106,12 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wgDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
+			FirstRunEnv: []string{
+				// when the user runs `wunderctl up` for the first time, we revalidate the cache
+				// so the user can be sure that the introspection is up to date. In case of an API is not available
+				// we will fallback to the cached introspection (when available)
+				"WG_ENABLE_INTROSPECTION_CACHE=false",
+			},
 			ScriptEnv: append(os.Environ(),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
@@ -300,6 +307,7 @@ var upCmd = &cobra.Command{
 				node.WithHooksSecret(secret),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
+				node.WithDevMode(),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))

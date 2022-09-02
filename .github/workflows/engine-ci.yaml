@@ -57,6 +57,7 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1

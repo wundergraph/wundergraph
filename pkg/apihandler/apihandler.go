@@ -20,43 +20,42 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/securecookie"
-	"github.com/hashicorp/go-uuid"
-	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
-	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
-	"github.com/wundergraph/wundergraph/pkg/graphiql"
-	"github.com/wundergraph/wundergraph/pkg/hooks"
-	"github.com/wundergraph/wundergraph/pkg/interpolate"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
-	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
-	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
-
 	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/securecookie"
+	"github.com/hashicorp/go-uuid"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"golang.org/x/sync/singleflight"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvalidation"
 	"github.com/wundergraph/graphql-go-tools/pkg/astvisitor"
+	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
+	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
-	"golang.org/x/sync/singleflight"
-
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/graphiql"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
+	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
+	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
+	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
 const (
@@ -87,6 +86,7 @@ type Builder struct {
 	forceHttpsRedirects bool
 	enableDebugMode     bool
 	enableIntrospection bool
+	devMode             bool
 
 	renameTypeNames []resolve.RenameTypeName
 
@@ -102,6 +102,7 @@ type BuilderConfig struct {
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
 	HookServerURL              string
+	DevMode                    bool
 }
 
 func NewBuilder(pool *pool.Pool,
@@ -122,6 +123,7 @@ func NewBuilder(pool *pool.Pool,
 		enableIntrospection:        config.EnableIntrospection,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
+		devMode:                    config.DevMode,
 	}
 }
 
@@ -765,36 +767,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case *plan.SubscriptionResponsePlan:
-		flusher, ok := w.(http.Flusher)
+		flushWriter, ok := getFlushWriter(shared.Ctx, r, w)
 		if !ok {
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
 			return
-		}
-
-		subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-		sse := r.URL.Query().Get("wg_sse") == "true"
-
-		if !subscribeOnce {
-			w.Header().Set("Content-Type", "text/event-stream")
-			w.Header().Set("Cache-Control", "no-cache")
-			w.Header().Set("Connection", "keep-alive")
-		}
-
-		flusher.Flush()
-
-		flushWriter := &httpFlushWriter{
-			writer:  w,
-			flusher: flusher,
-			sse:     sse,
-		}
-
-		if subscribeOnce {
-			flushWriter.subscribeOnce = true
-			var (
-				closeFunc func()
-			)
-			shared.Ctx.Context, closeFunc = context.WithCancel(shared.Ctx.Context)
-			flushWriter.close = closeFunc
 		}
 
 		err := h.resolver.ResolveGraphQLSubscription(shared.Ctx, p.Response, flushWriter)
@@ -1084,9 +1060,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "requires flushing", http.StatusBadRequest)
 			return
 		}
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
+		setSubscriptionHeaders(w)
 		flusher.Flush()
 	} else {
 		w.Header().Set("Content-Type", "application/json")
@@ -1692,41 +1666,15 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		http.Error(w, "Connection not flushable", http.StatusBadRequest)
-		return
-	}
-
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
-
-	if !subscribeOnce {
-		w.Header().Set("Content-Type", "text/event-stream")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
-	}
-	flusher.Flush()
-
 	ctx := pool.GetCtx(r, r, pool.Config{
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
 
-	flushWriter := &httpFlushWriter{
-		writer:                 w,
-		flusher:                flusher,
-		postResolveTransformer: h.postResolveTransformer,
-		sse:                    sse,
-	}
-
-	if subscribeOnce {
-		flushWriter.subscribeOnce = true
-		var (
-			closeFunc func()
-		)
-		ctx.Context, closeFunc = context.WithCancel(ctx.Context)
-		flushWriter.close = closeFunc
+	flushWriter, ok := getFlushWriter(ctx, r, w)
+	if !ok {
+		http.Error(w, "Connection not flushable", http.StatusBadRequest)
+		return
 	}
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
@@ -1867,22 +1815,28 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		jwksProviders                 []*wgpb.JwksAuthProvider
 	)
 
-	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-		hashKey = []byte(h)
+	if r.devMode {
+		hashKey = r.staticInsecureSecret(11)
+		blockKey = r.staticInsecureSecret(32)
+		csrfSecret = r.staticInsecureSecret(32)
 	} else {
-		hashKey = r.generateSecret(11)
-	}
+		if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
+			hashKey = []byte(h)
+		} else {
+			hashKey = r.generateSecret(11)
+		}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-		blockKey = []byte(b)
-	} else {
-		blockKey = r.generateSecret(32)
-	}
+		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
+			blockKey = []byte(b)
+		} else {
+			blockKey = r.generateSecret(32)
+		}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
-	} else {
-		csrfSecret = r.generateSecret(32)
+		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
+			csrfSecret = []byte(b)
+		} else {
+			csrfSecret = r.generateSecret(32)
+		}
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
@@ -1926,6 +1880,14 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
 	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, pathPrefix)
+}
+
+func (r *Builder) staticInsecureSecret(length int) []byte {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = 'a'
+	}
+	return b
 }
 
 func (r *Builder) generateSecret(length int) []byte {
@@ -2199,4 +2161,46 @@ func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte
 		buf, _ = jsonparser.Set(buf, response, "response")
 	}
 	return buf
+}
+
+func setSubscriptionHeaders(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	// allow unbuffered responses, it's used when it's necessary just to pass response through
+	// setting this to “yes” will allow the response to be cached
+	w.Header().Set("X-Accel-Buffering", "no")
+}
+
+func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter) (*httpFlushWriter, bool) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		return nil, false
+	}
+
+	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
+	sse := r.URL.Query().Get("wg_sse") == "true"
+
+	if !subscribeOnce {
+		setSubscriptionHeaders(w)
+	}
+
+	flusher.Flush()
+
+	flushWriter := &httpFlushWriter{
+		writer:  w,
+		flusher: flusher,
+		sse:     sse,
+	}
+
+	if subscribeOnce {
+		flushWriter.subscribeOnce = true
+		var (
+			closeFunc func()
+		)
+		ctx.Context, closeFunc = context.WithCancel(ctx.Context)
+		flushWriter.close = closeFunc
+	}
+
+	return flushWriter, true
 }
