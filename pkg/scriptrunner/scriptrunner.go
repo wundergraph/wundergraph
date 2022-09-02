@@ -10,10 +10,12 @@ import (
 )
 
 type Config struct {
-	Name          string
-	Executable    string
-	ScriptArgs    []string
-	ScriptEnv     []string
+	Name       string
+	Executable string
+	ScriptArgs []string
+	// ScriptEnv is the environment variables that are always passed to the script.
+	ScriptEnv []string
+	// ScriptEnv are environment variables that are only set on the first script run.
 	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        abstractlogger.Logger

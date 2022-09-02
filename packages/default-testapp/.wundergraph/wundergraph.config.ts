@@ -27,7 +27,7 @@ const weather = introspect.graphql({
 	apiNamespace: 'weather',
 	url: 'https://graphql-weather-api.herokuapp.com/',
 	introspection: {
-		pollingIntervalSeconds: 15,
+		pollingIntervalSeconds: 5,
 	},
 });
 
