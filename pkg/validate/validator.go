@@ -103,6 +103,7 @@ type Validator struct {
 	data       any
 }
 
+// NewValidator returns a new Validator. The configPath is the path to the config value that is being validated.
 func NewValidator(configPath string, data any) *Validator {
 	return &Validator{
 		configPath: configPath,
