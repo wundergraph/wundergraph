@@ -1870,28 +1870,20 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		jwksProviders                 []*wgpb.JwksAuthProvider
 	)
 
-	if r.devMode {
-		hashKey = r.staticInsecureSecret(11)
-		blockKey = r.staticInsecureSecret(32)
-		csrfSecret = r.staticInsecureSecret(32)
-	} else {
-		if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-			hashKey = []byte(h)
-		} else {
-			hashKey = r.generateSecret(11)
-		}
+	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
+		hashKey = []byte(h)
+	}
 
-		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-			blockKey = []byte(b)
-		} else {
-			blockKey = r.generateSecret(32)
-		}
+	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
+		blockKey = []byte(b)
+	}
 
-		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-			csrfSecret = []byte(b)
-		} else {
-			csrfSecret = r.generateSecret(32)
-		}
+	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
+		csrfSecret = []byte(b)
+	}
+
+	if hashKey == nil || blockKey == nil || csrfSecret == nil {
+		panic("hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)

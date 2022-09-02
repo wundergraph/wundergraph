@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 	"golang.org/x/crypto/acme"
@@ -308,6 +310,34 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 
 	for _, api := range nodeConfig.Apis {
 
+		valid, messages := validate.DefaultApiConfig(api, validate.ApiConfigValidationConfig{
+			// in dev mode, ignore missing cookie secrets
+			// we automatically override them
+			IgnoreMissingCookieAuthenticationSecrets: n.options.devMode,
+		})
+
+		if !valid {
+			n.log.Error("API config invalid",
+				abstractlogger.Strings("errors", messages),
+			)
+			os.Exit(1)
+			return
+		}
+
+		n.setApiConfigDefaults(api)
+
+		// revalidate after setting defaults
+		// just to make sure that defaults are validated
+		valid, messages = validate.DefaultApiConfig(api, validate.ApiConfigValidationConfig{})
+
+		if !valid {
+			n.log.Error("API config invalid",
+				abstractlogger.Strings("errors", messages),
+			)
+			os.Exit(1)
+			return
+		}
+
 		if api.HooksServerURL == "" {
 			api.HooksServerURL = "http://127.0.0.1:9992"
 		}
@@ -467,6 +497,26 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 					n.errCh <- err
 				}
 			}()
+		}
+	}
+}
+
+func (n *Node) setApiConfigDefaults(api *wgpb.Api) {
+	if n.options.devMode {
+		// in dev mode, we set these values statically so that auth never drops login sessions during development
+		if api.AuthenticationConfig != nil && api.AuthenticationConfig.CookieBased != nil {
+			api.AuthenticationConfig.CookieBased.CsrfSecret = &wgpb.ConfigurationVariable{
+				Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+				StaticVariableContent: "aaaaaaaaaaa",
+			}
+			api.AuthenticationConfig.CookieBased.BlockKey = &wgpb.ConfigurationVariable{
+				Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+				StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			}
+			api.AuthenticationConfig.CookieBased.HashKey = &wgpb.ConfigurationVariable{
+				Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+				StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			}
 		}
 	}
 }
