@@ -625,7 +625,12 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 			introspection.introspection?.pollingIntervalSeconds !== undefined &&
 			introspection.introspection?.pollingIntervalSeconds > 0
 		) {
-			await introspectInInterval(introspection.introspection?.pollingIntervalSeconds, introspection, generator);
+			await introspectInInterval(
+				introspection.introspection?.pollingIntervalSeconds,
+				cacheKey,
+				introspection,
+				generator
+			);
 		}
 		return {} as Api<A>;
 	}

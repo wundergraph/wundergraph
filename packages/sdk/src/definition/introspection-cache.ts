@@ -50,9 +50,9 @@ export const writeIntrospectionCacheFile = async (cacheKey: string, content: str
 
 export const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	api: Api<A>,
-	cacheKey: string
+	introspectionCacheKey: string
 ): Promise<boolean> => {
-	const cachedIntrospectionString = await readIntrospectionCacheFile(cacheKey);
+	const cachedIntrospectionString = await readIntrospectionCacheFile(introspectionCacheKey);
 	const actualApiCacheEntry = toCacheEntry(api);
 	const actualApiCacheEntryString = JSON.stringify(actualApiCacheEntry);
 
@@ -62,21 +62,21 @@ export const updateIntrospectionCache = async <Introspection extends Introspecti
 
 	// we only write to the file system if the introspection result has changed.
 	// A file change will trigger a rebuild of the entire WunderGraph config.
-	await writeIntrospectionCacheFile(cacheKey, actualApiCacheEntryString);
+	await writeIntrospectionCacheFile(introspectionCacheKey, actualApiCacheEntryString);
 
 	return true;
 };
 
 export const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	intervalInSeconds: number,
+	introspectionCacheKey: string,
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
 	setInterval(async () => {
 		try {
-			const cacheKey = objectHash(introspection);
 			const api = await generator(introspection);
-			const updated = await updateIntrospectionCache(api, cacheKey);
+			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
 			if (updated) {
 				console.log(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
