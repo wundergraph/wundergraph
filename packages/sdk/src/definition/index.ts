@@ -660,7 +660,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
 		return api;
 	} catch (e) {
-		console.error('Could not update cache. Try to fallback to old introspection result', e);
+		console.error('Could not introspect the api. Trying to fallback to old introspection result...', e);
 		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 		if (cacheEntryString) {
 			console.log('Fallback to old introspection result');
