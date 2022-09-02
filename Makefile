@@ -1,10 +1,13 @@
-all: check-setup engine-dev
+all: check-setup
 # install workspace without scripts
 	pnpm install --ignore-scripts
 # Build wunderctl before run postinstall
 	pnpm -r run --filter="./packages/wunderctl" build
 # Build all libs, run scripts and link all packages
 	pnpm build:libs && pnpm install
+# Codegen (Can only run after PNPM workspace installation)
+	go mod tidy
+	go mod download
 
 docs:
 	pnpm --filter="./docs-website" dev
