@@ -13,10 +13,6 @@ inputs:
     description: 'The github secret'
     required: true
 
-env:
-  CI: true
-  PNPM_CACHE_FOLDER: .pnpm-store
-
 runs:
   using: 'composite'
   steps:

@@ -25,6 +25,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -32,7 +33,7 @@ jobs:
 
       - name: Install
         run: |
-          pnpm add @lerna-lite/cli@1.11.1 @commitlint/config-conventional@17.0.0
+          pnpm add -g @lerna-lite/cli@1.11.1 @commitlint/config-conventional@17.0.0
 
       - name: Generate next release (dry-run)
         run: pnpm run preview:version:packages --yes
