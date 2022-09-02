@@ -5,6 +5,7 @@ import (
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
+// ApiConfig validates the Api
 func ApiConfig(api *wgpb.Api) (valid bool, messages []string) {
 	// if providers slice is empty, cookie based auth is disabled
 	if api != nil &&
