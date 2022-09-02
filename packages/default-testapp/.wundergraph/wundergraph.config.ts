@@ -66,9 +66,6 @@ configureWunderGraphApplication({
 	},
 	authentication: {
 		cookieBased: {
-			csrfTokenSecret: 'bbbbbbbbbbb',
-			secureCookieBlockKey: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
-			secureCookieHashKey: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
 			providers: [authProviders.demo()],
 			authorizedRedirectUris: ['http://localhost:3000'],
 		},
