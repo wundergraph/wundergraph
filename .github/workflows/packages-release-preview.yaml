@@ -28,10 +28,11 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install
         run: |
-          pnpm install --ignore-scripts
+          pnpm install --fix-lockfile --ignore-scripts
           pnpm run patch
 
       - name: Generate next release (dry-run)

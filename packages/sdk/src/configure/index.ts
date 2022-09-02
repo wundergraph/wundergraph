@@ -641,7 +641,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		// instead, we only resolve all Promises of the API Introspection
 		// This will keep polling the (configured) DataSources until `wunderctl up` stops the polling process
 		// If a change is detected in the DataSource, the cache is updated,
-		// which will trigger a re-run
+		// which will trigger a re-run of the config build process
 		Promise.all(config.application.apis).catch();
 		return;
 	}
@@ -656,6 +656,10 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		fs.writeFileSync(path.join('generated', schemaFileName), schemaContent, { encoding: 'utf8' });
 		done();
 		console.log(`${new Date().toLocaleTimeString()}: ${schemaFileName} updated`);
+
+		/**
+		 * Webhooks
+		 */
 
 		const webhooksDir = path.join('webhooks');
 		if (fs.existsSync(webhooksDir)) {

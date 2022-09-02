@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.92.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.91.3...@wundergraph/protobuf@0.92.0) (2022-09-01)
+
+### Features
+
+- implement userId for fromClaim directive ([#152](https://github.com/wundergraph/wundergraph/issues/152)) ([51df6e5](https://github.com/wundergraph/wundergraph/commit/51df6e50244bee9f5f8d579ff6f604e1a1c853d9)) (@jensneuse)
+
 ## [0.91.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.91.2...@wundergraph/protobuf@0.91.3) (2022-08-29)
 
 **Note:** Version bump only for package @wundergraph/protobuf

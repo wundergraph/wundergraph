@@ -28,6 +28,7 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
         shell: bash
@@ -62,6 +63,7 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
         shell: bash

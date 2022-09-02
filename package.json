@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.100.0",
+  "version": "0.103.0",
   "name": "wundergraph-env",
   "license": "Apache-2.0",
   "author": {
@@ -76,7 +76,7 @@
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
     "prettier": "^2.6.2",
-    "release-it": "^15.1.1",
+    "release-it": "^15.4.1",
     "rimraf": "^3.0.2"
   }
 }
