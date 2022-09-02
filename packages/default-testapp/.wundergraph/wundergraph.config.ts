@@ -9,11 +9,6 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const spaceX = introspect.graphql({
-	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
-});
-
 const jsp = introspect.openApi({
 	apiNamespace: 'jsp',
 	source: {
@@ -31,11 +26,14 @@ const countries = introspect.graphql({
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
 	url: 'https://graphql-weather-api.herokuapp.com/',
+	introspection: {
+		pollingIntervalSeconds: 5,
+	},
 });
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [spaceX, jsp, weather, countries],
+	apis: [jsp, weather, countries],
 });
 
 // configureWunderGraph emits the configuration

@@ -1,4 +1,4 @@
-query ($where: db_NodeWhereInput @internal) {
+query ($where: db_NodeWhereInput) {
 	db_findManyNode(where: $where) {
 		name
 		id

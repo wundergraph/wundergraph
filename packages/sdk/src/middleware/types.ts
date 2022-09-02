@@ -1,6 +1,6 @@
 import { InternalClient } from './internal-client';
 import { FastifyLoggerInstance } from 'fastify';
-import { Headers } from 'headers-polyfill';
+import { Headers } from '@web-std/fetch';
 import { HooksConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
 import { middlewarePort } from '../env';

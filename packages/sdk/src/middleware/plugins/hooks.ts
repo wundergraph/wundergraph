@@ -8,7 +8,7 @@ import {
 } from '../../configure';
 import { WunderGraphConfiguration, OperationType } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
-import { flattenHeadersObject, Headers } from 'headers-polyfill';
+import { Headers } from '@web-std/fetch';
 
 export interface BodyResponse {
 	data?: any;
@@ -30,8 +30,12 @@ export interface HooksRouteConfig {
 }
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
-	const flattenHeaders = (headers: ClientRequestHeaders) => {
-		return flattenHeadersObject(headers.all());
+	const headersToObject = (headers: ClientRequestHeaders) => {
+		const headersObj: Record<string, string> = {};
+		for (const [key, value] of headers.entries()) {
+			headersObj[key] = value;
+		}
+		return headersObj;
 	};
 
 	// authentication
@@ -58,7 +62,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'mutatingPostAuthentication',
 					response: out,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -75,7 +79,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'revalidateAuthentication',
 					response: out,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -114,7 +118,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					cancel: hookOut === 'cancel',
 					request:
 						hookOut !== 'skip' && hookOut !== 'cancel'
-							? { ...hookOut, headers: flattenHeaders(hookOut.headers) }
+							? { ...hookOut, headers: headersToObject(hookOut.headers) }
 							: undefined,
 				},
 			};
@@ -154,7 +158,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					cancel: hookOut === 'cancel',
 					response:
 						hookOut !== 'skip' && hookOut !== 'cancel'
-							? { ...hookOut, headers: flattenHeaders(hookOut.headers) }
+							? { ...hookOut, headers: headersToObject(hookOut.headers) }
 							: undefined,
 				},
 			};
@@ -191,7 +195,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mock',
 					response: mutated,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -220,7 +224,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'preResolve',
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -250,7 +254,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'postResolve',
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -280,7 +284,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPreResolve',
 					input: mutatedInput,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -311,7 +315,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPostResolve',
 					response: mutatedResponse,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -341,7 +345,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'customResolve',
 					response: out || null,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
