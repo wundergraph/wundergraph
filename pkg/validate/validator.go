@@ -9,6 +9,7 @@ type ValidationFunc func(v *Validator) (valid bool, messages []string)
 func MinLength(minLength int) ValidationFunc {
 	return func(v *Validator) (valid bool, messages []string) {
 		errMsg := []string{fmt.Sprintf("%s must be at least %d characters long", v.configPath, minLength)}
+		errMsgNoString := []string{fmt.Sprintf("%s must be a string", v.configPath)}
 
 		switch v.data.(type) {
 		case *string:
@@ -20,7 +21,7 @@ func MinLength(minLength int) ValidationFunc {
 				return false, errMsg
 			}
 		default:
-			return false, errMsg
+			return false, errMsgNoString
 		}
 
 		return true, nil
@@ -30,6 +31,7 @@ func MinLength(minLength int) ValidationFunc {
 func Length(length int) ValidationFunc {
 	return func(v *Validator) (valid bool, messages []string) {
 		errMsg := []string{fmt.Sprintf("%s must be exactly %d characters long", v.configPath, length)}
+		errMsgNoString := []string{fmt.Sprintf("%s must be a string", v.configPath)}
 
 		switch v.data.(type) {
 		case *string:
@@ -41,7 +43,7 @@ func Length(length int) ValidationFunc {
 				return false, errMsg
 			}
 		default:
-			return false, errMsg
+			return false, errMsgNoString
 		}
 
 		return true, nil
@@ -51,6 +53,7 @@ func Length(length int) ValidationFunc {
 func MaxLength(maxLength int) ValidationFunc {
 	return func(v *Validator) (valid bool, messages []string) {
 		errMsg := []string{fmt.Sprintf("%s must be at most %d characters long", v.configPath, maxLength)}
+		errMsgNoString := []string{fmt.Sprintf("%s must be a string", v.configPath)}
 
 		switch v.data.(type) {
 		case *string:
@@ -62,7 +65,7 @@ func MaxLength(maxLength int) ValidationFunc {
 				return false, errMsg
 			}
 		default:
-			return false, errMsg
+			return false, errMsgNoString
 		}
 
 		return true, nil
@@ -72,6 +75,7 @@ func MaxLength(maxLength int) ValidationFunc {
 func Required() ValidationFunc {
 	return func(v *Validator) (valid bool, messages []string) {
 		errMsg := []string{fmt.Sprintf("%s is required", v.configPath)}
+		errMsgNoString := []string{fmt.Sprintf("%s must be a string", v.configPath)}
 
 		if v.data == nil {
 			return false, errMsg
@@ -86,6 +90,8 @@ func Required() ValidationFunc {
 			if v.data.(string) == "" {
 				return false, errMsg
 			}
+		default:
+			return false, errMsgNoString
 		}
 
 		return true, nil
