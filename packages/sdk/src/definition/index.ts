@@ -12,7 +12,6 @@ import {
 } from 'graphql';
 import { mergeApis } from './merge';
 import * as fs from 'fs';
-import * as fsP from 'fs/promises';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
@@ -51,6 +50,14 @@ import { composeServices } from '@apollo/composition';
 import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
 import * as https from 'https';
 import objectHash from 'object-hash';
+import {
+	fromCacheEntry,
+	introspectInInterval,
+	IntrospectionCacheFile,
+	readIntrospectionCacheFile,
+	toCacheEntry,
+	writeIntrospectionCacheFile,
+} from './introspection-cache';
 
 export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const IntrospectionCacheEnabled = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
@@ -89,7 +96,9 @@ export interface RenameTypeFields {
 	renameTypeFields: (rename: RenameTypeField[]) => void;
 }
 
-export class Api<T> implements RenameTypes, RenameTypeFields {
+export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
+
+export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
 		dataSources: DataSource<T>[],
@@ -601,10 +610,12 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 	});
 };
 
-const introspectWithCache = async <Introspection extends IntrospectionConfiguration, Api>(
+const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	introspection: Introspection,
-	generator: (introspection: Introspection) => Promise<Api>
-): Promise<Api> => {
+	generator: (introspection: Introspection) => Promise<Api<A>>
+): Promise<Api<A>> => {
+	const cacheKey = objectHash(introspection);
+
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
 	 * The return value is ignorable because we don't use it.
@@ -616,10 +627,8 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 		) {
 			await introspectInInterval(introspection.introspection?.pollingIntervalSeconds, introspection, generator);
 		}
-		return {} as Api;
+		return {} as Api<A>;
 	}
-
-	const cacheKey = objectHash(introspection);
 
 	/**
 	 * This is the regular path to introspect the API and return the result.
@@ -630,70 +639,23 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	 */
 
 	if (IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true) {
-		const api = await readIntrospectionFromCache(cacheKey);
-		return JSON.parse(api) as Api;
+		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+		const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+		return fromCacheEntry<A>(cacheEntry);
 	}
 
 	try {
 		// generate introspection from scratch
 		const api = await generator(introspection);
-		await writeIntrospectionToCache(cacheKey, JSON.stringify(api));
+		const cacheEntry = toCacheEntry<A>(api);
+		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
 		return api;
 	} catch (e) {
 		console.error('Could not update cache. Fallback to old introspection result', e);
-		const api = await readIntrospectionFromCache(cacheKey);
-		return JSON.parse(api) as Api;
+		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+		const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+		return fromCacheEntry<A>(cacheEntry);
 	}
-};
-
-const readIntrospectionFromCache = async (cacheKey: string): Promise<string> => {
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	if (fs.existsSync(cacheFile)) {
-		return fsP.readFile(cacheFile, 'utf8');
-	}
-	return '';
-};
-
-const writeIntrospectionToCache = async (cacheKey: string, content: string): Promise<void> => {
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	return fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
-};
-
-const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, Api>(
-	api: Api,
-	cacheKey: string
-): Promise<boolean> => {
-	const cachedIntrospection = await readIntrospectionFromCache(cacheKey);
-	const actual = JSON.stringify(api);
-
-	if (actual === cachedIntrospection) {
-		return false;
-	}
-
-	// we only write to the file system if the introspection result has changed.
-	// A file change will trigger a rebuild of the entire WunderGraph config.
-	await writeIntrospectionToCache(cacheKey, actual);
-
-	return true;
-};
-
-const introspectInInterval = async <Introspection extends IntrospectionConfiguration, Api>(
-	intervalInSeconds: number,
-	introspection: Introspection,
-	generator: (introspection: Introspection) => Promise<Api>
-) => {
-	setInterval(async () => {
-		try {
-			const cacheKey = objectHash(introspection);
-			const api = await generator(introspection);
-			const updated = await updateIntrospectionCache(api, cacheKey);
-			if (updated) {
-				console.log(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
-			}
-		} catch (e) {
-			console.error('Error during introspection cache update', e);
-		}
-	}, intervalInSeconds * 1000);
 };
 
 export const introspect = {
