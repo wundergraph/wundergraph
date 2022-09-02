@@ -287,9 +287,11 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			path := loadvariable.String(in.CustomGraphql.Fetch.GetPath())
 			url := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
 			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
-
 			if url == "" {
 				url = baseURL + path
+			}
+			if subscriptionUrl == "" {
+				subscriptionUrl = url
 			}
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
