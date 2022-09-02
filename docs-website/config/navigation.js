@@ -142,6 +142,15 @@ const navigation = [
 		],
 	},
 	{
+		title: 'Deployment',
+		links: [
+			{
+				title: 'Fly.io',
+				href: '/docs/deployment/flyio',
+			},
+		],
+	},
+	{
 		title: 'Examples',
 		links: [
 			{
