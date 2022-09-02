@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -178,7 +179,12 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	if options.staticConfig != nil {
 		n.log.Info("Api config: static")
-		go n.startServer(*options.staticConfig)
+		go func() {
+			err := n.startServer(*options.staticConfig)
+			if err != nil {
+				os.Exit(1)
+			}
+		}()
 	} else if options.fileSystemConfig != nil {
 		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
@@ -282,7 +288,7 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 	n.log.Debug("old server gracefully shut down")
 }
 
-func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
+func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) error {
 
 	var (
 		err error
@@ -310,32 +316,15 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 
 	for _, api := range nodeConfig.Apis {
 
-		valid, messages := validate.DefaultApiConfig(api, validate.ApiConfigValidationConfig{
-			// in dev mode, ignore missing cookie secrets
-			// we automatically override them
-			IgnoreMissingCookieAuthenticationSecrets: n.options.devMode,
-		})
+		n.setApiDevConfigDefaults(api)
+
+		valid, messages := validate.ApiConfig(api)
 
 		if !valid {
 			n.log.Fatal("API config invalid",
 				abstractlogger.Strings("errors", messages),
 			)
-			os.Exit(1)
-			return
-		}
-
-		n.setApiConfigDefaults(api)
-
-		// revalidate after setting defaults
-		// just to make sure that defaults are validated
-		valid, messages = validate.DefaultApiConfig(api, validate.ApiConfigValidationConfig{})
-
-		if !valid {
-			n.log.Error("API config invalid",
-				abstractlogger.Strings("errors", messages),
-			)
-			os.Exit(1)
-			return
+			return errors.New("API config invalid")
 		}
 
 		if api.HooksServerURL == "" {
@@ -420,7 +409,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	listeners, err := n.newListeners()
 	if err != nil {
 		n.errCh <- err
-		return
+		return nil
 	}
 
 	if n.cfg.Server.ListenTLS {
@@ -499,25 +488,38 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 			}()
 		}
 	}
+
+	return nil
 }
 
-func (n *Node) setApiConfigDefaults(api *wgpb.Api) {
+// setApiDevConfigDefaults sets default values for the api config in dev mode
+func (n *Node) setApiDevConfigDefaults(api *wgpb.Api) {
 	if n.options.devMode {
-		// in dev mode, we set these values statically so that auth never drops login sessions during development
+
+		// we set these values statically so that auth never drops login sessions during development
 		if api.AuthenticationConfig != nil && api.AuthenticationConfig.CookieBased != nil {
-			api.AuthenticationConfig.CookieBased.CsrfSecret = &wgpb.ConfigurationVariable{
-				Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-				StaticVariableContent: "aaaaaaaaaaa",
+			if csrfSecret := loadvariable.String(api.AuthenticationConfig.CookieBased.CsrfSecret); csrfSecret == "" {
+				api.AuthenticationConfig.CookieBased.CsrfSecret = &wgpb.ConfigurationVariable{
+					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+					StaticVariableContent: "aaaaaaaaaaa",
+				}
 			}
-			api.AuthenticationConfig.CookieBased.BlockKey = &wgpb.ConfigurationVariable{
-				Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-				StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+
+			if blockKey := loadvariable.String(api.AuthenticationConfig.CookieBased.BlockKey); blockKey == "" {
+				api.AuthenticationConfig.CookieBased.BlockKey = &wgpb.ConfigurationVariable{
+					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				}
 			}
-			api.AuthenticationConfig.CookieBased.HashKey = &wgpb.ConfigurationVariable{
-				Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-				StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+
+			if hashKey := loadvariable.String(api.AuthenticationConfig.CookieBased.HashKey); hashKey == "" {
+				api.AuthenticationConfig.CookieBased.HashKey = &wgpb.ConfigurationVariable{
+					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				}
 			}
 		}
+
 	}
 }
 
@@ -550,7 +552,12 @@ func (n *Node) reconfigureOnConfigUpdate() {
 		case config := <-n.configCh:
 			n.log.Debug("Updated config -> (re-)configuring server")
 			_ = n.Close()
-			go n.startServer(config)
+			go func() {
+				err := n.startServer(config)
+				if err != nil {
+					os.Exit(1)
+				}
+			}()
 		case <-n.ctx.Done():
 			return
 		}
