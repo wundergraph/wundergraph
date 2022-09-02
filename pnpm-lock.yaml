@@ -7,7 +7,6 @@ importers:
       '@commitlint/cli': ^17.0.1
       '@commitlint/config-conventional': ^17.0.0
       '@lerna-lite/cli': 1.11.1
-      '@lerna-lite/core': 1.11.1
       '@milahu/patch-package-with-pnpm-support': 6.4.10
       '@release-it/bumper': ^4.0.0
       husky: ^8.0.1
@@ -19,7 +18,6 @@ importers:
       '@commitlint/cli': 17.0.2
       '@commitlint/config-conventional': 17.0.2
       '@lerna-lite/cli': 1.11.1
-      '@lerna-lite/core': 1.11.1
       '@milahu/patch-package-with-pnpm-support': 6.4.10
       '@release-it/bumper': 4.0.0_release-it@15.4.1
       husky: 8.0.1
