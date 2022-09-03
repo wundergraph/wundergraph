@@ -63,6 +63,22 @@
     },
     "/some/properties": {
       "get": {
+        "parameters": [
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -92,6 +108,9 @@
           },
           "country_code": {
             "type": "string"
+          },
+          "status_code": {
+            "$ref": "#/components/schemas/StatusCode"
           }
         }
       },
@@ -107,6 +126,16 @@
           }
         },
         "additionalProperties": false
+      },
+      "SortOrder": {
+        "enum": [0, 1],
+        "type": "integer",
+        "format": "int32"
+      },
+      "StatusCode": {
+        "enum": [0, 1, 2],
+        "type": "integer",
+        "format": "int32"
       }
     }
   }

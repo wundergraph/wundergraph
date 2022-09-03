@@ -20169,7 +20169,16 @@ exports[`users: users_data_sources 1`] = `
           \\"staticVariableContent\\": \\"\\"
         },
         \\"header\\": {},
-        \\"query\\": [],
+        \\"query\\": [
+          {
+            \\"name\\": \\"sortBy\\",
+            \\"value\\": \\"{{ .arguments.sortBy }}\\"
+          },
+          {
+            \\"name\\": \\"sortOrder\\",
+            \\"value\\": \\"{{ .arguments.sortOrder }}\\"
+          }
+        ],
         \\"urlEncodeBody\\": false
       },
       \\"Subscription\\": {
@@ -20220,13 +20229,14 @@ exports[`users: users_schema 1`] = `
 "type Query {
   api_getUsers: [api_User]
   api_getUsersUserId(user_id: Int!): api_User
-  api_getSomeProperties: api_PropertiesResponse
+  api_getSomeProperties(sortBy: String, sortOrder: Int): api_PropertiesResponse
 }
 
 type api_User {
   id: Int
   name: String
   country_code: String
+  status_code: Int
 }
 
 type api_PropertiesResponse {
