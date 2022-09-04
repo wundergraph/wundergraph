@@ -5,9 +5,8 @@ all: check-setup
 	pnpm -r run --filter="./packages/wunderctl" build
 # Build all libs, run scripts and link all packages
 	pnpm build:libs && pnpm install
-# Codegen (Can only run after PNPM workspace installation)
-	go mod tidy
-	go mod download
+# prepare and install engine
+	make engine-dev
 
 docs:
 	pnpm --filter="./docs-website" dev
