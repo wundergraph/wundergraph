@@ -46,6 +46,9 @@ jobs:
       - name: Generate release summary
         working-directory: './cmd/wunderctl'
         run: goreleaser changelog --config ./../../.github/goreleaser/.goreleaser-linux.yml -o release-summary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
       - name: Export release summary
         working-directory: './cmd/wunderctl'
