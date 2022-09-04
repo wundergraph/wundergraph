@@ -43,7 +43,7 @@ jobs:
           version: latest
           workdir: './cmd/wunderctl'
           distribution: goreleaser-pro
-          args: changelog --config ./../../.github/goreleaser/.goreleaser-darwin.yml >> $GITHUB_STEP_SUMMARY
+          args: changelog --config ./../../.github/goreleaser/.goreleaser-darwin.yml -o release-summary
         env:
           # custom PAT to push in https://github.com/wundergraph/homebrew-wundergraph
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
@@ -51,3 +51,7 @@ jobs:
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+
+      - name: Get the previous version of the release tag
+        working-directory: './cmd/wunderctl'
+        run: export GITHUB_STEP_SUMMARY=$(cat release-summary)
