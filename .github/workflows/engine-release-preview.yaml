@@ -13,8 +13,6 @@ env:
 
 jobs:
   engine-release-summary:
-    # Disable until goreleaser bug is fixed
-    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -33,9 +31,6 @@ jobs:
 
       - name: generate go types based on protobuf definitions
         run: make codegen-go
-
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*")" >> $GITHUB_ENV
 
       - name: Generate Release summary with GoReleaser
         uses: goreleaser/goreleaser-action@v2
