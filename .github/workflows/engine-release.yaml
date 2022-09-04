@@ -77,10 +77,11 @@ jobs:
         run: make codegen-go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-darwin.yml
         env:
           # custom PAT to push in https://github.com/wundergraph/homebrew-wundergraph
@@ -88,6 +89,7 @@ jobs:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   goreleaser-linux:
     name: Release Linux build
@@ -116,16 +118,18 @@ jobs:
         run: make codegen-go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-linux.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   goreleaser-win:
     name: Release Windows build
@@ -154,16 +158,18 @@ jobs:
         run: make codegen-go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-windows.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   release-wunderctl:
     name: Release wunderctl wrapper
