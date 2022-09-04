@@ -34,7 +34,7 @@ jobs:
         run: make codegen-go
 
       - name: Generate Release summary with GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
