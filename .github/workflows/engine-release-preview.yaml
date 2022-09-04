@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - '**'
-    tags-ignore:
-      - '**'
     paths-ignore:
       - 'docs*/**'
       - '*.md'
@@ -14,7 +12,9 @@ env:
   CI: true
 
 jobs:
-  release-summary:
+  engine-release-summary:
+    # Disable until goreleaser bug is fixed
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -35,23 +35,20 @@ jobs:
         run: make codegen-go
 
       - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*")" >> $GITHUB_ENV
 
-      - name: Run GoReleaser
+      - name: Generate Release summary with GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           workdir: './cmd/wunderctl'
           distribution: goreleaser-pro
-          args: changelog --config ./../../.github/goreleaser/.goreleaser-darwin.yml -o release-summary
+          args: changelog --config ./../../.github/goreleaser/.goreleaser-linux.yml -o release-summary
         env:
           # custom PAT to push in https://github.com/wundergraph/homebrew-wundergraph
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
-          AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
-          GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
-          GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
           GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
-      - name: Get the previous version of the release tag
+      - name: Export release summary
         working-directory: './cmd/wunderctl'
         run: export GITHUB_STEP_SUMMARY=$(cat release-summary)
