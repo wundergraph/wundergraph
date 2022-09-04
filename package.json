@@ -1,7 +1,7 @@
 {
   "private": true,
   "version": "0.103.0",
-  "name": "engine",
+  "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
     "name": "WunderGraph Maintainers",
