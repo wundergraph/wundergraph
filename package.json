@@ -56,6 +56,9 @@
       "after:bump": "pnpm install --filter ./packages/wunderctl --lockfile-only"
     },
     "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "conventionalcommits"
+      },
       "@release-it/bumper": {
         "out": [
           {
@@ -71,6 +74,7 @@
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "1.11.1",
     "@milahu/patch-package-with-pnpm-support": "6.4.10",
+    "@release-it/conventional-changelog": "^5.1.0",
     "@release-it/bumper": "^4.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
