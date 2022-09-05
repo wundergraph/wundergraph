@@ -8,7 +8,6 @@ import (
 	"path"
 
 	"github.com/jensneuse/abstractlogger"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
@@ -23,11 +22,6 @@ var nodeCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return nil
 	},
-}
-
-type NodeStartSettings struct {
-	NodeAddr  string `envconfig:"NODE_ADDR" required:"true"`
-	ServerUrl string `envconfig:"SERVER_URL" required:"true"`
 }
 
 var nodeStartCmd = &cobra.Command{
@@ -61,11 +55,6 @@ var nodeStartCmd = &cobra.Command{
 		err = json.Unmarshal(data, &graphConfig)
 		if err != nil {
 			log.Fatal("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
-			return err
-		}
-
-		var settings NodeStartSettings
-		if err := envconfig.Process(EnvVarWGPrefix, &settings); err != nil {
 			return err
 		}
 

@@ -32,7 +32,7 @@ func New(ctx context.Context, info BuildInfo, log abstractlogger.Logger) *Node {
 		info:     info,
 		ctx:      ctx,
 		errCh:    make(chan error),
-		configCh: make(chan wgpb.WunderNodeConfig),
+		configCh: make(chan WunderNodeConfig),
 		pool:     pool.New(),
 		log:      log,
 		apiClient: &fasthttp.Client{
@@ -53,7 +53,7 @@ type Node struct {
 
 	stopped  bool
 	errCh    chan error
-	configCh chan wgpb.WunderNodeConfig
+	configCh chan WunderNodeConfig
 
 	server *http.Server
 
@@ -66,7 +66,7 @@ type Node struct {
 }
 
 type options struct {
-	staticConfig        *wgpb.WunderNodeConfig
+	staticConfig        *WunderNodeConfig
 	fileSystemConfig    *string
 	enableDebugMode     bool
 	forceHttpsRedirects bool
@@ -84,7 +84,7 @@ type options struct {
 
 type Option func(options *options)
 
-func WithStaticWunderNodeConfig(config wgpb.WunderNodeConfig) Option {
+func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	return func(options *options) {
 		options.staticConfig = &config
 	}
@@ -185,7 +185,7 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListeners(configuration *wgpb.ListenerConfiguration) ([]net.Listener, error) {
+func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
 	cfg := net.ListenConfig{
 		Control:   reuseport.Control,
 		KeepAlive: 90 * time.Second,
@@ -254,11 +254,8 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 	n.log.Debug("old server gracefully shut down")
 }
 
-func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
-
-	var (
-		err error
-	)
+func (n *Node) startServer(nodeConfig WunderNodeConfig) {
+	var err error
 
 	router := mux.NewRouter()
 
@@ -280,59 +277,57 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	var streamClosers []chan struct{}
 	var allowedHosts []string
 
-	for _, api := range nodeConfig.Apis {
-		dialer := &net.Dialer{
-			Timeout:   10 * time.Second,
-			KeepAlive: 90 * time.Second,
-		}
-
-		defaultTransport := &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return dialer.DialContext(ctx, network, addr)
-			},
-			ForceAttemptHTTP2:   true,
-			MaxIdleConns:        1024,
-			IdleConnTimeout:     90 * time.Second,
-			TLSHandshakeTimeout: 10 * time.Second,
-		}
-
-		hooksClient := hooks.NewClient(api.Server.PublicUrl, n.log)
-
-		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
-
-		n.log.Debug("http.Client.Transport",
-			abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
-		)
-
-		loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
-
-		builderConfig := apihandler.BuilderConfig{
-			InsecureCookies:            n.options.insecureCookies,
-			ForceHttpsRedirects:        n.options.forceHttpsRedirects,
-			EnableDebugMode:            n.options.enableDebugMode,
-			EnableIntrospection:        n.options.enableIntrospection,
-			GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
-			GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
-			HookServerURL:              api.Server.PublicUrl,
-		}
-
-		builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-		internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
-
-		publicClosers, err := builder.BuildAndMountApiHandler(n.ctx, router, api)
-		if err != nil {
-			n.log.Error("BuildAndMountApiHandler", abstractlogger.Error(err))
-		}
-		streamClosers = append(streamClosers, publicClosers...)
-
-		internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, api)
-		if err != nil {
-			n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
-			err = nil
-		}
-
-		streamClosers = append(streamClosers, internalClosers...)
+	dialer := &net.Dialer{
+		Timeout:   10 * time.Second,
+		KeepAlive: 90 * time.Second,
 	}
+
+	defaultTransport := &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer.DialContext(ctx, network, addr)
+		},
+		ForceAttemptHTTP2:   true,
+		MaxIdleConns:        1024,
+		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	hooksClient := hooks.NewClient(nodeConfig.Api.ServerUrl, n.log)
+
+	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
+
+	n.log.Debug("http.Client.Transport",
+		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
+	)
+
+	loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
+
+	builderConfig := apihandler.BuilderConfig{
+		InsecureCookies:            n.options.insecureCookies,
+		ForceHttpsRedirects:        n.options.forceHttpsRedirects,
+		EnableDebugMode:            n.options.enableDebugMode,
+		EnableIntrospection:        n.options.enableIntrospection,
+		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
+		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
+		HookServerURL:              nodeConfig.Api.ServerUrl,
+	}
+
+	builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
+	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
+
+	publicClosers, err := builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
+	if err != nil {
+		n.log.Error("BuildAndMountApiHandler", abstractlogger.Error(err))
+	}
+	streamClosers = append(streamClosers, publicClosers...)
+
+	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
+	if err != nil {
+		n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
+		err = nil
+	}
+
+	streamClosers = append(streamClosers, internalClosers...)
 
 	allowedHosts = uniqueStrings(allowedHosts)
 
@@ -355,8 +350,7 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
 	}
 
-	// TODO: tmp: support only single api
-	listeners, err := n.newListeners(nodeConfig.Apis[0].Node.Listener)
+	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		n.errCh <- err
 		return
@@ -382,8 +376,8 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) {
 	}
 }
 
-func (n *Node) filterHosts(api *wgpb.Api) []string {
-	hosts := []string{fmt.Sprintf("%s:%d", api.Node.Listener.Host, api.Node.Listener.Port)}
+func (n *Node) filterHosts(api apihandler.Api) []string {
+	hosts := []string{fmt.Sprintf("%s:%d", api.Options.Listener.Host, api.Options.Listener.Port)}
 WithNext:
 	for _, host := range api.Hosts {
 		for _, existing := range hosts {
@@ -452,7 +446,7 @@ func (n *Node) reloadFileConfig(filePath string) {
 		return
 	}
 
-	config := CreateConfig(graphConfig, wgpb.LogLevel_DEBUG)
+	config := CreateConfig(&graphConfig)
 
 	n.configCh <- config
 }

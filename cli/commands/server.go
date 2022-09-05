@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/runners"
@@ -13,12 +12,6 @@ import (
 )
 
 const EnvVarWGPrefix = "WG"
-
-type ServerStartSettings struct {
-	NodeURL    string `envconfig:"NODE_URL" required:"true"`
-	ServerHost string `envconfig:"SERVER_HOST" required:"true"`
-	ServerPort int    `envconfig:"SERVER_PORT" required:"true"`
-}
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
@@ -47,20 +40,12 @@ var serverStartCmd = &cobra.Command{
 			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 		}
 
-		var settings ServerStartSettings
-		if err := envconfig.Process(EnvVarWGPrefix, &settings); err != nil {
-			return err
-		}
-
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		srvCfg := &runners.ServerRunConfig{
 			EnableDebugMode:   enableDebugMode,
 			WunderGraphDirAbs: wgDir,
-			ServerHost:        settings.ServerHost,
-			ServerListenPort:  settings.ServerPort,
-			NodeUrl:           settings.NodeURL,
 			ServerScriptFile:  serverScriptFile,
 		}
 

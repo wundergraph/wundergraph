@@ -3,26 +3,6 @@ package wgpb;
 
 option go_package = "./go/wgpb";
 
-message WunderNodeConfig {
-	Server server = 1;
-	Logging logging = 2;
-	repeated Api apis = 3;
-}
-
-message Server {
-	int64 gracefulShutdownTimeout = 1;
-	int64 keepAlive = 2;
-	int64 readTimeout = 3;
-	int64 writeTimeout = 4;
-	int64 idleTimeout = 5;
-	repeated Certificate certificates = 6;
-}
-
-message Certificate {
-	string keyPem = 2;
-	string certPem = 3;
-}
-
 message Logging {
 	LogLevel level = 1;
 }
@@ -34,22 +14,6 @@ enum LogLevel {
 	WARNING = 3;
 	PANIC = 4;
 	FATAL = 5;
-}
-
-message Api {
-	repeated string hosts = 1;
-	string pathPrefix = 2;
-	EngineConfiguration engineConfiguration = 3;
-	bool enableSingleFlight = 4;
-	bool enableGraphqlEndpoint = 5;
-	repeated Operation operations = 6;
-	CorsConfiguration corsConfiguration = 7;
-	string deploymentId = 9;
-	ApiCacheConfig cacheConfig = 10;
-	string apiConfigHash = 11;
-	ApiAuthenticationConfig authenticationConfig = 12;
-	repeated S3UploadConfiguration s3UploadConfiguration = 13;
-	repeated WebhookConfiguration webhooks = 14;
 }
 
 message ApiAuthenticationConfig {

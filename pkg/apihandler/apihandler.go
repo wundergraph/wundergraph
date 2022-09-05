@@ -67,7 +67,7 @@ const (
 type Builder struct {
 	router   *mux.Router
 	loader   *engineconfigloader.EngineConfigLoader
-	api      *wgpb.Api
+	api      *Api
 	resolver *resolve.Resolver
 	pool     *pool.Pool
 
@@ -124,7 +124,7 @@ func NewBuilder(pool *pool.Pool,
 	}
 }
 
-func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *wgpb.Api) (streamClosers []chan struct{}, err error) {
+func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
 
 	if api.CacheConfig != nil {
 		err = r.configureCache(api)
@@ -295,7 +295,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
 			log:           r.log,
 			html:          graphiql.GetGraphiqlPlaygroundHTML(),
-			apiPathPrefix: api.GetPathPrefix(),
+			apiPathPrefix: api.PathPrefix,
 		}
 		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
@@ -588,8 +588,8 @@ func (r *Builder) cleanupJsonSchema(schema string) string {
 	return schema
 }
 
-func (r *Builder) configureCache(api *wgpb.Api) (err error) {
-	primaryHost := fmt.Sprintf("%s:%d", api.Node.Listener.Host, api.Node.Listener.Port)
+func (r *Builder) configureCache(api *Api) (err error) {
+	primaryHost := fmt.Sprintf("%s:%d", api.Options.Listener.Host, api.Options.Listener.Port)
 
 	config := api.CacheConfig
 	switch config.Kind {

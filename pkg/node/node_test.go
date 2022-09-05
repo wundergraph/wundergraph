@@ -20,8 +20,8 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/wundergraph/pkg/logging"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
@@ -68,28 +68,20 @@ func TestNode(t *testing.T) {
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
-	cfg := &wundernodeconfig.Config{
-		Server: &wundernodeconfig.ServerConfig{
-			ListenAddr: nodeURL,
-			ListenTLS:  false,
-			ProxyProto: false,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node := New(ctx, BuildInfo{}, cfg, logger)
+	node := New(ctx, BuildInfo{}, logger)
 
-	nodeConfig := wgpb.WunderNodeConfig{
-		Server: &wgpb.Server{
+	nodeConfig := WunderNodeConfig{
+		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
 			ReadTimeout:             5,
 			WriteTimeout:            5,
 			IdleTimeout:             5,
 		},
-		Apis: []*wgpb.Api{
+		Apis: []*Api{
 			{
 				Hosts:                 []string{"jens.wundergraph.dev"},
 				PathPrefix:            "myApi/main",
@@ -201,33 +193,25 @@ func TestWebHooks(t *testing.T) {
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
-	cfg := &wundernodeconfig.Config{
-		Server: &wundernodeconfig.ServerConfig{
-			ListenAddr: nodeURL,
-			ListenTLS:  false,
-			ProxyProto: false,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	logger := logging.New(abstractlogger.InfoLevel, true)
-	node := New(ctx, BuildInfo{}, cfg, logger)
+	node := New(ctx, BuildInfo{}, logger)
 
-	nodeConfig := wgpb.WunderNodeConfig{
-		Server: &wgpb.Server{
+	nodeConfig := WunderNodeConfig{
+		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
 			ReadTimeout:             5,
 			WriteTimeout:            5,
 			IdleTimeout:             5,
 		},
-		Apis: []*wgpb.Api{
+		Apis: []*Api{
 			{
-				Hosts:                 []string{"localhost"},
-				PathPrefix:            "api/main",
-				HooksServerURL:        testServer.URL,
+				Hosts:      []string{"localhost"},
+				PathPrefix: "api/main",
+				// HooksServerURL:        testServer.URL,
 				EnableSingleFlight:    true,
 				EnableGraphqlEndpoint: true,
 				AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
@@ -313,28 +297,20 @@ func BenchmarkNode(t *testing.B) {
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
-	cfg := &wundernodeconfig.Config{
-		Server: &wundernodeconfig.ServerConfig{
-			ListenAddr: nodeURL,
-			ListenTLS:  false,
-			ProxyProto: false,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node := New(ctx, BuildInfo{}, cfg, logger)
+	node := New(ctx, BuildInfo{}, logger)
 
-	nodeConfig := wgpb.WunderNodeConfig{
-		Server: &wgpb.Server{
+	nodeConfig := WunderNodeConfig{
+		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               0,
 			ReadTimeout:             5,
 			WriteTimeout:            5,
 			IdleTimeout:             5,
 		},
-		Apis: []*wgpb.Api{
+		Apis: []*Api{
 			{
 				Hosts:                 []string{"jens.wundergraph.dev"},
 				PathPrefix:            "myApi",
