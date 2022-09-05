@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.103.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.102.0...@wundergraph/sdk@0.103.0) (2022-09-04)
+
+### Features
+
+* don't exit, throw error and handle at root ([#161](https://github.com/wundergraph/wundergraph/issues/161)) ([5495d27](https://github.com/wundergraph/wundergraph/commit/5495d27c181f12a96655fae0f403ffaedda50816)) (@StarpTech)
+
+### Bug Fixes
+
+* subscription url config ([#162](https://github.com/wundergraph/wundergraph/issues/162)) ([c503400](https://github.com/wundergraph/wundergraph/commit/c503400061a33243702c8e7be753e14d863e5d98)) (@jensneuse)
+
 ## [0.102.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.101.0...@wundergraph/sdk@0.102.0) (2022-09-02)
 
 ### Features

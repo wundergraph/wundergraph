@@ -9,6 +9,7 @@ importers:
       '@lerna-lite/cli': 1.11.1
       '@milahu/patch-package-with-pnpm-support': 6.4.10
       '@release-it/bumper': ^4.0.0
+      '@release-it/conventional-changelog': ^5.1.0
       husky: ^8.0.1
       lint-staged: ^12.4.2
       prettier: ^2.6.2
@@ -20,6 +21,7 @@ importers:
       '@lerna-lite/cli': 1.11.1
       '@milahu/patch-package-with-pnpm-support': 6.4.10
       '@release-it/bumper': 4.0.0_release-it@15.4.1
+      '@release-it/conventional-changelog': 5.1.0_release-it@15.4.1
       husky: 8.0.1
       lint-staged: 12.4.2
       prettier: 2.6.2
@@ -134,7 +136,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
       '@wundergraph/protobuf': workspace:^0.92.0
-      '@wundergraph/sdk': workspace:^0.102.0
+      '@wundergraph/sdk': workspace:^0.103.0
       handlebars: ^4.7.7
       next: ^12.1.6
       object-hash: ^2.2.0
@@ -172,7 +174,7 @@ importers:
       typescript: ^4.8.2
       wait-on: ^6.0.0
     dependencies:
-      '@wundergraph/nextjs': file:packages/nextjs_qurro4if4yvzuexcfppsnvmhce
+      '@wundergraph/nextjs': file:packages/nextjs_nlpdj2wm4czkadmbosant5ih2i
       '@wundergraph/sdk': file:packages/sdk
       next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
       react: 18.1.0
@@ -241,7 +243,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@web-std/fetch': ^4.1.0
       '@wundergraph/protobuf': workspace:^0.92.0
-      '@wundergraph/wunderctl': workspace:^0.103.0
+      '@wundergraph/wunderctl': workspace:^0.104.0
       axios: ^0.26.1
       chai: ^4.3.4
       colors: ^1.4.0
@@ -2444,6 +2446,19 @@ packages:
       semver: 7.3.7
     dev: true
 
+  /@release-it/conventional-changelog/5.1.0_release-it@15.4.1:
+    resolution: {integrity: sha512-o55D822tVIoldUDj1Fp1KvenVREcEEjYOyuVNwRVnTcExFN6nWUPrH05q7Y8opT23N5snuCwPJ5bzLPEcpBvRg==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      release-it: ^15.3.0
+    dependencies:
+      concat-stream: 2.0.0
+      conventional-changelog: 3.1.25
+      conventional-recommended-bump: 6.1.0
+      release-it: 15.4.1
+      semver: 7.3.7
+    dev: true
+
   /@remix-run/web-blob/3.0.4:
     resolution: {integrity: sha512-AfegzZvSSDc+LwnXV+SwROTrDtoLiPxeFW+jxgvtDAnkuCX1rrzmVJ6CzqZ1Ai0bVfmJadkG5GxtAfYclpPmgw==}
     dependencies:
@@ -4081,6 +4096,29 @@ packages:
       q: 1.5.1
     dev: true
 
+  /conventional-changelog-atom/2.0.8:
+    resolution: {integrity: sha512-xo6v46icsFTK3bb7dY/8m2qvc8sZemRgdqLb/bjpBsH2UyOS8rKNTgcb5025Hri6IpANPApbXMg15QLb1LJpBw==}
+    engines: {node: '>=10'}
+    dependencies:
+      q: 1.5.1
+    dev: true
+
+  /conventional-changelog-codemirror/2.0.8:
+    resolution: {integrity: sha512-z5DAsn3uj1Vfp7po3gpt2Boc+Bdwmw2++ZHa5Ak9k0UKsYAO5mH1UBTN0qSCuJZREIhX6WU4E1p3IW2oRCNzQw==}
+    engines: {node: '>=10'}
+    dependencies:
+      q: 1.5.1
+    dev: true
+
+  /conventional-changelog-conventionalcommits/4.6.3:
+    resolution: {integrity: sha512-LTTQV4fwOM4oLPad317V/QNQ1FY4Hju5qeBIM1uTHbrnCE+Eg4CdRZ3gO2pUeR+tzWdp80M2j3qFFEDWVqOV4g==}
+    engines: {node: '>=10'}
+    dependencies:
+      compare-func: 2.0.0
+      lodash: 4.17.21
+      q: 1.5.1
+    dev: true
+
   /conventional-changelog-conventionalcommits/5.0.0:
     resolution: {integrity: sha512-lCDbA+ZqVFQGUj7h9QBKoIpLhl8iihkO0nCTyRNzuXtcd7ubODpYB04IFy31JloiJgG0Uovu8ot8oxRzn7Nwtw==}
     engines: {node: '>=10'}
@@ -4110,6 +4148,42 @@ packages:
       through2: 4.0.2
     dev: true
 
+  /conventional-changelog-ember/2.0.9:
+    resolution: {integrity: sha512-ulzIReoZEvZCBDhcNYfDIsLTHzYHc7awh+eI44ZtV5cx6LVxLlVtEmcO+2/kGIHGtw+qVabJYjdI5cJOQgXh1A==}
+    engines: {node: '>=10'}
+    dependencies:
+      q: 1.5.1
+    dev: true
+
+  /conventional-changelog-eslint/3.0.9:
+    resolution: {integrity: sha512-6NpUCMgU8qmWmyAMSZO5NrRd7rTgErjrm4VASam2u5jrZS0n38V7Y9CzTtLT2qwz5xEChDR4BduoWIr8TfwvXA==}
+    engines: {node: '>=10'}
+    dependencies:
+      q: 1.5.1
+    dev: true
+
+  /conventional-changelog-express/2.0.6:
+    resolution: {integrity: sha512-SDez2f3iVJw6V563O3pRtNwXtQaSmEfTCaTBPCqn0oG0mfkq0rX4hHBq5P7De2MncoRixrALj3u3oQsNK+Q0pQ==}
+    engines: {node: '>=10'}
+    dependencies:
+      q: 1.5.1
+    dev: true
+
+  /conventional-changelog-jquery/3.0.11:
+    resolution: {integrity: sha512-x8AWz5/Td55F7+o/9LQ6cQIPwrCjfJQ5Zmfqi8thwUEKHstEn4kTIofXub7plf1xvFA2TqhZlq7fy5OmV6BOMw==}
+    engines: {node: '>=10'}
+    dependencies:
+      q: 1.5.1
+    dev: true
+
+  /conventional-changelog-jshint/2.0.9:
+    resolution: {integrity: sha512-wMLdaIzq6TNnMHMy31hql02OEQ8nCQfExw1SE0hYL5KvU+JCTuPaDO+7JiogGT2gJAxiUGATdtYYfh+nT+6riA==}
+    engines: {node: '>=10'}
+    dependencies:
+      compare-func: 2.0.0
+      q: 1.5.1
+    dev: true
+
   /conventional-changelog-preset-loader/2.3.4:
     resolution: {integrity: sha512-GEKRWkrSAZeTq5+YjUZOYxdHq+ci4dNwHvpaBC3+ENalzFWuCWa9EZXSuZBpkr72sMdKB+1fyDV4takK1Lf58g==}
     engines: {node: '>=10'}
@@ -4129,6 +4203,23 @@ packages:
       semver: 6.3.0
       split: 1.0.1
       through2: 4.0.2
+    dev: true
+
+  /conventional-changelog/3.1.25:
+    resolution: {integrity: sha512-ryhi3fd1mKf3fSjbLXOfK2D06YwKNic1nC9mWqybBHdObPd8KJ2vjaXZfYj1U23t+V8T8n0d7gwnc9XbIdFbyQ==}
+    engines: {node: '>=10'}
+    dependencies:
+      conventional-changelog-angular: 5.0.13
+      conventional-changelog-atom: 2.0.8
+      conventional-changelog-codemirror: 2.0.8
+      conventional-changelog-conventionalcommits: 4.6.3
+      conventional-changelog-core: 4.2.4
+      conventional-changelog-ember: 2.0.9
+      conventional-changelog-eslint: 3.0.9
+      conventional-changelog-express: 2.0.6
+      conventional-changelog-jquery: 3.0.11
+      conventional-changelog-jshint: 2.0.9
+      conventional-changelog-preset-loader: 2.3.4
     dev: true
 
   /conventional-commits-filter/2.0.7:
@@ -11295,11 +11386,11 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  file:packages/nextjs_qurro4if4yvzuexcfppsnvmhce:
+  file:packages/nextjs_nlpdj2wm4czkadmbosant5ih2i:
     resolution: {directory: packages/nextjs, type: directory}
     id: file:packages/nextjs
     name: '@wundergraph/nextjs'
-    version: 0.1.8
+    version: 0.1.9
     peerDependencies:
       '@wundergraph/sdk': '>=0.91.0'
       react: ^16.8.0 || ^17.0.2 || ^18.0.0
@@ -11324,7 +11415,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.102.0
+    version: 0.103.0
     hasBin: true
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
