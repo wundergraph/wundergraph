@@ -167,7 +167,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		//const debug = print(filtered);
+		// const debug = print(filtered);
 		const schema = buildASTSchema(filtered);
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -403,18 +403,26 @@ class RESTApiBuilder {
 			const componentSchema = resolved.schema;
 			ref = resolved.ref;
 			let fieldTypeName = ref;
+
 			if (objectKind === 'input') {
 				fieldTypeName = `${fieldTypeName}Input`;
 			}
+
+			const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
 			if (argumentName) {
-				this.addArgument(parentTypeName, fieldName, argumentName, fieldTypeName, enclosingTypes);
+				this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
 			} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
 				fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
 				this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
 			} else {
-				this.addField(parentTypeName, objectKind, fieldName, fieldTypeName, enclosingTypes);
+				this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
 			}
-			const created = this.ensureType(componentSchema.enum ? 'enum' : objectKind, fieldTypeName);
+			if (isIntEnum) return;
+
+			const created = this.ensureType(
+				componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
+				fieldTypeName
+			);
 			if (!created) {
 				return;
 			}
@@ -502,6 +510,10 @@ class RESTApiBuilder {
 				return;
 			case 'object':
 				if (!schema.properties) {
+					if (schema?.additionalProperties && schema.additionalProperties !== false) {
+						this.ensureType('scalar', 'JSON');
+						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);
+					}
 					return;
 				}
 				if (argumentName) {
