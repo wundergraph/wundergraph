@@ -3,8 +3,6 @@ package apihandler
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,6 +27,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/wundergraph/wundergraph/pkg/apiconfig"
 	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -1815,28 +1814,20 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		jwksProviders                 []*wgpb.JwksAuthProvider
 	)
 
-	if r.devMode {
-		hashKey = r.staticInsecureSecret(11)
-		blockKey = r.staticInsecureSecret(32)
-		csrfSecret = r.staticInsecureSecret(32)
-	} else {
-		if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-			hashKey = []byte(h)
-		} else {
-			hashKey = r.generateSecret(11)
-		}
+	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
+		hashKey = []byte(h)
+	}
 
-		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-			blockKey = []byte(b)
-		} else {
-			blockKey = r.generateSecret(32)
-		}
+	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
+		blockKey = []byte(b)
+	}
 
-		if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-			csrfSecret = []byte(b)
-		} else {
-			csrfSecret = r.generateSecret(32)
-		}
+	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
+		csrfSecret = []byte(b)
+	}
+
+	if apiconfig.HasCookieAuthEnabled(r.api) && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
+		panic("hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
@@ -1880,22 +1871,6 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
 	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, pathPrefix)
-}
-
-func (r *Builder) staticInsecureSecret(length int) []byte {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = 'a'
-	}
-	return b
-}
-
-func (r *Builder) generateSecret(length int) []byte {
-	b := make([]byte, length)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return nil
-	}
-	return []byte(base64.RawURLEncoding.EncodeToString(b))[:length]
 }
 
 func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, pathPrefix string) {
