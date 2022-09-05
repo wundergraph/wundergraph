@@ -2,7 +2,7 @@
 export const template = `
 import type { HooksConfig } from "./wundergraph.hooks";
 import type { InternalClient } from "./wundergraph.internal.client"
-import type { GraphQLServerConfig, BaseContext, WunderGraphUser } from "@wundergraph/sdk";
+import type { GraphQLServerConfig, BaseRequestContext, WunderGraphUser } from "@wundergraph/sdk";
 
 export type Role = {{{ roleDefinitions }}};
 
@@ -19,6 +19,6 @@ export interface OutputConfig {
 }
 
 export interface GraphQLExecutionContext {
-    wundergraph: BaseContext<User, InternalClient>;
+    wundergraph: BaseRequestContext<User, InternalClient>;
 }
 `;

@@ -14,14 +14,15 @@ declare module 'fastify' {
 }
 
 export interface FastifyRequestContext<User = any, IC = InternalClient> {
-	ctx: BaseContext<User, IC>;
+	ctx: BaseRequestContext<User, IC> & AuthRequestContext;
 }
 
-export interface BaseContext<User = any, IC = InternalClient> {
+export interface BaseRequestContext<User = any, IC = InternalClient> {
 	/**
 	 * The user that is currently logged in.
 	 */
 	user?: User;
+
 	clientRequest: ClientRequest;
 	/**
 	 * The request logger.
@@ -31,6 +32,13 @@ export interface BaseContext<User = any, IC = InternalClient> {
 	 * The internal client that is used to communicate with the server.
 	 */
 	internalClient: IC;
+}
+
+export interface AuthRequestContext<User = any> {
+	/**
+	 * The user that is currently logged in.
+	 */
+	user: User;
 }
 
 export interface ClientRequestHeaders extends Headers {}
@@ -115,4 +123,16 @@ export interface WunderGraphHooksAndServerConfig<
 	hooks?: GeneratedHooksConfig;
 	// url of the server is set internally by the hooks server
 	graphqlServers?: (GraphQLServerConfig & { url: string })[];
+}
+
+export type AuthenticationResponse<User> = AuthenticationOK<User> | AuthenticationDeny;
+
+export interface AuthenticationOK<User = any> {
+	status: 'ok';
+	user: User;
+}
+
+export interface AuthenticationDeny {
+	status: 'deny';
+	message: string;
 }

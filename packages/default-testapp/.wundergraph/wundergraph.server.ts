@@ -5,10 +5,7 @@ import type { InternalClient } from './generated/wundergraph.internal.client';
 import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
 	buildSchema,
-	GraphQLBoolean,
 	GraphQLEnumType,
-	GraphQLInt,
-	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
 	GraphQLSchema,
@@ -61,16 +58,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 						console.log('onOriginResponse headers', response.headers);
 						return 'skip';
 					},
-				},
-			},
-		},
-		queries: {
-			OperationWithInternalVariable: {
-				mutatingPreResolve: async ({ input }) => {
-					return {
-						country: 'DE',
-						city: input.city,
-					};
 				},
 			},
 		},
