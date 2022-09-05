@@ -1,11 +1,11 @@
 //language=handlebars
 export const template = `
 import { {{ modelImports }} } from "./models"
-import type { BaseRequestContext, AuthRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse } from "@wundergraph/sdk";
+import type { BaseRequestContext, AuthenticationRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse } from "@wundergraph/sdk";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 
-export type AuthenticationHookRequest = BaseRequestContext<User, InternalClient> & AuthRequestContext<User>
+export type AuthenticationHookRequest = BaseRequestContext<User, InternalClient> & AuthenticationRequestContext<User>
 
 // use SKIP to skip the hook and continue the request / response chain without modifying the request / response
 export type SKIP = "skip";

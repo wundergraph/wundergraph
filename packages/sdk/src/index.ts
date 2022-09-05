@@ -18,7 +18,7 @@ export type {
 	WunderGraphResponse,
 	WunderGraphUser,
 	BaseRequestContext,
-	AuthRequestContext,
+	AuthenticationRequestContext,
 	AuthenticationResponse,
 	ClientRequest,
 	WunderGraphHooksAndServerConfig,
