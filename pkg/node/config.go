@@ -17,8 +17,8 @@ type Server struct {
 }
 
 type WunderNodeConfig struct {
-	Server *Server         `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
-	Api    *apihandler.Api `protobuf:"bytes,3,rep,name=apis,proto3" json:"apis,omitempty"`
+	Server *Server
+	Api    *apihandler.Api
 }
 
 func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {

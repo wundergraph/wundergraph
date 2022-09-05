@@ -30,7 +30,7 @@ type InternalBuilder struct {
 	pool            *pool.Pool
 	log             abstractlogger.Logger
 	loader          *engineconfigloader.EngineConfigLoader
-	api             *wgpb.Api
+	api             *Api
 	planConfig      plan.Configuration
 	resolver        *resolve.Resolver
 	definition      *ast.Document
@@ -46,7 +46,7 @@ func NewInternalBuilder(pool *pool.Pool, log abstractlogger.Logger, loader *engi
 	}
 }
 
-func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *wgpb.Api) (streamClosers []chan struct{}, err error) {
+func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
 
 	if api.EngineConfiguration == nil {
 		// engine config is nil, skipping
