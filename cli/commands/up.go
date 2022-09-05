@@ -24,17 +24,7 @@ import (
 )
 
 var (
-	nodeListenAddr          string
-	serverHost              string
-	serverListenPort        int
 	clearIntrospectionCache bool
-)
-
-const (
-	NodeListenAddrFlagName       = "listen-addr"
-	MiddlewareListenPortFlagName = "middleware-listen-port"
-	ServerHostFlagName           = "server-host"
-	ServerListenPortFlagName     = "server-listen-port"
 )
 
 // upCmd represents the up command
@@ -61,7 +51,7 @@ var upCmd = &cobra.Command{
 		// this leads to the middleware hooks server (sub-process) not being killed
 		// on subsequent runs of the up command, we're not able to listen on the same port
 		// so we kill the existing hooks process before we start the new one
-		killExistingHooksProcess()
+		killExistingHooksProcess(9992)
 
 		quit := make(chan os.Signal, 2)
 		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
@@ -97,19 +87,13 @@ var upCmd = &cobra.Command{
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 
-		wgEnvVars := append(os.Environ(),
-			fmt.Sprintf("WG_SERVER_PORT=%d", serverListenPort),
-			fmt.Sprintf("WG_SERVER_HOST=%s", serverHost),
-			fmt.Sprintf("WG_NODE_URL=%s", fmt.Sprintf("http://%s", nodeListenAddr)),
-		)
-
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
 			AbsWorkingDir: wgDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(wgEnvVars,
+			ScriptEnv: append(os.Environ(),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
 			),
 		})
@@ -121,7 +105,7 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wgDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(wgEnvVars,
+			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 			),
@@ -163,11 +147,7 @@ var upCmd = &cobra.Command{
 			}
 
 			srvCfg := &runners.ServerRunConfig{
-				EnableDebugMode:   enableDebugMode,
 				WunderGraphDirAbs: wgDir,
-				ServerListenPort:  serverListenPort,
-				ServerHost:        serverHost,
-				NodeUrl:           fmt.Sprintf("http://%s", nodeListenAddr),
 				ServerScriptFile:  serverOutFile,
 			}
 
@@ -322,29 +302,20 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	upCmd.Flags().StringVar(&nodeListenAddr, NodeListenAddrFlagName, "localhost:9991", fmt.Sprintf("%s is the host:port combination, WunderGraph should listen on.", NodeListenAddrFlagName))
-	upCmd.Flags().IntVar(&serverListenPort, MiddlewareListenPortFlagName, 9992, fmt.Sprintf("%s is the port which the WunderGraph middleware will bind to", MiddlewareListenPortFlagName))
-	upCmd.Flags().IntVar(&serverListenPort, ServerListenPortFlagName, 9992, fmt.Sprintf("%s is the port which the WunderGraph middleware will bind to", ServerListenPortFlagName))
-	upCmd.Flags().StringVar(&serverHost, ServerHostFlagName, "127.0.0.1", fmt.Sprintf("%s is the host which the WunderGraph middleware will bind to", ServerHostFlagName))
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
-	upCmd.Flags().StringVarP(&configJsonFilename, "config", "c", "wundergraph.config.json", "filename to the generated wundergraph config")
-	upCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to the node config")
-	upCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to the server config")
-
-	_ = upCmd.Flags().MarkDeprecated(MiddlewareListenPortFlagName, fmt.Sprintf("%s is deprecated please use %s instead", MiddlewareListenPortFlagName, ServerListenPortFlagName))
 }
 
-func killExistingHooksProcess() {
+func killExistingHooksProcess(serverListenPort int) {
 	if runtime.GOOS == "windows" {
 		command := fmt.Sprintf("(Get-NetTCPConnection -LocalPort %d).OwningProcess -Force", serverListenPort)
-		execCmd(exec.Command("Stop-Process", "-Id", command))
+		execCmd(exec.Command("Stop-Process", "-Id", command), serverListenPort)
 	} else {
 		command := fmt.Sprintf("lsof -i tcp:%d | grep LISTEN | awk '{print $2}' | xargs kill -9", serverListenPort)
-		execCmd(exec.Command("bash", "-c", command))
+		execCmd(exec.Command("bash", "-c", command), serverListenPort)
 	}
 }
 
-func execCmd(cmd *exec.Cmd) {
+func execCmd(cmd *exec.Cmd, serverListenPort int) {
 	var waitStatus syscall.WaitStatus
 	if err := cmd.Run(); err != nil {
 		if err != nil {
@@ -357,7 +328,6 @@ func execCmd(cmd *exec.Cmd) {
 	} else {
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
 		log.Debug("Successfully killed existing middleware process",
-			abstractlogger.String("host", serverHost),
 			abstractlogger.Int("port", serverListenPort),
 		)
 	}

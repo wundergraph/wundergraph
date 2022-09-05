@@ -11,8 +11,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
-const EnvVarWGPrefix = "WG"
-
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Subcommand to work with WunderGraph middleware server",
@@ -44,7 +42,6 @@ var serverStartCmd = &cobra.Command{
 		defer cancel()
 
 		srvCfg := &runners.ServerRunConfig{
-			EnableDebugMode:   enableDebugMode,
 			WunderGraphDirAbs: wgDir,
 			ServerScriptFile:  serverScriptFile,
 		}

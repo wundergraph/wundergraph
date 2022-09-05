@@ -64,7 +64,7 @@ var nodeStartCmd = &cobra.Command{
 		gracefulTimeoutSeconds := 10
 		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeoutSeconds)
 
-		wunderNodeConfig := node.CreateConfig(graphConfig, wgpb.LogLevel_ERROR)
+		wunderNodeConfig := node.CreateConfig(&graphConfig)
 
 		n := node.New(ctx, BuildInfo, log)
 

@@ -55,9 +55,6 @@ Use this command if you only want to generate the configuration`,
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
-				fmt.Sprintf("WG_SERVER_HOST=%s", serverHost),
-				fmt.Sprintf("WG_SERVER_PORT=%d", serverListenPort),
-				fmt.Sprintf("WG_NODE_URL=%s", fmt.Sprintf("http://%s", nodeListenAddr)),
 			),
 		})
 		defer func() {
@@ -172,14 +169,5 @@ Use this command if you only want to generate the configuration`,
 
 func init() {
 	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
-	generateCmd.Flags().StringVar(&nodeListenAddr, NodeListenAddrFlagName, "localhost:9991", fmt.Sprintf("%s is the host:port combination, WunderGraph should listen on.", NodeListenAddrFlagName))
-	generateCmd.Flags().IntVar(&serverListenPort, MiddlewareListenPortFlagName, 9992, fmt.Sprintf("%s is the port which the WunderGraph middleware will bind to", MiddlewareListenPortFlagName))
-	generateCmd.Flags().IntVar(&serverListenPort, ServerListenPortFlagName, 9992, fmt.Sprintf("%s is the port which the WunderGraph middleware will bind to", ServerListenPortFlagName))
-	generateCmd.Flags().StringVar(&serverHost, ServerHostFlagName, "127.0.0.1", fmt.Sprintf("%s is the host which the WunderGraph middleware will bind to", ServerHostFlagName))
-	generateCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
-	generateCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
-
-	_ = generateCmd.Flags().MarkDeprecated(MiddlewareListenPortFlagName, fmt.Sprintf("%s is deprecated please use %s instead", MiddlewareListenPortFlagName, ServerListenPortFlagName))
-
 	rootCmd.AddCommand(generateCmd)
 }

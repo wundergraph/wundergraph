@@ -9,6 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
+
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -17,10 +18,17 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
+
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
+)
+
+const (
+	configJsonFilename       = "wundergraph.config.json"
+	configEntryPointFilename = "wundergraph.config.ts"
+	serverEntryPointFilename = "wundergraph.server.ts"
 )
 
 var (
@@ -33,9 +41,6 @@ var (
 	jsonEncodedLogging bool
 	serviceToken       string
 	wundergraphDir     string
-
-	configEntryPointFilename string
-	serverEntryPointFilename string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
