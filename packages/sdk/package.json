@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.103.0",
+  "version": "0.103.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
