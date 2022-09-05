@@ -24,6 +24,8 @@ import {
 	DataSourceConfiguration,
 	DataSourceKind,
 	FieldConfiguration,
+	LogLevel,
+	logLevelFromJSON,
 	Operation,
 	OperationType,
 	PostResolveTransformationKind,
@@ -96,6 +98,19 @@ export const resolveVariable = (variable: string | EnvironmentVariable): string 
 	return variable;
 };
 
+export const resolveConfigurationVariable = (variable: ConfigurationVariable): string => {
+	switch (variable.kind) {
+		case ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE:
+			return variable.staticVariableContent;
+		case ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE:
+			return resolveVariable(
+				new EnvironmentVariable(variable.environmentVariableName, variable.environmentVariableDefaultValue)
+			);
+		case ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE:
+			throw `Placeholder ${variable.placeholderVariableName} should be replaced with a real value`;
+	}
+};
+
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
 	allowedMethods?: string[];
@@ -105,21 +120,35 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
-export interface HttpConfiguration {
-	listener: HttpListenerConfiguration;
-	publicUrl: InputVariable;
+export interface NodeLogger {
+	level?: InputVariable;
 }
 
-export interface HttpListenerConfiguration {
-	host: InputVariable;
-	port: InputVariable;
+export interface ServerLogger {
+	level?: InputVariable;
+}
+
+export interface ListenOptions {
+	host?: InputVariable;
+	port?: InputVariable;
+}
+
+export interface ServerOptions {
+	serverUrl?: InputVariable;
+	listen?: ListenOptions;
+	logger?: ServerLogger;
+}
+
+export interface NodeOptions {
+	nodeUrl?: InputVariable;
+	listen?: ListenOptions;
+	logger?: NodeLogger;
 }
 
 export interface WunderGraphConfigApplicationConfig {
 	application: Application;
 	codeGenerators?: CodeGen[];
-	serverConfiguration: HttpConfiguration;
-	nodeConfiguration: HttpConfiguration;
+	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
 	cors: WunderGraphCorsConfiguration;
 	s3UploadProvider?: S3Provider;
@@ -255,8 +284,6 @@ export interface ResolvedApplication {
 	Operations: GraphQLOperation[];
 	CorsConfiguration: CorsConfiguration;
 	S3UploadProvider: S3Provider;
-	ServerConfiguration: HttpConfiguration;
-	NodeConfiguration: HttpConfiguration;
 }
 
 interface ResolvedDeployment {
@@ -310,7 +337,122 @@ export interface ResolvedWunderGraphConfig {
 	};
 	interpolateVariableDefinitionAsJSON: string[];
 	webhooks: WebhookConfiguration[];
+	nodeOptions: ResolvedNodeOptions;
+	serverOptions?: ResolvedServerOptions;
 }
+
+export interface ResolvedServerLogger {
+	level: LogLevel;
+}
+
+export interface ResolvedNodeLogger {
+	level: LogLevel;
+}
+
+export interface ResolvedListenOptions {
+	host: ConfigurationVariable;
+	port: ConfigurationVariable;
+}
+
+export interface ResolvedServerOptions {
+	serverUrl: ConfigurationVariable;
+	listen: ResolvedListenOptions;
+	logger: ResolvedServerLogger;
+}
+
+export interface ResolvedNodeOptions {
+	nodeUrl: ConfigurationVariable;
+	listen: ResolvedListenOptions;
+	logger: ResolvedNodeLogger;
+}
+
+const resolveLogLevel = (level: ConfigurationVariable): LogLevel => {
+	const stringLevel = resolveConfigurationVariable(level);
+
+	return logLevelFromJSON(stringLevel);
+};
+
+const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
+	if (!options) {
+		options = {};
+	}
+
+	if (!options.nodeUrl) {
+		options.nodeUrl = new EnvironmentVariable('WG_NODE_URL', 'http://localhost:9991');
+	}
+
+	if (!options.listen) {
+		options.listen = {};
+	}
+
+	if (!options.listen.host) {
+		options.listen.host = new EnvironmentVariable('WG_NODE_HOST', '127.0.0.1');
+	}
+
+	if (!options.listen.port) {
+		options.listen.port = new EnvironmentVariable('WG_NODE_PORT', '9991');
+	}
+
+	if (!options.logger) {
+		options.logger = {};
+	}
+
+	if (!options.logger.level) {
+		options.logger.level = new EnvironmentVariable('WG_LOG_LEVEL', 'WARN');
+	}
+
+	return {
+		nodeUrl: mapInputVariable(options.nodeUrl),
+		listen: {
+			host: mapInputVariable(options.listen.host),
+			port: mapInputVariable(options.listen.port),
+		},
+		logger: {
+			level: resolveLogLevel(mapInputVariable(options.logger.level)),
+		},
+	};
+};
+
+const resolveServerOptions = (options: ServerOptions): ResolvedServerOptions => {
+	if (!options) {
+		options = {};
+	}
+
+	if (!options.serverUrl) {
+		options.serverUrl = new EnvironmentVariable('WG_SERVER_URL', 'http://localhost:9992');
+	}
+
+	if (!options.listen) {
+		options.listen = {};
+	}
+
+	if (!options.listen.host) {
+		options.listen.host = new EnvironmentVariable('WG_NODE_HOST', '127.0.0.1');
+	}
+
+	if (!options.listen.port) {
+		options.listen.port = new EnvironmentVariable('WG_NODE_PORT', '9992');
+	}
+
+	if (!options.logger) {
+		options.logger = {};
+	}
+
+	if (!options.logger.level) {
+		options.logger.level = new EnvironmentVariable('WG_LOG_LEVEL', 'WARN');
+	}
+
+	return {
+		serverUrl: mapInputVariable(options.serverUrl),
+		listen: {
+			host: mapInputVariable(options.listen.host),
+			port: mapInputVariable(options.listen.port),
+		},
+		logger: {
+			level: resolveLogLevel(mapInputVariable(options.logger.level)),
+		},
+	};
+};
 
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
 	const api = {
@@ -318,9 +460,10 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		name: config.application.name,
 	};
 
-	const name = 'main';
+	const nodeOptions = resolveNodeOptions(config.options);
 
-	const nodeUrl = resolveVariable(config.nodeConfiguration.publicUrl);
+	const name = 'main';
+	const nodeUrl = resolveConfigurationVariable(nodeOptions.nodeUrl);
 
 	const environment = {
 		id: '',
@@ -364,16 +507,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const apps = [config.application];
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = (
-		await resolveApplications(
-			roles,
-			apps,
-			cors,
-			config.serverConfiguration,
-			config.nodeConfiguration,
-			config.s3UploadProvider || []
-		)
-	)[0];
+	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -435,6 +569,8 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		},
 		interpolateVariableDefinitionAsJSON: resolved.EngineConfiguration.interpolateVariableDefinitionAsJSON,
 		webhooks: [],
+		nodeOptions: nodeOptions,
+		serverOptions: config.server ? resolveServerOptions(config.server.options) : undefined,
 	};
 
 	if (config.links) {
@@ -640,8 +776,6 @@ const resolveApplications = async (
 	roles: string[],
 	applications: Application[],
 	cors: CorsConfiguration,
-	serverConfiguration: HttpConfiguration,
-	nodeConfiguration: HttpConfiguration,
 	s3: S3Provider
 ): Promise<ResolvedApplication[]> => {
 	const out: ResolvedApplication[] = [];
@@ -655,8 +789,6 @@ const resolveApplications = async (
 			Operations: [],
 			CorsConfiguration: cors,
 			S3UploadProvider: s3,
-			ServerConfiguration: serverConfiguration,
-			NodeConfiguration: nodeConfiguration,
 		});
 	}
 	return out;
@@ -891,7 +1023,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 		done();
 
-		const nodeUrl = resolveVariable(config.nodeConfiguration.publicUrl);
+		const nodeUrl = resolveConfigurationVariable(resolved.nodeOptions.nodeUrl);
 
 		const dotGraphQLNested =
 			config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
@@ -1033,20 +1165,8 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 			},
 			allowedHostNames: config.security.allowedHostNames,
 			webhooks: config.webhooks,
-			server: {
-				listener: {
-					host: mapInputVariable(config.application.ServerConfiguration.listener.host),
-					port: mapInputVariable(config.application.ServerConfiguration.listener.port),
-				},
-				publicUrl: mapInputVariable(config.application.ServerConfiguration.publicUrl),
-			},
-			node: {
-				listener: {
-					host: mapInputVariable(config.application.NodeConfiguration.listener.host),
-					port: mapInputVariable(config.application.NodeConfiguration.listener.port),
-				},
-				publicUrl: mapInputVariable(config.application.NodeConfiguration.publicUrl),
-			},
+			nodeOptions: config.nodeOptions,
+			serverOptions: config.serverOptions,
 		},
 		dangerouslyEnableGraphQLEndpoint: config.enableGraphQLEndpoint,
 	};

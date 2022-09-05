@@ -50,18 +50,6 @@ message Api {
 	ApiAuthenticationConfig authenticationConfig = 12;
 	repeated S3UploadConfiguration s3UploadConfiguration = 13;
 	repeated WebhookConfiguration webhooks = 14;
-	ServerConfiguration server = 16;
-	ServerConfiguration node = 17;
-}
-
-message ServerConfiguration {
-	ListenerConfiguration listener = 1;
-	string publicUrl = 2;
-}
-
-message ListenerConfiguration {
-	string host  = 1;
-	int64 port = 2;
 }
 
 message ApiAuthenticationConfig {
@@ -485,18 +473,29 @@ message UserDefinedApi {
 	repeated S3UploadConfiguration s3UploadConfiguration = 9;
 	repeated ConfigurationVariable allowedHostNames = 11;
 	repeated WebhookConfiguration webhooks = 12;
-	ApiServerConfiguration server = 14;
-	ApiServerConfiguration node = 15;
+	ServerOptions serverOptions = 14;
+	NodeOptions nodeOptions = 15;
 }
 
-message ApiServerConfiguration {
-	ApiListenerConfiguration listener = 1;
-	ConfigurationVariable publicUrl = 2;
-}
-
-message ApiListenerConfiguration {
+message ListenerOptions {
 	ConfigurationVariable host  = 1;
 	ConfigurationVariable port = 2;
+}
+
+message NodeOptions {
+	ConfigurationVariable nodeUrl = 1;
+	ListenerOptions listen = 2;
+	Logging logger = 3;
+}
+
+message ServerLogging {
+	LogLevel level = 1;
+}
+
+message ServerOptions {
+	ConfigurationVariable serverUrl = 1;
+	ListenerOptions listen = 2;
+	ServerLogging logger = 3;
 }
 
 message WebhookConfiguration {

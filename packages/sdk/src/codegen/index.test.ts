@@ -2,7 +2,7 @@ import { CodeGenOutWriter, GenerateCode, Template, TemplateOutputFile } from './
 import { Api } from '../definition';
 import { mapInputVariable, ResolvedWunderGraphConfig } from '../configure';
 import { assert } from 'chai';
-import { OperationType } from '@wundergraph/protobuf';
+import { ConfigurationVariable, ConfigurationVariableKind, LogLevel, OperationType } from '@wundergraph/protobuf';
 
 class FakeTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -44,22 +44,64 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 			wunderGraphConfig: {
 				sdkVersion: 'unknown',
 				webhooks: [],
+				nodeOptions: {
+					nodeUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9991',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					listen: {
+						host: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '127.0.0.1',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9991',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					logger: {
+						level: LogLevel.INFO,
+					},
+				},
+				serverOptions: {
+					serverUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9992',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					listen: {
+						host: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '127.0.0.1',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9992',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					logger: {
+						level: LogLevel.INFO,
+					},
+				},
 				application: {
 					Name: 'Test',
-					NodeConfiguration: {
-						listener: {
-							host: '127.0.0.1',
-							port: '9991',
-						},
-						publicUrl: 'http://localhost:9991',
-					},
-					ServerConfiguration: {
-						listener: {
-							host: '127.0.0.1',
-							port: '9992',
-						},
-						publicUrl: 'http://localhost:9992',
-					},
 					EngineConfiguration: new Api<any>('', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
