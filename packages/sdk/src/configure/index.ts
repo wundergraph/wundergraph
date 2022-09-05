@@ -427,11 +427,11 @@ const resolveServerOptions = (options: ServerOptions): ResolvedServerOptions => 
 	}
 
 	if (!options.listen.host) {
-		options.listen.host = new EnvironmentVariable('WG_NODE_HOST', '127.0.0.1');
+		options.listen.host = new EnvironmentVariable('WG_SERVER_HOST', '127.0.0.1');
 	}
 
 	if (!options.listen.port) {
-		options.listen.port = new EnvironmentVariable('WG_NODE_PORT', '9992');
+		options.listen.port = new EnvironmentVariable('WG_SERVER_PORT', '9992');
 	}
 
 	if (!options.logger) {
