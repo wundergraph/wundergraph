@@ -72,6 +72,7 @@ If used without --exclude-server, make sure the server is available in this dire
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
+				"NODE_ENV=production",
 				fmt.Sprintf("WG_ABS_DIR=%s", wgDir),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),

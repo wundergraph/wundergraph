@@ -614,6 +614,7 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
+	const isIntrospectionCacheEnabled = IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true;
 	const cacheKey = objectHash(introspection);
 
 	/**
@@ -636,14 +637,14 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	}
 
 	/**
-	 * This is the regular path to introspect the API and return the result.
-	 * By default we try to early return with a cached introspection result.
+	 * The introspection cache is only used in development mode `wunderctl up`.
+	 * We try to early return with a cached introspection result.
 	 * When the user runs `wunderctl up` for the first time, we disable the cache
-	 * so the user can be sure that the introspection is up to date. If the API is down
-	 * the cache will not be updated and we will fallback to the old introspection result (if possible).
+	 * so the user can be sure that the introspection is up to date. If the API is down during development
+	 * we try to fallback to the previous introspection result.
 	 */
 
-	if (IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true) {
+	if (isIntrospectionCacheEnabled) {
 		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 		if (cacheEntryString) {
 			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
@@ -656,17 +657,29 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	try {
 		// generate introspection from scratch
 		const api = await generator(introspection);
-		const cacheEntry = toCacheEntry<A>(api);
-		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+
+		// prefill cache with new introspection result (Only in development).
+		if (process.env.NODE_ENV !== 'production') {
+			try {
+				const cacheEntry = toCacheEntry<A>(api);
+				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+			} catch (e) {}
+		}
+
 		return api;
 	} catch (e) {
 		console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
-		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-		if (cacheEntryString) {
-			console.log('Fallback to old introspection result');
-			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-			return fromCacheEntry<A>(cacheEntry);
+
+		// fallback to old introspection result (Only in development).
+		if (process.env.NODE_ENV !== 'production') {
+			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+			if (cacheEntryString) {
+				console.log('Fallback to old introspection result');
+				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+				return fromCacheEntry<A>(cacheEntry);
+			}
 		}
+
 		console.log('Could not fallback to old introspection result');
 		throw e;
 	}

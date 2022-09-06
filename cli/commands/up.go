@@ -113,6 +113,7 @@ var upCmd = &cobra.Command{
 				"WG_ENABLE_INTROSPECTION_CACHE=false",
 			},
 			ScriptEnv: append(os.Environ(),
+				"NODE_ENV=development",
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -128,6 +129,7 @@ var upCmd = &cobra.Command{
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
+				"NODE_ENV=development",
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -171,6 +173,7 @@ var upCmd = &cobra.Command{
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
+				"NODE_ENV=development",
 				fmt.Sprintf("WG_ABS_DIR=%s", wgDir),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),

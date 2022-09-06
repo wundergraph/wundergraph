@@ -52,7 +52,11 @@ Use this command if you only want to generate the configuration`,
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wgDir,
 			Logger:        log,
-			ScriptEnv:     append(os.Environ(), fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish)),
+			ScriptEnv: append(
+				os.Environ(),
+				"NODE_ENV=production",
+				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
+			),
 		})
 		defer func() {
 			log.Debug("Stopping config-runner after WunderNode shutdown")
