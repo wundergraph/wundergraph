@@ -14,6 +14,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 

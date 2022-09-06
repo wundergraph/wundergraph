@@ -5,14 +5,15 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/jensneuse/abstractlogger"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"github.com/jensneuse/abstractlogger"
+
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 

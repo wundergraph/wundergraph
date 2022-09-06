@@ -15,6 +15,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/tidwall/sjson"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astnormalization"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"

@@ -20,6 +20,7 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
 

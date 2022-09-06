@@ -12,11 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
-	"golang.org/x/sync/errgroup"
-
 	"github.com/bep/debounce"
 	"github.com/fsnotify/fsnotify"
+	"github.com/jensneuse/abstractlogger"
+	"golang.org/x/sync/errgroup"
 )
 
 // build upon https://github.com/livebud/bud/blob/main/package/watcher/watcher.go

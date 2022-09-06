@@ -11,6 +11,7 @@ import (
 	"github.com/andybalholm/brotli"
 	"github.com/buger/jsonparser"
 	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 

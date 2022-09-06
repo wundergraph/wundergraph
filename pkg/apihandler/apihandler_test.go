@@ -10,16 +10,17 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
+
+	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-
-	"github.com/wundergraph/wundergraph/pkg/apicache"
-	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
 type FakeResolver struct {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/buger/jsonparser"
+
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 

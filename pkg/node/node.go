@@ -15,9 +15,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
+	"github.com/libp2p/go-reuseport"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
+	"golang.org/x/crypto/acme"
+	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/net/idna"
+	"golang.org/x/time/rate"
+
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -26,14 +33,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/net/idna"
-	"golang.org/x/time/rate"
-
-	"github.com/libp2p/go-reuseport"
-
-	"github.com/gorilla/mux"
 )
 
 func New(ctx context.Context, info BuildInfo, cfg *wundernodeconfig.Config, log abstractlogger.Logger) *Node {

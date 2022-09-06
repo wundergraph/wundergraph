@@ -14,6 +14,7 @@ type apiError struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
 }
+
 type Client struct {
 	accessToken string
 	baseURL     string

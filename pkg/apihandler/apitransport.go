@@ -13,13 +13,14 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"
+
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-
-	"github.com/wundergraph/wundergraph/pkg/authentication"
 )
 
 type ApiTransport struct {
