@@ -398,7 +398,7 @@ const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
 	}
 
 	if (!options.logger.level) {
-		options.logger.level = new EnvironmentVariable('WG_LOG_LEVEL', 'WARN');
+		options.logger.level = new EnvironmentVariable('WG_LOG_LEVEL', 'WARNING');
 	}
 
 	return {
@@ -439,7 +439,7 @@ const resolveServerOptions = (options: ServerOptions): ResolvedServerOptions => 
 	}
 
 	if (!options.logger.level) {
-		options.logger.level = new EnvironmentVariable('WG_LOG_LEVEL', 'WARN');
+		options.logger.level = new EnvironmentVariable('WG_LOG_LEVEL', 'WARNING');
 	}
 
 	return {
