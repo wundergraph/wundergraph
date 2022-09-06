@@ -46,13 +46,13 @@ require (
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.26.0
 	github.com/wundergraph/graphql-go-tools v1.52.1
-	github.com/wundergraph/wundergraph/types v0.0.0-00010101000000-000000000000
 	go.uber.org/zap v1.18.1
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
@@ -134,7 +134,6 @@ require (
 	golang.org/x/tools v0.0.0-20210106214847-113979e3529a // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

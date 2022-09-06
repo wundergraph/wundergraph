@@ -21,9 +21,9 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/securecookie"
 	"github.com/jensneuse/abstractlogger"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 )
 

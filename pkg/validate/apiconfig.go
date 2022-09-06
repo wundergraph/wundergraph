@@ -3,7 +3,7 @@ package validate
 import (
 	"github.com/wundergraph/wundergraph/pkg/apiconfig"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 // ApiConfig validates the Api
