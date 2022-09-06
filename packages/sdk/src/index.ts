@@ -74,6 +74,8 @@ export { configureWunderGraphServer } from './middleware/server';
 export { default as cors } from './cors';
 export { authProviders } from './configure/authentication';
 
+export { visitJSONSchema } from './codegen/index';
+
 export {
 	BaseTypeScriptDataModel,
 	formatTypeScript,

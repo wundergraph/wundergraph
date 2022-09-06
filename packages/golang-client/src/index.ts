@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile, visitJSONSchema } from '@wundergraph/sdk/dist/codegen';
+import { Template, TemplateOutputFile, visitJSONSchema } from '@wundergraph/sdk';
 import { ResolvedWunderGraphConfig } from '@wundergraph/sdk';
 import { hasInput } from '@wundergraph/sdk/dist/codegen/templates/typescript/react';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
