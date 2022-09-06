@@ -23,8 +23,7 @@
     "build": "pnpm generate && next build && pnpm check",
     "check": "tsc --noEmit",
     "nextDev": "next dev --port 3003",
-    "start": "next start --port 3003",
-    "wunderctl": "wunderctl"
+    "start": "next start --port 3003"
   },
   "dependencies": {
     "@wundergraph/nextjs": "workspace:*",
@@ -32,14 +31,6 @@
     "next": "^12.1.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
-  },
-  "dependenciesMeta": {
-    "@wundergraph/sdk": {
-      "injected": true
-    },
-    "@wundergraph/nextjs": {
-      "injected": true
-    }
   },
   "devDependencies": {
     "@types/node": "^17.0.27",
