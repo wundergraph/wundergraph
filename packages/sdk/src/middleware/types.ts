@@ -14,7 +14,7 @@ declare module 'fastify' {
 }
 
 export interface FastifyRequestContext<User = any, IC = InternalClient> {
-	ctx: BaseRequestContext<User, IC> & AuthenticationRequestContext;
+	ctx: BaseRequestContext<User, IC> & AuthenticationRequestContext<User>;
 }
 
 export interface BaseRequestContext<User = any, IC = InternalClient> {
