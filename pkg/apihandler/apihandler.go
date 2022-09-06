@@ -54,7 +54,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
 	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 const (

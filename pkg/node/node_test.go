@@ -23,7 +23,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/logging"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func TestNode(t *testing.T) {
