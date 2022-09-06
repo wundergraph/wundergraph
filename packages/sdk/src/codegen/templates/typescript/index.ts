@@ -131,19 +131,39 @@ export class BaseTypeScriptDataModel implements Template {
 		const definitions: Map<string, JSONSchema7> = new Map();
 
 		config.application.Operations.forEach((op) => {
-			if (!op.VariablesSchema.definitions) {
-				return;
-			}
-			Object.keys(op.VariablesSchema.definitions).forEach((definitionName) => {
-				if (definitions.has(definitionName)) {
-					return;
-				}
-				const definition = op.VariablesSchema.definitions![definitionName];
-				if (typeof definition !== 'object') {
-					return;
-				}
-				definitions.set(definitionName, definition);
-			});
+			if (op.VariablesSchema.definitions)
+				Object.keys(op.VariablesSchema.definitions).forEach((definitionName) => {
+					if (definitions.has(definitionName)) {
+						return;
+					}
+					let definition = op.VariablesSchema.definitions![definitionName];
+					if (typeof definition !== 'object') {
+						return;
+					}
+					definitions.set(definitionName, definition);
+				});
+			if (op.InjectedVariablesSchema.definitions)
+				Object.keys(op.InjectedVariablesSchema.definitions).forEach((definitionName) => {
+					if (definitions.has(definitionName)) {
+						return;
+					}
+					let definition = op.InjectedVariablesSchema.definitions![definitionName];
+					if (typeof definition !== 'object') {
+						return;
+					}
+					definitions.set(definitionName, definition);
+				});
+			if (op.InternalVariablesSchema.definitions)
+				Object.keys(op.InternalVariablesSchema.definitions).forEach((definitionName) => {
+					if (definitions.has(definitionName)) {
+						return;
+					}
+					let definition = op.InternalVariablesSchema.definitions![definitionName];
+					if (typeof definition !== 'object') {
+						return;
+					}
+					definitions.set(definitionName, definition);
+				});
 		});
 
 		const content = Array.from(definitions.entries())

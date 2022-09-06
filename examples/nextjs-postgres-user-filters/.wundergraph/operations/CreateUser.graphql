@@ -1,0 +1,5 @@
+mutation ($data: db_UserCreateInput!) {
+	db_createOneUser(data: $data) {
+		id
+	}
+}

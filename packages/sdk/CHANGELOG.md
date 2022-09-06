@@ -3,6 +3,99 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.103.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.103.0...@wundergraph/sdk@0.103.1) (2022-09-05)
+
+### Bug Fixes
+
+* fixes open api errors for int based enums and json fields ([#164](https://github.com/wundergraph/wundergraph/issues/164)) ([a79fe3e](https://github.com/wundergraph/wundergraph/commit/a79fe3ebc8c0b8d863123d565edfe0942f03048d)) (@rpeterson)
+
+## [0.103.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.102.0...@wundergraph/sdk@0.103.0) (2022-09-04)
+
+### Features
+
+* don't exit, throw error and handle at root ([#161](https://github.com/wundergraph/wundergraph/issues/161)) ([5495d27](https://github.com/wundergraph/wundergraph/commit/5495d27c181f12a96655fae0f403ffaedda50816)) (@StarpTech)
+
+### Bug Fixes
+
+* subscription url config ([#162](https://github.com/wundergraph/wundergraph/issues/162)) ([c503400](https://github.com/wundergraph/wundergraph/commit/c503400061a33243702c8e7be753e14d863e5d98)) (@jensneuse)
+
+## [0.102.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.101.0...@wundergraph/sdk@0.102.0) (2022-09-02)
+
+### Features
+
+* refactor introspection runner ([#158](https://github.com/wundergraph/wundergraph/issues/158)) ([49d0ab3](https://github.com/wundergraph/wundergraph/commit/49d0ab3be58552e017d5120feb7f09d0f48b4aae)) (@StarpTech)
+
+## [0.101.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.100.0...@wundergraph/sdk@0.101.0) (2022-09-01)
+
+### Features
+
+* implement userId for fromClaim directive ([#152](https://github.com/wundergraph/wundergraph/issues/152)) ([51df6e5](https://github.com/wundergraph/wundergraph/commit/51df6e50244bee9f5f8d579ff6f604e1a1c853d9)) (@jensneuse)
+
+## [0.100.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.99.0...@wundergraph/sdk@0.100.0) (2022-08-30)
+
+### Features
+
+* **server:** introduce pino base logger ([#146](https://github.com/wundergraph/wundergraph/issues/146)) ([d261b8f](https://github.com/wundergraph/wundergraph/commit/d261b8fe5d8fa6e21058468c2e70b45defa0601a)) (@StarpTech)
+
+### Bug Fixes
+
+* internal directive breaks code generation ([#148](https://github.com/wundergraph/wundergraph/issues/148)) ([a9cb48c](https://github.com/wundergraph/wundergraph/commit/a9cb48cbfd840862cd38f17b9c185407acad7772)) (@jensneuse)
+* **types:** make webhooks optional ([#149](https://github.com/wundergraph/wundergraph/issues/149)) ([fa0d243](https://github.com/wundergraph/wundergraph/commit/fa0d243e3bd0bfbf62448d1348709375df404cac)) (@StarpTech)
+
+## [0.99.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.98.3...@wundergraph/sdk@0.99.0) (2022-08-29)
+
+### Features
+
+* use web std header implementation ([#145](https://github.com/wundergraph/wundergraph/issues/145)) ([7c0359b](https://github.com/wundergraph/wundergraph/commit/7c0359bdc3efac0a8c11ceb23cd49172a991fbd3))(@StarpTech)
+
+## [0.98.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.98.2...@wundergraph/sdk@0.98.3) (2022-08-25)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.98.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.98.1...@wundergraph/sdk@0.98.2) (2022-08-25)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.98.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.98.0...@wundergraph/sdk@0.98.1) (2022-08-18)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.98.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.97.0...@wundergraph/sdk@0.98.0) (2022-08-18)
+
+### Features
+
+* native webhooks support ([#126](https://github.com/wundergraph/wundergraph/issues/126)) ([a0b38bd](https://github.com/wundergraph/wundergraph/commit/a0b38bd54b88198db6cc176432d577dab0931245))
+
+### Bug Fixes
+
+* issue with unhandled hyphens in input names ([#123](https://github.com/wundergraph/wundergraph/issues/123)) ([b01caaa](https://github.com/wundergraph/wundergraph/commit/b01caaa8c4036afbeb579dbbf14a52d82971b116))
+
+## [0.97.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.96.1...@wundergraph/sdk@0.97.0) (2022-08-09)
+
+### Features
+
+* add fragment support to sdk ([5839e35](https://github.com/wundergraph/wundergraph/commit/5839e35ad4ab00f9174e8e18a54375580dd1c6a0))
+* extract typescript client from nextjs ([#72](https://github.com/wundergraph/wundergraph/issues/72)) ([282797d](https://github.com/wundergraph/wundergraph/commit/282797dd4d28dce922cca8a3d5092d68c508f5bd))
+* replace the legacy client with the new implementation ([#78](https://github.com/wundergraph/wundergraph/issues/78)) ([e2468c8](https://github.com/wundergraph/wundergraph/commit/e2468c8856e02a7d1d89dc1c08c1731871bc19f3))
+
+### Bug Fixes
+
+* update tsdoc for hooks config ([8f5d916](https://github.com/wundergraph/wundergraph/commit/8f5d9161383981e5abae2be5c66587cf2b5fb547))
+
+## [0.96.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.96.0...@wundergraph/sdk@0.96.1) (2022-07-18)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.96.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.95.0...@wundergraph/sdk@0.96.0) (2022-07-13)
+
+### Features
+
+- use headersobject for transport hooks ([#75](https://github.com/wundergraph/wundergraph/issues/75)) ([82059cf](https://github.com/wundergraph/wundergraph/commit/82059cfb87292b3baadc8d618732314a532b5ed6))
+
+### Bug Fixes
+
+- **auth:** pass raw access token to hook ([#76](https://github.com/wundergraph/wundergraph/issues/76)) ([c31644d](https://github.com/wundergraph/wundergraph/commit/c31644ddcb29dcb74063ef20d80d7ef71aa3c88f))
+
 ## [0.95.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.94.4...@wundergraph/sdk@0.95.0) (2022-07-07)
 
 ### Features

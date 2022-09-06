@@ -1,0 +1,5 @@
+fragment Missions on spacex_Mission {
+	id
+	name
+	manufacturers
+}

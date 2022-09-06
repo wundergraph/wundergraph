@@ -1,5 +1,6 @@
-import { configureWunderGraphServer } from '@wundergraph/sdk';
+import { configureWunderGraphServer, EnvironmentVariable, GithubWebhookVerifier } from '@wundergraph/sdk';
 import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { WebhooksConfig } from './generated/wundergraph.webhooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 import type { GraphQLExecutionContext } from './generated/wundergraph.server';
 import {
@@ -18,11 +19,16 @@ import { createGraphQLSchema } from 'openapi-to-graphql';
 import jsonPlaceholder from './../json_placeholder.json';
 import type { SDLResponse } from './generated/models';
 
-export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
+	webhooks: {
+		github: {
+			verifier: GithubWebhookVerifier(new EnvironmentVariable('GITHUB_SECRET')),
+		},
+	},
 	hooks: {
 		authentication: {
-			postAuthentication: async (hook) => {},
-			mutatingPostAuthentication: async (hook) => {
+			postAuthentication: async ({ user }) => {},
+			mutatingPostAuthentication: async ({ user }) => {
 				return {
 					user: {
 						name: 'John Doe',
@@ -39,16 +45,32 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				};
 			},
 		},
-		global: {},
-		queries: {
-			Dragons: {
-				mutatingPostResolve: async (hook) => {
-					console.log('########mutatingPostResolve##########', hook.clientRequest.method);
-					return hook.response;
+		global: {
+			httpTransport: {
+				onOriginRequest: {
+					enableForAllOperations: true,
+					hook: async ({ request }) => {
+						request.headers.set('X-Wundergraph-Test', 'test');
+						console.log('onOriginRequest', request.headers);
+						return request;
+					},
 				},
-				preResolve: async ({ user, log, clientRequest, internalClient }) => {
-					clientRequest.headers.append('X-Wundergraph', 'foo');
-					clientRequest.headers.delete('Cache-Control');
+				onOriginResponse: {
+					enableForAllOperations: true,
+					hook: async ({ response }) => {
+						console.log('onOriginResponse headers', response.headers);
+						return 'skip';
+					},
+				},
+			},
+		},
+		queries: {
+			OperationWithInternalVariable: {
+				mutatingPreResolve: async ({ input }) => {
+					return {
+						country: 'DE',
+						city: input.city,
+					};
 				},
 			},
 		},
@@ -164,54 +186,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 											name: 'b',
 										};
 								}
-							},
-						},
-						dragons: {
-							type: new GraphQLList(
-								new GraphQLObjectType({
-									name: 'Dragon',
-									fields: {
-										name: {
-											type: GraphQLString,
-										},
-										crewCapacity: {
-											type: GraphQLInt,
-										},
-										active: {
-											type: GraphQLBoolean,
-										},
-										posts: {
-											type: new GraphQLList(
-												new GraphQLObjectType({
-													name: 'Post',
-													fields: {
-														id: {
-															type: GraphQLInt,
-														},
-														title: {
-															type: GraphQLString,
-														},
-													},
-												})
-											),
-										},
-									},
-								})
-							),
-							async resolve(root, args, ctx, info) {
-								ctx.wundergraph.log.info(`resolve_clientRequest: ${JSON.stringify(ctx.wundergraph.clientRequest)}`);
-
-								const data = await ctx.wundergraph.internalClient.queries.InternalDragons();
-								const posts = await ctx.wundergraph.internalClient.queries.JSP();
-								return data.data?.spacex_dragons?.map((d) => ({
-									name: d.name,
-									crewCapacity: d.crew_capacity,
-									active: d.active,
-									posts: posts.data?.jsp_getPosts?.map((p) => ({
-										id: p.id,
-										title: p.title,
-									})),
-								}));
 							},
 						},
 					},

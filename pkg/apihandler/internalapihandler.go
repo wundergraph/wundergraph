@@ -50,7 +50,8 @@ func NewInternalBuilder(pool *pool.Pool, log abstractlogger.Logger, loader *engi
 func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *wgpb.Api, secret []byte) (streamClosers []chan struct{}, err error) {
 
 	if api.EngineConfiguration == nil {
-		return streamClosers, fmt.Errorf("engine config must not be nil")
+		// engine config is nil, skipping
+		return streamClosers, nil
 	}
 	if api.AuthenticationConfig == nil ||
 		api.AuthenticationConfig.Hooks == nil {

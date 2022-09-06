@@ -13,29 +13,47 @@ type Config struct {
 	Name       string
 	Executable string
 	ScriptArgs []string
-	ScriptEnv  []string
-	Logger     abstractlogger.Logger
+	// ScriptEnv is the environment variables that are always passed to the script.
+	ScriptEnv []string
+	// ScriptEnv are environment variables that are only set on the first script run.
+	FirstRunEnv   []string
+	AbsWorkingDir string
+	Logger        abstractlogger.Logger
 }
 
 type ScriptRunner struct {
-	name        string
-	fatalOnStop bool
-	executable  string
-	scriptArgs  []string
-	scriptEnv   []string
-	cmdDoneChan chan struct{}
-	log         abstractlogger.Logger
-	cmd         *gocmd.Cmd
+	name          string
+	fatalOnStop   bool
+	executable    string
+	scriptArgs    []string
+	scriptEnv     []string
+	firstRunEnv   []string
+	absWorkingDir string
+	firstRun      bool
+	cmdDoneChan   chan struct{}
+	log           abstractlogger.Logger
+	cmd           *gocmd.Cmd
 }
 
 func NewScriptRunner(config *Config) *ScriptRunner {
 	return &ScriptRunner{
-		name:       config.Name,
-		log:        config.Logger,
-		executable: config.Executable,
-		scriptArgs: config.ScriptArgs,
-		scriptEnv:  config.ScriptEnv,
+		name:          config.Name,
+		log:           config.Logger,
+		firstRunEnv:   config.FirstRunEnv,
+		absWorkingDir: config.AbsWorkingDir,
+		executable:    config.Executable,
+		scriptArgs:    config.ScriptArgs,
+		scriptEnv:     config.ScriptEnv,
+		firstRun:      true,
 	}
+}
+
+func (b *ScriptRunner) ExitCode() int {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		return status.Exit
+	}
+	return 0
 }
 
 func (b *ScriptRunner) Stop() error {
@@ -50,6 +68,18 @@ func (b *ScriptRunner) Stop() error {
 	return nil
 }
 
+// Successful returns true if the script exited with <= 0 and without an error.
+// This method should only be called after the script is done.
+func (b *ScriptRunner) Successful() bool {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		if status.Error != nil || status.Exit > 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	err := b.Stop()
 	if err != nil {
@@ -59,7 +89,19 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		)
 	}
 
-	cmd, doneChan := newCmd(b.executable, b.scriptArgs, b.scriptEnv)
+	cmdOptions := CmdOptions{
+		executable: b.executable,
+		cmdDir:     b.absWorkingDir,
+		scriptArgs: b.scriptArgs,
+		scriptEnv:  b.scriptEnv,
+	}
+
+	if b.firstRun {
+		b.firstRun = false
+		cmdOptions.scriptEnv = append(cmdOptions.scriptEnv, b.firstRunEnv...)
+	}
+
+	cmd, doneChan := newCmd(cmdOptions)
 	b.cmd = cmd
 	b.cmdDoneChan = doneChan
 
@@ -97,7 +139,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				)
 				return
 			}
-			if status.Error != nil {
+			if status.Error != nil || status.Exit > 0 {
 				b.log.Error("Script runner exited with error",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
@@ -127,16 +169,24 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	return doneChan
 }
 
+type CmdOptions struct {
+	executable string
+	cmdDir     string
+	scriptArgs []string
+	scriptEnv  []string
+}
+
 // newCmd creates a new command to run the bundler script.
 // it returns a channel that is closed when the command is done.
 // this is necessary to make sure the IO was flushed after the script is stopped.
-func newCmd(executable string, scriptArgs []string, scriptEnv []string) (*gocmd.Cmd, chan struct{}) {
+func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 	cmdOptions := gocmd.Options{
 		Buffered:  false,
 		Streaming: true,
 	}
-	cmd := gocmd.NewCmdOptions(cmdOptions, executable, scriptArgs...)
-	cmd.Env = append(cmd.Env, scriptEnv...)
+	cmd := gocmd.NewCmdOptions(cmdOptions, options.executable, options.scriptArgs...)
+	cmd.Dir = options.cmdDir
+	cmd.Env = append(cmd.Env, options.scriptEnv...)
 
 	doneChan := make(chan struct{})
 

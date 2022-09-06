@@ -6,16 +6,17 @@
 npm install && npm start
 ```
 
-#### Get Dragons
+#### Get all Continents
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Dragons
+curl -X GET http://localhost:9991/app/main/operations/Continents
 ```
 
-#### Get Missions
+#### Get Andorra
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Missions
+curl --location -g --request GET 'http://localhost:9991/app/main/operations/Countries?wg_variables={ "filter": {"code": { "eq": "AD" } } }' \
+--header 'Content-Type: application/json'
 ```
 
 #### Call your custom GraphQL server
@@ -23,3 +24,11 @@ curl -X GET http://localhost:9991/app/main/operations/Missions
 ```shell
 curl -X GET http://localhost:9991/app/main/operations/Hello
 ```
+
+## Learn More
+
+Read the [Docs](https://wundergraph.com/docs).
+
+## Got Questions?
+
+Join us on [Discord](https://wundergraph.com/discord)!

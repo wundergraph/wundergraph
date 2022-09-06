@@ -1,6 +1,5 @@
-import { FastifyContextConfig, FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import fp from 'fastify-plugin';
-import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../server';
+import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
+import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../types';
 import {
 	HooksConfiguration,
 	HooksConfigurationOperationType,
@@ -9,7 +8,7 @@ import {
 } from '../../configure';
 import { WunderGraphConfiguration, OperationType } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
-import { flattenHeadersObject } from 'headers-polyfill';
+import { Headers } from '@web-std/fetch';
 
 export interface BodyResponse {
 	data?: any;
@@ -25,25 +24,19 @@ export interface FastifyHooksOptions extends HooksConfiguration {
 	config: WunderGraphConfiguration;
 }
 
-export interface RouteConfig {
+export interface HooksRouteConfig {
+	kind: 'hook';
 	operationName?: string;
 }
 
 const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fastify, config) => {
-	const flattenHeaders = (headers: ClientRequestHeaders) => {
-		return flattenHeadersObject(headers.all());
-	};
-
-	fastify.addHook('onRoute', (routeOptions) => {
-		const routeConfig = routeOptions.config as RouteConfig | undefined;
-		if (routeConfig?.operationName) {
-			fastify.log.debug(
-				`Registered Operation Hook '${routeConfig.operationName}' with (${routeOptions.method}) '${routeOptions.url}'`
-			);
-		} else {
-			fastify.log.debug(`Registered Global Hook (${routeOptions.method}) '${routeOptions.url}'`);
+	const headersToObject = (headers: ClientRequestHeaders) => {
+		const headersObj: Record<string, string> = {};
+		for (const [key, value] of headers.entries()) {
+			headersObj[key] = value;
 		}
-	});
+		return headersObj;
+	};
 
 	// authentication
 	fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
@@ -69,7 +62,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'mutatingPostAuthentication',
 					response: out,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -86,7 +79,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					hook: 'revalidateAuthentication',
 					response: out,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -111,7 +104,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					name: request.body.operationName,
 					type: request.body.operationType,
 				},
-				request: request.body.request,
+				request: {
+					...request.body.request,
+					headers: new Headers(request.body.request.headers),
+				},
 			});
 			const hookOut = maybeHookOut || 'skip';
 			return {
@@ -120,7 +116,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				response: {
 					skip: hookOut === 'skip',
 					cancel: hookOut === 'cancel',
-					request: hookOut !== 'skip' && hookOut !== 'cancel' ? hookOut : undefined,
+					request:
+						hookOut !== 'skip' && hookOut !== 'cancel'
+							? { ...hookOut, headers: headersToObject(hookOut.headers) }
+							: undefined,
 				},
 			};
 		} catch (err) {
@@ -141,7 +140,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		try {
 			const maybeHookOut = await config.global?.httpTransport?.onOriginResponse?.hook({
 				...request.ctx,
-				response: request.body.response,
+				response: {
+					...request.body.response,
+					headers: new Headers(request.body.response.headers),
+				},
 				operation: {
 					name: request.body.operationName,
 					type: request.body.operationType,
@@ -154,7 +156,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				response: {
 					skip: hookOut === 'skip',
 					cancel: hookOut === 'cancel',
-					response: hookOut !== 'skip' && hookOut !== 'cancel' ? hookOut : undefined,
+					response:
+						hookOut !== 'skip' && hookOut !== 'cancel'
+							? { ...hookOut, headers: headersToObject(hookOut.headers) }
+							: undefined,
 				},
 			};
 		} catch (err) {
@@ -190,7 +195,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mock',
 					response: mutated,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -219,7 +224,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'preResolve',
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -249,7 +254,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				return {
 					op: operationName,
 					hook: 'postResolve',
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -279,7 +284,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPreResolve',
 					input: mutatedInput,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -310,7 +315,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'mutatingPostResolve',
 					response: mutatedResponse,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -340,7 +345,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					op: operationName,
 					hook: 'customResolve',
 					response: out || null,
-					setClientRequestHeaders: flattenHeaders(request.ctx.clientRequest.headers),
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
 				};
 			} catch (err) {
 				request.log.error(err);
@@ -353,54 +358,54 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		operations.forEach((operationName) => {
 			const mockResolveOp = operationHooks?.[operationName]?.mockResolve;
 			if (mockResolveOp) {
-				fastify.post(
+				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mockResolve`,
-					{ config: { operationName } },
+					{ config: { operationName, kind: 'hook' } },
 					mockResolve(operationName, mockResolveOp)
 				);
 			}
 
 			const preResolveOp = operationHooks?.[operationName]?.preResolve;
 			if (preResolveOp) {
-				fastify.post(
+				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/preResolve`,
-					{ config: { operationName } },
+					{ config: { operationName, kind: 'hook' } },
 					preResolve(operationName, preResolveOp)
 				);
 			}
 
 			const postResolveOp = operationHooks?.[operationName]?.postResolve;
 			if (postResolveOp) {
-				fastify.post(
+				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/postResolve`,
-					{ config: { operationName } },
+					{ config: { operationName, kind: 'hook' } },
 					postResolve(operationName, postResolveOp)
 				);
 			}
 
 			const mutatingPreResolveOp = operationHooks?.[operationName]?.mutatingPreResolve;
 			if (mutatingPreResolveOp) {
-				fastify.post(
+				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mutatingPreResolve`,
-					{ config: { operationName } },
+					{ config: { operationName, kind: 'hook' } },
 					mutatingPreResolve(operationName, mutatingPreResolveOp)
 				);
 			}
 
 			const mutatingPostResolveOp = operationHooks?.[operationName]?.mutatingPostResolve;
 			if (mutatingPostResolveOp) {
-				fastify.post(
+				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/mutatingPostResolve`,
-					{ config: { operationName } },
+					{ config: { operationName, kind: 'hook' } },
 					mutatingPostResolve(operationName, mutatingPostResolveOp)
 				);
 			}
 
 			const customResolveOp = operationHooks?.[operationName]?.customResolve;
 			if (customResolveOp) {
-				fastify.post(
+				fastify.post<any, HooksRouteConfig>(
 					`/operation/${operationName}/customResolve`,
-					{ config: { operationName } },
+					{ config: { operationName, kind: 'hook' } },
 					customResolve(operationName, customResolveOp)
 				);
 			}
@@ -422,4 +427,4 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	}
 };
 
-export default fp(FastifyHooksPlugin, '3.x');
+export default FastifyHooksPlugin;

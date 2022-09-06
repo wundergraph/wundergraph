@@ -1,6 +1,6 @@
 # Contributing to the WunderGraph Repository
 
-Welcome to the WunderGraph Community contributing guide. We are excited to having you!
+Welcome to the WunderGraph Community contributing guide. We are excited to have you!
 
 ## Prerequisites
 
@@ -45,6 +45,8 @@ This command will run all Go and NPM tests.
 ```bash
 make test
 ```
+
+In order to run integration tests add the `INT=true` environment variable.
 
 Ready! You can now start contributing to the WunderGraph repository. Feel free to open an issue or pull request to add a new feature or fix a bug.
 If you run into any onboarding issue, please open an issue as well or visit the [WunderGraph Discord](https://discord.gg/Jjmc8TC) to get help.

@@ -18,3 +18,5 @@ logs
 # IDE
 .vscode
 .idea
+
+CHANGELOG.md

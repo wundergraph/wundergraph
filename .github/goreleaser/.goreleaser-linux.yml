@@ -1,11 +1,13 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
 project_name: wunderctl
+monorepo:
+  tag_prefix: 'v'
 before:
   hooks:
     # You may remove this if you don't use go modules.
     - go mod download
-#    - sudo cp -r /home/runner/go/pkg/mod/github.com/jensneuse/goprisma@v0.0.11/lib/ /home/runner/work/wundergraph/
+    #    - sudo cp -r /home/runner/go/pkg/mod/github.com/jensneuse/goprisma@v0.0.11/lib/ /home/runner/work/wundergraph/
     # you may remove this if you don't need go generate
     - go generate ../...
 builds:
@@ -27,7 +29,7 @@ archives:
       386: i386
       amd64: x86_64
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: '{{ .Tag }}-next'
 changelog:
   use: github
   # Sorts the changelog by the commit's messages.
@@ -43,10 +45,10 @@ changelog:
   # Default is no groups.
   groups:
     - title: Features
-      regexp: "^.*feat.*:+.*$"
+      regexp: '^.*feat.*:+.*$'
       order: 0
     - title: 'Bug fixes'
-      regexp: "^.*fix.*:+.*$"
+      regexp: '^.*fix.*:+.*$'
       order: 1
 
   filters:
@@ -58,7 +60,7 @@ changelog:
       - chore
       - typo
 release:
-  name_template: "Release {{.ProjectName}} {{.Tag}}"
+  name_template: 'Release {{.ProjectName}} {{.Tag}}'
   header: |
     This is a new release of the command-line interface (CLI) {{.ProjectName}}.
     It allows you to create, deploy and manage your WunderGraph application.
@@ -68,4 +70,4 @@ release:
     name: wundergraph
 
 checksum:
-  name_template: "{{ .ProjectName }}_{{ .Version }}_linux_checksums.txt"
+  name_template: '{{ .ProjectName }}_{{ .Version }}_linux_checksums.txt'

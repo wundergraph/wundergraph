@@ -1,7 +1,28 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.95.0",
+  "version": "0.103.1",
   "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "default": "./dist/client/index.js"
+    },
+    "./dist/*": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "client": [
+        "./dist/client"
+      ]
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "WunderGraph SDK",
@@ -48,31 +69,33 @@
     "chai": "^4.3.4",
     "jest": "^28.1.0",
     "ts-jest": "^28.0.4",
-    "typescript": "^4.7.2"
+    "typescript": "^4.8.2"
   },
   "dependencies": {
     "@apollo/composition": "^2.0.2",
     "@apollo/federation": "^0.36.2",
+    "@fastify/formbody": "^7.0.1",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
-    "@wundergraph/protobuf": "workspace:^0.91.1",
-    "@wundergraph/wunderctl": "workspace:^0.94.1",
+    "@web-std/fetch": "^4.1.0",
+    "@wundergraph/protobuf": "workspace:^0.92.0",
+    "@wundergraph/wunderctl": "workspace:^0.104.0",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
-    "fastify": "^3.27.1",
-    "fastify-graceful-shutdown": "^3.1.0",
-    "fastify-plugin": "^3.0.1",
+    "fastify": "^4.4.0",
+    "fastify-graceful-shutdown": "^3.2.0",
+    "fastify-plugin": "^4.2.0",
     "graphql": "^16.3.0",
     "graphql-helix": "^1.12.0",
     "handlebars": "^4.7.7",
-    "headers-polyfill": "^3.0.7",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
     "openapi-types": "^10.0.0",
+    "pino": "^8.4.2",
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",

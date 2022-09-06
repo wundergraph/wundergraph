@@ -43,6 +43,7 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 			basePath: './generated',
 			wunderGraphConfig: {
 				sdkVersion: 'unknown',
+				webhooks: [],
 				application: {
 					Name: 'Test',
 					EngineConfiguration: new Api<any>('', [], [], [], []),

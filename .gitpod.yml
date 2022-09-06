@@ -1,12 +1,10 @@
 # Commands to start on workspace startup
 tasks:
-  - init: curl -s -L https://github.com/wundergraph/wundergraph/releases/download/v0.90.23/wunderctl_0.90.23_Linux_x86_64.tar.gz | tar xzvf - && chmod +x wunderctl && sudo mv wunderctl /usr/local/bin/
-    name: 'Download Wunderctl'
   - init: cd examples/simple && npm install
     command: |
       export WG_ALLOWED_ORIGIN="https://9991-$GITPOD_WORKSPACE_ID.$GITPOD_WORKSPACE_CLUSTER_HOST"
       echo "$WG_ALLOWED_ORIGIN"
-      npx --yes concurrently "npm start" "npx --yes wait-on $(gp url 9991) && gp preview $(gp url 9991)/app/main/operations/Dragons"
+      npx --yes concurrently "npm start" "npx --yes wait-on $(gp url 9991) && gp preview $(gp url 9991)/app/main/operations/Continents"
     name: 'Start app'
 # Ports to expose on workspace startup
 ports:

@@ -49,23 +49,25 @@ func NewApiTransport(tripper http.RoundTripper, api *wgpb.Api, hooksClient *hook
 		hooksClient:                hooksClient,
 	}
 
-	for _, configuration := range api.EngineConfiguration.DatasourceConfigurations {
-		switch configuration.Kind {
-		case wgpb.DataSourceKind_GRAPHQL:
-			if configuration.CustomGraphql != nil && configuration.CustomGraphql.Fetch != nil && configuration.CustomGraphql.Fetch.UpstreamAuthentication != nil {
-				parsed, err := url.Parse(loadvariable.String(configuration.CustomGraphql.Fetch.Url))
-				if err != nil {
-					continue
+	if api.EngineConfiguration != nil && api.EngineConfiguration.DatasourceConfigurations != nil {
+		for _, configuration := range api.EngineConfiguration.DatasourceConfigurations {
+			switch configuration.Kind {
+			case wgpb.DataSourceKind_GRAPHQL:
+				if configuration.CustomGraphql != nil && configuration.CustomGraphql.Fetch != nil && configuration.CustomGraphql.Fetch.UpstreamAuthentication != nil {
+					parsed, err := url.Parse(loadvariable.String(configuration.CustomGraphql.Fetch.Url))
+					if err != nil {
+						continue
+					}
+					transport.upstreamAuthConfigurations[parsed.Host] = configuration.CustomGraphql.Fetch.UpstreamAuthentication
 				}
-				transport.upstreamAuthConfigurations[parsed.Host] = configuration.CustomGraphql.Fetch.UpstreamAuthentication
-			}
-		case wgpb.DataSourceKind_REST:
-			if configuration.CustomRest != nil && configuration.CustomRest.Fetch != nil && configuration.CustomRest.Fetch.UpstreamAuthentication != nil {
-				parsed, err := url.Parse(loadvariable.String(configuration.CustomRest.Fetch.Url))
-				if err != nil {
-					continue
+			case wgpb.DataSourceKind_REST:
+				if configuration.CustomRest != nil && configuration.CustomRest.Fetch != nil && configuration.CustomRest.Fetch.UpstreamAuthentication != nil {
+					parsed, err := url.Parse(loadvariable.String(configuration.CustomRest.Fetch.Url))
+					if err != nil {
+						continue
+					}
+					transport.upstreamAuthConfigurations[parsed.Host] = configuration.CustomRest.Fetch.UpstreamAuthentication
 				}
-				transport.upstreamAuthConfigurations[parsed.Host] = configuration.CustomRest.Fetch.UpstreamAuthentication
 			}
 		}
 	}

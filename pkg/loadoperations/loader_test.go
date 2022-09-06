@@ -1,17 +1,10 @@
 package loadoperations
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestLoader_Load(t *testing.T) {
-	loader := Loader{}
-	out := loader.Load("../../testdata/operations")
-	fmt.Println(out)
-}
 
 func TestIsValidOperationName(t *testing.T) {
 	assert.True(t, isValidOperationName("Foo"))
