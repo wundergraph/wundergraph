@@ -8,6 +8,7 @@ import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
 import { HooksConfiguration, resolveConfigurationVariable } from '../configure';
 import type { InternalClient } from './internal-client';
+import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
 import fs from 'fs';
@@ -20,54 +21,53 @@ import {
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
 
-/**
- * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
- * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
- * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
- * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
- */
-process.on('uncaughtExceptionMonitor', (err, origin) => {
-	console.error(`uncaught exception, origin: ${origin}, error: ${err}`);
-});
-
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
+let logger: pino.Logger;
 
 /**
  * By default, this script will not start the server
  * You need to pass START_HOOKS_SERVER=true to start the server
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
+	logger = Pino({
+		level: process.env.LOG_LEVEL || 'info',
+	});
+
+	/**
+	 * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
+	 * a hook installed via process.setUncaughtExceptionCaptureCallback() is called. Installing an
+	 * 'uncaughtExceptionMonitor' listener does not change the behavior once an 'uncaughtException'
+	 * event is emitted. The process will still crash if no 'uncaughtException' listener is installed.
+	 */
+	process.on('uncaughtExceptionMonitor', (err, origin) => {
+		logger.error(err, `uncaught exception, origin: ${origin}`);
+	});
+
 	if (!process.env.WG_ABS_DIR) {
-		console.error('The environment variable `WG_ABS_DIR` is required!');
+		logger.fatal('The environment variable `WG_ABS_DIR` is required!');
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR, 'generated', 'wundergraph.config.json'), {
+		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR!, 'generated', 'wundergraph.config.json'), {
 			encoding: 'utf8',
 		});
-		try {
-			WG_CONFIG = JSON.parse(configContent);
+		WG_CONFIG = JSON.parse(configContent);
 
-			if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeUrl) {
-				const nodeUrl = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeUrl);
+		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeUrl) {
+			const nodeUrl = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeUrl);
 
-				clientFactory = internalClientFactory(
-					WG_CONFIG.apiName,
-					WG_CONFIG.deploymentName,
-					WG_CONFIG.api.operations,
-					nodeUrl
-				);
-			} else {
-				console.error('Could not get user defined api. Try `wunderctl generate`');
-				process.exit(1);
-			}
-		} catch (err: any) {
-			console.error('Could not parse wundergraph.config.json. Try `wunderctl generate`');
-			process.exit(1);
+			clientFactory = internalClientFactory(
+				WG_CONFIG.apiName,
+				WG_CONFIG.deploymentName,
+				WG_CONFIG.api.operations,
+				nodeUrl
+			);
+		} else {
+			throw new Error('User defined api is not set.');
 		}
-	} catch {
-		console.error('Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
+	} catch (err: any) {
+		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
 		process.exit(1);
 	}
 }
@@ -75,7 +75,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 export const configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
 	GeneratedClient extends InternalClient,
-	GeneratedWebhooksConfig extends WebhooksConfig
+	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
 >(
 	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
 ): WunderGraphHooksAndServerConfig => {
@@ -113,7 +113,7 @@ const _configureWunderGraphServer = <
 			serverConfig,
 			gracefulShutdown: process.env.NODE_ENV === 'production',
 		}).catch((err) => {
-			console.error('Could not start the hook server', err);
+			logger.fatal(err, 'Could not start the hook server');
 			process.exit(1);
 		});
 	}
@@ -152,12 +152,11 @@ export const createServer = async ({
 	let logLevel = 'info';
 	if (config.api?.serverOptions?.logger?.level) {
 		logLevel = logLevelToJSON(config.api?.serverOptions?.logger?.level);
+		logger.level = logLevel;
 	}
 
 	const fastify = Fastify({
-		logger: {
-			level: logLevel,
-		},
+		logger,
 	});
 
 	fastify.decorateRequest('ctx', null);

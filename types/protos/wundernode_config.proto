@@ -186,6 +186,7 @@ enum Claim {
 	NICKNAME = 3;
 	LOCATION = 4;
 	PROVIDER = 5;
+	USERID = 6;
 }
 
 message OperationLiveQueryConfig {

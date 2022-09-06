@@ -8,10 +8,13 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
+	"github.com/libp2p/go-reuseport"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
 	"golang.org/x/time/rate"
@@ -19,12 +22,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/types/go/wgpb"
-
-	"github.com/libp2p/go-reuseport"
-
-	"github.com/gorilla/mux"
 )
 
 func New(ctx context.Context, info BuildInfo, log abstractlogger.Logger) *Node {
@@ -80,6 +81,7 @@ type options struct {
 	disableGracefulShutdown bool
 	insecureCookies         bool
 	githubAuthDemo          GitHubAuthDemo
+	devMode                 bool
 }
 
 type Option func(options *options)
@@ -93,6 +95,15 @@ func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 func WithGitHubAuthDemo(authDemo GitHubAuthDemo) Option {
 	return func(options *options) {
 		options.githubAuthDemo = authDemo
+	}
+}
+
+// WithDevMode will set cookie secrets to a static, insecure, string
+// This way, you stay logged in during development
+// Should never be used in production
+func WithDevMode() Option {
+	return func(options *options) {
+		options.devMode = true
 	}
 }
 
@@ -152,7 +163,12 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
-		go n.startServer(*options.staticConfig)
+		go func() {
+			err := n.startServer(*options.staticConfig)
+			if err != nil {
+				os.Exit(1)
+			}
+		}()
 	case options.fileSystemConfig != nil:
 		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
@@ -254,7 +270,7 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 	n.log.Debug("old server gracefully shut down")
 }
 
-func (n *Node) startServer(nodeConfig WunderNodeConfig) {
+func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	var err error
 
 	router := mux.NewRouter()
@@ -276,6 +292,17 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) {
 
 	var streamClosers []chan struct{}
 	var allowedHosts []string
+
+	n.setApiDevConfigDefaults(nodeConfig.Api)
+
+	valid, messages := validate.ApiConfig(nodeConfig.Api)
+
+	if !valid {
+		n.log.Fatal("API config invalid",
+			abstractlogger.Strings("errors", messages),
+		)
+		return errors.New("API config invalid")
+	}
 
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,
@@ -310,6 +337,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) {
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
 		HookServerURL:              nodeConfig.Api.ServerUrl,
+		DevMode:                    n.options.devMode,
 	}
 
 	builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
@@ -353,7 +381,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) {
 	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		n.errCh <- err
-		return
+		return nil
 	}
 
 	for _, listener := range listeners {
@@ -373,6 +401,39 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) {
 				n.errCh <- err
 			}
 		}()
+	}
+
+	return nil
+}
+
+// setApiDevConfigDefaults sets default values for the api config in dev mode
+func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
+	if n.options.devMode {
+
+		// we set these values statically so that auth never drops login sessions during development
+		if api.AuthenticationConfig != nil && api.AuthenticationConfig.CookieBased != nil {
+			if csrfSecret := loadvariable.String(api.AuthenticationConfig.CookieBased.CsrfSecret); csrfSecret == "" {
+				api.AuthenticationConfig.CookieBased.CsrfSecret = &wgpb.ConfigurationVariable{
+					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+					StaticVariableContent: "aaaaaaaaaaa",
+				}
+			}
+
+			if blockKey := loadvariable.String(api.AuthenticationConfig.CookieBased.BlockKey); blockKey == "" {
+				api.AuthenticationConfig.CookieBased.BlockKey = &wgpb.ConfigurationVariable{
+					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				}
+			}
+
+			if hashKey := loadvariable.String(api.AuthenticationConfig.CookieBased.HashKey); hashKey == "" {
+				api.AuthenticationConfig.CookieBased.HashKey = &wgpb.ConfigurationVariable{
+					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				}
+			}
+		}
+
 	}
 }
 
@@ -405,7 +466,12 @@ func (n *Node) reconfigureOnConfigUpdate() {
 		case config := <-n.configCh:
 			n.log.Debug("Updated config -> (re-)configuring server")
 			_ = n.Close()
-			go n.startServer(config)
+			go func() {
+				err := n.startServer(config)
+				if err != nil {
+					os.Exit(1)
+				}
+			}()
 		case <-n.ctx.Done():
 			return
 		}

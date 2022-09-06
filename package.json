@@ -1,7 +1,7 @@
 {
   "private": true,
-  "version": "0.100.0",
-  "name": "wundergraph-env",
+  "version": "0.104.0",
+  "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
     "name": "WunderGraph Maintainers",
@@ -56,6 +56,9 @@
       "after:bump": "pnpm install --filter ./packages/wunderctl --lockfile-only"
     },
     "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": "conventionalcommits"
+      },
       "@release-it/bumper": {
         "out": [
           {
@@ -70,13 +73,13 @@
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "1.11.1",
-    "@lerna-lite/core": "1.11.1",
     "@milahu/patch-package-with-pnpm-support": "6.4.10",
+    "@release-it/conventional-changelog": "^5.1.0",
     "@release-it/bumper": "^4.0.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
     "prettier": "^2.6.2",
-    "release-it": "^15.1.1",
+    "release-it": "^15.4.1",
     "rimraf": "^3.0.2"
   }
 }

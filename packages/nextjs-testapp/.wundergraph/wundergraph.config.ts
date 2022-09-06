@@ -12,11 +12,6 @@ import operations from './wundergraph.operations';
 // import linkBuilder from "./generated/linkbuilder";
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
-const spaceX = introspect.graphql({
-	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
-});
-
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
 	url: 'https://graphql-weather-api.herokuapp.com/',
@@ -93,11 +88,16 @@ const graphQLAPI = introspect.graphql({
         .addClientRequestHeader("Authorization","Authorization")
 });*/
 
+const mgoSpaceX = introspect.mongodb({
+	apiNamespace: 'mgospacex',
+	databaseURL: 'mongodb+srv://public:spacex@spacex-gcp-gpg0u.gcp.mongodb.net/spacex-api',
+});
+
 const myApplication = new Application({
 	name: 'api',
 	apis: [
 		weather,
-		spaceX,
+		mgoSpaceX,
 		//jspFieldsRenamed,
 		/*federatedApi,
             openAPI,
@@ -151,7 +151,7 @@ configureWunderGraphApplication({
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:3003/authentication', 'http://localhost:3003/auth-test'],
+			authorizedRedirectUriRegexes: ['http://localhost:3003*'],
 		},
 	},
 	/*links: [

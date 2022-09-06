@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.99.0",
+  "version": "0.103.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -78,8 +78,8 @@
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
-    "@wundergraph/protobuf": "workspace:^0.91.3",
-    "@wundergraph/wunderctl": "workspace:^0.100.0",
+    "@wundergraph/protobuf": "workspace:^0.92.0",
+    "@wundergraph/wunderctl": "workspace:^0.104.0",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
@@ -95,6 +95,7 @@
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
     "openapi-types": "^10.0.0",
+    "pino": "^8.4.2",
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",
