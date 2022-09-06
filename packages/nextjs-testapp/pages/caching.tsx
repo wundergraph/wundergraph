@@ -26,16 +26,16 @@ const JobsPage: NextPage = () => {
 			</p>
 			<ul>
 				{launches.result.status === 'ok' &&
-					launches.result.data.launchesPast.map((launch, i) => (
+					launches.result.data.launchesPast?.map((launch, i) => (
 						<li key={i}>
 							<h3>{launch.mission_name}</h3>
-							<p>{launch.rocket.rocket_name}</p>
-							<p>{launch.launch_site.site_name_long}</p>
-							<a target="_blank" href={launch.links.article_link}>
+							<p>{launch.rocket?.rocket_name}</p>
+							<p>{launch.launch_site?.site_name_long}</p>
+							<a target="_blank" href={launch.links?.article_link}>
 								Article
 							</a>
 							&nbsp;&nbsp;
-							<a target="_blank" href={launch.links.video_link}>
+							<a target="_blank" href={launch.links?.video_link}>
 								Video
 							</a>
 						</li>

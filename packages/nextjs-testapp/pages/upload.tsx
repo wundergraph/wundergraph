@@ -4,7 +4,7 @@ import styles from '../styles/Home.module.css';
 import { S3Provider, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
 
 const UploadPage: NextPage = () => {
-	const [files, setFiles] = useState<FileList>();
+	const [files, setFiles] = useState<FileList | null>();
 	const [data, setData] = useState<string[]>([]);
 	const { uploadFiles } = useWunderGraph();
 	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -12,12 +12,14 @@ const UploadPage: NextPage = () => {
 	};
 	const onSubmit = async (e: React.FormEvent<Element>) => {
 		e.preventDefault();
-		const result = await uploadFiles({
-			provider: S3Provider.minio,
-			files,
-		});
-		if (result.status === 'ok') {
-			setData(result.fileKeys);
+		if (files) {
+			const result = await uploadFiles({
+				provider: S3Provider.minio,
+				files,
+			});
+			if (result.status === 'ok') {
+				setData(result.fileKeys);
+			}
 		}
 	};
 

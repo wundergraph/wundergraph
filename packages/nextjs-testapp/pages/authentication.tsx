@@ -75,12 +75,12 @@ const ProtectedLiveWeather: FC<{ city: string }> = ({ city }) => {
 			{liveWeather.result.status === 'error' && <p>Error</p>}
 			{liveWeather.result.status === 'ok' && (
 				<div>
-					<h3>City: {liveWeather.result.data.getCityByName.name}</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName.coord)}</p>
+					<h3>City: {liveWeather.result.data.getCityByName?.name}</h3>
+					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.coord)}</p>
 					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName.weather.temperature)}</p>
+					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.temperature)}</p>
 					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName.weather.wind)}</p>
+					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.wind)}</p>
 				</div>
 			)}
 		</div>
