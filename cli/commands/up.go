@@ -11,8 +11,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/wundergraph/wundergraph/pkg/webhooks"
-
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
