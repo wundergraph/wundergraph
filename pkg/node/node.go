@@ -384,7 +384,6 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		return nil
 	}
 
-<<<<<<< HEAD
 	for _, listener := range listeners {
 		l := listener
 		go func() {
@@ -396,36 +395,6 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 				if err == http.ErrServerClosed {
 					n.log.Debug("listener closed",
 						abstractlogger.String("addr", l.Addr().String()),
-=======
-	if n.cfg.Server.ListenTLS {
-		manager := autocert.Manager{
-			Prompt: autocert.AcceptTOS,
-			// Cache:  certCache,
-			HostPolicy: func(ctx context.Context, host string) error {
-				for _, allowedHost := range allowedHosts {
-					if allowedHost == host {
-						n.log.Debug("Node.autocert.HostPolicy.allow",
-							abstractlogger.String("host", host),
-						)
-						return nil
-					}
-				}
-				n.log.Debug("Node.autocert.HostPolicy.disallow",
-					abstractlogger.String("host", host),
-				)
-				return fmt.Errorf("autocert hostpolicy disallows host: %s", host)
-			},
-		}
-		n.server.TLSConfig = &tls.Config{
-			GetCertificate: func(info *tls.ClientHelloInfo) (*tls.Certificate, error) {
-				n.log.Debug("Node.tls.GetCertificate",
-					abstractlogger.String("ServerName", info.ServerName),
-				)
-				name, err := idna.Lookup.ToASCII(info.ServerName)
-				if err != nil {
-					n.log.Error("Node.tls.GetCertificate.idna.Lookup",
-						abstractlogger.Error(err),
->>>>>>> origin/main
 					)
 					return
 				}

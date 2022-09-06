@@ -1,7 +1,7 @@
 package apihandler
 
 import (
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 type Listener struct {
