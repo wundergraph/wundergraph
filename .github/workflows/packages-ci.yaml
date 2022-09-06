@@ -51,9 +51,7 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm install
-
-      - run: pnpm build
+      - run: ./scripts/pnpm.sh
 
       - run: pnpm check:apps
 
