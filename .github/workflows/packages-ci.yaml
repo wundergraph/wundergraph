@@ -50,9 +50,9 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/packages/nextjs-testapp/.next/cache
-          # Generate a new cache whenever packages or source files change.
+          # Generate a new cache whenever packages or source files change
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('packages/nextjs-testapp/**.[jt]s', 'packages/nextjs-testapp/**.[jt]sx') }}
-          # If source files changed but packages didn't, rebuild from a prior cache.
+          # If source files changed but packages didn't, rebuild from a prior cache
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
