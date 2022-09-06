@@ -98,6 +98,9 @@ var upCmd = &cobra.Command{
 				// so the user can be sure that the introspection is up to date. In case of an API is not available
 				// we will fallback to the cached introspection (when available)
 				"WG_ENABLE_INTROSPECTION_CACHE=false",
+				// this option allows us to make different decision for the first run
+				// for example, we decide to not use the cache but we will prefill the cache
+				"WG_DEV_FIRST_RUN=true",
 			},
 			ScriptEnv: append(os.Environ(),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",

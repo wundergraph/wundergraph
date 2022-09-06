@@ -4,7 +4,7 @@ import {
 	Application,
 	DatabaseApiCustom,
 	DataSource,
-	DataSourcePollingModeEnabled,
+	WG_DATA_SOURCE_POLLING_MODE,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -797,7 +797,7 @@ const resolveApplications = async (
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
 export const configureWunderGraphApplication = (config: WunderGraphConfigApplicationConfig) => {
-	if (DataSourcePollingModeEnabled) {
+	if (WG_DATA_SOURCE_POLLING_MODE) {
 		// if the DataSourcePolling environment variable is set to 'true',
 		// we don't run the regular config build process which would generate the whole config
 		// instead, we only resolve all Promises of the API Introspection

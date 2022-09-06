@@ -53,7 +53,10 @@ Use this command if you only want to generate the configuration`,
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wgDir,
 			Logger:        log,
-			ScriptEnv: append(os.Environ(),
+			ScriptEnv: append(
+				os.Environ(),
+				// Run scripts in prod mode
+				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
 			),
 		})

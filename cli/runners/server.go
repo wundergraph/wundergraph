@@ -17,6 +17,8 @@ type ServerRunConfig struct {
 func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
 	hooksEnv := []string{
 		"START_HOOKS_SERVER=true",
+		// Run scripts in prod mode
+		"NODE_ENV=production",
 		fmt.Sprintf("WG_ABS_DIR=%s", cfg.WunderGraphDirAbs),
 	}
 
