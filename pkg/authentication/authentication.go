@@ -248,12 +248,15 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 		return
 	}
 	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err == nil {
+	if userJson, err := json.Marshal(user); err != nil {
+		h.Log.Error("Could not marshal user", abstractlogger.Error(err))
+		return
+	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
 	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
 	if err != nil {
-		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
+		h.Log.Error("PostAuthentication queries hook", abstractlogger.Error(err))
 		return
 	}
 }
@@ -269,12 +272,14 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 		return true, "", user
 	}
 	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err == nil {
+	if userJson, err := json.Marshal(user); err != nil {
+		return false, "", User{}
+	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
 	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
-		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
+		h.Log.Error("MutatingPostAuthentication queries hook", abstractlogger.Error(err))
 		return
 	}
 	if out.Error != "" {
@@ -661,7 +666,11 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
 		hookData := []byte(`{}`)
-		if userJson, err := json.Marshal(user); err == nil {
+		if userJson, err := json.Marshal(user); err != nil {
+			u.Log.Error("Could not marshal user", abstractlogger.Error(err))
+			http.NotFound(w, r)
+			return
+		} else {
 			hookData, _ = jsonparser.Set(hookData, userJson, "user")
 		}
 		if user.AccessToken != nil {
@@ -672,16 +681,19 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
 		if err != nil {
-			u.Log.Error("RevalidateAuthentication", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication request failed", abstractlogger.Error(err))
+			http.NotFound(w, r)
 			return
 		}
 		if out.Error != "" {
+			u.Log.Error("RevalidateAuthentication returned an error", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}
 		var res MutatingPostAuthenticationResponse
 		err = json.Unmarshal(out.Response, &res)
 		if res.Status != "ok" {
+			u.Log.Error("MutatingPostAuthenticationResponse status is not ok", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}

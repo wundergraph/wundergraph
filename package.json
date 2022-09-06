@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.104.0",
+  "version": "0.105.0",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -13,7 +13,7 @@
   },
   "homepage": "https://wundergraph.com",
   "scripts": {
-    "build": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
+    "build": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' --filter='!./docs-website' build",
     "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' --filter='!./docs-website' build --watch",
@@ -30,7 +30,8 @@
     "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
     "postinstall": "husky install && pnpm run patch",
     "patch": "patch-package",
-    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' +"
+    "link-engine": "make build && mv wunderctl ./packages/wunderctl/download",
+    "clean": "del-cli '**/node_modules/' 'packages/**/dist/' 'packages/**/download/' 'packages/**/generated/'"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -74,12 +75,12 @@
     "@commitlint/config-conventional": "^17.0.0",
     "@lerna-lite/cli": "1.11.1",
     "@milahu/patch-package-with-pnpm-support": "6.4.10",
-    "@release-it/conventional-changelog": "^5.1.0",
     "@release-it/bumper": "^4.0.0",
+    "@release-it/conventional-changelog": "^5.1.0",
     "husky": "^8.0.1",
     "lint-staged": "^12.4.2",
     "prettier": "^2.6.2",
     "release-it": "^15.4.1",
-    "rimraf": "^3.0.2"
+    "del-cli": "^5.0.0"
   }
 }

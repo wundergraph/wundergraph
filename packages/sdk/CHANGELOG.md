@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.104.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.103.1...@wundergraph/sdk@0.104.0) (2022-09-06)
+
+### Features
+
+* ensure that user is always set in auth hooks, disable introspection cache in `wunderctl generate` ([#167](https://github.com/wundergraph/wundergraph/issues/167)) ([4b40572](https://github.com/wundergraph/wundergraph/commit/4b40572dd993be1c84e421f1796eb8a2913ecf69)) (@StarpTech)
+
+### Bug Fixes
+
+* sync wunderctl ([06dfe11](https://github.com/wundergraph/wundergraph/commit/06dfe11e885acafe48b6d7e8776cb763f0c75a66)) (@StarpTech)
+
 ## [0.103.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.103.0...@wundergraph/sdk@0.103.1) (2022-09-05)
 
 ### Bug Fixes
