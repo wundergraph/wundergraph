@@ -1,10 +1,11 @@
 import { InternalClient } from './internal-client';
 import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from '@web-std/fetch';
-import { HooksConfiguration, ResolvedServerOptions, ServerOptions } from '../configure';
+import { HooksConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
-import { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { WebhooksConfig } from '../webhooks/types';
+import { ServerOptions } from '../configure/options';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -93,8 +94,6 @@ export interface WunderGraphUser<Role = any> {
 }
 
 export interface ServerRunOptions {
-	port?: number;
-	host?: string;
 	wundergraphDir: string;
 	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
