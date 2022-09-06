@@ -5,15 +5,16 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/jensneuse/abstractlogger"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/jensneuse/abstractlogger"
+
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func New(config *wgpb.WebhookConfiguration, pathPrefix, hooksServerURL string, log abstractlogger.Logger) (http.Handler, error) {
