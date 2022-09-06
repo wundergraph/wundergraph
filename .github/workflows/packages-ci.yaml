@@ -53,6 +53,8 @@ jobs:
 
       - run: pnpm install --ignore-scripts
 
-      - run: pnpm build:libs
+      - run: pnpm build
+
+      - run: pnpm check:apps
 
       - run: pnpm test --filter '@wundergraph/sdk'

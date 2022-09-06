@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/nextjs-starter",
+  "name": "@test/nextjs",
   "version": "0.1.0",
   "repository": {
     "type": "git",

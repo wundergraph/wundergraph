@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/wundergraph-mtls",
+  "name": "@test/mtls",
   "version": "0.1.0",
   "repository": {
     "type": "git",
