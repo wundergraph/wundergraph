@@ -43,8 +43,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 			ServerUrl:            loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: loadvariable.String(graphConfig.Api.ServerOptions.Listen.Host),
-					Port: uint16(loadvariable.Int(graphConfig.Api.ServerOptions.Listen.Port)),
+					Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
+					Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
 				},
 				Logging: graphConfig.Api.NodeOptions.Logger,
 			},
