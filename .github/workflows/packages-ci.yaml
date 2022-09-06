@@ -54,11 +54,8 @@ jobs:
       - name: Bootstrap PNPM workspace
         run: ./scripts/pnpm.sh
 
-      - name: Generate WunderGraph config for all apps
-        run: pnpm gen:apps
-
-      - name: Tsc check of all apps
-        run: pnpm check:apps
+      - name: Build all libs + apps
+        run: pnpm build
 
       - name: Run all NPM tests
         run: pnpm test --filter '@wundergraph/sdk'

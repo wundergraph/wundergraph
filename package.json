@@ -14,8 +14,6 @@
   "homepage": "https://wundergraph.com",
   "scripts": {
     "build": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' --filter='!./docs-website' build",
-    "gen:apps": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' generate",
-    "check:apps": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' check",
     "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' --filter='!./docs-website' build --watch",

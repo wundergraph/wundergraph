@@ -4,9 +4,9 @@ set -e
 
 # Bootstrap pnpm workspace
 
-# install workspace without scripts
+# Install wunderctl without scripts because wunderctl has to be build first
 pnpm install --filter="./packages/wunderctl" --ignore-scripts
-# Build wunderctl before run postinstall
+# Build wunderctl
 pnpm -r run --filter="./packages/wunderctl" build
-# Build all libs, run scripts and link all packages
-pnpm install && pnpm build
+# Install, link all packages + build all packages
+pnpm install && pnpm build:libs

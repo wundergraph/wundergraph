@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
+    "build": "pnpm generate && pnpm check",
     "check": "tsc"
   },
   "dependencies": {
