@@ -48,7 +48,7 @@ jobs:
       - name: Cache Nextjs builds
         uses: actions/cache@v2
         with:
-          paths: |
+          path: |
             ${{ github.workspace }}/packages/nextjs-testapp/.next/cache
           # Generate a new cache whenever packages or source files change.
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('packages/nextjs-testapp/**.[jt]s', 'packages/nextjs-testapp/**.[jt]sx') }}
