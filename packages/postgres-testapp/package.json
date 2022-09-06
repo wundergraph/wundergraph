@@ -1,12 +1,12 @@
 {
-  "name": "@test/wundergraph-testapp-postgres",
+  "name": "@test/postgres",
   "private": true,
   "version": "1.0.1",
   "description": "",
   "scripts": {
     "start-database": "docker-compose up",
-    "dev": "cd .wundergraph && wunderctl up --debug",
-    "generate": "cd .wundergraph && wunderctl generate --debug",
+    "dev": "wunderctl up --debug",
+    "generate": "wunderctl generate --debug",
     "cleanup": "docker-compose down"
   },
   "author": "",

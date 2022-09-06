@@ -1,5 +1,5 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders } from '../types';
+import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders, AuthenticationOK } from '../types';
 import {
 	HooksConfiguration,
 	HooksConfigurationOperationType,

@@ -51,8 +51,11 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm install --ignore-scripts
+      - name: Bootstrap PNPM workspace
+        run: ./scripts/pnpm.sh
 
-      - run: pnpm build:libs
+      - name: Build all libs + apps
+        run: pnpm build
 
-      - run: pnpm test --filter '@wundergraph/sdk'
+      - name: Run all NPM tests
+        run: pnpm test

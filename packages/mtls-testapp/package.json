@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/wundergraph-mtls",
+  "name": "@test/mtls",
   "version": "0.1.0",
   "repository": {
     "type": "git",
@@ -15,8 +15,8 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
-    "dev": "cd .wundergraph && wunderctl up --debug",
-    "generate": "cd .wundergraph && wunderctl generate --debug",
+    "dev": "wunderctl up --debug",
+    "generate": "wunderctl generate --debug",
     "check": "tsc"
   },
   "dependencies": {
