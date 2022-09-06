@@ -59,8 +59,10 @@ import {
 	writeIntrospectionCacheFile,
 } from './introspection-cache';
 
-export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
-export const IntrospectionCacheEnabled = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+// Use UPPERCASE for environment variables
+export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
+export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+export const WG_DEV_FIRST_RUN = process.env['WG_DEV_FIRST_RUN'] === 'true';
 
 export interface ApplicationConfig {
 	name: string;
@@ -614,14 +616,15 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const isIntrospectionCacheEnabled = IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true;
+	const isIntrospectionCacheEnabled =
+		WG_ENABLE_INTROSPECTION_CACHE && introspection.introspection?.disableCache !== true;
 	const cacheKey = objectHash(introspection);
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
 	 * The return value is ignorable because we don't use it.
 	 */
-	if (DataSourcePollingModeEnabled) {
+	if (WG_DATA_SOURCE_POLLING_MODE) {
 		if (
 			introspection.introspection?.pollingIntervalSeconds !== undefined &&
 			introspection.introspection?.pollingIntervalSeconds > 0
@@ -658,8 +661,8 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 		// generate introspection from scratch
 		const api = await generator(introspection);
 
-		// prefill cache with new introspection result (Only in development).
-		if (process.env.NODE_ENV !== 'production') {
+		// prefill cache with new introspection result (only for development mode)
+		if (WG_DEV_FIRST_RUN) {
 			try {
 				const cacheEntry = toCacheEntry<A>(api);
 				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
@@ -670,8 +673,8 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	} catch (e) {
 		console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
 
-		// fallback to old introspection result (Only in development).
-		if (process.env.NODE_ENV !== 'production') {
+		// fallback to old introspection result (only for development mode)
+		if (WG_DEV_FIRST_RUN) {
 			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 			if (cacheEntryString) {
 				console.log('Fallback to old introspection result');

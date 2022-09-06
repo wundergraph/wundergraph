@@ -111,9 +111,11 @@ var upCmd = &cobra.Command{
 				// so the user can be sure that the introspection is up to date. In case of an API is not available
 				// we will fallback to the cached introspection (when available)
 				"WG_ENABLE_INTROSPECTION_CACHE=false",
+				// this option allows us to make different decision for the first run
+				// for example, we decide to not use the cache but we will prefill the cache
+				"WG_DEV_FIRST_RUN=true",
 			},
 			ScriptEnv: append(os.Environ(),
-				"NODE_ENV=development",
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -129,7 +131,6 @@ var upCmd = &cobra.Command{
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
-				"NODE_ENV=development",
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),

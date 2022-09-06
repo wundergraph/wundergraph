@@ -71,7 +71,9 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 
 			hooksEnv := []string{
+				// Run the hooks server as long running process
 				"START_HOOKS_SERVER=true",
+				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WG_ABS_DIR=%s", wgDir),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
