@@ -174,7 +174,6 @@ var upCmd = &cobra.Command{
 
 			hooksEnv := []string{
 				"START_HOOKS_SERVER=true",
-				"NODE_ENV=development",
 				fmt.Sprintf("WG_ABS_DIR=%s", wgDir),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
