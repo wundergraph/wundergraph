@@ -936,7 +936,7 @@ export interface NodeOptions {
 }
 
 export interface ServerLogging {
-	level: LogLevel;
+	level: string;
 }
 
 export interface ServerOptions {
@@ -3365,25 +3365,25 @@ export const NodeOptions = {
 };
 
 function createBaseServerLogging(): ServerLogging {
-	return { level: 0 };
+	return { level: '' };
 }
 
 export const ServerLogging = {
 	fromJSON(object: any): ServerLogging {
 		return {
-			level: isSet(object.level) ? logLevelFromJSON(object.level) : 0,
+			level: isSet(object.level) ? String(object.level) : '',
 		};
 	},
 
 	toJSON(message: ServerLogging): unknown {
 		const obj: any = {};
-		message.level !== undefined && (obj.level = logLevelToJSON(message.level));
+		message.level !== undefined && (obj.level = message.level);
 		return obj;
 	},
 
 	fromPartial<I extends Exact<DeepPartial<ServerLogging>, I>>(object: I): ServerLogging {
 		const message = createBaseServerLogging();
-		message.level = object.level ?? 0;
+		message.level = object.level ?? '';
 		return message;
 	},
 };

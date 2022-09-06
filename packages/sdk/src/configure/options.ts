@@ -72,14 +72,34 @@ export interface MandatoryServerLogger {
 	level: InputVariable;
 }
 
+type PinoLogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug'; // 'trace' | 'silent'
+
 export interface ResolvedServerLogger {
-	level: LogLevel;
+	level: PinoLogLevel;
 }
 
 const resolveLogLevel = (level: ConfigurationVariable): LogLevel => {
 	const stringLevel = resolveConfigurationVariable(level);
 
 	return logLevelFromJSON(stringLevel);
+};
+
+const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLevel => {
+	const wgLogLevel = resolveLogLevel(level);
+	switch (wgLogLevel) {
+		case LogLevel.FATAL:
+			return 'fatal';
+		case LogLevel.PANIC:
+			return 'fatal';
+		case LogLevel.WARNING:
+			return 'warn';
+		case LogLevel.ERROR:
+			return 'error';
+		case LogLevel.INFO:
+			return 'info';
+		case LogLevel.DEBUG:
+			return 'debug';
+	}
 };
 
 export const resolveNodeOptionsWithDefaults = (options?: NodeOptions): ResolvedNodeOptions => {
@@ -131,7 +151,7 @@ export const resolveServerOptions = (options: MandatoryServerOptions): ResolvedS
 			port: mapInputVariable(options.listen.port),
 		},
 		logger: {
-			level: resolveLogLevel(mapInputVariable(options.logger.level)),
+			level: resolveServerLogLevel(mapInputVariable(options.logger.level)),
 		},
 	};
 };

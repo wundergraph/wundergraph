@@ -454,7 +454,7 @@ message NodeOptions {
 }
 
 message ServerLogging {
-	LogLevel level = 1;
+	string level = 1;
 }
 
 message ServerOptions {

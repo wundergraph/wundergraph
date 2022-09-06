@@ -97,7 +97,7 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						},
 					},
 					logger: {
-						level: LogLevel.INFO,
+						level: 'info',
 					},
 				},
 				application: {

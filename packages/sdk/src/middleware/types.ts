@@ -108,7 +108,7 @@ export interface WunderGraphServerConfig<
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
-	options: ServerOptions;
+	options?: ServerOptions;
 }
 
 // internal representation of the fully resolved server config
@@ -120,7 +120,7 @@ export interface WunderGraphHooksAndServerConfig<
 	hooks?: GeneratedHooksConfig;
 	// url of the server is set internally by the hooks server
 	graphqlServers?: (GraphQLServerConfig & { url: string })[];
-	options: ServerOptions;
+	options?: ServerOptions;
 }
 
 export type AuthenticationResponse<User> = AuthenticationOK<User> | AuthenticationDeny;

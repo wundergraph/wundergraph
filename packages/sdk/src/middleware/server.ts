@@ -127,9 +127,6 @@ export const startServer = async (opts: ServerRunOptions) => {
 		const host = resolveConfigurationVariable(opts.config.api.serverOptions.listen.host);
 		const port = parseInt(portString, 10);
 
-		opts.port = port;
-		opts.host = host;
-
 		const fastify = await createServer(opts);
 		await fastify.listen({
 			port: port,
@@ -146,13 +143,9 @@ export const createServer = async ({
 	serverConfig,
 	config,
 	gracefulShutdown,
-	host,
-	port,
 }: ServerRunOptions): Promise<FastifyInstance> => {
-	let logLevel = 'info';
 	if (config.api?.serverOptions?.logger?.level) {
-		logLevel = logLevelToJSON(config.api?.serverOptions?.logger?.level);
-		logger.level = logLevel;
+		logger.level = config.api.serverOptions.logger.level;
 	}
 
 	const fastify = Fastify({
@@ -212,9 +205,10 @@ export const createServer = async ({
 		}
 
 		if (serverConfig.graphqlServers) {
-			for (const server of serverConfig.graphqlServers) {
-				server.url = `http://${host}:${port}/gqls/${server.serverName}/graphql`;
-			}
+			// TODO: check this
+			// for (const server of serverConfig.graphqlServers) {
+			// 	server.url = `http://${host}:${port}/gqls/${server.serverName}/graphql`;
+			// }
 
 			for await (const server of serverConfig.graphqlServers) {
 				const routeUrl = `/gqls/${server.serverName}/graphql`;

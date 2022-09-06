@@ -4385,7 +4385,7 @@ type ServerLogging struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Level LogLevel `protobuf:"varint,1,opt,name=level,proto3,enum=wgpb.LogLevel" json:"level,omitempty"`
+	Level string `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
 }
 
 func (x *ServerLogging) Reset() {
@@ -4420,11 +4420,11 @@ func (*ServerLogging) Descriptor() ([]byte, []int) {
 	return file_wundernode_config_proto_rawDescGZIP(), []int{53}
 }
 
-func (x *ServerLogging) GetLevel() LogLevel {
+func (x *ServerLogging) GetLevel() string {
 	if x != nil {
 		return x.Level
 	}
-	return LogLevel_DEBUG
+	return ""
 }
 
 type ServerOptions struct {
@@ -5523,10 +5523,9 @@ var file_wundernode_config_proto_rawDesc = []byte{
 	0x74, 0x65, 0x6e, 0x65, 0x72, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x06, 0x6c, 0x69,
 	0x73, 0x74, 0x65, 0x6e, 0x12, 0x25, 0x0a, 0x06, 0x6c, 0x6f, 0x67, 0x67, 0x65, 0x72, 0x18, 0x03,
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x4c, 0x6f, 0x67, 0x67,
-	0x69, 0x6e, 0x67, 0x52, 0x06, 0x6c, 0x6f, 0x67, 0x67, 0x65, 0x72, 0x22, 0x35, 0x0a, 0x0d, 0x53,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x4c, 0x6f, 0x67, 0x67, 0x69, 0x6e, 0x67, 0x12, 0x24, 0x0a, 0x05,
-	0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x0e, 0x2e, 0x77, 0x67,
-	0x70, 0x62, 0x2e, 0x4c, 0x6f, 0x67, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x52, 0x05, 0x6c, 0x65, 0x76,
+	0x69, 0x6e, 0x67, 0x52, 0x06, 0x6c, 0x6f, 0x67, 0x67, 0x65, 0x72, 0x22, 0x25, 0x0a, 0x0d, 0x53,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x4c, 0x6f, 0x67, 0x67, 0x69, 0x6e, 0x67, 0x12, 0x14, 0x0a, 0x05,
+	0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x6c, 0x65, 0x76,
 	0x65, 0x6c, 0x22, 0xa6, 0x01, 0x0a, 0x0d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4f, 0x70, 0x74,
 	0x69, 0x6f, 0x6e, 0x73, 0x12, 0x39, 0x0a, 0x09, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x55, 0x72,
 	0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43,
@@ -5876,21 +5875,20 @@ var file_wundernode_config_proto_depIdxs = []int32{
 	73,  // 102: wgpb.NodeOptions.nodeUrl:type_name -> wgpb.ConfigurationVariable
 	66,  // 103: wgpb.NodeOptions.listen:type_name -> wgpb.ListenerOptions
 	15,  // 104: wgpb.NodeOptions.logger:type_name -> wgpb.Logging
-	0,   // 105: wgpb.ServerLogging.level:type_name -> wgpb.LogLevel
-	73,  // 106: wgpb.ServerOptions.serverUrl:type_name -> wgpb.ConfigurationVariable
-	66,  // 107: wgpb.ServerOptions.listen:type_name -> wgpb.ListenerOptions
-	68,  // 108: wgpb.ServerOptions.logger:type_name -> wgpb.ServerLogging
-	71,  // 109: wgpb.WebhookConfiguration.verifier:type_name -> wgpb.WebhookVerifier
-	13,  // 110: wgpb.WebhookVerifier.kind:type_name -> wgpb.WebhookVerifierKind
-	73,  // 111: wgpb.WebhookVerifier.secret:type_name -> wgpb.ConfigurationVariable
-	73,  // 112: wgpb.CorsConfiguration.allowedOrigins:type_name -> wgpb.ConfigurationVariable
-	14,  // 113: wgpb.ConfigurationVariable.kind:type_name -> wgpb.ConfigurationVariableKind
-	57,  // 114: wgpb.FetchConfiguration.HeaderEntry.value:type_name -> wgpb.HTTPHeader
-	115, // [115:115] is the sub-list for method output_type
-	115, // [115:115] is the sub-list for method input_type
-	115, // [115:115] is the sub-list for extension type_name
-	115, // [115:115] is the sub-list for extension extendee
-	0,   // [0:115] is the sub-list for field type_name
+	73,  // 105: wgpb.ServerOptions.serverUrl:type_name -> wgpb.ConfigurationVariable
+	66,  // 106: wgpb.ServerOptions.listen:type_name -> wgpb.ListenerOptions
+	68,  // 107: wgpb.ServerOptions.logger:type_name -> wgpb.ServerLogging
+	71,  // 108: wgpb.WebhookConfiguration.verifier:type_name -> wgpb.WebhookVerifier
+	13,  // 109: wgpb.WebhookVerifier.kind:type_name -> wgpb.WebhookVerifierKind
+	73,  // 110: wgpb.WebhookVerifier.secret:type_name -> wgpb.ConfigurationVariable
+	73,  // 111: wgpb.CorsConfiguration.allowedOrigins:type_name -> wgpb.ConfigurationVariable
+	14,  // 112: wgpb.ConfigurationVariable.kind:type_name -> wgpb.ConfigurationVariableKind
+	57,  // 113: wgpb.FetchConfiguration.HeaderEntry.value:type_name -> wgpb.HTTPHeader
+	114, // [114:114] is the sub-list for method output_type
+	114, // [114:114] is the sub-list for method input_type
+	114, // [114:114] is the sub-list for extension type_name
+	114, // [114:114] is the sub-list for extension extendee
+	0,   // [0:114] is the sub-list for field type_name
 }
 
 func init() { file_wundernode_config_proto_init() }
