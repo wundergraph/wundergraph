@@ -31,3 +31,9 @@ type Api struct {
 	ServerUrl             string
 	Options               *Options
 }
+
+func (api *Api) HasCookieAuthEnabled() bool {
+	return api.AuthenticationConfig != nil &&
+		api.AuthenticationConfig.CookieBased != nil &&
+		len(api.AuthenticationConfig.CookieBased.Providers) > 0
+}

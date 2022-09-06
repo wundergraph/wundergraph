@@ -1,15 +1,14 @@
 package validate
 
 import (
-	"github.com/wundergraph/wundergraph/pkg/apiconfig"
+	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
 // ApiConfig validates the Api
-func ApiConfig(api *wgpb.Api) (valid bool, messages []string) {
+func ApiConfig(api *apihandler.Api) (valid bool, messages []string) {
 
-	if !apiconfig.HasCookieAuthEnabled(api) {
+	if !api.HasCookieAuthEnabled() {
 		// skip following tests if cookie auth is not enabled
 		// in this case, we don't have to check it
 		return true, nil

@@ -43,7 +43,6 @@ import (
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"
-	"github.com/wundergraph/wundergraph/pkg/apiconfig"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
@@ -1829,8 +1828,8 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		csrfSecret = []byte(b)
 	}
 
-	if apiconfig.HasCookieAuthEnabled(r.api) && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
