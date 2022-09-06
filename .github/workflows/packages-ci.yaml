@@ -51,7 +51,7 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm install --ignore-scripts
+      - run: pnpm install
 
       - run: pnpm build
 
