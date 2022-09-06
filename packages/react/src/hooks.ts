@@ -12,6 +12,9 @@ import type {
 	QueryResult,
 	SubscriptionResult,
 	UploadConfig,
+	SubscriptionArgs,
+	MutationArgs,
+	InternalMutationArgs,
 } from '@wundergraph/sdk/client';
 
 import { useWunderGraphContext, WunderGraphContextProperties } from './provider';
@@ -20,32 +23,38 @@ export interface LogoutOptions {
 	logout_openid_connect_provider?: boolean;
 }
 
-interface UseQueryProps {
-	operationName: string;
-}
-
-export interface UseQueryOptions<Role> {
+export interface UseQueryOptions<Role> extends QueryArgs {
 	context?: Context<WunderGraphContextProperties<Role> | undefined>;
 	requiresAuthentication?: boolean;
 }
 
+export type UseQueryReturn<Input, Data> = {
+	data?: Data;
+	isLoading?: boolean;
+	isSuccess?: boolean;
+	isError?: boolean;
+	isLazy?: boolean;
+	refetch: (input?: Input, args?: QueryArgs) => void;
+} & QueryResult<Data>;
+
 export function useQuery<Input, Data, Role>(
-	query: UseQueryProps,
-	args?: QueryArgsWithInput<Input>,
-	options?: UseQueryOptions<Role>
-): {
-	result: QueryResult<Data>;
-	refetch: (args?: QueryArgsWithInput<Input>) => void;
-} {
-	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useWunderGraphContext<Role>(
-		options?.context,
-		{ name: 'useQuery' }
-	);
+	operationName: string,
+	input?: Input,
+	options: UseQueryOptions<Role> = {}
+): UseQueryReturn<Input, Data> {
+	const { context, requiresAuthentication, ...args } = options;
+
+	const argsWithInput: QueryArgsWithInput<Input | undefined> = { input, ...args };
+
+	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useWunderGraphContext<Role>(context, {
+		name: 'useQuery',
+	});
+
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true && args?.lazy !== true;
 	const cacheKey = client.cacheKey({
-		...query,
-		...args,
+		operationName,
+		...argsWithInput,
 	});
 
 	if (isServer) {
@@ -54,19 +63,24 @@ export function useQuery<Input, Data, Role>(
 				status: 'requires_authentication',
 			};
 			return {
-				result: ssrCache[cacheKey] as QueryResult<Data>,
+				...(ssrCache[cacheKey] as QueryResult<Data>),
 				refetch: () => {},
 			};
 		}
 		if (ssrEnabled) {
 			if (ssrCache[cacheKey]) {
+				const result = ssrCache[cacheKey] as QueryResult<Data>;
 				return {
-					result: ssrCache[cacheKey] as QueryResult<Data>,
-					refetch: () => Promise.resolve(ssrCache[cacheKey] as QueryResult<Data>),
+					...result,
+					isLoading: result.status === 'loading',
+					isSuccess: result.status === 'ok',
+					isError: result.status === 'error',
+					isLazy: result.status === 'lazy',
+					refetch: () => Promise.resolve(result),
 				};
 			}
 			const promise = client.query<Input, Data>({
-				...query,
+				operationName,
 				...args,
 			});
 			ssrCache[cacheKey] = promise;
@@ -76,18 +90,20 @@ export function useQuery<Input, Data, Role>(
 				status: 'none',
 			};
 			return {
-				result: ssrCache[cacheKey] as QueryResult<Data>,
+				...(ssrCache[cacheKey] as QueryResult<Data>),
 				refetch: () => ({}),
 			};
 		}
 	}
 	const [invalidate, setInvalidate] = useState<number>(0);
 	const [debounce, setDebounce] = useState<number>(0);
-	const [statefulArgs, setStatefulArgs] = useState<InternalQueryArgsWithInput<Input> | undefined>(args);
+	const [statefulArgs, setStatefulArgs] = useState<InternalQueryArgsWithInput<Input | undefined> | undefined>(
+		argsWithInput
+	);
 	const [lazy] = useState(args?.lazy === true);
 	const [lastCacheKey, setLastCacheKey] = useState<string>('');
 	const [refetchOnWindowFocus] = useState(args?.refetchOnWindowFocus === true);
-	const [queryResult, setQueryResult] = useState<QueryResult<Data> | undefined>(
+	const [queryResult, setQueryResult] = useState<QueryResult<Data>>(
 		(ssrCache[cacheKey] as QueryResult<Data>) || { status: 'none' }
 	);
 	useEffect(() => {
@@ -108,7 +124,7 @@ export function useQuery<Input, Data, Role>(
 			return;
 		}
 		setLastCacheKey(cacheKey);
-		setStatefulArgs(args);
+		setStatefulArgs(argsWithInput);
 		if (args?.debounceMillis !== undefined) {
 			setDebounce((prev) => prev + 1);
 			return;
@@ -142,7 +158,7 @@ export function useQuery<Input, Data, Role>(
 		}
 		(async () => {
 			const result = await client.query<Input, Data>({
-				...query,
+				operationName,
 				...statefulArgs,
 				abortSignal: abort.signal,
 			});
@@ -162,38 +178,49 @@ export function useQuery<Input, Data, Role>(
 		}
 		setInvalidate((prev) => prev + 1);
 	}, [refetchOnWindowFocus, isWindowFocused]);
-	const refetch = useCallback((args?: InternalQueryArgsWithInput<Input>) => {
-		if (args !== undefined) {
-			setStatefulArgs(args);
+	const refetch = useCallback((input?: Input, args?: QueryArgs) => {
+		if (input !== undefined || args !== undefined) {
+			const argsWithInput = {
+				input,
+				...args,
+			};
+			setStatefulArgs(argsWithInput);
 		}
 		setInvalidate((prev) => prev + 1);
 	}, []);
 	return {
-		result: queryResult as QueryResult<Data>,
+		...(queryResult as QueryResult<Data>),
+		isLoading: queryResult.status === 'loading',
+		isSuccess: queryResult.status === 'ok',
+		isError: queryResult.status === 'error',
+		isLazy: queryResult.status === 'lazy',
 		refetch,
 	};
 }
 
-interface UseSubscriptionProps {
-	operationName: string;
-}
-
-interface UseSubscriptionArgs<Input> extends SubscriptionArgsWithInput<Input> {
-	isLiveQuery: boolean;
-}
-
-interface UseSubscriptionOptions<Role> {
+export interface UseSubscriptionOptions<Role> extends SubscriptionArgs {
 	context?: Context<WunderGraphContextProperties<Role> | undefined>;
 	requiresAuthentication?: boolean;
+	isLiveQuery?: boolean;
 }
 
+export type UseSubscriptionReturn<Input, Data> = {
+	data?: Data;
+	isLoading?: boolean;
+	isSuccess?: boolean;
+	isStopped?: boolean;
+	isError?: boolean;
+} & SubscriptionResult<Data>;
+
 export function useSubscription<Input, Data, Role>(
-	subscription: UseSubscriptionProps,
-	args?: UseSubscriptionArgs<Input>,
-	options?: UseSubscriptionOptions<Role>
-): {
-	result: SubscriptionResult<Data>;
-} {
+	operationName: string,
+	input?: Input,
+	options: UseSubscriptionOptions<Role> = {}
+): UseSubscriptionReturn<Input, Data> {
+	const { context, requiresAuthentication, ...args } = options;
+
+	const argsWithInput: SubscriptionArgsWithInput<Input | undefined> = { input, ...args };
+
 	const { ssrCache, client, isWindowFocused, refetchMountedOperations, user } = useWunderGraphContext(
 		options?.context,
 		{ name: 'useSubscription' }
@@ -201,8 +228,8 @@ export function useSubscription<Input, Data, Role>(
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true;
 	const cacheKey = client.cacheKey({
-		...subscription,
-		...args,
+		operationName,
+		...argsWithInput,
 	});
 	if (isServer) {
 		if (options?.requiresAuthentication && user === null) {
@@ -210,16 +237,16 @@ export function useSubscription<Input, Data, Role>(
 				status: 'requires_authentication',
 			};
 			return {
-				result: ssrCache[cacheKey] as SubscriptionResult<Data>,
+				...(ssrCache[cacheKey] as SubscriptionResult<Data>),
 			};
 		}
 		if (ssrEnabled) {
 			if (ssrCache[cacheKey]) {
 				return {
-					result: ssrCache[cacheKey] as SubscriptionResult<Data>,
+					...(ssrCache[cacheKey] as SubscriptionResult<Data>),
 				};
 			}
-			const promise = client.query({ ...subscription, ...args, subscribeOnce: true });
+			const promise = client.query({ operationName, ...argsWithInput, subscribeOnce: true });
 			ssrCache[cacheKey] = promise;
 			throw promise;
 		} else {
@@ -227,12 +254,12 @@ export function useSubscription<Input, Data, Role>(
 				status: 'none',
 			};
 			return {
-				result: ssrCache[cacheKey] as SubscriptionResult<Data>,
+				...(ssrCache[cacheKey] as SubscriptionResult<Data>),
 			};
 		}
 	}
 	const [invalidate, setInvalidate] = useState<number>(0);
-	const [subscriptionResult, setSubscriptionResult] = useState<SubscriptionResult<Data> | undefined>(
+	const [subscriptionResult, setSubscriptionResult] = useState<SubscriptionResult<Data>>(
 		(ssrCache[cacheKey] as SubscriptionResult<Data>) || { status: 'none' }
 	);
 	const stopOnWindowBlur = args?.stopOnWindowBlur === true;
@@ -260,8 +287,8 @@ export function useSubscription<Input, Data, Role>(
 		const abort = new AbortController();
 		client.subscribe(
 			{
-				...subscription,
-				...args,
+				operationName,
+				...argsWithInput,
 				abortSignal: abort.signal,
 			},
 			(result: SubscriptionResult<Data>) => {
@@ -285,26 +312,31 @@ export function useSubscription<Input, Data, Role>(
 		};
 	}, [cacheKey]);
 	return {
-		result: subscriptionResult as SubscriptionResult<Data>,
+		...(subscriptionResult as SubscriptionResult<Data>),
+		isLoading: subscriptionResult.status === 'loading',
+		isSuccess: subscriptionResult.status === 'ok',
+		isStopped: subscriptionResult.status === 'ok' && stop,
+		isError: subscriptionResult.status === 'error',
 	};
 }
 
-interface UseMutationProps {
-	operationName: string;
-}
-
-interface UseMutationOptions<Role> {
+export interface UseMutationOptions<Role> extends MutationArgs {
 	context?: Context<WunderGraphContextProperties<Role> | undefined>;
 	requiresAuthentication?: boolean;
 }
 
+export type UseMutationReturn<Input, Data> = {
+	data?: Data;
+	isLoading?: boolean;
+	isSuccess?: boolean;
+	isError?: boolean;
+	mutate: (input?: Input, args?: MutationArgs) => Promise<MutationResult<Data>>;
+} & MutationResult<Data>;
+
 export function useMutation<Input, Data, Role>(
-	mutation: UseMutationProps,
+	operationName: string,
 	options: UseMutationOptions<Role>
-): {
-	result: MutationResult<Data>;
-	mutate: (args?: MutationArgsWithInput<Input>) => Promise<MutationResult<Data>>;
-} {
+): UseMutationReturn<Input, Data> {
 	const { client, setRefetchMountedOperations, user } = useWunderGraphContext(options.context, {
 		name: 'useMutation',
 	});
@@ -312,12 +344,12 @@ export function useMutation<Input, Data, Role>(
 		options?.requiresAuthentication && user === null ? { status: 'requires_authentication' } : { status: 'none' }
 	);
 	const mutate = useCallback(
-		async (args?: InternalMutationArgsWithInput<Input>): Promise<MutationResult<Data>> => {
+		async (input?: Input, args?: InternalMutationArgs): Promise<MutationResult<Data>> => {
 			if (options?.requiresAuthentication && user === null) {
 				return { status: 'requires_authentication' };
 			}
 			setResult({ status: 'loading' });
-			const result = await client.mutate({ ...mutation, ...args });
+			const result = await client.mutate({ operationName, input, ...args });
 			setResult(result as any);
 			if (result.status === 'ok' && args?.refetchMountedOperationsOnSuccess === true) {
 				setRefetchMountedOperations((prev) => prev + 1);
@@ -341,7 +373,10 @@ export function useMutation<Input, Data, Role>(
 		}
 	}, [user]);
 	return {
-		result,
+		...result,
+		isLoading: result.status === 'loading',
+		isSuccess: result.status === 'ok',
+		isError: result.status === 'error',
 		mutate,
 	};
 }

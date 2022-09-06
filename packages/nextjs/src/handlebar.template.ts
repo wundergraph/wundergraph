@@ -1,10 +1,19 @@
 //language=handlebars
 export const handlebarTemplate = `
+import type { {{ modelImports }} } from "./models";
 import { NextComponentType } from "next";
 import { 
     withWunderGraph as withInternalWunderGraph,
     WithWunderGraphOptions,
 } from "@wundergraph/nextjs";
+
+import {
+    QueryArgs,
+	QueryArgsWithInput,
+    MutationArgs,
+    MutationArgsWithInput,
+	SubscriptionArgsWithInput,
+} from '@wundergraph/sdk/client';
 
 import {
     useWunderGraph,
@@ -29,37 +38,111 @@ export const withWunderGraph = (Page: NextComponentType<any, any, any>, options?
 
 export const useQuery = {
 {{#each queriesWithInput}}
-    {{name}}: use{{name}}Query,
+    {{name}}: (args: QueryArgsWithInput<{{name}}Input>) => {
+        const {input, ...options} = args
+        const { refetch, isLoading, isSuccess, isError, isLazy, ...result } = use{{name}}Query(input, options)
+        return {
+            refetch,
+            isLoading,
+            isSuccess,
+            isError,
+            isLazy,
+            result
+        }
+    },
 {{/each}}
 {{#each queriesWithoutInput}}
-    {{name}}: use{{name}}Query,
+    {{name}}: (args?: QueryArgs) => {
+        const { refetch, isLoading, isSuccess, isError, isLazy, ...result } = use{{name}}Query(args)
+        return {
+            refetch,
+            isLoading,
+            isSuccess,
+            isError,
+            isLazy,
+            result
+        }
+    },
 {{/each}}
 };
 
 export const useMutation = {
-{{#each mutationsWithoutInput}}
-    {{name}}: use{{name}}Mutation,
-{{/each}}
 {{#each mutationsWithInput}}
-    {{name}}: use{{name}}Mutation,
+    {{name}}: (args?: MutationArgs) => {
+        const { mutate, ...result } = use{{name}}Mutation(args)
+        return {
+            result,
+            mutate(args: MutationArgsWithInput<{{name}}Input>) {
+                const {input, ...options} = args
+                return mutate(input, options)
+            }
+        }
+    },
+{{/each}}
+{{#each mutationsWithoutInput}}
+    {{name}}: (args?: MutationArgs) => {
+        const { mutate, ...result } = use{{name}}Mutation(args)
+        return {
+            result,
+            mutate
+        }
+    },
 {{/each}}
 };
 
 export const useSubscription = {
 {{#each subscriptionsWithInput}}
-    {{name}}: use{{name}}Subscription,
+    {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => {
+        const { input, ...options } = args
+        const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}Subscription(input, options)
+        return {
+            isLoading,
+            isSuccess,
+            isStopped,
+            isError,
+            result
+        }
+    },
 {{/each}}
 {{#each subscriptionsWithoutInput}}
-    {{name}}: use{{name}}Subscription,
+    {{name}}: (args: SubscriptionArgs) => {
+        const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}Subscription(args)
+        return {
+            isLoading,
+            isSuccess,
+            isStopped,
+            isError,
+            result
+        }
+    },
 {{/each}}
 };
             
 export const useLiveQuery = {
 {{#each liveQueriesWithInput}}
-    {{name}}: use{{name}}LiveQuery,
+    {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => {
+        const { input, ...options } = args
+        const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}LiveQuery(input, options)
+        return {
+            isLoading,
+            isSuccess,
+            isStopped,
+            isError,
+            result
+        }
+    },
 {{/each}}
 {{#each liveQueriesWithoutInput}}
-    {{name}}: use{{name}}LiveQuery,
+    {{name}}: (args: SubscriptionArgs) => {
+        const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}LiveQuery(args)
+        return {
+            isLoading,
+            isSuccess,
+            isStopped,
+            isError,
+            result
+        }
+    },
 {{/each}}
 };
 `;

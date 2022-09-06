@@ -65,46 +65,30 @@ export const useWunderGraph = () => {
 }
 
 {{#each queriesWithInput}}
-export const use{{name}}Query = (args: QueryArgsWithInput<{{name}}Input>) => useQuery<{{name}}Input, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, args, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
+export const use{{name}}Query = (input: {{name}}Input, args?: QueryArgs) => useQuery<{{name}}Input, {{name}}ResponseData, Role>("{{name}}", input, {...args, context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
 {{/each}}
 {{#each queriesWithoutInput}}
-export const use{{name}}Query = (args?: QueryArgs) => useQuery<never, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, args as QueryArgsWithInput<never>, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
+export const use{{name}}Query = (args?: QueryArgs) => useQuery<never, {{name}}ResponseData, Role>("{{name}}", undefined, { ...args, context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
 {{/each}}
 
 {{#each mutationsWithInput}}
-export const use{{name}}Mutation = () => useMutation<{{name}}Input, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
+export const use{{name}}Mutation = () => useMutation<{{name}}Input, {{name}}ResponseData, Role>("{{name}}", { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
 {{/each}}
 {{#each mutationsWithoutInput}}
-export const use{{name}}Mutation = () => useMutation<never, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
+export const use{{name}}Mutation = () => useMutation<never, {{name}}ResponseData, Role>("{{name}}", { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
 {{/each}}
 
 {{#each subscriptionsWithInput}}
-export const use{{name}}Subscription = (args: SubscriptionArgsWithInput<{{name}}Input>) => useSubscription<{{name}}Input, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, args, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
+export const use{{name}}Subscription = (input: {{name}}Input, args?: SubscriptionArgs) => useSubscription<{{name}}Input, {{name}}ResponseData, Role>("{{name}}", input, { ...args, context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
 {{/each}}
 {{#each subscriptionsWithoutInput}}
-export const use{{name}}Subscription = (args?: SubscriptionArgs) => useSubscription<never, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, args as SubscriptionArgsWithInput<never>, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
+export const use{{name}}Subscription = (args?: SubscriptionArgs) => useSubscription<never, {{name}}ResponseData, Role>("{{name}}", undefined, { ...args, context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} });
 {{/each}}
 
 {{#each liveQueriesWithInput}}
-export const use{{name}}LiveQuery = (args: SubscriptionArgsWithInput<{{name}}Input>) => useSubscription<{{name}}Input, {{name}}ResponseData,Role>({
-    operationName: "{{name}}"
-}, { ...args, isLiveQuery: true }, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} } );
+export const use{{name}}LiveQuery = (input: {{name}}Input, args?: SubscriptionArgs) => useSubscription<{{name}}Input, {{name}}ResponseData,Role>("{{name}}", input, { ...args, isLiveQuery: true, context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} } );
 {{/each}}
 {{#each liveQueriesWithoutInput}}
-export const use{{name}}LiveQuery = (args?: SubscriptionArgs) => useSubscription<never, {{name}}ResponseData, Role>({
-    operationName: "{{name}}"
-}, { ...args as SubscriptionArgsWithInput<never>, isLiveQuery: true }, { context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} } );
+export const use{{name}}LiveQuery = (args?: SubscriptionArgs) => useSubscription<never, {{name}}ResponseData, Role>("{{name}}", undefined, { ...args, isLiveQuery: true, context: wunderGraphContext, requiresAuthentication: {{requiresAuthentication}} } );
 {{/each}}
 `;
