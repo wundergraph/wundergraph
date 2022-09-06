@@ -23,9 +23,10 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
 
-func InstallPrismaDependencies(log abstractlogger.Logger) error {
+func InstallPrismaDependencies(log abstractlogger.Logger, wundergraphDir string) error {
 	engine := Engine{
-		log: log,
+		log:            log,
+		wundergraphDir: wundergraphDir,
 		client: &http.Client{
 			Timeout: time.Second * 10,
 		},
@@ -56,6 +57,7 @@ type IntrospectionResponse struct {
 }
 
 type Engine struct {
+	wundergraphDir          string
 	queryEnginePath         string
 	introspectionEnginePath string
 	url                     string
@@ -241,7 +243,7 @@ func (e *Engine) StartQueryEngine(schema string) error {
 
 func (e *Engine) ensurePrisma() error {
 
-	prismaPath := path.Join("generated", "prisma")
+	prismaPath := path.Join(e.wundergraphDir, "generated", "prisma")
 
 	err := os.MkdirAll(prismaPath, os.ModePerm)
 	if err != nil {

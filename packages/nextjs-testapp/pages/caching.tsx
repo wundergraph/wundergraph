@@ -26,7 +26,7 @@ const JobsPage: NextPage = () => {
 			</p>
 			<ul>
 				{launches.result.status === 'ok' &&
-					launches.result.data.launchesPast?.map((launch, i) => (
+					launches.result.data.mgospacex_findManylaunch.map((launch, i) => (
 						<li key={i}>
 							<h3>{launch.mission_name}</h3>
 							<p>{launch.rocket?.rocket_name}</p>

@@ -10,10 +10,13 @@ import (
 )
 
 type Config struct {
-	Name          string
-	Executable    string
-	ScriptArgs    []string
-	ScriptEnv     []string
+	Name       string
+	Executable string
+	ScriptArgs []string
+	// ScriptEnv is the environment variables that are always passed to the script.
+	ScriptEnv []string
+	// ScriptEnv are environment variables that are only set on the first script run.
+	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        abstractlogger.Logger
 }
@@ -24,7 +27,9 @@ type ScriptRunner struct {
 	executable    string
 	scriptArgs    []string
 	scriptEnv     []string
+	firstRunEnv   []string
 	absWorkingDir string
+	firstRun      bool
 	cmdDoneChan   chan struct{}
 	log           abstractlogger.Logger
 	cmd           *gocmd.Cmd
@@ -34,11 +39,21 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 	return &ScriptRunner{
 		name:          config.Name,
 		log:           config.Logger,
+		firstRunEnv:   config.FirstRunEnv,
 		absWorkingDir: config.AbsWorkingDir,
 		executable:    config.Executable,
 		scriptArgs:    config.ScriptArgs,
 		scriptEnv:     config.ScriptEnv,
+		firstRun:      true,
 	}
+}
+
+func (b *ScriptRunner) ExitCode() int {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		return status.Exit
+	}
+	return 0
 }
 
 func (b *ScriptRunner) Stop() error {
@@ -53,6 +68,18 @@ func (b *ScriptRunner) Stop() error {
 	return nil
 }
 
+// Successful returns true if the script exited with <= 0 and without an error.
+// This method should only be called after the script is done.
+func (b *ScriptRunner) Successful() bool {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		if status.Error != nil || status.Exit > 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	err := b.Stop()
 	if err != nil {
@@ -62,12 +89,19 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		)
 	}
 
-	cmd, doneChan := newCmd(CmdOptions{
+	cmdOptions := CmdOptions{
 		executable: b.executable,
 		cmdDir:     b.absWorkingDir,
 		scriptArgs: b.scriptArgs,
 		scriptEnv:  b.scriptEnv,
-	})
+	}
+
+	if b.firstRun {
+		b.firstRun = false
+		cmdOptions.scriptEnv = append(cmdOptions.scriptEnv, b.firstRunEnv...)
+	}
+
+	cmd, doneChan := newCmd(cmdOptions)
 	b.cmd = cmd
 	b.cmdDoneChan = doneChan
 
@@ -105,7 +139,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				)
 				return
 			}
-			if status.Error != nil {
+			if status.Error != nil || status.Exit > 0 {
 				b.log.Error("Script runner exited with error",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),

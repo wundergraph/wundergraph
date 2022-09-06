@@ -1,5 +1,5 @@
 {
-	launchesPast: spacex_launchesPast(limit: 10) {
+	mgospacex_findManylaunch(take: 10) {
 		mission_name
 		launch_date_local
 		launch_site {
@@ -14,10 +14,7 @@
 			first_stage {
 				cores {
 					flight
-					core {
-						reuse_count
-						status
-					}
+					core_serial
 				}
 			}
 			second_stage {
@@ -28,10 +25,6 @@
 				}
 			}
 		}
-		ships {
-			name
-			home_port
-			image
-		}
+		ships
 	}
 }

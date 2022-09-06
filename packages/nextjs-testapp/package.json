@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/nextjs-starter",
+  "name": "@test/nextjs",
   "version": "0.1.0",
   "repository": {
     "type": "git",
@@ -20,11 +20,10 @@
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:3003\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3003",
-    "build": "pnpm run generate && next build",
+    "build": "pnpm generate && next build && pnpm check",
     "check": "tsc --noEmit",
     "nextDev": "next dev --port 3003",
-    "start": "next start --port 3003",
-    "wunderctl": "wunderctl"
+    "start": "next start --port 3003"
   },
   "dependencies": {
     "@wundergraph/nextjs": "workspace:*",
@@ -33,21 +32,13 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
-  "dependenciesMeta": {
-    "@wundergraph/sdk": {
-      "injected": true
-    },
-    "@wundergraph/nextjs": {
-      "injected": true
-    }
-  },
   "devDependencies": {
     "@types/node": "^17.0.27",
     "@types/react": "^18.0.7",
     "concurrently": "^6.0.0",
     "graphql": "^16.3.0",
     "open-cli": "^7.0.1",
-    "typescript": "^4.7.2",
+    "typescript": "^4.8.2",
     "wait-on": "^6.0.0"
   },
   "sideEffects": false

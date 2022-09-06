@@ -214,6 +214,10 @@ const navigation = [
 				href: '/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 			},
 			{
+				title: 'TypeScript webhooks to integrate third party applications',
+				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+			},
+			{
 				title: 'API Namespacing',
 				href: '/docs/features/api-namespacing',
 			},

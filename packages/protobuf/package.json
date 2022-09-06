@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/protobuf",
-  "version": "0.91.1",
+  "version": "0.92.0",
   "license": "Apache-2.0",
   "main": "./dist/wundernode_config.js",
   "types": "./dist/wundernode_config.d.ts",
@@ -25,7 +25,6 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
-    "version": "pnpm install --filter=\"@wundergraph/protobuf\" --lockfile-only && git add ../../pnpm-lock.yaml",
     "build": "./generate.sh && tsc"
   },
   "dependencies": {
@@ -35,7 +34,7 @@
   },
   "devDependencies": {
     "cpy-cli": "^4.1.0",
-    "typescript": "^4.7.2"
+    "typescript": "^4.8.2"
   },
   "sideEffects": false
 }

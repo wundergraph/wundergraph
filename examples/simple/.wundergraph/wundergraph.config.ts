@@ -64,15 +64,15 @@ const graphQLAPI = introspect.graphql({
         .addClientRequestHeader("Authorization","Authorization")
 });*/
 
-const spaceX = introspect.graphql({
-	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+const countries = introspect.graphql({
+	apiNamespace: 'countries',
+	url: 'https://countries.trevorblades.com/',
 });
 
 const myApplication = new Application({
 	name: 'app',
 	apis: [
-		spaceX,
+		countries,
 		/*federatedApi,
         openAPI,
         graphQLAPI*/

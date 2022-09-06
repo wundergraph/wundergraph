@@ -3,6 +3,8 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"path"
 	"time"
@@ -25,10 +27,19 @@ var generateCmd = &cobra.Command{
 	Long: `In contrast to wunderctl up, it only generates all files in ./generated but doesn't start WunderGraph or the hooks.
 Use this command if you only want to generate the configuration`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
 		}
+
+		// only validate if the file exists
+		_, err = files.CodeFilePath(wgDir, configEntryPointFilename)
+		if err != nil {
+			return err
+		}
+
+		// optional, no error check
+		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
@@ -39,9 +50,14 @@ Use this command if you only want to generate the configuration`,
 			Name:          "config-runner",
 			Executable:    "node",
 			ScriptArgs:    []string{configOutFile},
-			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+			AbsWorkingDir: wgDir,
 			Logger:        log,
-			ScriptEnv:     append(os.Environ(), fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish)),
+			ScriptEnv: append(
+				os.Environ(),
+				// Run scripts in prod mode
+				"NODE_ENV=production",
+				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
+			),
 		})
 		defer func() {
 			log.Debug("Stopping config-runner after WunderNode shutdown")
@@ -54,37 +70,92 @@ Use this command if you only want to generate the configuration`,
 			}
 		}()
 
-		var onAfterBuild func()
+		var onAfterBuild func() error
 
-		if entryPoints.ServerEntryPointAbs != "" {
-			serverOutFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+		if codeServerFilePath != "" {
+			serverOutFile := path.Join(wgDir, "generated", "bundle", "server.js")
+			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+			webhooksDir := path.Join(wgDir, webhooks.WebhookDirectoryName)
+
+			var webhooksBundler *bundler.Bundler
+
+			if files.DirectoryExists(webhooksDir) {
+				webhookPaths, err := webhooks.GetWebhooks(wgDir)
+				if err != nil {
+					return err
+				}
+				webhooksBundler = bundler.NewBundler(bundler.Config{
+					Name:          "webhooks-bundler",
+					EntryPoints:   webhookPaths,
+					AbsWorkingDir: wgDir,
+					OutDir:        webhooksOutDir,
+					Logger:        log,
+					OnAfterBundle: func() error {
+						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+						return nil
+					},
+				})
+			}
+
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-				EntryPoint:    serverEntryPointFilename,
+				AbsWorkingDir: wgDir,
+				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
 				Logger:        log,
-				WatchPaths:    []string{},
 			})
 
-			onAfterBuild = func() {
+			onAfterBuild = func() error {
 				<-configRunner.Run(ctx)
-				hooksBundler.Bundle()
+
+				if !configRunner.Successful() {
+					return fmt.Errorf("configuration could not be generated. Process exit with code %d",
+						configRunner.ExitCode(),
+					)
+				}
+
+				var wg errgroup.Group
+
+				wg.Go(func() error {
+					// bundle hooks
+					return hooksBundler.Bundle()
+				})
+
+				if webhooksBundler != nil {
+					wg.Go(func() error {
+						// bundle webhooks
+						return webhooksBundler.Bundle()
+					})
+				}
+
+				err := wg.Wait()
+				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+
+				return err
 			}
 		} else {
 			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
-			onAfterBuild = func() {
+			onAfterBuild = func() error {
 				<-configRunner.Run(ctx)
+
+				if !configRunner.Successful() {
+					return fmt.Errorf("configuration could not be generated. Process exit with code %d",
+						configRunner.ExitCode(),
+					)
+				}
+
+				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+
+				return nil
 			}
 		}
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
-			AbsWorkingDir: entryPoints.WunderGraphDirAbs,
-			EntryPoint:    configEntryPointFilename,
+			AbsWorkingDir: wgDir,
+			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
-			WatchPaths:    []string{},
 			IgnorePaths: []string{
 				"generated",
 				"node_modules",
@@ -92,9 +163,9 @@ Use this command if you only want to generate the configuration`,
 			OnAfterBundle: onAfterBuild,
 		})
 
-		configBundler.Bundle()
+		err = configBundler.Bundle()
 
-		return nil
+		return err
 	},
 }
 

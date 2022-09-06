@@ -9,38 +9,42 @@ inputs:
     description: 'The working directory of your node package'
     default: '.'
     required: false
-
-env:
-  CI: true
-  PNPM_CACHE_FOLDER: .pnpm-store
+  repo-token:
+    description: 'The github secret'
+    required: true
 
 runs:
   using: 'composite'
   steps:
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
         node-version: 'lts/*'
-
-    - name: Cache pnpm modules
-      uses: actions/cache@v2
-      with:
-        path: ~/.pnpm-store
-        key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-
 
     - name: Install Protoc
       uses: arduino/setup-protoc@v1
       with:
         version: '3.x'
+        repo-token: ${{ inputs.repo-token }}
 
-    - uses: pnpm/action-setup@v2.1.0
+    - uses: pnpm/action-setup@v2.2.2
+      id: pnpm-install
       with:
-        version: 7.1.2
+        version: 7.9.0
+        run_install: false
 
-    - name: setup pnpm config
-      run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+    - name: Get pnpm store directory
       shell: bash
+      id: pnpm-cache
+      run: |
+        echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+    - uses: actions/cache@v3
+      name: Setup pnpm cache
+      with:
+        path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
 
     - name: setup pnpm config registry
       run: pnpm config set registry https://registry.npmjs.org

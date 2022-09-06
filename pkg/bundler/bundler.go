@@ -2,6 +2,7 @@ package bundler
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,18 +21,19 @@ var NonNodeModuleReg = regexp.MustCompile(`^[^./]|^\.[^./]|^\.\.[^/]`) // Must n
 
 type Bundler struct {
 	name                  string
-	entryPoint            string
+	entryPoints           []string
 	absWorkingDir         string
-	watchPaths            []string
+	watchPaths            []*watcher.WatchPath
 	ignorePaths           []string
 	log                   abstractlogger.Logger
 	skipWatchOnEntryPoint bool
 	outFile               string
+	outDir                string
 	externalImports       []string
 	fileLoaders           []string
 	mu                    sync.Mutex
 	buildResult           *api.BuildResult
-	onAfterBundle         func()
+	onAfterBundle         func() error
 }
 
 type Config struct {
@@ -39,11 +41,12 @@ type Config struct {
 	Logger                abstractlogger.Logger
 	AbsWorkingDir         string
 	SkipWatchOnEntryPoint bool
-	EntryPoint            string
-	WatchPaths            []string
+	EntryPoints           []string
+	WatchPaths            []*watcher.WatchPath
 	IgnorePaths           []string
 	OutFile               string
-	OnAfterBundle         func()
+	OutDir                string
+	OnAfterBundle         func() error
 }
 
 func NewBundler(config Config) *Bundler {
@@ -51,7 +54,8 @@ func NewBundler(config Config) *Bundler {
 		name:                  config.Name,
 		absWorkingDir:         config.AbsWorkingDir,
 		outFile:               config.OutFile,
-		entryPoint:            config.EntryPoint,
+		outDir:                config.OutDir,
+		entryPoints:           config.EntryPoints,
 		watchPaths:            config.WatchPaths,
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
@@ -61,7 +65,7 @@ func NewBundler(config Config) *Bundler {
 	}
 }
 
-func (b *Bundler) Bundle() {
+func (b *Bundler) Bundle() error {
 	if b.buildResult != nil {
 		buildResult := b.buildResult.Rebuild()
 		b.buildResult = &buildResult
@@ -70,7 +74,7 @@ func (b *Bundler) Bundle() {
 				abstractlogger.String("bundlerName", b.name),
 				abstractlogger.Any("errors", b.buildResult.Errors),
 			)
-			return
+			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
 		b.log.Debug("Build successful", abstractlogger.String("bundlerName", b.name))
 	} else {
@@ -81,13 +85,15 @@ func (b *Bundler) Bundle() {
 				abstractlogger.String("bundlerName", b.name),
 				abstractlogger.Any("errors", b.buildResult.Errors),
 			)
-			return
+			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
 		b.log.Debug("Initial Build successful", abstractlogger.String("bundlerName", b.name))
 	}
 	if b.onAfterBundle != nil {
-		b.onAfterBundle()
+		return b.onAfterBundle()
 	}
+
+	return nil
 }
 
 func (b *Bundler) Watch(ctx context.Context) {
@@ -102,7 +108,7 @@ func (b *Bundler) Watch(ctx context.Context) {
 			abstractlogger.String("bundlerName", b.name),
 			abstractlogger.String("outFile", b.outFile),
 			abstractlogger.Strings("externalImports", b.externalImports),
-			abstractlogger.Strings("watchPaths", b.watchPaths),
+			abstractlogger.Any("watchPaths", b.watchPaths),
 			abstractlogger.Strings("fileLoaders", b.fileLoaders),
 		)
 		b.watch(ctx, b.buildResult.Rebuild)
@@ -125,10 +131,12 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 func (b *Bundler) initialBuild() api.BuildResult {
 	options := api.BuildOptions{
 		Outfile:       b.outFile,
-		EntryPoints:   []string{b.entryPoint},
+		Outdir:        b.outDir,
+		EntryPoints:   b.entryPoints,
 		Bundle:        true,
 		Incremental:   true,
 		Platform:      api.PlatformNode,
+		Sourcemap:     api.SourceMapLinked,
 		AbsWorkingDir: b.absWorkingDir,
 		Loader: map[string]api.Loader{
 			".json": api.LoaderJSON,
@@ -170,7 +178,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 			// check if the path already exist
 			exists := false
 			for _, watchPath := range b.watchPaths {
-				if watchPath == file {
+				if watchPath.Path == file {
 					exists = true
 					break
 				}
@@ -180,7 +188,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 					// each plugin runs on a separate go routine
 					b.mu.Lock()
 					defer b.mu.Unlock()
-					b.watchPaths = append(b.watchPaths, file)
+					b.watchPaths = append(b.watchPaths, &watcher.WatchPath{Path: file})
 				} else {
 					b.log.Error("Bundler watching limit exceeded", abstractlogger.String("bundlerName", b.name), abstractlogger.Int("limit", watchFileLimit), abstractlogger.Error(err))
 				}

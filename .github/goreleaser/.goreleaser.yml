@@ -1,6 +1,8 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
 project_name: wunderctl
+monorepo:
+  tag_prefix: 'v'
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -56,7 +58,7 @@ archives:
       386: i386
       amd64: x86_64
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: '{{ .Tag }}-next'
 changelog:
   sort: asc
   filters:

@@ -1,0 +1,7 @@
+query ($where: db_NodeWhereInput) {
+	db_findManyNode(where: $where) {
+		name
+		id
+		created_at
+	}
+}

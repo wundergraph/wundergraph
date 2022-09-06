@@ -7,16 +7,16 @@
     "start:services": "cd federation && docker-compose up -d",
     "start:nextjs": "next dev",
     "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "wundergraph": "cd .wundergraph && wunderctl up --debug",
-    "generate": "cd .wundergraph && wunderctl generate --debug",
+    "wundergraph": "wunderctl up --debug",
+    "generate": "wunderctl generate --debug",
     "generate:api": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004 && npm run generate",
     "start:api": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004 && cd npm run wundergraph",
     "cleanup": "cd federation && docker-compose down",
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.0.35",
-    "@wundergraph/sdk": "^0.96.1",
+    "@wundergraph/nextjs": "^0.1.6",
+    "@wundergraph/sdk": "^0.100.0",
     "graphql": "^16.3.0",
     "next": "^12.1.6",
     "react": "^18.0.0",
@@ -29,7 +29,7 @@
     "npm-run-all": "^4.1.5",
     "open-cli": "^7.0.1",
     "ts-node": "^10.8.0",
-    "typescript": "^4.7.2",
+    "typescript": "^4.8.2",
     "wait-on": "^6.0.1"
   }
 }

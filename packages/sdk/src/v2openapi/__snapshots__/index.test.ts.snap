@@ -15927,12 +15927,16 @@ type api_PostPasswordlessStartInternalError {
 input api_postPasswordlessStartInput {
   applicationId: String!
   loginId: String!
+  state: JSON
 }
+
+scalar JSON
 
 union api_PostPasswordlessLoginResponse = UnspecifiedHttpResponse | api_PostPasswordlessLoginOK | api_PostPasswordlessLoginNotRegisteredForApp | api_PostPasswordlessLoginPasswordChangeRequested | api_PostPasswordlessLoginEmailNotVerified | api_PostPasswordlessLoginRegistrationNotVerified | api_PostPasswordlessLoginTwoFactorEnabled | api_PostPasswordlessLoginBadRequest | api_PostPasswordlessLoginInternalError
 
 type api_PostPasswordlessLoginOK {
   refreshToken: String
+  state: JSON
   token: String
   user: api_User
 }
@@ -15964,6 +15968,7 @@ type api_PostPasswordlessLoginRegistrationNotVerified {
 }
 
 type api_PostPasswordlessLoginTwoFactorEnabled {
+  methods: [JSON]
   twoFactorId: String
 }
 
@@ -16194,12 +16199,16 @@ type api_PostPasswordlessStartBadRequest {
 input api_postPasswordlessStartInput {
   applicationId: String!
   loginId: String!
+  state: JSON
 }
+
+scalar JSON
 
 union api_PostPasswordlessLoginResponse = UnspecifiedHttpResponse | api_PostPasswordlessLoginOK
 
 type api_PostPasswordlessLoginOK {
   refreshToken: String
+  state: JSON
   token: String
   user: api_User
 }
@@ -16378,10 +16387,14 @@ type api_PostPasswordlessStart {
 input api_postPasswordlessStartInput {
   applicationId: String!
   loginId: String!
+  state: JSON
 }
+
+scalar JSON
 
 type api_PostPasswordlessLogin {
   refreshToken: String
+  state: JSON
   token: String
   user: api_User
 }
@@ -19643,6 +19656,7 @@ exports[`petstore: petstore_schema 1`] = `
   api_findPetsByStatus(status: api_findPetsByStatus_status): [api_Pet]
   api_findPetsByTags(tags: [String]): [api_Pet]
   api_getPetById(petId: Int!): api_Pet
+  api_getInventory: JSON
   api_getOrderById(orderId: Int!): api_Order
   api_loginUser(username: String, password: String): String
   api_getUserByName(username: String!): api_User
@@ -19703,6 +19717,8 @@ type api_ApiResponse {
   type: String
   message: String
 }
+
+scalar JSON
 
 type api_Order {
   id: Int
@@ -20110,6 +20126,69 @@ exports[`users: users_data_sources 1`] = `
     },
     \\"ChildNodes\\": [],
     \\"Directives\\": []
+  },
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_getSomeProperties\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/some/properties\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"http://localhost:8881\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [
+          {
+            \\"name\\": \\"sortBy\\",
+            \\"value\\": \\"{{ .arguments.sortBy }}\\"
+          },
+          {
+            \\"name\\": \\"sortOrder\\",
+            \\"value\\": \\"{{ .arguments.sortOrder }}\\"
+          }
+        ],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"\\",
+      \\"StatusCodeTypeMappings\\": []
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
   }
 ]"
 `;
@@ -20133,6 +20212,15 @@ exports[`users: users_fields 1`] = `
     \\"requiresFields\\": [],
     \\"path\\": [],
     \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_getSomeProperties\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
   }
 ]"
 `;
@@ -20141,13 +20229,21 @@ exports[`users: users_schema 1`] = `
 "type Query {
   api_getUsers: [api_User]
   api_getUsersUserId(user_id: Int!): api_User
+  api_getSomeProperties(sortBy: String, sortOrder: Int): api_PropertiesResponse
 }
 
 type api_User {
   id: Int
   name: String
   country_code: String
-}"
+  status_code: Int
+}
+
+type api_PropertiesResponse {
+  properties: JSON
+}
+
+scalar JSON"
 `;
 
 exports[`weather: weather_data_sources 1`] = `
@@ -20454,7 +20550,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       {
         \\"typeName\\": \\"Mutation\\",
         \\"fieldNames\\": [
-          \\"api_postJwtRefresh\\"
+          \\"api_postJwtRefreshToken\\"
         ]
       }
     ],
@@ -20467,7 +20563,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"environmentVariableDefaultValue\\": \\"\\",
           \\"environmentVariableName\\": \\"\\",
           \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/jwt/refresh\\"
+          \\"staticVariableContent\\": \\"/jwt/refresh-token\\"
         },
         \\"baseUrl\\": {
           \\"kind\\": 0,
@@ -20485,7 +20581,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         \\"body\\": {
           \\"kind\\": 0,
-          \\"staticVariableContent\\": \\"{{ .arguments.postJwtRefreshInput }}\\",
+          \\"staticVariableContent\\": \\"{{ .arguments.postJwtRefreshTokenInput }}\\",
           \\"environmentVariableName\\": \\"\\",
           \\"environmentVariableDefaultValue\\": \\"\\",
           \\"placeholderVariableName\\": \\"\\"
@@ -20641,7 +20737,7 @@ exports[`with_path_parameters: fusion_fields 1`] = `
   },
   {
     \\"typeName\\": \\"Mutation\\",
-    \\"fieldName\\": \\"api_postJwtRefresh\\",
+    \\"fieldName\\": \\"api_postJwtRefreshToken\\",
     \\"disableDefaultFieldMapping\\": true,
     \\"argumentsConfiguration\\": [],
     \\"requiresFields\\": [],
@@ -20673,7 +20769,7 @@ exports[`with_path_parameters: fusion_schema 1`] = `
 "type Mutation {
   api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_PostPasswordlessStart
   api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_PostPasswordlessLogin
-  api_postJwtRefresh(postJwtRefreshInput: api_postJwtRefreshInput): api_PostJwtRefresh
+  api_postJwtRefreshToken(postJwtRefreshTokenInput: api_postJwtRefreshTokenInput): api_PostJwtRefreshToken
   api_postLogout(refreshToken: String!): JSON
   api_postUserByUserId(userId: String!, postUserUserIdInput: api_postUserUserIdInput): api_PostUserByUserId
 }
@@ -20685,10 +20781,14 @@ type api_PostPasswordlessStart {
 input api_postPasswordlessStartInput {
   applicationId: String!
   loginId: String!
+  state: JSON
 }
+
+scalar JSON
 
 type api_PostPasswordlessLogin {
   refreshToken: String
+  state: JSON
   token: String
   user: api_User
 }
@@ -20717,17 +20817,15 @@ input api_DeviceInput {
   name: String
 }
 
-type api_PostJwtRefresh {
+type api_PostJwtRefreshToken {
   refreshToken: String
   token: String
 }
 
-input api_postJwtRefreshInput {
+input api_postJwtRefreshTokenInput {
   refreshToken: String
   token: String
 }
-
-scalar JSON
 
 type api_PostUserByUserId {
   token: String

@@ -3,6 +3,9 @@ package node
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -180,6 +183,110 @@ func TestNode(t *testing.T) {
 
 	withHeaders.GET("/myApi/main/graphql").Expect().Status(http.StatusOK).Text(
 		httpexpect.ContentOpts{MediaType: "text/html"})
+}
+
+func TestWebHooks(t *testing.T) {
+
+	var paths []string
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+		paths = append(paths, r.URL.Path)
+	}))
+	defer testServer.Close()
+
+	port, err := freeport.GetFreePort()
+	assert.NoError(t, err)
+
+	nodeURL := fmt.Sprintf(":%d", port)
+
+	cfg := &wundernodeconfig.Config{
+		Server: &wundernodeconfig.ServerConfig{
+			ListenAddr: nodeURL,
+			ListenTLS:  false,
+			ProxyProto: false,
+		},
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	logger := logging.New(abstractlogger.InfoLevel, true)
+	node := New(ctx, BuildInfo{}, cfg, logger)
+
+	nodeConfig := wgpb.WunderNodeConfig{
+		Server: &wgpb.Server{
+			GracefulShutdownTimeout: 0,
+			KeepAlive:               5,
+			ReadTimeout:             5,
+			WriteTimeout:            5,
+			IdleTimeout:             5,
+		},
+		Apis: []*wgpb.Api{
+			{
+				Hosts:                 []string{"localhost"},
+				PathPrefix:            "api/main",
+				HooksServerURL:        testServer.URL,
+				EnableSingleFlight:    true,
+				EnableGraphqlEndpoint: true,
+				AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+					CookieBased: &wgpb.CookieBasedAuthentication{},
+					JwksBased:   &wgpb.JwksBasedAuthentication{},
+					Hooks:       &wgpb.ApiAuthenticationHooks{},
+				},
+				Webhooks: []*wgpb.WebhookConfiguration{
+					{
+						Name: "github",
+					},
+					{
+						Name: "stripe",
+					},
+					{
+						Name: "github-protected",
+						Verifier: &wgpb.WebhookVerifier{
+							Kind:                  wgpb.WebhookVerifierKind_HMAC_SHA256,
+							SignatureHeader:       "X-Hub-Signature",
+							SignatureHeaderPrefix: "sha256=",
+							Secret: &wgpb.ConfigurationVariable{
+								Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+								StaticVariableContent: "secret",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	go func() {
+		err = node.StartBlocking(WithStaticWunderNodeConfig(nodeConfig))
+		assert.NoError(t, err)
+	}()
+
+	time.Sleep(time.Second)
+
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL: "http://" + nodeURL,
+		Client: &http.Client{
+			Jar:     httpexpect.NewJar(),
+			Timeout: time.Second * 30,
+		},
+		Reporter: httpexpect.NewRequireReporter(t),
+	})
+
+	hash := hmac.New(sha256.New, []byte("secret"))
+	_, _ = hash.Write([]byte("ok"))
+	signatureString := hex.EncodeToString(hash.Sum(nil))
+
+	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
+	e.GET("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
+	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
+	// We can't return 200 otherwise we would accept the delivery of the webhook and the publisher might not redeliver it.
+	e.POST("/api/main/webhooks/github-protected").Expect().Status(http.StatusUnauthorized)
+	e.POST("/api/main/webhooks/github-protected").WithBytes([]byte("ok")).WithHeader("X-Hub-Signature", fmt.Sprintf("sha256=%s", signatureString)).Expect().Status(http.StatusOK)
+
+	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe", "/webhooks/github-protected"}, paths)
 }
 
 func BenchmarkNode(t *testing.B) {

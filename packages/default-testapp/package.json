@@ -15,8 +15,9 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
-    "dev": "cd .wundergraph && wunderctl up --debug",
-    "generate": "cd .wundergraph && wunderctl generate --debug",
+    "dev": "wunderctl up --debug",
+    "generate": "wunderctl generate --debug",
+    "build": "pnpm generate && pnpm check",
     "check": "tsc"
   },
   "dependencies": {
@@ -26,12 +27,7 @@
     "openapi-to-graphql": "^2.2.5",
     "pg": "^8.7.3",
     "postgraphile": "^4.12.9",
-    "typescript": "^4.1.3"
-  },
-  "dependenciesMeta": {
-    "@wundergraph/sdk": {
-      "injected": true
-    }
+    "typescript": "^4.8.2"
   },
   "sideEffects": false
 }

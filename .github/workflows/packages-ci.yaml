@@ -43,6 +43,18 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Nextjs builds
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/packages/nextjs-testapp/.next/cache
+          # Generate a new cache whenever packages or source files change
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('packages/nextjs-testapp/**.[jt]s', 'packages/nextjs-testapp/**.[jt]sx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
@@ -50,8 +62,11 @@ jobs:
           version: '3.x'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: pnpm install --ignore-scripts
+      - name: Bootstrap PNPM workspace
+        run: ./scripts/pnpm.sh
 
-      - run: pnpm build:libs
+      - name: Build all libs + apps
+        run: pnpm build
 
-      - run: pnpm test --filter '@wundergraph/sdk'
+      - name: Run all NPM tests
+        run: pnpm test

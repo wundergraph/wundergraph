@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Operation, OperationType } from '@wundergraph/protobuf';
-import { ClientRequest } from './server';
+import { ClientRequest } from './types';
 
 export interface OperationArgsWithInput<T = void> {
 	input: T;

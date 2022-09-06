@@ -37,12 +37,12 @@ just running the engine as efficiently as possible without the dev overhead.
 If used without --exclude-server, make sure the server is available in this directory:
 {entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		entryPoints, err := files.GetWunderGraphEntryPoints(wundergraphDir, configEntryPointFilename, serverEntryPointFilename)
+		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
-			return fmt.Errorf("could not find file or directory: %s", err)
+			return err
 		}
 
-		configFile := path.Join(entryPoints.WunderGraphDirAbs, "generated", configJsonFilename)
+		configFile := path.Join(wgDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
@@ -65,14 +65,17 @@ If used without --exclude-server, make sure the server is available in this dire
 
 		if !excludeServer {
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
-			serverExecutablePath := path.Join(entryPoints.WunderGraphDirAbs, "generated", "bundle", "server.js")
+			serverExecutablePath := path.Join(wgDir, "generated", "bundle", "server.js")
 			if !files.FileExists(serverExecutablePath) {
-				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wundergraphDir, serverScriptFile))
+				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wgDir, serverScriptFile))
 			}
 
 			hooksEnv := []string{
+				// Run the hooks server as long running process
 				"START_HOOKS_SERVER=true",
-				fmt.Sprintf("WG_ABS_DIR=%s", entryPoints.WunderGraphDirAbs),
+				// Run scripts in prod mode
+				"NODE_ENV=production",
+				fmt.Sprintf("WG_ABS_DIR=%s", wgDir),
 				fmt.Sprintf("HOOKS_TOKEN=%s", hooksJWT),
 				fmt.Sprintf("WG_MIDDLEWARE_PORT=%d", middlewareListenPort),
 				fmt.Sprintf("WG_LISTEN_ADDR=%s", listenAddr),
@@ -85,7 +88,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 				Name:          "hooks-server-runner",
 				Executable:    "node",
-				AbsWorkingDir: entryPoints.WunderGraphDirAbs,
+				AbsWorkingDir: wgDir,
 				ScriptArgs:    []string{serverScriptFile},
 				Logger:        log,
 				ScriptEnv:     append(os.Environ(), hooksEnv...),
@@ -172,6 +175,6 @@ func init() {
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
-	startCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "filename of node config")
-	startCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "filename of the server config")
+	startCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to the node config")
+	startCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to the server config")
 }

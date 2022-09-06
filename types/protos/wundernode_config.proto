@@ -50,6 +50,8 @@ message Api {
 	string apiConfigHash = 11;
 	ApiAuthenticationConfig authenticationConfig = 12;
 	repeated S3UploadConfiguration s3UploadConfiguration = 13;
+	repeated WebhookConfiguration webhooks = 14;
+	string hooksServerURL = 15;
 }
 
 message ApiAuthenticationConfig {
@@ -222,6 +224,7 @@ enum Claim {
 	NICKNAME = 3;
 	LOCATION = 4;
 	PROVIDER = 5;
+	USERID = 6;
 }
 
 message OperationLiveQueryConfig {
@@ -472,6 +475,27 @@ message UserDefinedApi {
 	ApiAuthenticationConfig authenticationConfig = 8;
 	repeated S3UploadConfiguration s3UploadConfiguration = 9;
 	repeated ConfigurationVariable allowedHostNames = 11;
+	repeated WebhookConfiguration webhooks = 12;
+}
+
+message WebhookConfiguration {
+	// Name of the webhook.
+	string name = 1;
+ // The path to the bundled file.
+ // The path is relative to the bundle directory.
+	string filePath = 2;
+	WebhookVerifier verifier = 3;
+}
+
+message WebhookVerifier {
+	WebhookVerifierKind kind = 1;
+	ConfigurationVariable secret = 2;
+	string signatureHeader = 3;
+	string signatureHeaderPrefix = 4;
+}
+
+enum WebhookVerifierKind {
+	HMAC_SHA256 = 0;
 }
 
 message CorsConfiguration {

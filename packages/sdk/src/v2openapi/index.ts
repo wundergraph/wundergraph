@@ -167,7 +167,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		//const debug = print(filtered);
+		// const debug = print(filtered);
 		const schema = buildASTSchema(filtered);
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -403,18 +403,26 @@ class RESTApiBuilder {
 			const componentSchema = resolved.schema;
 			ref = resolved.ref;
 			let fieldTypeName = ref;
+
 			if (objectKind === 'input') {
 				fieldTypeName = `${fieldTypeName}Input`;
 			}
+
+			const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
 			if (argumentName) {
-				this.addArgument(parentTypeName, fieldName, argumentName, fieldTypeName, enclosingTypes);
+				this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
 			} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
 				fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
 				this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
 			} else {
-				this.addField(parentTypeName, objectKind, fieldName, fieldTypeName, enclosingTypes);
+				this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
 			}
-			const created = this.ensureType(componentSchema.enum ? 'enum' : objectKind, fieldTypeName);
+			if (isIntEnum) return;
+
+			const created = this.ensureType(
+				componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
+				fieldTypeName
+			);
 			if (!created) {
 				return;
 			}
@@ -502,6 +510,10 @@ class RESTApiBuilder {
 				return;
 			case 'object':
 				if (!schema.properties) {
+					if (schema?.additionalProperties && schema.additionalProperties !== false) {
+						this.ensureType('scalar', 'JSON');
+						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);
+					}
 					return;
 				}
 				if (argumentName) {
@@ -1130,9 +1142,13 @@ class RESTApiBuilder {
 		const formattedPath = path.split('/').reduce((prev, current) => {
 			if (current.startsWith('{') && current.endsWith('}')) {
 				const trimmed = current.substring(1, current.length - 1);
-				return prev + trimmed[0].toUpperCase() + trimmed.substring(1);
+				return (
+					prev + trimmed[0].toUpperCase() + this.prettyFieldName(trimmed.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+				);
 			}
-			return prev + current[0]?.toUpperCase() + current.substring(1);
+			return (
+				prev + current[0]?.toUpperCase() + this.prettyFieldName(current.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+			);
 		});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0] + formattedPath.substring(1) + 'Input';
 	}

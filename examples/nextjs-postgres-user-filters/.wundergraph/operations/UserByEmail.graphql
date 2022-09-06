@@ -1,0 +1,10 @@
+query ($email: String!) {
+	db_findFirstUser(where: { email: { equals: $email } }) {
+		id
+		email
+		name
+		Filter {
+			node_created_after
+		}
+	}
+}

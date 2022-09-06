@@ -20,9 +20,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
       - run: pnpm i --frozen-lockfile --ignore-scripts
 
   goreleaser-darwin:
@@ -71,16 +74,14 @@ jobs:
         run: xcrun -sdk macosx12.1 --show-sdk-platform-version
 
       - name: generate go types based on protobuf definitions
-        run: make codegen
-
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+        run: make codegen-go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-darwin.yml
         env:
           # custom PAT to push in https://github.com/wundergraph/homebrew-wundergraph
@@ -88,6 +89,7 @@ jobs:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   goreleaser-linux:
     name: Release Linux build
@@ -113,22 +115,21 @@ jobs:
         run: go env
 
       - name: generate go types based on protobuf definitions
-        run: make codegen
-
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+        run: make codegen-go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-linux.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   goreleaser-win:
     name: Release Windows build
@@ -154,22 +155,21 @@ jobs:
         run: go env
 
       - name: generate go types based on protobuf definitions
-        run: make codegen
-
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+        run: make codegen-go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-windows.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   release-wunderctl:
     name: Release wunderctl wrapper
@@ -185,6 +185,7 @@ jobs:
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: pnpm install --ignore-scripts
 
