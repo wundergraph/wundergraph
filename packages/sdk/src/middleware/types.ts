@@ -118,8 +118,7 @@ export interface WunderGraphHooksAndServerConfig<
 > extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
-	// url of the server is set internally by the hooks server
-	graphqlServers?: (GraphQLServerConfig & { url: string })[];
+	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
 }
 

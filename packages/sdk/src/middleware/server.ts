@@ -6,7 +6,7 @@ import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
-import { HooksConfiguration, resolveConfigurationVariable } from '../configure';
+import { customGqlServerMountPath, HooksConfiguration, resolveConfigurationVariable } from '../configure';
 import type { InternalClient } from './internal-client';
 import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
@@ -205,16 +205,11 @@ export const createServer = async ({
 		}
 
 		if (serverConfig.graphqlServers) {
-			// TODO: check this
-			// for (const server of serverConfig.graphqlServers) {
-			// 	server.url = `http://${host}:${port}/gqls/${server.serverName}/graphql`;
-			// }
-
 			for await (const server of serverConfig.graphqlServers) {
-				const routeUrl = `/gqls/${server.serverName}/graphql`;
+				const routeUrl = customGqlServerMountPath(server.serverName);
 				await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
-				fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
+				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
 			}
 		}
 	});

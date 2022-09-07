@@ -397,6 +397,8 @@ export type JWTSigningMethod = 'HS256';
 
 export interface GraphQLUpstream extends HTTPUpstream {
 	url: InputVariable;
+	baseUrl?: InputVariable;
+	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 }
 
@@ -775,8 +777,8 @@ export const introspect = {
 						Custom: {
 							Fetch: {
 								url: mapInputVariable(introspection.url),
-								baseUrl: mapInputVariable(''),
-								path: mapInputVariable(''),
+								baseUrl: introspection.baseUrl ? mapInputVariable(introspection.baseUrl) : mapInputVariable(''),
+								path: introspection.path ? mapInputVariable(introspection.path) : mapInputVariable(''),
 								method: HTTPMethod.POST,
 								body: mapInputVariable(''),
 								header: headers,

@@ -330,6 +330,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 
 	const resolvedNodeOptions = resolveNodeOptionsWithDefaults(config.options);
 	const serverOptions = serverOptionsWithDefaults(config.server?.options);
+	const resolvedServerOptions = resolveServerOptions(serverOptions);
 
 	const name = 'main';
 	const nodeUrl = resolveConfigurationVariable(resolvedNodeOptions.nodeUrl);
@@ -360,14 +361,18 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			.map(mapInputVariable),
 	};
 
-	const graphqlApis = config.server?.graphqlServers?.map((gs) =>
-		introspectGraphqlServer({
+	const graphqlApis = config.server?.graphqlServers?.map((gs) => {
+		const serverPath = customGqlServerMountPath(gs.serverName);
+
+		return introspectGraphqlServer({
 			skipRenameRootFields: gs.skipRenameRootFields,
-			url: serverOptions.serverUrl,
+			url: '',
+			baseUrl: serverOptions.serverUrl,
+			path: serverPath,
 			apiNamespace: gs.apiNamespace,
 			schema: gs.schema,
-		})
-	);
+		});
+	});
 
 	if (graphqlApis) {
 		config.application.apis.push(...graphqlApis);
@@ -439,7 +444,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		interpolateVariableDefinitionAsJSON: resolved.EngineConfiguration.interpolateVariableDefinitionAsJSON,
 		webhooks: [],
 		nodeOptions: resolvedNodeOptions,
-		serverOptions: resolveServerOptions(serverOptions),
+		serverOptions: resolvedServerOptions,
 	};
 
 	if (config.links) {
@@ -1274,4 +1279,8 @@ export const resolveIntegration = (
 		return Promise.resolve(applyNamespaceToApi(published.definition, apiNamespace, []));
 	}
 	return Promise.resolve(published.definition);
+};
+
+export const customGqlServerMountPath = (name: string): string => {
+	return `/gqls/${name}/graphql`;
 };
