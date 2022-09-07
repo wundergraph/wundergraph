@@ -69,6 +69,7 @@ const ProtectedLiveWeather: FC<{ city: string }> = ({ city }) => {
 	const liveWeather = useProtectedWeatherLiveQuery({
 		forCity: city,
 	});
+
 	return (
 		<div>
 			{liveWeather.status === 'requires_authentication' && <p>LiveQuery waiting for user to be authenticated</p>}

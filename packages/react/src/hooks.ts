@@ -20,6 +20,14 @@ import type {
 import { useWunderGraphContext, WunderGraphContextProperties } from './provider';
 import { UseMutationResult, UseQueryResult, UseSubscriptionResult } from './types';
 
+function getResultState<Data>(result: QueryResult<Data> | MutationResult<Data> | SubscriptionResult<Data>) {
+	return {
+		isLoading: ['requires_authentication', 'loading'].includes(result.status),
+		isSuccess: result.status === 'ok',
+		isError: result.status === 'error',
+	};
+}
+
 export interface LogoutOptions {
 	logout_openid_connect_provider?: boolean;
 }
@@ -55,41 +63,37 @@ export function useQuery<Input, Data, Role>(
 	});
 
 	if (isServer) {
+		let ssrResult: any;
 		if (options?.requiresAuthentication && user === null) {
-			ssrCache[cacheKey] = {
+			ssrResult = ssrCache[cacheKey] = {
 				status: 'requires_authentication',
 			};
-			return {
-				...(ssrCache[cacheKey] as UseQueryResult<Data>),
-				refetch: () => {},
-			};
-		}
-		if (ssrEnabled) {
+		} else if (ssrEnabled) {
 			if (ssrCache[cacheKey]) {
 				const result = ssrCache[cacheKey] as QueryResult<Data>;
-				return {
+				ssrResult = {
 					...result,
-					isLoading: result.status === 'loading',
-					isSuccess: result.status === 'ok',
-					isError: result.status === 'error',
 					refetch: () => Promise.resolve(result),
-				} as UseQueryReturn<Input, Data>;
+				};
+			} else {
+				const promise = client.query<Input, Data>({
+					operationName,
+					...args,
+				});
+				ssrCache[cacheKey] = promise;
+				throw promise;
 			}
-			const promise = client.query<Input, Data>({
-				operationName,
-				...args,
-			});
-			ssrCache[cacheKey] = promise;
-			throw promise;
 		} else {
-			ssrCache[cacheKey] = {
+			ssrResult = ssrCache[cacheKey] = {
 				status: 'none',
 			};
-			return {
-				...(ssrCache[cacheKey] as UseQueryResult<Data>),
-				refetch: () => ({}),
-			};
 		}
+
+		return {
+			refetch: () => {},
+			...ssrResult,
+			...getResultState(ssrResult),
+		} as UseQueryReturn<Input, Data>;
 	}
 	const [invalidate, setInvalidate] = useState<number>(0);
 	const [debounce, setDebounce] = useState<number>(0);
@@ -186,9 +190,7 @@ export function useQuery<Input, Data, Role>(
 	}, []);
 	return {
 		...queryResult,
-		isLoading: queryResult.status === 'loading',
-		isSuccess: queryResult.status === 'ok',
-		isError: queryResult.status === 'error',
+		...getResultState(queryResult),
 		refetch,
 	} as UseQueryReturn<Input, Data>;
 }
@@ -224,31 +226,29 @@ export function useSubscription<Input, Data, Role>(
 		...argsWithInput,
 	});
 	if (isServer) {
+		let ssrResult: any;
 		if (options?.requiresAuthentication && user === null) {
-			ssrCache[cacheKey] = {
+			ssrResult = ssrCache[cacheKey] = {
 				status: 'requires_authentication',
 			};
-			return {
-				...(ssrCache[cacheKey] as UseSubscriptionResult<Data>),
-			};
-		}
-		if (ssrEnabled) {
+		} else if (ssrEnabled) {
 			if (ssrCache[cacheKey]) {
-				return {
-					...(ssrCache[cacheKey] as UseSubscriptionResult<Data>),
-				};
+				ssrResult = ssrCache[cacheKey];
+			} else {
+				const promise = client.query({ operationName, ...argsWithInput, subscribeOnce: true });
+				ssrCache[cacheKey] = promise;
+				throw promise;
 			}
-			const promise = client.query({ operationName, ...argsWithInput, subscribeOnce: true });
-			ssrCache[cacheKey] = promise;
-			throw promise;
 		} else {
-			ssrCache[cacheKey] = {
+			ssrResult = ssrCache[cacheKey] = {
 				status: 'none',
 			};
-			return {
-				...(ssrCache[cacheKey] as UseSubscriptionResult<Data>),
-			};
 		}
+
+		return {
+			...ssrResult,
+			...getResultState(ssrResult),
+		};
 	}
 	const [invalidate, setInvalidate] = useState<number>(0);
 	const [subscriptionResult, setSubscriptionResult] = useState<SubscriptionResult<Data>>(
@@ -305,10 +305,8 @@ export function useSubscription<Input, Data, Role>(
 	}, [cacheKey]);
 	return {
 		...subscriptionResult,
-		isLoading: subscriptionResult.status === 'loading',
-		isSuccess: subscriptionResult.status === 'ok',
-		isStopped: subscriptionResult.status === 'ok' && stop,
-		isError: subscriptionResult.status === 'error',
+		...getResultState(subscriptionResult),
+		isStopped: subscriptionResult.status === 'ok' && subscriptionResult.streamState === 'stopped',
 	} as UseSubscriptionReturn<Input, Data>;
 }
 
@@ -363,9 +361,7 @@ export function useMutation<Input, Data, Role>(
 	}, [user]);
 	return {
 		...result,
-		isLoading: result.status === 'loading',
-		isSuccess: result.status === 'ok',
-		isError: result.status === 'error',
+		...getResultState(result),
 		mutate,
 	} as UseMutationReturn<Input, Data>;
 }

@@ -56,7 +56,7 @@ interface HookResultNone extends ResultNone {
 interface HookResultRequiresAuthentication extends ResultRequiresAuthentication {
 	isLoading: false;
 	isSuccess: false;
-	isError: true;
+	isError: false;
 }
 
 interface UseQueryResultOK<Data> extends QueryResultOK<Data> {
