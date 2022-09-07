@@ -1,7 +1,7 @@
 package apiconfig
 
 import (
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func HasCookieAuthEnabled(api *wgpb.Api) bool {
