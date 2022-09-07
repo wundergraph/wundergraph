@@ -93,7 +93,3 @@ func (m *Mutations) SetField(ctx context.Context, input SetFieldInput) (*SetFiel
 type Subscriptions struct {
 	client *Client
 }
-
-func (s *Subscriptions) PriceUpdates(ctx context.Context) (*execute.Stream[PriceUpdatesResponse], error) {
-	return execute.Subscribe[any, PriceUpdatesResponse](s.client.httpClient, ctx, s.client.baseURL, "/PriceUpdates", nil)
-}

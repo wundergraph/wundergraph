@@ -1,7 +1,0 @@
-subscription {
-	federated_updatedPrice {
-		upc
-		price
-		name
-	}
-}

@@ -41,11 +41,6 @@ type PostsResponse struct {
 	errors []GraphQLError     `json:"errors"`
 }
 
-type PriceUpdatesResponse struct {
-	Data   *PriceUpdatesResponseData `json:"data,omitempty"`
-	errors []GraphQLError            `json:"errors"`
-}
-
 type SDLResponse struct {
 	Data   *SDLResponseData `json:"data,omitempty"`
 	errors []GraphQLError   `json:"errors"`
@@ -110,14 +105,6 @@ type PostsResponseData struct {
 		Id    float64 `json:"id,omitempty"`
 		Title string  `json:"title,omitempty"`
 	} `json:"jsp_getPosts,omitempty"`
-}
-
-type PriceUpdatesResponseData struct {
-	Federated_updatedPrice struct {
-		Upc   string   `json:"upc,omitempty"`
-		Price *float64 `json:"price,omitempty"`
-		Name  *string  `json:"name,omitempty"`
-	} `json:"federated_updatedPrice,omitempty"`
 }
 
 type SDLResponseData struct {

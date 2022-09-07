@@ -83,27 +83,3 @@ func TestLiveQueries_Weather(t *testing.T) {
 		t.Log(string(b))
 	}
 }
-
-func TestSubscriptions_UpdatedPrice(t *testing.T) {
-	client := &Client{
-		baseURL:    "http://localhost:9991/app/main/operations",
-		httpClient: &http.Client{},
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	stream, err := client.Subscriptions().PriceUpdates(ctx)
-	assert.NoError(t, err)
-	defer stream.Close()
-
-	for {
-		res, closed, err := stream.Next(ctx)
-		assert.NoError(t, err)
-		if closed {
-			break
-		}
-		// pretty print res as json
-		b, err := json.MarshalIndent(res, "", "  ")
-		assert.NoError(t, err)
-		t.Log(string(b))
-	}
-}

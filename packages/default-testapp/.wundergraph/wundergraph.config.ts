@@ -19,7 +19,7 @@ const jsp = introspect.openApi({
 	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
-const federatedApi = introspect.federation({
+/*const federatedApi = introspect.federation({
 	apiNamespace: 'federated',
 	upstreams: [
 		{
@@ -35,7 +35,7 @@ const federatedApi = introspect.federation({
 			url: 'http://localhost:4004/graphql',
 		},
 	],
-});
+});*/
 
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -57,7 +57,7 @@ const weather = introspect.graphql({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [jsp, weather, countries, spacex, federatedApi],
+	apis: [jsp, weather, countries, spacex],
 });
 
 // configureWunderGraph emits the configuration
