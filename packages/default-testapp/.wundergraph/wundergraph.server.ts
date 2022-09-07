@@ -47,18 +47,17 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 				onOriginRequest: {
 					enableForAllOperations: true,
 					hook: async ({ request }) => {
-						request.headers.set('X-Wundergraph-Test', 'test');
 						console.log('onOriginRequest', request.headers);
 						return request;
 					},
 				},
-				onOriginResponse: {
+				/*onOriginResponse: {
 					enableForAllOperations: true,
 					hook: async ({ response }) => {
 						console.log('onOriginResponse headers', response.headers);
 						return 'skip';
 					},
-				},
+				},*/
 			},
 		},
 		mutations: {

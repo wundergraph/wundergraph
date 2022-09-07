@@ -15,11 +15,8 @@ func TestQueries_Missions(t *testing.T) {
 		baseURL:    "http://localhost:9991/app/main/operations",
 		httpClient: &http.Client{},
 	}
-	manufacturer := "Orbital ATK"
-	res, err := client.Queries().Missions(context.Background(), MissionsInput{
-		Find: &Spacex_MissionsFind{
-			Manufacturer: &manufacturer,
-		},
+	res, err := client.Queries().Weather(context.Background(), WeatherInput{
+		Code: "DE",
 	})
 	assert.NoError(t, err)
 

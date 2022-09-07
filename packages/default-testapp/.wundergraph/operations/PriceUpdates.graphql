@@ -1,14 +1,7 @@
 subscription {
 	federated_updatedPrice {
-		name
-		inStock
+		upc
 		price
-		reviews {
-			id
-			author {
-				id
-				name
-			}
-		}
+		name
 	}
 }

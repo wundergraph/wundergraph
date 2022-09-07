@@ -119,7 +119,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.5
       '@wundergraph/protobuf': workspace:^0.92.0
-      '@wundergraph/sdk': workspace:^0.103.1
+      '@wundergraph/sdk': workspace:^0.104.0
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0

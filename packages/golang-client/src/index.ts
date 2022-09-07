@@ -2,7 +2,7 @@ import { Template, TemplateOutputFile, visitJSONSchema } from '@wundergraph/sdk'
 import { ResolvedWunderGraphConfig } from '@wundergraph/sdk';
 import { hasInput } from '@wundergraph/sdk/dist/codegen/templates/typescript/react';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
-import { BaseTypeScriptDataModel } from '@wundergraph/sdk/dist/codegen/templates/typescript';
+import { BaseTypeScriptDataModel } from '@wundergraph/sdk';
 import execa from 'execa';
 import _ from 'lodash';
 import Handlebars from 'handlebars';

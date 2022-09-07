@@ -19,6 +19,29 @@ const jsp = introspect.openApi({
 	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
+const federatedApi = introspect.federation({
+	apiNamespace: 'federated',
+	upstreams: [
+		{
+			url: 'http://localhost:4001/graphql',
+		},
+		{
+			url: 'http://localhost:4002/graphql',
+		},
+		{
+			url: 'http://localhost:4003/graphql',
+		},
+		{
+			url: 'http://localhost:4004/graphql',
+		},
+	],
+});
+
+const spacex = introspect.graphql({
+	apiNamespace: 'spacex',
+	url: 'https://api.spacex.land/graphql/',
+});
+
 const countries = introspect.graphql({
 	apiNamespace: 'countries',
 	url: 'https://countries.trevorblades.com/',
@@ -34,7 +57,7 @@ const weather = introspect.graphql({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [jsp, weather, countries],
+	apis: [jsp, weather, countries, spacex, federatedApi],
 });
 
 // configureWunderGraph emits the configuration
@@ -60,7 +83,7 @@ configureWunderGraphApplication({
 					packageName: 'client',
 				}),
 			],
-			path: 'generated/golang',
+			path: '../golang/client',
 		},
 	],
 	cors: {
