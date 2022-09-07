@@ -1,9 +1,11 @@
 package validate
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func TestValidateApiConfig(t *testing.T) {

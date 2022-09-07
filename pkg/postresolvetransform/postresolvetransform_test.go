@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func TestTransformer_Transform(t *testing.T) {

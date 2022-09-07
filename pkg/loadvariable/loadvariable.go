@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func String(variable *wgpb.ConfigurationVariable) string {
