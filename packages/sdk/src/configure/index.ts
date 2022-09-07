@@ -64,14 +64,14 @@ import {
 	serverOptionsWithDefaults,
 } from './options';
 
-export class EnvironmentVariable {
-	constructor(name: string, defaultValue?: string) {
+export class EnvironmentVariable<DefaultValue = string> {
+	constructor(name: string, defaultValue?: DefaultValue) {
 		this.name = name;
 		this.defaultValue = defaultValue;
 	}
 
 	public name: string;
-	public defaultValue?: string;
+	public defaultValue?: DefaultValue;
 }
 
 export class PlaceHolder {
@@ -83,7 +83,7 @@ export class PlaceHolder {
 	public readonly _identifier = 'placeholder';
 }
 
-export type InputVariable = string | EnvironmentVariable | PlaceHolder;
+export type InputVariable<T = string> = T | EnvironmentVariable<T> | PlaceHolder;
 
 /**
  * resolveVariable resolves a variable to a string. Whereby it can fetch the value from an environment variable,
