@@ -10,8 +10,9 @@ type Listener struct {
 }
 
 type Options struct {
-	Listener *Listener
-	Logging  *wgpb.Logging
+	ServerUrl string
+	Listener  *Listener
+	Logging   *wgpb.Logging
 }
 
 type Api struct {
@@ -28,7 +29,6 @@ type Api struct {
 	AuthenticationConfig  *wgpb.ApiAuthenticationConfig
 	S3UploadConfiguration []*wgpb.S3UploadConfiguration
 	Webhooks              []*wgpb.WebhookConfiguration
-	ServerUrl             string
 	Options               *Options
 }
 

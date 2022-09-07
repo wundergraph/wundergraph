@@ -319,7 +319,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
-	hooksClient := hooks.NewClient(nodeConfig.Api.ServerUrl, n.log)
+	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
 
 	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
 
@@ -336,7 +336,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		EnableIntrospection:        n.options.enableIntrospection,
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
-		HookServerURL:              nodeConfig.Api.ServerUrl,
+		HookServerURL:              nodeConfig.Api.Options.ServerUrl,
 		DevMode:                    n.options.devMode,
 	}
 

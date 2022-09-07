@@ -40,8 +40,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 			},
 			AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
 			Webhooks:             graphConfig.Api.Webhooks,
-			ServerUrl:            loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
 			Options: &apihandler.Options{
+				ServerUrl: loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
 				Listener: &apihandler.Listener{
 					Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
 					Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),

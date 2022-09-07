@@ -216,7 +216,6 @@ func TestWebHooks(t *testing.T) {
 		Api: &apihandler.Api{
 			Hosts:                 []string{"localhost"},
 			PathPrefix:            "api/main",
-			ServerUrl:             testServer.URL,
 			EnableSingleFlight:    true,
 			EnableGraphqlEndpoint: true,
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
@@ -245,6 +244,7 @@ func TestWebHooks(t *testing.T) {
 				},
 			},
 			Options: &apihandler.Options{
+				ServerUrl: testServer.URL,
 				Listener: &apihandler.Listener{
 					Host: "127.0.0.1",
 					Port: uint16(port),
