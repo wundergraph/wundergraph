@@ -18,6 +18,7 @@ import type {
 } from '@wundergraph/sdk/client';
 
 import { useWunderGraphContext, WunderGraphContextProperties } from './provider';
+import { UseMutationResult, UseQueryResult, UseSubscriptionResult } from './types';
 
 export interface LogoutOptions {
 	logout_openid_connect_provider?: boolean;
@@ -30,12 +31,8 @@ export interface UseQueryOptions<Role> extends QueryArgs {
 
 export type UseQueryReturn<Input, Data> = {
 	data?: Data;
-	isLoading?: boolean;
-	isSuccess?: boolean;
-	isError?: boolean;
-	isLazy?: boolean;
 	refetch: (input?: Input, args?: QueryArgs) => void;
-} & QueryResult<Data>;
+} & UseQueryResult<Data>;
 
 export function useQuery<Input, Data, Role>(
 	operationName: string,
@@ -63,7 +60,7 @@ export function useQuery<Input, Data, Role>(
 				status: 'requires_authentication',
 			};
 			return {
-				...(ssrCache[cacheKey] as QueryResult<Data>),
+				...(ssrCache[cacheKey] as UseQueryResult<Data>),
 				refetch: () => {},
 			};
 		}
@@ -75,9 +72,8 @@ export function useQuery<Input, Data, Role>(
 					isLoading: result.status === 'loading',
 					isSuccess: result.status === 'ok',
 					isError: result.status === 'error',
-					isLazy: result.status === 'lazy',
 					refetch: () => Promise.resolve(result),
-				};
+				} as UseQueryReturn<Input, Data>;
 			}
 			const promise = client.query<Input, Data>({
 				operationName,
@@ -90,7 +86,7 @@ export function useQuery<Input, Data, Role>(
 				status: 'none',
 			};
 			return {
-				...(ssrCache[cacheKey] as QueryResult<Data>),
+				...(ssrCache[cacheKey] as UseQueryResult<Data>),
 				refetch: () => ({}),
 			};
 		}
@@ -189,13 +185,12 @@ export function useQuery<Input, Data, Role>(
 		setInvalidate((prev) => prev + 1);
 	}, []);
 	return {
-		...(queryResult as QueryResult<Data>),
+		...queryResult,
 		isLoading: queryResult.status === 'loading',
 		isSuccess: queryResult.status === 'ok',
 		isError: queryResult.status === 'error',
-		isLazy: queryResult.status === 'lazy',
 		refetch,
-	};
+	} as UseQueryReturn<Input, Data>;
 }
 
 export interface UseSubscriptionOptions<Role> extends SubscriptionArgs {
@@ -206,11 +201,8 @@ export interface UseSubscriptionOptions<Role> extends SubscriptionArgs {
 
 export type UseSubscriptionReturn<Input, Data> = {
 	data?: Data;
-	isLoading?: boolean;
-	isSuccess?: boolean;
 	isStopped?: boolean;
-	isError?: boolean;
-} & SubscriptionResult<Data>;
+} & UseSubscriptionResult<Data>;
 
 export function useSubscription<Input, Data, Role>(
 	operationName: string,
@@ -237,13 +229,13 @@ export function useSubscription<Input, Data, Role>(
 				status: 'requires_authentication',
 			};
 			return {
-				...(ssrCache[cacheKey] as SubscriptionResult<Data>),
+				...(ssrCache[cacheKey] as UseSubscriptionResult<Data>),
 			};
 		}
 		if (ssrEnabled) {
 			if (ssrCache[cacheKey]) {
 				return {
-					...(ssrCache[cacheKey] as SubscriptionResult<Data>),
+					...(ssrCache[cacheKey] as UseSubscriptionResult<Data>),
 				};
 			}
 			const promise = client.query({ operationName, ...argsWithInput, subscribeOnce: true });
@@ -254,7 +246,7 @@ export function useSubscription<Input, Data, Role>(
 				status: 'none',
 			};
 			return {
-				...(ssrCache[cacheKey] as SubscriptionResult<Data>),
+				...(ssrCache[cacheKey] as UseSubscriptionResult<Data>),
 			};
 		}
 	}
@@ -312,12 +304,12 @@ export function useSubscription<Input, Data, Role>(
 		};
 	}, [cacheKey]);
 	return {
-		...(subscriptionResult as SubscriptionResult<Data>),
+		...subscriptionResult,
 		isLoading: subscriptionResult.status === 'loading',
 		isSuccess: subscriptionResult.status === 'ok',
 		isStopped: subscriptionResult.status === 'ok' && stop,
 		isError: subscriptionResult.status === 'error',
-	};
+	} as UseSubscriptionReturn<Input, Data>;
 }
 
 export interface UseMutationOptions<Role> extends MutationArgs {
@@ -327,11 +319,8 @@ export interface UseMutationOptions<Role> extends MutationArgs {
 
 export type UseMutationReturn<Input, Data> = {
 	data?: Data;
-	isLoading?: boolean;
-	isSuccess?: boolean;
-	isError?: boolean;
 	mutate: (input?: Input, args?: MutationArgs) => Promise<MutationResult<Data>>;
-} & MutationResult<Data>;
+} & UseMutationResult<Data>;
 
 export function useMutation<Input, Data, Role>(
 	operationName: string,
@@ -378,7 +367,7 @@ export function useMutation<Input, Data, Role>(
 		isSuccess: result.status === 'ok',
 		isError: result.status === 'error',
 		mutate,
-	};
+	} as UseMutationReturn<Input, Data>;
 }
 
 export interface UseWunderGraphProps<Role> {

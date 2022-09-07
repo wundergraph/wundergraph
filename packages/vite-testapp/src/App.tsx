@@ -1,23 +1,23 @@
 import reactLogo from './assets/react.svg';
 import './App.css';
-import { WunderGraphProvider, useWeatherLiveQuery, useFakeWeatherQuery } from './components/generated/react';
+import { WunderGraphProvider, useWeatherLiveQuery } from './components/generated/react';
 
 const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 	const liveWeather = useWeatherLiveQuery({
-		input: { forCity: city },
+		forCity: city,
 	});
 	return (
 		<div>
-			{liveWeather.result.status === 'loading' && <p>Loading...</p>}
-			{liveWeather.result.status === 'error' && <p>Error</p>}
-			{liveWeather.result.status === 'ok' && (
+			{liveWeather.isLoading && <p>Loading...</p>}
+			{liveWeather.isError && <p>Error</p>}
+			{liveWeather.isSuccess && (
 				<div>
-					<h3>City: {liveWeather.result.data.getCityByName?.name}</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.coord)}</p>
+					<h3>City: {liveWeather.data.getCityByName?.name}</h3>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.coord)}</p>
 					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.temperature)}</p>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.temperature)}</p>
 					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.wind)}</p>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.wind)}</p>
 				</div>
 			)}
 		</div>
