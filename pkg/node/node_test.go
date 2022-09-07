@@ -20,9 +20,10 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
 )
 
 func TestNode(t *testing.T) {

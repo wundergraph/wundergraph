@@ -1,7 +1,7 @@
 syntax = "proto3";
 package wgpb;
 
-option go_package = "./go/wgpb";
+option go_package = "github.com/wundergraph/wundergraph/pkg/wgpb";
 
 message WunderNodeConfig {
 	Server server = 1;
