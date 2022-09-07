@@ -1,8 +1,9 @@
 import { AuthProvider, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useHelloUserQuery } from '../components/generated/react';
 
 const Claims = () => {
 	const { login, user } = useWunderGraph();
-	const helloUser = useQuery.HelloUser();
+	const helloUser = useHelloUserQuery();
 	return (
 		<div>
 			<h1>Claims</h1>

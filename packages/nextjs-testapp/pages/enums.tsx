@@ -1,10 +1,9 @@
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useTestQuery } from '../components/generated/react';
 
 const Enums = () => {
-	const data = useQuery.Test({
-		input: {
-			input: ['EnumValueA'],
-		},
+	const data = useTestQuery({
+		input: ['EnumValueA'],
 	});
 	return (
 		<div>

@@ -1,9 +1,10 @@
 import { NextPage } from 'next';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useFakeWeatherQuery } from '../components/generated/react';
 import styles from '../styles/Home.module.css';
 
 const Mocks: NextPage = () => {
-	const weather = useQuery.FakeWeather();
+	const weather = useFakeWeatherQuery();
 	return (
 		<div>
 			<h1>Mocks: Fake Weather</h1>

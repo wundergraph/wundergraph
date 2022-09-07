@@ -1,10 +1,9 @@
-import { AuthProvider, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { AuthProvider, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useProtectedWeatherQuery } from '../components/generated/react';
 
 const Page = () => {
-	const weather = useQuery.ProtectedWeather({
-		input: {
-			forCity: 'Berlin',
-		},
+	const weather = useProtectedWeatherQuery({
+		forCity: 'Berlin',
 	});
 	const { user, login, logout } = useWunderGraph();
 	return (

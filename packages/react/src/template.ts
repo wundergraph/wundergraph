@@ -30,6 +30,7 @@ export class ReactTemplate implements Template {
 	}
 
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		console.log(config.application.Operations);
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({

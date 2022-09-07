@@ -1,3 +1,3 @@
-query ($name: String! @fromClaim(name: USERID)) {
+query ($name: String! @fromClaim(name: NAME)) {
 	gql_hello(name: $name)
 }

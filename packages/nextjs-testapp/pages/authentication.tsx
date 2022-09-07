@@ -1,7 +1,8 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { FC, useState } from 'react';
-import { AuthProviders, useLiveQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { AuthProviders, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useProtectedWeatherLiveQuery } from '../components/generated/react';
 
 const JobsPage: NextPage = () => {
 	const { user, login, logout } = useWunderGraph();
@@ -65,22 +66,22 @@ const JobsPage: NextPage = () => {
 };
 
 const ProtectedLiveWeather: FC<{ city: string }> = ({ city }) => {
-	const liveWeather = useLiveQuery.ProtectedWeather({
-		input: { forCity: city },
+	const liveWeather = useProtectedWeatherLiveQuery({
+		forCity: city,
 	});
 	return (
 		<div>
-			{liveWeather.result.status === 'requires_authentication' && <p>LiveQuery waiting for user to be authenticated</p>}
-			{liveWeather.result.status === 'loading' && <p>Loading...</p>}
-			{liveWeather.result.status === 'error' && <p>Error</p>}
-			{liveWeather.result.status === 'ok' && (
+			{liveWeather.status === 'requires_authentication' && <p>LiveQuery waiting for user to be authenticated</p>}
+			{liveWeather.isLoading && <p>Loading...</p>}
+			{liveWeather.isError && <p>Error</p>}
+			{liveWeather.isSuccess && (
 				<div>
-					<h3>City: {liveWeather.result.data.getCityByName?.name}</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.coord)}</p>
+					<h3>City: {liveWeather.data.getCityByName?.name}</h3>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.coord)}</p>
 					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.temperature)}</p>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.temperature)}</p>
 					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.wind)}</p>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.wind)}</p>
 				</div>
 			)}
 		</div>

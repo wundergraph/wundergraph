@@ -1,9 +1,10 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { usePastLaunchesQuery } from '../components/generated/react';
 
 const JobsPage: NextPage = () => {
-	const launches = useQuery.PastLaunches({ refetchOnWindowFocus: true });
+	const launches = usePastLaunchesQuery({ refetchOnWindowFocus: true });
 	return (
 		<div className={styles.examplesContainer}>
 			<h1>Cached SpaceX rocket launches</h1>
@@ -25,8 +26,8 @@ const JobsPage: NextPage = () => {
 				Additionally, if you re-focus the Browser window/tab you'll see a network request kick off to refresh the page.
 			</p>
 			<ul>
-				{launches.result.status === 'ok' &&
-					launches.result.data.launchesPast?.map((launch, i) => (
+				{launches.isSuccess &&
+					launches.data.pastLaunches?.map((launch, i) => (
 						<li key={i}>
 							<h3>{launch.mission_name}</h3>
 							<p>{launch.rocket?.rocket_name}</p>

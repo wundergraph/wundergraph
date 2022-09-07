@@ -1,10 +1,9 @@
 import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useWeatherLiveQuery } from '../components/generated/react';
 
 const StopOnBlur = () => {
-	const data = useLiveQuery.Weather({
-		input: {
-			forCity: 'Berlin',
-		},
+	const data = useWeatherLiveQuery({
+		forCity: 'Berlin',
 	});
 	return (
 		<div>
