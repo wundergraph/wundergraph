@@ -5,11 +5,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func TestValidateApiConfig(t *testing.T) {
-	// if providers slice is empty, cookie based auth is disabled
+	// if providers slice is empty, cookie based auth is disabled,
 	// so we always need to pass a provider
 	providers := []*wgpb.AuthProvider{
 		{
@@ -19,7 +20,7 @@ func TestValidateApiConfig(t *testing.T) {
 	}
 
 	t.Run("all valid", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
@@ -44,7 +45,7 @@ func TestValidateApiConfig(t *testing.T) {
 	})
 
 	t.Run("authentication.cookieBased.secureCookieBlockKey is required", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
@@ -65,7 +66,7 @@ func TestValidateApiConfig(t *testing.T) {
 	})
 
 	t.Run("authentication.cookieBased.secureCookieBlockKey is wrong", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
@@ -90,7 +91,7 @@ func TestValidateApiConfig(t *testing.T) {
 	})
 
 	t.Run("authentication.cookieBased.csrfTokenSecret is required", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
@@ -111,7 +112,7 @@ func TestValidateApiConfig(t *testing.T) {
 	})
 
 	t.Run("authentication.cookieBased.csrfTokenSecret is wrong", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
@@ -136,7 +137,7 @@ func TestValidateApiConfig(t *testing.T) {
 	})
 
 	t.Run("authentication.cookieBased.secureCookieHashKey is required", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
@@ -157,7 +158,7 @@ func TestValidateApiConfig(t *testing.T) {
 	})
 
 	t.Run("authentication.cookieBased.secureCookieHashKey is wrong", func(t *testing.T) {
-		valid, messages := ApiConfig(&wgpb.Api{
+		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
