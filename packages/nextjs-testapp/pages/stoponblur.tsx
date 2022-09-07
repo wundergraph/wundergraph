@@ -1,4 +1,4 @@
-import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
+import { withWunderGraph } from '../components/generated/nextjs';
 import { useWeatherLiveQuery } from '../components/generated/react';
 
 const StopOnBlur = () => {

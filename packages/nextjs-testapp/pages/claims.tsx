@@ -1,4 +1,4 @@
-import { AuthProvider, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { AuthProvider, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
 import { useHelloUserQuery } from '../components/generated/react';
 
 const Claims = () => {

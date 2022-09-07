@@ -1,4 +1,4 @@
-import { useMutation, withWunderGraph } from '../components/generated/nextjs';
+import { withWunderGraph } from '../components/generated/nextjs';
 import { useState } from 'react';
 import { useSetNameMutation } from '../components/generated/react';
 

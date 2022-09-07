@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { FC, useState } from 'react';
-import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
+import { withWunderGraph } from '../components/generated/nextjs';
 import { useWeatherLiveQuery } from '../components/generated/react';
 
 const RealtimePage: NextPage = () => {

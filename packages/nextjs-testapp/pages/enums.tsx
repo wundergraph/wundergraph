@@ -1,4 +1,4 @@
-import { useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { withWunderGraph } from '../components/generated/nextjs';
 import { useTestQuery } from '../components/generated/react';
 
 const Enums = () => {

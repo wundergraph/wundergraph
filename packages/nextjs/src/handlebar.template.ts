@@ -38,6 +38,9 @@ export const withWunderGraph = (Page: NextComponentType<any, any, any>, options?
 
 export const useQuery = {
 {{#each queriesWithInput}}
+    /**
+     * @deprecated use use{{name}}Query instead
+     */
     {{name}}: (args: QueryArgsWithInput<{{name}}Input>) => {
         const {input, ...options} = args
         const { refetch, isLoading, isSuccess, isError, isLazy, ...result } = use{{name}}Query(input, options)
@@ -52,6 +55,9 @@ export const useQuery = {
     },
 {{/each}}
 {{#each queriesWithoutInput}}
+    /**
+     * @deprecated use use{{name}}Query instead
+     */
     {{name}}: (args?: QueryArgs) => {
         const { refetch, isLoading, isSuccess, isError, isLazy, ...result } = use{{name}}Query(args)
         return {
@@ -68,6 +74,9 @@ export const useQuery = {
 
 export const useMutation = {
 {{#each mutationsWithInput}}
+    /**
+     * @deprecated use use{{name}}Mutation instead
+     */
     {{name}}: (args?: MutationArgs) => {
         const { mutate, ...result } = use{{name}}Mutation(args)
         return {
@@ -80,6 +89,9 @@ export const useMutation = {
     },
 {{/each}}
 {{#each mutationsWithoutInput}}
+    /**
+     * @deprecated use use{{name}}Mutation instead
+     */
     {{name}}: (args?: MutationArgs) => {
         const { mutate, ...result } = use{{name}}Mutation(args)
         return {
@@ -92,6 +104,9 @@ export const useMutation = {
 
 export const useSubscription = {
 {{#each subscriptionsWithInput}}
+    /**
+     * @deprecated use use{{name}}Subscription instead
+     */
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => {
         const { input, ...options } = args
         const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}Subscription(input, options)
@@ -105,6 +120,9 @@ export const useSubscription = {
     },
 {{/each}}
 {{#each subscriptionsWithoutInput}}
+    /**
+     * @deprecated use use{{name}}Subscription instead
+     */
     {{name}}: (args: SubscriptionArgs) => {
         const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}Subscription(args)
         return {
@@ -120,6 +138,9 @@ export const useSubscription = {
             
 export const useLiveQuery = {
 {{#each liveQueriesWithInput}}
+    /**
+     * @deprecated use use{{name}}LiveQuery instead
+     */
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => {
         const { input, ...options } = args
         const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}LiveQuery(input, options)
@@ -133,6 +154,9 @@ export const useLiveQuery = {
     },
 {{/each}}
 {{#each liveQueriesWithoutInput}}
+    /**
+     * @deprecated use use{{name}}LiveQuery instead
+     */
     {{name}}: (args: SubscriptionArgs) => {
         const { isLoading, isSuccess, isStopped, isError, ...result } = use{{name}}LiveQuery(args)
         return {
