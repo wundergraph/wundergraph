@@ -32,6 +32,11 @@ var serverStartCmd = &cobra.Command{
 			return err
 		}
 
+		configFile := path.Join(wgDir, "generated", configJsonFilename)
+		if !files.FileExists(configFile) {
+			return fmt.Errorf("could not find configuration file: %s", configFile)
+		}
+
 		serverScriptFile := path.Join("generated", "bundle", "server.js")
 		serverExecutablePath := path.Join(wgDir, serverScriptFile)
 		if !files.FileExists(serverExecutablePath) {

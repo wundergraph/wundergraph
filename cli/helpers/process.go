@@ -1,14 +1,30 @@
 package helpers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
 	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
+
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
+
+func ServerPortFromConfig(configJsonPath string) int {
+	data, _ := ioutil.ReadFile(configJsonPath)
+	var graphConfig wgpb.WunderGraphConfiguration
+	if err := json.Unmarshal(data, &graphConfig); err != nil {
+		return 0
+	}
+
+	newPort := loadvariable.Int(graphConfig.Api.ServerOptions.Listen.Port)
+	return newPort
+}
 
 // KillExistingHooksProcess kills the existing hooks process before we start the new one
 // some IDEs, like Goland, don't send a SIGINT to the process group

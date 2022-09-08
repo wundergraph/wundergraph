@@ -2,8 +2,6 @@ package commands
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
@@ -16,12 +14,10 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 var (
@@ -191,11 +187,8 @@ var upCmd = &cobra.Command{
 					}
 
 					// we could have a new port so just read it from config
-					data, _ := ioutil.ReadFile(configJsonPath)
-					var graphConfig wgpb.WunderGraphConfiguration
-					err := json.Unmarshal(data, &graphConfig)
-					if err == nil {
-						newPort := loadvariable.Int(graphConfig.Api.ServerOptions.Listen.Port)
+					newPort := helpers.ServerPortFromConfig(configJsonPath)
+					if newPort != 0 {
 						helpers.KillExistingHooksProcess(newPort, log)
 						port = newPort
 					}
