@@ -13,7 +13,6 @@ on:
       - 'go.sum'
       - '!examples/**/*'
       - '!**/*.md'
-      - '.github/workflows/engine-ci.yaml'
   pull_request:
     branches:
       - main
@@ -25,7 +24,6 @@ on:
       - 'go.sum'
       - '!examples/**/*'
       - '!**/*.md'
-      - '.github/workflows/engine-ci.yaml'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
@@ -37,7 +35,16 @@ env:
 
 jobs:
   build_test:
-    runs-on: 'windows-latest'
+    runs-on: ubuntu-latest
+    services:
+      minio:
+        image: minio/minio:edge-cicd
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio123
+        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -58,9 +65,16 @@ jobs:
           version: '3.12.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: make bootstrap-minio
+
       - run: pnpm install --ignore-scripts
 
       - run: make engine-dev
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
+
+      - name: Run unit and integration tests
+        run: make test-go
+        env:
+          INT: true
