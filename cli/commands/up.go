@@ -371,11 +371,12 @@ func execCmd(cmd *exec.Cmd) {
 	var waitStatus syscall.WaitStatus
 	if err := cmd.Run(); err != nil {
 		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
+			log.Debug("Error during port killing", abstractlogger.Error(err))
+			return
 		}
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			log.Debug(fmt.Sprintf("Error during port killing (exit code: %s)\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus()))))
+			log.Debug("Error during port killing", abstractlogger.Int("exitCode", waitStatus.ExitStatus()))
 		}
 	} else {
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
