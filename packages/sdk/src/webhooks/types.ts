@@ -4,20 +4,20 @@ import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure';
 
 export interface Webhook<
-	InternalClient = InternalClientBase,
+	InternalClient extends InternalClientBase = InternalClientBase,
 	Event extends WebhookHttpEvent<InternalClient> = WebhookHttpEvent<InternalClient>,
 	Response extends WebhookResponse = WebhookResponse
 > {
 	handler: (event: Event, context: WebhookRequestContext<InternalClient>) => Promise<Response>;
 }
-export interface WebhookResponse<ResponseBody = unknown, Headers = WebhookHeaders> {
+export interface WebhookResponse<ResponseBody = unknown, Headers extends WebhookHeaders = WebhookHeaders> {
 	statusCode?: number;
 	body?: ResponseBody;
 	headers?: Headers;
 }
 export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
-export interface WebhookRequestContext<InternalClient = any> {
+export interface WebhookRequestContext<InternalClient extends InternalClientBase = InternalClientBase> {
 	internalClient: InternalClient;
 	log: Logger;
 }
@@ -31,7 +31,12 @@ export interface Logger {
 	debug: LogFn;
 	error: LogFn;
 }
-export interface WebhookHttpEvent<InternalClient, Body = unknown, Query = WebhookQuery, Headers = WebhookHeaders> {
+export interface WebhookHttpEvent<
+	InternalClient extends InternalClientBase = InternalClientBase,
+	Body = unknown,
+	Query extends WebhookQuery = WebhookQuery,
+	Headers extends WebhookHeaders = WebhookHeaders
+> {
 	method: RequestMethod;
 	url: string;
 	headers: Headers;
