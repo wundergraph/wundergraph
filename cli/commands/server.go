@@ -43,6 +43,13 @@ var serverStartCmd = &cobra.Command{
 			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 		}
 
+		if enableDebugMode {
+			port := helpers.ServerPortFromConfig(configFile)
+			if port != 0 {
+				helpers.KillExistingHooksProcess(port, log)
+			}
+		}
+
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
