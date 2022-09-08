@@ -58,8 +58,6 @@ jobs:
           version: '3.12.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: make bootstrap-minio
-
       - run: pnpm install --ignore-scripts
 
       - run: make engine-dev
