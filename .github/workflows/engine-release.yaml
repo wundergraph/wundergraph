@@ -143,10 +143,15 @@ jobs:
     needs:
       - check-pnpm
     steps:
+      - name: Prepare git
+        run: |
+          git config --global core.autocrlf false
+
       - name: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: ./.github/actions/go
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
