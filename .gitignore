@@ -11,7 +11,6 @@ pkg/templates/assets/templates/**/*lock.json
 
 # Directories
 dist
-types/go/wgpb
 
 # Next.js build output
 .next
