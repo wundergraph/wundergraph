@@ -1,4 +1,4 @@
-import { logLevelToJSON, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
@@ -48,7 +48,6 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 
 	if (!process.env.WG_ABS_DIR) {
 		logger.fatal('The environment variable `WG_ABS_DIR` is required!');
-		process.exit(1);
 	}
 	try {
 		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR!, 'generated', 'wundergraph.config.json'), {
@@ -70,7 +69,6 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		}
 	} catch (err: any) {
 		logger.fatal(err, 'Could not load wundergraph.config.json. Did you forget to run `wunderctl generate` ?');
-		process.exit(1);
 	}
 }
 
@@ -116,7 +114,6 @@ const _configureWunderGraphServer = <
 			gracefulShutdown: process.env.NODE_ENV === 'production',
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
-			process.exit(1);
 		});
 	}
 
