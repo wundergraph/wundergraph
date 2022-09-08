@@ -164,9 +164,7 @@ jobs:
         run: make codegen-go
 
       - name: Check if git is not dirty after generating files
-        run: |
-          which protoc-gen-go 
-          git diff --no-ext-diff --exit-code
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
