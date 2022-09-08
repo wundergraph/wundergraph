@@ -8,7 +8,9 @@ import path from 'path';
 export const getWebhooks = async (dir: string): Promise<{ filePath: string; name: string }[]> => {
 	const list = await readdir(dir, { withFileTypes: true });
 	return list
-		.filter((file: Dirent) => file.name.endsWith('.ts'))
+		.filter((file: Dirent) => {
+			return file.isFile() && !file.name.endsWith('.d.ts') && file.name.endsWith('.ts');
+		})
 		.map((entry: Dirent) => {
 			return {
 				// ts is transpiled to js

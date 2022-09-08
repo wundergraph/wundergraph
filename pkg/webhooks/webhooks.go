@@ -3,7 +3,7 @@ package webhooks
 import (
 	"os"
 	"path"
-	"path/filepath"
+	"strings"
 )
 
 const WebhookDirectoryName = "webhooks"
@@ -16,7 +16,7 @@ func GetWebhooks(wunderGraphDir string) ([]string, error) {
 	}
 	webhookFilePaths := make([]string, len(des))
 	for i, entry := range des {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".ts" {
+		if entry.IsDir() || strings.HasSuffix(entry.Name(), ".d.ts") || !strings.HasSuffix(entry.Name(), ".ts") {
 			continue
 		}
 		webhookFilePaths[i] = path.Join(WebhookDirectoryName, entry.Name())
