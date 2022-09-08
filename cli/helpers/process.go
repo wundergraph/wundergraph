@@ -15,15 +15,15 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-func ServerPortFromConfig(configJsonPath string) int {
+func ServerPortFromConfig(configJsonPath string) (int, error) {
 	data, _ := ioutil.ReadFile(configJsonPath)
 	var graphConfig wgpb.WunderGraphConfiguration
 	if err := json.Unmarshal(data, &graphConfig); err != nil {
-		return 0
+		return 0, err
 	}
 
 	newPort := loadvariable.Int(graphConfig.Api.ServerOptions.Listen.Port)
-	return newPort
+	return newPort, nil
 }
 
 // KillExistingHooksProcess kills the existing hooks process before we start the new one

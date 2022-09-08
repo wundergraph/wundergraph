@@ -187,8 +187,10 @@ var upCmd = &cobra.Command{
 					}
 
 					// we could have a new port so just read it from config
-					newPort := helpers.ServerPortFromConfig(configJsonPath)
-					if newPort != 0 {
+					if newPort, err := helpers.ServerPortFromConfig(configJsonPath); err != nil {
+						log.Info("could not read server port from config file", abstractlogger.String("configFile", configJsonPath))
+						os.Exit(1)
+					} else {
 						helpers.KillExistingHooksProcess(newPort, log)
 						port = newPort
 					}

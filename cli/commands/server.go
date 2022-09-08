@@ -3,8 +3,10 @@ package commands
 import (
 	"context"
 	"fmt"
+	"os"
 	"path"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
@@ -44,8 +46,10 @@ var serverStartCmd = &cobra.Command{
 		}
 
 		if enableDebugMode {
-			port := helpers.ServerPortFromConfig(configFile)
-			if port != 0 {
+			if port, err := helpers.ServerPortFromConfig(configFile); err != nil {
+				log.Info("could not read server port from config file", abstractlogger.String("configFile", configFile))
+				os.Exit(1)
+			} else {
 				helpers.KillExistingHooksProcess(port, log)
 			}
 		}
