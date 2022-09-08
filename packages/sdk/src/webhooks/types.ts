@@ -6,11 +6,11 @@ import { EnvironmentVariable } from '../configure';
 export interface Webhook<
 	InternalClient extends InternalClientBase = InternalClientBase,
 	Event extends WebhookHttpEvent = WebhookHttpEvent,
-	Response extends WebhookResponse = WebhookResponse
+	Response extends WebhookHttpResponse = WebhookHttpResponse
 > {
 	handler: (event: Event, context: WebhookRequestContext<InternalClient>) => Promise<Response>;
 }
-export interface WebhookResponse<ResponseBody = unknown, Headers extends WebhookHeaders = WebhookHeaders> {
+export interface WebhookHttpResponse<ResponseBody = unknown, Headers extends WebhookHeaders = WebhookHeaders> {
 	statusCode?: number;
 	body?: ResponseBody;
 	headers?: Headers;

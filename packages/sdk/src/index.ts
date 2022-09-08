@@ -51,7 +51,7 @@ export type { FastifyLoggerInstance } from 'fastify';
 export type { Template, TemplateOutputFile } from './codegen/index';
 export type {
 	WebhookHttpEvent,
-	WebhookResponse,
+	WebhookHttpResponse,
 	Webhook,
 	WebhookRequestContext,
 	Logger,

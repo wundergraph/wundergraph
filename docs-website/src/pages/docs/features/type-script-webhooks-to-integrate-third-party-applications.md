@@ -16,7 +16,7 @@ For example, you might want to receive message when a User has starred your repo
 import type {
   Webhook,
   WebhookHttpEvent,
-  WebhookResponse,
+  WebhookHttpResponse,
 } from '@wundergraph/sdk'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
@@ -27,7 +27,7 @@ const webhook: Webhook<
     { myQueryVar: string },
     { myHeaderVar: string }
   >,
-  WebhookResponse<
+  WebhookHttpResponse<
     { myResponseBodyVar: string },
     { myResponseHeaderVar: string }
   >

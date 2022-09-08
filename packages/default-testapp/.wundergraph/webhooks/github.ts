@@ -1,12 +1,12 @@
 import localImported from './../../local-import';
 import { buildSchema } from 'graphql';
-import type { Webhook, WebhookHttpEvent, WebhookResponse } from '@wundergraph/sdk';
+import type { Webhook, WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk';
 import type { InternalClient } from '../generated/wundergraph.internal.client';
 
 const webhook: Webhook<
 	InternalClient,
 	WebhookHttpEvent<{ myBodyVar: string }, { myQueryVar: string }, { myHeaderVar: string }>,
-	WebhookResponse<{ myResponseBodyVar: string; localImported: number }, { myResponseHeaderVar: string }>
+	WebhookHttpResponse<{ myResponseBodyVar: string; localImported: number }, { myResponseHeaderVar: string }>
 > = {
 	handler: async (event, context) => {
 		event.query.myQueryVar;
