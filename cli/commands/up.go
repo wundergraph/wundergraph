@@ -2,12 +2,11 @@ package commands
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path"
-	"runtime"
 	"sync"
 	"syscall"
 
@@ -17,10 +16,12 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 var (
@@ -33,6 +34,8 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var port int
+
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return err
@@ -46,12 +49,6 @@ var upCmd = &cobra.Command{
 
 		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
-
-		// some IDEs, like Goland, don't send a SIGINT to the process group
-		// this leads to the middleware hooks server (sub-process) not being killed
-		// on subsequent runs of the up command, we're not able to listen on the same port
-		// so we kill the existing hooks process before we start the new one
-		killExistingHooksProcess(9992)
 
 		quit := make(chan os.Signal, 2)
 		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
@@ -188,6 +185,21 @@ var upCmd = &cobra.Command{
 				wg.Wait()
 
 				go func() {
+					if port != 0 {
+						// we have previously set port try to kill it
+						helpers.KillExistingHooksProcess(port, log)
+					}
+
+					// we could have a new port so just read it from config
+					data, _ := ioutil.ReadFile(configJsonPath)
+					var graphConfig wgpb.WunderGraphConfiguration
+					err := json.Unmarshal(data, &graphConfig)
+					if err == nil {
+						newPort := loadvariable.Int(graphConfig.Api.ServerOptions.Listen.Port)
+						helpers.KillExistingHooksProcess(newPort, log)
+						port = newPort
+					}
+
 					// run or restart hook server
 					<-hookServerRunner.Run(ctx)
 				}()
@@ -313,32 +325,4 @@ var upCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(upCmd)
 	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
-}
-
-func killExistingHooksProcess(serverListenPort int) {
-	if runtime.GOOS == "windows" {
-		command := fmt.Sprintf("(Get-NetTCPConnection -LocalPort %d).OwningProcess -Force", serverListenPort)
-		execCmd(exec.Command("Stop-Process", "-Id", command), serverListenPort)
-	} else {
-		command := fmt.Sprintf("lsof -i tcp:%d | grep LISTEN | awk '{print $2}' | xargs kill -9", serverListenPort)
-		execCmd(exec.Command("bash", "-c", command), serverListenPort)
-	}
-}
-
-func execCmd(cmd *exec.Cmd, serverListenPort int) {
-	var waitStatus syscall.WaitStatus
-	if err := cmd.Run(); err != nil {
-		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
-		}
-		if exitError, ok := err.(*exec.ExitError); ok {
-			waitStatus = exitError.Sys().(syscall.WaitStatus)
-			log.Debug(fmt.Sprintf("Error during port killing (exit code: %s)\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus()))))
-		}
-	} else {
-		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
-		log.Debug("Successfully killed existing middleware process",
-			abstractlogger.Int("port", serverListenPort),
-		)
-	}
 }
