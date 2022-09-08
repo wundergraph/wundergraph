@@ -7,8 +7,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/node"
 )
 
-// trigger
-
 var (
 	version                    = "dev"
 	commit                     = "unknown"
