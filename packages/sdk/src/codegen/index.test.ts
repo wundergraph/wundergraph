@@ -1,8 +1,10 @@
 import { CodeGenOutWriter, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
-import { mapInputVariable, ResolvedWunderGraphConfig } from '../configure';
+import { ResolvedWunderGraphConfig } from '../configure';
 import { assert } from 'chai';
 import { ConfigurationVariable, ConfigurationVariableKind, LogLevel, OperationType } from '@wundergraph/protobuf';
+import { WgLogLevel } from '../configure/options';
+import { mapInputVariable } from '../configure/variables';
 
 class FakeTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -69,7 +71,13 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						},
 					},
 					logger: {
-						level: LogLevel.INFO,
+						level: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: WgLogLevel.INFO,
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
 					},
 				},
 				serverOptions: {
@@ -97,7 +105,13 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						},
 					},
 					logger: {
-						level: 'info',
+						level: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: WgLogLevel.INFO,
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
 					},
 				},
 				application: {

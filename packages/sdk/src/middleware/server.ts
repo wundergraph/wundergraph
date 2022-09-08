@@ -6,7 +6,7 @@ import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
-import { customGqlServerMountPath, HooksConfiguration, resolveConfigurationVariable } from '../configure';
+import { customGqlServerMountPath, HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
@@ -20,6 +20,8 @@ import {
 	WunderGraphHooksAndServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
+import { PinoLogLevel, resolveServerLogLevel } from './logger';
+import { resolveConfigurationVariable } from '../configure/variables';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -31,7 +33,7 @@ let logger: pino.Logger;
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
 	logger = Pino({
-		level: process.env.LOG_LEVEL || 'info',
+		level: process.env.LOG_LEVEL || PinoLogLevel.Info,
 	});
 
 	/**
@@ -145,7 +147,7 @@ export const createServer = async ({
 	gracefulShutdown,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level) {
-		logger.level = config.api.serverOptions.logger.level;
+		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
 	const fastify = Fastify({

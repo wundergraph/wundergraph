@@ -1,5 +1,5 @@
 import { AuthProvider, AuthProviderKind } from '@wundergraph/protobuf';
-import { mapInputVariable, InputVariable } from './index';
+import { InputVariable, mapInputVariable } from './variables';
 
 export interface AuthenticationProvider {
 	resolve: () => AuthProvider;

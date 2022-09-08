@@ -63,13 +63,7 @@ export type { WebhookVerifierConfiguration } from './webhooks/verifiers';
 
 export { default as templates } from './codegen/templates';
 export { Application, introspect, createMockApi, Api } from './definition';
-export {
-	configureWunderGraphApplication,
-	configurePublishWunderGraphAPI,
-	resolveIntegration,
-	EnvironmentVariable,
-	PlaceHolder,
-} from './configure';
+export { configureWunderGraphApplication, configurePublishWunderGraphAPI, resolveIntegration } from './configure';
 export { configureWunderGraphOperations, enableAuth, enableCaching, disableAuth } from './configure/operations';
 export { configureWunderGraphServer } from './middleware/server';
 
@@ -85,3 +79,5 @@ export {
 } from './codegen/templates/typescript/index';
 export { modelImports } from './codegen/templates/typescript/web.client';
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from './webhooks/verifiers';
+export { PlaceHolder } from './configure/variables';
+export { EnvironmentVariable } from './configure/variables';

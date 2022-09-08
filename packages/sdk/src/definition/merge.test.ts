@@ -1,7 +1,8 @@
 import { mergeApis } from './merge';
 import { Api, GraphQLApi, GraphQLApiCustom } from './index';
 import { ArgumentRenderConfiguration, ArgumentSource, DataSourceKind, HTTPMethod } from '@wundergraph/protobuf';
-import { mapInputVariable, resolveIntegration } from '../configure';
+import { resolveIntegration } from '../configure';
+import { mapInputVariable } from '../configure/variables';
 
 test('Should be merged', () => {
 	const userApi: GraphQLApi = new GraphQLApi(

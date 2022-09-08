@@ -47,7 +47,7 @@ import {
 	applyNameSpaceToGraphQLSchema,
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
-import { mapInputVariable } from '../configure';
+import { mapInputVariable } from '../configure/variables';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,

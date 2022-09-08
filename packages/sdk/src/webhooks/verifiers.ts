@@ -1,5 +1,5 @@
 import { webhookVerifierKindFromJSON } from '@wundergraph/protobuf';
-import { EnvironmentVariable } from '../configure';
+import { EnvironmentVariable } from '../configure/variables';
 
 export enum WebhookVerifierKind {
 	HMAC_SHA256 = 0,
