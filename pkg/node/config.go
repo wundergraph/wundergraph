@@ -22,6 +22,9 @@ type WunderNodeConfig struct {
 }
 
 func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
+	logLevelStr := loadvariable.String(graphConfig.Api.NodeOptions.Logger.Level)
+	logLevel := wgpb.LogLevel(wgpb.LogLevel_value[logLevelStr])
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
@@ -46,7 +49,9 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 					Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
 					Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
 				},
-				Logging: graphConfig.Api.NodeOptions.Logger,
+				Logging: apihandler.Logging{
+					Level: logLevel,
+				},
 			},
 		},
 		Server: &Server{

@@ -9,10 +9,14 @@ type Listener struct {
 	Port uint16
 }
 
+type Logging struct {
+	Level wgpb.LogLevel
+}
+
 type Options struct {
 	ServerUrl string
 	Listener  *Listener
-	Logging   *wgpb.Logging
+	Logging   Logging
 }
 
 type Api struct {
