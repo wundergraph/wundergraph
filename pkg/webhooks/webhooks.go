@@ -14,12 +14,12 @@ func GetWebhooks(wunderGraphDir string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	webhookFilePaths := make([]string, len(des))
-	for i, entry := range des {
+	var webhookFilePaths []string
+	for _, entry := range des {
 		if entry.IsDir() || strings.HasSuffix(entry.Name(), ".d.ts") || !strings.HasSuffix(entry.Name(), ".ts") {
 			continue
 		}
-		webhookFilePaths[i] = path.Join(WebhookDirectoryName, entry.Name())
+		webhookFilePaths = append(webhookFilePaths, path.Join(WebhookDirectoryName, entry.Name()))
 	}
 	return webhookFilePaths, nil
 }

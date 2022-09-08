@@ -15,6 +15,8 @@ export const getWebhooks = async (dir: string): Promise<{ filePath: string; name
 			return {
 				// ts is transpiled to js
 				filePath: path.join(dir, entry.name.replace('.ts', '.js')),
+				// we need to know the name of the file to compare it with the webhooks settings
+				// in the config
 				name: path.basename(entry.name, '.ts'),
 			};
 		});
