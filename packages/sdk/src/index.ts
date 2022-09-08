@@ -69,6 +69,8 @@ export { configureWunderGraphServer } from './middleware/server';
 
 export { default as cors } from './cors';
 export { authProviders } from './configure/authentication';
+export type { LoggerLevel } from './configure/options';
+export { WgEnv } from './configure/options';
 
 export {
 	BaseTypeScriptDataModel,
