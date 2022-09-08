@@ -135,7 +135,7 @@ export const startServer = async (opts: ServerRunOptions) => {
 			host: host,
 		});
 	} else {
-		console.error('Could not get user defined api. Try `wunderctl generate`');
+		logger.fatal('Could not start the hook server');
 		process.exit(1);
 	}
 };

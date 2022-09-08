@@ -27,5 +27,7 @@ export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLeve
 			return PinoLogLevel.Info;
 		case LogLevel.DEBUG:
 			return PinoLogLevel.Debug;
+		default:
+			throw new Error(`Unknown log level: ${wgLogLevel}`);
 	}
 };

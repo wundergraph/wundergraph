@@ -64,7 +64,6 @@ export const resolveConfigurationVariable = (variable: ConfigurationVariable): s
  */
 export const mapInputVariable = (stringOrEnvironmentVariable: InputVariable) => {
 	if (stringOrEnvironmentVariable === undefined) {
-		console.trace();
 		console.log('unable to load environment variable');
 		console.log('make sure to replace \'process.env...\' with new EnvironmentVariable("%VARIABLE_NAME%")');
 		console.log('or ensure that all environment variables are defined\n');
