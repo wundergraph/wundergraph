@@ -17,7 +17,7 @@ When dealing with date and time,
 we've realised that not all upstreams are capable of creating these values themselves,
 so we've had to come up with a solution where these fields can be handled in front of the database or API.
 
-Our solution to the problem is the `@injectCurrentDateTime` directive.
+Our solution to the problem is the [@injectCurrentDateTime](https://docs.wundergraph.com/docs/directives-reference/inject-current-datetime-directive) directive.
 Attach it to a field and WunderGraph automatically injects the current dateTime into the variable.
 
 Additionally, by attaching the directive to a variable,

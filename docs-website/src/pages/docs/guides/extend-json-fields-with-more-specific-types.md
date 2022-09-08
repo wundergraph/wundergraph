@@ -37,7 +37,7 @@ const db = introspect.postgresql({
 ```
 
 We're simply pointing WunderGraph to the database we're using.
-You can learn more about configuring a PostgreSQL datasource [here](/docs/wundergraph-config-ts-reference/configure-postgresql-datasource).
+You can learn more about configuring a PostgreSQL datasource [here](/docs/wundergraph-config-ts-reference/configure-postgresql-data-source).
 
 We're showcasing this approach with PostgreSQL, but you can use [any database you like](/docs/supported-data-sources).
 

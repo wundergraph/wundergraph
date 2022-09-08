@@ -30,4 +30,4 @@ together with the simplicity of writing REST APIs.
 ## Reference
 
 If you want to learn more on how to use the OpenAPI- / REST Datasource,
-head over to the [Reference Documentation](/docs/wundergraph-config-ts-reference/configure-openapi-rest-datasource).
+head over to the [Reference Documentation](/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source).

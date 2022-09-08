@@ -68,4 +68,4 @@ Combined with a MySQL Database, you're able to easily build Realtime Application
 
 ## Reference
 
-Follow [this Link](/docs/wundergraph-config-ts-reference/configure-mysql-datasource) to find more information on how to use the MySQL DataSource.
+Follow [this Link](/docs/wundergraph-config-ts-reference/configure-mysql-datas-source) to find more information on how to use the MySQL DataSource.
