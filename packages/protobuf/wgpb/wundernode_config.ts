@@ -559,10 +559,6 @@ export function configurationVariableKindToJSON(object: ConfigurationVariableKin
 	}
 }
 
-export interface Logging {
-	level: LogLevel;
-}
-
 export interface ApiAuthenticationConfig {
 	cookieBased: CookieBasedAuthentication | undefined;
 	hooks: ApiAuthenticationHooks | undefined;
@@ -929,14 +925,18 @@ export interface ListenerOptions {
 	port: ConfigurationVariable | undefined;
 }
 
+export interface NodeLogging {
+	level: ConfigurationVariable | undefined;
+}
+
 export interface NodeOptions {
 	nodeUrl: ConfigurationVariable | undefined;
 	listen: ListenerOptions | undefined;
-	logger: Logging | undefined;
+	logger: NodeLogging | undefined;
 }
 
 export interface ServerLogging {
-	level: string;
+	level: ConfigurationVariable | undefined;
 }
 
 export interface ServerOptions {
@@ -1009,30 +1009,6 @@ export interface ConfigurationVariable {
 	environmentVariableDefaultValue: string;
 	placeholderVariableName: string;
 }
-
-function createBaseLogging(): Logging {
-	return { level: 0 };
-}
-
-export const Logging = {
-	fromJSON(object: any): Logging {
-		return {
-			level: isSet(object.level) ? logLevelFromJSON(object.level) : 0,
-		};
-	},
-
-	toJSON(message: Logging): unknown {
-		const obj: any = {};
-		message.level !== undefined && (obj.level = logLevelToJSON(message.level));
-		return obj;
-	},
-
-	fromPartial<I extends Exact<DeepPartial<Logging>, I>>(object: I): Logging {
-		const message = createBaseLogging();
-		message.level = object.level ?? 0;
-		return message;
-	},
-};
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
 	return { cookieBased: undefined, hooks: undefined, jwksBased: undefined };
@@ -3328,6 +3304,32 @@ export const ListenerOptions = {
 	},
 };
 
+function createBaseNodeLogging(): NodeLogging {
+	return { level: undefined };
+}
+
+export const NodeLogging = {
+	fromJSON(object: any): NodeLogging {
+		return {
+			level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined,
+		};
+	},
+
+	toJSON(message: NodeLogging): unknown {
+		const obj: any = {};
+		message.level !== undefined &&
+			(obj.level = message.level ? ConfigurationVariable.toJSON(message.level) : undefined);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<NodeLogging>, I>>(object: I): NodeLogging {
+		const message = createBaseNodeLogging();
+		message.level =
+			object.level !== undefined && object.level !== null ? ConfigurationVariable.fromPartial(object.level) : undefined;
+		return message;
+	},
+};
+
 function createBaseNodeOptions(): NodeOptions {
 	return { nodeUrl: undefined, listen: undefined, logger: undefined };
 }
@@ -3337,7 +3339,7 @@ export const NodeOptions = {
 		return {
 			nodeUrl: isSet(object.nodeUrl) ? ConfigurationVariable.fromJSON(object.nodeUrl) : undefined,
 			listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
-			logger: isSet(object.logger) ? Logging.fromJSON(object.logger) : undefined,
+			logger: isSet(object.logger) ? NodeLogging.fromJSON(object.logger) : undefined,
 		};
 	},
 
@@ -3346,7 +3348,7 @@ export const NodeOptions = {
 		message.nodeUrl !== undefined &&
 			(obj.nodeUrl = message.nodeUrl ? ConfigurationVariable.toJSON(message.nodeUrl) : undefined);
 		message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
-		message.logger !== undefined && (obj.logger = message.logger ? Logging.toJSON(message.logger) : undefined);
+		message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
 		return obj;
 	},
 
@@ -3359,31 +3361,33 @@ export const NodeOptions = {
 		message.listen =
 			object.listen !== undefined && object.listen !== null ? ListenerOptions.fromPartial(object.listen) : undefined;
 		message.logger =
-			object.logger !== undefined && object.logger !== null ? Logging.fromPartial(object.logger) : undefined;
+			object.logger !== undefined && object.logger !== null ? NodeLogging.fromPartial(object.logger) : undefined;
 		return message;
 	},
 };
 
 function createBaseServerLogging(): ServerLogging {
-	return { level: '' };
+	return { level: undefined };
 }
 
 export const ServerLogging = {
 	fromJSON(object: any): ServerLogging {
 		return {
-			level: isSet(object.level) ? String(object.level) : '',
+			level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined,
 		};
 	},
 
 	toJSON(message: ServerLogging): unknown {
 		const obj: any = {};
-		message.level !== undefined && (obj.level = message.level);
+		message.level !== undefined &&
+			(obj.level = message.level ? ConfigurationVariable.toJSON(message.level) : undefined);
 		return obj;
 	},
 
 	fromPartial<I extends Exact<DeepPartial<ServerLogging>, I>>(object: I): ServerLogging {
 		const message = createBaseServerLogging();
-		message.level = object.level ?? '';
+		message.level =
+			object.level !== undefined && object.level !== null ? ConfigurationVariable.fromPartial(object.level) : undefined;
 		return message;
 	},
 };

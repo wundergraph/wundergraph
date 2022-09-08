@@ -3,10 +3,6 @@ package wgpb;
 
 option go_package = "github.com/wundergraph/wundergraph/pkg/wgpb";
 
-message Logging {
-	LogLevel level = 1;
-}
-
 enum LogLevel {
 	DEBUG = 0;
 	INFO = 1;
@@ -447,14 +443,18 @@ message ListenerOptions {
 	ConfigurationVariable port = 2;
 }
 
+message NodeLogging {
+	ConfigurationVariable level = 1;
+}
+
 message NodeOptions {
 	ConfigurationVariable nodeUrl = 1;
 	ListenerOptions listen = 2;
-	Logging logger = 3;
+	NodeLogging logger = 3;
 }
 
 message ServerLogging {
-	string level = 1;
+	ConfigurationVariable level = 1;
 }
 
 message ServerOptions {
