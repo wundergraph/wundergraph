@@ -144,8 +144,11 @@ jobs:
       - check-pnpm
     steps:
       - name: Prepare git
+        # To fix the EOL issues on Windows runners, we need to disable autocrlf. See actions/checkout#135 for more info.
+        # https://github.com/actions/checkout/issues/135#issuecomment-613361104
         run: |
           git config --global core.autocrlf false
+          git config --global core.eol lf
 
       - name: checkout
         uses: actions/checkout@v3
