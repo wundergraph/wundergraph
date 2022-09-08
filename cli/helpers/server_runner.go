@@ -1,4 +1,4 @@
-package runners
+package helpers
 
 import (
 	"fmt"
@@ -12,14 +12,17 @@ import (
 type ServerRunConfig struct {
 	WunderGraphDirAbs string
 	ServerScriptFile  string
+	Production        bool
 }
 
 func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
 	hooksEnv := []string{
 		"START_HOOKS_SERVER=true",
-		// Run scripts in prod mode
-		"NODE_ENV=production",
 		fmt.Sprintf("WG_ABS_DIR=%s", cfg.WunderGraphDirAbs),
+	}
+
+	if cfg.Production {
+		hooksEnv = append(hooksEnv, "NODE_ENV=production")
 	}
 
 	hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{

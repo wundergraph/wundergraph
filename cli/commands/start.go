@@ -8,7 +8,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
-	"github.com/wundergraph/wundergraph/cli/runners"
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 )
@@ -51,12 +51,13 @@ If used without --exclude-server, make sure the server is available in this dire
 				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wgDir, serverScriptFile))
 			}
 
-			srvCfg := &runners.ServerRunConfig{
+			srvCfg := &helpers.ServerRunConfig{
 				WunderGraphDirAbs: wgDir,
 				ServerScriptFile:  serverScriptFile,
+				Production:        true,
 			}
 
-			hookServerRunner := runners.NewServerRunner(log, srvCfg)
+			hookServerRunner := helpers.NewServerRunner(log, srvCfg)
 
 			defer func() {
 				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
@@ -77,7 +78,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			}()
 		}
 
-		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeout)
+		shutdownHandler := helpers.NewNodeShutdownHandler(log, gracefulTimeout)
 
 		configFileChangeChan := make(chan struct{})
 		n := node.New(ctx, BuildInfo, log)

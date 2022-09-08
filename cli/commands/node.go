@@ -10,7 +10,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
-	"github.com/wundergraph/wundergraph/cli/runners"
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -62,7 +62,7 @@ var nodeStartCmd = &cobra.Command{
 		defer cancel()
 
 		gracefulTimeoutSeconds := 10
-		shutdownHandler := runners.NewNodeShutdownHandler(log, gracefulTimeoutSeconds)
+		shutdownHandler := helpers.NewNodeShutdownHandler(log, gracefulTimeoutSeconds)
 
 		wunderNodeConfig := node.CreateConfig(&graphConfig)
 

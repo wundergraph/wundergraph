@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/wundergraph/wundergraph/cli/runners"
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
@@ -41,12 +41,13 @@ var serverStartCmd = &cobra.Command{
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		srvCfg := &runners.ServerRunConfig{
+		srvCfg := &helpers.ServerRunConfig{
 			WunderGraphDirAbs: wgDir,
 			ServerScriptFile:  serverScriptFile,
+			Production:        true,
 		}
 
-		hookServerRunner := runners.NewServerRunner(log, srvCfg)
+		hookServerRunner := helpers.NewServerRunner(log, srvCfg)
 
 		<-hookServerRunner.Run(ctx)
 		log.Error("Hook server excited")

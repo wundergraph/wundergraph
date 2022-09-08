@@ -14,7 +14,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
-	"github.com/wundergraph/wundergraph/cli/runners"
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
@@ -155,12 +155,12 @@ var upCmd = &cobra.Command{
 				})
 			}
 
-			srvCfg := &runners.ServerRunConfig{
+			srvCfg := &helpers.ServerRunConfig{
 				WunderGraphDirAbs: wgDir,
 				ServerScriptFile:  serverOutFile,
 			}
 
-			hookServerRunner := runners.NewServerRunner(log, srvCfg)
+			hookServerRunner = helpers.NewServerRunner(log, srvCfg)
 
 			onAfterBuild = func() error {
 				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
