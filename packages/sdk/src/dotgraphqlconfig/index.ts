@@ -17,6 +17,8 @@ export const generateDotGraphQLConfig = (
 	const app = wunderGraphConfig.application;
 	const deployment = 'main';
 
+	const url = new URL(`${app.name}/${deployment}/graphql`, options.baseURL).toString();
+
 	config.projects[app.name] = {
 		name: app.name,
 		schemaPath: path.join(options.nested ? '.wundergraph' : '', 'generated', `wundergraph.${app.name}.schema.graphql`),
@@ -24,7 +26,7 @@ export const generateDotGraphQLConfig = (
 			endpoints: {
 				[app.name]: {
 					introspect: false,
-					url: `${options.baseURL}/${app.name}/${deployment}/graphql`,
+					url: url,
 					headers: {
 						'user-agent': 'WunderGraph Client',
 					},

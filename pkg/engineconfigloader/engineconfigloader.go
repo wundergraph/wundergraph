@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -17,10 +18,10 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 
+	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
 type EngineConfigLoader struct {
@@ -251,13 +252,14 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			}
 			baseURL := loadvariable.String(in.CustomRest.Fetch.GetBaseUrl())
 			path := loadvariable.String(in.CustomRest.Fetch.GetPath())
-			url := loadvariable.String(in.CustomRest.Fetch.GetUrl())
-			if url == "" {
-				url = baseURL + path
+			fetchUrl := loadvariable.String(in.CustomRest.Fetch.GetUrl())
+			fetchUrl, err := buildFetchUrl(fetchUrl, baseURL, path)
+			if err != nil {
+				return nil, err
 			}
 			restConfig := oas_datasource.Configuration{
 				Fetch: oas_datasource.FetchConfiguration{
-					URL:           url,
+					URL:           fetchUrl,
 					Method:        in.CustomRest.Fetch.Method.String(),
 					Header:        header,
 					Query:         query,
@@ -285,17 +287,18 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			}
 			baseURL := loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl())
 			path := loadvariable.String(in.CustomGraphql.Fetch.GetPath())
-			url := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
-			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
-			if url == "" {
-				url = baseURL + path
+			fetchUrl := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
+			fetchUrl, err := buildFetchUrl(fetchUrl, baseURL, path)
+			if err != nil {
+				return nil, err
 			}
+			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
 			if subscriptionUrl == "" {
-				subscriptionUrl = url
+				subscriptionUrl = fetchUrl
 			}
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
-					URL:    url,
+					URL:    fetchUrl,
 					Method: in.CustomGraphql.Fetch.Method.String(),
 					Header: header,
 				},
@@ -402,4 +405,21 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 
 `, databaseURL, provider)
 	return dataSource + schema
+}
+
+func buildFetchUrl(fetchUrl, baseUrl, path string) (string, error) {
+	if fetchUrl != "" {
+		return fetchUrl, nil
+	}
+
+	baseParsed, err := url.Parse(baseUrl)
+	if err != nil {
+		return "", errors.New("invalid base url")
+	}
+	pathParsed, err := url.Parse(path)
+	if err != nil {
+		return "", errors.New("invalid path")
+	}
+
+	return baseParsed.ResolveReference(pathParsed).String(), nil
 }

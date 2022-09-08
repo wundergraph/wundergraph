@@ -14,6 +14,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
@@ -133,6 +134,7 @@ func NewClient(serverUrl string, logger abstractlogger.Logger) *Client {
 	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
 		logger.Debug("hook request call", abstractlogger.Int("attempt", attempt), abstractlogger.String("url", req.URL.String()))
 	}
+	
 	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,

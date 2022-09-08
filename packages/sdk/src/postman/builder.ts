@@ -29,9 +29,11 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	mutationGroup.describe('All your mutation operations');
 
 	operations.forEach((op) => {
+		const url = new URL(`/${options.applicationPath}/operations/${op.Name}`, options.baseURL).toString();
+
 		if (op.OperationType !== OperationType.MUTATION) {
 			const request = new Request({
-				url: `{{apiBaseUrl}}/${options.applicationPath}/operations/${op.Name}`,
+				url: url,
 				method: 'GET',
 			});
 			request.addHeader({
