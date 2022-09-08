@@ -13,6 +13,7 @@ on:
       - 'go.sum'
       - '!examples/**/*'
       - '!**/*.md'
+      - '.github/workflows/engine-ci.yaml'
   pull_request:
     branches:
       - main
@@ -24,6 +25,7 @@ on:
       - 'go.sum'
       - '!examples/**/*'
       - '!**/*.md'
+      - '.github/workflows/engine-ci.yaml'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
@@ -35,7 +37,7 @@ env:
 
 jobs:
   build_test:
-    runs-on: ubuntu-latest
+    runs-on: 'windows-latest'
     services:
       minio:
         image: minio/minio:edge-cicd
