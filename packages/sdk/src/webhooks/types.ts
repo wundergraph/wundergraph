@@ -3,16 +3,17 @@ import { RequestMethod } from '../middleware/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure';
 
-export interface Webhook<InternalClient = InternalClientBase, Body = unknown, ResponseBody = unknown> {
-	handler: (
-		event: WebhookHttpEvent<InternalClient, Body>,
-		context: WebhookRequestContext<InternalClient>
-	) => Promise<WebhookResponse<ResponseBody>>;
+export interface Webhook<
+	InternalClient = InternalClientBase,
+	Event extends WebhookHttpEvent<InternalClient> = WebhookHttpEvent<InternalClient>,
+	Response extends WebhookResponse = WebhookResponse
+> {
+	handler: (event: Event, context: WebhookRequestContext<InternalClient>) => Promise<Response>;
 }
-export interface WebhookResponse<ResponseBody> {
+export interface WebhookResponse<ResponseBody = unknown, Headers = WebhookHeaders> {
 	statusCode?: number;
 	body?: ResponseBody;
-	headers?: WebhookHeaders;
+	headers?: Headers;
 }
 export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
@@ -30,11 +31,11 @@ export interface Logger {
 	debug: LogFn;
 	error: LogFn;
 }
-export interface WebhookHttpEvent<InternalClient, Body> {
+export interface WebhookHttpEvent<InternalClient, Body = unknown, Query = WebhookQuery, Headers = WebhookHeaders> {
 	method: RequestMethod;
 	url: string;
-	headers: WebhookHeaders;
-	query: WebhookQuery;
+	headers: Headers;
+	query: Query;
 	body: Body;
 }
 

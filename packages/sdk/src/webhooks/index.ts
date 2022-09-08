@@ -7,11 +7,13 @@ import path from 'path';
  */
 export const getWebhooks = async (dir: string): Promise<{ filePath: string; name: string }[]> => {
 	const list = await readdir(dir, { withFileTypes: true });
-	return list.map((entry: Dirent) => {
-		return {
-			// ts is transpiled to js
-			filePath: path.join(dir, entry.name.replace('.ts', '.js')),
-			name: path.basename(entry.name, '.ts'),
-		};
-	});
+	return list
+		.filter((file: Dirent) => file.name.endsWith('.ts'))
+		.map((entry: Dirent) => {
+			return {
+				// ts is transpiled to js
+				filePath: path.join(dir, entry.name.replace('.ts', '.js')),
+				name: path.basename(entry.name, '.ts'),
+			};
+		});
 };
