@@ -5,7 +5,7 @@ import { EnvironmentVariable } from '../configure';
 
 export interface Webhook<
 	InternalClient extends InternalClientBase = InternalClientBase,
-	Event extends WebhookHttpEvent<InternalClient> = WebhookHttpEvent<InternalClient>,
+	Event extends WebhookHttpEvent = WebhookHttpEvent,
 	Response extends WebhookResponse = WebhookResponse
 > {
 	handler: (event: Event, context: WebhookRequestContext<InternalClient>) => Promise<Response>;
@@ -32,7 +32,6 @@ export interface Logger {
 	error: LogFn;
 }
 export interface WebhookHttpEvent<
-	InternalClient extends InternalClientBase = InternalClientBase,
 	Body = unknown,
 	Query extends WebhookQuery = WebhookQuery,
 	Headers extends WebhookHeaders = WebhookHeaders

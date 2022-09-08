@@ -1,7 +1,7 @@
 import type { Webhook, WebhookHttpEvent, WebhookResponse } from '@wundergraph/sdk';
 import type { InternalClient } from '../generated/wundergraph.internal.client';
 
-const webhook: Webhook<InternalClient, WebhookHttpEvent<InternalClient>> = {
+const webhook: Webhook<InternalClient, WebhookHttpEvent> = {
 	handler: async (event, context) => {
 		return {
 			statusCode: 200,

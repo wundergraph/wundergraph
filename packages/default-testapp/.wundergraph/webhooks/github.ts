@@ -5,7 +5,7 @@ import type { InternalClient } from '../generated/wundergraph.internal.client';
 
 const webhook: Webhook<
 	InternalClient,
-	WebhookHttpEvent<InternalClient, { myBodyVar: string }, { myQueryVar: string }, { myHeaderVar: string }>,
+	WebhookHttpEvent<{ myBodyVar: string }, { myQueryVar: string }, { myHeaderVar: string }>,
 	WebhookResponse<{ myResponseBodyVar: string; localImported: number }, { myResponseHeaderVar: string }>
 > = {
 	handler: async (event, context) => {

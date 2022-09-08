@@ -23,7 +23,6 @@ import type { InternalClient } from '../generated/wundergraph.internal.client'
 const webhook: Webhook<
   InternalClient,
   WebhookHttpEvent<
-    InternalClient,
     { myBodyVar: string },
     { myQueryVar: string },
     { myHeaderVar: string }
