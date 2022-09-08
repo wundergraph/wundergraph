@@ -13,14 +13,7 @@ export enum WgEnv {
 	ServerPort = 'WG_SERVER_PORT',
 }
 
-export enum WgLogLevel {
-	FATAL = 'FATAL',
-	PANIC = 'PANIC',
-	WARNING = 'WARNING',
-	ERROR = 'ERROR',
-	INFO = 'INFO',
-	DEBUG = 'DEBUG',
-}
+export type LoggerLevel = 'FATAL' | 'PANIC' | 'WARNING' | 'ERROR' | 'INFO' | 'DEBUG';
 
 const DefaultNodeOptions = {
 	listen: {
@@ -29,7 +22,7 @@ const DefaultNodeOptions = {
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991'),
 	logger: {
-		level: new EnvironmentVariable<WgLogLevel>(WgEnv.LogLevel, WgLogLevel.DEBUG),
+		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'DEBUG'),
 	},
 };
 
@@ -40,7 +33,7 @@ const DefaultServerOptions: MandatoryServerOptions = {
 	},
 	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, 'http://localhost:9992'),
 	logger: {
-		level: new EnvironmentVariable<WgLogLevel>(WgEnv.LogLevel, WgLogLevel.DEBUG),
+		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'DEBUG'),
 	},
 };
 
@@ -58,7 +51,7 @@ export interface NodeOptions {
 	nodeUrl?: InputVariable;
 	listen?: ListenOptions;
 	logger?: {
-		level?: InputVariable<WgLogLevel>;
+		level?: InputVariable<LoggerLevel>;
 	};
 }
 
@@ -83,7 +76,7 @@ export interface MandatoryServerOptions {
 		port: InputVariable;
 	};
 	logger: {
-		level: InputVariable<WgLogLevel>;
+		level: InputVariable<LoggerLevel>;
 	};
 }
 
@@ -94,7 +87,7 @@ export interface ResolvedServerOptions {
 }
 
 export interface ServerLogger {
-	level?: InputVariable<WgLogLevel>;
+	level?: InputVariable<LoggerLevel>;
 }
 
 export interface ResolvedServerLogger {
