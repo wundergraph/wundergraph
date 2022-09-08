@@ -32,8 +32,7 @@ format-templates:
 	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
 
 install-proto:
-	go install github.com/golang/protobuf/proto
-	go install github.com/golang/protobuf/protoc-gen-go
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
 
 codegen-go: install-proto
 	cd types && ./generate.sh
