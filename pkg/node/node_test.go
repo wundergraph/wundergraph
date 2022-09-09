@@ -128,7 +128,7 @@ func TestNode(t *testing.T) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: &wgpb.Logging{Level: wgpb.LogLevel_ERROR},
+				Logging: apihandler.Logging{Level: wgpb.LogLevel_ERROR},
 			},
 		},
 	}
@@ -249,7 +249,7 @@ func TestWebHooks(t *testing.T) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: &wgpb.Logging{Level: wgpb.LogLevel_ERROR},
+				Logging: apihandler.Logging{Level: wgpb.LogLevel_ERROR},
 			},
 		},
 	}
@@ -340,7 +340,7 @@ func BenchmarkNode(t *testing.B) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: &wgpb.Logging{Level: wgpb.LogLevel_ERROR},
+				Logging: apihandler.Logging{Level: wgpb.LogLevel_ERROR},
 			},
 		},
 	}
