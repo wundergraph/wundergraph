@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { queryTypeFields, typesInfo } from '../../../linkbuilder';
 import { buildSchema } from 'graphql';
@@ -27,7 +27,7 @@ export class TypeScriptLinkBuilder implements Template {
 			{
 				path: 'linkbuilder.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

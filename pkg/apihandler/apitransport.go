@@ -13,13 +13,14 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/websocket"
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/authentication"
 )
 
 type ApiTransport struct {
@@ -113,6 +114,10 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 		onRequestHook, onResponseHook bool
 	)
 
+	// this evaluation needs to happen on the original request
+	// if you're doing this after calling the onRequest hook, it won't work
+	isUpgradeRequest := websocket.IsWebSocketUpgrade(request)
+
 	metaData := getOperationMetaData(request)
 	if metaData != nil {
 		_, onRequestHook = t.onRequestHook[metaData.OperationName]
@@ -141,7 +146,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 
 	// in case of http Upgrade requests, we must not dump the response
 	// otherwise, the upgrade will fail
-	if request.Header.Get("Upgrade") != "" {
+	if isUpgradeRequest {
 		if t.debugMode {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
