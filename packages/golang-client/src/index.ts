@@ -1,4 +1,5 @@
-import { Template, TemplateOutputFile, visitJSONSchema } from '@wundergraph/sdk';
+import { Template, TemplateOutputFile } from '@wundergraph/sdk';
+import { visitJSONSchema } from '@wundergraph/sdk/internal';
 import { ResolvedWunderGraphConfig } from '@wundergraph/sdk';
 import { hasInput } from '@wundergraph/sdk/dist/codegen/templates/typescript/react';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
@@ -33,6 +34,7 @@ const gofmt = (code: string) => {
 	} catch (e: any) {
 		// we silently ignore the error on purpose
 		// It's not a must to prettify the code
+		console.error('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
 	}
 	return code;
 };
