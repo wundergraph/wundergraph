@@ -17,7 +17,11 @@ import (
 
 func ServerPortFromConfig(configJsonPath string) (int, error) {
 	data, _ := ioutil.ReadFile(configJsonPath)
-	var graphConfig wgpb.WunderGraphConfiguration
+	var graphConfig struct {
+		Api *struct {
+			ServerOptions *wgpb.ServerOptions `json:"serverOptions,omitempty"`
+		} `json:"api,omitempty"`
+	}
 	if err := json.Unmarshal(data, &graphConfig); err != nil {
 		return 0, err
 	}

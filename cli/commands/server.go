@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 
 	"github.com/jensneuse/abstractlogger"
@@ -47,8 +46,7 @@ var serverStartCmd = &cobra.Command{
 
 		if enableDebugMode {
 			if port, err := helpers.ServerPortFromConfig(configFile); err != nil {
-				log.Info("could not read server port from config file", abstractlogger.String("configFile", configFile))
-				os.Exit(1)
+				log.Fatal("could not read server port from config file", abstractlogger.String("configFile", configFile))
 			} else {
 				helpers.KillExistingHooksProcess(port, log)
 			}
