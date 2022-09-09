@@ -59,7 +59,7 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
         with:
-          version: '3.x'
+          version: '3.12.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Bootstrap PNPM workspace
@@ -67,6 +67,9 @@ jobs:
 
       - name: Build all libs + apps
         run: pnpm build
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run all NPM tests
         run: pnpm test
