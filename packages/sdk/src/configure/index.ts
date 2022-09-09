@@ -814,7 +814,11 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			done();
 
-			const nodeUrl = resolveConfigurationVariable(resolved.nodeOptions.nodeUrl);
+			let nodeUrl = resolveConfigurationVariable(resolved.nodeOptions.nodeUrl);
+			// trim trailing slash if any
+			if (nodeUrl.charAt(nodeUrl.length - 1) == '/') {
+				nodeUrl = nodeUrl.substring(0, nodeUrl.length - 1);
+			}
 
 			const dotGraphQLNested =
 				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
