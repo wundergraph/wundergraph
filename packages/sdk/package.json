@@ -11,6 +11,10 @@
       "types": "./dist/client/index.d.ts",
       "default": "./dist/client/index.js"
     },
+    "./internal": {
+      "types": "./dist/internal/index.d.ts",
+      "default": "./dist/internal/index.js"
+    },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
@@ -20,6 +24,9 @@
     "*": {
       "client": [
         "./dist/client"
+      ],
+      "internal": [
+        "./dist/internal"
       ]
     }
   },

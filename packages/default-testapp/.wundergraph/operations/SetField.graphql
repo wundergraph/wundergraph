@@ -1,0 +1,3 @@
+mutation ($sdl: String!) {
+	sdl_setSdlField(sdl: $sdl)
+}
