@@ -32,8 +32,7 @@ format-templates:
 	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
 
 install-proto:
-# Can't pin to tag or version, we have to install a specific commit
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@6875c3d
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 
 codegen-go: install-proto
 	cd types && ./generate.sh
