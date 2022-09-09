@@ -645,10 +645,16 @@ export interface GithubAuthProviderConfig {
 	clientSecret: ConfigurationVariable | undefined;
 }
 
+export interface OpenIDConnectQueryParam {
+	name: string;
+	value: ConfigurationVariable | undefined;
+}
+
 export interface OpenIDConnectAuthProviderConfig {
 	issuer: ConfigurationVariable | undefined;
 	clientId: ConfigurationVariable | undefined;
 	clientSecret: ConfigurationVariable | undefined;
+	queryParams: OpenIDConnectQueryParam[];
 }
 
 export interface ApiCacheConfig {
@@ -1609,8 +1615,37 @@ export const GithubAuthProviderConfig = {
 	},
 };
 
+function createBaseOpenIDConnectQueryParam(): OpenIDConnectQueryParam {
+	return { name: '', value: undefined };
+}
+
+export const OpenIDConnectQueryParam = {
+	fromJSON(object: any): OpenIDConnectQueryParam {
+		return {
+			name: isSet(object.name) ? String(object.name) : '',
+			value: isSet(object.value) ? ConfigurationVariable.fromJSON(object.value) : undefined,
+		};
+	},
+
+	toJSON(message: OpenIDConnectQueryParam): unknown {
+		const obj: any = {};
+		message.name !== undefined && (obj.name = message.name);
+		message.value !== undefined &&
+			(obj.value = message.value ? ConfigurationVariable.toJSON(message.value) : undefined);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<OpenIDConnectQueryParam>, I>>(object: I): OpenIDConnectQueryParam {
+		const message = createBaseOpenIDConnectQueryParam();
+		message.name = object.name ?? '';
+		message.value =
+			object.value !== undefined && object.value !== null ? ConfigurationVariable.fromPartial(object.value) : undefined;
+		return message;
+	},
+};
+
 function createBaseOpenIDConnectAuthProviderConfig(): OpenIDConnectAuthProviderConfig {
-	return { issuer: undefined, clientId: undefined, clientSecret: undefined };
+	return { issuer: undefined, clientId: undefined, clientSecret: undefined, queryParams: [] };
 }
 
 export const OpenIDConnectAuthProviderConfig = {
@@ -1619,6 +1654,9 @@ export const OpenIDConnectAuthProviderConfig = {
 			issuer: isSet(object.issuer) ? ConfigurationVariable.fromJSON(object.issuer) : undefined,
 			clientId: isSet(object.clientId) ? ConfigurationVariable.fromJSON(object.clientId) : undefined,
 			clientSecret: isSet(object.clientSecret) ? ConfigurationVariable.fromJSON(object.clientSecret) : undefined,
+			queryParams: Array.isArray(object?.queryParams)
+				? object.queryParams.map((e: any) => OpenIDConnectQueryParam.fromJSON(e))
+				: [],
 		};
 	},
 
@@ -1630,6 +1668,11 @@ export const OpenIDConnectAuthProviderConfig = {
 			(obj.clientId = message.clientId ? ConfigurationVariable.toJSON(message.clientId) : undefined);
 		message.clientSecret !== undefined &&
 			(obj.clientSecret = message.clientSecret ? ConfigurationVariable.toJSON(message.clientSecret) : undefined);
+		if (message.queryParams) {
+			obj.queryParams = message.queryParams.map((e) => (e ? OpenIDConnectQueryParam.toJSON(e) : undefined));
+		} else {
+			obj.queryParams = [];
+		}
 		return obj;
 	},
 
@@ -1649,6 +1692,7 @@ export const OpenIDConnectAuthProviderConfig = {
 			object.clientSecret !== undefined && object.clientSecret !== null
 				? ConfigurationVariable.fromPartial(object.clientSecret)
 				: undefined;
+		message.queryParams = object.queryParams?.map((e) => OpenIDConnectQueryParam.fromPartial(e)) || [];
 		return message;
 	},
 };

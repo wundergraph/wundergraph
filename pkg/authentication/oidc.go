@@ -27,10 +27,16 @@ func NewOpenIDConnectCookieHandler(log abstractlogger.Logger) *OpenIDConnectCook
 	}
 }
 
+type QueryParam struct {
+	Name  string
+	Value string
+}
+
 type OpenIDConnectConfig struct {
 	Issuer             string
 	ClientID           string
 	ClientSecret       string
+	QueryParams        []QueryParam
 	ProviderID         string
 	PathPrefix         string
 	InsecureCookies    bool
@@ -68,6 +74,9 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	}
 
 	provider := h.createProvider(ctx, config)
+	if provider == nil {
+		return
+	}
 
 	err := provider.Claims(&h.claims)
 	if err != nil {
@@ -146,7 +155,12 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			http.SetCookie(w, c3)
 		}
 
-		redirect := oauth2Config.AuthCodeURL(state)
+		opts := make([]oauth2.AuthCodeOption, len(config.QueryParams))
+		for i, p := range config.QueryParams {
+			opts[i] = oauth2.SetAuthURLParam(p.Name, p.Value)
+		}
+
+		redirect := oauth2Config.AuthCodeURL(state, opts...)
 
 		http.Redirect(w, r, redirect, http.StatusFound)
 	})

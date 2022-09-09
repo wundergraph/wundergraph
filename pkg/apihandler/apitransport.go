@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -13,13 +13,13 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/wundergraph/graphql-go-tools/pkg/pool"
 
+	"github.com/wundergraph/graphql-go-tools/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/authentication"
 )
 
 type ApiTransport struct {
@@ -74,10 +74,10 @@ func NewApiTransport(tripper http.RoundTripper, api *wgpb.Api, hooksClient *hook
 
 	for i := range api.Operations {
 		name := api.Operations[i].Name
-		if api.Operations[i].HooksConfiguration.HttpTransportOnRequest == true {
+		if api.Operations[i].HooksConfiguration.HttpTransportOnRequest {
 			transport.onRequestHook[name] = struct{}{}
 		}
-		if api.Operations[i].HooksConfiguration.HttpTransportOnResponse == true {
+		if api.Operations[i].HooksConfiguration.HttpTransportOnResponse {
 			transport.onResponseHook[name] = struct{}{}
 		}
 	}
@@ -218,7 +218,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 		requestBody, err = jsonparser.Set(requestBody, requestJSON, "__wg", "clientRequest")
 	}
 
-	req, err := http.NewRequestWithContext(request.Context(), request.Method, request.URL.String(), ioutil.NopCloser(bytes.NewReader(requestBody)))
+	req, err := http.NewRequestWithContext(request.Context(), request.Method, request.URL.String(), io.NopCloser(bytes.NewReader(requestBody)))
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		err  error
 	)
 	if r.Body != nil {
-		body, err = ioutil.ReadAll(r.Body)
+		body, err = io.ReadAll(r.Body)
 		if err != nil {
 			return nil, err
 		}
@@ -270,7 +270,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		return nil, err
 	}
 	if response.Skip {
-		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		r.Body = io.NopCloser(bytes.NewBuffer(body))
 		return r, nil
 	}
 	if response.Cancel {
@@ -288,7 +288,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 }
 
 func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData) (*http.Response, error) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -325,7 +325,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 		return nil, err
 	}
 	if response.Skip {
-		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		r.Body = io.NopCloser(bytes.NewBuffer(body))
 		return r, nil
 	}
 	if response.Cancel {
@@ -333,7 +333,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 	}
 	if response.Response != nil {
 		r.StatusCode = response.Response.StatusCode
-		r.Body = ioutil.NopCloser(bytes.NewBuffer(response.Response.Body))
+		r.Body = io.NopCloser(bytes.NewBuffer(response.Response.Body))
 		r.Header = hooks.HeaderCSVToSlice(response.Response.Headers)
 	}
 	return r, nil
