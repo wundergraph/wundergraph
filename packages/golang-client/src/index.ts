@@ -31,7 +31,8 @@ const gofmt = (code: string) => {
 			return formatter.stdout;
 		}
 	} catch (e: any) {
-		console.error(e);
+		// we silently ignore the error on purpose
+		// It's not a must to prettify the code
 	}
 	return code;
 };
