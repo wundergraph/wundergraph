@@ -36,7 +36,7 @@
     "typescript": "^4.7.2"
   },
   "peerDependencies": {
-    "@wundergraph/sdk": "workspace:>=0.105.1"
+    "@wundergraph/sdk": ">=0.105.1"
   },
   "dependencies": {
     "@wundergraph/protobuf": "workspace:^0.92.0",
