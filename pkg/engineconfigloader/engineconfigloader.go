@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
@@ -250,13 +250,12 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				typeMappings[i].InjectStatusCodeIntoResponse = in.CustomRest.StatusCodeTypeMappings[i].InjectStatusCodeIntoBody
 				typeMappings[i].StatusCodeByteString = []byte(strconv.Itoa(int(in.CustomRest.StatusCodeTypeMappings[i].StatusCode)))
 			}
-			baseURL := loadvariable.String(in.CustomRest.Fetch.GetBaseUrl())
-			path := loadvariable.String(in.CustomRest.Fetch.GetPath())
-			fetchUrl := loadvariable.String(in.CustomRest.Fetch.GetUrl())
-			fetchUrl, err := buildFetchUrl(fetchUrl, baseURL, path)
-			if err != nil {
-				return nil, err
-			}
+
+			fetchUrl := buildFetchUrl(
+				loadvariable.String(in.CustomRest.Fetch.GetUrl()),
+				loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()),
+				loadvariable.String(in.CustomRest.Fetch.GetPath()))
+
 			restConfig := oas_datasource.Configuration{
 				Fetch: oas_datasource.FetchConfiguration{
 					URL:           fetchUrl,
@@ -285,13 +284,13 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					header.Add(s, loadvariable.String(value))
 				}
 			}
-			baseURL := loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl())
-			path := loadvariable.String(in.CustomGraphql.Fetch.GetPath())
-			fetchUrl := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
-			fetchUrl, err := buildFetchUrl(fetchUrl, baseURL, path)
-			if err != nil {
-				return nil, err
-			}
+
+			fetchUrl := buildFetchUrl(
+				loadvariable.String(in.CustomGraphql.Fetch.GetUrl()),
+				loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl()),
+				loadvariable.String(in.CustomGraphql.Fetch.GetPath()),
+			)
+
 			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
 			if subscriptionUrl == "" {
 				subscriptionUrl = fetchUrl
@@ -407,19 +406,10 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 	return dataSource + schema
 }
 
-func buildFetchUrl(fetchUrl, baseUrl, path string) (string, error) {
-	if fetchUrl != "" {
-		return fetchUrl, nil
+func buildFetchUrl(url, baseUrl, path string) string {
+	if url != "" {
+		return url
 	}
 
-	baseParsed, err := url.Parse(baseUrl)
-	if err != nil {
-		return "", errors.New("invalid base url")
-	}
-	pathParsed, err := url.Parse(path)
-	if err != nil {
-		return "", errors.New("invalid path")
-	}
-
-	return baseParsed.ResolveReference(pathParsed).String(), nil
+	return strings.TrimSuffix(baseUrl, "/") + "/" + strings.TrimPrefix(path, "/")
 }

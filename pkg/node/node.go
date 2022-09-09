@@ -319,10 +319,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
-	serverUrl := nodeConfig.Api.Options.ServerUrl
-	if serverUrl[len(serverUrl)-1] == '/' {
-		serverUrl = serverUrl[:len(serverUrl)-1]
-	}
+	serverUrl := strings.TrimSuffix(nodeConfig.Api.Options.ServerUrl, "/")
 
 	hooksClient := hooks.NewClient(serverUrl, n.log)
 
