@@ -70,7 +70,7 @@ func (b *Bundler) Bundle() error {
 		buildResult := b.buildResult.Rebuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
-			b.log.Fatal("Build failed",
+			b.log.Error("Build failed",
 				abstractlogger.String("bundlerName", b.name),
 				abstractlogger.Any("errors", b.buildResult.Errors),
 			)
@@ -81,7 +81,7 @@ func (b *Bundler) Bundle() error {
 		buildResult := b.initialBuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
-			b.log.Fatal("Initial Build failed",
+			b.log.Error("Initial Build failed",
 				abstractlogger.String("bundlerName", b.name),
 				abstractlogger.Any("errors", b.buildResult.Errors),
 			)
