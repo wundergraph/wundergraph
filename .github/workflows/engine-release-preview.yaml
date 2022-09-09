@@ -26,7 +26,7 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
         with:
-          version: '3.12.4'
+          version: '3.21.5'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: generate go types based on protobuf definitions
