@@ -3,7 +3,7 @@
 #### Getting started
 
 ```shell
-npm install && npm run generate
+npm install && npm start
 ```
 
 #### Get all Continents
