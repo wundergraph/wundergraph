@@ -15,9 +15,6 @@ import (
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Subcommand to work with WunderGraph middleware server",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return nil
-	},
 }
 
 var serverStartCmd = &cobra.Command{
@@ -25,7 +22,7 @@ var serverStartCmd = &cobra.Command{
 	Short: "Start runs WunderGraph Middleware in production mode",
 	Long: `
 		Example usage:
-			WG_SECRET=secret WG_SERVER_PORT=9992 WG_SERVER_HOST=127.0.0.1 WG_NODE_URL=http://127.0.0.1:9991 wunderctl server start
+			wunderctl server start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
