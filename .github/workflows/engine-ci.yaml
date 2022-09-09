@@ -60,10 +60,9 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v1
+        uses: abelfodil/protoc-action@v1
         with:
-          version: '3.21.5'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          version: '21.5'
 
       - run: make bootstrap-minio
 
