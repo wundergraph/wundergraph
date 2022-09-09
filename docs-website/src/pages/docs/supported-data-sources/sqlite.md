@@ -67,4 +67,4 @@ Combined with a SQLite Database, you're able to easily build Realtime Applicatio
 
 ## Reference
 
-Follow [this Link](/docs/wundergraph-config-ts-reference/configure-sqlite-datasource) to find more information on how to use the SQLite DataSource.
+Follow [this Link](/docs/wundergraph-config-ts-reference/configure-sqlite-data-source) to find more information on how to use the SQLite DataSource.

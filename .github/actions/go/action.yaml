@@ -1,5 +1,5 @@
-name: "Setup Go"
-description: "This action install go and cache modules and build dependencies"
+name: 'Setup Go'
+description: 'This action install go and cache modules and build dependencies'
 inputs:
   go-version:
     description: 'The go version to install'
@@ -11,17 +11,9 @@ inputs:
     required: false
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ format('{0}-go-{1}', runner.os, hashFiles(format('{0}/**/go.sum', inputs.working-directory ))) }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - uses: actions/setup-go@v2
+    - uses: actions/setup-go@v3
       with:
         go-version: ${{ inputs.go-version }}
+        cache: true

@@ -1,7 +1,7 @@
 all: check-setup
-	# Bootstrap pnpm workspace
+# Bootstrap pnpm workspace
 	./scripts/pnpm.sh
-	# prepare and install engine
+# prepare and install engine
 	make engine-dev
 
 docs:
@@ -32,8 +32,8 @@ format-templates:
 	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
 
 install-proto:
-	go install github.com/golang/protobuf/proto
-	go install github.com/golang/protobuf/protoc-gen-go
+# Can't pin to tag or version, we have to install a specific commit
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@6875c3d
 
 codegen-go: install-proto
 	cd types && ./generate.sh

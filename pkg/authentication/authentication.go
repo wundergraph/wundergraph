@@ -22,9 +22,9 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/jensneuse/abstractlogger"
 
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/hooks"
 )
 
 func init() {
@@ -693,7 +693,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var res MutatingPostAuthenticationResponse
 		err = json.Unmarshal(out.Response, &res)
 		if res.Status != "ok" {
-			u.Log.Error("MutatingPostAuthenticationResponse status is not ok", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication status is not ok", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}
@@ -702,6 +702,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		user = &res.User
 		err = user.Save(u.Cookie, w, r, u.Host, u.InsecureCookies)
 		if err != nil {
+			u.Log.Error("RevalidateAuthentication could not save cookie", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}
