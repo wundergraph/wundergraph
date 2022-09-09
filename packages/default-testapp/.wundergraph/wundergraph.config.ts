@@ -8,7 +8,6 @@ import {
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
-import { golangClient } from '@wundergraph/golang-client';
 
 const jsp = introspect.openApi({
 	apiNamespace: 'jsp',
@@ -76,14 +75,6 @@ configureWunderGraphApplication({
 				templates.typescript.operations,
 				templates.typescript.linkBuilder,
 			],
-		},
-		{
-			templates: [
-				...golangClient.all({
-					packageName: 'client',
-				}),
-			],
-			path: '../golang/client',
 		},
 	],
 	cors: {
