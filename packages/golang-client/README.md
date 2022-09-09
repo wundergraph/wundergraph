@@ -1,54 +1,33 @@
-# Wundergraph Next.js integration
+# Wundergraph Golang Client
 
-![wunderctl](https://img.shields.io/npm/v/@wundergraph/nextjs.svg)
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/golang-client.svg)
 
-WunderGraph codegen template plugin to add deep Next.js integration.
+WunderGraph codegen template plugin to auto-generate a Golang client for your WunderGraph API.
 
 ## Getting Started
 
 ```shell
-npm install @wundergraph/nextjs
+npm install @wundergraph/golang-client
 ```
 
-### 1. Register the codegen template
+### Register the codegen template
 
 ```ts
 // .wundergraph/wundergraph.config.ts
-import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+import { golangClient } from '@wundergraph/golang-client';
 
 configureWunderGraphApplication({
   // ...
   // omitted for brevity
   codeGenerators: [
     {
-      templates: [new NextJsTemplate()],
+      templates: [
+        ...golangClient.all({
+          packageName: 'client',
+        }),
+      ],
+      path: './generated/golang/client',
     },
   ],
 });
-```
-
-### 2. Import the package
-
-```tsx
-// pages/authentication.ts
-import { useQuery, useMutation, useLiveQuery, AuthProviders } from '.wundergraph/generated/nextjs';
-
-const Example: ExamplePage = () => {
-  const { user, login, logout } = useWunderGraph();
-  const onClick = () => {
-    if (user === null || user === undefined) {
-      login(AuthProviders.github);
-    } else {
-      logout();
-    }
-  };
-  return (
-    <div>
-      <h1>Authentication</h1>
-      <button onClick={onClick}>${user ? logout : login}</button>
-      <p>{JSON.stringify(user)}</p>
-    </div>
-  );
-};
-export default withWunderGraph(Example);
 ```
