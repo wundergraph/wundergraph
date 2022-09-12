@@ -10,6 +10,7 @@ isIndexFile: true
 Here's an overview of all the different options to extend your WunderGraph Server using custom hooks and custom GraphQL resolvers.
 
 {% quick-links %}
+{% quick-link title="options" icon="core" href="/docs/wundergraph-server-ts-reference/options" description="Server configuration options" /%}
 {% quick-link title="webhooks" icon="core" href="/docs/wundergraph-server-ts-reference/webhooks" description="Configures your custom webhook endpoints." /%}
 {% quick-link title="preResolve hook" icon="core" href="/docs/wundergraph-server-ts-reference/pre-resolve-hook" description="This hook is called BEFORE on Operation is resolved." /%}
 {% quick-link title="mutatingPreResolve hook" icon="core" href="/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook" description="This hook is called BEFORE an operation is resolved, it can manipulate the input." /%}
