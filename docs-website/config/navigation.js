@@ -544,6 +544,10 @@ const navigation = [
 				href: '/docs/wunderctl-reference/wunderctl-remove',
 			},
 			{
+				title: 'wunderctl start',
+				href: '/docs/wunderctl-reference/wunderctl-start',
+			},
+			{
 				title: 'wunderctl node start',
 				href: '/docs/wunderctl-reference/wunderctl-node-start',
 			},
