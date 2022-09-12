@@ -4,12 +4,14 @@
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
+    "generate": "wunderctl generate up --debug",
     "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@wundergraph/sdk": "^0.106.0",
+    "@wundergraph/golang-client": "^0.1.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

@@ -19,9 +19,21 @@ npm install @wundergraph/wunderctl
 npx -p @wundergraph/wunderctl wunderctl init
 ```
 
+# Exports
+
+## Client
+
+This is the base javascript implementation for all WunderGraph clients.
+
+```ts
+import { WunderGraphClient } from '@wundergraph/sdk/client';
+```
+
 ## Internal
 
-We export a different entrypoint for internal usage. This is used e.g. by WunderGraph NPM packages.
+This is only intended for internal plugin development.
+
+> **Warning**: The api may change at any time.
 
 ```ts
 import { visitJSONSchema } from '@wundergraph/sdk/internal';
