@@ -22,7 +22,7 @@ const DefaultNodeOptions = {
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991'),
 	logger: {
-		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'DEBUG'),
+		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
 };
 
@@ -33,7 +33,7 @@ const DefaultServerOptions: MandatoryServerOptions = {
 	},
 	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, 'http://localhost:9992'),
 	logger: {
-		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'DEBUG'),
+		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
 };
 
