@@ -543,6 +543,14 @@ const navigation = [
 				title: 'wunderctl remove',
 				href: '/docs/wunderctl-reference/wunderctl-remove',
 			},
+			{
+				title: 'wunderctl node start',
+				href: '/docs/wunderctl-reference/wunderctl-node-start',
+			},
+			{
+				title: 'wunderctl server start',
+				href: '/docs/wunderctl-reference/wunderctl-server-start',
+			},
 		],
 	},
 	{
