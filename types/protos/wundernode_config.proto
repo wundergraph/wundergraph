@@ -104,7 +104,7 @@ message GithubAuthProviderConfig {
 }
 
 message OpenIDConnectQueryParam {
-	string name = 1;
+	ConfigurationVariable name = 1;
 	ConfigurationVariable value = 2;
 }
 
