@@ -32,7 +32,7 @@ export class GithubAuthProvider implements AuthenticationProvider {
 }
 
 export interface OpenIDConnectQueryParamConfig {
-	name: string;
+	name: InputVariable;
 	value: InputVariable;
 }
 
@@ -54,7 +54,7 @@ export class OpenIDConnectAuthProvider implements AuthenticationProvider {
 	resolve(): AuthProvider {
 		const queryParams = this.config.queryParams?.map(
 			(param): OpenIDConnectQueryParam => ({
-				name: param.name,
+				name: mapInputVariable(param.name),
 				value: mapInputVariable(param.value),
 			})
 		);

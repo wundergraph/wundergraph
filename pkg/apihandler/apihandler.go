@@ -1973,7 +1973,6 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 	return issuerLogoutURLs
 }
 
-// TODO: check
 type OpenIDConnectConfiguration struct {
 	Issuer                string `json:"issuer"`
 	AuthorizationEndpoint string `json:"authorization_endpoint"`
@@ -2042,7 +2041,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		queryParams := make([]authentication.QueryParam, 0, len(provider.OidcConfig.QueryParams))
 		for _, p := range provider.OidcConfig.QueryParams {
 			queryParams = append(queryParams, authentication.QueryParam{
-				Name:  p.Name,
+				Name:  loadvariable.String(p.Name),
 				Value: loadvariable.String(p.Value),
 			})
 		}

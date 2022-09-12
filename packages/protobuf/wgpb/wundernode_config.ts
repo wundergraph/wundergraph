@@ -646,7 +646,7 @@ export interface GithubAuthProviderConfig {
 }
 
 export interface OpenIDConnectQueryParam {
-	name: string;
+	name: ConfigurationVariable | undefined;
 	value: ConfigurationVariable | undefined;
 }
 
@@ -1616,20 +1616,20 @@ export const GithubAuthProviderConfig = {
 };
 
 function createBaseOpenIDConnectQueryParam(): OpenIDConnectQueryParam {
-	return { name: '', value: undefined };
+	return { name: undefined, value: undefined };
 }
 
 export const OpenIDConnectQueryParam = {
 	fromJSON(object: any): OpenIDConnectQueryParam {
 		return {
-			name: isSet(object.name) ? String(object.name) : '',
+			name: isSet(object.name) ? ConfigurationVariable.fromJSON(object.name) : undefined,
 			value: isSet(object.value) ? ConfigurationVariable.fromJSON(object.value) : undefined,
 		};
 	},
 
 	toJSON(message: OpenIDConnectQueryParam): unknown {
 		const obj: any = {};
-		message.name !== undefined && (obj.name = message.name);
+		message.name !== undefined && (obj.name = message.name ? ConfigurationVariable.toJSON(message.name) : undefined);
 		message.value !== undefined &&
 			(obj.value = message.value ? ConfigurationVariable.toJSON(message.value) : undefined);
 		return obj;
@@ -1637,7 +1637,8 @@ export const OpenIDConnectQueryParam = {
 
 	fromPartial<I extends Exact<DeepPartial<OpenIDConnectQueryParam>, I>>(object: I): OpenIDConnectQueryParam {
 		const message = createBaseOpenIDConnectQueryParam();
-		message.name = object.name ?? '';
+		message.name =
+			object.name !== undefined && object.name !== null ? ConfigurationVariable.fromPartial(object.name) : undefined;
 		message.value =
 			object.value !== undefined && object.value !== null ? ConfigurationVariable.fromPartial(object.value) : undefined;
 		return message;
