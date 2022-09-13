@@ -10,7 +10,7 @@ isIndexFile: true
 Here's an overview of all the different options to configure your WunderNode using supported data sources.
 
 {% quick-links %}
-{% quick-link title="Options" icon="core" href="/docs/wundergraph-config-ts-reference/options" description="node configuration options" /%}
+{% quick-link title="WunderNode Options" icon="core" href="/docs/wundergraph-config-ts-reference/configure-wundernode-options" description="" /%}
 {% quick-link title="GraphQL Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-graphql-data-source" description="" /%}
 {% quick-link title="PostgreSQL Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-postgresql-data-source" description="" /%}
 {% quick-link title="MySQL Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-mysql-data-source" description="" /%}

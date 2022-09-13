@@ -646,8 +646,8 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference',
 			},
 			{
-				title: 'options',
-				href: '/docs/wundergraph-config-ts-reference/options',
+				title: 'WunderNode Options',
+				href: '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
 			},
 			{
 				title: 'GraphQL Data Source',
@@ -747,8 +747,8 @@ const navigation = [
 				href: '/docs/wundergraph-server-ts-reference',
 			},
 			{
-				title: 'options',
-				href: '/docs/wundergraph-server-ts-reference/options',
+				title: 'WunderGraph Server Options',
+				href: '/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
 			},
 			{
 				title: 'preResolve hook',
