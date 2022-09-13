@@ -48,7 +48,7 @@ configureWunderGraphApplication({
 					issuer: new EnvironmentVariable('AUTH_ISSUER'),
 					clientId: new EnvironmentVariable('AUTH_CLIENT_ID'),
 					clientSecret: new EnvironmentVariable('AUTH_CLIENT_SECRET'),
-					queryParams: [{ name: 'kc_idp_hint', value: 'github' }],
+					queryParameters: [{ name: 'kc_idp_hint', value: 'github' }],
 				}),
 			],
 			authorizedRedirectUris: ['http://localhost:3003'],

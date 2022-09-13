@@ -2038,9 +2038,9 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			return
 		}
 
-		queryParams := make([]authentication.QueryParam, 0, len(provider.OidcConfig.QueryParams))
-		for _, p := range provider.OidcConfig.QueryParams {
-			queryParams = append(queryParams, authentication.QueryParam{
+		queryParameters := make([]authentication.QueryParameter, 0, len(provider.OidcConfig.QueryParameters))
+		for _, p := range provider.OidcConfig.QueryParameters {
+			queryParameters = append(queryParameters, authentication.QueryParameter{
 				Name:  loadvariable.String(p.Name),
 				Value: loadvariable.String(p.Value),
 			})
@@ -2051,7 +2051,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			Issuer:             loadvariable.String(provider.OidcConfig.Issuer),
 			ClientID:           loadvariable.String(provider.OidcConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
-			QueryParams:        queryParams,
+			QueryParameters:    queryParameters,
 			ProviderID:         provider.Id,
 			PathPrefix:         pathPrefix,
 			InsecureCookies:    r.insecureCookies,
