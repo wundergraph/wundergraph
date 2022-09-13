@@ -57,4 +57,8 @@ npm install && npm start
 On the NextJS frontend, click the "Login" button.
 Once the login is complete, the Frontend will automatically fetch the data and inject the bearer token into the origin request.
 
-Keycloak console: `http://localhost:8080/` user name: admin, password: admin
+### 4. Keycloak console
+
+- `http://localhost:8080/`
+- user name: admin
+- password: admin
