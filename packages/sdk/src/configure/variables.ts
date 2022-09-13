@@ -36,7 +36,11 @@ export const resolveVariable = (variable: string | EnvironmentVariable): string 
 		if (resolved) {
 			return resolved;
 		}
-		return environmentVariable.defaultValue || '';
+		if (environmentVariable.defaultValue) {
+			return environmentVariable.defaultValue as string;
+		}
+
+		throw new Error(`could not resolve environment variable: ${environmentVariable.name}`);
 	}
 	return variable;
 };
