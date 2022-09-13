@@ -34,7 +34,7 @@ var nodeStartCmd = &cobra.Command{
 			return err
 		}
 
-		configFile := path.Join(wgDir, "generated", "wundergraph.config.json")
+		configFile := path.Join(wgDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
