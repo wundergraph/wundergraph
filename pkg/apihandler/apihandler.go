@@ -591,13 +591,11 @@ func (r *Builder) cleanupJsonSchema(schema string) string {
 }
 
 func (r *Builder) configureCache(api *Api) (err error) {
-	primaryHost := fmt.Sprintf("%s:%d", api.Options.Listener.Host, api.Options.Listener.Port)
-
 	config := api.CacheConfig
 	switch config.Kind {
 	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
 		r.log.Debug("configureCache",
-			abstractlogger.String("primaryHost", primaryHost),
+			abstractlogger.String("primaryHost", api.PrimaryHost),
 			abstractlogger.String("pathPrefix", api.PathPrefix),
 			abstractlogger.String("deploymentID", api.DeploymentId),
 			abstractlogger.String("cacheKind", config.Kind.String()),
@@ -610,7 +608,7 @@ func (r *Builder) configureCache(api *Api) (err error) {
 		redisAddr := os.Getenv(config.RedisConfig.RedisUrlEnvVar)
 
 		r.log.Debug("configureCache",
-			abstractlogger.String("primaryHost", primaryHost),
+			abstractlogger.String("primaryHost", api.PrimaryHost),
 			abstractlogger.String("pathPrefix", api.PathPrefix),
 			abstractlogger.String("deploymentID", api.DeploymentId),
 			abstractlogger.String("cacheKind", config.Kind.String()),
@@ -622,7 +620,7 @@ func (r *Builder) configureCache(api *Api) (err error) {
 		return
 	default:
 		r.log.Debug("configureCache",
-			abstractlogger.String("primaryHost", primaryHost),
+			abstractlogger.String("primaryHost", api.PrimaryHost),
 			abstractlogger.String("pathPrefix", api.PathPrefix),
 			abstractlogger.String("deploymentID", api.DeploymentId),
 			abstractlogger.String("cacheKind", config.Kind.String()),

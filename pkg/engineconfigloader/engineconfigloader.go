@@ -411,5 +411,5 @@ func buildFetchUrl(url, baseUrl, path string) string {
 		return url
 	}
 
-	return strings.TrimSuffix(baseUrl, "/") + "/" + strings.TrimPrefix(path, "/")
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(baseUrl, "/"), strings.TrimPrefix(path, "/"))
 }

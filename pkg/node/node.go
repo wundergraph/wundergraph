@@ -440,7 +440,7 @@ func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
 }
 
 func (n *Node) filterHosts(api apihandler.Api) []string {
-	hosts := []string{fmt.Sprintf("%s:%d", api.Options.Listener.Host, api.Options.Listener.Port)}
+	hosts := []string{api.PrimaryHost}
 WithNext:
 	for _, host := range api.Hosts {
 		for _, existing := range hosts {

@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"path"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
@@ -25,8 +26,14 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 	logLevelStr := loadvariable.String(graphConfig.Api.NodeOptions.Logger.Level)
 	logLevel := wgpb.LogLevel(wgpb.LogLevel_value[logLevelStr])
 
+	listener := &apihandler.Listener{
+		Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
+		Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
+			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
 			Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
 			PathPrefix:            path.Join(graphConfig.ApiName, graphConfig.DeploymentName),
 			EngineConfiguration:   graphConfig.Api.EngineConfiguration,
@@ -45,10 +52,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 			Webhooks:             graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
 				ServerUrl: loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
-				Listener: &apihandler.Listener{
-					Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
-					Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
-				},
+				Listener:  listener,
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},

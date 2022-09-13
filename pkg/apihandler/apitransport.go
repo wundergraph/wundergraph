@@ -354,13 +354,11 @@ func (t *ApiTransport) handleUpstreamAuthentication(request *http.Request, auth 
 	switch auth.Kind {
 	case wgpb.UpstreamAuthenticationKind_UpstreamAuthenticationJWT:
 
-		primaryHost := fmt.Sprintf("%s:%d", t.api.Options.Listener.Host, t.api.Options.Listener.Port)
-
 		claims := &Claims{
 			Name: user.Name,
 			StandardClaims: jwt.StandardClaims{
 				ExpiresAt: time.Now().Add(time.Minute * 15).Unix(),
-				Issuer:    primaryHost,
+				Issuer:    t.api.PrimaryHost,
 				Subject:   user.Email,
 				Audience:  request.Host,
 			},
