@@ -45,7 +45,7 @@ var nodeStartCmd = &cobra.Command{
 			return err
 		}
 		if len(data) == 0 {
-			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile))
 			return nil
 		}
 		var graphConfig wgpb.WunderGraphConfiguration
