@@ -37,19 +37,11 @@ In this cli version a couple of flags were removed and a new commands were added
 
 Starts a WunderNode in production mode. No flags are required.
 
-Requires:
-
-- `wundergraph.config.json` to be present in the `.wundegraph` directory.
-
-Before use please run `wunderctl generate` to generate the config file.
+Requires to run beforehand `wunderctl generate` to generate all necessary files.
 
 ### wunderctl server start
 
 Starts a WunderGraph Server in production mode. No flags are required.
 
-Requires:
-
-- `wundergraph.config.json` to be present in the `.wundegraph` directory.
-- `"generated/bundle/server.js"` to be present in the `.wundegraph` directory.
-
-Before use please run `wunderctl generate` to generate the config and server files.
+Requires to run beforehand `wunderctl generate` to generate all necessary files.
+s
