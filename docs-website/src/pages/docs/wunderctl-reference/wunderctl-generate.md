@@ -13,6 +13,11 @@ using `wunderctl up`,
 or you also do it on demand using `wunderctl generate`.
 
 {% callout type="warning" %}
+When you are using `EnvironmentVariable` in your configuration,
+please make sure that you are providing them for `wunderctl generate` command
+{% /callout %}
+
+{% callout type="warning" %}
 When you are generating your production config please make sure that you have provided all the necessary environment variables:
 
 - `WG_LOG_LEVEL`
@@ -24,6 +29,4 @@ When you are generating your production config please make sure that you have pr
 - `WG_SERVER_PORT`
 
 Alternatively provide a static options in `wundergraph.config.ts` and if you use WunderGraph Server in `wundergraph.server.ts`.
-
-In case you are using custom environment variables you should also provide them for `wunderctl generate` command
 {% /callout %}

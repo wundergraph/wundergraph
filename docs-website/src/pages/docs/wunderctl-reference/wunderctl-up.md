@@ -15,3 +15,8 @@ This involves:
 - compiling the configuration files
 - compiling the hooks server
 - restarting WunderNode and hooks when necessary
+
+{% callout type="warning" %}
+When you are using `EnvironmentVariable` in your configuration,
+please make sure that you are providing values for them for `wunderctl up` command
+{% /callout %}
