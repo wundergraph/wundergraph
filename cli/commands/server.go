@@ -3,7 +3,10 @@ package commands
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"path"
+	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -49,8 +52,8 @@ var serverStartCmd = &cobra.Command{
 			}
 		}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
 
 		srvCfg := &helpers.ServerRunConfig{
 			WunderGraphDirAbs: wgDir,
