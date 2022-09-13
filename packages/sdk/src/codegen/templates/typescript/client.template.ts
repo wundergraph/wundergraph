@@ -23,45 +23,43 @@ export const createClient = (config?: CreateClientProps) => {
     })
 }
 
-export interface Queries {
+export type Queries = ClientOperationDefs<{
 {{#each queries}}
     {{operationName}}: {
-        input: {{#if hasInput}}{{operationName}}Input{{else}}never{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}
+}>
 
-export interface Mutations {
+export type Mutations = ClientOperationDefs<{
 {{#each mutations}}
     {{operationName}}: {
-        input: {{#if hasInput}}{{operationName}}Input{{else}}never{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}
+}>
 
-export interface Subscriptions {
+export type Subscriptions = ClientOperationDefs<{
 {{#each subscriptions}}
     {{operationName}}: {
-        input: {{#if hasInput}}{{operationName}}Input{{else}}never{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}
-
-export interface LiveQueries {
 {{#each liveQueries}}
     {{operationName}}: {
-        input: {{#if hasInput}}{{operationName}}Input{{else}}never{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{/if}}
         data: {{operationName}}ResponseData
+        isLiveQuery: true
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}
+}>
 
-export type Operations = ClientOperations<Queries, Mutations, Subscriptions, LiveQueries>
+export type Operations = ClientOperations<Queries, Mutations, Subscriptions>
 `;

@@ -43,25 +43,24 @@ export interface User<Role> {
 }
 
 export interface ClientOperation {
-	input: never | object;
+	input?: object;
+	isLiveQuery?: boolean;
 	data: any;
 	requiresAuthentication: boolean;
 }
 
-export type ClientOperationDefs = {
-	[key: string]: ClientOperation;
+export type ClientOperationDefs<T> = {
+	[K in keyof T]: T[K];
 };
 
 export interface ClientOperations<
-	Queries = ClientOperationDefs,
-	Mutations = ClientOperationDefs,
-	Subscriptions = ClientOperationDefs,
-	LiveQueries = ClientOperationDefs
+	Queries = ClientOperationDefs<{ [key: string]: ClientOperation }>,
+	Mutations = ClientOperationDefs<{ [key: string]: ClientOperation }>,
+	Subscriptions = ClientOperationDefs<{ [key: string]: ClientOperation }>
 > {
 	queries: Queries;
 	mutations: Mutations;
 	subscriptions: Subscriptions;
-	liveQueries: LiveQueries;
 }
 
 export class WunderGraphClient<Role, Operations extends ClientOperations = ClientOperations> {
@@ -105,12 +104,12 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 
 	public async query<
 		OperationName extends keyof Operations['queries'],
-		Input = Operations['queries'][OperationName]['input'],
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
 		Data = Operations['queries'][OperationName]['data']
-	>(query: QueryProps<OperationName, InternalQueryArgsWithInput<Input>>): Promise<QueryResult<Data>> {
+	>(query: QueryProps<OperationName, InternalClientQueryArgs<Input>>): Promise<QueryResult<Data>> {
 		try {
 			const params = this.queryString({
-				wg_variables: query.input,
+				wg_variables: this.hasInput(query) ? query.input : undefined,
 				wg_api_hash: this.applicationHash,
 				wg_subscribe_once: query.subscribeOnce,
 			});
@@ -139,9 +138,9 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 
 	public async mutate<
 		OperationName extends keyof Operations['mutations'],
-		Input = Operations['mutations'][OperationName]['input'],
+		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
 		Data = Operations['mutations'][OperationName]['data']
-	>(mutation: MutationProps<OperationName, InternalMutationArgsWithInput<Input>>): Promise<MutationResult<Data>> {
+	>(mutation: MutationProps<OperationName, InternalClientMutationArgs<Input>>): Promise<MutationResult<Data>> {
 		try {
 			const params = this.queryString({
 				wg_api_hash: this.applicationHash,
@@ -158,7 +157,8 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 			if (this.csrfToken !== undefined) {
 				headers['X-CSRF-Token'] = this.csrfToken;
 			}
-			const body = mutation.input !== undefined ? JSON.stringify(mutation.input) : '{}';
+
+			const body = this.hasInput<Input>(mutation) ? JSON.stringify(mutation.input) : '{}';
 			const response = await this.fetch(this.operationUrl(String(mutation.operationName), params), {
 				headers,
 				method: 'POST',
@@ -180,10 +180,11 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 
 	public subscribe = <
 		OperationName extends keyof Operations['subscriptions'],
-		Input = Operations['mutations'][OperationName]['input'],
-		Data = Operations['mutations'][OperationName]['data']
+		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
+		Data = Operations['subscriptions'][OperationName]['data'],
+		LiveQuery extends Operations['subscriptions'][OperationName]['isLiveQuery'] = Operations['subscriptions'][OperationName]['isLiveQuery']
 	>(
-		subscription: SubscriptionProps<OperationName, InternalSubscriptionArgsWithInput<Input>>,
+		subscription: SubscriptionProps<OperationName, InternalClientSubscriptionArgs<Input>, LiveQuery>,
 		cb: (response: SubscriptionResult<Data>) => void
 	) => {
 		if ('EventSource' in global) {
@@ -194,16 +195,17 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 
 	private subscribeWithSSE = <
 		OperationName extends keyof Operations['subscriptions'],
-		Input = Operations['subscriptions'][OperationName]['input'],
-		Data = Operations['subscriptions'][OperationName]['data']
+		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
+		Data = Operations['subscriptions'][OperationName]['data'],
+		LiveQuery extends Operations['subscriptions'][OperationName]['isLiveQuery'] = Operations['subscriptions'][OperationName]['isLiveQuery']
 	>(
-		subscription: SubscriptionProps<OperationName, InternalSubscriptionArgsWithInput<Input>>,
+		subscription: SubscriptionProps<OperationName, InternalClientSubscriptionArgs<Input>, LiveQuery>,
 		cb: (result: SubscriptionResult<Data>) => void
 	) => {
 		(async () => {
 			try {
 				const params = this.queryString({
-					wg_variables: subscription?.input,
+					wg_variables: this.hasInput(subscription) ? subscription.input : {},
 					wg_live: subscription?.isLiveQuery ? true : undefined,
 					wg_sse: true,
 					wg_sdk_version: this.sdkVersion,
@@ -232,16 +234,17 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 
 	private subscribeWithFetch = <
 		OperationName extends keyof Operations['subscriptions'],
-		Input = Operations['subscriptions'][OperationName]['input'],
-		Data = Operations['subscriptions'][OperationName]['data']
+		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
+		Data = Operations['subscriptions'][OperationName]['data'],
+		LiveQuery extends Operations['subscriptions'][OperationName]['isLiveQuery'] = Operations['subscriptions'][OperationName]['isLiveQuery']
 	>(
-		subscription: SubscriptionProps<OperationName, InternalSubscriptionArgsWithInput<Input>>,
+		subscription: SubscriptionProps<OperationName, InternalClientSubscriptionArgs<Input>, LiveQuery>,
 		cb: (result: SubscriptionResult<Data>) => void
 	) => {
 		(async () => {
 			try {
 				const params = this.queryString({
-					wg_variables: subscription?.input,
+					wg_variables: this.hasInput(subscription) ? subscription.input : {},
 					wg_live: subscription?.isLiveQuery ? true : undefined,
 				});
 				const response = await this.fetch(this.operationUrl(String(subscription.operationName), params), {
@@ -342,6 +345,21 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 			};
 		}
 	};
+
+	private hasInput<Input>(
+		args:
+			| InternalQueryArgs
+			| InternalQueryArgsWithInput<Input>
+			| InternalMutationArgs
+			| InternalMutationArgsWithInput<Input>
+			| InternalSubscriptionArgs
+			| InternalSubscriptionArgsWithInput<Input>
+	): args is
+		| InternalMutationArgsWithInput<Input>
+		| InternalQueryArgsWithInput<Input>
+		| InternalSubscriptionArgsWithInput<Input> {
+		return 'input' in args;
+	}
 
 	private isOK(response: Response) {
 		return response.status === 200;
@@ -526,40 +544,47 @@ export interface WithWunderGraphOptions {
 	disableFetchUserOnWindowFocus?: boolean;
 }
 
-export interface QueryBaseArgs {
+export interface QueryArgs {
 	disableSSR?: boolean;
 	lazy?: boolean;
 	debounceMillis?: number;
 	refetchOnWindowFocus?: boolean;
 }
 
-export interface QueryArgsWithInput<Input> extends QueryBaseArgs {
+export interface QueryArgsWithInput<Input> extends QueryArgs {
 	input: Input;
 }
 
-export type QueryArgs<Input = never> = QueryBaseArgs | QueryArgsWithInput<Input>;
+export interface QueryArgsWithInput<Input> extends QueryArgs {
+	input: Input;
+}
 
-export interface InternalQueryBaseArgs extends QueryBaseArgs {
+export interface InternalQueryArgs extends QueryArgs {
 	abortSignal?: AbortSignal;
 	subscribeOnce?: boolean;
 }
 
-export interface InternalQueryArgsWithInput<Input> extends InternalQueryBaseArgs {
+export interface InternalQueryArgsWithInput<Input> extends InternalQueryArgs {
 	input: Input;
 }
 
-export type InternalQueryArgs<Input = never> = InternalQueryBaseArgs | InternalQueryArgsWithInput<Input>;
+export type InternalClientQueryArgs<Input = object> = Input extends object
+	? InternalQueryArgsWithInput<Input>
+	: InternalQueryArgs;
 
-export interface QueryArgsWithInput<Input> extends QueryBaseArgs {
-	input: Input;
-}
+export type ClientQueryArgs<Input = object> = Input extends object ? QueryArgsWithInput<Input> : QueryArgs;
 
 export type QueryProps<OperationName = string, Args extends QueryArgs = QueryArgs> = Args & {
 	operationName: OperationName;
 };
 
-export type SubscriptionProps<OperationName = string, Args extends SubscriptionArgs = SubscriptionArgs> = Args & {
+export type SubscriptionProps<
+	OperationName = string,
+	Args extends SubscriptionArgs = SubscriptionArgs,
+	LiveQuery = false
+> = Args & {
 	operationName: OperationName;
+	isLiveQuery: LiveQuery;
 };
 
 export interface SubscriptionArgs {
@@ -582,6 +607,12 @@ export interface SubscriptionArgsWithInput<Input> extends SubscriptionArgs {
 	input: Input;
 }
 
+export type InternalClientSubscriptionArgs<Input> = Input extends object
+	? InternalSubscriptionArgsWithInput<Input>
+	: InternalSubscriptionArgs;
+
+export type ClientSubscriptionArgs<Input> = Input extends object ? SubscriptionArgsWithInput<Input> : SubscriptionArgs;
+
 export type MutationProps<OperationName = string, Args extends MutationArgs = MutationArgs> = Args & {
 	operationName: OperationName;
 };
@@ -602,6 +633,12 @@ export interface MutationArgsWithInput<Input> extends MutationArgs {
 	input: Input;
 }
 
+export type InternalClientMutationArgs<Input = object> = Input extends object
+	? InternalMutationArgsWithInput<Input>
+	: InternalMutationArgs;
+
+export type ClientMutationArgs<Input = object> = Input extends object ? MutationArgsWithInput<Input> : MutationArgs;
+
 export interface GraphQLError {
 	message: string;
 	path?: ReadonlyArray<string | number>;
@@ -615,22 +652,27 @@ export interface ResultOK<Data> {
 
 export interface ResultRequiresAuthentication {
 	status: 'requires_authentication';
+	data?: undefined;
 }
 
 export interface ResultNone {
 	status: 'none';
+	data?: undefined;
 }
 
 export interface ResultLazy {
 	status: 'lazy';
+	data?: undefined;
 }
 
 export interface ResultCancelled {
 	status: 'cancelled';
+	data?: undefined;
 }
 
 export interface ResultLoading {
 	status: 'loading';
+	data?: undefined;
 }
 
 export interface ResultPartial<Data> {
@@ -642,6 +684,7 @@ export interface ResultPartial<Data> {
 export interface ResultError {
 	status: 'error';
 	errors: ReadonlyArray<GraphQLError>;
+	data?: undefined;
 }
 
 export type SubscriptionResult<Data> =
