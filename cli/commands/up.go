@@ -30,8 +30,6 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var port int
-
 		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
 		if err != nil {
 			return err
@@ -79,6 +77,12 @@ var upCmd = &cobra.Command{
 		configOutFile := path.Join("generated", "bundle", "config.js")
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+
+		if port, err := helpers.ServerPortFromConfig(configJsonPath); err != nil {
+			log.Fatal("could not read server port from config file", abstractlogger.String("configFile", configJsonPath))
+		} else {
+			helpers.KillExistingHooksProcess(port, log)
+		}
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -181,19 +185,6 @@ var upCmd = &cobra.Command{
 				wg.Wait()
 
 				go func() {
-					if port != 0 {
-						// we have previously set port try to kill it
-						helpers.KillExistingHooksProcess(port, log)
-					}
-
-					// we could have a new port so just read it from config
-					if newPort, err := helpers.ServerPortFromConfig(configJsonPath); err != nil {
-						log.Fatal("could not read server port from config file", abstractlogger.String("configFile", configJsonPath))
-					} else {
-						helpers.KillExistingHooksProcess(newPort, log)
-						port = newPort
-					}
-
 					// run or restart hook server
 					<-hookServerRunner.Run(ctx)
 				}()
