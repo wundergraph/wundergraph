@@ -1,6 +1,6 @@
 import Handlebars from 'handlebars';
 import { OperationType } from '@wundergraph/protobuf';
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
 import { modelImports, operations } from './web.client';
@@ -30,7 +30,7 @@ export class WunderGraphInternalApiClient implements Template {
 			{
 				path: 'wundergraph.internal.client.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

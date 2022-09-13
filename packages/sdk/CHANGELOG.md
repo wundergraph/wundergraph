@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.106.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.105.1...@wundergraph/sdk@0.106.0) (2022-09-09)
+
+### Features
+
+* add golang client ([#170](https://github.com/wundergraph/wundergraph/issues/170)) ([a26bc32](https://github.com/wundergraph/wundergraph/commit/a26bc32d4a178134f893012ca4e2648460b4e7f8)) (@jensneuse)
+
+## [0.105.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.105.0...@wundergraph/sdk@0.105.1) (2022-09-08)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.105.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.104.0...@wundergraph/sdk@0.105.0) (2022-09-08)
+
+### Features
+
+* improve webhook types ([#173](https://github.com/wundergraph/wundergraph/issues/173)) ([8cb6d97](https://github.com/wundergraph/wundergraph/commit/8cb6d9750f6e14e2fdd3d87ad97ca0cf3236f95b)) (@StarpTech)
+
 ## [0.104.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.103.1...@wundergraph/sdk@0.104.0) (2022-09-06)
 
 ### Features

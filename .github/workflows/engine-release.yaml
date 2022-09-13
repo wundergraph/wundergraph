@@ -45,7 +45,7 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
         with:
-          version: '3.x'
+          version: '3.12.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Gon
@@ -75,6 +75,9 @@ jobs:
 
       - name: generate go types based on protobuf definitions
         run: make codegen-go
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
@@ -108,7 +111,7 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
         with:
-          version: '3.x'
+          version: '3.12.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: go env
@@ -116,6 +119,9 @@ jobs:
 
       - name: generate go types based on protobuf definitions
         run: make codegen-go
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
@@ -137,10 +143,18 @@ jobs:
     needs:
       - check-pnpm
     steps:
+      - name: Prepare git
+        # To fix the EOL issues on Windows runners, we need to disable autocrlf. See actions/checkout#135 for more info.
+        # https://github.com/actions/checkout/issues/135#issuecomment-613361104
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - name: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: ./.github/actions/go
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -148,7 +162,7 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
         with:
-          version: '3.x'
+          version: '3.12.4'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: go env
@@ -156,6 +170,9 @@ jobs:
 
       - name: generate go types based on protobuf definitions
         run: make codegen-go
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3

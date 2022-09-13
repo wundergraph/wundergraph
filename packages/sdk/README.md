@@ -18,3 +18,23 @@ The WunderGraph SDK works best in combination with the WunderGraph CLI, wunderct
 npm install @wundergraph/wunderctl
 npx -p @wundergraph/wunderctl wunderctl init
 ```
+
+# Exports
+
+## Client
+
+This is the base javascript implementation for all WunderGraph clients.
+
+```ts
+import { WunderGraphClient } from '@wundergraph/sdk/client';
+```
+
+## Internal
+
+This is only intended for internal plugin development.
+
+> **Warning**: The api may change at any time.
+
+```ts
+import { visitJSONSchema } from '@wundergraph/sdk/internal';
+```

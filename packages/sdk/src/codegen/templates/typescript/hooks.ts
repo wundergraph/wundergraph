@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
@@ -31,7 +31,7 @@ export class WunderGraphHooksPlugin implements Template {
 			{
 				path: 'wundergraph.hooks.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

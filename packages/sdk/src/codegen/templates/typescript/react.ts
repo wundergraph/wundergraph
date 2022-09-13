@@ -1,4 +1,4 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import Handlebars from 'handlebars';
@@ -18,7 +18,7 @@ export class TypescriptReactProvider implements Template {
 			{
 				path: 'provider.tsx',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -34,7 +34,7 @@ export class TypescriptReactNativeProvider implements Template {
 			{
 				path: 'provider.tsx',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -74,7 +74,7 @@ export class TypescriptReactHooks implements Template {
 			{
 				path: 'hooks.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
