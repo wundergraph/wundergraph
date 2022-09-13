@@ -3,7 +3,6 @@ package helpers
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
@@ -16,7 +15,11 @@ import (
 )
 
 func ServerPortFromConfig(configJsonPath string) (int, error) {
-	data, _ := ioutil.ReadFile(configJsonPath)
+	data, err := os.ReadFile(configJsonPath)
+	if err != nil {
+		return 0, err
+	}
+
 	var graphConfig struct {
 		Api *struct {
 			ServerOptions *wgpb.ServerOptions `json:"serverOptions,omitempty"`
@@ -47,9 +50,8 @@ func KillExistingHooksProcess(serverListenPort int, log abstractlogger.Logger) {
 func execCmd(cmd *exec.Cmd, serverListenPort int, log abstractlogger.Logger) {
 	var waitStatus syscall.WaitStatus
 	if err := cmd.Run(); err != nil {
-		if err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("Error: %s\n", err.Error()))
-		}
+		log.Debug(fmt.Sprintf("Error: %s", err.Error()))
+
 		if exitError, ok := err.(*exec.ExitError); ok {
 			waitStatus = exitError.Sys().(syscall.WaitStatus)
 			log.Debug(fmt.Sprintf("Error during port killing (exit code: %s)\n", []byte(fmt.Sprintf("%d", waitStatus.ExitStatus()))))
