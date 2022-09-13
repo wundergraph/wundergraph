@@ -11,6 +11,7 @@ import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 // import linkBuilder from "./generated/linkbuilder";
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+import { TypeScriptClientTemplate } from '@wundergraph/sdk/dist/codegen/templates/typescript/client';
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
@@ -132,7 +133,7 @@ configureWunderGraphApplication({
 			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
 		},
 		{
-			templates: [new NextJsTemplate()],
+			templates: [new NextJsTemplate(), new TypeScriptClientTemplate()],
 			path: '../components/generated',
 		},
 	],
