@@ -95,10 +95,14 @@ export interface ResolvedServerLogger {
 }
 
 export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
+	const fallbackNodeUrl = options?.listen?.port
+		? new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${options?.listen?.port}`)
+		: DefaultNodeOptions.nodeUrl;
+
 	let nodeOptions = isCloud
 		? DefaultNodeOptions
 		: {
-				nodeUrl: options?.nodeUrl || DefaultNodeOptions.nodeUrl,
+				nodeUrl: options?.nodeUrl || fallbackNodeUrl,
 				listen: {
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,
@@ -121,10 +125,14 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 };
 
 export const serverOptionsWithDefaults = (options?: ServerOptions): MandatoryServerOptions => {
+	const fallbackServerUrl = options?.listen?.port
+		? new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${options?.listen?.port}`)
+		: DefaultServerOptions.serverUrl;
+
 	return isCloud
 		? DefaultServerOptions
 		: {
-				serverUrl: options?.serverUrl || DefaultServerOptions.serverUrl,
+				serverUrl: options?.serverUrl || fallbackServerUrl,
 				listen: {
 					host: options?.listen?.host || DefaultServerOptions.listen.host,
 					port: options?.listen?.port || DefaultServerOptions.listen.port,
