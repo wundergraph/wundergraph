@@ -751,6 +751,10 @@ const navigation = [
 				href: '/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
 			},
 			{
+				title: 'Webhooks',
+				href: '/docs/wundergraph-server-ts-reference/webhooks',
+			},
+			{
 				title: 'preResolve hook',
 				href: '/docs/wundergraph-server-ts-reference/pre-resolve-hook',
 			},

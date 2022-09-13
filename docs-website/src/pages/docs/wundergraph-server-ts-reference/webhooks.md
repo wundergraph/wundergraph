@@ -4,7 +4,7 @@ pageTitle: WunderGraph - Webhooks
 description:
 ---
 
-The [`webhooks`](https://docs.wundergraph.com/docs/features/type-script-webhooks-to-integrate-third-party-applications) property allows you to configure your custom [webhooks](https://docs.wundergraph.com/docs/features/type-script-webhooks-to-integrate-third-party-applications). Currently, only the `verifier` option is supported.
+The [webhooks](/docs/features/type-script-webhooks-to-integrate-third-party-applications) property allows you to configure your custom [webhooks](/docs/features/type-script-webhooks-to-integrate-third-party-applications). Currently, only the `verifier` option is supported.
 The `verifier` define how the webhook is verified. Verification is handled by the gateway. Before a webhook can be configured you need to create one. See [webhooks feature](/docs/features/type-script-webhooks-to-integrate-third-party-applications) for more information.
 
 ```typescript

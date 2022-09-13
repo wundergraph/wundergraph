@@ -18,15 +18,16 @@ please make sure that you are providing them for `wunderctl generate` command
 {% /callout %}
 
 {% callout type="warning" %}
-When you are generating your production config please make sure that you have provided all the necessary environment variables:
+When you do not provide an options in `wundergraph.config.ts` and/or in `wundergraph.server.ts`.
+We will use [Default Environment Variables](/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables) to generate the config.
 
-- `WG_LOG_LEVEL`
+For the production it is mandatory to set:
+
+- `nodeUrl` in WunderNode [`options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options)
+- `serverUrl` in WunderGraph Server [`options`](/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options)
+
+Alternatively provide values for the following environment variables
+
 - `WG_NODE_URL`
-- `WG_NODE_HOST`
-- `WG_NODE_PORT`
 - `WG_SERVER_URL`
-- `WG_SERVER_HOST`
-- `WG_SERVER_PORT`
-
-Alternatively provide a static options in `wundergraph.config.ts` and if you use WunderGraph Server in `wundergraph.server.ts`.
-{% /callout %}
+  {% /callout %}

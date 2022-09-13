@@ -4,16 +4,13 @@ pageTitle: WunderGraph - wunderctl node start
 description:
 ---
 
-The cmd `wunderctl node start` stars WunderNode in the production mode.
+The cmd `wunderctl node start` starts WunderNode in the production mode.
 
 {% callout type="warning" %}
 When you are running node in production make sure that mandatory environment variables are provided:
 
-- `WG_LOG_LEVEL`
-- `WG_NODE_HOST`
-- `WG_NODE_PORT`
 - `WG_SERVER_URL`
 
-`wundergraph.config.ts` static values or custom environment variables in options has priority over default environment variables.
+`wundergraph.config.ts` static values or custom environment variables in [`options`](/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options) has priority over default environment variables.
 
 {% /callout %}
