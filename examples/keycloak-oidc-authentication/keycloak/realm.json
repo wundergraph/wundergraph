@@ -600,7 +600,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${AUTH0_CLIENT_SECRET}",
+      "secret": "${AUTH_CLIENT_SECRET}",
       "redirectUris": ["${REDIRECT_URI}"],
       "webOrigins": [],
       "notBefore": 0,

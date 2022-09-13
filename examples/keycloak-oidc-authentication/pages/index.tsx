@@ -52,7 +52,7 @@ const Home: NextPage = () => {
 						<p className="mt-3 mb-8 text-center text-black/80">
 							This Operation is protected using{' '}
 							<code className="font-mono font-medium text-amber-500 font-bold">OpenID Connect Authentication</code>{' '}
-							(Auth0).
+							(KC).
 						</p>
 						<code className="p-3">{JSON.stringify(countries, null, 2)}</code>
 					</div>
@@ -63,7 +63,7 @@ const Home: NextPage = () => {
 					</div>
 					<div className="flex justify-center mt-8 gap-2">
 						<button
-							onClick={() => login(AuthProvider.auth0)}
+							onClick={() => login(AuthProvider.kc)}
 							className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
 						>
 							Login

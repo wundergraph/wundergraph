@@ -44,10 +44,10 @@ configureWunderGraphApplication({
 			providers: [
 				authProviders.demo(),
 				authProviders.openIdConnect({
-					id: 'auth0',
-					issuer: new EnvironmentVariable('AUTH0_ISSUER'),
-					clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
-					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
+					id: 'kc',
+					issuer: new EnvironmentVariable('AUTH_ISSUER'),
+					clientId: new EnvironmentVariable('AUTH_CLIENT_ID'),
+					clientSecret: new EnvironmentVariable('AUTH_CLIENT_SECRET'),
 					queryParams: [{ name: 'kc_idp_hint', value: 'github' }],
 				}),
 			],

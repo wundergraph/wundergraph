@@ -2,11 +2,11 @@
 
 ## Getting Started
 
-### 1. Get Auth0 credentials:
+### 1. Get GitHub OAuth2 app credentials:
 
-1. Go to [Github profile settings](https://github.com/settings/developers) and create a new OAuth app.
+1. Go to [GitHub profile settings](https://github.com/settings/developers) and create a new OAuth app.
 2. Generate client secret
-3. Set authorization callback URL to: ... , and home page URL to: ...
+3. Set authorization callback URL to: `http://localhost:8080/realms/demo/broker/github/endpoint`, and home page URL to: `http://localhost:3000`
 4. Copy the `Client ID` and `Client Secret` to the clipboard
 5. Rename the `.example.env` file to `.env`
 6. Paste the credentials into the `.env` file
