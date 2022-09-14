@@ -50,4 +50,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: wundergraph/wundergraph
           event-type: release-engine
-          client-payload: '{"ref": "${{ steps.tag.outputs.release_version }}"}'
+          client-payload: '{"ref": "v${{ steps.tag.outputs.release_version }}"}'
