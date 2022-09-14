@@ -8,7 +8,6 @@ import (
 	"path"
 	"syscall"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
@@ -42,14 +41,6 @@ var serverStartCmd = &cobra.Command{
 		serverExecutablePath := path.Join(wgDir, serverScriptFile)
 		if !files.FileExists(serverExecutablePath) {
 			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
-		}
-
-		if enableDebugMode {
-			if port, err := helpers.ServerPortFromConfig(configFile); err != nil {
-				log.Fatal("could not read server port from config file", abstractlogger.String("configFile", configFile))
-			} else {
-				helpers.KillExistingHooksProcess(port, log)
-			}
 		}
 
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
