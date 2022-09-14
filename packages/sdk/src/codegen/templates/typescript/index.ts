@@ -2,7 +2,7 @@ import { doNotEditHeader, Template, TemplateOutputFile, visitJSONSchema } from '
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import prettier from 'prettier';
 import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
-import { hasInput, hasInternalInput, hasInjectedInput } from './react';
+import { hasInput, hasInternalInput, hasInjectedInput } from './helpers';
 import fs from 'fs';
 import path from 'path';
 

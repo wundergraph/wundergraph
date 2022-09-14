@@ -6,7 +6,7 @@ import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { template } from './web.client.template';
 import { listenAddrHttp } from '../../../env';
-import { hasInjectedInput, hasInternalInput, hasInput } from './react';
+import { hasInjectedInput, hasInternalInput, hasInput } from './helpers';
 
 export class TypeScriptWebClient implements Template {
 	constructor(reactNative?: boolean) {

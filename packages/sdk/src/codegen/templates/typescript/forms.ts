@@ -4,7 +4,7 @@ import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import Handlebars from 'handlebars';
 import { template } from './forms.tsx.template';
-import { hasInput, isNotInternal } from './react';
+import { hasInput, isNotInternal } from './helpers';
 
 export class Forms implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
