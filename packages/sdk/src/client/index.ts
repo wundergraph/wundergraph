@@ -105,7 +105,7 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 	public async query<
 		OperationName extends keyof Operations['queries'],
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
-		Data = Operations['queries'][OperationName]['data']
+		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data']
 	>(query: QueryProps<OperationName, InternalClientQueryArgs<Input>>): Promise<QueryResult<Data>> {
 		try {
 			const params = this.queryString({
@@ -123,7 +123,7 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 				method: 'GET',
 				signal: query.abortSignal,
 			});
-			return this.httpResponseToQueryResult(response);
+			return this.httpResponseToQueryResult<Data>(response);
 		} catch (e: any) {
 			return {
 				status: 'error',
@@ -187,7 +187,7 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 		subscription: SubscriptionProps<OperationName, InternalClientSubscriptionArgs<Input>, LiveQuery>,
 		cb: (response: SubscriptionResult<Data>) => void
 	) => {
-		if ('EventSource' in global) {
+		if ('EventSource' in globalThis) {
 			return this.subscribeWithSSE(subscription, cb);
 		}
 		return this.subscribeWithFetch(subscription, cb);
