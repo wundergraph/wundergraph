@@ -23,4 +23,5 @@ Here's an overview of all the available examples.
 {% quick-link title="Apollo Federation" icon="core" href="/docs/examples/apollo-federation" description="This example demonstrates how to use Apollo Federation in WunderGraph." /%}
 {% quick-link title="Auth0 OpenID Connect Authentication" icon="core" href="/docs/examples/auth0-openid-connect-authentication" description="This example demonstrates how to use Auth0 OpenID Connect Authentication in WunderGraph." /%}
 {% quick-link title="Fragments" icon="core" href="/docs/examples/fragments" description="This example show how to use GraphQL Fragments with WunderGraph." /%}
+{% quick-link title="Keycloak OpenID Connect Authentication" icon="core" href="/docs/examples/keycloak-openid-connect-authentication" description="This example demonstrates how to use Keycloak OpenID Connect Authentication in WunderGraph." /%}
 {% /quick-links %}
