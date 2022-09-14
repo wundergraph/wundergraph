@@ -568,11 +568,11 @@ export interface InternalQueryArgsWithInput<Input> extends InternalQueryArgs {
 	input: Input;
 }
 
-export type InternalClientQueryArgs<Input = object> = Input extends object
+export type InternalClientQueryArgs<Input> = Input extends object
 	? InternalQueryArgsWithInput<Input>
 	: InternalQueryArgs;
 
-export type ClientQueryArgs<Input = object> = Input extends object ? QueryArgsWithInput<Input> : QueryArgs;
+export type ClientQueryArgs<Input> = Input extends object ? QueryArgsWithInput<Input> : QueryArgs;
 
 export type QueryProps<OperationName = string, Args extends QueryArgs = QueryArgs> = Args & {
 	operationName: OperationName;

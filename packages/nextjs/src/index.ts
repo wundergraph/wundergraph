@@ -341,7 +341,7 @@ function useQueryContextWrapper<Input, Data, Role>(
 					refetch: () => Promise.resolve(ssrCache[cacheKey] as QueryResult<Data>),
 				};
 			}
-			const promise = client.query<Input, Data>({
+			const promise = client.query({
 				...query,
 				...args,
 			});
@@ -417,7 +417,7 @@ function useQueryContextWrapper<Input, Data, Role>(
 			setQueryResult({ status: 'loading' });
 		}
 		(async () => {
-			const result = await client.query<Input, Data>({
+			const result = await client.query({
 				...query,
 				...statefulArgs,
 				abortSignal: abort.signal,
@@ -530,6 +530,7 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 			{
 				...subscription,
 				...args,
+				isLiveQuery: !!subscription.isLiveQuery,
 				abortSignal: abort.signal,
 			},
 			(result: SubscriptionResult<Data>) => {

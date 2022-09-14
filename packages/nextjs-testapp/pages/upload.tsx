@@ -8,10 +8,13 @@ const UploadPage: NextPage = () => {
 	const [data, setData] = useState<string[]>([]);
 	const { uploadFiles } = useWunderGraph();
 	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFiles(e.target.files);
+		if (e.target.files) setFiles(e.target.files);
 	};
 	const onSubmit = async (e: React.FormEvent<Element>) => {
 		e.preventDefault();
+		if (!files) {
+			return;
+		}
 		const result = await uploadFiles({
 			provider: S3Provider.minio,
 			files,
