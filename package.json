@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.107.0",
+  "version": "0.108.1",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -26,8 +26,7 @@
     "preview:version:packages-next": "lerna version prerelease --git-dry-run",
     "ci:publish:packages": "lerna publish --allow-branch main --yes",
     "ci:publish:packages-next": "lerna publish prerelease --allow-branch next --yes",
-    "publish:engine": "release-it --git.requireBranch=main",
-    "publish:engine-next": "release-it --git.requireBranch=next --preRelease=next",
+    "release-it": "release-it",
     "postinstall": "husky install && pnpm run patch",
     "patch": "patch-package",
     "link-engine": "make build && mv wunderctl ./packages/wunderctl/download",

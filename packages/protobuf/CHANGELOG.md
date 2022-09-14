@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.93.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.92.0...@wundergraph/protobuf@0.93.0) (2022-09-14)
+
+### Features
+
+* oidc,  allow passing additional query parameters to the IDP ([#178](https://github.com/wundergraph/wundergraph/issues/178)) ([d015bb1](https://github.com/wundergraph/wundergraph/commit/d015bb150762cba7a46865e66f3de633e731de07)) (@YuriBuerov)
+
 ## [0.92.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.91.3...@wundergraph/protobuf@0.92.0) (2022-09-01)
 
 ### Features

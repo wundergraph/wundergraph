@@ -1,0 +1,60 @@
+name: Tag Engine Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: Release bump
+        required: true
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  CI: true
+  WORKING_DIRECTORY: '.'
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
+
+jobs:
+  tag-release:
+    name: Create a new release
+    runs-on: ubuntu-latest
+    steps:
+      - run: pnpm i --frozen-lockfile --ignore-scripts
+
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN_WORKFLOW_PUBLISH }}
+
+      - name: git config
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: pnpm i --frozen-lockfile --ignore-scripts
+
+      - name: tag and prepare release
+        id: tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm release-it "${{ github.event.inputs.version }}" --ci -V
+          RELEASE_VERSION=$(cat package.json | jq -r '.version')
+          echo ::set-output name=release_version::${RELEASE_VERSION}
+
+      - name: Dispatch engine release workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: wundergraph/wundergraph
+          event-type: release-engine
+          client-payload: '{"ref": "v${{ steps.tag.outputs.release_version }}"}'
