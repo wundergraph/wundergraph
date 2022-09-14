@@ -40,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pnpm release-it "${{ github.event.inputs.version }}" --ci
+          pnpm release-it "${{ github.event.inputs.version }}" --ci -V
           RELEASE_VERSION=$(cat package.json | jq -r '.version')
           echo ::set-output name=release_version::${RELEASE_VERSION}
 
