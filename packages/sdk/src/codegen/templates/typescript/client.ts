@@ -12,7 +12,6 @@ export class TypeScriptClientTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const _queries = operations(config.application, OperationType.QUERY, false);
-		console.log('QUERIES', _queries);
 		const _liveQueries = liveQueries(config.application, false);
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);

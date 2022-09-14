@@ -26,7 +26,7 @@ export const createClient = (config?: CreateClientProps) => {
 export type Queries = ClientOperationDefs<{
 {{#each queries}}
     {{operationName}}: {
-        {{#if hasInput}}input: {{operationName}}Input{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
     }
@@ -36,7 +36,7 @@ export type Queries = ClientOperationDefs<{
 export type Mutations = ClientOperationDefs<{
 {{#each mutations}}
     {{operationName}}: {
-        {{#if hasInput}}input: {{operationName}}Input{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
     }
@@ -46,14 +46,14 @@ export type Mutations = ClientOperationDefs<{
 export type Subscriptions = ClientOperationDefs<{
 {{#each subscriptions}}
     {{operationName}}: {
-        {{#if hasInput}}input: {{operationName}}Input{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
 {{#each liveQueries}}
     {{operationName}}: {
-        {{#if hasInput}}input: {{operationName}}Input{{/if}}
+        {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         isLiveQuery: true
         requiresAuthentication: {{requiresAuthentication}}
