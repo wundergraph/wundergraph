@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -1076,8 +1075,9 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "MockResolve query hook failed", http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(out.Response)
+
 		if out != nil {
+			_, _ = w.Write(out.Response)
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("MockResolve query hook response is empty", abstractlogger.Bool("isLive", isLive))
@@ -1558,8 +1558,9 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "MutatingPostResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
-		ctx.Variables = out.Input
+
 		if out != nil {
+			ctx.Variables = out.Input
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
 			h.log.Error("MutatingPostResolve mutation hook response is empty")
@@ -1919,9 +1920,9 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			)
 			continue
 		}
-		if strings.HasSuffix(issuer, "/") {
-			issuer = issuer[:len(issuer)-1]
-		}
+
+		issuer = strings.TrimSuffix(issuer, "/")
+
 		introspectionURL := issuer + "/.well-known/openid-configuration"
 		req, err := http.NewRequest(http.MethodGet, introspectionURL, nil)
 		if err != nil {
@@ -1944,7 +1945,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			continue
 		}
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			r.log.Error("failed to read openid-configuration",
 				abstractlogger.Error(err),
@@ -2035,11 +2036,21 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		if provider.OidcConfig == nil {
 			return
 		}
+
+		queryParameters := make([]authentication.QueryParameter, 0, len(provider.OidcConfig.QueryParameters))
+		for _, p := range provider.OidcConfig.QueryParameters {
+			queryParameters = append(queryParameters, authentication.QueryParameter{
+				Name:  loadvariable.String(p.Name),
+				Value: loadvariable.String(p.Value),
+			})
+		}
+
 		openID := authentication.NewOpenIDConnectCookieHandler(r.log)
 		openID.Register(authorizeRouter, callbackRouter, authentication.OpenIDConnectConfig{
 			Issuer:             loadvariable.String(provider.OidcConfig.Issuer),
 			ClientID:           loadvariable.String(provider.OidcConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
+			QueryParameters:    queryParameters,
 			ProviderID:         provider.Id,
 			PathPrefix:         pathPrefix,
 			InsecureCookies:    r.insecureCookies,
@@ -2070,7 +2081,7 @@ func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, _ *http.Re
 }
 
 func updateContextHeaders(ctx *resolve.Context, headers map[string]string) {
-	if headers == nil || len(headers) == 0 {
+	if len(headers) == 0 {
 		return
 	}
 	httpHeader := http.Header{}

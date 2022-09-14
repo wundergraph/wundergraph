@@ -200,6 +200,10 @@ const navigation = [
 				title: 'GraphQL Fragments',
 				href: '/docs/examples/fragments',
 			},
+			{
+				title: 'Keycloak OpenID Connect Authentication',
+				href: '/docs/examples/keycloak-openid-connect-authentication',
+			},
 		],
 	},
 	{

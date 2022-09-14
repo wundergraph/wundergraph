@@ -1,0 +1,23 @@
+services:
+  keycloak:
+    image: 'quay.io/keycloak/keycloak:${KC_VERSION}'
+    command: ['start-dev', '--import-realm']
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '--fail', 'http://localhost:8080/health/ready']
+    environment:
+      - KC_METRICS_ENABLED=false
+      - KC_HEALTH_ENABLED=true
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_REALM_NAME=${KC_REALM_NAME}
+      - AUTH_CLIENT_SECRET=${AUTH_CLIENT_SECRET}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - GITHUB_APP_CLIENT_SECRET=${GITHUB_APP_CLIENT_SECRET}
+      - GITHUB_APP_CLIENT_ID=${GITHUB_APP_CLIENT_ID}
+    ports:
+      - ${KC_PORT}:8080
+    volumes:
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+    security_opt:
+      - no-new-privileges:true

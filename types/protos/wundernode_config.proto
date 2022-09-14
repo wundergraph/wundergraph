@@ -61,10 +61,16 @@ message GithubAuthProviderConfig {
 	ConfigurationVariable clientSecret = 2;
 }
 
+message OpenIDConnectQueryParameter {
+	ConfigurationVariable name = 1;
+	ConfigurationVariable value = 2;
+}
+
 message OpenIDConnectAuthProviderConfig {
 	ConfigurationVariable issuer = 1;
 	ConfigurationVariable clientId = 2;
 	ConfigurationVariable clientSecret = 3;
+	repeated OpenIDConnectQueryParameter queryParameters = 4;
 }
 
 message ApiCacheConfig {
