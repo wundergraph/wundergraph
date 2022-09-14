@@ -1,0 +1,51 @@
+name: Tag Engine Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'minor | major | patch | <version>'
+        required: true
+
+env:
+  CI: true
+  WORKING_DIRECTORY: '.'
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: false
+
+jobs:
+  tag-release:
+    name: Check PNPM lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: git config
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: pnpm i --frozen-lockfile --ignore-scripts
+
+      - name: tag and prepare release
+        id: tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_VERSION=$(pnpm release-it "${{ github.event.inputs.version }}" --release-version)
+          pnpm release-it "$RELEASE_VERSION" --ci
+          echo ::set-output name=release_version::${RELEASE_VERSION}
+
+      - name: Dispatch engine release workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: wundergraph/wundergraph
+          event-type: release-engine
+          client-payload: '{"ref": "${{ steps.tag.outputs.release_version }}"}'
