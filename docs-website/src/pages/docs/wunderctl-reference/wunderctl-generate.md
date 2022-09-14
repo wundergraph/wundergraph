@@ -13,11 +13,6 @@ using `wunderctl up`,
 or you also do it on demand using `wunderctl generate`.
 
 {% callout type="warning" %}
-When you are using `EnvironmentVariable` in your configuration,
-please make sure that you are providing them for `wunderctl generate` command
-{% /callout %}
-
-{% callout type="warning" %}
 When you do not provide an options in `wundergraph.config.ts` and/or in `wundergraph.server.ts`.
 We will use [Default Environment Variables](/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables) to generate the config.
 
@@ -30,4 +25,10 @@ Alternatively provide values for the following environment variables
 
 - `WG_NODE_URL`
 - `WG_SERVER_URL`
-  {% /callout %}
+
+{% /callout %}
+
+{% callout type="warning" %}
+When you are using custom `EnvironmentVariable` in your configuration,
+please make sure that you are providing values for them when running this command
+{% /callout %}

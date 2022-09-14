@@ -17,6 +17,6 @@ This involves:
 - restarting WunderNode and hooks when necessary
 
 {% callout type="warning" %}
-When you are using `EnvironmentVariable` in your configuration,
-please make sure that you are providing values for them for `wunderctl up` command
+When you are using custom `EnvironmentVariable` in your configuration,
+please make sure that you are providing values for them when running this command
 {% /callout %}

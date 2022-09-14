@@ -7,10 +7,30 @@ description:
 The cmd `wunderctl server start` starts WunderGraph Server in the production mode.
 
 {% callout type="warning" %}
-When you are running node in production make sure that mandatory environment variables are provided:
+`wunderctl server start` not doing any kind of generation.
+It is requires generated files from `wunderctl generate`.
+{% /callout %}
+
+{% callout type="warning" %}
+To run WunderGraph Server it is mandatory to set:
+
+- `nodeUrl` in WunderNode [`options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options)
+
+Alternatively provide values for the following EnvironmentVariable:
 
 - `WG_NODE_URL`
 
-`wundergraph.server.ts` static values or custom environment variables in [`options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options) has priority over default environment variables.
+{% /callout %}
 
+{% callout type="warning" %}
+Static values or custom environment variables has priority over default environment variables in:
+
+- [`WunderNode options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options) of `wundergraph.config.ts`
+- [`WunderGraph Server options`](/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options) of `wundergraph.server.ts`
+
+{% /callout %}
+
+{% callout type="warning" %}
+When you are using custom `EnvironmentVariable` in your configuration,
+please make sure that you are providing values for them when running this command
 {% /callout %}
