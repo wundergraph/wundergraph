@@ -3,8 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'minor | major | patch | <version>'
+        type: choice
+        description: Release bump
         required: true
+        options:
+          - patch
+          - minor
+          - major
 
 env:
   CI: true
@@ -19,6 +24,8 @@ jobs:
     name: Create a new release
     runs-on: ubuntu-latest
     steps:
+      - run: pnpm i --frozen-lockfile --ignore-scripts
+
       - uses: actions/checkout@v3
         with:
           token: ${{ secrets.GH_TOKEN_WORKFLOW_PUBLISH }}
