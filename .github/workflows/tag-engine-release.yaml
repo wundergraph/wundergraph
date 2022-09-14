@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   tag-release:
-    name: Check PNPM lockfile
+    name: Create a new release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -38,8 +38,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_VERSION=$(pnpm release-it "${{ github.event.inputs.version }}" --release-version)
-          pnpm release-it "$RELEASE_VERSION" --ci
+          pnpm release-it "${{ github.event.inputs.version }}" --ci
+          RELEASE_VERSION=$(cat package.json | jq -r '.version')
           echo ::set-output name=release_version::${RELEASE_VERSION}
 
       - name: Dispatch engine release workflow
