@@ -48,10 +48,10 @@ We use lerna conventional commit integration to calculate the version. If you cr
 
 ## Release Cheat Sheet
 
-| Component           | Stable Release                             | Next Release                             |
-| ------------------- | ------------------------------------------ | ---------------------------------------- |
-| WunderCtl           | `pnpm publish:engine`                      | `pnpm publish:engine-next`             |
-| WunderCtl (Wrapper) | Automated after WunderCtl                  | -                                        |
-| NPM Packages        | Trigger via Workflow run (Select `stable`) | Trigger via Workflow run (Select `next`) |
+| Component           | Stable Release                                                                                                                                                                                                                                            | Next Release                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| WunderCtl           | [Trigger workflow](https://github.com/wundergraph/wundergraph/actions/workflows/tag-engine-release.yaml)                                                                                                                                                  | Trigger via Workflow run (Select branch `next`) |
+| WunderCtl (Wrapper) | Is released automatically after [Wunderctl workflow](https://github.com/wundergraph/wundergraph/actions/workflows/tag-engine-release.yaml) in [Engine Release workflow](https://github.com/wundergraph/wundergraph/actions/workflows/engine-release.yaml) | -                                               |
+| NPM Packages        | Trigger via [Workflow](https://github.com/wundergraph/wundergraph/actions/workflows/packages-release.yaml) run (Select `stable`)                                                                                                                          | Trigger via Workflow run (Select branch `next`) |
 
 Next releases must be done on a branch with the name `next`. Regular "stable" releases are done on the `main` branch.
