@@ -271,8 +271,6 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
-	var err error
-
 	router := mux.NewRouter()
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
@@ -354,7 +352,6 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
 	if err != nil {
 		n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
-		err = nil
 	}
 
 	streamClosers = append(streamClosers, internalClosers...)
@@ -387,13 +384,12 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	for _, listener := range listeners {
-		l := listener
-		go func() {
+		go func(l net.Listener) {
 			n.log.Info("listening on",
 				abstractlogger.String("addr", l.Addr().String()),
 			)
-			err = n.server.Serve(l)
-			if err != nil {
+
+			if err := n.server.Serve(l); err != nil {
 				if err == http.ErrServerClosed {
 					n.log.Debug("listener closed",
 						abstractlogger.String("addr", l.Addr().String()),
@@ -402,7 +398,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 				}
 				n.errCh <- err
 			}
-		}()
+		}(listener)
 	}
 
 	return nil
