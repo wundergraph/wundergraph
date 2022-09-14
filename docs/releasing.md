@@ -42,15 +42,15 @@ WunderGraph applications. After installing this package, it will download the co
 relationship makes it necessary to release the wunderctl binary first before upgrading
 the [`@wundergraph/wunderctl`](https://github.com/wundergraph/wundergraph/tree/main/packages/wunderctl) package.
 
-## How to select the version?
+## How to select the release version?
 
-We use lerna conventional commit integration to calculate the version. If you create a PR, we also enforce a proper PR title which decide upon the semver change.
+We use lerna conventional commit integration to estimate the next release version. If you create a PR, we also enforce a proper PR title which decide upon the semver change.
 
 ## Release Cheat Sheet
 
 | Component           | Stable Release                                                                                                                                                                                                                                            | Next Release                                    |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| WunderCtl           | [Trigger workflow](https://github.com/wundergraph/wundergraph/actions/workflows/tag-engine-release.yaml)                                                                                                                                                  | Trigger via Workflow run (Select branch `next`) |
+| WunderCtl           | [Trigger workflow](https://github.com/wundergraph/wundergraph/actions/workflows/tag-engine-release.yaml) Choose between `patch`, `minor`, `major`.                                                                                                        | Trigger via Workflow run (Select branch `next`) |
 | WunderCtl (Wrapper) | Is released automatically after [Wunderctl workflow](https://github.com/wundergraph/wundergraph/actions/workflows/tag-engine-release.yaml) in [Engine Release workflow](https://github.com/wundergraph/wundergraph/actions/workflows/engine-release.yaml) | -                                               |
 | NPM Packages        | Trigger via [Workflow](https://github.com/wundergraph/wundergraph/actions/workflows/packages-release.yaml) run (Select `stable`)                                                                                                                          | Trigger via Workflow run (Select branch `next`) |
 
