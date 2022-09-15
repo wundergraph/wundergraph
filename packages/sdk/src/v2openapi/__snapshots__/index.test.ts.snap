@@ -15589,6 +15589,235 @@ enum api_AuctionStatus {
 }"
 `;
 
+exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
+"[
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_getUsers\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/users\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"\\",
+      \\"StatusCodeTypeMappings\\": []
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
+  },
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_getUsersUserId\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/users/{{ .arguments.user_id }}\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"\\",
+      \\"StatusCodeTypeMappings\\": []
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
+  },
+  {
+    \\"RootNodes\\": [
+      {
+        \\"typeName\\": \\"Query\\",
+        \\"fieldNames\\": [
+          \\"api_getSomeProperties\\"
+        ]
+      }
+    ],
+    \\"Kind\\": 1,
+    \\"Custom\\": {
+      \\"Fetch\\": {
+        \\"method\\": 0,
+        \\"path\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"/some/properties\\"
+        },
+        \\"baseUrl\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\"
+        },
+        \\"url\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"body\\": {
+          \\"kind\\": 0,
+          \\"environmentVariableDefaultValue\\": \\"\\",
+          \\"environmentVariableName\\": \\"\\",
+          \\"placeholderVariableName\\": \\"\\",
+          \\"staticVariableContent\\": \\"\\"
+        },
+        \\"header\\": {},
+        \\"query\\": [
+          {
+            \\"name\\": \\"sortBy\\",
+            \\"value\\": \\"{{ .arguments.sortBy }}\\"
+          },
+          {
+            \\"name\\": \\"sortOrder\\",
+            \\"value\\": \\"{{ .arguments.sortOrder }}\\"
+          }
+        ],
+        \\"urlEncodeBody\\": false
+      },
+      \\"Subscription\\": {
+        \\"Enabled\\": false
+      },
+      \\"DefaultTypeName\\": \\"\\",
+      \\"StatusCodeTypeMappings\\": []
+    },
+    \\"ChildNodes\\": [],
+    \\"Directives\\": []
+  }
+]"
+`;
+
+exports[`dynamic baseurl: dynamic_baseurl_fields 1`] = `
+"[
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_getUsers\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_getUsersUserId\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
+  },
+  {
+    \\"typeName\\": \\"Query\\",
+    \\"fieldName\\": \\"api_getSomeProperties\\",
+    \\"disableDefaultFieldMapping\\": true,
+    \\"argumentsConfiguration\\": [],
+    \\"requiresFields\\": [],
+    \\"path\\": [],
+    \\"unescapeResponseJson\\": false
+  }
+]"
+`;
+
+exports[`dynamic baseurl: dynamic_baseurl_schema 1`] = `
+"type Query {
+  api_getUsers(basepath: String!): [api_User]
+  api_getUsersUserId(basepath: String!, user_id: Int!): api_User
+  api_getSomeProperties(basepath: String!, sortBy: String, sortOrder: Int): api_PropertiesResponse
+}
+
+type api_User {
+  id: Int
+  name: String
+  country_code: String
+  status_code: Int
+}
+
+type api_PropertiesResponse {
+  properties: JSON
+}
+
+scalar JSON"
+`;
+
 exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
 "[
   {
