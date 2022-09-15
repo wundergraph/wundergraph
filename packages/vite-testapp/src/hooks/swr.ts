@@ -1,7 +1,7 @@
 import { createClient, Mutations, Queries, Subscriptions } from '../components/generated/client';
-import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 'swr';
+import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions, unstable_serialize } from 'swr';
 import { ClientQueryArgs, ClientMutationArgs, QueryProps, ResultError, MutationProps } from '@wundergraph/sdk/client';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 
 const client = createClient();
 
@@ -51,7 +51,8 @@ export const useQuery = <
 	options: UseQueryOptions<LiveQuery> = {}
 ): SWRResponse<Data, ResultError> => {
 	const { isLiveQuery, enabled = true, ...config } = options;
-	const key = useMemo(() => ({ operationName, input }), [operationName, input]);
+	const key = { operationName, input };
+	const [_key] = unstable_serialize(key)[0];
 	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, config);
 
 	useEffect(() => {
@@ -62,7 +63,7 @@ export const useQuery = <
 		return () => {
 			unsubscribe?.();
 		};
-	}, [isLiveQuery, enabled, operationName]);
+	}, [isLiveQuery, enabled, _key]);
 
 	return response;
 };
@@ -130,8 +131,9 @@ export const useSubscription = <
 	options: UseSubscriptionOptions = {}
 ): SWRResponse<Data, ResultError> => {
 	const { enabled = true, ...config } = options;
-	const key = useMemo(() => (enabled ? { operationName, input } : null), [enabled, operationName, input]);
-	const response = useSWR(key, null, config);
+	const key = { operationName, input };
+	const [_key] = unstable_serialize(key)[0];
+	const response = useSWR(enabled ? key : null, null, config);
 
 	useEffect(() => {
 		let unsubscribe: () => void;
@@ -141,7 +143,7 @@ export const useSubscription = <
 		return () => {
 			unsubscribe?.();
 		};
-	}, [operationName, input, enabled]);
+	}, [enabled, _key]);
 
 	return response;
 };
