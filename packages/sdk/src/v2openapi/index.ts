@@ -48,7 +48,6 @@ import {
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
 import { mapInputVariable } from '../configure';
-import { resolveConfigurationVariable } from '../../dist/configure/variables';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -245,8 +244,15 @@ class RESTApiBuilder {
 			ChildNodes: [],
 			Directives: [],
 		});
-		const baseURL = resolveConfigurationVariable(this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl!);
-		this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl = mapInputVariable(this.cleanupBaseURL(baseURL));
+		if (this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl) {
+			const baseURL = this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl!;
+			if (baseURL.kind !== ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE) {
+				throw new Error('Base URL must be a static string, environment variables are not supported');
+			}
+			this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl = mapInputVariable(
+				this.cleanupBaseURL(baseURL.staticVariableContent)
+			);
+		}
 		this.fields.push({
 			typeName: parentType,
 			fieldName: fieldName,
