@@ -1,39 +1,70 @@
 import { createClient, Mutations, Queries, Subscriptions } from '../components/generated/client';
 import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 'swr';
-import {
-	ClientQueryArgs,
-	ClientMutationArgs,
-	ClientSubscriptionArgs,
-	QueryProps,
-	ResultError,
-	SubscriptionProps,
-	SubscriptionResult,
-	MutationProps,
-} from '@wundergraph/sdk/client';
-import { useEffect, useState } from 'react';
+import { ClientQueryArgs, ClientMutationArgs, QueryProps, ResultError, MutationProps } from '@wundergraph/sdk/client';
+import { useEffect, useMemo } from 'react';
 
 const client = createClient();
+
+const queryFetcher = async <
+	OperationName extends keyof Queries,
+	Input extends Queries[OperationName]['input'] = Queries[OperationName]['input']
+>(
+	query: QueryProps<OperationName, ClientQueryArgs<Input>>
+) => {
+	const result = await client.query(query);
+
+	if (result.status === 'error' || result.status === 'partial') {
+		throw new Error(result.errors[0].message);
+	}
+
+	return result.data;
+};
+
+const mutationFetcher = async <
+	OperationName extends keyof Mutations,
+	Input extends Mutations[OperationName]['input'] = Mutations[OperationName]['input']
+>(
+	mutation: MutationProps<OperationName, ClientMutationArgs<Input>>
+) => {
+	const result = await client.mutate(mutation);
+
+	if (result.status === 'error' || result.status === 'partial') {
+		throw new Error(result.errors[0].message);
+	}
+
+	return result.data;
+};
+
+export interface UseQueryOptions<LiveQuery> extends SWRConfiguration {
+	isLiveQuery?: LiveQuery;
+	enabled?: boolean;
+}
 
 export const useQuery = <
 	OperationName extends keyof Queries,
 	Input extends Queries[OperationName]['input'] = Queries[OperationName]['input'],
-	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data']
+	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data'],
+	LiveQuery extends Queries[OperationName]['liveQuery'] = Queries[OperationName]['liveQuery']
 >(
 	operationName: OperationName,
 	input: Input,
-	config?: SWRConfiguration
+	options: UseQueryOptions<LiveQuery> = {}
 ): SWRResponse<Data, ResultError> => {
-	return useSWR(
-		{ operationName, input },
-		async (query: QueryProps<OperationName, ClientQueryArgs<Input>>) => {
-			const result = await client.query(query);
+	const { isLiveQuery, enabled = true, ...config } = options;
+	const key = useMemo(() => ({ operationName, input }), [operationName, input]);
+	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, config);
 
-			if (result.data) {
-				return result.data;
-			}
-		},
-		config
-	);
+	useEffect(() => {
+		let unsubscribe: () => void;
+		if (isLiveQuery && enabled) {
+			unsubscribe = subscribeTo(operationName, input, { isLiveQuery: true });
+		}
+		return () => {
+			unsubscribe?.();
+		};
+	}, [isLiveQuery, enabled, operationName]);
+
+	return response;
 };
 
 export const useMutation = <
@@ -48,50 +79,69 @@ export const useMutation = <
 
 	return {
 		...response,
-		async mutate(input: Input, options: MutatorOptions<Data>) {
-			const result = await client.mutate({
-				operationName,
-				input,
-			} as unknown as MutationProps<OperationName, ClientMutationArgs<Input>>);
-
-			if (result.status === 'ok') {
-				response.mutate(result.data, options);
-			}
-
-			return result.data;
+		async mutate(input: Input, options?: MutatorOptions<Data>) {
+			return response.mutate(async () => {
+				return mutationFetcher<any>({ operationName, input });
+			}, options);
 		},
 	};
 };
 
+/**
+ * This is will subscribe to an operation and mutate the SWR state on result.
+ *
+ * @usage
+ * ```ts
+ * const unsubscribe = subscribeTo('Hello', {world: 'World'})
+ * ```
+ */
+const subscribeTo = <OperationName = any, Input = any, Data = any>(
+	operationName: OperationName,
+	input: Input,
+	options: { isLiveQuery?: boolean } = {}
+) => {
+	const abort = new AbortController();
+	const key = { operationName, input };
+	const { isLiveQuery } = options;
+	client.subscribe<any, any, any>({ operationName, input, abortSignal: abort.signal, isLiveQuery }, (result) => {
+		mutate(key, async () => {
+			if (result.status === 'error' || result.status === 'partial') {
+				throw new Error(result.errors[0].message);
+			}
+			return result.data;
+		});
+	});
+	return () => {
+		abort.abort();
+	};
+};
+
+export interface UseSubscriptionOptions extends SWRConfiguration {
+	enabled?: boolean;
+}
+
 export const useSubscription = <
 	OperationName extends keyof Subscriptions,
 	Input extends Subscriptions[OperationName]['input'] = Subscriptions[OperationName]['input'],
-	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data'],
-	LiveQuery extends Subscriptions[OperationName]['isLiveQuery'] = Subscriptions[OperationName]['isLiveQuery']
+	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data']
 >(
 	operationName: OperationName,
 	input: Input,
-	config: SWRConfiguration & { isLiveQuery: LiveQuery }
+	options: UseSubscriptionOptions = {}
 ): SWRResponse<Data, ResultError> => {
-	const [key] = useState({ operationName, input, isLiveQuery: config?.isLiveQuery });
+	const { enabled = true, ...config } = options;
+	const key = useMemo(() => (enabled ? { operationName, input } : null), [enabled, operationName, input]);
 	const response = useSWR(key, null, config);
-	useEffect(() => {
-		const abort = new AbortController();
-		client.subscribe(
-			{ ...key, abortSignal: abort.signal } as unknown as SubscriptionProps<
-				OperationName,
-				ClientSubscriptionArgs<Input>,
-				LiveQuery
-			>,
-			(result: SubscriptionResult<Data>) => {
-				mutate(key, result.data);
-			}
-		);
 
+	useEffect(() => {
+		let unsubscribe: () => void;
+		if (enabled) {
+			unsubscribe = subscribeTo(operationName, input);
+		}
 		return () => {
-			abort.abort();
+			unsubscribe?.();
 		};
-	}, [key]);
+	}, [operationName, input, enabled]);
 
 	return response;
 };

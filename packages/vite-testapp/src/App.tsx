@@ -1,9 +1,10 @@
 import reactLogo from './assets/react.svg';
 import './App.css';
-import { useSubscription } from './hooks/swr';
+import { useQuery, useMutation } from './hooks/swr';
+import { useState } from 'react';
 
 const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
-	const liveWeather = useSubscription('Weather', { forCity: city }, { isLiveQuery: true });
+	const liveWeather = useQuery('Weather', { forCity: city }, { isLiveQuery: true });
 
 	return (
 		<div>
@@ -19,6 +20,33 @@ const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.wind)}</p>
 				</div>
 			)}
+		</div>
+	);
+};
+
+const NameForm = () => {
+	const mutation = useMutation('SetName');
+
+	const [name, setName] = useState('');
+
+	return (
+		<div>
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					mutation.mutate({ name });
+				}}
+			>
+				<div>
+					<label>
+						Name
+						<input name="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
+					</label>
+				</div>
+				<button type="submit">Submit</button>
+
+				<p>{JSON.stringify(mutation.data)}</p>
+			</form>
 		</div>
 	);
 };
@@ -40,6 +68,10 @@ function App() {
 			<h1>WunderGraph + Vite + React</h1>
 			<div className="card">
 				<LiveWeather city="Berlin" />
+			</div>
+
+			<div className="card">
+				<NameForm />
 			</div>
 			<p className="read-the-docs">Click on the WunderGraph, Vite and React logos to learn more</p>
 		</div>
