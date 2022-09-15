@@ -2,7 +2,8 @@
 
 set -e
 
-# Copy templates to CLI, removes the destination directory first and then all .gitignore files
+# Copy templates to the CLI
+# It removes the destination directory first and then all .gitignored files
 
 e1="pkg/templates/assets/templates/application"
 rm -rf $e1 && cp -r examples/simple/. $e1 && git clean -X -f $e1
