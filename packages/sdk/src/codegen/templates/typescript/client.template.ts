@@ -29,6 +29,7 @@ export type Queries = ClientOperationDefs<{
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
+        liveQuery: {{liveQuery}}
     }
 {{/each}}
 }>
@@ -51,6 +52,9 @@ export type Subscriptions = ClientOperationDefs<{
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
+}>
+
+export type LiveQueries = ClientOperationDefs<{
 {{#each liveQueries}}
     {{operationName}}: {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
@@ -61,5 +65,5 @@ export type Subscriptions = ClientOperationDefs<{
 {{/each}}
 }>
 
-export type Operations = ClientOperations<Queries, Mutations, Subscriptions>
+export type Operations = ClientOperations<Queries, Mutations, Subscriptions & LiveQueries>
 `;

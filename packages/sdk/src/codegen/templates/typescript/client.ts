@@ -11,7 +11,7 @@ import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
 export class TypeScriptClientTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
-		const _queries = operations(config.application, OperationType.QUERY, false);
+		const _queries = queries(config.application, false);
 		const _liveQueries = liveQueries(config.application, false);
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
@@ -62,6 +62,18 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 				requiresAuthentication: op.AuthenticationConfig.required,
 			};
 		});
+
+export const queries = (application: ResolvedApplication, includeInternal: boolean) =>
+	filteredOperations(application, includeInternal).map((op) => {
+		return {
+			operationName: op.Name,
+			path: op.Name,
+			hasInput: hasInput(op),
+			hasInternalInput: hasInternalInput(op),
+			requiresAuthentication: op.AuthenticationConfig.required,
+			liveQuery: !!op.LiveQuery?.enable,
+		};
+	});
 
 export const liveQueries = (application: ResolvedApplication, includeInternal: boolean) =>
 	filteredOperations(application, includeInternal)

@@ -346,7 +346,7 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 		}
 	};
 
-	private hasInput<Input>(
+	public hasInput<Input>(
 		args:
 			| InternalQueryArgs
 			| InternalQueryArgsWithInput<Input>
@@ -633,11 +633,11 @@ export interface MutationArgsWithInput<Input> extends MutationArgs {
 	input: Input;
 }
 
-export type InternalClientMutationArgs<Input = object> = Input extends object
-	? InternalMutationArgsWithInput<Input>
-	: InternalMutationArgs;
+export type InternalClientMutationArgs<Input> = Input extends undefined
+	? InternalMutationArgs
+	: InternalMutationArgsWithInput<Input>;
 
-export type ClientMutationArgs<Input = object> = Input extends object ? MutationArgsWithInput<Input> : MutationArgs;
+export type ClientMutationArgs<Input> = Input extends undefined ? MutationArgs : MutationArgsWithInput<Input>;
 
 export interface GraphQLError {
 	message: string;
