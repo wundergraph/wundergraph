@@ -44,11 +44,8 @@ var upCmd = &cobra.Command{
 		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
 
-		quit := make(chan os.Signal, 2)
-		signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
-
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
 
 		log.Info("Starting WunderNode",
 			abstractlogger.String("version", BuildInfo.Version),
@@ -78,10 +75,6 @@ var upCmd = &cobra.Command{
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 
-		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
-			helpers.KillExistingHooksProcess(port, log)
-		}
-
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
@@ -90,11 +83,11 @@ var upCmd = &cobra.Command{
 			Logger:        log,
 			FirstRunEnv: []string{
 				// when the user runs `wunderctl up` for the first time, we revalidate the cache
-				// so the user can be sure that the introspection is up to date. In case of an API is not available
-				// we will fallback to the cached introspection (when available)
+				// so the user can be sure that the introspection is up-to-date. In case of an API is not available
+				// we will fall back to the cached introspection (when available)
 				"WG_ENABLE_INTROSPECTION_CACHE=false",
 				// this option allows us to make different decision for the first run
-				// for example, we decide to not use the cache but we will prefill the cache
+				// for example, we decide to not use the cache, but we will prefill the cache
 				"WG_DEV_FIRST_RUN=true",
 			},
 			ScriptEnv: append(os.Environ(),
@@ -279,25 +272,10 @@ var upCmd = &cobra.Command{
 		// because no fs event is fired as build is already done
 		configFileChangeChan <- struct{}{}
 
-		select {
-		case signal := <-quit:
-			log.Info("Received interrupt signal. Initialize WunderNode shutdown ...",
-				abstractlogger.String("signal", signal.String()),
-			)
-		case <-ctx.Done():
-			log.Info("Context was canceled. Initialize WunderNode shutdown ....")
-		}
-
-		configRunner.Stop()
-		configIntrospectionRunner.Stop()
-		if hookServerRunner != nil {
-			hookServerRunner.Stop()
-		}
-
-		err = n.Close()
-		if err != nil {
-			log.Error("Error during WunderNode close", abstractlogger.Error(err))
-		}
+		<-ctx.Done()
+		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+		
+		_ = n.Shutdown(context.Background())
 
 		log.Info("WunderNode shutdown complete")
 

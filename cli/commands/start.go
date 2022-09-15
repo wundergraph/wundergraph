@@ -3,7 +3,10 @@ package commands
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"path"
+	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -41,10 +44,13 @@ If used without --exclude-server, make sure the server is available in this dire
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
+		nodeCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
 
 		if !excludeServer {
+			serverCtx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
 			serverExecutablePath := path.Join(wgDir, "generated", "bundle", "server.js")
 			if !files.FileExists(serverExecutablePath) {
@@ -71,17 +77,18 @@ If used without --exclude-server, make sure the server is available in this dire
 			}()
 
 			go func() {
-				<-hookServerRunner.Run(ctx)
-				log.Error("Hook server excited. Initialize WunderNode shutdown")
-				// cancel context when hook server stopped
-				cancel()
+				<-hookServerRunner.Run(serverCtx)
+				if err := nodeCtx.Err(); err != nil {
+					log.Info("WunderGraph Server shutdown complete.")
+				} else {
+					log.Error("Hook server excited. Initialize WunderNode shutdown")
+					stop()
+				}
 			}()
 		}
 
-		shutdownHandler := helpers.NewNodeShutdownHandler(log, gracefulTimeout)
-
 		configFileChangeChan := make(chan struct{})
-		n := node.New(ctx, BuildInfo, log)
+		n := node.New(nodeCtx, BuildInfo, log)
 
 		go func() {
 			err := n.StartBlocking(
@@ -101,7 +108,7 @@ If used without --exclude-server, make sure the server is available in this dire
 		// because no fs event is fired as build is already done
 		configFileChangeChan <- struct{}{}
 
-		shutdownHandler.HandleGracefulShutdown(ctx, n)
+		n.HandleGracefulShutdown(gracefulTimeout)
 
 		return nil
 	},

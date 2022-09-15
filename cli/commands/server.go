@@ -55,7 +55,11 @@ var serverStartCmd = &cobra.Command{
 		hookServerRunner := helpers.NewServerRunner(log, srvCfg)
 
 		<-hookServerRunner.Run(ctx)
-		log.Error("Hook server excited")
+		if ctx.Err() != nil {
+			log.Info("WunderGraph Server shutdown complete")
+		} else {
+			log.Error("WunderGraph Server excited")
+		}
 
 		return nil
 	},

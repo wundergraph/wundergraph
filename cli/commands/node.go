@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/signal"
 	"path"
+	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -55,14 +57,10 @@ var nodeStartCmd = &cobra.Command{
 			return err
 		}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		gracefulTimeoutSeconds := 10
-		shutdownHandler := helpers.NewNodeShutdownHandler(log, gracefulTimeoutSeconds)
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
 
 		wunderNodeConfig := node.CreateConfig(&graphConfig)
-
 		n := node.New(ctx, BuildInfo, log)
 
 		go func() {
@@ -75,7 +73,8 @@ var nodeStartCmd = &cobra.Command{
 			}
 		}()
 
-		shutdownHandler.HandleGracefulShutdown(ctx, n)
+		gracefulTimeoutSeconds := 10
+		n.HandleGracefulShutdown(gracefulTimeoutSeconds)
 
 		return nil
 	},

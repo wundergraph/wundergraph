@@ -270,6 +270,22 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 	n.log.Debug("old server gracefully shut down")
 }
 
+func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
+	<-n.ctx.Done()
+	n.log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+
+	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
+	n.log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), gracefulTimeoutDur)
+	defer cancel()
+
+	if err := n.Shutdown(shutdownCtx); err != nil {
+		n.log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
+	}
+
+	n.log.Info("WunderNode shutdown complete")
+}
+
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	router := mux.NewRouter()
 
