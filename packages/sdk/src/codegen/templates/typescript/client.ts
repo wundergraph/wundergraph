@@ -1,7 +1,13 @@
 import { handlebarTemplate } from './client.template';
 import Handlebars from 'handlebars';
 import { Template, TemplateOutputFile } from '../../index';
-import { formatTypeScript } from './';
+import {
+	BaseTypeScriptDataModel,
+	formatTypeScript,
+	TypeScriptInputModels,
+	TypeScriptResponseDataModels,
+	TypeScriptResponseModels,
+} from './';
 import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
@@ -44,6 +50,14 @@ export class TypeScriptClientTemplate implements Template {
 				doNotEditHeader: true,
 			},
 		]);
+	}
+	dependencies(): Template[] {
+		return [
+			new TypeScriptInputModels(),
+			new TypeScriptResponseModels(),
+			new TypeScriptResponseDataModels(),
+			new BaseTypeScriptDataModel(),
+		];
 	}
 }
 
