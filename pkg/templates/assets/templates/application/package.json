@@ -1,19 +1,20 @@
 {
-  "name": "wundergraph-application",
+  "name": "wundergraph-simple",
   "version": "1.0.0",
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
-    "wunderctl": "wunderctl",
-    "check": "tsc"
+    "generate": "wunderctl generate up --debug",
+    "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@wundergraph/sdk": "^0.108.0",
+    "graphql": "^16.3.0"
+  },
+  "devDependencies": {
     "@types/node": "^14.14.37",
-    "@wundergraph/sdk": "^0.107.0",
-    "graphql": "^16.3.0",
     "typescript": "^4.8.2"
   }
 }
