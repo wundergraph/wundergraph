@@ -52,7 +52,7 @@ export const useQuery = <
 ): SWRResponse<Data, ResultError> => {
 	const { isLiveQuery, enabled = true, ...config } = options;
 	const key = { operationName, input };
-	const [_key] = unstable_serialize(key)[0];
+	const [_key] = unstable_serialize(key);
 	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, config);
 
 	useEffect(() => {
@@ -132,7 +132,7 @@ export const useSubscription = <
 ): SWRResponse<Data, ResultError> => {
 	const { enabled = true, ...config } = options;
 	const key = { operationName, input };
-	const [_key] = unstable_serialize(key)[0];
+	const [_key] = unstable_serialize(key);
 	const response = useSWR(enabled ? key : null, null, config);
 
 	useEffect(() => {
