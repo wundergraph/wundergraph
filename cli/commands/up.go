@@ -78,9 +78,7 @@ var upCmd = &cobra.Command{
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 
-		if port, err := helpers.ServerPortFromConfig(configJsonPath); err != nil {
-			log.Fatal("could not read server port from config file", abstractlogger.String("configFile", configJsonPath))
-		} else {
+		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
 		}
 

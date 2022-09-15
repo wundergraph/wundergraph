@@ -20,6 +20,10 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 		return 0, err
 	}
 
+	if len(data) == 0 {
+		return 0, fmt.Errorf("config file is empty")
+	}
+
 	var graphConfig struct {
 		Api *struct {
 			ServerOptions *wgpb.ServerOptions `json:"serverOptions,omitempty"`
