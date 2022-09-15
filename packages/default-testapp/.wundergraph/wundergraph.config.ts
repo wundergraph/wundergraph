@@ -16,6 +16,7 @@ const jsp = introspect.openApi({
 		kind: 'file',
 		filePath: '../json_placeholder.json',
 	},
+	baseURL: 'https://jsonplaceholder.typicode.{tld}',
 	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
