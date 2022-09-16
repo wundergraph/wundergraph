@@ -94,7 +94,7 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 		this.extraHeaders = headers;
 	}
 
-	public cacheKey<Q extends QueryProps<Record<any, any>>>(query: Q): string {
+	public cacheKey<OperationName extends string, Q extends QueryProps<OperationName>>(query: Q): string {
 		return serialize(query);
 	}
 
