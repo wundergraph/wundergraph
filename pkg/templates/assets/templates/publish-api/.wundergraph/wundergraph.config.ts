@@ -1,4 +1,13 @@
-import { configurePublishWunderGraphAPI, EnvironmentVariable, introspect, PlaceHolder } from '@wundergraph/sdk';
+import {
+	Application,
+	configurePublishWunderGraphAPI,
+	configureWunderGraphApplication,
+	cors,
+	EnvironmentVariable,
+	introspect,
+	PlaceHolder,
+} from '@wundergraph/sdk';
+import { integrations } from './generated/wundergraph.integrations';
 
 const weatherApi = introspect.graphql({
 	// when publishing an API, your will probably NOT want to apply a namespace
@@ -18,6 +27,27 @@ const weatherApi = introspect.graphql({
         // add a static Header using a EnvironmentVariable
         // the EnvironmentVariable can be replaced by the API user
         .addStaticHeader("Authorization", new EnvironmentVariable("AUTH_TOKEN"))*/
+});
+
+// uncomment this section to use the weather and spacex API
+const myApplication = new Application({
+	name: 'app',
+	apis: [weatherApi, integrations.starptech.spacex()],
+});
+
+// configureWunderGraph emits the configuration
+configureWunderGraphApplication({
+	application: myApplication,
+	cors: {
+		...cors.allowAll,
+		allowedOrigins:
+			process.env.NODE_ENV === 'production'
+				? [
+						// change this before deploying to production to the actual domain where you're deploying your app
+						'http://localhost:3000',
+				  ]
+				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
+	},
 });
 
 // If you want to allow your API users some confiugration flexibility,
