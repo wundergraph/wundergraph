@@ -36,7 +36,8 @@ const mutationFetcher = async <
 	return result.data;
 };
 
-export type UseQueryOptions<Input, LiveQuery> = SWRConfiguration & {
+export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration & {
+	operationName: OperationName;
 	isLiveQuery?: LiveQuery;
 	enabled?: boolean;
 } & (Input extends object ? { input: Input } : {});
@@ -47,17 +48,16 @@ export const useQuery = <
 	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data'],
 	LiveQuery extends Queries[OperationName]['liveQuery'] = Queries[OperationName]['liveQuery']
 >(
-	operationName: OperationName,
-	options?: UseQueryOptions<Input, LiveQuery>
+	options: UseQueryOptions<OperationName, Input, LiveQuery>
 ): SWRResponse<Data, ResultError> => {
 	const _options = {
 		input: undefined,
 		...options,
 	};
-	const { isLiveQuery, enabled = true, input, ...swrConfig } = _options;
-	const key = input ? { operationName, input } : { operationName };
+	const { operationName, isLiveQuery, enabled = true, input, ...swrConfig } = _options;
+	const key = { operationName, input };
 	const [_key] = serialize(key);
-	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, swrConfig);
+	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, swrConfig as SWRConfiguration);
 
 	useEffect(() => {
 		let unsubscribe: () => void;
@@ -72,6 +72,9 @@ export const useQuery = <
 	return response;
 };
 
+export type UseMutationOptions<OperationName> = SWRConfiguration & {
+	operationName: OperationName;
+};
 export type MutateOptions<Input, Data> = MutatorOptions<Data> & (Input extends object ? { input: Input } : {});
 
 export const useMutation = <
@@ -79,20 +82,19 @@ export const useMutation = <
 	Input extends Mutations[OperationName]['input'] = Mutations[OperationName]['input'],
 	Data extends Mutations[OperationName]['data'] = Mutations[OperationName]['data']
 >(
-	operationName: OperationName,
-	config?: SWRConfiguration
+	options: UseMutationOptions<OperationName>
 ) => {
+	const { operationName, ...config } = options;
 	const response = useSWR(operationName, null, config);
 
 	return {
 		...response,
 		async mutate(options?: MutateOptions<Input, Data>): Promise<Data> {
 			const _options = {
-				input: undefined,
 				...options,
 			};
 			const { input, ...swrOptions } = _options;
-			return response.mutate(async () => {
+			return response.mutate(() => {
 				return mutationFetcher<any>({ operationName, input });
 			}, swrOptions);
 		},
@@ -128,7 +130,8 @@ const subscribeTo = <OperationName = any, Input = any, Data = any>(
 	};
 };
 
-export type UseSubscriptionOptions<Input> = SWRConfiguration & {
+export type UseSubscriptionOptions<OperationName, Input> = SWRConfiguration & {
+	operationName?: OperationName;
 	enabled?: boolean;
 } & (Input extends object ? { input: Input } : {});
 
@@ -138,7 +141,7 @@ export const useSubscription = <
 	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data']
 >(
 	operationName: OperationName,
-	options: UseSubscriptionOptions<Input>
+	options: UseSubscriptionOptions<OperationName, Input>
 ): SWRResponse<Data, ResultError> => {
 	const _options = {
 		input: undefined,
