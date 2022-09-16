@@ -118,7 +118,7 @@ export class Client {
         {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
             const result = await this._client.query({
                 operationName: "{{operationName}}",
-                input: options.input,
+                {{#if hasInput}}input: options.input,{{/if}}
                 abortSignal: options.abortSignal,
             })
             return this.resultToResponse<{{operationName}}Response>(result)
@@ -132,7 +132,7 @@ export class Client {
         {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
             const result =  await this._client.mutate({
                 operationName: "{{operationName}}",
-                input: options.input,
+                {{#if hasInput}}input: options.input,{{/if}}
                 abortSignal: options.abortSignal,
             })
             return this.resultToResponse<{{operationName}}Response>(result)
@@ -147,7 +147,7 @@ export class Client {
             return this._client.subscribe({
                 operationName: "{{operationName}}",
                 isLiveQuery: false,
-                input: options.input,
+                {{#if hasInput}}input: options.input,{{/if}}
                 abortSignal: options.abortSignal,
             }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
         },
@@ -161,7 +161,7 @@ export class Client {
                 return this._client.subscribe({
                     operationName: "{{operationName}}",
                     isLiveQuery: true,
-                    input: options.input,
+                    {{#if hasInput}}input: options.input,{{/if}}
                     abortSignal: options.abortSignal,
                 }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
             },
