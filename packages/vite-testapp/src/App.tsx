@@ -4,7 +4,7 @@ import { useQuery, useMutation } from './hooks/swr';
 import { useState } from 'react';
 
 const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
-	const liveWeather = useQuery('Weather', { forCity: city }, { isLiveQuery: true });
+	const liveWeather = useQuery('Weather', { input: { forCity: city }, isLiveQuery: true });
 
 	return (
 		<div>
@@ -34,7 +34,9 @@ const NameForm = () => {
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
-					mutation.mutate({ name });
+					mutation.mutate({
+						input: { name },
+					});
 				}}
 			>
 				<div>

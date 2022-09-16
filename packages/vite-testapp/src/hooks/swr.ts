@@ -36,10 +36,10 @@ const mutationFetcher = async <
 	return result.data;
 };
 
-export interface UseQueryOptions<LiveQuery> extends SWRConfiguration {
+export type UseQueryOptions<Input, LiveQuery> = SWRConfiguration & {
 	isLiveQuery?: LiveQuery;
 	enabled?: boolean;
-}
+} & (Input extends object ? { input: Input } : {});
 
 export const useQuery = <
 	OperationName extends keyof Queries,
@@ -48,13 +48,16 @@ export const useQuery = <
 	LiveQuery extends Queries[OperationName]['liveQuery'] = Queries[OperationName]['liveQuery']
 >(
 	operationName: OperationName,
-	input: Input,
-	options: UseQueryOptions<LiveQuery> = {}
+	options?: UseQueryOptions<Input, LiveQuery>
 ): SWRResponse<Data, ResultError> => {
-	const { isLiveQuery, enabled = true, ...config } = options;
-	const key = { operationName, input };
+	const _options = {
+		input: undefined,
+		...options,
+	};
+	const { isLiveQuery, enabled = true, input, ...swrConfig } = _options;
+	const key = input ? { operationName, input } : { operationName };
 	const [_key] = serialize(key);
-	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, config);
+	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, swrConfig);
 
 	useEffect(() => {
 		let unsubscribe: () => void;
@@ -69,6 +72,8 @@ export const useQuery = <
 	return response;
 };
 
+export type MutateOptions<Input, Data> = MutatorOptions<Data> & (Input extends object ? { input: Input } : {});
+
 export const useMutation = <
 	OperationName extends keyof Mutations,
 	Input extends Mutations[OperationName]['input'] = Mutations[OperationName]['input'],
@@ -81,10 +86,15 @@ export const useMutation = <
 
 	return {
 		...response,
-		async mutate(input: Input, options?: MutatorOptions<Data>) {
+		async mutate(options?: MutateOptions<Input, Data>): Promise<Data> {
+			const _options = {
+				input: undefined,
+				...options,
+			};
+			const { input, ...swrOptions } = _options;
 			return response.mutate(async () => {
 				return mutationFetcher<any>({ operationName, input });
-			}, options);
+			}, swrOptions);
 		},
 	};
 };
@@ -118,9 +128,9 @@ const subscribeTo = <OperationName = any, Input = any, Data = any>(
 	};
 };
 
-export interface UseSubscriptionOptions extends SWRConfiguration {
+export type UseSubscriptionOptions<Input> = SWRConfiguration & {
 	enabled?: boolean;
-}
+} & (Input extends object ? { input: Input } : {});
 
 export const useSubscription = <
 	OperationName extends keyof Subscriptions,
@@ -128,13 +138,16 @@ export const useSubscription = <
 	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data']
 >(
 	operationName: OperationName,
-	input: Input,
-	options: UseSubscriptionOptions = {}
+	options: UseSubscriptionOptions<Input>
 ): SWRResponse<Data, ResultError> => {
-	const { enabled = true, ...config } = options;
+	const _options = {
+		input: undefined,
+		...options,
+	};
+	const { enabled = true, input, ...swrConfig } = _options;
 	const key = { operationName, input };
 	const [_key] = serialize(key);
-	const response = useSWR(enabled ? key : null, null, config);
+	const response = useSWR(enabled ? key : null, null, swrConfig);
 
 	useEffect(() => {
 		let unsubscribe: () => void;
