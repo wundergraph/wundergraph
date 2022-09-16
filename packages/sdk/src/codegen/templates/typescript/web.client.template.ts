@@ -116,7 +116,7 @@ export class Client {
     public query = {
         {{#each queries}}
         {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
-            const result = await this._client.query({
+            const result = await this._client.query<"{{operationName}}", any>({
                 operationName: "{{operationName}}",
                 {{#if hasInput}}input: options.input,{{/if}}
                 abortSignal: options.abortSignal,
@@ -130,7 +130,7 @@ export class Client {
     public mutation = {
     {{#each mutations}}
         {{operationName}}: async (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>) => {
-            const result =  await this._client.mutate({
+            const result = await this._client.mutate<"{{operationName}}", any>({
                 operationName: "{{operationName}}",
                 {{#if hasInput}}input: options.input,{{/if}}
                 abortSignal: options.abortSignal,
@@ -144,7 +144,7 @@ export class Client {
     public subscription = {
     {{#each subscriptions}}
         {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
-            return this._client.subscribe({
+            return this._client.subscribe<"{{operationName}}", any>({
                 operationName: "{{operationName}}",
                 isLiveQuery: false,
                 {{#if hasInput}}input: options.input,{{/if}}
@@ -158,7 +158,7 @@ export class Client {
         public liveQuery = {
         {{#each liveQueries }}
             {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
-                return this._client.subscribe({
+                return this._client.subscribe<"{{operationName}}", any>({
                     operationName: "{{operationName}}",
                     isLiveQuery: true,
                     {{#if hasInput}}input: options.input,{{/if}}
