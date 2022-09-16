@@ -48,13 +48,7 @@ exports[`Should be merged: merged_apis 1`] = `
             \\"placeholderVariableName\\": \\"\\",
             \\"staticVariableContent\\": \\"https://user.service\\"
           },
-          \\"baseUrl\\": {
-            \\"kind\\": 0,
-            \\"environmentVariableDefaultValue\\": \\"\\",
-            \\"environmentVariableName\\": \\"\\",
-            \\"placeholderVariableName\\": \\"\\",
-            \\"staticVariableContent\\": \\"\\"
-          },
+          \\"baseUrl\\": \\"\\",
           \\"path\\": {
             \\"kind\\": 0,
             \\"environmentVariableDefaultValue\\": \\"\\",
@@ -122,13 +116,7 @@ exports[`Should be merged: merged_apis 1`] = `
             \\"placeholderVariableName\\": \\"\\",
             \\"staticVariableContent\\": \\"https://product.service\\"
           },
-          \\"baseUrl\\": {
-            \\"kind\\": 0,
-            \\"environmentVariableDefaultValue\\": \\"\\",
-            \\"environmentVariableName\\": \\"\\",
-            \\"placeholderVariableName\\": \\"\\",
-            \\"staticVariableContent\\": \\"\\"
-          },
+          \\"baseUrl\\": \\"\\",
           \\"path\\": {
             \\"kind\\": 0,
             \\"environmentVariableDefaultValue\\": \\"\\",
@@ -214,13 +202,7 @@ exports[`Should be merged: merged_apis 1`] = `
             \\"placeholderVariableName\\": \\"\\",
             \\"staticVariableContent\\": \\"https://reviews.service\\"
           },
-          \\"baseUrl\\": {
-            \\"kind\\": 0,
-            \\"environmentVariableDefaultValue\\": \\"\\",
-            \\"environmentVariableName\\": \\"\\",
-            \\"placeholderVariableName\\": \\"\\",
-            \\"staticVariableContent\\": \\"\\"
-          },
+          \\"baseUrl\\": \\"\\",
           \\"path\\": {
             \\"kind\\": 0,
             \\"environmentVariableDefaultValue\\": \\"\\",
@@ -286,13 +268,7 @@ exports[`Should be merged: merged_apis 1`] = `
             \\"placeholderVariableName\\": \\"\\",
             \\"staticVariableContent\\": \\"https://inventory.service\\"
           },
-          \\"baseUrl\\": {
-            \\"kind\\": 0,
-            \\"environmentVariableDefaultValue\\": \\"\\",
-            \\"environmentVariableName\\": \\"\\",
-            \\"placeholderVariableName\\": \\"\\",
-            \\"staticVariableContent\\": \\"\\"
-          },
+          \\"baseUrl\\": \\"\\",
           \\"path\\": {
             \\"kind\\": 0,
             \\"environmentVariableDefaultValue\\": \\"\\",

@@ -857,7 +857,7 @@ export interface FetchConfiguration {
 	 */
 	urlEncodeBody: boolean;
 	mTLS: MTLSConfiguration | undefined;
-	baseUrl: ConfigurationVariable | undefined;
+	baseUrl: string;
 	path: ConfigurationVariable | undefined;
 }
 
@@ -2811,7 +2811,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
 		upstreamAuthentication: undefined,
 		urlEncodeBody: false,
 		mTLS: undefined,
-		baseUrl: undefined,
+		baseUrl: '',
 		path: undefined,
 	};
 }
@@ -2834,7 +2834,7 @@ export const FetchConfiguration = {
 				: undefined,
 			urlEncodeBody: isSet(object.urlEncodeBody) ? Boolean(object.urlEncodeBody) : false,
 			mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
-			baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
+			baseUrl: isSet(object.baseUrl) ? String(object.baseUrl) : '',
 			path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
 		};
 	},
@@ -2861,8 +2861,7 @@ export const FetchConfiguration = {
 				: undefined);
 		message.urlEncodeBody !== undefined && (obj.urlEncodeBody = message.urlEncodeBody);
 		message.mTLS !== undefined && (obj.mTLS = message.mTLS ? MTLSConfiguration.toJSON(message.mTLS) : undefined);
-		message.baseUrl !== undefined &&
-			(obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
+		message.baseUrl !== undefined && (obj.baseUrl = message.baseUrl);
 		message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
 		return obj;
 	},
@@ -2888,10 +2887,7 @@ export const FetchConfiguration = {
 		message.urlEncodeBody = object.urlEncodeBody ?? false;
 		message.mTLS =
 			object.mTLS !== undefined && object.mTLS !== null ? MTLSConfiguration.fromPartial(object.mTLS) : undefined;
-		message.baseUrl =
-			object.baseUrl !== undefined && object.baseUrl !== null
-				? ConfigurationVariable.fromPartial(object.baseUrl)
-				: undefined;
+		message.baseUrl = object.baseUrl ?? '';
 		message.path =
 			object.path !== undefined && object.path !== null ? ConfigurationVariable.fromPartial(object.path) : undefined;
 		return message;

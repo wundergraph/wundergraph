@@ -441,7 +441,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
-	baseURL?: InputVariable;
+	baseURL?: string;
 }
 
 export interface StaticApiCustom {
@@ -775,7 +775,7 @@ export const introspect = {
 						Custom: {
 							Fetch: {
 								url: mapInputVariable(introspection.url),
-								baseUrl: mapInputVariable(''),
+								baseUrl: '',
 								path: mapInputVariable(''),
 								method: HTTPMethod.POST,
 								body: mapInputVariable(''),

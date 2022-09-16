@@ -226,7 +226,7 @@ class RESTApiBuilder {
 				Fetch: {
 					method: verb,
 					path: mapInputVariable(path),
-					baseUrl: mapInputVariable(this.introspection.baseURL || this.baseURL()),
+					baseUrl: this.baseURL(),
 					url: mapInputVariable(''),
 					body: mapInputVariable(''),
 					header: this.headers,
@@ -246,12 +246,7 @@ class RESTApiBuilder {
 		});
 		if (this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl) {
 			const baseURL = this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl!;
-			if (baseURL.kind !== ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE) {
-				throw new Error('Base URL must be a static string, environment variables are not supported');
-			}
-			this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl = mapInputVariable(
-				this.cleanupBaseURL(baseURL.staticVariableContent)
-			);
+			this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl = this.cleanupBaseURL(baseURL);
 		}
 		this.fields.push({
 			typeName: parentType,
@@ -702,6 +697,9 @@ class RESTApiBuilder {
 		return true;
 	};
 	private baseURL = (): string => {
+		if (this.introspection.baseURL) {
+			return this.introspection.baseURL;
+		}
 		if (!this.spec.servers || this.spec.servers.length === 0) {
 			throw new Error('OpenAPISpecification must contain server + url');
 		}

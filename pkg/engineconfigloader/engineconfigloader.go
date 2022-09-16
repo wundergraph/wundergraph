@@ -17,10 +17,10 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 
+	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
 type EngineConfigLoader struct {
@@ -249,11 +249,10 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				typeMappings[i].InjectStatusCodeIntoResponse = in.CustomRest.StatusCodeTypeMappings[i].InjectStatusCodeIntoBody
 				typeMappings[i].StatusCodeByteString = []byte(strconv.Itoa(int(in.CustomRest.StatusCodeTypeMappings[i].StatusCode)))
 			}
-			baseURL := loadvariable.String(in.CustomRest.Fetch.GetBaseUrl())
 			path := loadvariable.String(in.CustomRest.Fetch.GetPath())
 			url := loadvariable.String(in.CustomRest.Fetch.GetUrl())
 			if url == "" {
-				url = baseURL + path
+				url = in.CustomRest.Fetch.BaseUrl + path
 			}
 			restConfig := oas_datasource.Configuration{
 				Fetch: oas_datasource.FetchConfiguration{
@@ -283,12 +282,11 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					header.Add(s, loadvariable.String(value))
 				}
 			}
-			baseURL := loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl())
 			path := loadvariable.String(in.CustomGraphql.Fetch.GetPath())
 			url := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
 			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
 			if url == "" {
-				url = baseURL + path
+				url = in.CustomGraphql.Fetch.BaseUrl + path
 			}
 			if subscriptionUrl == "" {
 				subscriptionUrl = url
