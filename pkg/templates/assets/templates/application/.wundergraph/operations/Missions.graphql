@@ -1,7 +1,0 @@
-query Missions($find: spacex_MissionsFind) {
-	spacex_missions(find: $find) {
-		id
-		name
-		manufacturers
-	}
-}

@@ -31,7 +31,7 @@ import { WunderGraphClient } from '@wundergraph/sdk/client';
 
 ## Internal
 
-This is only intended for internal plugin development.
+This is only intended for internal plugin development. No api compatibility guarantees.
 
 > **Warning**: The api may change at any time.
 

@@ -1,8 +1,8 @@
 import {
 	Application,
-	configurePublishWunderGraphAPI,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -64,15 +64,15 @@ const graphQLAPI = introspect.graphql({
         .addClientRequestHeader("Authorization","Authorization")
 });*/
 
-const spaceX = introspect.graphql({
-	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+const countries = introspect.graphql({
+	apiNamespace: 'countries',
+	url: 'https://countries.trevorblades.com/',
 });
 
 const myApplication = new Application({
 	name: 'app',
 	apis: [
-		spaceX,
+		countries,
 		/*federatedApi,
         openAPI,
         graphQLAPI*/
@@ -84,21 +84,6 @@ configureWunderGraphApplication({
 	application: myApplication,
 	server,
 	operations,
-	// S3 Server
-	// 1. Run `./minio/setup.sh` to create a S3 server.
-	// 2. Comment out the section below and save!
-
-	// Enable file upload functionality in your generated client
-	// Minio credentials: minio / minio123
-	// s3UploadProvider: [{
-	//     name: "minio",
-	//     endpoint: "127.0.0.1:9000",
-	//     accessKeyID: "test",
-	//     secretAccessKey: "12345678",
-	//     bucketLocation: "eu-central-1",
-	//     bucketName: "uploads",
-	//     useSSL: false
-	// }],
 	codeGenerators: [
 		{
 			templates: [
@@ -119,12 +104,12 @@ configureWunderGraphApplication({
 						// change this before deploying to production to the actual domain where you're deploying your app
 						'http://localhost:3000',
 				  ]
-				: ['http://localhost:3000'],
+				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
 	},
 	dotGraphQLConfig: {
 		hasDotWunderGraphDirectory: false,
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
+		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined,
 	},
 });

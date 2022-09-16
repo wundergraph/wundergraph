@@ -1,4 +1,4 @@
-import hash from 'object-hash';
+import { serialize } from '../utils/serialize';
 
 export type Headers = { [key: string]: string };
 
@@ -73,8 +73,8 @@ export class WunderGraphClient<Role> {
 		this.extraHeaders = headers;
 	}
 
-	public cacheKey<Q extends QueryProps<any>>(query: Q): string {
-		return hash(query);
+	public cacheKey<Q extends QueryProps<Record<any, any>>>(query: Q): string {
+		return serialize(query);
 	}
 
 	public async query<Input, Data>(

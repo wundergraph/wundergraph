@@ -21,10 +21,9 @@ runs:
         node-version: 'lts/*'
 
     - name: Install Protoc
-      uses: arduino/setup-protoc@v1
+      uses: abelfodil/protoc-action@v1
       with:
-        version: '3.12.4'
-        repo-token: ${{ inputs.repo-token }}
+        protoc-version: '21.5'
 
     - uses: pnpm/action-setup@v2.2.2
       id: pnpm-install

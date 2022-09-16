@@ -147,6 +147,8 @@ class RESTApiBuilder {
 	private graphQLSchema: DocumentNode;
 	private dataSources: DataSource<RESTApiCustom>[] = [];
 	private fields: FieldConfiguration[] = [];
+	private baseUrlArgs: string[] = [];
+
 	public build = (): RESTApi => {
 		Object.keys(this.spec.paths).forEach((path) => {
 			const pathObject = this.spec.paths[path];
@@ -167,7 +169,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		// const debug = print(filtered);
+		//const debug = print(filtered);
 		const schema = buildASTSchema(filtered);
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -177,6 +179,22 @@ class RESTApiBuilder {
 				ChildNodes: applyNameSpaceToTypeFields(ds.ChildNodes, schema, this.apiNamespace),
 			};
 		});
+		if (this.baseUrlArgs.length) {
+			this.baseUrlArgs.forEach((arg) => {
+				this.fields.map((field) => ({
+					...field,
+					argumentsConfiguration: [
+						...(field.argumentsConfiguration || []),
+						{
+							name: arg,
+							renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_ARRAY_CSV,
+							sourceType: ArgumentSource.FIELD_ARGUMENT,
+							sourcePath: [arg],
+						},
+					],
+				}));
+			});
+		}
 		return new RESTApi(
 			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
 			dataSources,
@@ -226,6 +244,15 @@ class RESTApiBuilder {
 			ChildNodes: [],
 			Directives: [],
 		});
+		if (this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl) {
+			const baseURL = this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl!;
+			if (baseURL.kind !== ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE) {
+				throw new Error('Base URL must be a static string, environment variables are not supported');
+			}
+			this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl = mapInputVariable(
+				this.cleanupBaseURL(baseURL.staticVariableContent)
+			);
+		}
 		this.fields.push({
 			typeName: parentType,
 			fieldName: fieldName,
@@ -276,6 +303,11 @@ class RESTApiBuilder {
 				statusCode: statusCode,
 				responseObjectDescription: responseObject!.description,
 			});
+			if (this.baseUrlArgs.length) {
+				this.baseUrlArgs.forEach((arg) => {
+					this.addArgument(parentType, fieldName, arg, 'String', ['non_null']);
+				});
+			}
 		});
 		const parameters = [...(pathItemObject.parameters || []), ...(operationObject.parameters || [])];
 		parameters.map(this.resolveParamsObject).forEach((param) => {
@@ -674,10 +706,14 @@ class RESTApiBuilder {
 			throw new Error('OpenAPISpecification must contain server + url');
 		}
 		const secure = this.spec.servers.find((server) => server.url.startsWith('https'));
-		if (secure) {
-			return secure.url;
-		}
-		return this.spec.servers[0].url;
+		return secure ? secure.url : this.spec.servers[0].url;
+	};
+	private cleanupBaseURL = (url: string): string => {
+		return url.replace(/{[a-zA-Z]+}/, (str) => {
+			const arg = this.sanitizeName(str.substring(1, str.length - 1));
+			this.baseUrlArgs.push(arg);
+			return `{{ .arguments.${arg} }}`;
+		});
 	};
 	private buildScalarTypeDefinitionNode = (name: string): ScalarTypeDefinitionNode => {
 		return {
@@ -707,6 +743,11 @@ class RESTApiBuilder {
 			FieldDefinition: {
 				enter: (node) => {
 					if (node.name.value !== fieldName) {
+						return;
+					}
+					const arg = node.arguments?.find((arg) => arg.name.value === argumentName);
+					if (arg) {
+						done = true;
 						return;
 					}
 					const update: FieldDefinitionNode = {

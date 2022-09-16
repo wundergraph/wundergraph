@@ -1,4 +1,4 @@
-import { AuthProvider, AuthProviderKind } from '@wundergraph/protobuf';
+import { AuthProvider, AuthProviderKind, OpenIDConnectQueryParameter } from '@wundergraph/protobuf';
 import { mapInputVariable, InputVariable } from './index';
 
 export interface AuthenticationProvider {
@@ -31,11 +31,17 @@ export class GithubAuthProvider implements AuthenticationProvider {
 	}
 }
 
+export interface OpenIDConnectQueryParameterConfig {
+	name: InputVariable;
+	value: InputVariable;
+}
+
 export interface OpenIDConnectAuthProviderConfig {
 	id: string;
 	issuer: InputVariable;
 	clientId: InputVariable;
 	clientSecret: InputVariable;
+	queryParameters?: OpenIDConnectQueryParameterConfig[];
 }
 
 export class OpenIDConnectAuthProvider implements AuthenticationProvider {
@@ -46,6 +52,13 @@ export class OpenIDConnectAuthProvider implements AuthenticationProvider {
 	}
 
 	resolve(): AuthProvider {
+		const queryParameters = this.config.queryParameters?.map(
+			(param): OpenIDConnectQueryParameter => ({
+				name: mapInputVariable(param.name),
+				value: mapInputVariable(param.value),
+			})
+		);
+
 		return {
 			kind: AuthProviderKind.AuthProviderOIDC,
 			githubConfig: undefined,
@@ -53,6 +66,7 @@ export class OpenIDConnectAuthProvider implements AuthenticationProvider {
 				clientId: mapInputVariable(this.config.clientId),
 				clientSecret: mapInputVariable(this.config.clientSecret),
 				issuer: mapInputVariable(this.config.issuer),
+				queryParameters: queryParameters || [],
 			},
 			id: this.config.id,
 		};
