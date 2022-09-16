@@ -7,4 +7,9 @@ export default defineConfig({
 	optimizeDeps: {
 		include: ['@wundergraph/sdk', '@wundergraph/sdk/client', '@wundergraph/sdk/internal'],
 	},
+	build: {
+		commonjsOptions: {
+			include: [/sdk\/dist\//, /node_modules/],
+		},
+	},
 });
