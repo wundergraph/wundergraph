@@ -1,4 +1,4 @@
-import hash from 'object-hash';
+import { serialize } from '../utils/serialize';
 
 export type Headers = { [key: string]: string };
 
@@ -94,8 +94,8 @@ export class WunderGraphClient<Role, Operations extends ClientOperations = Clien
 		this.extraHeaders = headers;
 	}
 
-	public cacheKey<Q extends QueryProps<any>>(query: Q): string {
-		return hash(query);
+	public cacheKey<Q extends QueryProps<Record<any, any>>>(query: Q): string {
+		return serialize(query);
 	}
 
 	private operationUrl(operationName: string, params: string) {

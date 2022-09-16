@@ -3,8 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'minor | major | patch | <version>'
+        type: choice
+        description: Release bump
         required: true
+        options:
+          - patch
+          - minor
+          - major
 
 env:
   CI: true

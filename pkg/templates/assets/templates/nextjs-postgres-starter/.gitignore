@@ -39,5 +39,4 @@ yarn-error.log*
 # vercel
 .vercel
 
-migrations/20220427084213_init
-migrations/migration_lock.toml
+migrations

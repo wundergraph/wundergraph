@@ -81,3 +81,7 @@ test('json placeholder array', async () => {
 test('github starred with unions', async () => {
 	await runTest('src/v2openapi/testdata/github.json', 'github_starred', true);
 });
+
+test('dynamic baseurl', async () => {
+	await runTest('src/v2openapi/testdata/dynamic_baseurl.json', 'dynamic_baseurl');
+});

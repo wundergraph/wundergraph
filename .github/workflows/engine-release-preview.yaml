@@ -2,7 +2,8 @@ name: Engine Release Preview
 on:
   push:
     branches:
-      - '**'
+      - 'main'
+      - 'next'
     paths-ignore:
       - 'docs*/**'
       - '*.md'

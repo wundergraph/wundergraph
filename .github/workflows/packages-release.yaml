@@ -5,7 +5,11 @@ on:
     inputs:
       type:
         description: 'Release type: "stable" or "next". Versions are determined automatically via conventional commits.'
+        type: choice
         required: false
+        options:
+          - stable
+          - next
         default: 'stable'
 
 concurrency:

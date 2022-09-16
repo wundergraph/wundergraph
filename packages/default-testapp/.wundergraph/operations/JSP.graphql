@@ -1,5 +1,5 @@
 {
-	jsp_getPosts {
+	jsp_getPosts(tld: "com") {
 		id
 		title
 	}

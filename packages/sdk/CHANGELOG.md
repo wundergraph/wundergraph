@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.108.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.107.1...@wundergraph/sdk@0.108.0) (2022-09-15)
+
+### Features
+
+* allow templates in baseURL for openapi ([#183](https://github.com/wundergraph/wundergraph/issues/183)) ([cb279e7](https://github.com/wundergraph/wundergraph/commit/cb279e7829e704d75a1bcea5a87c42b09331c624)) (@jensneuse)
+* custom stable hash function for js values ([#182](https://github.com/wundergraph/wundergraph/issues/182)) ([c16c635](https://github.com/wundergraph/wundergraph/commit/c16c635dd6c6ee5a9784e83b4063941b8e3f3435)) (@StarpTech)
+
+## [0.107.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.107.0...@wundergraph/sdk@0.107.1) (2022-09-15)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.107.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.106.0...@wundergraph/sdk@0.107.0) (2022-09-14)
+
+### Features
+
+* oidc,  allow passing additional query parameters to the IDP ([#178](https://github.com/wundergraph/wundergraph/issues/178)) ([d015bb1](https://github.com/wundergraph/wundergraph/commit/d015bb150762cba7a46865e66f3de633e731de07)) (@YuriBuerov)
+
 ## [0.106.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.105.1...@wundergraph/sdk@0.106.0) (2022-09-09)
 
 ### Features

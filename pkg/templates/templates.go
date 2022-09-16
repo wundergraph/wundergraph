@@ -8,6 +8,8 @@ import (
 	"path"
 )
 
+// Use scripts/copy-templates-to-cli.sh to sync the templates with the CLI
+
 var (
 	//go:embed assets/*
 	//go:embed assets/templates/application/.wundergraph/*
