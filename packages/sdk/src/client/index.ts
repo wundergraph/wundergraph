@@ -21,25 +21,25 @@ export interface ClientConfig {
 
 export interface User<Role> {
 	provider?: string;
-	provider_id?: string;
+	providerId?: string;
 	email?: string;
-	email_verified?: boolean;
+	emailVerified?: boolean;
 	name?: string;
-	first_name?: string;
-	last_name?: string;
-	nick_name?: string;
+	firstName?: string;
+	lastName?: string;
+	nickName?: string;
 	description?: string;
-	user_id?: string;
-	avatar_url?: string;
+	userId?: string;
+	avatarUrl?: string;
 	location?: string;
 	roles?: Role[];
-	custom_attributes?: string[];
-	custom_claims?: {
+	customAttributes?: string[];
+	customClaims?: {
 		[key: string]: any;
 	};
-	access_token?: JSONObject;
-	id_token?: JSONObject;
-	raw_id_token?: string;
+	accessToken?: JSONObject;
+	idToken?: JSONObject;
+	rawIdToken?: string;
 }
 
 export interface ClientOperation {
