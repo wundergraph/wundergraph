@@ -9,7 +9,8 @@
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
-    "build": "npm run generate && tsc && vite build",
+    "check": "tsc --noEmit",
+    "build": "pnpm generate && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

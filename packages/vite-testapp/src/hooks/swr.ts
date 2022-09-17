@@ -118,9 +118,14 @@ const subscribeTo = <OperationName = any, Input = any, Data = any>(
 	const key = { operationName, input };
 	const { isLiveQuery } = options;
 	client.subscribe<any, any, any>({ operationName, input, abortSignal: abort.signal, isLiveQuery }, (result) => {
+		// Promise is not handled because we are not interested in the result
+		// Errors are handled by SWR internally
 		mutate(key, async () => {
 			if (result.status === 'error' || result.status === 'partial') {
-				throw new Error(result.errors[0].message);
+				if (result.errors.length > 0) {
+					throw new Error(result.errors[0].message);
+				}
+				throw new Error('Error but nothing returned from server');
 			}
 			return result.data;
 		});
