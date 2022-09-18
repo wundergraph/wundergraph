@@ -43,7 +43,7 @@ export interface SubscriptionArgs {
 export interface InternalSubscriptionArgs extends SubscriptionArgs {
 	abortSignal?: AbortSignal;
 	subscribeOnce?: boolean;
-	isLiveQuery?: boolean;
+	liveQuery?: boolean;
 }
 
 export interface InternalSubscriptionArgsWithInput<Input> extends InternalSubscriptionArgs {

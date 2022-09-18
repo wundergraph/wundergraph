@@ -208,3 +208,7 @@ if (error instanceof GraphQLResponseError) {
 
 Methods that initiate a network request throw a `ResponseError` or `Error` if the request fails to initiate or the response is not 2xx.
 You can be sure that the request was successful if the method doesn't throw an error.
+
+## Limitations
+
+- Subscriptions are not supported server side

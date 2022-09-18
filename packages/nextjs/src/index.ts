@@ -473,7 +473,7 @@ function useQueryContextWrapper<
 
 interface UseSubscriptionProps extends ContextWrapperOptions {
 	operationName: string;
-	isLiveQuery?: boolean;
+	liveQuery?: boolean;
 }
 
 function useSubscriptionContextWrapper<
@@ -512,6 +512,7 @@ function useSubscriptionContextWrapper<
 					result: ssrCache[cacheKey] as SubscriptionResult<Data>,
 				};
 			}
+			// TODO: What's the difference between "subscribeOnce" this and a single query call?
 			const promise = client.query({ ...subscription, ...args, subscribeOnce: true });
 			ssrCache[cacheKey] = promise;
 			throw promise;
@@ -555,7 +556,7 @@ function useSubscriptionContextWrapper<
 			{
 				...subscription,
 				...args,
-				liveQuery: !!subscription.isLiveQuery,
+				liveQuery: !!subscription.liveQuery,
 				abortSignal: abort.signal,
 			},
 			(result) => {
