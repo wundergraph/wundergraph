@@ -1,0 +1,29 @@
+{
+  "name": "@wundergraph/swr-hooks",
+  "version": "0.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "swr": "^1.3.0"
+  },
+  "peerDependencies": {
+    "@wundergraph/sdk": ">=0.91.0",
+    "react": "^16.8.0 || ^17.0.2 || ^18.0.0",
+    "react-dom": "^16.8.0 || ^17.0.2 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "@wundergraph/sdk": "workspace:*",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
+    "typescript": "^4.8.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

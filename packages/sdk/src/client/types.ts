@@ -12,6 +12,18 @@ export interface OperationMetadata {
 	};
 }
 
+// base interface for the untyped client
+export interface ClientOperation {
+	input?: object;
+	liveQuery?: boolean;
+	data: any;
+	requiresAuthentication: boolean;
+}
+
+export type ClientOperationDefs = {
+	[key: string]: ClientOperation;
+};
+
 export interface ClientConfig {
 	applicationHash: string;
 	applicationPath: string;
