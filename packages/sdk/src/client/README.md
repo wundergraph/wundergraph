@@ -167,7 +167,7 @@ const user = await client.fetchUser();
 
 ## AbortController
 
-All methods accept an AbortController instance that can be used to cancel the request.
+Almost all methods accept an AbortController instance that can be used to cancel the request.
 
 ```ts
 const controller = new AbortController();
@@ -188,6 +188,21 @@ controller.abort();
 
 Query and mutation errors are returned as a `GraphQLResponseError` object. We expose the original GraphQL errors object as `errors` property.
 Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code response as `statusCode` property.
+
+```ts
+const { data, error } = await client.query({
+  operationName: 'Hello',
+  input: {
+    hello: 'World',
+  },
+});
+
+if (error instanceof GraphQLResponseError) {
+  error.errors;
+} else if (error instanceof ResponseError) {
+  error.statusCode;
+}
+```
 
 ### Other
 
