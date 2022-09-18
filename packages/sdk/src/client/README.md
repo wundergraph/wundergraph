@@ -165,6 +165,23 @@ client.logout();
 const user = await client.fetchUser();
 ```
 
+## AbortController
+
+All methods accept an AbortController instance that can be used to cancel the request.
+
+```ts
+const controller = new AbortController();
+
+const { fileKeys } = await client.uploadFiles({
+  abortSignal: abortController.signal,
+  provider: S3Provider.minio,
+  files,
+});
+
+// cancel the request
+controller.abort();
+```
+
 ## Error handling
 
 ### Operations
