@@ -1,5 +1,5 @@
 {
-	mgospacex_findManylaunch(take: 10) {
+	spacex_launchesPast {
 		mission_name
 		launch_date_local
 		launch_site {
@@ -14,7 +14,6 @@
 			first_stage {
 				cores {
 					flight
-					core_serial
 				}
 			}
 			second_stage {
@@ -25,6 +24,5 @@
 				}
 			}
 		}
-		ships
 	}
 }

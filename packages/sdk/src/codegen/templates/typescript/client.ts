@@ -24,7 +24,7 @@ export class TypeScriptClient implements Template {
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
 		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
-			modelImports: modelImports(config.application, false),
+			modelImports: modelImports(config.application, false, true),
 			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : listenAddrHttp,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			sdkVersion: config.sdkVersion,

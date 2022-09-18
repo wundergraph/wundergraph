@@ -18,6 +18,7 @@ describe('Client', () => {
 			const client = newClient();
 
 			const scope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.matchHeader('X-Test', 'test')
@@ -59,6 +60,7 @@ describe('Client', () => {
 			const client = newClient();
 
 			const scope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.get('/app/operations/Weather')
@@ -84,6 +86,7 @@ describe('Client', () => {
 			const client = newClient();
 
 			const scope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.get('/app/operations/Weather')
@@ -117,6 +120,7 @@ describe('Client', () => {
 			const client = newClient();
 
 			const scope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.get('/app/operations/Weather')
@@ -152,6 +156,7 @@ describe('Client', () => {
 				.reply(200, 'csrf');
 
 			const apiScope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('x-csrf-token', 'csrf')
 				.matchHeader('WG-SDK-Version', '1.0.0')
@@ -185,6 +190,7 @@ describe('Client', () => {
 				.reply(200, 'csrf');
 
 			const apiScope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.post('/app/operations/CreateWeather', { lat: 1 })
@@ -218,6 +224,7 @@ describe('Client', () => {
 				.reply(200, 'csrf');
 
 			const apiScope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.post('/app/operations/CreateWeather')

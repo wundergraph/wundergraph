@@ -3,7 +3,7 @@ import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 's
 import { OperationRequestOptions, SubscriptionRequestOptions, GraphQLResponseError } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useEffect } from 'react';
-import { ClientResponse } from '@wundergraph/sdk/dist/client';
+import { ClientResponse } from '@wundergraph/sdk/client';
 
 const client = createClient();
 

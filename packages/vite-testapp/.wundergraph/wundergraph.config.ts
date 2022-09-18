@@ -10,7 +10,6 @@ import {
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 // import linkBuilder from "./generated/linkbuilder";
-import { TypeScriptClientTemplate } from '@wundergraph/sdk/dist/codegen/templates/typescript/client';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -129,10 +128,7 @@ configureWunderGraphApplication({
 	],
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
-		},
-		{
-			templates: [new TypeScriptClientTemplate(), ...templates.typescript.models],
+			templates: [templates.typescript.client, ...templates.typescript.models],
 			path: '../src/components/generated',
 		},
 	],

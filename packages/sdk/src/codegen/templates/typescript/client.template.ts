@@ -1,6 +1,6 @@
 //language=handlebars
 export const handlebarTemplate = `
-import { Client, ClientConfig, User } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, User, UploadRequestOptions } from '@wundergraph/sdk/client';
 import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};

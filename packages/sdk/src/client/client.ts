@@ -14,14 +14,12 @@ import {
 } from './types';
 import { serialize } from '../utils/serialize';
 import { GraphQLResponseError } from './GraphQLResponseError';
-import { loadFile } from '../codegen/templates/typescript';
 
 // https://graphql.org/learn/serving-over-http/
 
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
-			'Content-Type': 'application/json',
 			'WG-SDK-Version': options.sdkVersion,
 		};
 	}
@@ -51,6 +49,12 @@ export class Client {
 
 		return url + '?' + queryParams.toString();
 	}
+
+	private async fetchJson(url: string, init: RequestInit = {}) {
+		init.headers = { ...init.headers, Accept: 'application/json', 'Content-Type': 'application/json' };
+		return this.fetch(url, init);
+	}
+
 	private async fetch(input: RequestInfo, init: RequestInit = {}): Promise<globalThis.Response> {
 		const fetchImpl = this.options.customFetch || globalThis.fetch;
 
@@ -127,7 +131,7 @@ export class Client {
 				wg_api_hash: this.options.applicationHash,
 			})
 		);
-		const resp = await this.fetch(url, {
+		const resp = await this.fetchJson(url, {
 			method: 'GET',
 			signal: options.abortSignal,
 		});
@@ -165,7 +169,7 @@ export class Client {
 
 		const csrfToken = await this.getCSRFToken();
 
-		const resp = await this.fetch(url, {
+		const resp = await this.fetchJson(url, {
 			method: 'POST',
 			signal: options.abortSignal,
 			body: this.stringifyInput(options.input),
@@ -182,7 +186,7 @@ export class Client {
 			revalidate: options?.revalidate ? 'true' : 'false',
 		});
 
-		const response = await this.fetch(
+		const response = await this.fetchJson(
 			this.addUrlParams(`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/user`, params),
 			{
 				method: 'GET',
@@ -238,7 +242,7 @@ export class Client {
 			wg_live: subscription?.isLiveQuery ? 'true' : 'false',
 		});
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
-		const response = await this.fetch(url, {
+		const response = await this.fetchJson(url, {
 			method: 'GET',
 			signal: subscription.abortSignal,
 		});
@@ -267,6 +271,11 @@ export class Client {
 		}
 	}
 
+	/**
+	 * Uploads one or more files to the server. The method throws an error if the files
+	 * could not be uploaded for any reason. If the upload was successful, your return a list
+	 * of file IDs that can be used to download the files from your S3 bucket.
+	 */
 	public async uploadFiles(config: UploadRequestOptions): Promise<UploadResponse> {
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
@@ -283,6 +292,7 @@ export class Client {
 			this.addUrlParams(`${this.options.baseURL}/${this.options.applicationPath}/s3/${config.provider}/upload`, params),
 			{
 				headers: {
+					// Dont set the content-type header, the browser will set it for us + boundary
 					'X-CSRF-Token': csrfToken,
 				},
 				body: formData,

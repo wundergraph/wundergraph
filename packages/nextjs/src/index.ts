@@ -18,7 +18,7 @@ import {
 } from 'react';
 import ssrPrepass from 'react-ssr-prepass';
 
-import { Client, User, ClientConfig, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
+import { Client, User, ClientConfig, SubscriptionRequestOptions, GraphQLResponseError } from '@wundergraph/sdk/client';
 import {
 	InternalMutationArgsWithInput,
 	InternalQueryArgsWithInput,
@@ -32,7 +32,6 @@ import {
 	SubscriptionResult,
 	UploadConfig,
 } from './types';
-import { GraphQLResponseError } from '@wundergraph/sdk/dist/client';
 
 export type Headers = { [key: string]: string };
 
@@ -430,7 +429,21 @@ function useQueryContextWrapper<
 				...statefulArgs,
 				abortSignal: abort.signal,
 			});
-			setQueryResult(result as QueryResult<Data>);
+			if (result.error) {
+				if (result.error instanceof GraphQLResponseError) {
+					setQueryResult({
+						status: 'error',
+						errors: result.error.errors,
+					});
+				} else {
+					setQueryResult({
+						status: 'error',
+						errors: [result.error],
+					});
+				}
+			} else {
+				setQueryResult({ status: 'ok', data: result.data, refetching: true } as QueryResult<Data>);
+			}
 		})();
 		return () => {
 			abort.abort();
@@ -776,3 +789,5 @@ export const hooks = {
 	useSubscriptionWithoutInput,
 	withWunderGraphContextWrapper,
 };
+
+export type { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from './types';

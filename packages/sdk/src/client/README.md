@@ -18,7 +18,7 @@ npm install @wundergraph/sdk
 ```ts
 import { Client } from '@wundergraph/sdk/client';
 
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
