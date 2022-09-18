@@ -10,9 +10,9 @@ import {
 } from './';
 import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
-import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
+import { ResolvedWunderGraphConfig } from '../../../configure';
 import { listenAddrHttp } from '../../../env';
-import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
+import { liveQueries, modelImports, operations, queries } from './helpers';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
@@ -63,69 +63,3 @@ export class TypeScriptClient implements Template {
 		];
 	}
 }
-
-const filteredOperations = (application: ResolvedApplication, includeInternal: boolean) =>
-	includeInternal ? application.Operations : application.Operations.filter((op) => !op.Internal);
-
-export const operations = (application: ResolvedApplication, operationType: OperationType, includeInternal: boolean) =>
-	filteredOperations(application, includeInternal)
-		.filter((op) => op.OperationType === operationType)
-		.map((op) => {
-			return {
-				operationName: op.Name,
-				path: op.Name,
-				hasInput: hasInput(op),
-				hasInternalInput: hasInternalInput(op),
-				requiresAuthentication: op.AuthenticationConfig.required,
-			};
-		});
-
-export const queries = (application: ResolvedApplication, includeInternal: boolean) =>
-	filteredOperations(application, includeInternal).map((op) => {
-		return {
-			operationName: op.Name,
-			path: op.Name,
-			hasInput: hasInput(op),
-			hasInternalInput: hasInternalInput(op),
-			requiresAuthentication: op.AuthenticationConfig.required,
-			liveQuery: !!op.LiveQuery?.enable,
-		};
-	});
-
-export const liveQueries = (application: ResolvedApplication, includeInternal: boolean) =>
-	filteredOperations(application, includeInternal)
-		.filter((op) => op.OperationType === OperationType.QUERY && op.LiveQuery && op.LiveQuery.enable)
-		.map((op) => {
-			return {
-				operationName: op.Name,
-				path: op.Name,
-				hasInput: hasInput(op),
-				hasInternalInput: hasInternalInput(op),
-				requiresAuthentication: op.AuthenticationConfig.required,
-			};
-		});
-
-export const modelImports = (
-	application: ResolvedApplication,
-	includeInternal: boolean,
-	includeResponseData?: boolean
-): string => {
-	return filteredOperations(application, includeInternal)
-		.map((op) => {
-			let out = `${op.Name}Response`;
-			if (hasInput(op)) {
-				out += `,${op.Name}Input`;
-			}
-			if (includeInternal && hasInternalInput(op)) {
-				out += `,Internal${op.Name}Input`;
-			}
-			if (includeInternal && hasInjectedInput(op)) {
-				out += `,Injected${op.Name}Input`;
-			}
-			if (includeResponseData === true) {
-				out += `,${op.Name}ResponseData`;
-			}
-			return out;
-		})
-		.join(',');
-};

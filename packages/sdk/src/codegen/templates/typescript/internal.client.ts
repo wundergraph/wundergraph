@@ -3,7 +3,7 @@ import { OperationType } from '@wundergraph/protobuf';
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
-import { modelImports, operations } from './client';
+import { modelImports, operations } from './helpers';
 import { template } from './internal.client.template';
 
 export class WunderGraphInternalApiClient implements Template {

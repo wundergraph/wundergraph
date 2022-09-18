@@ -1,14 +1,19 @@
 import { createClient, Mutations, Queries, Subscriptions } from '../components/generated/client';
 import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 'swr';
-import { OperationRequestOptions, SubscriptionRequestOptions, GraphQLResponseError } from '@wundergraph/sdk/client';
+import {
+	OperationRequestOptions,
+	SubscriptionRequestOptions,
+	GraphQLResponseError,
+	ClientResponse,
+} from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useEffect } from 'react';
-import { ClientResponse } from '@wundergraph/sdk/client';
 
 const client = createClient();
 
 const queryFetcher = async <
 	OperationName extends keyof Queries,
+	Data extends Queries[OperationName]['data'] = Queries[OperationName]['data'],
 	RequestOptions extends OperationRequestOptions<
 		keyof Queries,
 		Queries[OperationName]['input']
@@ -16,7 +21,7 @@ const queryFetcher = async <
 >(
 	query: RequestOptions
 ) => {
-	const result = await client.query<RequestOptions>(query);
+	const result = await client.query<RequestOptions, Data>(query);
 
 	if (result.error) {
 		throw result.error;
@@ -27,14 +32,15 @@ const queryFetcher = async <
 
 const mutationFetcher = async <
 	OperationName extends keyof Mutations,
+	Data extends Mutations[OperationName]['data'] = Mutations[OperationName]['data'],
 	RequestOptions extends OperationRequestOptions<
-		keyof Queries,
-		Queries[OperationName]['input']
-	> = OperationRequestOptions<keyof Queries, Queries[OperationName]['input']>
+		keyof Mutations,
+		Mutations[OperationName]['input']
+	> = OperationRequestOptions<keyof Mutations, Mutations[OperationName]['input']>
 >(
 	mutation: RequestOptions
 ) => {
-	const result = await client.mutate(mutation);
+	const result = await client.mutate<RequestOptions, Data>(mutation);
 
 	if (result.error) {
 		throw result.error;
@@ -47,7 +53,7 @@ export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration 
 	operationName: OperationName;
 	isLiveQuery?: LiveQuery;
 	enabled?: boolean;
-} & (Input extends object ? { input: Input } : {});
+} & (Input extends object ? { input: Input } : unknown);
 
 export const useQuery = <
 	OperationName extends keyof Queries,
@@ -56,7 +62,7 @@ export const useQuery = <
 	LiveQuery extends Queries[OperationName]['liveQuery'] = Queries[OperationName]['liveQuery']
 >(
 	options: UseQueryOptions<OperationName, Input, LiveQuery>
-): SWRResponse<Data, GraphQLResponseError> => {
+) => {
 	const _options = {
 		input: undefined,
 		...options,
@@ -64,7 +70,11 @@ export const useQuery = <
 	const { operationName, isLiveQuery, enabled = true, input, ...swrConfig } = _options;
 	const key = { operationName, input };
 	const [_key] = serialize(key);
-	const response = useSWR(enabled ? key : null, !isLiveQuery ? queryFetcher : null, swrConfig as SWRConfiguration);
+	const response = useSWR<Data | undefined, GraphQLResponseError>(
+		enabled ? key : null,
+		!isLiveQuery ? queryFetcher : null,
+		swrConfig
+	);
 
 	useEffect(() => {
 		let unsubscribe: () => void;
@@ -82,7 +92,7 @@ export const useQuery = <
 export type UseMutationOptions<OperationName> = SWRConfiguration & {
 	operationName: OperationName;
 };
-export type MutateOptions<Input, Data> = MutatorOptions<Data> & (Input extends object ? { input: Input } : {});
+export type MutateOptions<Input, Data> = MutatorOptions<Data> & (Input extends object ? { input: Input } : unknown);
 
 export const useMutation = <
 	OperationName extends keyof Mutations,
@@ -92,17 +102,17 @@ export const useMutation = <
 	options: UseMutationOptions<OperationName>
 ) => {
 	const { operationName, ...config } = options;
-	const response = useSWR(operationName, null, config);
+	const response = useSWR<Data, GraphQLResponseError>(operationName, null, config);
 
 	return {
 		...response,
-		async mutate(options?: MutateOptions<Input, Data>): Promise<Data> {
+		async mutate(options?: MutateOptions<Input, Data>): Promise<Data | undefined> {
 			const _options = {
 				...options,
 			};
 			const { input, ...swrOptions } = _options;
 			return response.mutate(() => {
-				return mutationFetcher<any>({ operationName, input });
+				return mutationFetcher({ operationName, input });
 			}, swrOptions);
 		},
 	};

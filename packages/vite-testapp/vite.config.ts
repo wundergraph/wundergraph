@@ -9,7 +9,7 @@ export default defineConfig({
 	},
 	build: {
 		commonjsOptions: {
-			include: [/sdk\/dist\//, /node_modules/],
+			include: [/sdk\/dist\//, /node_modules/, /@wundergraph/],
 		},
 	},
 });

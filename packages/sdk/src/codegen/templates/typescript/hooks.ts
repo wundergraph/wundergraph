@@ -3,7 +3,7 @@ import { ResolvedWunderGraphConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
 import { OperationType } from '@wundergraph/protobuf';
-import { modelImports, operations } from './client';
+import { modelImports, operations } from './helpers';
 import { template } from './hooks.template';
 
 export class WunderGraphHooksPlugin implements Template {

@@ -1,3 +1,4 @@
+//language=handlebars
 export const template = `
 import type { UserListener } from "@wundergraph/sdk";
 import { Client } from "./wundergraph.client";

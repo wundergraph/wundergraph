@@ -3,6 +3,6 @@
  */
 export { visitJSONSchema } from '../codegen/index';
 
-export { serialize } from '../utils/serialize';
+export { serialize } from '../utils';
 
-export { modelImports } from '../codegen/templates/typescript/client';
+export { modelImports } from '../codegen/templates/typescript/helpers';
