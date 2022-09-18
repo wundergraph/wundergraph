@@ -1,4 +1,5 @@
 import { GraphQLResponseError } from './GraphQLResponseError';
+import { ResponseError } from './ResponseError';
 
 export type Headers = { [key: string]: string };
 
@@ -36,13 +37,20 @@ export interface ClientConfig {
 
 export type SubscriptionEventHandler<Data = any> = (resp: ClientResponse<Data>) => void;
 
+export interface GraphQLErrorLocation {
+	line: number;
+	column: number;
+}
+
 export interface GraphQLError {
 	message: string;
+	location?: ReadonlyArray<GraphQLErrorLocation>;
+	path?: ReadonlyArray<string | number>;
 }
 
 export interface ClientResponse<ResponseData = any> {
 	data?: ResponseData;
-	error?: Error | GraphQLResponseError;
+	error?: Error | GraphQLResponseError | ResponseError;
 }
 
 export interface GraphQLResponse<

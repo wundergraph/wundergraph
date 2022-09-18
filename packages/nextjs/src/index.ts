@@ -555,7 +555,7 @@ function useSubscriptionContextWrapper<
 			{
 				...subscription,
 				...args,
-				isLiveQuery: !!subscription.isLiveQuery,
+				liveQuery: !!subscription.isLiveQuery,
 				abortSignal: abort.signal,
 			},
 			(result) => {

@@ -164,3 +164,15 @@ client.logout();
 ```ts
 const user = await client.fetchUser();
 ```
+
+## Error handling
+
+### Operations
+
+Query and mutation errors are returned as a `GraphQLResponseError` object. We expose the original GraphQL errors object as `errors` property.
+Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code response as `statusCode` property.
+
+### Other
+
+Methods that initiate a network request throw a `ResponseError` or `Error` if the request fails to initiate or the response is not 2xx.
+You can be sure that the request was successful if the method doesn't throw an error.
