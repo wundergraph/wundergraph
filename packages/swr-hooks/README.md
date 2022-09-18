@@ -39,7 +39,7 @@ import { createClient, Mutations, Queries, Subscriptions } from './components/ge
 const { useQuery, useMutation } = newSWRHooks<Queries, Mutations, Subscriptions>(createClient());
 
 export const Home: React.FC<{ city: string }> = ({ city }) => {
-  const { error, data } = useQuery({
+  const { error, data, isValidating } = useQuery({
     operationName: 'Weather',
     input: { forCity: city },
     liveQuery: true,
