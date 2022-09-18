@@ -104,3 +104,16 @@ expectType<Promise<boolean>>(
 		logoutOpenidConnectProvider: true,
 	})
 );
+
+// Set extra headers
+
+expectType<void>(client.setExtraHeaders({ 'x-foo': 'bar' }));
+
+// Build cache key
+
+expectType<string>(
+	Client.buildCacheKey({
+		operationName: 'Weather',
+		input: { lat: 1 },
+	})
+);

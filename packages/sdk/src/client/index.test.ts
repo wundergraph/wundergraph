@@ -13,6 +13,47 @@ const newClient = () => {
 };
 
 describe('Client', () => {
+	describe('Utility', () => {
+		test('Should be able to set extra headers', async () => {
+			const client = newClient();
+
+			const scope = nock('https://api.com')
+				.matchHeader('content-type', 'application/json')
+				.matchHeader('WG-SDK-Version', '1.0.0')
+				.matchHeader('X-Test', 'test')
+				.get('/app/operations/Weather')
+				.query({ wg_api_hash: '123', wg_variables: '{}' })
+				.once()
+				.reply(200, {
+					data: {
+						id: '1',
+					},
+				});
+
+			client.setExtraHeaders({
+				'X-Test': 'test',
+			});
+
+			const resp = await client.query({
+				operationName: 'Weather',
+			});
+
+			scope.done();
+
+			expect(resp.data).toEqual({ id: '1' });
+			expect(resp.error).toBeUndefined();
+		});
+
+		test('Should be able to build the cache key for an operation', async () => {
+			const cacheKey = Client.buildCacheKey({
+				operationName: 'Weather',
+				input: { lat: 1 },
+			});
+
+			expect(cacheKey).toEqual('#operationName:"Weather",input:#lat:1,,');
+		});
+	});
+
 	describe('Query', () => {
 		test('Should be able to fire a simple query operation', async () => {
 			const client = newClient();
