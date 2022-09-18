@@ -186,8 +186,8 @@ controller.abort();
 
 ### Operations
 
-Query and mutation errors are returned as a `GraphQLResponseError` object. We expose the original GraphQL errors object as `errors` property.
-Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code response as `statusCode` property.
+Query and mutation errors are returned as a `GraphQLResponseError` object. By default, the first error specifiy the error message but you can access all GraphQL errors through the `errors` property.
+Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code as `statusCode` property.
 
 ```ts
 const { data, error } = await client.query({
@@ -198,7 +198,7 @@ const { data, error } = await client.query({
 });
 
 if (error instanceof GraphQLResponseError) {
-  error.errors;
+  error.errors[0].location;
 } else if (error instanceof ResponseError) {
   error.statusCode;
 }
