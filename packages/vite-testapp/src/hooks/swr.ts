@@ -1,21 +1,25 @@
 import { createClient, Mutations, Queries, Subscriptions } from '../components/generated/client';
 import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 'swr';
-import { ClientQueryArgs, ClientMutationArgs, QueryProps, ResultError, MutationProps } from '@wundergraph/sdk/client';
+import { OperationRequestOptions, SubscriptionRequestOptions, GraphQLResponseError } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useEffect } from 'react';
+import { ClientResponse } from '@wundergraph/sdk/dist/client';
 
 const client = createClient();
 
 const queryFetcher = async <
 	OperationName extends keyof Queries,
-	Input extends Queries[OperationName]['input'] = Queries[OperationName]['input']
+	RequestOptions extends OperationRequestOptions<
+		keyof Queries,
+		Queries[OperationName]['input']
+	> = OperationRequestOptions<keyof Queries, Queries[OperationName]['input']>
 >(
-	query: QueryProps<OperationName, ClientQueryArgs<Input>>
+	query: RequestOptions
 ) => {
-	const result = await client.query(query);
+	const result = await client.query<RequestOptions>(query);
 
-	if (result.status === 'error' || result.status === 'partial') {
-		throw new Error(result.errors[0].message);
+	if (result.error) {
+		throw result.error;
 	}
 
 	return result.data;
@@ -23,14 +27,17 @@ const queryFetcher = async <
 
 const mutationFetcher = async <
 	OperationName extends keyof Mutations,
-	Input extends Mutations[OperationName]['input'] = Mutations[OperationName]['input']
+	RequestOptions extends OperationRequestOptions<
+		keyof Queries,
+		Queries[OperationName]['input']
+	> = OperationRequestOptions<keyof Queries, Queries[OperationName]['input']>
 >(
-	mutation: MutationProps<OperationName, ClientMutationArgs<Input>>
+	mutation: RequestOptions
 ) => {
 	const result = await client.mutate(mutation);
 
-	if (result.status === 'error' || result.status === 'partial') {
-		throw new Error(result.errors[0].message);
+	if (result.error) {
+		throw result.error;
 	}
 
 	return result.data;
@@ -49,7 +56,7 @@ export const useQuery = <
 	LiveQuery extends Queries[OperationName]['liveQuery'] = Queries[OperationName]['liveQuery']
 >(
 	options: UseQueryOptions<OperationName, Input, LiveQuery>
-): SWRResponse<Data, ResultError> => {
+): SWRResponse<Data, GraphQLResponseError> => {
 	const _options = {
 		input: undefined,
 		...options,
@@ -62,7 +69,7 @@ export const useQuery = <
 	useEffect(() => {
 		let unsubscribe: () => void;
 		if (isLiveQuery && enabled) {
-			unsubscribe = subscribeTo(operationName, input, { isLiveQuery: true });
+			unsubscribe = subscribeTo({ operationName, input, isLiveQuery: true });
 		}
 		return () => {
 			unsubscribe?.();
@@ -109,23 +116,17 @@ export const useMutation = <
  * const unsubscribe = subscribeTo('Hello', {world: 'World'})
  * ```
  */
-const subscribeTo = <OperationName = any, Input = any, Data = any>(
-	operationName: OperationName,
-	input: Input,
-	options: { isLiveQuery?: boolean } = {}
-) => {
+const subscribeTo = (options: SubscriptionRequestOptions) => {
 	const abort = new AbortController();
-	const key = { operationName, input };
-	const { isLiveQuery } = options;
-	client.subscribe<any, any, any>({ operationName, input, abortSignal: abort.signal, isLiveQuery }, (result) => {
+
+	options.abortSignal = abort.signal;
+
+	client.subscribe(options, (result: ClientResponse) => {
 		// Promise is not handled because we are not interested in the result
 		// Errors are handled by SWR internally
-		mutate(key, async () => {
-			if (result.status === 'error' || result.status === 'partial') {
-				if (result.errors.length > 0) {
-					throw new Error(result.errors[0].message);
-				}
-				throw new Error('Error but nothing returned from server');
+		mutate({ operationName: options.operationName, input: options.input }, async () => {
+			if (result.error) {
+				throw result.error;
 			}
 			return result.data;
 		});
@@ -147,7 +148,7 @@ export const useSubscription = <
 >(
 	operationName: OperationName,
 	options: UseSubscriptionOptions<OperationName, Input>
-): SWRResponse<Data, ResultError> => {
+): SWRResponse<Data, GraphQLResponseError> => {
 	const _options = {
 		input: undefined,
 		...options,
@@ -160,7 +161,10 @@ export const useSubscription = <
 	useEffect(() => {
 		let unsubscribe: () => void;
 		if (enabled) {
-			unsubscribe = subscribeTo(operationName, input);
+			unsubscribe = subscribeTo({
+				operationName,
+				input,
+			});
 		}
 		return () => {
 			unsubscribe?.();

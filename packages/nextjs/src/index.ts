@@ -18,12 +18,11 @@ import {
 } from 'react';
 import ssrPrepass from 'react-ssr-prepass';
 
-import { InternalSubscriptionArgs, WunderGraphClient } from '@wundergraph/sdk/client';
-
-import type {
-	ClientConfig,
+import { Client, User, ClientConfig, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
+import {
 	InternalMutationArgsWithInput,
 	InternalQueryArgsWithInput,
+	InternalSubscriptionArgs,
 	InternalSubscriptionArgsWithInput,
 	MutationArgsWithInput,
 	MutationResult,
@@ -31,9 +30,9 @@ import type {
 	QueryArgsWithInput,
 	QueryResult,
 	SubscriptionResult,
-	User,
 	UploadConfig,
-} from '@wundergraph/sdk/client';
+} from './types';
+import { GraphQLResponseError } from '@wundergraph/sdk/dist/client';
 
 export type Headers = { [key: string]: string };
 
@@ -45,12 +44,13 @@ export interface LogoutOptions {
 	logout_openid_connect_provider?: boolean;
 }
 
-export interface WunderGraphContextProperties<Role> {
+export interface WunderGraphContextProperties<Role extends string> {
 	ssrCache: { [key: string]: Promise<any> | {} };
-	clientConfig: ClientConfig & { authenticationEnabled?: boolean };
-	client: WunderGraphClient<Role>;
+	clientConfig: ClientConfig;
+	client: Client;
 	user: User<Role> | null;
 	setUser: Dispatch<SetStateAction<User<Role> | null>>;
+	authenticationEnabled?: boolean;
 	isWindowFocused: 'pristine' | 'focused' | 'blurred';
 	setIsWindowFocused: Dispatch<SetStateAction<'pristine' | 'focused' | 'blurred'>>;
 	refetchMountedOperations: number;
@@ -69,7 +69,7 @@ type NextPageWithLayout = NextPage & {
 	getLayout?: (page: ReactElement) => ReactNode;
 };
 
-function withWunderGraphContextWrapper<Role>(
+function withWunderGraphContextWrapper<Role extends string>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	defaultContextProperties: WunderGraphContextProperties<Role>
 ) {
@@ -80,7 +80,7 @@ function withWunderGraphContextWrapper<Role>(
 			if (options?.baseURL) {
 				baseOptions.baseURL = options.baseURL;
 			}
-			defaultContextProperties.client = new WunderGraphClient(baseOptions);
+			defaultContextProperties.client = new Client(baseOptions);
 		}
 
 		const WithWunderGraph: NextPage<any> = (props: any) => {
@@ -90,7 +90,7 @@ function withWunderGraphContextWrapper<Role>(
 				const [isWindowFocused, setIsWindowFocused] = useState<'pristine' | 'focused' | 'blurred'>('pristine');
 				const [refetchMountedOperations, setRefetchMountedOperations] = useState<number>(0);
 				windowHooks(setIsWindowFocused);
-				if (defaultContextProperties.clientConfig.authenticationEnabled) {
+				if (defaultContextProperties.authenticationEnabled) {
 					clientUserHooks<Role>(user, setUser, isWindowFocused, defaultContextProperties, options);
 				}
 				const clientProps: WunderGraphContextProperties<Role> = {
@@ -142,9 +142,9 @@ function withWunderGraphContextWrapper<Role>(
 
 			let ssrUser: User<Role> | null = null;
 
-			if (options?.disableFetchUserServerSide !== true && defaultContextProperties.clientConfig.authenticationEnabled) {
+			if (options?.disableFetchUserServerSide !== true && defaultContextProperties.authenticationEnabled) {
 				try {
-					ssrUser = await defaultContextProperties.client.fetchUser();
+					ssrUser = await defaultContextProperties.client.fetchUser<User<Role>>();
 				} catch (e) {}
 			}
 
@@ -214,7 +214,7 @@ const windowHooks = (setIsWindowFocused: Dispatch<SetStateAction<'pristine' | 'f
 	}, []);
 };
 
-const clientUserHooks = <Role>(
+const clientUserHooks = <Role extends string>(
 	user: User<Role> | null,
 	setUser: Dispatch<SetStateAction<User<Role> | null>>,
 	isWindowFocused: 'pristine' | 'focused' | 'blurred',
@@ -231,7 +231,9 @@ const clientUserHooks = <Role>(
 		if (user === null) {
 			(async () => {
 				try {
-					const nextUser = await ctx.client.fetchUser(abort.signal);
+					const nextUser = await ctx.client.fetchUser<User<Role>>({
+						abortSignal: abort.signal,
+					});
 					if (JSON.stringify(nextUser) === JSON.stringify(user)) {
 						return;
 					}
@@ -256,7 +258,9 @@ const clientUserHooks = <Role>(
 		const abort = new AbortController();
 		(async () => {
 			try {
-				const nextUser = await ctx.client.fetchUser(abort.signal);
+				const nextUser = await ctx.client.fetchUser<User<Role>>({
+					abortSignal: abort.signal,
+				});
 				if (JSON.stringify(nextUser) === JSON.stringify(user)) {
 					return;
 				}
@@ -285,7 +289,7 @@ interface UseWunderGraphContextOptions {
 	name?: string;
 }
 
-function useWunderGraphContext<Role>(
+function useWunderGraphContext<Role extends string>(
 	context: Context<WunderGraphContextProperties<Role>>,
 	options: UseWunderGraphContextOptions = {}
 ) {
@@ -306,7 +310,11 @@ function useWunderGraphContext<Role>(
 	return ctx;
 }
 
-function useQueryContextWrapper<Input, Data, Role>(
+function useQueryContextWrapper<
+	Input extends object | undefined = object | undefined,
+	Data = any,
+	Role extends string = string
+>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	query: UseQueryProps,
 	args?: InternalQueryArgsWithInput<Input>
@@ -320,7 +328,7 @@ function useQueryContextWrapper<Input, Data, Role>(
 	);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true && args?.lazy !== true;
-	const cacheKey = client.cacheKey({
+	const cacheKey = Client.buildCacheKey({
 		...query,
 		...args,
 	});
@@ -455,7 +463,11 @@ interface UseSubscriptionProps extends ContextWrapperOptions {
 	isLiveQuery?: boolean;
 }
 
-function useSubscriptionContextWrapper<Input, Data, Role>(
+function useSubscriptionContextWrapper<
+	Input extends object | undefined = object | undefined,
+	Data = any,
+	Role extends string = string
+>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	subscription: UseSubscriptionProps,
 	args?: InternalSubscriptionArgsWithInput<Input>
@@ -468,7 +480,7 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 	);
 	const isServer = typeof window === 'undefined';
 	const ssrEnabled = args?.disableSSR !== true;
-	const cacheKey = client.cacheKey({
+	const cacheKey = Client.buildCacheKey({
 		...subscription,
 		...args,
 	});
@@ -526,15 +538,33 @@ function useSubscriptionContextWrapper<Input, Data, Role>(
 			setSubscriptionResult({ status: 'loading' });
 		}
 		const abort = new AbortController();
-		client.subscribe(
+		client.subscribe<SubscriptionRequestOptions, Data>(
 			{
 				...subscription,
 				...args,
 				isLiveQuery: !!subscription.isLiveQuery,
 				abortSignal: abort.signal,
 			},
-			(result: SubscriptionResult<Data>) => {
-				setSubscriptionResult(result);
+			(result) => {
+				if (result.error) {
+					if (result.error instanceof GraphQLResponseError) {
+						setSubscriptionResult({
+							status: 'error',
+							errors: result.error.errors,
+						});
+					} else {
+						setSubscriptionResult({
+							status: 'error',
+							errors: [result.error],
+						});
+					}
+				} else if (result.data) {
+					setSubscriptionResult({
+						status: 'ok',
+						streamState: 'streaming',
+						data: result.data,
+					});
+				}
 			}
 		);
 		return () => {
@@ -562,7 +592,11 @@ interface UseMutationProps extends ContextWrapperOptions {
 	operationName: string;
 }
 
-function useMutationContextWrapper<Role, Input = never, Data = never>(
+function useMutationContextWrapper<
+	Role extends string,
+	Input extends object | undefined = object | undefined,
+	Data = never
+>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	mutation: UseMutationProps
 ): {
@@ -581,9 +615,13 @@ function useMutationContextWrapper<Role, Input = never, Data = never>(
 				return { status: 'requires_authentication' };
 			}
 			setResult({ status: 'loading' });
-			const result = await client.mutate({ ...mutation, ...args });
+			const result = await client.mutate({
+				operationName: mutation.operationName,
+				input: args?.input,
+				abortSignal: args?.abortSignal,
+			});
 			setResult(result as any);
-			if (result.status === 'ok' && args?.refetchMountedOperationsOnSuccess === true) {
+			if (!result.error && args?.refetchMountedOperationsOnSuccess === true) {
 				setRefetchMountedOperations((prev) => prev + 1);
 			}
 			return result as any;
@@ -610,7 +648,7 @@ function useMutationContextWrapper<Role, Input = never, Data = never>(
 	};
 }
 
-function useWunderGraph<Role, AuthProviders extends string = '', S3Providers extends string = ''>(
+function useWunderGraph<Role extends string, AuthProviders extends string = '', S3Providers extends string = ''>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>
 ) {
 	return function () {
@@ -623,7 +661,9 @@ function useWunderGraph<Role, AuthProviders extends string = '', S3Providers ext
 		);
 		const logout = useCallback(
 			async (options?: LogoutOptions) => {
-				const success = await client.logout(options);
+				const success = await client.logout({
+					logoutOpenidConnectProvider: options?.logout_openid_connect_provider,
+				});
 				if (success) {
 					setUser(null);
 				}
@@ -633,7 +673,7 @@ function useWunderGraph<Role, AuthProviders extends string = '', S3Providers ext
 		);
 		const fetchUser = useCallback(async () => {
 			try {
-				const user = await client.fetchUser();
+				const user = await client.fetchUser<User<Role>>();
 				setUser(user);
 				return user;
 			} catch {
@@ -657,10 +697,11 @@ function useWunderGraph<Role, AuthProviders extends string = '', S3Providers ext
 	};
 }
 
-function useQueryWithInput<Input, Data, Role>(
-	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	query: UseQueryProps
-) {
+function useQueryWithInput<
+	Input extends object | undefined = object | undefined,
+	Data = any,
+	Role extends string = string
+>(wunderGraphContext: Context<WunderGraphContextProperties<Role>>, query: UseQueryProps) {
 	return (args: QueryArgsWithInput<Input>) =>
 		useQueryContextWrapper(wunderGraphContext, query, args) as {
 			result: QueryResult<Data>;
@@ -668,7 +709,7 @@ function useQueryWithInput<Input, Data, Role>(
 		};
 }
 
-function useQueryWithoutInput<Data, Role>(
+function useQueryWithoutInput<Data, Role extends string>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	query: UseQueryProps
 ) {
@@ -679,17 +720,18 @@ function useQueryWithoutInput<Data, Role>(
 		};
 }
 
-function useMutationWithInput<Input, Data, Role>(
-	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	mutation: UseMutationProps
-) {
+function useMutationWithInput<
+	Input extends object | undefined = object | undefined,
+	Data = any,
+	Role extends string = string
+>(wunderGraphContext: Context<WunderGraphContextProperties<Role>>, mutation: UseMutationProps) {
 	return useMutationContextWrapper<Role, Input, Data>(wunderGraphContext, mutation) as {
 		result: MutationResult<Data>;
 		mutate: (args: MutationArgsWithInput<Input>) => Promise<MutationResult<Data>>;
 	};
 }
 
-function useMutationWithoutInput<Data, Role>(
+function useMutationWithoutInput<Data = any, Role extends string = string>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	mutation: UseMutationProps
 ) {
@@ -699,17 +741,18 @@ function useMutationWithoutInput<Data, Role>(
 	};
 }
 
-function useSubscriptionWithInput<Input, Data, Role>(
-	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
-	subscription: UseSubscriptionProps
-) {
+function useSubscriptionWithInput<
+	Input extends object | undefined = object | undefined,
+	Data = any,
+	Role extends string = string
+>(wunderGraphContext: Context<WunderGraphContextProperties<Role>>, subscription: UseSubscriptionProps) {
 	return (args: InternalSubscriptionArgsWithInput<Input>) =>
 		useSubscriptionContextWrapper(wunderGraphContext, subscription, args) as {
 			result: SubscriptionResult<Data>;
 		};
 }
 
-function useSubscriptionWithoutInput<Data, Role>(
+function useSubscriptionWithoutInput<Data = any, Role extends string = string>(
 	wunderGraphContext: Context<WunderGraphContextProperties<Role>>,
 	subscription: UseSubscriptionProps
 ) {

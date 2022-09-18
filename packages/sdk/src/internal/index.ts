@@ -4,3 +4,5 @@
 export { visitJSONSchema } from '../codegen/index';
 
 export { serialize } from '../utils/serialize';
+
+export { modelImports } from '../codegen/templates/typescript/client';

@@ -26,7 +26,7 @@ npx -p @wundergraph/wunderctl wunderctl init
 This is the base javascript implementation for all WunderGraph clients.
 
 ```ts
-import { WunderGraphClient } from '@wundergraph/sdk/client';
+import { Client } from '@wundergraph/sdk/client';
 ```
 
 ## Internal

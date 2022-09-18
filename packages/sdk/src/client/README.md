@@ -16,7 +16,7 @@ npm install @wundergraph/sdk
 ### Create the client
 
 ```ts
-import { WunderGraphClient } from '@wundergraph/sdk/client';
+import { Client } from '@wundergraph/sdk/client';
 
 const client = new WunderGraphClient({
   applicationHash: '1f7dac83',
@@ -39,10 +39,10 @@ npm i node-fetch
 ```
 
 ```ts
-import { WunderGraphClient } from '@wundergraph/sdk/client';
+import { Client } from '@wundergraph/sdk/client';
 import fetch from 'node-fetch';
 
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -60,7 +60,7 @@ import 'promise-polyfill/src/polyfill';
 import 'yet-another-abortcontroller-polyfill';
 import { fetch } from 'whatwg-fetch';
 
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -72,7 +72,7 @@ const client = new WunderGraphClient({
 ## Adding custom headers
 
 ```ts
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -88,7 +88,7 @@ const client = new WunderGraphClient({
 ### Run a query
 
 ```ts
-const result = await client.query({
+const response = await client.query({
   operationName: 'Hello',
   input: {
     hello: 'World',
@@ -99,7 +99,7 @@ const result = await client.query({
 ### Mutation
 
 ```ts
-const result = await client.mutate({
+const response = await client.mutate({
   operationName: 'SetName',
   input: {
     name: 'WunderGraph',
@@ -118,7 +118,7 @@ client.subscribe(
     },
     isLiveQuery: true,
   },
-  (result) => {}
+  (response) => {}
 );
 ```
 
@@ -132,7 +132,7 @@ client.subscribe(
       from: 100,
     },
   },
-  (result) => {}
+  (response) => {}
 );
 ```
 

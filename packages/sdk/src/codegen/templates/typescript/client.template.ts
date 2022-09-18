@@ -1,9 +1,37 @@
 //language=handlebars
 export const handlebarTemplate = `
-import { WunderGraphClient, ClientConfig, ClientOperations, ClientOperationDefs } from '@wundergraph/sdk/client'
+import { Client, ClientConfig, User } from '@wundergraph/sdk/client';
 import type { {{ modelImports }} } from "./models";
 
-export type Role = {{{ roleDefinitions }}};
+export type UserRole = {{{ roleDefinitions }}};
+
+export const WUNDERGRAPH_S3_ENABLED = {{hasS3Provider}};
+export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
+
+{{#if hasS3Provider}}
+export interface UploadResponse { key: string }
+
+export enum S3Provider {
+    {{#each s3Provider }}
+    "{{name}}" = "{{name}}",
+    {{/each}}
+}
+
+export type UploadConfig = UploadRequestOptions<S3Provider>
+{{/if}}
+
+{{#if hasAuthProviders}}
+export enum AuthProviderId {
+    {{#each authProviders}}
+    "{{.}}" = "{{.}}",
+    {{/each}}
+}
+
+export interface AuthProvider {
+    id: AuthProviderId;
+    login: (redirectURI?: string) => void;
+}
+{{/if}}
 
 export const defaultClientConfig: ClientConfig = {
     applicationHash: "{{applicationHash}}",
@@ -12,18 +40,14 @@ export const defaultClientConfig: ClientConfig = {
     sdkVersion: "{{sdkVersion}}",
 }
 
-export interface CreateClientProps {
-    baseURL?: string;
-}
-
-export const createClient = (config?: CreateClientProps) => {
-    return new WunderGraphClient<Role, Operations>({
+export const createClient = (config?: Pick<ClientConfig, 'baseURL'>) => {
+    return new Client({
         ...defaultClientConfig,
         ...config
     })
 }
 
-export type Queries = ClientOperationDefs<{
+export type Queries = {
 {{#each queries}}
     {{operationName}}: {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
@@ -32,9 +56,9 @@ export type Queries = ClientOperationDefs<{
         liveQuery: {{liveQuery}}
     }
 {{/each}}
-}>
+}
 
-export type Mutations = ClientOperationDefs<{
+export type Mutations = {
 {{#each mutations}}
     {{operationName}}: {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
@@ -42,9 +66,9 @@ export type Mutations = ClientOperationDefs<{
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}>
+}
 
-export type Subscriptions = ClientOperationDefs<{
+export type Subscriptions = {
 {{#each subscriptions}}
     {{operationName}}: {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
@@ -52,9 +76,9 @@ export type Subscriptions = ClientOperationDefs<{
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}>
+}
 
-export type LiveQueries = ClientOperationDefs<{
+export type LiveQueries = {
 {{#each liveQueries}}
     {{operationName}}: {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
@@ -63,7 +87,5 @@ export type LiveQueries = ClientOperationDefs<{
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
-}>
-
-export type Operations = ClientOperations<Queries, Mutations, Subscriptions & LiveQueries>
+}
 `;

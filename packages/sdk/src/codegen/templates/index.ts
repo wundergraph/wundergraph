@@ -5,7 +5,6 @@ import {
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
 } from './typescript';
-import { TypeScriptWebClient } from './typescript/web.client';
 import { TypescriptReactHooks, TypescriptReactNativeProvider, TypescriptReactProvider } from './typescript/react';
 import { Operations } from './typescript/operations';
 import { TypeScriptLinkBuilder } from './typescript/linkbuilder';
@@ -15,6 +14,7 @@ import { WunderGraphServer } from './typescript/server';
 import { WunderGraphHooksPlugin } from './typescript/hooks';
 import { AuthenticationProviderConfiguration } from './markdown/authentication';
 import { WunderGraphWebhooksPlugin } from './typescript/webhooks';
+import { TypeScriptClient } from './typescript/client';
 
 const typescriptModels = [
 	new TypeScriptInputModels(),
@@ -39,21 +39,21 @@ const templates = {
 		models: typescriptModels,
 		inputModels: new TypeScriptInputModels(),
 		responseModels: new TypeScriptResponseModels(),
-		client: new TypeScriptWebClient(),
-		all: [...typescriptAll, new TypeScriptWebClient(), new AuthenticationProviderConfiguration()],
+		client: new TypeScriptClient(),
+		all: [...typescriptAll, new AuthenticationProviderConfiguration()],
 		fastifyServer: new WunderGraphServer(),
 		fastifyHooksPlugin: new WunderGraphHooksPlugin(),
 		fastifyWebhookPlugin: new WunderGraphWebhooksPlugin(),
 		react: [
 			...typescriptAll,
-			new TypeScriptWebClient(),
+			new TypeScriptClient(),
 			new TypescriptReactProvider(),
 			new TypescriptReactHooks(),
 			new Forms(),
 		],
 		reactNative: [
 			...typescriptAll,
-			new TypeScriptWebClient(true),
+			new TypeScriptClient(true),
 			new TypescriptReactNativeProvider(),
 			new TypescriptReactHooks(true),
 		],

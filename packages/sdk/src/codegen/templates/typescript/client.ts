@@ -14,7 +14,8 @@ import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configu
 import { listenAddrHttp } from '../../../env';
 import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
 
-export class TypeScriptClientTemplate implements Template {
+export class TypeScriptClient implements Template {
+	constructor(reactNative: boolean = false) {}
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const _queries = queries(config.application, false);
@@ -42,6 +43,8 @@ export class TypeScriptClientTemplate implements Template {
 			authProviders: config.authentication.cookieBased.map((provider) => provider.id),
 			hasS3Providers: config.application.S3UploadProvider.length !== 0,
 			s3Providers: config.application.S3UploadProvider.map((provider) => provider.name),
+			hasS3Provider: config.application.S3UploadProvider.length > 0,
+			s3Provider: config.application.S3UploadProvider,
 		});
 		return Promise.resolve([
 			{
@@ -102,10 +105,14 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 			};
 		});
 
-export const modelImports = (application: ResolvedApplication, includeInternal: boolean): string => {
+export const modelImports = (
+	application: ResolvedApplication,
+	includeInternal: boolean,
+	includeResponseData?: boolean
+): string => {
 	return filteredOperations(application, includeInternal)
 		.map((op) => {
-			let out = `${op.Name}ResponseData`;
+			let out = `${op.Name}Response`;
 			if (hasInput(op)) {
 				out += `,${op.Name}Input`;
 			}
@@ -114,6 +121,9 @@ export const modelImports = (application: ResolvedApplication, includeInternal: 
 			}
 			if (includeInternal && hasInjectedInput(op)) {
 				out += `,Injected${op.Name}Input`;
+			}
+			if (includeResponseData === true) {
+				out += `,${op.Name}ResponseData`;
 			}
 			return out;
 		})
