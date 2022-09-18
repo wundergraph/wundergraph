@@ -38,18 +38,20 @@ import { newSWRHooks } from '@wundergraph/swr-hooks';
 import { createClient, Mutations, Queries, Subscriptions } from './components/generated/client';
 const { useQuery, useMutation } = newSWRHooks<Queries, Mutations, Subscriptions>(createClient());
 
-const { error, data } = useQuery({
-  operationName: 'Weather',
-  input: { forCity: city },
-  liveQuery: true,
-});
+export const Home: React.FC<{ city: string }> = ({ city }) => {
+  const { error, data } = useQuery({
+    operationName: 'Weather',
+    input: { forCity: city },
+    liveQuery: true,
+  });
 
-const { mutate } = useMutation({
-  operationName: 'SetName',
-});
-mutate({
-  input: { name },
-});
+  const { mutate } = useMutation({
+    operationName: 'SetName',
+  });
+  mutate({
+    input: { name },
+  });
+};
 ```
 
 ## Options
