@@ -1,6 +1,7 @@
 import { Client, OperationRequestOptions } from './index';
 import nock from 'nock';
 import fetch from 'node-fetch';
+import { ResponseError } from './ResponseError';
 
 const newClient = () => {
 	return new Client({
@@ -153,6 +154,24 @@ describe('Client', () => {
 
 			expect(resp.data).toBeUndefined();
 			expect(resp.error).toEqual(new Error('Error'));
+		});
+
+		test('Should return ResponseError when request failed', async () => {
+			const client = newClient();
+
+			const scope = nock('https://api.com')
+				.get('/app/operations/Weather')
+				.query({ wg_api_hash: '123', wg_variables: '{}' })
+				.once()
+				.reply(500);
+
+			const resp = await client.query<OperationRequestOptions<'Weather'>>({
+				operationName: 'Weather',
+			});
+
+			expect(resp.error).toBeInstanceOf(Error);
+			expect(resp.error).toEqual(new ResponseError('Response is not ok', 500));
+			expect(resp.data).toBeUndefined();
 		});
 	});
 

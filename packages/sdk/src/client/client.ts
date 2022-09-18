@@ -14,6 +14,7 @@ import {
 } from './types';
 import { serialize } from '../utils/serialize';
 import { GraphQLResponseError } from './GraphQLResponseError';
+import { ResponseError } from './ResponseError';
 
 // https://graphql.org/learn/serving-over-http/
 
@@ -92,13 +93,17 @@ export class Client {
 		};
 	}
 
+	/***
+	 * fetchResponseToClientResponse converts a fetch response to a ClientResponse.
+	 * Network errors or non-200 status codes are converted to an error. Application errors
+	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
+	 */
 	private async fetchResponseToClientResponse(resp: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
 		if (!resp.ok) {
 			return {
-				data: null,
-				error: new Error(`HTTP Error: ${resp.status}`),
+				error: new ResponseError(`Response is not ok`, resp.status),
 			};
 		}
 
@@ -121,6 +126,11 @@ export class Client {
 		};
 	}
 
+	/***
+	 * Query makes a GET request to the server.
+	 * The method only throws an error if the request fails to reach the server or
+	 * the server returns a non-200 status code. Application errors are returned as part of the response.
+	 */
 	public async query<RequestOptions extends OperationRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
@@ -157,6 +167,11 @@ export class Client {
 		return this.csrfToken;
 	}
 
+	/***
+	 * Mutate makes a POST request to the server.
+	 * The method only throws an error if the request fails to reach the server or
+	 * the server returns a non-200 status code. Application errors are returned as part of the response.
+	 */
 	public async mutate<RequestOptions extends OperationRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
@@ -187,6 +202,11 @@ export class Client {
 		return this.fetchResponseToClientResponse(resp);
 	}
 
+	/***
+	 * fetchUser makes a GET request to the server to fetch the current user.
+	 * The method throws an error if the request fails to reach the server or
+	 * the server returns a non-200 status code.
+	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
 		const params = new URLSearchParams({
 			revalidate: options?.revalidate ? 'true' : 'false',
@@ -200,7 +220,7 @@ export class Client {
 			}
 		);
 		if (!response.ok) {
-			throw new Error(`HTTP Error: ${response.status}`);
+			throw new ResponseError(`Response is not ok`, response.status);
 		}
 
 		return response.json();
@@ -309,12 +329,12 @@ export class Client {
 		);
 
 		if (!response.ok) {
-			throw new Error(`HTTP Error: ${response.status}`);
+			throw new ResponseError(`Response is not ok`, response.status);
 		}
 
 		const result = await response.json();
 		if (!result.data) {
-			throw new Error('Invalid server response');
+			throw new ResponseError(`Invalid server response shape`, response.status);
 		}
 
 		const json = result.data as { key: string }[];
