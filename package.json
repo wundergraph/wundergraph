@@ -17,7 +17,7 @@
     "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' --filter='!./docs-website' build --watch",
-    "watch:sdk": "pnpm -r run --filter='./packages/sdk' build --watch",
+    "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql} pkg/templates/assets/templates/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",

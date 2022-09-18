@@ -61,6 +61,7 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
+    "watch": "tsc -w",
     "test": "jest",
     "test:types": "tsd --testFiles src/**/*.test.d.ts",
     "test:int": "TEST_INTEGRATION=true jest"
