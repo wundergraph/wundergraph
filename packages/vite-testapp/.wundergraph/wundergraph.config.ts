@@ -128,7 +128,7 @@ configureWunderGraphApplication({
 	],
 	codeGenerators: [
 		{
-			templates: [templates.typescript.client, ...templates.typescript.models],
+			templates: [templates.typescript.client],
 			path: '../src/components/generated',
 		},
 	],
