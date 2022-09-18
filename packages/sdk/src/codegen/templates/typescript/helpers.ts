@@ -27,6 +27,7 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
+				liveQuery: !!op.LiveQuery?.enable,
 				requiresAuthentication: op.AuthenticationConfig.required,
 			};
 		});
@@ -52,6 +53,7 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
+				liveQuery: true,
 				requiresAuthentication: op.AuthenticationConfig.required,
 			};
 		});

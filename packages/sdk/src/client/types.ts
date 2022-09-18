@@ -6,6 +6,12 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
+export interface OperationMetadata {
+	[key: string]: {
+		requiresAuthentication: boolean;
+	};
+}
+
 export interface ClientConfig {
 	applicationHash: string;
 	applicationPath: string;
@@ -13,6 +19,7 @@ export interface ClientConfig {
 	sdkVersion: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
+	operationMetadata?: OperationMetadata;
 }
 
 export type SubscriptionEventHandler<Data = any> = (resp: ClientResponse<Data>) => void;
@@ -47,7 +54,7 @@ export interface SubscriptionRequestOptions<
 	OperationName extends string = string,
 	Input extends object | undefined = object | undefined
 > extends OperationRequestOptions<OperationName, Input> {
-	isLiveQuery?: Boolean;
+	liveQuery?: Boolean;
 }
 
 export interface SubscriptionResult {

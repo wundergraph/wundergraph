@@ -7,7 +7,7 @@ const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 	const liveWeather = useQuery({
 		operationName: 'Weather',
 		input: { forCity: city },
-		isLiveQuery: true,
+		liveQuery: true,
 	});
 
 	return (

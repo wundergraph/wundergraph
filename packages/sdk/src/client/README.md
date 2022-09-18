@@ -116,7 +116,7 @@ client.subscribe(
     input: {
       name: 'World',
     },
-    isLiveQuery: true,
+    liveQuery: true,
   },
   (response) => {}
 );

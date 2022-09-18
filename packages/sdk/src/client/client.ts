@@ -1,16 +1,16 @@
 import {
 	ClientConfig,
-	OperationRequestOptions,
+	ClientResponse,
+	FetchUserRequestOptions,
 	GraphQLResponse,
 	Headers,
+	LogoutOptions,
+	OperationRequestOptions,
+	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
-	ClientResponse,
 	UploadRequestOptions,
 	UploadResponse,
-	FetchUserRequestOptions,
 	User,
-	LogoutOptions,
-	SubscriptionEventHandler,
 } from './types';
 import { serialize } from '../utils/serialize';
 import { GraphQLResponseError } from './GraphQLResponseError';
@@ -167,15 +167,21 @@ export class Client {
 			})
 		);
 
-		const csrfToken = await this.getCSRFToken();
+		const headers: Headers = {};
+
+		if (
+			this.options.operationMetadata &&
+			this.options.operationMetadata[options.operationName] &&
+			this.options.operationMetadata[options.operationName].requiresAuthentication
+		) {
+			headers['X-CSRF-Token'] = await this.getCSRFToken();
+		}
 
 		const resp = await this.fetchJson(url, {
 			method: 'POST',
 			signal: options.abortSignal,
 			body: this.stringifyInput(options.input),
-			headers: {
-				'X-CSRF-Token': csrfToken,
-			},
+			headers,
 		});
 
 		return this.fetchResponseToClientResponse(resp);
@@ -218,7 +224,7 @@ export class Client {
 	) {
 		const params = new URLSearchParams({
 			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.isLiveQuery ? 'true' : 'false',
+			wg_live: subscription?.liveQuery ? 'true' : 'false',
 			wg_sse: 'true',
 		});
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
@@ -239,7 +245,7 @@ export class Client {
 	): AsyncGenerator<ClientResponse<ResponseData>> {
 		const params = new URLSearchParams({
 			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.isLiveQuery ? 'true' : 'false',
+			wg_live: subscription?.liveQuery ? 'true' : 'false',
 		});
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 		const response = await this.fetchJson(url, {
@@ -272,7 +278,7 @@ export class Client {
 	}
 
 	/**
-	 * Uploads one or more files to the server. The method throws an error if the files
+	 * Uploads one or more files to the server. Authentication is required. The method throws an error if the files
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
@@ -284,6 +290,7 @@ export class Client {
 			}
 		}
 		const csrfToken = await this.getCSRFToken();
+
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});

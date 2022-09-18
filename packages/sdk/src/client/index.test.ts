@@ -9,6 +9,17 @@ const newClient = () => {
 		applicationHash: '123',
 		applicationPath: 'app',
 		customFetch: fetch as any,
+		operationMetadata: {
+			Weather: {
+				requiresAuthentication: true,
+			},
+			CreateWeather: {
+				requiresAuthentication: true,
+			},
+			CreateWeatherWithoutAuth: {
+				requiresAuthentication: false,
+			},
+		},
 	});
 };
 
@@ -147,6 +158,40 @@ describe('Client', () => {
 
 	describe('Mutation', () => {
 		test('Should be able to fire a simple mutation operation', async () => {
+			const client = newClient();
+
+			const csrfScope = nock('https://api.com')
+				.matchHeader('accept', 'text/plain')
+				.matchHeader('WG-SDK-Version', '1.0.0')
+				.get('/app/auth/cookie/csrf')
+				.reply(200, 'csrf');
+
+			const apiScope = nock('https://api.com')
+				.matchHeader('accept', 'application/json')
+				.matchHeader('content-type', 'application/json')
+				.matchHeader('x-csrf-token', 'csrf')
+				.matchHeader('WG-SDK-Version', '1.0.0')
+				.post('/app/operations/CreateWeather')
+				.query({ wg_api_hash: '123' })
+				.once()
+				.reply(200, {
+					data: {
+						id: '1',
+					},
+				});
+
+			const resp = await client.mutate({
+				operationName: 'CreateWeather',
+			});
+
+			csrfScope.done();
+			apiScope.done();
+
+			expect(resp.data).toEqual({ id: '1' });
+			expect(resp.error).toBeUndefined();
+		});
+
+		test('Should make a CSRF call for authenticated mutations', async () => {
 			const client = newClient();
 
 			const csrfScope = nock('https://api.com')

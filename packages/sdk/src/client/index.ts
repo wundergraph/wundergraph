@@ -15,6 +15,7 @@ export type {
 	JSONValue,
 	SubscriptionResult,
 	SubscriptionEventHandler,
+	OperationMetadata,
 } from './types';
 
 export { Client } from './client';

@@ -12,14 +12,15 @@ import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { listenAddrHttp } from '../../../env';
-import { liveQueries, modelImports, operations, queries } from './helpers';
+import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
-		const _queries = queries(config.application, false);
+		const allOperations = allQueries(config.application, false);
 		const _liveQueries = liveQueries(config.application, false);
+		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
 		const productionBaseURL = 'https://' + config.deployment.environment.name;
@@ -31,9 +32,10 @@ export class TypeScriptClient implements Template {
 			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),
 			queries: _queries,
+			allOperations: allOperations,
 			liveQueries: _liveQueries,
 			hasLiveQueries: _liveQueries.length !== 0,
-			hasQueries: _queries.length !== 0,
+			hasOperations: allOperations.length !== 0,
 			mutations: _mutations,
 			hasMutations: _mutations.length !== 0,
 			subscriptions: _subscriptions,

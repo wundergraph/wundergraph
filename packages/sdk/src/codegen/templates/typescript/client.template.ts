@@ -1,6 +1,6 @@
 //language=handlebars
 export const handlebarTemplate = `
-import { Client, ClientConfig, User, UploadRequestOptions } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, User, UploadRequestOptions, OperationMetadata } from '@wundergraph/sdk/client';
 import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
@@ -40,10 +40,20 @@ export const defaultClientConfig: ClientConfig = {
     sdkVersion: "{{sdkVersion}}",
 }
 
+const operationMetadata: OperationMetadata = {
+{{#each allOperations}}
+    {{operationName}}: {
+        requiresAuthentication: {{requiresAuthentication}}
+		}
+    {{#unless @last}},{{/unless}}
+{{/each}}
+}
+
 export const createClient = (config?: Pick<ClientConfig, 'baseURL'>) => {
     return new Client({
         ...defaultClientConfig,
-        ...config
+        ...config,
+    		operationMetadata
     })
 }
 
@@ -83,7 +93,7 @@ export type LiveQueries = {
     {{operationName}}: {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
-        isLiveQuery: true
+        liveQuery: true
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}

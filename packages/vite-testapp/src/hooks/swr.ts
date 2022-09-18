@@ -51,7 +51,7 @@ const mutationFetcher = async <
 
 export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration & {
 	operationName: OperationName;
-	isLiveQuery?: LiveQuery;
+	liveQuery?: LiveQuery;
 	enabled?: boolean;
 } & (Input extends object ? { input: Input } : unknown);
 
@@ -67,24 +67,24 @@ export const useQuery = <
 		input: undefined,
 		...options,
 	};
-	const { operationName, isLiveQuery, enabled = true, input, ...swrConfig } = _options;
+	const { operationName, liveQuery, enabled = true, input, ...swrConfig } = _options;
 	const key = { operationName, input };
 	const [_key] = serialize(key);
 	const response = useSWR<Data | undefined, GraphQLResponseError>(
 		enabled ? key : null,
-		!isLiveQuery ? queryFetcher : null,
+		!liveQuery ? queryFetcher : null,
 		swrConfig
 	);
 
 	useEffect(() => {
 		let unsubscribe: () => void;
-		if (isLiveQuery && enabled) {
-			unsubscribe = subscribeTo({ operationName, input, isLiveQuery: true });
+		if (liveQuery && enabled) {
+			unsubscribe = subscribeTo({ operationName, input, liveQuery });
 		}
 		return () => {
 			unsubscribe?.();
 		};
-	}, [isLiveQuery, enabled, _key]);
+	}, [liveQuery, enabled, _key]);
 
 	return response;
 };
