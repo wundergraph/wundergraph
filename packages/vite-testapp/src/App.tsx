@@ -1,10 +1,10 @@
 import reactLogo from './assets/react.svg';
 import './App.css';
-import { newSWRHooks } from '@wundergraph/swr-hooks';
+import { createHooks } from '@wundergraph/swr-hooks';
 import { useState } from 'react';
 
 import { createClient, Mutations, Queries, Subscriptions } from './components/generated/client';
-const { useQuery, useMutation } = newSWRHooks<Queries, Mutations, Subscriptions>(createClient());
+const { useQuery, useMutation } = createHooks<Queries, Mutations, Subscriptions>(createClient());
 
 const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 	const liveWeather = useQuery({

@@ -29,7 +29,7 @@ export type UseMutationOptions<OperationName> = SWRConfiguration & {
 
 export type MutateOptions<Input, Data> = MutatorOptions<Data> & { input?: Input };
 
-export const newSWRHooks = <
+export const createHooks = <
 	Queries extends ClientOperationDefs,
 	Mutations extends ClientOperationDefs,
 	Subscriptions extends ClientOperationDefs
