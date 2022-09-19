@@ -67,48 +67,45 @@ const NameForm = () => {
 	);
 };
 
-export default withWunderGraph(
-	function Swr() {
-		return (
-			<div className={styles.container}>
-				<Head>
-					<title>Create Next App</title>
-					<link rel="icon" href="/favicon.ico" />
-				</Head>
-				<main className={styles.main}>
-					<h1 className={styles.title}>
-						Welcome to <a href="https://nextjs.org">SWR</a>
-					</h1>
-					<h2 className={styles.subTitle}>
-						... with <a href="https://wundergraph.com?utm_source=nextjs_starter">WunderGraph</a>
-					</h2>
-					<p className={styles.description}>Take a look at the examples below...</p>
-				</main>
+const SWR = () => {
+	return (
+		<div className={styles.container}>
+			<Head>
+				<title>Create Next App</title>
+				<link rel="icon" href="/favicon.ico" />
+			</Head>
+			<main className={styles.main}>
+				<h1 className={styles.title}>
+					Welcome to <a href="https://nextjs.org">SWR</a>
+				</h1>
+				<h2 className={styles.subTitle}>
+					... with <a href="https://wundergraph.com?utm_source=nextjs_starter">WunderGraph</a>
+				</h2>
+				<p className={styles.description}>Take a look at the examples below...</p>
+			</main>
 
-				<div>
-					<LiveWeather city="Berlin" />
-				</div>
-
-				<div>
-					<NameForm />
-				</div>
-
-				<footer className={styles.footer}>
-					Powered by{' '}
-					<a
-						href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						<img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-					</a>
-					&nbsp;&nbsp;and&nbsp;
-					<img src="/wundergraph.svg" alt="WunderGraph Logo" className={styles.logoWg} />
-				</footer>
+			<div>
+				<LiveWeather city="Berlin" />
 			</div>
-		);
-	},
-	{
-		client,
-	}
-);
+
+			<div>
+				<NameForm />
+			</div>
+
+			<footer className={styles.footer}>
+				Powered by{' '}
+				<a
+					href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
+				</a>
+				&nbsp;&nbsp;and&nbsp;
+				<img src="/wundergraph.svg" alt="WunderGraph Logo" className={styles.logoWg} />
+			</footer>
+		</div>
+	);
+};
+
+export default withWunderGraph(SWR)(client);
