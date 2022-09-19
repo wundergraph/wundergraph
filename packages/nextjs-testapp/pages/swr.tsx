@@ -72,7 +72,7 @@ export default function Swr() {
 			</Head>
 			<main className={styles.main}>
 				<h1 className={styles.title}>
-					Welcome to <a href="https://nextjs.org">Next.js!</a>
+					Welcome to <a href="https://nextjs.org">SWR</a>
 				</h1>
 				<h2 className={styles.subTitle}>
 					... with <a href="https://wundergraph.com?utm_source=nextjs_starter">WunderGraph</a>
