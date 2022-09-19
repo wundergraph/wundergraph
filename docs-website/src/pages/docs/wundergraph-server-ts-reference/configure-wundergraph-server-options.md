@@ -29,12 +29,14 @@ This option allows you to configure the logger level of WunderGraph Server.
 
 ## Options default values
 
-| Option         | Default Value           |
-| -------------- | ----------------------- |
-| `listen.host`  | `127.0.0.1`             |
-| `listen.port`  | `9992`                  |
-| `serverUrl`    | `http://localhost:9992` |
-| `logger.level` | `INFO`                  |
+Each option when unset will get a value from the `Default Environment Variables` or from the default value of that variable.
+
+| Option         | Default Value           | Default Environment Variable |
+| -------------- | ----------------------- | ---------------------------- |
+| `listen.host`  | `127.0.0.1`             | `WG_SERVER_HOST`             |
+| `listen.port`  | `9992`                  | `WG_SERVER_PORT`             |
+| `serverUrl`    | `http://localhost:9992` | `WG_SERVER_URL`              |
+| `logger.level` | `INFO`                  | `WG_LOG_LEVEL`               |
 
 ## Running in production
 

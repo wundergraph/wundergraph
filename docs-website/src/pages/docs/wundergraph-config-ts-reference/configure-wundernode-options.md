@@ -30,12 +30,14 @@ This option allows you to configure the logger level of WunderNode.
 
 ## Options default values
 
-| Option         | Default Value           |
-| -------------- | ----------------------- |
-| `listen.host`  | `127.0.0.1`             |
-| `listen.port`  | `9991`                  |
-| `nodeUrl`      | `http://localhost:9991` |
-| `logger.level` | `INFO`                  |
+Each option when unset will get a value from the `Default Environment Variables` or from the default value of that variable.
+
+| Option         | Default Value           | Default Environment Variable |
+| -------------- | ----------------------- | ---------------------------- |
+| `listen.host`  | `127.0.0.1`             | `WG_NODE_HOST`               |
+| `listen.port`  | `9991`                  | `WG_NODE_PORT`               |
+| `nodeUrl`      | `http://localhost:9991` | `WG_NODE_URL`                |
+| `logger.level` | `INFO`                  | `WG_LOG_LEVEL`               |
 
 ## Running in production
 
