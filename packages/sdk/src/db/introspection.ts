@@ -1,5 +1,4 @@
 import { wunderctlExecAsync } from '../wunderctlexec';
-import { resolveVariable } from '../configure';
 import { InputValueDefinitionNode, parse, parseType, print, TypeNode, visit } from 'graphql';
 import { DatabaseIntrospection, ReplaceJSONTypeFieldConfiguration } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
@@ -9,6 +8,7 @@ import _ from 'lodash';
 import * as fs from 'fs';
 import hash from 'object-hash';
 import path from 'path';
+import { resolveVariable } from '../configure/variables';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;

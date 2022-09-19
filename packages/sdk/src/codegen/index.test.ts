@@ -1,8 +1,9 @@
 import { CodeGenOutWriter, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
-import { mapInputVariable, ResolvedWunderGraphConfig } from '../configure';
+import { ResolvedWunderGraphConfig } from '../configure';
 import { assert } from 'chai';
-import { OperationType } from '@wundergraph/protobuf';
+import { ConfigurationVariableKind, OperationType } from '@wundergraph/protobuf';
+import { mapInputVariable } from '../configure/variables';
 
 class FakeTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -44,6 +45,74 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 			wunderGraphConfig: {
 				sdkVersion: 'unknown',
 				webhooks: [],
+				nodeOptions: {
+					nodeUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9991',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					listen: {
+						host: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '127.0.0.1',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9991',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					logger: {
+						level: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: 'INFO',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+				},
+				serverOptions: {
+					serverUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9992',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					listen: {
+						host: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '127.0.0.1',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9992',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					logger: {
+						level: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: 'INFO',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+				},
 				application: {
 					Name: 'Test',
 					EngineConfiguration: new Api<any>('', [], [], [], []),
@@ -377,7 +446,8 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						name: 'api',
 					},
 					environment: {
-						name: 'localhost:9991',
+						name: 'main',
+						baseUrl: 'http://localhost:9991',
 						id: '',
 					},
 					name: 'main',

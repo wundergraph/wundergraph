@@ -29,7 +29,6 @@ require (
 	github.com/jensneuse/abstractlogger v0.0.4
 	github.com/jensneuse/goprisma v0.2.0
 	github.com/joho/godotenv v1.4.0
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/klauspost/compress v1.14.4
 	github.com/libp2p/go-reuseport v0.0.2
 	github.com/minio/minio-go/v7 v7.0.14
@@ -48,7 +47,6 @@ require (
 	github.com/valyala/fasthttp v1.26.0
 	github.com/wundergraph/graphql-go-tools v1.54.0
 	go.uber.org/zap v1.18.1
-	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -128,6 +126,7 @@ require (
 	go.opentelemetry.io/otel/trace v0.20.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/exp v0.0.0-20201221025956-e89b829e73ea // indirect
 	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/text v0.3.7 // indirect

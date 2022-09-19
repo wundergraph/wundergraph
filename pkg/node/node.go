@@ -1,9 +1,7 @@
 package node
 
 import (
-	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"time"
 
@@ -20,9 +17,6 @@ import (
 	"github.com/libp2p/go-reuseport"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
-	"golang.org/x/crypto/acme"
-	"golang.org/x/crypto/acme/autocert"
-	"golang.org/x/net/idna"
 	"golang.org/x/time/rate"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
@@ -32,16 +26,14 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
 )
 
-func New(ctx context.Context, info BuildInfo, cfg *wundernodeconfig.Config, log abstractlogger.Logger) *Node {
+func New(ctx context.Context, info BuildInfo, log abstractlogger.Logger) *Node {
 	return &Node{
 		info:     info,
-		cfg:      cfg,
 		ctx:      ctx,
 		errCh:    make(chan error),
-		configCh: make(chan wgpb.WunderNodeConfig),
+		configCh: make(chan WunderNodeConfig),
 		pool:     pool.New(),
 		log:      log,
 		apiClient: &fasthttp.Client{
@@ -60,11 +52,9 @@ type Node struct {
 	ctx  context.Context
 	info BuildInfo
 
-	cfg *wundernodeconfig.Config
-
 	stopped  bool
 	errCh    chan error
-	configCh chan wgpb.WunderNodeConfig
+	configCh chan WunderNodeConfig
 
 	server *http.Server
 
@@ -77,7 +67,7 @@ type Node struct {
 }
 
 type options struct {
-	staticConfig        *wgpb.WunderNodeConfig
+	staticConfig        *WunderNodeConfig
 	fileSystemConfig    *string
 	enableDebugMode     bool
 	forceHttpsRedirects bool
@@ -90,14 +80,13 @@ type options struct {
 	}
 	disableGracefulShutdown bool
 	insecureCookies         bool
-	hooksSecret             []byte
 	githubAuthDemo          GitHubAuthDemo
 	devMode                 bool
 }
 
 type Option func(options *options)
 
-func WithStaticWunderNodeConfig(config wgpb.WunderNodeConfig) Option {
+func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	return func(options *options) {
 		options.staticConfig = &config
 	}
@@ -144,12 +133,6 @@ func WithFileSystemConfig(configFilePath string) Option {
 	}
 }
 
-func WithHooksSecret(secret []byte) Option {
-	return func(options *options) {
-		options.hooksSecret = secret
-	}
-}
-
 func WithConfigFileChange(event chan struct{}) Option {
 	return func(options *options) {
 		options.configFileChange = event
@@ -176,7 +159,9 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	n.options = options
 
-	if options.staticConfig != nil {
+	switch {
+
+	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
 		go func() {
 			err := n.startServer(*options.staticConfig)
@@ -184,7 +169,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 				os.Exit(1)
 			}
 		}()
-	} else if options.fileSystemConfig != nil {
+	case options.fileSystemConfig != nil:
 		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
@@ -192,10 +177,8 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			go n.reconfigureOnConfigUpdate()
 			go n.filePollConfig(*options.fileSystemConfig)
 		}
-	} else {
-		n.log.Info("Api config: network polling")
-		go n.reconfigureOnConfigUpdate()
-		go n.netPollConfig()
+	default:
+		return errors.New("could not start a node. no config present")
 	}
 
 	select {
@@ -218,13 +201,13 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListeners() ([]net.Listener, error) {
+func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
 	cfg := net.ListenConfig{
 		Control:   reuseport.Control,
 		KeepAlive: 90 * time.Second,
 	}
 
-	host, port, _ := net.SplitHostPort(n.cfg.Server.ListenAddr)
+	host, port := configuration.Host, configuration.Port
 
 	var listeners []net.Listener
 	var localhostIPs []net.IP
@@ -238,7 +221,7 @@ func (n *Node) newListeners() ([]net.Listener, error) {
 		nip := ip.String()
 		// isIPv6
 		if strings.Contains(nip, ":") {
-			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%s", nip, port))
+			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%d", nip, port))
 			// in some cases e.g when ipv6 is not enabled in docker, listen will error
 			// in that case we ignore this error and try to listen to next ip
 			if err == nil {
@@ -252,7 +235,7 @@ func (n *Node) newListeners() ([]net.Listener, error) {
 				)
 			}
 		} else {
-			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%s", nip, port))
+			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", nip, port))
 			if err != nil {
 				return nil, err
 			}
@@ -264,7 +247,7 @@ func (n *Node) newListeners() ([]net.Listener, error) {
 
 	// when we didn't listen to additional localhostIPs we will listen only to the host
 	if len(localhostIPs) == 0 {
-		listener, err := cfg.Listen(context.Background(), "tcp", n.cfg.Server.ListenAddr)
+		listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
 		if err != nil {
 			return nil, err
 		}
@@ -287,12 +270,23 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 	n.log.Debug("old server gracefully shut down")
 }
 
-func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) error {
+func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
+	<-n.ctx.Done()
+	n.log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 
-	var (
-		err error
-	)
+	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
+	n.log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), gracefulTimeoutDur)
+	defer cancel()
 
+	if err := n.Shutdown(shutdownCtx); err != nil {
+		n.log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
+	}
+
+	n.log.Info("WunderNode shutdown complete")
+}
+
+func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	router := mux.NewRouter()
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
@@ -313,76 +307,70 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) error {
 	var streamClosers []chan struct{}
 	var allowedHosts []string
 
-	for _, api := range nodeConfig.Apis {
+	n.setApiDevConfigDefaults(nodeConfig.Api)
 
-		n.setApiDevConfigDefaults(api)
+	valid, messages := validate.ApiConfig(nodeConfig.Api)
 
-		valid, messages := validate.ApiConfig(api)
-
-		if !valid {
-			n.log.Fatal("API config invalid",
-				abstractlogger.Strings("errors", messages),
-			)
-			return errors.New("API config invalid")
-		}
-
-		if api.HooksServerURL == "" {
-			api.HooksServerURL = "http://127.0.0.1:9992"
-		}
-
-		dialer := &net.Dialer{
-			Timeout:   10 * time.Second,
-			KeepAlive: 90 * time.Second,
-		}
-
-		defaultTransport := &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return dialer.DialContext(ctx, network, addr)
-			},
-			ForceAttemptHTTP2:   true,
-			MaxIdleConns:        1024,
-			IdleConnTimeout:     90 * time.Second,
-			TLSHandshakeTimeout: 10 * time.Second,
-		}
-
-		hooksClient := hooks.NewClient(api.HooksServerURL, n.log)
-
-		transportFactory := apihandler.NewApiTransportFactory(api, hooksClient, n.options.enableDebugMode)
-
-		n.log.Debug("http.Client.Transport",
-			abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
+	if !valid {
+		n.log.Fatal("API config invalid",
+			abstractlogger.Strings("errors", messages),
 		)
-
-		loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
-
-		builderConfig := apihandler.BuilderConfig{
-			InsecureCookies:            n.options.insecureCookies,
-			ForceHttpsRedirects:        n.options.forceHttpsRedirects,
-			EnableDebugMode:            n.options.enableDebugMode,
-			EnableIntrospection:        n.options.enableIntrospection,
-			GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
-			GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
-			HookServerURL:              api.HooksServerURL,
-			DevMode:                    n.options.devMode,
-		}
-
-		builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-		internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
-
-		publicClosers, err := builder.BuildAndMountApiHandler(n.ctx, router, api)
-		if err != nil {
-			n.log.Error("BuildAndMountApiHandler", abstractlogger.Error(err))
-		}
-		streamClosers = append(streamClosers, publicClosers...)
-
-		internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, api, n.options.hooksSecret)
-		if err != nil {
-			n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
-			err = nil
-		}
-
-		streamClosers = append(streamClosers, internalClosers...)
+		return errors.New("API config invalid")
 	}
+
+	dialer := &net.Dialer{
+		Timeout:   10 * time.Second,
+		KeepAlive: 90 * time.Second,
+	}
+
+	defaultTransport := &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer.DialContext(ctx, network, addr)
+		},
+		ForceAttemptHTTP2:   true,
+		MaxIdleConns:        1024,
+		IdleConnTimeout:     90 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
+	}
+
+	serverUrl := strings.TrimSuffix(nodeConfig.Api.Options.ServerUrl, "/")
+
+	hooksClient := hooks.NewClient(serverUrl, n.log)
+
+	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
+
+	n.log.Debug("http.Client.Transport",
+		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
+	)
+
+	loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
+
+	builderConfig := apihandler.BuilderConfig{
+		InsecureCookies:            n.options.insecureCookies,
+		ForceHttpsRedirects:        n.options.forceHttpsRedirects,
+		EnableDebugMode:            n.options.enableDebugMode,
+		EnableIntrospection:        n.options.enableIntrospection,
+		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
+		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
+		HookServerURL:              serverUrl,
+		DevMode:                    n.options.devMode,
+	}
+
+	builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
+	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
+
+	publicClosers, err := builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
+	if err != nil {
+		n.log.Error("BuildAndMountApiHandler", abstractlogger.Error(err))
+	}
+	streamClosers = append(streamClosers, publicClosers...)
+
+	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
+	if err != nil {
+		n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
+	}
+
+	streamClosers = append(streamClosers, internalClosers...)
 
 	allowedHosts = uniqueStrings(allowedHosts)
 
@@ -405,94 +393,35 @@ func (n *Node) startServer(nodeConfig wgpb.WunderNodeConfig) error {
 		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
 	}
 
-	listeners, err := n.newListeners()
+	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		n.errCh <- err
 		return nil
 	}
 
-	if n.cfg.Server.ListenTLS {
-		manager := autocert.Manager{
-			Prompt: autocert.AcceptTOS,
-			// Cache:  certCache,
-			HostPolicy: func(ctx context.Context, host string) error {
-				for _, allowedHost := range allowedHosts {
-					if allowedHost == host {
-						n.log.Debug("Node.autocert.HostPolicy.allow",
-							abstractlogger.String("host", host),
-						)
-						return nil
-					}
-				}
-				n.log.Debug("Node.autocert.HostPolicy.disallow",
-					abstractlogger.String("host", host),
-				)
-				return fmt.Errorf("autocert hostpolicy disallows host: %s", host)
-			},
-		}
-		n.server.TLSConfig = &tls.Config{
-			GetCertificate: func(info *tls.ClientHelloInfo) (*tls.Certificate, error) {
-				n.log.Debug("Node.tls.GetCertificate",
-					abstractlogger.String("ServerName", info.ServerName),
-				)
-				name, err := idna.Lookup.ToASCII(info.ServerName)
-				if err != nil {
-					n.log.Error("Node.tls.GetCertificate.idna.Lookup",
-						abstractlogger.Error(err),
+	for _, listener := range listeners {
+		go func(l net.Listener) {
+			n.log.Info("listening on",
+				abstractlogger.String("addr", l.Addr().String()),
+			)
+
+			if err := n.server.Serve(l); err != nil {
+				if err == http.ErrServerClosed {
+					n.log.Debug("listener closed",
+						abstractlogger.String("addr", l.Addr().String()),
 					)
-					return nil, err
+					return
 				}
-				n.log.Debug("Node.tls.GetCertificate",
-					abstractlogger.String("serverName", name),
-				)
-				return manager.GetCertificate(info)
-			},
-			NextProtos: []string{acme.ALPNProto},
-		}
-		for _, listener := range listeners {
-			l := listener
-			go func() {
-				n.log.Info("listening on",
-					abstractlogger.String("addr", l.Addr().String()),
-				)
-				err = n.server.ServeTLS(l, "", "")
-				if err != nil {
-					if err == http.ErrServerClosed {
-						n.log.Debug("listener closed",
-							abstractlogger.String("addr", l.Addr().String()),
-						)
-						return
-					}
-					n.errCh <- err
-				}
-			}()
-		}
-	} else {
-		for _, listener := range listeners {
-			l := listener
-			go func() {
-				n.log.Info("listening on",
-					abstractlogger.String("addr", l.Addr().String()),
-				)
-				err = n.server.Serve(l)
-				if err != nil {
-					if err == http.ErrServerClosed {
-						n.log.Debug("listener closed",
-							abstractlogger.String("addr", l.Addr().String()),
-						)
-						return
-					}
-					n.errCh <- err
-				}
-			}()
-		}
+				n.errCh <- err
+			}
+		}(listener)
 	}
 
 	return nil
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
-func (n *Node) setApiDevConfigDefaults(api *wgpb.Api) {
+func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
 	if n.options.devMode {
 
 		// we set these values statically so that auth never drops login sessions during development
@@ -522,7 +451,7 @@ func (n *Node) setApiDevConfigDefaults(api *wgpb.Api) {
 	}
 }
 
-func (n *Node) filterHosts(api *wgpb.Api) []string {
+func (n *Node) filterHosts(api apihandler.Api) []string {
 	hosts := []string{api.PrimaryHost}
 WithNext:
 	for _, host := range api.Hosts {
@@ -563,71 +492,6 @@ func (n *Node) reconfigureOnConfigUpdate() {
 	}
 }
 
-func (n *Node) netPollConfig() {
-	buf := &bytes.Buffer{}
-	client := http.Client{
-		Timeout: time.Second * time.Duration(10),
-	}
-	var (
-		etag string
-	)
-	for {
-		buf.Reset()
-		req, err := http.NewRequest(http.MethodGet, n.cfg.LoadConfig.URL+"/wundernode/config", nil)
-		if err != nil {
-			n.errCh <- err
-			return
-		}
-		req.Header.Set("Authorization", "Bearer "+n.cfg.LoadConfig.BearerToken)
-		if etag != "" {
-			req.Header.Set("If-None-Match", etag)
-		}
-		res, err := client.Do(req)
-		if err != nil {
-			n.log.Error("netPollConfig client.Do", abstractlogger.Error(err))
-			time.Sleep(time.Second * time.Duration(10))
-			continue
-		}
-		switch res.StatusCode {
-		case http.StatusOK:
-			etag = res.Header.Get("ETag")
-			_, err = buf.ReadFrom(res.Body)
-			if err != nil {
-				n.log.Error("netPollConfig res.Body read", abstractlogger.Error(err))
-				time.Sleep(time.Second * time.Duration(10))
-				continue
-			}
-			var config wgpb.WunderNodeConfig
-			err = json.Unmarshal(buf.Bytes(), &config)
-			if err != nil {
-				n.log.Error("netPollConfig json.Unmarshal", abstractlogger.Error(err))
-				time.Sleep(time.Second * time.Duration(10))
-				etag = ""
-				continue
-			}
-			select {
-			case n.configCh <- config:
-			default:
-			}
-		case http.StatusNotModified:
-			n.log.Debug("netPollConfig config not modified")
-			break
-		default:
-			n.log.Debug("netPollConfig unexpected status",
-				abstractlogger.Int("status_code", res.StatusCode),
-				abstractlogger.String("status_message", res.Status),
-			)
-		}
-		n.log.Debug("netPollConfig wait 10s")
-		select {
-		case <-time.After(time.Second * time.Duration(10)):
-			continue
-		case <-n.ctx.Done():
-			return
-		}
-	}
-}
-
 func (n *Node) filePollConfig(filePath string) {
 	go func() {
 		for {
@@ -662,72 +526,9 @@ func (n *Node) reloadFileConfig(filePath string) {
 		return
 	}
 
-	config := wgpb.WunderNodeConfig{
-		Apis: []*wgpb.Api{
-			{
-				PrimaryHost:           n.cfg.Server.ListenAddr,
-				Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
-				PathPrefix:            path.Join(graphConfig.ApiName, graphConfig.DeploymentName),
-				EngineConfiguration:   graphConfig.Api.EngineConfiguration,
-				EnableSingleFlight:    true,
-				EnableGraphqlEndpoint: graphConfig.DangerouslyEnableGraphQLEndpoint,
-				Operations:            graphConfig.Api.Operations,
-				CorsConfiguration:     graphConfig.Api.CorsConfiguration,
-				S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
-				CacheConfig: &wgpb.ApiCacheConfig{
-					Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
-					InMemoryConfig: &wgpb.InMemoryCacheConfig{
-						MaxSize: 1e9,
-					},
-				},
-				AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
-				Webhooks:             graphConfig.Api.Webhooks,
-			},
-		},
-		Server: &wgpb.Server{
-			GracefulShutdownTimeout: 0,
-			KeepAlive:               5,
-			ReadTimeout:             5,
-			WriteTimeout:            5,
-			IdleTimeout:             10,
-		},
-		Logging: &wgpb.Logging{
-			Level: wgpb.LogLevel_DEBUG,
-		},
-	}
+	config := CreateConfig(&graphConfig)
+
 	n.configCh <- config
-}
-
-func (n *Node) sendMetrics(data []byte, try int) {
-	req, res := fasthttp.AcquireRequest(), fasthttp.AcquireResponse()
-	defer func() {
-		fasthttp.ReleaseRequest(req)
-		fasthttp.ReleaseResponse(res)
-	}()
-
-	req.SetRequestURI("http://localhost:8080/wundernode/metrics")
-	req.Header.SetMethod(http.MethodPost)
-	req.Header.Set("Content-Type", "application/protobuf")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", n.cfg.LoadConfig.BearerToken))
-	req.SetBody(data)
-
-	n.log.Debug("sending metrics")
-
-	err := n.apiClient.DoTimeout(req, res, time.Second*5)
-	if res.StatusCode() != http.StatusOK {
-		n.log.Debug("sendMetrics status", abstractlogger.Int("code", res.StatusCode()))
-	}
-	if err != nil {
-		if try < 4 {
-			n.log.Error("sendMetrics retrying", abstractlogger.Error(err))
-			<-time.After(time.Second * 5 * time.Duration(try))
-			n.sendMetrics(data, try+1)
-			return
-		}
-		n.log.Error("sendMetrics failed", abstractlogger.Error(err))
-		return
-	}
-	n.log.Debug("metrics sent")
 }
 
 func uniqueStrings(slice []string) []string {

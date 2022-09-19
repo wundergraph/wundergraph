@@ -44,7 +44,6 @@ import {
 	applyNameSpaceToTypeFields,
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
-import { EnvironmentVariable, InputVariable, mapInputVariable, PlaceHolder, resolveVariable } from '../configure';
 import { loadFile } from '../codegen/templates/typescript';
 import { composeServices } from '@apollo/composition';
 import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
@@ -58,6 +57,13 @@ import {
 	toCacheEntry,
 	writeIntrospectionCacheFile,
 } from './introspection-cache';
+import {
+	EnvironmentVariable,
+	InputVariable,
+	mapInputVariable,
+	PlaceHolder,
+	resolveVariable,
+} from '../configure/variables';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -397,6 +403,8 @@ export type JWTSigningMethod = 'HS256';
 
 export interface GraphQLUpstream extends HTTPUpstream {
 	url: InputVariable;
+	baseUrl?: InputVariable;
+	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 }
 
@@ -775,8 +783,8 @@ export const introspect = {
 						Custom: {
 							Fetch: {
 								url: mapInputVariable(introspection.url),
-								baseUrl: '',
-								path: mapInputVariable(''),
+								baseUrl: introspection.baseUrl ? mapInputVariable(introspection.baseUrl) : mapInputVariable(''),
+								path: introspection.path ? mapInputVariable(introspection.path) : mapInputVariable(''),
 								method: HTTPMethod.POST,
 								body: mapInputVariable(''),
 								header: headers,

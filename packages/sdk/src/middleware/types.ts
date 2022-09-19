@@ -3,11 +3,9 @@ import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from '@web-std/fetch';
 import { HooksConfiguration } from '../configure';
 import { GraphQLServerConfig } from './plugins/graphql';
-import { middlewarePort } from '../env';
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { WebhooksConfig } from '../webhooks/types';
-
-export const SERVER_PORT = middlewarePort;
+import { ServerOptions } from '../configure/options';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -95,9 +93,7 @@ export interface WunderGraphUser<Role = any> {
 	rawIdToken?: string;
 }
 
-export interface ServerOptions {
-	port: number;
-	host: string;
+export interface ServerRunOptions {
 	wundergraphDir: string;
 	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
@@ -112,6 +108,7 @@ export interface WunderGraphServerConfig<
 	hooks?: GeneratedHooksConfig;
 	// routeUrl is set internally
 	graphqlServers?: Omit<GraphQLServerConfig, 'routeUrl'>[];
+	options?: ServerOptions;
 }
 
 // internal representation of the fully resolved server config
@@ -121,8 +118,8 @@ export interface WunderGraphHooksAndServerConfig<
 > extends WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig> {
 	webhooks?: GeneratedWebhooksConfig;
 	hooks?: GeneratedHooksConfig;
-	// url of the server is set internally by the hooks server
-	graphqlServers?: (GraphQLServerConfig & { url: string })[];
+	graphqlServers?: GraphQLServerConfig[];
+	options?: ServerOptions;
 }
 
 export type AuthenticationResponse<User> = AuthenticationOK<User> | AuthenticationDeny;

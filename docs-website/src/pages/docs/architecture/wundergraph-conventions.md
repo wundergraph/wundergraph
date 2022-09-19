@@ -1,5 +1,5 @@
 ---
-title: Conventions
+title: WunderGraph Conventions
 pageTitle: WunderGraph - Conventions
 description:
 ---
@@ -84,6 +84,49 @@ In contrast to generating the configuration,
 the `wundergraph.server.ts` file is actually compiled and executed at runtime.
 
 So, you're safe to use `process.env.{VARIABLE_NAME}` in your `wundergraph.server.ts` file.
+
+### Wundergraph Default Environment Variables
+
+By default, when no options are passed to `wundergraph.config.ts` or `wundergraph.server.ts`, we will use environment variables with default values:
+
+| Variable name    | Description                                             | Default value           |
+| ---------------- | ------------------------------------------------------- | ----------------------- |
+| `WG_LOG_LEVEL`   | The log level of the `WunderNode`/`WunderGraph Server`. | `INFO`                  |
+| `WG_NODE_URL`    | The URL of the `WunderNode`.                            | `http://localhost:9991` |
+| `WG_NODE_HOST`   | The host of the `WunderNode`.                           | `127.0.0.1`             |
+| `WG_NODE_PORT`   | The port of the `WunderNode`.                           | `9991`                  |
+| `WG_SERVER_URL`  | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
+| `WG_SERVER_HOST` | The host of the `WunderGraph Server`.                   | `127.0.0.1`             |
+| `WG_SERVER_PORT` | The port of the `WunderGraph Server`.                   | `9992`                  |
+
+### Available log levels
+
+- `FATAL`
+- `PANIC`
+- `WARNING`
+- `ERROR`
+- `INFO`
+- `DEBUG`
+
+To have a proper code completions for log level you could use exported type from our sdk
+
+```typescript
+import { LoggerLevel } from '@wundergraph/sdk'
+
+const level: LoggerLevel = 'WARNING'
+```
+
+#### How to use default environment variables
+
+When you want to use default environment variables you don't have to type them manually as we are providing enum for that.
+
+```typescript
+import { WgEnv } from '@wundergraph/sdk'
+import { EnvironmentVariable } from './variables'
+
+const varName = WgEnv.ServerPort // WG_SERVER_PORT
+const variable = new EnvironmentVariable(WgEnv.ServerPort, '9992')
+```
 
 ### Summary
 

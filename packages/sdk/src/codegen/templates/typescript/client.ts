@@ -5,14 +5,12 @@ import { formatTypeScript } from './';
 
 import hash from 'object-hash';
 import { ResolvedWunderGraphConfig } from '../../../configure';
-import { listenAddrHttp } from '../../../env';
 
 export class TypeScriptClientTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
-		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
-			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : listenAddrHttp,
+			baseURL: config.deployment.environment.baseUrl,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			sdkVersion: config.sdkVersion,
 			applicationPath: config.deployment.path,
