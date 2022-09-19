@@ -73,7 +73,6 @@ query Dragons {
 
 ```typescript
 import { NextPage } from 'next'
-import { withWunderGraph } from '../components/generated/nextjs'
 import { client, useQuery } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
@@ -86,5 +85,5 @@ export default Home
 ```
 
 Your operations will be compiled into RPC endpoints.
-The template will generate the NextJS client and types for the SWR hooks,
+The template will generate the WunderGraph client and types for the SWR hooks,
 so all you have to do is to import he `useQuery` hook and call your newly created API.
