@@ -10,12 +10,12 @@
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite --force",
     "check": "tsc --noEmit",
-    "build": "pnpm generate && tsc && vite build",
+    "build": "pnpm generate && pnpm check && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@wundergraph/sdk": "workspace:*",
-    "@wundergraph/swr-hooks": "workspace:*",
+    "@wundergraph/swr": "workspace:*",
     "react": "^18.1.0",
     "react-dom": "^18.1.0"
   },

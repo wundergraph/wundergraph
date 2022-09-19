@@ -1,6 +1,6 @@
 # WunderGraph SWR Integration
 
-![wunderctl](https://img.shields.io/npm/v/@wundergraph/swr-hooks.svg)
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/swr.svg)
 
 This package provides a type-safe integration of [SWR](https://swr.vercel.app/) with WunderGraph.
 SWR is a React Hooks library for data fetching. With just one hook, you can significantly simplify the data fetching logic in your project. And it also covered in all aspects of speed, correctness, and stability to help you build better experiences.
@@ -10,7 +10,7 @@ SWR is a React Hooks library for data fetching. With just one hook, you can sign
 ## Getting Started
 
 ```shell
-npm install @wundergraph/swr-hooks
+npm install @wundergraph/swr
 ```
 
 Before you can use the hooks, you need to modify your code generation to include the base typescript client.
@@ -34,8 +34,9 @@ Second, run `wunderctl generate` to generate the code.
 Now you can use the hooks.
 
 ```ts
-import { createHooks } from '@wundergraph/swr-hooks';
+import { createHooks } from '';
 import { createClient, Mutations, Queries, Subscriptions } from './components/generated/client';
+
 const { useQuery, useMutation } = createHooks<Queries, Mutations, Subscriptions>(createClient());
 
 export const Home: React.FC<{ city: string }> = ({ city }) => {
