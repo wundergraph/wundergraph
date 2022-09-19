@@ -1,4 +1,4 @@
-# Migration steps from wunderctl 0.106.3 to 0.107.0
+# Migration steps to 0.110.0
 
 In this cli version a couple of flags were removed and a new commands were added.
 
