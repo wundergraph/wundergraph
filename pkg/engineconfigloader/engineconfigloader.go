@@ -18,10 +18,10 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 
-	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
 type EngineConfigLoader struct {
