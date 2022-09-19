@@ -104,14 +104,14 @@ export const useLiveQuery = {
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
         requiresAuthentication: {{requiresAuthentication}},
-        isLiveQuery: true,
+        liveQuery: true,
     })(args),
 {{/each}}
 {{#each liveQueriesWithoutInput}}
     {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
         requiresAuthentication: {{requiresAuthentication}},
-        isLiveQuery: true,
+        liveQuery: true,
     })(args),
 {{/each}}
 };
