@@ -2,19 +2,19 @@
 
 exports[`Introspection introspect GraphQL API with interface type definitions 1`] = `
 GraphQLApi {
-  "DataSources": Array [
-    Object {
-      "ChildNodes": Array [
-        Object {
-          "fieldNames": Array [
+  "DataSources": [
+    {
+      "ChildNodes": [
+        {
+          "fieldNames": [
             "id",
             "displayName",
             "isLoggedIn",
           ],
           "typeName": "api_User",
         },
-        Object {
-          "fieldNames": Array [
+        {
+          "fieldNames": [
             "id",
             "displayName",
             "isLoggedIn",
@@ -23,39 +23,39 @@ GraphQLApi {
           "typeName": "api_RegisteredUser",
         },
       ],
-      "Custom": Object {
-        "Federation": Object {
+      "Custom": {
+        "Federation": {
           "Enabled": false,
           "ServiceSDL": "",
         },
-        "Fetch": Object {
-          "baseUrl": Object {
+        "Fetch": {
+          "baseUrl": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
-          "body": Object {
+          "body": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
-          "header": Object {},
+          "header": {},
           "mTLS": undefined,
           "method": 1,
-          "path": Object {
+          "path": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
-          "query": Array [],
+          "query": [],
           "upstreamAuthentication": undefined,
-          "url": Object {
+          "url": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
@@ -64,9 +64,9 @@ GraphQLApi {
           },
           "urlEncodeBody": false,
         },
-        "Subscription": Object {
+        "Subscription": {
           "Enabled": false,
-          "URL": Object {
+          "URL": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
@@ -91,11 +91,11 @@ type RegisteredUser implements User {
   hasVerifiedEmail: Boolean!
 }",
       },
-      "Directives": Array [],
+      "Directives": [],
       "Kind": 2,
-      "RootNodes": Array [
-        Object {
-          "fieldNames": Array [
+      "RootNodes": [
+        {
+          "fieldNames": [
             "api_user",
           ],
           "typeName": "Query",
@@ -104,15 +104,15 @@ type RegisteredUser implements User {
     },
   ],
   "DefaultFlushInterval": 500,
-  "Fields": Array [
-    Object {
-      "argumentsConfiguration": Array [],
+  "Fields": [
+    {
+      "argumentsConfiguration": [],
       "disableDefaultFieldMapping": false,
       "fieldName": "api_user",
-      "path": Array [
+      "path": [
         "user",
       ],
-      "requiresFields": Array [],
+      "requiresFields": [],
       "typeName": "Query",
       "unescapeResponseJson": false,
     },
@@ -133,16 +133,16 @@ type api_RegisteredUser implements api_User {
   isLoggedIn: Boolean!
   hasVerifiedEmail: Boolean!
 }",
-  "Types": Array [
-    Object {
+  "Types": [
+    {
       "renameTo": "User",
       "typeName": "api_User",
     },
-    Object {
+    {
       "renameTo": "RegisteredUser",
       "typeName": "api_RegisteredUser",
     },
   ],
-  "interpolateVariableDefinitionAsJSON": Array [],
+  "interpolateVariableDefinitionAsJSON": [],
 }
 `;
