@@ -1,6 +1,8 @@
 name: Engine Release Preview
 on:
   push:
+    tags-ignore:
+      - '**'
     branches:
       - 'main'
       - 'next'
