@@ -1,8 +1,5 @@
 import Head from 'next/head';
 
-import { withWunderGraph } from '../components/generated/nextjs';
-import { client } from '../lib/wundergraph';
-
 function MyApp({ Component, pageProps }) {
 	return (
 		<>
@@ -18,6 +15,4 @@ function MyApp({ Component, pageProps }) {
 	);
 }
 
-export default withWunderGraph(MyApp, {
-	client,
-});
+export default MyApp;

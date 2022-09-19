@@ -1,6 +1,6 @@
 # WunderGraph Next.js + SWR Starter
 
-This example demonstrates how to use WunderGraph with Next.js and SWR. We are going to make your data-source accessible through JSON-RPC to your Next.js app.
+This example demonstrates how to use WunderGraph with Next.js and SWR. [SWR](https://swr.vercel.app/) is a React Hooks library for data fetching. With just one hook, you can significantly simplify the data fetching logic in your project. And it also covered in all aspects of speed, correctness, and stability to help you build better experiences.
 
 ## Getting Started
 
