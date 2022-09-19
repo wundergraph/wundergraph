@@ -49,7 +49,7 @@ What's notable here is that we're using `templates.typescript.client` to generat
 Next up is setting up the SWR hooks.
 
 ```ts
-// libs/wundergraph.ts
+// lib/wundergraph.ts
 
 import { createClient, Operations } from '../components/generated/client'
 
