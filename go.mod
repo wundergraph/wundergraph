@@ -46,7 +46,7 @@ require (
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.26.0
-	github.com/wundergraph/graphql-go-tools v1.53.0
+	github.com/wundergraph/graphql-go-tools v1.54.0
 	go.uber.org/zap v1.18.1
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
