@@ -77,6 +77,8 @@ import { useQuery } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
   const { data, error } = useQuery({
+    // This is allows conditional fetching https://swr.vercel.app/docs/conditional-fetching
+    enabled: true,
     operationName: 'Dragons',
   })
   return <div>{JSON.stringify(data)}</div>
