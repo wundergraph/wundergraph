@@ -310,7 +310,7 @@ message FetchConfiguration {
 	// and the body will be URL encoded and set as the URL Query String
 	bool urlEncodeBody = 7;
 	MTLSConfiguration mTLS = 8;
-	string baseUrl = 9;
+	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
 }
 

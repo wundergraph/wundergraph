@@ -214,6 +214,9 @@ class RESTApiBuilder {
 			return;
 		}
 		const parentType = verb === HTTPMethod.GET ? 'Query' : 'Mutation';
+
+		const baseUrl = this.cleanupBaseURL(this.baseURL());
+
 		this.dataSources.push({
 			RootNodes: [
 				{
@@ -226,7 +229,7 @@ class RESTApiBuilder {
 				Fetch: {
 					method: verb,
 					path: mapInputVariable(path),
-					baseUrl: this.baseURL(),
+					baseUrl: mapInputVariable(baseUrl),
 					url: mapInputVariable(''),
 					body: mapInputVariable(''),
 					header: this.headers,
@@ -244,10 +247,7 @@ class RESTApiBuilder {
 			ChildNodes: [],
 			Directives: [],
 		});
-		if (this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl) {
-			const baseURL = this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl!;
-			this.dataSources[this.dataSources.length - 1].Custom.Fetch.baseUrl = this.cleanupBaseURL(baseURL);
-		}
+
 		this.fields.push({
 			typeName: parentType,
 			fieldName: fieldName,
