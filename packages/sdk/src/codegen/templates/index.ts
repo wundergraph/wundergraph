@@ -15,6 +15,7 @@ import { WunderGraphHooksPlugin } from './typescript/hooks';
 import { AuthenticationProviderConfiguration } from './markdown/authentication';
 import { WunderGraphWebhooksPlugin } from './typescript/webhooks';
 import { TypeScriptClient } from './typescript/client';
+import { TypeScriptLegacyWebClient } from './typescript/web.client';
 
 const typescriptModels = [
 	new TypeScriptInputModels(),
@@ -47,6 +48,7 @@ const templates = {
 		react: [
 			...typescriptAll,
 			new TypeScriptClient(),
+			new TypeScriptLegacyWebClient(),
 			new TypescriptReactProvider(),
 			new TypescriptReactHooks(),
 			new Forms(),
@@ -54,6 +56,7 @@ const templates = {
 		reactNative: [
 			...typescriptAll,
 			new TypeScriptClient(true),
+			new TypeScriptLegacyWebClient(),
 			new TypescriptReactNativeProvider(),
 			new TypescriptReactHooks(true),
 		],
