@@ -6,7 +6,7 @@ description:
 
 The cmd `wunderctl start` starts WunderNode and WunderGraph Server together in a single process.
 
-The main purpose is to start Wundergraph in production.
+The main purpose is to simplify running all WunderGraph components in production mode.
 To start the development process you should use `wunderctl up` instead.
 
 {% callout type="warning" %}
