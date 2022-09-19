@@ -22,13 +22,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/monitoring\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -76,13 +70,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/environment\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -130,13 +118,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/isalive\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -184,13 +166,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/isconnected\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -238,13 +214,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/equipmenttype/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -292,13 +262,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allline\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -346,13 +310,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/alllinesummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -400,13 +358,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/linedetail/{{ .arguments.lineIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -454,13 +406,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/powertransformerdetail/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -508,13 +454,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/powertransformerbyvoltagelevel/{{ .arguments.pu }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -562,13 +502,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allpowertransformer\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -616,13 +550,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/voltageleveldetail/{{ .arguments.pu }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -670,13 +598,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/substationdetail/{{ .arguments.p }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -724,13 +646,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allsubstation\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -778,13 +694,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/voltagelevelbysubstation/{{ .arguments.p }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -832,13 +742,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/circuitbreakerfunctiondetail/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -886,13 +790,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allcircuitbreakerfunction\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -940,13 +838,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/linebybasevoltage/{{ .arguments.basevoltage }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -994,13 +886,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alltower\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1048,13 +934,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alltowersummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1102,13 +982,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1156,13 +1030,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alljunction\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1210,13 +1078,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1264,13 +1126,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allaerialconductorsetspan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1318,13 +1174,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1372,13 +1222,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allundergroundconductorsetspan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1426,13 +1270,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1480,13 +1318,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allearthwirespan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1534,13 +1366,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1588,13 +1414,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allconductorsethook\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1642,13 +1462,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsethookbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1696,13 +1510,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allearthwirehook\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1750,13 +1558,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirehookbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1804,13 +1606,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerdetail/{{ .arguments.towerIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1858,13 +1654,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbyline/{{ .arguments.lineId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1912,13 +1702,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbygeographicalunit/{{ .arguments.ugecode }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -1966,13 +1750,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbyservicecenter/{{ .arguments.servicecenter }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2020,13 +1798,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctiondetail/{{ .arguments.junctionIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2074,13 +1846,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towernearby/{{ .arguments.latitude }}/{{ .arguments.longitude }}/{{ .arguments.radius }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2128,13 +1894,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspandetail/{{ .arguments.aerialConductorSetSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2182,13 +1942,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspandetail/{{ .arguments.undergroundConductorSetSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2236,13 +1990,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespandetail/{{ .arguments.earthWireSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2290,13 +2038,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsetHookdetail/{{ .arguments.conductorSetHookIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2344,13 +2086,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwireHookdetail/{{ .arguments.earthWireHookIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2398,13 +2134,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/circuitbreakerassetdetail/{{ .arguments.ids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2452,13 +2182,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allcircuitbreakerasset\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2506,13 +2230,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/party/allservicecenter\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2560,13 +2278,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allgeographicalspan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2614,13 +2326,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allgeographicalspansummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2668,13 +2374,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2722,13 +2422,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allparcel\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2776,13 +2470,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2830,13 +2518,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspandetail/{{ .arguments.geographicalSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2884,13 +2566,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbyline/{{ .arguments.lineId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2938,13 +2614,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbygeographicalunit/{{ .arguments.ugeCode }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -2992,13 +2662,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parceldetail/{{ .arguments.parcelIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3046,13 +2710,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbyline/{{ .arguments.lineId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3100,13 +2758,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/internal/topologicallayer/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3154,13 +2806,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/finance/allgeographicalunit\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3208,13 +2854,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/assessmentresult/contractedpowerbycontract/{{ .arguments.deliveryrangestart }}/{{ .arguments.deliveryrangeend }}/{{ .arguments.ancillarycontractid }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3262,13 +2902,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/assessmentresult/contractedpowerdetail/{{ .arguments.contractedpowerids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3316,13 +2950,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/activity/allauction/{{ .arguments.deliveryrangestart }}/{{ .arguments.deliveryrangeend }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -3370,13 +2998,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/activity/auctiondetail/{{ .arguments.auctionids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com\\"
-        },
+        \\"baseUrl\\": \\"https://example.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5019,13 +4641,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/monitoring\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5073,13 +4689,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/environment\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5127,13 +4737,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/isalive\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5181,13 +4785,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/monitoring/isconnected\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5235,13 +4833,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/equipmenttype/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5289,13 +4881,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allline\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5343,13 +4929,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/alllinesummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5397,13 +4977,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/linedetail/{{ .arguments.lineIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5451,13 +5025,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/powertransformerdetail/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5505,13 +5073,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/powertransformerbyvoltagelevel/{{ .arguments.pu }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5559,13 +5121,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allpowertransformer\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5613,13 +5169,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/voltageleveldetail/{{ .arguments.pu }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5667,13 +5217,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/substationdetail/{{ .arguments.p }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5721,13 +5265,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/substationbygeographicalsite/{{ .arguments.id }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5775,13 +5313,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allsubstation\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5829,13 +5361,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/voltagelevelbysubstation/{{ .arguments.p }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5883,13 +5409,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/circuitbreakerfunctiondetail/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5937,13 +5457,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/allcircuitbreakerfunction\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -5991,13 +5505,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/linebybasevoltage/{{ .arguments.basevoltage }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6045,13 +5553,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/alltechnicalfacility\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6099,13 +5601,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/alltechnicalunit\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6153,13 +5649,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/technicalfacilitydetail/{{ .arguments.eans }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6207,13 +5697,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/topology/technicalunitdetail/{{ .arguments.eans }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6261,13 +5745,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alltower\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6315,13 +5793,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alltowersummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6369,13 +5841,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6423,13 +5889,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6477,13 +5937,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6531,13 +5985,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6585,13 +6033,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alljunction\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6639,13 +6081,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alljunctionsummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6693,13 +6129,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6747,13 +6177,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6801,13 +6225,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6855,13 +6273,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6909,13 +6321,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allaerialconductorsetspan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -6963,13 +6369,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7017,13 +6417,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7071,13 +6465,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspanbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7125,13 +6513,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspanbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7179,13 +6561,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspanbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7233,13 +6609,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allundergroundconductorsetspan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7287,13 +6657,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7341,13 +6705,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspanbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7395,13 +6753,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspanbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7449,13 +6801,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspanbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7503,13 +6849,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allearthwirespan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7557,13 +6897,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7611,13 +6945,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespanbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7665,13 +6993,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespanbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7719,13 +7041,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespanbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7773,13 +7089,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allconductorsethook\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7827,13 +7137,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsethookbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7881,13 +7185,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsethookbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7935,13 +7233,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsethookbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -7989,13 +7281,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsethookbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8043,13 +7329,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allearthwirehook\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8097,13 +7377,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alllungchamber\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8151,13 +7425,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/alltelecomcable\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8205,13 +7473,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirehookbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8259,13 +7521,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirehookbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8313,13 +7569,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirehookbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8367,13 +7617,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirehookbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8421,13 +7665,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerdetail/{{ .arguments.towerIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8475,13 +7713,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbyanchorkey/{{ .arguments.anchorKeys }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8529,13 +7761,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbyline/{{ .arguments.lineId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8583,13 +7809,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbygeographicalunit/{{ .arguments.ugecode }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8637,13 +7857,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towerbyservicecenter/{{ .arguments.servicecenter }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8691,13 +7905,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctiondetail/{{ .arguments.junctionIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8745,13 +7953,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbyservicecenter/{{ .arguments.servicecenter }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8799,13 +8001,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/junctionbygeographicalunit/{{ .arguments.ugecode }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8853,13 +8049,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towernearby/{{ .arguments.latitude }}/{{ .arguments.longitude }}/{{ .arguments.radius }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8907,13 +8097,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/aerialconductorsetspandetail/{{ .arguments.aerialConductorSetSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -8961,13 +8145,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/undergroundconductorsetspandetail/{{ .arguments.undergroundConductorSetSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9015,13 +8193,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwirespandetail/{{ .arguments.earthWireSpanIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9069,13 +8241,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/conductorsetHookdetail/{{ .arguments.conductorSetHookIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9123,13 +8289,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/earthwireHookdetail/{{ .arguments.earthWireHookIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9177,13 +8337,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/lungchamberdetail/{{ .arguments.lungChamberIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9231,13 +8385,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/telecomcabledetail\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9285,13 +8433,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/circuitbreakerassetdetail/{{ .arguments.ids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9339,13 +8481,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/allcircuitbreakerasset\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9393,13 +8529,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/towercomponentbytower/{{ .arguments.towerid }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9447,13 +8577,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/telecomcablebypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9501,13 +8625,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/physicalobject/telecomcablebypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9555,13 +8673,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allgeographicalspan\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9609,13 +8721,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allgeographicalspansummary\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9663,13 +8769,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9717,13 +8817,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9771,13 +8865,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9825,13 +8913,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9879,13 +8961,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allparcel\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9933,13 +9009,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbypolygon\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -9987,13 +9057,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbypolygongps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10041,13 +9105,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10095,13 +9153,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10149,13 +9201,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspandetail\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10203,13 +9249,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbyanchorkey/{{ .arguments.anchorKeys }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10257,13 +9297,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbyline/{{ .arguments.lineId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10311,13 +9345,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbygeographicalunit/{{ .arguments.ugeCode }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10365,13 +9393,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalspanbyservicecenter/{{ .arguments.servicecenter }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10419,13 +9441,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parceldetail/{{ .arguments.parcelIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10473,13 +9489,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalsitedetail/{{ .arguments.geographicalSiteIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10527,13 +9537,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/trenchdetail/{{ .arguments.trenchIds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10581,13 +9585,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalsitebypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10635,13 +9633,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/geographicalsitebypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10689,13 +9681,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/parcelbyline/{{ .arguments.lineId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10743,13 +9729,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/polygoncentroid\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10797,13 +9777,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/polygongpscentroid\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10851,13 +9825,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/polygoncentroid/{{ .arguments.polygonwkt }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10905,13 +9873,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/polygongpscentroid/{{ .arguments.polygonwkt }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -10959,13 +9921,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/pointregionalinfo\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11013,13 +9969,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/pointgpsregionalinfo\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11067,13 +10017,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/locationlamberttolocationgps\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11121,13 +10065,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/locationgpstolocationlambert\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11175,13 +10113,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allservicecenter\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11229,13 +10161,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/allgeographicalsite\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11283,13 +10209,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/location/alltrench\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11337,13 +10257,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/internal/topologicallayer/{{ .arguments.putms }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11391,13 +10305,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/finance/allgeographicalunit\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11445,13 +10353,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/dataglossary/alldataset\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11499,13 +10401,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/dataglossary/allfield\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11553,13 +10449,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/dataglossary/allreport\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11607,13 +10497,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/dataglossary/allmeasure\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11661,13 +10545,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/dataglossary/allterm\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11715,13 +10593,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/dataglossary/allgenericdefinition\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11769,13 +10641,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/contractual/alloutageplanningdeliverypoint\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11823,13 +10689,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/contractual/allschedulingdeliverypoint\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11877,13 +10737,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/contractual/schedulingdeliverypointdetail/{{ .arguments.ean }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11931,13 +10785,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/contractual/outageplanningdeliverypointdetail/{{ .arguments.ean }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -11985,13 +10833,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/contactpoint/postaladdressbypoint/{{ .arguments.pointWkt }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12039,13 +10881,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/contactpoint/postaladdressbypointgps/{{ .arguments.pointWkt }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12093,13 +10929,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/communication/infrastructureplanfolderdetail/{{ .arguments.infrastructureplanfolderid }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12147,13 +10977,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/communication/infrastructureplanfolderdetailbypolygon/{{ .arguments.infrastructureplanfolderid }}/{{ .arguments.polygonWkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12201,13 +11025,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/communication/infrastructureplanfolderdetailbypolygongps/{{ .arguments.infrastructureplanfolderid }}/{{ .arguments.polygonWkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12255,13 +11073,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/communication/allinfrastructureplanfolder\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12309,13 +11121,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/communication/infrastructureplanfolderbypolygon/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12363,13 +11169,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/communication/infrastructureplanfolderbypolygongps/{{ .arguments.polygonwkt }}/{{ .arguments.buffer }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12417,13 +11217,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/assessmentresult/contractedpowerbycontract/{{ .arguments.deliveryrangestart }}/{{ .arguments.deliveryrangeend }}/{{ .arguments.ancillarycontractid }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12471,13 +11265,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/assessmentresult/contractedpowerdetail/{{ .arguments.contractedpowerids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12525,13 +11313,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/assessmentresult/mwschedulebyschedulingdeliverypoint/{{ .arguments.eans }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12579,13 +11361,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/activity/allauction/{{ .arguments.deliveryrangestart }}/{{ .arguments.deliveryrangeend }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12633,13 +11409,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/activity/auctiondetail/{{ .arguments.auctionids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12687,13 +11457,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/activity/allpruninginspectionpolicies\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -12741,13 +11505,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/interface/activity/pruninginspectionpolicydetail/{{ .arguments.pruninginspectionpolicyids }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.net/1.3.dev\\"
-        },
+        \\"baseUrl\\": \\"https://example.net/1.3.dev\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -15611,13 +14369,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/users\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -15665,13 +14417,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/users/{{ .arguments.user_id }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -15719,13 +14465,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/some/properties\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8881/{{ .arguments.basepath }}/\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -15840,13 +14580,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/start\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -15920,13 +14654,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/login\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16015,13 +14743,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/jwt/refresh\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16274,13 +14996,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/start\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16339,13 +15055,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/login\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16489,13 +15199,7 @@ exports[`fusion: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/start\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16543,13 +15247,7 @@ exports[`fusion: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/login\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16675,13 +15373,7 @@ exports[`github starred with unions: github_starred_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/starred/{{ .arguments.owner }}/{{ .arguments.repo }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://api.github.com\\"
-        },
+        \\"baseUrl\\": \\"https://api.github.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16815,13 +15507,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/status/{{ .arguments.code }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16869,13 +15555,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/get\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16923,13 +15603,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/post\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -16977,13 +15651,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/put\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17031,13 +15699,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/delete\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17085,13 +15747,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/xml\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17139,13 +15795,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/ip\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17193,13 +15843,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user-agent\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17247,13 +15891,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/headers\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17301,13 +15939,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/delay/{{ .arguments.seconds }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17355,13 +15987,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/cache/{{ .arguments.maxAge }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17409,13 +16035,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/uuid\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17463,13 +16083,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/anything\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17517,13 +16131,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/gzip\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17571,13 +16179,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/base64/{{ .arguments.value }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17625,13 +16227,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/deflate\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17679,13 +16275,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/brotli\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17733,13 +16323,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/response-headers\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17787,13 +16371,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/bytes/{{ .arguments.number }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17841,13 +16419,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/redirect-to\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -17900,13 +16472,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/stream/{{ .arguments.number }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://httpbin.org\\"
-        },
+        \\"baseUrl\\": \\"https://httpbin.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18184,13 +16750,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/posts\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
-        },
+        \\"baseUrl\\": \\"https://jsonplaceholder.typicode.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18238,13 +16798,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/posts/{{ .arguments.id }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
-        },
+        \\"baseUrl\\": \\"https://jsonplaceholder.typicode.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18334,13 +16888,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/posts\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
-        },
+        \\"baseUrl\\": \\"https://jsonplaceholder.typicode.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18388,13 +16936,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/posts/{{ .arguments.postID }}/comments\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
-        },
+        \\"baseUrl\\": \\"https://jsonplaceholder.typicode.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18442,13 +16984,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/users\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
-        },
+        \\"baseUrl\\": \\"https://jsonplaceholder.typicode.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18496,13 +17032,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/users/{{ .arguments.userID }}/posts\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://jsonplaceholder.typicode.com\\"
-        },
+        \\"baseUrl\\": \\"https://jsonplaceholder.typicode.com\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18650,13 +17180,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18704,13 +17228,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18758,13 +17276,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet/findByStatus\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18817,13 +17329,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet/findByTags\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18876,13 +17382,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet/{{ .arguments.petId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18930,13 +17430,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet/{{ .arguments.petId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -18993,13 +17487,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet/{{ .arguments.petId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19059,13 +17547,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pet/{{ .arguments.petId }}/uploadImage\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19118,13 +17600,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/store/inventory\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19172,13 +17648,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/store/order\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19226,13 +17696,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/store/order/{{ .arguments.orderId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19280,13 +17744,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/store/order/{{ .arguments.orderId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19334,13 +17792,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19388,13 +17840,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/createWithList\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19442,13 +17888,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/login\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19505,13 +17945,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/logout\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19559,13 +17993,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/{{ .arguments.username }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19613,13 +18041,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/{{ .arguments.username }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -19667,13 +18089,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/{{ .arguments.username }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"/v3\\"
-        },
+        \\"baseUrl\\": \\"/v3\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20010,13 +18426,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pets\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://petstore.org\\"
-        },
+        \\"baseUrl\\": \\"https://petstore.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20064,13 +18474,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pets\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://petstore.org\\"
-        },
+        \\"baseUrl\\": \\"https://petstore.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20118,13 +18522,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/pets/{{ .arguments.name }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://petstore.org\\"
-        },
+        \\"baseUrl\\": \\"https://petstore.org\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20268,13 +18666,7 @@ exports[`users: users_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/users\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8881\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8881\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20322,13 +18714,7 @@ exports[`users: users_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/users/{{ .arguments.user_id }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8881\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8881\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20376,13 +18762,7 @@ exports[`users: users_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/some/properties\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8881\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8881\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20497,13 +18877,7 @@ exports[`weather: weather_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/WeatherForecast\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://localhost:44331/\\"
-        },
+        \\"baseUrl\\": \\"https://localhost:44331/\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20583,13 +18957,7 @@ exports[`with url encoded params: stripe_query_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/v1/checkout/sessions\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"http://localhost:8111\\"
-        },
+        \\"baseUrl\\": \\"http://localhost:8111\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20686,13 +19054,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/start\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com/api\\"
-        },
+        \\"baseUrl\\": \\"https://example.com/api\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20740,13 +19102,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/passwordless/login\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com/api\\"
-        },
+        \\"baseUrl\\": \\"https://example.com/api\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20794,13 +19150,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/jwt/refresh-token\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com/api\\"
-        },
+        \\"baseUrl\\": \\"https://example.com/api\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20848,13 +19198,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/logout\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com/api\\"
-        },
+        \\"baseUrl\\": \\"https://example.com/api\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
@@ -20907,13 +19251,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
           \\"placeholderVariableName\\": \\"\\",
           \\"staticVariableContent\\": \\"/user/{{ .arguments.userId }}\\"
         },
-        \\"baseUrl\\": {
-          \\"kind\\": 0,
-          \\"environmentVariableDefaultValue\\": \\"\\",
-          \\"environmentVariableName\\": \\"\\",
-          \\"placeholderVariableName\\": \\"\\",
-          \\"staticVariableContent\\": \\"https://example.com/api\\"
-        },
+        \\"baseUrl\\": \\"https://example.com/api\\",
         \\"url\\": {
           \\"kind\\": 0,
           \\"environmentVariableDefaultValue\\": \\"\\",
