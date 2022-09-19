@@ -12,8 +12,7 @@ Configuration is done via `wundergraph.config.ts`.
 
 ## WunderGraph Server
 
-WunderGraph Server - Is optional server allowing you to extend your WunderNode with hooks,
-[webhooks](/docs/features/type-script-webhooks-to-integrate-third-party-applications)
-and [Custom GraphQL Resolvers](/docs/features/custom-graphql-resolvers).
+WunderGraph Server - Is an optional server allowing you to extend your WunderNode with TypeScript hooks, webhooks
+and Custom GraphQL Resolvers.
 
 Configuration is done via `wundergraph.server.ts`.

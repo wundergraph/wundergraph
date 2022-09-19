@@ -31,6 +31,7 @@ const tags = {
 	'CSRF Protection': '/docs/features/automatic-csrf-protection-for-mutations',
 	CSRF: '/docs/features/automatic-csrf-protection-for-mutations',
 	ETag: '/docs/features/automatic-content-revalidation-with-etags',
+	'Custom GraphQL Resolvers': '/docs/features/custom-graphql-resolvers',
 	'custom GraphQL resolvers': '/docs/features/custom-graphql-resolvers',
 	'custom GraphQL resolver': '/docs/features/custom-graphql-resolvers',
 	'Authentication-aware data fetching':
