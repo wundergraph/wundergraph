@@ -80,7 +80,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 ```typescript
 import { EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk'
 
-configureWunderGraphApplication({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
       host: new EnvironmentVariable('SERVER_HOST', '127.0.0.1'),
@@ -104,7 +104,7 @@ By using default environment variables names you could stick with Wundergraph De
 import { EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk'
 
 // use WgEnv enum to set variable names
-configureWunderGraphApplication({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
       host: new EnvironmentVariable(WgEnv.ServerHost, '127.0.0.1'),
@@ -121,7 +121,7 @@ configureWunderGraphApplication({
 })
 
 // alternative using plain string variable names
-configureWunderGraphApplication({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
       host: new EnvironmentVariable('WG_SERVER_HOST', '127.0.0.1'),
