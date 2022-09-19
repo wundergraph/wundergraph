@@ -1,6 +1,6 @@
 import reactLogo from './assets/react.svg';
 import './App.css';
-import { createHooks } from '@wundergraph/swr-hooks';
+import { createHooks } from '../../swr';
 import { useState } from 'react';
 
 import { createClient, Mutations, Queries, Subscriptions } from './components/generated/client';

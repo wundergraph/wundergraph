@@ -346,7 +346,7 @@ importers:
       tsd: 0.24.1
       typescript: 4.8.2
 
-  packages/swr-hooks:
+  packages/swr:
     specifiers:
       '@types/react': ^18.0.15
       '@types/react-dom': ^18.0.6
@@ -379,7 +379,7 @@ importers:
       '@types/react-dom': ^18.0.6
       '@vitejs/plugin-react': ^2.0.0
       '@wundergraph/sdk': workspace:*
-      '@wundergraph/swr-hooks': workspace:*
+      '@wundergraph/swr': workspace:*
       concurrently: ^6.0.0
       graphql: ^16.3.0
       open-cli: ^7.0.1
@@ -390,7 +390,7 @@ importers:
       wait-on: ^6.0.0
     dependencies:
       '@wundergraph/sdk': link:../sdk
-      '@wundergraph/swr-hooks': link:../swr-hooks
+      '@wundergraph/swr': link:../swr
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     devDependencies:

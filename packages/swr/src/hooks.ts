@@ -117,13 +117,9 @@ export const createHooks = <
 		return {
 			...response,
 			async mutate(options?: MutateOptions<Input, Data>): Promise<Data | undefined> {
-				const _options = {
-					...options,
-				};
-				const { input, ...swrOptions } = _options;
 				return response.mutate(() => {
-					return mutationFetcher({ operationName, input });
-				}, swrOptions);
+					return mutationFetcher({ operationName, input: options?.input });
+				}, options);
 			},
 		};
 	};
@@ -133,7 +129,7 @@ export const createHooks = <
 	 *
 	 * @usage
 	 * ```ts
-	 * const unsubscribe = subscribeTo('Hello', {world: 'World'})
+	 * const unsubscribe = subscribeTo({ operationName: 'hello', world: 'World' })
 	 * ```
 	 */
 	const subscribeTo = (options: SubscriptionRequestOptions) => {
@@ -144,7 +140,7 @@ export const createHooks = <
 		client.subscribe(options, (result: ClientResponse) => {
 			// Promise is not handled because we are not interested in the result
 			// Errors are handled by SWR internally
-			mutate({ operationName: options.operationName, input: options.input }, async () => {
+			mutate({ operationName: options.operationName, input: options.input }, () => {
 				if (result.error) {
 					throw result.error;
 				}

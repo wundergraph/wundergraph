@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
 	plugins: [react()],
 	optimizeDeps: {
-		include: ['@wundergraph/sdk', '@wundergraph/swr-hooks', '@wundergraph/sdk/client'],
+		include: ['@wundergraph/sdk', '@wundergraph/swr', '@wundergraph/sdk/client'],
 	},
 	build: {
 		commonjsOptions: {
