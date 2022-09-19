@@ -167,7 +167,7 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
-      '@wundergraph/protobuf': workspace:^0.93.0
+      '@wundergraph/protobuf': workspace:*
       '@wundergraph/sdk': workspace:*
       handlebars: ^4.7.7
       next: ^12.1.6

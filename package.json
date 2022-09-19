@@ -32,6 +32,9 @@
     "link-engine": "make build && mv wunderctl ./packages/wunderctl/download",
     "clean": "del-cli '**/node_modules/' 'packages/**/dist/' 'packages/**/download/' 'packages/**/generated/'"
   },
+  "resolutions": {
+    "react": "18.2.0"
+  },
   "engines": {
     "node": ">=16.0.0",
     "pnpm": ">=7.0.0 < 7.4.0 || >= 7.5.0"
