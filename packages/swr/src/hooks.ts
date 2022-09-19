@@ -133,7 +133,7 @@ export const createHooks = <
 	 *
 	 * @usage
 	 * ```ts
-	 * const unsubscribe = subscribeTo('Hello', {world: 'World'})
+	 * const unsubscribe = subscribeTo({ operationName: 'hello', world: 'World' })
 	 * ```
 	 */
 	const subscribeTo = (options: SubscriptionRequestOptions) => {
