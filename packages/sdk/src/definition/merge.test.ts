@@ -34,7 +34,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://user.service'),
-						baseUrl: mapInputVariable(''),
+						baseUrl: '',
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						body: mapInputVariable(''),
@@ -83,7 +83,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://product.service'),
-						baseUrl: mapInputVariable(''),
+						baseUrl: '',
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						query: [],
@@ -161,7 +161,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://reviews.service'),
-						baseUrl: mapInputVariable(''),
+						baseUrl: '',
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						body: mapInputVariable(''),
@@ -229,7 +229,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://inventory.service'),
-						baseUrl: mapInputVariable(''),
+						baseUrl: '',
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						query: [],
@@ -391,7 +391,7 @@ test('Should collide because weather and countries API has an enum called Langua
 					},
 					Fetch: {
 						url: mapInputVariable('https://graphql-weather-api.herokuapp.com'),
-						baseUrl: mapInputVariable(''),
+						baseUrl: '',
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						query: [],

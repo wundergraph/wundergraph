@@ -38,7 +38,7 @@ test('renameTypes', async () => {
 							Fetch: {
 								method: HTTPMethod.POST,
 								url: mapInputVariable('example.com'),
-								baseUrl: mapInputVariable(''),
+								baseUrl: '',
 								path: mapInputVariable(''),
 								query: [],
 								header: {},
@@ -102,7 +102,7 @@ test('renameTypes', async () => {
 					Fetch: {
 						method: HTTPMethod.POST,
 						url: mapInputVariable('example.com'),
-						baseUrl: mapInputVariable(''),
+						baseUrl: '',
 						path: mapInputVariable(''),
 						query: [],
 						header: {},
@@ -167,7 +167,7 @@ test('renameTypeFields', async () => {
 							Fetch: {
 								method: HTTPMethod.POST,
 								url: mapInputVariable('example.com'),
-								baseUrl: mapInputVariable(''),
+								baseUrl: '',
 								path: mapInputVariable(''),
 								query: [],
 								header: {},
@@ -250,7 +250,7 @@ test('renameTypeFields', async () => {
 							Fetch: {
 								method: HTTPMethod.POST,
 								url: mapInputVariable('example.com'),
-								baseUrl: mapInputVariable(''),
+								baseUrl: '',
 								path: mapInputVariable(''),
 								query: [],
 								header: {},
