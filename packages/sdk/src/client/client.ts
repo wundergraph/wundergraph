@@ -333,11 +333,12 @@ export class Client {
 		}
 
 		const result = await response.json();
-		if (!result.data) {
+
+		if (!result.length) {
 			throw new ResponseError(`Invalid server response shape`, response.status);
 		}
 
-		const json = result.data as { key: string }[];
+		const json = result as { key: string }[];
 		return {
 			fileKeys: json.map((x) => x.key),
 		};
