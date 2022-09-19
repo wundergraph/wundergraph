@@ -215,10 +215,7 @@ class RESTApiBuilder {
 		}
 		const parentType = verb === HTTPMethod.GET ? 'Query' : 'Mutation';
 
-		let baseUrl = this.baseURL();
-		if (baseUrl) {
-			baseUrl = this.cleanupBaseURL(baseUrl);
-		}
+		const baseUrl = this.cleanupBaseURL(this.baseURL());
 
 		this.dataSources.push({
 			RootNodes: [
