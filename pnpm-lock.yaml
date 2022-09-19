@@ -367,10 +367,12 @@ importers:
 
   packages/type-tests:
     specifiers:
-      '@wundergraph/sdk': workspace:^0.108.0
+      '@wundergraph/sdk': workspace:*
+      '@wundergraph/swr': workspace:*
       tsd: ^0.24.1
     dependencies:
       '@wundergraph/sdk': link:../sdk
+      '@wundergraph/swr': link:../swr
       tsd: 0.24.1
 
   packages/vite-testapp:

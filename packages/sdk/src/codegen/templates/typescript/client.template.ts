@@ -1,6 +1,6 @@
 //language=handlebars
 export const handlebarTemplate = `
-import { Client, ClientConfig, User, UploadRequestOptions, OperationMetadata } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, User, UploadRequestOptions, OperationMetadata, OperationsDefinition } from '@wundergraph/sdk/client';
 import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
@@ -98,4 +98,6 @@ export type LiveQueries = {
     }
 {{/each}}
 }
+
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions> {}
 `;

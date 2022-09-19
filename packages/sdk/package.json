@@ -63,7 +63,6 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "test:types": "tsd --testFiles src/**/*.test.d.ts",
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
@@ -84,7 +83,6 @@
     "nock": "^13.2.9",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.1",
-    "tsd": "^0.24.1",
     "typescript": "^4.8.2"
   },
   "dependencies": {

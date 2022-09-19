@@ -16,8 +16,9 @@ export type {
 	SubscriptionResult,
 	SubscriptionEventHandler,
 	OperationMetadata,
-	ClientOperationDefs,
+	OperationDefinition,
 	ClientOperation,
+	OperationsDefinition,
 } from './types';
 
 export { Client } from './client';

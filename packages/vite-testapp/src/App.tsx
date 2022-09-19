@@ -3,8 +3,8 @@ import './App.css';
 import { createHooks } from '../../swr';
 import { useState } from 'react';
 
-import { createClient, Mutations, Queries, Subscriptions } from './components/generated/client';
-const { useQuery, useMutation } = createHooks<Queries, Mutations, Subscriptions>(createClient());
+import { createClient, Operations } from './components/generated/client';
+const { useQuery, useMutation } = createHooks<Operations>(createClient());
 
 const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 	const liveWeather = useQuery({

@@ -4,7 +4,7 @@ import {
 	SubscriptionRequestOptions,
 	GraphQLResponseError,
 	ClientResponse,
-	ClientOperationDefs,
+	OperationsDefinition,
 	Client,
 } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
@@ -29,20 +29,17 @@ export type UseMutationOptions<OperationName> = SWRConfiguration & {
 
 export type MutateOptions<Input, Data> = MutatorOptions<Data> & { input?: Input };
 
-export const createHooks = <
-	Queries extends ClientOperationDefs,
-	Mutations extends ClientOperationDefs,
-	Subscriptions extends ClientOperationDefs
->(
-	client: Client
-) => {
+export const createHooks = <Operations extends OperationsDefinition>(client: Client) => {
 	const queryFetcher = async <
-		OperationName extends Extract<keyof Queries, string>,
-		Data extends Queries[OperationName]['data'] = Queries[OperationName]['data'],
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
 		RequestOptions extends OperationRequestOptions<
-			Extract<keyof Queries, string>,
-			Queries[OperationName]['input']
-		> = OperationRequestOptions<Extract<keyof Queries, string>, Queries[OperationName]['input']>
+			Extract<keyof Operations['queries'], string>,
+			Operations['queries'][OperationName]['input']
+		> = OperationRequestOptions<
+			Extract<keyof Operations['queries'], string>,
+			Operations['queries'][OperationName]['input']
+		>
 	>(
 		query: RequestOptions
 	) => {
@@ -56,12 +53,15 @@ export const createHooks = <
 	};
 
 	const mutationFetcher = async <
-		OperationName extends Extract<keyof Mutations, string>,
-		Data extends Mutations[OperationName]['data'] = Mutations[OperationName]['data'],
+		OperationName extends Extract<keyof Operations['mutations'], string>,
+		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
 		RequestOptions extends OperationRequestOptions<
-			Extract<keyof Mutations, string>,
-			Mutations[OperationName]['input']
-		> = OperationRequestOptions<Extract<keyof Mutations, string>, Mutations[OperationName]['input']>
+			Extract<keyof Operations['mutations'], string>,
+			Operations['mutations'][OperationName]['input']
+		> = OperationRequestOptions<
+			Extract<keyof Operations['mutations'], string>,
+			Operations['mutations'][OperationName]['input']
+		>
 	>(
 		mutation: RequestOptions
 	) => {
@@ -75,10 +75,10 @@ export const createHooks = <
 	};
 
 	const useQuery = <
-		OperationName extends Extract<keyof Queries, string>,
-		Input extends Queries[OperationName]['input'] = Queries[OperationName]['input'],
-		Data extends Queries[OperationName]['data'] = Queries[OperationName]['data'],
-		LiveQuery extends Queries[OperationName]['liveQuery'] = Queries[OperationName]['liveQuery']
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
+		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
 		options: UseQueryOptions<OperationName, Input, LiveQuery>
 	) => {
@@ -105,9 +105,9 @@ export const createHooks = <
 	};
 
 	const useMutation = <
-		OperationName extends Extract<keyof Mutations, string>,
-		Input extends Mutations[OperationName]['input'] = Mutations[OperationName]['input'],
-		Data extends Mutations[OperationName]['data'] = Mutations[OperationName]['data']
+		OperationName extends Extract<keyof Operations['mutations'], string>,
+		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
+		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
 	>(
 		options: UseMutationOptions<OperationName>
 	) => {
@@ -153,9 +153,9 @@ export const createHooks = <
 	};
 
 	const useSubscription = <
-		OperationName extends Extract<keyof Subscriptions, string>,
-		Input extends Subscriptions[OperationName]['input'] = Subscriptions[OperationName]['input'],
-		Data extends Subscriptions[OperationName]['data'] = Subscriptions[OperationName]['data']
+		OperationName extends Extract<keyof Operations['subscriptions'], string>,
+		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
+		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
 	>(
 		options: UseSubscriptionOptions<OperationName, Input>
 	): SWRResponse<Data, GraphQLResponseError> => {

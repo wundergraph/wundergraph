@@ -34,16 +34,24 @@ Second, run `wunderctl generate` to generate the code.
 Now you can use the hooks.
 
 ```ts
-import { createHooks } from '';
-import { createClient, Mutations, Queries, Subscriptions } from './components/generated/client';
+import { createHooks } from '@wundergraph/swr';
+import { createClient, Operations } from './components/generated/client';
 
-const { useQuery, useMutation } = createHooks<Queries, Mutations, Subscriptions>(createClient());
+const { useQuery, useMutation, useSubscription } = createHooks<Operations>(createClient());
 
 export const Home: React.FC<{ city: string }> = ({ city }) => {
   const { error, data, isValidating } = useQuery({
     operationName: 'Weather',
     input: { forCity: city },
     liveQuery: true,
+  });
+
+  const { data: subData, error: subError } = useSubscription({
+    enabled: true,
+    operationName: 'Weather',
+    input: {
+      forCity: 'Berlin',
+    },
   });
 
   const { mutate } = useMutation({

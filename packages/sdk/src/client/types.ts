@@ -21,9 +21,19 @@ export interface ClientOperation {
 	requiresAuthentication: boolean;
 }
 
-export type ClientOperationDefs = {
+export interface OperationsDefinition<
+	Queries extends OperationDefinition = OperationDefinition,
+	Mutations extends OperationDefinition = OperationDefinition,
+	Subscriptions extends OperationDefinition = OperationDefinition
+> {
+	queries: Queries;
+	mutations: Mutations;
+	subscriptions: Subscriptions;
+}
+
+export interface OperationDefinition {
 	[key: string]: ClientOperation;
-};
+}
 
 export interface ClientConfig {
 	applicationHash: string;
