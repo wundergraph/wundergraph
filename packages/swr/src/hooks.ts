@@ -19,6 +19,7 @@ export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration 
 
 export type UseSubscriptionOptions<OperationName, Input> = SWRConfiguration & {
 	operationName: OperationName;
+	subscribeOnce?: boolean;
 	enabled?: boolean;
 	input?: Input;
 };
@@ -159,7 +160,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	>(
 		options: UseSubscriptionOptions<OperationName, Input>
 	): SWRResponse<Data, GraphQLResponseError> => {
-		const { enabled = true, operationName, input, ...swrConfig } = options;
+		const { enabled = true, operationName, input, subscribeOnce, ...swrConfig } = options;
 		const key = { operationName, input };
 		const _key = serialize(key);
 		const response = useSWR(enabled ? key : null, null, swrConfig);
@@ -168,6 +169,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			let unsubscribe: () => void;
 			if (enabled) {
 				unsubscribe = subscribeTo({
+					subscribeOnce,
 					operationName,
 					input,
 				});

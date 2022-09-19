@@ -39,8 +39,9 @@ export class Client {
 
 	private addUrlParams(url: string, queryParams: URLSearchParams): string {
 		// avoid stringify to 'undefined'
+		// remove empty params and values that are false
 		for (const [key, value] of queryParams.entries()) {
-			if (value == '') {
+			if (value == '' || value == undefined || value == 'false') {
 				queryParams.delete(key);
 			}
 		}
@@ -243,6 +244,7 @@ export class Client {
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
 		const params = new URLSearchParams({
+			wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
 			wg_variables: this.stringifyInput(subscription.input),
 			wg_live: subscription?.liveQuery ? 'true' : 'false',
 			wg_sse: 'true',

@@ -1,7 +1,6 @@
 import { createHooks } from '@wundergraph/swr';
-import { Client, OperationsDefinition } from '@wundergraph/sdk/client';
+import { Client, OperationsDefinition, GraphQLResponseError } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
-import { GraphQLResponseError } from '@wundergraph/sdk/dist/client';
 
 interface Operations extends OperationsDefinition {
 	queries: {
@@ -55,6 +54,7 @@ expectType<GraphQLResponseError | undefined>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
+	subscribeOnce: true,
 	operationName: 'Weather',
 	input: {
 		forCity: 'Berlin',

@@ -85,6 +85,7 @@ export interface SubscriptionRequestOptions<
 	Input extends object | undefined = object | undefined
 > extends OperationRequestOptions<OperationName, Input> {
 	liveQuery?: Boolean;
+	subscribeOnce?: Boolean;
 }
 
 export interface SubscriptionResult {
