@@ -3,7 +3,7 @@ export const handlebarTemplate = `
 import type { {{ modelImports }} } from "./models";
 import {createContext} from "react";
 import { hooks, WunderGraphContextProperties } from "@wundergraph/nextjs";
-import { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from "@wundergraph/sdk/client";
+import type { QueryArgsWithInput, SubscriptionArgs, SubscriptionArgsWithInput } from "@wundergraph/nextjs";
 export type Role = {{{ roleDefinitions }}};
 
 {{#if hasAuthProviders}}
@@ -37,8 +37,8 @@ const defaultWunderGraphContextProperties: WunderGraphContextProperties<Role> = 
         applicationPath: "{{applicationPath}}",
         baseURL: "{{baseURL}}",
         sdkVersion: "{{sdkVersion}}",
-        authenticationEnabled: {{hasAuthProviders}},
     },
+    authenticationEnabled: {{hasAuthProviders}},
     user: null,
     setUser: value => {},
     isWindowFocused: "pristine",
@@ -104,14 +104,14 @@ export const useLiveQuery = {
     {{name}}: (args: SubscriptionArgsWithInput<{{name}}Input>) => hooks.useSubscriptionWithInput<{{name}}Input, {{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
         requiresAuthentication: {{requiresAuthentication}},
-        isLiveQuery: true,
+        liveQuery: true,
     })(args),
 {{/each}}
 {{#each liveQueriesWithoutInput}}
     {{name}}: (args?: SubscriptionArgs) => hooks.useSubscriptionWithoutInput<{{name}}ResponseData,Role>(WunderGraphContext,{
         operationName: "{{name}}",
         requiresAuthentication: {{requiresAuthentication}},
-        isLiveQuery: true,
+        liveQuery: true,
     })(args),
 {{/each}}
 };

@@ -1,7 +1,7 @@
 import { Template, TemplateOutputFile } from '@wundergraph/sdk';
 import { visitJSONSchema } from '@wundergraph/sdk/internal';
 import { ResolvedWunderGraphConfig } from '@wundergraph/sdk';
-import { hasInput } from '@wundergraph/sdk/dist/codegen/templates/typescript/react';
+import { hasInput } from '@wundergraph/sdk/dist/codegen/templates/typescript/helpers';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import { BaseTypeScriptDataModel } from '@wundergraph/sdk';
 import execa from 'execa';

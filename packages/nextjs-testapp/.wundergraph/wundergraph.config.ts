@@ -88,16 +88,16 @@ const graphQLAPI = introspect.graphql({
         .addClientRequestHeader("Authorization","Authorization")
 });*/
 
-const mgoSpaceX = introspect.mongodb({
-	apiNamespace: 'mgospacex',
-	databaseURL: 'mongodb+srv://public:spacex@spacex-gcp-gpg0u.gcp.mongodb.net/spacex-api',
+const spaceX = introspect.graphql({
+	apiNamespace: 'spacex',
+	url: 'https://api.spacex.land/graphql/',
 });
 
 const myApplication = new Application({
 	name: 'api',
 	apis: [
 		weather,
-		mgoSpaceX,
+		spaceX,
 		//jspFieldsRenamed,
 		/*federatedApi,
             openAPI,
@@ -130,6 +130,10 @@ configureWunderGraphApplication({
 	codeGenerators: [
 		{
 			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
+		},
+		{
+			templates: [templates.typescript.client],
+			path: '../components/generated',
 		},
 		{
 			templates: [new NextJsTemplate()],

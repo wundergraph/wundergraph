@@ -8,16 +8,21 @@ const UploadPage: NextPage = () => {
 	const [data, setData] = useState<string[]>([]);
 	const { uploadFiles } = useWunderGraph();
 	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setFiles(e.target.files);
+		if (e.target.files) setFiles(e.target.files);
 	};
 	const onSubmit = async (e: React.FormEvent<Element>) => {
 		e.preventDefault();
-		const result = await uploadFiles({
-			provider: S3Provider.minio,
-			files,
-		});
-		if (result.status === 'ok') {
+		if (!files) {
+			return;
+		}
+		try {
+			const result = await uploadFiles({
+				provider: S3Provider.minio,
+				files,
+			});
 			setData(result.fileKeys);
+		} catch (e) {
+			console.error("Couldn't upload files", e);
 		}
 	};
 
@@ -35,7 +40,7 @@ const UploadPage: NextPage = () => {
 				</form>
 				<ul>
 					{data.map((file) => (
-						<li>
+						<li key={file}>
 							<a target="_blank" href={`http://127.0.0.1:9000/uploads/${file}`}>
 								{file}
 							</a>

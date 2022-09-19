@@ -4,6 +4,8 @@
 
 WunderGraph codegen template plugin to add deep Next.js integration.
 
+> **Warning**: Only works with WunderGraph.
+
 ## Getting Started
 
 ```shell
@@ -14,16 +16,16 @@ npm install @wundergraph/nextjs
 
 ```ts
 // .wundergraph/wundergraph.config.ts
-import {NextJsTemplate} from '@wundergraph/nextjs/dist/template';
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 configureWunderGraphApplication({
   // ...
   // omitted for brevity
   codeGenerators: [
     {
-      templates: [new NextJsTemplate()]
+      templates: [new NextJsTemplate()],
     },
-  ]
+  ],
 });
 ```
 
@@ -31,10 +33,10 @@ configureWunderGraphApplication({
 
 ```tsx
 // pages/authentication.ts
-import {useQuery, useMutation, useLiveQuery, AuthProviders} from '.wundergraph/generated/nextjs';
+import { useQuery, useMutation, useLiveQuery, AuthProviders } from '.wundergraph/generated/nextjs';
 
 const Example: ExamplePage = () => {
-  const {user, login, logout} = useWunderGraph();
+  const { user, login, logout } = useWunderGraph();
   const onClick = () => {
     if (user === null || user === undefined) {
       login(AuthProviders.github);
@@ -48,7 +50,7 @@ const Example: ExamplePage = () => {
       <button onClick={onClick}>${user ? logout : login}</button>
       <p>{JSON.stringify(user)}</p>
     </div>
-  )
-}
+  );
+};
 export default withWunderGraph(Example);
 ```

@@ -3,42 +3,35 @@ export const template = `
 import type { {{ modelImports }} } from "./models";
 import type { RequestOptions, UserListener, Response } from "@wundergraph/sdk";
 import type { User, Role } from "./wundergraph.server";
-
-import { WunderGraphClient, ClientConfig, UploadConfig as BaseUploadConfig, QueryResult, MutationResult, SubscriptionResult } from "@wundergraph/sdk/client";
-
+import {
+	Client as WunderGraphClient,
+	ClientConfig,
+	UploadRequestOptions,
+	ClientResponse as Result,
+  LogoutOptions
+} from "@wundergraph/sdk/client";
 export const WUNDERGRAPH_S3_ENABLED = {{hasS3Provider}};
 export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
-
 {{#if hasS3Provider}}
 export interface UploadResponse { key: string }
-
 export enum S3Provider {
     {{#each s3Provider }}
     "{{name}}" = "{{name}}",
     {{/each}}
 }
-
-export type UploadConfig = BaseUploadConfig<S3Provider>
+export type UploadConfig = UploadRequestOptions<S3Provider>
 {{/if}}
-
 {{#if hasAuthProviders}}
 export enum AuthProviderId {
     {{#each authProviders}}
     "{{.}}" = "{{.}}",
     {{/each}}
 }
-
 export interface AuthProvider {
     id: AuthProviderId;
     login: (redirectURI?: string) => void;
 }
 {{/if}}
-
-export interface LogoutOptions {
-    logout_openid_connect_provider?: boolean;
-}
-
-type Result<Data> = QueryResult<Data> | MutationResult<Data> | SubscriptionResult<Data>;
 
 export class Client {
     constructor(config: Partial<ClientConfig> = {}) {
@@ -47,22 +40,20 @@ export class Client {
             ...rest
         } = config
         
-        this._client = new WunderGraphClient<Role>({
+        this._client = new WunderGraphClient({
             baseURL,
             applicationHash: "{{ applicationHash }}",
             applicationPath: "{{ applicationPath }}",
             sdkVersion: "{{ sdkVersion }}",
             ...rest
         });
-
         this.user = null;
     }
-    private _client: WunderGraphClient<Role>;
+    private _client: WunderGraphClient;
     private logoutCallback: undefined | (() => void);
     public setLogoutCallback(cb: ()=>void){
         this.logoutCallback = cb;
     }
-
     private user: User | null;
     private userListener: UserListener<User> | undefined;
     public setUserListener = (listener: UserListener<User>) => {
@@ -81,36 +72,19 @@ export class Client {
         }
     };
 	private resultToResponse = <TResponse>(result: Result<any>): Response<TResponse> => {
-		switch (result.status) {
-			case 'ok':
-				return {
-					status: 'ok',
-					body: { data: result.data }
-				} as Response<any>
-			case 'error':
-				return {
-					status: 'error',
-					message: result.errors[0].message,
-				}
-			case 'requires_authentication':
-				return {
-					status: 'requiresAuthentication'
-				}
-			case 'cancelled':
-				return {
-					status: 'aborted'
-				}
-			case 'partial': {
-				return {
-					status: 'error',
-					message: result.errors[0].message,
-				};
-			}
-			default:
-				return {
-					status: result.status
-				}
-		}
+    if (result.error) {
+      return {
+        status: 'error',
+        message: result.error.message
+      }
+    }
+
+    return {
+      status: 'ok',
+      body: {
+        data: result.data
+      }
+    } as Response<any>;
 	};
     {{#if hasQueries}}
     public query = {
@@ -168,39 +142,36 @@ export class Client {
         {{/each}}
         }
     {{/unless}}{{/if}}
-
     {{#if hasS3Provider}}
     public uploadFiles = async (config: UploadConfig): Promise<Response<UploadResponse[]>> => {
+      try {
         const result = await this._client.uploadFiles(config);
-
-		if (result.status === "ok") {
-			return {
-				status: "ok",
-				body: result.fileKeys.map((key) => ({key})),
-			};
-		}
-
         return {
-			status: result.status,
-			message: result.errors[0].message
-		};
+          status: "ok",
+          body: result.fileKeys.map((key) => ({key})),
+        };
+      } catch (e) {
+        return {
+          status: 'error',
+          message: e.message
+        }
+      }
     };
     {{/if}}
    
     public fetchUser = async (revalidate?: boolean): Promise<User | null> => {
 		try {
-			const user = await this._client.fetchUser(null, revalidate);
-
+			const user = await this._client.fetchUser<User>({
+        revalidate
+      });
 			if (user) {
 				this.setUser(user);
 				return this.user;
 			}
 		} catch {}
-
 		this.setUser(null);
 		return null;
     };
-
     {{#if hasAuthProviders}}
     public login : Record<AuthProviderId, AuthProvider['login']> = {
         {{#each authProviders}}
@@ -209,7 +180,6 @@ export class Client {
         },
         {{/each}}
     }
-
     public authProviders: Array<AuthProvider> = [
         {{#each authProviders}}
         {
@@ -218,13 +188,10 @@ export class Client {
         },
         {{/each}}
     ]
-
     public logout = async (options?: LogoutOptions): Promise<boolean> => {
         const response = await this._client.logout(options);
-
         this.setUser(null);
         this.logoutCallback?.()
-
         return response
     }
     {{/if}}

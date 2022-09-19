@@ -79,7 +79,6 @@ export {
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
 } from './codegen/templates/typescript/index';
-export { modelImports } from './codegen/templates/typescript/web.client';
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from './webhooks/verifiers';
 export { PlaceHolder } from './configure/variables';
 export { EnvironmentVariable } from './configure/variables';

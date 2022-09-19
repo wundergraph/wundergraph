@@ -9,9 +9,9 @@ import {
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
 	ResolvedWunderGraphConfig,
-	modelImports,
 	GraphQLOperation,
 } from '@wundergraph/sdk';
+import { modelImports } from '@wundergraph/sdk/internal';
 import hash from 'object-hash';
 import { OperationType } from '@wundergraph/protobuf';
 
