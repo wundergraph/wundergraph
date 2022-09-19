@@ -29,7 +29,13 @@ GraphQLApi {
           "ServiceSDL": "",
         },
         "Fetch": Object {
-          "baseUrl": "",
+          "baseUrl": Object {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
           "body": Object {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",

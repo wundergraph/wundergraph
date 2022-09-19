@@ -1,7 +1,8 @@
 import { mergeApis } from './merge';
 import { Api, GraphQLApi, GraphQLApiCustom } from './index';
 import { ArgumentRenderConfiguration, ArgumentSource, DataSourceKind, HTTPMethod } from '@wundergraph/protobuf';
-import { mapInputVariable, resolveIntegration } from '../configure';
+import { resolveIntegration } from '../configure';
+import { mapInputVariable } from '../configure/variables';
 
 test('Should be merged', () => {
 	const userApi: GraphQLApi = new GraphQLApi(
@@ -33,7 +34,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://user.service'),
-						baseUrl: '',
+						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						body: mapInputVariable(''),
@@ -82,7 +83,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://product.service'),
-						baseUrl: '',
+						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						query: [],
@@ -160,7 +161,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://reviews.service'),
-						baseUrl: '',
+						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						body: mapInputVariable(''),
@@ -228,7 +229,7 @@ test('Should be merged', () => {
 					},
 					Fetch: {
 						url: mapInputVariable('https://inventory.service'),
-						baseUrl: '',
+						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						query: [],
@@ -390,7 +391,7 @@ test('Should collide because weather and countries API has an enum called Langua
 					},
 					Fetch: {
 						url: mapInputVariable('https://graphql-weather-api.herokuapp.com'),
-						baseUrl: '',
+						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,
 						query: [],

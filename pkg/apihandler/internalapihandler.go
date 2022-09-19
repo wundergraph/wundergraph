@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/buger/jsonparser"
@@ -32,12 +31,11 @@ type InternalBuilder struct {
 	pool            *pool.Pool
 	log             abstractlogger.Logger
 	loader          *engineconfigloader.EngineConfigLoader
-	api             *wgpb.Api
+	api             *Api
 	planConfig      plan.Configuration
 	resolver        *resolve.Resolver
 	definition      *ast.Document
 	router          *mux.Router
-	secret          []byte
 	renameTypeNames []resolve.RenameTypeName
 }
 
@@ -49,7 +47,7 @@ func NewInternalBuilder(pool *pool.Pool, log abstractlogger.Logger, loader *engi
 	}
 }
 
-func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *wgpb.Api, secret []byte) (streamClosers []chan struct{}, err error) {
+func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
 
 	if api.EngineConfiguration == nil {
 		// engine config is nil, skipping
@@ -59,8 +57,6 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		api.AuthenticationConfig.Hooks == nil {
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
-
-	i.secret = secret
 
 	planConfig, err := i.loader.Load(*api.EngineConfiguration)
 	if err != nil {
@@ -154,7 +150,6 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			extractedVariables: extractedVariables,
 			log:                i.log,
 			resolver:           i.resolver,
-			jwtSecret:          i.secret,
 			renameTypeNames:    i.renameTypeNames,
 		}
 
@@ -189,7 +184,6 @@ type InternalApiHandler struct {
 	extractedVariables []byte
 	log                abstractlogger.Logger
 	resolver           *resolve.Resolver
-	jwtSecret          []byte
 	bearerCache        sync.Map
 	renameTypeNames    []resolve.RenameTypeName
 }
@@ -197,23 +191,6 @@ type InternalApiHandler struct {
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r = setOperationMetaData(r, h.operation)
-
-	authorizationHeader := r.Header.Get("X-WG-Authorization")
-	if authorizationHeader == "" { // for legacy reasons, can be removed in the future
-		authorizationHeader = r.Header.Get("Authorization")
-	}
-	_, ok := h.bearerCache.Load(authorizationHeader)
-	if !ok {
-		bearer := strings.TrimPrefix(authorizationHeader, "Bearer ")
-		token, err := jwt.Parse(bearer, func(token *jwt.Token) (interface{}, error) {
-			return h.jwtSecret, nil
-		})
-		if err != nil || !token.Valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-		h.bearerCache.Store(authorizationHeader, struct{}{})
-	}
 
 	bodyBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(bodyBuf)

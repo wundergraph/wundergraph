@@ -25,7 +25,7 @@ import (
 
 type ApiTransport struct {
 	roundTripper               http.RoundTripper
-	api                        *wgpb.Api
+	api                        *Api
 	debugMode                  bool
 	upstreamAuthConfigurations map[string]*wgpb.UpstreamAuthentication
 	onRequestHook              map[string]struct{}
@@ -33,13 +33,13 @@ type ApiTransport struct {
 	hooksClient                *hooks.Client
 }
 
-func NewApiTransportFactory(api *wgpb.Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper) http.RoundTripper {
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper) http.RoundTripper {
 	return func(tripper http.RoundTripper) http.RoundTripper {
 		return NewApiTransport(tripper, api, hooksClient, enableDebugMode)
 	}
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *wgpb.Api, hooksClient *hooks.Client, enableDebugMode bool) http.RoundTripper {
+func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool) http.RoundTripper {
 	transport := &ApiTransport{
 		roundTripper:               tripper,
 		debugMode:                  enableDebugMode,

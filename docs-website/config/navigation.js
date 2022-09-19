@@ -547,6 +547,18 @@ const navigation = [
 				title: 'wunderctl remove',
 				href: '/docs/wunderctl-reference/wunderctl-remove',
 			},
+			{
+				title: 'wunderctl start',
+				href: '/docs/wunderctl-reference/wunderctl-start',
+			},
+			{
+				title: 'wunderctl node start',
+				href: '/docs/wunderctl-reference/wunderctl-node-start',
+			},
+			{
+				title: 'wunderctl server start',
+				href: '/docs/wunderctl-reference/wunderctl-server-start',
+			},
 		],
 	},
 	{
@@ -636,6 +648,10 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-config-ts-reference',
+			},
+			{
+				title: 'WunderNode Options',
+				href: '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
 			},
 			{
 				title: 'GraphQL Data Source',
@@ -733,6 +749,14 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-server-ts-reference',
+			},
+			{
+				title: 'WunderGraph Server Options',
+				href: '/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
+			},
+			{
+				title: 'Webhooks',
+				href: '/docs/wundergraph-server-ts-reference/webhooks',
 			},
 			{
 				title: 'preResolve hook',

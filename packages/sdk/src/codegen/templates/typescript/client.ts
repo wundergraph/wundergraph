@@ -11,7 +11,6 @@ import {
 import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { ResolvedWunderGraphConfig } from '../../../configure';
-import { listenAddrHttp } from '../../../env';
 import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
 
 export class TypeScriptClient implements Template {
@@ -26,7 +25,7 @@ export class TypeScriptClient implements Template {
 		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
-			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : listenAddrHttp,
+			baseURL: config.deployment.environment.baseUrl,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			sdkVersion: config.sdkVersion,
 			applicationPath: config.deployment.path,

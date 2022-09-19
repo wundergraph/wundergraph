@@ -42,7 +42,6 @@ import (
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"
-	"github.com/wundergraph/wundergraph/pkg/apiconfig"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
@@ -66,7 +65,7 @@ const (
 type Builder struct {
 	router   *mux.Router
 	loader   *engineconfigloader.EngineConfigLoader
-	api      *wgpb.Api
+	api      *Api
 	resolver *resolve.Resolver
 	pool     *pool.Pool
 
@@ -126,7 +125,7 @@ func NewBuilder(pool *pool.Pool,
 	}
 }
 
-func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *wgpb.Api) (streamClosers []chan struct{}, err error) {
+func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
 
 	if api.CacheConfig != nil {
 		err = r.configureCache(api)
@@ -297,7 +296,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
 			log:           r.log,
 			html:          graphiql.GetGraphiqlPlaygroundHTML(),
-			apiPathPrefix: api.GetPathPrefix(),
+			apiPathPrefix: api.PathPrefix,
 		}
 		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
@@ -590,7 +589,7 @@ func (r *Builder) cleanupJsonSchema(schema string) string {
 	return schema
 }
 
-func (r *Builder) configureCache(api *wgpb.Api) (err error) {
+func (r *Builder) configureCache(api *Api) (err error) {
 	config := api.CacheConfig
 	switch config.Kind {
 	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
@@ -1828,8 +1827,8 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		csrfSecret = []byte(b)
 	}
 
-	if apiconfig.HasCookieAuthEnabled(r.api) && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)

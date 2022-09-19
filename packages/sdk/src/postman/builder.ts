@@ -14,7 +14,7 @@ export interface JSONSchemaParameterPath {
 	type: string;
 }
 
-// TS types of this modules are so bad, I opt out!
+// TS types of these modules are so bad, I opt out!
 // docs: https://www.postmanlabs.com/postman-collection/
 
 export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanBuilderOptions) => {
@@ -29,71 +29,26 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	mutationGroup.describe('All your mutation operations');
 
 	operations.forEach((op) => {
+		const operationURL = `{{apiBaseUrl}}/${options.applicationPath}/operations/${op.Name}`;
+
+		let paths: JSONSchemaParameterPath[] = [];
+		buildPath([], false, op.VariablesSchema, paths);
+
 		if (op.OperationType !== OperationType.MUTATION) {
-			const request = new Request({
-				url: `{{apiBaseUrl}}/${options.applicationPath}/operations/${op.Name}`,
-				method: 'GET',
-			});
-			request.addHeader({
-				key: 'Content-Type',
-				value: 'application/json',
-			});
-
-			let paths: JSONSchemaParameterPath[] = [];
-			buildPath([], false, op.VariablesSchema, paths);
-
-			paths.sort(function (a, b) {
-				return a.path.length - b.path.length;
-			});
-
-			for (const path of paths) {
-				request.addQueryParams([
-					{
-						key: path.path.join('.'),
-						disabled: !path.required,
-						value: '',
-						description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
-					},
-				]);
-			}
+			const request = queryRequestJson(operationURL, paths);
 
 			queryGroup.items.add({
 				id: op.Name,
 				name: op.Name,
-				request: request.toJSON(),
+				request: request,
 			});
 		} else if (op.OperationType === OperationType.MUTATION) {
-			const request = new Request({
-				url: `{{apiBaseUrl}}/${options.applicationPath}/operations/${op.Name}`,
-				method: 'POST',
-				body: {
-					mode: 'urlencoded',
-					urlencoded: [],
-					description: 'Your GraphQL variables in JSON',
-				},
-			});
-			let paths: JSONSchemaParameterPath[] = [];
-
-			buildPath([], false, op.VariablesSchema, paths);
-
-			paths.sort(function (a, b) {
-				return a.path.length - b.path.length;
-			});
-
-			for (const path of paths) {
-				request.body.urlencoded.add({
-					key: path.path.join('.'),
-					disabled: !path.required,
-					description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
-					value: '',
-					type: 'text',
-				});
-			}
+			const request = mutationRequestJson(operationURL, paths);
 
 			mutationGroup.items.add({
 				id: op.Name,
 				name: op.Name,
-				request: request.toJSON(),
+				request: request,
 			});
 		}
 	});
@@ -115,6 +70,54 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	myCollection.items.add(mutationGroup.toJSON());
 
 	return myCollection;
+};
+
+const mutationRequestJson = (url: string, paths: JSONSchemaParameterPath[]): string => {
+	const request = new Request({
+		url: url,
+		method: 'POST',
+		body: {
+			mode: 'urlencoded',
+			urlencoded: [],
+			description: 'Your GraphQL variables in JSON',
+		},
+	});
+
+	for (const path of paths) {
+		request.body.urlencoded.add({
+			key: path.path.join('.'),
+			disabled: !path.required,
+			description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
+			value: '',
+			type: 'text',
+		});
+	}
+
+	return request.toJSON();
+};
+
+const queryRequestJson = (url: string, paths: JSONSchemaParameterPath[]): string => {
+	const request = new Request({
+		url: url,
+		method: 'GET',
+	});
+	request.addHeader({
+		key: 'Content-Type',
+		value: 'application/json',
+	});
+
+	for (const path of paths) {
+		request.addQueryParams([
+			{
+				key: path.path.join('.'),
+				disabled: !path.required,
+				value: '',
+				description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
+			},
+		]);
+	}
+
+	return request.toJSON();
 };
 
 // TODO: Add "default" values
@@ -153,5 +156,9 @@ export function buildPath(
 		path,
 		required: false, // ignore it for now because this would make all variants required
 		type: typeof obj.type === 'string' ? obj.type : 'any',
+	});
+
+	paths.sort(function (a, b) {
+		return a.path.length - b.path.length;
 	});
 }

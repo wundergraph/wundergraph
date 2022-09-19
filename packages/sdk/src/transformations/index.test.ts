@@ -3,7 +3,7 @@ import { GraphQLApi } from '../definition';
 import { parse, print } from 'graphql';
 import { ArgumentRenderConfiguration, ArgumentSource, DataSourceKind, HTTPMethod } from '@wundergraph/protobuf';
 import transformApi from './index';
-import { mapInputVariable } from '../configure';
+import { mapInputVariable } from '../configure/variables';
 
 test('renameTypes', async () => {
 	const schema = `type User {name: String!} type Query {me: User!}`;
@@ -38,7 +38,7 @@ test('renameTypes', async () => {
 							Fetch: {
 								method: HTTPMethod.POST,
 								url: mapInputVariable('example.com'),
-								baseUrl: '',
+								baseUrl: mapInputVariable(''),
 								path: mapInputVariable(''),
 								query: [],
 								header: {},
@@ -102,7 +102,7 @@ test('renameTypes', async () => {
 					Fetch: {
 						method: HTTPMethod.POST,
 						url: mapInputVariable('example.com'),
-						baseUrl: '',
+						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						query: [],
 						header: {},
@@ -167,7 +167,7 @@ test('renameTypeFields', async () => {
 							Fetch: {
 								method: HTTPMethod.POST,
 								url: mapInputVariable('example.com'),
-								baseUrl: '',
+								baseUrl: mapInputVariable(''),
 								path: mapInputVariable(''),
 								query: [],
 								header: {},
@@ -250,7 +250,7 @@ test('renameTypeFields', async () => {
 							Fetch: {
 								method: HTTPMethod.POST,
 								url: mapInputVariable('example.com'),
-								baseUrl: '',
+								baseUrl: mapInputVariable(''),
 								path: mapInputVariable(''),
 								query: [],
 								header: {},
