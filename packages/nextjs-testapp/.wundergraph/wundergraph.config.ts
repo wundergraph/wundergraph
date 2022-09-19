@@ -132,6 +132,10 @@ configureWunderGraphApplication({
 			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
 		},
 		{
+			templates: [templates.typescript.client],
+			path: '../components/generated',
+		},
+		{
 			templates: [new NextJsTemplate()],
 			path: '../components/generated',
 		},
