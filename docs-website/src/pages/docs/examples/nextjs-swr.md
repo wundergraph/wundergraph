@@ -4,7 +4,7 @@ pageTitle: WunderGraph - Examples - Next.js - SWR
 description:
 ---
 
-[The NextJS + SWR example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-swr) demonstrates the power of
+[The Next.js + SWR example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-swr) demonstrates the power of
 code generation,
 when it comes to integrating WunderGraph with frontend frameworks like Next.js.
 
@@ -30,21 +30,14 @@ configureWunderGraphApplication({
   operations,
   codeGenerators: [
     {
-      templates: [
-        ...templates.typescript.all,
-        templates.typescript.operations,
-        templates.typescript.linkBuilder,
-      ],
-    },
-    {
-      templates: [templates.typescript.client, new NextJsTemplate()],
+      templates: [templates.typescript.client],
       path: '../components/generated',
     },
   ],
 })
 ```
 
-What's notable here is that we're using `templates.typescript.client` to generate our base client that is used by SWR and our the `NextJsTemplate` generated Next.js client.
+What's notable here is that we're using `templates.typescript.client` to generate our base client that is used by SWR [`@wundergraph/swr`](https://github.com/wundergraph/wundergraph/tree/main/packages/swr) package.
 
 Next up is setting up the SWR hooks.
 
@@ -89,9 +82,7 @@ const Home: NextPage = () => {
   })
   return <div>{JSON.stringify(dragons)}</div>
 }
-export default withWunderGraph(Home, {
-  client,
-})
+export default Home
 ```
 
 Your operations will be compiled into RPC endpoints.
