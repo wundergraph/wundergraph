@@ -83,6 +83,5 @@ export {
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
 } from './codegen/templates/typescript/index';
-export { modelImports } from './codegen/templates/typescript/web.client';
 export { listenAddrHttp, middlewarePort, middlewarePortString, listenAddr } from './env/index';
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from './webhooks/verifiers';

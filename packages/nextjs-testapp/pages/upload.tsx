@@ -15,12 +15,14 @@ const UploadPage: NextPage = () => {
 		if (!files) {
 			return;
 		}
-		const result = await uploadFiles({
-			provider: S3Provider.minio,
-			files,
-		});
-		if (result.status === 'ok') {
+		try {
+			const result = await uploadFiles({
+				provider: S3Provider.minio,
+				files,
+			});
 			setData(result.fileKeys);
+		} catch (e) {
+			console.error("Couldn't upload files", e);
 		}
 	};
 
@@ -38,7 +40,7 @@ const UploadPage: NextPage = () => {
 				</form>
 				<ul>
 					{data.map((file) => (
-						<li>
+						<li key={file}>
 							<a target="_blank" href={`http://127.0.0.1:9000/uploads/${file}`}>
 								{file}
 							</a>

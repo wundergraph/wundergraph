@@ -14,7 +14,7 @@
   },
   "loglevel": "verbose",
   "changelogPreset": "conventional-changelog-conventionalcommits",
-  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf", "packages/golang-client"],
+  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf", "packages/golang-client", "packages/swr"],
   "npmClient": "pnpm",
   "version": "independent"
 }

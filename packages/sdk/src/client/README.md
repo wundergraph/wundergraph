@@ -16,9 +16,9 @@ npm install @wundergraph/sdk
 ### Create the client
 
 ```ts
-import { WunderGraphClient } from '@wundergraph/sdk/client';
+import { Client } from '@wundergraph/sdk/client';
 
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -39,10 +39,10 @@ npm i node-fetch
 ```
 
 ```ts
-import { WunderGraphClient } from '@wundergraph/sdk/client';
+import { Client } from '@wundergraph/sdk/client';
 import fetch from 'node-fetch';
 
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -60,7 +60,7 @@ import 'promise-polyfill/src/polyfill';
 import 'yet-another-abortcontroller-polyfill';
 import { fetch } from 'whatwg-fetch';
 
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -72,7 +72,7 @@ const client = new WunderGraphClient({
 ## Adding custom headers
 
 ```ts
-const client = new WunderGraphClient({
+const client = new Client({
   applicationHash: '1f7dac83',
   applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
@@ -88,7 +88,7 @@ const client = new WunderGraphClient({
 ### Run a query
 
 ```ts
-const result = await client.query({
+const response = await client.query({
   operationName: 'Hello',
   input: {
     hello: 'World',
@@ -99,7 +99,7 @@ const result = await client.query({
 ### Mutation
 
 ```ts
-const result = await client.mutate({
+const response = await client.mutate({
   operationName: 'SetName',
   input: {
     name: 'WunderGraph',
@@ -116,9 +116,9 @@ client.subscribe(
     input: {
       name: 'World',
     },
-    isLiveQuery: true,
+    liveQuery: true,
   },
-  (result) => {}
+  (response) => {}
 );
 ```
 
@@ -132,7 +132,7 @@ client.subscribe(
       from: 100,
     },
   },
-  (result) => {}
+  (response) => {}
 );
 ```
 
@@ -164,3 +164,51 @@ client.logout();
 ```ts
 const user = await client.fetchUser();
 ```
+
+## AbortController
+
+Almost all methods accept an AbortController instance that can be used to cancel the request.
+
+```ts
+const controller = new AbortController();
+
+const { fileKeys } = await client.uploadFiles({
+  abortSignal: abortController.signal,
+  provider: S3Provider.minio,
+  files,
+});
+
+// cancel the request
+controller.abort();
+```
+
+## Error handling
+
+### Operations
+
+Query and mutation errors are returned as a `GraphQLResponseError` object. By default, the first error specifiy the error message but you can access all GraphQL errors through the `errors` property.
+Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code as `statusCode` property.
+
+```ts
+const { data, error } = await client.query({
+  operationName: 'Hello',
+  input: {
+    hello: 'World',
+  },
+});
+
+if (error instanceof GraphQLResponseError) {
+  error.errors[0].location;
+} else if (error instanceof ResponseError) {
+  error.statusCode;
+}
+```
+
+### Other
+
+Methods that initiate a network request throw a `ResponseError` or `Error` if the request fails to initiate or the response is not 2xx.
+You can be sure that the request was successful if the method doesn't throw an error.
+
+## Limitations
+
+- Subscriptions are not supported server side

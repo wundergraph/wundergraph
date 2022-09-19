@@ -1,10 +1,11 @@
-import { doNotEditHeader, Template, TemplateOutputFile, visitJSONSchema } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import prettier from 'prettier';
 import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
 import { hasInput, hasInternalInput, hasInjectedInput } from './helpers';
 import fs from 'fs';
 import path from 'path';
+import { visitJSONSchema } from '../../jsonschema';
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {

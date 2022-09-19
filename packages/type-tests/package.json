@@ -1,0 +1,20 @@
+{
+  "name": "@wundergraph/type-tests",
+  "private": true,
+  "version": "0.0.0",
+  "types": "test",
+  "scripts": {
+    "test": "tsd"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "tsd": {
+    "directory": "test"
+  },
+  "dependencies": {
+    "@wundergraph/sdk": "workspace:*",
+    "@wundergraph/swr": "workspace:*",
+    "tsd": "^0.24.1"
+  }
+}

@@ -1,3 +1,0 @@
-mutation ($name: String!) {
-	gql_setName(name: $name)
-}

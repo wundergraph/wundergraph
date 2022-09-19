@@ -1,4 +1,4 @@
-import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
+import { Template, TemplateOutputFile } from '../../index';
 import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
@@ -8,7 +8,7 @@ import { template } from './web.client.template';
 import { listenAddrHttp } from '../../../env';
 import { hasInjectedInput, hasInternalInput, hasInput } from './helpers';
 
-export class TypeScriptWebClient implements Template {
+export class TypeScriptLegacyWebClient implements Template {
 	constructor(reactNative?: boolean) {
 		this.reactNative = reactNative || false;
 	}
@@ -47,7 +47,7 @@ export class TypeScriptWebClient implements Template {
 			{
 				path: 'wundergraph.client.ts',
 				content: formatTypeScript(content),
-				header: doNotEditHeader,
+				doNotEditHeader: true,
 			},
 		]);
 	}
