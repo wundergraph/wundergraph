@@ -14,7 +14,7 @@ It is requires generated files from `wunderctl generate`.
 {% callout type="warning" %}
 To run WunderGraph Server it is mandatory to set:
 
-- `nodeUrl` in WunderNode [`options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options)
+- `nodeUrl` in `WunderNode options`
 
 Alternatively provide values for the following EnvironmentVariable:
 
@@ -25,8 +25,8 @@ Alternatively provide values for the following EnvironmentVariable:
 {% callout type="warning" %}
 Static values or custom environment variables has priority over default environment variables in:
 
-- [`WunderNode options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options) of `wundergraph.config.ts`
-- [`WunderGraph Server options`](/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options) of `wundergraph.server.ts`
+- `WunderNode options` of `wundergraph.config.ts`
+- `WunderGraph Server options` of `wundergraph.server.ts`
 
 {% /callout %}
 

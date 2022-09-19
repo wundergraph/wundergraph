@@ -17,8 +17,8 @@ It is requires generated files from `wunderctl generate`.
 {% callout type="warning" %}
 For the production it is mandatory to set:
 
-- `nodeUrl` in WunderNode [`options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options)
-- `serverUrl` in WunderGraph Server [`options`](/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options)
+- `nodeUrl` in `WunderNode options`
+- `serverUrl` in `WunderGraph Server options`
 
 Alternatively provide values for the following environment variables
 
@@ -34,8 +34,8 @@ We highly recommend launching WunderNode and WunderGraph Server separately in or
 
 To accomplish that please use following commands:
 
-- [`wunderctl node start`](/docs/wunderctl-reference/wunderctl-node-start) to start WunderNode
-- [`wunderctl server start`](/docs/wunderctl-reference/wunderctl-server-start) to start WunderGraph Server
+- `wunderctl node start` to start WunderNode
+- `wunderctl server start` to start WunderGraph Server
 
 {% /callout %}
 

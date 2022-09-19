@@ -14,12 +14,12 @@ or you also do it on demand using `wunderctl generate`.
 
 {% callout type="warning" %}
 When you do not provide an options in `wundergraph.config.ts` and/or in `wundergraph.server.ts`.
-We will use [Default Environment Variables](/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables) to generate the config.
+We will use Default Environment Variables to generate the config.
 
 For the production it is mandatory to set:
 
-- `nodeUrl` in WunderNode [`options`](/docs/wundergraph-config-ts-reference/configure-wundernode-options)
-- `serverUrl` in WunderGraph Server [`options`](/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options)
+- `nodeUrl` in `WunderNode options`
+- `serverUrl` in `WunderGraph Server options`
 
 Alternatively provide values for the following environment variables
 
