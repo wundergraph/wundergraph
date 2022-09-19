@@ -77,5 +77,8 @@
     "prettier": "^2.6.2",
     "release-it": "^15.4.1",
     "del-cli": "^5.0.0"
+  },
+  "resolutions": {
+    "react": "18.2.0"
   }
 }
