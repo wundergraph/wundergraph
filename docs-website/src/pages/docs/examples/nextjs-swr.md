@@ -87,8 +87,6 @@ export default Home
 
 ## Run Mutations from Next.js
 
-You can also run mutation operations from Next.js with the SWR hooks.
-
 ```typescript
 import { NextPage } from 'next'
 import { withWunderGraph } from '../components/generated/nextjs'
@@ -111,6 +109,27 @@ const Home: NextPage = () => {
       <button onClick={onClick}>Click me</button>
     </div>
   )
+}
+export default Home
+```
+
+## Run Subscriptions from Next.js
+
+> Note: Subscriptions are currently not supported with SSR.
+
+```typescript
+import { NextPage } from 'next'
+import { withWunderGraph } from '../components/generated/nextjs'
+import { useSubscription } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { data, error, mutate } = useSubscription({
+    operationName: 'Dragons',
+    input: {
+      name: 'test',
+    },
+  })
+  return <div>{JSON.stringify(data)}</div>
 }
 export default Home
 ```
