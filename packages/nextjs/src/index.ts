@@ -57,6 +57,7 @@ export interface WunderGraphContextProperties<Role extends string> {
 }
 
 export interface WithWunderGraphOptions {
+	client?: Client;
 	baseURL?: string;
 	logPrerenderTime?: boolean;
 	disableFetchUserServerSide?: boolean;
@@ -75,11 +76,15 @@ function withWunderGraphContextWrapper<Role extends string>(
 	return <C extends NextPage<any> | NextApp>(Page: C, options?: WithWunderGraphOptions) => {
 		// initialize the client
 		if (defaultContextProperties.client === null) {
-			const baseOptions = { ...defaultContextProperties.clientConfig };
-			if (options?.baseURL) {
-				baseOptions.baseURL = options.baseURL;
+			if (options?.client) {
+				defaultContextProperties.client = options.client;
+			} else {
+				const baseOptions = { ...defaultContextProperties.clientConfig };
+				if (options?.baseURL) {
+					baseOptions.baseURL = options.baseURL;
+				}
+				defaultContextProperties.client = new Client(baseOptions);
 			}
-			defaultContextProperties.client = new Client(baseOptions);
 		}
 
 		const WithWunderGraph: NextPage<any> = (props: any) => {
