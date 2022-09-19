@@ -108,4 +108,6 @@ const SWR = () => {
 	);
 };
 
-export default withWunderGraph(SWR)(client);
+export default withWunderGraph(SWR, {
+	client,
+});
