@@ -6,7 +6,7 @@ description:
 
 [The Next.js + SWR example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-swr) demonstrates the power of
 code generation,
-when it comes to integrating WunderGraph with frontend frameworks like Next.js.
+when it comes to integrating WunderGraph with data fetching libraries like [SWR](https://swr.vercel.app/).
 
 ## Configuration
 
