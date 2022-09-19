@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.1.17...@wundergraph/nextjs@0.2.0) (2022-09-19)
+
+### Features
+
+* implement config first approach ([#151](https://github.com/wundergraph/wundergraph/issues/151)) ([803da0e](https://github.com/wundergraph/wundergraph/commit/803da0e51beb3a7b23ee826dfde835eccfa1c2dd)), closes [#190](https://github.com/wundergraph/wundergraph/issues/190) (@spetrunin)
+
 ## [0.1.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.1.16...@wundergraph/nextjs@0.1.17) (2022-09-15)
 
 **Note:** Version bump only for package @wundergraph/nextjs
