@@ -69,21 +69,64 @@ query Dragons {
 }
 ```
 
-## Use from Next.js
+## Run Queries from Next.js
 
 ```typescript
 import { NextPage } from 'next'
-import { client, useQuery } from '../lib/wundergraph'
+import { useQuery } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
-  const dragons = useQuery({
+  const { data, error } = useQuery({
     operationName: 'Dragons',
   })
-  return <div>{JSON.stringify(dragons)}</div>
+  return <div>{JSON.stringify(data)}</div>
 }
 export default Home
 ```
 
-Your operations will be compiled into RPC endpoints.
-The template will generate the WunderGraph client and types for the SWR hooks,
-so all you have to do is to import he `useQuery` hook and call your newly created API.
+## Run Mutations from Next.js
+
+```typescript
+import { NextPage } from 'next'
+import { useMutation } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { data, error, mutate } = useMutation({
+    operationName: 'Dragons',
+  })
+  const onClick = () => {
+    mutate({
+      input: {
+        name: 'test',
+      },
+    })
+  }
+  return (
+    <div>
+      {JSON.stringify(data)}
+      <button onClick={onClick}>Click me</button>
+    </div>
+  )
+}
+export default Home
+```
+
+## Run Subscriptions from Next.js
+
+> Note: Subscriptions are currently not supported with SSR.
+
+```typescript
+import { NextPage } from 'next'
+import { useSubscription } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { data, error } = useSubscription({
+    operationName: 'Dragons',
+    input: {
+      name: 'test',
+    },
+  })
+  return <div>{JSON.stringify(data)}</div>
+}
+export default Home
+```

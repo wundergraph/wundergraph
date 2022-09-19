@@ -54,7 +54,7 @@ const Home: NextPage = () => {
 							SWR
 						</a>
 					</code>{' '}
-					simplify the data fetching logic in your project.
+					to simplify the data fetching logic in your project.
 				</p>
 			</div>
 			<div className="relative flex flex-col items-center overflow-hidden p-8 sm:p-12">
