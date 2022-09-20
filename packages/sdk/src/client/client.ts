@@ -49,7 +49,9 @@ export class Client {
 		// stable stringify
 		queryParams.sort();
 
-		return url + '?' + queryParams.toString();
+		const queryString = queryParams.toString();
+
+		return url + (queryString ? `?${queryString}` : '');
 	}
 
 	private async fetchJson(url: string, init: RequestInit = {}) {
