@@ -139,10 +139,7 @@ export default Home
 
 ```typescript
 import { NextPage } from 'next'
-// Might differ depending on your output directory
-import { AuthProviderId, UserRole } from '../components/generated/client'
-import { User } from '@wundergraph/sdk/client'
-import { useAuth } from '../lib/wundergraph'
+import { useAuth, useUser } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
   const { login, logout } = useAuth()
