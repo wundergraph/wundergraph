@@ -316,7 +316,7 @@ importers:
       '@types/tar': 4.0.5
       typescript: 4.8.2
 
-  testapps/default-testapp:
+  testapps/default:
     specifiers:
       '@types/node': ^14.14.37
       '@wundergraph/golang-client': workspace:*
@@ -336,7 +336,7 @@ importers:
       postgraphile: 4.12.9
       typescript: 4.8.2
 
-  testapps/mtls-testapp:
+  testapps/mtls:
     specifiers:
       '@types/node': ^14.14.37
       '@wundergraph/sdk': workspace:*
@@ -357,7 +357,7 @@ importers:
       '@wundergraph/sdk':
         injected: true
 
-  testapps/nextjs-testapp:
+  testapps/nextjs:
     specifiers:
       '@types/node': ^17.0.27
       '@types/react': ^18.0.7
@@ -388,7 +388,7 @@ importers:
       typescript: 4.8.2
       wait-on: 6.0.1
 
-  testapps/postgres-testapp:
+  testapps/postgres:
     specifiers:
       '@types/node': ^14.14.37
       '@wundergraph/sdk': workspace:*
@@ -10987,7 +10987,7 @@ packages:
     dev: true
 
   /unpipe/1.0.0:
-    resolution: {integrity: sha1-sr9O6FFKrmFltIF4KdIbLvSZBOw=}
+    resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
     engines: {node: '>= 0.8'}
 
   /update-notifier/6.0.2:

@@ -33,7 +33,7 @@
     "clean": "del-cli '**/node_modules/' '**/**/dist/' 'packages/**/download/' 'testapps/**/generated/'"
   },
   "resolutions": {
-    "react": "17.2.0"
+    "react": "18.2.0"
   },
   "engines": {
     "node": ">=16.0.0",
