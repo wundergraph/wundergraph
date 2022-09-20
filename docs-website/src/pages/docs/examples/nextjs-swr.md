@@ -165,10 +165,10 @@ import { NextPage } from 'next'
 import { useFileUpload } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
-  const { upload } = useFileUpload()
+  const { upload, data, error } = useFileUpload()
   const onUpload = () => {
     upload({
-      file: new File([''], 'test.txt'),
+      files: [new File([''], 'test.txt')],
     })
   }
   return <button onClick={onUpload}>Upload</button>

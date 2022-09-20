@@ -12,7 +12,8 @@ import {
 	User,
 } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Error } from '@wundergraph/sdk';
 
 export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration & {
 	operationName: OperationName;
@@ -33,6 +34,8 @@ export type UseMutationOptions<OperationName> = SWRConfiguration & {
 };
 
 export type MutateOptions<Input, Data> = MutatorOptions<Data> & { input?: Input };
+
+export const userSWRKey = 'user';
 
 export const createHooks = <Operations extends OperationsDefinition>(client: Client) => {
 	const queryFetcher = async <
@@ -132,7 +135,12 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	const useAuth = () => {
 		return {
 			login: (authProviderID: string, redirectURI?: string | undefined) => client.login(authProviderID, redirectURI),
-			logout: (options?: LogoutOptions | undefined) => client.logout(options),
+			logout: async (options?: LogoutOptions | undefined) => {
+				const result = await client.logout(options);
+				// refetch user
+				mutate(userSWRKey);
+				return result;
+			},
 		};
 	};
 
@@ -141,14 +149,24 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		swrOptions?: SWRConfiguration
 	) => {
 		const { enabled = true } = options || {};
-		return useSWR<U, GraphQLResponseError>(enabled ? 'user' : null, () => client.fetchUser(options), swrOptions);
+		return useSWR<U, GraphQLResponseError>(enabled ? userSWRKey : null, () => client.fetchUser(options), swrOptions);
 	};
 
 	const useFileUpload = () => {
+		const [uploadResult, setUploadResult] = useState<{ data?: string[]; error?: Error }>(() => ({
+			data: undefined,
+			error: undefined,
+		}));
 		return {
-			upload: async (options: UploadRequestOptions): Promise<string[]> => {
-				const resp = await client.uploadFiles(options);
-				return resp.fileKeys;
+			data: uploadResult,
+			upload: async (options: UploadRequestOptions): Promise<string[] | undefined> => {
+				try {
+					const resp = await client.uploadFiles(options);
+					setUploadResult({ data: resp.fileKeys, error: undefined });
+					return resp.fileKeys;
+				} catch (err: any) {
+					setUploadResult({ data: undefined, error: err });
+				}
 			},
 		};
 	};
