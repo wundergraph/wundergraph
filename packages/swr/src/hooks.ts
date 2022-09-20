@@ -2,10 +2,14 @@ import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 's
 import {
 	OperationRequestOptions,
 	SubscriptionRequestOptions,
+	FetchUserRequestOptions,
 	GraphQLResponseError,
 	ClientResponse,
 	OperationsDefinition,
+	UploadRequestOptions,
+	LogoutOptions,
 	Client,
+	User,
 } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useEffect } from 'react';
@@ -125,6 +129,30 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		};
 	};
 
+	const useAuth = () => {
+		return {
+			login: (authProviderID: string, redirectURI?: string | undefined) => client.login(authProviderID, redirectURI),
+			logout: (options?: LogoutOptions | undefined) => client.logout(options),
+		};
+	};
+
+	const useUser = <U extends User>(
+		options?: FetchUserRequestOptions & { enabled?: boolean },
+		swrOptions?: SWRConfiguration
+	) => {
+		const { enabled = true } = options || {};
+		return useSWR<U, GraphQLResponseError>(enabled ? 'user' : null, () => client.fetchUser(options), swrOptions);
+	};
+
+	const useFileUpload = () => {
+		return {
+			upload: async (options: UploadRequestOptions): Promise<string[]> => {
+				const resp = await client.uploadFiles(options);
+				return resp.fileKeys;
+			},
+		};
+	};
+
 	/**
 	 * This is will subscribe to an operation and mutate the SWR state on result.
 	 *
@@ -183,6 +211,9 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	};
 
 	return {
+		useAuth,
+		useFileUpload,
+		useUser,
 		useMutation,
 		useQuery,
 		useSubscription,

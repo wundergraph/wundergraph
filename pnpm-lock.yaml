@@ -285,10 +285,12 @@ importers:
     specifiers:
       '@wundergraph/sdk': workspace:*
       '@wundergraph/swr': workspace:*
+      swr: ^1.3.0
       tsd: ^0.24.1
     dependencies:
       '@wundergraph/sdk': link:../sdk
       '@wundergraph/swr': link:../swr
+      swr: 1.3.0
       tsd: 0.24.1
 
   packages/wunderctl:
@@ -10508,6 +10510,12 @@ packages:
       yargs: 17.5.1
     transitivePeerDependencies:
       - encoding
+    dev: false
+
+  /swr/1.3.0:
+    resolution: {integrity: sha512-dkghQrOl2ORX9HYrMDtPa7LTVHJjCTeZoB1dqTbnnEDlSvN8JEKpYIYurDfvbQFUUS8Cg8PceFVZNkW0KNNYPw==}
+    peerDependencies:
+      react: ^16.11.0 || ^17.0.0 || ^18.0.0
     dev: false
 
   /swr/1.3.0_react@18.2.0:

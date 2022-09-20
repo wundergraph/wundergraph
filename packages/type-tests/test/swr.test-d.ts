@@ -1,6 +1,7 @@
 import { createHooks } from '@wundergraph/swr';
-import { Client, OperationsDefinition, GraphQLResponseError } from '@wundergraph/sdk/client';
+import { Client, OperationsDefinition, GraphQLResponseError, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
+import { SWRResponse } from 'swr';
 
 interface Operations extends OperationsDefinition {
 	queries: {
@@ -32,7 +33,7 @@ interface Operations extends OperationsDefinition {
 	};
 }
 
-const { useSubscription, useQuery, useMutation } = createHooks<Operations>(
+const { useSubscription, useQuery, useMutation, useUser } = createHooks<Operations>(
 	new Client({
 		baseURL: 'http://localhost:8080',
 		applicationHash: 'my-application-hash',
@@ -75,11 +76,10 @@ const {
 expectType<Operations['mutations']['CreateUser']['data']>(mutData);
 expectType<GraphQLResponseError | undefined>(mutError);
 
-expectType<Promise<any>>(
-	mutate({
+expectType<SWRResponse<User>>(useUser());
+expectType<SWRResponse<User>>(
+	useUser({
 		revalidate: true,
-		input: {
-			name: 'John Doe',
-		},
+		abortSignal: new AbortController().signal,
 	})
 );

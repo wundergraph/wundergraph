@@ -132,3 +132,46 @@ const Home: NextPage = () => {
 }
 export default Home
 ```
+
+## Authentication from Next.js
+
+```typescript
+import { NextPage } from 'next'
+// Might differ depending on your output directory
+import { AuthProviderId, UserRole } from '../components/generated/client'
+import { User } from '@wundergraph/sdk/client'
+import { useAuth } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { login, logout } = useAuth()
+  const { data, error } = useUser<User<UserRole>>()
+  // Conditional fetching
+  // const { data, error } = useUser<User<UserRole>>({ enabled: true});
+  return (
+    <div>
+      {JSON.stringify(data)}
+      <button onClick={() => login(AuthProviderId.github)}>Login</button>
+      <button onClick={() => logout()}>Login</button>
+    </div>
+  )
+}
+export default Home
+```
+
+## File upload from Next.js
+
+```typescript
+import { NextPage } from 'next'
+import { useFileUpload } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { upload } = useFileUpload()
+  const onUpload = () => {
+    upload({
+      file: new File([''], 'test.txt'),
+    })
+  }
+  return <button onClick={onUpload}>Upload</button>
+}
+export default Home
+```
