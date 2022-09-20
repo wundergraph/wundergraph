@@ -85,8 +85,8 @@ expectType<Promise<any>>(
 	})
 );
 
-expectType<SWRResponse<User>>(useUser());
-expectType<SWRResponse<User>>(
+expectType<SWRResponse<User<string>, GraphQLResponseError>>(useUser());
+expectType<SWRResponse<User<string>, GraphQLResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,

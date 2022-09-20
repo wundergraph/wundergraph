@@ -35,7 +35,7 @@ export type UseMutationOptions<OperationName> = SWRConfiguration & {
 
 export type MutateOptions<Input, Data> = MutatorOptions<Data> & { input?: Input };
 
-export const userSWRKey = 'user';
+export const userSWRKey = 'wg_user';
 
 export const createHooks = <Operations extends OperationsDefinition>(client: Client) => {
 	const queryFetcher = async <
