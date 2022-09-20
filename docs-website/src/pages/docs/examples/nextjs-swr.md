@@ -135,7 +135,7 @@ export default Home
 
 ## Authentication from Next.js
 
-> Note: Logout() will trigger refetch of the user.
+> Note: Logout() will trigger a refetch of the user.
 
 ```typescript
 import { NextPage } from 'next'
