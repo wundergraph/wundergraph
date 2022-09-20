@@ -145,7 +145,7 @@ const Home: NextPage = () => {
   const { login, logout } = useAuth()
   const { data, error } = useUser()
   // Conditional fetching
-  // const { data, error } = useUser<User<UserRole>>({ enabled: true });
+  // const { data, error } = useUser({ enabled: true });
   return (
     <div>
       {JSON.stringify(data)}
