@@ -9,7 +9,6 @@ import {
 	UploadRequestOptions,
 	LogoutOptions,
 	Client,
-	User,
 } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useEffect, useState } from 'react';
@@ -134,7 +133,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 
 	const useAuth = () => {
 		return {
-			login: (authProviderID: string, redirectURI?: string | undefined) => client.login(authProviderID, redirectURI),
+			login: (authProviderID: Operations['s3Provider'], redirectURI?: string | undefined) =>
+				client.login(authProviderID, redirectURI),
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
 				// refetch user
@@ -144,12 +144,13 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		};
 	};
 
-	const useUser = <U extends User>(
-		options?: FetchUserRequestOptions & { enabled?: boolean },
-		swrOptions?: SWRConfiguration
-	) => {
+	const useUser = (options?: FetchUserRequestOptions & { enabled?: boolean }, swrOptions?: SWRConfiguration) => {
 		const { enabled = true } = options || {};
-		return useSWR<U, GraphQLResponseError>(enabled ? userSWRKey : null, () => client.fetchUser(options), swrOptions);
+		return useSWR<Operations['user'], GraphQLResponseError>(
+			enabled ? userSWRKey : null,
+			() => client.fetchUser(options),
+			swrOptions
+		);
 	};
 
 	const useFileUpload = () => {

@@ -146,7 +146,7 @@ import { useAuth } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
   const { login, logout } = useAuth()
-  const { data, error } = useUser<User<UserRole>>()
+  const { data, error } = useUser()
   // Conditional fetching
   // const { data, error } = useUser<User<UserRole>>({ enabled: true });
   return (

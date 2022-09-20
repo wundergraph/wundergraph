@@ -12,7 +12,7 @@ import {
 	UploadResponse,
 	User,
 } from './types';
-import { serialize } from '../utils/serialize';
+import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 
