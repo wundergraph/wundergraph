@@ -137,8 +137,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 				client.login(authProviderID, redirectURI),
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
-				// refetch user
-				mutate(userSWRKey);
+				// reset user in the cache and don't trigger a refetch
+				mutate(userSWRKey, null, { revalidate: false });
 				return result;
 			},
 		};
