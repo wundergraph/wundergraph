@@ -138,7 +138,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
 				// reset user
-				mutate(userSWRKey, null, { populateCache: true });
+				mutate(userSWRKey, null, { optimisticData: null });
 				return result;
 			},
 		};
