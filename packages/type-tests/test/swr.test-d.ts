@@ -76,6 +76,15 @@ const {
 expectType<Operations['mutations']['CreateUser']['data']>(mutData);
 expectType<GraphQLResponseError | undefined>(mutError);
 
+expectType<Promise<any>>(
+	mutate({
+		revalidate: true,
+		input: {
+			name: 'John Doe',
+		},
+	})
+);
+
 expectType<SWRResponse<User>>(useUser());
 expectType<SWRResponse<User>>(
 	useUser({
