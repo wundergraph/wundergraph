@@ -37,7 +37,9 @@ Now you can use the hooks.
 import { createHooks } from '@wundergraph/swr';
 import { createClient, Operations } from './components/generated/client';
 
-const { useQuery, useMutation, useSubscription } = createHooks<Operations>(createClient());
+const { useQuery, useMutation, useSubscription, useUser, useFileUpload, useAuth } = createHooks<Operations>(
+  createClient()
+);
 
 export const Home: React.FC<{ city: string }> = ({ city }) => {
   const { error, data, isValidating } = useQuery({
@@ -60,6 +62,12 @@ export const Home: React.FC<{ city: string }> = ({ city }) => {
   mutate({
     input: { name },
   });
+
+  const { data, error } = useUser();
+
+  const { upload, data, error } = useFileUpload();
+
+  const { login, logout } = useAuth();
 };
 ```
 
