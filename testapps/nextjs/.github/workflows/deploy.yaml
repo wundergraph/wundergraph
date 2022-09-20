@@ -2,7 +2,7 @@ name: publish
 on:
   push:
     branches:
-      - "main"
+      - 'main'
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -10,8 +10,8 @@ jobs:
       - uses: actions/checkout@v2
       - run: npm install -g @wundergraph/wunderctl@latest
       - run: npm install
-        working-directory: ".wundergraph"
+        working-directory: '.wundergraph'
       - run: npm run deploy
-        working-directory: ".wundergraph"
+        working-directory: '.wundergraph'
         env:
           WUNDERGRAPH_TOKEN: ${{ secrets.WUNDERGRAPH_TOKEN }}

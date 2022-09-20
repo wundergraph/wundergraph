@@ -14,9 +14,9 @@
   "homepage": "https://wundergraph.com",
   "scripts": {
     "build": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' --filter='!./docs-website' build",
-    "build:libs": "pnpm -r run --filter='!./packages/*-testapp' --filter='!./docs-website' build",
+    "build:libs": "pnpm -r run --filter='./packages/*' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
-    "watch:libs": "pnpm -r --parallel run --filter='!./packages/*-testapp' --filter='!./docs-website' build --watch",
+    "watch:libs": "pnpm -r --parallel run --filter='./packages/*' --filter='!./docs-website' build --watch",
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
@@ -30,10 +30,10 @@
     "postinstall": "husky install && pnpm run patch",
     "patch": "patch-package",
     "link-engine": "make build && mv wunderctl ./packages/wunderctl/download",
-    "clean": "del-cli '**/node_modules/' 'packages/**/dist/' 'packages/**/download/' 'packages/**/generated/'"
+    "clean": "del-cli '**/node_modules/' '**/**/dist/' 'packages/**/download/' 'testapps/**/generated/'"
   },
   "resolutions": {
-    "react": "18.2.0"
+    "react": "17.2.0"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -80,8 +80,5 @@
     "prettier": "^2.6.2",
     "release-it": "^15.4.1",
     "del-cli": "^5.0.0"
-  },
-  "resolutions": {
-    "react": "18.2.0"
   }
 }
