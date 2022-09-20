@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.2.0...@wundergraph/swr@0.2.1) (2022-09-20)
+
+### Bug Fixes
+
+* **swr:** reset user cache after logout ([#197](https://github.com/wundergraph/wundergraph/issues/197)) ([48fdaa1](https://github.com/wundergraph/wundergraph/commit/48fdaa1966bf26519026bcfc59e5fc07cf6a9887)) (@StarpTech)
+
 ## [0.2.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.1.1...@wundergraph/swr@0.2.0) (2022-09-20)
 
 ### Features
