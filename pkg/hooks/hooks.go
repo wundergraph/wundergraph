@@ -107,6 +107,7 @@ const (
 	MutatingPreResolve         MiddlewareHook = "mutatingPreResolve"
 	MutatingPostResolve        MiddlewareHook = "mutatingPostResolve"
 	PostAuthentication         MiddlewareHook = "postAuthentication"
+	PostLogout                 MiddlewareHook = "postLogout"
 	MutatingPostAuthentication MiddlewareHook = "mutatingPostAuthentication"
 	RevalidateAuthentication   MiddlewareHook = "revalidateAuthentication"
 
@@ -134,7 +135,7 @@ func NewClient(serverUrl string, logger abstractlogger.Logger) *Client {
 	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
 		logger.Debug("hook request call", abstractlogger.Int("attempt", attempt), abstractlogger.String("url", req.URL.String()))
 	}
-	
+
 	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,

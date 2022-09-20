@@ -241,6 +241,7 @@ type Hooks struct {
 	Log                        abstractlogger.Logger
 	PostAuthentication         bool
 	MutatingPostAuthentication bool
+	PostLogout                 bool
 }
 
 func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
@@ -259,6 +260,24 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 		h.Log.Error("PostAuthentication queries hook", abstractlogger.Error(err))
 		return
 	}
+}
+
+func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
+	if !h.PostLogout || user == nil {
+		return
+	}
+	hookData := []byte(`{}`)
+	if userJson, err := json.Marshal(user); err != nil {
+		h.Log.Error("Could not marshal user", abstractlogger.Error(err))
+		return
+	} else {
+		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
+	}
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData)
+	if err != nil {
+		h.Log.Error("PostLogout queries hook", abstractlogger.Error(err))
+	}
+	return
 }
 
 type MutatingPostAuthenticationResponse struct {
@@ -737,16 +756,18 @@ func (_ *CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type UserLogoutHandler struct {
 	InsecureCookies                  bool
 	OpenIDConnectIssuersToLogoutURLs map[string]string
+	Hooks                            Hooks
 }
 
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resetUserCookies(w, r, !u.InsecureCookies)
-	logoutOpenIDConnectProvider := r.URL.Query().Get("logout_openid_connect_provider") == "true"
-	if !logoutOpenIDConnectProvider {
-		return
-	}
 	user := UserFromContext(r.Context())
 	if user == nil {
+		return
+	}
+	u.Hooks.handlePostLogout(r.Context(), user)
+	logoutOpenIDConnectProvider := r.URL.Query().Get("logout_openid_connect_provider") == "true"
+	if !logoutOpenIDConnectProvider {
 		return
 	}
 	if user.ProviderName != "oidc" {

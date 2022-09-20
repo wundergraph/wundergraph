@@ -176,6 +176,7 @@ export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
 		postAuthentication?: AsyncFn;
 		mutatingPostAuthentication?: AsyncFn;
 		revalidate?: AsyncFn;
+		postLogout?: AsyncFn;
 	};
 	[HooksConfigurationOperationType.Queries]?: {
 		[operationName: string]: OperationHooksConfiguration<AsyncFn>;
@@ -253,6 +254,7 @@ export interface ResolvedWunderGraphConfig {
 			postAuthentication: boolean;
 			mutatingPostAuthentication: boolean;
 			revalidateAuthentication: boolean;
+			postLogout: boolean;
 		};
 		cookieSecurity: {
 			secureCookieHashKey: ConfigurationVariable;
@@ -378,6 +380,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				postAuthentication: config.server?.hooks?.authentication?.postAuthentication !== undefined,
 				mutatingPostAuthentication: config.server?.hooks?.authentication?.mutatingPostAuthentication !== undefined,
 				revalidateAuthentication: config.server?.hooks?.authentication?.revalidate !== undefined,
+				postLogout: config.server?.hooks?.authentication?.postLogout !== undefined,
 			},
 			cookieSecurity: {
 				secureCookieHashKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieHashKey || ''),

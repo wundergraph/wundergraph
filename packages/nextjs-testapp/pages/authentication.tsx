@@ -8,7 +8,7 @@ const JobsPage: NextPage = () => {
 	const [city, setCity] = useState<string>('Berlin');
 	const onClick = () => {
 		if (user === null || user === undefined) {
-			login(AuthProviders.github);
+			login(AuthProviders.auth0);
 		} else {
 			logout();
 		}

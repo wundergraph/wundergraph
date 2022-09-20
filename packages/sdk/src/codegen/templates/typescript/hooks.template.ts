@@ -84,6 +84,7 @@ export interface HooksConfig {
         postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>;
         mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
         revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
+        postLogout?: (hook: AuthenticationHookRequest) => Promise<void>;
     };
 {{#if hasQueries}}
     queries?: {

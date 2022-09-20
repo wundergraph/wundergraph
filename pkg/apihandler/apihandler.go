@@ -1837,16 +1837,19 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
 	}
 
+	authHooks := authentication.Hooks{
+		Log:                        r.log,
+		Client:                     r.middlewareClient,
+		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
+		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
+		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
+	}
+
 	loadUserConfig := authentication.LoadUserConfig{
 		Log:           r.log,
 		Cookie:        cookie,
 		JwksProviders: jwksProviders,
-		Hooks: authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		},
+		Hooks:         authHooks,
 	}
 
 	r.router.Use(authentication.NewLoadUserMw(loadUserConfig))
@@ -1871,14 +1874,15 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 	})
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
-	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, pathPrefix)
+	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks, pathPrefix)
 }
 
-func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, pathPrefix string) {
+func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks, pathPrefix string) {
 
 	router.Path("/user/logout").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.UserLogoutHandler{
 		InsecureCookies:                  r.insecureCookies,
 		OpenIDConnectIssuersToLogoutURLs: r.configureOpenIDConnectIssuerLogoutURLs(),
+		Hooks:                            authHooks,
 	})
 
 	if r.api.AuthenticationConfig == nil || r.api.AuthenticationConfig.CookieBased == nil {

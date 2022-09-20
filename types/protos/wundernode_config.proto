@@ -33,6 +33,7 @@ message ApiAuthenticationHooks {
 	bool postAuthentication = 1;
 	bool mutatingPostAuthentication = 2;
 	bool revalidateAuthentication = 3;
+	bool postLogout = 4;
 }
 
 message CookieBasedAuthentication {
