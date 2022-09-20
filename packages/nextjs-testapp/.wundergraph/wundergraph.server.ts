@@ -28,7 +28,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 					},
 				};
 			},
-			postLogout: async (hook) => {},
+			postLogout: async (hook) => {
+				console.log('postLogout', JSON.stringify(hook.user));
+			},
 		},
 		queries: {
 			Hello: {
