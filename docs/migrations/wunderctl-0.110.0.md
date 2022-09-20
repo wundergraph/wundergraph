@@ -1,4 +1,8 @@
-# Migration steps to 0.110.0
+# Migration steps
+
+| Version range | Migration complexity | Info                                                        |
+| ------------- | -------------------- | ----------------------------------------------------------- |
+| From 0.110.0  | low                  | (CLI flags) Changing the way how server settings are passed |
 
 In this cli version a couple of flags were removed and a new commands were added.
 

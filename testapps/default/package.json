@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/wundergraph-application",
+  "name": "@test/default",
   "version": "0.1.0",
   "repository": {
     "type": "git",
