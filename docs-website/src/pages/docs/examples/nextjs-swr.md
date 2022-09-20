@@ -171,7 +171,12 @@ const Home: NextPage = () => {
       files: [new File([''], 'test.txt')],
     })
   }
-  return <button onClick={onUpload}>Upload</button>
+  return (
+    <div>
+      {JSON.stringify(data)}
+      <button onClick={onUpload}>Upload</button>
+    </div>
+  )
 }
 export default Home
 ```
