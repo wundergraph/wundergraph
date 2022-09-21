@@ -807,6 +807,10 @@ const navigation = [
 				href: '/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
 			},
 			{
+				title: 'postLogout hook',
+				href: '/docs/wundergraph-server-ts-reference/post-logout-hook',
+			},
+			{
 				title: 'Custom GraphQL Servers',
 				href: '/docs/wundergraph-server-ts-reference/custom-graphql-servers',
 			},
