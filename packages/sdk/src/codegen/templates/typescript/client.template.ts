@@ -49,7 +49,9 @@ const operationMetadata: OperationMetadata = {
 {{/each}}
 }
 
-export const createClient = (config?: Pick<ClientConfig, 'baseURL'>) => {
+type PrivateConfigProperties = 'applicationHash' | 'applicationPath' | 'sdkVersion' | 'operationMetadata'
+
+export const createClient = (config?: Omit<ClientConfig, PrivateConfigProperties>) => {
     return new Client({
         ...defaultClientConfig,
         ...config,
@@ -99,5 +101,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Provider}}, keyof typeof S3Provider{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Provider}}, keyof typeof S3Provider{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;

@@ -6,7 +6,6 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
-import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -16,7 +15,7 @@ const spaceX = introspect.graphql({
 });
 
 const myApplication = new Application({
-	name: 'app',
+	name: 'api',
 	apis: [spaceX],
 });
 
@@ -33,12 +32,12 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://localhost:3000'] : ['http://localhost:3000'],
+		allowedOrigins: ['http://localhost:3003'],
 	},
 	authentication: {
 		cookieBased: {
 			providers: [authProviders.demo()],
-			authorizedRedirectUris: ['http://localhost:3000'],
+			authorizedRedirectUriRegexes: ['http://localhost:3000*'],
 		},
 	},
 	security: {
