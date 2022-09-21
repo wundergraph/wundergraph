@@ -39,72 +39,105 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	};
 
 	// authentication
-	fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
-		reply.type('application/json').code(200);
-		if (config.authentication?.postAuthentication !== undefined && request.ctx.user !== undefined) {
-			try {
-				await config.authentication.postAuthentication(request.ctx);
-			} catch (err) {
-				request.log.error(err);
-				reply.code(500);
-				return { hook: 'postAuthentication', error: err };
+	if (config.authentication?.postAuthentication) {
+		fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
+			reply.type('application/json');
+			if (request.ctx.user === undefined) {
+				reply.code(400);
+				request.log.error("User context doesn't exist");
+				return { hook: 'postAuthentication', error: "User context doesn't exist" };
 			}
-		}
-		return {
-			hook: 'postAuthentication',
-		};
-	});
-	fastify.post('/authentication/mutatingPostAuthentication', async (request, reply) => {
-		reply.type('application/json').code(200);
-		if (config.authentication?.mutatingPostAuthentication !== undefined && request.ctx.user !== undefined) {
-			try {
-				const out = await config.authentication.mutatingPostAuthentication(request.ctx);
-				return {
-					hook: 'mutatingPostAuthentication',
-					response: out,
-					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-				};
-			} catch (err) {
-				request.log.error(err);
-				reply.code(500);
-				return { hook: 'mutatingPostAuthentication', error: err };
+			reply.code(200);
+			if (config.authentication?.postAuthentication !== undefined) {
+				try {
+					await config.authentication.postAuthentication(request.ctx);
+				} catch (err) {
+					request.log.error(err);
+					reply.code(500);
+					return { hook: 'postAuthentication', error: err };
+				}
 			}
-		}
-	});
-	fastify.post<{ Body: {} }>('/authentication/revalidateAuthentication', async (request, reply) => {
-		reply.type('application/json').code(200);
-		if (config.authentication?.revalidate !== undefined && request.ctx.user !== undefined) {
-			try {
-				const out = await config.authentication.revalidate(request.ctx);
-				return {
-					hook: 'revalidateAuthentication',
-					response: out,
-					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-				};
-			} catch (err) {
-				request.log.error(err);
-				reply.code(500);
-				return { hook: 'revalidateAuthentication', error: err };
+			return {
+				hook: 'postAuthentication',
+			};
+		});
+	}
+
+	if (config.authentication?.mutatingPostAuthentication) {
+		fastify.post('/authentication/mutatingPostAuthentication', async (request, reply) => {
+			reply.type('application/json');
+			if (request.ctx.user === undefined) {
+				reply.code(400);
+				request.log.error("User context doesn't exist");
+				return { hook: 'mutatingPostAuthentication', error: "User context doesn't exist" };
 			}
-		}
-	});
-	fastify.post('/authentication/postLogout', async (request, reply) => {
-		reply.type('application/json').code(200);
-		if (config.authentication?.postLogout !== undefined && request.ctx.user !== undefined) {
-			try {
-				const out = await config.authentication.postLogout(request.ctx);
-				return {
-					hook: 'mutatingPostAuthentication',
-					response: out,
-					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
-				};
-			} catch (err) {
-				request.log.error(err);
-				reply.code(500);
-				return { hook: 'mutatingPostAuthentication', error: err };
+			reply.code(200);
+			if (config.authentication?.mutatingPostAuthentication !== undefined) {
+				try {
+					const out = await config.authentication.mutatingPostAuthentication(request.ctx);
+					return {
+						hook: 'mutatingPostAuthentication',
+						response: out,
+						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+					};
+				} catch (err) {
+					request.log.error(err);
+					reply.code(500);
+					return { hook: 'mutatingPostAuthentication', error: err };
+				}
 			}
-		}
-	});
+		});
+	}
+
+	if (config.authentication?.revalidate) {
+		fastify.post<{ Body: {} }>('/authentication/revalidateAuthentication', async (request, reply) => {
+			reply.type('application/json');
+			if (request.ctx.user === undefined) {
+				reply.code(400);
+				request.log.error("User context doesn't exist");
+				return { hook: 'revalidateAuthentication', error: "User context doesn't exist" };
+			}
+			if (config.authentication?.revalidate !== undefined) {
+				try {
+					const out = await config.authentication.revalidate(request.ctx);
+					return {
+						hook: 'revalidateAuthentication',
+						response: out,
+						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+					};
+				} catch (err) {
+					request.log.error(err);
+					reply.code(500);
+					return { hook: 'revalidateAuthentication', error: err };
+				}
+			}
+		});
+	}
+
+	if (config.authentication?.postLogout) {
+		fastify.post('/authentication/postLogout', async (request, reply) => {
+			reply.type('application/json');
+			if (request.ctx.user === undefined) {
+				reply.code(400);
+				request.log.error("User context doesn't exist");
+				return { hook: 'postLogout', error: "User context doesn't exist" };
+			}
+			if (config.authentication?.postLogout !== undefined) {
+				try {
+					const out = await config.authentication.postLogout(request.ctx);
+					return {
+						hook: 'postLogout',
+						response: out,
+						setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+					};
+				} catch (err) {
+					request.log.error(err);
+					reply.code(500);
+					return { hook: 'postLogout', error: err };
+				}
+			}
+		});
+	}
 
 	// global hooks
 
