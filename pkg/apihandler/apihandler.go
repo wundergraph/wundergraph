@@ -206,10 +206,18 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	r.router.Use(func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
 			if r.enableDebugMode {
-				requestDump, err := httputil.DumpRequest(request, true)
+				// If the request looks like a file upload, avoid printing the whole
+				// encoded file as a debug message.
+				// File upload is handled in packages/sdk/client.ts, make sure to keep both in sync.
+				isMultipart := strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/")
+				suffix := ""
+				if isMultipart {
+					suffix = "<multipart content omitted>"
+				}
+				requestDump, err := httputil.DumpRequest(request, !isMultipart)
 				if err == nil {
-					fmt.Printf("\n\n--- ClientRequest start ---\n\n%s\n\n\n\n--- ClientRequest end ---\n\n",
-						string(requestDump),
+					fmt.Printf("\n\n--- ClientRequest start ---\n\n%s%s\n\n\n\n--- ClientRequest end ---\n\n",
+						string(requestDump), suffix,
 					)
 				}
 			}

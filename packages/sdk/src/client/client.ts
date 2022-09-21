@@ -307,6 +307,9 @@ export class Client {
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
 	public async uploadFiles(config: UploadRequestOptions): Promise<UploadResponse> {
+		// XXX: apihandler.go uses the Content-Type header to detect file uploads
+		// and omit them from the logging messages. Any changes to the upload
+		// mechanism should also update apihandler.go accordingly.
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
 			if (file instanceof Blob) {
