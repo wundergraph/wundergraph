@@ -1,6 +1,7 @@
 package apihandler
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,13 +14,13 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
+	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/apicache"
-	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
 type FakeResolver struct {
@@ -263,4 +264,40 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Body().Empty()
 
 	assert.Equal(t, 2, resolver.invocations)
+}
+
+func TestLogMiddleware_Debug(t *testing.T) {
+	const (
+		testFileContents     = "this_should_be_omitted"
+		testFormContents     = "this_should_be_logged"
+		responseBodyContents = "hello"
+	)
+	var buf bytes.Buffer
+	middleware := logRequestMiddleware(&buf)
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, responseBodyContents)
+	})
+
+	srv := httptest.NewServer(middleware(handler))
+	defer srv.Close()
+
+	e := httpexpect.WithConfig(httpexpect.Config{
+		BaseURL:  srv.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+	})
+
+	t.Run("Should not log file contents", func(t *testing.T) {
+		buf.Reset()
+		res := e.POST("/").WithMultipart().WithFileBytes("file", "file.txt", []byte(testFileContents)).Expect()
+		res.Body().Contains(responseBodyContents)
+		assert.NotContains(t, buf.String(), testFileContents, "Should not contain the file")
+	})
+	t.Run("Should log form values", func(t *testing.T) {
+		buf.Reset()
+		res := e.POST("/").WithForm(map[string]string{"value": testFormContents}).Expect()
+		res.Body().Contains(responseBodyContents)
+		assert.Contains(t, buf.String(), testFormContents, "Should contain form values")
+
+	})
 }
