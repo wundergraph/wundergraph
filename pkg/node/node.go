@@ -14,7 +14,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
-	"github.com/libp2p/go-reuseport"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
 	"golang.org/x/time/rate"
@@ -203,7 +202,6 @@ func (n *Node) Close() error {
 
 func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
 	cfg := net.ListenConfig{
-		Control:   reuseport.Control,
 		KeepAlive: 90 * time.Second,
 	}
 
@@ -416,6 +414,10 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 			}
 		}(listener)
 	}
+
+	n.log.Debug("node url",
+		abstractlogger.String("nodeUrl", nodeConfig.Api.Options.NodeUrl),
+	)
 
 	return nil
 }

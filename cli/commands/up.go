@@ -44,7 +44,13 @@ var upCmd = &cobra.Command{
 		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
 
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
+			syscall.SIGHUP,  // process is detached from terminal
+			syscall.SIGTERM, // default for kill
+			syscall.SIGKILL,
+			syscall.SIGQUIT, // ctrl + \
+			syscall.SIGINT,  // ctrl+c
+		)
 		defer stop()
 
 		log.Info("Starting WunderNode",
@@ -74,6 +80,10 @@ var upCmd = &cobra.Command{
 		configOutFile := path.Join("generated", "bundle", "config.js")
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+
+		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
+			helpers.KillExistingHooksProcess(port, log)
+		}
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -274,7 +284,7 @@ var upCmd = &cobra.Command{
 
 		<-ctx.Done()
 		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
-		
+
 		_ = n.Shutdown(context.Background())
 
 		log.Info("WunderNode shutdown complete")

@@ -140,8 +140,6 @@ func init() {
 	viper.SetDefault("OAUTH_BASE_URL", "https://accounts.wundergraph.com/auth/realms/master")
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
-	log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
-
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "sets the log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
