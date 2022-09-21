@@ -6,7 +6,7 @@ import { createClient, AuthProviderId } from '../components/generated/client';
 
 const Authentication = () => {
 	const { login, logout } = useAuth();
-	const { data } = useUser({});
+	const { data } = useUser();
 
 	return (
 		<div>
