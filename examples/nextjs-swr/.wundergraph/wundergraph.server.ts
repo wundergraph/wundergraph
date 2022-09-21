@@ -1,4 +1,3 @@
-import { GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';

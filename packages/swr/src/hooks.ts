@@ -133,7 +133,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 
 	const useAuth = () => {
 		return {
-			login: (authProviderID: Operations['s3Provider'], redirectURI?: string | undefined) =>
+			login: (authProviderID: Operations['authProvider'], redirectURI?: string | undefined) =>
 				client.login(authProviderID, redirectURI),
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
