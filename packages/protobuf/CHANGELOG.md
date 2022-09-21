@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.95.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.94.0...@wundergraph/protobuf@0.95.0) (2022-09-21)
+
+### Features
+
+* add post logout hook ([#196](https://github.com/wundergraph/wundergraph/issues/196)) ([6870130](https://github.com/wundergraph/wundergraph/commit/6870130b0c4e6fc269d81160994384c1d1cf6e59)) (@jensneuse)
+
 ## [0.94.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.93.0...@wundergraph/protobuf@0.94.0) (2022-09-19)
 
 ### Features
