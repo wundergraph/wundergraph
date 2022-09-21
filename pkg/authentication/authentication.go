@@ -766,7 +766,7 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.Hooks.handlePostLogout(r.Context(), user)
-	logoutOpenIDConnectProvider := r.URL.Query().Get("logout_openid_connect_provider") == "true"
+	logoutOpenIDConnectProvider := r.URL.Query().Has("logout_openid_connect_provider")
 	if !logoutOpenIDConnectProvider {
 		return
 	}
@@ -795,10 +795,8 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	res, err := client.Do(req)
-	if err != nil || res.StatusCode != http.StatusOK {
-		return
-	}
+	_, _ = client.Do(req)
+	// we can safely ignore the outcome
 }
 
 type CSRFErrorHandler struct {
