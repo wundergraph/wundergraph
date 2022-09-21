@@ -306,6 +306,7 @@ func shouldLogRequestBody(request *http.Request) bool {
 	return !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/")
 }
 
+// returns a middleware that logs all requests to the given io.Writer
 func logRequestMiddleware(logger io.Writer) mux.MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
