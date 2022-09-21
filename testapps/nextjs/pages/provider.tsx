@@ -5,10 +5,11 @@ import { useState } from 'react';
 import { createHooks } from '@wundergraph/swr';
 
 import { createClient, Operations } from '../components/generated/client';
+import { withWunderGraph } from '../components/generated/nextjs';
 
 const client = createClient();
 
-const { useQuery, useMutation, useUser } = createHooks<Operations>(client);
+const { useQuery, useMutation } = createHooks<Operations>(client);
 
 const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 	const liveWeather = useQuery({
@@ -66,9 +67,7 @@ const NameForm = () => {
 	);
 };
 
-const SWR = () => {
-	const { data, error } = useUser();
-
+const SWRWithProvider = () => {
 	return (
 		<div className={styles.container}>
 			<Head>
@@ -84,11 +83,6 @@ const SWR = () => {
 				</h2>
 				<p className={styles.description}>Take a look at the examples below...</p>
 			</main>
-
-			<div>
-				<h2>User</h2>
-				{JSON.stringify(data)}
-			</div>
 
 			<div>
 				<LiveWeather city="Berlin" />
@@ -114,4 +108,6 @@ const SWR = () => {
 	);
 };
 
-export default SWR;
+export default withWunderGraph(SWRWithProvider, {
+	client,
+});

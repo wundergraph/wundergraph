@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.111.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.110.0...@wundergraph/sdk@0.111.0) (2022-09-20)
+
+### Features
+
+* add swr hooks for auth and file upload ([#195](https://github.com/wundergraph/wundergraph/issues/195)) ([a0b1bae](https://github.com/wundergraph/wundergraph/commit/a0b1bae6a18e30fcefc35bdde2f72326f3de1392)) (@StarpTech)
+
 ## [0.110.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.109.0...@wundergraph/sdk@0.110.0) (2022-09-19)
 
 ### Features

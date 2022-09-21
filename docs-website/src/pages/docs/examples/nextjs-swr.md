@@ -132,3 +132,50 @@ const Home: NextPage = () => {
 }
 export default Home
 ```
+
+## Authentication from Next.js
+
+> Note: Logout() will trigger a refetch of the user.
+
+```typescript
+import { NextPage } from 'next'
+import { useAuth, useUser } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { login, logout } = useAuth()
+  const { data, error } = useUser()
+  // Conditional fetching
+  // const { data, error } = useUser({ enabled: true });
+  return (
+    <div>
+      {JSON.stringify(data)}
+      <button onClick={() => login(AuthProviderId.github)}>Login</button>
+      <button onClick={() => logout()}>Login</button>
+    </div>
+  )
+}
+export default Home
+```
+
+## File upload from Next.js
+
+```typescript
+import { NextPage } from 'next'
+import { useFileUpload } from '../lib/wundergraph'
+
+const Home: NextPage = () => {
+  const { upload, data, error } = useFileUpload()
+  const onUpload = () => {
+    upload({
+      files: [new File([''], 'test.txt')],
+    })
+  }
+  return (
+    <div>
+      {JSON.stringify(data)}
+      <button onClick={onUpload}>Upload</button>
+    </div>
+  )
+}
+export default Home
+```

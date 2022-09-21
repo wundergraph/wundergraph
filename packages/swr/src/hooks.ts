@@ -2,13 +2,17 @@ import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 's
 import {
 	OperationRequestOptions,
 	SubscriptionRequestOptions,
+	FetchUserRequestOptions,
 	GraphQLResponseError,
 	ClientResponse,
 	OperationsDefinition,
+	UploadRequestOptions,
+	LogoutOptions,
 	Client,
 } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Error } from '@wundergraph/sdk';
 
 export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration & {
 	operationName: OperationName;
@@ -29,6 +33,8 @@ export type UseMutationOptions<OperationName> = SWRConfiguration & {
 };
 
 export type MutateOptions<Input, Data> = MutatorOptions<Data> & { input?: Input };
+
+export const userSWRKey = 'wg_user';
 
 export const createHooks = <Operations extends OperationsDefinition>(client: Client) => {
 	const queryFetcher = async <
@@ -125,6 +131,47 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		};
 	};
 
+	const useAuth = () => {
+		return {
+			login: (authProviderID: Operations['s3Provider'], redirectURI?: string | undefined) =>
+				client.login(authProviderID, redirectURI),
+			logout: async (options?: LogoutOptions | undefined) => {
+				const result = await client.logout(options);
+				// reset user in the cache and don't trigger a refetch
+				mutate(userSWRKey, null, { revalidate: false });
+				return result;
+			},
+		};
+	};
+
+	const useUser = (options?: FetchUserRequestOptions & { enabled?: boolean }, swrOptions?: SWRConfiguration) => {
+		const { enabled = true } = options || {};
+		return useSWR<Operations['user'], GraphQLResponseError>(
+			enabled ? userSWRKey : null,
+			() => client.fetchUser(options),
+			swrOptions
+		);
+	};
+
+	const useFileUpload = () => {
+		const [uploadResult, setUploadResult] = useState<{ data?: string[]; error?: Error }>(() => ({
+			data: undefined,
+			error: undefined,
+		}));
+		return {
+			data: uploadResult,
+			upload: async (options: UploadRequestOptions): Promise<string[] | undefined> => {
+				try {
+					const resp = await client.uploadFiles(options);
+					setUploadResult({ data: resp.fileKeys, error: undefined });
+					return resp.fileKeys;
+				} catch (err: any) {
+					setUploadResult({ data: undefined, error: err });
+				}
+			},
+		};
+	};
+
 	/**
 	 * This is will subscribe to an operation and mutate the SWR state on result.
 	 *
@@ -183,6 +230,9 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	};
 
 	return {
+		useAuth,
+		useFileUpload,
+		useUser,
 		useMutation,
 		useQuery,
 		useSubscription,

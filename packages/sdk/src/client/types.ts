@@ -24,8 +24,12 @@ export interface ClientOperation {
 export interface OperationsDefinition<
 	Queries extends OperationDefinition = OperationDefinition,
 	Mutations extends OperationDefinition = OperationDefinition,
-	Subscriptions extends OperationDefinition = OperationDefinition
+	Subscriptions extends OperationDefinition = OperationDefinition,
+	UserRole extends string = string,
+	S3Provider extends string = string
 > {
+	user: User<UserRole>;
+	s3Provider: S3Provider;
 	queries: Queries;
 	mutations: Mutations;
 	subscriptions: Subscriptions;

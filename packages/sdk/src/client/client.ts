@@ -12,7 +12,7 @@ import {
 	UploadResponse,
 	User,
 } from './types';
-import { serialize } from '../utils/serialize';
+import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 
@@ -49,7 +49,9 @@ export class Client {
 		// stable stringify
 		queryParams.sort();
 
-		return url + '?' + queryParams.toString();
+		const queryString = queryParams.toString();
+
+		return url + (queryString ? `?${queryString}` : '');
 	}
 
 	private async fetchJson(url: string, init: RequestInit = {}) {
