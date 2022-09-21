@@ -1,21 +1,13 @@
 import { InferGetServerSidePropsType, NextPage } from 'next';
-import { client, useQuery } from '../lib/wundergraph';
-import { unstable_serialize, SWRConfig } from 'swr';
-import { OperationRequestOptions } from '@wundergraph/sdk/client';
-import { DragonsResponseData } from '../.wundergraph/generated/models';
+import { useAuth, useUser } from '../lib/wundergraph';
+import { SWRConfig } from 'swr';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { createClient, AuthProviderId } from '../components/generated/client';
 
-const Dragons = () => {
-	const router = useRouter();
-	const user = useQuery({
-		operationName: 'Dragons',
-		enabled: true,
-	});
-	const refresh = () => {
-		// Update
-		user.mutate();
-	};
+const Authentication = () => {
+	const { login, logout } = useAuth();
+	const { data } = useUser();
+
 	return (
 		<div>
 			<div className="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32">
@@ -50,7 +42,7 @@ const Dragons = () => {
 					</Link>
 				</div>
 				<h1 className="text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-					WunderGraph & SWR (SSR)
+					WunderGraph Authentication & SWR
 				</h1>
 				<p className="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400">
 					Use{' '}
@@ -66,14 +58,15 @@ const Dragons = () => {
 				<div className="w-full max-w-xl rounded-2xl bg-blue-50 px-20 py-14">
 					<div className="mx-auto flex max-w-sm flex-col items-center">
 						<p className="mt-3 mb-8 text-center text-black/80">
-							This is the server-rendered result of your{' '}
-							<code className="font-mono font-medium text-amber-500 font-bold">Dragons</code> operation.
+							This is the user data of your logged in{' '}
+							<code className="font-mono font-medium text-amber-500 font-bold">User</code>. The implementation supports{' '}
+							<b>SSR</b>.
 						</p>
-						<code className="p-3">{JSON.stringify(user, null, 2)}</code>
+						<code className="p-3">{data ? JSON.stringify(data, null, 2) : 'Not logged in'}</code>
 					</div>
-					<div className="flex justify-center space-x-2 mt-8">
+					<div className="flex justify-center mt-8 space-x-2">
 						<button
-							onClick={refresh}
+							onClick={() => login(AuthProviderId.github, 'http://localhost:3003/authentication')}
 							className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
 						>
 							<svg
@@ -86,12 +79,15 @@ const Dragons = () => {
 								width="1em"
 								xmlns="http://www.w3.org/2000/svg"
 							>
-								<path d="M10 11H7.101l.001-.009a4.956 4.956 0 0 1 .752-1.787 5.054 5.054 0 0 1 2.2-1.811c.302-.128.617-.226.938-.291a5.078 5.078 0 0 1 2.018 0 4.978 4.978 0 0 1 2.525 1.361l1.416-1.412a7.036 7.036 0 0 0-2.224-1.501 6.921 6.921 0 0 0-1.315-.408 7.079 7.079 0 0 0-2.819 0 6.94 6.94 0 0 0-1.316.409 7.04 7.04 0 0 0-3.08 2.534 6.978 6.978 0 0 0-1.054 2.505c-.028.135-.043.273-.063.41H2l4 4 4-4zm4 2h2.899l-.001.008a4.976 4.976 0 0 1-2.103 3.138 4.943 4.943 0 0 1-1.787.752 5.073 5.073 0 0 1-2.017 0 4.956 4.956 0 0 1-1.787-.752 5.072 5.072 0 0 1-.74-.61L7.05 16.95a7.032 7.032 0 0 0 2.225 1.5c.424.18.867.317 1.315.408a7.07 7.07 0 0 0 2.818 0 7.031 7.031 0 0 0 4.395-2.945 6.974 6.974 0 0 0 1.053-2.503c.027-.135.043-.273.063-.41H22l-4-4-4 4z"></path>
+								<g>
+									<path fill="none" d="M0 0h24v24H0z"></path>
+									<path d="M10 11V8l5 4-5 4v-3H1v-2h9zm-7.542 4h2.124A8.003 8.003 0 0 0 20 12 8 8 0 0 0 4.582 9H2.458C3.732 4.943 7.522 2 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10c-4.478 0-8.268-2.943-9.542-7z"></path>
+								</g>
 							</svg>
-							Refresh
+							Login with GitHub
 						</button>
 						<button
-							onClick={() => router.push('/authentication')}
+							onClick={() => logout()}
 							className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
 						>
 							<svg
@@ -104,9 +100,12 @@ const Dragons = () => {
 								width="1em"
 								xmlns="http://www.w3.org/2000/svg"
 							>
-								<polyline fill="none" stroke="currentColor" strokeWidth="2" points="9 6 15 12 9 18"></polyline>
+								<g>
+									<path fill="none" d="M0 0h24v24H0z"></path>
+									<path d="M5 11h8v2H5v3l-5-4 5-4v3zm-1 7h2.708a8 8 0 1 0 0-12H4A9.985 9.985 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10a9.985 9.985 0 0 1-8-4z"></path>
+								</g>
 							</svg>
-							See Auth example
+							Logout
 						</button>
 					</div>
 				</div>
@@ -128,26 +127,29 @@ const Dragons = () => {
 	);
 };
 
-export const getServerSideProps = async () => {
-	const { data, error } = await client.query<OperationRequestOptions<'Dragons'>, DragonsResponseData>({
-		operationName: 'Dragons',
+export const getServerSideProps = async ({ req }) => {
+	const cookieHeader = req.headers.cookie;
+	const client = createClient();
+	client.setExtraHeaders({
+		cookie: cookieHeader,
 	});
 
-	if (error) {
-		throw error;
-	}
+	try {
+		const user = await client.fetchUser();
 
-	// Computes the same key that swr is using when using the useQuery hook
-	// If you pass "input" you also need to pass it here.
-	const key = unstable_serialize({ operationName: 'Dragons' });
-
-	return {
-		props: {
-			fallback: {
-				[key]: data,
+		return {
+			props: {
+				fallback: {
+					// this key is important to tell SWR that this is a fallback data for the "useUser" hook
+					['wg_user']: user,
+				},
 			},
-		},
-	};
+		};
+	} catch (e) {
+		return {
+			props: {},
+		};
+	}
 };
 
 const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({ fallback }) => {
@@ -155,7 +157,7 @@ const Home: NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = (
 		// Pass the fallback data to the SWR config
 		// Here you can also configure other global options like errorRetryCount ...
 		<SWRConfig value={{ fallback }}>
-			<Dragons />
+			<Authentication />
 		</SWRConfig>
 	);
 };
