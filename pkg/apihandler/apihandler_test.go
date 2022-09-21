@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -288,14 +287,17 @@ func TestLogMiddleware_Debug(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	e.POST("/").WithMultipart().WithFileBytes("file", "file.txt", []byte(testFileContents)).Expect().Body().Contains(responseBodyContents)
-	if strings.Contains(buf.String(), testFileContents) {
-		t.Error("log message contains file")
-	}
-	buf.Reset()
+	t.Run("Should not log file contents", func(t *testing.T) {
+		buf.Reset()
+		res := e.POST("/").WithMultipart().WithFileBytes("file", "file.txt", []byte(testFileContents)).Expect()
+		res.Body().Contains(responseBodyContents)
+		assert.NotContains(t, buf.String(), testFileContents, "Should not contain the file")
+	})
+	t.Run("Should log form values", func(t *testing.T) {
+		buf.Reset()
+		res := e.POST("/").WithForm(map[string]string{"value": testFormContents}).Expect()
+		res.Body().Contains(responseBodyContents)
+		assert.Contains(t, buf.String(), testFormContents, "Should contain form values")
 
-	e.POST("/").WithForm(map[string]string{"value": testFormContents}).Expect().Body().Contains(responseBodyContents)
-	if !strings.Contains(buf.String(), testFormContents) {
-		t.Error("log message does not contain form field")
-	}
+	})
 }
