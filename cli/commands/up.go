@@ -81,6 +81,10 @@ var upCmd = &cobra.Command{
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 
+		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
+			helpers.KillExistingHooksProcess(port, log)
+		}
+
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
