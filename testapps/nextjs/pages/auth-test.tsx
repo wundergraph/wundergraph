@@ -15,7 +15,7 @@ const Page = () => {
 			<br />
 			<button onClick={() => login(AuthProvider.auth0)}>Login</button>
 			<br />
-			<button onClick={() => logout()}>Logout</button>
+			<button onClick={() => logout({ logout_openid_connect_provider: true })}>Logout</button>
 			<br />
 			<p>{JSON.stringify(weather)}</p>
 		</div>

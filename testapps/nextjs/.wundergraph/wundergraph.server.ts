@@ -19,6 +19,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
 		authentication: {
 			mutatingPostAuthentication: async (hook) => {
+				console.log('mutatingPostAuthentication', JSON.stringify(hook.user));
 				return {
 					status: 'ok',
 					user: {
@@ -26,6 +27,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 						roles: ['user', 'admin'],
 					},
 				};
+			},
+			postLogout: async (hook) => {
+				console.log('postLogout', JSON.stringify(hook.user));
 			},
 		},
 		queries: {

@@ -88,6 +88,23 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			}
 		}
 	});
+	fastify.post('/authentication/postLogout', async (request, reply) => {
+		reply.type('application/json').code(200);
+		if (config.authentication?.postLogout !== undefined && request.ctx.user !== undefined) {
+			try {
+				const out = await config.authentication.postLogout(request.ctx);
+				return {
+					hook: 'mutatingPostAuthentication',
+					response: out,
+					setClientRequestHeaders: headersToObject(request.ctx.clientRequest.headers),
+				};
+			} catch (err) {
+				request.log.error(err);
+				reply.code(500);
+				return { hook: 'mutatingPostAuthentication', error: err };
+			}
+		}
+	});
 
 	// global hooks
 

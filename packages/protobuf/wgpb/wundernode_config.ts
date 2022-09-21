@@ -580,6 +580,7 @@ export interface ApiAuthenticationHooks {
 	postAuthentication: boolean;
 	mutatingPostAuthentication: boolean;
 	revalidateAuthentication: boolean;
+	postLogout: boolean;
 }
 
 export interface CookieBasedAuthentication {
@@ -1137,7 +1138,12 @@ export const JwksAuthProvider = {
 };
 
 function createBaseApiAuthenticationHooks(): ApiAuthenticationHooks {
-	return { postAuthentication: false, mutatingPostAuthentication: false, revalidateAuthentication: false };
+	return {
+		postAuthentication: false,
+		mutatingPostAuthentication: false,
+		revalidateAuthentication: false,
+		postLogout: false,
+	};
 }
 
 export const ApiAuthenticationHooks = {
@@ -1150,6 +1156,7 @@ export const ApiAuthenticationHooks = {
 			revalidateAuthentication: isSet(object.revalidateAuthentication)
 				? Boolean(object.revalidateAuthentication)
 				: false,
+			postLogout: isSet(object.postLogout) ? Boolean(object.postLogout) : false,
 		};
 	},
 
@@ -1159,6 +1166,7 @@ export const ApiAuthenticationHooks = {
 		message.mutatingPostAuthentication !== undefined &&
 			(obj.mutatingPostAuthentication = message.mutatingPostAuthentication);
 		message.revalidateAuthentication !== undefined && (obj.revalidateAuthentication = message.revalidateAuthentication);
+		message.postLogout !== undefined && (obj.postLogout = message.postLogout);
 		return obj;
 	},
 
@@ -1167,6 +1175,7 @@ export const ApiAuthenticationHooks = {
 		message.postAuthentication = object.postAuthentication ?? false;
 		message.mutatingPostAuthentication = object.mutatingPostAuthentication ?? false;
 		message.revalidateAuthentication = object.revalidateAuthentication ?? false;
+		message.postLogout = object.postLogout ?? false;
 		return message;
 	},
 };

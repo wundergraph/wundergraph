@@ -461,6 +461,7 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						postAuthentication: false,
 						mutatingPostAuthentication: false,
 						revalidateAuthentication: false,
+						postLogout: false,
 					},
 					tokenBased: [],
 					cookieSecurity: {
