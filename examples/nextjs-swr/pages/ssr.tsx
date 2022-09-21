@@ -139,6 +139,7 @@ export const getServerSideProps = async () => {
 
 	// Computes the same key that swr is using when using the useQuery hook
 	// If you pass "input" you also need to pass it here.
+	// See https://swr.vercel.app/docs/with-nextjs#pre-rendering-with-default-data
 	const key = unstable_serialize({ operationName: 'Dragons' });
 
 	return {
