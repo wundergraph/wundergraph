@@ -297,6 +297,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			log:           r.log,
 			html:          graphiql.GetGraphiqlPlaygroundHTML(),
 			apiPathPrefix: api.PathPrefix,
+			nodeUrl:       api.Options.NodeUrl,
 		}
 		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
@@ -632,17 +633,12 @@ func (r *Builder) configureCache(api *Api) (err error) {
 type GraphQLPlaygroundHandler struct {
 	log           abstractlogger.Logger
 	html          string
+	nodeUrl       string
 	apiPathPrefix string
 }
 
 func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	protocol := "http"
-	if r.TLS != nil {
-		protocol = "https"
-	}
-
-	apiURL := protocol + "://" + path.Join(r.Host, h.apiPathPrefix)
+	apiURL := fmt.Sprintf("%s/%s", strings.TrimSuffix(h.nodeUrl, "/"), strings.TrimPrefix(h.apiPathPrefix, "/"))
 
 	tpl := strings.Replace(h.html, "{{apiURL}}", apiURL, 1)
 	resp := []byte(tpl)

@@ -15,6 +15,7 @@ type Logging struct {
 
 type Options struct {
 	ServerUrl string
+	NodeUrl   string
 	Listener  *Listener
 	Logging   Logging
 }
