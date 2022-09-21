@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.113.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.112.0...@wundergraph/sdk@0.113.0) (2022-09-21)
+
+### Features
+
+* add auth example for swr ([#200](https://github.com/wundergraph/wundergraph/issues/200)) ([7a5f34e](https://github.com/wundergraph/wundergraph/commit/7a5f34e8c80141f400a9b6ed195d04a22a86c92b)) (@StarpTech)
+
 ## [0.112.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.111.0...@wundergraph/sdk@0.112.0) (2022-09-21)
 
 ### Features
