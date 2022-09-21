@@ -303,7 +303,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 func shouldLogRequestBody(request *http.Request) bool {
 	// If the request looks like a file upload, avoid printing the whole
 	// encoded file as a debug message.
-	return !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/")
+	return !strings.HasPrefix(request.Header.Get("Content-Type"), "multipart/form-data")
 }
 
 // returns a middleware that logs all requests to the given io.Writer
