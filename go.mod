@@ -30,7 +30,6 @@ require (
 	github.com/jensneuse/goprisma v0.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/klauspost/compress v1.14.4
-	github.com/libp2p/go-reuseport v0.0.2
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pires/go-proxyproto v0.4.2
