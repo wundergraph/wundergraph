@@ -18,6 +18,7 @@ import {
 	WunderGraphUser,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
+	FastifyRequestBody,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
 import { PinoLogLevel, resolveServerLogLevel } from './logger';
@@ -114,6 +115,7 @@ const _configureWunderGraphServer = <
 			config: WG_CONFIG,
 			serverConfig,
 			gracefulShutdown: process.env.NODE_ENV === 'production',
+			clientFactory,
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
 			process.exit(1);
@@ -145,6 +147,7 @@ export const createServer = async ({
 	serverConfig,
 	config,
 	gracefulShutdown,
+	clientFactory,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level) {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
@@ -184,22 +187,19 @@ export const createServer = async ({
 		 * Calls on every request. We use it to do pre-init stuff e.g. create the request context and internalClient
 		 * Registering this handler will only affect child plugins
 		 */
-		fastify.addHook<{ Body: { __wg: { user?: WunderGraphUser; clientRequest?: ClientRequest } } }>(
-			'preHandler',
-			async (req, reply) => {
-				req.ctx = {
-					log: req.log,
-					user: req.body.__wg.user,
-					// clientRequest represents the original client request that was sent initially to the WunderNode.
-					clientRequest: {
-						headers: new Headers(req.body.__wg.clientRequest?.headers),
-						requestURI: req.body.__wg.clientRequest?.requestURI || '',
-						method: req.body.__wg.clientRequest?.method || 'GET',
-					},
-					internalClient: clientFactory({}, req.body.__wg.clientRequest),
-				};
-			}
-		);
+		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
+			req.ctx = {
+				log: req.log,
+				user: req.body.__wg.user,
+				// clientRequest represents the original client request that was sent initially to the WunderNode.
+				clientRequest: {
+					headers: new Headers(req.body.__wg.clientRequest?.headers),
+					requestURI: req.body.__wg.clientRequest?.requestURI || '',
+					method: req.body.__wg.clientRequest?.method || 'GET',
+				},
+				internalClient: clientFactory({}, req.body.__wg.clientRequest),
+			};
+		});
 
 		if (serverConfig?.hooks) {
 			await fastify.register(HooksPlugin, { ...serverConfig.hooks, config });

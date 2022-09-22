@@ -1,4 +1,4 @@
-import { InternalClient } from './internal-client';
+import { InternalClient, InternalClientFactory } from './internal-client';
 import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from '@web-std/fetch';
 import { HooksConfiguration } from '../configure';
@@ -98,6 +98,7 @@ export interface ServerRunOptions {
 	serverConfig: WunderGraphHooksAndServerConfig;
 	config: WunderGraphConfiguration;
 	gracefulShutdown: boolean;
+	clientFactory: InternalClientFactory;
 }
 
 export interface WunderGraphServerConfig<
@@ -120,6 +121,10 @@ export interface WunderGraphHooksAndServerConfig<
 	hooks?: GeneratedHooksConfig;
 	graphqlServers?: GraphQLServerConfig[];
 	options?: ServerOptions;
+}
+
+export interface FastifyRequestBody {
+	__wg: { user?: WunderGraphUser; clientRequest?: ClientRequest };
 }
 
 export type AuthenticationResponse<User> = AuthenticationOK<User> | AuthenticationDeny;
