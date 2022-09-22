@@ -78,3 +78,42 @@ configureWunderGraphApplication({
   },
 })
 ```
+
+## Important Notes for Production Use
+
+When deploying to production, you might be running into the following issue:
+
+```
+authentication.cookieBased.csrfTokenSecret is required
+```
+
+This is because cookie-based authentication relies on secrets for the cookie encryption and the CSRF token.
+During development, we use a static (insecure) secret so that you don't have to configure anything.
+In production, you have to provide your own secrets for security reasons.
+
+The following example configuration shows you how to set this up properly.
+Make sure that all values have the correct length and are secure random strings.
+
+```typescript
+// wundergraph.config.ts
+configureWunderGraphApplication({
+  authentication: {
+    cookieBased: {
+      providers: [
+        authProviders.openIDConnect({
+          id: 'auth0', // you have to choose this ID
+          clientId: 'XXX', // client ID from Auth0
+          clientSecret: 'XXX', // client secret from Auth0
+        }),
+      ],
+      secureCookieHashKey: new EnvironmentVariable(
+        'WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'
+      ), // must be of length 32
+      secureCookieBlockKey: new EnvironmentVariable(
+        'WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'
+      ), // must be of length 32
+      csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
+    },
+  },
+})
+```
