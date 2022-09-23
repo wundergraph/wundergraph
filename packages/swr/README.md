@@ -38,7 +38,7 @@ import { createHooks } from '@wundergraph/swr';
 import { createClient, Operations } from './components/generated/client';
 
 const { useQuery, useMutation, useSubscription, useUser, useFileUpload, useAuth } = createHooks<Operations>(
-  createClient()
+  createClient({ baseURL: 'https://your-wundernode.com', extraHeaders: {}, customFetch: undefined })
 );
 
 export const Home: React.FC<{ city: string }> = ({ city }) => {
