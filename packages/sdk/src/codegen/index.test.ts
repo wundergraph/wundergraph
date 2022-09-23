@@ -487,7 +487,7 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 	};
 };
 
-test('should collect all template dependencies recursively', () => {
+test('should collect all template dependencies recursively and dedupe based on the template name', () => {
 	class Template1 implements Template {
 		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
