@@ -1,4 +1,4 @@
-import { CodeGenOutWriter, GenerateCode, Template, TemplateOutputFile } from './index';
+import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
 import { ResolvedWunderGraphConfig } from '../configure';
 import { assert } from 'chai';
@@ -486,3 +486,55 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 		},
 	};
 };
+
+test('should collect all template dependencies recursively', () => {
+	class Template1 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template1.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+		dependencies(): Template[] {
+			return [new Template2()];
+		}
+	}
+
+	class Template2 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template2.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+
+		dependencies(): Template[] {
+			return [new Template3(), new Template3()];
+		}
+	}
+
+	class Template3 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template3.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+	}
+
+	const templates = Array.from(collectAllTemplates([new Template1()]));
+
+	expect(templates).toHaveLength(3);
+	expect(templates[0]).toEqual(new Template1());
+	expect(templates[1]).toEqual(new Template2());
+	expect(templates[2]).toEqual(new Template3());
+});
