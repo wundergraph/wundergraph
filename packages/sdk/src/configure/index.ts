@@ -283,12 +283,12 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const resolvedServerOptions = resolveServerOptions(serverOptions);
 
 	const name = 'main';
-	const nodeUrl = resolveConfigurationVariable(resolvedNodeOptions.nodeUrl);
+	const publicNodeUrl = resolveConfigurationVariable(resolvedNodeOptions.publicNodeUrl);
 
 	const environment = {
 		id: '',
 		name: name,
-		baseUrl: nodeUrl,
+		baseUrl: publicNodeUrl,
 	};
 
 	const deploymentConfiguration: ResolvedDeployment = {
@@ -817,9 +817,9 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			done();
 
-			let nodeUrl = resolveConfigurationVariable(resolved.nodeOptions.nodeUrl);
+			let publicNodeUrl = resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl);
 			// trim trailing slash if any
-			nodeUrl = nodeUrl.endsWith('/') ? nodeUrl.slice(0, -1) : nodeUrl;
+			publicNodeUrl = publicNodeUrl.endsWith('/') ? publicNodeUrl.slice(0, -1) : publicNodeUrl;
 
 			const dotGraphQLNested =
 				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
@@ -827,7 +827,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 					: true;
 
 			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: nodeUrl,
+				baseURL: publicNodeUrl,
 				nested: dotGraphQLNested,
 			});
 
@@ -850,7 +850,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			const postman = PostmanBuilder(app.Operations, {
 				applicationPath: resolved.deployment.path,
-				baseURL: nodeUrl,
+				baseURL: publicNodeUrl,
 			});
 			fs.writeFileSync(
 				path.join('generated', 'wundergraph.postman.json'),
