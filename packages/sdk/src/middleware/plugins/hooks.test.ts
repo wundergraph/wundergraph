@@ -1,6 +1,6 @@
-import { createServer } from '../server';
-import { ClientRequest, FastifyRequestBody, WunderGraphHooksAndServerConfig, WunderGraphUser } from '../types';
 import { internalClientFactory } from '../internal-client';
+import { createServer } from '../server';
+import { FastifyRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
 	const clientFactory = internalClientFactory('app', 'app', [], 'http://localhost:9991');
