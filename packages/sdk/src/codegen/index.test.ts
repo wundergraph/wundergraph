@@ -1,7 +1,6 @@
 import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
 import { ResolvedWunderGraphConfig } from '../configure';
-import { assert } from 'chai';
 import { ConfigurationVariableKind, OperationType } from '@wundergraph/protobuf';
 import { mapInputVariable } from '../configure/variables';
 
@@ -28,16 +27,12 @@ class FakeFileSystem implements CodeGenOutWriter {
 
 test('GenerateCode', async () => {
 	const out = await RunTemplateTest(new FakeTemplate(), new FakeTemplate());
-	out.equals({
+	expect(out).toEqual({
 		'generated/testFile.txt': 'MyReviews+CreatePet+NewPets',
 	});
 });
 
-export interface EvaluateTemplate {
-	equals: (expected: { [key: string]: string }) => void;
-}
-
-export const RunTemplateTest = async (...templates: Template[]): Promise<EvaluateTemplate> => {
+export const RunTemplateTest = async (...templates: Template[]) => {
 	const fakeFileSystem = new FakeFileSystem();
 	await GenerateCode(
 		{
@@ -480,11 +475,7 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 		},
 		fakeFileSystem
 	);
-	return {
-		equals: (expected) => {
-			assert.deepEqual(fakeFileSystem.files, expected);
-		},
-	};
+	return fakeFileSystem.files;
 };
 
 test('should collect all template dependencies recursively and dedupe based on the template name', () => {
@@ -537,4 +528,55 @@ test('should collect all template dependencies recursively and dedupe based on t
 	expect(templates[0]).toEqual(new Template1());
 	expect(templates[1]).toEqual(new Template2());
 	expect(templates[2]).toEqual(new Template3());
+});
+
+test('should collect templates up to maxTemplateDepth', () => {
+	class Template1 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template1.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+		dependencies(): Template[] {
+			return [new Template2()];
+		}
+	}
+
+	class Template2 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template2.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+
+		dependencies(): Template[] {
+			return [new Template3(), new Template3()];
+		}
+	}
+
+	class Template3 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template3.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+	}
+
+	const templates = Array.from(collectAllTemplates([new Template1()], 1));
+
+	expect(templates).toHaveLength(2);
+	expect(templates[0]).toEqual(new Template1());
+	expect(templates[1]).toEqual(new Template2());
 });

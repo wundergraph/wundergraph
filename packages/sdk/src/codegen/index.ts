@@ -37,16 +37,17 @@ const ensurePath = (filePath: string) => {
 	}
 };
 
-export const collectAllTemplates = (templates: Template[], level = 0) => {
-	if (level > 10) {
-		throw new Error('Template dependency loop detected');
-	}
+export const collectAllTemplates = (templates: Template[], maxTemplateDepth = 25, level = 0) => {
 	const allTemplates = new Map<string, Template>();
+
+	if (level > maxTemplateDepth) {
+		return allTemplates.values();
+	}
 
 	for (const tpl of templates) {
 		allTemplates.set(tpl.constructor.name, tpl);
 		const deps = tpl?.dependencies?.() || [];
-		for (const dep of collectAllTemplates(deps, level + 1)) {
+		for (const dep of collectAllTemplates(deps, maxTemplateDepth, level + 1)) {
 			allTemplates.set(dep.constructor.name, dep);
 		}
 	}
