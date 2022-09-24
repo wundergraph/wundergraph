@@ -52,7 +52,4 @@ configureWunderGraphApplication({
 	security: {
 		enableGraphQLEndpoint: true,
 	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
 });

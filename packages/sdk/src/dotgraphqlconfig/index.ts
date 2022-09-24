@@ -3,7 +3,6 @@ import { WunderGraphConfigApplicationConfig } from '../configure';
 
 export interface DotGraphQLConfigOptions {
 	baseURL: string;
-	nested: boolean;
 }
 
 export const generateDotGraphQLConfig = (
@@ -19,7 +18,7 @@ export const generateDotGraphQLConfig = (
 
 	config.projects[app.name] = {
 		name: app.name,
-		schemaPath: path.join(options.nested ? '.wundergraph' : '', 'generated', `wundergraph.${app.name}.schema.graphql`),
+		schemaPath: path.join('.wundergraph', 'generated', `wundergraph.${app.name}.schema.graphql`),
 		extensions: {
 			endpoints: {
 				[app.name]: {

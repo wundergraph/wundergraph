@@ -16,14 +16,12 @@ autocompletion in your IDE will not work when defining GraphQL Operations.
 ```typescript
 configureWunderGraphApplication({
   dotGraphQLConfig: {
-    hasDotWunderGraphDirectory: false,
+    enabled: true,
   },
 })
 ```
 
 By default, you don't have to set this configuration.
-However, you might have a project where all WunderGraph files are in the root directory and there's no `.wundergraph` directory.
-In this case, you can set `hasDotWunderGraphDirectory` to `false`.
 
 {% callout type="warning" %}
 Some IDEs, like VSCode, will not search for the `.graphqlconfig` file in sub directories.

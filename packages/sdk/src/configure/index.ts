@@ -133,10 +133,7 @@ export interface SecurityConfig {
 }
 
 export interface DotGraphQLConfig {
-	// hasDotWunderGraphDirectory should be set to true if the project has a ".wundergraph" directory as the WunderGraph root
-	// the default is true so this config doesn't have to be touched usually
-	// only set it to false if you don't have a ".wundergraph" directory in your project
-	hasDotWunderGraphDirectory?: boolean;
+	disable?: boolean;
 }
 
 export enum HooksConfigurationOperationType {
@@ -821,29 +818,28 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			// trim trailing slash if any
 			nodeUrl = nodeUrl.endsWith('/') ? nodeUrl.slice(0, -1) : nodeUrl;
 
-			const dotGraphQLNested =
-				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
-					? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
-					: true;
+			const dotGraphQLConfigEnabled = config.dotGraphQLConfig?.disable !== true;
 
-			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: nodeUrl,
-				nested: dotGraphQLNested,
-			});
+			if (dotGraphQLConfigEnabled) {
+				const dotGraphQLConfig = generateDotGraphQLConfig(config, {
+					baseURL: nodeUrl,
+				});
 
-			const dotGraphQLConfigPath = path.join(dotGraphQLNested ? '..' + path.sep : '', '.graphqlconfig');
-			let shouldUpdateDotGraphQLConfig = true;
-			const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
-			if (fs.existsSync(dotGraphQLConfigPath)) {
-				const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
-				if (dotGraphQLContent === existingDotGraphQLContent) {
-					shouldUpdateDotGraphQLConfig = false;
+				const dotGraphQLConfigPath = path.join('..', '.graphqlconfig');
+
+				let shouldUpdateDotGraphQLConfig = true;
+				const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
+				if (fs.existsSync(dotGraphQLConfigPath)) {
+					const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
+					if (dotGraphQLContent === existingDotGraphQLContent) {
+						shouldUpdateDotGraphQLConfig = false;
+					}
 				}
-			}
 
-			if (shouldUpdateDotGraphQLConfig) {
-				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				console.log(`${new Date().toLocaleTimeString()}: .graphqlconfig updated`);
+				if (shouldUpdateDotGraphQLConfig) {
+					fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
+					console.log(`${new Date().toLocaleTimeString()}: .graphqlconfig updated`);
+				}
 			}
 
 			done();
