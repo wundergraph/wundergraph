@@ -2,9 +2,10 @@ import Handlebars from 'handlebars';
 import { OperationType } from '@wundergraph/protobuf';
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
-import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
+import { formatTypeScript } from './index';
 import { modelImports, operations } from './helpers';
 import { template } from './internal.client.template';
+import templates from '../index';
 
 export class WunderGraphInternalApiClient implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -36,6 +37,6 @@ export class WunderGraphInternalApiClient implements Template {
 	}
 
 	dependencies(): Template[] {
-		return [new TypeScriptInputModels(), new TypeScriptResponseModels()];
+		return templates.typescript.models;
 	}
 }

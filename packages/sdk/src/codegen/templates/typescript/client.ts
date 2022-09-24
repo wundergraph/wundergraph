@@ -1,17 +1,12 @@
 import { handlebarTemplate } from './client.template';
 import Handlebars from 'handlebars';
 import { Template, TemplateOutputFile } from '../../index';
-import {
-	BaseTypeScriptDataModel,
-	formatTypeScript,
-	TypeScriptInputModels,
-	TypeScriptResponseDataModels,
-	TypeScriptResponseModels,
-} from './';
+import { formatTypeScript } from './';
 import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
+import templates from '../index';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
@@ -56,11 +51,6 @@ export class TypeScriptClient implements Template {
 		]);
 	}
 	dependencies(): Template[] {
-		return [
-			new TypeScriptInputModels(),
-			new TypeScriptResponseModels(),
-			new TypeScriptResponseDataModels(),
-			new BaseTypeScriptDataModel(),
-		];
+		return templates.typescript.models;
 	}
 }
