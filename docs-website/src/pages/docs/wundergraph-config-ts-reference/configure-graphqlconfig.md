@@ -4,9 +4,7 @@ pageTitle: 'WunderGraph - Configure .graphqlconfig'
 description:
 ---
 
-This section describes how to set up the configuration for generating the `.graphqlconfig` file.
-
-This file is very important for WunderGraph to work.
+This `.graphqlconfig` file is very important for WunderGraph to work.
 It tells your IDE where to look for a GraphQL schema.
 If this configuration is wrong,
 autocompletion in your IDE will not work when defining GraphQL Operations.
