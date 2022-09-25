@@ -2,7 +2,7 @@
   "projects": {
     "app": {
       "name": "app",
-      "schemaPath": "generated/wundergraph.app.schema.graphql",
+      "schemaPath": ".wundergraph/generated/wundergraph.app.schema.graphql",
       "extensions": {
         "endpoints": {
           "app": {
