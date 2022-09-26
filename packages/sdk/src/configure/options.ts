@@ -16,13 +16,17 @@ export enum WgEnv {
 
 export type LoggerLevel = 'FATAL' | 'PANIC' | 'WARNING' | 'ERROR' | 'INFO' | 'DEBUG';
 
+const defaultHost = '127.0.0.1';
+const defaultNodePort = '9991';
+const defaultServerPort = '9992';
+
 const DefaultNodeOptions = {
 	listen: {
-		host: new EnvironmentVariable(WgEnv.NodeHost, '127.0.0.1'),
-		port: new EnvironmentVariable(WgEnv.NodePort, '9991'),
+		host: new EnvironmentVariable(WgEnv.NodeHost, defaultHost),
+		port: new EnvironmentVariable(WgEnv.NodePort, defaultNodePort),
 	},
-	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991'),
-	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, 'http://localhost:9991'),
+	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${defaultNodePort}`),
+	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://localhost:${defaultNodePort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
@@ -30,10 +34,10 @@ const DefaultNodeOptions = {
 
 const DefaultServerOptions: MandatoryServerOptions = {
 	listen: {
-		host: new EnvironmentVariable(WgEnv.ServerHost, '127.0.0.1'),
-		port: new EnvironmentVariable(WgEnv.ServerPort, '9992'),
+		host: new EnvironmentVariable(WgEnv.ServerHost, defaultHost),
+		port: new EnvironmentVariable(WgEnv.ServerPort, defaultServerPort),
 	},
-	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, 'http://localhost:9992'),
+	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${defaultServerPort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
@@ -98,20 +102,19 @@ export interface ResolvedServerLogger {
 	level: ConfigurationVariable;
 }
 
+const fallbackUrl = (defaultPort: string, listen?: ListenOptions) => {
+	return `http://${listen?.host || 'localhost'}:${listen?.port || defaultPort}`;
+};
+
 export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
-	const fallbackNodeUrl = options?.listen?.port
-		? new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${options?.listen?.port}`)
-		: DefaultNodeOptions.nodeUrl;
-
-	const fallbackPublicNodeUrl = options?.listen?.port
-		? new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://localhost:${options?.listen?.port}`)
-		: DefaultNodeOptions.publicNodeUrl;
-
 	let nodeOptions = isCloud
 		? DefaultNodeOptions
 		: {
-				nodeUrl: options?.nodeUrl || fallbackNodeUrl,
-				publicNodeUrl: options?.publicNodeUrl || fallbackPublicNodeUrl,
+				nodeUrl:
+					options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackUrl(defaultNodePort, options?.listen)),
+				publicNodeUrl:
+					options?.publicNodeUrl ||
+					new EnvironmentVariable(WgEnv.PublicNodeUrl, fallbackUrl(defaultNodePort, options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,
@@ -135,14 +138,12 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 };
 
 export const serverOptionsWithDefaults = (options?: ServerOptions): MandatoryServerOptions => {
-	const fallbackServerUrl = options?.listen?.port
-		? new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${options?.listen?.port}`)
-		: DefaultServerOptions.serverUrl;
-
 	return isCloud
 		? DefaultServerOptions
 		: {
-				serverUrl: options?.serverUrl || fallbackServerUrl,
+				serverUrl:
+					options?.serverUrl ||
+					new EnvironmentVariable(WgEnv.ServerUrl, fallbackUrl(defaultServerPort, options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultServerOptions.listen.host,
 					port: options?.listen?.port || DefaultServerOptions.listen.port,

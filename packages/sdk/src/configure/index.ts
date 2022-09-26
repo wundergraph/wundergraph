@@ -817,9 +817,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			done();
 
-			let publicNodeUrl = resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl);
-			// trim trailing slash if any
-			publicNodeUrl = publicNodeUrl.endsWith('/') ? publicNodeUrl.slice(0, -1) : publicNodeUrl;
+			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
 			const dotGraphQLNested =
 				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
@@ -1197,4 +1195,8 @@ export const resolveIntegration = (
 
 export const customGqlServerMountPath = (name: string): string => {
 	return `/gqls/${name}/graphql`;
+};
+
+const trimTrailingSlash = (url: string): string => {
+	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
