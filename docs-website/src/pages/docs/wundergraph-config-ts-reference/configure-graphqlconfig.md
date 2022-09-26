@@ -4,12 +4,13 @@ pageTitle: 'WunderGraph - Configure .graphqlconfig'
 description:
 ---
 
-This `.graphqlconfig` file is very important for WunderGraph to work.
-It tells your IDE where to look for a GraphQL schema.
-If this configuration is wrong,
-autocompletion in your IDE will not work when defining GraphQL Operations.
+This `.graphqlconfig` file is very important for an ideal developer experience.
+IDEs like VSCode and Jetbrains recognise the file and use it to configure IntelliSense.
+It's important to place it in the right directory.
+E.g. in VSCode, it's important that you place it at the root of the project.
+With the `.graphqlconfig` properly configured, your IDE helps you to define GraphQL Operations.
 
-By default, you don't have to set this configuration. The file will be auto generated next to your `.wundergraph` directory.
+By default, you don't have to set any configuration. The file will be auto generated on the same directory level as your `.wundergraph` directory.
 
 If you don't want to generate the file you can disable it:
 
