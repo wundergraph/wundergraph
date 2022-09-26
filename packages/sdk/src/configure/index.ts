@@ -164,7 +164,10 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	customResolve?: AsyncFn;
 }
 
-export type AuthenticationHookRequest = BaseRequestContext<User, InternalClient> & AuthenticationRequestContext<User>;
+export type Role = 'admin' | 'user';
+
+export type AuthenticationHookRequest = BaseRequestContext<User<Role>, InternalClient> &
+	AuthenticationRequestContext<User<Role>>;
 
 export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
 	global?: {
@@ -183,8 +186,8 @@ export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
 	};
 	authentication?: {
 		postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>;
-		mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
-		revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
+		mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User<Role>>>;
+		revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User<Role>>>;
 		postLogout?: (hook: AuthenticationHookRequest) => Promise<void>;
 	};
 	[HooksConfigurationOperationType.Queries]?: {
