@@ -23,31 +23,37 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 };
 
 test('tests to verify the fastify authentication endpoints', async () => {
-	const serverConfig = {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			authentication: {
 				postAuthentication: (...args: any[]) =>
-					new Promise((resolve) => {
+					new Promise<void>((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve();
 						}, 30);
 					}),
 				mutatingPostAuthentication: (...args: any[]) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve({
+								status: 'ok',
+								user: {},
+							});
 						}, 30);
 					}),
 				revalidate: (...args: any[]) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve({
+								status: 'ok',
+								user: {},
+							});
 						}, 30);
 					}),
 				postLogout: (...args: any[]) =>
-					new Promise((resolve) => {
+					new Promise<void>((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve();
 						}, 30);
 					}),
 			},
@@ -104,31 +110,37 @@ test('tests to verify the fastify authentication endpoints', async () => {
 });
 
 test('tests to verify if the fastify authentication endpoints have user context check', async () => {
-	const serverConfig = {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			authentication: {
 				postAuthentication: (...args: any[]) =>
-					new Promise((resolve) => {
+					new Promise<void>((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve();
 						}, 30);
 					}),
 				mutatingPostAuthentication: (...args: any[]) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve({
+								status: 'ok',
+								user: {},
+							});
 						}, 30);
 					}),
 				revalidate: (...args: any[]) =>
 					new Promise((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve({
+								status: 'ok',
+								user: {},
+							});
 						}, 30);
 					}),
 				postLogout: (...args: any[]) =>
-					new Promise((resolve) => {
+					new Promise<void>((resolve) => {
 						setTimeout(() => {
-							resolve('');
+							resolve();
 						}, 30);
 					}),
 			},
@@ -185,7 +197,7 @@ test('tests to verify if the fastify authentication endpoints have user context 
 });
 
 test('tests to verify if only the hooks used have fastify authentication hooks', async () => {
-	const serverConfig = {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			// none of the hooks are used
 			authentication: {},

@@ -52,7 +52,12 @@ import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { WunderGraphHooksAndServerConfig } from '../middleware/types';
+import {
+	AuthenticationRequestContext,
+	AuthenticationResponse,
+	BaseRequestContext,
+	WunderGraphHooksAndServerConfig,
+} from '../middleware/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 import {
@@ -64,6 +69,8 @@ import {
 	serverOptionsWithDefaults,
 } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
+import { User } from '../client/types';
+import { InternalClient } from '../middleware/internal-client';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -157,6 +164,8 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	customResolve?: AsyncFn;
 }
 
+export type AuthenticationHookRequest = BaseRequestContext<User, InternalClient> & AuthenticationRequestContext<User>;
+
 export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
 	global?: {
 		httpTransport?: {
@@ -173,10 +182,10 @@ export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
 		};
 	};
 	authentication?: {
-		postAuthentication?: AsyncFn;
-		mutatingPostAuthentication?: AsyncFn;
-		revalidate?: AsyncFn;
-		postLogout?: AsyncFn;
+		postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>;
+		mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
+		revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
+		postLogout?: (hook: AuthenticationHookRequest) => Promise<void>;
 	};
 	[HooksConfigurationOperationType.Queries]?: {
 		[operationName: string]: OperationHooksConfiguration<AsyncFn>;
