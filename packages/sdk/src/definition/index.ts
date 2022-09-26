@@ -1,4 +1,4 @@
-import { federationServiceSDL, isFederationService } from '../graphql/federation';
+import { fetchFederationServiceSDL, isFederationService } from './federation';
 import { configuration } from '../graphql/configuration';
 import {
 	buildClientSchema,
@@ -248,6 +248,12 @@ export interface DataSource<Custom = unknown> {
 	Directives: DirectiveConfiguration[];
 }
 
+export type RequestMiddleware = (requestConfig: AxiosRequestConfig) => AxiosRequestConfig;
+
+interface GraphQLIntrospectionMiddleware {
+	introspectionRequestMiddleware?: RequestMiddleware;
+}
+
 interface GraphQLIntrospectionOptions {
 	// loadSchemaFromString allows you to skip the introspection process and load the GraphQL Schema from a string instead
 	// this way, you can import a GraphQL Schema file or load the Schema in more flexible ways than relying on sending a GraphQL Introspection Query
@@ -261,11 +267,16 @@ interface GraphQLIntrospectionOptions {
 	skipRenameRootFields?: string[];
 }
 
-export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospectionOptions {
+export interface GraphQLIntrospection
+	extends GraphQLUpstream,
+		GraphQLIntrospectionOptions,
+		GraphQLIntrospectionMiddleware {
 	isFederation?: boolean;
 }
 
-export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
+export interface GraphQLFederationUpstream
+	extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'>,
+		GraphQLIntrospectionMiddleware {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
 }
@@ -317,14 +328,7 @@ export interface IHeadersBuilder {
 
 export class HeadersBuilder {
 	private headers: HeaderConfiguration[] = [];
-	public addEnvironmentVariableHeader = (key: string, environmentVariableName: string) => {
-		this.headers.push({
-			key,
-			value: environmentVariableName,
-			valueSource: 'env',
-		});
-		return this;
-	};
+
 	public addStaticHeader = (key: string, value: InputVariable) => {
 		if (value === undefined) {
 			throw new Error(`Static header value cannot be undefined`);
@@ -752,7 +756,10 @@ export const introspect = {
 			);
 			const serviceSDL = !federationEnabled
 				? undefined
-				: await federationServiceSDL(resolveVariable(introspection.url));
+				: await fetchFederationServiceSDL(
+						resolveVariable(introspection.url),
+						introspection.introspectionRequestMiddleware
+				  );
 			const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 			const schemaDocumentNode = parse(schemaSDL);
 			const graphQLSchema = buildSchema(schemaSDL);
@@ -882,7 +889,10 @@ export const introspect = {
 				const name = upstream.name ?? i.toString();
 
 				if (schema === '' && upstream.url) {
-					schema = await federationServiceSDL(resolveVariable(upstream.url));
+					schema = await fetchFederationServiceSDL(
+						resolveVariable(upstream.url),
+						upstream.introspectionRequestMiddleware
+					);
 				}
 
 				if (schema == '') {
@@ -1026,9 +1036,13 @@ const introspectGraphQLAPI = async (
 		});
 	}
 
-	const opts: AxiosRequestConfig = {
+	let opts: AxiosRequestConfig = {
 		headers: baseHeaders,
 	};
+
+	if (introspection.introspectionRequestMiddleware) {
+		opts = introspection.introspectionRequestMiddleware(opts);
+	}
 
 	if (introspection.mTLS) {
 		opts.httpsAgent = new https.Agent({

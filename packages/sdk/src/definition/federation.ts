@@ -1,5 +1,6 @@
 import { GraphQLSchema } from 'graphql';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
+import { RequestMiddleware } from './index';
 
 export const isFederationService = (schema: GraphQLSchema): boolean => {
 	const queryType = schema.getQueryType();
@@ -13,15 +14,26 @@ export const isFederationService = (schema: GraphQLSchema): boolean => {
 	return Object.keys(fields).indexOf('_service') !== -1;
 };
 
-export const fetchFederationServiceSDL = async (url: string): Promise<string> => {
+export const fetchFederationServiceSDL = async (
+	url: string,
+	requestMiddleware?: RequestMiddleware
+): Promise<string> => {
 	const data = JSON.stringify({
 		query: '{_service{sdl}}',
 	});
-	const res = await axios.post(url, data, {
+
+	let opts: AxiosRequestConfig = {
 		headers: {
 			'Content-Type': 'application/json',
 			Accept: 'application/json',
 		},
-	});
+	};
+
+	if (requestMiddleware) {
+		opts = requestMiddleware(opts);
+	}
+
+	const res = await axios.post(url, data, opts);
+
 	return res.data.data._service.sdl;
 };
