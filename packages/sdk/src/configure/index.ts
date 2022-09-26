@@ -280,12 +280,12 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const resolvedServerOptions = resolveServerOptions(serverOptions);
 
 	const name = 'main';
-	const nodeUrl = resolveConfigurationVariable(resolvedNodeOptions.nodeUrl);
+	const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolvedNodeOptions.publicNodeUrl));
 
 	const environment = {
 		id: '',
 		name: name,
-		baseUrl: nodeUrl,
+		baseUrl: publicNodeUrl,
 	};
 
 	const deploymentConfiguration: ResolvedDeployment = {
@@ -814,9 +814,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			done();
 
-			let nodeUrl = resolveConfigurationVariable(resolved.nodeOptions.nodeUrl);
-			// trim trailing slash if any
-			nodeUrl = nodeUrl.endsWith('/') ? nodeUrl.slice(0, -1) : nodeUrl;
+			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
 			const dotGraphQLConfigEnabled = config.dotGraphQLConfig?.disable !== true;
 
@@ -846,7 +844,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			const postman = PostmanBuilder(app.Operations, {
 				applicationPath: resolved.deployment.path,
-				baseURL: nodeUrl,
+				baseURL: publicNodeUrl,
 			});
 			fs.writeFileSync(
 				path.join('generated', 'wundergraph.postman.json'),
@@ -1193,4 +1191,8 @@ export const resolveIntegration = (
 
 export const customGqlServerMountPath = (name: string): string => {
 	return `/gqls/${name}/graphql`;
+};
+
+const trimTrailingSlash = (url: string): string => {
+	return url.endsWith('/') ? url.slice(0, -1) : url;
 };

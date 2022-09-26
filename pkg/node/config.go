@@ -51,9 +51,9 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 			AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
 			Webhooks:             graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
-				ServerUrl: loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
-				NodeUrl:   loadvariable.String(graphConfig.Api.NodeOptions.NodeUrl),
-				Listener:  listener,
+				ServerUrl:     loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
+				PublicNodeUrl: loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
+				Listener:      listener,
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},

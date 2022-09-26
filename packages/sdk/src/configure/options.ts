@@ -6,6 +6,7 @@ const isCloud = process.env.WG_CLOUD === 'true';
 export enum WgEnv {
 	LogLevel = 'WG_LOG_LEVEL',
 	NodeUrl = 'WG_NODE_URL',
+	PublicNodeUrl = 'WG_PUBLIC_NODE_URL',
 	NodeHost = 'WG_NODE_HOST',
 	NodePort = 'WG_NODE_PORT',
 	ServerUrl = 'WG_SERVER_URL',
@@ -15,12 +16,17 @@ export enum WgEnv {
 
 export type LoggerLevel = 'FATAL' | 'PANIC' | 'WARNING' | 'ERROR' | 'INFO' | 'DEBUG';
 
+const defaultHost = '127.0.0.1';
+const defaultNodePort = '9991';
+const defaultServerPort = '9992';
+
 const DefaultNodeOptions = {
 	listen: {
-		host: new EnvironmentVariable(WgEnv.NodeHost, '127.0.0.1'),
-		port: new EnvironmentVariable(WgEnv.NodePort, '9991'),
+		host: new EnvironmentVariable(WgEnv.NodeHost, defaultHost),
+		port: new EnvironmentVariable(WgEnv.NodePort, defaultNodePort),
 	},
-	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991'),
+	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${defaultNodePort}`),
+	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://localhost:${defaultNodePort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
@@ -28,10 +34,10 @@ const DefaultNodeOptions = {
 
 const DefaultServerOptions: MandatoryServerOptions = {
 	listen: {
-		host: new EnvironmentVariable(WgEnv.ServerHost, '127.0.0.1'),
-		port: new EnvironmentVariable(WgEnv.ServerPort, '9992'),
+		host: new EnvironmentVariable(WgEnv.ServerHost, defaultHost),
+		port: new EnvironmentVariable(WgEnv.ServerPort, defaultServerPort),
 	},
-	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, 'http://localhost:9992'),
+	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${defaultServerPort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
@@ -49,6 +55,7 @@ export interface ResolvedListenOptions {
 
 export interface NodeOptions {
 	nodeUrl?: InputVariable;
+	publicNodeUrl?: InputVariable;
 	listen?: ListenOptions;
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
@@ -57,6 +64,7 @@ export interface NodeOptions {
 
 export interface ResolvedNodeOptions {
 	nodeUrl: ConfigurationVariable;
+	publicNodeUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
 	logger: {
 		level: ConfigurationVariable;
@@ -94,15 +102,19 @@ export interface ResolvedServerLogger {
 	level: ConfigurationVariable;
 }
 
-export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
-	const fallbackNodeUrl = options?.listen?.port
-		? new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${options?.listen?.port}`)
-		: DefaultNodeOptions.nodeUrl;
+const fallbackUrl = (defaultPort: string, listen?: ListenOptions) => {
+	return `http://${listen?.host || 'localhost'}:${listen?.port || defaultPort}`;
+};
 
+export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
 	let nodeOptions = isCloud
 		? DefaultNodeOptions
 		: {
-				nodeUrl: options?.nodeUrl || fallbackNodeUrl,
+				nodeUrl:
+					options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackUrl(defaultNodePort, options?.listen)),
+				publicNodeUrl:
+					options?.publicNodeUrl ||
+					new EnvironmentVariable(WgEnv.PublicNodeUrl, fallbackUrl(defaultNodePort, options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,
@@ -114,6 +126,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 
 	return {
 		nodeUrl: mapInputVariable(nodeOptions.nodeUrl),
+		publicNodeUrl: mapInputVariable(nodeOptions.publicNodeUrl),
 		listen: {
 			host: mapInputVariable(nodeOptions.listen.host),
 			port: mapInputVariable(nodeOptions.listen.port),
@@ -125,14 +138,12 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 };
 
 export const serverOptionsWithDefaults = (options?: ServerOptions): MandatoryServerOptions => {
-	const fallbackServerUrl = options?.listen?.port
-		? new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${options?.listen?.port}`)
-		: DefaultServerOptions.serverUrl;
-
 	return isCloud
 		? DefaultServerOptions
 		: {
-				serverUrl: options?.serverUrl || fallbackServerUrl,
+				serverUrl:
+					options?.serverUrl ||
+					new EnvironmentVariable(WgEnv.ServerUrl, fallbackUrl(defaultServerPort, options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultServerOptions.listen.host,
 					port: options?.listen?.port || DefaultServerOptions.listen.port,
