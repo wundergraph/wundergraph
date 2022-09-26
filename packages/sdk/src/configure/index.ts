@@ -283,7 +283,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const resolvedServerOptions = resolveServerOptions(serverOptions);
 
 	const name = 'main';
-	const publicNodeUrl = resolveConfigurationVariable(resolvedNodeOptions.publicNodeUrl);
+	const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolvedNodeOptions.publicNodeUrl));
 
 	const environment = {
 		id: '',
