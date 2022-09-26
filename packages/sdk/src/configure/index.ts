@@ -820,7 +820,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			if (dotGraphQLConfigEnabled) {
 				const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-					baseURL: nodeUrl,
+					baseURL: publicNodeUrl,
 				});
 
 				const dotGraphQLConfigPath = path.join('..', '.graphqlconfig');
