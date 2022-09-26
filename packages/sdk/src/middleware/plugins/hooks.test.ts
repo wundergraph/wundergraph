@@ -22,40 +22,24 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 	return fastify;
 };
 
-test('tests to verify the fastify authentication endpoints', async () => {
+test('Hook should return 200 when everything is provided', async () => {
 	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			authentication: {
-				postAuthentication: (...args: any[]) =>
-					new Promise<void>((resolve) => {
-						setTimeout(() => {
-							resolve();
-						}, 30);
-					}),
-				mutatingPostAuthentication: (...args: any[]) =>
-					new Promise((resolve) => {
-						setTimeout(() => {
-							resolve({
-								status: 'ok',
-								user: {},
-							});
-						}, 30);
-					}),
-				revalidate: (...args: any[]) =>
-					new Promise((resolve) => {
-						setTimeout(() => {
-							resolve({
-								status: 'ok',
-								user: {},
-							});
-						}, 30);
-					}),
-				postLogout: (...args: any[]) =>
-					new Promise<void>((resolve) => {
-						setTimeout(() => {
-							resolve();
-						}, 30);
-					}),
+				postAuthentication: async () => {},
+				mutatingPostAuthentication: async () => {
+					return {
+						status: 'ok',
+						user: {},
+					};
+				},
+				revalidate: async () => {
+					return {
+						status: 'ok',
+						user: {},
+					};
+				},
+				postLogout: async () => {},
 			},
 		},
 	};
@@ -71,6 +55,7 @@ test('tests to verify the fastify authentication endpoints', async () => {
 		} as FastifyRequestBody,
 	});
 	expect(postAuthenticationResponse.statusCode).toEqual(200);
+	expect(postAuthenticationResponse.json()).toEqual({ hook: 'postAuthentication' });
 
 	const mutatingPostAuthenticationResponse = await fastify.inject({
 		method: 'POST',
@@ -83,6 +68,14 @@ test('tests to verify the fastify authentication endpoints', async () => {
 		} as FastifyRequestBody,
 	});
 	expect(mutatingPostAuthenticationResponse.statusCode).toEqual(200);
+	expect(mutatingPostAuthenticationResponse.json()).toEqual({
+		hook: 'mutatingPostAuthentication',
+		response: {
+			status: 'ok',
+			user: {},
+		},
+		setClientRequestHeaders: {},
+	});
 
 	const revalidateAuthenticationResponse = await fastify.inject({
 		method: 'POST',
@@ -95,6 +88,14 @@ test('tests to verify the fastify authentication endpoints', async () => {
 		} as FastifyRequestBody,
 	});
 	expect(revalidateAuthenticationResponse.statusCode).toEqual(200);
+	expect(revalidateAuthenticationResponse.json()).toEqual({
+		hook: 'revalidateAuthentication',
+		response: {
+			status: 'ok',
+			user: {},
+		},
+		setClientRequestHeaders: {},
+	});
 
 	const postLogoutResponse = await fastify.inject({
 		method: 'POST',
@@ -107,42 +108,27 @@ test('tests to verify the fastify authentication endpoints', async () => {
 		} as FastifyRequestBody,
 	});
 	expect(postLogoutResponse.statusCode).toEqual(200);
+	expect(postLogoutResponse.json()).toEqual({ hook: 'postLogout', setClientRequestHeaders: {} });
 });
 
-test('tests to verify if the fastify authentication endpoints have user context check', async () => {
+test('Hook should return 400 when user context was not provided', async () => {
 	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			authentication: {
-				postAuthentication: (...args: any[]) =>
-					new Promise<void>((resolve) => {
-						setTimeout(() => {
-							resolve();
-						}, 30);
-					}),
-				mutatingPostAuthentication: (...args: any[]) =>
-					new Promise((resolve) => {
-						setTimeout(() => {
-							resolve({
-								status: 'ok',
-								user: {},
-							});
-						}, 30);
-					}),
-				revalidate: (...args: any[]) =>
-					new Promise((resolve) => {
-						setTimeout(() => {
-							resolve({
-								status: 'ok',
-								user: {},
-							});
-						}, 30);
-					}),
-				postLogout: (...args: any[]) =>
-					new Promise<void>((resolve) => {
-						setTimeout(() => {
-							resolve();
-						}, 30);
-					}),
+				postAuthentication: async () => {},
+				mutatingPostAuthentication: async () => {
+					return {
+						status: 'ok',
+						user: {},
+					};
+				},
+				revalidate: async () => {
+					return {
+						status: 'ok',
+						user: {},
+					};
+				},
+				postLogout: async () => {},
 			},
 		},
 	};
@@ -196,7 +182,7 @@ test('tests to verify if the fastify authentication endpoints have user context 
 	expect(postAuthenticationResponse.json()).toEqual({ error: "User context doesn't exist" });
 });
 
-test('tests to verify if only the hooks used have fastify authentication hooks', async () => {
+test('Hook should return 404 if not being used', async () => {
 	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			// none of the hooks are used
