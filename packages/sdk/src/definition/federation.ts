@@ -13,7 +13,7 @@ export const isFederationService = (schema: GraphQLSchema): boolean => {
 	return Object.keys(fields).indexOf('_service') !== -1;
 };
 
-export const federationServiceSDL = async (url: string): Promise<string> => {
+export const fetchFederationServiceSDL = async (url: string): Promise<string> => {
 	const data = JSON.stringify({
 		query: '{_service{sdl}}',
 	});
