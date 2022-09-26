@@ -40,9 +40,11 @@ Each option when unset will get a value from the `Default Environment Variables`
 
 ## Running in production
 
-In production is mandatory to provide `serverUrl`, because WunderNode needs to know where the WunderGraphServer is deployed.
+{% callout type="warning" %}
+In production, it is mandatory to provide `serverUrl`, because WunderNode needs to know where the WunderGraphServer is deployed.
+{% /callout %}
 
-You could provide it either by setting the Default Environment Variable `WG_NODE_URL` or as a static value.
+You could provide it either by setting the Default Environment Variable `WG_SERVER_URL` or as a static value.
 
 {% callout type="warning" %}
 When no options were provided you still could override default values by setting WG environment variables

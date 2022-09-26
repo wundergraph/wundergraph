@@ -20,9 +20,16 @@ The port on which the WunderNode should listen.
 
 ### `nodeUrl` (optional)
 
-This option allows you to configure the URL where your WunderNode will be deployed.
+This option allows you to configure the internal URL where your WunderNode will be deployed in the internal network.
 This is important for the WunderGraph Server to be able to comminucate with WunderNode.
-The `nodeUrl` is used to set a base URL for the `.graphqlconfig` file and postman collection
+
+The `nodeUrl` is used in internal client requests to WunderNode in the hooks and webhooks.
+
+### `publicNodeUrl` (optional)
+
+This option allows you to configure the Public URL on which you WunderNode Api will be accessible.
+
+The `publicNodeUrl` is used to set a base URL for the `.graphqlconfig` file, postman collection and generated clients.
 
 ### `logger.level` (optional)
 
@@ -32,18 +39,30 @@ This option allows you to configure the logger level of WunderNode.
 
 Each option when unset will get a value from the `Default Environment Variables` or from the default value of that variable.
 
-| Option         | Default Value           | Default Environment Variable |
-| -------------- | ----------------------- | ---------------------------- |
-| `listen.host`  | `127.0.0.1`             | `WG_NODE_HOST`               |
-| `listen.port`  | `9991`                  | `WG_NODE_PORT`               |
-| `nodeUrl`      | `http://localhost:9991` | `WG_NODE_URL`                |
-| `logger.level` | `INFO`                  | `WG_LOG_LEVEL`               |
+| Option          | Default Value           | Default Environment Variable |
+| --------------- | ----------------------- | ---------------------------- |
+| `listen.host`   | `127.0.0.1`             | `WG_NODE_HOST`               |
+| `listen.port`   | `9991`                  | `WG_NODE_PORT`               |
+| `nodeUrl`       | `http://localhost:9991` | `WG_NODE_URL`                |
+| `publicNodeUrl` | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`         |
+| `logger.level`  | `INFO`                  | `WG_LOG_LEVEL`               |
+
+In case in options only `listen.port` is provided, the `nodeUrl` and `publicNodeUrl` will be set to `http://localhost:<port>`
 
 ## Running in production
 
-In production is mandatory provide `nodeUrl`, because WunderGraph Server needs to know where the WunderNode is deployed.
+{% callout type="warning" %}
+In production it is mandatory to provide:
 
-You could provide it either by setting the Default Environment Variable `WG_SERVER_URL` or as a static value.
+- `publicNodeUrl` - to have a proper configuration of generated clients, graphiql, graphqlconfig and postman collection
+- `nodeUrl` - when you want to run WunderNode in a different network/host than WunderGraph Server
+
+{% /callout %}
+
+You could provide it either by setting the Default Environment Variable or as a static value:
+
+- `WG_NODE_URL`
+- `WG_PUBLIC_NODE_URL`
 
 {% callout type="warning" %}
 When no options were provided you still could override default values by setting WG environment variables
@@ -68,7 +87,8 @@ configureWunderGraphApplication({
       host: '127.0.0.1',
       port: '4444',
     },
-    nodeUrl: 'http://localhost:4444/',
+    nodeUrl: 'http://my-internal-network-node:4444/',
+    publicNodeUrl: 'http://my-api.example.com/',
     logger: {
       level: 'DEBUG',
     },
@@ -88,6 +108,10 @@ configureWunderGraphApplication({
       port: new EnvironmentVariable('NODE_PORT', '4444'),
     },
     nodeUrl: new EnvironmentVariable('NODE_URL', 'http://localhost:4444/'),
+    publicNodeUrl: new EnvironmentVariable(
+      'PUBLIC_NODE_URL',
+      'http://my-api.example.com/'
+    ),
     logger: {
       level: new EnvironmentVariable<LoggerLevel>('NODE_LOG_LEVEL', 'DEBUG'),
     },
@@ -112,6 +136,10 @@ configureWunderGraphApplication({
       port: new EnvironmentVariable(WgEnv.NodePort, '9991'),
     },
     nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991/'),
+    publicNodeUrl: new EnvironmentVariable(
+      WgEnv.PublicNodeUrl,
+      'http://my-api.example.com/'
+    ),
     logger: {
       level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
     },
@@ -126,6 +154,10 @@ configureWunderGraphApplication({
       port: new EnvironmentVariable('WG_NODE_PORT', '9991'),
     },
     nodeUrl: new EnvironmentVariable('WG_NODE_URL', 'http://localhost:9991/'),
+    publicNodeUrl: new EnvironmentVariable(
+      'WG_PUBLIC_NODE_URL',
+      'http://my-api.example.com/'
+    ),
     logger: {
       level: new EnvironmentVariable<LoggerLevel>('WG_LOG_LEVEL', 'INFO'),
     },
