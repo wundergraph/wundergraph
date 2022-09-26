@@ -679,19 +679,17 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 
 		return api;
 	} catch (e) {
-		console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
-
 		// fallback to old introspection result (only for development mode)
 		if (WG_DEV_FIRST_RUN) {
+			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
 			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 			if (cacheEntryString) {
 				console.log('Fallback to old introspection result');
 				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
 				return fromCacheEntry<A>(cacheEntry);
 			}
+			console.log('Could not fallback to old introspection result');
 		}
-
-		console.log('Could not fallback to old introspection result');
 		throw e;
 	}
 };
