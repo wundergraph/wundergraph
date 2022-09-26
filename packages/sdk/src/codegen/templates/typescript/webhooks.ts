@@ -18,8 +18,4 @@ export class WunderGraphWebhooksPlugin implements Template {
 			},
 		]);
 	}
-
-	dependencies(): Template[] {
-		return [];
-	}
 }

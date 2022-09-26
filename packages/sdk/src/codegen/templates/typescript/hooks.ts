@@ -1,10 +1,11 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import Handlebars from 'handlebars';
-import { formatTypeScript, TypeScriptInputModels, TypeScriptResponseModels } from './index';
+import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import { modelImports, operations } from './helpers';
 import { template } from './hooks.template';
+import templates from '../index';
 
 export class WunderGraphHooksPlugin implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -37,6 +38,6 @@ export class WunderGraphHooksPlugin implements Template {
 	}
 
 	dependencies(): Template[] {
-		return [new TypeScriptInputModels(), new TypeScriptResponseModels()];
+		return templates.typescript.models;
 	}
 }
