@@ -406,7 +406,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	baseUrl?: InputVariable;
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
-	useSSEForSubscription?: boolean;
+	subscriptionUseSSE?: boolean;
 }
 
 export interface OpenAPIIntrospectionFile {
@@ -801,7 +801,7 @@ export const introspect = {
 										: typeof introspection.url === 'string'
 										? mapInputVariable(introspection.url)
 										: mapInputVariable(''),
-								UseSSE: introspection.useSSEForSubscription !== undefined ? introspection.useSSEForSubscription : false,
+								UseSSE: introspection.subscriptionUseSSE !== undefined ? introspection.subscriptionUseSSE : false,
 							},
 							Federation: {
 								Enabled: federationEnabled,
