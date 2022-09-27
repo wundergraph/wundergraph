@@ -799,7 +799,7 @@ export const introspect = {
 									introspection.subscriptionsURL !== undefined
 										? mapInputVariable(introspection.subscriptionsURL)
 										: typeof introspection.url === 'string'
-										? mapInputVariable(subscriptionsURL(introspection.url))
+										? mapInputVariable(introspection.url)
 										: mapInputVariable(''),
 								UseSSE:
 									introspection.useSSEForSubscription !== undefined
@@ -1092,5 +1092,3 @@ const hasSubscriptions = (schema: GraphQLSchema): boolean => {
 	const fields = subscriptionType.getFields();
 	return Object.keys(fields).length !== 0;
 };
-
-const subscriptionsURL = (url: string) => url; //.replace('https://', 'wss://').replace('http://', 'ws://');
