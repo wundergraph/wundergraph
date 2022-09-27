@@ -13,6 +13,7 @@ Here's an overview of all the available examples.
 {% quick-link title="Hello world" icon="core" href="/docs/examples/hello-world" description="The simplest example of WunderGraph." /%}
 {% quick-link title="Cross API Joins" icon="core" href="/docs/examples/cross-api-joins" description="An example demonstrating how to join data across two APIs." /%}
 {% quick-link title="Next.js" icon="core" href="/docs/examples/nextjs" description="This example integrates WunderGraph with Next.js." /%}
+{% quick-link title="Next.js + SWR" icon="core" href="/docs/examples/nextjs-swr" description="This example integrates WunderGraph with Next.js and SWR." /%}
 {% quick-link title="Hooks" icon="core" href="/docs/examples/hooks" description="This example demonstrates how to use hooks in WunderGraph." /%}
 {% quick-link title="Caching" icon="core" href="/docs/examples/caching" description="This example demonstrates how to use caching in WunderGraph." /%}
 {% quick-link title="FaunaDB Next.js" icon="core" href="/docs/examples/fauna-db-nextjs" description="This example demonstrates how to integrate FaunaDB into your WunderGraph applications." /%}
@@ -23,4 +24,5 @@ Here's an overview of all the available examples.
 {% quick-link title="Apollo Federation" icon="core" href="/docs/examples/apollo-federation" description="This example demonstrates how to use Apollo Federation in WunderGraph." /%}
 {% quick-link title="Auth0 OpenID Connect Authentication" icon="core" href="/docs/examples/auth0-openid-connect-authentication" description="This example demonstrates how to use Auth0 OpenID Connect Authentication in WunderGraph." /%}
 {% quick-link title="Fragments" icon="core" href="/docs/examples/fragments" description="This example show how to use GraphQL Fragments with WunderGraph." /%}
+{% quick-link title="Keycloak OpenID Connect Authentication" icon="core" href="/docs/examples/keycloak-openid-connect-authentication" description="This example demonstrates how to use Keycloak OpenID Connect Authentication in WunderGraph." /%}
 {% /quick-links %}

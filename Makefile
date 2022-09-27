@@ -1,10 +1,8 @@
-all: check-setup engine-dev
-# install workspace without scripts
-	pnpm install --ignore-scripts
-# Build wunderctl before run postinstall
-	pnpm -r run --filter="./packages/wunderctl" build
-# Build all libs, run scripts and link all packages
-	pnpm build:libs && pnpm install
+all: check-setup
+# Bootstrap pnpm workspace
+	./scripts/pnpm.sh
+# prepare and install engine
+	make engine-dev
 
 docs:
 	pnpm --filter="./docs-website" dev
@@ -34,8 +32,7 @@ format-templates:
 	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
 
 install-proto:
-	go install github.com/golang/protobuf/proto
-	go install github.com/golang/protobuf/protoc-gen-go
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 
 codegen-go: install-proto
 	cd types && ./generate.sh

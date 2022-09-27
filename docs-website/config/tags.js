@@ -31,6 +31,7 @@ const tags = {
 	'CSRF Protection': '/docs/features/automatic-csrf-protection-for-mutations',
 	CSRF: '/docs/features/automatic-csrf-protection-for-mutations',
 	ETag: '/docs/features/automatic-content-revalidation-with-etags',
+	'Custom GraphQL Resolvers': '/docs/features/custom-graphql-resolvers',
 	'custom GraphQL resolvers': '/docs/features/custom-graphql-resolvers',
 	'custom GraphQL resolver': '/docs/features/custom-graphql-resolvers',
 	'Authentication-aware data fetching':
@@ -75,8 +76,10 @@ const tags = {
 	'type-safe mocking': '/docs/features/type-safe-mocking',
 	'TypeScript hooks':
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
-	webhooks: 'type-script-webhooks-to-integrate-third-party-applications',
-	Webhooks: 'type-script-webhooks-to-integrate-third-party-applications',
+	webhooks:
+		'/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+	Webhooks:
+		'/docs/features/type-script-webhooks-to-integrate-third-party-applications',
 	hooks:
 		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	Hooks:
@@ -113,6 +116,8 @@ const tags = {
 	'wunderctl logout': '/docs/wunderctl-reference/wunderctl-logout',
 	'wunderctl remove': '/docs/wunderctl-reference/wunderctl-remove',
 	'wunderctl version': '/docs/wunderctl-reference/wunderctl-version',
+	'wunderctl node start': '/docs/wunderctl-reference/wunderctl-node-start',
+	'wunderctl server start': '/docs/wunderctl-reference/wunderctl-server-start',
 	'@directives': '/docs/directives-reference',
 	'@directive': '/docs/directives-reference',
 	'@export': '/docs/directives-reference/export-directive',
@@ -246,9 +251,31 @@ const tags = {
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
 	EnvironmentVariable:
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
+	'Default Environment Variables':
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_LOG_LEVEL:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_URL:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_PUBLIC_NODE_URL:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_HOST:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_PORT:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_SERVER_URL:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_SERVER_HOST:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_SERVER_PORT:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	'reach out to our Sales Team': 'https://wundergraph.com/contact/sales',
 	'Sales Team': 'https://wundergraph.com/contact/sales',
 	Sales: 'https://wundergraph.com/contact/sales',
+	'WunderNode options':
+		'/docs/wundergraph-config-ts-reference/configure-wundernode-options',
+	'WunderGraph Server options':
+		'/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
 }
 
 export default tags

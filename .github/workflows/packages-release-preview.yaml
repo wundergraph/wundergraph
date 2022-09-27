@@ -2,10 +2,11 @@ name: Packages Release Preview
 
 on:
   push:
-    branches:
-      - '**'
     tags-ignore:
       - '**'
+    branches:
+      - 'main'
+      - 'next'
     paths-ignore:
       - 'docs*/**'
       - '*.md'

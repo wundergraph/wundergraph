@@ -5,10 +5,9 @@ import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { template } from './web.client.template';
-import { listenAddrHttp } from '../../../env';
-import { hasInjectedInput, hasInternalInput, hasInput } from './react';
+import { hasInjectedInput, hasInternalInput, hasInput } from './helpers';
 
-export class TypeScriptWebClient implements Template {
+export class TypeScriptLegacyWebClient implements Template {
 	constructor(reactNative?: boolean) {
 		this.reactNative = reactNative || false;
 	}
@@ -21,10 +20,9 @@ export class TypeScriptWebClient implements Template {
 		const _liveQueries = liveQueries(config.application, false);
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
-		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
 			modelImports: modelImports(config.application, false),
-			baseURL: process.env.NODE_ENV === 'production' ? productionBaseURL : listenAddrHttp,
+			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
 			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),

@@ -8,7 +8,7 @@ import {
 	shouldRenderGraphiQL,
 	ExecutionContext as HelixExecutionContext,
 } from 'graphql-helix';
-import { BaseContext } from '../types';
+import { BaseRequestContext } from '../types';
 
 export interface GraphQLServerConfig {
 	serverName: string;
@@ -29,7 +29,7 @@ export interface GraphQLServerConfig {
 }
 
 interface ExecutionContext {
-	wundergraph: BaseContext;
+	wundergraph: BaseRequestContext;
 }
 
 const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {

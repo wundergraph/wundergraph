@@ -1,4 +1,4 @@
-import { WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { logLevelToJSON, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
@@ -6,7 +6,7 @@ import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
-import { HooksConfiguration } from '../configure';
+import { customGqlServerMountPath, HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
@@ -14,25 +14,26 @@ import path from 'path';
 import fs from 'fs';
 import {
 	ClientRequest,
-	SERVER_PORT,
 	WunderGraphServerConfig,
 	WunderGraphUser,
-	ServerOptions,
+	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
+import { PinoLogLevel, resolveServerLogLevel } from './logger';
+import { resolveConfigurationVariable } from '../configure/variables';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
 let logger: pino.Logger;
 
 /**
- * By default this script will not start the server
+ * By default, this script will not start the server
  * You need to pass START_HOOKS_SERVER=true to start the server
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
 	logger = Pino({
-		level: process.env.LOG_LEVEL || 'info',
+		level: process.env.LOG_LEVEL || PinoLogLevel.Info,
 	});
 
 	/**
@@ -54,8 +55,16 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 			encoding: 'utf8',
 		});
 		WG_CONFIG = JSON.parse(configContent);
-		if (WG_CONFIG.api) {
-			clientFactory = internalClientFactory(WG_CONFIG.apiName, WG_CONFIG.deploymentName, WG_CONFIG.api.operations);
+
+		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeUrl) {
+			const nodeUrl = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeUrl);
+
+			clientFactory = internalClientFactory(
+				WG_CONFIG.apiName,
+				WG_CONFIG.deploymentName,
+				WG_CONFIG.api.operations,
+				nodeUrl
+			);
 		} else {
 			throw new Error('User defined api is not set.');
 		}
@@ -94,10 +103,6 @@ const _configureWunderGraphServer = <
 			}
 			seenServer[server.serverName] = true;
 		});
-		// Here we set the server url of the graphqlServers
-		for (const server of serverConfig.graphqlServers) {
-			server.url = `http://127.0.0.1:${SERVER_PORT}/gqls/${server.serverName}/graphql`;
-		}
 	}
 
 	/**
@@ -109,8 +114,6 @@ const _configureWunderGraphServer = <
 			config: WG_CONFIG,
 			serverConfig,
 			gracefulShutdown: process.env.NODE_ENV === 'production',
-			host: '127.0.0.1',
-			port: SERVER_PORT,
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
 			process.exit(1);
@@ -120,12 +123,21 @@ const _configureWunderGraphServer = <
 	return serverConfig;
 };
 
-export const startServer = async (opts: ServerOptions) => {
-	const fastify = await createServer(opts);
-	await fastify.listen({
-		port: opts.port,
-		host: opts.host,
-	});
+export const startServer = async (opts: ServerRunOptions) => {
+	if (opts.config.api?.serverOptions?.listen?.port && !!opts.config.api?.serverOptions?.listen?.host) {
+		const portString = resolveConfigurationVariable(opts.config.api.serverOptions.listen.port);
+		const host = resolveConfigurationVariable(opts.config.api.serverOptions.listen.host);
+		const port = parseInt(portString, 10);
+
+		const fastify = await createServer(opts);
+		await fastify.listen({
+			port: port,
+			host: host,
+		});
+	} else {
+		logger.fatal('Could not start the hook server');
+		process.exit(1);
+	}
 };
 
 export const createServer = async ({
@@ -133,7 +145,11 @@ export const createServer = async ({
 	serverConfig,
 	config,
 	gracefulShutdown,
-}: ServerOptions): Promise<FastifyInstance> => {
+}: ServerRunOptions): Promise<FastifyInstance> => {
+	if (config.api?.serverOptions?.logger?.level) {
+		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
+	}
+
 	const fastify = Fastify({
 		logger,
 	});
@@ -192,10 +208,10 @@ export const createServer = async ({
 
 		if (serverConfig.graphqlServers) {
 			for await (const server of serverConfig.graphqlServers) {
-				const routeUrl = `/gqls/${server.serverName}/graphql`;
+				const routeUrl = customGqlServerMountPath(server.serverName);
 				await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
-				fastify.log.info(`Graphql server '${server.serverName}' listening at ${server.url}`);
+				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
 			}
 		}
 	});

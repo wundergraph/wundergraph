@@ -1,31 +1,7 @@
 syntax = "proto3";
 package wgpb;
 
-option go_package = "./go/wgpb";
-
-message WunderNodeConfig {
-	Server server = 1;
-	Logging logging = 2;
-	repeated Api apis = 3;
-}
-
-message Server {
-	int64 gracefulShutdownTimeout = 1;
-	int64 keepAlive = 2;
-	int64 readTimeout = 3;
-	int64 writeTimeout = 4;
-	int64 idleTimeout = 5;
-	repeated Certificate certificates = 6;
-}
-
-message Certificate {
-	string keyPem = 2;
-	string certPem = 3;
-}
-
-message Logging {
-	LogLevel level = 1;
-}
+option go_package = "github.com/wundergraph/wundergraph/pkg/wgpb";
 
 enum LogLevel {
 	DEBUG = 0;
@@ -34,24 +10,6 @@ enum LogLevel {
 	WARNING = 3;
 	PANIC = 4;
 	FATAL = 5;
-}
-
-message Api {
-	repeated string hosts = 1;
-	string pathPrefix = 2;
-	EngineConfiguration engineConfiguration = 3;
-	bool enableSingleFlight = 4;
-	bool enableGraphqlEndpoint = 5;
-	repeated Operation operations = 6;
-	CorsConfiguration corsConfiguration = 7;
-	string primaryHost = 8;
-	string deploymentId = 9;
-	ApiCacheConfig cacheConfig = 10;
-	string apiConfigHash = 11;
-	ApiAuthenticationConfig authenticationConfig = 12;
-	repeated S3UploadConfiguration s3UploadConfiguration = 13;
-	repeated WebhookConfiguration webhooks = 14;
-	string hooksServerURL = 15;
 }
 
 message ApiAuthenticationConfig {
@@ -75,6 +33,7 @@ message ApiAuthenticationHooks {
 	bool postAuthentication = 1;
 	bool mutatingPostAuthentication = 2;
 	bool revalidateAuthentication = 3;
+	bool postLogout = 4;
 }
 
 message CookieBasedAuthentication {
@@ -103,10 +62,16 @@ message GithubAuthProviderConfig {
 	ConfigurationVariable clientSecret = 2;
 }
 
+message OpenIDConnectQueryParameter {
+	ConfigurationVariable name = 1;
+	ConfigurationVariable value = 2;
+}
+
 message OpenIDConnectAuthProviderConfig {
 	ConfigurationVariable issuer = 1;
 	ConfigurationVariable clientId = 2;
 	ConfigurationVariable clientSecret = 3;
+	repeated OpenIDConnectQueryParameter queryParameters = 4;
 }
 
 message ApiCacheConfig {
@@ -476,6 +441,34 @@ message UserDefinedApi {
 	repeated S3UploadConfiguration s3UploadConfiguration = 9;
 	repeated ConfigurationVariable allowedHostNames = 11;
 	repeated WebhookConfiguration webhooks = 12;
+	ServerOptions serverOptions = 14;
+	NodeOptions nodeOptions = 15;
+}
+
+message ListenerOptions {
+	ConfigurationVariable host  = 1;
+	ConfigurationVariable port = 2;
+}
+
+message NodeLogging {
+	ConfigurationVariable level = 1;
+}
+
+message NodeOptions {
+	ConfigurationVariable nodeUrl = 1;
+	ConfigurationVariable publicNodeUrl = 4;
+	ListenerOptions listen = 2;
+	NodeLogging logger = 3;
+}
+
+message ServerLogging {
+	ConfigurationVariable level = 1;
+}
+
+message ServerOptions {
+	ConfigurationVariable serverUrl = 1;
+	ListenerOptions listen = 2;
+	ServerLogging logger = 3;
 }
 
 message WebhookConfiguration {

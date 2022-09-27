@@ -1,6 +1,8 @@
 # This is an example goreleaser.yaml file with some sane defaults.
 # Make sure to check the documentation at http://goreleaser.com
 project_name: wunderctl
+monorepo:
+  tag_prefix: 'v'
 before:
   hooks:
     # You may remove this if you don't use go modules.
@@ -27,7 +29,7 @@ archives:
       386: i386
       amd64: x86_64
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: '{{ .Tag }}-next'
 changelog:
   use: github
   # Sorts the changelog by the commit's messages.
@@ -43,10 +45,10 @@ changelog:
   # Default is no groups.
   groups:
     - title: Features
-      regexp: "^.*feat.*:+.*$"
+      regexp: '^.*feat.*:+.*$'
       order: 0
     - title: 'Bug fixes'
-      regexp: "^.*fix.*:+.*$"
+      regexp: '^.*fix.*:+.*$'
       order: 1
 
   filters:
@@ -58,7 +60,7 @@ changelog:
       - chore
       - typo
 release:
-  name_template: "Release {{.ProjectName}} {{.Tag}}"
+  name_template: 'Release {{.ProjectName}} {{.Tag}}'
   header: |
     This is a new release of the command-line interface (CLI) {{.ProjectName}}.
     It allows you to create, deploy and manage your WunderGraph application.
@@ -67,4 +69,4 @@ release:
     owner: wundergraph
     name: wundergraph
 checksum:
-  name_template: "{{ .ProjectName }}_{{ .Version }}_windows_checksums.txt"
+  name_template: '{{ .ProjectName }}_{{ .Version }}_windows_checksums.txt'

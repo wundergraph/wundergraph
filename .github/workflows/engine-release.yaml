@@ -1,7 +1,7 @@
 name: Engine Release
 on:
-  push:
-    tags: ['v*']
+  repository_dispatch:
+    types: [release-engine]
 
 env:
   CI: true
@@ -12,41 +12,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Avoid failing releases when the pnpm-lock.yaml was not updated
-  check-pnpm:
-    name: Check PNPM lockfile
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - uses: ./.github/actions/node
-        with:
-          working-directory: ${{ env.WORKING_DIRECTORY }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: pnpm i --frozen-lockfile --ignore-scripts
-
   goreleaser-darwin:
     name: Release MacOS build
     runs-on: 'macos-latest'
-    needs:
-      - check-pnpm
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.client_payload.ref }}
+
       - uses: ./.github/actions/go
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v1
+        uses: abelfodil/protoc-action@v1
         with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          protoc-version: '21.5'
 
       - name: Install Gon
         run: |
@@ -76,14 +59,15 @@ jobs:
       - name: generate go types based on protobuf definitions
         run: make codegen-go
 
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-darwin.yml
         env:
           # custom PAT to push in https://github.com/wundergraph/homebrew-wundergraph
@@ -91,26 +75,26 @@ jobs:
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   goreleaser-linux:
     name: Release Linux build
     runs-on: 'ubuntu-latest'
-    needs:
-      - check-pnpm
     steps:
       - name: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.client_payload.ref }}
+
       - uses: ./.github/actions/go
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v1
+        uses: abelfodil/protoc-action@v1
         with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          protoc-version: '21.5'
 
       - name: go env
         run: go env
@@ -118,40 +102,48 @@ jobs:
       - name: generate go types based on protobuf definitions
         run: make codegen-go
 
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-linux.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   goreleaser-win:
     name: Release Windows build
     runs-on: 'windows-latest'
-    needs:
-      - check-pnpm
     steps:
+      - name: Prepare git
+        # To fix the EOL issues on Windows runners, we need to disable autocrlf. See actions/checkout#135 for more info.
+        # https://github.com/actions/checkout/issues/135#issuecomment-613361104
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - name: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.client_payload.ref }}
+
       - uses: ./.github/actions/go
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v1
+        uses: abelfodil/protoc-action@v1
         with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          protoc-version: '21.5'
 
       - name: go env
         run: go env
@@ -159,20 +151,22 @@ jobs:
       - name: generate go types based on protobuf definitions
         run: make codegen-go
 
-      - name: Get the previous version of the release tag
-        run: echo "GORELEASER_PREVIOUS_TAG=$(git describe --abbrev=0 --tags --match "v[0-9]*" tags/${{github.ref_name}}^)" >> $GITHUB_ENV
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v3
         with:
           version: latest
           workdir: './cmd/wunderctl'
+          distribution: goreleaser-pro
           args: release --rm-dist --config ./../../.github/goreleaser/.goreleaser-windows.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AC_PASSWORD: ${{ secrets.AC_PASSWORD }}
           GH_AUTH_DEMO_CLIENT_ID: ${{ secrets.GH_AUTH_DEMO_CLIENT_ID }}
           GH_AUTH_DEMO_CLIENT_SECRET: ${{ secrets.GH_AUTH_DEMO_CLIENT_SECRET }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
 
   release-wunderctl:
     name: Release wunderctl wrapper
@@ -185,6 +179,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.event.client_payload.ref }}
+
       - uses: ./.github/actions/node
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}

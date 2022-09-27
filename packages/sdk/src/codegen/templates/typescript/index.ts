@@ -1,10 +1,11 @@
-import { Template, TemplateOutputFile, visitJSONSchema } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import prettier from 'prettier';
 import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
-import { hasInput, hasInternalInput, hasInjectedInput } from './react';
+import { hasInput, hasInternalInput, hasInjectedInput } from './helpers';
 import fs from 'fs';
 import path from 'path';
+import { visitJSONSchema } from '../../jsonschema';
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -24,7 +25,7 @@ export class TypeScriptInputModels implements Template {
 			{
 				path: 'models.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -43,7 +44,7 @@ export class TypeScriptInternalInputModels implements Template {
 			{
 				path: 'models.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -63,7 +64,7 @@ export class TypeScriptInjectedInputModels implements Template {
 			{
 				path: 'models.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -89,7 +90,7 @@ export class TypeScriptResponseModels implements Template {
 			{
 				path: 'models.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -116,7 +117,7 @@ export class TypeScriptResponseDataModels implements Template {
 			{
 				path: 'models.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}
@@ -174,7 +175,7 @@ export class BaseTypeScriptDataModel implements Template {
 			{
 				path: 'models.ts',
 				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n' + graphQLErrorDefinition),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

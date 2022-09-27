@@ -1,10 +1,10 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import Handlebars from 'handlebars';
 import { template } from './forms.tsx.template';
-import { hasInput, isNotInternal } from './react';
+import { hasInput, isNotInternal } from './helpers';
 
 export class Forms implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -78,7 +78,7 @@ export class Forms implements Template {
 			{
 				path: 'forms.tsx',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

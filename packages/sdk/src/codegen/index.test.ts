@@ -1,8 +1,8 @@
-import { CodeGenOutWriter, GenerateCode, Template, TemplateOutputFile } from './index';
+import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
-import { mapInputVariable, ResolvedWunderGraphConfig } from '../configure';
-import { assert } from 'chai';
-import { OperationType } from '@wundergraph/protobuf';
+import { ResolvedWunderGraphConfig } from '../configure';
+import { ConfigurationVariableKind, OperationType } from '@wundergraph/protobuf';
+import { mapInputVariable } from '../configure/variables';
 
 class FakeTemplate implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
@@ -27,16 +27,12 @@ class FakeFileSystem implements CodeGenOutWriter {
 
 test('GenerateCode', async () => {
 	const out = await RunTemplateTest(new FakeTemplate(), new FakeTemplate());
-	out.equals({
+	expect(out).toEqual({
 		'generated/testFile.txt': 'MyReviews+CreatePet+NewPets',
 	});
 });
 
-export interface EvaluateTemplate {
-	equals: (expected: { [key: string]: string }) => void;
-}
-
-export const RunTemplateTest = async (...templates: Template[]): Promise<EvaluateTemplate> => {
+export const RunTemplateTest = async (...templates: Template[]) => {
 	const fakeFileSystem = new FakeFileSystem();
 	await GenerateCode(
 		{
@@ -44,6 +40,81 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 			wunderGraphConfig: {
 				sdkVersion: 'unknown',
 				webhooks: [],
+				nodeOptions: {
+					nodeUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9991',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					publicNodeUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9991',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					listen: {
+						host: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '127.0.0.1',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9991',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					logger: {
+						level: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: 'INFO',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+				},
+				serverOptions: {
+					serverUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: 'http://127.0.0.1:9992',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
+					listen: {
+						host: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '127.0.0.1',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9992',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+					logger: {
+						level: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: 'INFO',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
+				},
 				application: {
 					Name: 'Test',
 					EngineConfiguration: new Api<any>('', [], [], [], []),
@@ -377,7 +448,8 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						name: 'api',
 					},
 					environment: {
-						name: 'localhost:9991',
+						name: 'main',
+						baseUrl: 'http://localhost:9991',
 						id: '',
 					},
 					name: 'main',
@@ -391,6 +463,7 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 						postAuthentication: false,
 						mutatingPostAuthentication: false,
 						revalidateAuthentication: false,
+						postLogout: false,
 					},
 					tokenBased: [],
 					cookieSecurity: {
@@ -409,9 +482,108 @@ export const RunTemplateTest = async (...templates: Template[]): Promise<Evaluat
 		},
 		fakeFileSystem
 	);
-	return {
-		equals: (expected) => {
-			assert.deepEqual(fakeFileSystem.files, expected);
-		},
-	};
+	return fakeFileSystem.files;
 };
+
+test('should collect all template dependencies recursively and dedupe based on the template name', () => {
+	class Template1 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template1.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+		dependencies(): Template[] {
+			return [new Template2()];
+		}
+	}
+
+	class Template2 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template2.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+
+		dependencies(): Template[] {
+			return [new Template3(), new Template3()];
+		}
+	}
+
+	class Template3 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template3.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+	}
+
+	const templates = Array.from(collectAllTemplates([new Template1()]));
+
+	expect(templates).toHaveLength(3);
+	expect(templates[0]).toEqual(new Template1());
+	expect(templates[1]).toEqual(new Template2());
+	expect(templates[2]).toEqual(new Template3());
+});
+
+test('should collect templates up to maxTemplateDepth', () => {
+	class Template1 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template1.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+		dependencies(): Template[] {
+			return [new Template2()];
+		}
+	}
+
+	class Template2 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template2.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+
+		dependencies(): Template[] {
+			return [new Template3(), new Template3()];
+		}
+	}
+
+	class Template3 implements Template {
+		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+			return Promise.resolve([
+				{
+					path: 'template3.txt',
+					content: '',
+					doNotEditHeader: false,
+				},
+			]);
+		}
+	}
+
+	const templates = Array.from(collectAllTemplates([new Template1()], 1));
+
+	expect(templates).toHaveLength(2);
+	expect(templates[0]).toEqual(new Template1());
+	expect(templates[1]).toEqual(new Template2());
+});

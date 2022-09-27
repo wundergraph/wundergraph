@@ -21,10 +21,10 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/securecookie"
 	"github.com/jensneuse/abstractlogger"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
 
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func init() {
@@ -241,6 +241,7 @@ type Hooks struct {
 	Log                        abstractlogger.Logger
 	PostAuthentication         bool
 	MutatingPostAuthentication bool
+	PostLogout                 bool
 }
 
 func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
@@ -248,14 +249,35 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 		return
 	}
 	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err == nil {
+	if userJson, err := json.Marshal(user); err != nil {
+		h.Log.Error("Could not marshal user", abstractlogger.Error(err))
+		return
+	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
 	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
 	if err != nil {
-		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
+		h.Log.Error("PostAuthentication queries hook", abstractlogger.Error(err))
 		return
 	}
+}
+
+func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
+	if !h.PostLogout || user == nil {
+		return
+	}
+	hookData := []byte(`{}`)
+	if userJson, err := json.Marshal(user); err != nil {
+		h.Log.Error("Could not marshal user", abstractlogger.Error(err))
+		return
+	} else {
+		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
+	}
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData)
+	if err != nil {
+		h.Log.Error("PostLogout queries hook", abstractlogger.Error(err))
+	}
+	return
 }
 
 type MutatingPostAuthenticationResponse struct {
@@ -269,12 +291,14 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 		return true, "", user
 	}
 	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err == nil {
+	if userJson, err := json.Marshal(user); err != nil {
+		return false, "", User{}
+	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
 	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
-		h.Log.Error("MockResolve queries hook", abstractlogger.Error(err))
+		h.Log.Error("MutatingPostAuthentication queries hook", abstractlogger.Error(err))
 		return
 	}
 	if out.Error != "" {
@@ -661,7 +685,11 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
 		hookData := []byte(`{}`)
-		if userJson, err := json.Marshal(user); err == nil {
+		if userJson, err := json.Marshal(user); err != nil {
+			u.Log.Error("Could not marshal user", abstractlogger.Error(err))
+			http.NotFound(w, r)
+			return
+		} else {
 			hookData, _ = jsonparser.Set(hookData, userJson, "user")
 		}
 		if user.AccessToken != nil {
@@ -672,16 +700,19 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
 		if err != nil {
-			u.Log.Error("RevalidateAuthentication", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication request failed", abstractlogger.Error(err))
+			http.NotFound(w, r)
 			return
 		}
 		if out.Error != "" {
+			u.Log.Error("RevalidateAuthentication returned an error", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}
 		var res MutatingPostAuthenticationResponse
 		err = json.Unmarshal(out.Response, &res)
 		if res.Status != "ok" {
+			u.Log.Error("RevalidateAuthentication status is not ok", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}
@@ -690,6 +721,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		user = &res.User
 		err = user.Save(u.Cookie, w, r, u.Host, u.InsecureCookies)
 		if err != nil {
+			u.Log.Error("RevalidateAuthentication could not save cookie", abstractlogger.Error(err))
 			http.NotFound(w, r)
 			return
 		}
@@ -724,16 +756,18 @@ func (_ *CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type UserLogoutHandler struct {
 	InsecureCookies                  bool
 	OpenIDConnectIssuersToLogoutURLs map[string]string
+	Hooks                            Hooks
 }
 
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resetUserCookies(w, r, !u.InsecureCookies)
-	logoutOpenIDConnectProvider := r.URL.Query().Get("logout_openid_connect_provider") == "true"
-	if !logoutOpenIDConnectProvider {
-		return
-	}
 	user := UserFromContext(r.Context())
 	if user == nil {
+		return
+	}
+	u.Hooks.handlePostLogout(r.Context(), user)
+	logoutOpenIDConnectProvider := r.URL.Query().Has("logout_openid_connect_provider")
+	if !logoutOpenIDConnectProvider {
 		return
 	}
 	if user.ProviderName != "oidc" {
@@ -761,10 +795,8 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
-	res, err := client.Do(req)
-	if err != nil || res.StatusCode != http.StatusOK {
-		return
-	}
+	_, _ = client.Do(req)
+	// we can safely ignore the outcome
 }
 
 type CSRFErrorHandler struct {

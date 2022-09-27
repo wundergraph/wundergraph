@@ -1,23 +1,11 @@
 //language=handlebars
 export const template = `
 import { {{ modelImports }} } from "./models"
-import type { BaseContext, WunderGraphRequest, WunderGraphResponse } from "@wundergraph/sdk";
+import type { BaseRequestContext, AuthenticationRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse } from "@wundergraph/sdk";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 
-export interface AuthenticationHookRequest extends BaseContext<User, InternalClient> {}
-
-export type AuthenticationResponse = AuthenticationOK | AuthenticationDeny;
-
-export interface AuthenticationOK {
-    status: "ok";
-    user: User;
-}
-
-export interface AuthenticationDeny {
-    status: "deny";
-    message: string;
-}
+export type AuthenticationHookRequest = BaseRequestContext<User, InternalClient> & AuthenticationRequestContext<User>
 
 // use SKIP to skip the hook and continue the request / response chain without modifying the request / response
 export type SKIP = "skip";
@@ -28,14 +16,14 @@ export type CANCEL = "cancel";
 
 export type WUNDERGRAPH_OPERATION = {{{operationNamesUnion}}};
 
-export interface HttpTransportHookRequest extends BaseContext<User,InternalClient> {
+export interface HttpTransportHookRequest extends BaseRequestContext<User, InternalClient> {
 		request: WunderGraphRequest;
 		operation: {
 				name: WUNDERGRAPH_OPERATION;
 				type: 'mutation' | 'query' | 'subscription';
 		}
 }
-export interface HttpTransportHookRequestWithResponse extends BaseContext<User,InternalClient> {
+export interface HttpTransportHookRequestWithResponse extends BaseRequestContext<User, InternalClient> {
 		response: WunderGraphResponse;
     operation: {
         name: string;
@@ -80,7 +68,7 @@ export type JSONValue =
 
 export type JSONObject = { [key: string]: JSONValue };
 										
-export interface HookRequest extends BaseContext<User,InternalClient> {}
+export interface HookRequest extends BaseRequestContext<User, InternalClient> {}
 
 export interface HookRequestWithResponse<Response> extends HookRequest {
 		response: Response;
@@ -94,8 +82,9 @@ export interface HooksConfig {
     global?: GlobalHooksConfig;
     authentication?: {
         postAuthentication?: (hook: AuthenticationHookRequest) => Promise<void>;
-        mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse>;
-        revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse>;
+        mutatingPostAuthentication?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
+        revalidate?: (hook: AuthenticationHookRequest) => Promise<AuthenticationResponse<User>>;
+        postLogout?: (hook: AuthenticationHookRequest) => Promise<void>;
     };
 {{#if hasQueries}}
     queries?: {

@@ -2,6 +2,21 @@
 
 WunderGraph documentation site built using [Tailwind CSS](https://tailwindcss.com) and [Next.js](https://nextjs.org).
 
+## How to add internal links to the documentation
+
+Do not directly add links between docs pages.
+If we did this, we'd have to maintain that all these links are correct.
+Instead, use "tagging" which takes a sequence of characters and adds a link to the corresponding page.
+
+Here's an example that directly adds a link, don't do it like this:
+
+```md
+We will use [Default Environment Variables](/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables) to generate the config.
+```
+
+Instead, add a tag to `docs-website/markdoc/tags.js` and link it to the correct page.
+This will ensure that all links are in one place and can easily be changed without going through all the docs manually.
+
 ## Getting started
 
 To get started with this project, first configure your secrets:

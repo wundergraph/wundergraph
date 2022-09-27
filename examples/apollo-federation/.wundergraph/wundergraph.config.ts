@@ -28,9 +28,14 @@ const federatedApi = introspect.federation({
 	],
 });
 
+const db = new WunderBase({
+	apiNamespace: 'db',
+	schema: './prisma.schema',
+});
+
 const myApplication = new Application({
 	name: 'app',
-	apis: [federatedApi],
+	apis: [federatedApi, db],
 });
 
 // configureWunderGraph emits the configuration

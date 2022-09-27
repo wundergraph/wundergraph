@@ -44,7 +44,6 @@ import {
 	applyNameSpaceToTypeFields,
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
-import { EnvironmentVariable, InputVariable, mapInputVariable, PlaceHolder, resolveVariable } from '../configure';
 import { loadFile } from '../codegen/templates/typescript';
 import { composeServices } from '@apollo/composition';
 import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
@@ -58,9 +57,18 @@ import {
 	toCacheEntry,
 	writeIntrospectionCacheFile,
 } from './introspection-cache';
+import {
+	EnvironmentVariable,
+	InputVariable,
+	mapInputVariable,
+	PlaceHolder,
+	resolveVariable,
+} from '../configure/variables';
 
-export const DataSourcePollingModeEnabled = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
-export const IntrospectionCacheEnabled = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+// Use UPPERCASE for environment variables
+export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
+export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+export const WG_DEV_FIRST_RUN = process.env['WG_DEV_FIRST_RUN'] === 'true';
 
 export interface ApplicationConfig {
 	name: string;
@@ -395,6 +403,8 @@ export type JWTSigningMethod = 'HS256';
 
 export interface GraphQLUpstream extends HTTPUpstream {
 	url: InputVariable;
+	baseUrl?: InputVariable;
+	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 }
 
@@ -439,7 +449,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
-	baseURL?: InputVariable;
+	baseURL?: string;
 }
 
 export interface StaticApiCustom {
@@ -614,13 +624,15 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
+	const isIntrospectionCacheEnabled =
+		WG_ENABLE_INTROSPECTION_CACHE && introspection.introspection?.disableCache !== true;
 	const cacheKey = objectHash(introspection);
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
 	 * The return value is ignorable because we don't use it.
 	 */
-	if (DataSourcePollingModeEnabled) {
+	if (WG_DATA_SOURCE_POLLING_MODE) {
 		if (
 			introspection.introspection?.pollingIntervalSeconds !== undefined &&
 			introspection.introspection?.pollingIntervalSeconds > 0
@@ -636,14 +648,14 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	}
 
 	/**
-	 * This is the regular path to introspect the API and return the result.
-	 * By default we try to early return with a cached introspection result.
+	 * The introspection cache is only used in development mode `wunderctl up`.
+	 * We try to early return with a cached introspection result.
 	 * When the user runs `wunderctl up` for the first time, we disable the cache
-	 * so the user can be sure that the introspection is up to date. If the API is down
-	 * the cache will not be updated and we will fallback to the old introspection result (if possible).
+	 * so the user can be sure that the introspection is up to date. If the API is down during development
+	 * we try to fallback to the previous introspection result.
 	 */
 
-	if (IntrospectionCacheEnabled && introspection.introspection?.disableCache !== true) {
+	if (isIntrospectionCacheEnabled) {
 		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 		if (cacheEntryString) {
 			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
@@ -656,18 +668,28 @@ const introspectWithCache = async <Introspection extends IntrospectionConfigurat
 	try {
 		// generate introspection from scratch
 		const api = await generator(introspection);
-		const cacheEntry = toCacheEntry<A>(api);
-		await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+
+		// prefill cache with new introspection result (only for development mode)
+		if (WG_DEV_FIRST_RUN) {
+			try {
+				const cacheEntry = toCacheEntry<A>(api);
+				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+			} catch (e) {}
+		}
+
 		return api;
 	} catch (e) {
-		console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
-		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-		if (cacheEntryString) {
-			console.log('Fallback to old introspection result');
-			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-			return fromCacheEntry<A>(cacheEntry);
+		// fallback to old introspection result (only for development mode)
+		if (WG_DEV_FIRST_RUN) {
+			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
+			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+			if (cacheEntryString) {
+				console.log('Fallback to old introspection result');
+				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+				return fromCacheEntry<A>(cacheEntry);
+			}
+			console.log('Could not fallback to old introspection result');
 		}
-		console.log('Could not fallback to old introspection result');
 		throw e;
 	}
 };
@@ -759,8 +781,8 @@ export const introspect = {
 						Custom: {
 							Fetch: {
 								url: mapInputVariable(introspection.url),
-								baseUrl: mapInputVariable(''),
-								path: mapInputVariable(''),
+								baseUrl: introspection.baseUrl ? mapInputVariable(introspection.baseUrl) : mapInputVariable(''),
+								path: introspection.path ? mapInputVariable(introspection.path) : mapInputVariable(''),
 								method: HTTPMethod.POST,
 								body: mapInputVariable(''),
 								header: headers,
@@ -883,11 +905,9 @@ export const introspect = {
 			}
 
 			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
+				...upstream,
 				isFederation: true,
-				url: upstream.url,
-				headers: upstream.headers,
 				apiNamespace: introspection.apiNamespace,
-				loadSchemaFromString: upstream.loadSchemaFromString,
 			}));
 
 			const apis = await Promise.all(graphQLIntrospections.map((i) => introspect.graphql(i)));

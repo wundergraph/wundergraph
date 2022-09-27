@@ -170,6 +170,10 @@ const navigation = [
 				href: '/docs/examples/nextjs',
 			},
 			{
+				title: 'NextJS + SWR',
+				href: '/docs/examples/nextjs-swr',
+			},
+			{
 				title: 'Hooks',
 				href: '/docs/examples/hooks',
 			},
@@ -208,6 +212,10 @@ const navigation = [
 			{
 				title: 'GraphQL Fragments',
 				href: '/docs/examples/fragments',
+			},
+			{
+				title: 'Keycloak OpenID Connect Authentication',
+				href: '/docs/examples/keycloak-openid-connect-authentication',
 			},
 		],
 	},
@@ -552,6 +560,18 @@ const navigation = [
 				title: 'wunderctl remove',
 				href: '/docs/wunderctl-reference/wunderctl-remove',
 			},
+			{
+				title: 'wunderctl start',
+				href: '/docs/wunderctl-reference/wunderctl-start',
+			},
+			{
+				title: 'wunderctl node start',
+				href: '/docs/wunderctl-reference/wunderctl-node-start',
+			},
+			{
+				title: 'wunderctl server start',
+				href: '/docs/wunderctl-reference/wunderctl-server-start',
+			},
 		],
 	},
 	{
@@ -641,6 +661,10 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-config-ts-reference',
+			},
+			{
+				title: 'WunderNode Options',
+				href: '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
 			},
 			{
 				title: 'GraphQL Data Source',
@@ -740,6 +764,14 @@ const navigation = [
 				href: '/docs/wundergraph-server-ts-reference',
 			},
 			{
+				title: 'WunderGraph Server Options',
+				href: '/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
+			},
+			{
+				title: 'Webhooks',
+				href: '/docs/wundergraph-server-ts-reference/webhooks',
+			},
+			{
 				title: 'preResolve hook',
 				href: '/docs/wundergraph-server-ts-reference/pre-resolve-hook',
 			},
@@ -782,6 +814,10 @@ const navigation = [
 			{
 				title: 'mutatingPostAuthentication hook',
 				href: '/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
+			},
+			{
+				title: 'postLogout hook',
+				href: '/docs/wundergraph-server-ts-reference/post-logout-hook',
 			},
 			{
 				title: 'Custom GraphQL Servers',

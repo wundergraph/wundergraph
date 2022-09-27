@@ -3,7 +3,7 @@ import { GraphQLApi } from '../definition';
 import { parse, print } from 'graphql';
 import { ArgumentRenderConfiguration, ArgumentSource, DataSourceKind, HTTPMethod } from '@wundergraph/protobuf';
 import transformApi from './index';
-import { mapInputVariable } from '../configure';
+import { mapInputVariable } from '../configure/variables';
 
 test('renameTypes', async () => {
 	const schema = `type User {name: String!} type Query {me: User!}`;

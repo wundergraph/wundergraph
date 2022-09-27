@@ -1,0 +1,20 @@
+mutation (
+	$email: String!
+	$name: String!
+	$bio: String!
+	$title: String!
+	$content: String!
+	$published: Boolean!
+	$now: DateTime! @injectCurrentDateTime
+) {
+	db_createOneUser(
+		data: {
+			email: $email
+			name: $name
+			Profile: { create: { bio: $bio } }
+			Post: { create: { title: $title, content: $content, published: $published, createdAt: $now, updatedAt: $now } }
+		}
+	) {
+		id
+	}
+}

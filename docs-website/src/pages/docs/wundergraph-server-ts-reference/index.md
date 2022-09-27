@@ -10,6 +10,7 @@ isIndexFile: true
 Here's an overview of all the different options to extend your WunderGraph Server using custom hooks and custom GraphQL resolvers.
 
 {% quick-links %}
+{% quick-link title="WunderGraph Server Options" icon="core" href="/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options" description="" /%}
 {% quick-link title="webhooks" icon="core" href="/docs/wundergraph-server-ts-reference/webhooks" description="Configures your custom webhook endpoints." /%}
 {% quick-link title="preResolve hook" icon="core" href="/docs/wundergraph-server-ts-reference/pre-resolve-hook" description="This hook is called BEFORE on Operation is resolved." /%}
 {% quick-link title="mutatingPreResolve hook" icon="core" href="/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook" description="This hook is called BEFORE an operation is resolved, it can manipulate the input." /%}
@@ -22,5 +23,6 @@ Here's an overview of all the different options to extend your WunderGraph Serve
 {% quick-link title="postAuthentication hook" icon="core" href="/docs/wundergraph-server-ts-reference/post-authentication-hook" description="This hook is called AFTER the authentication flow is complete." /%}
 {% quick-link title="revalidate hook" icon="core" href="/docs/wundergraph-server-ts-reference/revalidate-hook" description="This hook is called when the user calls the user endpoint with the revalidate option." /%}
 {% quick-link title="mutatingPostAuthentication hook" icon="core" href="/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook" description="This hook can be used to manipulate the user object AFTER the authentication flow is complete." /%}
+{% quick-link title="postLogout hook" icon="core" href="/docs/wundergraph-server-ts-reference/post-logout-hook" description="This hook is called AFTER the user is logged out." /%}
 {% quick-link title="Custom GraphQL Servers" icon="core" href="/docs/wundergraph-server-ts-reference/custom-graphql-servers" description="Write custom GraphQL servers/resolvers to extend your Virtual Graph." /%}
 {% /quick-links %}

@@ -20,9 +20,10 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/logging"
-	"github.com/wundergraph/wundergraph/pkg/wundernodeconfig"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func TestNode(t *testing.T) {
@@ -68,69 +69,66 @@ func TestNode(t *testing.T) {
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
-	cfg := &wundernodeconfig.Config{
-		Server: &wundernodeconfig.ServerConfig{
-			ListenAddr: nodeURL,
-			ListenTLS:  false,
-			ProxyProto: false,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node := New(ctx, BuildInfo{}, cfg, logger)
+	node := New(ctx, BuildInfo{}, logger)
 
-	nodeConfig := wgpb.WunderNodeConfig{
-		Server: &wgpb.Server{
+	nodeConfig := WunderNodeConfig{
+		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
 			ReadTimeout:             5,
 			WriteTimeout:            5,
 			IdleTimeout:             5,
 		},
-		Apis: []*wgpb.Api{
-			{
-				Hosts:                 []string{"jens.wundergraph.dev"},
-				PathPrefix:            "myApi/main",
-				EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
-				EnableSingleFlight:    true,
-				EnableGraphqlEndpoint: true,
-				Operations: []*wgpb.Operation{
-					{
-						Name:          "MyReviews",
-						Content:       federationTestQuery,
-						OperationType: wgpb.OperationType_QUERY,
-						HooksConfiguration: &wgpb.OperationHooksConfiguration{
-							MockResolve: &wgpb.MockResolveHookConfiguration{},
-						},
-						VariablesSchema:              `{}`,
-						ResponseSchema:               `{}`,
-						InterpolationVariablesSchema: `{}`,
-						AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
-							RoleConfig: &wgpb.OperationRoleConfig{},
-						},
+		Api: &apihandler.Api{
+			Hosts:                 []string{"jens.wundergraph.dev"},
+			PathPrefix:            "myApi/main",
+			EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
+			EnableSingleFlight:    true,
+			EnableGraphqlEndpoint: true,
+			Operations: []*wgpb.Operation{
+				{
+					Name:          "MyReviews",
+					Content:       federationTestQuery,
+					OperationType: wgpb.OperationType_QUERY,
+					HooksConfiguration: &wgpb.OperationHooksConfiguration{
+						MockResolve: &wgpb.MockResolveHookConfiguration{},
 					},
-					{
-						Name:          "TopProducts",
-						Content:       topProductsQuery,
-						OperationType: wgpb.OperationType_QUERY,
-						HooksConfiguration: &wgpb.OperationHooksConfiguration{
-							MockResolve: &wgpb.MockResolveHookConfiguration{},
-						},
-						VariablesSchema:              `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
-						ResponseSchema:               `{}`,
-						InterpolationVariablesSchema: `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
-						AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
-							RoleConfig: &wgpb.OperationRoleConfig{},
-						},
+					VariablesSchema:              `{}`,
+					ResponseSchema:               `{}`,
+					InterpolationVariablesSchema: `{}`,
+					AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
+						RoleConfig: &wgpb.OperationRoleConfig{},
 					},
 				},
-				AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
-					CookieBased: &wgpb.CookieBasedAuthentication{},
-					JwksBased:   &wgpb.JwksBasedAuthentication{},
-					Hooks:       &wgpb.ApiAuthenticationHooks{},
+				{
+					Name:          "TopProducts",
+					Content:       topProductsQuery,
+					OperationType: wgpb.OperationType_QUERY,
+					HooksConfiguration: &wgpb.OperationHooksConfiguration{
+						MockResolve: &wgpb.MockResolveHookConfiguration{},
+					},
+					VariablesSchema:              `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
+					ResponseSchema:               `{}`,
+					InterpolationVariablesSchema: `{"type":"object","properties":{"first":{"type":["number","null"]}}}`,
+					AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
+						RoleConfig: &wgpb.OperationRoleConfig{},
+					},
 				},
+			},
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{},
+				JwksBased:   &wgpb.JwksBasedAuthentication{},
+				Hooks:       &wgpb.ApiAuthenticationHooks{},
+			},
+			Options: &apihandler.Options{
+				Listener: &apihandler.Listener{
+					Host: "127.0.0.1",
+					Port: uint16(port),
+				},
+				Logging: apihandler.Logging{Level: wgpb.LogLevel_ERROR},
 			},
 		},
 	}
@@ -201,60 +199,57 @@ func TestWebHooks(t *testing.T) {
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
-	cfg := &wundernodeconfig.Config{
-		Server: &wundernodeconfig.ServerConfig{
-			ListenAddr: nodeURL,
-			ListenTLS:  false,
-			ProxyProto: false,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	logger := logging.New(abstractlogger.InfoLevel, true)
-	node := New(ctx, BuildInfo{}, cfg, logger)
+	node := New(ctx, BuildInfo{}, logger)
 
-	nodeConfig := wgpb.WunderNodeConfig{
-		Server: &wgpb.Server{
+	nodeConfig := WunderNodeConfig{
+		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
 			ReadTimeout:             5,
 			WriteTimeout:            5,
 			IdleTimeout:             5,
 		},
-		Apis: []*wgpb.Api{
-			{
-				Hosts:                 []string{"localhost"},
-				PathPrefix:            "api/main",
-				HooksServerURL:        testServer.URL,
-				EnableSingleFlight:    true,
-				EnableGraphqlEndpoint: true,
-				AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
-					CookieBased: &wgpb.CookieBasedAuthentication{},
-					JwksBased:   &wgpb.JwksBasedAuthentication{},
-					Hooks:       &wgpb.ApiAuthenticationHooks{},
+		Api: &apihandler.Api{
+			Hosts:                 []string{"localhost"},
+			PathPrefix:            "api/main",
+			EnableSingleFlight:    true,
+			EnableGraphqlEndpoint: true,
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{},
+				JwksBased:   &wgpb.JwksBasedAuthentication{},
+				Hooks:       &wgpb.ApiAuthenticationHooks{},
+			},
+			Webhooks: []*wgpb.WebhookConfiguration{
+				{
+					Name: "github",
 				},
-				Webhooks: []*wgpb.WebhookConfiguration{
-					{
-						Name: "github",
-					},
-					{
-						Name: "stripe",
-					},
-					{
-						Name: "github-protected",
-						Verifier: &wgpb.WebhookVerifier{
-							Kind:                  wgpb.WebhookVerifierKind_HMAC_SHA256,
-							SignatureHeader:       "X-Hub-Signature",
-							SignatureHeaderPrefix: "sha256=",
-							Secret: &wgpb.ConfigurationVariable{
-								Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-								StaticVariableContent: "secret",
-							},
+				{
+					Name: "stripe",
+				},
+				{
+					Name: "github-protected",
+					Verifier: &wgpb.WebhookVerifier{
+						Kind:                  wgpb.WebhookVerifierKind_HMAC_SHA256,
+						SignatureHeader:       "X-Hub-Signature",
+						SignatureHeaderPrefix: "sha256=",
+						Secret: &wgpb.ConfigurationVariable{
+							Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+							StaticVariableContent: "secret",
 						},
 					},
 				},
+			},
+			Options: &apihandler.Options{
+				ServerUrl: testServer.URL,
+				Listener: &apihandler.Listener{
+					Host: "127.0.0.1",
+					Port: uint16(port),
+				},
+				Logging: apihandler.Logging{Level: wgpb.LogLevel_ERROR},
 			},
 		},
 	}
@@ -313,41 +308,39 @@ func BenchmarkNode(t *testing.B) {
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
-	cfg := &wundernodeconfig.Config{
-		Server: &wundernodeconfig.ServerConfig{
-			ListenAddr: nodeURL,
-			ListenTLS:  false,
-			ProxyProto: false,
-		},
-	}
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node := New(ctx, BuildInfo{}, cfg, logger)
+	node := New(ctx, BuildInfo{}, logger)
 
-	nodeConfig := wgpb.WunderNodeConfig{
-		Server: &wgpb.Server{
+	nodeConfig := WunderNodeConfig{
+		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               0,
 			ReadTimeout:             5,
 			WriteTimeout:            5,
 			IdleTimeout:             5,
 		},
-		Apis: []*wgpb.Api{
-			{
-				Hosts:                 []string{"jens.wundergraph.dev"},
-				PathPrefix:            "myApi",
-				EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
-				EnableSingleFlight:    true,
-				EnableGraphqlEndpoint: true,
-				Operations: []*wgpb.Operation{
-					{
-						Name:          "MyReviews",
-						Content:       federationTestQuery,
-						OperationType: wgpb.OperationType_QUERY,
-					},
+		Api: &apihandler.Api{
+
+			Hosts:                 []string{"jens.wundergraph.dev"},
+			PathPrefix:            "myApi",
+			EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
+			EnableSingleFlight:    true,
+			EnableGraphqlEndpoint: true,
+			Operations: []*wgpb.Operation{
+				{
+					Name:          "MyReviews",
+					Content:       federationTestQuery,
+					OperationType: wgpb.OperationType_QUERY,
 				},
+			},
+			Options: &apihandler.Options{
+				Listener: &apihandler.Listener{
+					Host: "127.0.0.1",
+					Port: uint16(port),
+				},
+				Logging: apihandler.Logging{Level: wgpb.LogLevel_ERROR},
 			},
 		},
 	}

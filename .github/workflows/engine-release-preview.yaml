@@ -1,0 +1,52 @@
+name: Engine Release Preview
+on:
+  push:
+    tags-ignore:
+      - '**'
+    branches:
+      - 'main'
+      - 'next'
+    paths-ignore:
+      - 'docs*/**'
+      - '*.md'
+
+env:
+  WORKING_DIRECTORY: '.'
+  CI: true
+
+jobs:
+  engine-release-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/go
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+
+      - name: Install Protoc
+        uses: abelfodil/protoc-action@v1
+        with:
+          protoc-version: '21.5'
+
+      - name: generate go types based on protobuf definitions
+        run: make codegen-go
+
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v3
+        with:
+          version: latest
+          distribution: goreleaser-pro
+          install-only: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+
+      - name: Generate release summary
+        working-directory: './cmd/wunderctl'
+        run: goreleaser changelog --config ./../../.github/goreleaser/.goreleaser-linux.yml >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_GORELEASER }}
+          GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}

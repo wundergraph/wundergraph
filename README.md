@@ -70,6 +70,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Migrate from Apollo GraphQL](./examples/migrate-from-apollo)
 - [Publish & Install APIs](./examples/publish-install-api)
 - [Dockerize WunderGraph](https://github.com/wundergraph/docker)
+- [Typesafe Golang Client](/examples/golang-client)
 
 ## The WunderGraph Stack
 

@@ -3,6 +3,110 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.113.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.113.1...@wundergraph/sdk@0.113.2) (2022-09-26)
+
+### Bug Fixes
+
+* **cache:** dont print dev messages in prod mode ([#208](https://github.com/wundergraph/wundergraph/issues/208)) ([b22c32a](https://github.com/wundergraph/wundergraph/commit/b22c32ab7f2705b19ad537f76dfef43d589fd026)) (@StarpTech)
+* **codegen:** resolve template dependencies recursively ([#209](https://github.com/wundergraph/wundergraph/issues/209)) ([283a9c8](https://github.com/wundergraph/wundergraph/commit/283a9c8db4c28f8fb1177fd68aa6a55acc98e8a0)) (@StarpTech)
+
+## [0.113.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.113.0...@wundergraph/sdk@0.113.1) (2022-09-22)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.113.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.112.0...@wundergraph/sdk@0.113.0) (2022-09-21)
+
+### Features
+
+* add auth example for swr ([#200](https://github.com/wundergraph/wundergraph/issues/200)) ([7a5f34e](https://github.com/wundergraph/wundergraph/commit/7a5f34e8c80141f400a9b6ed195d04a22a86c92b)) (@StarpTech)
+
+## [0.112.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.111.0...@wundergraph/sdk@0.112.0) (2022-09-21)
+
+### Features
+
+* add post logout hook ([#196](https://github.com/wundergraph/wundergraph/issues/196)) ([6870130](https://github.com/wundergraph/wundergraph/commit/6870130b0c4e6fc269d81160994384c1d1cf6e59)) (@jensneuse)
+
+## [0.111.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.110.0...@wundergraph/sdk@0.111.0) (2022-09-20)
+
+### Features
+
+* add swr hooks for auth and file upload ([#195](https://github.com/wundergraph/wundergraph/issues/195)) ([a0b1bae](https://github.com/wundergraph/wundergraph/commit/a0b1bae6a18e30fcefc35bdde2f72326f3de1392)) (@StarpTech)
+
+## [0.110.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.109.0...@wundergraph/sdk@0.110.0) (2022-09-19)
+
+### Features
+
+* make typescript client typesafe ([#179](https://github.com/wundergraph/wundergraph/issues/179)) ([942b278](https://github.com/wundergraph/wundergraph/commit/942b2782255de3b9e6374500c7a8047de074e4ff)), closes [#188](https://github.com/wundergraph/wundergraph/issues/188) (@Pagebakers)
+
+## [0.109.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.108.0...@wundergraph/sdk@0.109.0) (2022-09-19)
+
+### Features
+
+* implement config first approach ([#151](https://github.com/wundergraph/wundergraph/issues/151)) ([803da0e](https://github.com/wundergraph/wundergraph/commit/803da0e51beb3a7b23ee826dfde835eccfa1c2dd)), closes [#190](https://github.com/wundergraph/wundergraph/issues/190) (@spetrunin)
+
+### Bug Fixes
+
+* update User interface on client to parse json correctly ([#176](https://github.com/wundergraph/wundergraph/issues/176)) ([f80e410](https://github.com/wundergraph/wundergraph/commit/f80e410530433c6c9b1c290abca2e51b1e7ea907)) (@thisisnithin)
+
+## [0.108.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.107.1...@wundergraph/sdk@0.108.0) (2022-09-15)
+
+### Features
+
+* allow templates in baseURL for openapi ([#183](https://github.com/wundergraph/wundergraph/issues/183)) ([cb279e7](https://github.com/wundergraph/wundergraph/commit/cb279e7829e704d75a1bcea5a87c42b09331c624)) (@jensneuse)
+* custom stable hash function for js values ([#182](https://github.com/wundergraph/wundergraph/issues/182)) ([c16c635](https://github.com/wundergraph/wundergraph/commit/c16c635dd6c6ee5a9784e83b4063941b8e3f3435)) (@StarpTech)
+
+## [0.107.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.107.0...@wundergraph/sdk@0.107.1) (2022-09-15)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.107.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.106.0...@wundergraph/sdk@0.107.0) (2022-09-14)
+
+### Features
+
+* oidc,  allow passing additional query parameters to the IDP ([#178](https://github.com/wundergraph/wundergraph/issues/178)) ([d015bb1](https://github.com/wundergraph/wundergraph/commit/d015bb150762cba7a46865e66f3de633e731de07)) (@YuriBuerov)
+
+## [0.106.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.105.1...@wundergraph/sdk@0.106.0) (2022-09-09)
+
+### Features
+
+* add golang client ([#170](https://github.com/wundergraph/wundergraph/issues/170)) ([a26bc32](https://github.com/wundergraph/wundergraph/commit/a26bc32d4a178134f893012ca4e2648460b4e7f8)) (@jensneuse)
+
+## [0.105.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.105.0...@wundergraph/sdk@0.105.1) (2022-09-08)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.105.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.104.0...@wundergraph/sdk@0.105.0) (2022-09-08)
+
+### Features
+
+* improve webhook types ([#173](https://github.com/wundergraph/wundergraph/issues/173)) ([8cb6d97](https://github.com/wundergraph/wundergraph/commit/8cb6d9750f6e14e2fdd3d87ad97ca0cf3236f95b)) (@StarpTech)
+
+## [0.104.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.103.1...@wundergraph/sdk@0.104.0) (2022-09-06)
+
+### Features
+
+* ensure that user is always set in auth hooks, disable introspection cache in `wunderctl generate` ([#167](https://github.com/wundergraph/wundergraph/issues/167)) ([4b40572](https://github.com/wundergraph/wundergraph/commit/4b40572dd993be1c84e421f1796eb8a2913ecf69)) (@StarpTech)
+
+### Bug Fixes
+
+* sync wunderctl ([06dfe11](https://github.com/wundergraph/wundergraph/commit/06dfe11e885acafe48b6d7e8776cb763f0c75a66)) (@StarpTech)
+
+## [0.103.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.103.0...@wundergraph/sdk@0.103.1) (2022-09-05)
+
+### Bug Fixes
+
+* fixes open api errors for int based enums and json fields ([#164](https://github.com/wundergraph/wundergraph/issues/164)) ([a79fe3e](https://github.com/wundergraph/wundergraph/commit/a79fe3ebc8c0b8d863123d565edfe0942f03048d)) (@rpeterson)
+
+## [0.103.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.102.0...@wundergraph/sdk@0.103.0) (2022-09-04)
+
+### Features
+
+* don't exit, throw error and handle at root ([#161](https://github.com/wundergraph/wundergraph/issues/161)) ([5495d27](https://github.com/wundergraph/wundergraph/commit/5495d27c181f12a96655fae0f403ffaedda50816)) (@StarpTech)
+
+### Bug Fixes
+
+* subscription url config ([#162](https://github.com/wundergraph/wundergraph/issues/162)) ([c503400](https://github.com/wundergraph/wundergraph/commit/c503400061a33243702c8e7be753e14d863e5d98)) (@jensneuse)
+
 ## [0.102.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.101.0...@wundergraph/sdk@0.102.0) (2022-09-02)
 
 ### Features

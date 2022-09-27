@@ -13,13 +13,31 @@ For example, you might want to receive message when a User has starred your repo
 ```typescript
 // .wundergraph/webhooks/github.ts
 
-import type { Webhook } from '@wundergraph/sdk'
+import type {
+  Webhook,
+  WebhookHttpEvent,
+  WebhookHttpResponse,
+} from '@wundergraph/sdk'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
-const webhook: Webhook<InternalClient, { a: number }, { hello: string }> = {
+const webhook: Webhook<
+  InternalClient,
+  WebhookHttpEvent<
+    { myBodyVar: string },
+    { myQueryVar: string },
+    { myHeaderVar: string }
+  >,
+  WebhookHttpResponse<
+    { myResponseBodyVar: string },
+    { myResponseHeaderVar: string }
+  >
+> = {
   handler: async (event, context) => {
     return {
       statusCode: 200,
+      headers: {
+        myResponseHeaderVar: 'myResponseHeaderValue',
+      },
       body: {
         hello: 'github',
       },
@@ -42,7 +60,7 @@ You have access to the original client request.
 import type { Webhook } from '@wundergraph/sdk'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
-const webhook: Webhook<InternalClient, { a: number }, { hello: string }> = {
+const webhook: Webhook<InternalClient> = {
   handler: async (event, context) => {
     event.body
     event.url
@@ -52,6 +70,9 @@ const webhook: Webhook<InternalClient, { a: number }, { hello: string }> = {
 
     return {
       statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: {
         hello: 'github',
       },
@@ -72,7 +93,7 @@ You can call internal operations from webhooks. Ensure to import the generated c
 import type { Webhook } from '@wundergraph/sdk'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
-const webhook: Webhook<InternalClient, { a: number }, { hello: string }> = {
+const webhook: Webhook<InternalClient> = {
   handler: async (event, context) => {
     const data = context.internalClient.queries.Dragons()
     console.log(data)

@@ -47,7 +47,7 @@ import {
 	applyNameSpaceToGraphQLSchema,
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
-import { mapInputVariable } from '../configure';
+import { mapInputVariable } from '../configure/variables';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -147,6 +147,8 @@ class RESTApiBuilder {
 	private graphQLSchema: DocumentNode;
 	private dataSources: DataSource<RESTApiCustom>[] = [];
 	private fields: FieldConfiguration[] = [];
+	private baseUrlArgs: string[] = [];
+
 	public build = (): RESTApi => {
 		Object.keys(this.spec.paths).forEach((path) => {
 			const pathObject = this.spec.paths[path];
@@ -177,6 +179,22 @@ class RESTApiBuilder {
 				ChildNodes: applyNameSpaceToTypeFields(ds.ChildNodes, schema, this.apiNamespace),
 			};
 		});
+		if (this.baseUrlArgs.length) {
+			this.baseUrlArgs.forEach((arg) => {
+				this.fields.map((field) => ({
+					...field,
+					argumentsConfiguration: [
+						...(field.argumentsConfiguration || []),
+						{
+							name: arg,
+							renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_ARRAY_CSV,
+							sourceType: ArgumentSource.FIELD_ARGUMENT,
+							sourcePath: [arg],
+						},
+					],
+				}));
+			});
+		}
 		return new RESTApi(
 			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
 			dataSources,
@@ -196,6 +214,9 @@ class RESTApiBuilder {
 			return;
 		}
 		const parentType = verb === HTTPMethod.GET ? 'Query' : 'Mutation';
+
+		const baseUrl = this.cleanupBaseURL(this.baseURL());
+
 		this.dataSources.push({
 			RootNodes: [
 				{
@@ -208,7 +229,7 @@ class RESTApiBuilder {
 				Fetch: {
 					method: verb,
 					path: mapInputVariable(path),
-					baseUrl: mapInputVariable(this.introspection.baseURL || this.baseURL()),
+					baseUrl: mapInputVariable(baseUrl),
 					url: mapInputVariable(''),
 					body: mapInputVariable(''),
 					header: this.headers,
@@ -226,6 +247,7 @@ class RESTApiBuilder {
 			ChildNodes: [],
 			Directives: [],
 		});
+
 		this.fields.push({
 			typeName: parentType,
 			fieldName: fieldName,
@@ -276,6 +298,11 @@ class RESTApiBuilder {
 				statusCode: statusCode,
 				responseObjectDescription: responseObject!.description,
 			});
+			if (this.baseUrlArgs.length) {
+				this.baseUrlArgs.forEach((arg) => {
+					this.addArgument(parentType, fieldName, arg, 'String', ['non_null']);
+				});
+			}
 		});
 		const parameters = [...(pathItemObject.parameters || []), ...(operationObject.parameters || [])];
 		parameters.map(this.resolveParamsObject).forEach((param) => {
@@ -403,18 +430,26 @@ class RESTApiBuilder {
 			const componentSchema = resolved.schema;
 			ref = resolved.ref;
 			let fieldTypeName = ref;
+
 			if (objectKind === 'input') {
 				fieldTypeName = `${fieldTypeName}Input`;
 			}
+
+			const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
 			if (argumentName) {
-				this.addArgument(parentTypeName, fieldName, argumentName, fieldTypeName, enclosingTypes);
+				this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
 			} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
 				fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
 				this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
 			} else {
-				this.addField(parentTypeName, objectKind, fieldName, fieldTypeName, enclosingTypes);
+				this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
 			}
-			const created = this.ensureType(componentSchema.enum ? 'enum' : objectKind, fieldTypeName);
+			if (isIntEnum) return;
+
+			const created = this.ensureType(
+				componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
+				fieldTypeName
+			);
 			if (!created) {
 				return;
 			}
@@ -502,6 +537,10 @@ class RESTApiBuilder {
 				return;
 			case 'object':
 				if (!schema.properties) {
+					if (schema?.additionalProperties && schema.additionalProperties !== false) {
+						this.ensureType('scalar', 'JSON');
+						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);
+					}
 					return;
 				}
 				if (argumentName) {
@@ -658,14 +697,21 @@ class RESTApiBuilder {
 		return true;
 	};
 	private baseURL = (): string => {
+		if (this.introspection.baseURL) {
+			return this.introspection.baseURL;
+		}
 		if (!this.spec.servers || this.spec.servers.length === 0) {
 			throw new Error('OpenAPISpecification must contain server + url');
 		}
 		const secure = this.spec.servers.find((server) => server.url.startsWith('https'));
-		if (secure) {
-			return secure.url;
-		}
-		return this.spec.servers[0].url;
+		return secure ? secure.url : this.spec.servers[0].url;
+	};
+	private cleanupBaseURL = (url: string): string => {
+		return url.replace(/{[a-zA-Z]+}/, (str) => {
+			const arg = this.sanitizeName(str.substring(1, str.length - 1));
+			this.baseUrlArgs.push(arg);
+			return `{{ .arguments.${arg} }}`;
+		});
 	};
 	private buildScalarTypeDefinitionNode = (name: string): ScalarTypeDefinitionNode => {
 		return {
@@ -695,6 +741,11 @@ class RESTApiBuilder {
 			FieldDefinition: {
 				enter: (node) => {
 					if (node.name.value !== fieldName) {
+						return;
+					}
+					const arg = node.arguments?.find((arg) => arg.name.value === argumentName);
+					if (arg) {
+						done = true;
 						return;
 					}
 					const update: FieldDefinitionNode = {

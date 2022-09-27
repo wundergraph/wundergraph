@@ -3,17 +3,18 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/webhooks"
-	"golang.org/x/sync/errgroup"
 	"os"
 	"path"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
+
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
 var (
@@ -52,7 +53,12 @@ Use this command if you only want to generate the configuration`,
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wgDir,
 			Logger:        log,
-			ScriptEnv:     append(os.Environ(), fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish)),
+			ScriptEnv: append(
+				os.Environ(),
+				// Run scripts in prod mode
+				"NODE_ENV=production",
+				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
+			),
 		})
 		defer func() {
 			log.Debug("Stopping config-runner after WunderNode shutdown")
@@ -166,10 +172,5 @@ Use this command if you only want to generate the configuration`,
 
 func init() {
 	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
-	generateCmd.Flags().StringVar(&listenAddr, "listen-addr", "localhost:9991", "listen_addr is the host:port combination, WunderGraph should listen on.")
-	generateCmd.Flags().IntVar(&middlewareListenPort, "middleware-listen-port", 9992, "middleware-listen-port is the port which the WunderGraph middleware will bind to")
-	generateCmd.Flags().StringVar(&configEntryPointFilename, "entrypoint", "wundergraph.config.ts", "entrypoint to build the config")
-	generateCmd.Flags().StringVar(&serverEntryPointFilename, "serverEntryPoint", "wundergraph.server.ts", "entrypoint to build the server config")
-
 	rootCmd.AddCommand(generateCmd)
 }

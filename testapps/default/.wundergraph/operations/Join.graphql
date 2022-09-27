@@ -1,0 +1,15 @@
+query ($userID: Int! @internal) {
+	posts: jsp_getPosts(tld: "com") {
+		id
+		title
+		userId @export(as: "userID")
+		user: _join @transform(get: "jsp_getUser") {
+			jsp_getUser(tld: "com", id: $userID) {
+				id
+				email
+				name
+				username
+			}
+		}
+	}
+}

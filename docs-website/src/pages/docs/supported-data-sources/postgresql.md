@@ -73,4 +73,4 @@ Combined with a PostgreSQL Database, you're able to easily build Realtime Applic
 
 ## Reference
 
-Follow [this Link](/docs/wundergraph-config-ts-reference/configure-postgresql-datasource) to find more information on how to use the PostgreSQL DataSource.
+Follow [this Link](/docs/wundergraph-config-ts-reference/configure-postgresql-data-source) to find more information on how to use the PostgreSQL DataSource.

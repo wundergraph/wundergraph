@@ -10,16 +10,17 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
+
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/types/go/wgpb"
-
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
@@ -249,15 +250,15 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				typeMappings[i].InjectStatusCodeIntoResponse = in.CustomRest.StatusCodeTypeMappings[i].InjectStatusCodeIntoBody
 				typeMappings[i].StatusCodeByteString = []byte(strconv.Itoa(int(in.CustomRest.StatusCodeTypeMappings[i].StatusCode)))
 			}
-			baseURL := loadvariable.String(in.CustomRest.Fetch.GetBaseUrl())
-			path := loadvariable.String(in.CustomRest.Fetch.GetPath())
-			url := loadvariable.String(in.CustomRest.Fetch.GetUrl())
-			if url == "" {
-				url = baseURL + path
-			}
+
+			fetchUrl := buildFetchUrl(
+				loadvariable.String(in.CustomRest.Fetch.GetUrl()),
+				loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()),
+				loadvariable.String(in.CustomRest.Fetch.GetPath()))
+
 			restConfig := oas_datasource.Configuration{
 				Fetch: oas_datasource.FetchConfiguration{
-					URL:           url,
+					URL:           fetchUrl,
 					Method:        in.CustomRest.Fetch.Method.String(),
 					Header:        header,
 					Query:         query,
@@ -283,15 +284,20 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					header.Add(s, loadvariable.String(value))
 				}
 			}
-			baseURL := loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl())
-			path := loadvariable.String(in.CustomGraphql.Fetch.GetPath())
-			url := loadvariable.String(in.CustomGraphql.Fetch.GetUrl())
-			if url == "" {
-				url = baseURL + path
+
+			fetchUrl := buildFetchUrl(
+				loadvariable.String(in.CustomGraphql.Fetch.GetUrl()),
+				loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl()),
+				loadvariable.String(in.CustomGraphql.Fetch.GetPath()),
+			)
+
+			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
+			if subscriptionUrl == "" {
+				subscriptionUrl = fetchUrl
 			}
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
-					URL:    url,
+					URL:    fetchUrl,
 					Method: in.CustomGraphql.Fetch.Method.String(),
 					Header: header,
 				},
@@ -300,7 +306,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					ServiceSDL: in.CustomGraphql.Federation.ServiceSdl,
 				},
 				Subscription: graphql_datasource.SubscriptionConfiguration{
-					URL: url,
+					URL: subscriptionUrl,
 				},
 				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
 			})
@@ -398,4 +404,12 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 
 `, databaseURL, provider)
 	return dataSource + schema
+}
+
+func buildFetchUrl(url, baseUrl, path string) string {
+	if url != "" {
+		return url
+	}
+
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(baseUrl, "/"), strings.TrimPrefix(path, "/"))
 }

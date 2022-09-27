@@ -1,6 +1,6 @@
-import { Template, TemplateOutputFile } from '../../index';
+import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
 import { ResolvedWunderGraphConfig } from '../../../configure';
-import { formatTypeScript, loadFile } from './index';
+import { formatTypeScript } from './index';
 import Handlebars from 'handlebars';
 import { template } from './jsonschema.template';
 
@@ -19,7 +19,7 @@ export class JsonSchema implements Template {
 			{
 				path: 'jsonschema.ts',
 				content: formatTypeScript(content),
-				doNotEditHeader: true,
+				header: doNotEditHeader,
 			},
 		]);
 	}

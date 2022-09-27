@@ -5,7 +5,7 @@ on:
       - main
       - next
     tags-ignore:
-      - '*'
+      - '**'
     paths:
       - 'packages/**/*'
       - '.github/workflows/packages-ci.yaml'
@@ -45,14 +45,30 @@ jobs:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
+      - name: Cache Nextjs builds
+        uses: actions/cache@v2
         with:
-          version: '3.x'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          path: |
+            ${{ github.workspace }}/packages/nextjs-testapp/.next/cache
+          # Generate a new cache whenever packages or source files change
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('packages/nextjs-testapp/**.[jt]s', 'packages/nextjs-testapp/**.[jt]sx') }}
+          # If source files changed but packages didn't, rebuild from a prior cache
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
-      - run: pnpm install --ignore-scripts
+      - name: Install Protoc
+        uses: abelfodil/protoc-action@v1
+        with:
+          protoc-version: '21.5'
 
-      - run: pnpm build:libs
+      - name: Bootstrap PNPM workspace
+        run: ./scripts/pnpm.sh
 
-      - run: pnpm test --filter '@wundergraph/sdk'
+      - name: Build all libs + apps
+        run: pnpm build
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
+
+      - name: Run all NPM tests
+        run: pnpm test
