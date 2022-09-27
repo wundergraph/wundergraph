@@ -15,7 +15,7 @@ interface InternalClientRequestContext {
 }
 interface Operations {
 	queries: {
-		[operationName: string]: any;
+		[operationName: string]: (...args: any[]) => Promise<any>;
 	};
 	mutations: {
 		[operationName: string]: any;
