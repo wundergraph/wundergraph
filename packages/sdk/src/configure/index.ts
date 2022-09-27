@@ -71,7 +71,7 @@ import {
 	serverOptionsWithDefaults,
 } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { InternalBaseClient } from '../middleware/internal-client';
+import { InternalClient } from '../middleware/internal-client';
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
 	allowedMethods?: string[];
@@ -174,7 +174,7 @@ export interface HooksConfiguration<
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
 	// We could work with an index signature, but that would make it less type safe
-	IC extends InternalBaseClient = InternalBaseClient<any, any>
+	IC extends InternalClient = InternalClient<any, any>
 > {
 	global?: {
 		httpTransport?: {

@@ -1,6 +1,6 @@
 //language=handlebars
 export const template = `
-import type { OperationArgsWithInput, InternalBaseClient } from "@wundergraph/sdk";
+import type { OperationArgsWithInput, InternalClient as BaseClient } from "@wundergraph/sdk";
 import { {{ modelImports }} } from "./models"
 
 export interface Queries  {
@@ -19,5 +19,5 @@ export interface Mutations  {
 {{/if}}
 }
 
-export interface InternalClient extends InternalBaseClient<Queries, Mutations> {}
+export interface InternalClient extends BaseClient<Queries, Mutations> {}
 `;

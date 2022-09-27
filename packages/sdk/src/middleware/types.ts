@@ -1,4 +1,4 @@
-import { InternalBaseClient, InternalClientFactory } from './internal-client';
+import { InternalClient, InternalClientFactory } from './internal-client';
 import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from '@web-std/fetch';
 import { HooksConfiguration } from '../configure';
@@ -15,19 +15,19 @@ export type UserRole = 'admin' | 'user';
 
 export type AuthenticationHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalBaseClient = InternalBaseClient
+	IC extends InternalClient = InternalClient
 > = BaseRequestContext<User, IC> & AuthenticationRequestContext<User>;
 
 export interface FastifyRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalBaseClient = InternalBaseClient
+	IC extends InternalClient = InternalClient
 > {
 	ctx: AuthenticationHookRequest<User, IC>;
 }
 
 export interface BaseRequestContext<
 	User extends WunderGraphUser = WunderGraphUser,
-	IC extends InternalBaseClient = InternalBaseClient
+	IC extends InternalClient = InternalClient
 > {
 	/**
 	 * The user that is currently logged in.
