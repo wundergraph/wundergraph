@@ -1,4 +1,4 @@
-export type { ResolvedWunderGraphConfig } from './configure';
+export type { ResolvedWunderGraphConfig, HooksConfiguration, OperationHooksConfiguration } from './configure';
 export type {
 	BaseOperationConfiguration,
 	QueryConfiguration,
@@ -24,6 +24,7 @@ export type {
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 	ClientRequestHeaders,
+	AuthenticationHookRequest,
 } from './middleware/types';
 export type {
 	SubscriptionRequestOptions,
@@ -45,7 +46,7 @@ export type {
 	Aborted,
 	FetchConfig,
 } from './middleware/client';
-export type { OperationArgsWithInput, InternalClient } from './middleware/internal-client';
+export type { OperationArgsWithInput, InternalBaseClient } from './middleware/internal-client';
 export type { GraphQLServerConfig } from './middleware/plugins/graphql';
 export type { FastifyLoggerInstance } from 'fastify';
 export type { Template, TemplateOutputFile } from './codegen/index';

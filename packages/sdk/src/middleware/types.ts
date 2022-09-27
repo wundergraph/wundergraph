@@ -1,4 +1,4 @@
-import { InternalClient, InternalClientFactory } from './internal-client';
+import { InternalBaseClient, InternalClientFactory } from './internal-client';
 import { FastifyLoggerInstance } from 'fastify';
 import { Headers } from '@web-std/fetch';
 import { HooksConfiguration } from '../configure';
@@ -11,11 +11,24 @@ declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
 }
 
-export interface FastifyRequestContext<User = any, IC = InternalClient> {
-	ctx: BaseRequestContext<User, IC> & AuthenticationRequestContext<User>;
+export type UserRole = 'admin' | 'user';
+
+export type AuthenticationHookRequest<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalBaseClient = InternalBaseClient
+> = BaseRequestContext<User, IC> & AuthenticationRequestContext<User>;
+
+export interface FastifyRequestContext<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalBaseClient = InternalBaseClient
+> {
+	ctx: AuthenticationHookRequest<User, IC>;
 }
 
-export interface BaseRequestContext<User = any, IC = InternalClient> {
+export interface BaseRequestContext<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalBaseClient = InternalBaseClient
+> {
 	/**
 	 * The user that is currently logged in.
 	 */
@@ -31,8 +44,7 @@ export interface BaseRequestContext<User = any, IC = InternalClient> {
 	 */
 	internalClient: IC;
 }
-
-export interface AuthenticationRequestContext<User = any> {
+export interface AuthenticationRequestContext<User extends WunderGraphUser = WunderGraphUser> {
 	/**
 	 * The user that is currently logged in.
 	 */
@@ -69,7 +81,7 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
-export interface WunderGraphUser<Role = any> {
+export interface WunderGraphUser<Role extends string = UserRole> {
 	provider?: string;
 	providerId?: string;
 	email?: string;
@@ -127,9 +139,9 @@ export interface FastifyRequestBody {
 	__wg: { user?: WunderGraphUser; clientRequest?: ClientRequest };
 }
 
-export type AuthenticationResponse<User> = AuthenticationOK<User> | AuthenticationDeny;
+export type AuthenticationResponse<User extends WunderGraphUser> = AuthenticationOK<User> | AuthenticationDeny;
 
-export interface AuthenticationOK<User = any> {
+export interface AuthenticationOK<User extends WunderGraphUser> {
 	status: 'ok';
 	user: User;
 }

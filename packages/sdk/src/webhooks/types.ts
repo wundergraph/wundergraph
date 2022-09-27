@@ -1,10 +1,10 @@
-import { InternalClient as InternalClientBase } from '../middleware/internal-client';
+import { InternalBaseClient } from '../middleware/internal-client';
 import { RequestMethod } from '../middleware/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure/variables';
 
 export interface Webhook<
-	InternalClient extends InternalClientBase = InternalClientBase,
+	InternalClient extends InternalBaseClient = InternalBaseClient,
 	Event extends WebhookHttpEvent = WebhookHttpEvent,
 	Response extends WebhookHttpResponse = WebhookHttpResponse
 > {
@@ -17,7 +17,7 @@ export interface WebhookHttpResponse<ResponseBody = unknown, Headers extends Web
 }
 export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
-export interface WebhookRequestContext<InternalClient extends InternalClientBase = InternalClientBase> {
+export interface WebhookRequestContext<InternalClient extends InternalBaseClient = InternalBaseClient> {
 	internalClient: InternalClient;
 	log: Logger;
 }

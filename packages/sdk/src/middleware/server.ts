@@ -7,7 +7,7 @@ import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
 import { customGqlServerMountPath, HooksConfiguration } from '../configure';
-import type { InternalClient } from './internal-client';
+import type { InternalBaseClient } from './internal-client';
 import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import path from 'path';
@@ -77,7 +77,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 
 export const configureWunderGraphServer = <
 	GeneratedHooksConfig extends HooksConfiguration,
-	GeneratedClient extends InternalClient,
+	GeneratedClient extends InternalBaseClient,
 	GeneratedWebhooksConfig extends WebhooksConfig = WebhooksConfig
 >(
 	configWrapper: () => WunderGraphServerConfig<GeneratedHooksConfig, GeneratedWebhooksConfig>
@@ -190,7 +190,7 @@ export const createServer = async ({
 		fastify.addHook<{ Body: FastifyRequestBody }>('preHandler', async (req, reply) => {
 			req.ctx = {
 				log: req.log,
-				user: req.body.__wg.user,
+				user: req.body.__wg.user!,
 				// clientRequest represents the original client request that was sent initially to the WunderNode.
 				clientRequest: {
 					headers: new Headers(req.body.__wg.clientRequest?.headers),
