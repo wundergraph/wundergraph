@@ -406,6 +406,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	baseUrl?: InputVariable;
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
+	useSSEForSubscription?: InputVariable;
 }
 
 export interface OpenAPIIntrospectionFile {
@@ -486,6 +487,7 @@ export interface GraphQLApiCustom {
 	Subscription: {
 		Enabled: boolean;
 		URL: ConfigurationVariable;
+		UseSSE: ConfigurationVariable;
 	};
 	UpstreamSchema: string;
 }
@@ -799,6 +801,10 @@ export const introspect = {
 										: typeof introspection.url === 'string'
 										? mapInputVariable(subscriptionsURL(introspection.url))
 										: mapInputVariable(''),
+								UseSSE:
+									introspection.useSSEForSubscription !== undefined
+										? mapInputVariable(introspection.useSSEForSubscription)
+										: mapInputVariable('false'),
 							},
 							Federation: {
 								Enabled: federationEnabled,
@@ -1087,4 +1093,4 @@ const hasSubscriptions = (schema: GraphQLSchema): boolean => {
 	return Object.keys(fields).length !== 0;
 };
 
-const subscriptionsURL = (url: string) => url.replace('https://', 'wss://').replace('http://', 'ws://');
+const subscriptionsURL = (url: string) => url; //.replace('https://', 'wss://').replace('http://', 'ws://');

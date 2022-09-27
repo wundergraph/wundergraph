@@ -793,6 +793,7 @@ export interface DataSourceCustomStatic {
 export interface GraphQLSubscriptionConfiguration {
 	enabled: boolean;
 	url: ConfigurationVariable | undefined;
+	useSSE: ConfigurationVariable | undefined;
 }
 
 export interface FetchConfiguration {
@@ -2493,7 +2494,7 @@ export const DataSourceCustomStatic = {
 };
 
 function createBaseGraphQLSubscriptionConfiguration(): GraphQLSubscriptionConfiguration {
-	return { enabled: false, url: undefined };
+	return { enabled: false, url: undefined, useSSE: undefined };
 }
 
 export const GraphQLSubscriptionConfiguration = {
@@ -2501,6 +2502,7 @@ export const GraphQLSubscriptionConfiguration = {
 		return {
 			enabled: isSet(object.enabled) ? Boolean(object.enabled) : false,
 			url: isSet(object.url) ? ConfigurationVariable.fromJSON(object.url) : undefined,
+			useSSE: isSet(object.useSSE) ? ConfigurationVariable.fromJSON(object.useSSE) : undefined,
 		};
 	},
 
@@ -2508,6 +2510,8 @@ export const GraphQLSubscriptionConfiguration = {
 		const obj: any = {};
 		message.enabled !== undefined && (obj.enabled = message.enabled);
 		message.url !== undefined && (obj.url = message.url ? ConfigurationVariable.toJSON(message.url) : undefined);
+		message.useSSE !== undefined &&
+			(obj.useSSE = message.useSSE ? ConfigurationVariable.toJSON(message.useSSE) : undefined);
 		return obj;
 	},
 
@@ -2518,6 +2522,10 @@ export const GraphQLSubscriptionConfiguration = {
 		message.enabled = object.enabled ?? false;
 		message.url =
 			object.url !== undefined && object.url !== null ? ConfigurationVariable.fromPartial(object.url) : undefined;
+		message.useSSE =
+			object.useSSE !== undefined && object.useSSE !== null
+				? ConfigurationVariable.fromPartial(object.useSSE)
+				: undefined;
 		return message;
 	},
 };
