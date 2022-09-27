@@ -165,7 +165,7 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 }
 
 // Any is used here because the exact type of the hooks is not known at compile time
-// We could work with an index signature, but that would make it less type safe
+// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
 export type OperationHooks = Record<string, any>;
 
 export interface HooksConfiguration<
@@ -173,7 +173,7 @@ export interface HooksConfiguration<
 	Mutations extends OperationHooks = OperationHooks,
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
-	// We could work with an index signature, but that would make it less type safe
+	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
 	IC extends InternalClient = InternalClient<any, any>
 > {
 	global?: {
