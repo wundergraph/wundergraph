@@ -31,7 +31,7 @@ test('Should be merged', () => {
 					Subscription: {
 						Enabled: false,
 						URL: mapInputVariable(''),
-						UseSSE: mapInputVariable('false'),
+						UseSSE: false,
 					},
 					Fetch: {
 						url: mapInputVariable('https://user.service'),
@@ -81,7 +81,7 @@ test('Should be merged', () => {
 					Subscription: {
 						Enabled: false,
 						URL: mapInputVariable(''),
-						UseSSE: mapInputVariable('false'),
+						UseSSE: false,
 					},
 					Fetch: {
 						url: mapInputVariable('https://product.service'),
@@ -160,7 +160,7 @@ test('Should be merged', () => {
 					Subscription: {
 						Enabled: false,
 						URL: mapInputVariable(''),
-						UseSSE: mapInputVariable('false'),
+						UseSSE: false,
 					},
 					Fetch: {
 						url: mapInputVariable('https://reviews.service'),
@@ -229,7 +229,7 @@ test('Should be merged', () => {
 					Subscription: {
 						Enabled: false,
 						URL: mapInputVariable(''),
-						UseSSE: mapInputVariable('false'),
+						UseSSE: false,
 					},
 					Fetch: {
 						url: mapInputVariable('https://inventory.service'),
@@ -392,7 +392,7 @@ test('Should collide because weather and countries API has an enum called Langua
 					Subscription: {
 						Enabled: false,
 						URL: mapInputVariable(''),
-						UseSSE: mapInputVariable('false'),
+						UseSSE: false,
 					},
 					Fetch: {
 						url: mapInputVariable('https://graphql-weather-api.herokuapp.com'),

@@ -34,7 +34,7 @@ test('renameTypes', async () => {
 							Subscription: {
 								Enabled: false,
 								URL: mapInputVariable(''),
-								UseSSE: mapInputVariable('false'),
+								UseSSE: false,
 							},
 							Fetch: {
 								method: HTTPMethod.POST,
@@ -99,7 +99,7 @@ test('renameTypes', async () => {
 					Subscription: {
 						Enabled: false,
 						URL: mapInputVariable(''),
-						UseSSE: mapInputVariable('false'),
+						UseSSE: false,
 					},
 					Fetch: {
 						method: HTTPMethod.POST,
@@ -165,7 +165,7 @@ test('renameTypeFields', async () => {
 							Subscription: {
 								Enabled: false,
 								URL: mapInputVariable(''),
-								UseSSE: mapInputVariable('false'),
+								UseSSE: false,
 							},
 							Fetch: {
 								method: HTTPMethod.POST,
@@ -249,7 +249,7 @@ test('renameTypeFields', async () => {
 							Subscription: {
 								Enabled: false,
 								URL: mapInputVariable(''),
-								UseSSE: mapInputVariable('false'),
+								UseSSE: false,
 							},
 							Fetch: {
 								method: HTTPMethod.POST,

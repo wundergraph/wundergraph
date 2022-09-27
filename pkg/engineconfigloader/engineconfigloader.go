@@ -296,8 +296,6 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				subscriptionUrl = fetchUrl
 			}
 
-			useSSE := loadvariable.Bool(in.CustomGraphql.Subscription.UseSSE)
-
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -310,7 +308,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				},
 				Subscription: graphql_datasource.SubscriptionConfiguration{
 					URL:    subscriptionUrl,
-					UseSSE: useSSE,
+					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
 				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
 			})

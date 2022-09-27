@@ -292,7 +292,7 @@ message DataSourceCustom_Static {
 message GraphQLSubscriptionConfiguration {
 	bool enabled = 1;
 	ConfigurationVariable url = 2;
-	ConfigurationVariable useSSE = 3;
+	bool useSSE = 3;
 }
 
 message FetchConfiguration {
