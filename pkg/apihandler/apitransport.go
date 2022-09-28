@@ -118,6 +118,9 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 	// if you're doing this after calling the onRequest hook, it won't work
 	isUpgradeRequest := websocket.IsWebSocketUpgrade(request)
 
+	// on stream request we shouldn't read response body
+	isStreamingRequest := request.Header.Get("Accept") == "text/event-stream"
+
 	metaData := getOperationMetaData(request)
 	if metaData != nil {
 		_, onRequestHook = t.onRequestHook[metaData.OperationName]
@@ -146,14 +149,14 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 
 	// in case of http Upgrade requests, we must not dump the response
 	// otherwise, the upgrade will fail
-	if isUpgradeRequest {
+	if isUpgradeRequest || isStreamingRequest {
 		if t.debugMode {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
 				duration,
 			)
 		}
-		return t.roundTripper.RoundTrip(request)
+		return
 	}
 
 	if t.debugMode {

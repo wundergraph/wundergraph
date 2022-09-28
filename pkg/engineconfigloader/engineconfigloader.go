@@ -48,12 +48,17 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 		Timeout:   time.Second * 10,
 		Transport: transportFactory(baseTransport),
 	}
+	streamingClient := &http.Client{
+		Transport: transportFactory(baseTransport),
+	}
+
 	return &DefaultFactoryResolver{
 		baseTransport:    baseTransport,
 		transportFactory: transportFactory,
 		graphql: &graphql_datasource.Factory{
-			HTTPClient:   defaultHttpClient,
-			BatchFactory: graphql_datasource.NewBatchFactory(),
+			HTTPClient:      defaultHttpClient,
+			StreamingClient: streamingClient,
+			BatchFactory:    graphql_datasource.NewBatchFactory(),
 		},
 		rest: &oas_datasource.Factory{
 			Client: defaultHttpClient,
