@@ -1,8 +1,17 @@
-import { Api, ApiType, DataSource, IntrospectionConfiguration } from './index';
+import {
+	Api,
+	ApiType,
+	DataSource,
+	IntrospectionConfiguration,
+	WG_DATA_SOURCE_POLLING_MODE,
+	WG_DEV_FIRST_RUN,
+	WG_ENABLE_INTROSPECTION_CACHE,
+} from './index';
 import path from 'path';
 import fs from 'fs';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
+import objectHash from 'object-hash';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
@@ -83,4 +92,78 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 			console.error('Error during introspection cache update', e);
 		}
 	}, intervalInSeconds * 1000);
+};
+
+export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+	introspection: Introspection,
+	generator: (introspection: Introspection) => Promise<Api<A>>
+): Promise<Api<A>> => {
+	const isIntrospectionCacheEnabled =
+		WG_ENABLE_INTROSPECTION_CACHE && introspection.introspection?.disableCache !== true;
+	const cacheKey = objectHash(introspection);
+
+	/**
+	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
+	 * The return value is ignorable because we don't use it.
+	 */
+	if (WG_DATA_SOURCE_POLLING_MODE) {
+		if (
+			introspection.introspection?.pollingIntervalSeconds !== undefined &&
+			introspection.introspection?.pollingIntervalSeconds > 0
+		) {
+			await introspectInInterval(
+				introspection.introspection?.pollingIntervalSeconds,
+				cacheKey,
+				introspection,
+				generator
+			);
+		}
+		return {} as Api<A>;
+	}
+
+	/**
+	 * The introspection cache is only used in development mode `wunderctl up`.
+	 * We try to early return with a cached introspection result.
+	 * When the user runs `wunderctl up` for the first time, we disable the cache
+	 * so the user can be sure that the introspection is up to date. If the API is down during development
+	 * we try to fallback to the previous introspection result.
+	 */
+
+	if (isIntrospectionCacheEnabled) {
+		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+		if (cacheEntryString) {
+			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+			return fromCacheEntry<A>(cacheEntry);
+		} else {
+			console.error('Invalid cached introspection result. Revalidate introspection...');
+		}
+	}
+
+	try {
+		// generate introspection from scratch
+		const api = await generator(introspection);
+
+		// prefill cache with new introspection result (only for development mode)
+		if (WG_DEV_FIRST_RUN) {
+			try {
+				const cacheEntry = toCacheEntry<A>(api);
+				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+			} catch (e) {}
+		}
+
+		return api;
+	} catch (e) {
+		// fallback to old introspection result (only for development mode)
+		if (WG_DEV_FIRST_RUN) {
+			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
+			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
+			if (cacheEntryString) {
+				console.log('Fallback to old introspection result');
+				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
+				return fromCacheEntry<A>(cacheEntry);
+			}
+			console.log('Could not fallback to old introspection result');
+		}
+		throw e;
+	}
 };
