@@ -1,5 +1,5 @@
 import { GraphQLSchema } from 'graphql';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
@@ -32,7 +32,20 @@ export const fetchFederationServiceSDL = async (url: string, headers?: Record<st
 		headers,
 	};
 
-	const res = await axios.post(url, data, opts);
+	let res: AxiosResponse | undefined;
+	try {
+		res = await axios.post(url, data, opts);
+	} catch (e: any) {
+		throw new Error(`failed to fetch federation service sdl (url: ${url}), error: ${e.message}`);
+	}
+	if (res === undefined) {
+		throw new Error(`failed to fetch federation service sdl (url: ${url}), no response`);
+	}
+	if (res.status !== 200) {
+		throw new Error(
+			`failed to fetch federation service sdl (url: ${url}), response code: ${res.status}, message: ${res.statusText}`
+		);
+	}
 
 	return res.data.data._service.sdl;
 };
@@ -46,6 +59,10 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 
 			if (schema === '' && upstream.url) {
 				const introspectionHeadersBuilder = new HeadersBuilder();
+
+				if (upstream.headers !== undefined) {
+					upstream.headers(introspectionHeadersBuilder);
+				}
 
 				if (upstream.introspection?.headers !== undefined) {
 					upstream.introspection?.headers(introspectionHeadersBuilder);
