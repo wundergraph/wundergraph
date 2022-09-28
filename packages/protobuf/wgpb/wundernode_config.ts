@@ -938,6 +938,7 @@ export interface NodeLogging {
 
 export interface NodeOptions {
 	nodeUrl: ConfigurationVariable | undefined;
+	publicNodeUrl: ConfigurationVariable | undefined;
 	listen: ListenerOptions | undefined;
 	logger: NodeLogging | undefined;
 }
@@ -3385,13 +3386,14 @@ export const NodeLogging = {
 };
 
 function createBaseNodeOptions(): NodeOptions {
-	return { nodeUrl: undefined, listen: undefined, logger: undefined };
+	return { nodeUrl: undefined, publicNodeUrl: undefined, listen: undefined, logger: undefined };
 }
 
 export const NodeOptions = {
 	fromJSON(object: any): NodeOptions {
 		return {
 			nodeUrl: isSet(object.nodeUrl) ? ConfigurationVariable.fromJSON(object.nodeUrl) : undefined,
+			publicNodeUrl: isSet(object.publicNodeUrl) ? ConfigurationVariable.fromJSON(object.publicNodeUrl) : undefined,
 			listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
 			logger: isSet(object.logger) ? NodeLogging.fromJSON(object.logger) : undefined,
 		};
@@ -3401,6 +3403,8 @@ export const NodeOptions = {
 		const obj: any = {};
 		message.nodeUrl !== undefined &&
 			(obj.nodeUrl = message.nodeUrl ? ConfigurationVariable.toJSON(message.nodeUrl) : undefined);
+		message.publicNodeUrl !== undefined &&
+			(obj.publicNodeUrl = message.publicNodeUrl ? ConfigurationVariable.toJSON(message.publicNodeUrl) : undefined);
 		message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
 		message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
 		return obj;
@@ -3411,6 +3415,10 @@ export const NodeOptions = {
 		message.nodeUrl =
 			object.nodeUrl !== undefined && object.nodeUrl !== null
 				? ConfigurationVariable.fromPartial(object.nodeUrl)
+				: undefined;
+		message.publicNodeUrl =
+			object.publicNodeUrl !== undefined && object.publicNodeUrl !== null
+				? ConfigurationVariable.fromPartial(object.publicNodeUrl)
 				: undefined;
 		message.listen =
 			object.listen !== undefined && object.listen !== null ? ListenerOptions.fromPartial(object.listen) : undefined;

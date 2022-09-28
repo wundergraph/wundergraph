@@ -17,7 +17,6 @@ export class TypeScriptClient implements Template {
 		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
-		const productionBaseURL = 'https://' + config.deployment.environment.name;
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,

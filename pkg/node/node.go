@@ -415,8 +415,8 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}(listener)
 	}
 
-	n.log.Debug("node url",
-		abstractlogger.String("nodeUrl", nodeConfig.Api.Options.NodeUrl),
+	n.log.Debug("public node url",
+		abstractlogger.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
 	return nil

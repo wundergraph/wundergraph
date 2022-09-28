@@ -287,7 +287,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			log:           r.log,
 			html:          graphiql.GetGraphiqlPlaygroundHTML(),
 			apiPathPrefix: api.PathPrefix,
-			nodeUrl:       api.Options.NodeUrl,
+			nodeUrl:       api.Options.PublicNodeUrl,
 		}
 		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
