@@ -11,8 +11,6 @@ declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
 }
 
-export type UserRole = 'admin' | 'user';
-
 export type AuthenticationHookRequest<
 	User extends WunderGraphUser = WunderGraphUser,
 	IC extends InternalClient = InternalClient
@@ -81,7 +79,7 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
-export interface WunderGraphUser<Role extends string = UserRole> {
+export interface WunderGraphUser<Role extends string = string> {
 	provider?: string;
 	providerId?: string;
 	email?: string;
