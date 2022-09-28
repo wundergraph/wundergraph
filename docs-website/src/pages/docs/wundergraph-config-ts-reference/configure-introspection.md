@@ -77,3 +77,85 @@ because the data source is introspected every time a configuration file is chang
 Disabling the cache will not help you if you're changing the schema of your database.
 The process will only re-introspect if a file is changed.
 {% /callout %}
+
+## Introspection of protected graphql API
+
+In order to authorize introspection request you have to add header either via headers configuration or by a similar headers builder in the introspection configuration.
+
+### Provide headers with headers configuration
+
+Using this approach you could use the same static headers for introspection and for the actual requests.
+
+Specifying dynamic (client request headers) will have no effect on the introspection.
+
+```typescript
+// simple graphql api
+const countries = introspect.graphql({
+  apiNamespace: 'countries',
+  url: ' http://localhost:4000/',
+  headers: (builder) =>
+    builder
+      // this header has no effect on introspection
+      .addClientRequestHeader('X-Authorization', 'Authorization')
+      // this header is shared between introspection and actual requests
+      .addStaticHeader('Authorization', 'Secret'),
+})
+
+// or federated api
+const federatedApi = introspect.federation({
+  apiNamespace: 'federated',
+  upstreams: [
+    {
+      url: 'http://localhost:4001/graphql',
+      headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
+    },
+  ],
+})
+```
+
+### Provide headers with introspection configuration
+
+By providing headers in the introspection configuration you could avoid using static header for all requests.
+Headers configured in a such way will be used only for the graphql introspection and getting service sdl query in case of federated api.
+
+```typescript
+// simple graphql api
+const countries = introspect.graphql({
+  apiNamespace: 'countries',
+  url: ' http://localhost:4000/',
+  headers: (builder) =>
+    builder.addClientRequestHeader('X-Authorization', 'Authorization'),
+  introspection: {
+    headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
+  },
+})
+
+// or federated api
+const federatedApi = introspect.federation({
+  apiNamespace: 'federated',
+  upstreams: [
+    {
+      url: 'http://localhost:4001/graphql',
+      introspection: {
+        headers: (builder) =>
+          builder.addStaticHeader('Authorization', 'Secret'),
+      },
+    },
+  ],
+})
+```
+
+You could even mixup both approaches.
+In this case introspection headers will be merged with the headers provided in the headers configuration and the headers provided in the introspection configuration will have higher priority for the introspection request.
+
+```typescript
+const countries = introspect.graphql({
+  apiNamespace: 'countries',
+  url: ' http://localhost:4000/',
+  headers: (builder) => builder.addStaticHeader('Authorization', 'Secret One'),
+  introspection: {
+    headers: (builder) =>
+      builder.addStaticHeader('Authorization', 'Secret Two'),
+  },
+})
+```

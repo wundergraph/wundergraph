@@ -276,6 +276,12 @@ const tags = {
 		'/docs/wundergraph-config-ts-reference/configure-wundernode-options',
 	'WunderGraph Server options':
 		'/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
+	'headers configuration':
+		'/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources',
+	'configure mTLS':
+		'/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
+	'configure introspection for protected API':
+		'/docs/wundergraph-config-ts-reference/configure-introspection#introspection-of-protected-graphql-api',
 }
 
 export default tags
