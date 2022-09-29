@@ -31,12 +31,7 @@ var nodeStartCmd = &cobra.Command{
 			wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
-		if err != nil {
-			return err
-		}
-
-		configFile := path.Join(wgDir, "generated", configJsonFilename)
+		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
@@ -61,7 +56,7 @@ var nodeStartCmd = &cobra.Command{
 		defer stop()
 
 		wunderNodeConfig := node.CreateConfig(&graphConfig)
-		n := node.New(ctx, BuildInfo, log)
+		n := node.New(ctx, BuildInfo, WunderGraphDir, log)
 
 		go func() {
 			err := n.StartBlocking(

@@ -1,30 +1,23 @@
-import { federationServiceSDL, isFederationService } from '../graphql/federation';
 import { configuration } from '../graphql/configuration';
 import {
 	buildClientSchema,
 	buildSchema,
-	getIntrospectionQuery,
 	GraphQLSchema,
 	introspectionFromSchema,
 	parse,
 	print,
 	printSchema,
 } from 'graphql';
-import { mergeApis } from './merge';
 import * as fs from 'fs';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
 	ArgumentSource,
 	ConfigurationVariable,
-	ConfigurationVariableKind,
 	DataSourceKind,
 	DirectiveConfiguration,
 	FetchConfiguration,
 	FieldConfiguration,
-	HTTPHeader,
-	HTTPMethod,
 	MTLSConfiguration,
 	SigningMethod,
 	SingleTypeField,
@@ -34,36 +27,19 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import { cleanupSchema } from '../graphql/schema';
 import path from 'path';
 import { DatabaseSchema, introspectPrismaDatabaseWithRetries } from '../db/introspection';
 import {
-	applyNamespaceToDirectiveConfiguration,
 	applyNameSpaceToFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
 	applyNameSpaceToTypeFields,
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
-import { loadFile } from '../codegen/templates/typescript';
-import { composeServices } from '@apollo/composition';
-import { buildSubgraphSchema, ServiceDefinition } from '@apollo/federation';
-import * as https from 'https';
-import objectHash from 'object-hash';
-import {
-	fromCacheEntry,
-	introspectInInterval,
-	IntrospectionCacheFile,
-	readIntrospectionCacheFile,
-	toCacheEntry,
-	writeIntrospectionCacheFile,
-} from './introspection-cache';
-import {
-	EnvironmentVariable,
-	InputVariable,
-	mapInputVariable,
-	PlaceHolder,
-	resolveVariable,
-} from '../configure/variables';
+import { introspectWithCache } from './introspection-cache';
+import { InputVariable, mapInputVariable } from '../configure/variables';
+import { introspectGraphql } from './graphql-introspection';
+import { introspectFederation } from './federation-introspection';
+import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -268,16 +244,12 @@ export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospect
 export interface GraphQLFederationUpstream extends Omit<Omit<GraphQLUpstream, 'introspection'>, 'apiNamespace'> {
 	name?: string;
 	loadSchemaFromString?: GraphQLIntrospectionOptions['loadSchemaFromString'];
+	introspection?: GraphqlIntrospectionHeaders;
 }
 
 export interface GraphQLFederationIntrospection extends IntrospectionConfiguration {
 	upstreams: GraphQLFederationUpstream[];
 	apiNamespace?: string;
-}
-
-export interface ResolvedReplaceJSONTypeFieldConfiguration {
-	fields: SingleTypeField[];
-	replaceWithNamedType: string;
 }
 
 export interface ReplaceJSONTypeFieldConfiguration {
@@ -308,62 +280,6 @@ export interface HTTPUpstream extends IntrospectionConfiguration {
 	headers?: (builder: IHeadersBuilder) => IHeadersBuilder;
 	authentication?: HTTPUpstreamAuthentication;
 	mTLS?: HTTPmTlsConfiguration;
-}
-
-export interface IHeadersBuilder {
-	addStaticHeader: (key: string, value: InputVariable) => IHeadersBuilder;
-	addClientRequestHeader: (key: string, requestHeaderName: string) => IHeadersBuilder;
-}
-
-export class HeadersBuilder {
-	private headers: HeaderConfiguration[] = [];
-	public addEnvironmentVariableHeader = (key: string, environmentVariableName: string) => {
-		this.headers.push({
-			key,
-			value: environmentVariableName,
-			valueSource: 'env',
-		});
-		return this;
-	};
-	public addStaticHeader = (key: string, value: InputVariable) => {
-		if (value === undefined) {
-			throw new Error(`Static header value cannot be undefined`);
-		}
-		if (typeof value === 'string') {
-			this.headers.push({
-				key,
-				value,
-				valueSource: 'static',
-			});
-			return this;
-		}
-		if ((value as PlaceHolder)._identifier === 'placeholder') {
-			this.headers.push({
-				key,
-				value: (value as PlaceHolder).name,
-				valueSource: 'placeholder',
-			});
-			return this;
-		}
-		this.headers.push({
-			key,
-			value: value.name,
-			valueSource: 'env',
-			defaultValue: (value as EnvironmentVariable).defaultValue,
-		});
-		return this;
-	};
-	public addClientRequestHeader = (key: string, requestHeaderName: string) => {
-		this.headers.push({
-			key,
-			value: requestHeaderName,
-			valueSource: 'clientRequest',
-		});
-		return this;
-	};
-	public build = (): HeaderConfiguration[] => {
-		return this.headers;
-	};
 }
 
 export type HTTPmTlsConfiguration = {
@@ -401,12 +317,17 @@ export interface JWTAuthenticationWithAccessTokenExchange {
 
 export type JWTSigningMethod = 'HS256';
 
+export interface GraphqlIntrospectionHeaders {
+	headers?: (builder: IGraphqlIntrospectionHeadersBuilder) => IGraphqlIntrospectionHeadersBuilder;
+}
+
 export interface GraphQLUpstream extends HTTPUpstream {
 	url: InputVariable;
 	baseUrl?: InputVariable;
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
 	subscriptionsUseSSE?: boolean;
+	introspection?: HTTPUpstream['introspection'] & GraphqlIntrospectionHeaders;
 }
 
 export interface OpenAPIIntrospectionFile {
@@ -428,20 +349,6 @@ export type OpenAPIIntrospectionSource =
 	| OpenAPIIntrospectionFile
 	| OpenAPIIntrospectionString
 	| OpenAPIIntrospectionObject;
-
-export interface HeaderConfiguration {
-	// key is the name of the Header that will be sent to the upstream, e.g. Authorization
-	key: string;
-	// valueSource defines where the value should come from
-	// static means, use the static content of the field "value"
-	// clientRequest means, the content of "value" defines a client request Header field
-	// so, if the field value is "Authorization",
-	// the client Header value for the key "Authorization" will be injected into the header
-	// env means, use the value from the environment variable
-	valueSource: 'static' | 'env' | 'clientRequest' | 'placeholder';
-	value: string;
-	defaultValue?: string;
-}
 
 export interface OpenAPIIntrospection extends HTTPUpstream {
 	source: OpenAPIIntrospectionSource;
@@ -622,207 +529,8 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 	});
 };
 
-const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
-	introspection: Introspection,
-	generator: (introspection: Introspection) => Promise<Api<A>>
-): Promise<Api<A>> => {
-	const isIntrospectionCacheEnabled =
-		WG_ENABLE_INTROSPECTION_CACHE && introspection.introspection?.disableCache !== true;
-	const cacheKey = objectHash(introspection);
-
-	/**
-	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
-	 * The return value is ignorable because we don't use it.
-	 */
-	if (WG_DATA_SOURCE_POLLING_MODE) {
-		if (
-			introspection.introspection?.pollingIntervalSeconds !== undefined &&
-			introspection.introspection?.pollingIntervalSeconds > 0
-		) {
-			await introspectInInterval(
-				introspection.introspection?.pollingIntervalSeconds,
-				cacheKey,
-				introspection,
-				generator
-			);
-		}
-		return {} as Api<A>;
-	}
-
-	/**
-	 * The introspection cache is only used in development mode `wunderctl up`.
-	 * We try to early return with a cached introspection result.
-	 * When the user runs `wunderctl up` for the first time, we disable the cache
-	 * so the user can be sure that the introspection is up to date. If the API is down during development
-	 * we try to fallback to the previous introspection result.
-	 */
-
-	if (isIntrospectionCacheEnabled) {
-		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-		if (cacheEntryString) {
-			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-			return fromCacheEntry<A>(cacheEntry);
-		} else {
-			console.error('Invalid cached introspection result. Revalidate introspection...');
-		}
-	}
-
-	try {
-		// generate introspection from scratch
-		const api = await generator(introspection);
-
-		// prefill cache with new introspection result (only for development mode)
-		if (WG_DEV_FIRST_RUN) {
-			try {
-				const cacheEntry = toCacheEntry<A>(api);
-				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
-			} catch (e) {}
-		}
-
-		return api;
-	} catch (e) {
-		// fallback to old introspection result (only for development mode)
-		if (WG_DEV_FIRST_RUN) {
-			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
-			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-			if (cacheEntryString) {
-				console.log('Fallback to old introspection result');
-				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-				return fromCacheEntry<A>(cacheEntry);
-			}
-			console.log('Could not fallback to old introspection result');
-		}
-		throw e;
-	}
-};
-
 export const introspect = {
-	graphql: async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
-		return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
-			const headers: { [key: string]: HTTPHeader } = {};
-			introspection.headers !== undefined &&
-				(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
-					const values: ConfigurationVariable[] = [];
-					switch (config.valueSource) {
-						case 'placeholder':
-							values.push({
-								kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,
-								staticVariableContent: '',
-								environmentVariableDefaultValue: '',
-								environmentVariableName: '',
-								placeholderVariableName: config.value,
-							});
-							break;
-						case 'clientRequest':
-							values.push({
-								kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-								staticVariableContent: `{{ .request.headers.${config.value} }}`,
-								environmentVariableName: '',
-								environmentVariableDefaultValue: '',
-								placeholderVariableName: '',
-							});
-							break;
-						case 'static':
-							values.push({
-								kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-								staticVariableContent: config.value,
-								environmentVariableDefaultValue: '',
-								environmentVariableName: '',
-								placeholderVariableName: '',
-							});
-							break;
-						case 'env':
-							values.push({
-								kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-								staticVariableContent: '',
-								environmentVariableDefaultValue: config.defaultValue || '',
-								environmentVariableName: config.value,
-								placeholderVariableName: '',
-							});
-							break;
-					}
-					headers[config.key] = {
-						values,
-					};
-				});
-			const schema = await introspectGraphQLSchema(introspection, headers);
-			const federationEnabled = isFederationService(schema);
-			const schemaSDL = cleanupSchema(
-				schema,
-				introspection.customFloatScalars || [],
-				introspection.customIntScalars || []
-			);
-			const serviceSDL = !federationEnabled
-				? undefined
-				: await federationServiceSDL(resolveVariable(introspection.url));
-			const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
-			const schemaDocumentNode = parse(schemaSDL);
-			const graphQLSchema = buildSchema(schemaSDL);
-			const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
-			const subscriptionsEnabled = hasSubscriptions(schema);
-			if (introspection.internal === true) {
-				headers['X-WG-Internal-GraphQL-API'] = {
-					values: [
-						{
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: 'true',
-							environmentVariableName: '',
-							environmentVariableDefaultValue: '',
-							placeholderVariableName: '',
-						},
-					],
-				};
-			}
-			return new GraphQLApi(
-				applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
-				[
-					{
-						Kind: DataSourceKind.GRAPHQL,
-						RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
-						ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
-						Custom: {
-							Fetch: {
-								url: mapInputVariable(introspection.url),
-								baseUrl: introspection.baseUrl ? mapInputVariable(introspection.baseUrl) : mapInputVariable(''),
-								path: introspection.path ? mapInputVariable(introspection.path) : mapInputVariable(''),
-								method: HTTPMethod.POST,
-								body: mapInputVariable(''),
-								header: headers,
-								query: [],
-								upstreamAuthentication: buildUpstreamAuthentication(introspection),
-								mTLS: buildMTLSConfiguration(introspection),
-								urlEncodeBody: false,
-							},
-							Subscription: {
-								Enabled: subscriptionsEnabled,
-								URL:
-									introspection.subscriptionsURL !== undefined
-										? mapInputVariable(introspection.subscriptionsURL)
-										: typeof introspection.url === 'string'
-										? mapInputVariable(introspection.url)
-										: mapInputVariable(''),
-								UseSSE: introspection.subscriptionsUseSSE !== undefined ? introspection.subscriptionsUseSSE : false,
-							},
-							Federation: {
-								Enabled: federationEnabled,
-								ServiceSDL: serviceSDL || '',
-							},
-							UpstreamSchema: schemaSDL,
-						},
-						Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
-					},
-				],
-				applyNameSpaceToFieldConfigurations(
-					Fields,
-					graphQLSchema,
-					introspection.skipRenameRootFields || [],
-					introspection.apiNamespace
-				),
-				generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
-				[]
-			);
-		});
-	},
+	graphql: introspectGraphql,
 	postgresql: async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> =>
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
@@ -877,70 +585,12 @@ export const introspect = {
 			);
 			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
-	federation: async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> =>
-		introspectWithCache(introspection, async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
-			const upstreams = introspection.upstreams.map(async (upstream, i) => {
-				let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
-
-				const name = upstream.name ?? i.toString();
-
-				if (schema === '' && upstream.url) {
-					schema = await federationServiceSDL(resolveVariable(upstream.url));
-				}
-
-				if (schema == '') {
-					throw new Error(`Subgraph ${name} has not provided a schema`);
-				}
-
-				return {
-					name,
-					typeDefs: parse(schema),
-				};
-			});
-			const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
-			const compositionResult = composeServices(serviceList);
-			const errors = compositionResult.errors;
-
-			if (errors && errors?.length > 0) {
-				throw new Error(
-					`Service composition of federated subgraph failed: ${errors[0]}. Make sure all subgraphs can be composed to a supergaph.`
-				);
-			}
-
-			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
-				...upstream,
-				isFederation: true,
-				apiNamespace: introspection.apiNamespace,
-			}));
-
-			const apis = await Promise.all(graphQLIntrospections.map((i) => introspect.graphql(i)));
-			return mergeApis([], ...apis) as GraphQLApi;
-		}),
+	federation: introspectFederation,
 	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> =>
 		introspectWithCache(introspection, async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 			const spec = loadOpenApi(introspection);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
 		}),
-};
-
-const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, headers: { [key: string]: HTTPHeader }) => {
-	if (introspection.loadSchemaFromString) {
-		try {
-			if (introspection.isFederation) {
-				return buildSubgraphSchema(parse(loadFile(introspection.loadSchemaFromString)));
-			}
-			return buildSchema(loadFile(introspection.loadSchemaFromString));
-		} catch (e: any) {
-			throw new Error(
-				`Loading schema from string failed for apiNamespace '${introspection.apiNamespace}'. Make sure the schema is valid and try again: ${e}`
-			);
-		}
-	}
-	try {
-		return introspectGraphQLAPI(introspection, headers);
-	} catch (e: any) {
-		throw new Error(`Introspecting GraphQL API failed for apiNamespace '${introspection.apiNamespace}': ${e}`);
-	}
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {
@@ -998,75 +648,6 @@ const upstreamAuthenticationKind = (kind: HTTPUpstreamAuthentication['kind']): U
 	}
 };
 
-const introspectGraphQLAPI = async (
-	introspection: GraphQLIntrospection,
-	headers?: { [key: string]: HTTPHeader }
-): Promise<GraphQLSchema> => {
-	const data = JSON.stringify({
-		query: getIntrospectionQuery(),
-		operationName: 'IntrospectionQuery',
-	});
-	const baseHeaders: Record<string, string> = {
-		'Content-Type': 'application/json',
-		Accept: 'application/json',
-	};
-	if (headers !== undefined) {
-		Object.keys(headers).forEach((key) => {
-			if (headers[key].values.length === 1) {
-				switch (headers[key].values[0].kind) {
-					case ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE:
-						baseHeaders[key] = headers[key].values[0].staticVariableContent;
-						break;
-					case ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE:
-						if (process.env[headers[key].values[0].environmentVariableName] !== undefined) {
-							baseHeaders[key] = process.env[headers[key].values[0].environmentVariableName]!;
-						} else if (headers[key].values[0].environmentVariableDefaultValue !== undefined) {
-							baseHeaders[key] = headers[key].values[0].environmentVariableDefaultValue;
-						}
-						break;
-				}
-			}
-		});
-	}
-
-	const opts: AxiosRequestConfig = {
-		headers: baseHeaders,
-	};
-
-	if (introspection.mTLS) {
-		opts.httpsAgent = new https.Agent({
-			key: resolveVariable(introspection.mTLS.key),
-			cert: resolveVariable(introspection.mTLS.cert),
-			rejectUnauthorized: !introspection.mTLS.insecureSkipVerify,
-		});
-	}
-
-	// TODO single place where a HTTP client is configured for all data sources
-	let res: AxiosResponse | undefined;
-	try {
-		res = await axios.post(resolveVariable(introspection.url), data, opts);
-	} catch (e: any) {
-		throw new Error(
-			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${
-				e.message
-			}`
-		);
-	}
-	if (res === undefined) {
-		throw new Error(
-			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), no response`
-		);
-	}
-	if (res.status !== 200) {
-		throw new Error(
-			`introspection failed (url: ${introspection.url}, namespace: ${
-				introspection.apiNamespace || ''
-			}), response code: ${res.status}, message: ${res.statusText}`
-		);
-	}
-	return buildClientSchema(res.data.data);
-};
-
 const loadOpenApi = (introspection: OpenAPIIntrospection): string => {
 	switch (introspection.source.kind) {
 		case 'file':
@@ -1079,13 +660,4 @@ const loadOpenApi = (introspection: OpenAPIIntrospection): string => {
 		default:
 			return '';
 	}
-};
-
-const hasSubscriptions = (schema: GraphQLSchema): boolean => {
-	const subscriptionType = schema.getSubscriptionType();
-	if (!subscriptionType) {
-		return false;
-	}
-	const fields = subscriptionType.getFields();
-	return Object.keys(fields).length !== 0;
 };

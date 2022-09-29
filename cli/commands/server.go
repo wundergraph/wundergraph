@@ -27,18 +27,13 @@ var serverStartCmd = &cobra.Command{
 			wunderctl server start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
-		if err != nil {
-			return err
-		}
-
-		configFile := path.Join(wgDir, "generated", configJsonFilename)
+		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
 
 		serverScriptFile := path.Join("generated", "bundle", "server.js")
-		serverExecutablePath := path.Join(wgDir, serverScriptFile)
+		serverExecutablePath := path.Join(WunderGraphDir, serverScriptFile)
 		if !files.FileExists(serverExecutablePath) {
 			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 		}
@@ -47,7 +42,7 @@ var serverStartCmd = &cobra.Command{
 		defer stop()
 
 		srvCfg := &helpers.ServerRunConfig{
-			WunderGraphDirAbs: wgDir,
+			WunderGraphDirAbs: WunderGraphDir,
 			ServerScriptFile:  serverScriptFile,
 			Production:        true,
 		}

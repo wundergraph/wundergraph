@@ -25,7 +25,8 @@ import (
 )
 
 type EngineConfigLoader struct {
-	resolvers []FactoryResolver
+	wundergraphDir string
+	resolvers      []FactoryResolver
 }
 
 type FactoryResolver interface {
@@ -160,9 +161,10 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 	}
 }
 
-func New(resolvers ...FactoryResolver) *EngineConfigLoader {
+func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoader {
 	return &EngineConfigLoader{
-		resolvers: resolvers,
+		wundergraphDir: wundergraphDir,
+		resolvers:      resolvers,
 	}
 }
 
@@ -331,6 +333,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				PrismaSchema:        l.addDataSourceToPrismaSchema(in.CustomDatabase.PrismaSchema, databaseURL, in.Kind),
 				GraphqlSchema:       in.CustomDatabase.GraphqlSchema,
 				CloseTimeoutSeconds: in.CustomDatabase.CloseTimeoutSeconds,
+				WunderGraphDir:      l.wundergraphDir,
 			}
 			for _, field := range in.CustomDatabase.JsonTypeFields {
 				config.JsonTypeFields = append(config.JsonTypeFields, database.SingleTypeField{

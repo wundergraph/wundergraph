@@ -457,6 +457,7 @@ message NodeLogging {
 
 message NodeOptions {
 	ConfigurationVariable nodeUrl = 1;
+	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
 }

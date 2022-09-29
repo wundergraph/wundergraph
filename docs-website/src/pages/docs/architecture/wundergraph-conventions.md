@@ -89,15 +89,16 @@ So, you're safe to use `process.env.{VARIABLE_NAME}` in your `wundergraph.server
 
 By default, when no options are passed to `wundergraph.config.ts` or `wundergraph.server.ts`, we will use environment variables with default values:
 
-| Variable name    | Description                                             | Default value           |
-| ---------------- | ------------------------------------------------------- | ----------------------- |
-| `WG_LOG_LEVEL`   | The log level of the `WunderNode`/`WunderGraph Server`. | `INFO`                  |
-| `WG_NODE_URL`    | The URL of the `WunderNode`.                            | `http://localhost:9991` |
-| `WG_NODE_HOST`   | The host of the `WunderNode`.                           | `127.0.0.1`             |
-| `WG_NODE_PORT`   | The port of the `WunderNode`.                           | `9991`                  |
-| `WG_SERVER_URL`  | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
-| `WG_SERVER_HOST` | The host of the `WunderGraph Server`.                   | `127.0.0.1`             |
-| `WG_SERVER_PORT` | The port of the `WunderGraph Server`.                   | `9992`                  |
+| Variable name        | Description                                             | Default value           |
+| -------------------- | ------------------------------------------------------- | ----------------------- |
+| `WG_LOG_LEVEL`       | The log level of the `WunderNode`/`WunderGraph Server`. | `INFO`                  |
+| `WG_NODE_URL`        | The internal URL of the `WunderNode`.                   | `http://localhost:9991` |
+| `WG_PUBLIC_NODE_URL` | The publicly available URL of the `WunderNode`.         | `http://localhost:9991` |
+| `WG_NODE_HOST`       | The host of the `WunderNode`.                           | `127.0.0.1`             |
+| `WG_NODE_PORT`       | The port of the `WunderNode`.                           | `9991`                  |
+| `WG_SERVER_URL`      | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
+| `WG_SERVER_HOST`     | The host of the `WunderGraph Server`.                   | `127.0.0.1`             |
+| `WG_SERVER_PORT`     | The port of the `WunderGraph Server`.                   | `9992`                  |
 
 ### Available log levels
 

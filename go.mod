@@ -33,14 +33,14 @@ require (
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pires/go-proxyproto v0.4.2
-	github.com/prisma/prisma-client-go v0.16.1
+	github.com/prisma/prisma-client-go v0.16.2
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
 	github.com/sebdah/goldie v0.0.0-20180424091453-8784dd1ab561
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.10.1
-	github.com/stretchr/testify v1.7.1
+	github.com/stretchr/testify v1.8.0
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.26.0
@@ -137,7 +137,7 @@ require (
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
 	nhooyr.io/websocket v1.8.7 // indirect
 )

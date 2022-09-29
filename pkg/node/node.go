@@ -27,14 +27,15 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-func New(ctx context.Context, info BuildInfo, log abstractlogger.Logger) *Node {
+func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstractlogger.Logger) *Node {
 	return &Node{
-		info:     info,
-		ctx:      ctx,
-		errCh:    make(chan error),
-		configCh: make(chan WunderNodeConfig),
-		pool:     pool.New(),
-		log:      log,
+		info:           info,
+		ctx:            ctx,
+		errCh:          make(chan error),
+		configCh:       make(chan WunderNodeConfig),
+		pool:           pool.New(),
+		log:            log,
+		wundergraphDir: wundergraphDir,
 		apiClient: &fasthttp.Client{
 			ReadTimeout:              time.Second * 10,
 			WriteTimeout:             time.Second * 10,
@@ -63,6 +64,8 @@ type Node struct {
 	apiClient *fasthttp.Client
 
 	options options
+
+	wundergraphDir string
 }
 
 type options struct {
@@ -341,7 +344,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
 	)
 
-	loader := engineconfigloader.New(engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
+	loader := engineconfigloader.New(n.wundergraphDir, engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
 
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,
@@ -415,8 +418,8 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}(listener)
 	}
 
-	n.log.Debug("node url",
-		abstractlogger.String("nodeUrl", nodeConfig.Api.Options.NodeUrl),
+	n.log.Debug("public node url",
+		abstractlogger.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
 	return nil

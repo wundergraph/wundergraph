@@ -14,10 +14,10 @@ type Logging struct {
 }
 
 type Options struct {
-	ServerUrl string
-	NodeUrl   string
-	Listener  *Listener
-	Logging   Logging
+	ServerUrl     string
+	PublicNodeUrl string
+	Listener      *Listener
+	Logging       Logging
 }
 
 type Api struct {

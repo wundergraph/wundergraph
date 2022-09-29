@@ -9,6 +9,7 @@ import (
 type HybridEngine interface {
 	Close()
 	Execute(ctx context.Context, request []byte, w io.Writer) error
+	WaitUntilReady(ctx context.Context) error
 }
 
 type GQLRequest struct {

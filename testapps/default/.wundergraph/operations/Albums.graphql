@@ -1,0 +1,13 @@
+{
+	chinook_findManyAlbum(take: 10) {
+		Title
+		Track {
+			TrackId
+			Name
+		}
+		Artist {
+			ArtistId
+			Name
+		}
+	}
+}
