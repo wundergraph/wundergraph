@@ -31,4 +31,4 @@ or set a different URL for subscriptions by setting `subscriptionsURL`.
 
 ## Introspecting protected graphql apis
 
-Refer to `configure introspection for protected API` guide
+Refer to the `configure introspection for protected API` guide.

@@ -281,7 +281,7 @@ const tags = {
 	'configure mTLS':
 		'/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
 	'configure introspection for protected API':
-		'/docs/wundergraph-config-ts-reference/configure-introspection#introspection-of-protected-graphql-api',
+		'/docs/wundergraph-config-ts-reference/configure-introspection#introspection-of-protected-graph-ql-ap-is',
 }
 
 export default tags
