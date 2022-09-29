@@ -33,7 +33,7 @@ type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
-type ApiTransportFactory func(tripper http.RoundTripper) http.RoundTripper
+type ApiTransportFactory func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
 
 type DefaultFactoryResolver struct {
 	baseTransport    http.RoundTripper
@@ -47,14 +47,19 @@ type DefaultFactoryResolver struct {
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
 	defaultHttpClient := &http.Client{
 		Timeout:   time.Second * 10,
-		Transport: transportFactory(baseTransport),
+		Transport: transportFactory(baseTransport, false),
 	}
+	streamingClient := &http.Client{
+		Transport: transportFactory(baseTransport, true),
+	}
+
 	return &DefaultFactoryResolver{
 		baseTransport:    baseTransport,
 		transportFactory: transportFactory,
 		graphql: &graphql_datasource.Factory{
-			HTTPClient:   defaultHttpClient,
-			BatchFactory: graphql_datasource.NewBatchFactory(),
+			HTTPClient:      defaultHttpClient,
+			StreamingClient: streamingClient,
+			BatchFactory:    graphql_datasource.NewBatchFactory(),
 		},
 		rest: &oas_datasource.Factory{
 			Client: defaultHttpClient,
@@ -107,7 +112,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 		},
 	}
 
-	baseTransportWithMTLS := d.transportFactory(mtlsTransport)
+	baseTransportWithMTLS := d.transportFactory(mtlsTransport, false)
 
 	return &http.Client{
 		Timeout:   time.Second * 10,
@@ -297,6 +302,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			if subscriptionUrl == "" {
 				subscriptionUrl = fetchUrl
 			}
+
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -308,7 +314,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					ServiceSDL: in.CustomGraphql.Federation.ServiceSdl,
 				},
 				Subscription: graphql_datasource.SubscriptionConfiguration{
-					URL: subscriptionUrl,
+					URL:    subscriptionUrl,
+					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
 				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
 			})

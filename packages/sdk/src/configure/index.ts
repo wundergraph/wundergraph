@@ -1019,6 +1019,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 				subscription: {
 					enabled: graphql.Subscription.Enabled,
 					url: graphql.Subscription.URL,
+					useSSE: graphql.Subscription.UseSSE,
 				},
 				upstreamSchema: graphql.UpstreamSchema,
 			};

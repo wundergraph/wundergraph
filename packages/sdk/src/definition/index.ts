@@ -326,6 +326,7 @@ export interface GraphQLUpstream extends HTTPUpstream {
 	baseUrl?: InputVariable;
 	path?: InputVariable;
 	subscriptionsURL?: InputVariable;
+	subscriptionsUseSSE?: boolean;
 	introspection?: HTTPUpstream['introspection'] & GraphqlIntrospectionHeaders;
 }
 
@@ -393,6 +394,7 @@ export interface GraphQLApiCustom {
 	Subscription: {
 		Enabled: boolean;
 		URL: ConfigurationVariable;
+		UseSSE: boolean;
 	};
 	UpstreamSchema: string;
 }

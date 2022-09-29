@@ -73,6 +73,7 @@ GraphQLApi {
             "placeholderVariableName": "",
             "staticVariableContent": "http://localhost:8080/graphql",
           },
+          "UseSSE": false,
         },
         "UpstreamSchema": "type Query {
   user: User

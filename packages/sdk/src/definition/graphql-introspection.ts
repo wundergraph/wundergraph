@@ -118,6 +118,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 									: typeof introspection.url === 'string'
 									? mapInputVariable(introspection.url)
 									: mapInputVariable(''),
+							UseSSE: introspection.subscriptionsUseSSE !== undefined ? introspection.subscriptionsUseSSE : false,
 						},
 						Federation: {
 							Enabled: federationEnabled,

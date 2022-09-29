@@ -44,7 +44,7 @@ require (
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.26.0
-	github.com/wundergraph/graphql-go-tools v1.54.0
+	github.com/wundergraph/graphql-go-tools v1.57.0
 	go.uber.org/zap v1.18.1
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
@@ -99,6 +99,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
+	github.com/r3labs/sse/v2 v2.8.1 // indirect
 	github.com/rs/xid v1.2.1 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
@@ -132,6 +133,7 @@ require (
 	golang.org/x/tools v0.0.0-20210106214847-113979e3529a // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
