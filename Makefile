@@ -46,6 +46,7 @@ build: codegen
 # This command builds the wunderctl binary and copies it into the nodejs wunderctl wrapper
 wunderctl: build
 	pnpm -r run --filter="./packages/wunderctl" build
+	rm -f packages/wunderctl/download/wunderctl
 	cp -f wunderctl packages/wunderctl/download/wunderctl
 	rm wunderctl
 

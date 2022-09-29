@@ -103,6 +103,7 @@ type Configuration struct {
 	CloseTimeoutSeconds int64
 	JsonTypeFields      []SingleTypeField
 	JsonInputVariables  []string
+	WunderGraphDir      string
 }
 
 type SingleTypeField struct {
@@ -182,7 +183,7 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 	return plan.FetchConfiguration{
 		Input: string(rawInput),
 		DataSource: &Source{
-			engine: p.engineFactory.Engine(p.config.PrismaSchema, p.config.CloseTimeoutSeconds),
+			engine: p.engineFactory.Engine(p.config.PrismaSchema, p.config.WunderGraphDir, p.config.CloseTimeoutSeconds),
 			debug:  p.debug,
 			log:    p.log,
 		},
@@ -886,7 +887,7 @@ type LazyEngineFactory struct {
 	engines map[string]*LazyEngine
 }
 
-func (f *LazyEngineFactory) Engine(prismaSchema string, closeTimeoutSeconds int64) *LazyEngine {
+func (f *LazyEngineFactory) Engine(prismaSchema, wundergraphDir string, closeTimeoutSeconds int64) *LazyEngine {
 	if f.engines == nil {
 		f.engines = map[string]*LazyEngine{}
 	}
@@ -897,6 +898,7 @@ func (f *LazyEngineFactory) Engine(prismaSchema string, closeTimeoutSeconds int6
 	engine = &LazyEngine{
 		m:                   &sync.RWMutex{},
 		prismaSchema:        prismaSchema,
+		wundergraphDir:      wundergraphDir,
 		closeTimeoutSeconds: closeTimeoutSeconds,
 	}
 	go engine.Start(f.closer)
@@ -915,6 +917,7 @@ type LazyEngine struct {
 	m *sync.RWMutex
 
 	prismaSchema        string
+	wundergraphDir      string
 	closeTimeoutSeconds int64
 
 	engine HybridEngine
@@ -981,7 +984,11 @@ func (e *LazyEngine) initEngineAndExecute(ctx context.Context, request []byte, o
 	e.m.Lock()
 	defer e.m.Unlock()
 	var err error
-	e.engine, err = NewHybridEngine(e.prismaSchema, abstractlogger.NoopLogger)
+	e.engine, err = NewHybridEngine(e.prismaSchema, e.wundergraphDir, abstractlogger.NoopLogger)
+	if err != nil {
+		return err
+	}
+	err = e.engine.WaitUntilReady(ctx)
 	if err != nil {
 		return err
 	}

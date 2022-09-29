@@ -56,9 +56,19 @@ const weather = introspect.graphql({
 	},
 });
 
+const chinook = introspect.sqlite({
+	apiNamespace: 'chinook',
+	databaseURL: 'file:./Chinook.sqlite',
+});
+
+const db = introspect.sqlite({
+	apiNamespace: 'db',
+	databaseURL: 'file:./db.sqlite',
+});
+
 const myApplication = new Application({
 	name: 'app',
-	apis: [jsp, weather, countries, spacex],
+	apis: [jsp, weather, countries, spacex, chinook, db],
 });
 
 // configureWunderGraph emits the configuration

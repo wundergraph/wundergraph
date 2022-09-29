@@ -12,11 +12,11 @@ import (
 	"github.com/jensneuse/abstractlogger"
 )
 
-func NewHybridEngine(prismaSchema string, log abstractlogger.Logger) (HybridEngine, error) {
+func NewHybridEngine(prismaSchema, wundergraphDir string, log abstractlogger.Logger) (HybridEngine, error) {
 	client := &http.Client{
 		Timeout: time.Second * 5,
 	}
-	engine := NewEngine(client, log)
+	engine := NewEngine(client, log, wundergraphDir)
 	err := engine.StartQueryEngine(prismaSchema)
 	if err != nil {
 		return nil, err
@@ -28,6 +28,10 @@ func NewHybridEngine(prismaSchema string, log abstractlogger.Logger) (HybridEngi
 
 type BinaryEngine struct {
 	engine *Engine
+}
+
+func (e *BinaryEngine) WaitUntilReady(ctx context.Context) error {
+	return e.engine.WaitUntilReady(ctx)
 }
 
 func (e *BinaryEngine) Close() {

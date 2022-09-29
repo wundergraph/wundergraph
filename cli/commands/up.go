@@ -30,19 +30,15 @@ var upCmd = &cobra.Command{
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
-		if err != nil {
-			return err
-		}
 
 		// only validate if the file exists
-		_, err = files.CodeFilePath(wgDir, configEntryPointFilename)
+		_, err := files.CodeFilePath(WunderGraphDir, configEntryPointFilename)
 		if err != nil {
 			return err
 		}
 
 		// optional, no error check
-		codeServerFilePath, _ := files.CodeFilePath(wgDir, serverEntryPointFilename)
+		codeServerFilePath, _ := files.CodeFilePath(WunderGraphDir, serverEntryPointFilename)
 
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
 			syscall.SIGHUP,  // process is detached from terminal
@@ -60,7 +56,7 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		introspectionCacheDir := path.Join(wgDir, "generated", "introspection", "cache")
+		introspectionCacheDir := path.Join(WunderGraphDir, "generated", "introspection", "cache")
 		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
 		if errIntrospectionDir == nil {
 			if clearIntrospectionCache {
@@ -75,8 +71,8 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		configJsonPath := path.Join(wgDir, "generated", configJsonFilename)
-		webhooksDir := path.Join(wgDir, webhooks.WebhookDirectoryName)
+		configJsonPath := path.Join(WunderGraphDir, "generated", configJsonFilename)
+		webhooksDir := path.Join(WunderGraphDir, webhooks.WebhookDirectoryName)
 		configOutFile := path.Join("generated", "bundle", "config.js")
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
@@ -88,7 +84,7 @@ var upCmd = &cobra.Command{
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
-			AbsWorkingDir: wgDir,
+			AbsWorkingDir: AbsoluteWunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			FirstRunEnv: []string{
@@ -109,7 +105,7 @@ var upCmd = &cobra.Command{
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-introspection-runner",
 			Executable:    "node",
-			AbsWorkingDir: wgDir,
+			AbsWorkingDir: AbsoluteWunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
@@ -126,7 +122,7 @@ var upCmd = &cobra.Command{
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoints:   []string{serverEntryPointFilename},
-				AbsWorkingDir: wgDir,
+				AbsWorkingDir: AbsoluteWunderGraphDir,
 				OutFile:       serverOutFile,
 				Logger:        log,
 				WatchPaths: []*watcher.WatchPath{
@@ -135,7 +131,7 @@ var upCmd = &cobra.Command{
 			})
 
 			if files.DirectoryExists(webhooksDir) {
-				webhookPaths, err := webhooks.GetWebhooks(wgDir)
+				webhookPaths, err := webhooks.GetWebhooks(WunderGraphDir)
 				if err != nil {
 					return err
 				}
@@ -143,7 +139,7 @@ var upCmd = &cobra.Command{
 				webhooksBundler = bundler.NewBundler(bundler.Config{
 					Name:          "webhooks-bundler",
 					EntryPoints:   webhookPaths,
-					AbsWorkingDir: wgDir,
+					AbsWorkingDir: AbsoluteWunderGraphDir,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
@@ -154,7 +150,7 @@ var upCmd = &cobra.Command{
 			}
 
 			srvCfg := &helpers.ServerRunConfig{
-				WunderGraphDirAbs: wgDir,
+				WunderGraphDirAbs: AbsoluteWunderGraphDir,
 				ServerScriptFile:  serverOutFile,
 			}
 
@@ -217,12 +213,12 @@ var upCmd = &cobra.Command{
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
 			EntryPoints:   []string{configEntryPointFilename},
-			AbsWorkingDir: wgDir,
+			AbsWorkingDir: AbsoluteWunderGraphDir,
 			OutFile:       configOutFile,
 			Logger:        log,
 			WatchPaths: []*watcher.WatchPath{
-				{Path: path.Join(wgDir, "operations"), Optional: true},
-				{Path: path.Join(wgDir, "fragments"), Optional: true},
+				{Path: path.Join(WunderGraphDir, "operations"), Optional: true},
+				{Path: path.Join(WunderGraphDir, "fragments"), Optional: true},
 				// all webhook filenames are stored in the config
 				// we are going to create HTTP routes on the node for all of them
 				{Path: webhooksDir, Optional: true},
@@ -261,9 +257,9 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		n := node.New(ctx, BuildInfo, log)
+		n := node.New(ctx, BuildInfo, WunderGraphDir, log)
 		go func() {
-			configFile := path.Join(wgDir, "generated", "wundergraph.config.json")
+			configFile := path.Join(WunderGraphDir, "generated", "wundergraph.config.json")
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
