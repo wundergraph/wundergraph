@@ -32,15 +32,16 @@ const (
 )
 
 var (
-	BuildInfo          node.BuildInfo
-	GitHubAuthDemo     node.GitHubAuthDemo
-	logLevel           string
-	DotEnvFile         string
-	log                abstractlogger.Logger
-	enableDebugMode    bool
-	jsonEncodedLogging bool
-	serviceToken       string
-	wundergraphDir     string
+	BuildInfo             node.BuildInfo
+	GitHubAuthDemo        node.GitHubAuthDemo
+	logLevel              string
+	DotEnvFile            string
+	log                   abstractlogger.Logger
+	enableDebugMode       bool
+	jsonEncodedLogging    bool
+	serviceToken          string
+	_wunderGraphDirConfig string
+	WunderGraphDir        string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -61,18 +62,25 @@ Simply running "wunderctl" will check the wundergraph.manifest.json in the curre
 wunderctl is gathering anonymous usage data so that we can better understand how it's being used and improve it.
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+
+		var err error
+		WunderGraphDir, err = files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
+		}
+
 		if enableDebugMode {
 			log = buildLogger(abstractlogger.DebugLevel)
 		} else {
 			log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
 		}
 
-		err := godotenv.Load(DotEnvFile)
+		err = godotenv.Load(DotEnvFile)
 		if err != nil {
 			if _, ok := err.(*fs.PathError); ok {
 				log.Debug("starting without env file")
-				return
+				return nil
 			}
 			log.Fatal("error loading env file",
 				abstractlogger.Error(err),
@@ -82,15 +90,12 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 				abstractlogger.String("file", DotEnvFile),
 			)
 		}
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
-		if err != nil {
-			return err
-		}
 		client := InitWunderGraphApiClient()
-		man := manifest.New(log, client, wgDir)
-		err = man.Load()
+		man := manifest.New(log, client, WunderGraphDir)
+		err := man.Load()
 		if err != nil {
 			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}
@@ -144,7 +149,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
-	rootCmd.PersistentFlags().StringVar(&wundergraphDir, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
+	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {

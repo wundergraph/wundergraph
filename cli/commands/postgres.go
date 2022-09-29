@@ -27,7 +27,7 @@ var postgresCmd = &cobra.Command{
 			provider = "postgresql"
 			url      = "%s"
 		}`, databaseURL)
-		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, log)
+		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, WunderGraphDir, log)
 		if err != nil {
 			return err
 		}

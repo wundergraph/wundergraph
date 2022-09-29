@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
@@ -20,7 +19,7 @@ var sqliteCmd = &cobra.Command{
 			provider = "sqlite"
 			url      = "%s"
 		}`, databaseURL)
-		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, log)
+		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, WunderGraphDir, log)
 		if err != nil {
 			return err
 		}
