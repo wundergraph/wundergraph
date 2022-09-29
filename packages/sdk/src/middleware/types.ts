@@ -79,7 +79,9 @@ export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue
 
 export type JSONObject = { [key: string]: JSONValue };
 
-export interface WunderGraphUser<Role extends string = string> {
+// Changed the default type of Role to any.
+// It should be worked on
+export interface WunderGraphUser<Role extends string = any> {
 	provider?: string;
 	providerId?: string;
 	email?: string;
