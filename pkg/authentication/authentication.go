@@ -58,42 +58,49 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		return nil
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", token)
-	res, err := u.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	var claims Claims
-	err = json.Unmarshal(body, &claims)
-	if err != nil {
-		return err
-	}
-	tempUser := User{
-		ProviderName:  "token",
-		ProviderID:    cfg.issuer,
-		Email:         claims.Email,
-		EmailVerified: claims.EmailVerified,
-		Name:          claims.Name,
-		FirstName:     claims.GivenName,
-		LastName:      claims.FamilyName,
-		NickName:      "",
-		Description:   "",
-		UserID:        claims.Sub,
-		AvatarURL:     claims.Picture,
-		Location:      claims.Locale,
-		ETag:          "",
-		AccessToken:   tryParseJWT(token),
+	var tempUser User
+
+	if cfg.userInfoEndpoint == "" {
+		tempUser = User{
+			ProviderName: "token",
+			ProviderID:   cfg.issuer,
+			AccessToken:  tryParseJWT(token),
+		}
+	} else {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", token)
+		res, err := u.client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		var claims Claims
+		err = json.Unmarshal(body, &claims)
+		if err != nil {
+			return err
+		}
+		tempUser = User{
+			ProviderName:  "token",
+			ProviderID:    cfg.issuer,
+			Email:         claims.Email,
+			EmailVerified: claims.EmailVerified,
+			Name:          claims.Name,
+			FirstName:     claims.GivenName,
+			LastName:      claims.FamilyName,
+			UserID:        claims.Sub,
+			AvatarURL:     claims.Picture,
+			Location:      claims.Locale,
+			AccessToken:   tryParseJWT(token),
+		}
 	}
 	u.hooks.handlePostAuthentication(context.Background(), tempUser)
 	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
