@@ -38,7 +38,8 @@ exports[`Should be merged: merged_apis 1`] = `
             "environmentVariableName": "",
             "placeholderVariableName": "",
             "staticVariableContent": ""
-          }
+          },
+          "UseSSE": false
         },
         "Fetch": {
           "url": {
@@ -112,7 +113,8 @@ exports[`Should be merged: merged_apis 1`] = `
             "environmentVariableName": "",
             "placeholderVariableName": "",
             "staticVariableContent": ""
-          }
+          },
+          "UseSSE": false
         },
         "Fetch": {
           "url": {
@@ -204,7 +206,8 @@ exports[`Should be merged: merged_apis 1`] = `
             "environmentVariableName": "",
             "placeholderVariableName": "",
             "staticVariableContent": ""
-          }
+          },
+          "UseSSE": false
         },
         "Fetch": {
           "url": {
@@ -276,7 +279,8 @@ exports[`Should be merged: merged_apis 1`] = `
             "environmentVariableName": "",
             "placeholderVariableName": "",
             "staticVariableContent": ""
-          }
+          },
+          "UseSSE": false
         },
         "Fetch": {
           "url": {

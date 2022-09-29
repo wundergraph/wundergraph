@@ -32,7 +32,7 @@ type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
-type ApiTransportFactory func(tripper http.RoundTripper) http.RoundTripper
+type ApiTransportFactory func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
 
 type DefaultFactoryResolver struct {
 	baseTransport    http.RoundTripper
@@ -46,10 +46,10 @@ type DefaultFactoryResolver struct {
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
 	defaultHttpClient := &http.Client{
 		Timeout:   time.Second * 10,
-		Transport: transportFactory(baseTransport),
+		Transport: transportFactory(baseTransport, false),
 	}
 	streamingClient := &http.Client{
-		Transport: transportFactory(baseTransport),
+		Transport: transportFactory(baseTransport, true),
 	}
 
 	return &DefaultFactoryResolver{
@@ -111,7 +111,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 		},
 	}
 
-	baseTransportWithMTLS := d.transportFactory(mtlsTransport)
+	baseTransportWithMTLS := d.transportFactory(mtlsTransport, false)
 
 	return &http.Client{
 		Timeout:   time.Second * 10,

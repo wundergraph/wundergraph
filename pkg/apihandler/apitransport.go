@@ -31,15 +31,16 @@ type ApiTransport struct {
 	onRequestHook              map[string]struct{}
 	onResponseHook             map[string]struct{}
 	hooksClient                *hooks.Client
+	enableStreamingMode        bool
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper) http.RoundTripper {
-	return func(tripper http.RoundTripper) http.RoundTripper {
-		return NewApiTransport(tripper, api, hooksClient, enableDebugMode)
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
+	return func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
+		return NewApiTransport(tripper, api, hooksClient, enableDebugMode, enableStreamingMode)
 	}
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool) http.RoundTripper {
+func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool, enableStreamingMode bool) http.RoundTripper {
 	transport := &ApiTransport{
 		roundTripper:               tripper,
 		debugMode:                  enableDebugMode,
@@ -48,6 +49,7 @@ func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Cli
 		onResponseHook:             map[string]struct{}{},
 		onRequestHook:              map[string]struct{}{},
 		hooksClient:                hooksClient,
+		enableStreamingMode:        enableStreamingMode,
 	}
 
 	if api.EngineConfiguration != nil && api.EngineConfiguration.DatasourceConfigurations != nil {
@@ -109,7 +111,6 @@ func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) 
 }
 
 func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err error) {
-
 	var (
 		onRequestHook, onResponseHook bool
 	)
@@ -117,9 +118,6 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 	// this evaluation needs to happen on the original request
 	// if you're doing this after calling the onRequest hook, it won't work
 	isUpgradeRequest := websocket.IsWebSocketUpgrade(request)
-
-	// on stream request we shouldn't read response body
-	isStreamingRequest := request.Header.Get("Accept") == "text/event-stream"
 
 	metaData := getOperationMetaData(request)
 	if metaData != nil {
@@ -149,7 +147,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 
 	// in case of http Upgrade requests, we must not dump the response
 	// otherwise, the upgrade will fail
-	if isUpgradeRequest || isStreamingRequest {
+	if isUpgradeRequest || t.enableStreamingMode {
 		if t.debugMode {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
