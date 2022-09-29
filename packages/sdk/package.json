@@ -93,7 +93,7 @@
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@wundergraph/protobuf": "workspace:^0.96.0",
-    "@wundergraph/wunderctl": "workspace:>=0.111.0",
+    "@wundergraph/wunderctl": "workspace:>=0.111.1",
     "axios": "^0.26.1",
     "colors": "^1.4.0",
     "execa": "5.1.1",
