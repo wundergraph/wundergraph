@@ -34,12 +34,7 @@ just running the engine as efficiently as possible without the dev overhead.
 If used without --exclude-server, make sure the server is available in this directory:
 {entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wgDir, err := files.FindWunderGraphDir(wundergraphDir)
-		if err != nil {
-			return err
-		}
-
-		configFile := path.Join(wgDir, "generated", configJsonFilename)
+		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
@@ -52,13 +47,13 @@ If used without --exclude-server, make sure the server is available in this dire
 			defer cancel()
 
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
-			serverExecutablePath := path.Join(wgDir, "generated", "bundle", "server.js")
+			serverExecutablePath := path.Join(WunderGraphDir, "generated", "bundle", "server.js")
 			if !files.FileExists(serverExecutablePath) {
-				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wgDir, serverScriptFile))
+				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(WunderGraphDir, serverScriptFile))
 			}
 
 			srvCfg := &helpers.ServerRunConfig{
-				WunderGraphDirAbs: wgDir,
+				WunderGraphDirAbs: WunderGraphDir,
 				ServerScriptFile:  serverScriptFile,
 				Production:        true,
 			}
@@ -88,7 +83,7 @@ If used without --exclude-server, make sure the server is available in this dire
 		}
 
 		configFileChangeChan := make(chan struct{})
-		n := node.New(nodeCtx, BuildInfo, log)
+		n := node.New(nodeCtx, BuildInfo, WunderGraphDir, log)
 
 		go func() {
 			err := n.StartBlocking(

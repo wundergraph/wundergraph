@@ -29,7 +29,7 @@ var planetscaleCmd = &cobra.Command{
 			provider = "mysql"
 			url      = "%s"
 		}`, parsed.String())
-		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, log)
+		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, WunderGraphDir, log)
 		if err != nil {
 			return err
 		}

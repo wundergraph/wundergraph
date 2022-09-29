@@ -11,12 +11,13 @@ import (
 	"github.com/jensneuse/abstractlogger"
 )
 
-func IntrospectPrismaDatabase(introspectionSchema string, log abstractlogger.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
+func IntrospectPrismaDatabase(introspectionSchema, wundergraphDir string, log abstractlogger.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
 	engine := NewEngine(
 		&http.Client{
 			Timeout: time.Second * 10,
 		},
 		log,
+		wundergraphDir,
 	)
 	defer engine.StopQueryEngine()
 	prismaSchema, err = engine.IntrospectPrismaDatabaseSchema(introspectionSchema)

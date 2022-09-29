@@ -66,10 +66,11 @@ type Engine struct {
 	log                     abstractlogger.Logger
 }
 
-func NewEngine(client *http.Client, log abstractlogger.Logger) *Engine {
+func NewEngine(client *http.Client, log abstractlogger.Logger, wundergraphDir string) *Engine {
 	return &Engine{
-		client: client,
-		log:    log,
+		wundergraphDir: wundergraphDir,
+		client:         client,
+		log:            log,
 	}
 }
 
@@ -231,6 +232,10 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel
 	cmd := exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
+	// ensure that prisma starts with the dir set to the .wundergraph directory
+	// this is important for sqlite support as it's expected that the path of the sqlite file is the same
+	// (relative to the .wundergraph directory) during introspection and at runtime
+	cmd.Dir = e.wundergraphDir
 	cmd.Env = append(cmd.Env, "PRISMA_DML="+schema)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -288,4 +293,21 @@ func (e *Engine) StopQueryEngine() {
 		return
 	}
 	e.cancel()
+}
+
+func (e *Engine) WaitUntilReady(ctx context.Context) error {
+	done := ctx.Done()
+	for {
+		select {
+		case <-done:
+			return fmt.Errorf("WaitUntilReady: context cancelled")
+		default:
+			_, err := http.Get(e.url)
+			if err != nil {
+				time.Sleep(time.Millisecond * 10)
+				continue
+			}
+			return nil
+		}
+	}
 }

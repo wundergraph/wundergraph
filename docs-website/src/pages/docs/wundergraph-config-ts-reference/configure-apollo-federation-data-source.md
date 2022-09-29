@@ -42,6 +42,10 @@ const myApplication = new Application({
 ```
 
 Simply add all the URLs of your SubGraphs to the `upstreams` array.
-Aside from the `url`, you can also define a [headers configuration](/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources),
-you can [configure mTLS](/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources),
+Aside from the `url`, you can also define a headers configuration,
+you can configure mTLS,
 or set a different URL for subscriptions by setting `subscriptionsURL`.
+
+## Introspecting protected graphql apis
+
+Refer to the `configure introspection for protected API` guide.
