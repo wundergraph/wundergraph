@@ -2,7 +2,6 @@ import {
 	buildMTLSConfiguration,
 	buildUpstreamAuthentication,
 	DataSource,
-	HeadersBuilder,
 	OpenAPIIntrospection,
 	RESTApi,
 	RESTApiCustom,
@@ -32,7 +31,6 @@ import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
-	ConfigurationVariable,
 	ConfigurationVariableKind,
 	DataSourceKind,
 	FieldConfiguration,
@@ -48,6 +46,7 @@ import {
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
 import { mapInputVariable } from '../configure/variables';
+import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -101,42 +100,10 @@ class RESTApiBuilder {
 		this.statusCodeUnions = introspection.statusCodeUnions || false;
 		this.introspection = introspection;
 		this.apiNamespace = introspection.apiNamespace;
-		introspection.headers !== undefined &&
-			(introspection.headers(new HeadersBuilder()) as HeadersBuilder).build().forEach((config) => {
-				const values: ConfigurationVariable[] = [];
-				switch (config.valueSource) {
-					case 'clientRequest':
-						values.push({
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: `{{ .request.headers.${config.value} }}`,
-							environmentVariableName: '',
-							environmentVariableDefaultValue: '',
-							placeholderVariableName: '',
-						});
-						break;
-					case 'static':
-						values.push({
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: config.value,
-							environmentVariableDefaultValue: '',
-							environmentVariableName: '',
-							placeholderVariableName: '',
-						});
-						break;
-					case 'env':
-						values.push({
-							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
-							staticVariableContent: '',
-							environmentVariableDefaultValue: '',
-							environmentVariableName: config.value,
-							placeholderVariableName: '',
-						});
-						break;
-				}
-				this.headers[config.key] = {
-					values,
-				};
-			});
+
+		if (introspection.headers !== undefined) {
+			this.headers = mapHeaders(introspection.headers(new HeadersBuilder()) as HeadersBuilder);
+		}
 	}
 
 	private statusCodeUnions: boolean;
