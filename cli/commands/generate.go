@@ -46,7 +46,7 @@ Use this command if you only want to generate the configuration`,
 			Name:          "config-runner",
 			Executable:    "node",
 			ScriptArgs:    []string{configOutFile},
-			AbsWorkingDir: AbsoluteWunderGraphDir,
+			AbsWorkingDir: WunderGraphDir,
 			Logger:        log,
 			ScriptEnv: append(
 				os.Environ(),
@@ -83,7 +83,7 @@ Use this command if you only want to generate the configuration`,
 				webhooksBundler = bundler.NewBundler(bundler.Config{
 					Name:          "webhooks-bundler",
 					EntryPoints:   webhookPaths,
-					AbsWorkingDir: AbsoluteWunderGraphDir,
+					AbsWorkingDir: WunderGraphDir,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
@@ -95,7 +95,7 @@ Use this command if you only want to generate the configuration`,
 
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
-				AbsWorkingDir: AbsoluteWunderGraphDir,
+				AbsWorkingDir: WunderGraphDir,
 				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
 				Logger:        log,
@@ -148,7 +148,7 @@ Use this command if you only want to generate the configuration`,
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
-			AbsWorkingDir: AbsoluteWunderGraphDir,
+			AbsWorkingDir: WunderGraphDir,
 			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,

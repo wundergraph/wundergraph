@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/fatih/color"
@@ -33,17 +32,16 @@ const (
 )
 
 var (
-	BuildInfo              node.BuildInfo
-	GitHubAuthDemo         node.GitHubAuthDemo
-	logLevel               string
-	DotEnvFile             string
-	log                    abstractlogger.Logger
-	enableDebugMode        bool
-	jsonEncodedLogging     bool
-	serviceToken           string
-	_wunderGraphDirConfig  string
-	WunderGraphDir         string
-	AbsoluteWunderGraphDir string
+	BuildInfo             node.BuildInfo
+	GitHubAuthDemo        node.GitHubAuthDemo
+	logLevel              string
+	DotEnvFile            string
+	log                   abstractlogger.Logger
+	enableDebugMode       bool
+	jsonEncodedLogging    bool
+	serviceToken          string
+	_wunderGraphDirConfig string
+	WunderGraphDir        string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -71,8 +69,6 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		if err != nil {
 			return err
 		}
-
-		AbsoluteWunderGraphDir, err = filepath.Abs(WunderGraphDir)
 
 		if enableDebugMode {
 			log = buildLogger(abstractlogger.DebugLevel)

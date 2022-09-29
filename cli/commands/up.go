@@ -84,7 +84,7 @@ var upCmd = &cobra.Command{
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
-			AbsWorkingDir: AbsoluteWunderGraphDir,
+			AbsWorkingDir: WunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			FirstRunEnv: []string{
@@ -105,7 +105,7 @@ var upCmd = &cobra.Command{
 		configIntrospectionRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-introspection-runner",
 			Executable:    "node",
-			AbsWorkingDir: AbsoluteWunderGraphDir,
+			AbsWorkingDir: WunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
@@ -122,7 +122,7 @@ var upCmd = &cobra.Command{
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "hooks-bundler",
 				EntryPoints:   []string{serverEntryPointFilename},
-				AbsWorkingDir: AbsoluteWunderGraphDir,
+				AbsWorkingDir: WunderGraphDir,
 				OutFile:       serverOutFile,
 				Logger:        log,
 				WatchPaths: []*watcher.WatchPath{
@@ -139,7 +139,7 @@ var upCmd = &cobra.Command{
 				webhooksBundler = bundler.NewBundler(bundler.Config{
 					Name:          "webhooks-bundler",
 					EntryPoints:   webhookPaths,
-					AbsWorkingDir: AbsoluteWunderGraphDir,
+					AbsWorkingDir: WunderGraphDir,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
@@ -150,7 +150,7 @@ var upCmd = &cobra.Command{
 			}
 
 			srvCfg := &helpers.ServerRunConfig{
-				WunderGraphDirAbs: AbsoluteWunderGraphDir,
+				WunderGraphDirAbs: WunderGraphDir,
 				ServerScriptFile:  serverOutFile,
 			}
 
@@ -213,7 +213,7 @@ var upCmd = &cobra.Command{
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
 			EntryPoints:   []string{configEntryPointFilename},
-			AbsWorkingDir: AbsoluteWunderGraphDir,
+			AbsWorkingDir: WunderGraphDir,
 			OutFile:       configOutFile,
 			Logger:        log,
 			WatchPaths: []*watcher.WatchPath{

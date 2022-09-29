@@ -53,7 +53,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			}
 
 			srvCfg := &helpers.ServerRunConfig{
-				WunderGraphDirAbs: AbsoluteWunderGraphDir,
+				WunderGraphDirAbs: WunderGraphDir,
 				ServerScriptFile:  serverScriptFile,
 				Production:        true,
 			}

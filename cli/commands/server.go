@@ -42,7 +42,7 @@ var serverStartCmd = &cobra.Command{
 		defer stop()
 
 		srvCfg := &helpers.ServerRunConfig{
-			WunderGraphDirAbs: AbsoluteWunderGraphDir,
+			WunderGraphDirAbs: WunderGraphDir,
 			ServerScriptFile:  serverScriptFile,
 			Production:        true,
 		}
