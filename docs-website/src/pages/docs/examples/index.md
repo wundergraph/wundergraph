@@ -25,4 +25,8 @@ Here's an overview of all the available examples.
 {% quick-link title="Auth0 OpenID Connect Authentication" icon="core" href="/docs/examples/auth0-openid-connect-authentication" description="This example demonstrates how to use Auth0 OpenID Connect Authentication in WunderGraph." /%}
 {% quick-link title="Fragments" icon="core" href="/docs/examples/fragments" description="This example show how to use GraphQL Fragments with WunderGraph." /%}
 {% quick-link title="Keycloak OpenID Connect Authentication" icon="core" href="/docs/examples/keycloak-openid-connect-authentication" description="This example demonstrates how to use Keycloak OpenID Connect Authentication in WunderGraph." /%}
+{% quick-link title="GraphQL apollo subscriptions" icon="core" href="/docs/examples/graphql-apollo-subscriptions" description="This example demonstrates how to use GraphQL apollo WS subscriptions with WunderGraph." /%}
+{% quick-link title="GraphQL WS subscriptions" icon="core" href="/docs/examples/graphql-ws-subscriptions" description="This example demonstrates how to use GraphQL WS subscriptions with WunderGraph." /%}
+{% quick-link title="GraphQL SSE subscriptions" icon="core" href="/docs/examples/graphql-sse-subscriptions" description="This example demonstrates how to use GraphQL SSE subscriptions with WunderGraph." /%}
+{% quick-link title="GraphQL yoga SSE subscriptions" icon="core" href="/docs/examples/graphql-yoga-subscriptions" description="This example demonstrates how to use GraphQL yoga SSE subscriptions with WunderGraph." /%}
 {% /quick-links %}

@@ -217,6 +217,22 @@ const navigation = [
 				title: 'Keycloak OpenID Connect Authentication',
 				href: '/docs/examples/keycloak-openid-connect-authentication',
 			},
+			{
+				title: 'GraphQl Apollo subscriptions',
+				href: '/docs/examples/graphql-apollo-subscriptions',
+			},
+			{
+				title: 'GraphQl yoga subscriptions',
+				href: '/docs/examples/graphql-yoga-subscriptions',
+			},
+			{
+				title: 'GraphQl SSE subscriptions',
+				href: '/docs/examples/graphql-sse-subscriptions',
+			},
+			{
+				title: 'GraphQl WS subscriptions',
+				href: '/docs/examples/graphql-ws-subscriptions',
+			},
 		],
 	},
 	{

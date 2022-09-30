@@ -1,6 +1,12 @@
-# WunderGraph subscriptions example - graphql apollo WS
+---
+title: GraphQl Apollo WS subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQl Apollo WS subscriptions
+description:
+---
 
-#### Getting started
+[Check the example](https://github.com/wundergraph/wundergraph/tree/main/examples/graphql-apollo-subscripptions)
+
+### Getting started
 
 Start the chat server:
 
@@ -18,7 +24,7 @@ Start wundergraph:
 npm install && npm start
 ```
 
-#### Check results
+### Check results
 
 ```shell
 curl -N http://localhost:9991/app/main/operations/Chat
@@ -34,11 +40,3 @@ mutation SendMessage {
   }
 }
 ```
-
-## Learn More
-
-Read the [Docs](https://wundergraph.com/docs).
-
-## Got Questions?
-
-Join us on [Discord](https://wundergraph.com/discord)!
