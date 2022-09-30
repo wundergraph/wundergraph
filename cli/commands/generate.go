@@ -53,6 +53,7 @@ Use this command if you only want to generate the configuration`,
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
+				fmt.Sprintf("WG_DIR_ABS=%s", WunderGraphDir),
 			),
 		})
 		defer func() {
