@@ -32,17 +32,16 @@ const (
 )
 
 var (
-	BuildInfo                     node.BuildInfo
-	GitHubAuthDemo                node.GitHubAuthDemo
-	logLevel                      string
-	DotEnvFile                    string
-	log                           abstractlogger.Logger
-	enableDebugMode               bool
-	jsonEncodedLogging            bool
-	serviceToken                  string
-	_wunderGraphDirConfig         string
-	_absoluteWunderGraphDirConfig string
-	WunderGraphDir                string
+	BuildInfo             node.BuildInfo
+	GitHubAuthDemo        node.GitHubAuthDemo
+	logLevel              string
+	DotEnvFile            string
+	log                   abstractlogger.Logger
+	enableDebugMode       bool
+	jsonEncodedLogging    bool
+	serviceToken          string
+	_wunderGraphDirConfig string
+	WunderGraphDir        string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -66,13 +65,9 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		var err error
-		if _absoluteWunderGraphDirConfig != "" {
-			WunderGraphDir = _absoluteWunderGraphDirConfig
-		} else {
-			WunderGraphDir, err = files.FindWunderGraphDir(_wunderGraphDirConfig)
-			if err != nil {
-				return err
-			}
+		WunderGraphDir, err = files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
 		}
 
 		if enableDebugMode {
@@ -155,7 +150,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
-	rootCmd.PersistentFlags().StringVar(&_absoluteWunderGraphDirConfig, "wundergraph-dir-abs", "", "absolute path to your .wundergraph directory, takes precedence over wundergraph-dir")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
