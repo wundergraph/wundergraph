@@ -15,8 +15,8 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
-    "dev": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "dev": "wunderctl up --debug --wundergraph-dir src",
+    "generate": "wunderctl generate --debug --wundergraph-dir src",
     "build": "pnpm generate && pnpm check",
     "check": "tsc"
   },
