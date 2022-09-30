@@ -71,8 +71,9 @@ GraphQLApi {
             "environmentVariableName": "",
             "kind": 0,
             "placeholderVariableName": "",
-            "staticVariableContent": "ws://localhost:8080/graphql",
+            "staticVariableContent": "http://localhost:8080/graphql",
           },
+          "UseSSE": false,
         },
         "UpstreamSchema": "type Query {
   user: User

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.0...@wundergraph/sdk@0.114.1) (2022-09-29)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.114.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.113.2...@wundergraph/sdk@0.114.0) (2022-09-29)
+
+### Features
+
+*  add graphql introspection middleware ([#214](https://github.com/wundergraph/wundergraph/issues/214)) ([33e840c](https://github.com/wundergraph/wundergraph/commit/33e840c995c5d482e6e755d19bbd76b006d19f3c)) (@spetrunin)
+* sse subscriptions configuration ([#217](https://github.com/wundergraph/wundergraph/issues/217)) ([7bf72ef](https://github.com/wundergraph/wundergraph/commit/7bf72efd16a8bac422db32fe957e102395d7357c)) (@YuriBuerov)
+
+### Bug Fixes
+
+* allow to configure internal and public node urls separately ([#207](https://github.com/wundergraph/wundergraph/issues/207)) ([c01bd9a](https://github.com/wundergraph/wundergraph/commit/c01bd9a1cedefbb5fd0ecde83f3b96b3dfee6f41)) (@spetrunin)
+* synchronize prisma install for multiple prisma datasources ([#222](https://github.com/wundergraph/wundergraph/issues/222)) ([9ca1fc9](https://github.com/wundergraph/wundergraph/commit/9ca1fc9d3f75ce381bafd4f895c8fb803547a932)) (@jensneuse)
+
 ## [0.113.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.113.1...@wundergraph/sdk@0.113.2) (2022-09-26)
 
 ### Bug Fixes

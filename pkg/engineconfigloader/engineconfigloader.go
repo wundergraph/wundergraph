@@ -18,21 +18,22 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 
+	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
-	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
 
 type EngineConfigLoader struct {
-	resolvers []FactoryResolver
+	wundergraphDir string
+	resolvers      []FactoryResolver
 }
 
 type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
-type ApiTransportFactory func(tripper http.RoundTripper) http.RoundTripper
+type ApiTransportFactory func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
 
 type DefaultFactoryResolver struct {
 	baseTransport    http.RoundTripper
@@ -46,14 +47,19 @@ type DefaultFactoryResolver struct {
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
 	defaultHttpClient := &http.Client{
 		Timeout:   time.Second * 10,
-		Transport: transportFactory(baseTransport),
+		Transport: transportFactory(baseTransport, false),
 	}
+	streamingClient := &http.Client{
+		Transport: transportFactory(baseTransport, true),
+	}
+
 	return &DefaultFactoryResolver{
 		baseTransport:    baseTransport,
 		transportFactory: transportFactory,
 		graphql: &graphql_datasource.Factory{
-			HTTPClient:   defaultHttpClient,
-			BatchFactory: graphql_datasource.NewBatchFactory(),
+			HTTPClient:      defaultHttpClient,
+			StreamingClient: streamingClient,
+			BatchFactory:    graphql_datasource.NewBatchFactory(),
 		},
 		rest: &oas_datasource.Factory{
 			Client: defaultHttpClient,
@@ -106,7 +112,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 		},
 	}
 
-	baseTransportWithMTLS := d.transportFactory(mtlsTransport)
+	baseTransportWithMTLS := d.transportFactory(mtlsTransport, false)
 
 	return &http.Client{
 		Timeout:   time.Second * 10,
@@ -155,9 +161,10 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 	}
 }
 
-func New(resolvers ...FactoryResolver) *EngineConfigLoader {
+func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoader {
 	return &EngineConfigLoader{
-		resolvers: resolvers,
+		wundergraphDir: wundergraphDir,
+		resolvers:      resolvers,
 	}
 }
 
@@ -295,6 +302,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			if subscriptionUrl == "" {
 				subscriptionUrl = fetchUrl
 			}
+
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -306,7 +314,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					ServiceSDL: in.CustomGraphql.Federation.ServiceSdl,
 				},
 				Subscription: graphql_datasource.SubscriptionConfiguration{
-					URL: subscriptionUrl,
+					URL:    subscriptionUrl,
+					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
 				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
 			})
@@ -324,6 +333,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				PrismaSchema:        l.addDataSourceToPrismaSchema(in.CustomDatabase.PrismaSchema, databaseURL, in.Kind),
 				GraphqlSchema:       in.CustomDatabase.GraphqlSchema,
 				CloseTimeoutSeconds: in.CustomDatabase.CloseTimeoutSeconds,
+				WunderGraphDir:      l.wundergraphDir,
 			}
 			for _, field := range in.CustomDatabase.JsonTypeFields {
 				config.JsonTypeFields = append(config.JsonTypeFields, database.SingleTypeField{

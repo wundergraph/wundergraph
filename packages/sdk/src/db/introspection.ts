@@ -23,10 +23,24 @@ export interface PrismaDatabaseIntrospectionResult {
 
 export type DatabaseSchema = 'postgresql' | 'mysql' | 'sqlite' | 'sqlserver' | 'planetscale' | 'mongodb';
 
+const _ensurePrisma = async () => {
+	console.log('Installing prisma...');
+	await wunderctlExecAsync({
+		cmd: ['installPrismaDependencies'],
+	});
+	console.log('Installing prisma... done');
+};
+
+let ensurePrisma: Promise<void> | undefined;
+
 const introspectPrismaDatabase = async (
 	databaseURL: string,
 	databaseSchema: DatabaseSchema
 ): Promise<PrismaDatabaseIntrospectionResult> => {
+	if (!ensurePrisma) {
+		ensurePrisma = _ensurePrisma();
+	}
+	await ensurePrisma;
 	const id = hash({ databaseURL, databaseSchema });
 	const introspectionDir = path.join('generated', 'introspection', 'database');
 	if (!fs.existsSync(introspectionDir)) {

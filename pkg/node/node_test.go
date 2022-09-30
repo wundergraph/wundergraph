@@ -72,7 +72,7 @@ func TestNode(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node := New(ctx, BuildInfo{}, logger)
+	node := New(ctx, BuildInfo{}, "", logger)
 
 	nodeConfig := WunderNodeConfig{
 		Server: &Server{
@@ -203,7 +203,7 @@ func TestWebHooks(t *testing.T) {
 	defer cancel()
 
 	logger := logging.New(abstractlogger.InfoLevel, true)
-	node := New(ctx, BuildInfo{}, logger)
+	node := New(ctx, BuildInfo{}, "", logger)
 
 	nodeConfig := WunderNodeConfig{
 		Server: &Server{
@@ -311,7 +311,7 @@ func BenchmarkNode(t *testing.B) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	node := New(ctx, BuildInfo{}, logger)
+	node := New(ctx, BuildInfo{}, "", logger)
 
 	nodeConfig := WunderNodeConfig{
 		Server: &Server{
