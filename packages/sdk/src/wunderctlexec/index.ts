@@ -12,6 +12,9 @@ export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnVal
 	if (!fs.existsSync(file)) {
 		throw new Error('wunderctl binary not found');
 	}
+	if (process.env.WG_DIR_ABS) {
+		args.cmd.push('--wundergraph-dir-abs', process.env.WG_DIR_ABS);
+	}
 	return execa.sync(file, args.cmd, {
 		encoding: 'utf-8',
 		timeout: args.timeout,
@@ -25,6 +28,9 @@ export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<strin
 	const file = wunderctlBinaryPath();
 	if (!fs.existsSync(file)) {
 		throw new Error('wunderctl binary not found');
+	}
+	if (process.env.WG_DIR_ABS) {
+		args.cmd.push('--wundergraph-dir-abs', process.env.WG_DIR_ABS);
 	}
 	const subprocess = execa(file, args.cmd, {
 		timeout: args.timeout,

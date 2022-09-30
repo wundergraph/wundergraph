@@ -1,0 +1,6 @@
+{
+	jsp_getPosts(tld: "com") {
+		id
+		title
+	}
+}
