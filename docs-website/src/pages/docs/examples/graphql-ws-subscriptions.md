@@ -6,23 +6,23 @@ description:
 
 [Check the example](https://github.com/wundergraph/wundergraph/tree/main/examples/graphql-ws-subscriptions)
 
-### Protocol
+## Protocol
 
 https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
-#### Getting started
+## Getting started
 
 ```shell
 npm install && npm start
 ```
 
-#### Check results
+## Check results
 
 ```shell
 curl -N http://localhost:9991/app/main/operations/Ws
 ```
 
-#### SSE output
+## SSE output
 
 ```shell
  curl -N http://localhost:9991/app/main/operations/Ws\?wg_sse\=true

@@ -6,11 +6,11 @@ description:
 
 [Check the example](https://github.com/wundergraph/wundergraph/tree/main/examples/graphql-sse-subscriptions)
 
-### Protocol
+## Protocol
 
 https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md
 
-### Configuration
+## Configuration
 
 ```typescript
 const schema = `
@@ -36,19 +36,19 @@ const greetings = introspect.graphql({
 })
 ```
 
-#### Getting started
+## Getting started
 
 ```shell
 npm install && npm start
 ```
 
-#### Check results
+## Check results
 
 ```shell
 curl -N http://localhost:9991/app/main/operations/Sse
 ```
 
-#### SSE output
+## SSE output
 
 ```shell
  curl -N http://localhost:9991/app/main/operations/Sse\?wg_sse\=true
