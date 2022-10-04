@@ -1,7 +1,7 @@
 import { fetchFederationServiceSDL, isFederationService } from './federation-introspection';
 import { configuration } from '../graphql/configuration';
 import { buildClientSchema, buildSchema, getIntrospectionQuery, GraphQLSchema, parse } from 'graphql';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -17,7 +17,8 @@ import * as https from 'https';
 import { introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
 import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
-import { mapHeaders, HeadersBuilder } from './headers-builder';
+import { HeadersBuilder, mapHeaders } from './headers-builder';
+import { Fetcher } from './introspection-fetcher';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -184,7 +185,7 @@ const introspectGraphQLAPI = async (
 
 	let res: AxiosResponse | undefined;
 	try {
-		res = await axios.post(resolveVariable(introspection.url), data, opts);
+		res = await Fetcher().post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
 		throw new Error(
 			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${

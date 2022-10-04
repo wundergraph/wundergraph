@@ -1,5 +1,5 @@
 import { GraphQLSchema } from 'graphql';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
@@ -9,7 +9,8 @@ import { composeServices } from '@apollo/composition';
 import { mergeApis } from './merge';
 import { introspectWithCache } from './introspection-cache';
 import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';
-import { mapHeaders, HeadersBuilder } from './headers-builder';
+import { HeadersBuilder, mapHeaders } from './headers-builder';
+import { Fetcher } from './introspection-fetcher';
 
 export const isFederationService = (schema: GraphQLSchema): boolean => {
 	const queryType = schema.getQueryType();
@@ -34,7 +35,7 @@ export const fetchFederationServiceSDL = async (url: string, headers?: Record<st
 
 	let res: AxiosResponse | undefined;
 	try {
-		res = await axios.post(url, data, opts);
+		res = await Fetcher().post(url, data, opts);
 	} catch (e: any) {
 		throw new Error(`failed to fetch federation service sdl (url: ${url}), error: ${e.message}`);
 	}
