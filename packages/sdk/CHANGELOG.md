@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.1...@wundergraph/sdk@0.114.2) (2022-09-30)
+
+### Bug Fixes
+
+* re-enable to specify wundergraph dir via arg ([#226](https://github.com/wundergraph/wundergraph/issues/226)) ([50cb5f2](https://github.com/wundergraph/wundergraph/commit/50cb5f22468fa481089caeba9935ee65e9dfe1f3)) (@jensneuse)
+
 ## [0.114.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.0...@wundergraph/sdk@0.114.1) (2022-09-29)
 
 **Note:** Version bump only for package @wundergraph/sdk
