@@ -7,20 +7,20 @@ GraphQLApi {
       "ChildNodes": [
         {
           "fieldNames": [
-            "id",
             "displayName",
+            "hasVerifiedEmail",
+            "id",
             "isLoggedIn",
           ],
-          "typeName": "api_User",
+          "typeName": "api_RegisteredUser",
         },
         {
           "fieldNames": [
-            "id",
             "displayName",
+            "id",
             "isLoggedIn",
-            "hasVerifiedEmail",
           ],
-          "typeName": "api_RegisteredUser",
+          "typeName": "api_User",
         },
       ],
       "Custom": {
@@ -79,17 +79,17 @@ GraphQLApi {
   user: User
 }
 
-interface User {
-  id: ID!
+type RegisteredUser implements User {
   displayName: String!
+  hasVerifiedEmail: Boolean!
+  id: ID!
   isLoggedIn: Boolean!
 }
 
-type RegisteredUser implements User {
-  id: ID!
+interface User {
   displayName: String!
+  id: ID!
   isLoggedIn: Boolean!
-  hasVerifiedEmail: Boolean!
 }",
       },
       "Directives": [],
@@ -122,26 +122,26 @@ type RegisteredUser implements User {
   api_user: api_User
 }
 
-interface api_User {
-  id: ID!
+type api_RegisteredUser implements api_User {
   displayName: String!
+  hasVerifiedEmail: Boolean!
+  id: ID!
   isLoggedIn: Boolean!
 }
 
-type api_RegisteredUser implements api_User {
-  id: ID!
+interface api_User {
   displayName: String!
+  id: ID!
   isLoggedIn: Boolean!
-  hasVerifiedEmail: Boolean!
 }",
   "Types": [
     {
-      "renameTo": "User",
-      "typeName": "api_User",
-    },
-    {
       "renameTo": "RegisteredUser",
       "typeName": "api_RegisteredUser",
+    },
+    {
+      "renameTo": "User",
+      "typeName": "api_User",
     },
   ],
   "interpolateVariableDefinitionAsJSON": [],
