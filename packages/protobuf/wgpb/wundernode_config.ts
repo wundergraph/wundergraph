@@ -819,6 +819,7 @@ export interface FetchConfiguration {
 	mTLS: MTLSConfiguration | undefined;
 	baseUrl: ConfigurationVariable | undefined;
 	path: ConfigurationVariable | undefined;
+	timeoutMillis: number;
 }
 
 export interface FetchConfiguration_HeaderEntry {
@@ -2539,6 +2540,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
 		mTLS: undefined,
 		baseUrl: undefined,
 		path: undefined,
+		timeoutMillis: 0,
 	};
 }
 
@@ -2562,6 +2564,7 @@ export const FetchConfiguration = {
 			mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
 			baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
 			path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
+			timeoutMillis: isSet(object.timeoutMillis) ? Number(object.timeoutMillis) : 0,
 		};
 	},
 
@@ -2590,6 +2593,7 @@ export const FetchConfiguration = {
 		message.baseUrl !== undefined &&
 			(obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
 		message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
+		message.timeoutMillis !== undefined && (obj.timeoutMillis = Math.round(message.timeoutMillis));
 		return obj;
 	},
 
@@ -2620,6 +2624,7 @@ export const FetchConfiguration = {
 				: undefined;
 		message.path =
 			object.path !== undefined && object.path !== null ? ConfigurationVariable.fromPartial(object.path) : undefined;
+		message.timeoutMillis = object.timeoutMillis ?? 0;
 		return message;
 	},
 };

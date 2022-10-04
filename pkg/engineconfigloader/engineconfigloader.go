@@ -25,6 +25,12 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+const (
+	// Used for shared http.Client as well as dedicated ones when no
+	// specified timeout has been specified
+	defaultHttpClientTimeout = 10 * time.Second
+)
+
 type EngineConfigLoader struct {
 	wundergraphDir string
 	resolvers      []FactoryResolver
@@ -47,7 +53,7 @@ type DefaultFactoryResolver struct {
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
 	defaultHttpClient := &http.Client{
-		Timeout:   time.Second * 10,
+		Timeout:   defaultHttpClientTimeout,
 		Transport: transportFactory(baseTransport, false),
 	}
 	streamingClient := &http.Client{
@@ -74,8 +80,23 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 	}
 }
 
-// tryCreateHTTPSClient creates a http client with the given options or defaults to the standard client if no mTLS options are given
-func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfiguration) (*http.Client, error) {
+// useCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
+func (d *DefaultFactoryResolver) useCustomHTTPClient(cfg *wgpb.FetchConfiguration) bool {
+	if cfg != nil {
+		// when mTLS is enabled, we need to create a new client
+		if cfg.MTLS != nil {
+			return true
+		}
+		// when a custom timeout is specified, we can't use the shared http.Client
+		if cfg.TimeoutMillis > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// customTLSRoundTripper returns a TLS http.Roundtripper with the given key and certificates loaded
+func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfiguration) (http.RoundTripper, error) {
 	privateKey := loadvariable.String(mTLS.Key)
 	caCert := loadvariable.String(mTLS.Cert)
 
@@ -86,7 +107,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 	caCertData := []byte(caCert)
 	cert, err := tls.X509KeyPair(caCertData, []byte(privateKey))
 	if err != nil {
-		return nil, errors.New("unable to build key pair")
+		return nil, fmt.Errorf("unable to build key pair: %w", err)
 	}
 
 	dialer := &net.Dialer{
@@ -99,7 +120,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCertData)
 
-	mtlsTransport := &http.Transport{
+	return &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return dialer.DialContext(ctx, network, addr)
 		},
@@ -111,23 +132,39 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 			RootCAs:            caCertPool,
 			InsecureSkipVerify: mTLS.InsecureSkipVerify,
 		},
-	}
-
-	baseTransportWithMTLS := d.transportFactory(mtlsTransport, false)
-
-	return &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: baseTransportWithMTLS,
 	}, nil
+}
 
+// newHTTPClient returns a custom http.Client with the given FetchConfiguration applied. Configuration
+// should have been previously validated by d.fetchConfigurationRequiresDedicatedHTTPClient()
+func (d *DefaultFactoryResolver) newHTTPClient(cfg *wgpb.FetchConfiguration) (*http.Client, error) {
+	// Timeout
+	timeout := defaultHttpClientTimeout
+	if cfg.TimeoutMillis > 0 {
+		timeout = time.Duration(cfg.TimeoutMillis) * time.Millisecond
+	}
+	// TLS
+	var transport http.RoundTripper
+	var err error
+	if cfg.MTLS != nil {
+		transport, err = d.customTLSRoundTripper(cfg.MTLS)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		transport = d.baseTransport
+	}
+	return &http.Client{
+		Timeout:   timeout,
+		Transport: d.transportFactory(transport, false),
+	}, nil
 }
 
 func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error) {
 	switch ds.Kind {
 	case wgpb.DataSourceKind_GRAPHQL:
-		// when mTLS is enabled, we need to create a new client
-		if ds.CustomGraphql != nil && ds.CustomGraphql.Fetch != nil && ds.CustomGraphql.Fetch.MTLS != nil {
-			client, err := d.tryCreateHTTPSClient(ds.CustomGraphql.Fetch.MTLS)
+		if ds.CustomGraphql != nil && d.useCustomHTTPClient(ds.CustomGraphql.Fetch) {
+			client, err := d.newHTTPClient(ds.CustomGraphql.Fetch)
 			if err != nil {
 				return nil, err
 			}
@@ -138,9 +175,8 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		}
 		return d.graphql, nil
 	case wgpb.DataSourceKind_REST:
-		// when mTLS is enabled, we need to create a new client
-		if ds.CustomRest != nil && ds.CustomRest.Fetch != nil && ds.CustomRest.Fetch.MTLS != nil {
-			client, err := d.tryCreateHTTPSClient(ds.CustomRest.Fetch.MTLS)
+		if ds.CustomRest != nil && d.useCustomHTTPClient(ds.CustomRest.Fetch) {
+			client, err := d.newHTTPClient(ds.CustomRest.Fetch)
 			if err != nil {
 				return nil, err
 			}

@@ -54,6 +54,7 @@ GraphQLApi {
             "staticVariableContent": "",
           },
           "query": [],
+          "timeoutMillis": 0,
           "upstreamAuthentication": undefined,
           "url": {
             "environmentVariableDefaultValue": "",

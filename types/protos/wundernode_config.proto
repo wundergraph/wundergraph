@@ -314,6 +314,7 @@ message FetchConfiguration {
 	MTLSConfiguration mTLS = 8;
 	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
+	int64 timeoutMillis = 11;
 }
 
 message MTLSConfiguration {
