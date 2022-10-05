@@ -1,6 +1,13 @@
 import { fetchFederationServiceSDL, isFederationService } from './federation-introspection';
 import { configuration } from '../graphql/configuration';
-import { buildClientSchema, buildSchema, getIntrospectionQuery, GraphQLSchema, parse } from 'graphql';
+import {
+	buildClientSchema,
+	buildSchema,
+	getIntrospectionQuery,
+	GraphQLSchema,
+	parse,
+	lexicographicSortSchema,
+} from 'graphql';
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
@@ -63,7 +70,8 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const headers = mapHeaders(headersBuilder);
 		const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
-		const schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
+		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
+		schema = lexicographicSortSchema(schema);
 		const federationEnabled = isFederationService(schema);
 		const schemaSDL = cleanupSchema(
 			schema,

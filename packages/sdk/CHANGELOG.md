@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.2...@wundergraph/sdk@0.114.3) (2022-10-04)
+
+### Bug Fixes
+
+* introspection, infinite loop in file changes ([#230](https://github.com/wundergraph/wundergraph/issues/230)) ([4fdf635](https://github.com/wundergraph/wundergraph/commit/4fdf6352bddd63125be673f55808f4d8493299b8)) (@YuriBuerov)
+
 ## [0.114.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.1...@wundergraph/sdk@0.114.2) (2022-09-30)
 
 ### Bug Fixes
