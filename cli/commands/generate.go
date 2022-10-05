@@ -3,7 +3,6 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
@@ -49,7 +49,7 @@ Use this command if you only want to generate the configuration`,
 			AbsWorkingDir: WunderGraphDir,
 			Logger:        log,
 			ScriptEnv: append(
-				os.Environ(),
+				helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),

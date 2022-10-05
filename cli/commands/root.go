@@ -34,7 +34,7 @@ const (
 var (
 	BuildInfo             node.BuildInfo
 	GitHubAuthDemo        node.GitHubAuthDemo
-	logLevel              string
+	cliLogLevel           string
 	DotEnvFile            string
 	log                   abstractlogger.Logger
 	enableDebugMode       bool
@@ -63,6 +63,11 @@ wunderctl is gathering anonymous usage data so that we can better understand how
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		switch cmd.Name() {
+		case "loadoperations":
+			// skip any setup for loadoperations to avoid logging anything
+			return nil
+		}
 
 		var err error
 		WunderGraphDir, err = files.FindWunderGraphDir(_wunderGraphDirConfig)
@@ -71,9 +76,10 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		}
 
 		if enableDebugMode {
+			// cliLogLevel = "debug"
 			log = logging.New(abstractlogger.DebugLevel, jsonEncodedLogging)
 		} else {
-			log = logging.New(logging.FindLogLevel(logLevel, abstractlogger.ErrorLevel), jsonEncodedLogging)
+			log = logging.New(logging.FindLogLevel(cliLogLevel, abstractlogger.ErrorLevel), jsonEncodedLogging)
 		}
 
 		err = godotenv.Load(DotEnvFile)
@@ -146,7 +152,7 @@ func init() {
 	viper.SetDefault("OAUTH_BASE_URL", "https://accounts.wundergraph.com/auth/realms/master")
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
-	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "sets the log level")
+	rootCmd.PersistentFlags().StringVarP(&cliLogLevel, "loglevel", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")

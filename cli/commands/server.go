@@ -45,6 +45,7 @@ var serverStartCmd = &cobra.Command{
 			WunderGraphDirAbs: WunderGraphDir,
 			ServerScriptFile:  serverScriptFile,
 			Production:        true,
+			Env:               helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
 		}
 
 		hookServerRunner := helpers.NewServerRunner(log, srvCfg)
