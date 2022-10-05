@@ -4,8 +4,7 @@ import {
 	DataSource,
 	IntrospectionConfiguration,
 	WG_DATA_SOURCE_POLLING_MODE,
-	WG_DEV_FIRST_RUN,
-	WG_ENABLE_INTROSPECTION_CACHE,
+	WG_DISABLE_INTROSPECTION_CACHE,
 } from './index';
 import path from 'path';
 import fs from 'fs';
@@ -98,8 +97,9 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const isIntrospectionCacheEnabled =
-		WG_ENABLE_INTROSPECTION_CACHE && introspection.introspection?.disableCache !== true;
+	const isIntrospectionDisabledBySource = introspection.introspection?.disableCache === true;
+	const isIntrospectionDisabledByEnv = WG_DISABLE_INTROSPECTION_CACHE;
+	const isIntrospectionCacheEnabled = !isIntrospectionDisabledBySource && !isIntrospectionDisabledByEnv;
 	const cacheKey = objectHash(introspection);
 
 	/**
@@ -122,11 +122,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	}
 
 	/**
-	 * The introspection cache is only used in development mode `wunderctl up`.
-	 * We try to early return with a cached introspection result.
-	 * When the user runs `wunderctl up` for the first time, we disable the cache
-	 * so the user can be sure that the introspection is up to date. If the API is down during development
-	 * we try to fallback to the previous introspection result.
+	 * As long as the cache is enabled, always try to hit it first
 	 */
 
 	if (isIntrospectionCacheEnabled) {
@@ -134,36 +130,24 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		if (cacheEntryString) {
 			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
 			return fromCacheEntry<A>(cacheEntry);
-		} else {
-			console.error('Invalid cached introspection result. Revalidate introspection...');
 		}
 	}
 
-	try {
-		// generate introspection from scratch
-		const api = await generator(introspection);
+	/*
+	 * At this point, we don't have a cache entry for this. Generate
+	 * introspection from scratch. Then cache it
+	 */
+	const api = await generator(introspection);
 
-		// prefill cache with new introspection result (only for development mode)
-		if (WG_DEV_FIRST_RUN) {
-			try {
-				const cacheEntry = toCacheEntry<A>(api);
-				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
-			} catch (e) {}
-		}
-
-		return api;
-	} catch (e) {
-		// fallback to old introspection result (only for development mode)
-		if (WG_DEV_FIRST_RUN) {
-			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
-			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-			if (cacheEntryString) {
-				console.log('Fallback to old introspection result');
-				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-				return fromCacheEntry<A>(cacheEntry);
-			}
-			console.log('Could not fallback to old introspection result');
-		}
-		throw e;
+	/*
+	 * We got a result. If the cache is enabled, populate it
+	 */
+	if (isIntrospectionCacheEnabled) {
+		try {
+			const cacheEntry = toCacheEntry<A>(api);
+			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+		} catch (e) {}
 	}
+
+	return api;
 };
