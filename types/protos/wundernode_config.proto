@@ -232,6 +232,7 @@ message DataSourceConfiguration {
 	DataSourceCustom_Static customStatic = 7;
 	DataSourceCustom_Database customDatabase = 8;
 	repeated DirectiveConfiguration directives = 9;
+	int64 timeoutMilliseconds = 10;
 }
 
 message DirectiveConfiguration {
@@ -314,7 +315,6 @@ message FetchConfiguration {
 	MTLSConfiguration mTLS = 8;
 	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
-	int64 timeoutMillis = 11;
 }
 
 message MTLSConfiguration {

@@ -184,7 +184,6 @@ class RESTApiBuilder {
 		const parentType = verb === HTTPMethod.GET ? 'Query' : 'Mutation';
 
 		const baseUrl = this.cleanupBaseURL(this.baseURL());
-		const timeoutMillis = this.introspection.timeout ?? 0;
 
 		this.dataSources.push({
 			RootNodes: [
@@ -206,7 +205,6 @@ class RESTApiBuilder {
 					mTLS: buildMTLSConfiguration(this.introspection),
 					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
 					urlEncodeBody: false,
-					timeoutMillis: timeoutMillis,
 				},
 				Subscription: {
 					Enabled: false,
@@ -216,6 +214,7 @@ class RESTApiBuilder {
 			},
 			ChildNodes: [],
 			Directives: [],
+			TimeoutMilliseconds: this.introspection.introspection?.timeoutMilliseconds ?? 0,
 		});
 
 		this.fields.push({

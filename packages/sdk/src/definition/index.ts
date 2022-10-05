@@ -223,6 +223,7 @@ export interface DataSource<Custom = unknown> {
 	ChildNodes: TypeField[];
 	Custom: Custom;
 	Directives: DirectiveConfiguration[];
+	TimeoutMilliseconds: number;
 }
 
 interface GraphQLIntrospectionOptions {
@@ -273,6 +274,7 @@ export interface IntrospectionConfiguration {
 	introspection?: {
 		disableCache?: boolean;
 		pollingIntervalSeconds?: number;
+		timeoutMilliseconds?: number;
 	};
 }
 
@@ -474,6 +476,7 @@ const introspectDatabase = async (
 			jsonInputVariables: applyNameSpaceToTypeNames(interpolateVariableDefinitionAsJSON, introspection.apiNamespace),
 		},
 		Directives: [],
+		TimeoutMilliseconds: introspection.introspection?.timeoutMilliseconds ?? 0,
 	};
 	const dataSources: DataSource<DatabaseApiCustom>[] = [];
 	dataSource.RootNodes.forEach((rootNode) => {

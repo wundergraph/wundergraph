@@ -81,16 +81,14 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 }
 
 // useCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
-func (d *DefaultFactoryResolver) useCustomHTTPClient(cfg *wgpb.FetchConfiguration) bool {
-	if cfg != nil {
-		// when mTLS is enabled, we need to create a new client
-		if cfg.MTLS != nil {
-			return true
-		}
-		// when a custom timeout is specified, we can't use the shared http.Client
-		if cfg.TimeoutMillis > 0 {
-			return true
-		}
+func (d *DefaultFactoryResolver) useCustomHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
+	// when a custom timeout is specified, we can't use the shared http.Client
+	if ds != nil && ds.TimeoutMilliseconds > 0 {
+		return true
+	}
+	// when mTLS is enabled, we need to create a new client
+	if cfg != nil && cfg.MTLS != nil {
+		return true
 	}
 	return false
 }
@@ -137,16 +135,16 @@ func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfigurat
 
 // newHTTPClient returns a custom http.Client with the given FetchConfiguration applied. Configuration
 // should have been previously validated by d.fetchConfigurationRequiresDedicatedHTTPClient()
-func (d *DefaultFactoryResolver) newHTTPClient(cfg *wgpb.FetchConfiguration) (*http.Client, error) {
+func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) (*http.Client, error) {
 	// Timeout
 	timeout := defaultHttpClientTimeout
-	if cfg.TimeoutMillis > 0 {
-		timeout = time.Duration(cfg.TimeoutMillis) * time.Millisecond
+	if ds != nil && ds.TimeoutMilliseconds > 0 {
+		timeout = time.Duration(ds.TimeoutMilliseconds) * time.Millisecond
 	}
 	// TLS
 	var transport http.RoundTripper
 	var err error
-	if cfg.MTLS != nil {
+	if cfg != nil && cfg.MTLS != nil {
 		transport, err = d.customTLSRoundTripper(cfg.MTLS)
 		if err != nil {
 			return nil, err
@@ -163,11 +161,12 @@ func (d *DefaultFactoryResolver) newHTTPClient(cfg *wgpb.FetchConfiguration) (*h
 func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error) {
 	switch ds.Kind {
 	case wgpb.DataSourceKind_GRAPHQL:
-		if ds.CustomGraphql != nil && d.useCustomHTTPClient(ds.CustomGraphql.Fetch) {
-			client, err := d.newHTTPClient(ds.CustomGraphql.Fetch)
+		if d.useCustomHTTPClient(ds, ds.CustomGraphql.Fetch) {
+			client, err := d.newHTTPClient(ds, ds.CustomGraphql.Fetch)
 			if err != nil {
 				return nil, err
 			}
+			// XXX: Implement WithHTTPClient?
 			return &graphql_datasource.Factory{
 				HTTPClient:   client,
 				BatchFactory: graphql_datasource.NewBatchFactory(),
@@ -175,14 +174,12 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		}
 		return d.graphql, nil
 	case wgpb.DataSourceKind_REST:
-		if ds.CustomRest != nil && d.useCustomHTTPClient(ds.CustomRest.Fetch) {
-			client, err := d.newHTTPClient(ds.CustomRest.Fetch)
+		if d.useCustomHTTPClient(ds, ds.CustomRest.Fetch) {
+			client, err := d.newHTTPClient(ds, ds.CustomRest.Fetch)
 			if err != nil {
 				return nil, err
 			}
-			return &oas_datasource.Factory{
-				Client: client,
-			}, nil
+			return d.rest.WithHTTPClient(client), nil
 		}
 		return d.rest, nil
 	case wgpb.DataSourceKind_STATIC:
@@ -192,6 +189,14 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		wgpb.DataSourceKind_SQLSERVER,
 		wgpb.DataSourceKind_MONGODB,
 		wgpb.DataSourceKind_SQLITE:
+
+		if d.useCustomHTTPClient(ds, nil) {
+			client, err := d.newHTTPClient(ds, nil)
+			if err != nil {
+				return nil, err
+			}
+			return d.database.WithHTTPClient(client), nil
+		}
 		return d.database, nil
 	default:
 		return nil, fmt.Errorf("invalid datasource kind %q", ds.Kind)

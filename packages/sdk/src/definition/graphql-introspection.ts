@@ -88,7 +88,6 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const graphQLSchema = buildSchema(schemaSDL);
 		const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
 		const subscriptionsEnabled = hasSubscriptions(schema);
-		const timeoutMillis = introspection.timeout ?? 0;
 		if (introspection.internal === true) {
 			headers['X-WG-Internal-GraphQL-API'] = {
 				values: [
@@ -121,7 +120,6 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							upstreamAuthentication: buildUpstreamAuthentication(introspection),
 							mTLS: buildMTLSConfiguration(introspection),
 							urlEncodeBody: false,
-							timeoutMillis: timeoutMillis
 						},
 						Subscription: {
 							Enabled: subscriptionsEnabled,
@@ -140,6 +138,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 						UpstreamSchema: schemaSDL,
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
+					TimeoutMilliseconds: introspection.introspection?.timeoutMilliseconds ?? 0,
 				},
 			],
 			applyNameSpaceToFieldConfigurations(

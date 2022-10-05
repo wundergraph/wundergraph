@@ -45,8 +45,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -55,7 +54,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -100,8 +100,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -110,7 +109,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -155,8 +155,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -165,7 +164,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -210,8 +210,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -220,7 +219,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -265,8 +265,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -275,7 +274,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -320,8 +320,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -330,7 +329,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -375,8 +375,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -385,7 +384,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -430,8 +430,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -440,7 +439,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -485,8 +485,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -495,7 +494,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -540,8 +540,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -550,7 +549,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -595,8 +595,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -605,7 +604,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -650,8 +650,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -660,7 +659,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -705,8 +705,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -715,7 +714,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -760,8 +760,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -770,7 +769,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -815,8 +815,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -825,7 +824,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -870,8 +870,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -880,7 +879,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -925,8 +925,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -935,7 +934,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -980,8 +980,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -990,7 +989,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1035,8 +1035,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1045,7 +1044,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1090,8 +1090,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1100,7 +1099,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1145,8 +1145,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1155,7 +1154,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1200,8 +1200,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1210,7 +1209,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1255,8 +1255,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1265,7 +1264,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1310,8 +1310,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1320,7 +1319,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1365,8 +1365,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1375,7 +1374,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1420,8 +1420,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1430,7 +1429,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1475,8 +1475,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1485,7 +1484,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1530,8 +1530,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1540,7 +1539,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1585,8 +1585,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1595,7 +1594,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1640,8 +1640,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1650,7 +1649,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1695,8 +1695,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1705,7 +1704,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1750,8 +1750,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1760,7 +1759,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1805,8 +1805,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1815,7 +1814,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1860,8 +1860,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1870,7 +1869,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1915,8 +1915,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1925,7 +1924,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -1970,8 +1970,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -1980,7 +1979,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2025,8 +2025,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2035,7 +2034,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2080,8 +2080,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2090,7 +2089,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2135,8 +2135,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2145,7 +2144,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2190,8 +2190,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2200,7 +2199,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2245,8 +2245,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2255,7 +2254,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2300,8 +2300,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2310,7 +2309,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2355,8 +2355,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2365,7 +2364,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2410,8 +2410,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2420,7 +2419,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2465,8 +2465,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2475,7 +2474,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2520,8 +2520,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2530,7 +2529,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2575,8 +2575,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2585,7 +2584,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2630,8 +2630,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2640,7 +2639,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2685,8 +2685,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2695,7 +2694,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2740,8 +2740,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2750,7 +2749,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2795,8 +2795,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2805,7 +2804,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2850,8 +2850,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2860,7 +2859,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2905,8 +2905,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2915,7 +2914,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -2960,8 +2960,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -2970,7 +2969,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3015,8 +3015,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3025,7 +3024,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3070,8 +3070,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3080,7 +3079,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3125,8 +3125,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3135,7 +3134,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3180,8 +3180,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3190,7 +3189,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3235,8 +3235,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3245,7 +3244,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3290,8 +3290,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3300,7 +3299,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3345,8 +3345,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3355,7 +3354,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3400,8 +3400,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3410,7 +3409,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -3455,8 +3455,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -3465,7 +3464,8 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -5105,8 +5105,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5115,7 +5114,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5160,8 +5160,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5170,7 +5169,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5215,8 +5215,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5225,7 +5224,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5270,8 +5270,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5280,7 +5279,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5325,8 +5325,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5335,7 +5334,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5380,8 +5380,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5390,7 +5389,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5435,8 +5435,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5445,7 +5444,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5490,8 +5490,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5500,7 +5499,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5545,8 +5545,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5555,7 +5554,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5600,8 +5600,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5610,7 +5609,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5655,8 +5655,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5665,7 +5664,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5710,8 +5710,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5720,7 +5719,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5765,8 +5765,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5775,7 +5774,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5820,8 +5820,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5830,7 +5829,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5875,8 +5875,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5885,7 +5884,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5930,8 +5930,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5940,7 +5939,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -5985,8 +5985,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -5995,7 +5994,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6040,8 +6040,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6050,7 +6049,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6095,8 +6095,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6105,7 +6104,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6150,8 +6150,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6160,7 +6159,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6205,8 +6205,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6215,7 +6214,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6260,8 +6260,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6270,7 +6269,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6315,8 +6315,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6325,7 +6324,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6370,8 +6370,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6380,7 +6379,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6425,8 +6425,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6435,7 +6434,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6480,8 +6480,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6490,7 +6489,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6535,8 +6535,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6545,7 +6544,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6590,8 +6590,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6600,7 +6599,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6645,8 +6645,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6655,7 +6654,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6700,8 +6700,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6710,7 +6709,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6755,8 +6755,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6765,7 +6764,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6810,8 +6810,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6820,7 +6819,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6865,8 +6865,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6875,7 +6874,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6920,8 +6920,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6930,7 +6929,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -6975,8 +6975,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -6985,7 +6984,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7030,8 +7030,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7040,7 +7039,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7085,8 +7085,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7095,7 +7094,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7140,8 +7140,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7150,7 +7149,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7195,8 +7195,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7205,7 +7204,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7250,8 +7250,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7260,7 +7259,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7305,8 +7305,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7315,7 +7314,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7360,8 +7360,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7370,7 +7369,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7415,8 +7415,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7425,7 +7424,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7470,8 +7470,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7480,7 +7479,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7525,8 +7525,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7535,7 +7534,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7580,8 +7580,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7590,7 +7589,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7635,8 +7635,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7645,7 +7644,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7690,8 +7690,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7700,7 +7699,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7745,8 +7745,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7755,7 +7754,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7800,8 +7800,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7810,7 +7809,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7855,8 +7855,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7865,7 +7864,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7910,8 +7910,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7920,7 +7919,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -7965,8 +7965,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -7975,7 +7974,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8020,8 +8020,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8030,7 +8029,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8075,8 +8075,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8085,7 +8084,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8130,8 +8130,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8140,7 +8139,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8185,8 +8185,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8195,7 +8194,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8240,8 +8240,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8250,7 +8249,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8295,8 +8295,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8305,7 +8304,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8350,8 +8350,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8360,7 +8359,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8405,8 +8405,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8415,7 +8414,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8460,8 +8460,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8470,7 +8469,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8515,8 +8515,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8525,7 +8524,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8570,8 +8570,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8580,7 +8579,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8625,8 +8625,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8635,7 +8634,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8680,8 +8680,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8690,7 +8689,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8735,8 +8735,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8745,7 +8744,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8790,8 +8790,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8800,7 +8799,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8845,8 +8845,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8855,7 +8854,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8900,8 +8900,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8910,7 +8909,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -8955,8 +8955,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -8965,7 +8964,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9010,8 +9010,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9020,7 +9019,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9065,8 +9065,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9075,7 +9074,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9120,8 +9120,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9130,7 +9129,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9175,8 +9175,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9185,7 +9184,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9230,8 +9230,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9240,7 +9239,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9285,8 +9285,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9295,7 +9294,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9340,8 +9340,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9350,7 +9349,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9395,8 +9395,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9405,7 +9404,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9450,8 +9450,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9460,7 +9459,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9505,8 +9505,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9515,7 +9514,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9560,8 +9560,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9570,7 +9569,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9615,8 +9615,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9625,7 +9624,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9670,8 +9670,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9680,7 +9679,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9725,8 +9725,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9735,7 +9734,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9780,8 +9780,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9790,7 +9789,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9835,8 +9835,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9845,7 +9844,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9890,8 +9890,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9900,7 +9899,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -9945,8 +9945,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -9955,7 +9954,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10000,8 +10000,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10010,7 +10009,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10055,8 +10055,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10065,7 +10064,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10110,8 +10110,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10120,7 +10119,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10165,8 +10165,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10175,7 +10174,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10220,8 +10220,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10230,7 +10229,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10275,8 +10275,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10285,7 +10284,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10330,8 +10330,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10340,7 +10339,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10385,8 +10385,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10395,7 +10394,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10440,8 +10440,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10450,7 +10449,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10495,8 +10495,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10505,7 +10504,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10550,8 +10550,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10560,7 +10559,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10605,8 +10605,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10615,7 +10614,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10660,8 +10660,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10670,7 +10669,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10715,8 +10715,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10725,7 +10724,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10770,8 +10770,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10780,7 +10779,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10825,8 +10825,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10835,7 +10834,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10880,8 +10880,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10890,7 +10889,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10935,8 +10935,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -10945,7 +10944,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -10990,8 +10990,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11000,7 +10999,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11045,8 +11045,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11055,7 +11054,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11100,8 +11100,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11110,7 +11109,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11155,8 +11155,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11165,7 +11164,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11210,8 +11210,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11220,7 +11219,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11265,8 +11265,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11275,7 +11274,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11320,8 +11320,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11330,7 +11329,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11375,8 +11375,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11385,7 +11384,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11430,8 +11430,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11440,7 +11439,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11485,8 +11485,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11495,7 +11494,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11540,8 +11540,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11550,7 +11549,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11595,8 +11595,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11605,7 +11604,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11650,8 +11650,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11660,7 +11659,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11705,8 +11705,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11715,7 +11714,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11760,8 +11760,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11770,7 +11769,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11815,8 +11815,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11825,7 +11824,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11870,8 +11870,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11880,7 +11879,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11925,8 +11925,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11935,7 +11934,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -11980,8 +11980,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -11990,7 +11989,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12035,8 +12035,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12045,7 +12044,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12090,8 +12090,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12100,7 +12099,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12145,8 +12145,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12155,7 +12154,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12200,8 +12200,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12210,7 +12209,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12255,8 +12255,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12265,7 +12264,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12310,8 +12310,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12320,7 +12319,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12365,8 +12365,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12375,7 +12374,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12420,8 +12420,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12430,7 +12429,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12475,8 +12475,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12485,7 +12484,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12530,8 +12530,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12540,7 +12539,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12585,8 +12585,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12595,7 +12594,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12640,8 +12640,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12650,7 +12649,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12695,8 +12695,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12705,7 +12704,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12750,8 +12750,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12760,7 +12759,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12805,8 +12805,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12815,7 +12814,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12860,8 +12860,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12870,7 +12869,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12915,8 +12915,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12925,7 +12924,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -12970,8 +12970,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -12980,7 +12979,8 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -15841,8 +15841,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -15851,7 +15850,8 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -15896,8 +15896,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -15906,7 +15905,8 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -15960,8 +15960,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
             "value": "{{ .arguments.sortOrder }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -15970,7 +15969,8 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -16073,8 +16073,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16109,7 +16108,8 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
       ]
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -16154,8 +16154,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16205,7 +16204,8 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
       ]
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -16250,8 +16250,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16291,7 +16290,8 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
       ]
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -16510,8 +16510,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16531,7 +16530,8 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
       ]
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -16576,8 +16576,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16592,7 +16591,8 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
       ]
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -16727,8 +16727,7 @@ exports[`fusion: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16737,7 +16736,8 @@ exports[`fusion: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -16782,8 +16782,7 @@ exports[`fusion: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16792,7 +16791,8 @@ exports[`fusion: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -16915,8 +16915,7 @@ exports[`github starred with unions: github_starred_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -16951,7 +16950,8 @@ exports[`github starred with unions: github_starred_data_sources 1`] = `
       ]
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -17056,8 +17056,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17066,7 +17065,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17111,8 +17111,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17121,7 +17120,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17166,8 +17166,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17176,7 +17175,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17221,8 +17221,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17231,7 +17230,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17276,8 +17276,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17286,7 +17285,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17331,8 +17331,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17341,7 +17340,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17386,8 +17386,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17396,7 +17395,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17441,8 +17441,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17451,7 +17450,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17496,8 +17496,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17506,7 +17505,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17551,8 +17551,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17561,7 +17560,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17606,8 +17606,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17616,7 +17615,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17661,8 +17661,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17671,7 +17670,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17716,8 +17716,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17726,7 +17725,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17771,8 +17771,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17781,7 +17780,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17826,8 +17826,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17836,7 +17835,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17881,8 +17881,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17891,7 +17890,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17936,8 +17936,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -17946,7 +17945,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -17991,8 +17991,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18001,7 +18000,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18046,8 +18046,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18056,7 +18055,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18106,8 +18106,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
             "value": "{{ .arguments.url }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18116,7 +18115,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18161,8 +18161,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18171,7 +18170,8 @@ exports[`httpbin: httpbin_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -18446,8 +18446,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18456,7 +18455,8 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18501,8 +18501,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18511,7 +18510,8 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -18598,8 +18598,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18608,7 +18607,8 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18653,8 +18653,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18663,7 +18662,8 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18708,8 +18708,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18718,7 +18717,8 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -18763,8 +18763,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -18773,7 +18772,8 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -19127,8 +19127,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "timeoutMillis": 0
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -19137,7 +19136,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19182,8 +19182,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "timeoutMillis": 0
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -19192,7 +19191,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19242,8 +19242,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.status }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19252,7 +19251,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19302,8 +19302,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.tags }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19312,7 +19311,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19357,8 +19357,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19367,7 +19366,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19421,8 +19421,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.status }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19431,7 +19430,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19488,8 +19488,7 @@ exports[`petstore: petstore_data_sources 1`] = `
           }
         },
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19498,7 +19497,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19548,8 +19548,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.additionalMetadata }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19558,7 +19557,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19603,8 +19603,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19613,7 +19612,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19658,8 +19658,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "timeoutMillis": 0
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -19668,7 +19667,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19713,8 +19713,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19723,7 +19722,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19768,8 +19768,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19778,7 +19777,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19823,8 +19823,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "timeoutMillis": 0
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -19833,7 +19832,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19878,8 +19878,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19888,7 +19887,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19942,8 +19942,7 @@ exports[`petstore: petstore_data_sources 1`] = `
             "value": "{{ .arguments.password }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -19952,7 +19951,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -19997,8 +19997,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20007,7 +20006,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20052,8 +20052,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20062,7 +20061,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20107,8 +20107,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "timeoutMillis": 0
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -20117,7 +20116,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20162,8 +20162,7 @@ exports[`petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20172,7 +20171,8 @@ exports[`petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -20506,8 +20506,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20516,7 +20515,8 @@ exports[`simple petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20561,8 +20561,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20571,7 +20570,8 @@ exports[`simple petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20616,8 +20616,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20626,7 +20625,8 @@ exports[`simple petstore: petstore_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -20878,8 +20878,7 @@ exports[`users: users_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20888,7 +20887,8 @@ exports[`users: users_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20933,8 +20933,7 @@ exports[`users: users_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -20943,7 +20942,8 @@ exports[`users: users_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -20997,8 +20997,7 @@ exports[`users: users_data_sources 1`] = `
             "value": "{{ .arguments.sortOrder }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21007,7 +21006,8 @@ exports[`users: users_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -21110,8 +21110,7 @@ exports[`weather: weather_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21120,7 +21119,8 @@ exports[`weather: weather_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -21197,8 +21197,7 @@ exports[`with url encoded params: stripe_query_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": true,
-        "timeoutMillis": 0
+        "urlEncodeBody": true
       },
       "Subscription": {
         "Enabled": false
@@ -21207,7 +21206,8 @@ exports[`with url encoded params: stripe_query_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;
@@ -21301,8 +21301,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21311,7 +21310,8 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -21356,8 +21356,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21366,7 +21365,8 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -21411,8 +21411,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21421,7 +21420,8 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -21471,8 +21471,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
             "value": "{{ .arguments.refreshToken }}"
           }
         ],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21481,7 +21480,8 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   },
   {
     "RootNodes": [
@@ -21526,8 +21526,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
         },
         "header": {},
         "query": [],
-        "urlEncodeBody": false,
-        "timeoutMillis": 0
+        "urlEncodeBody": false
       },
       "Subscription": {
         "Enabled": false
@@ -21536,7 +21535,8 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "TimeoutMilliseconds": 0
   }
 ]"
 `;

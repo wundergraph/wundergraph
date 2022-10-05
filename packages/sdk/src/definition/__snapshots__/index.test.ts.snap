@@ -54,7 +54,6 @@ GraphQLApi {
             "staticVariableContent": "",
           },
           "query": [],
-          "timeoutMillis": 0,
           "upstreamAuthentication": undefined,
           "url": {
             "environmentVariableDefaultValue": "",
@@ -103,6 +102,7 @@ interface User {
           "typeName": "Query",
         },
       ],
+      "TimeoutMilliseconds": 0,
     },
   ],
   "DefaultFlushInterval": 500,
