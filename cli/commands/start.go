@@ -2,7 +2,10 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
@@ -26,20 +29,15 @@ var (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start runs WunderGraph in production mode",
-	Long: `Running WunderGraph in production mode means,
-no code generation, no directory watching, no config updates,
-just running the engine as efficiently as possible without the dev overhead.
-
-If used without --exclude-server, make sure the server is available in this directory:
-{entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
+	Short: "Starts WunderGraph in production mode",
+	Long:  `Runs WunderGraph as a single process in production mode`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
 			return fmt.Errorf("could not find configuration file: %s", configFile)
 		}
 
-		nodeCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
 		if !excludeServer {
@@ -49,7 +47,7 @@ If used without --exclude-server, make sure the server is available in this dire
 			serverScriptFile := path.Join("generated", "bundle", "server.js")
 			serverExecutablePath := path.Join(WunderGraphDir, "generated", "bundle", "server.js")
 			if !files.FileExists(serverExecutablePath) {
-				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(WunderGraphDir, serverScriptFile))
+				return fmt.Errorf(`hooks server executable "%s" not found. Please use --exclude-server to disable the server`, path.Join(WunderGraphDir, serverScriptFile))
 			}
 
 			srvCfg := &helpers.ServerRunConfig{
@@ -73,7 +71,7 @@ If used without --exclude-server, make sure the server is available in this dire
 
 			go func() {
 				<-hookServerRunner.Run(serverCtx)
-				if err := nodeCtx.Err(); err != nil {
+				if err := ctx.Err(); err != nil {
 					log.Info("WunderGraph Server shutdown complete.")
 				} else {
 					log.Error("Hook server excited. Initialize WunderNode shutdown")
@@ -82,28 +80,39 @@ If used without --exclude-server, make sure the server is available in this dire
 			}()
 		}
 
-		configFileChangeChan := make(chan struct{})
-		n := node.New(nodeCtx, BuildInfo, WunderGraphDir, log)
+		data, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			log.Fatal("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			return err
+		}
+		if len(data) == 0 {
+			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile))
+			return nil
+		}
+		var graphConfig wgpb.WunderGraphConfiguration
+		err = json.Unmarshal(data, &graphConfig)
+		if err != nil {
+			log.Fatal("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			return err
+		}
+
+		wunderNodeConfig := node.CreateConfig(&graphConfig)
+		n := node.New(ctx, BuildInfo, WunderGraphDir, log)
 
 		go func() {
 			err := n.StartBlocking(
-				node.WithConfigFileChange(configFileChangeChan),
-				node.WithFileSystemConfig(configFile),
-				node.WithDebugMode(enableDebugMode),
+				node.WithStaticWunderNodeConfig(wunderNodeConfig),
 				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 				node.WithIntrospection(enableIntrospection),
-				node.WithGitHubAuthDemo(GitHubAuthDemo),
+				node.WithDebugMode(enableDebugMode),
 			)
 			if err != nil {
 				log.Fatal("startBlocking", abstractlogger.Error(err))
 			}
 		}()
 
-		// trigger server reload after initial config build
-		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
-
-		n.HandleGracefulShutdown(gracefulTimeout)
+		gracefulTimeoutSeconds := gracefulTimeout
+		n.HandleGracefulShutdown(gracefulTimeoutSeconds)
 
 		return nil
 	},

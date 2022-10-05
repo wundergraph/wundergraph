@@ -21,7 +21,7 @@ var serverCmd = &cobra.Command{
 
 var serverStartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start runs WunderGraph Middleware in production mode",
+	Short: "Starts WunderGraph Server in production mode",
 	Long: `
 		Example usage:
 			wunderctl server start
