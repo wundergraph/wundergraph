@@ -12,20 +12,32 @@ func zapLogger(lvl zapcore.Level, syncer zapcore.WriteSyncer, encodeAsJSON bool)
 	var encoder zapcore.Encoder
 	ec := zap.NewProductionEncoderConfig()
 	ec.EncodeDuration = zapcore.SecondsDurationEncoder
-	ec.EncodeTime = zapcore.RFC3339TimeEncoder
+	ec.TimeKey = "time"
+	ec.ConsoleSeparator = " "
 
 	if encodeAsJSON {
 		encoder = zapcore.NewJSONEncoder(ec)
+		ec.EncodeTime = zapcore.EpochNanosTimeEncoder
 	} else {
+		ec.EncodeTime = zapcore.RFC3339TimeEncoder
 		ec.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		encoder = zapcore.NewConsoleEncoder(ec)
 	}
 
-	return zap.New(zapcore.NewCore(
+	zapLogger := zap.New(zapcore.NewCore(
 		encoder,
 		syncer,
 		lvl,
 	))
+
+	host, err := os.Hostname()
+	if err != nil {
+		host = "unknown"
+	}
+
+	return zapLogger.With(
+		zap.String("hostname", host),
+		zap.Int("pid", os.Getpid()))
 }
 
 func New(level abstractlogger.Level, encodeAsJSON bool) abstractlogger.Logger {
