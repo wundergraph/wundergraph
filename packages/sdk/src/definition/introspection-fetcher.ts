@@ -1,5 +1,6 @@
 import axiosRetry from 'axios-retry';
 import axios, { AxiosError, AxiosInstance } from 'axios';
+import { Logger } from '../logger/logger';
 
 let axiosInstance: AxiosInstance | undefined;
 
@@ -25,8 +26,8 @@ const initAxios = (): AxiosInstance => {
 			return true;
 		},
 		onRetry: (retryCount, error, requestConfig) => {
-			console.log(
-				`failed to perform request method: ${requestConfig.method} url: ${requestConfig.url}. Retry attempt #${retryCount}`
+			Logger().error(
+				`failed to perform introspection request method: ${requestConfig.method} url: ${requestConfig.url}. Retry attempt #${retryCount}`
 			);
 		},
 	});

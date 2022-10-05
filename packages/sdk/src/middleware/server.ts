@@ -1,4 +1,4 @@
-import { logLevelToJSON, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import FastifyGraceful from 'fastify-graceful-shutdown';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
@@ -8,19 +8,19 @@ import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
 import { customGqlServerMountPath, HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
-import Pino, { pino } from 'pino';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
+import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
 import {
 	ClientRequest,
-	WunderGraphServerConfig,
-	WunderGraphUser,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
+	WunderGraphServerConfig,
+	WunderGraphUser,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
-import { PinoLogLevel, resolveServerLogLevel } from './logger';
+import { Logger, resolveServerLogLevel, SetLogLevel } from '../logger/logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 
 let WG_CONFIG: WunderGraphConfiguration;
@@ -32,9 +32,7 @@ let logger: pino.Logger;
  * You need to pass START_HOOKS_SERVER=true to start the server
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
-	logger = Pino({
-		level: process.env.LOG_LEVEL || PinoLogLevel.Info,
-	});
+	logger = Logger();
 
 	/**
 	 * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
@@ -147,7 +145,7 @@ export const createServer = async ({
 	gracefulShutdown,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level) {
-		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
+		SetLogLevel(resolveServerLogLevel(config.api.serverOptions.logger.level));
 	}
 
 	const fastify = Fastify({

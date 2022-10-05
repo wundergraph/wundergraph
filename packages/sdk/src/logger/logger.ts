@@ -1,5 +1,6 @@
 import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
+import { pino } from 'pino';
 
 export enum PinoLogLevel {
 	Fatal = 'fatal',
@@ -30,4 +31,19 @@ export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLeve
 		default:
 			throw new Error(`Unknown log level: ${wgLogLevel}`);
 	}
+};
+
+let logger: pino.Logger | undefined;
+
+export const Logger = (): pino.Logger => {
+	if (logger) {
+		return logger;
+	}
+
+	logger = pino({ level: PinoLogLevel.Info });
+	return logger;
+};
+
+export const SetLogLevel = (level: PinoLogLevel) => {
+	Logger().level = level;
 };

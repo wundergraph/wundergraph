@@ -30,6 +30,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
 import { wunderctlExec } from '../wunderctlexec';
+import { Logger } from '../logger/logger';
 
 export interface GraphQLOperation {
 	Name: string;
@@ -148,9 +149,8 @@ export const parseOperations = (
 					});
 					const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
 					if (errors.length > 0) {
-						console.log('\n\n');
-						console.log(`Error parsing operation ${operationName}: ${errors.join('\n')}`);
-						console.log('Skipping operation\n\n');
+						Logger().error(`Error parsing operation ${operationName}: ${errors.join(',')}`);
+						Logger().error('Skipping operation');
 						return;
 					}
 
@@ -269,15 +269,11 @@ export const parseOperations = (
 			},
 		});
 	} catch (e) {
-		console.error(e);
-		console.log('\n\n\n');
-		console.log('');
-		console.log('--->');
-		console.log('No Operations found! Please create at least one Operation in the directory ./operations');
-		console.log("Operation files must have the file extension '.graphql', otherwise they are ignored.");
-		console.log("Operations don't need to be named, the file name is responsible for the operation name.");
-		console.log('<---');
-		console.log('');
+		const log = Logger();
+		log.error(e);
+		log.error('No Operations found! Please create at least one Operation in the directory ./operations');
+		log.error("Operation files must have the file extension '.graphql', otherwise they are ignored.");
+		log.error("Operations don't need to be named, the file name is responsible for the operation name.");
 	}
 	return parsed;
 };
@@ -1283,8 +1279,8 @@ export const loadOperations = (schemaFileName: string): string => {
 	const output = result?.stdout;
 	if (output) {
 		const out = JSON.parse(output) as LoadOperationsOutput;
-		out.info?.forEach((info) => console.log(JSON.stringify({ level: 'info', message: info })));
-		out.errors?.forEach((info) => console.log(JSON.stringify({ level: 'error', message: info })));
+		out.info?.forEach((info) => Logger().info(info));
+		out.errors?.forEach((info) => Logger().info(info));
 		return out.files?.map((file) => file.content).join(' ') || '';
 	}
 	return '';

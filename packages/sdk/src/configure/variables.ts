@@ -1,5 +1,6 @@
 import process from 'node:process';
 import { ConfigurationVariable, ConfigurationVariableKind } from '@wundergraph/protobuf';
+import { Logger } from '../logger/logger';
 
 export class EnvironmentVariable<DefaultValue = string> {
 	constructor(name: string, defaultValue?: DefaultValue) {
@@ -68,9 +69,9 @@ export const resolveConfigurationVariable = (variable: ConfigurationVariable): s
  */
 export const mapInputVariable = (stringOrEnvironmentVariable: InputVariable) => {
 	if (stringOrEnvironmentVariable === undefined) {
-		console.log('unable to load environment variable');
-		console.log('make sure to replace \'process.env...\' with new EnvironmentVariable("%VARIABLE_NAME%")');
-		console.log('or ensure that all environment variables are defined\n');
+		Logger().error('unable to load environment variable');
+		Logger().info('make sure to replace \'process.env...\' with new EnvironmentVariable("%VARIABLE_NAME%")');
+		Logger().info('or ensure that all environment variables are defined\n');
 		throw new Error('InputVariable is undefined');
 	}
 	if (typeof stringOrEnvironmentVariable === 'string') {
