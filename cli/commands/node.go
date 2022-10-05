@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -38,18 +39,18 @@ var nodeStartCmd = &cobra.Command{
 
 		data, err := ioutil.ReadFile(configFile)
 		if err != nil {
-			log.Fatal("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			log.Error("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
 			return err
 		}
 		if len(data) == 0 {
-			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile))
-			return nil
+			log.Error("Config file is empty", abstractlogger.String("filePath", configFile))
+			return errors.New("config file is empty")
 		}
 		var graphConfig wgpb.WunderGraphConfiguration
 		err = json.Unmarshal(data, &graphConfig)
 		if err != nil {
-			log.Fatal("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
-			return err
+			log.Error("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+			return errors.New("failed to unmarshal config file")
 		}
 
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
