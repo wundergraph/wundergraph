@@ -532,3 +532,8 @@ enum ConfigurationVariableKind {
 	ENV_CONFIGURATION_VARIABLE = 1;
 	PLACEHOLDER_CONFIGURATION_VARIABLE = 2;
 }
+
+enum WgEnvironmentVariable {
+	WG_CLI_LOG_LEVEL = 0;
+	WG_CLI_LOG_JSON = 1;
+}

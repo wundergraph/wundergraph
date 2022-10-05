@@ -770,6 +770,52 @@ func (ConfigurationVariableKind) EnumDescriptor() ([]byte, []int) {
 	return file_wundernode_config_proto_rawDescGZIP(), []int{14}
 }
 
+type WgEnvironmentVariable int32
+
+const (
+	WgEnvironmentVariable_WG_CLI_LOG_LEVEL WgEnvironmentVariable = 0
+	WgEnvironmentVariable_WG_CLI_LOG_JSON  WgEnvironmentVariable = 1
+)
+
+// Enum value maps for WgEnvironmentVariable.
+var (
+	WgEnvironmentVariable_name = map[int32]string{
+		0: "WG_CLI_LOG_LEVEL",
+		1: "WG_CLI_LOG_JSON",
+	}
+	WgEnvironmentVariable_value = map[string]int32{
+		"WG_CLI_LOG_LEVEL": 0,
+		"WG_CLI_LOG_JSON":  1,
+	}
+)
+
+func (x WgEnvironmentVariable) Enum() *WgEnvironmentVariable {
+	p := new(WgEnvironmentVariable)
+	*p = x
+	return p
+}
+
+func (x WgEnvironmentVariable) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (WgEnvironmentVariable) Descriptor() protoreflect.EnumDescriptor {
+	return file_wundernode_config_proto_enumTypes[15].Descriptor()
+}
+
+func (WgEnvironmentVariable) Type() protoreflect.EnumType {
+	return &file_wundernode_config_proto_enumTypes[15]
+}
+
+func (x WgEnvironmentVariable) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use WgEnvironmentVariable.Descriptor instead.
+func (WgEnvironmentVariable) EnumDescriptor() ([]byte, []int) {
+	return file_wundernode_config_proto_rawDescGZIP(), []int{15}
+}
+
 type ApiAuthenticationConfig struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -5783,10 +5829,14 @@ var file_wundernode_config_proto_rawDesc = []byte{
 	0x4e, 0x5f, 0x56, 0x41, 0x52, 0x49, 0x41, 0x42, 0x4c, 0x45, 0x10, 0x01, 0x12, 0x26, 0x0a, 0x22,
 	0x50, 0x4c, 0x41, 0x43, 0x45, 0x48, 0x4f, 0x4c, 0x44, 0x45, 0x52, 0x5f, 0x43, 0x4f, 0x4e, 0x46,
 	0x49, 0x47, 0x55, 0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x56, 0x41, 0x52, 0x49, 0x41, 0x42,
-	0x4c, 0x45, 0x10, 0x02, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
-	0x6f, 0x6d, 0x2f, 0x77, 0x75, 0x6e, 0x64, 0x65, 0x72, 0x67, 0x72, 0x61, 0x70, 0x68, 0x2f, 0x77,
-	0x75, 0x6e, 0x64, 0x65, 0x72, 0x67, 0x72, 0x61, 0x70, 0x68, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x77,
-	0x67, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x4c, 0x45, 0x10, 0x02, 0x2a, 0x42, 0x0a, 0x15, 0x57, 0x67, 0x45, 0x6e, 0x76, 0x69, 0x72, 0x6f,
+	0x6e, 0x6d, 0x65, 0x6e, 0x74, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x12, 0x14, 0x0a,
+	0x10, 0x57, 0x47, 0x5f, 0x43, 0x4c, 0x49, 0x5f, 0x4c, 0x4f, 0x47, 0x5f, 0x4c, 0x45, 0x56, 0x45,
+	0x4c, 0x10, 0x00, 0x12, 0x13, 0x0a, 0x0f, 0x57, 0x47, 0x5f, 0x43, 0x4c, 0x49, 0x5f, 0x4c, 0x4f,
+	0x47, 0x5f, 0x4a, 0x53, 0x4f, 0x4e, 0x10, 0x01, 0x42, 0x2d, 0x5a, 0x2b, 0x67, 0x69, 0x74, 0x68,
+	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x77, 0x75, 0x6e, 0x64, 0x65, 0x72, 0x67, 0x72, 0x61,
+	0x70, 0x68, 0x2f, 0x77, 0x75, 0x6e, 0x64, 0x65, 0x72, 0x67, 0x72, 0x61, 0x70, 0x68, 0x2f, 0x70,
+	0x6b, 0x67, 0x2f, 0x77, 0x67, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -5801,7 +5851,7 @@ func file_wundernode_config_proto_rawDescGZIP() []byte {
 	return file_wundernode_config_proto_rawDescData
 }
 
-var file_wundernode_config_proto_enumTypes = make([]protoimpl.EnumInfo, 15)
+var file_wundernode_config_proto_enumTypes = make([]protoimpl.EnumInfo, 16)
 var file_wundernode_config_proto_msgTypes = make([]protoimpl.MessageInfo, 61)
 var file_wundernode_config_proto_goTypes = []interface{}{
 	(LogLevel)(0),                                            // 0: wgpb.LogLevel
@@ -5819,188 +5869,189 @@ var file_wundernode_config_proto_goTypes = []interface{}{
 	(ArgumentRenderConfiguration)(0),                         // 12: wgpb.ArgumentRenderConfiguration
 	(WebhookVerifierKind)(0),                                 // 13: wgpb.WebhookVerifierKind
 	(ConfigurationVariableKind)(0),                           // 14: wgpb.ConfigurationVariableKind
-	(*ApiAuthenticationConfig)(nil),                          // 15: wgpb.ApiAuthenticationConfig
-	(*JwksBasedAuthentication)(nil),                          // 16: wgpb.JwksBasedAuthentication
-	(*JwksAuthProvider)(nil),                                 // 17: wgpb.JwksAuthProvider
-	(*ApiAuthenticationHooks)(nil),                           // 18: wgpb.ApiAuthenticationHooks
-	(*CookieBasedAuthentication)(nil),                        // 19: wgpb.CookieBasedAuthentication
-	(*AuthProvider)(nil),                                     // 20: wgpb.AuthProvider
-	(*GithubAuthProviderConfig)(nil),                         // 21: wgpb.GithubAuthProviderConfig
-	(*OpenIDConnectQueryParameter)(nil),                      // 22: wgpb.OpenIDConnectQueryParameter
-	(*OpenIDConnectAuthProviderConfig)(nil),                  // 23: wgpb.OpenIDConnectAuthProviderConfig
-	(*ApiCacheConfig)(nil),                                   // 24: wgpb.ApiCacheConfig
-	(*InMemoryCacheConfig)(nil),                              // 25: wgpb.InMemoryCacheConfig
-	(*RedisCacheConfig)(nil),                                 // 26: wgpb.RedisCacheConfig
-	(*Operation)(nil),                                        // 27: wgpb.Operation
-	(*PostResolveTransformation)(nil),                        // 28: wgpb.PostResolveTransformation
-	(*PostResolveGetTransformation)(nil),                     // 29: wgpb.PostResolveGetTransformation
-	(*OperationVariablesConfiguration)(nil),                  // 30: wgpb.OperationVariablesConfiguration
-	(*VariableInjectionConfiguration)(nil),                   // 31: wgpb.VariableInjectionConfiguration
-	(*OperationHooksConfiguration)(nil),                      // 32: wgpb.OperationHooksConfiguration
-	(*MockResolveHookConfiguration)(nil),                     // 33: wgpb.MockResolveHookConfiguration
-	(*OperationAuthorizationConfig)(nil),                     // 34: wgpb.OperationAuthorizationConfig
-	(*OperationRoleConfig)(nil),                              // 35: wgpb.OperationRoleConfig
-	(*ClaimConfig)(nil),                                      // 36: wgpb.ClaimConfig
-	(*OperationLiveQueryConfig)(nil),                         // 37: wgpb.OperationLiveQueryConfig
-	(*OperationAuthenticationConfig)(nil),                    // 38: wgpb.OperationAuthenticationConfig
-	(*OperationCacheConfig)(nil),                             // 39: wgpb.OperationCacheConfig
-	(*EngineConfiguration)(nil),                              // 40: wgpb.EngineConfiguration
-	(*DataSourceConfiguration)(nil),                          // 41: wgpb.DataSourceConfiguration
-	(*DirectiveConfiguration)(nil),                           // 42: wgpb.DirectiveConfiguration
-	(*DataSourceCustom_REST)(nil),                            // 43: wgpb.DataSourceCustom_REST
-	(*StatusCodeTypeMapping)(nil),                            // 44: wgpb.StatusCodeTypeMapping
-	(*DataSourceCustom_GraphQL)(nil),                         // 45: wgpb.DataSourceCustom_GraphQL
-	(*DataSourceCustom_Database)(nil),                        // 46: wgpb.DataSourceCustom_Database
-	(*GraphQLFederationConfiguration)(nil),                   // 47: wgpb.GraphQLFederationConfiguration
-	(*DataSourceCustom_Static)(nil),                          // 48: wgpb.DataSourceCustom_Static
-	(*GraphQLSubscriptionConfiguration)(nil),                 // 49: wgpb.GraphQLSubscriptionConfiguration
-	(*FetchConfiguration)(nil),                               // 50: wgpb.FetchConfiguration
-	(*MTLSConfiguration)(nil),                                // 51: wgpb.MTLSConfiguration
-	(*UpstreamAuthentication)(nil),                           // 52: wgpb.UpstreamAuthentication
-	(*JwtUpstreamAuthenticationConfig)(nil),                  // 53: wgpb.JwtUpstreamAuthenticationConfig
-	(*JwtUpstreamAuthenticationWithAccessTokenExchange)(nil), // 54: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange
-	(*RESTSubscriptionConfiguration)(nil),                    // 55: wgpb.RESTSubscriptionConfiguration
-	(*URLQueryConfiguration)(nil),                            // 56: wgpb.URLQueryConfiguration
-	(*HTTPHeader)(nil),                                       // 57: wgpb.HTTPHeader
-	(*TypeConfiguration)(nil),                                // 58: wgpb.TypeConfiguration
-	(*FieldConfiguration)(nil),                               // 59: wgpb.FieldConfiguration
-	(*TypeField)(nil),                                        // 60: wgpb.TypeField
-	(*SingleTypeField)(nil),                                  // 61: wgpb.SingleTypeField
-	(*ArgumentConfiguration)(nil),                            // 62: wgpb.ArgumentConfiguration
-	(*WunderGraphConfiguration)(nil),                         // 63: wgpb.WunderGraphConfiguration
-	(*S3UploadConfiguration)(nil),                            // 64: wgpb.S3UploadConfiguration
-	(*UserDefinedApi)(nil),                                   // 65: wgpb.UserDefinedApi
-	(*ListenerOptions)(nil),                                  // 66: wgpb.ListenerOptions
-	(*NodeLogging)(nil),                                      // 67: wgpb.NodeLogging
-	(*NodeOptions)(nil),                                      // 68: wgpb.NodeOptions
-	(*ServerLogging)(nil),                                    // 69: wgpb.ServerLogging
-	(*ServerOptions)(nil),                                    // 70: wgpb.ServerOptions
-	(*WebhookConfiguration)(nil),                             // 71: wgpb.WebhookConfiguration
-	(*WebhookVerifier)(nil),                                  // 72: wgpb.WebhookVerifier
-	(*CorsConfiguration)(nil),                                // 73: wgpb.CorsConfiguration
-	(*ConfigurationVariable)(nil),                            // 74: wgpb.ConfigurationVariable
-	nil,                                                      // 75: wgpb.FetchConfiguration.HeaderEntry
+	(WgEnvironmentVariable)(0),                               // 15: wgpb.WgEnvironmentVariable
+	(*ApiAuthenticationConfig)(nil),                          // 16: wgpb.ApiAuthenticationConfig
+	(*JwksBasedAuthentication)(nil),                          // 17: wgpb.JwksBasedAuthentication
+	(*JwksAuthProvider)(nil),                                 // 18: wgpb.JwksAuthProvider
+	(*ApiAuthenticationHooks)(nil),                           // 19: wgpb.ApiAuthenticationHooks
+	(*CookieBasedAuthentication)(nil),                        // 20: wgpb.CookieBasedAuthentication
+	(*AuthProvider)(nil),                                     // 21: wgpb.AuthProvider
+	(*GithubAuthProviderConfig)(nil),                         // 22: wgpb.GithubAuthProviderConfig
+	(*OpenIDConnectQueryParameter)(nil),                      // 23: wgpb.OpenIDConnectQueryParameter
+	(*OpenIDConnectAuthProviderConfig)(nil),                  // 24: wgpb.OpenIDConnectAuthProviderConfig
+	(*ApiCacheConfig)(nil),                                   // 25: wgpb.ApiCacheConfig
+	(*InMemoryCacheConfig)(nil),                              // 26: wgpb.InMemoryCacheConfig
+	(*RedisCacheConfig)(nil),                                 // 27: wgpb.RedisCacheConfig
+	(*Operation)(nil),                                        // 28: wgpb.Operation
+	(*PostResolveTransformation)(nil),                        // 29: wgpb.PostResolveTransformation
+	(*PostResolveGetTransformation)(nil),                     // 30: wgpb.PostResolveGetTransformation
+	(*OperationVariablesConfiguration)(nil),                  // 31: wgpb.OperationVariablesConfiguration
+	(*VariableInjectionConfiguration)(nil),                   // 32: wgpb.VariableInjectionConfiguration
+	(*OperationHooksConfiguration)(nil),                      // 33: wgpb.OperationHooksConfiguration
+	(*MockResolveHookConfiguration)(nil),                     // 34: wgpb.MockResolveHookConfiguration
+	(*OperationAuthorizationConfig)(nil),                     // 35: wgpb.OperationAuthorizationConfig
+	(*OperationRoleConfig)(nil),                              // 36: wgpb.OperationRoleConfig
+	(*ClaimConfig)(nil),                                      // 37: wgpb.ClaimConfig
+	(*OperationLiveQueryConfig)(nil),                         // 38: wgpb.OperationLiveQueryConfig
+	(*OperationAuthenticationConfig)(nil),                    // 39: wgpb.OperationAuthenticationConfig
+	(*OperationCacheConfig)(nil),                             // 40: wgpb.OperationCacheConfig
+	(*EngineConfiguration)(nil),                              // 41: wgpb.EngineConfiguration
+	(*DataSourceConfiguration)(nil),                          // 42: wgpb.DataSourceConfiguration
+	(*DirectiveConfiguration)(nil),                           // 43: wgpb.DirectiveConfiguration
+	(*DataSourceCustom_REST)(nil),                            // 44: wgpb.DataSourceCustom_REST
+	(*StatusCodeTypeMapping)(nil),                            // 45: wgpb.StatusCodeTypeMapping
+	(*DataSourceCustom_GraphQL)(nil),                         // 46: wgpb.DataSourceCustom_GraphQL
+	(*DataSourceCustom_Database)(nil),                        // 47: wgpb.DataSourceCustom_Database
+	(*GraphQLFederationConfiguration)(nil),                   // 48: wgpb.GraphQLFederationConfiguration
+	(*DataSourceCustom_Static)(nil),                          // 49: wgpb.DataSourceCustom_Static
+	(*GraphQLSubscriptionConfiguration)(nil),                 // 50: wgpb.GraphQLSubscriptionConfiguration
+	(*FetchConfiguration)(nil),                               // 51: wgpb.FetchConfiguration
+	(*MTLSConfiguration)(nil),                                // 52: wgpb.MTLSConfiguration
+	(*UpstreamAuthentication)(nil),                           // 53: wgpb.UpstreamAuthentication
+	(*JwtUpstreamAuthenticationConfig)(nil),                  // 54: wgpb.JwtUpstreamAuthenticationConfig
+	(*JwtUpstreamAuthenticationWithAccessTokenExchange)(nil), // 55: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange
+	(*RESTSubscriptionConfiguration)(nil),                    // 56: wgpb.RESTSubscriptionConfiguration
+	(*URLQueryConfiguration)(nil),                            // 57: wgpb.URLQueryConfiguration
+	(*HTTPHeader)(nil),                                       // 58: wgpb.HTTPHeader
+	(*TypeConfiguration)(nil),                                // 59: wgpb.TypeConfiguration
+	(*FieldConfiguration)(nil),                               // 60: wgpb.FieldConfiguration
+	(*TypeField)(nil),                                        // 61: wgpb.TypeField
+	(*SingleTypeField)(nil),                                  // 62: wgpb.SingleTypeField
+	(*ArgumentConfiguration)(nil),                            // 63: wgpb.ArgumentConfiguration
+	(*WunderGraphConfiguration)(nil),                         // 64: wgpb.WunderGraphConfiguration
+	(*S3UploadConfiguration)(nil),                            // 65: wgpb.S3UploadConfiguration
+	(*UserDefinedApi)(nil),                                   // 66: wgpb.UserDefinedApi
+	(*ListenerOptions)(nil),                                  // 67: wgpb.ListenerOptions
+	(*NodeLogging)(nil),                                      // 68: wgpb.NodeLogging
+	(*NodeOptions)(nil),                                      // 69: wgpb.NodeOptions
+	(*ServerLogging)(nil),                                    // 70: wgpb.ServerLogging
+	(*ServerOptions)(nil),                                    // 71: wgpb.ServerOptions
+	(*WebhookConfiguration)(nil),                             // 72: wgpb.WebhookConfiguration
+	(*WebhookVerifier)(nil),                                  // 73: wgpb.WebhookVerifier
+	(*CorsConfiguration)(nil),                                // 74: wgpb.CorsConfiguration
+	(*ConfigurationVariable)(nil),                            // 75: wgpb.ConfigurationVariable
+	nil,                                                      // 76: wgpb.FetchConfiguration.HeaderEntry
 }
 var file_wundernode_config_proto_depIdxs = []int32{
-	19,  // 0: wgpb.ApiAuthenticationConfig.cookieBased:type_name -> wgpb.CookieBasedAuthentication
-	18,  // 1: wgpb.ApiAuthenticationConfig.hooks:type_name -> wgpb.ApiAuthenticationHooks
-	16,  // 2: wgpb.ApiAuthenticationConfig.jwksBased:type_name -> wgpb.JwksBasedAuthentication
-	17,  // 3: wgpb.JwksBasedAuthentication.providers:type_name -> wgpb.JwksAuthProvider
-	74,  // 4: wgpb.JwksAuthProvider.jwksUrl:type_name -> wgpb.ConfigurationVariable
-	74,  // 5: wgpb.JwksAuthProvider.jwksJson:type_name -> wgpb.ConfigurationVariable
-	74,  // 6: wgpb.JwksAuthProvider.userInfoEndpoint:type_name -> wgpb.ConfigurationVariable
-	20,  // 7: wgpb.CookieBasedAuthentication.providers:type_name -> wgpb.AuthProvider
-	74,  // 8: wgpb.CookieBasedAuthentication.authorizedRedirectUris:type_name -> wgpb.ConfigurationVariable
-	74,  // 9: wgpb.CookieBasedAuthentication.authorizedRedirectUriRegexes:type_name -> wgpb.ConfigurationVariable
-	74,  // 10: wgpb.CookieBasedAuthentication.hashKey:type_name -> wgpb.ConfigurationVariable
-	74,  // 11: wgpb.CookieBasedAuthentication.blockKey:type_name -> wgpb.ConfigurationVariable
-	74,  // 12: wgpb.CookieBasedAuthentication.csrfSecret:type_name -> wgpb.ConfigurationVariable
+	20,  // 0: wgpb.ApiAuthenticationConfig.cookieBased:type_name -> wgpb.CookieBasedAuthentication
+	19,  // 1: wgpb.ApiAuthenticationConfig.hooks:type_name -> wgpb.ApiAuthenticationHooks
+	17,  // 2: wgpb.ApiAuthenticationConfig.jwksBased:type_name -> wgpb.JwksBasedAuthentication
+	18,  // 3: wgpb.JwksBasedAuthentication.providers:type_name -> wgpb.JwksAuthProvider
+	75,  // 4: wgpb.JwksAuthProvider.jwksUrl:type_name -> wgpb.ConfigurationVariable
+	75,  // 5: wgpb.JwksAuthProvider.jwksJson:type_name -> wgpb.ConfigurationVariable
+	75,  // 6: wgpb.JwksAuthProvider.userInfoEndpoint:type_name -> wgpb.ConfigurationVariable
+	21,  // 7: wgpb.CookieBasedAuthentication.providers:type_name -> wgpb.AuthProvider
+	75,  // 8: wgpb.CookieBasedAuthentication.authorizedRedirectUris:type_name -> wgpb.ConfigurationVariable
+	75,  // 9: wgpb.CookieBasedAuthentication.authorizedRedirectUriRegexes:type_name -> wgpb.ConfigurationVariable
+	75,  // 10: wgpb.CookieBasedAuthentication.hashKey:type_name -> wgpb.ConfigurationVariable
+	75,  // 11: wgpb.CookieBasedAuthentication.blockKey:type_name -> wgpb.ConfigurationVariable
+	75,  // 12: wgpb.CookieBasedAuthentication.csrfSecret:type_name -> wgpb.ConfigurationVariable
 	1,   // 13: wgpb.AuthProvider.kind:type_name -> wgpb.AuthProviderKind
-	21,  // 14: wgpb.AuthProvider.githubConfig:type_name -> wgpb.GithubAuthProviderConfig
-	23,  // 15: wgpb.AuthProvider.oidcConfig:type_name -> wgpb.OpenIDConnectAuthProviderConfig
-	74,  // 16: wgpb.GithubAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
-	74,  // 17: wgpb.GithubAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
-	74,  // 18: wgpb.OpenIDConnectQueryParameter.name:type_name -> wgpb.ConfigurationVariable
-	74,  // 19: wgpb.OpenIDConnectQueryParameter.value:type_name -> wgpb.ConfigurationVariable
-	74,  // 20: wgpb.OpenIDConnectAuthProviderConfig.issuer:type_name -> wgpb.ConfigurationVariable
-	74,  // 21: wgpb.OpenIDConnectAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
-	74,  // 22: wgpb.OpenIDConnectAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
-	22,  // 23: wgpb.OpenIDConnectAuthProviderConfig.queryParameters:type_name -> wgpb.OpenIDConnectQueryParameter
+	22,  // 14: wgpb.AuthProvider.githubConfig:type_name -> wgpb.GithubAuthProviderConfig
+	24,  // 15: wgpb.AuthProvider.oidcConfig:type_name -> wgpb.OpenIDConnectAuthProviderConfig
+	75,  // 16: wgpb.GithubAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
+	75,  // 17: wgpb.GithubAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
+	75,  // 18: wgpb.OpenIDConnectQueryParameter.name:type_name -> wgpb.ConfigurationVariable
+	75,  // 19: wgpb.OpenIDConnectQueryParameter.value:type_name -> wgpb.ConfigurationVariable
+	75,  // 20: wgpb.OpenIDConnectAuthProviderConfig.issuer:type_name -> wgpb.ConfigurationVariable
+	75,  // 21: wgpb.OpenIDConnectAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
+	75,  // 22: wgpb.OpenIDConnectAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
+	23,  // 23: wgpb.OpenIDConnectAuthProviderConfig.queryParameters:type_name -> wgpb.OpenIDConnectQueryParameter
 	2,   // 24: wgpb.ApiCacheConfig.kind:type_name -> wgpb.ApiCacheKind
-	25,  // 25: wgpb.ApiCacheConfig.inMemoryConfig:type_name -> wgpb.InMemoryCacheConfig
-	26,  // 26: wgpb.ApiCacheConfig.redisConfig:type_name -> wgpb.RedisCacheConfig
+	26,  // 25: wgpb.ApiCacheConfig.inMemoryConfig:type_name -> wgpb.InMemoryCacheConfig
+	27,  // 26: wgpb.ApiCacheConfig.redisConfig:type_name -> wgpb.RedisCacheConfig
 	6,   // 27: wgpb.Operation.operationType:type_name -> wgpb.OperationType
-	39,  // 28: wgpb.Operation.cacheConfig:type_name -> wgpb.OperationCacheConfig
-	38,  // 29: wgpb.Operation.authenticationConfig:type_name -> wgpb.OperationAuthenticationConfig
-	37,  // 30: wgpb.Operation.liveQueryConfig:type_name -> wgpb.OperationLiveQueryConfig
-	34,  // 31: wgpb.Operation.authorizationConfig:type_name -> wgpb.OperationAuthorizationConfig
-	32,  // 32: wgpb.Operation.hooksConfiguration:type_name -> wgpb.OperationHooksConfiguration
-	30,  // 33: wgpb.Operation.variablesConfiguration:type_name -> wgpb.OperationVariablesConfiguration
-	28,  // 34: wgpb.Operation.postResolveTransformations:type_name -> wgpb.PostResolveTransformation
+	40,  // 28: wgpb.Operation.cacheConfig:type_name -> wgpb.OperationCacheConfig
+	39,  // 29: wgpb.Operation.authenticationConfig:type_name -> wgpb.OperationAuthenticationConfig
+	38,  // 30: wgpb.Operation.liveQueryConfig:type_name -> wgpb.OperationLiveQueryConfig
+	35,  // 31: wgpb.Operation.authorizationConfig:type_name -> wgpb.OperationAuthorizationConfig
+	33,  // 32: wgpb.Operation.hooksConfiguration:type_name -> wgpb.OperationHooksConfiguration
+	31,  // 33: wgpb.Operation.variablesConfiguration:type_name -> wgpb.OperationVariablesConfiguration
+	29,  // 34: wgpb.Operation.postResolveTransformations:type_name -> wgpb.PostResolveTransformation
 	3,   // 35: wgpb.PostResolveTransformation.kind:type_name -> wgpb.PostResolveTransformationKind
-	29,  // 36: wgpb.PostResolveTransformation.get:type_name -> wgpb.PostResolveGetTransformation
-	31,  // 37: wgpb.OperationVariablesConfiguration.injectVariables:type_name -> wgpb.VariableInjectionConfiguration
+	30,  // 36: wgpb.PostResolveTransformation.get:type_name -> wgpb.PostResolveGetTransformation
+	32,  // 37: wgpb.OperationVariablesConfiguration.injectVariables:type_name -> wgpb.VariableInjectionConfiguration
 	4,   // 38: wgpb.VariableInjectionConfiguration.variableKind:type_name -> wgpb.InjectVariableKind
-	33,  // 39: wgpb.OperationHooksConfiguration.mockResolve:type_name -> wgpb.MockResolveHookConfiguration
-	36,  // 40: wgpb.OperationAuthorizationConfig.claims:type_name -> wgpb.ClaimConfig
-	35,  // 41: wgpb.OperationAuthorizationConfig.roleConfig:type_name -> wgpb.OperationRoleConfig
+	34,  // 39: wgpb.OperationHooksConfiguration.mockResolve:type_name -> wgpb.MockResolveHookConfiguration
+	37,  // 40: wgpb.OperationAuthorizationConfig.claims:type_name -> wgpb.ClaimConfig
+	36,  // 41: wgpb.OperationAuthorizationConfig.roleConfig:type_name -> wgpb.OperationRoleConfig
 	5,   // 42: wgpb.ClaimConfig.claim:type_name -> wgpb.Claim
-	41,  // 43: wgpb.EngineConfiguration.datasourceConfigurations:type_name -> wgpb.DataSourceConfiguration
-	59,  // 44: wgpb.EngineConfiguration.fieldConfigurations:type_name -> wgpb.FieldConfiguration
-	58,  // 45: wgpb.EngineConfiguration.typeConfigurations:type_name -> wgpb.TypeConfiguration
+	42,  // 43: wgpb.EngineConfiguration.datasourceConfigurations:type_name -> wgpb.DataSourceConfiguration
+	60,  // 44: wgpb.EngineConfiguration.fieldConfigurations:type_name -> wgpb.FieldConfiguration
+	59,  // 45: wgpb.EngineConfiguration.typeConfigurations:type_name -> wgpb.TypeConfiguration
 	7,   // 46: wgpb.DataSourceConfiguration.kind:type_name -> wgpb.DataSourceKind
-	60,  // 47: wgpb.DataSourceConfiguration.rootNodes:type_name -> wgpb.TypeField
-	60,  // 48: wgpb.DataSourceConfiguration.childNodes:type_name -> wgpb.TypeField
-	43,  // 49: wgpb.DataSourceConfiguration.customRest:type_name -> wgpb.DataSourceCustom_REST
-	45,  // 50: wgpb.DataSourceConfiguration.customGraphql:type_name -> wgpb.DataSourceCustom_GraphQL
-	48,  // 51: wgpb.DataSourceConfiguration.customStatic:type_name -> wgpb.DataSourceCustom_Static
-	46,  // 52: wgpb.DataSourceConfiguration.customDatabase:type_name -> wgpb.DataSourceCustom_Database
-	42,  // 53: wgpb.DataSourceConfiguration.directives:type_name -> wgpb.DirectiveConfiguration
-	50,  // 54: wgpb.DataSourceCustom_REST.fetch:type_name -> wgpb.FetchConfiguration
-	55,  // 55: wgpb.DataSourceCustom_REST.subscription:type_name -> wgpb.RESTSubscriptionConfiguration
-	44,  // 56: wgpb.DataSourceCustom_REST.statusCodeTypeMappings:type_name -> wgpb.StatusCodeTypeMapping
-	50,  // 57: wgpb.DataSourceCustom_GraphQL.fetch:type_name -> wgpb.FetchConfiguration
-	49,  // 58: wgpb.DataSourceCustom_GraphQL.subscription:type_name -> wgpb.GraphQLSubscriptionConfiguration
-	47,  // 59: wgpb.DataSourceCustom_GraphQL.federation:type_name -> wgpb.GraphQLFederationConfiguration
-	74,  // 60: wgpb.DataSourceCustom_Database.databaseURL:type_name -> wgpb.ConfigurationVariable
-	61,  // 61: wgpb.DataSourceCustom_Database.jsonTypeFields:type_name -> wgpb.SingleTypeField
-	74,  // 62: wgpb.DataSourceCustom_Static.data:type_name -> wgpb.ConfigurationVariable
-	74,  // 63: wgpb.GraphQLSubscriptionConfiguration.url:type_name -> wgpb.ConfigurationVariable
-	74,  // 64: wgpb.FetchConfiguration.url:type_name -> wgpb.ConfigurationVariable
+	61,  // 47: wgpb.DataSourceConfiguration.rootNodes:type_name -> wgpb.TypeField
+	61,  // 48: wgpb.DataSourceConfiguration.childNodes:type_name -> wgpb.TypeField
+	44,  // 49: wgpb.DataSourceConfiguration.customRest:type_name -> wgpb.DataSourceCustom_REST
+	46,  // 50: wgpb.DataSourceConfiguration.customGraphql:type_name -> wgpb.DataSourceCustom_GraphQL
+	49,  // 51: wgpb.DataSourceConfiguration.customStatic:type_name -> wgpb.DataSourceCustom_Static
+	47,  // 52: wgpb.DataSourceConfiguration.customDatabase:type_name -> wgpb.DataSourceCustom_Database
+	43,  // 53: wgpb.DataSourceConfiguration.directives:type_name -> wgpb.DirectiveConfiguration
+	51,  // 54: wgpb.DataSourceCustom_REST.fetch:type_name -> wgpb.FetchConfiguration
+	56,  // 55: wgpb.DataSourceCustom_REST.subscription:type_name -> wgpb.RESTSubscriptionConfiguration
+	45,  // 56: wgpb.DataSourceCustom_REST.statusCodeTypeMappings:type_name -> wgpb.StatusCodeTypeMapping
+	51,  // 57: wgpb.DataSourceCustom_GraphQL.fetch:type_name -> wgpb.FetchConfiguration
+	50,  // 58: wgpb.DataSourceCustom_GraphQL.subscription:type_name -> wgpb.GraphQLSubscriptionConfiguration
+	48,  // 59: wgpb.DataSourceCustom_GraphQL.federation:type_name -> wgpb.GraphQLFederationConfiguration
+	75,  // 60: wgpb.DataSourceCustom_Database.databaseURL:type_name -> wgpb.ConfigurationVariable
+	62,  // 61: wgpb.DataSourceCustom_Database.jsonTypeFields:type_name -> wgpb.SingleTypeField
+	75,  // 62: wgpb.DataSourceCustom_Static.data:type_name -> wgpb.ConfigurationVariable
+	75,  // 63: wgpb.GraphQLSubscriptionConfiguration.url:type_name -> wgpb.ConfigurationVariable
+	75,  // 64: wgpb.FetchConfiguration.url:type_name -> wgpb.ConfigurationVariable
 	10,  // 65: wgpb.FetchConfiguration.method:type_name -> wgpb.HTTPMethod
-	75,  // 66: wgpb.FetchConfiguration.header:type_name -> wgpb.FetchConfiguration.HeaderEntry
-	74,  // 67: wgpb.FetchConfiguration.body:type_name -> wgpb.ConfigurationVariable
-	56,  // 68: wgpb.FetchConfiguration.query:type_name -> wgpb.URLQueryConfiguration
-	52,  // 69: wgpb.FetchConfiguration.upstreamAuthentication:type_name -> wgpb.UpstreamAuthentication
-	51,  // 70: wgpb.FetchConfiguration.mTLS:type_name -> wgpb.MTLSConfiguration
-	74,  // 71: wgpb.FetchConfiguration.baseUrl:type_name -> wgpb.ConfigurationVariable
-	74,  // 72: wgpb.FetchConfiguration.path:type_name -> wgpb.ConfigurationVariable
-	74,  // 73: wgpb.MTLSConfiguration.key:type_name -> wgpb.ConfigurationVariable
-	74,  // 74: wgpb.MTLSConfiguration.cert:type_name -> wgpb.ConfigurationVariable
+	76,  // 66: wgpb.FetchConfiguration.header:type_name -> wgpb.FetchConfiguration.HeaderEntry
+	75,  // 67: wgpb.FetchConfiguration.body:type_name -> wgpb.ConfigurationVariable
+	57,  // 68: wgpb.FetchConfiguration.query:type_name -> wgpb.URLQueryConfiguration
+	53,  // 69: wgpb.FetchConfiguration.upstreamAuthentication:type_name -> wgpb.UpstreamAuthentication
+	52,  // 70: wgpb.FetchConfiguration.mTLS:type_name -> wgpb.MTLSConfiguration
+	75,  // 71: wgpb.FetchConfiguration.baseUrl:type_name -> wgpb.ConfigurationVariable
+	75,  // 72: wgpb.FetchConfiguration.path:type_name -> wgpb.ConfigurationVariable
+	75,  // 73: wgpb.MTLSConfiguration.key:type_name -> wgpb.ConfigurationVariable
+	75,  // 74: wgpb.MTLSConfiguration.cert:type_name -> wgpb.ConfigurationVariable
 	8,   // 75: wgpb.UpstreamAuthentication.kind:type_name -> wgpb.UpstreamAuthenticationKind
-	53,  // 76: wgpb.UpstreamAuthentication.jwtConfig:type_name -> wgpb.JwtUpstreamAuthenticationConfig
-	54,  // 77: wgpb.UpstreamAuthentication.jwtWithAccessTokenExchangeConfig:type_name -> wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange
-	74,  // 78: wgpb.JwtUpstreamAuthenticationConfig.secret:type_name -> wgpb.ConfigurationVariable
+	54,  // 76: wgpb.UpstreamAuthentication.jwtConfig:type_name -> wgpb.JwtUpstreamAuthenticationConfig
+	55,  // 77: wgpb.UpstreamAuthentication.jwtWithAccessTokenExchangeConfig:type_name -> wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange
+	75,  // 78: wgpb.JwtUpstreamAuthenticationConfig.secret:type_name -> wgpb.ConfigurationVariable
 	9,   // 79: wgpb.JwtUpstreamAuthenticationConfig.signingMethod:type_name -> wgpb.SigningMethod
-	74,  // 80: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.secret:type_name -> wgpb.ConfigurationVariable
+	75,  // 80: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.secret:type_name -> wgpb.ConfigurationVariable
 	9,   // 81: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.signingMethod:type_name -> wgpb.SigningMethod
-	74,  // 82: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.accessTokenExchangeEndpoint:type_name -> wgpb.ConfigurationVariable
-	74,  // 83: wgpb.HTTPHeader.values:type_name -> wgpb.ConfigurationVariable
-	62,  // 84: wgpb.FieldConfiguration.argumentsConfiguration:type_name -> wgpb.ArgumentConfiguration
+	75,  // 82: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.accessTokenExchangeEndpoint:type_name -> wgpb.ConfigurationVariable
+	75,  // 83: wgpb.HTTPHeader.values:type_name -> wgpb.ConfigurationVariable
+	63,  // 84: wgpb.FieldConfiguration.argumentsConfiguration:type_name -> wgpb.ArgumentConfiguration
 	11,  // 85: wgpb.ArgumentConfiguration.sourceType:type_name -> wgpb.ArgumentSource
 	12,  // 86: wgpb.ArgumentConfiguration.renderConfiguration:type_name -> wgpb.ArgumentRenderConfiguration
-	65,  // 87: wgpb.WunderGraphConfiguration.api:type_name -> wgpb.UserDefinedApi
-	74,  // 88: wgpb.S3UploadConfiguration.endpoint:type_name -> wgpb.ConfigurationVariable
-	74,  // 89: wgpb.S3UploadConfiguration.accessKeyID:type_name -> wgpb.ConfigurationVariable
-	74,  // 90: wgpb.S3UploadConfiguration.secretAccessKey:type_name -> wgpb.ConfigurationVariable
-	74,  // 91: wgpb.S3UploadConfiguration.bucketName:type_name -> wgpb.ConfigurationVariable
-	74,  // 92: wgpb.S3UploadConfiguration.bucketLocation:type_name -> wgpb.ConfigurationVariable
-	40,  // 93: wgpb.UserDefinedApi.engineConfiguration:type_name -> wgpb.EngineConfiguration
-	27,  // 94: wgpb.UserDefinedApi.operations:type_name -> wgpb.Operation
-	73,  // 95: wgpb.UserDefinedApi.corsConfiguration:type_name -> wgpb.CorsConfiguration
-	15,  // 96: wgpb.UserDefinedApi.authenticationConfig:type_name -> wgpb.ApiAuthenticationConfig
-	64,  // 97: wgpb.UserDefinedApi.s3UploadConfiguration:type_name -> wgpb.S3UploadConfiguration
-	74,  // 98: wgpb.UserDefinedApi.allowedHostNames:type_name -> wgpb.ConfigurationVariable
-	71,  // 99: wgpb.UserDefinedApi.webhooks:type_name -> wgpb.WebhookConfiguration
-	70,  // 100: wgpb.UserDefinedApi.serverOptions:type_name -> wgpb.ServerOptions
-	68,  // 101: wgpb.UserDefinedApi.nodeOptions:type_name -> wgpb.NodeOptions
-	74,  // 102: wgpb.ListenerOptions.host:type_name -> wgpb.ConfigurationVariable
-	74,  // 103: wgpb.ListenerOptions.port:type_name -> wgpb.ConfigurationVariable
-	74,  // 104: wgpb.NodeLogging.level:type_name -> wgpb.ConfigurationVariable
-	74,  // 105: wgpb.NodeOptions.nodeUrl:type_name -> wgpb.ConfigurationVariable
-	74,  // 106: wgpb.NodeOptions.publicNodeUrl:type_name -> wgpb.ConfigurationVariable
-	66,  // 107: wgpb.NodeOptions.listen:type_name -> wgpb.ListenerOptions
-	67,  // 108: wgpb.NodeOptions.logger:type_name -> wgpb.NodeLogging
-	74,  // 109: wgpb.ServerLogging.level:type_name -> wgpb.ConfigurationVariable
-	74,  // 110: wgpb.ServerOptions.serverUrl:type_name -> wgpb.ConfigurationVariable
-	66,  // 111: wgpb.ServerOptions.listen:type_name -> wgpb.ListenerOptions
-	69,  // 112: wgpb.ServerOptions.logger:type_name -> wgpb.ServerLogging
-	72,  // 113: wgpb.WebhookConfiguration.verifier:type_name -> wgpb.WebhookVerifier
+	66,  // 87: wgpb.WunderGraphConfiguration.api:type_name -> wgpb.UserDefinedApi
+	75,  // 88: wgpb.S3UploadConfiguration.endpoint:type_name -> wgpb.ConfigurationVariable
+	75,  // 89: wgpb.S3UploadConfiguration.accessKeyID:type_name -> wgpb.ConfigurationVariable
+	75,  // 90: wgpb.S3UploadConfiguration.secretAccessKey:type_name -> wgpb.ConfigurationVariable
+	75,  // 91: wgpb.S3UploadConfiguration.bucketName:type_name -> wgpb.ConfigurationVariable
+	75,  // 92: wgpb.S3UploadConfiguration.bucketLocation:type_name -> wgpb.ConfigurationVariable
+	41,  // 93: wgpb.UserDefinedApi.engineConfiguration:type_name -> wgpb.EngineConfiguration
+	28,  // 94: wgpb.UserDefinedApi.operations:type_name -> wgpb.Operation
+	74,  // 95: wgpb.UserDefinedApi.corsConfiguration:type_name -> wgpb.CorsConfiguration
+	16,  // 96: wgpb.UserDefinedApi.authenticationConfig:type_name -> wgpb.ApiAuthenticationConfig
+	65,  // 97: wgpb.UserDefinedApi.s3UploadConfiguration:type_name -> wgpb.S3UploadConfiguration
+	75,  // 98: wgpb.UserDefinedApi.allowedHostNames:type_name -> wgpb.ConfigurationVariable
+	72,  // 99: wgpb.UserDefinedApi.webhooks:type_name -> wgpb.WebhookConfiguration
+	71,  // 100: wgpb.UserDefinedApi.serverOptions:type_name -> wgpb.ServerOptions
+	69,  // 101: wgpb.UserDefinedApi.nodeOptions:type_name -> wgpb.NodeOptions
+	75,  // 102: wgpb.ListenerOptions.host:type_name -> wgpb.ConfigurationVariable
+	75,  // 103: wgpb.ListenerOptions.port:type_name -> wgpb.ConfigurationVariable
+	75,  // 104: wgpb.NodeLogging.level:type_name -> wgpb.ConfigurationVariable
+	75,  // 105: wgpb.NodeOptions.nodeUrl:type_name -> wgpb.ConfigurationVariable
+	75,  // 106: wgpb.NodeOptions.publicNodeUrl:type_name -> wgpb.ConfigurationVariable
+	67,  // 107: wgpb.NodeOptions.listen:type_name -> wgpb.ListenerOptions
+	68,  // 108: wgpb.NodeOptions.logger:type_name -> wgpb.NodeLogging
+	75,  // 109: wgpb.ServerLogging.level:type_name -> wgpb.ConfigurationVariable
+	75,  // 110: wgpb.ServerOptions.serverUrl:type_name -> wgpb.ConfigurationVariable
+	67,  // 111: wgpb.ServerOptions.listen:type_name -> wgpb.ListenerOptions
+	70,  // 112: wgpb.ServerOptions.logger:type_name -> wgpb.ServerLogging
+	73,  // 113: wgpb.WebhookConfiguration.verifier:type_name -> wgpb.WebhookVerifier
 	13,  // 114: wgpb.WebhookVerifier.kind:type_name -> wgpb.WebhookVerifierKind
-	74,  // 115: wgpb.WebhookVerifier.secret:type_name -> wgpb.ConfigurationVariable
-	74,  // 116: wgpb.CorsConfiguration.allowedOrigins:type_name -> wgpb.ConfigurationVariable
+	75,  // 115: wgpb.WebhookVerifier.secret:type_name -> wgpb.ConfigurationVariable
+	75,  // 116: wgpb.CorsConfiguration.allowedOrigins:type_name -> wgpb.ConfigurationVariable
 	14,  // 117: wgpb.ConfigurationVariable.kind:type_name -> wgpb.ConfigurationVariableKind
-	57,  // 118: wgpb.FetchConfiguration.HeaderEntry.value:type_name -> wgpb.HTTPHeader
+	58,  // 118: wgpb.FetchConfiguration.HeaderEntry.value:type_name -> wgpb.HTTPHeader
 	119, // [119:119] is the sub-list for method output_type
 	119, // [119:119] is the sub-list for method input_type
 	119, // [119:119] is the sub-list for extension type_name
@@ -6740,7 +6791,7 @@ func file_wundernode_config_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_wundernode_config_proto_rawDesc,
-			NumEnums:      15,
+			NumEnums:      16,
 			NumMessages:   61,
 			NumExtensions: 0,
 			NumServices:   0,

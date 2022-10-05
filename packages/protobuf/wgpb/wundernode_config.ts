@@ -559,6 +559,35 @@ export function configurationVariableKindToJSON(object: ConfigurationVariableKin
 	}
 }
 
+export enum WgEnvironmentVariable {
+	WG_CLI_LOG_LEVEL = 0,
+	WG_CLI_LOG_JSON = 1,
+}
+
+export function wgEnvironmentVariableFromJSON(object: any): WgEnvironmentVariable {
+	switch (object) {
+		case 0:
+		case 'WG_CLI_LOG_LEVEL':
+			return WgEnvironmentVariable.WG_CLI_LOG_LEVEL;
+		case 1:
+		case 'WG_CLI_LOG_JSON':
+			return WgEnvironmentVariable.WG_CLI_LOG_JSON;
+		default:
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum WgEnvironmentVariable');
+	}
+}
+
+export function wgEnvironmentVariableToJSON(object: WgEnvironmentVariable): string {
+	switch (object) {
+		case WgEnvironmentVariable.WG_CLI_LOG_LEVEL:
+			return 'WG_CLI_LOG_LEVEL';
+		case WgEnvironmentVariable.WG_CLI_LOG_JSON:
+			return 'WG_CLI_LOG_JSON';
+		default:
+			return 'UNKNOWN';
+	}
+}
+
 export interface ApiAuthenticationConfig {
 	cookieBased: CookieBasedAuthentication | undefined;
 	hooks: ApiAuthenticationHooks | undefined;
