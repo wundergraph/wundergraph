@@ -1,5 +1,5 @@
 import axiosRetry from 'axios-retry';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
 let axiosInstance: AxiosInstance | undefined;
 
@@ -20,14 +20,9 @@ const initAxios = (): AxiosInstance => {
 		retryDelay: axiosRetry.exponentialDelay,
 		retryCondition: (error: AxiosError) => {
 			if (error.response) {
-				return error.response.status >= 400;
+				return error.response.status >= 500;
 			}
-			return true;
-		},
-		onRetry: (retryCount, error, requestConfig) => {
-			console.log(
-				`failed to perform request method: ${requestConfig.method} url: ${requestConfig.url}. Retry attempt #${retryCount}`
-			);
+			return axiosRetry.isNetworkError(error);
 		},
 	});
 

@@ -8,7 +8,7 @@ import {
 	parse,
 	lexicographicSortSchema,
 } from 'graphql';
-import { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -80,7 +80,9 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		);
 		const serviceSDL = !federationEnabled
 			? undefined
-			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders);
+			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
+					apiNamespace: introspection.apiNamespace,
+			  });
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
@@ -181,6 +183,17 @@ const introspectGraphQLAPI = async (
 
 	let opts: AxiosRequestConfig = {
 		headers: headers,
+		'axios-retry': {
+			onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
+				let msg = `failed to run introspection query: method: ${requestConfig.method} url: ${requestConfig.url}`;
+				if (introspection.apiNamespace) {
+					msg += ` apiNamespace: ${introspection.apiNamespace}`;
+				}
+				msg += ` retryAttempt: ${retryCount}`;
+
+				console.log(msg);
+			},
+		},
 	};
 
 	if (introspection.mTLS) {
