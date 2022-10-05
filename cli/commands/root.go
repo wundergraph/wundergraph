@@ -71,15 +71,16 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		}
 
 		if enableDebugMode {
-			log = buildLogger(abstractlogger.DebugLevel)
+			log = logging.New(abstractlogger.DebugLevel, jsonEncodedLogging)
 		} else {
-			log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
+			log = logging.New(logging.FindLogLevel(logLevel, abstractlogger.ErrorLevel), jsonEncodedLogging)
 		}
 
 		err = godotenv.Load(DotEnvFile)
 		if err != nil {
 			if _, ok := err.(*fs.PathError); ok {
-				log.Debug("starting without env file")
+				log.Debug("starting without env file",
+					abstractlogger.String("cmd", cmd.Name()))
 				return nil
 			}
 			log.Fatal("error loading env file",
@@ -150,27 +151,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
-}
-
-func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
-	return logging.New(level, jsonEncodedLogging)
-}
-
-func findLogLevel(defaultLevel abstractlogger.Level) abstractlogger.Level {
-	switch logLevel {
-	case "debug":
-		return abstractlogger.DebugLevel
-	case "warn":
-		return abstractlogger.WarnLevel
-	case "error":
-		return abstractlogger.ErrorLevel
-	case "fatal":
-		return abstractlogger.FatalLevel
-	case "panic":
-		return abstractlogger.PanicLevel
-	default:
-		return defaultLevel
-	}
 }
 
 func authenticator() *auth.Authenticator {
