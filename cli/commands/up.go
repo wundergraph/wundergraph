@@ -62,7 +62,7 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		introspectionCacheDir := path.Join(wunderGraphDir, "generated", "introspection", "cache")
+		introspectionCacheDir := path.Join(wunderGraphDir, "introspection", "cache")
 		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
 		if errIntrospectionDir == nil {
 			if clearIntrospectionCache {

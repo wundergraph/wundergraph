@@ -25,7 +25,7 @@ That's why we've introduced introspection caching.
 
 {% callout type="warning" %}
 By default, every data source is introspected exactly once.
-The result is cached in the `.wundergraph/generated/introspection` directory.
+The result is cached in the `.wundergraph/introspection/cache` directory.
 {% /callout %}
 
 If a cache entry is found for a data source,
