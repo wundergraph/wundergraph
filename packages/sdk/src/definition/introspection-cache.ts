@@ -12,6 +12,7 @@ import fs from 'fs';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
+import { Logger } from '../logger/logger';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
@@ -86,10 +87,10 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 			const api = await generator(introspection);
 			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
 			if (updated) {
-				console.log(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
+				Logger().info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
 		} catch (e) {
-			console.error('Error during introspection cache update', e);
+			Logger().error('Error during introspection cache update', e);
 		}
 	}, intervalInSeconds * 1000);
 };
@@ -155,14 +156,14 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	} catch (e) {
 		// fallback to old introspection result (only for development mode)
 		if (WG_DEV_FIRST_RUN) {
-			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
+			Logger().error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
 			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
 			if (cacheEntryString) {
-				console.log('Fallback to old introspection result');
+				Logger().info('Fallback to old introspection result');
 				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
 				return fromCacheEntry<A>(cacheEntry);
 			}
-			console.log('Could not fallback to old introspection result');
+			Logger().error('Could not fallback to old introspection result');
 		}
 		throw e;
 	}

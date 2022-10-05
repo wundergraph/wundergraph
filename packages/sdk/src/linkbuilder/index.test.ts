@@ -79,6 +79,4 @@ test('linkBuilder', () => {
 		.argument('age', 'fieldArgument', 'userAge')
 		.argument('name', 'objectField', 'username')
 		.build();
-
-	//console.log(JSON.stringify(linkDefinition,null,"  "));
 });
