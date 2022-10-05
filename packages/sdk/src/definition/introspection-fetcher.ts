@@ -19,7 +19,10 @@ const initAxios = (): AxiosInstance => {
 		retries: 5,
 		retryDelay: axiosRetry.exponentialDelay,
 		retryCondition: (error: AxiosError) => {
-			return !error.response;
+			if (error.response) {
+				return error.response.status >= 400;
+			}
+			return true;
 		},
 		onRetry: (retryCount, error, requestConfig) => {
 			console.log(
