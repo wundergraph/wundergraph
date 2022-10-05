@@ -8,7 +8,7 @@ import {
 	parse,
 	lexicographicSortSchema,
 } from 'graphql';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -24,7 +24,8 @@ import * as https from 'https';
 import { introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
 import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
-import { mapHeaders, HeadersBuilder } from './headers-builder';
+import { HeadersBuilder, mapHeaders } from './headers-builder';
+import { Fetcher } from './introspection-fetcher';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -79,7 +80,9 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		);
 		const serviceSDL = !federationEnabled
 			? undefined
-			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders);
+			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
+					apiNamespace: introspection.apiNamespace,
+			  });
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
@@ -180,6 +183,17 @@ const introspectGraphQLAPI = async (
 
 	let opts: AxiosRequestConfig = {
 		headers: headers,
+		'axios-retry': {
+			onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
+				let msg = `failed to run introspection query: method: ${requestConfig.method} url: ${requestConfig.url}`;
+				if (introspection.apiNamespace) {
+					msg += ` apiNamespace: ${introspection.apiNamespace}`;
+				}
+				msg += ` retryAttempt: ${retryCount}`;
+
+				console.log(msg);
+			},
+		},
 	};
 
 	if (introspection.mTLS) {
@@ -192,7 +206,7 @@ const introspectGraphQLAPI = async (
 
 	let res: AxiosResponse | undefined;
 	try {
-		res = await axios.post(resolveVariable(introspection.url), data, opts);
+		res = await Fetcher().post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
 		throw new Error(
 			`introspection failed (url: ${introspection.url}, namespace: ${introspection.apiNamespace || ''}), error: ${
