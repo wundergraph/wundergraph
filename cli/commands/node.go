@@ -25,7 +25,7 @@ var nodeCmd = &cobra.Command{
 
 var nodeStartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Starts WunderGraph Node in production mode",
+	Short: "Start runs WunderGraph Node in production mode",
 	Long: `
 		Example usage:
 			wunderctl node start

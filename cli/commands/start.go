@@ -30,7 +30,7 @@ var (
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts WunderGraph in production mode",
-	Long:  `Runs WunderGraph as a single process in production mode`,
+	Long:  `Start runs WunderGraph as a single process in production mode`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
 		if !files.FileExists(configFile) {
