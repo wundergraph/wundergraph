@@ -41,7 +41,6 @@ var (
 	jsonEncodedLogging    bool
 	serviceToken          string
 	_wunderGraphDirConfig string
-	WunderGraphDir        string
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -64,19 +63,13 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		var err error
-		WunderGraphDir, err = files.FindWunderGraphDir(_wunderGraphDirConfig)
-		if err != nil {
-			return err
-		}
-
 		if enableDebugMode {
 			log = buildLogger(abstractlogger.DebugLevel)
 		} else {
 			log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
 		}
 
-		err = godotenv.Load(DotEnvFile)
+		err := godotenv.Load(DotEnvFile)
 		if err != nil {
 			if _, ok := err.(*fs.PathError); ok {
 				log.Debug("starting without env file")
@@ -94,8 +87,12 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := InitWunderGraphApiClient()
-		man := manifest.New(log, client, WunderGraphDir)
-		err := man.Load()
+		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
+		}
+		man := manifest.New(log, client, wunderGraphDir)
+		err = man.Load()
 		if err != nil {
 			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}
