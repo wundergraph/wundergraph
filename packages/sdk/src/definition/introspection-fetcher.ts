@@ -1,4 +1,4 @@
-import { getConfig, attach } from 'retry-axios';
+import axiosRetry from 'axios-retry';
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
 let axiosInstance: AxiosInstance | undefined;
@@ -15,22 +15,18 @@ export const Fetcher = (): AxiosInstance => {
 const initAxios = (): AxiosInstance => {
 	const instance = axios.create();
 
-	instance.defaults.raxConfig = {
-		instance: instance,
-		backoffType: 'exponential',
-		retry: 5,
-		noResponseRetries: 2,
-		httpMethodsToRetry: ['GET', 'POST'],
-		onRetryAttempt: (err: AxiosError) => {
-			const cfg = getConfig(err);
+	axiosRetry(instance, {
+		retries: 5,
+		retryDelay: axiosRetry.exponentialDelay,
+		retryCondition: (error: AxiosError) => {
+			return !error.response;
+		},
+		onRetry: (retryCount, error, requestConfig) => {
 			console.log(
-				`failed to perform request method: ${err.request.method} url: ${err.request.url}.${
-					cfg ? `Retry attempt #${cfg.currentRetryAttempt}` : ''
-				}`
+				`failed to perform request method: ${requestConfig.method} url: ${requestConfig.url}. Retry attempt #${retryCount}`
 			);
 		},
-	};
-	attach(instance);
+	});
 
 	return instance;
 };
