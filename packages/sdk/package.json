@@ -111,6 +111,7 @@
     "object-hash": "^2.2.0",
     "openapi-types": "^10.0.0",
     "pino": "^8.4.2",
+    "pino-pretty": "^9.1.0",
     "postman-collection": "^4.1.1",
     "prettier": "^2.5.0",
     "protobufjs": "^6.11.2",
