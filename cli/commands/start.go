@@ -112,8 +112,7 @@ var startCmd = &cobra.Command{
 			}
 		}()
 
-		gracefulTimeoutSeconds := gracefulTimeout
-		n.HandleGracefulShutdown(gracefulTimeoutSeconds)
+		n.HandleGracefulShutdown(gracefulTimeout)
 
 		return nil
 	},
