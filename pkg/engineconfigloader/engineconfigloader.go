@@ -25,12 +25,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-const (
-	// Used for shared http.Client as well as dedicated ones when no
-	// specified timeout has been specified
-	defaultHttpClientTimeout = 10 * time.Second
-)
-
 type EngineConfigLoader struct {
 	wundergraphDir string
 	resolvers      []FactoryResolver
@@ -40,8 +34,12 @@ type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
-type ApiTransportFactory func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+// Defined again here to avoid circular reference to apihandler.ApiTransportFactory
 
+type ApiTransportFactory interface {
+	RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+	DefaultTransportTimeout() time.Duration
+}
 type DefaultFactoryResolver struct {
 	baseTransport    http.RoundTripper
 	transportFactory ApiTransportFactory
@@ -53,11 +51,11 @@ type DefaultFactoryResolver struct {
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
 	defaultHttpClient := &http.Client{
-		Timeout:   defaultHttpClientTimeout,
-		Transport: transportFactory(baseTransport, false),
+		Timeout:   transportFactory.DefaultTransportTimeout(),
+		Transport: transportFactory.RoundTripper(baseTransport, false),
 	}
 	streamingClient := &http.Client{
-		Transport: transportFactory(baseTransport, true),
+		Transport: transportFactory.RoundTripper(baseTransport, true),
 	}
 
 	return &DefaultFactoryResolver{
@@ -137,7 +135,7 @@ func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfigurat
 // should have been previously validated by d.fetchConfigurationRequiresDedicatedHTTPClient()
 func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) (*http.Client, error) {
 	// Timeout
-	timeout := defaultHttpClientTimeout
+	timeout := d.transportFactory.DefaultTransportTimeout()
 	if ds != nil && ds.TimeoutMilliseconds > 0 {
 		timeout = time.Duration(ds.TimeoutMilliseconds) * time.Millisecond
 	}
@@ -154,7 +152,7 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	}
 	return &http.Client{
 		Timeout:   timeout,
-		Transport: d.transportFactory(transport, false),
+		Transport: d.transportFactory.RoundTripper(transport, false),
 	}, nil
 }
 

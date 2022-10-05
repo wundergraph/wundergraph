@@ -461,6 +461,7 @@ message NodeOptions {
 	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
+	int64 defaultTimeoutMilliseconds = 5;
 }
 
 message ServerLogging {

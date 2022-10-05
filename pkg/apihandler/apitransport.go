@@ -24,6 +24,25 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+type ApiTransportFactory interface {
+	RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+	DefaultTransportTimeout() time.Duration
+}
+
+type apiTransportFactory struct {
+	api             *Api
+	hooksClient     *hooks.Client
+	enableDebugMode bool
+}
+
+func (f *apiTransportFactory) RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
+	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableDebugMode, enableStreamingMode)
+}
+
+func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
+	return f.api.Options.DefaultTimeout
+}
+
 type ApiTransport struct {
 	roundTripper               http.RoundTripper
 	api                        *Api
@@ -35,9 +54,11 @@ type ApiTransport struct {
 	enableStreamingMode        bool
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
-	return func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
-		return NewApiTransport(tripper, api, hooksClient, enableDebugMode, enableStreamingMode)
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) ApiTransportFactory {
+	return &apiTransportFactory{
+		api:             api,
+		hooksClient:     hooksClient,
+		enableDebugMode: enableDebugMode,
 	}
 }
 

@@ -943,6 +943,7 @@ export interface NodeOptions {
 	publicNodeUrl: ConfigurationVariable | undefined;
 	listen: ListenerOptions | undefined;
 	logger: NodeLogging | undefined;
+	defaultTimeoutMilliseconds: number;
 }
 
 export interface ServerLogging {
@@ -3395,7 +3396,13 @@ export const NodeLogging = {
 };
 
 function createBaseNodeOptions(): NodeOptions {
-	return { nodeUrl: undefined, publicNodeUrl: undefined, listen: undefined, logger: undefined };
+	return {
+		nodeUrl: undefined,
+		publicNodeUrl: undefined,
+		listen: undefined,
+		logger: undefined,
+		defaultTimeoutMilliseconds: 0,
+	};
 }
 
 export const NodeOptions = {
@@ -3405,6 +3412,9 @@ export const NodeOptions = {
 			publicNodeUrl: isSet(object.publicNodeUrl) ? ConfigurationVariable.fromJSON(object.publicNodeUrl) : undefined,
 			listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
 			logger: isSet(object.logger) ? NodeLogging.fromJSON(object.logger) : undefined,
+			defaultTimeoutMilliseconds: isSet(object.defaultTimeoutMilliseconds)
+				? Number(object.defaultTimeoutMilliseconds)
+				: 0,
 		};
 	},
 
@@ -3416,6 +3426,8 @@ export const NodeOptions = {
 			(obj.publicNodeUrl = message.publicNodeUrl ? ConfigurationVariable.toJSON(message.publicNodeUrl) : undefined);
 		message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
 		message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
+		message.defaultTimeoutMilliseconds !== undefined &&
+			(obj.defaultTimeoutMilliseconds = Math.round(message.defaultTimeoutMilliseconds));
 		return obj;
 	},
 
@@ -3433,6 +3445,7 @@ export const NodeOptions = {
 			object.listen !== undefined && object.listen !== null ? ListenerOptions.fromPartial(object.listen) : undefined;
 		message.logger =
 			object.logger !== undefined && object.logger !== null ? NodeLogging.fromPartial(object.logger) : undefined;
+		message.defaultTimeoutMilliseconds = object.defaultTimeoutMilliseconds ?? 0;
 		return message;
 	},
 };

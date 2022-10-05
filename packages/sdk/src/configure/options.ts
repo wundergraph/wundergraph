@@ -30,6 +30,7 @@ const DefaultNodeOptions = {
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
+	defaultTimeoutMilliseconds: 0,
 };
 
 const DefaultServerOptions: MandatoryServerOptions = {
@@ -60,6 +61,7 @@ export interface NodeOptions {
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
+	defaultTimeoutMilliseconds?: number;
 }
 
 export interface ResolvedNodeOptions {
@@ -69,6 +71,7 @@ export interface ResolvedNodeOptions {
 	logger: {
 		level: ConfigurationVariable;
 	};
+	defaultTimeoutMilliseconds: number;
 }
 
 export interface ServerOptions {
@@ -122,6 +125,8 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
+				defaultTimeoutMilliseconds:
+					options?.defaultTimeoutMilliseconds || DefaultNodeOptions?.defaultTimeoutMilliseconds,
 		  };
 
 	return {
@@ -134,6 +139,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		logger: {
 			level: mapInputVariable(nodeOptions.logger.level),
 		},
+		defaultTimeoutMilliseconds: nodeOptions.defaultTimeoutMilliseconds,
 	};
 };
 
