@@ -1,4 +1,4 @@
-export type { ResolvedWunderGraphConfig } from './configure';
+export type { ResolvedWunderGraphConfig, HooksConfiguration, OperationHooksConfiguration } from './configure';
 export type {
 	BaseOperationConfiguration,
 	QueryConfiguration,
@@ -24,6 +24,7 @@ export type {
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 	ClientRequestHeaders,
+	AuthenticationHookRequest,
 } from './middleware/types';
 export type {
 	SubscriptionRequestOptions,
