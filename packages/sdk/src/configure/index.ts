@@ -52,7 +52,14 @@ import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
 import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { WunderGraphHooksAndServerConfig } from '../middleware/types';
+import {
+	AuthenticationHookRequest,
+	AuthenticationRequestContext,
+	AuthenticationResponse,
+	BaseRequestContext,
+	WunderGraphHooksAndServerConfig,
+	WunderGraphUser,
+} from '../middleware/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 import {
@@ -64,7 +71,7 @@ import {
 	serverOptionsWithDefaults,
 } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-
+import { InternalClient } from '../middleware/internal-client';
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
 	allowedMethods?: string[];
@@ -157,35 +164,41 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 	customResolve?: AsyncFn;
 }
 
-export interface HooksConfiguration<AsyncFn = OperationHookFunction> {
+// Any is used here because the exact type of the hooks is not known at compile time
+// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
+export type OperationHooks = Record<string, any>;
+
+export interface HooksConfiguration<
+	Queries extends OperationHooks = OperationHooks,
+	Mutations extends OperationHooks = OperationHooks,
+	User extends WunderGraphUser = WunderGraphUser,
+	// Any is used here because the exact type of the base client is not known at compile time
+	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
+	IC extends InternalClient = InternalClient<any, any>
+> {
 	global?: {
 		httpTransport?: {
 			onOriginRequest?: {
-				hook: AsyncFn;
+				hook: OperationHookFunction;
 				enableForOperations?: string[];
 				enableForAllOperations?: boolean;
 			};
 			onOriginResponse?: {
-				hook: AsyncFn;
+				hook: OperationHookFunction;
 				enableForOperations?: string[];
 				enableForAllOperations?: boolean;
 			};
 		};
 	};
 	authentication?: {
-		postAuthentication?: AsyncFn;
-		mutatingPostAuthentication?: AsyncFn;
-		revalidate?: AsyncFn;
-		postLogout?: AsyncFn;
+		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
+		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
+		revalidate?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
+		postLogout?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
 	};
-	[HooksConfigurationOperationType.Queries]?: {
-		[operationName: string]: OperationHooksConfiguration<AsyncFn>;
-	};
-	[HooksConfigurationOperationType.Mutations]?: {
-		[operationName: string]: OperationHooksConfiguration<AsyncFn>;
-	};
+	[HooksConfigurationOperationType.Queries]?: Queries;
+	[HooksConfigurationOperationType.Mutations]?: Mutations;
 }
-
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"path"
@@ -87,7 +88,7 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: WunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			FirstRunEnv: []string{
+			FirstRunEnv: append(os.Environ(),
 				// when the user runs `wunderctl up` for the first time, we revalidate the cache
 				// so the user can be sure that the introspection is up-to-date. In case of an API is not available
 				// we will fall back to the cached introspection (when available)
@@ -95,9 +96,11 @@ var upCmd = &cobra.Command{
 				// this option allows us to make different decision for the first run
 				// for example, we decide to not use the cache, but we will prefill the cache
 				"WG_DEV_FIRST_RUN=true",
-			},
+				fmt.Sprintf("WG_DIR_ABS=%s", WunderGraphDir),
+			),
 			ScriptEnv: append(os.Environ(),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
+				fmt.Sprintf("WG_DIR_ABS=%s", WunderGraphDir),
 			),
 		})
 
@@ -111,6 +114,7 @@ var upCmd = &cobra.Command{
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
+				fmt.Sprintf("WG_DIR_ABS=%s", WunderGraphDir),
 			),
 		})
 
