@@ -4,7 +4,7 @@ import {
 	DataSource,
 	IntrospectionConfiguration,
 	WG_DATA_SOURCE_POLLING_MODE,
-	WG_DISABLE_INTROSPECTION_CACHE,
+	WG_ENABLE_INTROSPECTION_CACHE,
 } from './index';
 import path from 'path';
 import fsP from 'fs/promises';
@@ -118,9 +118,6 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const isIntrospectionDisabledBySource = introspection.introspection?.disableCache === true;
-	const isIntrospectionDisabledByEnv = WG_DISABLE_INTROSPECTION_CACHE;
-	const isIntrospectionCacheEnabled = !isIntrospectionDisabledBySource && !isIntrospectionDisabledByEnv;
 	const cacheKey = objectHash(introspection);
 
 	/**
@@ -141,6 +138,10 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		}
 		return {} as Api<A>;
 	}
+
+	const isIntrospectionDisabledBySource = introspection.introspection?.disableCache === true;
+	const isIntrospectionEnabledByEnv = WG_ENABLE_INTROSPECTION_CACHE;
+	const isIntrospectionCacheEnabled = !isIntrospectionDisabledBySource && isIntrospectionEnabledByEnv;
 
 	/**
 	 * As long as the cache is enabled, always try to hit it first

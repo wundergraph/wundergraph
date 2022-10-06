@@ -38,6 +38,7 @@ var (
 	jsonEncodedLogging    bool
 	serviceToken          string
 	_wunderGraphDirConfig string
+	enableCache           bool
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -64,6 +65,12 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			log = buildLogger(abstractlogger.DebugLevel)
 		} else {
 			log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
+		}
+
+		if enableCache {
+			if err := os.Setenv("WG_ENABLE_INTROSPECTION_CACHE", "true"); err != nil {
+				return err
+			}
 		}
 
 		err := godotenv.Load(DotEnvFile)
@@ -144,6 +151,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
+	rootCmd.PersistentFlags().BoolVar(&enableCache, "cache", false, "Enable cache")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
