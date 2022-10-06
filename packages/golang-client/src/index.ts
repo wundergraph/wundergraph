@@ -35,7 +35,7 @@ const gofmt = (code: string) => {
 	} catch (e: any) {
 		// we silently ignore the error on purpose
 		// It's not a must to prettify the code
-		Logger().error('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
+		Logger().warn('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
 	}
 	return code;
 };
