@@ -40,7 +40,7 @@ Use this command if you only want to generate the configuration`,
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
 
-		configOutFile := path.Join("generated", "bundle", "config.js")
+		configOutFile := path.Join(WunderGraphDir, "generated", "bundle", "config.js")
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -71,7 +71,7 @@ Use this command if you only want to generate the configuration`,
 
 		if codeServerFilePath != "" {
 			serverOutFile := path.Join(WunderGraphDir, "generated", "bundle", "server.js")
-			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+			webhooksOutDir := path.Join(WunderGraphDir, "generated", "bundle", "webhooks")
 			webhooksDir := path.Join(WunderGraphDir, webhooks.WebhookDirectoryName)
 
 			var webhooksBundler *bundler.Bundler
