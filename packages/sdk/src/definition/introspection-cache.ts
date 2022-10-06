@@ -7,7 +7,6 @@ import {
 	WG_DISABLE_INTROSPECTION_CACHE,
 } from './index';
 import path from 'path';
-import fs from 'fs';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
@@ -44,10 +43,15 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 
 export const readIntrospectionCacheFile = async (cacheKey: string): Promise<string> => {
 	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
-	if (fs.existsSync(cacheFile)) {
-		return fsP.readFile(cacheFile, 'utf8');
+	try {
+		return await fsP.readFile(cacheFile, 'utf8');
+	} catch (e) {
+		if (e instanceof Error && e.message.startsWith('ENOENT')) {
+			// File does not exist
+			return '';
+		}
+		throw e;
 	}
-	return '';
 };
 
 export const writeIntrospectionCacheFile = async (cacheKey: string, content: string): Promise<void> => {
