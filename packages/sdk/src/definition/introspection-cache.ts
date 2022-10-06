@@ -5,6 +5,7 @@ import {
 	IntrospectionConfiguration,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
+	WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY,
 } from './index';
 import path from 'path';
 import fsP from 'fs/promises';
@@ -156,9 +157,14 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	}
 
 	/*
-	 * At this point, we don't have a cache entry for this. Generate
-	 * introspection from scratch. Then cache it
+	 * At this point, we don't have a cache entry for this. If we're in cache exclusive
+	 * mode, fail here. Otherwise generate introspection from scratch. Then cache it.
 	 */
+
+	if (WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY) {
+		throw new Error(`Could not load introspection from cache`);
+	}
+
 	const api = await generator(introspection);
 
 	/*

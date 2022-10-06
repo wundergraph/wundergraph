@@ -9,6 +9,7 @@ import (
 	"path"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -23,7 +24,8 @@ import (
 )
 
 var (
-	clearIntrospectionCache bool
+	keepIntrospectionCache          bool
+	introspectionCacheClearInterval int
 )
 
 // upCmd represents the up command
@@ -64,10 +66,20 @@ var upCmd = &cobra.Command{
 		)
 
 		introspectionCacheDir := path.Join(wunderGraphDir, "cache", "introspection")
-		if clearIntrospectionCache {
+		if !keepIntrospectionCache {
 			if err := os.RemoveAll(introspectionCacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
 				return err
 			}
+		}
+
+		if introspectionCacheClearInterval > 0 {
+			go func() {
+				for range time.Tick(time.Second * time.Duration(introspectionCacheClearInterval)) {
+					if err := os.RemoveAll(introspectionCacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+						fmt.Fprintf(os.Stderr, "error clearing introspection cache: %s\n", err)
+					}
+				}
+			}()
 		}
 
 		configJsonPath := path.Join(wunderGraphDir, "generated", configJsonFilename)
@@ -87,6 +99,7 @@ var upCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(os.Environ(),
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
@@ -101,6 +114,7 @@ var upCmd = &cobra.Command{
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
@@ -282,5 +296,6 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
+	upCmd.Flags().BoolVar(&keepIntrospectionCache, "keep-introspection-cache", false, "avoid clearing the introspection cache on startup")
+	upCmd.Flags().IntVar(&introspectionCacheClearInterval, "cache-clear-interval", 5, "interval to clear the instrospection cache periodically, in seconds - 0 to disable")
 }

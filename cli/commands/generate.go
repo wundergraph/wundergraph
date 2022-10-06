@@ -19,6 +19,7 @@ import (
 
 var (
 	generateAndPublish bool
+	cacheFallback      bool
 )
 
 // generateCmd represents the generate command
@@ -57,6 +58,8 @@ Use this command if you only want to generate the configuration`,
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
+				fmt.Sprintf("WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY=%t", !cacheFallback),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
@@ -172,5 +175,6 @@ Use this command if you only want to generate the configuration`,
 
 func init() {
 	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
+	generateCmd.Flags().BoolVar(&cacheFallback, "cache-fallback", false, "fallback to introspection if cache fails")
 	rootCmd.AddCommand(generateCmd)
 }
