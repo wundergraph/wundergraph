@@ -52,7 +52,24 @@ export const readIntrospectionCacheFile = async (cacheKey: string): Promise<stri
 
 export const writeIntrospectionCacheFile = async (cacheKey: string, content: string): Promise<void> => {
 	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
-	return fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
+	try {
+		return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
+	} catch (e) {
+		if (e instanceof Error && e.message.startsWith('ENOENT')) {
+			const dir = path.dirname(cacheFile);
+			try {
+				await fsP.mkdir(dir, { recursive: true });
+			} catch (de) {
+				console.log(`Error creating cache directory: ${de}`);
+			}
+			// Now try again. Avoid calling writeIntrospectionCacheFile(), otherwise
+			// a bug could end up causing infinite recursion instead of a a non-working
+			// cache
+			return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
+		}
+		// Could not write cache file, rethrow original error
+		throw e;
+	}
 };
 
 export const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(

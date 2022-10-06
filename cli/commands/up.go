@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -63,18 +64,10 @@ var upCmd = &cobra.Command{
 		)
 
 		introspectionCacheDir := path.Join(wunderGraphDir, "cache", "introspection")
-		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
-		if errIntrospectionDir == nil {
-			if clearIntrospectionCache {
-				err = os.RemoveAll(introspectionCacheDir)
-				if err != nil {
-					return err
-				}
+		if clearIntrospectionCache {
+			if err := os.RemoveAll(introspectionCacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+				return err
 			}
-		}
-		err = os.MkdirAll(introspectionCacheDir, os.ModePerm)
-		if err != nil {
-			return err
 		}
 
 		configJsonPath := path.Join(wunderGraphDir, "generated", configJsonFilename)
