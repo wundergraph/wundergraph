@@ -11,7 +11,7 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.109.0"
+    "@wundergraph/sdk": "^0.114.3"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",

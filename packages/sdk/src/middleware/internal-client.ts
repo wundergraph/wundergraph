@@ -13,17 +13,23 @@ interface InternalClientRequestContext {
 		clientRequest?: ClientRequest;
 	};
 }
-interface Operations {
-	queries: {
-		[operationName: string]: any;
-	};
-	mutations: {
-		[operationName: string]: any;
-	};
+export interface Operations<
+	Queries extends OperationDefinitions = OperationDefinitions,
+	Mutations extends OperationDefinitions = OperationDefinitions
+> {
+	queries?: Queries;
+	mutations?: Mutations;
 }
 
-export interface InternalClient extends Operations {
-	withHeaders: (headers: { [key: string]: string }) => InternalClient;
+export interface OperationDefinitions {
+	[operationName: string]: any;
+}
+
+export interface InternalClient<
+	Queries extends OperationDefinitions = OperationDefinitions,
+	Mutations extends OperationDefinitions = OperationDefinitions
+> extends Operations<Queries, Mutations> {
+	withHeaders: (headers: { [key: string]: string }) => InternalClient<Queries, Mutations>;
 }
 
 export interface InternalClientFactory {

@@ -1,5 +1,5 @@
 import { GraphQLSchema } from 'graphql';
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
@@ -9,7 +9,8 @@ import { composeServices } from '@apollo/composition';
 import { mergeApis } from './merge';
 import { introspectWithCache } from './introspection-cache';
 import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';
-import { mapHeaders, HeadersBuilder } from './headers-builder';
+import { HeadersBuilder, mapHeaders } from './headers-builder';
+import { Fetcher } from './introspection-fetcher';
 
 export const isFederationService = (schema: GraphQLSchema): boolean => {
 	const queryType = schema.getQueryType();
@@ -23,18 +24,37 @@ export const isFederationService = (schema: GraphQLSchema): boolean => {
 	return Object.keys(fields).indexOf('_service') !== -1;
 };
 
-export const fetchFederationServiceSDL = async (url: string, headers?: Record<string, string>): Promise<string> => {
+export const fetchFederationServiceSDL = async (
+	url: string,
+	headers?: Record<string, string>,
+	meta?: { apiNamespace?: string; upstreamName?: string }
+): Promise<string> => {
 	const data = JSON.stringify({
 		query: '{_service{sdl}}',
 	});
 
 	let opts: AxiosRequestConfig = {
 		headers,
+		'axios-retry': {
+			onRetry: (retryCount: number, error: AxiosError, requestConfig: AxiosRequestConfig) => {
+				let msg = `failed to fetch federation service sdl: ${requestConfig.method} url: ${requestConfig.url}`;
+				if (meta?.apiNamespace) {
+					msg += ` apiNamespace: ${meta.apiNamespace}`;
+				}
+				if (meta?.upstreamName) {
+					msg += ` upstreamName: ${meta.upstreamName}`;
+				}
+
+				msg += ` retryAttempt: ${retryCount}`;
+
+				console.log(msg);
+			},
+		},
 	};
 
 	let res: AxiosResponse | undefined;
 	try {
-		res = await axios.post(url, data, opts);
+		res = await Fetcher().post(url, data, opts);
 	} catch (e: any) {
 		throw new Error(`failed to fetch federation service sdl (url: ${url}), error: ${e.message}`);
 	}
@@ -69,7 +89,10 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 				}
 				const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
-				schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders);
+				schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
+					apiNamespace: introspection.apiNamespace,
+					upstreamName: name,
+				});
 			}
 
 			if (schema == '') {
