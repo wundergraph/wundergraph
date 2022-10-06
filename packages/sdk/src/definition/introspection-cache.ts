@@ -146,7 +146,9 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		try {
 			const cacheEntry = toCacheEntry<A>(api);
 			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
-		} catch (e) {}
+		} catch (e) {
+			console.log(`Error storing cache: ${e}`);
+		}
 	}
 
 	return api;
