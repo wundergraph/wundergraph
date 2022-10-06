@@ -43,7 +43,7 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 }
 
 export const readIntrospectionCacheFile = async (cacheKey: string): Promise<string> => {
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
+	const cacheFile = path.join('introspection', 'cache', `${cacheKey}.json`);
 	if (fs.existsSync(cacheFile)) {
 		return fsP.readFile(cacheFile, 'utf8');
 	}
@@ -51,7 +51,7 @@ export const readIntrospectionCacheFile = async (cacheKey: string): Promise<stri
 };
 
 export const writeIntrospectionCacheFile = async (cacheKey: string, content: string): Promise<void> => {
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
+	const cacheFile = path.join('introspection', 'cache', `${cacheKey}.json`);
 	return fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
 };
 
