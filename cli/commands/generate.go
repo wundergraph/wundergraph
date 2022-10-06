@@ -28,14 +28,18 @@ var generateCmd = &cobra.Command{
 	Long: `In contrast to wunderctl up, it only generates all files in ./generated but doesn't start WunderGraph or the hooks.
 Use this command if you only want to generate the configuration`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
+		}
 		// only validate if the file exists
-		_, err := files.CodeFilePath(WunderGraphDir, configEntryPointFilename)
+		_, err = files.CodeFilePath(wunderGraphDir, configEntryPointFilename)
 		if err != nil {
 			return err
 		}
 
 		// optional, no error check
-		codeServerFilePath, _ := files.CodeFilePath(WunderGraphDir, serverEntryPointFilename)
+		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 		defer cancel()
@@ -46,14 +50,14 @@ Use this command if you only want to generate the configuration`,
 			Name:          "config-runner",
 			Executable:    "node",
 			ScriptArgs:    []string{configOutFile},
-			AbsWorkingDir: WunderGraphDir,
+			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
 			ScriptEnv: append(
 				helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
-				fmt.Sprintf("WG_DIR_ABS=%s", WunderGraphDir),
+				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
 		defer func() {
@@ -70,21 +74,21 @@ Use this command if you only want to generate the configuration`,
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
-			serverOutFile := path.Join(WunderGraphDir, "generated", "bundle", "server.js")
+			serverOutFile := path.Join(wunderGraphDir, "generated", "bundle", "server.js")
 			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
-			webhooksDir := path.Join(WunderGraphDir, webhooks.WebhookDirectoryName)
+			webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 
 			var webhooksBundler *bundler.Bundler
 
 			if files.DirectoryExists(webhooksDir) {
-				webhookPaths, err := webhooks.GetWebhooks(WunderGraphDir)
+				webhookPaths, err := webhooks.GetWebhooks(wunderGraphDir)
 				if err != nil {
 					return err
 				}
 				webhooksBundler = bundler.NewBundler(bundler.Config{
 					Name:          "webhooks-bundler",
 					EntryPoints:   webhookPaths,
-					AbsWorkingDir: WunderGraphDir,
+					AbsWorkingDir: wunderGraphDir,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
@@ -96,7 +100,7 @@ Use this command if you only want to generate the configuration`,
 
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
-				AbsWorkingDir: WunderGraphDir,
+				AbsWorkingDir: wunderGraphDir,
 				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
 				Logger:        log,
@@ -149,7 +153,7 @@ Use this command if you only want to generate the configuration`,
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
-			AbsWorkingDir: WunderGraphDir,
+			AbsWorkingDir: wunderGraphDir,
 			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
