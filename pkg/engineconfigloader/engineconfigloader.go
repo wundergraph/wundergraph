@@ -81,7 +81,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 // useCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
 func (d *DefaultFactoryResolver) useCustomHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
 	// when a custom timeout is specified, we can't use the shared http.Client
-	if ds != nil && ds.RequestTimeoutMilliseconds > 0 {
+	if ds != nil && ds.RequestTimeoutSeconds > 0 {
 		return true
 	}
 	// when mTLS is enabled, we need to create a new client
@@ -136,8 +136,8 @@ func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfigurat
 func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) (*http.Client, error) {
 	// Timeout
 	timeout := d.transportFactory.DefaultTransportTimeout()
-	if ds != nil && ds.RequestTimeoutMilliseconds > 0 {
-		timeout = time.Duration(ds.RequestTimeoutMilliseconds) * time.Millisecond
+	if ds != nil && ds.RequestTimeoutSeconds > 0 {
+		timeout = time.Duration(ds.RequestTimeoutSeconds) * time.Second
 	}
 	// TLS
 	var transport http.RoundTripper

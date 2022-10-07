@@ -94,7 +94,7 @@ interface User {
       },
       "Directives": [],
       "Kind": 2,
-      "RequestTimeoutMilliseconds": 0,
+      "RequestTimeoutSeconds": 0,
       "RootNodes": [
         {
           "fieldNames": [

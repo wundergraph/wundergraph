@@ -138,7 +138,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 						UpstreamSchema: schemaSDL,
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
-					RequestTimeoutMilliseconds: introspection.requestTimeoutMilliseconds ?? 0,
+					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
 				},
 			],
 			applyNameSpaceToFieldConfigurations(

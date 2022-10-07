@@ -479,7 +479,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 				Custom: custom,
 				ChildNodes: [],
 				Directives: [],
-				RequestTimeoutMilliseconds: 0,
+				RequestTimeoutSeconds: 0,
 			});
 			fields.push({
 				typeName: node.name.value,

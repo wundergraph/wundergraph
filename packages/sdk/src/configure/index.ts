@@ -1000,7 +1000,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		overrideFieldPathFromAlias: source.Kind === DataSourceKind.GRAPHQL,
 		customDatabase: undefined,
 		directives: source.Directives,
-		requestTimeoutMilliseconds: source.RequestTimeoutMilliseconds,
+		requestTimeoutSeconds: source.RequestTimeoutSeconds,
 	};
 	switch (source.Kind) {
 		case DataSourceKind.REST:

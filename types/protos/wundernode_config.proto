@@ -232,7 +232,7 @@ message DataSourceConfiguration {
 	DataSourceCustom_Static customStatic = 7;
 	DataSourceCustom_Database customDatabase = 8;
 	repeated DirectiveConfiguration directives = 9;
-	int64 requestTimeoutMilliseconds = 10;
+	int64 requestTimeoutSeconds = 10;
 }
 
 message DirectiveConfiguration {
@@ -461,7 +461,7 @@ message NodeOptions {
 	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
-	int64 defaultRequestTimeoutMilliseconds = 5;
+	int64 defaultRequestTimeoutSeconds = 5;
 }
 
 message ServerLogging {

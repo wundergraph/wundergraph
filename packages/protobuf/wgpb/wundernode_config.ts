@@ -744,7 +744,7 @@ export interface DataSourceConfiguration {
 	customStatic: DataSourceCustomStatic | undefined;
 	customDatabase: DataSourceCustomDatabase | undefined;
 	directives: DirectiveConfiguration[];
-	requestTimeoutMilliseconds: number;
+	requestTimeoutSeconds: number;
 }
 
 export interface DirectiveConfiguration {
@@ -943,7 +943,7 @@ export interface NodeOptions {
 	publicNodeUrl: ConfigurationVariable | undefined;
 	listen: ListenerOptions | undefined;
 	logger: NodeLogging | undefined;
-	defaultRequestTimeoutMilliseconds: number;
+	defaultRequestTimeoutSeconds: number;
 }
 
 export interface ServerLogging {
@@ -2140,7 +2140,7 @@ function createBaseDataSourceConfiguration(): DataSourceConfiguration {
 		customStatic: undefined,
 		customDatabase: undefined,
 		directives: [],
-		requestTimeoutMilliseconds: 0,
+		requestTimeoutSeconds: 0,
 	};
 }
 
@@ -2162,9 +2162,7 @@ export const DataSourceConfiguration = {
 			directives: Array.isArray(object?.directives)
 				? object.directives.map((e: any) => DirectiveConfiguration.fromJSON(e))
 				: [],
-			requestTimeoutMilliseconds: isSet(object.requestTimeoutMilliseconds)
-				? Number(object.requestTimeoutMilliseconds)
-				: 0,
+			requestTimeoutSeconds: isSet(object.requestTimeoutSeconds) ? Number(object.requestTimeoutSeconds) : 0,
 		};
 	},
 
@@ -2198,8 +2196,8 @@ export const DataSourceConfiguration = {
 		} else {
 			obj.directives = [];
 		}
-		message.requestTimeoutMilliseconds !== undefined &&
-			(obj.requestTimeoutMilliseconds = Math.round(message.requestTimeoutMilliseconds));
+		message.requestTimeoutSeconds !== undefined &&
+			(obj.requestTimeoutSeconds = Math.round(message.requestTimeoutSeconds));
 		return obj;
 	},
 
@@ -2226,7 +2224,7 @@ export const DataSourceConfiguration = {
 				? DataSourceCustomDatabase.fromPartial(object.customDatabase)
 				: undefined;
 		message.directives = object.directives?.map((e) => DirectiveConfiguration.fromPartial(e)) || [];
-		message.requestTimeoutMilliseconds = object.requestTimeoutMilliseconds ?? 0;
+		message.requestTimeoutSeconds = object.requestTimeoutSeconds ?? 0;
 		return message;
 	},
 };
@@ -3404,7 +3402,7 @@ function createBaseNodeOptions(): NodeOptions {
 		publicNodeUrl: undefined,
 		listen: undefined,
 		logger: undefined,
-		defaultRequestTimeoutMilliseconds: 0,
+		defaultRequestTimeoutSeconds: 0,
 	};
 }
 
@@ -3415,8 +3413,8 @@ export const NodeOptions = {
 			publicNodeUrl: isSet(object.publicNodeUrl) ? ConfigurationVariable.fromJSON(object.publicNodeUrl) : undefined,
 			listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
 			logger: isSet(object.logger) ? NodeLogging.fromJSON(object.logger) : undefined,
-			defaultRequestTimeoutMilliseconds: isSet(object.defaultRequestTimeoutMilliseconds)
-				? Number(object.defaultRequestTimeoutMilliseconds)
+			defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
+				? Number(object.defaultRequestTimeoutSeconds)
 				: 0,
 		};
 	},
@@ -3429,8 +3427,8 @@ export const NodeOptions = {
 			(obj.publicNodeUrl = message.publicNodeUrl ? ConfigurationVariable.toJSON(message.publicNodeUrl) : undefined);
 		message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
 		message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
-		message.defaultRequestTimeoutMilliseconds !== undefined &&
-			(obj.defaultRequestTimeoutMilliseconds = Math.round(message.defaultRequestTimeoutMilliseconds));
+		message.defaultRequestTimeoutSeconds !== undefined &&
+			(obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
 		return obj;
 	},
 
@@ -3448,7 +3446,7 @@ export const NodeOptions = {
 			object.listen !== undefined && object.listen !== null ? ListenerOptions.fromPartial(object.listen) : undefined;
 		message.logger =
 			object.logger !== undefined && object.logger !== null ? NodeLogging.fromPartial(object.logger) : undefined;
-		message.defaultRequestTimeoutMilliseconds = object.defaultRequestTimeoutMilliseconds ?? 0;
+		message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
 		return message;
 	},
 };
