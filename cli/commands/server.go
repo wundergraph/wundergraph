@@ -66,11 +66,11 @@ func startWunderGraphServer(ctx context.Context) error {
 
 	<-hookServerRunner.Run(ctx)
 
-	if ctx.Err() == nil {
+	if ctx.Err() == nil { // script runner exited before context was canceled
 		log.Error("WunderGraph Server excited")
 		return fmt.Errorf("WunderGraph Server exited")
+	} else { // gracefull shutdown
+		log.Info("WunderGraph Server shutdown complete")
+		return nil
 	}
-
-	log.Info("WunderGraph Server shutdown complete")
-	return nil
 }
