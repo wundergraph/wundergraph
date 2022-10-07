@@ -32,51 +32,54 @@ var nodeStartCmd = &cobra.Command{
 			wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
-		if !files.FileExists(configFile) {
-			return fmt.Errorf("could not find configuration file: %s", configFile)
-		}
-
-		data, err := ioutil.ReadFile(configFile)
-		if err != nil {
-			log.Error("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
-			return err
-		}
-		if len(data) == 0 {
-			log.Error("Config file is empty", abstractlogger.String("filePath", configFile))
-			return errors.New("config file is empty")
-		}
-		var graphConfig wgpb.WunderGraphConfiguration
-		err = json.Unmarshal(data, &graphConfig)
-		if err != nil {
-			log.Error("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
-			return errors.New("failed to unmarshal config file")
-		}
-
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		wunderNodeConfig := node.CreateConfig(&graphConfig)
-		n := node.New(ctx, BuildInfo, WunderGraphDir, log)
-
-		go func() {
-			err := n.StartBlocking(
-				node.WithStaticWunderNodeConfig(wunderNodeConfig),
-				node.WithDebugMode(enableDebugMode),
-			)
-			if err != nil {
-				log.Fatal("startBlocking", abstractlogger.Error(err))
-			}
-		}()
-
-		gracefulTimeoutSeconds := 10
-		n.HandleGracefulShutdown(gracefulTimeoutSeconds)
-
-		return nil
+		return startWunderGraphNode(ctx, defaultNodeGracefulTimeoutSeconds)
 	},
 }
 
 func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
 	rootCmd.AddCommand(nodeCmd)
+}
+
+func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error {
+	configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
+	if !files.FileExists(configFile) {
+		return fmt.Errorf("could not find configuration file: %s", configFile)
+	}
+
+	data, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Error("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		return err
+	}
+	if len(data) == 0 {
+		log.Error("Config file is empty", abstractlogger.String("filePath", configFile))
+		return errors.New("config file is empty")
+	}
+	var graphConfig wgpb.WunderGraphConfiguration
+	err = json.Unmarshal(data, &graphConfig)
+	if err != nil {
+		log.Error("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		return errors.New("failed to unmarshal config file")
+	}
+
+	wunderNodeConfig := node.CreateConfig(&graphConfig)
+	n := node.New(ctx, BuildInfo, WunderGraphDir, log)
+
+	go func() {
+		err := n.StartBlocking(
+			node.WithStaticWunderNodeConfig(wunderNodeConfig),
+			node.WithDebugMode(enableDebugMode),
+		)
+		if err != nil {
+			log.Fatal("startBlocking", abstractlogger.Error(err))
+		}
+	}()
+
+	n.HandleGracefulShutdown(gracefulTimeoutSeconds)
+
+	return nil
 }

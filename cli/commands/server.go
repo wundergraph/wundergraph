@@ -27,40 +27,44 @@ var serverStartCmd = &cobra.Command{
 			wunderctl server start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
-		if !files.FileExists(configFile) {
-			return fmt.Errorf("could not find configuration file: %s", configFile)
-		}
-
-		serverScriptFile := path.Join("generated", "bundle", "server.js")
-		serverExecutablePath := path.Join(WunderGraphDir, serverScriptFile)
-		if !files.FileExists(serverExecutablePath) {
-			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
-		}
-
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		srvCfg := &helpers.ServerRunConfig{
-			WunderGraphDirAbs: WunderGraphDir,
-			ServerScriptFile:  serverScriptFile,
-			Production:        true,
-		}
-
-		hookServerRunner := helpers.NewServerRunner(log, srvCfg)
-
-		<-hookServerRunner.Run(ctx)
-		if ctx.Err() != nil {
-			log.Info("WunderGraph Server shutdown complete")
-		} else {
-			log.Error("WunderGraph Server excited")
-		}
-
-		return nil
+		return startWunderGraphServer(ctx)
 	},
 }
 
 func init() {
 	serverCmd.AddCommand(serverStartCmd)
 	rootCmd.AddCommand(serverCmd)
+}
+
+func startWunderGraphServer(ctx context.Context) error {
+	configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
+	if !files.FileExists(configFile) {
+		return fmt.Errorf("could not find configuration file: %s", configFile)
+	}
+
+	serverScriptFile := path.Join("generated", "bundle", "server.js")
+	serverExecutablePath := path.Join(WunderGraphDir, serverScriptFile)
+	if !files.FileExists(serverExecutablePath) {
+		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
+	}
+
+	srvCfg := &helpers.ServerRunConfig{
+		WunderGraphDirAbs: WunderGraphDir,
+		ServerScriptFile:  serverScriptFile,
+		Production:        true,
+	}
+
+	hookServerRunner := helpers.NewServerRunner(log, srvCfg)
+
+	<-hookServerRunner.Run(ctx)
+	if ctx.Err() != nil {
+		log.Info("WunderGraph Server shutdown complete")
+	} else {
+		log.Error("WunderGraph Server excited")
+	}
+
+	return nil
 }
