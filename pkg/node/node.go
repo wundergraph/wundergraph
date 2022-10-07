@@ -183,10 +183,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		return errors.New("could not start a node. no config present")
 	}
 
-	select {
-	case err := <-n.errCh:
-		return err
-	}
+	return <-n.errCh
 }
 
 func (n *Node) Shutdown(ctx context.Context) error {
@@ -306,7 +303,6 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	var streamClosers []chan struct{}
-	var allowedHosts []string
 
 	n.setApiDevConfigDefaults(nodeConfig.Api)
 
@@ -372,8 +368,6 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	streamClosers = append(streamClosers, internalClosers...)
-
-	allowedHosts = uniqueStrings(allowedHosts)
 
 	defer func() {
 		for _, closer := range streamClosers {

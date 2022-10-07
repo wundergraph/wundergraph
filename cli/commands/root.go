@@ -8,21 +8,18 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/jensneuse/abstractlogger"
+	"github.com/joho/godotenv"
+	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/manifest"
-
-	"github.com/jensneuse/abstractlogger"
-	"github.com/joho/godotenv"
-	"github.com/spf13/cobra"
-
-	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
-
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/manifest"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
 
 const (
