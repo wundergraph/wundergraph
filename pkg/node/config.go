@@ -24,6 +24,10 @@ type WunderNodeConfig struct {
 }
 
 func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
+	const (
+		defaultTimeout = 10 * time.Second
+	)
+
 	logLevelStr := loadvariable.String(graphConfig.Api.NodeOptions.Logger.Level)
 	logLevel := wgpb.LogLevel(wgpb.LogLevel_value[logLevelStr])
 
@@ -32,10 +36,10 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 		Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
 	}
 
-	defaultTimeout := 10 * time.Second
-	// XXX: Should we have an upper bound?
-	if graphConfig.Api.NodeOptions.DefaultTimeoutMilliseconds > 0 {
-		defaultTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultTimeoutMilliseconds) * time.Millisecond
+	defaultRequestTimeout := defaultTimeout
+	// Intentionally >= 0, since a zero time.Time disables timeouts
+	if graphConfig.Api.NodeOptions.DefaultTimeoutMilliseconds >= 0 {
+		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultTimeoutMilliseconds) * time.Millisecond
 	}
 
 	config := WunderNodeConfig{
@@ -64,7 +68,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},
-				DefaultTimeout: defaultTimeout,
+				DefaultTimeout: defaultRequestTimeout,
 			},
 		},
 		Server: &Server{

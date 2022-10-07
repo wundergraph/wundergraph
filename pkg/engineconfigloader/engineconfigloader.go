@@ -136,7 +136,7 @@ func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfigurat
 func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) (*http.Client, error) {
 	// Timeout
 	timeout := d.transportFactory.DefaultTransportTimeout()
-	if ds != nil && ds.TimeoutMilliseconds > 0 {
+	if ds != nil && ds.TimeoutMilliseconds >= 0 {
 		timeout = time.Duration(ds.TimeoutMilliseconds) * time.Millisecond
 	}
 	// TLS
