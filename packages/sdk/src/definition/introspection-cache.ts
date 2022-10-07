@@ -5,7 +5,7 @@ import {
 	IntrospectionConfiguration,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
-	WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY,
+	WG_ENABLE_INTROSPECTION_OFFLINE,
 } from './index';
 import path from 'path';
 import fsP from 'fs/promises';
@@ -161,7 +161,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	 * mode, fail here. Otherwise generate introspection from scratch. Then cache it.
 	 */
 
-	if (WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY) {
+	if (WG_ENABLE_INTROSPECTION_OFFLINE) {
 		throw new Error(`Could not load introspection from cache`);
 	}
 

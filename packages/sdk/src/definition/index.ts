@@ -45,7 +45,7 @@ import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
 // Only use the instrospection cache, return an error when hitting the network
-export const WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY = process.env['WG_USE_INTROSPECTION_CACHE_EXCLUSIVELY'] === 'true';
+export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 
 export interface ApplicationConfig {
 	name: string;
