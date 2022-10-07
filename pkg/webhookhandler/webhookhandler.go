@@ -56,9 +56,7 @@ type webhookHandler struct {
 }
 
 func (h *webhookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(r.URL.Path, h.pathPrefix) {
-		r.URL.Path = r.URL.Path[len(h.pathPrefix):]
-	}
+	r.URL.Path = strings.TrimPrefix(r.URL.Path, h.pathPrefix)
 	if r.Body != nil && h.verifier != nil {
 		if !h.verifier.Verify(r) {
 			h.log.Error("Webhook verification failed",

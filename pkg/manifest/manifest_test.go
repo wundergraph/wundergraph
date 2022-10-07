@@ -7,6 +7,7 @@ import (
 
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
 
