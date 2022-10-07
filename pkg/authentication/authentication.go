@@ -284,7 +284,6 @@ func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
 	if err != nil {
 		h.Log.Error("PostLogout queries hook", abstractlogger.Error(err))
 	}
-	return
 }
 
 type MutatingPostAuthenticationResponse struct {

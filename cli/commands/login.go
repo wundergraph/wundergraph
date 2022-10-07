@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/spf13/cobra"
+
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
 

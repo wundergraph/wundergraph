@@ -13,8 +13,8 @@ import (
 	"text/template"
 
 	"github.com/fatih/color"
-
 	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
 

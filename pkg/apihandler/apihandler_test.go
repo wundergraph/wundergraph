@@ -11,6 +11,7 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 

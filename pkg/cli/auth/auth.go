@@ -8,15 +8,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
-
+	"github.com/fatih/color"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/jensneuse/abstractlogger"
-	"github.com/spf13/viper"
-	"github.com/wundergraph/wundergraph/pkg/config"
-
-	"github.com/fatih/color"
 	"github.com/skratchdot/open-golang/open"
+	"github.com/spf13/viper"
+
+	"github.com/wundergraph/wundergraph/pkg/config"
+	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
 
 var (
