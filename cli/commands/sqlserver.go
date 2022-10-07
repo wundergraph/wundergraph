@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/files"
 
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 )
@@ -15,12 +16,17 @@ var sqlserverCmd = &cobra.Command{
 	Example: `Introspect sqlserver sqlserver://localhost:1433;database=wundergraph;schema=wg;user=SA;password=secure_Password;encrypt=true;trustServerCertificate=true`,
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
+		}
+
 		databaseURL := args[0]
 		introspectionSchema := fmt.Sprintf(`datasource db {
 			provider = "sqlserver"
 			url      = "%s"
 		}`, databaseURL)
-		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, WunderGraphDir, log)
+		prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(introspectionSchema, wunderGraphDir, log)
 		if err != nil {
 			return err
 		}

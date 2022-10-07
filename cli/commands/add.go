@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/manifest"
 )
 
@@ -17,8 +18,12 @@ var addCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, dependencies []string) error {
 		client := InitWunderGraphApiClient()
-		man := manifest.New(log, client, WunderGraphDir)
-		err := man.Load()
+		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+		if err != nil {
+			return err
+		}
+		man := manifest.New(log, client, wunderGraphDir)
+		err = man.Load()
 		if err != nil {
 			return fmt.Errorf("unable to load wundergraph.manifest.json")
 		}

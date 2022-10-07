@@ -1,9 +1,9 @@
-import { Client, OperationRequestOptions } from './index';
+import { Client, ClientConfig, OperationRequestOptions } from './index';
 import nock from 'nock';
 import fetch from 'node-fetch';
 import { ResponseError } from './ResponseError';
 
-const newClient = () => {
+const newClient = (overrides?: Partial<ClientConfig>) => {
 	return new Client({
 		sdkVersion: '1.0.0',
 		baseURL: 'https://api.com',
@@ -21,19 +21,25 @@ const newClient = () => {
 				requiresAuthentication: false,
 			},
 		},
+		...overrides,
 	});
 };
 
 describe('Client', () => {
 	describe('Utility', () => {
 		test('Should be able to set extra headers', async () => {
-			const client = newClient();
+			const client = newClient({
+				extraHeaders: {
+					'X-Test-From-Constructor': 'extra-header',
+				},
+			});
 
 			const scope = nock('https://api.com')
 				.matchHeader('accept', 'application/json')
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.matchHeader('X-Test', 'test')
+				.matchHeader('X-Test-From-Constructor', 'extra-header')
 				.get('/app/operations/Weather')
 				.query({ wg_api_hash: '123', wg_variables: '{}' })
 				.once()
