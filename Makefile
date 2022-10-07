@@ -31,6 +31,12 @@ test: test-go test-ts
 format-templates:
 	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
 
+golang-ci:
+	 golangci-lint run
+
+golang-ci-fix:
+	 golangci-lint run --fix
+
 install-proto:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 
