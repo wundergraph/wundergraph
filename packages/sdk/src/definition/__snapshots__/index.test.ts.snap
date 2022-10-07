@@ -102,7 +102,7 @@ interface User {
           "typeName": "Query",
         },
       ],
-      "TimeoutMilliseconds": 0,
+      "TimeoutMilliseconds": -1,
     },
   ],
   "DefaultFlushInterval": 500,

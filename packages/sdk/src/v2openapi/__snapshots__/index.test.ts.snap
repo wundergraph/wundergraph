@@ -55,7 +55,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -110,7 +110,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -165,7 +165,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -220,7 +220,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -275,7 +275,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -330,7 +330,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -385,7 +385,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -440,7 +440,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -495,7 +495,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -550,7 +550,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -605,7 +605,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -660,7 +660,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -715,7 +715,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -770,7 +770,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -825,7 +825,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -880,7 +880,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -935,7 +935,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -990,7 +990,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1045,7 +1045,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1100,7 +1100,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1155,7 +1155,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1210,7 +1210,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1265,7 +1265,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1320,7 +1320,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1375,7 +1375,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1430,7 +1430,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1485,7 +1485,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1540,7 +1540,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1595,7 +1595,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1650,7 +1650,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1705,7 +1705,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1760,7 +1760,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1815,7 +1815,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1870,7 +1870,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1925,7 +1925,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -1980,7 +1980,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2035,7 +2035,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2090,7 +2090,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2145,7 +2145,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2200,7 +2200,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2255,7 +2255,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2310,7 +2310,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2365,7 +2365,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2420,7 +2420,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2475,7 +2475,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2530,7 +2530,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2585,7 +2585,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2640,7 +2640,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2695,7 +2695,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2750,7 +2750,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2805,7 +2805,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2860,7 +2860,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2915,7 +2915,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -2970,7 +2970,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3025,7 +3025,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3080,7 +3080,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3135,7 +3135,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3190,7 +3190,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3245,7 +3245,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3300,7 +3300,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3355,7 +3355,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3410,7 +3410,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -3465,7 +3465,7 @@ exports[`complex oas3: complex_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -5115,7 +5115,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5170,7 +5170,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5225,7 +5225,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5280,7 +5280,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5335,7 +5335,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5390,7 +5390,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5445,7 +5445,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5500,7 +5500,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5555,7 +5555,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5610,7 +5610,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5665,7 +5665,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5720,7 +5720,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5775,7 +5775,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5830,7 +5830,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5885,7 +5885,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5940,7 +5940,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -5995,7 +5995,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6050,7 +6050,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6105,7 +6105,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6160,7 +6160,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6215,7 +6215,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6270,7 +6270,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6325,7 +6325,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6380,7 +6380,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6435,7 +6435,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6490,7 +6490,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6545,7 +6545,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6600,7 +6600,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6655,7 +6655,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6710,7 +6710,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6765,7 +6765,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6820,7 +6820,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6875,7 +6875,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6930,7 +6930,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -6985,7 +6985,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7040,7 +7040,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7095,7 +7095,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7150,7 +7150,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7205,7 +7205,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7260,7 +7260,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7315,7 +7315,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7370,7 +7370,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7425,7 +7425,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7480,7 +7480,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7535,7 +7535,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7590,7 +7590,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7645,7 +7645,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7700,7 +7700,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7755,7 +7755,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7810,7 +7810,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7865,7 +7865,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7920,7 +7920,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -7975,7 +7975,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8030,7 +8030,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8085,7 +8085,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8140,7 +8140,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8195,7 +8195,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8250,7 +8250,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8305,7 +8305,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8360,7 +8360,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8415,7 +8415,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8470,7 +8470,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8525,7 +8525,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8580,7 +8580,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8635,7 +8635,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8690,7 +8690,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8745,7 +8745,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8800,7 +8800,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8855,7 +8855,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8910,7 +8910,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -8965,7 +8965,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9020,7 +9020,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9075,7 +9075,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9130,7 +9130,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9185,7 +9185,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9240,7 +9240,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9295,7 +9295,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9350,7 +9350,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9405,7 +9405,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9460,7 +9460,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9515,7 +9515,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9570,7 +9570,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9625,7 +9625,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9680,7 +9680,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9735,7 +9735,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9790,7 +9790,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9845,7 +9845,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9900,7 +9900,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -9955,7 +9955,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10010,7 +10010,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10065,7 +10065,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10120,7 +10120,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10175,7 +10175,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10230,7 +10230,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10285,7 +10285,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10340,7 +10340,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10395,7 +10395,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10450,7 +10450,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10505,7 +10505,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10560,7 +10560,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10615,7 +10615,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10670,7 +10670,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10725,7 +10725,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10780,7 +10780,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10835,7 +10835,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10890,7 +10890,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -10945,7 +10945,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11000,7 +11000,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11055,7 +11055,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11110,7 +11110,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11165,7 +11165,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11220,7 +11220,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11275,7 +11275,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11330,7 +11330,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11385,7 +11385,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11440,7 +11440,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11495,7 +11495,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11550,7 +11550,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11605,7 +11605,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11660,7 +11660,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11715,7 +11715,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11770,7 +11770,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11825,7 +11825,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11880,7 +11880,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11935,7 +11935,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -11990,7 +11990,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12045,7 +12045,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12100,7 +12100,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12155,7 +12155,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12210,7 +12210,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12265,7 +12265,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12320,7 +12320,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12375,7 +12375,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12430,7 +12430,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12485,7 +12485,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12540,7 +12540,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12595,7 +12595,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12650,7 +12650,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12705,7 +12705,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12760,7 +12760,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12815,7 +12815,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12870,7 +12870,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12925,7 +12925,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -12980,7 +12980,7 @@ exports[`complex2 oas3: complex2_oas3_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -15851,7 +15851,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -15906,7 +15906,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -15970,7 +15970,7 @@ exports[`dynamic baseurl: dynamic_baseurl_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -16109,7 +16109,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -16205,7 +16205,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -16291,7 +16291,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -16531,7 +16531,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -16592,7 +16592,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -16737,7 +16737,7 @@ exports[`fusion: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -16792,7 +16792,7 @@ exports[`fusion: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -16951,7 +16951,7 @@ exports[`github starred with unions: github_starred_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -17066,7 +17066,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17121,7 +17121,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17176,7 +17176,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17231,7 +17231,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17286,7 +17286,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17341,7 +17341,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17396,7 +17396,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17451,7 +17451,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17506,7 +17506,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17561,7 +17561,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17616,7 +17616,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17671,7 +17671,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17726,7 +17726,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17781,7 +17781,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17836,7 +17836,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17891,7 +17891,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -17946,7 +17946,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18001,7 +18001,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18056,7 +18056,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18116,7 +18116,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18171,7 +18171,7 @@ exports[`httpbin: httpbin_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -18456,7 +18456,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18511,7 +18511,7 @@ exports[`json placeholder array: jsp_array_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -18608,7 +18608,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18663,7 +18663,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18718,7 +18718,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -18773,7 +18773,7 @@ exports[`json placeholder: json_placeholder_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -19137,7 +19137,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19192,7 +19192,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19252,7 +19252,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19312,7 +19312,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19367,7 +19367,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19431,7 +19431,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19498,7 +19498,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19558,7 +19558,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19613,7 +19613,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19668,7 +19668,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19723,7 +19723,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19778,7 +19778,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19833,7 +19833,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19888,7 +19888,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -19952,7 +19952,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20007,7 +20007,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20062,7 +20062,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20117,7 +20117,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20172,7 +20172,7 @@ exports[`petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -20516,7 +20516,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20571,7 +20571,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20626,7 +20626,7 @@ exports[`simple petstore: petstore_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -20888,7 +20888,7 @@ exports[`users: users_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -20943,7 +20943,7 @@ exports[`users: users_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -21007,7 +21007,7 @@ exports[`users: users_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -21120,7 +21120,7 @@ exports[`weather: weather_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -21207,7 +21207,7 @@ exports[`with url encoded params: stripe_query_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;
@@ -21311,7 +21311,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -21366,7 +21366,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -21421,7 +21421,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -21481,7 +21481,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   },
   {
     "RootNodes": [
@@ -21536,7 +21536,7 @@ exports[`with_path_parameters: fusion_data_sources 1`] = `
     },
     "ChildNodes": [],
     "Directives": [],
-    "TimeoutMilliseconds": 0
+    "TimeoutMilliseconds": -1
   }
 ]"
 `;

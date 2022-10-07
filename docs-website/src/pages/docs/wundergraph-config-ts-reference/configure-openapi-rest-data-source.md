@@ -19,7 +19,7 @@ const jsp = introspect.openApi({
   introspection: {
     pollingIntervalSeconds: 2,
   },
-  timeout: 10 * 1000, // in milliseconds, optional
+  timeoutMilliseconds: 10 * 1000, // optional
 })
 const myApplication = new Application({
   name: 'app',

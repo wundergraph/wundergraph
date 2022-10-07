@@ -214,7 +214,7 @@ class RESTApiBuilder {
 			},
 			ChildNodes: [],
 			Directives: [],
-			TimeoutMilliseconds: this.introspection.introspection?.timeoutMilliseconds ?? 0,
+			TimeoutMilliseconds: this.introspection.timeoutMilliseconds ?? -1,
 		});
 
 		this.fields.push({
