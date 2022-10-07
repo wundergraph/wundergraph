@@ -45,7 +45,12 @@ func init() {
 }
 
 func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error {
-	configFile := path.Join(WunderGraphDir, "generated", configJsonFilename)
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return err
+	}
+
+	configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
@@ -67,7 +72,7 @@ func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error
 	}
 
 	wunderNodeConfig := node.CreateConfig(&graphConfig)
-	n := node.New(ctx, BuildInfo, WunderGraphDir, log)
+	n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 
 	go func() {
 		err := n.StartBlocking(

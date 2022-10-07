@@ -22,6 +22,8 @@ export const downloadURL = (version: string): string => {
 					return `https://github.com/wundergraph/wundergraph/releases/download/v${version}/wunderctl_${version}_Linux_x86_64.tar.gz`;
 				case 'x32':
 					return `https://github.com/wundergraph/wundergraph/releases/download/v${version}/wunderctl_${version}_Linux_i386.tar.gz`;
+				case 'arm64':
+					return `https://github.com/wundergraph/wundergraph/releases/download/v${version}/wunderctl_${version}_Linux_arm64.tar.gz`;
 				default:
 					throw new Error(`os arch unsupported: ${osType} ${osArch}`);
 			}
