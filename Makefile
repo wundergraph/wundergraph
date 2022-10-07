@@ -17,6 +17,9 @@ engine-dev: codegen
 check-setup:
 	$(shell ./scripts/check-setup.sh)
 
+setup-dev:
+	./scripts/setup-dev.sh
+
 bootstrap-minio:
 	./scripts/minio-setup.sh
 
