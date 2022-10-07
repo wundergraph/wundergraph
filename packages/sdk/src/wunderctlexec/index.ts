@@ -1,8 +1,6 @@
 import execa from 'execa';
 import fs from 'fs';
 import { wunderctlBinaryPath } from '@wundergraph/wunderctl';
-import { WgEnvironmentVariable } from '@wundergraph/protobuf';
-import { WgEnvValue } from '../env/env';
 
 export interface WunderCtlExecArgs {
 	cmd: string[];
@@ -43,14 +41,12 @@ const wunderCtlArgs = (args: string[]): string[] => {
 		args.push('--wundergraph-dir', '.');
 	}
 
-	const logLevel = WgEnvValue(WgEnvironmentVariable.WG_CLI_LOG_LEVEL);
-	if (logLevel) {
-		args.push('--loglevel', logLevel);
+	if (process.env.WG_CLI_LOG_LEVEL) {
+		args.push('--loglevel', process.env.WG_CLI_LOG_LEVEL);
 	}
 
-	const logJson = WgEnvValue(WgEnvironmentVariable.WG_CLI_LOG_JSON);
-	if (logJson) {
-		args.push(`--json-encoded-logging=${logJson}`);
+	if (process.env.WG_CLI_LOG_PRETTY) {
+		args.push(`--pretty-logging=${process.env.WG_CLI_LOG_PRETTY}`);
 	}
 
 	return args;

@@ -42,7 +42,7 @@ export const Logger = (): pino.Logger => {
 		return logger;
 	}
 
-	const enablePretty = WgEnvValue(WgEnvironmentVariable.WG_CLI_LOG_JSON) === 'false';
+	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
 
 	let options: pino.LoggerOptions = {
 		level: PinoLogLevel.Info,
