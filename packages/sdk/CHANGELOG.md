@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.4...@wundergraph/sdk@0.114.5) (2022-10-07)
+
+### Bug Fixes
+
+* automatically rename subscription object fields for oas ([#246](https://github.com/wundergraph/wundergraph/issues/246)) ([aaf018e](https://github.com/wundergraph/wundergraph/commit/aaf018e038758dcf5f79c9ee42641a9c562d5a70)) (@jensneuse)
+
 ## [0.114.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.3...@wundergraph/sdk@0.114.4) (2022-10-07)
 
 ### Bug Fixes
