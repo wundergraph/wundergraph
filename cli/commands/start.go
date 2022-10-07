@@ -37,7 +37,7 @@ var startCmd = &cobra.Command{
 		g.Go(func() error {
 			return startWunderGraphNode(ctx, gracefulTimeout)
 		})
-		
+
 		return g.Wait()
 	},
 }

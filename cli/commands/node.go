@@ -89,6 +89,6 @@ func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error
 	}()
 
 	n.HandleGracefulShutdown(gracefulTimeoutSeconds)
-	
+
 	return <-errChan
 }
