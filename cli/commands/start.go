@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -23,48 +23,22 @@ var startCmd = &cobra.Command{
 	Short: "Starts WunderGraph in production mode",
 	Long:  `Start runs WunderGraph Node and Server as a single process in production mode`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		var (
-			errChan    = make(chan error)
-			doneChan   = make(chan struct{})
-			shutdownWg sync.WaitGroup
-		)
+		g, ctx := errgroup.WithContext(sigCtx)
 
 		if !excludeServer {
-			shutdownWg.Add(1)
-			go func() {
-				defer shutdownWg.Done()
-
-				if err := startWunderGraphServer(ctx); err != nil {
-					errChan <- err
-				}
-			}()
+			g.Go(func() error {
+				return startWunderGraphServer(ctx)
+			})
 		}
 
-		shutdownWg.Add(1)
-		go func() {
-			defer shutdownWg.Done()
-
-			if err := startWunderGraphNode(ctx, gracefulTimeout); err != nil {
-				errChan <- err
-			}
-		}()
-
-		go func() {
-			shutdownWg.Wait()
-			close(doneChan)
-		}()
-
-		select {
-		case <-doneChan:
-		case err := <-errChan:
-			stop()
-			return err
-		}
-
-		return nil
+		g.Go(func() error {
+			return startWunderGraphNode(ctx, gracefulTimeout)
+		})
+		
+		return g.Wait()
 	},
 }
 
