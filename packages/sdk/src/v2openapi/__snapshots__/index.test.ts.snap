@@ -20793,7 +20793,8 @@ exports[`subscription as object field: subscription_as_object_field_data_sources
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "RequestTimeoutSeconds": 0
   }
 ]"
 `;
