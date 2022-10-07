@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -20,10 +19,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
-)
-
-var (
-	keepIntrospectionCache bool
 )
 
 // upCmd represents the up command
@@ -64,11 +59,6 @@ var upCmd = &cobra.Command{
 		)
 
 		introspectionCacheDir := path.Join(wunderGraphDir, "cache", "introspection")
-		if !keepIntrospectionCache {
-			if err := os.RemoveAll(introspectionCacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-				return err
-			}
-		}
 
 		configJsonPath := path.Join(wunderGraphDir, "generated", configJsonFilename)
 		webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
@@ -284,5 +274,4 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	upCmd.Flags().BoolVar(&keepIntrospectionCache, "keep-introspection-cache", false, "avoid clearing the introspection cache on startup")
 }
