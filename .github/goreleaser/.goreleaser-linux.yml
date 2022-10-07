@@ -12,7 +12,7 @@ before:
     - go generate ../...
 builds:
   - binary: wunderctl
-    id: linux
+    id: linux_amd64
     env:
       - CGO_ENABLED=0
     ldflags:
@@ -21,6 +21,16 @@ builds:
       - linux
     goarch:
       - amd64
+  - binary: wunderctl
+    id: linux_arm64
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -w -s -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=ci -X main.githubAuthDemoClientID={{.Env.GH_AUTH_DEMO_CLIENT_ID}} -X main.githubAuthDemoClientSecret={{.Env.GH_AUTH_DEMO_CLIENT_SECRET}}
+    goos:
+      - linux
+    goarch:
+      - arm64
 archives:
   - replacements:
       darwin: Darwin
