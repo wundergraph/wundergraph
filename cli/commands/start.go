@@ -61,7 +61,7 @@ If used without --exclude-server, make sure the server is available in this dire
 				WunderGraphDirAbs: wunderGraphDir,
 				ServerScriptFile:  serverScriptFile,
 				Production:        true,
-				Env:               helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
+				Env:               helpers.CliEnv(cliLogLevel, prettyLogging),
 			}
 
 			hookServerRunner := helpers.NewServerRunner(log, srvCfg)

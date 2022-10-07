@@ -53,7 +53,7 @@ Use this command if you only want to generate the configuration`,
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
 			ScriptEnv: append(
-				helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
+				helpers.CliEnv(cliLogLevel, prettyLogging),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),

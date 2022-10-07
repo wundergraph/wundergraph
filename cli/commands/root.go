@@ -38,7 +38,7 @@ var (
 	DotEnvFile            string
 	log                   abstractlogger.Logger
 	enableDebugMode       bool
-	jsonEncodedLogging    bool
+	prettyLogging         bool
 	serviceToken          string
 	_wunderGraphDirConfig string
 
@@ -68,11 +68,13 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			return nil
 		}
 
+		logging.Init(prettyLogging)
+
 		if enableDebugMode {
-			// cliLogLevel = "debug"
-			log = logging.New(abstractlogger.DebugLevel, jsonEncodedLogging)
+			cliLogLevel = "debug"
+			log = abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
 		} else {
-			log = logging.New(logging.FindLogLevel(cliLogLevel, abstractlogger.ErrorLevel), jsonEncodedLogging)
+			log = abstractlogger.NewZapLogger(logging.Zap(), logging.FindLogLevel(cliLogLevel, abstractlogger.ErrorLevel))
 		}
 
 		err := godotenv.Load(DotEnvFile)
@@ -152,7 +154,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cliLogLevel, "loglevel", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
+	rootCmd.PersistentFlags().BoolVar(&prettyLogging, "pretty-logging", false, "switches the logging to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 }
 

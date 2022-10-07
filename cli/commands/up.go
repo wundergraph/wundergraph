@@ -93,7 +93,7 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			FirstRunEnv: append(helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
+			FirstRunEnv: append(helpers.CliEnv(cliLogLevel, prettyLogging),
 				// when the user runs `wunderctl up` for the first time, we revalidate the cache
 				// so the user can be sure that the introspection is up-to-date. In case of an API is not available
 				// we will fall back to the cached introspection (when available)
@@ -103,7 +103,7 @@ var upCmd = &cobra.Command{
 				"WG_DEV_FIRST_RUN=true",
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
-			ScriptEnv: append(helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
+			ScriptEnv: append(helpers.CliEnv(cliLogLevel, prettyLogging),
 				"WG_ENABLE_INTROSPECTION_CACHE=true",
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
@@ -116,7 +116,7 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
+			ScriptEnv: append(helpers.CliEnv(cliLogLevel, prettyLogging),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
@@ -161,7 +161,7 @@ var upCmd = &cobra.Command{
 			srvCfg := &helpers.ServerRunConfig{
 				WunderGraphDirAbs: wunderGraphDir,
 				ServerScriptFile:  serverOutFile,
-				Env:               helpers.CliEnv(cliLogLevel, jsonEncodedLogging),
+				Env:               helpers.CliEnv(cliLogLevel, prettyLogging),
 			}
 
 			hookServerRunner = helpers.NewServerRunner(log, srvCfg)
