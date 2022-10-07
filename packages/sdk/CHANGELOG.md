@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.114.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.3...@wundergraph/sdk@0.114.4) (2022-10-07)
+
+### Bug Fixes
+
+* **sdk/client:** include extra headers from constructor ([#244](https://github.com/wundergraph/wundergraph/issues/244)) ([d59e3ab](https://github.com/wundergraph/wundergraph/commit/d59e3ab1d90c82a2971253e6afdc793d6f6e3f46)) (@chronotc)
+* **sdk:** add fastify route only if the hook is configured ([#204](https://github.com/wundergraph/wundergraph/issues/204)) ([4d744a3](https://github.com/wundergraph/wundergraph/commit/4d744a3c3923b9c0db926ea393cbba821b4b8b74)) (@JivusAyrus)
+
 ## [0.114.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.2...@wundergraph/sdk@0.114.3) (2022-10-04)
 
 ### Bug Fixes
