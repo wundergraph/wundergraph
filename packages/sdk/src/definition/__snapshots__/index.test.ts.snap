@@ -94,6 +94,7 @@ interface User {
       },
       "Directives": [],
       "Kind": 2,
+      "RequestTimeoutMilliseconds": 0,
       "RootNodes": [
         {
           "fieldNames": [
@@ -102,7 +103,6 @@ interface User {
           "typeName": "Query",
         },
       ],
-      "TimeoutMilliseconds": -1,
     },
   ],
   "DefaultFlushInterval": 500,

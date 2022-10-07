@@ -78,7 +78,7 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": ""
       },
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     },
     {
       "Kind": 2,
@@ -154,7 +154,7 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": ""
       },
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     },
     {
       "Kind": 2,
@@ -248,7 +248,7 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": ""
       },
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     },
     {
       "Kind": 2,
@@ -322,7 +322,7 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": ""
       },
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     },
     {
       "Kind": 0,
@@ -345,7 +345,7 @@ exports[`Should be merged: merged_apis 1`] = `
       },
       "ChildNodes": [],
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     },
     {
       "Kind": 0,
@@ -368,7 +368,7 @@ exports[`Should be merged: merged_apis 1`] = `
       },
       "ChildNodes": [],
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     },
     {
       "Kind": 0,
@@ -391,7 +391,7 @@ exports[`Should be merged: merged_apis 1`] = `
       },
       "ChildNodes": [],
       "Directives": [],
-      "TimeoutMilliseconds": 0
+      "RequestTimeoutMilliseconds": 0
     }
   ],
   "Fields": [

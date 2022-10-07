@@ -37,9 +37,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 	}
 
 	defaultRequestTimeout := defaultTimeout
-	// Intentionally >= 0, since a zero time.Time disables timeouts
-	if graphConfig.Api.NodeOptions.DefaultTimeoutMilliseconds >= 0 {
-		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultTimeoutMilliseconds) * time.Millisecond
+	if graphConfig.Api.NodeOptions.DefaultRequestTimeoutMilliseconds > 0 {
+		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutMilliseconds) * time.Millisecond
 	}
 
 	config := WunderNodeConfig{
