@@ -11,6 +11,7 @@ pkg/templates/assets/templates/**/*lock.json
 
 # Directories
 dist
+types/go/
 
 # Next.js build output
 .next
