@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -31,7 +30,8 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstrac
 	return &Node{
 		info:           info,
 		ctx:            ctx,
-		errCh:          make(chan error),
+		errCh:          make(chan error, 1),
+		startExited:    make(chan struct{}),
 		configCh:       make(chan WunderNodeConfig),
 		pool:           pool.New(),
 		log:            log,
@@ -52,9 +52,10 @@ type Node struct {
 	ctx  context.Context
 	info BuildInfo
 
-	stopped  bool
-	errCh    chan error
-	configCh chan WunderNodeConfig
+	stopped     bool
+	errCh       chan error
+	startExited chan struct{}
+	configCh    chan WunderNodeConfig
 
 	server *http.Server
 
@@ -154,6 +155,8 @@ func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 }
 
 func (n *Node) StartBlocking(opts ...Option) error {
+	defer close(n.startExited)
+
 	var options options
 	for i := range opts {
 		opts[i](&options)
@@ -162,13 +165,12 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	n.options = options
 
 	switch {
-
 	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
 		go func() {
 			err := n.startServer(*options.staticConfig)
 			if err != nil {
-				os.Exit(1)
+				n.errCh <- err
 			}
 		}()
 	case options.fileSystemConfig != nil:
@@ -269,7 +271,14 @@ func (n *Node) shutdownServerGracefully(server *http.Server) {
 }
 
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
-	<-n.ctx.Done()
+	defer close(n.errCh)
+
+	select {
+	case <-n.startExited:
+		return
+	case <-n.ctx.Done():
+	}
+
 	n.log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
@@ -309,7 +318,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	valid, messages := validate.ApiConfig(nodeConfig.Api)
 
 	if !valid {
-		n.log.Fatal("API config invalid",
+		n.log.Error("API config invalid",
 			abstractlogger.Strings("errors", messages),
 		)
 		return errors.New("API config invalid")
@@ -390,8 +399,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
-		n.errCh <- err
-		return nil
+		return err
 	}
 
 	for _, listener := range listeners {
@@ -482,7 +490,7 @@ func (n *Node) reconfigureOnConfigUpdate() {
 			go func() {
 				err := n.startServer(config)
 				if err != nil {
-					os.Exit(1)
+					n.errCh <- err
 				}
 			}()
 		case <-n.ctx.Done():

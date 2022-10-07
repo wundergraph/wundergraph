@@ -74,17 +74,21 @@ func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error
 	wunderNodeConfig := node.CreateConfig(&graphConfig)
 	n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 
+	errChan := make(chan error, 1)
 	go func() {
+		defer close(errChan)
+
 		err := n.StartBlocking(
 			node.WithStaticWunderNodeConfig(wunderNodeConfig),
 			node.WithDebugMode(enableDebugMode),
 		)
 		if err != nil {
-			log.Fatal("startBlocking", abstractlogger.Error(err))
+			log.Error("startBlocking", abstractlogger.Error(err))
+			errChan <- err
 		}
 	}()
 
 	n.HandleGracefulShutdown(gracefulTimeoutSeconds)
-
-	return nil
+	
+	return <-errChan
 }
