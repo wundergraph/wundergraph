@@ -5,6 +5,7 @@ package database
 
 import (
 	"github.com/jensneuse/goprisma"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
 

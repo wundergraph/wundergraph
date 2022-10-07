@@ -8,11 +8,11 @@ import (
 	"net/http"
 
 	"github.com/buger/jsonparser"
+	"github.com/hetiansu5/urlquery"
 	"github.com/klauspost/compress/flate"
 	"github.com/klauspost/compress/gzip"
-	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 
-	"github.com/hetiansu5/urlquery"
+	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 )
 
 const (

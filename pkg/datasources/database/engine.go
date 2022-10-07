@@ -20,6 +20,7 @@ import (
 	"github.com/phayes/freeport"
 	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
 
@@ -267,7 +268,6 @@ func (e *Engine) ensurePrisma() error {
 			return err
 		}
 		e.log.Info("downloading prisma query engine complete")
-		err = nil
 	}
 
 	_, err = os.Lstat(e.introspectionEnginePath)
