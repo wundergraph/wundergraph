@@ -138,7 +138,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 			// this is intentional and not an error and happens
 			// when we re-start the process after a watched file has changed
 			if status.Exit == -1 {
-				b.log.Debug("Script exited with -1 exit code",
+				b.log.Debug("Script runner exited with -1 exit code",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
