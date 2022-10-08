@@ -135,9 +135,10 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-b.cmd.Done():
 			status := b.cmd.Status()
 			// exit code == -1 means the script was killed by a signal
-			// this is intentional and not an error and happens when we re-start the process after a watched file has changed
+			// this is intentional and not an error and happens
+			// when we re-start the process after a watched file has changed
 			if status.Exit == -1 {
-				b.log.Debug("Script exited",
+				b.log.Debug("Script exited with -1 exit code",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
@@ -148,7 +149,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
-				b.log.Error("Script runner exited with zero exit code",
+				b.log.Error("Script runner exited with non-zero exit code",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
