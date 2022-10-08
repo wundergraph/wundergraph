@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"github.com/jensneuse/abstractlogger"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,22 +24,39 @@ var startCmd = &cobra.Command{
 	Short: "Starts WunderGraph in production mode",
 	Long:  `Start runs WunderGraph Node and Server as a single process in production mode`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		g, ctx := errgroup.WithContext(sigCtx)
+		n, err := NewWunderGraphNode(ctx)
+		if err != nil {
+			return err
+		}
+
+		g, ctx := errgroup.WithContext(ctx)
 
 		if !excludeServer {
 			g.Go(func() error {
-				return startWunderGraphServer(ctx)
+				err := startWunderGraphServer(ctx)
+				if err != nil {
+					log.Error("start server", abstractlogger.Error(err))
+				}
+				return err
 			})
 		}
 
 		g.Go(func() error {
-			return startWunderGraphNode(ctx, gracefulTimeout)
+			err := StartWunderGraphNode(n)
+			if err != nil {
+				log.Error("start node", abstractlogger.Error(err))
+			}
+			return err
 		})
 
-		return g.Wait()
+		<-ctx.Done()
+
+		n.HandleGracefulShutdown(gracefulTimeout)
+
+		return ctx.Err()
 	},
 }
 

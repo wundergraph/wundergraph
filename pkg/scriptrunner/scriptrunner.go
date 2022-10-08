@@ -68,6 +68,14 @@ func (b *ScriptRunner) Stop() error {
 	return nil
 }
 
+func (b *ScriptRunner) Error() error {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		return status.Error
+	}
+	return nil
+}
+
 // Successful returns true if the script exited with <= 0 and without an error.
 // This method should only be called after the script is done.
 func (b *ScriptRunner) Successful() bool {
@@ -140,7 +148,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
-				b.log.Error("Script runner exited with error",
+				b.log.Error("Script runner exited with zero exit code",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -35,7 +36,26 @@ var nodeStartCmd = &cobra.Command{
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		return startWunderGraphNode(ctx, defaultNodeGracefulTimeoutSeconds)
+		g, ctx := errgroup.WithContext(ctx)
+
+		n, err := NewWunderGraphNode(ctx)
+		if err != nil {
+			return err
+		}
+
+		g.Go(func() error {
+			err := StartWunderGraphNode(n)
+			if err != nil {
+				log.Error("start node", abstractlogger.Error(err))
+			}
+			return err
+		})
+
+		<-ctx.Done()
+
+		n.HandleGracefulShutdown(gracefulTimeout)
+
+		return ctx.Err()
 	},
 }
 
@@ -44,7 +64,16 @@ func init() {
 	rootCmd.AddCommand(nodeCmd)
 }
 
-func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error {
+func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
+}
+
+func StartWunderGraphNode(n *node.Node) error {
 	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 	if err != nil {
 		return err
@@ -60,10 +89,12 @@ func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error
 		log.Error("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
 		return err
 	}
+
 	if len(data) == 0 {
 		log.Error("Config file is empty", abstractlogger.String("filePath", configFile))
 		return errors.New("config file is empty")
 	}
+
 	var graphConfig wgpb.WunderGraphConfiguration
 	err = json.Unmarshal(data, &graphConfig)
 	if err != nil {
@@ -72,23 +103,14 @@ func startWunderGraphNode(ctx context.Context, gracefulTimeoutSeconds int) error
 	}
 
 	wunderNodeConfig := node.CreateConfig(&graphConfig)
-	n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 
-	errChan := make(chan error, 1)
-	go func() {
-		defer close(errChan)
+	err = n.StartBlocking(
+		node.WithStaticWunderNodeConfig(wunderNodeConfig),
+		node.WithDebugMode(enableDebugMode),
+	)
+	if err != nil {
+		return err
+	}
 
-		err := n.StartBlocking(
-			node.WithStaticWunderNodeConfig(wunderNodeConfig),
-			node.WithDebugMode(enableDebugMode),
-		)
-		if err != nil {
-			log.Error("startBlocking", abstractlogger.Error(err))
-			errChan <- err
-		}
-	}()
-
-	n.HandleGracefulShutdown(gracefulTimeoutSeconds)
-
-	return <-errChan
+	return nil
 }
