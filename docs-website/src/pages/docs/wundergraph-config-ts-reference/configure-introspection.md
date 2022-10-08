@@ -28,12 +28,14 @@ By default, every data source is introspected exactly once.
 The result is cached in the `.wundergraph/cache/introspection` directory.
 {% /callout %}
 
-If a cache entry is found for a data source,
-it's always used instead of introspecting the data source again.
+When caching is enabled, if a cache entry is found for a data source,
+it's always used instead of introspecting the data source again. Cache is
+optional and might be turned off globally using the `--no-cache` flag.
 
 ## Clearing the Cache
 
-It's possible to clear the cache by running `wunderctl up --clear-introspection-cache`.
+`wunderctl up` will clear the cache when it starts up. To clear the cache again,
+just restart it.
 
 ## Enable Introspection Polling
 
@@ -56,7 +58,7 @@ const spaceX = introspect.graphql({
 
 ## Disable Introspection Caching
 
-It's also possible to disable introspection caching.
+It's also possible to disable introspection caching for a given data source.
 Set `disableCache` to true, and `wunderctl up` will ignore the cache for this data source.
 
 ```typescript
