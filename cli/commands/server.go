@@ -30,7 +30,16 @@ var serverStartCmd = &cobra.Command{
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		return startWunderGraphServer(ctx)
+		err := startWunderGraphServer(ctx)
+		if err != nil {
+			return err
+		}
+
+		if ctx.Err() != context.Canceled {
+			return err
+		}
+
+		return nil
 	},
 }
 

@@ -55,7 +55,11 @@ var nodeStartCmd = &cobra.Command{
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 
-		return ctx.Err()
+		if ctx.Err() != context.Canceled {
+			return err
+		}
+
+		return nil
 	},
 }
 
@@ -74,12 +78,7 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 }
 
 func StartWunderGraphNode(n *node.Node) error {
-	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-	if err != nil {
-		return err
-	}
-
-	configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
+	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}

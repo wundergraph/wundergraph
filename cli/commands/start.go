@@ -56,7 +56,11 @@ var startCmd = &cobra.Command{
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 
-		return ctx.Err()
+		if ctx.Err() != context.Canceled {
+			return err
+		}
+
+		return nil
 	},
 }
 

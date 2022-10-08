@@ -34,7 +34,7 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstrac
 		configCh:       make(chan WunderNodeConfig),
 		pool:           pool.New(),
 		log:            log,
-		wundergraphDir: wundergraphDir,
+		WundergraphDir: wundergraphDir,
 		apiClient: &fasthttp.Client{
 			ReadTimeout:              time.Second * 10,
 			WriteTimeout:             time.Second * 10,
@@ -63,7 +63,7 @@ type Node struct {
 
 	options options
 
-	wundergraphDir string
+	WundergraphDir string
 }
 
 type options struct {
@@ -364,7 +364,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
 	)
 
-	loader := engineconfigloader.New(n.wundergraphDir, engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
+	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
 
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,
