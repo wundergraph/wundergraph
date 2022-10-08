@@ -302,7 +302,7 @@ var upCmd = &cobra.Command{
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()
 
-		log.Info("close server ....")
+		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 
 		// close all listeners without waiting for them to finish
 		_ = n.Close()
