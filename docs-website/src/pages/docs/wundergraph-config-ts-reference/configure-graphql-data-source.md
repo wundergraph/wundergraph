@@ -14,7 +14,7 @@ The `GraphQL` data source allows you to introspect GraphQL services and add them
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-  timeoutMilliseconds: 10 * 1000, // optional
+  requestTimeoutSeconds: 10, // optional
 })
 
 const myApplication = new Application({
