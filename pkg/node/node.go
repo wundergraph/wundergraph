@@ -164,6 +164,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 	switch {
 	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
+
 		g.Go(func() error {
 			err := n.startServer(*options.staticConfig)
 			if err != nil {
@@ -189,6 +190,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 				}
 				return nil
 			})
+
 			g.Go(func() error {
 				err := n.filePollConfig(*options.fileSystemConfig)
 				if err != nil {
