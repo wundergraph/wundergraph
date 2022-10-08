@@ -164,11 +164,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			if err != nil {
 				return nil, err
 			}
-			// XXX: Implement WithHTTPClient?
-			return &graphql_datasource.Factory{
-				HTTPClient:   client,
-				BatchFactory: graphql_datasource.NewBatchFactory(),
-			}, nil
+			d.graphql.HTTPClient = client
 		}
 		return d.graphql, nil
 	case wgpb.DataSourceKind_REST:
