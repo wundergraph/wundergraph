@@ -78,8 +78,8 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 	}
 }
 
-// useCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
-func (d *DefaultFactoryResolver) useCustomHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
+// requiresCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
+func (d *DefaultFactoryResolver) requiresCustomHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
 	// when a custom timeout is specified, we can't use the shared http.Client
 	if ds != nil && ds.RequestTimeoutSeconds > 0 {
 		return true
@@ -159,7 +159,7 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error) {
 	switch ds.Kind {
 	case wgpb.DataSourceKind_GRAPHQL:
-		if d.useCustomHTTPClient(ds, ds.CustomGraphql.Fetch) {
+		if d.requiresCustomHTTPClient(ds, ds.CustomGraphql.Fetch) {
 			client, err := d.newHTTPClient(ds, ds.CustomGraphql.Fetch)
 			if err != nil {
 				return nil, err
@@ -168,7 +168,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		}
 		return d.graphql, nil
 	case wgpb.DataSourceKind_REST:
-		if d.useCustomHTTPClient(ds, ds.CustomRest.Fetch) {
+		if d.requiresCustomHTTPClient(ds, ds.CustomRest.Fetch) {
 			client, err := d.newHTTPClient(ds, ds.CustomRest.Fetch)
 			if err != nil {
 				return nil, err
@@ -184,7 +184,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		wgpb.DataSourceKind_MONGODB,
 		wgpb.DataSourceKind_SQLITE:
 
-		if d.useCustomHTTPClient(ds, nil) {
+		if d.requiresCustomHTTPClient(ds, nil) {
 			client, err := d.newHTTPClient(ds, nil)
 			if err != nil {
 				return nil, err
