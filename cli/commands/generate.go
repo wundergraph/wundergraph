@@ -25,9 +25,12 @@ var (
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
-	Short: "Runs the code generation process once",
-	Long: `In contrast to wunderctl up, it only generates all files in ./generated but doesn't start WunderGraph or the hooks.
-Use this command if you only want to generate the configuration`,
+	Short: "Generate the production config",
+	Long: `Generate the production config to start the node and hook component
+ with 'wunderctl start' or individually with 'wunderctl node start', 'wunderctl
+ server start'. All files are stored to .wundergraph/generated. The local
+ introspection cache has precedence. You can overwrite this behavior by passing
+ --no-cache to the command`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
