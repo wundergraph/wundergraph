@@ -61,6 +61,15 @@ export interface NodeOptions {
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
+	/**
+	 * Default timeout for network requests, in seconds.
+	 *
+	 * @remarks
+	 * See {@link IntrospectionConfiguration | the IntrospectionConfiguration type}
+	 * for data source specific timeouts.
+	 *
+	 * @defaultValue 10 seconds
+	 */
 	defaultRequestTimeoutSeconds?: number;
 }
 

@@ -271,6 +271,14 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 }
 
 export interface IntrospectionConfiguration {
+	/**
+	 * Timeout for network requests originated by this data source, in seconds.
+	 *
+	 * @remarks
+	 * See {@link NodeOptions| the NodeOptions type} for more details.
+	 *
+	 * @defaultValue Use the default timeout for this node.
+	 */
 	requestTimeoutSeconds?: number;
 	introspection?: {
 		disableCache?: boolean;
