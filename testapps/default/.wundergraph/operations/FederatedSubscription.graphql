@@ -1,0 +1,23 @@
+subscription {
+	federated_updatedPrice {
+		name
+		reviews {
+			id
+			author {
+				id
+				reviews {
+					id
+					body
+					product {
+						name
+						upc
+						inStock
+						price
+						shippingEstimate
+						weight
+					}
+				}
+			}
+		}
+	}
+}

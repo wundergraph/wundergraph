@@ -66,9 +66,27 @@ const db = introspect.sqlite({
 	databaseURL: 'file:./db.sqlite',
 });
 
+const federatedApi = introspect.federation({
+	apiNamespace: 'federated',
+	upstreams: [
+		{
+			url: 'http://localhost:4001/graphql',
+		},
+		{
+			url: 'http://localhost:4002/graphql',
+		},
+		{
+			url: 'http://localhost:4003/graphql',
+		},
+		{
+			url: 'http://localhost:4004/graphql',
+		},
+	],
+});
+
 const myApplication = new Application({
 	name: 'app',
-	apis: [jsp, weather, countries, spacex, chinook, db],
+	apis: [jsp, weather, countries, spacex, chinook, db, federatedApi],
 });
 
 // configureWunderGraph emits the configuration

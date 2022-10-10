@@ -1,0 +1,15 @@
+{
+	federated_topProducts {
+		name
+		inStock
+		upc
+		reviews {
+			id
+			author {
+				id
+				name
+				username
+			}
+		}
+	}
+}
