@@ -145,7 +145,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
-	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disable cache")
+	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
