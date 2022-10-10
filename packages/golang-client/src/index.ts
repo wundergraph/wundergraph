@@ -34,7 +34,11 @@ const gofmt = (code: string) => {
 	} catch (e: any) {
 		// we silently ignore the error on purpose
 		// It's not a must to prettify the code
-		console.error('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
+		if (e instanceof Error && e.message.indexOf('ENOENT') >= 0) {
+			console.error('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
+		} else {
+			throw e;
+		}
 	}
 	return code;
 };
