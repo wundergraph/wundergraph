@@ -249,7 +249,7 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 			},
 			leave: (name, isRequired, isArray) => {
 				if (name) {
-					out += ` \`json:"${name},omitempty"\` `;
+					out += ` \`json:"${name},omitempty"\`\n`;
 				}
 			},
 		},
