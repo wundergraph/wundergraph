@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
-
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 )

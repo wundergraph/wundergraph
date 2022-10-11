@@ -11,10 +11,9 @@ import (
 	"path"
 	"syscall"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"

@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/sync/errgroup"
 	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
