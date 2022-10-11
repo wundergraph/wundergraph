@@ -28,6 +28,8 @@ const (
 	configJsonFilename       = "wundergraph.config.json"
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
+
+	defaultNodeGracefulTimeoutSeconds = 10
 )
 
 var (

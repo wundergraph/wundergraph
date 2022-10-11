@@ -28,6 +28,9 @@ var upCmd = &cobra.Command{
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
 			return err
@@ -42,7 +45,7 @@ var upCmd = &cobra.Command{
 		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
 
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt,
+		ctx, stop := signal.NotifyContext(ctx, os.Interrupt,
 			syscall.SIGHUP,  // process is detached from terminal
 			syscall.SIGTERM, // default for kill
 			syscall.SIGKILL,
@@ -151,14 +154,14 @@ var upCmd = &cobra.Command{
 				go func() {
 					defer wg.Done()
 					// bundle hooks
-					hooksBundler.Bundle()
+					_ = hooksBundler.Bundle()
 				}()
 
 				if webhooksBundler != nil {
 					wg.Add(1)
 					go func() {
 						defer wg.Done()
-						webhooksBundler.Bundle()
+						_ = webhooksBundler.Bundle()
 					}()
 				}
 
@@ -215,7 +218,14 @@ var upCmd = &cobra.Command{
 			OnAfterBundle: onAfterBuild,
 		})
 
-		configBundler.Bundle()
+		err = configBundler.Bundle()
+		if err != nil {
+			log.Error("could not bundle",
+				abstractlogger.String("bundlerName", "config-bundler"),
+				abstractlogger.String("watcher", "config"),
+				abstractlogger.Error(err),
+			)
+		}
 
 		// only start watching in the builder once the initial config was built and written to the filesystem
 		go configBundler.Watch(ctx)
@@ -253,7 +263,9 @@ var upCmd = &cobra.Command{
 				node.WithDevMode(),
 			)
 			if err != nil {
-				log.Fatal("startBlocking", abstractlogger.Error(err))
+				log.Error("node exited", abstractlogger.Error(err))
+				// exit context because we can't recover from a server start error
+				cancel()
 			}
 		}()
 
@@ -261,12 +273,15 @@ var upCmd = &cobra.Command{
 		// because no fs event is fired as build is already done
 		configFileChangeChan <- struct{}{}
 
+		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()
+
 		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
 
-		_ = n.Shutdown(context.Background())
+		// close all listeners without waiting for them to finish
+		_ = n.Close()
 
-		log.Info("WunderNode shutdown complete")
+		log.Info("server shutdown complete")
 
 		return nil
 	},
