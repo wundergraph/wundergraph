@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
 	"syscall"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -33,10 +34,10 @@ var nodeStartCmd = &cobra.Command{
 			wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		g, ctx := errgroup.WithContext(ctx)
+		g, ctx := errgroup.WithContext(sigCtx)
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
@@ -51,13 +52,7 @@ var nodeStartCmd = &cobra.Command{
 			return err
 		})
 
-		<-ctx.Done()
-
 		n.HandleGracefulShutdown(gracefulTimeout)
-
-		if ctx.Err() != context.Canceled {
-			return err
-		}
 
 		return nil
 	},

@@ -69,9 +69,8 @@ func (b *ScriptRunner) Stop() error {
 }
 
 func (b *ScriptRunner) Error() error {
-	if b.cmd != nil {
-		status := b.cmd.Status()
-		return status.Error
+	if b.cmd != nil && b.cmd.Status().Exit > 0 {
+		return fmt.Errorf("script %s failed with exit code %d", b.name, b.cmd.Status().Exit)
 	}
 	return nil
 }

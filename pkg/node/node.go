@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
+	"golang.org/x/sync/errgroup"
 	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
@@ -48,21 +48,14 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstrac
 }
 
 type Node struct {
-	ctx  context.Context
-	info BuildInfo
-
-	stopped  bool
-	configCh chan WunderNodeConfig
-
-	server *http.Server
-
-	pool *pool.Pool
-	log  abstractlogger.Logger
-
-	apiClient *fasthttp.Client
-
-	options options
-
+	ctx            context.Context
+	info           BuildInfo
+	configCh       chan WunderNodeConfig
+	server         *http.Server
+	pool           *pool.Pool
+	log            abstractlogger.Logger
+	apiClient      *fasthttp.Client
+	options        options
 	WundergraphDir string
 }
 
@@ -159,7 +152,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	n.options = options
 
-	g, ctx := errgroup.WithContext(n.ctx)
+	g := errgroup.Group{}
 
 	switch {
 	case options.staticConfig != nil:
@@ -168,7 +161,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		g.Go(func() error {
 			err := n.startServer(*options.staticConfig)
 			if err != nil {
-				n.log.Error("could not start server",
+				n.log.Error("could not start a node",
 					abstractlogger.Error(err),
 				)
 				return err
@@ -206,9 +199,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		return errors.New("could not start a node. no config present")
 	}
 
-	<-ctx.Done()
-
-	return ctx.Err()
+	return g.Wait()
 }
 
 func (n *Node) Shutdown(ctx context.Context) error {
@@ -282,19 +273,10 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 	return listeners, nil
 }
 
-func (n *Node) shutdownServerGracefully(server *http.Server) {
-	<-time.After(time.Second)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(60))
-	defer cancel()
-	n.log.Debug("Gracefully shutting down old server",
-		abstractlogger.String("timeout", "60s"),
-	)
-	_ = server.Shutdown(ctx)
-	n.log.Debug("old server gracefully shut down")
-}
-
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
-	n.log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+	<-n.ctx.Done()
+
+	n.log.Info("Initialize WunderNode shutdown ....")
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
 	n.log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
@@ -519,7 +501,7 @@ func (n *Node) reconfigureOnConfigUpdate() error {
 			})
 
 		case <-ctx.Done():
-			return ctx.Err()
+			return nil
 		}
 	}
 }

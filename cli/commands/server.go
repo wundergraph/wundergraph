@@ -35,10 +35,6 @@ var serverStartCmd = &cobra.Command{
 			return err
 		}
 
-		if ctx.Err() != context.Canceled {
-			return err
-		}
-
 		return nil
 	},
 }

@@ -2,10 +2,11 @@ package commands
 
 import (
 	"context"
-	"github.com/jensneuse/abstractlogger"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/jensneuse/abstractlogger"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
@@ -24,15 +25,15 @@ var startCmd = &cobra.Command{
 	Short: "Starts WunderGraph in production mode",
 	Long:  `Start runs WunderGraph Node and Server as a single process in production mode`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
+
+		g, ctx := errgroup.WithContext(sigCtx)
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
 			return err
 		}
-
-		g, ctx := errgroup.WithContext(ctx)
 
 		if !excludeServer {
 			g.Go(func() error {
@@ -52,13 +53,7 @@ var startCmd = &cobra.Command{
 			return err
 		})
 
-		<-ctx.Done()
-
 		n.HandleGracefulShutdown(gracefulTimeout)
-
-		if ctx.Err() != context.Canceled {
-			return err
-		}
 
 		return nil
 	},
