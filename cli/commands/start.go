@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -55,7 +56,7 @@ var startCmd = &cobra.Command{
 		n.HandleGracefulShutdown(gracefulTimeout)
 
 		if err := g.Wait(); err != nil {
-			log.Error("WunderGraph process shutdown due to error", abstractlogger.Error(err))
+			return fmt.Errorf("WunderGraph process shutdown: %w", err)
 		}
 
 		return nil

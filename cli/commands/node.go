@@ -53,6 +53,10 @@ var nodeStartCmd = &cobra.Command{
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 
+		if err := g.Wait(); err != nil {
+			return fmt.Errorf("WunderGraph process shutdown: %w", err)
+		}
+
 		return nil
 	},
 }
