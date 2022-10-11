@@ -1,10 +1,12 @@
 package commands
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/fatih/color"
@@ -39,6 +41,7 @@ var (
 	serviceToken          string
 	_wunderGraphDirConfig string
 	disableCache          bool
+	clearCache            bool
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -71,16 +74,27 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		if err != nil {
 			if _, ok := err.(*fs.PathError); ok {
 				log.Debug("starting without env file")
-				return nil
+			} else {
+				log.Fatal("error loading env file",
+					abstractlogger.Error(err))
 			}
-			log.Fatal("error loading env file",
-				abstractlogger.Error(err),
-			)
 		} else {
 			log.Debug("env file successfully loaded",
 				abstractlogger.String("file", DotEnvFile),
 			)
 		}
+
+		if clearCache {
+			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+			if err != nil {
+				return err
+			}
+			cacheDir := filepath.Join(wunderGraphDir, "cache")
+			if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+				return err
+			}
+		}
+
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -146,6 +160,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
+	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
 }
 
 func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
