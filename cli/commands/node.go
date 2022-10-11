@@ -46,7 +46,7 @@ var nodeStartCmd = &cobra.Command{
 		g.Go(func() error {
 			err := StartWunderGraphNode(n)
 			if err != nil {
-				log.Error("start node", abstractlogger.Error(err))
+				log.Error("Start node", abstractlogger.Error(err))
 			}
 			return err
 		})
