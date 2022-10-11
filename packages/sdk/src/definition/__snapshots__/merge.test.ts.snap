@@ -75,7 +75,10 @@ exports[`Should be merged: merged_apis 1`] = `
           "query": [],
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onConnectionInit": false
+        }
       },
       "Directives": []
     },
@@ -150,7 +153,10 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onConnectionInit": false
+        }
       },
       "Directives": []
     },
@@ -243,7 +249,10 @@ exports[`Should be merged: merged_apis 1`] = `
           "query": [],
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onConnectionInit": false
+        }
       },
       "Directives": []
     },
@@ -316,7 +325,10 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onConnectionInit": false
+        }
       },
       "Directives": []
     },

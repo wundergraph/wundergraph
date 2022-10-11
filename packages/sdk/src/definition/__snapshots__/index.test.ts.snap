@@ -64,6 +64,9 @@ GraphQLApi {
           },
           "urlEncodeBody": false,
         },
+        "HooksConfiguration": {
+          "onConnectionInit": false,
+        },
         "Subscription": {
           "Enabled": false,
           "URL": {
@@ -93,6 +96,7 @@ interface User {
 }",
       },
       "Directives": [],
+      "Id": undefined,
       "Kind": 2,
       "RootNodes": [
         {
