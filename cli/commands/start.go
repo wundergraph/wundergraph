@@ -52,11 +52,11 @@ var startCmd = &cobra.Command{
 			return err
 		})
 
-		if err := g.Wait(); err != nil {
-			log.Error("Server shutdown due to error", abstractlogger.Error(err))
-		}
-
 		n.HandleGracefulShutdown(gracefulTimeout)
+
+		if err := g.Wait(); err != nil {
+			log.Error("WunderGraph process shutdown due to error", abstractlogger.Error(err))
+		}
 
 		return nil
 	},
