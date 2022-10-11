@@ -34,8 +34,23 @@ optional and might be turned off globally using the `--no-cache` flag.
 
 ## Clearing the Cache
 
-`wunderctl up` will clear the cache when it starts up. To clear the cache again,
-just restart it.
+Cache can be emptied when `wunderctl` starts by using the `--clear-cache`
+flag. Additionally, `wunderctl up` will automatically clear the cache
+when it starts up. To clear the cache again, just restart it.
+
+## Pregenerating the Cache
+
+For CI environments that cannot perform network requests, it might be
+useful to generate the cache contents and make the tests run offline.
+
+To populate the cache contents run `wunderctl generate --clear-cache`.
+This will delete any previous cache, introspect the data sources, and
+finally write the cache entries. `.wunderctl/cache` can then be stored
+and deployed to CI runners.
+
+To verify that your tests can run without fetching data from the network
+in a connected machine, the `--offline` flag can be used to disable loading
+remote resources.
 
 ## Enable Introspection Polling
 
