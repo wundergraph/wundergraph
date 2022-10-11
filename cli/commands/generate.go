@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -45,8 +44,7 @@ var generateCmd = &cobra.Command{
 		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-		defer cancel()
+		ctx := context.Background()
 
 		configOutFile := path.Join("generated", "bundle", "config.js")
 
