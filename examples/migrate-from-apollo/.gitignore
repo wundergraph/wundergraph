@@ -3,13 +3,14 @@
 .vscode
 .idea
 
+# WunderGraph build output
+.wundergraph/cache
+.wundergraph/generated
+
 # dependencies
 node_modules
 /.pnp
 .pnp.js
-
-# WunderGraph build output
-.wundergraph/generated
 
 # testing
 /coverage

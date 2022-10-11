@@ -8,6 +8,7 @@
 .pnp.js
 
 # WunderGraph build output
+.wundergraph/cache
 .wundergraph/generated
 components/generated/*
 !components/generated/.gitkeep

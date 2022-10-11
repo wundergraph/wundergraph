@@ -4,11 +4,10 @@ import {
 	DataSource,
 	IntrospectionConfiguration,
 	WG_DATA_SOURCE_POLLING_MODE,
-	WG_DEV_FIRST_RUN,
 	WG_ENABLE_INTROSPECTION_CACHE,
+	WG_ENABLE_INTROSPECTION_OFFLINE,
 } from './index';
 import path from 'path';
-import fs from 'fs';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
@@ -44,16 +43,38 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 }
 
 export const readIntrospectionCacheFile = async (cacheKey: string): Promise<string> => {
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	if (fs.existsSync(cacheFile)) {
-		return fsP.readFile(cacheFile, 'utf8');
+	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
+	try {
+		return await fsP.readFile(cacheFile, 'utf8');
+	} catch (e) {
+		if (e instanceof Error && e.message.startsWith('ENOENT')) {
+			// File does not exist
+			return '';
+		}
+		throw e;
 	}
-	return '';
 };
 
 export const writeIntrospectionCacheFile = async (cacheKey: string, content: string): Promise<void> => {
-	const cacheFile = path.join('generated', 'introspection', 'cache', `${cacheKey}.json`);
-	return fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
+	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
+	try {
+		return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
+	} catch (e) {
+		if (e instanceof Error && e.message.startsWith('ENOENT')) {
+			const dir = path.dirname(cacheFile);
+			try {
+				await fsP.mkdir(dir, { recursive: true });
+			} catch (de) {
+				console.log(`Error creating cache directory: ${de}`);
+			}
+			// Now try again. Avoid calling writeIntrospectionCacheFile(), otherwise
+			// a bug could end up causing infinite recursion instead of a a non-working
+			// cache
+			return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
+		}
+		// Could not write cache file, rethrow original error
+		throw e;
+	}
 };
 
 export const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
@@ -98,8 +119,6 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const isIntrospectionCacheEnabled =
-		WG_ENABLE_INTROSPECTION_CACHE && introspection.introspection?.disableCache !== true;
 	const cacheKey = objectHash(introspection);
 
 	/**
@@ -121,12 +140,12 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		return {} as Api<A>;
 	}
 
+	const isIntrospectionDisabledBySource = introspection.introspection?.disableCache === true;
+	const isIntrospectionEnabledByEnv = WG_ENABLE_INTROSPECTION_CACHE;
+	const isIntrospectionCacheEnabled = !isIntrospectionDisabledBySource && isIntrospectionEnabledByEnv;
+
 	/**
-	 * The introspection cache is only used in development mode `wunderctl up`.
-	 * We try to early return with a cached introspection result.
-	 * When the user runs `wunderctl up` for the first time, we disable the cache
-	 * so the user can be sure that the introspection is up to date. If the API is down during development
-	 * we try to fallback to the previous introspection result.
+	 * As long as the cache is enabled, always try to hit it first
 	 */
 
 	if (isIntrospectionCacheEnabled) {
@@ -134,36 +153,35 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		if (cacheEntryString) {
 			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
 			return fromCacheEntry<A>(cacheEntry);
-		} else {
-			console.error('Invalid cached introspection result. Revalidate introspection...');
 		}
 	}
 
-	try {
-		// generate introspection from scratch
-		const api = await generator(introspection);
+	/*
+	 * At this point, we don't have a cache entry for this. If we're in cache exclusive
+	 * mode, fail here. Otherwise generate introspection from scratch. Then cache it.
+	 */
 
-		// prefill cache with new introspection result (only for development mode)
-		if (WG_DEV_FIRST_RUN) {
-			try {
-				const cacheEntry = toCacheEntry<A>(api);
-				await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
-			} catch (e) {}
-		}
-
-		return api;
-	} catch (e) {
-		// fallback to old introspection result (only for development mode)
-		if (WG_DEV_FIRST_RUN) {
-			console.error('Could not introspect the api. Trying to fallback to old introspection result: ', e);
-			const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-			if (cacheEntryString) {
-				console.log('Fallback to old introspection result');
-				const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-				return fromCacheEntry<A>(cacheEntry);
-			}
-			console.log('Could not fallback to old introspection result');
-		}
-		throw e;
+	if (WG_ENABLE_INTROSPECTION_OFFLINE) {
+		throw new Error(
+			`Could not load introspection from cache for ${JSON.stringify(
+				introspection
+			)} and network requests are disabled in offline mode`
+		);
 	}
+
+	const api = await generator(introspection);
+
+	/*
+	 * We got a result. If the cache is enabled, populate it
+	 */
+	if (isIntrospectionCacheEnabled) {
+		try {
+			const cacheEntry = toCacheEntry<A>(api);
+			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+		} catch (e) {
+			console.log(`Error storing cache: ${e}`);
+		}
+	}
+
+	return api;
 };

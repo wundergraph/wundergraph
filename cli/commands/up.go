@@ -21,10 +21,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
-var (
-	clearIntrospectionCache bool
-)
-
 // upCmd represents the up command
 var upCmd = &cobra.Command{
 	Use:   "up",
@@ -65,20 +61,7 @@ var upCmd = &cobra.Command{
 			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		introspectionCacheDir := path.Join(wunderGraphDir, "generated", "introspection", "cache")
-		_, errIntrospectionDir := os.Stat(introspectionCacheDir)
-		if errIntrospectionDir == nil {
-			if clearIntrospectionCache {
-				err = os.RemoveAll(introspectionCacheDir)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		err = os.MkdirAll(introspectionCacheDir, os.ModePerm)
-		if err != nil {
-			return err
-		}
+		introspectionCacheDir := path.Join(wunderGraphDir, "cache", "introspection")
 
 		configJsonPath := path.Join(wunderGraphDir, "generated", configJsonFilename)
 		webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
@@ -96,18 +79,8 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			FirstRunEnv: append(os.Environ(),
-				// when the user runs `wunderctl up` for the first time, we revalidate the cache
-				// so the user can be sure that the introspection is up-to-date. In case of an API is not available
-				// we will fall back to the cached introspection (when available)
-				"WG_ENABLE_INTROSPECTION_CACHE=false",
-				// this option allows us to make different decision for the first run
-				// for example, we decide to not use the cache, but we will prefill the cache
-				"WG_DEV_FIRST_RUN=true",
-				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
-			),
 			ScriptEnv: append(os.Environ(),
-				"WG_ENABLE_INTROSPECTION_CACHE=true",
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
@@ -122,6 +95,7 @@ var upCmd = &cobra.Command{
 			ScriptEnv: append(os.Environ(),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
@@ -315,5 +289,4 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	upCmd.Flags().BoolVar(&clearIntrospectionCache, "clear-introspection-cache", false, "clears the introspection cache")
 }
