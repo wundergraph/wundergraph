@@ -1,0 +1,27 @@
+{
+  "name": "wundergraph-graphql-ws",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "run-p ws:server wundergraph",
+    "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
+    "ws:server": "ts-node graphql-ws/server.ts",
+    "check": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/websocket": "^7.0.1",
+    "@wundergraph/sdk": "^0.114.3",
+    "fastify": "^4.6.0",
+    "graphql": "^16.3.0",
+    "graphql-ws": "^5.11.2",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.1",
+    "wait-on": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "typescript": "^4.8.2"
+  }
+}
