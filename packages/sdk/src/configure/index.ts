@@ -54,9 +54,7 @@ import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
-	AuthenticationRequestContext,
 	AuthenticationResponse,
-	BaseRequestContext,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphUser,
 } from '../middleware/types';
@@ -72,6 +70,7 @@ import {
 } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import { InternalClient } from '../middleware/internal-client';
+
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
 	allowedMethods?: string[];
@@ -187,6 +186,12 @@ export interface HooksConfiguration<
 				hook: OperationHookFunction;
 				enableForOperations?: string[];
 				enableForAllOperations?: boolean;
+			};
+		};
+		wsTransport?: {
+			onConnectionInit?: {
+				hook: OperationHookFunction;
+				enableForAPIs?: string[];
 			};
 		};
 	};
@@ -767,6 +772,30 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				}
 			}
 
+			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
+				const enableForAPIs = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForAPIs;
+				if (enableForAPIs) {
+					app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
+						if (ds.Id !== undefined && ds.Id !== '' && ds.Kind === DataSourceKind.GRAPHQL) {
+							if (enableForAPIs.includes(ds.Id)) {
+								let Custom: GraphQLApiCustom = ds.Custom as GraphQLApiCustom;
+
+								Custom = {
+									...Custom,
+									HooksConfiguration: { onConnectionInit: true },
+								};
+
+								return {
+									...ds,
+									Custom,
+								};
+							}
+						}
+						return ds;
+					});
+				}
+			}
+
 			for (const operationName in config.server?.hooks?.queries) {
 				const hooks = config.server?.hooks!.queries[operationName];
 				const op = app.Operations.find((op) => op.OperationType === OperationType.QUERY && op.Name === operationName);
@@ -991,6 +1020,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 
 const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	const out: DataSourceConfiguration = {
+		id: source.Id || '',
 		kind: source.Kind,
 		customGraphql: undefined,
 		rootNodes: source.RootNodes,
@@ -1035,6 +1065,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 					useSSE: graphql.Subscription.UseSSE,
 				},
 				upstreamSchema: graphql.UpstreamSchema,
+				hooksConfiguration: graphql.HooksConfiguration,
 			};
 			break;
 		case DataSourceKind.POSTGRESQL:

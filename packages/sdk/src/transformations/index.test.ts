@@ -49,6 +49,9 @@ test('renameTypes', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							HooksConfiguration: {
+								onConnectionInit: false,
+							},
 						},
 						Directives: [],
 					},
@@ -114,6 +117,9 @@ test('renameTypes', async () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					HooksConfiguration: {
+						onConnectionInit: false,
+					},
 				},
 				Directives: [],
 			},
@@ -180,6 +186,9 @@ test('renameTypeFields', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							HooksConfiguration: {
+								onConnectionInit: false,
+							},
 						},
 						Directives: [],
 					},
@@ -264,6 +273,9 @@ test('renameTypeFields', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							HooksConfiguration: {
+								onConnectionInit: false,
+							},
 						},
 						Directives: [],
 					},

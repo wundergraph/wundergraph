@@ -13,6 +13,7 @@ export type SKIP = "skip";
 export type CANCEL = "cancel";
 
 export type WUNDERGRAPH_OPERATION = {{{operationNamesUnion}}};
+export type API_IDS = {{{apiIDsUnion}}};
 
 export interface HttpTransportHookRequest extends BaseRequestContext<User, InternalClient> {
 		request: WunderGraphRequest;
@@ -54,6 +55,12 @@ export interface GlobalHooksConfig {
             // enableForAllOperations will disregard the enableForOperations property and enable the hook for all operations
             enableForAllOperations?: boolean;
         };
+    },
+    wsTransport?: {
+        onConnectionInit?: {
+            hook: (hook: HttpTransportHookRequest) => Promise<any>;
+       	    enableForAPIs?: API_IDS[]; 
+        }
     }
 }
         

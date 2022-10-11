@@ -673,6 +673,10 @@ export interface VariableInjectionConfiguration {
 	environmentVariableName: string;
 }
 
+export interface GraphQLDataSourceHooksConfiguration {
+	onConnectionInit: boolean;
+}
+
 export interface OperationHooksConfiguration {
 	preResolve: boolean;
 	postResolve: boolean;
@@ -744,6 +748,7 @@ export interface DataSourceConfiguration {
 	customStatic: DataSourceCustomStatic | undefined;
 	customDatabase: DataSourceCustomDatabase | undefined;
 	directives: DirectiveConfiguration[];
+	id: string;
 }
 
 export interface DirectiveConfiguration {
@@ -769,6 +774,7 @@ export interface DataSourceCustomGraphQL {
 	subscription: GraphQLSubscriptionConfiguration | undefined;
 	federation: GraphQLFederationConfiguration | undefined;
 	upstreamSchema: string;
+	hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
 }
 
 export interface DataSourceCustomDatabase {
@@ -1778,6 +1784,32 @@ export const VariableInjectionConfiguration = {
 	},
 };
 
+function createBaseGraphQLDataSourceHooksConfiguration(): GraphQLDataSourceHooksConfiguration {
+	return { onConnectionInit: false };
+}
+
+export const GraphQLDataSourceHooksConfiguration = {
+	fromJSON(object: any): GraphQLDataSourceHooksConfiguration {
+		return {
+			onConnectionInit: isSet(object.onConnectionInit) ? Boolean(object.onConnectionInit) : false,
+		};
+	},
+
+	toJSON(message: GraphQLDataSourceHooksConfiguration): unknown {
+		const obj: any = {};
+		message.onConnectionInit !== undefined && (obj.onConnectionInit = message.onConnectionInit);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<GraphQLDataSourceHooksConfiguration>, I>>(
+		object: I
+	): GraphQLDataSourceHooksConfiguration {
+		const message = createBaseGraphQLDataSourceHooksConfiguration();
+		message.onConnectionInit = object.onConnectionInit ?? false;
+		return message;
+	},
+};
+
 function createBaseOperationHooksConfiguration(): OperationHooksConfiguration {
 	return {
 		preResolve: false,
@@ -2138,6 +2170,7 @@ function createBaseDataSourceConfiguration(): DataSourceConfiguration {
 		customStatic: undefined,
 		customDatabase: undefined,
 		directives: [],
+		id: '',
 	};
 }
 
@@ -2159,6 +2192,7 @@ export const DataSourceConfiguration = {
 			directives: Array.isArray(object?.directives)
 				? object.directives.map((e: any) => DirectiveConfiguration.fromJSON(e))
 				: [],
+			id: isSet(object.id) ? String(object.id) : '',
 		};
 	},
 
@@ -2192,6 +2226,7 @@ export const DataSourceConfiguration = {
 		} else {
 			obj.directives = [];
 		}
+		message.id !== undefined && (obj.id = message.id);
 		return obj;
 	},
 
@@ -2218,6 +2253,7 @@ export const DataSourceConfiguration = {
 				? DataSourceCustomDatabase.fromPartial(object.customDatabase)
 				: undefined;
 		message.directives = object.directives?.map((e) => DirectiveConfiguration.fromPartial(e)) || [];
+		message.id = object.id ?? '';
 		return message;
 	},
 };
@@ -2333,7 +2369,13 @@ export const StatusCodeTypeMapping = {
 };
 
 function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
-	return { fetch: undefined, subscription: undefined, federation: undefined, upstreamSchema: '' };
+	return {
+		fetch: undefined,
+		subscription: undefined,
+		federation: undefined,
+		upstreamSchema: '',
+		hooksConfiguration: undefined,
+	};
 }
 
 export const DataSourceCustomGraphQL = {
@@ -2345,6 +2387,9 @@ export const DataSourceCustomGraphQL = {
 				: undefined,
 			federation: isSet(object.federation) ? GraphQLFederationConfiguration.fromJSON(object.federation) : undefined,
 			upstreamSchema: isSet(object.upstreamSchema) ? String(object.upstreamSchema) : '',
+			hooksConfiguration: isSet(object.hooksConfiguration)
+				? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
+				: undefined,
 		};
 	},
 
@@ -2358,6 +2403,10 @@ export const DataSourceCustomGraphQL = {
 		message.federation !== undefined &&
 			(obj.federation = message.federation ? GraphQLFederationConfiguration.toJSON(message.federation) : undefined);
 		message.upstreamSchema !== undefined && (obj.upstreamSchema = message.upstreamSchema);
+		message.hooksConfiguration !== undefined &&
+			(obj.hooksConfiguration = message.hooksConfiguration
+				? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
+				: undefined);
 		return obj;
 	},
 
@@ -2374,6 +2423,10 @@ export const DataSourceCustomGraphQL = {
 				? GraphQLFederationConfiguration.fromPartial(object.federation)
 				: undefined;
 		message.upstreamSchema = object.upstreamSchema ?? '';
+		message.hooksConfiguration =
+			object.hooksConfiguration !== undefined && object.hooksConfiguration !== null
+				? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
+				: undefined;
 		return message;
 	},
 };

@@ -18,6 +18,10 @@ export class WunderGraphHooksPlugin implements Template {
 			applicationName: config.application.Name,
 			modelImports: modelImports(config.application, true),
 			operationNamesUnion: config.application.Operations.map((o) => `"${o.Name}"`).join(' | ') || 'never',
+			apiIDsUnion:
+				config.application.EngineConfiguration.DataSources.filter((ds) => ds.Id !== undefined && ds.Id !== '')
+					.map((ds) => `"${ds.Id}"`)
+					.join(' | ') || 'never',
 			queries: _queries,
 			hasQueries: _queries.length !== 0,
 			mutations: _mutations,

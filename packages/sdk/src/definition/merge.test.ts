@@ -46,6 +46,9 @@ test('Should be merged', () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					HooksConfiguration: {
+						onConnectionInit: false,
+					},
 				},
 				Directives: [],
 			},
@@ -96,6 +99,9 @@ test('Should be merged', () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					HooksConfiguration: {
+						onConnectionInit: false,
+					},
 				},
 				Directives: [],
 			},
@@ -175,6 +181,9 @@ test('Should be merged', () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					HooksConfiguration: {
+						onConnectionInit: false,
+					},
 				},
 				Directives: [],
 			},
@@ -244,6 +253,9 @@ test('Should be merged', () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					HooksConfiguration: {
+						onConnectionInit: false,
+					},
 				},
 				Directives: [],
 			},
@@ -408,6 +420,9 @@ test('Should collide because weather and countries API has an enum called Langua
 					},
 					UpstreamSchema:
 						'directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE\n\ntype City {\n  id: ID\n  name: String\n  country: String\n  coord: Coordinates\n  weather: Weather\n}\n\ntype Coordinates {\n  lon: Float\n  lat: Float\n}\n\ntype Summary {\n  title: String\n  description: String\n  icon: String\n}\n\ntype Temperature {\n  actual: Float\n  feelsLike: Float\n  min: Float\n  max: Float\n}\n\ntype Wind {\n  speed: Float\n  deg: Int\n}\n\ntype Clouds {\n  all: Int\n  visibility: Int\n  humidity: Int\n}\n\ntype Weather {\n  summary: Summary\n  temperature: Temperature\n  wind: Wind\n  clouds: Clouds\n  timestamp: Int\n}\n\ninput ConfigInput {\n  units: Unit\n  lang: Language\n}\n\ntype Query {\n  getCityByName(name: String!, country: String, config: ConfigInput): City\n  getCityById(id: [String!], config: ConfigInput): [City]\n}\n\nenum Unit {\n  metric\n  imperial\n  kelvin\n}\n\nenum Language {\n  af\n  al\n  ar\n  az\n  bg\n  ca\n  cz\n  da\n  de\n  el\n  en\n  eu\n  fa\n  fi\n  fr\n  gl\n  he\n  hi\n  hr\n  hu\n  id\n  it\n  ja\n  kr\n  la\n  lt\n  mk\n  no\n  nl\n  pl\n  pt\n  pt_br\n  ro\n  ru\n  sv\n  se\n  sk\n  sl\n  sp\n  es\n  sr\n  th\n  tr\n  ua\n  uk\n  vi\n  zh_cn\n  zh_tw\n  zu\n}\n\nenum CacheControlScope {\n  PUBLIC\n  PRIVATE\n}\n\n"""The `Upload` scalar type represents a file upload."""\nscalar Upload',
+					HooksConfiguration: {
+						onConnectionInit: false,
+					},
 				},
 				Directives: [],
 			},
