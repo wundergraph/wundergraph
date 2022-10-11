@@ -38,7 +38,7 @@ var startCmd = &cobra.Command{
 			g.Go(func() error {
 				err := startWunderGraphServer(ctx)
 				if err != nil {
-					log.Error("start server", abstractlogger.Error(err))
+					log.Error("Start server", abstractlogger.Error(err))
 				}
 				return err
 			})
@@ -47,10 +47,14 @@ var startCmd = &cobra.Command{
 		g.Go(func() error {
 			err := StartWunderGraphNode(n)
 			if err != nil {
-				log.Error("start node", abstractlogger.Error(err))
+				log.Error("Start node", abstractlogger.Error(err))
 			}
 			return err
 		})
+
+		if err := g.Wait(); err != nil {
+			log.Error("Server shutdown due to error", abstractlogger.Error(err))
+		}
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 

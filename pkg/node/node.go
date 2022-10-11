@@ -501,7 +501,7 @@ func (n *Node) reconfigureOnConfigUpdate() error {
 			})
 
 		case <-ctx.Done():
-			return nil
+			return g.Wait()
 		}
 	}
 }
