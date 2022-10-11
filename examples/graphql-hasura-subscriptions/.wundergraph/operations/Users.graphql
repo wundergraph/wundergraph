@@ -1,0 +1,9 @@
+subscription {
+	hasura_online_users {
+		id
+		last_seen
+		user {
+			name
+		}
+	}
+}

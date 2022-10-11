@@ -1,0 +1,6 @@
+subscription {
+	hasura_todos {
+		id
+		title
+	}
+}

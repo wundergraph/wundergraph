@@ -1,0 +1,19 @@
+{
+  "name": "wundergraph-hasura-ws",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "wunderctl up --debug",
+    "check": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@wundergraph/sdk": "^0.114.3",
+    "graphql": "^16.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "typescript": "^4.8.2"
+  }
+}
