@@ -68,6 +68,16 @@ func (b *ScriptRunner) Stop() error {
 	return nil
 }
 
+func (b *ScriptRunner) Error() error {
+	if b.cmd != nil {
+		status := b.cmd.Status()
+		if status.Exit > 0 || status.Error != nil {
+			return fmt.Errorf("script %s failed with exit code %d", b.name, status.Exit)
+		}
+	}
+	return nil
+}
+
 // Successful returns true if the script exited with <= 0 and without an error.
 // This method should only be called after the script is done.
 func (b *ScriptRunner) Successful() bool {
@@ -127,9 +137,10 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		case <-b.cmd.Done():
 			status := b.cmd.Status()
 			// exit code == -1 means the script was killed by a signal
-			// this is intentional and not an error and happens when we re-start the process after a watched file has changed
+			// this is intentional and not an error and happens
+			// when we re-start the process after a watched file has changed
 			if status.Exit == -1 {
-				b.log.Debug("Script exited",
+				b.log.Debug("Script runner exited with -1 exit code",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
@@ -140,7 +151,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
-				b.log.Error("Script runner exited with error",
+				b.log.Error("Script runner exited with non-zero exit code",
 					abstractlogger.String("runnerName", b.name),
 					abstractlogger.Int("exit", status.Exit),
 					abstractlogger.Error(status.Error),
