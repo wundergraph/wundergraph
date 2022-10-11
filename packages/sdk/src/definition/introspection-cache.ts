@@ -162,7 +162,11 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	 */
 
 	if (WG_ENABLE_INTROSPECTION_OFFLINE) {
-		throw new Error(`Could not load introspection from cache`);
+		throw new Error(
+			`Could not load introspection from cache for ${JSON.stringify(
+				introspection
+			)} and network requests are disabled in offline mode`
+		);
 	}
 
 	const api = await generator(introspection);
