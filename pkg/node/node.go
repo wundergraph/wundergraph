@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
+	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
@@ -31,11 +31,10 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstrac
 	return &Node{
 		info:           info,
 		ctx:            ctx,
-		errCh:          make(chan error),
 		configCh:       make(chan WunderNodeConfig),
 		pool:           pool.New(),
 		log:            log,
-		wundergraphDir: wundergraphDir,
+		WundergraphDir: wundergraphDir,
 		apiClient: &fasthttp.Client{
 			ReadTimeout:              time.Second * 10,
 			WriteTimeout:             time.Second * 10,
@@ -49,23 +48,15 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstrac
 }
 
 type Node struct {
-	ctx  context.Context
-	info BuildInfo
-
-	stopped  bool
-	errCh    chan error
-	configCh chan WunderNodeConfig
-
-	server *http.Server
-
-	pool *pool.Pool
-	log  abstractlogger.Logger
-
-	apiClient *fasthttp.Client
-
-	options options
-
-	wundergraphDir string
+	ctx            context.Context
+	info           BuildInfo
+	configCh       chan WunderNodeConfig
+	server         *http.Server
+	pool           *pool.Pool
+	log            abstractlogger.Logger
+	apiClient      *fasthttp.Client
+	options        options
+	WundergraphDir string
 }
 
 type options struct {
@@ -161,29 +152,54 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	n.options = options
 
-	switch {
+	g := errgroup.Group{}
 
+	switch {
 	case options.staticConfig != nil:
 		n.log.Info("Api config: static")
-		go func() {
+
+		g.Go(func() error {
 			err := n.startServer(*options.staticConfig)
 			if err != nil {
-				os.Exit(1)
+				n.log.Error("could not start a node",
+					abstractlogger.Error(err),
+				)
+				return err
 			}
-		}()
+			return nil
+		})
 	case options.fileSystemConfig != nil:
 		n.log.Info("Api config: file polling",
 			abstractlogger.String("config_file_name", *options.fileSystemConfig),
 		)
 		if options.configFileChange != nil {
-			go n.reconfigureOnConfigUpdate()
-			go n.filePollConfig(*options.fileSystemConfig)
+			g.Go(func() error {
+				err := n.reconfigureOnConfigUpdate()
+				if err != nil {
+					n.log.Error("could not reconfigure config update",
+						abstractlogger.Error(err),
+					)
+					return err
+				}
+				return nil
+			})
+
+			g.Go(func() error {
+				err := n.filePollConfig(*options.fileSystemConfig)
+				if err != nil {
+					n.log.Error("could not load config",
+						abstractlogger.Error(err),
+					)
+					return err
+				}
+				return nil
+			})
 		}
 	default:
 		return errors.New("could not start a node. no config present")
 	}
 
-	return <-n.errCh
+	return g.Wait()
 }
 
 func (n *Node) Shutdown(ctx context.Context) error {
@@ -257,20 +273,10 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 	return listeners, nil
 }
 
-func (n *Node) shutdownServerGracefully(server *http.Server) {
-	<-time.After(time.Second)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(60))
-	defer cancel()
-	n.log.Debug("Gracefully shutting down old server",
-		abstractlogger.String("timeout", "60s"),
-	)
-	_ = server.Shutdown(ctx)
-	n.log.Debug("old server gracefully shut down")
-}
-
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	<-n.ctx.Done()
-	n.log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+
+	n.log.Info("Initialize WunderNode shutdown ....")
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
 	n.log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
@@ -309,7 +315,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	valid, messages := validate.ApiConfig(nodeConfig.Api)
 
 	if !valid {
-		n.log.Fatal("API config invalid",
+		n.log.Error("API config invalid",
 			abstractlogger.Strings("errors", messages),
 		)
 		return errors.New("API config invalid")
@@ -340,7 +346,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
 	)
 
-	loader := engineconfigloader.New(n.wundergraphDir, engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
+	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
 
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,
@@ -390,12 +396,14 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
-		n.errCh <- err
-		return nil
+		return err
 	}
 
+	g, _ := errgroup.WithContext(n.ctx)
+
 	for _, listener := range listeners {
-		go func(l net.Listener) {
+		l := listener
+		g.Go(func() error {
 			n.log.Info("listening on",
 				abstractlogger.String("addr", l.Addr().String()),
 			)
@@ -405,18 +413,19 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 					n.log.Debug("listener closed",
 						abstractlogger.String("addr", l.Addr().String()),
 					)
-					return
+					return nil
 				}
-				n.errCh <- err
+				return err
 			}
-		}(listener)
+			return nil
+		})
 	}
 
 	n.log.Debug("public node url",
 		abstractlogger.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
-	return nil
+	return g.Wait()
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
@@ -473,61 +482,68 @@ WithNext:
 	return filtered
 }
 
-func (n *Node) reconfigureOnConfigUpdate() {
+func (n *Node) reconfigureOnConfigUpdate() error {
+	g, ctx := errgroup.WithContext(n.ctx)
+
 	for {
 		select {
 		case config := <-n.configCh:
 			n.log.Debug("Updated config -> (re-)configuring server")
 			_ = n.Close()
-			go func() {
+
+			// in a new routine, startServer is blocking
+			g.Go(func() error {
 				err := n.startServer(config)
 				if err != nil {
-					os.Exit(1)
+					return err
 				}
-			}()
-		case <-n.ctx.Done():
-			return
+				return nil
+			})
+
+		case <-ctx.Done():
+			return g.Wait()
 		}
 	}
 }
 
-func (n *Node) filePollConfig(filePath string) {
-	go func() {
-		for {
-			select {
-			case <-n.ctx.Done():
-				return
-			case _, ok := <-n.options.configFileChange:
-				if !ok {
-					return
-				}
-				n.reloadFileConfig(filePath)
+func (n *Node) filePollConfig(filePath string) error {
+	for {
+		select {
+		case <-n.ctx.Done():
+			return nil
+		case _, ok := <-n.options.configFileChange:
+			if !ok {
+				return nil
+			}
+			err := n.reloadFileConfig(filePath)
+			if err != nil {
+				return err
 			}
 		}
-	}()
-
-	<-n.ctx.Done()
+	}
 }
 
-func (n *Node) reloadFileConfig(filePath string) {
+func (n *Node) reloadFileConfig(filePath string) error {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		n.log.Debug("reloadFileConfig ioutil.ReadFile", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
-		return
+		n.log.Error("reloadFileConfig ioutil.ReadFile", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
+		return err
 	}
 	if len(data) == 0 {
-		return
+		return errors.New("empty config file")
 	}
 	var graphConfig wgpb.WunderGraphConfiguration
 	err = json.Unmarshal(data, &graphConfig)
 	if err != nil {
-		n.log.Debug("reloadFileConfig json.Unmarshal", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
-		return
+		n.log.Error("reloadFileConfig json.Unmarshal", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
+		return err
 	}
 
 	config := CreateConfig(&graphConfig)
 
 	n.configCh <- config
+
+	return nil
 }
 
 func uniqueStrings(slice []string) []string {
