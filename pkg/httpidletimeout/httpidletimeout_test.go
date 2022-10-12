@@ -1,10 +1,12 @@
 package httpidletimeout
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sync"
 	"testing"
 	"time"
 )
@@ -32,18 +34,12 @@ func sendDummyRequest(handler http.Handler) {
 }
 
 func TestInitialTimeout(t *testing.T) {
-	before := time.Now()
 	m := New(timeoutDuration)
 	m.Start()
-	timer := time.NewTimer(maxWait)
-	for {
-		select {
-		case <-m.C():
-			t.Logf("middleware triggered after %s", time.Since(before))
-			return
-		case <-timer.C:
-			t.Fatal("middleware timer didn't fire up in time")
-		}
+	ctx, cancel := context.WithTimeout(context.Background(), maxWait)
+	defer cancel()
+	if err := m.Wait(ctx); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -72,27 +68,30 @@ func TestResetTimeout(t *testing.T) {
 		})
 	}
 
-	timer1 := time.NewTimer(maxWait)
-	timer2 := time.NewTimer(maxWait + timeoutDuration)
+	ctx1, cancel1 := context.WithTimeout(context.Background(), maxWait)
+	defer cancel1()
 
-LOOP:
-	for {
-		select {
-		case <-m.C():
-			t.Fatal("middleware triggered too soon")
-		case <-timer1.C:
-			break LOOP
-		}
-	}
+	ctx2, cancel2 := context.WithTimeout(context.Background(), maxWait+timeoutDuration)
+	defer cancel2()
 
-	for {
-		select {
-		case <-m.C():
-			return
-		case <-timer2.C:
-			t.Fatal("middleware failed to trigger after reset")
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		if err := m.Wait(ctx1); err == nil {
+			t.Error("middleware triggered too soon")
 		}
-	}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err := m.Wait(ctx2); err != nil {
+			t.Error("middleware failed to trigger after reset")
+		}
+	}()
+
+	wg.Wait()
 }
 
 func TestLongLivedRequest(t *testing.T) {
@@ -106,17 +105,13 @@ func TestLongLivedRequest(t *testing.T) {
 		_, _ = io.WriteString(w, "Hello World")
 	})))
 
-	timer := time.NewTimer(maxWait)
+	ctx, cancel := context.WithTimeout(context.Background(), maxWait)
+	defer cancel()
 
 	go sendDummyRequest(server)
 
-	for {
-		select {
-		case <-m.C():
-			t.Fatal("middleware triggered too soon")
-		case <-timer.C:
-			return
-		}
+	if err := m.Wait(ctx); err == nil {
+		t.Error("middleware triggered too soon")
 	}
 }
 
@@ -128,7 +123,8 @@ func TestMultipleTriggers(t *testing.T) {
 	check := time.AfterFunc(maxWait*2, func() {
 		t.Fatal("took too long to trigger twice")
 	})
-	<-m.C()
-	<-m.C()
+	ctx := context.Background()
+	m.Wait(ctx)
+	m.Wait(ctx)
 	check.Stop()
 }

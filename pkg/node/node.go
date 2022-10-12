@@ -427,7 +427,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		n.server.RegisterOnShutdown(m.Cancel)
 		m.Start()
 		go func() {
-			<-m.C()
+			m.Wait(n.ctx)
 			n.options.idleHandler()
 		}()
 	}

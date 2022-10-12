@@ -3,6 +3,7 @@
 package httpidletimeout
 
 import (
+	"context"
 	"math"
 	"net/http"
 	"sync/atomic"
@@ -23,8 +24,9 @@ const (
 
 // Middleware implements an HTTP middleware that triggers after an idle timeout
 // (as in time since the last request completed). To initialize a Middleware,
-// use New() passing the idle timeout, then use C() to retrieve the channel where
-// notifications are received. To exit cleanly, you should call Cancel() at some point
+// use New() passing the idle timeout, start it via Start() and  finally use Wait()
+// to wait for the idle timeout to trigger.
+// To exit cleanly, Cancel() should be called at some point after Start()
 // to free the resources associated with the Middlware (e.g. with a defer after New()).
 type Middleware struct {
 	timeout  time.Duration
@@ -72,12 +74,21 @@ func (m *Middleware) HandlerFunc(next http.HandlerFunc) http.Handler {
 	return m.Handler(next)
 }
 
-// C returns a read-only channel which will receive an empty struct every
-// time Middleware triggers
-func (m *Middleware) C() <-chan struct{} {
-	return m.notifyCh
+// Wait blocks until the timeout triggers or until the given Context
+// is cancelled. If the timeout triggered, the return value will be
+// nil. Otherwise, it returns ctx.Err().
+func (m *Middleware) Wait(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-m.notifyCh:
+		return nil
+	}
 }
 
+// Start makes the Middleware start counting towards the idle
+// timeout. After Start(), Cancel() should be called at some
+// point.
 func (m *Middleware) Start() {
 	go func() {
 		t := time.NewTimer(m.timeout)
