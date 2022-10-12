@@ -66,7 +66,12 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
+		if !enableDebugMode && os.Getenv("WUNDERCTL_DEBUG") == "true" {
+			enableDebugMode = true
+		}
+
 		if enableDebugMode {
+			os.Setenv("WUNDERCTL_DEBUG", "true")
 			log = buildLogger(abstractlogger.DebugLevel)
 		} else {
 			log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
