@@ -41,7 +41,7 @@ func New(timeout time.Duration) *Middleware {
 	go func() {
 		parent := context.Background()
 		ctx, cancel := context.WithTimeout(parent, timeout)
-	LOOP:
+
 		for {
 			select {
 			case <-ctx.Done():
@@ -64,7 +64,7 @@ func New(timeout time.Duration) *Middleware {
 				case eventStartTimer:
 					ctx, cancel = context.WithTimeout(parent, timeout)
 				case eventStop:
-					break LOOP
+					return
 				}
 			}
 		}
