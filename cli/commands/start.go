@@ -21,7 +21,7 @@ var (
 	disableForceHttpsRedirects bool
 	enableIntrospection        bool
 	gracefulTimeout            int
-	idleTimeout                int
+	exitAfterIdle              int
 )
 
 // startCmd represents the start command
@@ -41,8 +41,8 @@ var startCmd = &cobra.Command{
 		}
 
 		var opts []node.Option
-		if idleTimeout > 0 {
-			middleware := httpidletimeout.New(time.Duration(idleTimeout) * time.Second)
+		if exitAfterIdle > 0 {
+			middleware := httpidletimeout.New(time.Duration(exitAfterIdle) * time.Second)
 			defer middleware.Cancel()
 			opts = append(opts, node.WithMiddleware(middleware.Handler))
 			go func() {
@@ -86,5 +86,5 @@ func init() {
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
-	startCmd.Flags().IntVar(&idleTimeout, "idle-timeout", 0, "exits after the given timeout has elapsed without any requests, in seconds")
+	startCmd.Flags().IntVar(&exitAfterIdle, "exit-after-idle", 0, "exits after the given timeout has elapsed without any requests, in seconds")
 }
