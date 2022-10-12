@@ -6,13 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
-
-	"github.com/wundergraph/wundergraph/pkg/node"
 )
 
 var (
@@ -39,14 +36,6 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
-		var opts []node.Option
-		if exitAfterIdle > 0 {
-			opts = append(opts, node.WithIdleTimeout(time.Duration(exitAfterIdle)*time.Second, func() {
-				log.Info("exiting due to idle timeout")
-				stop()
-			}))
-		}
-
 		if !excludeServer {
 			g.Go(func() error {
 				err := startWunderGraphServer(ctx)
@@ -58,7 +47,7 @@ var startCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n, opts...)
+			err := StartWunderGraphNode(n, stop)
 			if err != nil {
 				log.Error("Start node", abstractlogger.Error(err))
 			}
