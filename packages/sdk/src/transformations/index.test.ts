@@ -50,7 +50,7 @@ test('renameTypes', async () => {
 							},
 							UpstreamSchema: '',
 							HooksConfiguration: {
-								onConnectionInit: false,
+								onWSTransportConnectionInit: false,
 							},
 						},
 						Directives: [],
@@ -118,7 +118,7 @@ test('renameTypes', async () => {
 					},
 					UpstreamSchema: '',
 					HooksConfiguration: {
-						onConnectionInit: false,
+						onWSTransportConnectionInit: false,
 					},
 				},
 				Directives: [],
@@ -187,7 +187,7 @@ test('renameTypeFields', async () => {
 							},
 							UpstreamSchema: '',
 							HooksConfiguration: {
-								onConnectionInit: false,
+								onWSTransportConnectionInit: false,
 							},
 						},
 						Directives: [],
@@ -274,7 +274,7 @@ test('renameTypeFields', async () => {
 							},
 							UpstreamSchema: '',
 							HooksConfiguration: {
-								onConnectionInit: false,
+								onWSTransportConnectionInit: false,
 							},
 						},
 						Directives: [],

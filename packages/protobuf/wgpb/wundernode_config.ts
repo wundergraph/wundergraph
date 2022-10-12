@@ -674,7 +674,7 @@ export interface VariableInjectionConfiguration {
 }
 
 export interface GraphQLDataSourceHooksConfiguration {
-	onConnectionInit: boolean;
+	onWSTransportConnectionInit: boolean;
 }
 
 export interface OperationHooksConfiguration {
@@ -1785,19 +1785,22 @@ export const VariableInjectionConfiguration = {
 };
 
 function createBaseGraphQLDataSourceHooksConfiguration(): GraphQLDataSourceHooksConfiguration {
-	return { onConnectionInit: false };
+	return { onWSTransportConnectionInit: false };
 }
 
 export const GraphQLDataSourceHooksConfiguration = {
 	fromJSON(object: any): GraphQLDataSourceHooksConfiguration {
 		return {
-			onConnectionInit: isSet(object.onConnectionInit) ? Boolean(object.onConnectionInit) : false,
+			onWSTransportConnectionInit: isSet(object.onWSTransportConnectionInit)
+				? Boolean(object.onWSTransportConnectionInit)
+				: false,
 		};
 	},
 
 	toJSON(message: GraphQLDataSourceHooksConfiguration): unknown {
 		const obj: any = {};
-		message.onConnectionInit !== undefined && (obj.onConnectionInit = message.onConnectionInit);
+		message.onWSTransportConnectionInit !== undefined &&
+			(obj.onWSTransportConnectionInit = message.onWSTransportConnectionInit);
 		return obj;
 	},
 
@@ -1805,7 +1808,7 @@ export const GraphQLDataSourceHooksConfiguration = {
 		object: I
 	): GraphQLDataSourceHooksConfiguration {
 		const message = createBaseGraphQLDataSourceHooksConfiguration();
-		message.onConnectionInit = object.onConnectionInit ?? false;
+		message.onWSTransportConnectionInit = object.onWSTransportConnectionInit ?? false;
 		return message;
 	},
 };

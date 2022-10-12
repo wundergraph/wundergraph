@@ -271,6 +271,7 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 }
 
 export interface IntrospectionConfiguration {
+	// id is the unique identifier for the data source
 	id?: string;
 	introspection?: {
 		disableCache?: boolean;

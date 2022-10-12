@@ -13,7 +13,7 @@ export type SKIP = "skip";
 export type CANCEL = "cancel";
 
 export type WUNDERGRAPH_OPERATION = {{{operationNamesUnion}}};
-export type API_IDS = {{{apiIDsUnion}}};
+export type DATA_SOURCES = {{{dataSourcesUnion}}};
 
 export interface HttpTransportHookRequest extends BaseRequestContext<User, InternalClient> {
 		request: WunderGraphRequest;
@@ -57,9 +57,22 @@ export interface GlobalHooksConfig {
         };
     },
     wsTransport?: {
+        // onConnectionInit is used to populate 'connection_init' message payload with custom data
+        // it can be used to authenticate the websocket connection
         onConnectionInit?: {
             hook: (hook: HttpTransportHookRequest) => Promise<any>;
-       	    enableForAPIs?: API_IDS[]; 
+            /**
+             * enableForDataSources will enable the hook for specific data sources.
+             * you should provide a list of data sources ids
+             * an id is the identifier of the data source in the wundergraph.config.ts file 
+             * @example
+             *const chat = introspect.graphql({             
+             *	id: 'chatId',
+						 *	apiNamespace: 'chat',
+						 *	url: 'http://localhost:8085/query',
+						 *});
+             */
+       	    enableForDataSources?: DATA_SOURCES[]; 
         }
     }
 }

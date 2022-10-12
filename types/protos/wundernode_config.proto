@@ -146,7 +146,7 @@ enum InjectVariableKind {
 }
 
 message GraphQLDataSourceHooksConfiguration {
-	bool onConnectionInit = 1;
+	bool onWSTransportConnectionInit = 1;
 }
 
 message OperationHooksConfiguration {

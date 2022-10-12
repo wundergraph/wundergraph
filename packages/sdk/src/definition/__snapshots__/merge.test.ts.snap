@@ -77,7 +77,7 @@ exports[`Should be merged: merged_apis 1`] = `
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
-          "onConnectionInit": false
+          "onWSTransportConnectionInit": false
         }
       },
       "Directives": []
@@ -155,7 +155,7 @@ exports[`Should be merged: merged_apis 1`] = `
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
-          "onConnectionInit": false
+          "onWSTransportConnectionInit": false
         }
       },
       "Directives": []
@@ -251,7 +251,7 @@ exports[`Should be merged: merged_apis 1`] = `
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
-          "onConnectionInit": false
+          "onWSTransportConnectionInit": false
         }
       },
       "Directives": []
@@ -327,7 +327,7 @@ exports[`Should be merged: merged_apis 1`] = `
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
-          "onConnectionInit": false
+          "onWSTransportConnectionInit": false
         }
       },
       "Directives": []

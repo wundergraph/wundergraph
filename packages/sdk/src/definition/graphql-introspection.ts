@@ -138,7 +138,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 						},
 						UpstreamSchema: schemaSDL,
 						HooksConfiguration: {
-							onConnectionInit: false,
+							onWSTransportConnectionInit: false,
 						},
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),

@@ -191,7 +191,7 @@ export interface HooksConfiguration<
 		wsTransport?: {
 			onConnectionInit?: {
 				hook: OperationHookFunction;
-				enableForAPIs?: string[];
+				enableForDataSources?: string[];
 			};
 		};
 	};
@@ -773,16 +773,16 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			}
 
 			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
-				const enableForAPIs = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForAPIs;
-				if (enableForAPIs) {
+				const enableForDataSources = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForDataSources;
+				if (enableForDataSources) {
 					app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
 						if (ds.Id !== undefined && ds.Id !== '' && ds.Kind === DataSourceKind.GRAPHQL) {
-							if (enableForAPIs.includes(ds.Id)) {
+							if (enableForDataSources.includes(ds.Id)) {
 								let Custom: GraphQLApiCustom = ds.Custom as GraphQLApiCustom;
 
 								Custom = {
 									...Custom,
-									HooksConfiguration: { onConnectionInit: true },
+									HooksConfiguration: { onWSTransportConnectionInit: true },
 								};
 
 								return {

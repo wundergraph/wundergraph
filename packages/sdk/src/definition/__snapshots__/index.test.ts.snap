@@ -65,7 +65,7 @@ GraphQLApi {
           "urlEncodeBody": false,
         },
         "HooksConfiguration": {
-          "onConnectionInit": false,
+          "onWSTransportConnectionInit": false,
         },
         "Subscription": {
           "Enabled": false,
