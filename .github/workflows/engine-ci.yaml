@@ -73,6 +73,9 @@ jobs:
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
 
+      - name: Linters
+        uses: golangci/golangci-lint-action@v3
+
       - name: Run unit and integration tests
         run: make test-go
         env:

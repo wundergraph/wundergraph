@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -19,14 +18,18 @@ import (
 
 var (
 	generateAndPublish bool
+	offline            bool
 )
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
-	Short: "Runs the code generation process once",
-	Long: `In contrast to wunderctl up, it only generates all files in ./generated but doesn't start WunderGraph or the hooks.
-Use this command if you only want to generate the configuration`,
+	Short: "Generate the production config",
+	Long: `Generate the production config to start the node and hook component
+ with 'wunderctl start' or individually with 'wunderctl node start', 'wunderctl
+ server start'. All files are stored to .wundergraph/generated. The local
+ introspection cache has precedence. You can overwrite this behavior by passing
+ --no-cache to the command`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
@@ -41,8 +44,7 @@ Use this command if you only want to generate the configuration`,
 		// optional, no error check
 		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-		defer cancel()
+		ctx := context.Background()
 
 		configOutFile := path.Join("generated", "bundle", "config.js")
 
@@ -57,6 +59,8 @@ Use this command if you only want to generate the configuration`,
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
+				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
 		})
@@ -172,5 +176,6 @@ Use this command if you only want to generate the configuration`,
 
 func init() {
 	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
+	generateCmd.Flags().BoolVar(&offline, "offline", false, "disables loading resources from the network")
 	rootCmd.AddCommand(generateCmd)
 }

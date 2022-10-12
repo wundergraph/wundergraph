@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
@@ -31,49 +33,29 @@ var nodeStartCmd = &cobra.Command{
 			wunderctl node start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-		if err != nil {
-			return err
-		}
-		configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
-		if !files.FileExists(configFile) {
-			return fmt.Errorf("could not find configuration file: %s", configFile)
-		}
-
-		data, err := ioutil.ReadFile(configFile)
-		if err != nil {
-			log.Fatal("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
-			return err
-		}
-		if len(data) == 0 {
-			log.Fatal("Config file is empty", abstractlogger.String("filePath", configFile))
-			return nil
-		}
-		var graphConfig wgpb.WunderGraphConfiguration
-		err = json.Unmarshal(data, &graphConfig)
-		if err != nil {
-			log.Fatal("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
-			return err
-		}
-
-		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		wunderNodeConfig := node.CreateConfig(&graphConfig)
-		n := node.New(ctx, BuildInfo, wunderGraphDir, log)
+		g, ctx := errgroup.WithContext(sigCtx)
 
-		go func() {
-			err := n.StartBlocking(
-				node.WithStaticWunderNodeConfig(wunderNodeConfig),
-				node.WithDebugMode(enableDebugMode),
-			)
+		n, err := NewWunderGraphNode(ctx)
+		if err != nil {
+			return err
+		}
+
+		g.Go(func() error {
+			err := StartWunderGraphNode(n)
 			if err != nil {
-				log.Fatal("startBlocking", abstractlogger.Error(err))
+				log.Error("Start node", abstractlogger.Error(err))
 			}
-		}()
+			return err
+		})
 
-		gracefulTimeoutSeconds := 10
-		n.HandleGracefulShutdown(gracefulTimeoutSeconds)
+		n.HandleGracefulShutdown(gracefulTimeout)
+
+		if err := g.Wait(); err != nil {
+			return fmt.Errorf("WunderGraph process shutdown: %w", err)
+		}
 
 		return nil
 	},
@@ -82,4 +64,50 @@ var nodeStartCmd = &cobra.Command{
 func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
 	rootCmd.AddCommand(nodeCmd)
+}
+
+func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
+}
+
+func StartWunderGraphNode(n *node.Node) error {
+	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
+	if !files.FileExists(configFile) {
+		return fmt.Errorf("could not find configuration file: %s", configFile)
+	}
+
+	data, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Error("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		return err
+	}
+
+	if len(data) == 0 {
+		log.Error("Config file is empty", abstractlogger.String("filePath", configFile))
+		return errors.New("config file is empty")
+	}
+
+	var graphConfig wgpb.WunderGraphConfiguration
+	err = json.Unmarshal(data, &graphConfig)
+	if err != nil {
+		log.Error("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		return errors.New("failed to unmarshal config file")
+	}
+
+	wunderNodeConfig := node.CreateConfig(&graphConfig)
+
+	err = n.StartBlocking(
+		node.WithStaticWunderNodeConfig(wunderNodeConfig),
+		node.WithDebugMode(enableDebugMode),
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -20246,6 +20246,117 @@ input api_AddressInput {
 }"
 `;
 
+exports[`subscription as object field: subscription_as_object_field_data_sources 1`] = `
+"[
+  {
+    "RootNodes": [
+      {
+        "typeName": "Query",
+        "fieldNames": [
+          "api_getStoreData"
+        ]
+      }
+    ],
+    "Kind": 1,
+    "Custom": {
+      "Fetch": {
+        "method": 0,
+        "path": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "/"
+        },
+        "baseUrl": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "http://0.0.0.0:8787"
+        },
+        "url": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "body": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "header": {
+          "email": {
+            "values": [
+              {
+                "kind": 0,
+                "staticVariableContent": "{{ .arguments.email }",
+                "environmentVariableName": "",
+                "environmentVariableDefaultValue": "",
+                "placeholderVariableName": ""
+              }
+            ]
+          }
+        },
+        "query": [
+          {
+            "name": "shopUrl",
+            "value": "{{ .arguments.shopUrl }}"
+          }
+        ],
+        "urlEncodeBody": false
+      },
+      "Subscription": {
+        "Enabled": false
+      },
+      "DefaultTypeName": "",
+      "StatusCodeTypeMappings": []
+    },
+    "ChildNodes": [],
+    "Directives": []
+  }
+]"
+`;
+
+exports[`subscription as object field: subscription_as_object_field_fields 1`] = `
+"[
+  {
+    "typeName": "Query",
+    "fieldName": "api_getStoreData",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": false
+  }
+]"
+`;
+
+exports[`subscription as object field: subscription_as_object_field_schema 1`] = `
+"type Query {
+  api_getStoreData(shopUrl: String!, email: String!): api_StoreData
+}
+
+type api_StoreData {
+  data: api_Data
+  error: String
+}
+
+type api_Data {
+  url: String
+  subscription: api_DataSubscription
+}
+
+type api_DataSubscription {
+  type: String
+  running: Boolean
+}"
+`;
+
 exports[`users: users_data_sources 1`] = `
 "[
   {

@@ -11,6 +11,7 @@ pkg/templates/assets/templates/**/*lock.json
 
 # Directories
 dist
+types/go/
 
 # Next.js build output
 .next
@@ -60,3 +61,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# WunderGraph
+**/.wundergraph/cache/

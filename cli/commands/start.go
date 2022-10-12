@@ -5,15 +5,11 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
 	"syscall"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
-
-	"github.com/wundergraph/wundergraph/cli/helpers"
-	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/node"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -26,90 +22,42 @@ var (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start runs WunderGraph in production mode",
-	Long: `Running WunderGraph in production mode means,
-no code generation, no directory watching, no config updates,
-just running the engine as efficiently as possible without the dev overhead.
-
-If used without --exclude-server, make sure the server is available in this directory:
-{entrypoint}/bundle/server.js or override it with --server-entrypoint.`,
+	Short: "Starts WunderGraph in production mode",
+	Long:  `Start runs WunderGraph Node and Server as a single process in production mode`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+
+		g, ctx := errgroup.WithContext(sigCtx)
+
+		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
 			return err
 		}
 
-		configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
-		if !files.FileExists(configFile) {
-			return fmt.Errorf("could not find configuration file: %s", configFile)
-		}
-
-		nodeCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-		defer stop()
-
 		if !excludeServer {
-			serverCtx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
-			serverScriptFile := path.Join("generated", "bundle", "server.js")
-			serverExecutablePath := path.Join(wunderGraphDir, "generated", "bundle", "server.js")
-			if !files.FileExists(serverExecutablePath) {
-				return fmt.Errorf(`hooks server build artifact "%s" not found. Please use --exclude-server to disable the server`, path.Join(wunderGraphDir, serverScriptFile))
-			}
-
-			srvCfg := &helpers.ServerRunConfig{
-				WunderGraphDirAbs: wunderGraphDir,
-				ServerScriptFile:  serverScriptFile,
-				Production:        true,
-				Env:               helpers.CliEnv(cliLogLevel, prettyLogging),
-			}
-
-			hookServerRunner := helpers.NewServerRunner(log, srvCfg)
-
-			defer func() {
-				log.Debug("Stopping hooks-server-runner server after WunderNode shutdown")
-				err := hookServerRunner.Stop()
+			g.Go(func() error {
+				err := startWunderGraphServer(ctx)
 				if err != nil {
-					log.Error("Stopping hooks-server-runner failed",
-						abstractlogger.String("runnerName", "hooks-server-runner"),
-						abstractlogger.Error(err),
-					)
+					log.Error("Start server", abstractlogger.Error(err))
 				}
-			}()
-
-			go func() {
-				<-hookServerRunner.Run(serverCtx)
-				if err := nodeCtx.Err(); err != nil {
-					log.Info("WunderGraph Server shutdown complete.")
-				} else {
-					log.Error("Hook server excited. Initialize WunderNode shutdown")
-					stop()
-				}
-			}()
+				return err
+			})
 		}
 
-		configFileChangeChan := make(chan struct{})
-		n := node.New(nodeCtx, BuildInfo, wunderGraphDir, log)
-
-		go func() {
-			err := n.StartBlocking(
-				node.WithConfigFileChange(configFileChangeChan),
-				node.WithFileSystemConfig(configFile),
-				node.WithDebugMode(enableDebugMode),
-				node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
-				node.WithIntrospection(enableIntrospection),
-				node.WithGitHubAuthDemo(GitHubAuthDemo),
-			)
+		g.Go(func() error {
+			err := StartWunderGraphNode(n)
 			if err != nil {
-				log.Fatal("startBlocking", abstractlogger.Error(err))
+				log.Error("Start node", abstractlogger.Error(err))
 			}
-		}()
-
-		// trigger server reload after initial config build
-		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
+			return err
+		})
 
 		n.HandleGracefulShutdown(gracefulTimeout)
+
+		if err := g.Wait(); err != nil {
+			return fmt.Errorf("WunderGraph process shutdown: %w", err)
+		}
 
 		return nil
 	},
@@ -117,7 +65,7 @@ If used without --exclude-server, make sure the server is available in this dire
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", 10, "graceful-timeout is the time in seconds the server has to graceful shutdown")
+	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", defaultNodeGracefulTimeoutSeconds, "graceful-timeout is the time in seconds the server has to graceful shutdown")
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")

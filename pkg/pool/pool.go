@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/cespare/xxhash"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astnormalization"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
@@ -16,9 +17,8 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
-	"github.com/wundergraph/graphql-go-tools/pkg/postprocess"
-
 	p2 "github.com/wundergraph/graphql-go-tools/pkg/pool"
+	"github.com/wundergraph/graphql-go-tools/pkg/postprocess"
 )
 
 func GetBytesBuffer() *bytes.Buffer {

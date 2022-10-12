@@ -14,6 +14,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/websocket"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
@@ -222,6 +223,9 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 			return nil, err
 		}
 		requestBody, err = jsonparser.Set(requestBody, requestJSON, "__wg", "clientRequest")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	req, err := http.NewRequestWithContext(request.Context(), request.Method, request.URL.String(), io.NopCloser(bytes.NewReader(requestBody)))

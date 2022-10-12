@@ -22,6 +22,23 @@ const defaultTemplateConfig: GolangClientTemplateConfig = {
 	packageName: 'client',
 };
 
+/**
+ * Formats a given string with each line prepended by its line number
+ * (starting at 1).
+ *
+ * @remarks
+ * Lines are split by \r?\n, then joined by \n
+ *
+ * @param code - The code to split and prepend line numbers to
+ * @returns A string with the line annotated code
+ */
+function linefy(code: string): string {
+	return code
+		.split(/\r?\n/)
+		.map((line, idx) => `${idx + 1}: ${line}`)
+		.join('\n');
+}
+
 const gofmt = (code: string) => {
 	try {
 		// check if gofmt is installed
@@ -33,9 +50,14 @@ const gofmt = (code: string) => {
 			return formatter.stdout;
 		}
 	} catch (e: any) {
-		// we silently ignore the error on purpose
-		// It's not a must to prettify the code
-		Logger().warn('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
+		// If the error is due to gofmt not being installed, we ignore it
+		// on purpose. Otherwise we throw an error with both the code and
+		// the error message returned by gofmt.
+		if (e instanceof Error && e.message.indexOf('ENOENT') >= 0) {
+			Logger().warn('gofmt is not installed. If you want to prettify the generated code, please install gofmt');
+		} else {
+			throw new Error(`failed to format:\n${linefy(code)}\n\n${e}`);
+		}
 	}
 	return code;
 };
@@ -246,7 +268,7 @@ const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withEr
 			},
 			leave: (name, isRequired, isArray) => {
 				if (name) {
-					out += ` \`json:"${name},omitempty"\` `;
+					out += ` \`json:"${name},omitempty"\`\n`;
 				}
 			},
 		},

@@ -540,6 +540,7 @@ class RESTApiBuilder {
 					if (objectKind === 'input') {
 						typeName += 'Input';
 					}
+					typeName = this.cleanupTypeName(typeName, parentTypeName);
 					let fieldTypeName = typeName;
 					if (this.statusCodeUnions && isRootField && objectKind === 'type') {
 						fieldTypeName = this.buildFieldTypeName(typeName, responseObjectDescription || '', statusCode || '');
@@ -1162,6 +1163,17 @@ class RESTApiBuilder {
 
 	private sanitizeName = (name: string): string => {
 		return name.replace(/\[\]/g, '');
+	};
+
+	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
+		switch (typeName) {
+			case 'Query':
+			case 'Mutation':
+			case 'Subscription':
+				return parentTypeName + typeName;
+			default:
+				return typeName;
+		}
 	};
 }
 

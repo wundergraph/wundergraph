@@ -21,45 +21,18 @@ var serverCmd = &cobra.Command{
 
 var serverStartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Start runs WunderGraph Middleware in production mode",
+	Short: "Start runs WunderGraph Server in production mode",
 	Long: `
 		Example usage:
 			wunderctl server start
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-		if err != nil {
-			return err
-		}
-
-		configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
-		if !files.FileExists(configFile) {
-			return fmt.Errorf("could not find configuration file: %s", configFile)
-		}
-
-		serverScriptFile := path.Join("generated", "bundle", "server.js")
-		serverExecutablePath := path.Join(wunderGraphDir, serverScriptFile)
-		if !files.FileExists(serverExecutablePath) {
-			return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
-		}
-
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
-		srvCfg := &helpers.ServerRunConfig{
-			WunderGraphDirAbs: _wunderGraphDirConfig,
-			ServerScriptFile:  serverScriptFile,
-			Production:        true,
-			Env:               helpers.CliEnv(cliLogLevel, prettyLogging),
-		}
-
-		hookServerRunner := helpers.NewServerRunner(log, srvCfg)
-
-		<-hookServerRunner.Run(ctx)
-		if ctx.Err() != nil {
-			log.Info("WunderGraph Server shutdown complete")
-		} else {
-			log.Error("WunderGraph Server excited")
+		err := startWunderGraphServer(ctx)
+		if err != nil {
+			return err
 		}
 
 		return nil
@@ -69,4 +42,35 @@ var serverStartCmd = &cobra.Command{
 func init() {
 	serverCmd.AddCommand(serverStartCmd)
 	rootCmd.AddCommand(serverCmd)
+}
+
+func startWunderGraphServer(ctx context.Context) error {
+	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+	if err != nil {
+		return err
+	}
+
+	configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
+	if !files.FileExists(configFile) {
+		return fmt.Errorf("could not find configuration file: %s", configFile)
+	}
+
+	serverScriptFile := path.Join("generated", "bundle", "server.js")
+	serverExecutablePath := path.Join(wunderGraphDir, serverScriptFile)
+	if !files.FileExists(serverExecutablePath) {
+		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
+	}
+
+	srvCfg := &helpers.ServerRunConfig{
+		WunderGraphDirAbs: wunderGraphDir,
+		ServerScriptFile:  serverScriptFile,
+		Production:        true,
+		Env:               helpers.CliEnv(cliLogLevel, prettyLogging),
+	}
+
+	hookServerRunner := helpers.NewServerRunner(log, srvCfg)
+
+	<-hookServerRunner.Run(ctx)
+
+	return hookServerRunner.Error()
 }

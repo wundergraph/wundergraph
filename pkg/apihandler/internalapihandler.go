@@ -14,7 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"github.com/jensneuse/abstractlogger"
-	
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
