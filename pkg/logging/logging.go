@@ -26,6 +26,6 @@ func zapLogger(lvl zapcore.Level, syncer zapcore.WriteSyncer, encodeAsJSON bool)
 }
 
 func New(level abstractlogger.Level, encodeAsJSON bool) abstractlogger.Logger {
-	zapLog := zapLogger(zap.DebugLevel, zapcore.AddSync(os.Stdout), encodeAsJSON)
+	zapLog := zapLogger(zap.DebugLevel, zapcore.AddSync(os.Stderr), encodeAsJSON)
 	return abstractlogger.NewZapLogger(zapLog, level)
 }
