@@ -18932,7 +18932,8 @@ exports[`non alphanumeric fields: non_alphanumeric_fields_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "RequestTimeoutSeconds": 0
   },
   {
     "RootNodes": [
@@ -18995,7 +18996,8 @@ exports[`non alphanumeric fields: non_alphanumeric_fields_data_sources 1`] = `
       "StatusCodeTypeMappings": []
     },
     "ChildNodes": [],
-    "Directives": []
+    "Directives": [],
+    "RequestTimeoutSeconds": 0
   }
 ]"
 `;
