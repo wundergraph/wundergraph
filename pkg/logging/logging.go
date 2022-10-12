@@ -1,8 +1,10 @@
 package logging
 
 import (
+	"fmt"
 	"math"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
@@ -79,19 +81,21 @@ func zapLogger(syncer zapcore.WriteSyncer, encodeAsJSON bool) *zap.Logger {
 	)
 }
 
-func FindLogLevel(logLevel string, defaultLevel abstractlogger.Level) abstractlogger.Level {
-	switch logLevel {
-	case "debug":
-		return abstractlogger.DebugLevel
-	case "warning":
-		return abstractlogger.WarnLevel
-	case "error":
-		return abstractlogger.ErrorLevel
-	case "fatal":
-		return abstractlogger.FatalLevel
-	case "panic":
-		return abstractlogger.PanicLevel
+func FindLogLevel(logLevel string) (abstractlogger.Level, error) {
+	switch strings.ToUpper(logLevel) {
+	case "DEBUG":
+		return abstractlogger.DebugLevel, nil
+	case "INFO":
+		return abstractlogger.InfoLevel, nil
+	case "WARNING":
+		return abstractlogger.WarnLevel, nil
+	case "ERROR":
+		return abstractlogger.ErrorLevel, nil
+	case "FATAL":
+		return abstractlogger.FatalLevel, nil
+	case "PANIC":
+		return abstractlogger.PanicLevel, nil
 	default:
-		return defaultLevel
+		return -1, fmt.Errorf("unknown log level: %s", logLevel)
 	}
 }

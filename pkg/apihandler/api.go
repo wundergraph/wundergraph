@@ -1,6 +1,8 @@
 package apihandler
 
 import (
+	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -10,7 +12,7 @@ type Listener struct {
 }
 
 type Logging struct {
-	Level wgpb.LogLevel
+	Level abstractlogger.Level
 }
 
 type Options struct {

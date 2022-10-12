@@ -15,6 +15,7 @@ import (
 	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
 
@@ -22,6 +23,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -291,6 +293,8 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
+	n.log = abstractlogger.NewZapLogger(logging.Zap().With(zap.String("component", "WunderNode")), nodeConfig.Api.Options.Logging.Level)
+	
 	router := mux.NewRouter()
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
@@ -539,7 +543,11 @@ func (n *Node) reloadFileConfig(filePath string) error {
 		return err
 	}
 
-	config := CreateConfig(&graphConfig)
+	config, err := CreateConfig(&graphConfig)
+	if err != nil {
+		n.log.Error("reloadFileConfig CreateConfig", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
+		return err
+	}
 
 	n.configCh <- config
 

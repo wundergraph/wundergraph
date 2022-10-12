@@ -99,7 +99,11 @@ func StartWunderGraphNode(n *node.Node) error {
 		return errors.New("failed to unmarshal config file")
 	}
 
-	wunderNodeConfig := node.CreateConfig(&graphConfig)
+	wunderNodeConfig, err := node.CreateConfig(&graphConfig)
+	if err != nil {
+		log.Error("Failed to create config", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		return err
+	}
 
 	err = n.StartBlocking(
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),

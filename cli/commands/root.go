@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
@@ -68,19 +69,26 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		switch cmd.Name() {
 		case "loadoperations":
 			// skip any setup for loadoperations to avoid logging anything
+			// as sdk uses stdout for the generated operations list
+			// TODO: migrate to writing it to a file
 			return nil
 		}
 
 		logging.Init(prettyLogging)
 
 		if enableDebugMode {
+			// override log level to debug
 			cliLogLevel = "debug"
-			log = abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
-		} else {
-			log = abstractlogger.NewZapLogger(logging.Zap(), logging.FindLogLevel(cliLogLevel, abstractlogger.ErrorLevel))
 		}
 
-		err := godotenv.Load(DotEnvFile)
+		logLevel, err := logging.FindLogLevel(cliLogLevel)
+		if err != nil {
+			return err
+		}
+		zapLog := logging.Zap().With(zap.String("component", "wunderctl"))
+		log = abstractlogger.NewZapLogger(zapLog, logLevel)
+
+		err = godotenv.Load(DotEnvFile)
 		if err != nil {
 			if _, ok := err.(*fs.PathError); ok {
 				log.Debug("starting without env file")
