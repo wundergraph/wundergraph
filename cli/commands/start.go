@@ -43,6 +43,7 @@ var startCmd = &cobra.Command{
 		var opts []node.Option
 		if exitAfterIdle > 0 {
 			middleware := httpidletimeout.New(time.Duration(exitAfterIdle) * time.Second)
+			middleware.Start()
 			defer middleware.Cancel()
 			opts = append(opts, node.WithMiddleware(middleware.Handler))
 			go func() {

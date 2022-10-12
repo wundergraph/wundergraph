@@ -28,6 +28,7 @@ const (
 // notifications are received. To exit cleanly, you should call Cancel() at some point
 // to free the resources associated with the Middlware (e.g. with a defer after New()).
 type Middleware struct {
+	timeout  time.Duration
 	counter  uint64
 	eventCh  chan event
 	notifyCh chan struct{}
@@ -38,38 +39,8 @@ type Middleware struct {
 func New(timeout time.Duration) *Middleware {
 	eventCh := make(chan event, 1)
 	notifyCh := make(chan struct{}, 1)
-	go func() {
-		parent := context.Background()
-		ctx, cancel := context.WithTimeout(parent, timeout)
-
-		for {
-			select {
-			case <-ctx.Done():
-				// Deadline triggered
-				cancel()
-				// Avoid blocking here if there are no listeners, otherwise
-				// we could block here and not be able to service an event
-				select {
-				case notifyCh <- struct{}{}:
-				default:
-				}
-
-				// Continue looping
-				ctx, cancel = context.WithTimeout(parent, timeout)
-			case ev := <-eventCh:
-				cancel()
-				switch ev {
-				case eventResetTimer:
-					ctx, cancel = context.WithTimeout(parent, infiniteDuration)
-				case eventStartTimer:
-					ctx, cancel = context.WithTimeout(parent, timeout)
-				case eventStop:
-					return
-				}
-			}
-		}
-	}()
 	return &Middleware{
+		timeout:  timeout,
 		eventCh:  eventCh,
 		notifyCh: notifyCh,
 	}
@@ -106,6 +77,40 @@ func (m *Middleware) HandlerFunc(next http.HandlerFunc) http.Handler {
 // time Middleware triggers
 func (m *Middleware) C() <-chan struct{} {
 	return m.notifyCh
+}
+
+func (m *Middleware) Start() {
+	go func() {
+		parent := context.Background()
+		ctx, cancel := context.WithTimeout(parent, m.timeout)
+
+		for {
+			select {
+			case <-ctx.Done():
+				// Deadline triggered
+				cancel()
+				// Avoid blocking here if there are no listeners, otherwise
+				// we could block here and not be able to service an event
+				select {
+				case m.notifyCh <- struct{}{}:
+				default:
+				}
+
+				// Continue looping
+				ctx, cancel = context.WithTimeout(parent, m.timeout)
+			case ev := <-m.eventCh:
+				cancel()
+				switch ev {
+				case eventResetTimer:
+					ctx, cancel = context.WithTimeout(parent, infiniteDuration)
+				case eventStartTimer:
+					ctx, cancel = context.WithTimeout(parent, m.timeout)
+				case eventStop:
+					return
+				}
+			}
+		}
+	}()
 }
 
 // Cancel makes the Middleware stop triggering timeouts after its timeout

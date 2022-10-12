@@ -34,6 +34,7 @@ func sendDummyRequest(handler http.Handler) {
 func TestInitialTimeout(t *testing.T) {
 	before := time.Now()
 	m := New(timeoutDuration)
+	m.Start()
 	timer := time.NewTimer(maxWait)
 	for {
 		select {
@@ -48,6 +49,7 @@ func TestInitialTimeout(t *testing.T) {
 
 func TestResetTimeout(t *testing.T) {
 	m := New(timeoutDuration)
+	m.Start()
 	defer m.Cancel()
 
 	server := http.NewServeMux()
@@ -95,6 +97,7 @@ LOOP:
 
 func TestLongLivedRequest(t *testing.T) {
 	m := New(timeoutDuration)
+	m.Start()
 	defer m.Cancel()
 
 	server := http.NewServeMux()
@@ -115,4 +118,17 @@ func TestLongLivedRequest(t *testing.T) {
 			return
 		}
 	}
+}
+
+func TestMultipleTriggers(t *testing.T) {
+	m := New(timeoutDuration)
+	m.Start()
+	defer m.Cancel()
+
+	check := time.AfterFunc(maxWait*2, func() {
+		t.Fatal("took too long to trigger twice")
+	})
+	<-m.C()
+	<-m.C()
+	check.Stop()
 }
