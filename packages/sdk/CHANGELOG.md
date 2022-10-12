@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.115.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.6...@wundergraph/sdk@0.115.0) (2022-10-12)
+
+### Features
+
+* refactor cache handling, move storage out of generated ([#238](https://github.com/wundergraph/wundergraph/issues/238)) ([6351e35](https://github.com/wundergraph/wundergraph/commit/6351e35419215b4bc63bce4a80e16e20d8e9d2d0)) (@fiam)
+
+### Bug Fixes
+
+* correctly generate typenames for nested array objects ([#257](https://github.com/wundergraph/wundergraph/issues/257)) ([ca61274](https://github.com/wundergraph/wundergraph/commit/ca612747122195a826b9362e24765b66562e06cf)) (@jensneuse)
+* live query support in generated web client ([#248](https://github.com/wundergraph/wundergraph/issues/248)) ([a1bc5f5](https://github.com/wundergraph/wundergraph/commit/a1bc5f5fe5182d87759ea895257e1f643e472e4a)), closes [#78](https://github.com/wundergraph/wundergraph/issues/78) (@xzyfer)
+
 ## [0.114.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.5...@wundergraph/sdk@0.114.6) (2022-10-10)
 
 **Note:** Version bump only for package @wundergraph/sdk

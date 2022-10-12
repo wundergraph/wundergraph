@@ -48,6 +48,7 @@ import {
 import { mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { SdkLogger } from '../logger/logger';
+import _ from 'lodash';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -536,7 +537,7 @@ class RESTApiBuilder {
 				if (fieldName !== '') {
 					let typeName = schema.title
 						? schema.title.replace(' ', '')
-						: fieldName[0].toUpperCase() + fieldName.substring(1);
+						: parentTypeName + fieldName[0].toUpperCase() + fieldName.substring(1);
 					if (objectKind === 'input') {
 						typeName += 'Input';
 					}
@@ -834,6 +835,20 @@ class RESTApiBuilder {
 		enclosingTypes: EnclosingType[]
 	) => {
 		const fieldType = this.resolveTypeNode(fieldTypeName, enclosingTypes);
+		// remove non alphanumeric characters as well as leading numbers
+		const sanitizedFieldName = fieldName.replace(/[^a-zA-Z0-9_]/g, '').replace(/^[0-9]+/, '');
+		if (sanitizedFieldName !== fieldName) {
+			// add mapping
+			this.fields.push({
+				typeName: parentName,
+				fieldName: sanitizedFieldName,
+				disableDefaultFieldMapping: true,
+				path: [fieldName],
+				requiresFields: [],
+				unescapeResponseJson: false,
+				argumentsConfiguration: [],
+			});
+		}
 		if (objectKind === 'type') {
 			this.graphQLSchema = visit(this.graphQLSchema, {
 				ObjectTypeDefinition: (node) => {
@@ -848,7 +863,7 @@ class RESTApiBuilder {
 								kind: Kind.FIELD_DEFINITION,
 								name: {
 									kind: Kind.NAME,
-									value: fieldName,
+									value: sanitizedFieldName,
 								},
 								type: fieldType,
 							},
@@ -871,7 +886,7 @@ class RESTApiBuilder {
 								kind: Kind.INPUT_VALUE_DEFINITION,
 								name: {
 									kind: Kind.NAME,
-									value: fieldName,
+									value: sanitizedFieldName,
 								},
 								type: fieldType,
 							},
@@ -1166,6 +1181,12 @@ class RESTApiBuilder {
 	};
 
 	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
+		// remove all non-alphanumeric characters and all leading numbers
+		typeName = _.camelCase(typeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
+		parentTypeName = _.camelCase(parentTypeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
+		// and make the first character uppercase
+		typeName = typeName[0].toUpperCase() + typeName.substring(1);
+		parentTypeName = parentTypeName[0].toUpperCase() + parentTypeName.substring(1);
 		switch (typeName) {
 			case 'Query':
 			case 'Mutation':

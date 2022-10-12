@@ -15871,12 +15871,12 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
       "DefaultTypeName": "UnspecifiedHttpResponse",
       "StatusCodeTypeMappings": [
         {
-          "typeName": "api_PostPasswordlessStartOK",
+          "typeName": "api_MutationPostPasswordlessStartOK",
           "statusCode": 200,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessStartBadRequest",
+          "typeName": "api_MutationPostPasswordlessStartBadRequest",
           "statusCode": 400,
           "injectStatusCodeIntoBody": false
         },
@@ -15891,7 +15891,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
           "injectStatusCodeIntoBody": true
         },
         {
-          "typeName": "api_PostPasswordlessStartInternalError",
+          "typeName": "api_MutationPostPasswordlessStartInternalError",
           "statusCode": 500,
           "injectStatusCodeIntoBody": false
         }
@@ -15951,32 +15951,32 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
       "DefaultTypeName": "UnspecifiedHttpResponse",
       "StatusCodeTypeMappings": [
         {
-          "typeName": "api_PostPasswordlessLoginOK",
+          "typeName": "api_MutationPostPasswordlessLoginOK",
           "statusCode": 200,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessLoginNotRegisteredForApp",
+          "typeName": "api_MutationPostPasswordlessLoginNotRegisteredForApp",
           "statusCode": 202,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessLoginPasswordChangeRequested",
+          "typeName": "api_MutationPostPasswordlessLoginPasswordChangeRequested",
           "statusCode": 203,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessLoginEmailNotVerified",
+          "typeName": "api_MutationPostPasswordlessLoginEmailNotVerified",
           "statusCode": 212,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessLoginRegistrationNotVerified",
+          "typeName": "api_MutationPostPasswordlessLoginRegistrationNotVerified",
           "statusCode": 213,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessLoginTwoFactorEnabled",
+          "typeName": "api_MutationPostPasswordlessLoginTwoFactorEnabled",
           "statusCode": 242,
           "injectStatusCodeIntoBody": false
         },
@@ -15986,7 +15986,7 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
           "injectStatusCodeIntoBody": true
         },
         {
-          "typeName": "api_PostPasswordlessLoginInternalError",
+          "typeName": "api_MutationPostPasswordlessLoginInternalError",
           "statusCode": 500,
           "injectStatusCodeIntoBody": false
         }
@@ -16046,32 +16046,32 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_data_sources 1`] = `
       "DefaultTypeName": "UnspecifiedHttpResponse",
       "StatusCodeTypeMappings": [
         {
-          "typeName": "api_PostJwtRefreshOK",
+          "typeName": "api_MutationPostJwtRefreshOK",
           "statusCode": 200,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostJwtRefreshBadRequest",
+          "typeName": "api_MutationPostJwtRefreshBadRequest",
           "statusCode": 400,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostJwtRefreshNoAuthProvided",
+          "typeName": "api_MutationPostJwtRefreshNoAuthProvided",
           "statusCode": 401,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostJwtRefreshTokenNotFound",
+          "typeName": "api_MutationPostJwtRefreshTokenNotFound",
           "statusCode": 404,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostJwtRefreshInternalError",
+          "typeName": "api_MutationPostJwtRefreshInternalError",
           "statusCode": 500,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostJwtRefreshInternalError",
+          "typeName": "api_MutationPostJwtRefreshInternalError",
           "statusCode": 503,
           "injectStatusCodeIntoBody": false
         }
@@ -16122,21 +16122,21 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_schema 1`] = `
   api_postJwtRefresh(postJwtRefreshInput: api_postJwtRefreshInput): api_PostJwtRefreshResponse
 }
 
-union api_PostPasswordlessStartResponse = UnspecifiedHttpResponse | api_PostPasswordlessStartOK | api_PostPasswordlessStartBadRequest | api_UnauthorizedNoAuthProvided | api_PostPasswordlessStartUserNotFound | api_PostPasswordlessStartInternalError
+union api_PostPasswordlessStartResponse = UnspecifiedHttpResponse | api_MutationPostPasswordlessStartOK | api_MutationPostPasswordlessStartBadRequest | api_UnauthorizedNoAuthProvided | api_PostPasswordlessStartUserNotFound | api_MutationPostPasswordlessStartInternalError
 
 type UnspecifiedHttpResponse {
   statusCode: Int!
 }
 
-type api_PostPasswordlessStartOK {
+type api_MutationPostPasswordlessStartOK {
   code: String
 }
 
-type api_PostPasswordlessStartBadRequest {
-  fieldErrors: api_FieldErrors
+type api_MutationPostPasswordlessStartBadRequest {
+  fieldErrors: api_MutationPostPasswordlessStartBadRequestFieldErrors
 }
 
-type api_FieldErrors {
+type api_MutationPostPasswordlessStartBadRequestFieldErrors {
   applicationId: String
   loginId: String
 }
@@ -16149,7 +16149,7 @@ type api_PostPasswordlessStartUserNotFound {
   statusCode: Int!
 }
 
-type api_PostPasswordlessStartInternalError {
+type api_MutationPostPasswordlessStartInternalError {
   message: String
 }
 
@@ -16161,16 +16161,16 @@ input api_postPasswordlessStartInput {
 
 scalar JSON
 
-union api_PostPasswordlessLoginResponse = UnspecifiedHttpResponse | api_PostPasswordlessLoginOK | api_PostPasswordlessLoginNotRegisteredForApp | api_PostPasswordlessLoginPasswordChangeRequested | api_PostPasswordlessLoginEmailNotVerified | api_PostPasswordlessLoginRegistrationNotVerified | api_PostPasswordlessLoginTwoFactorEnabled | api_PostPasswordlessLoginBadRequest | api_PostPasswordlessLoginInternalError
+union api_PostPasswordlessLoginResponse = UnspecifiedHttpResponse | api_MutationPostPasswordlessLoginOK | api_MutationPostPasswordlessLoginNotRegisteredForApp | api_MutationPostPasswordlessLoginPasswordChangeRequested | api_MutationPostPasswordlessLoginEmailNotVerified | api_MutationPostPasswordlessLoginRegistrationNotVerified | api_MutationPostPasswordlessLoginTwoFactorEnabled | api_PostPasswordlessLoginBadRequest | api_MutationPostPasswordlessLoginInternalError
 
-type api_PostPasswordlessLoginOK {
+type api_MutationPostPasswordlessLoginOK {
   refreshToken: String
   state: JSON
   token: String
-  user: api_User
+  user: api_MutationPostPasswordlessLoginOkUser
 }
 
-type api_User {
+type api_MutationPostPasswordlessLoginOkUser {
   username: String
   verified: Boolean
   firstName: String
@@ -16180,23 +16180,23 @@ type api_User {
   timezone: String
 }
 
-type api_PostPasswordlessLoginNotRegisteredForApp {
+type api_MutationPostPasswordlessLoginNotRegisteredForApp {
   message: String
 }
 
-type api_PostPasswordlessLoginPasswordChangeRequested {
+type api_MutationPostPasswordlessLoginPasswordChangeRequested {
   changePasswordReason: String
 }
 
-type api_PostPasswordlessLoginEmailNotVerified {
+type api_MutationPostPasswordlessLoginEmailNotVerified {
   message: String
 }
 
-type api_PostPasswordlessLoginRegistrationNotVerified {
+type api_MutationPostPasswordlessLoginRegistrationNotVerified {
   message: String
 }
 
-type api_PostPasswordlessLoginTwoFactorEnabled {
+type api_MutationPostPasswordlessLoginTwoFactorEnabled {
   methods: [JSON]
   twoFactorId: String
 }
@@ -16205,44 +16205,44 @@ type api_PostPasswordlessLoginBadRequest {
   statusCode: Int!
 }
 
-type api_PostPasswordlessLoginInternalError {
+type api_MutationPostPasswordlessLoginInternalError {
   message: String
 }
 
 input api_postPasswordlessLoginInput {
   code: String!
   ipAddress: String
-  metaData: api_MetaDataInput
+  metaData: api_PostPasswordlessLoginInputMetaDataInput
 }
 
-input api_MetaDataInput {
-  device: api_DeviceInput
+input api_PostPasswordlessLoginInputMetaDataInput {
+  device: api_PostPasswordlessLoginInputMetaDataInputDeviceInput
 }
 
-input api_DeviceInput {
+input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
 }
 
-union api_PostJwtRefreshResponse = UnspecifiedHttpResponse | api_PostJwtRefreshOK | api_PostJwtRefreshBadRequest | api_PostJwtRefreshNoAuthProvided | api_PostJwtRefreshTokenNotFound | api_PostJwtRefreshInternalError
+union api_PostJwtRefreshResponse = UnspecifiedHttpResponse | api_MutationPostJwtRefreshOK | api_MutationPostJwtRefreshBadRequest | api_MutationPostJwtRefreshNoAuthProvided | api_MutationPostJwtRefreshTokenNotFound | api_MutationPostJwtRefreshInternalError
 
-type api_PostJwtRefreshOK {
+type api_MutationPostJwtRefreshOK {
   refreshToken: String
   token: String
 }
 
-type api_PostJwtRefreshBadRequest {
+type api_MutationPostJwtRefreshBadRequest {
   message: String
 }
 
-type api_PostJwtRefreshNoAuthProvided {
+type api_MutationPostJwtRefreshNoAuthProvided {
   message: String
 }
 
-type api_PostJwtRefreshTokenNotFound {
+type api_MutationPostJwtRefreshTokenNotFound {
   message: String
 }
 
-type api_PostJwtRefreshInternalError {
+type api_MutationPostJwtRefreshInternalError {
   message: String
 }
 
@@ -16305,12 +16305,12 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
       "DefaultTypeName": "UnspecifiedHttpResponse",
       "StatusCodeTypeMappings": [
         {
-          "typeName": "api_PostPasswordlessStartOK",
+          "typeName": "api_MutationPostPasswordlessStartOK",
           "statusCode": 200,
           "injectStatusCodeIntoBody": false
         },
         {
-          "typeName": "api_PostPasswordlessStartBadRequest",
+          "typeName": "api_MutationPostPasswordlessStartBadRequest",
           "statusCode": 400,
           "injectStatusCodeIntoBody": false
         }
@@ -16370,7 +16370,7 @@ exports[`fusion with statusCodeUnions: fusion_data_sources 1`] = `
       "DefaultTypeName": "UnspecifiedHttpResponse",
       "StatusCodeTypeMappings": [
         {
-          "typeName": "api_PostPasswordlessLoginOK",
+          "typeName": "api_MutationPostPasswordlessLoginOK",
           "statusCode": 200,
           "injectStatusCodeIntoBody": false
         }
@@ -16411,17 +16411,17 @@ exports[`fusion with statusCodeUnions: fusion_schema 1`] = `
   api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_PostPasswordlessLoginResponse
 }
 
-union api_PostPasswordlessStartResponse = UnspecifiedHttpResponse | api_PostPasswordlessStartOK | api_PostPasswordlessStartBadRequest
+union api_PostPasswordlessStartResponse = UnspecifiedHttpResponse | api_MutationPostPasswordlessStartOK | api_MutationPostPasswordlessStartBadRequest
 
 type UnspecifiedHttpResponse {
   statusCode: Int!
 }
 
-type api_PostPasswordlessStartOK {
+type api_MutationPostPasswordlessStartOK {
   code: String
 }
 
-type api_PostPasswordlessStartBadRequest {
+type api_MutationPostPasswordlessStartBadRequest {
   message: String
 }
 
@@ -16433,16 +16433,16 @@ input api_postPasswordlessStartInput {
 
 scalar JSON
 
-union api_PostPasswordlessLoginResponse = UnspecifiedHttpResponse | api_PostPasswordlessLoginOK
+union api_PostPasswordlessLoginResponse = UnspecifiedHttpResponse | api_MutationPostPasswordlessLoginOK
 
-type api_PostPasswordlessLoginOK {
+type api_MutationPostPasswordlessLoginOK {
   refreshToken: String
   state: JSON
   token: String
-  user: api_User
+  user: api_MutationPostPasswordlessLoginOkUser
 }
 
-type api_User {
+type api_MutationPostPasswordlessLoginOkUser {
   username: String
   verified: Boolean
   firstName: String
@@ -16455,14 +16455,14 @@ type api_User {
 input api_postPasswordlessLoginInput {
   code: String!
   ipAddress: String
-  metaData: api_MetaDataInput
+  metaData: api_PostPasswordlessLoginInputMetaDataInput
 }
 
-input api_MetaDataInput {
-  device: api_DeviceInput
+input api_PostPasswordlessLoginInputMetaDataInput {
+  device: api_PostPasswordlessLoginInputMetaDataInputDeviceInput
 }
 
-input api_DeviceInput {
+input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
 }"
 `;
@@ -16605,11 +16605,11 @@ exports[`fusion: fusion_fields 1`] = `
 
 exports[`fusion: fusion_schema 1`] = `
 "type Mutation {
-  api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_PostPasswordlessStart
-  api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_PostPasswordlessLogin
+  api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_MutationPostPasswordlessStart
+  api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_MutationPostPasswordlessLogin
 }
 
-type api_PostPasswordlessStart {
+type api_MutationPostPasswordlessStart {
   code: String
 }
 
@@ -16621,14 +16621,14 @@ input api_postPasswordlessStartInput {
 
 scalar JSON
 
-type api_PostPasswordlessLogin {
+type api_MutationPostPasswordlessLogin {
   refreshToken: String
   state: JSON
   token: String
-  user: api_User
+  user: api_MutationPostPasswordlessLoginUser
 }
 
-type api_User {
+type api_MutationPostPasswordlessLoginUser {
   username: String
   verified: Boolean
   firstName: String
@@ -16641,14 +16641,14 @@ type api_User {
 input api_postPasswordlessLoginInput {
   code: String!
   ipAddress: String
-  metaData: api_MetaDataInput
+  metaData: api_PostPasswordlessLoginInputMetaDataInput
 }
 
-input api_MetaDataInput {
-  device: api_DeviceInput
+input api_PostPasswordlessLoginInputMetaDataInput {
+  device: api_PostPasswordlessLoginInputMetaDataInputDeviceInput
 }
 
-input api_DeviceInput {
+input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
 }"
 `;
@@ -18628,6 +18628,215 @@ type api_Company {
 }"
 `;
 
+exports[`non alphanumeric fields: non_alphanumeric_fields_data_sources 1`] = `
+"[
+  {
+    "RootNodes": [
+      {
+        "typeName": "Query",
+        "fieldNames": [
+          "api_getConnectionAds"
+        ]
+      }
+    ],
+    "Kind": 1,
+    "Custom": {
+      "Fetch": {
+        "method": 0,
+        "path": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "/"
+        },
+        "baseUrl": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "http://0.0.0.0:8787"
+        },
+        "url": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "body": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "header": {},
+        "query": [
+          {
+            "name": "shopUrl",
+            "value": "{{ .arguments.shopUrl }}"
+          }
+        ],
+        "urlEncodeBody": false
+      },
+      "Subscription": {
+        "Enabled": false
+      },
+      "DefaultTypeName": "",
+      "StatusCodeTypeMappings": []
+    },
+    "ChildNodes": [],
+    "Directives": []
+  },
+  {
+    "RootNodes": [
+      {
+        "typeName": "Query",
+        "fieldNames": [
+          "api_getAdAccounts"
+        ]
+      }
+    ],
+    "Kind": 1,
+    "Custom": {
+      "Fetch": {
+        "method": 0,
+        "path": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "/get-adaccounts"
+        },
+        "baseUrl": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "http://0.0.0.0:8787"
+        },
+        "url": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "body": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "header": {},
+        "query": [
+          {
+            "name": "shopUrl",
+            "value": "{{ .arguments.shopUrl }}"
+          },
+          {
+            "name": "connectionAds",
+            "value": "{{ .arguments.connectionAds }}"
+          }
+        ],
+        "urlEncodeBody": false
+      },
+      "Subscription": {
+        "Enabled": false
+      },
+      "DefaultTypeName": "",
+      "StatusCodeTypeMappings": []
+    },
+    "ChildNodes": [],
+    "Directives": []
+  }
+]"
+`;
+
+exports[`non alphanumeric fields: non_alphanumeric_fields_fields 1`] = `
+"[
+  {
+    "typeName": "Query",
+    "fieldName": "api_getConnectionAds",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": false
+  },
+  {
+    "typeName": "Query",
+    "fieldName": "api_getAdAccounts",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_AdAccountData",
+    "fieldName": "connectionAds",
+    "disableDefaultFieldMapping": true,
+    "path": [
+      "$connectionAds"
+    ],
+    "requiresFields": [],
+    "unescapeResponseJson": false,
+    "argumentsConfiguration": []
+  }
+]"
+`;
+
+exports[`non alphanumeric fields: non_alphanumeric_fields_schema 1`] = `
+"type Query {
+  api_getConnectionAds(shopUrl: String!): api_ConnectionAd
+  api_getAdAccounts(shopUrl: String, connectionAds: String): api_AdAccount
+}
+
+type api_ConnectionAd {
+  data: [api_ConnectionAdData]
+  error: String
+}
+
+type api_ConnectionAdData {
+  _id: String
+  ts: Int
+  type: String
+  accessToken: String
+  name: String
+  idConnection: String
+  picture: String
+  store: String
+  connected: Boolean
+}
+
+type api_AdAccount {
+  data: [api_AdAccountData]
+  error: String
+}
+
+type api_AdAccountData {
+  store: String
+  ts: Int
+  name: String
+  account_id: String
+  enabled: Boolean
+  connectionAds: api_AdAccountDataConnectionAds
+  insight: api_AdAccountDataInsight
+}
+
+type api_AdAccountDataConnectionAds {
+  name: String
+  picture: String
+}
+
+type api_AdAccountDataInsight {
+  spend: Int
+}"
+`;
+
 exports[`petstore: petstore_data_sources 1`] = `
 "[
   {
@@ -20204,11 +20413,11 @@ type api_Pet {
 }
 
 type api_PetOwner {
-  name: api_Name!
+  name: api_PetOwnerName!
   address: api_Address
 }
 
-type api_Name {
+type api_PetOwnerName {
   first: String!
   last: String!
 }
@@ -20228,11 +20437,11 @@ input api_PetInput {
 }
 
 input api_PetOwnerInput {
-  name: api_NameInput!
+  name: api_PetOwnerInputNameInput!
   address: api_AddressInput
 }
 
-input api_NameInput {
+input api_PetOwnerInputNameInput {
   first: String!
   last: String!
 }
@@ -20342,16 +20551,16 @@ exports[`subscription as object field: subscription_as_object_field_schema 1`] =
 }
 
 type api_StoreData {
-  data: api_Data
+  data: api_StoreDataData
   error: String
 }
 
-type api_Data {
+type api_StoreDataData {
   url: String
-  subscription: api_DataSubscription
+  subscription: api_StoreDataDataSubscription
 }
 
-type api_DataSubscription {
+type api_StoreDataDataSubscription {
   type: String
   running: Boolean
 }"
@@ -20747,10 +20956,10 @@ exports[`with url encoded params: stripe_query_fields 1`] = `
 
 exports[`with url encoded params: stripe_query_schema 1`] = `
 "type Mutation {
-  api_checkoutSession(postV1CheckoutSessionsInput: api_postV1CheckoutSessionsInput): api_CheckoutSession
+  api_checkoutSession(postV1CheckoutSessionsInput: api_postV1CheckoutSessionsInput): api_MutationCheckoutSession
 }
 
-type api_CheckoutSession {
+type api_MutationCheckoutSession {
   id: String
   object: String
   expires_at: String
@@ -20763,13 +20972,13 @@ type api_CheckoutSession {
 }
 
 input api_postV1CheckoutSessionsInput {
-  line_items: [api_Line_itemsInput]!
+  line_items: [api_PostV1CheckoutSessionsInputLineItemsInput]!
   success_url: String!
   cancel_url: String!
   mode: String!
 }
 
-input api_Line_itemsInput {
+input api_PostV1CheckoutSessionsInputLineItemsInput {
   price: String
   quantity: Int
 }"
@@ -21107,14 +21316,14 @@ exports[`with_path_parameters: fusion_fields 1`] = `
 
 exports[`with_path_parameters: fusion_schema 1`] = `
 "type Mutation {
-  api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_PostPasswordlessStart
-  api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_PostPasswordlessLogin
-  api_postJwtRefreshToken(postJwtRefreshTokenInput: api_postJwtRefreshTokenInput): api_PostJwtRefreshToken
+  api_postPasswordlessStart(postPasswordlessStartInput: api_postPasswordlessStartInput): api_MutationPostPasswordlessStart
+  api_postPasswordlessLogin(postPasswordlessLoginInput: api_postPasswordlessLoginInput): api_MutationPostPasswordlessLogin
+  api_postJwtRefreshToken(postJwtRefreshTokenInput: api_postJwtRefreshTokenInput): api_MutationPostJwtRefreshToken
   api_postLogout(refreshToken: String!): JSON
-  api_postUserByUserId(userId: String!, postUserUserIdInput: api_postUserUserIdInput): api_PostUserByUserId
+  api_postUserByUserId(userId: String!, postUserUserIdInput: api_postUserUserIdInput): api_MutationPostUserByUserId
 }
 
-type api_PostPasswordlessStart {
+type api_MutationPostPasswordlessStart {
   code: String
 }
 
@@ -21126,14 +21335,14 @@ input api_postPasswordlessStartInput {
 
 scalar JSON
 
-type api_PostPasswordlessLogin {
+type api_MutationPostPasswordlessLogin {
   refreshToken: String
   state: JSON
   token: String
-  user: api_User
+  user: api_MutationPostPasswordlessLoginUser
 }
 
-type api_User {
+type api_MutationPostPasswordlessLoginUser {
   username: String
   verified: Boolean
   firstName: String
@@ -21146,18 +21355,18 @@ type api_User {
 input api_postPasswordlessLoginInput {
   code: String!
   ipAddress: String
-  metaData: api_MetaDataInput
+  metaData: api_PostPasswordlessLoginInputMetaDataInput
 }
 
-input api_MetaDataInput {
-  device: api_DeviceInput
+input api_PostPasswordlessLoginInputMetaDataInput {
+  device: api_PostPasswordlessLoginInputMetaDataInputDeviceInput
 }
 
-input api_DeviceInput {
+input api_PostPasswordlessLoginInputMetaDataInputDeviceInput {
   name: String
 }
 
-type api_PostJwtRefreshToken {
+type api_MutationPostJwtRefreshToken {
   refreshToken: String
   token: String
 }
@@ -21167,17 +21376,28 @@ input api_postJwtRefreshTokenInput {
   token: String
 }
 
-type api_PostUserByUserId {
+type api_MutationPostUserByUserId {
   token: String
-  user: api_User
+  user: api_MutationPostUserByUserIdUser
+}
+
+type api_MutationPostUserByUserIdUser {
+  firstName: String
+  lastName: String
+  email: String
+  birthDate: String
+  mobilePhone: String
+  imageUrl: String
+  id: String
+  username: String
 }
 
 input api_postUserUserIdInput {
   applicationId: String!
-  user: api_UserInput
+  user: api_PostUserUserIdInputUserInput
 }
 
-input api_UserInput {
+input api_PostUserUserIdInputUserInput {
   firstName: String
   lastName: String
   email: String

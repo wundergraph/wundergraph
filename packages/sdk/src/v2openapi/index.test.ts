@@ -89,3 +89,7 @@ test('dynamic baseurl', async () => {
 test('subscription as object field', async () => {
 	await runTest('src/v2openapi/testdata/oas_with_subscription.yaml', 'subscription_as_object_field');
 });
+
+test('non alphanumeric fields', async () => {
+	await runTest('src/v2openapi/testdata/non_alphanumeric_fields.yaml', 'non_alphanumeric_fields');
+});
