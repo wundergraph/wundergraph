@@ -3,7 +3,6 @@
 package httpidletimeout
 
 import (
-	"context"
 	"math"
 	"net/http"
 	"sync/atomic"
@@ -81,14 +80,12 @@ func (m *Middleware) C() <-chan struct{} {
 
 func (m *Middleware) Start() {
 	go func() {
-		parent := context.Background()
-		ctx, cancel := context.WithTimeout(parent, m.timeout)
+		t := time.NewTimer(m.timeout)
 
 		for {
 			select {
-			case <-ctx.Done():
+			case <-t.C:
 				// Deadline triggered
-				cancel()
 				// Avoid blocking here if there are no listeners, otherwise
 				// we could block here and not be able to service an event
 				select {
@@ -96,15 +93,18 @@ func (m *Middleware) Start() {
 				default:
 				}
 
-				// Continue looping
-				ctx, cancel = context.WithTimeout(parent, m.timeout)
+				// Expired and channel drained by us, safe to Reset straight away
+				t.Reset(m.timeout)
 			case ev := <-m.eventCh:
-				cancel()
+				// Timer no expired. Stop and drain the channel
+				if !t.Stop() {
+					<-t.C
+				}
 				switch ev {
 				case eventResetTimer:
-					ctx, cancel = context.WithTimeout(parent, infiniteDuration)
+					t.Reset(infiniteDuration)
 				case eventStartTimer:
-					ctx, cancel = context.WithTimeout(parent, m.timeout)
+					t.Reset(m.timeout)
 				case eventStop:
 					return
 				}
