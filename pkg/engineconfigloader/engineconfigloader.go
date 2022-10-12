@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
@@ -355,9 +356,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			if config.CloseTimeoutSeconds == 0 {
 				config.CloseTimeoutSeconds = 30
 			}
-			for _, variable := range in.CustomDatabase.JsonInputVariables {
-				config.JsonInputVariables = append(config.JsonInputVariables, variable)
-			}
+			config.JsonInputVariables = append(config.JsonInputVariables, in.CustomDatabase.JsonInputVariables...)
 			out.Custom = database.ConfigJson(config)
 		default:
 			continue

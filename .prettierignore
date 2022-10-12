@@ -5,7 +5,8 @@ pnpm-lock.yaml
 *lock.json
 
 # WunderGraph
-generated
+**/.wundergraph/cache
+**/.wundergraph/generated
 
 # Next.js build output
 .next

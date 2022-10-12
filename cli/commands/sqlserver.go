@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/wundergraph/wundergraph/pkg/files"
 
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
+	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
 // postgresCmd represents the postgres command

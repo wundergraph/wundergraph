@@ -17,6 +17,9 @@ engine-dev: codegen
 check-setup:
 	$(shell ./scripts/check-setup.sh)
 
+setup-dev:
+	./scripts/setup-dev.sh
+
 bootstrap-minio:
 	./scripts/minio-setup.sh
 
@@ -31,6 +34,12 @@ test: test-go test-ts
 format-templates:
 	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
 
+golang-ci:
+	 golangci-lint run
+
+golang-ci-fix:
+	 golangci-lint run --fix
+
 install-proto:
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 
@@ -41,7 +50,7 @@ codegen: install-proto codegen-go
 	pnpm codegen
 
 build: codegen
-	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-w -s -X 'main.commit=$COMMIT' -X 'main.builtBy=ci' -X 'main.version=$VERSION' -X 'main.date=$DATE'" -trimpath
+	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath
 
 # This command builds the wunderctl binary and copies it into the nodejs wunderctl wrapper
 wunderctl: build

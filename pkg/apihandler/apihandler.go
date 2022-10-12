@@ -1405,12 +1405,12 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			if sse {
 				_, _ = w.Write([]byte("data: "))
 			}
-			_, err := reader.WriteTo(w)
+			_, _ = reader.WriteTo(w)
 			if subscribeOnce {
 				flusher.Flush()
 				return
 			}
-			_, err = w.Write(literal.LINETERMINATOR)
+			_, _ = w.Write(literal.LINETERMINATOR)
 			_, err = w.Write(literal.LINETERMINATOR)
 			if err != nil {
 				return

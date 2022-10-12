@@ -23,6 +23,8 @@ export class Client {
 		this.baseHeaders = {
 			'WG-SDK-Version': options.sdkVersion,
 		};
+
+		this.extraHeaders = { ...options.extraHeaders };
 	}
 
 	private readonly baseHeaders: Headers = {};

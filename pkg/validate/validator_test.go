@@ -1,8 +1,9 @@
 package validate
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMinLength(t *testing.T) {

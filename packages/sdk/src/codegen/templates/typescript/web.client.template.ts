@@ -120,7 +120,7 @@ export class Client {
         {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
             return this._client.subscribe({
                 operationName: "{{operationName}}",
-                isLiveQuery: false,
+                liveQuery: false,
                 input: options.input,
                 abortSignal: options.abortSignal,
             }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));
@@ -134,7 +134,7 @@ export class Client {
             {{operationName}}: (options: RequestOptions<{{#if hasInput}}{{operationName}}Input{{else}}never{{/if}},{{operationName}}Response>, cb: (response: Response<{{operationName}}Response>) => void) => {
                 return this._client.subscribe({
                     operationName: "{{operationName}}",
-                    isLiveQuery: true,
+                    liveQuery: true,
                     input: options.input,
                     abortSignal: options.abortSignal,
                 }, (result) => cb(this.resultToResponse<{{operationName}}Response>(result)));

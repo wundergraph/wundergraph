@@ -3,7 +3,6 @@ package apicache
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/url"
 	"path"
 	"time"
@@ -88,7 +87,7 @@ func NewRedis(connectionString string, log abstractlogger.Logger) (*RedisCache, 
 
 	userName := u.User.Username()
 	password, _ := u.User.Password()
-	addr := path.Join(fmt.Sprintf("%s", u.Host), u.Path)
+	addr := path.Join(u.Host, u.Path)
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     addr,

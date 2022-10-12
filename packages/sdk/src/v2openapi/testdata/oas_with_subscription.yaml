@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: store-data
+  version: '13.0'
+servers:
+  - url: 'http://0.0.0.0:8787'
+paths:
+  '/':
+    parameters:
+      - schema:
+          type: string
+        name: shopUrl
+        in: query
+        required: true
+      - schema:
+          type: string
+        name: email
+        in: header
+        required: true
+    get:
+      summary: Get store data
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/StoreData'
+      operationId: getStoreData
+
+components:
+  schemas:
+    StoreData:
+      title: StoreData
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            url:
+              type: string
+            subscription:
+              type: object
+              properties:
+                type:
+                  type: string
+                running:
+                  type: boolean
+
+        error:
+          type: string
