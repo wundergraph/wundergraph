@@ -1,8 +1,7 @@
-import { ConfigurationVariable, LogLevel, logLevelFromJSON, WgEnvironmentVariable } from '@wundergraph/protobuf';
+import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { pino } from 'pino';
 import pretty from 'pino-pretty';
-import { WgEnvValue } from '../env/env';
 
 export enum PinoLogLevel {
 	Fatal = 'fatal',
@@ -15,7 +14,7 @@ export enum PinoLogLevel {
 }
 
 export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLevel => {
-	const stringLevel = resolveConfigurationVariable(level);
+	const stringLevel = resolveConfigurationVariable(level).toUpperCase();
 	const wgLogLevel = logLevelFromJSON(stringLevel);
 	switch (wgLogLevel) {
 		case LogLevel.FATAL:
@@ -35,13 +34,7 @@ export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLeve
 	}
 };
 
-let logger: pino.Logger | undefined;
-
-export const Logger = (): pino.Logger => {
-	if (logger) {
-		return logger;
-	}
-
+const initLogger = (): pino.Logger => {
 	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
 
 	let options: pino.LoggerOptions = {
@@ -58,20 +51,23 @@ export const Logger = (): pino.Logger => {
 			colorize: true,
 			translateTime: "SYS:yyyy-mm-dd'T'HH:MM:ssp", // https://www.npmjs.com/package/dateformat
 			customPrettifiers: {
-				time: (timestamp) => `${timestamp}`,
+				time: (timestamp: any) => `${timestamp}`,
 			},
 			ignore: 'pid,hostname',
 			messageFormat: 'SDK: {msg}',
 		});
 
-		logger = pino(options, stream);
-	} else {
-		logger = pino(options);
+		return pino(options, stream);
 	}
 
-	return logger;
+	return pino(options);
 };
 
+const logger = initLogger();
+
+export const SdkLogger = logger.child({ component: 'sdk' });
+export const ServerLogger = logger.child({ component: 'server' });
+
 export const SetLogLevel = (level: PinoLogLevel) => {
-	Logger().level = level;
+	SdkLogger.level = level;
 };

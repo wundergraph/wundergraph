@@ -30,7 +30,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
 import { wunderctlExec } from '../wunderctlexec';
-import { Logger } from '../logger/logger';
+import { SdkLogger } from '../logger/logger';
 
 export interface GraphQLOperation {
 	Name: string;
@@ -149,8 +149,8 @@ export const parseOperations = (
 					});
 					const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
 					if (errors.length > 0) {
-						Logger().error(`Error parsing operation ${operationName}: ${errors.join(',')}`);
-						Logger().error('Skipping operation');
+						SdkLogger.error(`Error parsing operation ${operationName}: ${errors.join(',')}`);
+						SdkLogger.error('Skipping operation');
 						return;
 					}
 
@@ -269,11 +269,10 @@ export const parseOperations = (
 			},
 		});
 	} catch (e) {
-		const log = Logger();
-		log.error(e);
-		log.error('No Operations found! Please create at least one Operation in the directory ./operations');
-		log.error("Operation files must have the file extension '.graphql', otherwise they are ignored.");
-		log.error("Operations don't need to be named, the file name is responsible for the operation name.");
+		SdkLogger.error(e);
+		SdkLogger.error('No Operations found! Please create at least one Operation in the directory ./operations');
+		SdkLogger.error("Operation files must have the file extension '.graphql', otherwise they are ignored.");
+		SdkLogger.error("Operations don't need to be named, the file name is responsible for the operation name.");
 	}
 	return parsed;
 };
@@ -1279,8 +1278,8 @@ export const loadOperations = (schemaFileName: string): string => {
 	const output = result?.stdout;
 	if (output) {
 		const out = JSON.parse(output) as LoadOperationsOutput;
-		out.info?.forEach((info) => Logger().info(info));
-		out.errors?.forEach((info) => Logger().info(info));
+		out.info?.forEach((info) => SdkLogger.info(info));
+		out.errors?.forEach((info) => SdkLogger.info(info));
 		return out.files?.map((file) => file.content).join(' ') || '';
 	}
 	return '';
