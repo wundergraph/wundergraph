@@ -77,6 +77,7 @@ type options struct {
 	insecureCookies         bool
 	githubAuthDemo          GitHubAuthDemo
 	devMode                 bool
+	middlewares             []func(http.Handler) http.Handler
 }
 
 type Option func(options *options)
@@ -143,6 +144,14 @@ func WithDebugMode(enable bool) Option {
 func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	return func(options *options) {
 		options.forceHttpsRedirects = forceHttpsRedirects
+	}
+}
+
+// WithMiddleware appends an HTTP middleware to the node's HTTP server.
+// Middlewares run in the same order they were added.
+func WithMiddleware(middleware func(http.Handler) http.Handler) Option {
+	return func(options *options) {
+		options.middlewares = append(options.middlewares, middleware)
 	}
 }
 
@@ -301,6 +310,10 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	n.log = abstractlogger.NewZapLogger(logging.Zap().With(zap.String("component", "@wundergraph/node")), logLevel)
 
 	router := mux.NewRouter()
+
+	for _, m := range n.options.middlewares {
+		router.Use(m)
+	}
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
 

@@ -6,10 +6,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
+	"github.com/wundergraph/wundergraph/pkg/node"
 )
 
 var (
@@ -17,6 +21,7 @@ var (
 	disableForceHttpsRedirects bool
 	enableIntrospection        bool
 	gracefulTimeout            int
+	idleTimeout                int
 )
 
 // startCmd represents the start command
@@ -35,6 +40,18 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
+		var opts []node.Option
+		if idleTimeout > 0 {
+			middleware := httpidletimeout.New(time.Duration(idleTimeout) * time.Second)
+			defer middleware.Cancel()
+			opts = append(opts, node.WithMiddleware(middleware.Handler))
+			go func() {
+				<-middleware.C()
+				log.Info("exiting due to idle timeout")
+				stop()
+			}()
+		}
+
 		if !excludeServer {
 			g.Go(func() error {
 				err := startWunderGraphServer(ctx)
@@ -46,7 +63,7 @@ var startCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n)
+			err := StartWunderGraphNode(n, opts...)
 			if err != nil {
 				log.Error("Start node", abstractlogger.Error(err))
 			}
@@ -69,4 +86,5 @@ func init() {
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
+	startCmd.Flags().IntVar(&idleTimeout, "idle-timeout", 0, "exits after the given timeout has elapsed without any requests, in seconds")
 }

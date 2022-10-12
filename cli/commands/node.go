@@ -75,7 +75,7 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
 }
 
-func StartWunderGraphNode(n *node.Node) error {
+func StartWunderGraphNode(n *node.Node, opts ...node.Option) error {
 	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
@@ -105,10 +105,13 @@ func StartWunderGraphNode(n *node.Node) error {
 		return err
 	}
 
-	err = n.StartBlocking(
+	allOpts := []node.Option{
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithDebugMode(rootFlags.DebugMode),
-	)
+	}
+	allOpts = append(allOpts, opts...)
+
+	err = n.StartBlocking(allOpts...)
 	if err != nil {
 		return err
 	}
