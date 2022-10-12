@@ -235,6 +235,10 @@ test('Hook should return 404 if not being used', async () => {
 	expect(postLogoutResponse.statusCode).toEqual(404);
 });
 
+// interface onConnectionInitResponse {
+// 	payload: JSONObject;
+// }
+
 test('onWSTransportConnectionInit hook registered', async () => {
 	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
@@ -244,7 +248,9 @@ test('onWSTransportConnectionInit hook registered', async () => {
 						enableForDataSources: ['chatId'],
 						hook: async () => {
 							return {
-								authentication: 'secret',
+								payload: {
+									chatId: '123',
+								},
 							};
 						},
 					},
@@ -253,13 +259,26 @@ test('onWSTransportConnectionInit hook registered', async () => {
 		},
 	};
 	const fastify = await getFastify(serverConfig);
-	const postAuthenticationResponse = await fastify.inject({
+	const onConnectionInitResponse = await fastify.inject({
 		method: 'POST',
 		url: '/global/wsTransport/onConnectionInit',
 		payload: {
-			headers: {},
+			__wg: {
+				clientRequest: {},
+			},
+			apiId: 'chatId',
+			request: {},
+			response: {
+				headers: {},
+			},
 		},
 	});
-	expect(postAuthenticationResponse.statusCode).toEqual(200);
-	expect(postAuthenticationResponse.json()).toEqual({ hook: 'onConnectionInit' });
+	expect(onConnectionInitResponse.statusCode).toEqual(200);
+	expect(onConnectionInitResponse.json()).toEqual({
+		apiId: 'chatId',
+		hook: 'onConnectionInit',
+		response: {
+			payload: { chatId: '123' },
+		},
+	});
 });
