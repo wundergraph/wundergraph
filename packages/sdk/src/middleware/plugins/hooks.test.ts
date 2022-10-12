@@ -1,6 +1,6 @@
 import { internalClientFactory } from '../internal-client';
 import { createServer } from '../server';
-import { FastifyRequestBody, WunderGraphHooksAndServerConfig } from '../types';
+import { FastifyRequestBody, OnConnectionInitHookRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
 	const clientFactory = internalClientFactory('app', 'app', [], 'http://localhost:9991');
@@ -235,11 +235,7 @@ test('Hook should return 404 if not being used', async () => {
 	expect(postLogoutResponse.statusCode).toEqual(404);
 });
 
-// interface onConnectionInitResponse {
-// 	payload: JSONObject;
-// }
-
-test('onWSTransportConnectionInit hook registered', async () => {
+test('onWSTransportConnectionInit hook', async () => {
 	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
 			global: {
@@ -249,7 +245,7 @@ test('onWSTransportConnectionInit hook registered', async () => {
 						hook: async () => {
 							return {
 								payload: {
-									chatId: '123',
+									authentication: 'secret',
 								},
 							};
 						},
@@ -266,19 +262,14 @@ test('onWSTransportConnectionInit hook registered', async () => {
 			__wg: {
 				clientRequest: {},
 			},
-			apiId: 'chatId',
 			request: {},
-			response: {
-				headers: {},
-			},
-		},
+		} as OnConnectionInitHookRequestBody,
 	});
 	expect(onConnectionInitResponse.statusCode).toEqual(200);
 	expect(onConnectionInitResponse.json()).toEqual({
-		apiId: 'chatId',
 		hook: 'onConnectionInit',
 		response: {
-			payload: { chatId: '123' },
+			payload: { authentication: 'secret' },
 		},
 	});
 });

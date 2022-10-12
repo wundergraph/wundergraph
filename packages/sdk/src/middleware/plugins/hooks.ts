@@ -195,7 +195,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	if (config.global?.wsTransport?.onConnectionInit) {
 		fastify.post<{
 			Body: {
-				apiId: string;
 				request: WunderGraphRequest;
 			};
 		}>(`/global/wsTransport/onConnectionInit`, async (request, reply) => {
@@ -210,7 +209,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				});
 				return {
 					hook: 'onConnectionInit',
-					apiId: request.body.apiId,
 					response: resp,
 				};
 			} catch (err) {

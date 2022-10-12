@@ -60,6 +60,17 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			HTTPClient:      defaultHttpClient,
 			StreamingClient: streamingClient,
 			BatchFactory:    graphql_datasource.NewBatchFactory(),
+			//	onSubscriptionCallback: func(ctx context.Context) (payload json.RawMessage){
+			//		if !metaData[onWSConnectionInit] {
+			//			return nil
+			//		}
+			//
+			//		// do onWsConnectionInit callback here
+			//
+			//		return
+			//
+			//	},
+			//},
 		},
 		rest: &oas_datasource.Factory{
 			Client: defaultHttpClient,

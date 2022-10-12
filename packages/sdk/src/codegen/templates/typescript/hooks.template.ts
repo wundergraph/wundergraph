@@ -1,7 +1,7 @@
 //language=handlebars
 export const template = `
 import { {{ modelImports }} } from "./models"
-import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration } from "@wundergraph/sdk";
+import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration, WsTransportOnConnectionInitResponse } from "@wundergraph/sdk";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 
@@ -28,6 +28,9 @@ export interface HttpTransportHookRequestWithResponse extends BaseRequestContext
         name: string;
         type: string;
     }
+}
+export interface WsTransportHookRequest extends BaseRequestContext<User, InternalClient> {
+		request: WunderGraphRequest;
 }
 export interface GlobalHooksConfig {
     httpTransport?: {
@@ -60,7 +63,7 @@ export interface GlobalHooksConfig {
         // onConnectionInit is used to populate 'connection_init' message payload with custom data
         // it can be used to authenticate the websocket connection
         onConnectionInit?: {
-            hook: (hook: HttpTransportHookRequest) => Promise<any>;
+            hook: (hook: WsTransportHookRequest) => Promise<WsTransportOnConnectionInitResponse>;
             /**
              * enableForDataSources will enable the hook for specific data sources.
              * you should provide a list of data sources ids
