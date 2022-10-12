@@ -234,3 +234,32 @@ test('Hook should return 404 if not being used', async () => {
 	});
 	expect(postLogoutResponse.statusCode).toEqual(404);
 });
+
+test('onWSTransportConnectionInit hook registered', async () => {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
+		hooks: {
+			global: {
+				wsTransport: {
+					onConnectionInit: {
+						enableForDataSources: ['chatId'],
+						hook: async () => {
+							return {
+								authentication: 'secret',
+							};
+						},
+					},
+				},
+			},
+		},
+	};
+	const fastify = await getFastify(serverConfig);
+	const postAuthenticationResponse = await fastify.inject({
+		method: 'POST',
+		url: '/global/wsTransport/onConnectionInit',
+		payload: {
+			headers: {},
+		},
+	});
+	expect(postAuthenticationResponse.statusCode).toEqual(200);
+	expect(postAuthenticationResponse.json()).toEqual({ hook: 'onConnectionInit' });
+});

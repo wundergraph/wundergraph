@@ -193,27 +193,27 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 	// wsTransport
 	if (config.global?.wsTransport?.onConnectionInit) {
-		config.global?.wsTransport?.onConnectionInit?.enableForDataSources.forEach((dataSource) => {
-			fastify.post<{
-				Body: {
-					request: WunderGraphRequest;
-				};
-			}>(`/global/wsTransport/${dataSource}/onConnectionInit`, async (request, reply) => {
-				try {
-					return await config.global?.wsTransport?.onConnectionInit?.hook({
-						...request.ctx,
-						request: {
-							...request.body.request,
-							headers: new Headers(request.body.request.headers),
-						},
-					});
-				} catch (err) {
-					request.log.error(err);
-					reply.code(500).send({ hook: 'onConnectionInit', error: err });
-				}
-				reply.code(200).send({
-					hook: 'onConnectionInit',
+		fastify.post<{
+			Body: {
+				request: WunderGraphRequest;
+			};
+		}>(`/global/wsTransport/onConnectionInit`, async (request, reply) => {
+			reply.type('application/json').code(200);
+			try {
+				return await config.global?.wsTransport?.onConnectionInit?.hook({
+					...request.ctx,
+					request: {
+						...request.body.request,
+						headers: new Headers(request.body.request.headers),
+					},
 				});
+			} catch (err) {
+				request.log.error(err);
+				console.log(err);
+				reply.code(504).send({ hook: 'onConnectionInit', error: err });
+			}
+			reply.code(200).send({
+				hook: 'onConnectionInit',
 			});
 		});
 	}
