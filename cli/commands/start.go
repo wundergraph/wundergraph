@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/node"
 )
 
@@ -42,15 +41,10 @@ var startCmd = &cobra.Command{
 
 		var opts []node.Option
 		if exitAfterIdle > 0 {
-			middleware := httpidletimeout.New(time.Duration(exitAfterIdle) * time.Second)
-			middleware.Start()
-			defer middleware.Cancel()
-			opts = append(opts, node.WithMiddleware(middleware.Handler))
-			go func() {
-				<-middleware.C()
+			opts = append(opts, node.WithIdleTimeout(time.Duration(exitAfterIdle)*time.Second, func() {
 				log.Info("exiting due to idle timeout")
 				stop()
-			}()
+			}))
 		}
 
 		if !excludeServer {

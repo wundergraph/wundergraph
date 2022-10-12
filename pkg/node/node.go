@@ -22,6 +22,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -77,7 +78,8 @@ type options struct {
 	insecureCookies         bool
 	githubAuthDemo          GitHubAuthDemo
 	devMode                 bool
-	middlewares             []func(http.Handler) http.Handler
+	idleTimeout             time.Duration
+	idleHandler             func()
 }
 
 type Option func(options *options)
@@ -147,11 +149,12 @@ func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	}
 }
 
-// WithMiddleware appends an HTTP middleware to the node's HTTP server.
-// Middlewares run in the same order they were added.
-func WithMiddleware(middleware func(http.Handler) http.Handler) Option {
+// WithIdleTimeout makes the Node call the given handler when idleTimeout
+// has elapsed without any requests.
+func WithIdleTimeout(idleTimeout time.Duration, idleHandler func()) Option {
 	return func(options *options) {
-		options.middlewares = append(options.middlewares, middleware)
+		options.idleTimeout = idleTimeout
+		options.idleHandler = idleHandler
 	}
 }
 
@@ -311,10 +314,6 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	router := mux.NewRouter()
 
-	for _, m := range n.options.middlewares {
-		router.Use(m)
-	}
-
 	internalRouter := router.PathPrefix("/internal").Subrouter()
 
 	if n.options.globalRateLimit.enable {
@@ -420,6 +419,17 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 			return context.WithValue(ctx, "conn", c)
 		},
 		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
+	}
+
+	if n.options.idleTimeout > 0 {
+		m := httpidletimeout.New(n.options.idleTimeout)
+		router.Use(m.Handler)
+		n.server.RegisterOnShutdown(m.Cancel)
+		m.Start()
+		go func() {
+			<-m.C()
+			n.options.idleHandler()
+		}()
 	}
 
 	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
