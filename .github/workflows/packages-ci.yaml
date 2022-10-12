@@ -17,6 +17,7 @@ on:
     branches:
       - main
       - next
+      - test
     paths:
       - 'packages/**/*'
       - '.github/workflows/packages-ci.yaml'
