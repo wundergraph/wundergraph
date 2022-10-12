@@ -191,7 +191,7 @@ export interface HooksConfiguration<
 		wsTransport?: {
 			onConnectionInit?: {
 				hook: OperationHookFunction;
-				enableForDataSources?: string[];
+				enableForDataSources: string[];
 			};
 		};
 	};
@@ -774,26 +774,24 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
 				const enableForDataSources = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForDataSources;
-				if (enableForDataSources) {
-					app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
-						if (ds.Id !== undefined && ds.Id !== '' && ds.Kind === DataSourceKind.GRAPHQL) {
-							if (enableForDataSources.includes(ds.Id)) {
-								let Custom: GraphQLApiCustom = ds.Custom as GraphQLApiCustom;
+				app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
+					if (ds.Id !== undefined && ds.Id !== '' && ds.Kind === DataSourceKind.GRAPHQL) {
+						if (enableForDataSources.includes(ds.Id)) {
+							let Custom: GraphQLApiCustom = ds.Custom as GraphQLApiCustom;
 
-								Custom = {
-									...Custom,
-									HooksConfiguration: { onWSTransportConnectionInit: true },
-								};
+							Custom = {
+								...Custom,
+								HooksConfiguration: { onWSTransportConnectionInit: true },
+							};
 
-								return {
-									...ds,
-									Custom,
-								};
-							}
+							return {
+								...ds,
+								Custom,
+							};
 						}
-						return ds;
-					});
-				}
+					}
+					return ds;
+				});
 			}
 
 			for (const operationName in config.server?.hooks?.queries) {

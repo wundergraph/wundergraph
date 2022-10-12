@@ -1,12 +1,12 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import { WunderGraphRequest, WunderGraphResponse, ClientRequestHeaders, AuthenticationOK } from '../types';
+import { ClientRequestHeaders, WunderGraphRequest, WunderGraphResponse } from '../types';
 import {
 	HooksConfiguration,
 	HooksConfigurationOperationType,
-	OperationHooksConfiguration,
 	OperationHookFunction,
+	OperationHooksConfiguration,
 } from '../../configure';
-import { WunderGraphConfiguration, OperationType } from '@wundergraph/protobuf';
+import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@web-std/fetch';
 
@@ -190,6 +190,33 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			return { hook: 'onOriginResponse', error: err };
 		}
 	});
+
+	// wsTransport
+	if (config.global?.wsTransport?.onConnectionInit) {
+		config.global?.wsTransport?.onConnectionInit?.enableForDataSources.forEach((dataSource) => {
+			fastify.post<{
+				Body: {
+					request: WunderGraphRequest;
+				};
+			}>(`/global/wsTransport/${dataSource}/onConnectionInit`, async (request, reply) => {
+				try {
+					return await config.global?.wsTransport?.onConnectionInit?.hook({
+						...request.ctx,
+						request: {
+							...request.body.request,
+							headers: new Headers(request.body.request.headers),
+						},
+					});
+				} catch (err) {
+					request.log.error(err);
+					reply.code(500).send({ hook: 'onConnectionInit', error: err });
+				}
+				reply.code(200).send({
+					hook: 'onConnectionInit',
+				});
+			});
+		});
+	}
 
 	const queries =
 		config.config.api?.operations.filter((op) => op.operationType == OperationType.QUERY).map((op) => op.name) || [];

@@ -72,7 +72,7 @@ export interface GlobalHooksConfig {
 						 *	url: 'http://localhost:8085/query',
 						 *});
              */
-       	    enableForDataSources?: DATA_SOURCES[]; 
+       	    enableForDataSources: DATA_SOURCES[]; 
         }
     }
 }
