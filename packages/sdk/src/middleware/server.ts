@@ -19,7 +19,7 @@ import {
 	WunderGraphServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
-import { Logger, resolveServerLogLevel, SetLogLevel } from '../logger/logger';
+import { ServerLogger, resolveServerLogLevel } from '../logger/logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 
 let WG_CONFIG: WunderGraphConfiguration;
@@ -31,7 +31,7 @@ let logger: pino.Logger;
  * You need to pass START_HOOKS_SERVER=true to start the server
  */
 if (process.env.START_HOOKS_SERVER === 'true') {
-	logger = Logger();
+	logger = ServerLogger;
 
 	/**
 	 * The 'uncaughtExceptionMonitor' event is emitted before an 'uncaughtException' event is emitted or
@@ -146,7 +146,7 @@ export const createServer = async ({
 	clientFactory,
 }: ServerRunOptions): Promise<FastifyInstance> => {
 	if (config.api?.serverOptions?.logger?.level) {
-		SetLogLevel(resolveServerLogLevel(config.api.serverOptions.logger.level));
+		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
 	const fastify = Fastify({

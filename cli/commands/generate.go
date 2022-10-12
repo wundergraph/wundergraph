@@ -65,7 +65,7 @@ var generateCmd = &cobra.Command{
 			),
 		})
 		defer func() {
-			log.Debug("Stopping config-runner after WunderNode shutdown")
+			log.Debug("Stopping config-runner")
 			err := configRunner.Stop()
 			if err != nil {
 				log.Error("Stopping runner failed",

@@ -14,7 +14,20 @@ export enum WgEnv {
 	ServerPort = 'WG_SERVER_PORT',
 }
 
-export type LoggerLevel = 'FATAL' | 'PANIC' | 'WARNING' | 'ERROR' | 'INFO' | 'DEBUG';
+export type LoggerLevel =
+	| 'FATAL'
+	| 'PANIC'
+	| 'WARNING'
+	| 'ERROR'
+	| 'INFO'
+	| 'DEBUG'
+	// lowercase
+	| 'fatal'
+	| 'panic'
+	| 'warning'
+	| 'error'
+	| 'info'
+	| 'debug';
 
 const defaultHost = '127.0.0.1';
 const defaultNodePort = '9991';

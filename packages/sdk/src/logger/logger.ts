@@ -14,7 +14,13 @@ export enum PinoLogLevel {
 }
 
 export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLevel => {
-	const stringLevel = resolveConfigurationVariable(level).toUpperCase();
+	const stringLevel = resolveConfigurationVariable(level);
+
+	return resolvePinoLogLevel(stringLevel);
+};
+
+const resolvePinoLogLevel = (level: string): PinoLogLevel => {
+	const stringLevel = level.toUpperCase();
 	const wgLogLevel = logLevelFromJSON(stringLevel);
 	switch (wgLogLevel) {
 		case LogLevel.FATAL:
@@ -36,9 +42,10 @@ export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLeve
 
 const initLogger = (): pino.Logger => {
 	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
+	const logLevel = process.env.WG_CLI_LOG_LEVEL ? resolvePinoLogLevel(process.env.WG_CLI_LOG_LEVEL) : PinoLogLevel.Info;
 
 	let options: pino.LoggerOptions = {
-		level: PinoLogLevel.Info,
+		level: logLevel,
 		formatters: {
 			level(label, number) {
 				return { level: label };
@@ -54,7 +61,8 @@ const initLogger = (): pino.Logger => {
 				time: (timestamp: any) => `${timestamp}`,
 			},
 			ignore: 'pid,hostname',
-			messageFormat: 'SDK: {msg}',
+			messageFormat: '{msg}',
+			singleLine: true,
 		});
 
 		return pino(options, stream);
@@ -66,8 +74,4 @@ const initLogger = (): pino.Logger => {
 const logger = initLogger();
 
 export const SdkLogger = logger.child({ component: 'sdk' });
-export const ServerLogger = logger.child({ component: 'server' });
-
-export const SetLogLevel = (level: PinoLogLevel) => {
-	SdkLogger.level = level;
-};
+export const ServerLogger = logger.child({ component: 'server' }, { level: PinoLogLevel.Info });

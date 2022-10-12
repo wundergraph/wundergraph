@@ -64,6 +64,10 @@ func zapLogger(syncer zapcore.WriteSyncer, encodeAsJSON bool) *zap.Logger {
 		zap.DebugLevel,
 	))
 
+	if !encodeAsJSON {
+		return zapLogger
+	}
+
 	host, err := os.Hostname()
 	if err != nil {
 		host = "unknown"
@@ -79,7 +83,7 @@ func FindLogLevel(logLevel string, defaultLevel abstractlogger.Level) abstractlo
 	switch logLevel {
 	case "debug":
 		return abstractlogger.DebugLevel
-	case "warn":
+	case "warning":
 		return abstractlogger.WarnLevel
 	case "error":
 		return abstractlogger.ErrorLevel
