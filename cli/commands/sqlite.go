@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
@@ -22,6 +23,7 @@ var sqliteCmd = &cobra.Command{
 		}
 
 		databaseURL := args[0]
+		log.Info("introspecting sqlite database", abstractlogger.String("url", databaseURL))
 		introspectionSchema := fmt.Sprintf(`datasource db {
 			provider = "sqlite"
 			url      = "%s"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
@@ -24,6 +25,7 @@ var planetscaleCmd = &cobra.Command{
 		}
 
 		databaseURL := args[0]
+		log.Info("introspecting planetscale", abstractlogger.String("url", databaseURL))
 		parsed, err := url.Parse(databaseURL)
 		if err != nil {
 			return errors.New("invalid database url")

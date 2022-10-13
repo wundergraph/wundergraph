@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
@@ -22,6 +23,7 @@ var sqlserverCmd = &cobra.Command{
 		}
 
 		databaseURL := args[0]
+		log.Info("introspecting sqlserver database", abstractlogger.String("url", databaseURL))
 		introspectionSchema := fmt.Sprintf(`datasource db {
 			provider = "sqlserver"
 			url      = "%s"

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
@@ -21,6 +22,7 @@ var mysqlCmd = &cobra.Command{
 			return err
 		}
 		databaseURL := args[0]
+		log.Info("introspecting mysql database", abstractlogger.String("url", databaseURL))
 		introspectionSchema := fmt.Sprintf(`datasource db {
 			provider = "mysql"
 			url      = "%s"
