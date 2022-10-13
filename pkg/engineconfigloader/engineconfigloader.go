@@ -164,7 +164,9 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			if err != nil {
 				return nil, err
 			}
-			d.graphql.HTTPClient = client
+			graphql := *d.graphql
+			graphql.HTTPClient = client
+			return &graphql, nil
 		}
 		return d.graphql, nil
 	case wgpb.DataSourceKind_REST:
