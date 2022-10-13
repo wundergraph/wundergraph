@@ -49,6 +49,12 @@ type Factory struct {
 	Client *http.Client
 }
 
+func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
+	return &Factory{
+		Client: client,
+	}
+}
+
 func (f *Factory) Planner(ctx context.Context) plan.DataSourcePlanner {
 	return &Planner{
 		client: f.Client,

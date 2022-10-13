@@ -43,6 +43,7 @@ const DefaultNodeOptions = {
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
 	},
+	defaultRequestTimeoutSeconds: 0,
 };
 
 const DefaultServerOptions: MandatoryServerOptions = {
@@ -73,6 +74,16 @@ export interface NodeOptions {
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
+	/**
+	 * Default timeout for network requests, in seconds.
+	 *
+	 * @remarks
+	 * See {@link IntrospectionConfiguration | the IntrospectionConfiguration type}
+	 * for data source specific timeouts.
+	 *
+	 * @defaultValue 10 seconds
+	 */
+	defaultRequestTimeoutSeconds?: number;
 }
 
 export interface ResolvedNodeOptions {
@@ -82,6 +93,7 @@ export interface ResolvedNodeOptions {
 	logger: {
 		level: ConfigurationVariable;
 	};
+	defaultRequestTimeoutSeconds: number;
 }
 
 export interface ServerOptions {
@@ -135,6 +147,8 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
+				defaultRequestTimeoutSeconds:
+					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions?.defaultRequestTimeoutSeconds,
 		  };
 
 	return {
@@ -147,6 +161,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		logger: {
 			level: mapInputVariable(nodeOptions.logger.level),
 		},
+		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
 	};
 };
 

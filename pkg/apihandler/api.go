@@ -1,6 +1,8 @@
 package apihandler
 
 import (
+	"time"
+
 	"github.com/jensneuse/abstractlogger"
 
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -16,10 +18,11 @@ type Logging struct {
 }
 
 type Options struct {
-	ServerUrl     string
-	PublicNodeUrl string
-	Listener      *Listener
-	Logging       Logging
+	ServerUrl      string
+	PublicNodeUrl  string
+	Listener       *Listener
+	Logging        Logging
+	DefaultTimeout time.Duration
 }
 
 type Api struct {
