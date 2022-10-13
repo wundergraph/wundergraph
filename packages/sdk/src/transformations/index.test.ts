@@ -51,6 +51,7 @@ test('renameTypes', async () => {
 							UpstreamSchema: '',
 						},
 						Directives: [],
+						RequestTimeoutSeconds: 0,
 					},
 				],
 				[
@@ -116,6 +117,7 @@ test('renameTypes', async () => {
 					UpstreamSchema: '',
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[
@@ -182,6 +184,7 @@ test('renameTypeFields', async () => {
 							UpstreamSchema: '',
 						},
 						Directives: [],
+						RequestTimeoutSeconds: 0,
 					},
 				],
 				[
@@ -266,6 +269,7 @@ test('renameTypeFields', async () => {
 							UpstreamSchema: '',
 						},
 						Directives: [],
+						RequestTimeoutSeconds: 0,
 					},
 				],
 				[
