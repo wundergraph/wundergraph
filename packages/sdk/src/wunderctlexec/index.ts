@@ -15,6 +15,7 @@ export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnVal
 	if (process.env.WG_DIR_ABS) {
 		args.cmd.push('--wundergraph-dir', '.');
 	}
+	console.log(`exec ${file} ${args.cmd.join(' ')}`);
 	return execa.sync(file, args.cmd, {
 		encoding: 'utf-8',
 		timeout: args.timeout,
@@ -32,6 +33,7 @@ export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<strin
 	if (process.env.WG_DIR_ABS) {
 		args.cmd.push('--wundergraph-dir', '.');
 	}
+	console.log(`execa ${file} ${args.cmd.join(' ')}`);
 	const subprocess = execa(file, args.cmd, {
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
