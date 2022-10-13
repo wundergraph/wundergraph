@@ -927,7 +927,6 @@ type mockResolveConfig struct {
 	subscriptionPollingIntervalMillis int64
 }
 
-// TODO:
 func buildHooksConfig(operation *wgpb.Operation) hooksConfig {
 	if operation == nil || operation.HooksConfiguration == nil {
 		return hooksConfig{}

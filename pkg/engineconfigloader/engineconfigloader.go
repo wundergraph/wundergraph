@@ -13,14 +13,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/jensneuse/abstractlogger"
-
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -47,9 +49,12 @@ type DefaultFactoryResolver struct {
 	rest             *oas_datasource.Factory
 	static           *staticdatasource.Factory
 	database         *database.Factory
+	hooksClient      *hooks.Client
 }
 
-func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
+func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper,
+	debug bool, log abstractlogger.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
+
 	defaultHttpClient := &http.Client{
 		Timeout:   transportFactory.DefaultTransportTimeout(),
 		Transport: transportFactory.RoundTripper(baseTransport, false),
@@ -65,17 +70,6 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			HTTPClient:      defaultHttpClient,
 			StreamingClient: streamingClient,
 			BatchFactory:    graphql_datasource.NewBatchFactory(),
-			//	onSubscriptionCallback: func(ctx context.Context) (payload json.RawMessage){
-			//		if !metaData[onWSConnectionInit] {
-			//			return nil
-			//		}
-			//
-			//		// do onWsConnectionInit callback here
-			//
-			//		return
-			//
-			//	},
-			//},
 		},
 		rest: &oas_datasource.Factory{
 			Client: defaultHttpClient,
@@ -86,6 +80,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			Debug:  debug,
 			Log:    log,
 		},
+		hooksClient: hooksClient,
 	}
 }
 
@@ -167,17 +162,66 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	}, nil
 }
 
+func (d *DefaultFactoryResolver) onWsConnectionInitCallback() *graphql_datasource.OnWsConnectionInitCallback {
+	var callback graphql_datasource.OnWsConnectionInitCallback = func(ctx context.Context, url string, header http.Header) (json.RawMessage, error) {
+		payload := hooks.OnWsConnectionInitHookPayload{
+			Request: hooks.WunderGraphRequest{
+				RequestURI: url,
+				Headers:    hooks.HeaderSliceToCSV(header),
+			},
+		}
+		hookData, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+
+		if user := authentication.UserFromContext(ctx); user != nil {
+			if userJson, err := json.Marshal(user); err == nil {
+				hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
+			}
+		}
+
+		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData)
+		if err != nil {
+			return nil, err
+		}
+
+		resp := struct {
+			Payload json.RawMessage `json:"payload"`
+		}{}
+
+		if err := json.Unmarshal(out.Response, &resp); err != nil {
+			return nil, err
+		}
+
+		return resp.Payload, nil
+	}
+
+	return &callback
+}
+
 func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error) {
 	switch ds.Kind {
 	case wgpb.DataSourceKind_GRAPHQL:
+		factory := &graphql_datasource.Factory{
+			HTTPClient:      d.graphql.HTTPClient,
+			StreamingClient: d.graphql.StreamingClient,
+			BatchFactory:    d.graphql.BatchFactory,
+		}
+
 		if d.requiresCustomHTTPClient(ds, ds.CustomGraphql.Fetch) {
 			client, err := d.newHTTPClient(ds, ds.CustomGraphql.Fetch)
 			if err != nil {
 				return nil, err
 			}
-			d.graphql.HTTPClient = client
+			factory.HTTPClient = client
 		}
-		return d.graphql, nil
+
+		if ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
+			factory.OnWsConnectionInitCallback = d.onWsConnectionInitCallback()
+		}
+
+		return factory, nil
 	case wgpb.DataSourceKind_REST:
 		if d.requiresCustomHTTPClient(ds, ds.CustomRest.Fetch) {
 			client, err := d.newHTTPClient(ds, ds.CustomRest.Fetch)
