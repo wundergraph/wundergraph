@@ -236,7 +236,8 @@ message DataSourceConfiguration {
 	DataSourceCustom_Static customStatic = 7;
 	DataSourceCustom_Database customDatabase = 8;
 	repeated DirectiveConfiguration directives = 9;
-	string id = 10;
+	int64 requestTimeoutSeconds = 10;
+	string id = 11;
 }
 
 message DirectiveConfiguration {
@@ -466,6 +467,7 @@ message NodeOptions {
 	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
+	int64 defaultRequestTimeoutSeconds = 5;
 }
 
 message ServerLogging {

@@ -54,6 +54,7 @@ test('renameTypes', async () => {
 							},
 						},
 						Directives: [],
+						RequestTimeoutSeconds: 0,
 					},
 				],
 				[
@@ -122,6 +123,7 @@ test('renameTypes', async () => {
 					},
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[
@@ -191,6 +193,7 @@ test('renameTypeFields', async () => {
 							},
 						},
 						Directives: [],
+						RequestTimeoutSeconds: 0,
 					},
 				],
 				[
@@ -278,6 +281,7 @@ test('renameTypeFields', async () => {
 							},
 						},
 						Directives: [],
+						RequestTimeoutSeconds: 0,
 					},
 				],
 				[

@@ -51,6 +51,7 @@ test('Should be merged', () => {
 					},
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[],
@@ -104,6 +105,7 @@ test('Should be merged', () => {
 					},
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[
@@ -186,6 +188,7 @@ test('Should be merged', () => {
 					},
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[
@@ -258,6 +261,7 @@ test('Should be merged', () => {
 					},
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[
@@ -425,6 +429,7 @@ test('Should collide because weather and countries API has an enum called Langua
 					},
 				},
 				Directives: [],
+				RequestTimeoutSeconds: 0,
 			},
 		],
 		[],

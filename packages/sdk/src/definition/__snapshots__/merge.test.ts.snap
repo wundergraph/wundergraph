@@ -80,7 +80,8 @@ exports[`Should be merged: merged_apis 1`] = `
           "onWSTransportConnectionInit": false
         }
       },
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     },
     {
       "Kind": 2,
@@ -158,7 +159,8 @@ exports[`Should be merged: merged_apis 1`] = `
           "onWSTransportConnectionInit": false
         }
       },
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     },
     {
       "Kind": 2,
@@ -254,7 +256,8 @@ exports[`Should be merged: merged_apis 1`] = `
           "onWSTransportConnectionInit": false
         }
       },
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     },
     {
       "Kind": 2,
@@ -330,7 +333,8 @@ exports[`Should be merged: merged_apis 1`] = `
           "onWSTransportConnectionInit": false
         }
       },
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     },
     {
       "Kind": 0,
@@ -352,7 +356,8 @@ exports[`Should be merged: merged_apis 1`] = `
         }
       },
       "ChildNodes": [],
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     },
     {
       "Kind": 0,
@@ -374,7 +379,8 @@ exports[`Should be merged: merged_apis 1`] = `
         }
       },
       "ChildNodes": [],
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     },
     {
       "Kind": 0,
@@ -396,7 +402,8 @@ exports[`Should be merged: merged_apis 1`] = `
         }
       },
       "ChildNodes": [],
-      "Directives": []
+      "Directives": [],
+      "RequestTimeoutSeconds": 0
     }
   ],
   "Fields": [

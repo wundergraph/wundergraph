@@ -877,6 +877,15 @@ type Factory struct {
 	Log           abstractlogger.Logger
 }
 
+func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
+	return &Factory{
+		Client:        client,
+		engineFactory: f.engineFactory,
+		Debug:         f.Debug,
+		Log:           f.Log,
+	}
+}
+
 func (f *Factory) Planner(ctx context.Context) plan.DataSourcePlanner {
 	f.engineFactory.closer = ctx.Done()
 	return &Planner{
