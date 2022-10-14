@@ -22,8 +22,8 @@ func Zap() *zap.Logger {
 	return singleZap
 }
 
-func Init(prettyLogging bool) {
-	singleZap = zapLogger(zapcore.AddSync(os.Stdout), !prettyLogging)
+func Init(prettyLogging bool, debug bool) {
+	singleZap = newZapLogger(zapcore.AddSync(os.Stdout), prettyLogging, debug)
 }
 
 func zapBaseEncoderConfig() zapcore.EncoderConfig {
@@ -51,24 +51,27 @@ func zapConsoleEncoder() zapcore.Encoder {
 	return zapcore.NewConsoleEncoder(ec)
 }
 
-func zapLogger(syncer zapcore.WriteSyncer, encodeAsJSON bool) *zap.Logger {
+func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool) *zap.Logger {
 	var encoder zapcore.Encoder
+	var zapOpts []zap.Option
 
-	if encodeAsJSON {
-		encoder = zapJsonEncoder()
-	} else {
+	if prettyLogging {
 		encoder = zapConsoleEncoder()
+	} else {
+		encoder = zapJsonEncoder()
+	}
+
+	if debug {
+		zapOpts = append(zapOpts, zap.AddCaller(), zap.AddCallerSkip(1), zap.AddStacktrace(zap.ErrorLevel))
 	}
 
 	zapLogger := zap.New(zapcore.NewCore(
 		encoder,
 		syncer,
 		zap.DebugLevel,
-	))
-	// TO HAVE LINES LOGGING ENABLE THIS
-	// ), zap.AddCaller(), zap.AddCallerSkip(1))
+	), zapOpts...)
 
-	if !encodeAsJSON {
+	if prettyLogging {
 		return zapLogger
 	}
 

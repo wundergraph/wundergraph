@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -36,15 +37,14 @@ const (
 var (
 	BuildInfo             node.BuildInfo
 	GitHubAuthDemo        node.GitHubAuthDemo
-	cliLogLevel           string
 	DotEnvFile            string
 	log                   abstractlogger.Logger
-	enableDebugMode       bool
-	prettyLogging         bool
 	serviceToken          string
 	_wunderGraphDirConfig string
 	disableCache          bool
 	clearCache            bool
+
+	rootFlags helpers.RootFlags
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -74,14 +74,14 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			return nil
 		}
 
-		logging.Init(prettyLogging)
+		logging.Init(rootFlags.PrettyLogs, rootFlags.DebugMode)
 
-		if enableDebugMode {
+		if rootFlags.DebugMode {
 			// override log level to debug
-			cliLogLevel = "debug"
+			rootFlags.CliLogLevel = "debug"
 		}
 
-		logLevel, err := logging.FindLogLevel(cliLogLevel)
+		logLevel, err := logging.FindLogLevel(rootFlags.CliLogLevel)
 		if err != nil {
 			return err
 		}
@@ -172,10 +172,10 @@ func init() {
 	viper.SetDefault("OAUTH_BASE_URL", "https://accounts.wundergraph.com/auth/realms/master")
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
-	rootCmd.PersistentFlags().StringVarP(&cliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
-	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&prettyLogging, "pretty-logging", false, "switches the logging to human readable format")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches the logging to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")

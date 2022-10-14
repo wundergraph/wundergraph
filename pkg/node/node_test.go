@@ -28,7 +28,7 @@ import (
 )
 
 func TestNode(t *testing.T) {
-	logging.Init(false)
+	logging.Init(false, false)
 	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -287,7 +287,7 @@ func TestWebHooks(t *testing.T) {
 }
 
 func BenchmarkNode(t *testing.B) {
-	logging.Init(true)
+	logging.Init(true, false)
 	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

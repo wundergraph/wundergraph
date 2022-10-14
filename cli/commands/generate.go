@@ -55,7 +55,7 @@ var generateCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
 			ScriptEnv: append(
-				helpers.CliEnv(cliLogLevel, prettyLogging),
+				helpers.CliEnv(rootFlags),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),

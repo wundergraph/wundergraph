@@ -293,7 +293,12 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
-	n.log = abstractlogger.NewZapLogger(logging.Zap().With(zap.String("component", "@wundergraph/node")), nodeConfig.Api.Options.Logging.Level)
+	logLevel := nodeConfig.Api.Options.Logging.Level
+	if n.options.enableDebugMode {
+		logLevel = abstractlogger.DebugLevel
+	}
+
+	n.log = abstractlogger.NewZapLogger(logging.Zap().With(zap.String("component", "@wundergraph/node")), logLevel)
 
 	router := mux.NewRouter()
 

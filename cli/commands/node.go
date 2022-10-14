@@ -107,7 +107,7 @@ func StartWunderGraphNode(n *node.Node) error {
 
 	err = n.StartBlocking(
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
-		node.WithDebugMode(enableDebugMode),
+		node.WithDebugMode(rootFlags.DebugMode),
 	)
 	if err != nil {
 		return err
