@@ -562,6 +562,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
 			queryParamsAllowList:   queryParamsAllowList,
+			hooksClient:            r.middlewareClient,
+			hooksConfig:            buildHooksConfig(operation),
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -1667,6 +1669,8 @@ type SubscriptionHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
+	hooksClient            *hooks.Client
+	hooksConfig            hooksConfig
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1687,6 +1691,24 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
+	}
+
+	if h.hooksConfig.mutatingPostResolve {
+		var callback flushWriterMutatingPostResolveCallback = func(ctx *resolve.Context, resp []byte) ([]byte, error) {
+			hookBuf := pool.GetBytesBuffer()
+			defer pool.PutBytesBuffer(hookBuf)
+			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
+			out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
+			if err != nil {
+				return nil, err
+			}
+			if out == nil {
+				return nil, errors.New("mutatingPostResolve hook response is empty")
+			}
+			return out.Response, nil
+		}
+
+		flushWriter.mutatingPostResolveCallback = &callback
 	}
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
@@ -1761,14 +1783,19 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 	o.walker.Stop()
 }
 
+type flushWriterMutatingPostResolveCallback func(ctx *resolve.Context, resp []byte) ([]byte, error)
+
 type httpFlushWriter struct {
-	writer                 io.Writer
-	flusher                http.Flusher
-	postResolveTransformer *postresolvetransform.Transformer
-	subscribeOnce          bool
-	sse                    bool
-	close                  func()
-	sseBuf                 *bytes.Buffer
+	writer                      io.Writer
+	flusher                     http.Flusher
+	postResolveTransformer      *postresolvetransform.Transformer
+	subscribeOnce               bool
+	sse                         bool
+	close                       func()
+	sseBuf                      *bytes.Buffer
+	buf                         *bytes.Buffer
+	mutatingPostResolveCallback *flushWriterMutatingPostResolveCallback
+	ctx                         *resolve.Context
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -1778,23 +1805,40 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	if f.sse {
-		if f.sseBuf == nil {
-			f.sseBuf = &bytes.Buffer{}
-		}
-		if f.sseBuf.Len() == 0 {
-			f.sseBuf.WriteString("data: ")
-		}
-		return f.sseBuf.Write(p)
-	}
-	return f.writer.Write(p)
+
+	//if f.sse {
+	//	if f.sseBuf == nil {
+	//		f.sseBuf = &bytes.Buffer{}
+	//	}
+	//	if f.sseBuf.Len() == 0 {
+	//		f.sseBuf.WriteString("data: ")
+	//	}
+	//	return f.sseBuf.Write(p)
+	//}
+	return f.buf.Write(p)
 }
 
 func (f *httpFlushWriter) Flush() {
-	if f.sse && f.sseBuf != nil {
-		_, _ = f.sseBuf.WriteTo(f.writer)
-		f.sseBuf.Reset()
+	//if f.sse && f.sseBuf != nil {
+	//	_, _ = f.sseBuf.WriteTo(f.writer)
+	//	f.sseBuf.Reset()
+	//}
+	r := f.buf.Bytes()
+	if f.mutatingPostResolveCallback != nil {
+		r, _ = (*f.mutatingPostResolveCallback)(f.ctx, r)
 	}
+
+	f.buf.Reset()
+	if f.sse {
+		_, _ = f.buf.WriteString("data: ")
+		_, _ = f.buf.Write(r)
+	} else {
+		_, _ = f.buf.Write(r)
+	}
+
+	_, _ = f.buf.WriteTo(f.writer)
+	f.buf.Reset()
+
 	if f.subscribeOnce {
 		f.flusher.Flush()
 		f.close()
@@ -2193,6 +2237,8 @@ func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter
 		writer:  w,
 		flusher: flusher,
 		sse:     sse,
+		buf:     &bytes.Buffer{},
+		ctx:     ctx,
 	}
 
 	if subscribeOnce {

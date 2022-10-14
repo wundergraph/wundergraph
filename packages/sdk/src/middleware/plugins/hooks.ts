@@ -195,6 +195,9 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		config.config.api?.operations.filter((op) => op.operationType == OperationType.QUERY).map((op) => op.name) || [];
 	const mutations =
 		config.config.api?.operations.filter((op) => op.operationType == OperationType.MUTATION).map((op) => op.name) || [];
+	const subscriptions =
+		config.config.api?.operations.filter((op) => op.operationType == OperationType.SUBSCRIPTION).map((op) => op.name) ||
+		[];
 
 	const mockResolve =
 		(
@@ -445,7 +448,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	const mutationOperations = config?.[HooksConfigurationOperationType.Mutations];
 	if (mutationOperations) {
 		registerOperationHooks(mutations, mutationOperations);
-		fastify.log.debug(`Registered (${queries.length}) mutation operations`);
+		fastify.log.debug(`Registered (${mutations.length}) mutation operations`);
+	}
+
+	// subscriptions
+	const subscriptionOperations = config?.[HooksConfigurationOperationType.Subscriptions];
+	if (subscriptionOperations) {
+		registerOperationHooks(subscriptions, subscriptionOperations);
+		fastify.log.debug(`Registered (${subscriptions.length}) subscription operations`);
 	}
 };
 

@@ -76,7 +76,7 @@ export interface HookRequestWithInput<Input> extends HookRequest {
 		input: Input; 
 }
 						
-export interface HooksConfig extends HooksConfiguration<Queries, Mutations, User, InternalClient> {
+export interface HooksConfig extends HooksConfiguration<Queries, Mutations, Subscriptions, User, InternalClient> {
     global?: GlobalHooksConfig;
     authentication?: {
         postAuthentication?: (hook: AuthenticationHookRequest<User, InternalClient>) => Promise<void>;
@@ -89,6 +89,9 @@ export interface HooksConfig extends HooksConfiguration<Queries, Mutations, User
 		{{/if}}
 		{{#if hasMutations}}
 				mutations?: Mutations
+		{{/if}}
+		{{#if hasSubscriptions}}
+				subscriptions?: Subscriptions
 		{{/if}}
 }
 
@@ -119,6 +122,19 @@ export interface Mutations {
         mutatingPostResolve?: (hook: {{#if hasInternalInput}}HookRequestWithInput<Injected{{operationName}}Input>{{else}}HookRequest{{/if}} & HookRequestWithResponse<{{operationName}}Response>) => Promise<{{operationName}}Response>;
         }
     {{/each}}
+{{/if}}
+}
+
+export interface Subscriptions {
+{{#if hasSubscriptions}}
+		{{#each subscriptions}}
+				{{operationName}}?: {
+        preResolve?: (hook: {{#if hasInternalInput}}HookRequestWithInput<Injected{{operationName}}Input>{{else}}HookRequest{{/if}}) => Promise<void>;
+        {{#if hasInternalInput}} mutatingPreResolve?: (hook: {{#if hasInternalInput}}HookRequestWithInput<Injected{{operationName}}Input>{{else}}HookRequest{{/if}}) => Promise<Injected{{operationName}}Input>;{{/if}}
+        postResolve?: (hook: {{#if hasInternalInput}}HookRequestWithInput<Injected{{operationName}}Input>{{else}}HookRequest{{/if}} & HookRequestWithResponse<{{operationName}}Response>) => Promise<void>;
+        mutatingPostResolve?: (hook: {{#if hasInternalInput}}HookRequestWithInput<Injected{{operationName}}Input>{{else}}HookRequest{{/if}} & HookRequestWithResponse<{{operationName}}Response>) => Promise<{{operationName}}Response>;
+        }
+		{{/each}}
 {{/if}}
 }
 `;
