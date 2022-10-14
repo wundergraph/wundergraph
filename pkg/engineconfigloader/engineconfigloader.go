@@ -15,6 +15,7 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/jensneuse/abstractlogger"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
