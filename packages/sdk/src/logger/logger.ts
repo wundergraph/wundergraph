@@ -74,4 +74,4 @@ const initLogger = (): pino.Logger => {
 const logger = initLogger();
 
 export const SdkLogger = logger.child({ component: '@wundergraph/sdk' });
-export const ServerLogger = logger.child({ component: 'WunderGraph Server' }, { level: PinoLogLevel.Info });
+export const ServerLogger = logger.child({ component: '@wundergraph/server' }, { level: PinoLogLevel.Info });

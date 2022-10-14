@@ -85,7 +85,7 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		if err != nil {
 			return err
 		}
-		zapLog := logging.Zap().With(zap.String("component", "wunderctl"))
+		zapLog := logging.Zap().With(zap.String("component", "@wundergraph/wunderctl"))
 		log = abstractlogger.NewZapLogger(zapLog, logLevel)
 
 		err = godotenv.Load(DotEnvFile)
@@ -172,7 +172,7 @@ func init() {
 	viper.SetDefault("OAUTH_BASE_URL", "https://accounts.wundergraph.com/auth/realms/master")
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
-	rootCmd.PersistentFlags().StringVarP(&cliLogLevel, "loglevel", "l", "info", "sets the CLI log level")
+	rootCmd.PersistentFlags().StringVarP(&cliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&prettyLogging, "pretty-logging", false, "switches the logging to human readable format")
