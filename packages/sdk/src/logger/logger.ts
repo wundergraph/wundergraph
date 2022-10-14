@@ -42,7 +42,12 @@ const resolvePinoLogLevel = (level: string): PinoLogLevel => {
 
 const initLogger = (): pino.Logger => {
 	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
-	const logLevel = process.env.WG_CLI_LOG_LEVEL ? resolvePinoLogLevel(process.env.WG_CLI_LOG_LEVEL) : PinoLogLevel.Info;
+	const logLevel =
+		process.env.WG_DEBUG_MODE === 'true'
+			? PinoLogLevel.Debug
+			: process.env.WG_CLI_LOG_LEVEL
+			? resolvePinoLogLevel(process.env.WG_CLI_LOG_LEVEL)
+			: PinoLogLevel.Info;
 
 	let options: pino.LoggerOptions = {
 		level: logLevel,
@@ -74,4 +79,7 @@ const initLogger = (): pino.Logger => {
 const logger = initLogger();
 
 export const SdkLogger = logger.child({ component: '@wundergraph/sdk' });
-export const ServerLogger = logger.child({ component: '@wundergraph/server' }, { level: PinoLogLevel.Info });
+export const ServerLogger = logger.child(
+	{ component: '@wundergraph/server' },
+	{ level: process.env.WG_DEBUG_MODE === 'true' ? PinoLogLevel.Debug : PinoLogLevel.Info }
+);

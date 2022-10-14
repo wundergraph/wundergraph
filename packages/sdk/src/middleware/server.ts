@@ -145,7 +145,7 @@ export const createServer = async ({
 	gracefulShutdown,
 	clientFactory,
 }: ServerRunOptions): Promise<FastifyInstance> => {
-	if (config.api?.serverOptions?.logger?.level) {
+	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
