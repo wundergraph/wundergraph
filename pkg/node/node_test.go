@@ -23,12 +23,13 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func TestNode(t *testing.T) {
-	z, _ := zap.NewDevelopment()
-	logger := abstractlogger.NewZapLogger(z, abstractlogger.DebugLevel)
+	logging.Init(false)
+	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
@@ -286,8 +287,8 @@ func TestWebHooks(t *testing.T) {
 }
 
 func BenchmarkNode(t *testing.B) {
-	z, _ := zap.NewDevelopment()
-	logger := abstractlogger.NewZapLogger(z, abstractlogger.DebugLevel)
+	logging.Init(true)
+	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
@@ -323,7 +324,6 @@ func BenchmarkNode(t *testing.B) {
 			IdleTimeout:             5,
 		},
 		Api: &apihandler.Api{
-
 			Hosts:                 []string{"jens.wundergraph.dev"},
 			PathPrefix:            "myApi",
 			EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
@@ -334,6 +334,14 @@ func BenchmarkNode(t *testing.B) {
 					Name:          "MyReviews",
 					Content:       federationTestQuery,
 					OperationType: wgpb.OperationType_QUERY,
+					HooksConfiguration: &wgpb.OperationHooksConfiguration{
+						MockResolve: &wgpb.MockResolveHookConfiguration{},
+					},
+					VariablesSchema:              "{}",
+					InterpolationVariablesSchema: "{}",
+					AuthorizationConfig: &wgpb.OperationAuthorizationConfig{
+						RoleConfig: &wgpb.OperationRoleConfig{},
+					},
 				},
 			},
 			Options: &apihandler.Options{
@@ -342,6 +350,15 @@ func BenchmarkNode(t *testing.B) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+			},
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					HashKey:    &wgpb.ConfigurationVariable{},
+					BlockKey:   &wgpb.ConfigurationVariable{},
+					CsrfSecret: &wgpb.ConfigurationVariable{},
+				},
+				Hooks:     &wgpb.ApiAuthenticationHooks{},
+				JwksBased: &wgpb.JwksBasedAuthentication{},
 			},
 		},
 	}

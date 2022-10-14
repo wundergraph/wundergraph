@@ -65,6 +65,8 @@ func zapLogger(syncer zapcore.WriteSyncer, encodeAsJSON bool) *zap.Logger {
 		syncer,
 		zap.DebugLevel,
 	))
+	// TO HAVE LINES LOGGING ENABLE THIS
+	// ), zap.AddCaller(), zap.AddCallerSkip(1))
 
 	if !encodeAsJSON {
 		return zapLogger
