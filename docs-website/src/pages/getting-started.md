@@ -36,15 +36,6 @@ You can also easily integrate WunderGraph into your existing projects.
 npx -y @wundergraph/wunderctl init
 ```
 
-## Project templates
-
-WunderGraph ships with multiple project templates that can help you
-get started faster. You can view all the available ones running:
-
-```shell
-npx -y @wundergraph/wunderctl templates
-```
-
 ## More Examples
 
 Have a look at [other examples](/docs/examples) we provide, to get a better understanding of WunderGraph.
