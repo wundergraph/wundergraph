@@ -10,8 +10,8 @@ This quick start guide will help you to start a new WunderGraph project from scr
 
 ## Install Node.js
 
-Wundergraph uses Node.js to manage and run your projects. Install it following their
-[official instructions](https://nodejs.org).
+Wundergraph uses Node.js to manage your projects. Install its latest LTS release
+following their [official instructions](https://nodejs.org).
 
 ## Creating a new WunderGraph project
 
