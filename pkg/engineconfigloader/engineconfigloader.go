@@ -61,11 +61,7 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 	return &DefaultFactoryResolver{
 		baseTransport:    baseTransport,
 		transportFactory: transportFactory,
-		graphql: &graphql_datasource.Factory{
-			HTTPClient:      defaultHttpClient,
-			StreamingClient: streamingClient,
-			BatchFactory:    graphql_datasource.NewBatchFactory(),
-		},
+		graphql:          newGraphqlFactory(defaultHttpClient, streamingClient),
 		rest: &oas_datasource.Factory{
 			Client: defaultHttpClient,
 		},
@@ -164,9 +160,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			if err != nil {
 				return nil, err
 			}
-			graphql := *d.graphql
-			graphql.HTTPClient = client
-			return &graphql, nil
+			return newGraphqlFactory(client, d.graphql.StreamingClient), nil
 		}
 		return d.graphql, nil
 	case wgpb.DataSourceKind_REST:
@@ -458,4 +452,12 @@ func buildFetchUrl(url, baseUrl, path string) string {
 	}
 
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(baseUrl, "/"), strings.TrimPrefix(path, "/"))
+}
+
+func newGraphqlFactory(httpClient *http.Client, streamingClient *http.Client) *graphql_datasource.Factory {
+	return &graphql_datasource.Factory{
+		HTTPClient:      httpClient,
+		StreamingClient: streamingClient,
+		BatchFactory:    graphql_datasource.NewBatchFactory(),
+	}
 }
