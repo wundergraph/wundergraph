@@ -49,7 +49,7 @@ type Factory struct {
 	Client *http.Client
 }
 
-func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
+func (f *Factory) CopyWithHTTPClient(client *http.Client) *Factory {
 	return &Factory{
 		Client: client,
 	}

@@ -169,7 +169,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			if err != nil {
 				return nil, err
 			}
-			return d.rest.WithHTTPClient(client), nil
+			return d.rest.CopyWithHTTPClient(client), nil
 		}
 		return d.rest, nil
 	case wgpb.DataSourceKind_STATIC:
@@ -185,7 +185,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			if err != nil {
 				return nil, err
 			}
-			return d.database.WithHTTPClient(client), nil
+			return d.database.CopyWithHTTPClient(client), nil
 		}
 		return d.database, nil
 	default:
