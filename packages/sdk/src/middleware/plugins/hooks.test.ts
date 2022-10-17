@@ -1,7 +1,7 @@
 import { internalClientFactory } from '../internal-client';
 import { createServer } from '../server';
-import { FastifyRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 import { OperationType } from '@wundergraph/protobuf';
+import { FastifyRequestBody, OnConnectionInitHookRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
 	const clientFactory = internalClientFactory('app', 'app', [], 'http://localhost:9991');
@@ -385,5 +385,44 @@ test('subscriptions postResolve hook', async () => {
 		hook: 'postResolve',
 		op: 'Chat',
 		setClientRequestHeaders: {},
+	});
+});
+
+test('onWSTransportConnectionInit hook', async () => {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
+		hooks: {
+			global: {
+				wsTransport: {
+					onConnectionInit: {
+						enableForDataSources: ['chatId'],
+						hook: async () => {
+							return {
+								payload: {
+									authentication: 'secret',
+								},
+							};
+						},
+					},
+				},
+			},
+		},
+	};
+	const fastify = await getFastify(serverConfig);
+	const onConnectionInitResponse = await fastify.inject({
+		method: 'POST',
+		url: '/global/wsTransport/onConnectionInit',
+		payload: {
+			__wg: {
+				clientRequest: {},
+			},
+			request: {},
+		} as OnConnectionInitHookRequestBody,
+	});
+	expect(onConnectionInitResponse.statusCode).toEqual(200);
+	expect(onConnectionInitResponse.json()).toEqual({
+		hook: 'onConnectionInit',
+		response: {
+			payload: { authentication: 'secret' },
+		},
 	});
 });

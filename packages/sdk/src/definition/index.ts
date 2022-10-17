@@ -18,6 +18,7 @@ import {
 	DirectiveConfiguration,
 	FetchConfiguration,
 	FieldConfiguration,
+	GraphQLDataSourceHooksConfiguration,
 	MTLSConfiguration,
 	SigningMethod,
 	SingleTypeField,
@@ -218,6 +219,7 @@ export class SQLServerApi extends Api<DatabaseApiCustom> {}
 export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
 export interface DataSource<Custom = unknown> {
+	Id?: string;
 	Kind: DataSourceKind;
 	RootNodes: TypeField[];
 	ChildNodes: TypeField[];
@@ -271,6 +273,8 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 }
 
 export interface IntrospectionConfiguration {
+	// id is the unique identifier for the data source
+	id?: string;
 	/**
 	 * Timeout for network requests originated by this data source, in seconds.
 	 *
@@ -408,6 +412,7 @@ export interface GraphQLApiCustom {
 		UseSSE: boolean;
 	};
 	UpstreamSchema: string;
+	HooksConfiguration: GraphQLDataSourceHooksConfiguration;
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {

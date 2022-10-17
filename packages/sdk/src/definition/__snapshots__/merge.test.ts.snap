@@ -75,7 +75,10 @@ exports[`Should be merged: merged_apis 1`] = `
           "query": [],
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onWSTransportConnectionInit": false
+        }
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0
@@ -151,7 +154,10 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onWSTransportConnectionInit": false
+        }
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0
@@ -245,7 +251,10 @@ exports[`Should be merged: merged_apis 1`] = `
           "query": [],
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onWSTransportConnectionInit": false
+        }
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0
@@ -319,7 +328,10 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "urlEncodeBody": false
         },
-        "UpstreamSchema": ""
+        "UpstreamSchema": "",
+        "HooksConfiguration": {
+          "onWSTransportConnectionInit": false
+        }
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0

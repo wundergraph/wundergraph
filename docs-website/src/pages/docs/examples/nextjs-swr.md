@@ -179,3 +179,14 @@ const Home: NextPage = () => {
 }
 export default Home
 ```
+
+## Global Configuration
+
+You can configure the hooks globally by using the [SWRConfig](https://swr.vercel.app/docs/global-configuration) context.
+
+In case the context configuration isn't working, it's likely due to multiple versions of SWR being installed or due to how PNPM or Yarn PnP link packages.
+To resolve this you can import SWR directly from `@wundergraph/swr` to make sure the same instance is used.
+
+```ts
+import { useSWR, SWRConfig, useSWRConfig } from '@wundergraph/swr'
+```
