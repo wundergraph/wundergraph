@@ -189,6 +189,12 @@ export interface HooksConfiguration<
 				enableForAllOperations?: boolean;
 			};
 		};
+		wsTransport?: {
+			onConnectionInit?: {
+				hook: OperationHookFunction;
+				enableForDataSources: string[];
+			};
+		};
 	};
 	authentication?: {
 		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
@@ -767,6 +773,28 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				}
 			}
 
+			if (config.server?.hooks?.global?.wsTransport?.onConnectionInit) {
+				const enableForDataSources = config.server?.hooks?.global?.wsTransport?.onConnectionInit.enableForDataSources;
+				app.EngineConfiguration.DataSources = app.EngineConfiguration.DataSources.map((ds) => {
+					if (ds.Id !== undefined && ds.Id !== '' && ds.Kind === DataSourceKind.GRAPHQL) {
+						if (enableForDataSources.includes(ds.Id)) {
+							let Custom: GraphQLApiCustom = ds.Custom as GraphQLApiCustom;
+
+							Custom = {
+								...Custom,
+								HooksConfiguration: { onWSTransportConnectionInit: true },
+							};
+
+							return {
+								...ds,
+								Custom,
+							};
+						}
+					}
+					return ds;
+				});
+			}
+
 			for (const operationName in config.server?.hooks?.queries) {
 				const hooks = config.server?.hooks!.queries[operationName];
 				const op = app.Operations.find((op) => op.OperationType === OperationType.QUERY && op.Name === operationName);
@@ -991,6 +1019,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 
 const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	const out: DataSourceConfiguration = {
+		id: source.Id || '',
 		kind: source.Kind,
 		customGraphql: undefined,
 		rootNodes: source.RootNodes,
@@ -1036,6 +1065,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 					useSSE: graphql.Subscription.UseSSE,
 				},
 				upstreamSchema: graphql.UpstreamSchema,
+				hooksConfiguration: graphql.HooksConfiguration,
 			};
 			break;
 		case DataSourceKind.POSTGRESQL:

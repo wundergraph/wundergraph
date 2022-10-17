@@ -355,7 +355,13 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
 	)
 
-	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(transportFactory, defaultTransport, n.options.enableDebugMode, n.log))
+	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(
+		transportFactory,
+		defaultTransport,
+		n.options.enableDebugMode,
+		n.log,
+		hooksClient,
+	))
 
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,

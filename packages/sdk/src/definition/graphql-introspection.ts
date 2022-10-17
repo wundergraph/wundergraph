@@ -106,6 +106,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 			applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
 			[
 				{
+					Id: introspection.id,
 					Kind: DataSourceKind.GRAPHQL,
 					RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
 					ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
@@ -137,6 +138,9 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							ServiceSDL: serviceSDL || '',
 						},
 						UpstreamSchema: schemaSDL,
+						HooksConfiguration: {
+							onWSTransportConnectionInit: false,
+						},
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
 					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,

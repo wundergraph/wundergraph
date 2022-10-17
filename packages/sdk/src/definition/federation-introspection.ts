@@ -119,6 +119,7 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 			...upstream,
 			isFederation: true,
 			apiNamespace: introspection.apiNamespace,
+			id: upstream.id ?? introspection.id,
 		}));
 
 		const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));

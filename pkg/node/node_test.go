@@ -477,6 +477,9 @@ func federationPlanConfiguration(userServiceURL, productServiceURL, reviewServic
 							StaticVariableContent: strings.Replace(userServiceURL, "http", "ws", -1),
 						},
 					},
+					HooksConfiguration: &wgpb.GraphQLDataSourceHooksConfiguration{
+						OnWSTransportConnectionInit: false,
+					},
 					Federation: &wgpb.GraphQLFederationConfiguration{
 						Enabled:    true,
 						ServiceSdl: "extend type Query {me: User} type User @key(fields: \"id\"){ id: ID! username: String!}",
@@ -523,6 +526,9 @@ func federationPlanConfiguration(userServiceURL, productServiceURL, reviewServic
 							StaticVariableContent: strings.Replace(productServiceURL, "http", "ws", -1),
 						},
 					},
+					HooksConfiguration: &wgpb.GraphQLDataSourceHooksConfiguration{
+						OnWSTransportConnectionInit: false,
+					},
 				},
 			},
 			{
@@ -568,6 +574,9 @@ func federationPlanConfiguration(userServiceURL, productServiceURL, reviewServic
 							Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
 							StaticVariableContent: strings.Replace(reviewServiceURL, "http", "ws", -1),
 						},
+					},
+					HooksConfiguration: &wgpb.GraphQLDataSourceHooksConfiguration{
+						OnWSTransportConnectionInit: false,
 					},
 				},
 			},
