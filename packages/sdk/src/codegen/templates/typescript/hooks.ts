@@ -21,6 +21,7 @@ export class WunderGraphHooksPlugin implements Template {
 			dataSourcesUnion:
 				config.application.EngineConfiguration.DataSources.filter((ds) => ds.Id !== undefined && ds.Id !== '')
 					.map((ds) => `"${ds.Id}"`)
+					.filter((ds, i, arr) => arr.indexOf(ds) === i)
 					.join(' | ') || 'never',
 			queries: _queries,
 			hasQueries: _queries.length !== 0,

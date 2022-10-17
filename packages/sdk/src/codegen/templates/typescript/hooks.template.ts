@@ -13,6 +13,7 @@ export type SKIP = "skip";
 export type CANCEL = "cancel";
 
 export type WUNDERGRAPH_OPERATION = {{{operationNamesUnion}}};
+
 export type DATA_SOURCES = {{{dataSourcesUnion}}};
 
 export interface HttpTransportHookRequest extends BaseRequestContext<User, InternalClient> {
