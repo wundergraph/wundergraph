@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: connection ads
+  version: '13.0'
+servers:
+  - url: 'http://0.0.0.0:8787'
+paths:
+  '/':
+    parameters:
+      - schema:
+          type: string
+        name: shopUrl
+        in: query
+        required: true
+    get:
+      summary: Get connection ads
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/ConnectionAd'
+      operationId: getConnectionAds
+
+  '/get-adaccounts':
+    parameters:
+      - schema:
+          type: string
+        name: shopUrl
+        in: query
+      - schema:
+          type: string
+        name: connectionAds
+        in: query
+    get:
+      summary: Get ad accounts
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/AdAccount'
+      operationId: getAdAccounts
+
+components:
+  schemas:
+    ConnectionAd:
+      title: ConnectionAd
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              ts:
+                type: number
+              type:
+                type: string
+              accessToken:
+                type: string
+              name:
+                type: string
+              idConnection:
+                type: string
+              picture:
+                type: string
+              store:
+                type: string
+              connected:
+                type: boolean
+        error:
+          type: string
+    AdAccount:
+      title: AdAccount
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              store:
+                type: string
+              ts:
+                type: number
+              name:
+                type: string
+              account_id:
+                type: string
+              enabled:
+                type: boolean
+              $connectionAds:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  picture:
+                    type: string
+              insight:
+                type: object
+                properties:
+                  spend:
+                    type: number
+
+        error:
+          type: string

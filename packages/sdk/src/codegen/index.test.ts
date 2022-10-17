@@ -80,6 +80,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							placeholderVariableName: '',
 						},
 					},
+					defaultRequestTimeoutSeconds: 0,
 				},
 				serverOptions: {
 					serverUrl: {

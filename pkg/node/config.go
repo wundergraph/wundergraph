@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"path"
+	"time"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
@@ -23,12 +24,21 @@ type WunderNodeConfig struct {
 }
 
 func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
+	const (
+		defaultTimeout = 10 * time.Second
+	)
+
 	logLevelStr := loadvariable.String(graphConfig.Api.NodeOptions.Logger.Level)
 	logLevel := wgpb.LogLevel(wgpb.LogLevel_value[logLevelStr])
 
 	listener := &apihandler.Listener{
 		Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
 		Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
+	}
+
+	defaultRequestTimeout := defaultTimeout
+	if graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds > 0 {
+		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds) * time.Second
 	}
 
 	config := WunderNodeConfig{
@@ -57,6 +67,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) WunderNodeConfig {
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},
+				DefaultTimeout: defaultRequestTimeout,
 			},
 		},
 		Server: &Server{

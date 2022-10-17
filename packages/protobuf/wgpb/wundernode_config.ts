@@ -673,6 +673,10 @@ export interface VariableInjectionConfiguration {
 	environmentVariableName: string;
 }
 
+export interface GraphQLDataSourceHooksConfiguration {
+	onWSTransportConnectionInit: boolean;
+}
+
 export interface OperationHooksConfiguration {
 	preResolve: boolean;
 	postResolve: boolean;
@@ -744,6 +748,8 @@ export interface DataSourceConfiguration {
 	customStatic: DataSourceCustomStatic | undefined;
 	customDatabase: DataSourceCustomDatabase | undefined;
 	directives: DirectiveConfiguration[];
+	requestTimeoutSeconds: number;
+	id: string;
 }
 
 export interface DirectiveConfiguration {
@@ -769,6 +775,7 @@ export interface DataSourceCustomGraphQL {
 	subscription: GraphQLSubscriptionConfiguration | undefined;
 	federation: GraphQLFederationConfiguration | undefined;
 	upstreamSchema: string;
+	hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
 }
 
 export interface DataSourceCustomDatabase {
@@ -942,6 +949,7 @@ export interface NodeOptions {
 	publicNodeUrl: ConfigurationVariable | undefined;
 	listen: ListenerOptions | undefined;
 	logger: NodeLogging | undefined;
+	defaultRequestTimeoutSeconds: number;
 }
 
 export interface ServerLogging {
@@ -1778,6 +1786,35 @@ export const VariableInjectionConfiguration = {
 	},
 };
 
+function createBaseGraphQLDataSourceHooksConfiguration(): GraphQLDataSourceHooksConfiguration {
+	return { onWSTransportConnectionInit: false };
+}
+
+export const GraphQLDataSourceHooksConfiguration = {
+	fromJSON(object: any): GraphQLDataSourceHooksConfiguration {
+		return {
+			onWSTransportConnectionInit: isSet(object.onWSTransportConnectionInit)
+				? Boolean(object.onWSTransportConnectionInit)
+				: false,
+		};
+	},
+
+	toJSON(message: GraphQLDataSourceHooksConfiguration): unknown {
+		const obj: any = {};
+		message.onWSTransportConnectionInit !== undefined &&
+			(obj.onWSTransportConnectionInit = message.onWSTransportConnectionInit);
+		return obj;
+	},
+
+	fromPartial<I extends Exact<DeepPartial<GraphQLDataSourceHooksConfiguration>, I>>(
+		object: I
+	): GraphQLDataSourceHooksConfiguration {
+		const message = createBaseGraphQLDataSourceHooksConfiguration();
+		message.onWSTransportConnectionInit = object.onWSTransportConnectionInit ?? false;
+		return message;
+	},
+};
+
 function createBaseOperationHooksConfiguration(): OperationHooksConfiguration {
 	return {
 		preResolve: false,
@@ -2138,6 +2175,8 @@ function createBaseDataSourceConfiguration(): DataSourceConfiguration {
 		customStatic: undefined,
 		customDatabase: undefined,
 		directives: [],
+		requestTimeoutSeconds: 0,
+		id: '',
 	};
 }
 
@@ -2159,6 +2198,8 @@ export const DataSourceConfiguration = {
 			directives: Array.isArray(object?.directives)
 				? object.directives.map((e: any) => DirectiveConfiguration.fromJSON(e))
 				: [],
+			requestTimeoutSeconds: isSet(object.requestTimeoutSeconds) ? Number(object.requestTimeoutSeconds) : 0,
+			id: isSet(object.id) ? String(object.id) : '',
 		};
 	},
 
@@ -2192,6 +2233,9 @@ export const DataSourceConfiguration = {
 		} else {
 			obj.directives = [];
 		}
+		message.requestTimeoutSeconds !== undefined &&
+			(obj.requestTimeoutSeconds = Math.round(message.requestTimeoutSeconds));
+		message.id !== undefined && (obj.id = message.id);
 		return obj;
 	},
 
@@ -2218,6 +2262,8 @@ export const DataSourceConfiguration = {
 				? DataSourceCustomDatabase.fromPartial(object.customDatabase)
 				: undefined;
 		message.directives = object.directives?.map((e) => DirectiveConfiguration.fromPartial(e)) || [];
+		message.requestTimeoutSeconds = object.requestTimeoutSeconds ?? 0;
+		message.id = object.id ?? '';
 		return message;
 	},
 };
@@ -2333,7 +2379,13 @@ export const StatusCodeTypeMapping = {
 };
 
 function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
-	return { fetch: undefined, subscription: undefined, federation: undefined, upstreamSchema: '' };
+	return {
+		fetch: undefined,
+		subscription: undefined,
+		federation: undefined,
+		upstreamSchema: '',
+		hooksConfiguration: undefined,
+	};
 }
 
 export const DataSourceCustomGraphQL = {
@@ -2345,6 +2397,9 @@ export const DataSourceCustomGraphQL = {
 				: undefined,
 			federation: isSet(object.federation) ? GraphQLFederationConfiguration.fromJSON(object.federation) : undefined,
 			upstreamSchema: isSet(object.upstreamSchema) ? String(object.upstreamSchema) : '',
+			hooksConfiguration: isSet(object.hooksConfiguration)
+				? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
+				: undefined,
 		};
 	},
 
@@ -2358,6 +2413,10 @@ export const DataSourceCustomGraphQL = {
 		message.federation !== undefined &&
 			(obj.federation = message.federation ? GraphQLFederationConfiguration.toJSON(message.federation) : undefined);
 		message.upstreamSchema !== undefined && (obj.upstreamSchema = message.upstreamSchema);
+		message.hooksConfiguration !== undefined &&
+			(obj.hooksConfiguration = message.hooksConfiguration
+				? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
+				: undefined);
 		return obj;
 	},
 
@@ -2374,6 +2433,10 @@ export const DataSourceCustomGraphQL = {
 				? GraphQLFederationConfiguration.fromPartial(object.federation)
 				: undefined;
 		message.upstreamSchema = object.upstreamSchema ?? '';
+		message.hooksConfiguration =
+			object.hooksConfiguration !== undefined && object.hooksConfiguration !== null
+				? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
+				: undefined;
 		return message;
 	},
 };
@@ -3390,7 +3453,13 @@ export const NodeLogging = {
 };
 
 function createBaseNodeOptions(): NodeOptions {
-	return { nodeUrl: undefined, publicNodeUrl: undefined, listen: undefined, logger: undefined };
+	return {
+		nodeUrl: undefined,
+		publicNodeUrl: undefined,
+		listen: undefined,
+		logger: undefined,
+		defaultRequestTimeoutSeconds: 0,
+	};
 }
 
 export const NodeOptions = {
@@ -3400,6 +3469,9 @@ export const NodeOptions = {
 			publicNodeUrl: isSet(object.publicNodeUrl) ? ConfigurationVariable.fromJSON(object.publicNodeUrl) : undefined,
 			listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
 			logger: isSet(object.logger) ? NodeLogging.fromJSON(object.logger) : undefined,
+			defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
+				? Number(object.defaultRequestTimeoutSeconds)
+				: 0,
 		};
 	},
 
@@ -3411,6 +3483,8 @@ export const NodeOptions = {
 			(obj.publicNodeUrl = message.publicNodeUrl ? ConfigurationVariable.toJSON(message.publicNodeUrl) : undefined);
 		message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
 		message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
+		message.defaultRequestTimeoutSeconds !== undefined &&
+			(obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
 		return obj;
 	},
 
@@ -3428,6 +3502,7 @@ export const NodeOptions = {
 			object.listen !== undefined && object.listen !== null ? ListenerOptions.fromPartial(object.listen) : undefined;
 		message.logger =
 			object.logger !== undefined && object.logger !== null ? NodeLogging.fromPartial(object.logger) : undefined;
+		message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
 		return message;
 	},
 };

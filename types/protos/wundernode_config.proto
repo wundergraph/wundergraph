@@ -145,6 +145,10 @@ enum InjectVariableKind {
 	ENVIRONMENT_VARIABLE = 2;
 }
 
+message GraphQLDataSourceHooksConfiguration {
+	bool onWSTransportConnectionInit = 1;
+}
+
 message OperationHooksConfiguration {
 	bool preResolve = 1;
 	bool postResolve = 2;
@@ -232,6 +236,8 @@ message DataSourceConfiguration {
 	DataSourceCustom_Static customStatic = 7;
 	DataSourceCustom_Database customDatabase = 8;
 	repeated DirectiveConfiguration directives = 9;
+	int64 requestTimeoutSeconds = 10;
+	string id = 11;
 }
 
 message DirectiveConfiguration {
@@ -268,6 +274,7 @@ message DataSourceCustom_GraphQL {
 	GraphQLSubscriptionConfiguration subscription = 2;
 	GraphQLFederationConfiguration federation = 3;
 	string upstreamSchema = 4;
+	GraphQLDataSourceHooksConfiguration hooksConfiguration = 5;
 }
 
 message DataSourceCustom_Database {
@@ -460,6 +467,7 @@ message NodeOptions {
 	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
+	int64 defaultRequestTimeoutSeconds = 5;
 }
 
 message ServerLogging {

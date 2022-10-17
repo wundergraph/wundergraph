@@ -18,6 +18,7 @@ import {
 	DirectiveConfiguration,
 	FetchConfiguration,
 	FieldConfiguration,
+	GraphQLDataSourceHooksConfiguration,
 	MTLSConfiguration,
 	SigningMethod,
 	SingleTypeField,
@@ -218,11 +219,13 @@ export class SQLServerApi extends Api<DatabaseApiCustom> {}
 export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
 export interface DataSource<Custom = unknown> {
+	Id?: string;
 	Kind: DataSourceKind;
 	RootNodes: TypeField[];
 	ChildNodes: TypeField[];
 	Custom: Custom;
 	Directives: DirectiveConfiguration[];
+	RequestTimeoutSeconds: number;
 }
 
 interface GraphQLIntrospectionOptions {
@@ -270,6 +273,17 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 }
 
 export interface IntrospectionConfiguration {
+	// id is the unique identifier for the data source
+	id?: string;
+	/**
+	 * Timeout for network requests originated by this data source, in seconds.
+	 *
+	 * @remarks
+	 * See {@link NodeOptions| the NodeOptions type} for more details.
+	 *
+	 * @defaultValue Use the default timeout for this node.
+	 */
+	requestTimeoutSeconds?: number;
 	introspection?: {
 		disableCache?: boolean;
 		pollingIntervalSeconds?: number;
@@ -398,6 +412,7 @@ export interface GraphQLApiCustom {
 		UseSSE: boolean;
 	};
 	UpstreamSchema: string;
+	HooksConfiguration: GraphQLDataSourceHooksConfiguration;
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {
@@ -473,6 +488,7 @@ const introspectDatabase = async (
 			jsonInputVariables: applyNameSpaceToTypeNames(interpolateVariableDefinitionAsJSON, introspection.apiNamespace),
 		},
 		Directives: [],
+		RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
 	};
 	const dataSources: DataSource<DatabaseApiCustom>[] = [];
 	dataSource.RootNodes.forEach((rootNode) => {
