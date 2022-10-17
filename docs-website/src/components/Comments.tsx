@@ -7,13 +7,13 @@ const Comments = () => {
 		<div className="my-8">
 			<Giscus
 				id="comments"
-				repo="wundergraph/comments"
+				repo="wundergraph/wundergraph"
 				repoId={
 					process.env.NEXT_PUBLIC_COMMENTS_REPO_ID
 						? process.env.NEXT_PUBLIC_COMMENTS_REPO_ID
 						: ''
 				}
-				category="General"
+				category="Docs"
 				categoryId={
 					process.env.NEXT_PUBLIC_COMMENTS_CATEGORY_ID
 						? process.env.NEXT_PUBLIC_COMMENTS_CATEGORY_ID
