@@ -32,6 +32,7 @@ concurrency:
 
 env:
   WORKING_DIRECTORY: '.'
+  PRISMA_CLIENT_GO_LOG: '1'
   CI: true
 
 jobs:
