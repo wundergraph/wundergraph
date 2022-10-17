@@ -8,6 +8,8 @@ export interface Queries  {
     {{#each internalQueries}}
         {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<Internal{{operationName}}Input>{{/if}}) => Promise<{{operationName}}Response>;
     {{/each}}
+{{else}}
+  queries: {};
 {{/if}}
 }
 		
@@ -16,6 +18,8 @@ export interface Mutations  {
     {{#each internalMutations}}
         {{operationName}}: ({{#if hasInternalInput}}options: OperationArgsWithInput<{{operationName}}Input>{{/if}}) => Promise<{{operationName}}Response>;
     {{/each}}
+{{else}}
+  mutations: {};
 {{/if}}
 }
 
