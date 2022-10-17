@@ -19,7 +19,7 @@ import {
 	WunderGraphServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
-import { ServerLogger, resolveServerLogLevel } from '../logger/logger';
+import { ServerLogger, resolveServerLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 
 let WG_CONFIG: WunderGraphConfiguration;

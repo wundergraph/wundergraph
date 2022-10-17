@@ -30,7 +30,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
 import { wunderctlExec } from '../wunderctlexec';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 
 export interface GraphQLOperation {
 	Name: string;

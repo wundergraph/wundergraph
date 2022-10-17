@@ -70,7 +70,7 @@ import {
 } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import { InternalClient } from '../middleware/internal-client';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];

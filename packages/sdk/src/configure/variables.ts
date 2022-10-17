@@ -1,6 +1,6 @@
 import process from 'node:process';
 import { ConfigurationVariable, ConfigurationVariableKind } from '@wundergraph/protobuf';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 
 export class EnvironmentVariable<DefaultValue = string> {
 	constructor(name: string, defaultValue?: DefaultValue) {

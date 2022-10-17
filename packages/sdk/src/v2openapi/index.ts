@@ -47,7 +47,7 @@ import {
 } from '../definition/namespacing';
 import { mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 import _ from 'lodash';
 
 export const openApiSpecificationToRESTApiObject = async (

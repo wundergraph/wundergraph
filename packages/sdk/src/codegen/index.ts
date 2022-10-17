@@ -1,7 +1,7 @@
 import { ResolvedWunderGraphConfig } from '../configure';
 import path from 'path';
 import * as fs from 'fs';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 
 export interface TemplateOutputFile {
 	path: string;

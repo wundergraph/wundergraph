@@ -11,7 +11,7 @@ import path from 'path';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';

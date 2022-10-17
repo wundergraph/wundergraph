@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import hash from 'object-hash';
 import path from 'path';
 import { resolveVariable } from '../configure/variables';
-import { Logger } from '../logger/logger';
+import { Logger } from '../logger';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;
