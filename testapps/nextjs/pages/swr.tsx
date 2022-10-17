@@ -76,7 +76,6 @@ const SWR = () => {
 		<SWRConfig
 			value={{
 				revalidateOnFocus: true,
-				refreshInterval: 10000000,
 				onError: (err) => {
 					console.error(err);
 				},
