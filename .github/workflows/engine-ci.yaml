@@ -75,6 +75,8 @@ jobs:
 
       - name: Linters
         uses: golangci/golangci-lint-action@v3
+        with:
+          args: --timeout 2m
 
       - name: Run unit and integration tests
         run: make test-go
