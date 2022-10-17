@@ -55,7 +55,7 @@ export type {
 	WebhookHttpResponse,
 	Webhook,
 	WebhookRequestContext,
-	Logger,
+	WebhookLogger,
 	WebhookHeaders,
 	WebhookQuery,
 	WebhookConfiguration,
