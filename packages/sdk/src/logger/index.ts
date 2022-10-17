@@ -83,3 +83,5 @@ export const ServerLogger = logger.child(
 	{ component: '@wundergraph/server' },
 	{ level: process.env.WG_DEBUG_MODE === 'true' ? PinoLogLevel.Debug : PinoLogLevel.Info }
 );
+
+export default Logger;

@@ -15,6 +15,10 @@
       "types": "./dist/internal/index.d.ts",
       "default": "./dist/internal/index.js"
     },
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "default": "./dist/logger/index.js"
+    },
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
@@ -27,6 +31,9 @@
       ],
       "internal": [
         "./dist/internal"
+      ],
+      "logger": [
+        "./dist/logger"
       ]
     }
   },

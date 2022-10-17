@@ -1,11 +1,12 @@
 import { BaseTypeScriptDataModel, ResolvedWunderGraphConfig, Template, TemplateOutputFile } from '@wundergraph/sdk';
-import { hasInput, Logger, visitJSONSchema } from '@wundergraph/sdk/internal';
+import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import execa from 'execa';
 import _ from 'lodash';
 import Handlebars from 'handlebars';
 import { clientTemplate } from './client-template';
 import { OperationType } from '@wundergraph/protobuf';
+import Logger from '@wundergraph/sdk/logger';
 
 const logger = Logger.child({ plugin: 'golang-client' });
 
