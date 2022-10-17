@@ -6,7 +6,7 @@ import _ from 'lodash';
 import Handlebars from 'handlebars';
 import { clientTemplate } from './client-template';
 import { OperationType } from '@wundergraph/protobuf';
-import Logger from '@wundergraph/sdk/logger';
+import Logger from '@wundergraph/sdk/internal/logger';
 
 const logger = Logger.child({ plugin: 'golang-client' });
 
