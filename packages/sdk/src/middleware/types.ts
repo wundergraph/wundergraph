@@ -75,6 +75,10 @@ export interface WunderGraphResponse extends WunderGraphRequest {
 	statusCode: number;
 }
 
+export interface WsTransportOnConnectionInitResponse {
+	payload: JSONObject;
+}
+
 export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
 
 export type JSONObject = { [key: string]: JSONValue };
@@ -137,6 +141,10 @@ export interface WunderGraphHooksAndServerConfig<
 
 export interface FastifyRequestBody {
 	__wg: { user?: WunderGraphUser; clientRequest?: ClientRequest };
+}
+
+export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {
+	request: WunderGraphRequest;
 }
 
 export type AuthenticationResponse<User extends WunderGraphUser> = AuthenticationOK<User> | AuthenticationDeny;

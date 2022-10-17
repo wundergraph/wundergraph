@@ -13,14 +13,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/jensneuse/abstractlogger"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -34,8 +37,12 @@ type FactoryResolver interface {
 	Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error)
 }
 
-type ApiTransportFactory func(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+// Defined again here to avoid circular reference to apihandler.ApiTransportFactory
 
+type ApiTransportFactory interface {
+	RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+	DefaultTransportTimeout() time.Duration
+}
 type DefaultFactoryResolver struct {
 	baseTransport    http.RoundTripper
 	transportFactory ApiTransportFactory
@@ -43,15 +50,18 @@ type DefaultFactoryResolver struct {
 	rest             *oas_datasource.Factory
 	static           *staticdatasource.Factory
 	database         *database.Factory
+	hooksClient      *hooks.Client
 }
 
-func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper, debug bool, log abstractlogger.Logger) *DefaultFactoryResolver {
+func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper,
+	debug bool, log abstractlogger.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
+
 	defaultHttpClient := &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: transportFactory(baseTransport, false),
+		Timeout:   transportFactory.DefaultTransportTimeout(),
+		Transport: transportFactory.RoundTripper(baseTransport, false),
 	}
 	streamingClient := &http.Client{
-		Transport: transportFactory(baseTransport, true),
+		Transport: transportFactory.RoundTripper(baseTransport, true),
 	}
 
 	return &DefaultFactoryResolver{
@@ -71,11 +81,25 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 			Debug:  debug,
 			Log:    log,
 		},
+		hooksClient: hooksClient,
 	}
 }
 
-// tryCreateHTTPSClient creates a http client with the given options or defaults to the standard client if no mTLS options are given
-func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfiguration) (*http.Client, error) {
+// requiresCustomHTTPClient returns true iff the given FetchConfiguration requires a dedicated HTTP client
+func (d *DefaultFactoryResolver) requiresCustomHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) bool {
+	// when a custom timeout is specified, we can't use the shared http.Client
+	if ds != nil && ds.RequestTimeoutSeconds > 0 {
+		return true
+	}
+	// when mTLS is enabled, we need to create a new client
+	if cfg != nil && cfg.MTLS != nil {
+		return true
+	}
+	return false
+}
+
+// customTLSRoundTripper returns a TLS http.Roundtripper with the given key and certificates loaded
+func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfiguration) (http.RoundTripper, error) {
 	privateKey := loadvariable.String(mTLS.Key)
 	caCert := loadvariable.String(mTLS.Cert)
 
@@ -86,7 +110,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 	caCertData := []byte(caCert)
 	cert, err := tls.X509KeyPair(caCertData, []byte(privateKey))
 	if err != nil {
-		return nil, errors.New("unable to build key pair")
+		return nil, fmt.Errorf("unable to build key pair: %w", err)
 	}
 
 	dialer := &net.Dialer{
@@ -99,7 +123,7 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCertData)
 
-	mtlsTransport := &http.Transport{
+	return &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return dialer.DialContext(ctx, network, addr)
 		},
@@ -111,42 +135,101 @@ func (d *DefaultFactoryResolver) tryCreateHTTPSClient(mTLS *wgpb.MTLSConfigurati
 			RootCAs:            caCertPool,
 			InsecureSkipVerify: mTLS.InsecureSkipVerify,
 		},
+	}, nil
+}
+
+// newHTTPClient returns a custom http.Client with the given FetchConfiguration applied. Configuration
+// should have been previously validated by d.fetchConfigurationRequiresDedicatedHTTPClient()
+func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration, cfg *wgpb.FetchConfiguration) (*http.Client, error) {
+	// Timeout
+	timeout := d.transportFactory.DefaultTransportTimeout()
+	if ds != nil && ds.RequestTimeoutSeconds > 0 {
+		timeout = time.Duration(ds.RequestTimeoutSeconds) * time.Second
+	}
+	// TLS
+	var transport http.RoundTripper
+	var err error
+	if cfg != nil && cfg.MTLS != nil {
+		transport, err = d.customTLSRoundTripper(cfg.MTLS)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		transport = d.baseTransport
+	}
+	return &http.Client{
+		Timeout:   timeout,
+		Transport: d.transportFactory.RoundTripper(transport, false),
+	}, nil
+}
+
+func (d *DefaultFactoryResolver) onWsConnectionInitCallback() *graphql_datasource.OnWsConnectionInitCallback {
+	var callback graphql_datasource.OnWsConnectionInitCallback = func(ctx context.Context, url string, header http.Header) (json.RawMessage, error) {
+		payload := hooks.OnWsConnectionInitHookPayload{
+			Request: hooks.WunderGraphRequest{
+				RequestURI: url,
+				Headers:    hooks.HeaderSliceToCSV(header),
+			},
+		}
+		hookData, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+
+		if user := authentication.UserFromContext(ctx); user != nil {
+			if userJson, err := json.Marshal(user); err == nil {
+				hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
+			}
+		}
+
+		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData)
+		if err != nil {
+			return nil, err
+		}
+
+		resp := struct {
+			Payload json.RawMessage `json:"payload"`
+		}{}
+
+		if err := json.Unmarshal(out.Response, &resp); err != nil {
+			return nil, err
+		}
+
+		return resp.Payload, nil
 	}
 
-	baseTransportWithMTLS := d.transportFactory(mtlsTransport, false)
-
-	return &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: baseTransportWithMTLS,
-	}, nil
-
+	return &callback
 }
 
 func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan.PlannerFactory, error) {
 	switch ds.Kind {
 	case wgpb.DataSourceKind_GRAPHQL:
-		// when mTLS is enabled, we need to create a new client
-		if ds.CustomGraphql != nil && ds.CustomGraphql.Fetch != nil && ds.CustomGraphql.Fetch.MTLS != nil {
-			client, err := d.tryCreateHTTPSClient(ds.CustomGraphql.Fetch.MTLS)
-			if err != nil {
-				return nil, err
-			}
-			return &graphql_datasource.Factory{
-				HTTPClient:   client,
-				BatchFactory: graphql_datasource.NewBatchFactory(),
-			}, nil
+		factory := &graphql_datasource.Factory{
+			HTTPClient:      d.graphql.HTTPClient,
+			StreamingClient: d.graphql.StreamingClient,
+			BatchFactory:    d.graphql.BatchFactory,
 		}
-		return d.graphql, nil
-	case wgpb.DataSourceKind_REST:
-		// when mTLS is enabled, we need to create a new client
-		if ds.CustomRest != nil && ds.CustomRest.Fetch != nil && ds.CustomRest.Fetch.MTLS != nil {
-			client, err := d.tryCreateHTTPSClient(ds.CustomRest.Fetch.MTLS)
+
+		if d.requiresCustomHTTPClient(ds, ds.CustomGraphql.Fetch) {
+			client, err := d.newHTTPClient(ds, ds.CustomGraphql.Fetch)
 			if err != nil {
 				return nil, err
 			}
-			return &oas_datasource.Factory{
-				Client: client,
-			}, nil
+			factory.HTTPClient = client
+		}
+
+		if ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
+			factory.OnWsConnectionInitCallback = d.onWsConnectionInitCallback()
+		}
+
+		return factory, nil
+	case wgpb.DataSourceKind_REST:
+		if d.requiresCustomHTTPClient(ds, ds.CustomRest.Fetch) {
+			client, err := d.newHTTPClient(ds, ds.CustomRest.Fetch)
+			if err != nil {
+				return nil, err
+			}
+			return d.rest.WithHTTPClient(client), nil
 		}
 		return d.rest, nil
 	case wgpb.DataSourceKind_STATIC:
@@ -156,6 +239,14 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		wgpb.DataSourceKind_SQLSERVER,
 		wgpb.DataSourceKind_MONGODB,
 		wgpb.DataSourceKind_SQLITE:
+
+		if d.requiresCustomHTTPClient(ds, nil) {
+			client, err := d.newHTTPClient(ds, nil)
+			if err != nil {
+				return nil, err
+			}
+			return d.database.WithHTTPClient(client), nil
+		}
 		return d.database, nil
 	default:
 		return nil, fmt.Errorf("invalid datasource kind %q", ds.Kind)
