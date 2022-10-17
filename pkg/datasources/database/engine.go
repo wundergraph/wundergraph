@@ -14,6 +14,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jensneuse/abstractlogger"
@@ -23,6 +24,41 @@ import (
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
+
+// lockedBuffer implements a multithread-safe bytes.Buffer
+type lockedBuffer struct {
+	buf bytes.Buffer
+	mu  sync.RWMutex
+}
+
+func (b *lockedBuffer) Read(p []byte) (n int, err error) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.buf.Read(p)
+}
+func (b *lockedBuffer) Write(p []byte) (n int, err error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	return b.buf.Write(p)
+}
+
+func (b *lockedBuffer) Len() int {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.buf.Len()
+}
+
+func (b *lockedBuffer) Bytes() []byte {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.buf.Bytes()
+}
+
+func (b *lockedBuffer) String() string {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+	return b.buf.String()
+}
 
 func InstallPrismaDependencies(log abstractlogger.Logger, wundergraphDir string) error {
 	engine := Engine{
@@ -86,9 +122,10 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (str
 
 	cmd := exec.CommandContext(ctx, e.introspectionEnginePath)
 
-	out := &bytes.Buffer{}
-	cmd.Stdout = out
-	cmd.Stderr = out
+	var stdout lockedBuffer
+	var stderr lockedBuffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
 	pipe, err := cmd.StdinPipe()
 	if err != nil {
@@ -122,18 +159,44 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (str
 
 	var response IntrospectionResponse
 
+	ch := make(chan error, 1)
+	go func() {
+		ch <- cmd.Wait()
+	}()
+	var last time.Time
 	for {
 		time.Sleep(time.Millisecond * 100)
-		content := out.Bytes()
+		content := stdout.Bytes()
 		if len(content) != 0 {
 			err = json.Unmarshal(content, &response)
 			if err != nil {
-				continue
+				// Assume the response is not yet complete, continue
+				if last.IsZero() {
+					last = time.Now()
+					continue
+				}
+				if time.Since(last) < 10*time.Second {
+					// Assume we haven't received the whole output yet
+					continue
+				}
+				// 10 seconds elapsed, assume something went wrong
+				// with the output
+				return "", fmt.Errorf("error decoding prisma output: %w", err)
 			}
 			break
 		}
-		if ctx.Err() != nil {
-			break
+		if stderr.Len() > 0 {
+			return "", fmt.Errorf("prisma error: %s", stderr.String())
+		}
+		select {
+		case err := <-ch:
+			if err != nil {
+				return "", err
+			}
+			return "", errors.New("prisma exited")
+		case <-ctx.Done():
+			return "", ctx.Err()
+		default:
 		}
 	}
 
