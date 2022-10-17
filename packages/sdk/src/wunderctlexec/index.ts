@@ -42,7 +42,7 @@ const wunderCtlArgs = (args: string[]): string[] => {
 	}
 
 	if (process.env.WG_CLI_LOG_LEVEL) {
-		args.push('--loglevel', process.env.WG_CLI_LOG_LEVEL);
+		args.push('--cli-log-level', process.env.WG_CLI_LOG_LEVEL);
 	}
 
 	if (process.env.WG_CLI_LOG_PRETTY) {
