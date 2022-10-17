@@ -7,17 +7,17 @@ description:
 The `preResolve` hook is called before the Operation gets resolved.
 As it's not a "mutating" hook,
 you cannot use it to modify the input of the Operation.
+Supported operations are `queries`, `mutations` and `subscriptions`.
 
 The main purpose of this hook is e.g. logging.
 
 Similar to all other hooks,
-the `customResolve` hook is called with the following parameters:
+the `preResolve` hook is called with the following parameters:
 
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `internalClient`: The internal client object
-- `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
 With the `internalClient`,
