@@ -11,7 +11,7 @@ import { introspectWithCache } from './introspection-cache';
 import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
-import { SdkLogger } from '../logger/logger';
+import { Logger } from '../logger/logger';
 
 export const isFederationService = (schema: GraphQLSchema): boolean => {
 	const queryType = schema.getQueryType();
@@ -48,7 +48,7 @@ export const fetchFederationServiceSDL = async (
 
 				msg += ` retryAttempt: ${retryCount}`;
 
-				SdkLogger.info(msg);
+				Logger.info(msg);
 			},
 		},
 	};

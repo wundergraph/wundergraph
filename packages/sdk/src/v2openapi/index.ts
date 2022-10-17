@@ -47,7 +47,7 @@ import {
 } from '../definition/namespacing';
 import { mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
-import { SdkLogger } from '../logger/logger';
+import { Logger } from '../logger/logger';
 import _ from 'lodash';
 
 export const openApiSpecificationToRESTApiObject = async (
@@ -338,7 +338,7 @@ class RESTApiBuilder {
 					}
 					break;
 				case 'cookie':
-					SdkLogger.debug('param.in not implemented for cookie');
+					Logger.debug('param.in not implemented for cookie');
 					break;
 			}
 		});

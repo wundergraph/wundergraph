@@ -78,7 +78,7 @@ const initLogger = (): pino.Logger => {
 
 const logger = initLogger();
 
-export const SdkLogger = logger.child({ component: '@wundergraph/sdk' });
+export const Logger = logger.child({ component: '@wundergraph/sdk' });
 export const ServerLogger = logger.child(
 	{ component: '@wundergraph/server' },
 	{ level: process.env.WG_DEBUG_MODE === 'true' ? PinoLogLevel.Debug : PinoLogLevel.Info }

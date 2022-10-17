@@ -26,7 +26,7 @@ import { mapInputVariable, resolveVariable } from '../configure/variables';
 import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
-import { SdkLogger } from '../logger/logger';
+import { Logger } from '../logger/logger';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -193,7 +193,7 @@ const introspectGraphQLAPI = async (
 				}
 				msg += ` retryAttempt: ${retryCount}`;
 
-				SdkLogger.info(msg);
+				Logger.info(msg);
 			},
 		},
 	};

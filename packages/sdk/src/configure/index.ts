@@ -70,7 +70,7 @@ import {
 } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import { InternalClient } from '../middleware/internal-client';
-import { SdkLogger } from '../logger/logger';
+import { Logger } from '../logger/logger';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -454,10 +454,10 @@ const addLink = (
 				fieldInfo.arguments.forEach((expected) => {
 					const exists = link.argumentSources.find((actual) => actual.name === expected.name) !== undefined;
 					if (!exists) {
-						SdkLogger.error(
+						Logger.error(
 							`configuration missing for argument: ${expected.name} on targetField: ${link.targetFieldName} on targetType: ${link.targetType}`
 						);
-						SdkLogger.info(
+						Logger.info(
 							'please add \'.argument("towerIds", ...)\' to the linkBuilder or the resolver will not be configured properly'
 						);
 					}
@@ -618,7 +618,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			fs.writeFileSync(path.join('generated', schemaFileName), schemaContent, { encoding: 'utf8' });
 			done();
-			SdkLogger.info(`${schemaFileName} updated`);
+			Logger.info(`${schemaFileName} updated`);
 
 			/**
 			 * Webhooks
@@ -811,7 +811,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 					});
 				}
 				done();
-				SdkLogger.info(`Code generation completed.`);
+				Logger.info(`Code generation completed.`);
 			}
 
 			const configJsonPath = path.join('generated', 'wundergraph.config.json');
@@ -821,11 +821,11 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				const existing = fs.readFileSync(configJsonPath, 'utf8');
 				if (configJSON !== existing) {
 					fs.writeFileSync(configJsonPath, configJSON, { encoding: 'utf8' });
-					SdkLogger.info(`wundergraph.config.json updated`);
+					Logger.info(`wundergraph.config.json updated`);
 				}
 			} else {
 				fs.writeFileSync(configJsonPath, configJSON, { encoding: 'utf8' });
-				SdkLogger.info(`wundergraph.config.json created`);
+				Logger.info(`wundergraph.config.json created`);
 			}
 
 			done();
@@ -854,7 +854,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			if (shouldUpdateDotGraphQLConfig) {
 				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				SdkLogger.info(`.graphqlconfig updated`);
+				Logger.info(`.graphqlconfig updated`);
 			}
 
 			done();
@@ -870,12 +870,12 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 					encoding: 'utf8',
 				}
 			);
-			SdkLogger.info(`wundergraph.postman.json updated`);
+			Logger.info(`wundergraph.postman.json updated`);
 
 			done();
 		})
 		.catch((e: any) => {
-			SdkLogger.fatal(`Couldn't configure your WunderNode: ${e}`);
+			Logger.fatal(`Couldn't configure your WunderNode: ${e}`);
 			process.exit(1);
 		});
 };
@@ -885,10 +885,10 @@ let doneCount = 0;
 
 const done = () => {
 	doneCount++;
-	SdkLogger.info(`${doneCount}/${total} done`);
+	Logger.info(`${doneCount}/${total} done`);
 	if (doneCount === 3) {
 		setTimeout(() => {
-			SdkLogger.info(`code generation completed`);
+			Logger.info(`code generation completed`);
 			process.exit(0);
 		}, 10);
 	}
@@ -1090,7 +1090,7 @@ export const configurePublishWunderGraphAPI = (configuration: PublishConfigurati
 	const outFile = path.join('generated', `${configuration.organization}.${configuration.name}.api.json`);
 	_configurePublishWunderGraphAPI(configuration, outFile)
 		.then(() => {
-			SdkLogger.info(
+			Logger.info(
 				colors.blue(`${configuration.organization}/${configuration.name} API configuration written to ${outFile}`)
 			);
 			if (process.env.WUNDERGRAPH_PUBLISH_API === 'true') {
@@ -1100,19 +1100,19 @@ export const configurePublishWunderGraphAPI = (configuration: PublishConfigurati
 						timeout: 1000 * 5,
 					});
 					if (result?.failed) {
-						SdkLogger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
+						Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
 					}
 				} catch (e) {
-					SdkLogger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
+					Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
 				}
 			} else {
-				SdkLogger.info(colors.blue(`You can now publish the API using the following command:`));
-				SdkLogger.info(colors.green(`wunderctl publish ${configuration.organization}/${configuration.name}`));
+				Logger.info(colors.blue(`You can now publish the API using the following command:`));
+				Logger.info(colors.green(`wunderctl publish ${configuration.organization}/${configuration.name}`));
 			}
 		})
 		.catch((err) => {
-			SdkLogger.error(`Failed to create publish configuration for ${configuration.organization}/${configuration.name}`);
-			SdkLogger.error(err);
+			Logger.error(`Failed to create publish configuration for ${configuration.organization}/${configuration.name}`);
+			Logger.error(err);
 		});
 };
 

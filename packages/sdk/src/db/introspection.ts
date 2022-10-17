@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import hash from 'object-hash';
 import path from 'path';
 import { resolveVariable } from '../configure/variables';
-import { SdkLogger } from '../logger/logger';
+import { Logger } from '../logger/logger';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;
@@ -25,11 +25,11 @@ export interface PrismaDatabaseIntrospectionResult {
 export type DatabaseSchema = 'postgresql' | 'mysql' | 'sqlite' | 'sqlserver' | 'planetscale' | 'mongodb';
 
 const _ensurePrisma = async () => {
-	SdkLogger.info('Installing prisma...');
+	Logger.info('Installing prisma...');
 	await wunderctlExecAsync({
 		cmd: ['installPrismaDependencies'],
 	});
-	SdkLogger.info('Installing prisma... done');
+	Logger.info('Installing prisma... done');
 };
 
 let ensurePrisma: Promise<void> | undefined;
@@ -98,11 +98,11 @@ export const introspectPrismaDatabaseWithRetries = async (
 					jsonResponseFields,
 				};
 			}
-			SdkLogger.error('database introspection failed: ' + (result.message || ''));
+			Logger.error('database introspection failed: ' + (result.message || ''));
 		} catch (e) {
-			SdkLogger.error('database introspection failed: ' + e);
+			Logger.error('database introspection failed: ' + e);
 		}
-		SdkLogger.info(`retrying database introspection ${i + 1}/${maxRetries}`);
+		Logger.info(`retrying database introspection ${i + 1}/${maxRetries}`);
 	}
 
 	const message = `introspection of ${databaseSchema} database failed after 5 attempts, make sure it's accessible at: ${introspection.databaseURL}

@@ -1,7 +1,7 @@
 import { ResolvedWunderGraphConfig } from '../configure';
 import path from 'path';
 import * as fs from 'fs';
-import { SdkLogger } from '../logger/logger';
+import { Logger } from '../logger/logger';
 
 export interface TemplateOutputFile {
 	path: string;
@@ -76,7 +76,7 @@ export const GenerateCode = async (config: CodeGenConfig, customOutWriter?: Code
 		const content = `${file.header || ''}${file.content}`;
 		const outPath = path.join(config.basePath, file.path);
 		outWriter.writeFileSync(outPath, content);
-		SdkLogger.info(`${outPath} updated`);
+		Logger.info(`${outPath} updated`);
 	});
 };
 
