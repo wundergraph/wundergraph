@@ -21,7 +21,7 @@ import {
 import { WebhooksConfig } from '../webhooks/types';
 import { ServerLogger, resolveServerLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
-import { isProcessRunning } from '../definition';
+import { onParentProcessExit } from '../utils/process';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -110,13 +110,10 @@ const _configureWunderGraphServer = <
 		const isProduction = process.env.NODE_ENV === 'production';
 
 		if (!isProduction) {
-			// for `wunderctl up` exit server if the wunderctl is exited
-			const parentPid = process.ppid;
-			setInterval(async () => {
-				if (!isProcessRunning(parentPid)) {
-					process.exit(0);
-				}
-			}, 200);
+			// Exit the server when wunderctl exited without the chance to kill the child processes
+			onParentProcessExit(() => {
+				process.exit(0);
+			});
 		}
 
 		startServer({

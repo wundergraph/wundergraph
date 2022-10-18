@@ -13,6 +13,7 @@ import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
 import { Logger } from '../logger';
 import process from 'node:process';
+import { onParentProcessExit } from '../utils/process';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
@@ -104,9 +105,7 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
-	const parentPid = process.ppid;
-
-	const runner = async () => {
+	const pollingRunner = async () => {
 		try {
 			const api = await generator(introspection);
 			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
@@ -118,16 +117,12 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 		}
 	};
 
-	let interval: NodeJS.Timeout;
-	interval = setInterval(async () => {
-		// clear interval and exit if parent process has exited
-		if (!isProcessRunning(parentPid)) {
-			clearInterval(interval);
-			process.exit(0);
-		}
+	const pollingInterval = setInterval(pollingRunner, intervalInSeconds * 1000);
 
-		await runner();
-	}, intervalInSeconds * 1000);
+	// Exit the long-running introspection poller when wunderctl exited without the chance to kill the child processes
+	onParentProcessExit(() => {
+		pollingInterval.unref();
+	});
 };
 
 export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
@@ -199,13 +194,4 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	}
 
 	return api;
-};
-
-export const isProcessRunning = (pid: number) => {
-	try {
-		process.kill(pid, 0);
-		return true;
-	} catch (e: any) {
-		return e.code === 'EPERM';
-	}
 };
