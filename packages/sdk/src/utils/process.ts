@@ -31,13 +31,9 @@ export const onParentProcessExit = (callback: () => void) => {
 
 	let interval: NodeJS.Timeout;
 
-	const clear = () => {
-		interval.unref();
-	};
-
-	setInterval(async () => {
+	interval = setInterval(async () => {
 		if (!isProcessAlive(parentPid)) {
-			clear();
+			interval.unref();
 			callback();
 		}
 	}, parentProcessCheckIntervalMs);
