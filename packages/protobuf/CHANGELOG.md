@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.97.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.96.0...@wundergraph/protobuf@0.97.0) (2022-10-18)
+
+### Features
+
+* add configurable per-source timeouts ([#232](https://github.com/wundergraph/wundergraph/issues/232)) ([bb3b6bd](https://github.com/wundergraph/wundergraph/commit/bb3b6bd31250b402fe0c9a099b0dad993976cf39)) (@fiam)
+* subscriptions, ws connection init hook ([#243](https://github.com/wundergraph/wundergraph/issues/243)) ([2e4ae85](https://github.com/wundergraph/wundergraph/commit/2e4ae8506558165a9bf3ada4b8f45cee55a9f18d)) (@YuriBuerov)
+
 ## [0.96.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.95.0...@wundergraph/protobuf@0.96.0) (2022-09-29)
 
 ### Features

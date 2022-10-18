@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.116.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.115.0...@wundergraph/sdk@0.116.0) (2022-10-18)
+
+### Features
+
+* add configurable per-source timeouts ([#232](https://github.com/wundergraph/wundergraph/issues/232)) ([bb3b6bd](https://github.com/wundergraph/wundergraph/commit/bb3b6bd31250b402fe0c9a099b0dad993976cf39)) (@fiam)
+* align logging format hooks server and ([#240](https://github.com/wundergraph/wundergraph/issues/240)) ([e601d4c](https://github.com/wundergraph/wundergraph/commit/e601d4c1597a949c2c564a5b953b4424dae5ee7c)) (@spetrunin)
+* subscriptions, ws connection init hook ([#243](https://github.com/wundergraph/wundergraph/issues/243)) ([2e4ae85](https://github.com/wundergraph/wundergraph/commit/2e4ae8506558165a9bf3ada4b8f45cee55a9f18d)) (@YuriBuerov)
+
+### Bug Fixes
+
+* fix mutations are possibly undefined ([#265](https://github.com/wundergraph/wundergraph/issues/265)) ([cea8607](https://github.com/wundergraph/wundergraph/commit/cea860703a1f76a63dae292770514218624ce3a1)) (@JivusAyrus)
+
 ## [0.115.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.114.6...@wundergraph/sdk@0.115.0) (2022-10-12)
 
 ### Features

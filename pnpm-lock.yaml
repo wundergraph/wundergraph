@@ -104,8 +104,8 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
-      '@wundergraph/protobuf': workspace:^0.96.0
-      '@wundergraph/sdk': workspace:^0.115.0
+      '@wundergraph/protobuf': workspace:^0.97.0
+      '@wundergraph/sdk': workspace:^0.116.0
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -132,8 +132,8 @@ importers:
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
-      '@wundergraph/protobuf': workspace:^0.96.0
-      '@wundergraph/sdk': workspace:^0.115.0
+      '@wundergraph/protobuf': workspace:^0.97.0
+      '@wundergraph/sdk': workspace:^0.116.0
       handlebars: ^4.7.7
       next: ^12.1.6
       object-hash: ^2.2.0
@@ -191,7 +191,7 @@ importers:
       '@types/node-fetch': ^2.6.2
       '@types/object-hash': ^1.3.4
       '@web-std/fetch': ^4.1.0
-      '@wundergraph/protobuf': workspace:^0.96.0
+      '@wundergraph/protobuf': workspace:^0.97.0
       '@wundergraph/wunderctl': workspace:>=0.112.0
       axios: ^0.26.1
       axios-retry: ^3.3.1
@@ -11529,7 +11529,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.115.0
+    version: 0.116.0
     hasBin: true
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
