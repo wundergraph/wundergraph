@@ -55,6 +55,12 @@ func ByName(templateName string) *Template {
 	return nil
 }
 
+// All returns an slice with all the available templates in the
+// same order they were defined
+func All() []Template {
+	return append([]Template(nil), templates...)
+}
+
 type Template struct {
 	Name             string
 	InputDir         string
