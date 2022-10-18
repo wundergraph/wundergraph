@@ -23,8 +23,7 @@ to save us some typing.
 
 ```shell
 # Init a new project with the application template
-npx -y @wundergraph/wunderctl init \
-	--template application -o countries
+npx -y @wundergraph/wunderctl init -o countries
 ```
 
 This will create our new application in the `countries` directory. Once it finishes,
