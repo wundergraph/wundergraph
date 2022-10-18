@@ -192,7 +192,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@web-std/fetch': ^4.1.0
       '@wundergraph/protobuf': workspace:^0.96.0
-      '@wundergraph/wunderctl': workspace:>=0.111.4
+      '@wundergraph/wunderctl': workspace:>=0.112.0
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -11559,6 +11559,7 @@ packages:
       object-hash: 2.2.0
       openapi-types: 10.0.0
       pino: 8.4.2
+      pino-pretty: 9.1.0
       postman-collection: 4.1.2
       prettier: 2.7.1
       protobufjs: 6.11.2
