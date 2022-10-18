@@ -14,7 +14,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/go-cmd/cmd"
@@ -25,41 +24,6 @@ import (
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
-
-// lockedBuffer implements a multithread-safe bytes.Buffer
-type lockedBuffer struct {
-	buf bytes.Buffer
-	mu  sync.RWMutex
-}
-
-func (b *lockedBuffer) Read(p []byte) (n int, err error) {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-	return b.buf.Read(p)
-}
-func (b *lockedBuffer) Write(p []byte) (n int, err error) {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	return b.buf.Write(p)
-}
-
-func (b *lockedBuffer) Len() int {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-	return b.buf.Len()
-}
-
-func (b *lockedBuffer) Bytes() []byte {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-	return b.buf.Bytes()
-}
-
-func (b *lockedBuffer) String() string {
-	b.mu.RLock()
-	defer b.mu.RUnlock()
-	return b.buf.String()
-}
 
 func InstallPrismaDependencies(log abstractlogger.Logger, wundergraphDir string) error {
 	engine := Engine{
