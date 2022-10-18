@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.2.13...@wundergraph/golang-client@0.3.0) (2022-10-18)
+
+### Features
+
+* align logging format hooks server and ([#240](https://github.com/wundergraph/wundergraph/issues/240)) ([e601d4c](https://github.com/wundergraph/wundergraph/commit/e601d4c1597a949c2c564a5b953b4424dae5ee7c)) (@spetrunin)
+
 ## [0.2.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.2.12...@wundergraph/golang-client@0.2.13) (2022-10-12)
 
 ### Bug Fixes
