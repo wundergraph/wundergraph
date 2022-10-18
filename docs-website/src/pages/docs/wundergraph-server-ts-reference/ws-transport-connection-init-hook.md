@@ -4,7 +4,7 @@ pageTitle: WunderGraph - On WS Connection Init Hook
 description:
 ---
 
-The `onConnectionInit` hook is called whenever the resolver needs to call a remote service.
+The `onConnectionInit` hook is called when the engine is initiating a WebSocket connection with a GraphQL Server.
 It can be enabled for specific data-sources.
 Using this hook, you're able to populate the websocket `connection_init` message payload.
 
@@ -36,11 +36,11 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
     global: {
       wsTransport: {
         onConnectionInit: {
-          enableForDataSources: ['myDataSourceId'],
-          hook: async ({ request }) => {
+          enableForDataSources: ['chat'],
+          hook: async ({ clientRequest }) => {
             return {
               payload: {
-                Authorization: request.headers.get('Authorization'),
+                Authorization: clientRequest.headers.get('Authorization') || '',
               },
             }
           },
