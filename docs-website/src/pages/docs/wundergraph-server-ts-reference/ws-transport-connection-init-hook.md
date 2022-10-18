@@ -37,10 +37,14 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
       wsTransport: {
         onConnectionInit: {
           enableForDataSources: ['chat'],
-          hook: async ({ clientRequest }) => {
+          hook: async ({ clientRequest, dataSourceId }) => {
+            let token = clientRequest.headers.get('Authorization') || ''
+            if (dataSourceId === 'chat') {
+              token = 'secret'
+            }
             return {
               payload: {
-                Authorization: clientRequest.headers.get('Authorization') || '',
+                Authorization: token,
               },
             }
           },

@@ -31,6 +31,7 @@ export interface HttpTransportHookRequestWithResponse extends BaseRequestContext
     }
 }
 export interface WsTransportHookRequest extends BaseRequestContext<User, InternalClient> {
+	  dataSourceId: string;
 		request: WunderGraphRequest;
 }
 export interface GlobalHooksConfig {

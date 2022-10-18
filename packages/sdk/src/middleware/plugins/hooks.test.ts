@@ -412,6 +412,7 @@ test('onWSTransportConnectionInit hook', async () => {
 		method: 'POST',
 		url: '/global/wsTransport/onConnectionInit',
 		payload: {
+			dataSourceId: 'chatId',
 			__wg: {
 				clientRequest: {},
 			},

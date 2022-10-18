@@ -163,9 +163,10 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 	}, nil
 }
 
-func (d *DefaultFactoryResolver) onWsConnectionInitCallback() *graphql_datasource.OnWsConnectionInitCallback {
+func (d *DefaultFactoryResolver) onWsConnectionInitCallback(dataSourceID string) *graphql_datasource.OnWsConnectionInitCallback {
 	var callback graphql_datasource.OnWsConnectionInitCallback = func(ctx context.Context, url string, header http.Header) (json.RawMessage, error) {
 		payload := hooks.OnWsConnectionInitHookPayload{
+			DataSourceID: dataSourceID,
 			Request: hooks.WunderGraphRequest{
 				RequestURI: url,
 				Headers:    hooks.HeaderSliceToCSV(header),
@@ -219,7 +220,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		}
 
 		if ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
-			factory.OnWsConnectionInitCallback = d.onWsConnectionInitCallback()
+			factory.OnWsConnectionInitCallback = d.onWsConnectionInitCallback(ds.Id)
 		}
 
 		return factory, nil

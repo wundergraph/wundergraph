@@ -65,7 +65,8 @@ func HeaderCSVToSlice(headers map[string]string) map[string][]string {
 }
 
 type OnWsConnectionInitHookPayload struct {
-	Request WunderGraphRequest `json:"request"`
+	DataSourceID string             `json:"dataSourceId"`
+	Request      WunderGraphRequest `json:"request"`
 }
 
 type OnRequestHookPayload struct {

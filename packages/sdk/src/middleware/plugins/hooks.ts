@@ -195,12 +195,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	if (config.global?.wsTransport?.onConnectionInit) {
 		fastify.post<{
 			Body: {
+				dataSourceId: string;
 				request: WunderGraphRequest;
 			};
 		}>(`/global/wsTransport/onConnectionInit`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
 				const resp = await config.global?.wsTransport?.onConnectionInit?.hook({
+					dataSourceId: request.body.dataSourceId,
 					...request.ctx,
 					request: {
 						...request.body.request,
