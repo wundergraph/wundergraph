@@ -17,6 +17,7 @@ var (
 	disableForceHttpsRedirects bool
 	enableIntrospection        bool
 	gracefulTimeout            int
+	shutdownAfterIdle          int
 )
 
 // startCmd represents the start command
@@ -46,7 +47,7 @@ var startCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n)
+			err := StartWunderGraphNode(n, stop)
 			if err != nil {
 				log.Error("Start node", abstractlogger.Error(err))
 			}
@@ -69,4 +70,5 @@ func init() {
 	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
+	startCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
 }
