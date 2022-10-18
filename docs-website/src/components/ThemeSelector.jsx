@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Listbox } from '@headlessui/react'
 import clsx from 'clsx'
+import { useTheme } from 'next-themes'
 
 const themes = [
 	{ name: 'Light', value: 'light', icon: LightIcon },
@@ -46,6 +47,7 @@ function SystemIcon(props) {
 
 export function ThemeSelector(props) {
 	let [selectedTheme, setSelectedTheme] = useState()
+	const { setTheme } = useTheme()
 
 	useEffect(() => {
 		if (selectedTheme) {
@@ -56,6 +58,7 @@ export function ThemeSelector(props) {
 					'content',
 					selectedTheme.value === 'dark' ? 'rgb(11, 15, 26)' : '#ffffff'
 				)
+			setTheme(selectedTheme.value)
 		} else {
 			setSelectedTheme(
 				themes.find(
@@ -63,6 +66,7 @@ export function ThemeSelector(props) {
 						theme.value === document.documentElement.getAttribute('data-theme')
 				)
 			)
+			setTheme(document.documentElement.getAttribute('data-theme') || 'dark')
 		}
 	}, [selectedTheme])
 

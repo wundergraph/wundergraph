@@ -5,6 +5,7 @@ import 'focus-visible'
 import '@/styles/tailwind.css'
 import Plausible from 'plausible-tracker'
 import { useEffect } from 'react'
+import { ThemeProvider } from 'next-themes'
 
 export const plausible = Plausible({
 	domain: 'docs.wundergraph.com',
@@ -80,13 +81,15 @@ export default function App({ Component, pageProps }) {
 				<title>{pageTitle}</title>
 				{description && <meta name="description" content={description} />}
 			</Head>
-			<Layout
-				title={title}
-				tableOfContents={tableOfContents}
-				frontmatter={pageProps.markdoc?.frontmatter}
-			>
-				<Component {...pageProps} />
-			</Layout>
+			<ThemeProvider attribute="class" enableSystem>
+				<Layout
+					title={title}
+					tableOfContents={tableOfContents}
+					frontmatter={pageProps.markdoc?.frontmatter}
+				>
+					<Component {...pageProps} />
+				</Layout>
+			</ThemeProvider>
 		</>
 	)
 }
