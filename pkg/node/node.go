@@ -149,8 +149,10 @@ func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	}
 }
 
-// WithIdleTimeout makes the Node call the given handler when idleTimeout
-// has elapsed without any requests.
+// WithIdleTimeout makes the Node call the given handler after idleTimeout
+// has elapsed without any requests while the server is running. If there
+// are no requests, the handler will be called after idleTimeout counting
+// from the server start.
 func WithIdleTimeout(idleTimeout time.Duration, idleHandler func()) Option {
 	return func(options *options) {
 		options.idleTimeout = idleTimeout
