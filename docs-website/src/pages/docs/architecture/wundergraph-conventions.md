@@ -91,7 +91,7 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 
 | Variable name        | Description                                             | Default value           |
 | -------------------- | ------------------------------------------------------- | ----------------------- |
-| `WG_LOG_LEVEL`       | The log level of the `WunderNode`/`WunderGraph Server`. | `INFO`                  |
+| `WG_LOG_LEVEL`       | The log level of the `WunderNode`/`WunderGraph Server`. | `info`                  |
 | `WG_NODE_URL`        | The internal URL of the `WunderNode`.                   | `http://localhost:9991` |
 | `WG_PUBLIC_NODE_URL` | The publicly available URL of the `WunderNode`.         | `http://localhost:9991` |
 | `WG_NODE_HOST`       | The host of the `WunderNode`.                           | `127.0.0.1`             |
@@ -102,19 +102,19 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 
 ### Available log levels
 
-- `FATAL`
-- `PANIC`
-- `WARNING`
-- `ERROR`
-- `INFO`
-- `DEBUG`
+- `fatal`
+- `panic`
+- `warning`
+- `error`
+- `info`
+- `debug`
 
 To have a proper code completions for log level you could use exported type from our sdk
 
 ```typescript
 import { LoggerLevel } from '@wundergraph/sdk'
 
-const level: LoggerLevel = 'WARNING'
+const level: LoggerLevel = 'warning'
 ```
 
 #### How to use default environment variables

@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/jensneuse/abstractlogger"
 
@@ -13,6 +12,7 @@ type ServerRunConfig struct {
 	WunderGraphDirAbs string
 	ServerScriptFile  string
 	Production        bool
+	Env               []string
 }
 
 func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
@@ -31,7 +31,7 @@ func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrun
 		AbsWorkingDir: cfg.WunderGraphDirAbs,
 		ScriptArgs:    []string{cfg.ServerScriptFile},
 		Logger:        log,
-		ScriptEnv:     append(os.Environ(), hooksEnv...),
+		ScriptEnv:     append(cfg.Env, hooksEnv...),
 	})
 
 	return hookServerRunner

@@ -14,7 +14,9 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -35,15 +37,14 @@ const (
 var (
 	BuildInfo             node.BuildInfo
 	GitHubAuthDemo        node.GitHubAuthDemo
-	logLevel              string
 	DotEnvFile            string
 	log                   abstractlogger.Logger
-	enableDebugMode       bool
-	jsonEncodedLogging    bool
 	serviceToken          string
 	_wunderGraphDirConfig string
 	disableCache          bool
 	clearCache            bool
+
+	rootFlags helpers.RootFlags
 
 	red    = color.New(color.FgHiRed)
 	green  = color.New(color.FgHiGreen)
@@ -65,14 +66,29 @@ wunderctl is gathering anonymous usage data so that we can better understand how
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-
-		if enableDebugMode {
-			log = buildLogger(abstractlogger.DebugLevel)
-		} else {
-			log = buildLogger(findLogLevel(abstractlogger.ErrorLevel))
+		switch cmd.Name() {
+		case "loadoperations":
+			// skip any setup for loadoperations to avoid logging anything
+			// as sdk uses stdout for the generated operations list
+			// TODO: migrate to writing it to a file
+			return nil
 		}
 
-		err := godotenv.Load(DotEnvFile)
+		logging.Init(rootFlags.PrettyLogs, rootFlags.DebugMode)
+
+		if rootFlags.DebugMode {
+			// override log level to debug
+			rootFlags.CliLogLevel = "debug"
+		}
+
+		logLevel, err := logging.FindLogLevel(rootFlags.CliLogLevel)
+		if err != nil {
+			return err
+		}
+		zapLog := logging.Zap().With(zap.String("component", "@wundergraph/wunderctl"))
+		log = abstractlogger.NewZapLogger(zapLog, logLevel)
+
+		err = godotenv.Load(DotEnvFile)
 		if err != nil {
 			if _, ok := err.(*fs.PathError); ok {
 				log.Debug("starting without env file")
@@ -156,34 +172,13 @@ func init() {
 	viper.SetDefault("OAUTH_BASE_URL", "https://accounts.wundergraph.com/auth/realms/master")
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
-	rootCmd.PersistentFlags().StringVarP(&logLevel, "loglevel", "l", "info", "sets the log level")
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
-	rootCmd.PersistentFlags().BoolVar(&enableDebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&jsonEncodedLogging, "json-encoded-logging", false, "switches the logging to json encoded logging")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches the logging to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
-}
-
-func buildLogger(level abstractlogger.Level) abstractlogger.Logger {
-	return logging.New(level, jsonEncodedLogging)
-}
-
-func findLogLevel(defaultLevel abstractlogger.Level) abstractlogger.Level {
-	switch logLevel {
-	case "debug":
-		return abstractlogger.DebugLevel
-	case "warn":
-		return abstractlogger.WarnLevel
-	case "error":
-		return abstractlogger.ErrorLevel
-	case "fatal":
-		return abstractlogger.FatalLevel
-	case "panic":
-		return abstractlogger.PanicLevel
-	default:
-		return defaultLevel
-	}
 }
 
 func authenticator() *auth.Authenticator {

@@ -5,4 +5,4 @@ export { visitJSONSchema } from '../codegen/jsonschema';
 
 export { serialize } from '../utils';
 
-export { modelImports } from '../codegen/templates/typescript/helpers';
+export { hasInput, modelImports } from '../codegen/templates/typescript/helpers';
