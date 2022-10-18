@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-cmd/cmd"
 	"github.com/jensneuse/abstractlogger"
 	"github.com/phayes/freeport"
 	"github.com/prisma/prisma-client-go/binaries"
@@ -76,21 +77,15 @@ func NewEngine(client *http.Client, log abstractlogger.Logger, wundergraphDir st
 }
 
 func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (string, error) {
+	const (
+		cmdTimeout = 10 * time.Second
+	)
+
+	var (
+		prismaExitedError = errors.New("prisma exited too early")
+	)
+
 	err := e.ensurePrisma()
-	if err != nil {
-		return "", err
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-
-	cmd := exec.CommandContext(ctx, e.introspectionEnginePath)
-
-	out := &bytes.Buffer{}
-	cmd.Stdout = out
-	cmd.Stderr = out
-
-	pipe, err := cmd.StdinPipe()
 	if err != nil {
 		return "", err
 	}
@@ -106,42 +101,54 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (str
 			},
 		},
 	}
-	data, err := json.Marshal(request)
+	requestData, err := json.Marshal(request)
 	if err != nil {
 		return "", err
 	}
-	_, err = pipe.Write(append(data, []byte("\n")...))
-	if err != nil {
-		return "", err
-	}
+	cmdInput := append(requestData, []byte("\n")...)
+	c := cmd.NewCmdOptions(cmd.Options{
+		Buffered:  false,
+		Streaming: true,
+	}, e.introspectionEnginePath)
 
-	err = cmd.Start()
-	if err != nil {
-		return "", err
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), cmdTimeout)
+	defer cancel()
 
-	var response IntrospectionResponse
+	statusCh := c.StartWithStdin(bytes.NewReader(cmdInput))
+	defer c.Stop()
 
+	var responseData bytes.Buffer
 	for {
-		time.Sleep(time.Millisecond * 100)
-		content := out.Bytes()
-		if len(content) != 0 {
-			err = json.Unmarshal(content, &response)
-			if err != nil {
-				continue
-			}
-			break
-		}
-		if ctx.Err() != nil {
-			break
-		}
-	}
+		select {
+		case <-ctx.Done():
 
-	if response.Error != nil {
-		return "", errors.New(response.Error.Data.Message)
+			return "", fmt.Errorf("prisma query cancelled: %w", ctx.Err())
+		case status := <-statusCh:
+			return "", fmt.Errorf("prisma exited with status %d", status.Exit)
+		case line, open := <-c.Stdout:
+			if !open {
+				return "", prismaExitedError
+			}
+			_, _ = io.WriteString(&responseData, line)
+			var response IntrospectionResponse
+			if err := json.Unmarshal(responseData.Bytes(), &response); err == nil {
+				// If error is non-nil, assume JSON is not complete and
+				// continue looping. If we don't finish, the timeout will
+				// end up killing us.
+				if response.Error != nil {
+					return "", errors.New(response.Error.Data.Message)
+				}
+				fmt.Fprintln(os.Stderr, "RESP", responseData.String())
+				dataModel := strings.Replace(response.Result.DataModel, " Bytes", " String", -1)
+				return dataModel, nil
+			}
+		case line, open := <-c.Stderr:
+			if !open {
+				return "", prismaExitedError
+			}
+			return "", fmt.Errorf("prisma reported an error: %s", line)
+		}
 	}
-	dataModel := strings.Replace(response.Result.DataModel, " Bytes", " String", -1)
-	return dataModel, nil
 }
 
 func (e *Engine) IntrospectGraphQLSchema(ctx context.Context) (schema string, err error) {
