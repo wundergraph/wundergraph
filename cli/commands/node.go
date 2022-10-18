@@ -66,7 +66,7 @@ func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
 	rootCmd.AddCommand(nodeCmd)
 
-	nodeStartCmd.Flags().IntVar(&exitAfterIdle, "exit-after-idle", 0, "exits after the given timeout has elapsed without any requests, in seconds")
+	nodeStartCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
 }
 
 func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
@@ -113,9 +113,9 @@ func StartWunderGraphNode(n *node.Node, stop func()) error {
 		node.WithDebugMode(rootFlags.DebugMode),
 	}
 
-	if exitAfterIdle > 0 {
-		opts = append(opts, node.WithIdleTimeout(time.Duration(exitAfterIdle)*time.Second, func() {
-			log.Info("exiting due to idle timeout")
+	if shutdownAfterIdle > 0 {
+		opts = append(opts, node.WithIdleTimeout(time.Duration(shutdownAfterIdle)*time.Second, func() {
+			log.Info("shutting down due to idle timeout")
 			stop()
 		}))
 	}
