@@ -8,10 +8,21 @@ description: Initialize your WunderGraph development environment and get started
 
 This quick start guide will help you to start a new WunderGraph project from scratch.
 
+## Install Node.js
+
+Wundergraph uses Node.js to manage your projects. Install its latest LTS release
+following their [official instructions](https://nodejs.org).
+
+## Creating a new WunderGraph project
+
 ```shell
 # Init a new project with the Next.js starter kit
 npx -y @wundergraph/wunderctl init \
-	--template nextjs-starter
+	--template nextjs-starter \
+	-o my-project
+
+# Move the the project directory
+cd my-project
 
 # Install dependencies and start
 npm i && npm start

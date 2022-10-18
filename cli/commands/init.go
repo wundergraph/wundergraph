@@ -24,7 +24,7 @@ wunderctl init
 
 with flags
 
-wunderctl init --template application --out .wundergraph (defaults)
+wunderctl init --template application --out . (defaults)
 
 generate a GitHub action to deploy your WunderGraph API
 
