@@ -86,7 +86,7 @@ export interface WunderGraphConfigApplicationConfig {
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
-	cors: WunderGraphCorsConfiguration;
+	cors?: WunderGraphCorsConfiguration;
 	s3UploadProvider?: S3Provider;
 	operations?: OperationsConfiguration;
 	authorization?: {
@@ -318,12 +318,12 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	};
 
 	const cors: CorsConfiguration = {
-		maxAge: config.cors.maxAge || 60,
-		allowedHeaders: config.cors.allowedHeaders || [],
-		allowedMethods: config.cors.allowedMethods || [],
-		exposedHeaders: config.cors.exposedHeaders || [],
-		allowCredentials: config.cors.allowCredentials || false,
-		allowedOrigins: config.cors.allowedOrigins
+		maxAge: config.cors?.maxAge || 60,
+		allowedHeaders: config.cors?.allowedHeaders || [],
+		allowedMethods: config.cors?.allowedMethods || [],
+		exposedHeaders: config.cors?.exposedHeaders || [],
+		allowCredentials: config.cors?.allowCredentials || false,
+		allowedOrigins: (config.cors?.allowedOrigins || [])
 			.map((origin) =>
 				typeof origin === 'string' && origin.endsWith('/') ? origin.substring(0, origin.length - 1) : origin
 			)
