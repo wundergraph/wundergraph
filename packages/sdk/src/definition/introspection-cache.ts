@@ -12,7 +12,6 @@ import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
 import { Logger } from '../logger';
-import process from 'node:process';
 import { onParentProcessExit } from '../utils/process';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
