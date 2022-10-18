@@ -8,14 +8,10 @@ export interface WunderCtlExecArgs {
 }
 
 export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnValue<string> | undefined => {
-	const file = wunderctlBinaryPath();
-	if (!fs.existsSync(file)) {
-		throw new Error('wunderctl binary not found');
-	}
-	if (process.env.WG_DIR_ABS) {
-		args.cmd.push('--wundergraph-dir', '.');
-	}
-	return execa.sync(file, args.cmd, {
+	const file = wunderCtlFile();
+	const cmdArgs = wunderCtlArgs(args.cmd);
+
+	return execa.sync(file, cmdArgs, {
 		encoding: 'utf-8',
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
@@ -25,14 +21,10 @@ export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnVal
 };
 
 export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
-	const file = wunderctlBinaryPath();
-	if (!fs.existsSync(file)) {
-		throw new Error('wunderctl binary not found');
-	}
-	if (process.env.WG_DIR_ABS) {
-		args.cmd.push('--wundergraph-dir', '.');
-	}
-	const subprocess = execa(file, args.cmd, {
+	const file = wunderCtlFile();
+	const cmdArgs = wunderCtlArgs(args.cmd);
+
+	const subprocess = execa(file, cmdArgs, {
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
 		extendEnv: true,
@@ -42,4 +34,29 @@ export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<strin
 
 	const { stdout } = await subprocess;
 	return stdout;
+};
+
+const wunderCtlArgs = (args: string[]): string[] => {
+	if (process.env.WG_DIR_ABS) {
+		args.push('--wundergraph-dir', '.');
+	}
+
+	if (process.env.WG_CLI_LOG_LEVEL) {
+		args.push('--cli-log-level', process.env.WG_CLI_LOG_LEVEL);
+	}
+
+	if (process.env.WG_CLI_LOG_PRETTY) {
+		args.push(`--pretty-logging=${process.env.WG_CLI_LOG_PRETTY}`);
+	}
+
+	return args;
+};
+
+const wunderCtlFile = (): string => {
+	const file = wunderctlBinaryPath();
+	if (!fs.existsSync(file)) {
+		throw new Error('wunderctl binary not found');
+	}
+
+	return file;
 };

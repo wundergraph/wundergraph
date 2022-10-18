@@ -3,13 +3,13 @@ package commands
 import (
 	"context"
 	"fmt"
-	"os"
 	"path"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
@@ -55,7 +55,7 @@ var generateCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
 			ScriptEnv: append(
-				os.Environ(),
+				helpers.CliEnv(rootFlags),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
@@ -65,7 +65,7 @@ var generateCmd = &cobra.Command{
 			),
 		})
 		defer func() {
-			log.Debug("Stopping config-runner after WunderNode shutdown")
+			log.Debug("Stopping config-runner")
 			err := configRunner.Stop()
 			if err != nil {
 				log.Error("Stopping runner failed",

@@ -36,7 +36,7 @@ Each option when unset will get a value from the `Default Environment Variables`
 | `listen.host`  | `127.0.0.1`             | `WG_SERVER_HOST`             |
 | `listen.port`  | `9992`                  | `WG_SERVER_PORT`             |
 | `serverUrl`    | `http://localhost:9992` | `WG_SERVER_URL`              |
-| `logger.level` | `INFO`                  | `WG_LOG_LEVEL`               |
+| `logger.level` | `info`                  | `WG_LOG_LEVEL`               |
 
 ## Running in production
 
@@ -71,7 +71,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
     },
     serverUrl: 'http://localhost:5555/',
     logger: {
-      level: 'DEBUG',
+      level: 'debug',
     }
   },
 })
@@ -90,7 +90,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
     },
     serverUrl: new EnvironmentVariable('SERVER_URL', 'http://localhost:4444/'),
     logger: {
-      level: new EnvironmentVariable<LoggerLevel>('NODE_LOG_LEVEL', 'DEBUG'),
+      level: new EnvironmentVariable<LoggerLevel>('NODE_LOG_LEVEL', 'debug'),
     },
   },
 })
@@ -117,7 +117,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
       'http://localhost:9992/'
     ),
     logger: {
-      level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
+      level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
     },
   },
 })
@@ -134,7 +134,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
       'http://localhost:9992/'
     ),
     logger: {
-      level: new EnvironmentVariable<LoggerLevel>('WG_LOG_LEVEL', 'INFO'),
+      level: new EnvironmentVariable<LoggerLevel>('WG_LOG_LEVEL', 'info'),
     },
   },
 })

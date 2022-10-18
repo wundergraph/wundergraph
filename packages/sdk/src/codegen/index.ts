@@ -1,6 +1,7 @@
 import { ResolvedWunderGraphConfig } from '../configure';
 import path from 'path';
 import * as fs from 'fs';
+import { Logger } from '../logger';
 
 export interface TemplateOutputFile {
 	path: string;
@@ -75,7 +76,7 @@ export const GenerateCode = async (config: CodeGenConfig, customOutWriter?: Code
 		const content = `${file.header || ''}${file.content}`;
 		const outPath = path.join(config.basePath, file.path);
 		outWriter.writeFileSync(outPath, content);
-		console.log(`${new Date().toLocaleTimeString()}: ${outPath} updated`);
+		Logger.info(`${outPath} updated`);
 	});
 };
 

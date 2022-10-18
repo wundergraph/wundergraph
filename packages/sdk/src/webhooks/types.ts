@@ -19,14 +19,14 @@ export type WebhookHeaders = Record<string, string>;
 export type WebhookQuery = Record<string, string | string[]>;
 export interface WebhookRequestContext<IC extends InternalClient = InternalClient> {
 	internalClient: IC;
-	log: Logger;
+	log: WebhookLogger;
 }
 interface LogFn {
 	<T extends object>(obj: T, msg?: string, ...args: any[]): void;
 	(obj: unknown, msg?: string, ...args: any[]): void;
 	(msg: string, ...args: any[]): void;
 }
-export interface Logger {
+export interface WebhookLogger {
 	info: LogFn;
 	debug: LogFn;
 	error: LogFn;

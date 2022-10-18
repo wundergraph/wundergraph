@@ -11,6 +11,7 @@ import path from 'path';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
+import { Logger } from '../logger';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
@@ -65,7 +66,7 @@ export const writeIntrospectionCacheFile = async (cacheKey: string, content: str
 			try {
 				await fsP.mkdir(dir, { recursive: true });
 			} catch (de) {
-				console.log(`Error creating cache directory: ${de}`);
+				Logger.error(`Error creating cache directory: ${de}`);
 			}
 			// Now try again. Avoid calling writeIntrospectionCacheFile(), otherwise
 			// a bug could end up causing infinite recursion instead of a a non-working
@@ -107,10 +108,10 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 			const api = await generator(introspection);
 			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
 			if (updated) {
-				console.log(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
+				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
 		} catch (e) {
-			console.error('Error during introspection cache update', e);
+			Logger.error('Error during introspection cache update', e);
 		}
 	}, intervalInSeconds * 1000);
 };
@@ -179,7 +180,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 			const cacheEntry = toCacheEntry<A>(api);
 			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
 		} catch (e) {
-			console.log(`Error storing cache: ${e}`);
+			Logger.error(`Error storing cache: ${e}`);
 		}
 	}
 

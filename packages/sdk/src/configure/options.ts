@@ -14,7 +14,7 @@ export enum WgEnv {
 	ServerPort = 'WG_SERVER_PORT',
 }
 
-export type LoggerLevel = 'FATAL' | 'PANIC' | 'WARNING' | 'ERROR' | 'INFO' | 'DEBUG';
+export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
 
 const defaultHost = '127.0.0.1';
 const defaultNodePort = '9991';
@@ -28,7 +28,7 @@ const DefaultNodeOptions = {
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${defaultNodePort}`),
 	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://localhost:${defaultNodePort}`),
 	logger: {
-		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
+		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
 	defaultRequestTimeoutSeconds: 0,
 };
@@ -40,7 +40,7 @@ const DefaultServerOptions: MandatoryServerOptions = {
 	},
 	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${defaultServerPort}`),
 	logger: {
-		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
+		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
 };
 
