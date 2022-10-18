@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.3.10...@wundergraph/swr@0.4.0) (2022-10-18)
+
+### Features
+
+* re-export SWR to prevent context issues ([#264](https://github.com/wundergraph/wundergraph/issues/264)) ([c05b341](https://github.com/wundergraph/wundergraph/commit/c05b341f64123d828caec4c95560163ce868ccd4)) (@Pagebakers)
+
 ## [0.3.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.3.9...@wundergraph/swr@0.3.10) (2022-10-12)
 
 **Note:** Version bump only for package @wundergraph/swr
