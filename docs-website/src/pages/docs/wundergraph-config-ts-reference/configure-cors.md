@@ -62,3 +62,17 @@ configureWunderGraphApplication({
   },
 })
 ```
+
+## Using wildcards
+
+An origin may contain a wildcard (\*) to replace 0 or more characters.
+Usage of wildcards implies a small performance penalty.
+
+```typescript
+configureWunderGraphApplication({
+  cors: {
+    ...cors.allowAll,
+    allowedOrigins: ['https://*.wundergraph.com'],
+  },
+})
+```
