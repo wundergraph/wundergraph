@@ -120,7 +120,7 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 
 	// Exit the long-running introspection poller when wunderctl exited without the chance to kill the child processes
 	onParentProcessExit(() => {
-		pollingInterval.unref();
+		clearInterval(pollingInterval);
 	});
 };
 

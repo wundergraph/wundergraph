@@ -33,7 +33,7 @@ export const onParentProcessExit = (callback: () => void) => {
 
 	interval = setInterval(async () => {
 		if (!isProcessAlive(parentPid)) {
-			interval.unref();
+			clearInterval(interval);
 			callback();
 		}
 	}, parentProcessCheckIntervalMs);
