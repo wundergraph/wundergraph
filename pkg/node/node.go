@@ -424,12 +424,12 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	if n.options.idleTimeout > 0 {
-		m := httpidletimeout.New(n.options.idleTimeout)
-		router.Use(m.Handler)
-		n.server.RegisterOnShutdown(m.Cancel)
-		m.Start()
+		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout)
+		router.Use(timeoutMiddleware.Handler)
+		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
+		timeoutMiddleware.Start()
 		go func() {
-			m.Wait(n.ctx)
+			timeoutMiddleware.Wait(n.ctx)
 			n.options.idleHandler()
 		}()
 	}
