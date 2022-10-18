@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"path"
 	"syscall"
+	"time"
 
 	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
@@ -44,7 +45,7 @@ var nodeStartCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n)
+			err := StartWunderGraphNode(n, stop)
 			if err != nil {
 				log.Error("Start node", abstractlogger.Error(err))
 			}
@@ -64,6 +65,8 @@ var nodeStartCmd = &cobra.Command{
 func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
 	rootCmd.AddCommand(nodeCmd)
+
+	nodeStartCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
 }
 
 func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
@@ -75,7 +78,7 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
 }
 
-func StartWunderGraphNode(n *node.Node) error {
+func StartWunderGraphNode(n *node.Node, stop func()) error {
 	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
@@ -105,10 +108,19 @@ func StartWunderGraphNode(n *node.Node) error {
 		return err
 	}
 
-	err = n.StartBlocking(
+	opts := []node.Option{
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithDebugMode(rootFlags.DebugMode),
-	)
+	}
+
+	if shutdownAfterIdle > 0 {
+		opts = append(opts, node.WithIdleTimeout(time.Duration(shutdownAfterIdle)*time.Second, func() {
+			log.Info("shutting down due to idle timeout")
+			stop()
+		}))
+	}
+
+	err = n.StartBlocking(opts...)
 	if err != nil {
 		return err
 	}

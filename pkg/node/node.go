@@ -22,6 +22,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -77,6 +78,8 @@ type options struct {
 	insecureCookies         bool
 	githubAuthDemo          GitHubAuthDemo
 	devMode                 bool
+	idleTimeout             time.Duration
+	idleHandler             func()
 }
 
 type Option func(options *options)
@@ -143,6 +146,17 @@ func WithDebugMode(enable bool) Option {
 func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	return func(options *options) {
 		options.forceHttpsRedirects = forceHttpsRedirects
+	}
+}
+
+// WithIdleTimeout makes the Node call the given handler after idleTimeout
+// has elapsed without any requests while the server is running. If there
+// are no requests, the handler will be called after idleTimeout counting
+// from the server start.
+func WithIdleTimeout(idleTimeout time.Duration, idleHandler func()) Option {
+	return func(options *options) {
+		options.idleTimeout = idleTimeout
+		options.idleHandler = idleHandler
 	}
 }
 
@@ -407,6 +421,17 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 			return context.WithValue(ctx, "conn", c)
 		},
 		// ErrorLog: log.New(ioutil.Discard, "", log.LstdFlags),
+	}
+
+	if n.options.idleTimeout > 0 {
+		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout)
+		router.Use(timeoutMiddleware.Handler)
+		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
+		timeoutMiddleware.Start()
+		go func() {
+			timeoutMiddleware.Wait(n.ctx)
+			n.options.idleHandler()
+		}()
 	}
 
 	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
