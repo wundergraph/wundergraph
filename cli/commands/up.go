@@ -79,7 +79,7 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(os.Environ(),
+			ScriptEnv: append(helpers.CliEnv(rootFlags),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 			),
@@ -92,7 +92,7 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(os.Environ(),
+			ScriptEnv: append(helpers.CliEnv(rootFlags),
 				// this environment variable starts the config runner in "Polling Mode"
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
@@ -138,6 +138,7 @@ var upCmd = &cobra.Command{
 			srvCfg := &helpers.ServerRunConfig{
 				WunderGraphDirAbs: wunderGraphDir,
 				ServerScriptFile:  serverOutFile,
+				Env:               helpers.CliEnv(rootFlags),
 			}
 
 			hookServerRunner = helpers.NewServerRunner(log, srvCfg)
@@ -256,7 +257,7 @@ var upCmd = &cobra.Command{
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
-				node.WithDebugMode(enableDebugMode),
+				node.WithDebugMode(rootFlags.DebugMode),
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),

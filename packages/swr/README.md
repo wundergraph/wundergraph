@@ -76,3 +76,14 @@ export const Home: React.FC<{ city: string }> = ({ city }) => {
 You can use all available options from [SWR](https://swr.vercel.app/docs/options) with the hooks.
 Due to the fact that we use the operationName + variables as **key**, you can't use the `key` option as usual.
 In order to use [conditional-fetching](https://swr.vercel.app/docs/conditional-fetching) you can use the `enabled` option.
+
+## Global Configuration
+
+You can configure the hooks globally by using the [SWRConfig](https://swr.vercel.app/docs/global-configuration) context.
+
+In case the context configuration isn't working, it's likely due to multiple versions of SWR being installed.
+To resolve this you can import SWRConfig directly from `@wundergraph/swr` to make sure the same instance is used.
+
+```ts
+import { useSWR, SWRConfig, useSWRConfig } from '@wundergraph/swr';
+```

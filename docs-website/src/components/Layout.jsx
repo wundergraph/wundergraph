@@ -12,6 +12,7 @@ import { ThemeSelector } from '@/components/ThemeSelector'
 import navigation from '../../config/navigation'
 import { GitHubIcon } from './icons/Github'
 import { DocsFooter } from './DocsFooter'
+import Comments from './Comments'
 
 function Header({ navigation }) {
 	let [isScrolled, setIsScrolled] = useState(false)
@@ -174,6 +175,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 							</header>
 						)}
 						<Prose>{children}</Prose>
+						<Comments />
 					</article>
 					<dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
 						{previousPage && (

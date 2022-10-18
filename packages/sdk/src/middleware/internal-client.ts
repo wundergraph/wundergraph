@@ -17,8 +17,8 @@ export interface Operations<
 	Queries extends OperationDefinitions = OperationDefinitions,
 	Mutations extends OperationDefinitions = OperationDefinitions
 > {
-	queries?: Queries;
-	mutations?: Mutations;
+	queries: Queries;
+	mutations: Mutations;
 }
 
 export interface OperationDefinitions {

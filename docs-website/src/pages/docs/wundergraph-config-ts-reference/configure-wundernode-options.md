@@ -45,7 +45,7 @@ Each option when unset will get a value from the `Default Environment Variables`
 | `listen.port`   | `9991`                  | `WG_NODE_PORT`               |
 | `nodeUrl`       | `http://localhost:9991` | `WG_NODE_URL`                |
 | `publicNodeUrl` | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`         |
-| `logger.level`  | `INFO`                  | `WG_LOG_LEVEL`               |
+| `logger.level`  | `info`                  | `WG_LOG_LEVEL`               |
 
 In case in options only `listen.port` is provided, the `nodeUrl` and `publicNodeUrl` will be set to `http://localhost:<port>`
 
@@ -113,7 +113,7 @@ configureWunderGraphApplication({
       'http://my-api.example.com/'
     ),
     logger: {
-      level: new EnvironmentVariable<LoggerLevel>('NODE_LOG_LEVEL', 'DEBUG'),
+      level: new EnvironmentVariable<LoggerLevel>('NODE_LOG_LEVEL', 'info'),
     },
   },
 })
@@ -141,7 +141,7 @@ configureWunderGraphApplication({
       'http://my-api.example.com/'
     ),
     logger: {
-      level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'INFO'),
+      level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
     },
   },
 })
@@ -159,7 +159,7 @@ configureWunderGraphApplication({
       'http://my-api.example.com/'
     ),
     logger: {
-      level: new EnvironmentVariable<LoggerLevel>('WG_LOG_LEVEL', 'INFO'),
+      level: new EnvironmentVariable<LoggerLevel>('WG_LOG_LEVEL', 'info'),
     },
   },
 })

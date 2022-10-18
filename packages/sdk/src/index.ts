@@ -16,6 +16,7 @@ export type { GraphQLOperation } from './graphql/operations';
 export type {
 	WunderGraphRequest,
 	WunderGraphResponse,
+	WsTransportOnConnectionInitResponse,
 	WunderGraphUser,
 	BaseRequestContext,
 	AuthenticationRequestContext,
@@ -55,7 +56,7 @@ export type {
 	WebhookHttpResponse,
 	Webhook,
 	WebhookRequestContext,
-	Logger,
+	WebhookLogger,
 	WebhookHeaders,
 	WebhookQuery,
 	WebhookConfiguration,

@@ -26,6 +26,7 @@ import { mapInputVariable, resolveVariable } from '../configure/variables';
 import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
+import { Logger } from '../logger';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -105,6 +106,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 			applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
 			[
 				{
+					Id: introspection.id,
 					Kind: DataSourceKind.GRAPHQL,
 					RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
 					ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
@@ -136,6 +138,9 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							ServiceSDL: serviceSDL || '',
 						},
 						UpstreamSchema: schemaSDL,
+						HooksConfiguration: {
+							onWSTransportConnectionInit: false,
+						},
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
 					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
@@ -192,7 +197,7 @@ const introspectGraphQLAPI = async (
 				}
 				msg += ` retryAttempt: ${retryCount}`;
 
-				console.log(msg);
+				Logger.info(msg);
 			},
 		},
 	};
