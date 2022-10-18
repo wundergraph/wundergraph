@@ -104,7 +104,6 @@ Now we're going to reduce our app to the bare minimum and explain what each step
 import {
   Application,
   configureWunderGraphApplication,
-  cors,
   introspect,
 } from '@wundergraph/sdk'
 
@@ -122,10 +121,6 @@ const myApplication = new Application({
 
 configureWunderGraphApplication({
   application: myApplication,
-  cors: {
-    ...cors.allowAll,
-    allowedOrigins: [],
-  },
 })
 ```
 
