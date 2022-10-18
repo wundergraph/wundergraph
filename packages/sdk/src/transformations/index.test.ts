@@ -49,6 +49,9 @@ test('renameTypes', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							HooksConfiguration: {
+								onWSTransportConnectionInit: false,
+							},
 						},
 						Directives: [],
 						RequestTimeoutSeconds: 0,
@@ -115,6 +118,9 @@ test('renameTypes', async () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					HooksConfiguration: {
+						onWSTransportConnectionInit: false,
+					},
 				},
 				Directives: [],
 				RequestTimeoutSeconds: 0,
@@ -182,6 +188,9 @@ test('renameTypeFields', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							HooksConfiguration: {
+								onWSTransportConnectionInit: false,
+							},
 						},
 						Directives: [],
 						RequestTimeoutSeconds: 0,
@@ -267,6 +276,9 @@ test('renameTypeFields', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							HooksConfiguration: {
+								onWSTransportConnectionInit: false,
+							},
 						},
 						Directives: [],
 						RequestTimeoutSeconds: 0,
