@@ -12,6 +12,7 @@ import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
 import objectHash from 'object-hash';
 import { Logger } from '../logger';
+import process from 'node:process';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
@@ -103,7 +104,9 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
-	setInterval(async () => {
+	const parentPid = process.ppid;
+
+	const runner = async () => {
 		try {
 			const api = await generator(introspection);
 			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
@@ -113,6 +116,17 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 		} catch (e) {
 			Logger.error('Error during introspection cache update', e);
 		}
+	};
+
+	let interval: NodeJS.Timeout;
+	interval = setInterval(async () => {
+		// clear interval and exit if parent process has exited
+		if (!isProcessRunning(parentPid)) {
+			clearInterval(interval);
+			process.exit(0);
+		}
+
+		await runner();
 	}, intervalInSeconds * 1000);
 };
 
@@ -185,4 +199,13 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	}
 
 	return api;
+};
+
+export const isProcessRunning = (pid: number) => {
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (e: any) {
+		return e.code === 'EPERM';
+	}
 };

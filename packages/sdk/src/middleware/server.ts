@@ -21,6 +21,7 @@ import {
 import { WebhooksConfig } from '../webhooks/types';
 import { ServerLogger, resolveServerLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
+import { isProcessRunning } from '../definition';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -106,11 +107,23 @@ const _configureWunderGraphServer = <
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
+		const isProduction = process.env.NODE_ENV === 'production';
+
+		if (!isProduction) {
+			// for `wunderctl up` exit server if the wunderctl is exited
+			const parentPid = process.ppid;
+			setInterval(async () => {
+				if (!isProcessRunning(parentPid)) {
+					process.exit(0);
+				}
+			}, 200);
+		}
+
 		startServer({
 			wundergraphDir: process.env.WG_ABS_DIR!,
 			config: WG_CONFIG,
 			serverConfig,
-			gracefulShutdown: process.env.NODE_ENV === 'production',
+			gracefulShutdown: isProduction,
 			clientFactory,
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
