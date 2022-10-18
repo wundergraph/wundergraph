@@ -82,7 +82,7 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (str
 	)
 
 	var (
-		prismaExitedError = errors.New("prisma exited too learly")
+		prismaExitedError = errors.New("prisma exited too early")
 	)
 
 	err := e.ensurePrisma()
