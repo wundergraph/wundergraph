@@ -167,7 +167,7 @@ export const createServer = async ({
 
 	fastify.route({
 		method: 'GET',
-		url: '/',
+		url: '/health',
 		handler: function (request, reply) {
 			reply.code(200).send({ status: 'ok' });
 		},

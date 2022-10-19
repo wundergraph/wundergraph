@@ -78,7 +78,24 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
 }
 
-func StartWunderGraphNode(n *node.Node, stop func()) error {
+type options struct {
+	hooksServerHealthCheck bool
+}
+
+type Option func(options *options)
+
+func WithHooksServerHealthCheck() Option {
+	return func(options *options) {
+		options.hooksServerHealthCheck = true
+	}
+}
+
+func StartWunderGraphNode(n *node.Node, stop func(), opts ...Option) error {
+	var options options
+	for i := range opts {
+		opts[i](&options)
+	}
+
 	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
@@ -108,19 +125,27 @@ func StartWunderGraphNode(n *node.Node, stop func()) error {
 		return err
 	}
 
-	opts := []node.Option{
+	nodeOpts := []node.Option{
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithDebugMode(rootFlags.DebugMode),
 	}
 
 	if shutdownAfterIdle > 0 {
-		opts = append(opts, node.WithIdleTimeout(time.Duration(shutdownAfterIdle)*time.Second, func() {
+		nodeOpts = append(nodeOpts, node.WithIdleTimeout(time.Duration(shutdownAfterIdle)*time.Second, func() {
 			log.Info("shutting down due to idle timeout")
 			stop()
 		}))
 	}
 
-	err = n.StartBlocking(opts...)
+	if options.hooksServerHealthCheck {
+		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck())
+	}
+
+	if healthCheckTimeout > 0 {
+		nodeOpts = append(nodeOpts, node.WithHealthCheckTimeout(time.Duration(healthCheckTimeout)*time.Second))
+	}
+
+	err = n.StartBlocking(nodeOpts...)
 	if err != nil {
 		return err
 	}
