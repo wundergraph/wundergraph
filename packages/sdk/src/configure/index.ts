@@ -323,7 +323,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		allowedMethods: config.cors?.allowedMethods || [],
 		exposedHeaders: config.cors?.exposedHeaders || [],
 		allowCredentials: config.cors?.allowCredentials || false,
-		allowedOrigins: (config.cors?.allowedOrigins || [])
+		allowedOrigins: (config.cors?.allowedOrigins || [new EnvironmentVariable('WG_ALLOWED_ORIGIN', '*')])
 			.map((origin) =>
 				typeof origin === 'string' && origin.endsWith('/') ? origin.substring(0, origin.length - 1) : origin
 			)
