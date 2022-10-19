@@ -289,5 +289,7 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
+	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "switches the logging to human readable format")
+
 	rootCmd.AddCommand(upCmd)
 }
