@@ -165,6 +165,14 @@ export const createServer = async ({
 
 	fastify.decorateRequest('ctx', null);
 
+	fastify.route({
+		method: 'GET',
+		url: '/',
+		handler: function (request, reply) {
+			reply.code(200).send({ status: 'ok' });
+		},
+	});
+
 	/**
 	 * Calls per event registration. We use it for debugging only.
 	 */

@@ -411,8 +411,18 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}()
 
 	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("WunderNode Status: OK\n"))
-		_, _ = w.Write([]byte(fmt.Sprintf("BuildInfo: %+v\n", n.info)))
+		resp, err := http.DefaultClient.Get(serverUrl + "/")
+		serverStatus := "OK"
+		if err != nil || resp.StatusCode != 200 {
+			serverStatus = "DEAD"
+		}
+
+		health := HealthCheck{
+			ServerStatus: serverStatus,
+			NodeStatus:   "OK",
+			BuildInfo:    n.info,
+		}
+		_ = json.NewEncoder(w).Encode(health)
 	}))
 
 	n.server = &http.Server{
