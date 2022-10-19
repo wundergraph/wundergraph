@@ -41,6 +41,7 @@ importers:
       '@radix-ui/react-tabs': ^0.2.0-rc.21
       '@sindresorhus/slugify': ^2.1.0
       '@tailwindcss/typography': ^0.5.2
+      '@typeform/embed-react': ^2.1.0
       '@types/node': ^18.0.3
       '@types/react': ^18.0.15
       autoprefixer: ^10.4.7
@@ -74,6 +75,7 @@ importers:
       '@radix-ui/react-tabs': 0.2.0-rc.27_biqbaboplfbrettd7655fr4n2y
       '@sindresorhus/slugify': 2.1.0
       '@tailwindcss/typography': 0.5.3_tailwindcss@3.1.5
+      '@typeform/embed-react': 2.1.0_react@18.2.0
       autoprefixer: 10.4.7
       clsx: 1.2.1
       copy-to-clipboard: 3.3.1
@@ -2704,6 +2706,22 @@ packages:
 
   /@tsd/typescript/4.8.3:
     resolution: {integrity: sha512-ytRZWmXF0i4VFSG8NQ67NUDQ3NGe3E4oByFrxH8eJyW5uBOM5juIdXCg81OY/IcK81qHCzrvGEo8tujlIQbexw==}
+    dev: false
+
+  /@typeform/embed-react/2.1.0_react@18.2.0:
+    resolution: {integrity: sha512-usjuo7gVbf/GdcAUxfVV5f0/VbSikdJaw2wYkSSaWQFVrgFewZ3yowhjSuJCTcOsOKwAb2IrTB+kHvNHNrJMlQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      '@typeform/embed': 2.0.1
+      fast-deep-equal: 3.1.3
+      react: 18.2.0
+    dev: false
+
+  /@typeform/embed/2.0.1:
+    resolution: {integrity: sha512-FeYgDtUAhFrCD7L7iAO65jzLUoPVXRbNjsXe7YQLgLinGpLeVXuwuOuzYagrVl3IQ3Ykmi4sA2LZr29LaMTA7w==}
+    engines: {node: '>=10'}
     dev: false
 
   /@types/axios/0.14.0:
