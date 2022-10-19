@@ -138,7 +138,6 @@ func (e *Engine) IntrospectPrismaDatabaseSchema(introspectionSchema string) (str
 				if response.Error != nil {
 					return "", errors.New(response.Error.Data.Message)
 				}
-				fmt.Fprintln(os.Stderr, "RESP", responseData.String())
 				dataModel := strings.Replace(response.Result.DataModel, " Bytes", " String", -1)
 				return dataModel, nil
 			}
