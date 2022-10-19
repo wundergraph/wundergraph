@@ -21,11 +21,12 @@ the `onConnectionInit` hook is called with the following parameters:
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `internalClient`: The internal client object
+- `datasourceId`: The id of the data-source
 
 ```typescript
 // wundergraph.config.ts
 const chat = introspect.graphql({
-  id: 'myDataSourceId',
+  id: 'chatId',
   apiNamespace: 'chat',
   url: 'http://localhost:8085/query',
 })
@@ -36,10 +37,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
     global: {
       wsTransport: {
         onConnectionInit: {
-          enableForDataSources: ['chat'],
+          enableForDataSources: ['chatId'],
           hook: async ({ clientRequest, dataSourceId }) => {
             let token = clientRequest.headers.get('Authorization') || ''
-            if (dataSourceId === 'chat') {
+            if (dataSourceId === 'chatId') {
               token = 'secret'
             }
             return {
