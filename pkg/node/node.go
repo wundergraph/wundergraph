@@ -81,20 +81,15 @@ type options struct {
 	idleTimeout             time.Duration
 	idleHandler             func()
 	hooksServerHealthCheck  bool
-	healthCheckTimeout      *time.Duration
+	healthCheckTimeout      time.Duration
 }
 
 type Option func(options *options)
 
-func WithHooksServerHealthCheck() Option {
+func WithHooksServerHealthCheck(timeout time.Duration) Option {
 	return func(options *options) {
 		options.hooksServerHealthCheck = true
-	}
-}
-
-func WithHealthCheckTimeout(timeout time.Duration) Option {
-	return func(options *options) {
-		options.healthCheckTimeout = &timeout
+		options.healthCheckTimeout = timeout
 	}
 }
 
@@ -428,9 +423,9 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		serverStatus := "SKIP"
 		if n.options.hooksServerHealthCheck {
 			c := http.DefaultClient
-			c.Timeout = 30 * time.Second
-			if n.options.healthCheckTimeout != nil {
-				c.Timeout = *n.options.healthCheckTimeout
+			c.Timeout = 10 * time.Second
+			if n.options.healthCheckTimeout > 0 {
+				c.Timeout = n.options.healthCheckTimeout
 			}
 
 			resp, err := c.Get(serverUrl + "/health")

@@ -138,11 +138,7 @@ func StartWunderGraphNode(n *node.Node, stop func(), opts ...Option) error {
 	}
 
 	if options.hooksServerHealthCheck {
-		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck())
-	}
-
-	if healthCheckTimeout > 0 {
-		nodeOpts = append(nodeOpts, node.WithHealthCheckTimeout(time.Duration(healthCheckTimeout)*time.Second))
+		nodeOpts = append(nodeOpts, node.WithHooksServerHealthCheck(time.Duration(healthCheckTimeout)*time.Second))
 	}
 
 	err = n.StartBlocking(nodeOpts...)
