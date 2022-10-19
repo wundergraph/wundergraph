@@ -23,15 +23,15 @@ to save us some typing.
 
 ```shell
 # Init a new project with the application template
-npx -y @wundergraph/wunderctl init -o countries
+npx -y @wundergraph/wunderctl init -o world
 ```
 
-This will create our new application in the `countries` directory. Once it finishes,
+This will create our new application in the `world` directory. Once it finishes,
 `cd` into it and run `npm i` (`i` is a shorthand for `install`) to download the
 WunderGraph SDK.
 
 ```shell
-cd countries && npm i
+cd world && npm i
 ```
 
 WunderGraph comes with its own code generation and development server, which we will
@@ -107,16 +107,16 @@ import {
   introspect,
 } from '@wundergraph/sdk'
 
-const continentsAPI = introspect.graphql({
+const world = introspect.graphql({
   // Namespace inside our virtual graph
-  apiNamespace: 'the_continents',
+  apiNamespace: 'world',
   // URL of the data source
   url: 'https://countries.trevorblades.com/',
 })
 
 const myApplication = new Application({
   name: 'app',
-  apis: [continentsAPI],
+  apis: [world],
 })
 
 configureWunderGraphApplication({
@@ -131,7 +131,7 @@ You will notice that our WunderGraph node now starts producing some errors:
 ```
 
 Can you spot what happened? We'll help you: we changed the namespace that our API data source
-maps to, notice `apiNamespace` used to be `countries`, but we changed it to `the_continents`.
+maps to, notice `apiNamespace` used to be `countries`, but we changed it to `world`.
 API namespaces are used to wire our virtual graph together. Since we changed the namespace, the
 operations we had defined in `.wundergraph/operations` are now invalid. Let's remove both
 `.wundergraph/operations/Countries.graphql` and `.wundergraph/operations/Continents.graphl`
@@ -144,7 +144,7 @@ with a `.graphql` extension represents an operation that our server exposes. Not
 operation is named after its file name, the query doesn't need to have an explicit name.
 
 Since our query must end up mapping to our data sources, before writing our first operation
-we should open `https://countries.trevorblades.com/` and visually inspecting
+we should open `https://countries.trevorblades.com/` and visually inspect
 its schema.
 
 We can see the root query has a `continents` field, and each `Continent` consists of a `name`,
@@ -155,7 +155,7 @@ Create `.wundergraph/operations/Continents.graphl` with the following contents:
 ```graphql
 query {
   # Notice how the query takes the <our-api-namespace>_<data-source-namespace>
-  the_continents_continents {
+  world_continents {
     code
   }
 }
@@ -163,14 +163,14 @@ query {
 
 Once we save `Continents.graphl` WunderGraph will automatically reload our application and
 we can test that it is once again returning results, but now it only includes the continent
-code. Also, the namespace for the top level is now `the_continents`.
+code. Also, the namespace for the top level is now `world`.
 
 ```shell
 # Operation name "Continents" matches the filename of the operation
 # filename "Continents.graphql" without extension
 $ curl http://localhost:9991/app/main/operations/Continents
 
-{"data":{"the_continents_continents":[{"code":"AF"},{"code":"AN"},{"code":"AS"},{"code":"EU"},{"code":"NA"},{"code":"OC"},{"code":"SA"}]}}
+{"data":{"world_continents":[{"code":"AF"},{"code":"AN"},{"code":"AS"},{"code":"EU"},{"code":"NA"},{"code":"OC"},{"code":"SA"}]}}
 ```
 
 ## Filtering
@@ -184,9 +184,9 @@ some means to retrieve only the results that we care about. With WunderGraph, th
 # Our filter type takes the form <api-namespace>_<remote-type>
 # ContinentFilterInput is the filter type as declared by
 # the data source.
-query Continents($filter: the_continents_ContinentFilterInput) {
+query Continents($filter: world_ContinentFilterInput) {
   # Pass the filter to the remote API
-  the_continents_continents(filter: $filter) {
+  world_continents(filter: $filter) {
     code
   }
 }
@@ -197,9 +197,9 @@ To test this, we need to send a request with the filter. To do so, we use the `w
 ```shell
 $ curl --get --data-urlencode 'wg_variables={"filter":{"code":{"eq":"AF"}}}' http://localhost:9991/app/main/operations/Continents
 
-{"data":{"the_continents_continents":[{"code":"AF"}]}
+{"data":{"world_continents":[{"code":"AF"}]}
 ```
 
 ## Exercises
 
-- Expand `Continents.graphql` to return the countrie codes inside each continent
+- Expand `Continents.graphql` to return the country codes inside each continent
