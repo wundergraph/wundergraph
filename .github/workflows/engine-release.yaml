@@ -36,7 +36,7 @@ jobs:
           pushd .
           cd /usr/local/Homebrew
           git fetch --tags
-          git checkout 3.3.9
+          git checkout 3.6.6
           popd
           brew tap mitchellh/gon
           brew install mitchellh/gon/gon
@@ -47,14 +47,8 @@ jobs:
           p12-file-base64: ${{ secrets.APPLE_DEVELOPER_CERTIFICATE_P12_BASE64 }}
           p12-password: ${{ secrets.AC_PASSWORD }}
 
-      - name: setup sdk 2
+      - name: Show installed SDK's
         run: xcodebuild -showsdks
-
-      - name: setup sdk 3
-        run: xcrun -sdk macosx12.1 --show-sdk-path
-
-      - name: setup sdk 3
-        run: xcrun -sdk macosx12.1 --show-sdk-platform-version
 
       - name: generate go types based on protobuf definitions
         run: make codegen-go
