@@ -6,9 +6,10 @@ description:
 
 The `mutatingPostResolve` hook is called after the response of an Operation has been resolved.
 You're able to modify the response before it gets sent to the client.
+Supported operations are `queries`, `mutations` and `subscriptions`.
 
 Similar to all other hooks,
-the `customResolve` hook is called with the following parameters:
+the `mutatingPostResolve` hook is called with the following parameters:
 
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers

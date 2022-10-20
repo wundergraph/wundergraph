@@ -21,6 +21,7 @@ import {
 import { WebhooksConfig } from '../webhooks/types';
 import { ServerLogger, resolveServerLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
+import { onParentProcessExit } from '../utils/process';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -106,11 +107,20 @@ const _configureWunderGraphServer = <
 	 * This environment variable is used to determine if the server should start the hooks server.
 	 */
 	if (process.env.START_HOOKS_SERVER === 'true') {
+		const isProduction = process.env.NODE_ENV === 'production';
+
+		if (!isProduction) {
+			// Exit the server when wunderctl exited without the chance to kill the child processes
+			onParentProcessExit(() => {
+				process.exit(0);
+			});
+		}
+
 		startServer({
 			wundergraphDir: process.env.WG_ABS_DIR!,
 			config: WG_CONFIG,
 			serverConfig,
-			gracefulShutdown: process.env.NODE_ENV === 'production',
+			gracefulShutdown: isProduction,
 			clientFactory,
 		}).catch((err) => {
 			logger.fatal(err, 'Could not start the hook server');
@@ -154,6 +164,14 @@ export const createServer = async ({
 	});
 
 	fastify.decorateRequest('ctx', null);
+
+	fastify.route({
+		method: 'GET',
+		url: '/health',
+		handler: function (request, reply) {
+			reply.code(200).send({ status: 'ok' });
+		},
+	});
 
 	/**
 	 * Calls per event registration. We use it for debugging only.

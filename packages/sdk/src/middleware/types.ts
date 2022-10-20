@@ -144,6 +144,7 @@ export interface FastifyRequestBody {
 }
 
 export interface OnConnectionInitHookRequestBody extends FastifyRequestBody {
+	dataSourceId: string;
 	request: WunderGraphRequest;
 }
 

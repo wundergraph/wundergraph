@@ -65,7 +65,8 @@ func HeaderCSVToSlice(headers map[string]string) map[string][]string {
 }
 
 type OnWsConnectionInitHookPayload struct {
-	Request WunderGraphRequest `json:"request"`
+	DataSourceID string             `json:"dataSourceId"`
+	Request      WunderGraphRequest `json:"request"`
 }
 
 type OnRequestHookPayload struct {
@@ -208,4 +209,16 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	}
 
 	return &hookRes, nil
+}
+
+func (c *Client) DoHealthCheckRequest(timeout time.Duration) (status bool) {
+	client := http.DefaultClient
+	client.Timeout = timeout
+
+	resp, err := client.Get(fmt.Sprintf("%s/health", c.serverUrl))
+	if err != nil || resp.StatusCode != 200 {
+		return
+	}
+
+	return true
 }

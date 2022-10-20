@@ -1,5 +1,6 @@
 import { internalClientFactory } from '../internal-client';
 import { createServer } from '../server';
+import { OperationType } from '@wundergraph/protobuf';
 import { FastifyRequestBody, OnConnectionInitHookRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
@@ -8,7 +9,35 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 	const fastify = await createServer({
 		wundergraphDir: '',
 		config: {
-			api: undefined,
+			api: {
+				operations: [
+					{
+						name: 'Chat',
+						operationType: OperationType.SUBSCRIPTION,
+						variablesSchema: '',
+						responseSchema: '',
+						cacheConfig: undefined,
+						authenticationConfig: undefined,
+						liveQueryConfig: undefined,
+						authorizationConfig: undefined,
+						hooksConfiguration: undefined,
+						variablesConfiguration: undefined,
+						internal: false,
+						interpolationVariablesSchema: '',
+						postResolveTransformations: [],
+						content: '',
+					},
+				],
+				engineConfiguration: undefined,
+				corsConfiguration: undefined,
+				authenticationConfig: undefined,
+				serverOptions: undefined,
+				nodeOptions: undefined,
+				s3UploadConfiguration: [],
+				allowedHostNames: [],
+				enableGraphqlEndpoint: false,
+				webhooks: [],
+			},
 			apiId: '',
 			apiName: '',
 			deploymentName: '',
@@ -235,6 +264,130 @@ test('Hook should return 404 if not being used', async () => {
 	expect(postLogoutResponse.statusCode).toEqual(404);
 });
 
+test('subscriptions mutatingPostResolve hook', async () => {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
+		hooks: {
+			subscriptions: {
+				Chat: {
+					mutatingPostResolve: async (hook: any) => {
+						return hook.response;
+					},
+				},
+			},
+		},
+	};
+	const fastify = await getFastify(serverConfig);
+	const onConnectionInitResponse = await fastify.inject({
+		method: 'POST',
+		url: '/operation/Chat/mutatingPostResolve',
+		payload: {
+			input: {},
+			__wg: {
+				clientRequest: {},
+			},
+			response: {},
+		},
+	});
+	expect(onConnectionInitResponse.statusCode).toEqual(200);
+	expect(onConnectionInitResponse.json()).toEqual({
+		hook: 'mutatingPostResolve',
+		op: 'Chat',
+		response: {},
+		setClientRequestHeaders: {},
+	});
+});
+
+test('subscriptions mutatingPreResolve hook', async () => {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
+		hooks: {
+			subscriptions: {
+				Chat: {
+					mutatingPreResolve: async (hook: any) => {
+						return hook.input;
+					},
+				},
+			},
+		},
+	};
+	const fastify = await getFastify(serverConfig);
+	const onConnectionInitResponse = await fastify.inject({
+		method: 'POST',
+		url: '/operation/Chat/mutatingPreResolve',
+		payload: {
+			input: {},
+			__wg: {
+				clientRequest: {},
+			},
+		},
+	});
+	expect(onConnectionInitResponse.statusCode).toEqual(200);
+	expect(onConnectionInitResponse.json()).toEqual({
+		hook: 'mutatingPreResolve',
+		op: 'Chat',
+		input: {},
+		setClientRequestHeaders: {},
+	});
+});
+
+test('subscriptions preResolve hook', async () => {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
+		hooks: {
+			subscriptions: {
+				Chat: {
+					preResolve: async (hook: any) => {},
+				},
+			},
+		},
+	};
+	const fastify = await getFastify(serverConfig);
+	const onConnectionInitResponse = await fastify.inject({
+		method: 'POST',
+		url: '/operation/Chat/preResolve',
+		payload: {
+			input: {},
+			__wg: {
+				clientRequest: {},
+			},
+		},
+	});
+	expect(onConnectionInitResponse.statusCode).toEqual(200);
+	expect(onConnectionInitResponse.json()).toEqual({
+		hook: 'preResolve',
+		op: 'Chat',
+		setClientRequestHeaders: {},
+	});
+});
+
+test('subscriptions postResolve hook', async () => {
+	const serverConfig: WunderGraphHooksAndServerConfig = {
+		hooks: {
+			subscriptions: {
+				Chat: {
+					postResolve: async (hook: any) => {},
+				},
+			},
+		},
+	};
+	const fastify = await getFastify(serverConfig);
+	const onConnectionInitResponse = await fastify.inject({
+		method: 'POST',
+		url: '/operation/Chat/postResolve',
+		payload: {
+			input: {},
+			response: {},
+			__wg: {
+				clientRequest: {},
+			},
+		},
+	});
+	expect(onConnectionInitResponse.statusCode).toEqual(200);
+	expect(onConnectionInitResponse.json()).toEqual({
+		hook: 'postResolve',
+		op: 'Chat',
+		setClientRequestHeaders: {},
+	});
+});
+
 test('onWSTransportConnectionInit hook', async () => {
 	const serverConfig: WunderGraphHooksAndServerConfig = {
 		hooks: {
@@ -259,6 +412,7 @@ test('onWSTransportConnectionInit hook', async () => {
 		method: 'POST',
 		url: '/global/wsTransport/onConnectionInit',
 		payload: {
+			dataSourceId: 'chatId',
 			__wg: {
 				clientRequest: {},
 			},

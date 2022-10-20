@@ -3,18 +3,9 @@ import { slugifyWithCounter } from '@sindresorhus/slugify'
 import { Layout } from '@/components/Layout'
 import 'focus-visible'
 import '@/styles/tailwind.css'
-import Plausible from 'plausible-tracker'
 import { useEffect } from 'react'
 import { ThemeProvider } from 'next-themes'
-
-export const plausible = Plausible({
-	domain: 'docs.wundergraph.com',
-	trackLocalhost: false,
-})
-
-export const trackOutboundLinkClick = (url) => {
-	plausible.trackEvent('Outbound Link: Click', { props: { url } })
-}
+import { plausible } from '@/utils/analytics'
 
 function getNodeText(node) {
 	let text = ''
