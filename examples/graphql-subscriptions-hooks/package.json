@@ -1,19 +1,21 @@
 {
-  "name": "wundergraph-yoga-sse",
+  "name": "wundergraph-graphql-subscriptions-hooks",
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "run-p yoga wundergraph",
+    "start": "run-p ws:server wundergraph",
     "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
-    "yoga": "ts-node yoga/server.ts",
+    "ws:server": "ts-node graphql-ws/server.ts",
     "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@graphql-yoga/node": "^2.13.13",
+    "@fastify/websocket": "^7.0.1",
     "@wundergraph/sdk": "^0.117.0",
+    "fastify": "^4.6.0",
     "graphql": "^16.3.0",
+    "graphql-ws": "^5.11.2",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.1",
     "wait-on": "^6.0.1"
