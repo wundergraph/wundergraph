@@ -8,3 +8,9 @@ type GitHubAuthDemo struct {
 	ClientID     string
 	ClientSecret string
 }
+
+type HealthCheck struct {
+	ServerStatus string    `json:"serverStatus"`
+	NodeStatus   string    `json:"nodeStatus"`
+	BuildInfo    BuildInfo `json:"buildInfo"`
+}

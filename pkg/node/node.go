@@ -80,9 +80,18 @@ type options struct {
 	devMode                 bool
 	idleTimeout             time.Duration
 	idleHandler             func()
+	hooksServerHealthCheck  bool
+	healthCheckTimeout      time.Duration
 }
 
 type Option func(options *options)
+
+func WithHooksServerHealthCheck(timeout time.Duration) Option {
+	return func(options *options) {
+		options.hooksServerHealthCheck = true
+		options.healthCheckTimeout = timeout
+	}
+}
 
 func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	return func(options *options) {
@@ -410,9 +419,23 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}
 	}()
 
-	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("WunderNode Status: OK\n"))
-		_, _ = w.Write([]byte(fmt.Sprintf("BuildInfo: %+v\n", n.info)))
+	router.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		serverStatus := "SKIP"
+		if n.options.hooksServerHealthCheck {
+			serverStatus = "OK"
+			ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+			if !ok {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				serverStatus = "DEAD"
+			}
+		}
+
+		health := HealthCheck{
+			ServerStatus: serverStatus,
+			NodeStatus:   "OK",
+			BuildInfo:    n.info,
+		}
+		_ = json.NewEncoder(w).Encode(health)
 	}))
 
 	n.server = &http.Server{
