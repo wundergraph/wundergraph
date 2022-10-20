@@ -13,6 +13,7 @@ import navigation from '../../config/navigation'
 import { GitHubIcon } from './icons/Github'
 import { DocsFooter } from './DocsFooter'
 import Comments from './Comments'
+import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 
 function Header({ navigation }) {
 	let [isScrolled, setIsScrolled] = useState(false)
@@ -32,38 +33,41 @@ function Header({ navigation }) {
 	return (
 		<header
 			className={clsx(
-				'sticky top-0 z-50 flex flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none sm:px-6 lg:px-8',
+				'sticky top-0 z-50 bg-white shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none',
 				isScrolled
 					? 'dark:bg-slate-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-slate-900/75'
 					: 'dark:bg-transparent'
 			)}
 		>
-			<div className="mr-6 flex lg:hidden">
-				<MobileNavigation navigation={navigation} />
-			</div>
-			<div className="relative flex flex-grow basis-0 items-center">
-				<Link
-					href="https://wundergraph.com/"
-					aria-label="WunderGraph landing page"
-				>
-					<div className="flex">
-						<Logomark className="h-10 w-10 text-black dark:text-white lg:hidden" />
-						<Logo className="hidden h-8 text-black dark:text-white lg:flex" />
-					</div>
-				</Link>
-			</div>
-			<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
-				<Search />
-			</div>
-			<div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
-				<ThemeSelector className="relative z-10" />
-				<Link
-					href="https://github.com/wundergraph/wundergraph"
-					className="group"
-					aria-label="GitHub"
-				>
-					<GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
-				</Link>
+			<AnnouncementBanner />
+			<div className="flex flex-wrap items-center justify-between py-5 px-4 sm:px-6 lg:px-8">
+				<div className="mr-6 flex lg:hidden">
+					<MobileNavigation navigation={navigation} />
+				</div>
+				<div className="relative flex flex-grow basis-0 items-center">
+					<Link
+						href="https://wundergraph.com/"
+						aria-label="WunderGraph landing page"
+					>
+						<div className="flex">
+							<Logomark className="h-10 w-10 text-black dark:text-white lg:hidden" />
+							<Logo className="hidden h-8 text-black dark:text-white lg:flex" />
+						</div>
+					</Link>
+				</div>
+				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
+					<Search />
+				</div>
+				<div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
+					<ThemeSelector className="relative z-10" />
+					<Link
+						href="https://github.com/wundergraph/wundergraph"
+						className="group"
+						aria-label="GitHub"
+					>
+						<GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
+					</Link>
+				</div>
 			</div>
 		</header>
 	)
