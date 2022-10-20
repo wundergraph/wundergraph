@@ -45,7 +45,7 @@ var nodeStartCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n, stop)
+			err := StartWunderGraphNode(n, WithIdleHandler(stop))
 			if err != nil {
 				log.Error("Start node", abstractlogger.Error(err))
 			}
@@ -80,6 +80,7 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 
 type options struct {
 	hooksServerHealthCheck bool
+	idleHandler            func()
 }
 
 type Option func(options *options)
@@ -90,7 +91,13 @@ func WithHooksServerHealthCheck() Option {
 	}
 }
 
-func StartWunderGraphNode(n *node.Node, stop func(), opts ...Option) error {
+func WithIdleHandler(idleHander func()) Option {
+	return func(options *options) {
+		options.idleHandler = idleHander
+	}
+}
+
+func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 	var options options
 	for i := range opts {
 		opts[i](&options)
@@ -133,7 +140,7 @@ func StartWunderGraphNode(n *node.Node, stop func(), opts ...Option) error {
 	if shutdownAfterIdle > 0 {
 		nodeOpts = append(nodeOpts, node.WithIdleTimeout(time.Duration(shutdownAfterIdle)*time.Second, func() {
 			log.Info("shutting down due to idle timeout")
-			stop()
+			options.idleHandler()
 		}))
 	}
 

@@ -209,3 +209,15 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 
 	return &hookRes, nil
 }
+
+func (c *Client) DoHealthCheckRequest(timeout time.Duration) (status bool) {
+	client := http.DefaultClient
+	client.Timeout = timeout
+
+	resp, err := client.Get(fmt.Sprintf("%s/health", c.serverUrl))
+	if err != nil || resp.StatusCode != 200 {
+		return
+	}
+
+	return true
+}

@@ -48,7 +48,7 @@ var startCmd = &cobra.Command{
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n, stop, WithHooksServerHealthCheck())
+			err := StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
 			if err != nil {
 				log.Error("Start node", abstractlogger.Error(err))
 			}
@@ -72,5 +72,5 @@ func init() {
 	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
 	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
 	startCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
-	startCmd.Flags().IntVar(&healthCheckTimeout, "healthcheck-timeout", 0, "healthcheck timeout in seconds")
+	startCmd.Flags().IntVar(&healthCheckTimeout, "healthcheck-timeout", 10, "healthcheck timeout in seconds")
 }

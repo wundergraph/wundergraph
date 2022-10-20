@@ -422,15 +422,9 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	router.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		serverStatus := "SKIP"
 		if n.options.hooksServerHealthCheck {
-			c := http.DefaultClient
-			c.Timeout = 10 * time.Second
-			if n.options.healthCheckTimeout > 0 {
-				c.Timeout = n.options.healthCheckTimeout
-			}
-
-			resp, err := c.Get(serverUrl + "/health")
 			serverStatus = "OK"
-			if err != nil || resp.StatusCode != 200 {
+			ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+			if !ok {
 				w.WriteHeader(http.StatusServiceUnavailable)
 				serverStatus = "DEAD"
 			}
