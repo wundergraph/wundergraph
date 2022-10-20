@@ -100,7 +100,7 @@
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@wundergraph/protobuf": "workspace:^0.97.0",
-    "@wundergraph/wunderctl": "workspace:>=0.113.0",
+    "@wundergraph/wunderctl": "workspace:>=0.114.1",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "colors": "^1.4.0",
