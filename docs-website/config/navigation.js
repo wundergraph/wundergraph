@@ -237,6 +237,10 @@ const navigation = [
 				title: 'GraphQl hasura WS subscriptions',
 				href: '/docs/examples/graphql-hasura-subscriptions',
 			},
+			{
+				title: 'GraphQl subscriptions hooks',
+				href: '/docs/examples/graphql-subscriptions-hooks',
+			},
 		],
 	},
 	{
