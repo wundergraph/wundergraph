@@ -149,6 +149,7 @@ export interface DotGraphQLConfig {
 export enum HooksConfigurationOperationType {
 	Queries = 'queries',
 	Mutations = 'mutations',
+	Subscriptions = 'subscriptions',
 }
 
 export interface OperationHookFunction {
@@ -171,6 +172,7 @@ export type OperationHooks = Record<string, any>;
 export interface HooksConfiguration<
 	Queries extends OperationHooks = OperationHooks,
 	Mutations extends OperationHooks = OperationHooks,
+	Subscriptions extends OperationHooks = OperationHooks,
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
 	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
@@ -204,6 +206,7 @@ export interface HooksConfiguration<
 	};
 	[HooksConfigurationOperationType.Queries]?: Queries;
 	[HooksConfigurationOperationType.Mutations]?: Mutations;
+	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
 }
 export interface DeploymentAPI {
 	apiConfig: () => {
@@ -826,6 +829,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
 					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 					op.HooksConfiguration.customResolve = hooks.customResolve !== undefined;
+				}
+			}
+
+			for (const operationName in config.server?.hooks?.subscriptions) {
+				const hooks = config.server?.hooks!.subscriptions[operationName];
+				const op = app.Operations.find(
+					(op) => op.OperationType === OperationType.SUBSCRIPTION && op.Name === operationName
+				);
+				if (op !== undefined && hooks !== undefined) {
+					op.HooksConfiguration.preResolve = hooks.preResolve !== undefined;
+					op.HooksConfiguration.postResolve = hooks.postResolve !== undefined;
+					op.HooksConfiguration.mutatingPreResolve = hooks.mutatingPreResolve !== undefined;
+					op.HooksConfiguration.mutatingPostResolve = hooks.mutatingPostResolve !== undefined;
 				}
 			}
 

@@ -6,15 +6,15 @@ description:
 
 The `mutatingPreResolve` hook is called before the Operation gets resolved.
 You're able to modify the input before it gets passed to the resolvers.
+Supported operations are `queries`, `mutations` and `subscriptions`.
 
 Similar to all other hooks,
-the `customResolve` hook is called with the following parameters:
+the `mutatingPreResolve` hook is called with the following parameters:
 
 - `user`: The user object when the user is authenticated
 - `clientRequest`: The original client request object, including Headers
 - `log`: The logger object
 - `internalClient`: The internal client object
-- `response`: The response object (only for postResolve hooks)
 - `input`: The input object (only for Operation hooks)
 
 With the `internalClient`,

@@ -824,6 +824,10 @@ const navigation = [
 				href: '/docs/wundergraph-server-ts-reference/on-origin-response-hook',
 			},
 			{
+				title: 'onConnectionInit hook',
+				href: '/docs/wundergraph-server-ts-reference/ws-transport-connection-init-hook',
+			},
+			{
 				title: 'postAuthentication hook',
 				href: '/docs/wundergraph-server-ts-reference/post-authentication-hook',
 			},

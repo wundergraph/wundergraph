@@ -562,6 +562,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
 			queryParamsAllowList:   queryParamsAllowList,
+			hooksClient:            r.middlewareClient,
+			hooksConfig:            buildHooksConfig(operation),
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -1667,6 +1669,8 @@ type SubscriptionHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
+	hooksClient            *hooks.Client
+	hooksConfig            hooksConfig
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1682,12 +1686,6 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		RenameTypeNames: h.renameTypeNames,
 	})
 	defer pool.PutCtx(ctx)
-
-	flushWriter, ok := getFlushWriter(ctx, r, w)
-	if !ok {
-		http.Error(w, "Connection not flushable", http.StatusBadRequest)
-		return
-	}
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
@@ -1713,6 +1711,81 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+
+	flushWriter, ok := getFlushWriter(ctx, r, w)
+	if !ok {
+		http.Error(w, "Connection not flushable", http.StatusBadRequest)
+		return
+	}
+
+	hookBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(hookBuf)
+
+	if h.hooksConfig.preResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
+		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
+		if err != nil {
+			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
+			http.Error(w, "PreResolve mutation hook failed", http.StatusInternalServerError)
+			return
+		}
+		if out != nil {
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("PreResolve mutation hook response is empty")
+			http.Error(w, "PreResolve mutation hook response is empty", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if h.hooksConfig.mutatingPreResolve {
+		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
+		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
+		if err != nil {
+			h.log.Error("MutatingPostResolve mutation hook", abstractlogger.Error(err))
+			http.Error(w, "MutatingPostResolve mutation hook failed", http.StatusInternalServerError)
+			return
+		}
+
+		if out != nil {
+			ctx.Variables = out.Input
+			updateContextHeaders(ctx, out.SetClientRequestHeaders)
+		} else {
+			h.log.Error("MutatingPostResolve mutation hook response is empty")
+			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if h.hooksConfig.postResolve {
+		var callback flushWriterPostResolveCallback = func(ctx *resolve.Context, resp []byte) {
+			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
+			_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
+			if err != nil {
+				h.log.Error("PostResolve subscription hook failed", abstractlogger.Error(err))
+			}
+		}
+
+		flushWriter.postResolveCallback = &callback
+	}
+
+	if h.hooksConfig.mutatingPostResolve {
+		var callback flushWriterMutatingPostResolveCallback = func(ctx *resolve.Context, resp []byte) ([]byte, error) {
+			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
+			out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
+			if err != nil {
+				h.log.Error("MutatingPostResolve subscription hook failed", abstractlogger.Error(err))
+				return nil, err
+			}
+			if out == nil {
+				h.log.Error("MutatingPostResolve subscription hook response is empty")
+				return nil, errors.New("mutatingPostResolve hook response is empty")
+			}
+			return out.Response, nil
+		}
+
+		flushWriter.mutatingPostResolveCallback = &callback
+	}
 
 	err = h.resolver.ResolveGraphQLSubscription(ctx, h.preparedPlan.Response, flushWriter)
 	if err != nil {
@@ -1761,14 +1834,20 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 	o.walker.Stop()
 }
 
+type flushWriterMutatingPostResolveCallback func(ctx *resolve.Context, resp []byte) ([]byte, error)
+type flushWriterPostResolveCallback func(ctx *resolve.Context, resp []byte)
+
 type httpFlushWriter struct {
-	writer                 io.Writer
-	flusher                http.Flusher
-	postResolveTransformer *postresolvetransform.Transformer
-	subscribeOnce          bool
-	sse                    bool
-	close                  func()
-	sseBuf                 *bytes.Buffer
+	writer                      io.Writer
+	flusher                     http.Flusher
+	postResolveTransformer      *postresolvetransform.Transformer
+	subscribeOnce               bool
+	sse                         bool
+	close                       func()
+	buf                         *bytes.Buffer
+	mutatingPostResolveCallback *flushWriterMutatingPostResolveCallback
+	postResolveCallback         *flushWriterPostResolveCallback
+	ctx                         *resolve.Context
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -1778,23 +1857,31 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 			return 0, err
 		}
 	}
-	if f.sse {
-		if f.sseBuf == nil {
-			f.sseBuf = &bytes.Buffer{}
-		}
-		if f.sseBuf.Len() == 0 {
-			f.sseBuf.WriteString("data: ")
-		}
-		return f.sseBuf.Write(p)
-	}
-	return f.writer.Write(p)
+
+	return f.buf.Write(p)
 }
 
 func (f *httpFlushWriter) Flush() {
-	if f.sse && f.sseBuf != nil {
-		_, _ = f.sseBuf.WriteTo(f.writer)
-		f.sseBuf.Reset()
+	resp := f.buf.Bytes()
+	f.buf.Reset()
+
+	if f.postResolveCallback != nil {
+		(*f.postResolveCallback)(f.ctx, resp)
 	}
+
+	if f.mutatingPostResolveCallback != nil {
+		if r, err := (*f.mutatingPostResolveCallback)(f.ctx, resp); err == nil {
+			resp = r
+		}
+	}
+
+	if f.sse {
+		_, _ = f.writer.Write([]byte("data: "))
+		_, _ = f.writer.Write(resp)
+	} else {
+		_, _ = f.writer.Write(resp)
+	}
+
 	if f.subscribeOnce {
 		f.flusher.Flush()
 		f.close()
@@ -2193,6 +2280,8 @@ func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter
 		writer:  w,
 		flusher: flusher,
 		sse:     sse,
+		buf:     &bytes.Buffer{},
+		ctx:     ctx,
 	}
 
 	if subscribeOnce {
