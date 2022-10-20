@@ -36,7 +36,7 @@ jobs:
           pushd .
           cd /usr/local/Homebrew
           git fetch --tags
-          git checkout 3.3.9
+          git checkout 3.6.6
           popd
           brew tap mitchellh/gon
           brew install mitchellh/gon/gon
@@ -51,10 +51,10 @@ jobs:
         run: xcodebuild -showsdks
 
       - name: setup sdk 3
-        run: xcrun -sdk macosx12.1 --show-sdk-path
+        run: xcrun -sdk macosx12.3 --show-sdk-path
 
       - name: setup sdk 3
-        run: xcrun -sdk macosx12.1 --show-sdk-platform-version
+        run: xcrun -sdk macosx12.3 --show-sdk-platform-version
 
       - name: generate go types based on protobuf definitions
         run: make codegen-go
