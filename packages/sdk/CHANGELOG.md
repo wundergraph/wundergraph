@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.117.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.116.1...@wundergraph/sdk@0.117.0) (2022-10-20)
+
+### Features
+
+* healthcheck, node and hooks server ([#274](https://github.com/wundergraph/wundergraph/issues/274)) ([b7f7ecc](https://github.com/wundergraph/wundergraph/commit/b7f7eccef038cf03913740cb43360ca1d38dc016)) (@YuriBuerov)
+* make WunderGraphConfigApplicationConfig.cors optional ([#270](https://github.com/wundergraph/wundergraph/issues/270)) ([4bb2658](https://github.com/wundergraph/wundergraph/commit/4bb26586b795b4b7682d4dc43574f9d765d6be86)) (@fiam)
+* subscriptions, operation hooks ([#260](https://github.com/wundergraph/wundergraph/issues/260)) ([3199931](https://github.com/wundergraph/wundergraph/commit/31999317c0d95098cefaef7b19b51aa9c0248353)) (@YuriBuerov)
+
+### Bug Fixes
+
+* exit node process when parent exited ([#271](https://github.com/wundergraph/wundergraph/issues/271)) ([fbc8608](https://github.com/wundergraph/wundergraph/commit/fbc8608a96ed5aa40afe17fa2ad658bd650d6257)) (@spetrunin)
+
 ## [0.116.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.116.0...@wundergraph/sdk@0.116.1) (2022-10-18)
 
 **Note:** Version bump only for package @wundergraph/sdk
