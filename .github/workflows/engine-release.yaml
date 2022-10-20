@@ -36,7 +36,7 @@ jobs:
           pushd .
           cd /usr/local/Homebrew
           git fetch --tags
-          git checkout 3.3.9
+          git checkout 3.6.6
           popd
           brew tap mitchellh/gon
           brew install mitchellh/gon/gon
