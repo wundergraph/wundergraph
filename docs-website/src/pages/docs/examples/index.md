@@ -30,4 +30,5 @@ Here's an overview of all the available examples.
 {% quick-link title="GraphQL SSE subscriptions" icon="core" href="/docs/examples/graphql-sse-subscriptions" description="This example demonstrates how to use GraphQL SSE subscriptions with WunderGraph." /%}
 {% quick-link title="GraphQL yoga SSE subscriptions" icon="core" href="/docs/examples/graphql-yoga-subscriptions" description="This example demonstrates how to use GraphQL yoga SSE subscriptions with WunderGraph." /%}
 {% quick-link title="GraphQL hasura subscriptions" icon="core" href="/docs/examples/graphql-hasura-subscriptions" description="This example demonstrates how to use GraphQL hasura WS subscriptions with WunderGraph." /%}
+{% quick-link title="GraphQL subscriptions hooks" icon="core" href="/docs/examples/graphql-subscriptions-hooks" description="This example demonstrates how to use GraphQL subscriptions hooks with WunderGraph." /%}
 {% /quick-links %}
