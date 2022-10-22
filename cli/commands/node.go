@@ -135,6 +135,8 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 	nodeOpts := []node.Option{
 		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithDebugMode(rootFlags.DebugMode),
+		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
+		node.WithIntrospection(enableIntrospection),
 	}
 
 	if shutdownAfterIdle > 0 {
