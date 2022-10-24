@@ -104,7 +104,7 @@ applications and microservices).
 ## Architecture & Key Differentiators
 
 <div align="center">
-    <img src="./assets/wundergraph_architecture_overview_light_transparent.png" height="auto"/>
+    <img src="./assets/architecture.jpg" height="auto"/>
 </div>
 
 WunderGraph is unique in its design,
