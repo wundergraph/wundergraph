@@ -1,5 +1,5 @@
 <div align="center"> <a href="https://wundergraph.com/">
-    <img src="./assets/newlogo.png" height="auto"/>
+    <img src="./assets/logo2.png" height="auto"/>
   </a>
 </div>
 
@@ -107,11 +107,7 @@ applications and microservices).
     <img src="./assets/architecture.jpg" height="auto"/>
 </div>
 
-WunderGraph is unique in its design,
-as we're not directly exposing GraphQL,
-but JSON-RPC. Combined with a generated Type-Safe client,
-this leads to a unique Developer Experience.
-You can learn more about the architecture of WunderGraph and why we've built it this way in [the architecture section](docs/architecture.md).
+You can learn more about the architecture of WunderGraph and why we’ve built it this way in [the architecture section](docs/architecture.md).
 
 ## Learn more about WunderGraph
 
