@@ -1,10 +1,11 @@
 <div align="center"> <a href="https://wundergraph.com/">
-    <img src="./assets/logo.png" height="auto"/>
+    <img src="./assets/newlogo.png" height="auto"/>
   </a>
 </div>
 
 <div align="center">
-  <h1>WunderGraph</h1>
+  <br />
+  <br />
   <a href="https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" /></a>
   <a href="https://github.com/wundergraph/wundergraph/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache%202-blue" /></a>
   <a href="https://discord.gg/Jjmc8TC"><img src="https://img.shields.io/badge/chat-on%20discord-blue.svg" /></a>
@@ -24,6 +25,7 @@
   <a href="https://discord.gg/Jjmc8TC">Discord</a>
   <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
   <a href="https://twitter.com/wundergraphcom">Twitter</a>
+  <br />
   <br />
   <hr />
 </div>
