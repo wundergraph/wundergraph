@@ -9,6 +9,7 @@ on:
       - 'types/**/*'
       - 'go.mod'
       - 'go.sum'
+      - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
   pull_request:
@@ -20,6 +21,7 @@ on:
       - 'types/**/*'
       - 'go.mod'
       - 'go.sum'
+      - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
 
