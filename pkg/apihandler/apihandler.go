@@ -57,9 +57,10 @@ import (
 )
 
 const (
-	WG_PREFIX    = "wg_"
-	WG_LIVE      = WG_PREFIX + "live"
-	WG_VARIABLES = WG_PREFIX + "variables"
+	WG_PREFIX       = "wg_"
+	WG_LIVE         = WG_PREFIX + "live"
+	WG_VARIABLES    = WG_PREFIX + "variables"
+	WG_CACHE_HEADER = "X-Wg-Cache"
 )
 
 type Builder struct {
@@ -1111,7 +1112,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		item, hit := h.cache.Get(ctx.Context, cacheKey)
 		if hit {
 
-			w.Header().Set("X-Cache", "HIT")
+			w.Header().Set(WG_CACHE_HEADER, "HIT")
 
 			_, _ = buf.Write(item.Data)
 
@@ -1145,7 +1146,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			_, _ = buf.WriteTo(w)
 			return
 		}
-		w.Header().Set("X-Cache", "MISS")
+		w.Header().Set(WG_CACHE_HEADER, "MISS")
 	}
 
 	if h.hooksConfig.preResolve {
