@@ -30,6 +30,7 @@ const (
 // to free the resources associated with the Middlware (e.g. with a defer after New()).
 type Middleware struct {
 	timeout  time.Duration
+	skip     SkipFunc
 	counter  uint64
 	eventCh  chan event
 	notifyCh chan struct{}
@@ -37,11 +38,13 @@ type Middleware struct {
 
 // New returns a new Middleware which will timeout after the given duration.
 // See Middleware for more information.
-func New(timeout time.Duration) *Middleware {
+func New(timeout time.Duration, opts ...Option) *Middleware {
+	options := applyOptions(opts)
 	eventCh := make(chan event, 1)
 	notifyCh := make(chan struct{}, 1)
 	return &Middleware{
 		timeout:  timeout,
+		skip:     options.skip,
 		eventCh:  eventCh,
 		notifyCh: notifyCh,
 	}
@@ -62,9 +65,11 @@ func (m *Middleware) endRequest() {
 // Handler returns a handler wrapped by the Middleware
 func (m *Middleware) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		m.startRequest()
-		// Use defer to ensure m.endRequest() is called even if next.ServeHTTP() panics
-		defer m.endRequest()
+		if m.skip == nil || !m.skip(r) {
+			m.startRequest()
+			// Use defer to ensure m.endRequest() is called even if next.ServeHTTP() panics
+			defer m.endRequest()
+		}
 		next.ServeHTTP(w, r)
 	})
 }
