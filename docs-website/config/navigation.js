@@ -142,6 +142,15 @@ const navigation = [
 		],
 	},
 	{
+		title: 'Cloud',
+		links: [
+			{
+				title: 'Deploy to WunderGraph Cloud',
+				href: '/docs/cloud/deployments',
+			},
+		],
+	},
+	{
 		title: 'Deployment',
 		links: [
 			{
