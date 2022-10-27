@@ -582,9 +582,7 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 			if jwksURL := loadvariable.String(provider.JwksUrl); jwksURL != "" {
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 				jwks, err := keyfunc.Get(jwksURL, keyfunc.Options{
-					Ctx:               ctx,
-					JWKUseNoWhitelist: true,
-					ResponseExtractor: keyfunc.ResponseExtractorStatusAny,
+					Ctx: ctx,
 				})
 				cancel()
 				if err != nil {
