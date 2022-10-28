@@ -239,6 +239,10 @@ interface GraphQLIntrospectionOptions {
 	// so that the request context can be enriched
 	internal?: boolean;
 	skipRenameRootFields?: string[];
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
 }
 
 export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospectionOptions {
