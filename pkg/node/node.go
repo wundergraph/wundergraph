@@ -30,6 +30,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+const (
+	healthCheckEndpoint = "/health"
+)
+
 func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstractlogger.Logger) *Node {
 	return &Node{
 		info:           info,
@@ -419,7 +423,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}
 	}()
 
-	router.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		serverStatus := "SKIP"
 		if n.options.hooksServerHealthCheck {
 			serverStatus = "OK"
@@ -447,7 +451,12 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	if n.options.idleTimeout > 0 {
-		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout)
+		opts := []httpidletimeout.Option{
+			httpidletimeout.WithSkip(func(r *http.Request) bool {
+				return r.URL.Path == healthCheckEndpoint
+			}),
+		}
+		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout, opts...)
 		router.Use(timeoutMiddleware.Handler)
 		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
 		timeoutMiddleware.Start()
