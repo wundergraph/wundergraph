@@ -12,7 +12,7 @@ There are a few requirements your project needs to have to be able to deploy to 
 
 1. Your repository needs to be hosted in Github.
 2. Currently only deployments on your repository default branch are supported.
-3. The `.wundergraph` folder needs to be in the root of your repository.
+3. There needs to be one `.wundergraph` folder in the project, it can be in a nested folder.
 
 # Setup your repository
 
