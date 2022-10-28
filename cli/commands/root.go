@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -30,6 +31,8 @@ const (
 	configJsonFilename       = "wundergraph.config.json"
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
+
+	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
 
 	defaultNodeGracefulTimeoutSeconds = 10
 )
@@ -66,6 +69,7 @@ wunderctl is gathering anonymous usage data so that we can better understand how
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		setupWunderctlBinaryPath()
 
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
@@ -166,6 +170,21 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func setupWunderctlBinaryPath() {
+	for _, v := range os.Environ() {
+		if strings.HasPrefix(v, wunderctlBinaryPathEnvKey+"=") {
+			// Variable is set, maybe by us or maybe by the
+			// user, but we never override it
+			return
+		}
+	}
+	// Variable is not set, find out our path and set it
+	exe, err := os.Executable()
+	if err == nil {
+		os.Setenv(wunderctlBinaryPathEnvKey, exe)
 	}
 }
 
