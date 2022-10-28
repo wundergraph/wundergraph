@@ -2036,7 +2036,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		}
 		resp, err := client.Do(req)
 		if err != nil {
-			r.log.Error("failed to get openid-configuration",
+			r.log.Warn("failed to get openid-configuration",
 				abstractlogger.Error(err),
 			)
 			continue
