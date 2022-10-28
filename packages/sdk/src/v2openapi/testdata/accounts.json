@@ -1,0 +1,333 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "desc",
+    "title": "api",
+    "version": "1.0"
+  },
+  "host": "localhost:8080",
+  "paths": {
+    "/account/getme": {
+      "get": {
+        "description": "Get the account profile",
+        "produces": ["application/json"],
+        "tags": ["Account"],
+        "summary": "Get Self Account",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/account_GetSelfAccountSwaggerResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/updateme": {
+      "post": {
+        "description": "Update the account ",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Account"],
+        "summary": "Update Self Account",
+        "parameters": [
+          {
+            "description": "body",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/types_UpdateSelfAccountRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/xerr_ResponseSuccessBean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/session/refresh": {
+      "post": {
+        "description": "Refreshes",
+        "tags": ["Auth/Passwordless"],
+        "summary": "Refresh Session",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth/signinup/code": {
+      "post": {
+        "description": "Send ",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Auth/Passwordless"],
+        "summary": "Signup Code Request",
+        "parameters": [
+          {
+            "description": "email",
+            "name": "email",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/supertokens_SignupCodeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/supertokens_SignupCodeRequestResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signinup/code/consume": {
+      "post": {
+        "description": "Consumes a signup code",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["Auth/Passwordless"],
+        "summary": "Signup Code Consume",
+        "parameters": [
+          {
+            "description": "body",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/supertokens_SignupCodeConsume"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/supertokens_SignupCodeConsumeResponse"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signout": {
+      "post": {
+        "description": "Logout a.k.a revoke supertoken's passwordless session",
+        "tags": ["Auth/Passwordless"],
+        "summary": "Logout",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "account_GetSelfAccountSwaggerResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/definitions/types_GetSelfAccountResponse"
+        },
+        "msg": {
+          "type": "string"
+        }
+      }
+    },
+    "supertokens_SignupCodeConsume": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "flowType": {
+          "type": "string"
+        },
+        "preAuthSessionId": {
+          "type": "string"
+        },
+        "userInputCode": {
+          "type": "string"
+        }
+      }
+    },
+    "supertokens_SignupCodeConsumeResponse": {
+      "type": "object",
+      "properties": {
+        "createdNewUser": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "phoneNumber": {
+              "type": "string"
+            },
+            "timejoined": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "supertokens_SignupCodeRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "supertokens_SignupCodeRequestResponse": {
+      "type": "object",
+      "properties": {
+        "deviceId": {
+          "type": "string"
+        },
+        "flowType": {
+          "type": "string"
+        },
+        "preAuthSessionId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "types_GetSelfAccountResponse": {
+      "type": "object",
+      "properties": {
+        "aid": {
+          "description": "Account ID",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "unix time of when the account was created",
+          "type": "integer"
+        },
+        "profile": {
+          "$ref": "#/definitions/types_UserProfile"
+        },
+        "uid": {
+          "description": "User ID from supertokens",
+          "type": "string"
+        },
+        "updated_time": {
+          "description": "unix time of when the profile was last updated",
+          "type": "integer"
+        }
+      }
+    },
+    "types_UpdateSelfAccountRequest": {
+      "type": "object",
+      "required": ["display_name", "gender"],
+      "properties": {
+        "bio": {
+          "description": "bio of this account",
+          "type": "string",
+          "maxLength": 160
+        },
+        "display_name": {
+          "description": "Display name of the account_",
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 2
+        },
+        "gender": {
+          "description": "Gender of the user",
+          "type": "string",
+          "enum": ["male", "female", "other"]
+        },
+        "location": {
+          "description": "Location of the account",
+          "type": "string",
+          "maxLength": 30
+        },
+        "memorial": {
+          "description": "is this account a memorial account? Has the owner of this account passed away?",
+          "type": "boolean"
+        }
+      }
+    },
+    "types_UserProfile": {
+      "type": "object",
+      "properties": {
+        "bio": {
+          "description": "bio of this account_",
+          "type": "string"
+        },
+        "display_name": {
+          "description": "the display name associated with this account_",
+          "type": "string"
+        },
+        "gender": {
+          "description": "Gender of the user. One of m(male), f(female), o(other), n(not specified)",
+          "type": "string"
+        },
+        "location": {
+          "description": "The location set by the user.",
+          "type": "string"
+        },
+        "memorial": {
+          "description": "is this account a memorial account? Has the owner of this account passed away?",
+          "type": "boolean"
+        },
+        "pid": {
+          "description": "Profile ID",
+          "type": "string"
+        },
+        "username": {
+          "description": "Username associated with this account_",
+          "type": "string"
+        }
+      }
+    },
+    "xerr_ResponseSuccessBean": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "data": {},
+        "msg": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

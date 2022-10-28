@@ -93,3 +93,7 @@ test('subscription as object field', async () => {
 test('non alphanumeric fields', async () => {
 	await runTest('src/v2openapi/testdata/non_alphanumeric_fields.yaml', 'non_alphanumeric_fields');
 });
+
+test('accounts', async () => {
+	await runTest('src/v2openapi/testdata/accounts.json', 'accounts');
+});

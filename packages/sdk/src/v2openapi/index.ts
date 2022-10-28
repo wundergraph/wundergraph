@@ -138,7 +138,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		//const debug = print(filtered);
+		const debug = print(filtered);
 		const schema = buildASTSchema(filtered);
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
