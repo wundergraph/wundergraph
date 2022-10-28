@@ -19,7 +19,7 @@ var loadoperationsCmd = &cobra.Command{
 		out := loader.Load(args[0], args[1], args[2])
 		// TODO: migrate to writing it to file because it can infer with logs
 		// or log and print to two different streams and respect that on the consumer side
-		fmt.Println(out)
+		fmt.Println(out.String())
 		return nil
 	},
 	Args: cobra.ExactArgs(3),

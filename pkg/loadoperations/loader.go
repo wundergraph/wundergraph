@@ -32,40 +32,57 @@ type Output struct {
 	Info   []string  `json:"info"`
 }
 
-func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath string) string {
+func (o *Output) Success() bool {
+	return len(o.Errors) == 0
+}
 
-	var (
-		out Output
-	)
+func (o *Output) String() string {
+	// This function might look a bit funky with the error reporting.
+	// It needs to communicate errors to the parent process via stdout,
+	// that's why we never return a Go error.
+	encodedOutput, err := json.Marshal(o)
+	if err != nil {
+		errOut := Output{
+			Errors: []string{err.Error()},
+		}
+		encodedOutput, err = json.Marshal(errOut)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return string(encodedOutput)
+}
 
+func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath string) Output {
+	var out Output
 	// check if schema file exists with os.Stat(schemaFilePath)
 	if _, err := os.Stat(schemaFilePath); os.IsNotExist(err) {
 		out.Errors = append(out.Errors, fmt.Sprintf("schema file %s does not exist", schemaFilePath))
-		return ""
+		return out
 	}
 
 	schemaBytes, err := os.ReadFile(schemaFilePath)
 	if err != nil {
 		out.Errors = append(out.Errors, fmt.Sprintf("error reading schema file %s", schemaFilePath))
-		return ""
+		return out
 	}
 
 	schemaDocument, report := astparser.ParseGraphqlDocumentBytes(schemaBytes)
 	if report.HasErrors() {
 		out.Errors = append(out.Errors, report.Error())
-		return ""
+		return out
 	}
 
 	err = asttransform.MergeDefinitionWithBaseSchema(&schemaDocument)
 	if err != nil {
 		out.Errors = append(out.Errors, fmt.Sprintf("error merging schema with base schema %s", schemaFilePath))
-		return ""
+		return out
 	}
 
 	fragments, err := l.loadFragments(&schemaDocument, fragmentsRootPath)
 	if err != nil {
 		out.Errors = append(out.Errors, fmt.Sprintf("error loading fragments %s", fragmentsRootPath))
-		return ""
+		return out
 	}
 
 	err = filepath.Walk(operationsRootPath, func(path string, info fs.FileInfo, err error) error {
@@ -104,14 +121,7 @@ func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath stri
 
 	if err != nil {
 		out.Errors = append(out.Errors, err.Error())
-		encodedOutput, err := json.Marshal(out)
-		if err != nil {
-			out = Output{
-				Errors: []string{err.Error()},
-			}
-			encodedOutput, _ = json.Marshal(out)
-		}
-		return string(encodedOutput)
+		return out
 	}
 
 	normalizer := astnormalization.NewWithOpts(astnormalization.WithRemoveFragmentDefinitions())
@@ -149,14 +159,7 @@ func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath stri
 		out.Files[i].Content = namedOperation
 	}
 
-	encodedOutput, err := json.Marshal(out)
-	if err != nil {
-		out = Output{
-			Errors: []string{err.Error()},
-		}
-		encodedOutput, _ = json.Marshal(out)
-	}
-	return string(encodedOutput)
+	return out
 }
 
 func (l *Loader) loadFragments(schemaDocument *ast.Document, fragmentsRootPath string) (string, error) {
