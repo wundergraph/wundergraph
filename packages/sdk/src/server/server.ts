@@ -6,7 +6,6 @@ import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
-import { customGqlServerMountPath, HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
@@ -14,6 +13,7 @@ import path from 'path';
 import fs from 'fs';
 import {
 	FastifyRequestBody,
+	HooksConfiguration,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -249,4 +249,8 @@ export const createServer = async ({
 	}
 
 	return fastify;
+};
+
+export const customGqlServerMountPath = (name: string): string => {
+	return `/gqls/${name}/graphql`;
 };

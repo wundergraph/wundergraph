@@ -1,4 +1,4 @@
-export type { ResolvedWunderGraphConfig, HooksConfiguration, OperationHooksConfiguration } from './configure';
+export type { ResolvedWunderGraphConfig } from './configure';
 export type {
 	BaseOperationConfiguration,
 	QueryConfiguration,
@@ -13,42 +13,6 @@ export type {
 	CustomizeSubscription,
 } from './configure/operations';
 export type { GraphQLOperation } from './graphql/operations';
-export type {
-	WunderGraphRequest,
-	WunderGraphResponse,
-	WsTransportOnConnectionInitResponse,
-	WunderGraphUser,
-	BaseRequestContext,
-	AuthenticationRequestContext,
-	AuthenticationResponse,
-	ClientRequest,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphServerConfig,
-	ClientRequestHeaders,
-	AuthenticationHookRequest,
-} from './middleware/types';
-export type {
-	SubscriptionRequestOptions,
-	Response,
-	ResponseOK,
-	RequestOptions,
-	MutateRequestOptions,
-	CachedResponse,
-	UploadResponse,
-	ClientConfig,
-	RequiresAuthentication,
-	Error,
-	Headers,
-	Lazy,
-	None,
-	Loading,
-	Refetch,
-	UserListener,
-	Aborted,
-	FetchConfig,
-} from './middleware/client';
-export type { OperationArgsWithInput, InternalClient } from './middleware/internal-client';
-export type { GraphQLServerConfig } from './middleware/plugins/graphql';
 export type { FastifyLoggerInstance } from 'fastify';
 export type { Template, TemplateOutputFile } from './codegen/index';
 export type {
@@ -67,7 +31,6 @@ export { default as templates } from './codegen/templates';
 export { Application, introspect, createMockApi, Api } from './definition';
 export { configureWunderGraphApplication, configurePublishWunderGraphAPI, resolveIntegration } from './configure';
 export { configureWunderGraphOperations, enableAuth, enableCaching, disableAuth } from './configure/operations';
-export { configureWunderGraphServer } from './middleware/server';
 
 export { default as cors } from './cors';
 export { authProviders } from './configure/authentication';

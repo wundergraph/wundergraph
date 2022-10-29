@@ -2,3 +2,4 @@ packages:
   - 'packages/*'
   - 'testapps/*'
   - 'docs-website'
+  - 'examples/simple'

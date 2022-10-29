@@ -22,6 +22,10 @@
     "./dist/*": {
       "types": "./dist/*.d.ts",
       "default": "./dist/*.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
     }
   },
   "typesVersions": {
@@ -34,6 +38,9 @@
       ],
       "internal/logger": [
         "./dist/logger"
+      ],
+      "server": [
+        "./dist/server"
       ]
     }
   },

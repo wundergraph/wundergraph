@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"os"
 	"os/signal"
 	"path"
@@ -21,15 +22,20 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
+var (
+	upCmdPrettyLogs bool
+)
+
 // upCmd represents the up command
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Start the WunderGraph application in the current dir",
 	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		logging.Init(upCmdPrettyLogs, rootFlags.DebugMode)
 
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
@@ -289,7 +295,7 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
-	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "switches the logging to human readable format")
+	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogs, "pretty-logging", true, "switches the logging to human readable format")
 
 	rootCmd.AddCommand(upCmd)
 }
