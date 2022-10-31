@@ -93,11 +93,19 @@ const spaceX = introspect.graphql({
 	url: 'https://api.spacex.land/graphql/',
 });
 
+const counter = introspect.graphql({
+	id: 'counter',
+	apiNamespace: 'ws',
+	subscriptionsUseSSE: true,
+	url: 'http://localhost:3003/api/graphql',
+});
+
 const myApplication = new Application({
 	name: 'api',
 	apis: [
 		weather,
 		spaceX,
+		counter,
 		//jspFieldsRenamed,
 		/*federatedApi,
             openAPI,
