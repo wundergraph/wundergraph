@@ -247,23 +247,31 @@ export class Client {
 		subscription: SubscriptionRequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
-		const params = new URLSearchParams({
-			wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
-			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.liveQuery ? 'true' : 'false',
-			wg_sse: 'true',
+		return new Promise<void>((resolve, reject) => {
+			const params = new URLSearchParams({
+				wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
+				wg_variables: this.stringifyInput(subscription.input),
+				wg_live: subscription?.liveQuery ? 'true' : 'false',
+				wg_sse: 'true',
+			});
+			const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
+			const eventSource = new EventSource(url, {
+				withCredentials: true,
+			});
+			eventSource.addEventListener('error', () => {
+				reject(new Error(`SSE connection error: ${subscription.operationName}`));
+			});
+			eventSource.addEventListener('open', () => {
+				resolve();
+			});
+			eventSource.addEventListener('message', (ev) => {
+				const jsonResp = JSON.parse(ev.data);
+				cb(this.convertGraphQLResponse(jsonResp));
+			});
+			if (subscription?.abortSignal) {
+				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
+			}
 		});
-		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
-		const eventSource = new EventSource(url, {
-			withCredentials: true,
-		});
-		eventSource.addEventListener('message', (ev) => {
-			const jsonResp = JSON.parse(ev.data);
-			cb(this.convertGraphQLResponse(jsonResp));
-		});
-		if (subscription?.abortSignal) {
-			subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
-		}
 	}
 
 	private async *subscribeWithFetch<ResponseData = any>(
