@@ -85,6 +85,7 @@ var upCmd = &cobra.Command{
 			ScriptEnv: append(helpers.CliEnv(rootFlags),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath),
 			),
 		})
 
@@ -100,6 +101,7 @@ var upCmd = &cobra.Command{
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath),
 			),
 		})
 

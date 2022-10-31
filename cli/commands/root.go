@@ -45,6 +45,7 @@ var (
 	_wunderGraphDirConfig string
 	disableCache          bool
 	clearCache            bool
+	wunderctlBinaryPath   string
 
 	rootFlags helpers.RootFlags
 
@@ -175,14 +176,15 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 func setupWunderctlBinaryPath() {
 	// Variable might be set, maybe by us or maybe by the
 	// user, but we never override it
-	_, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
+	value, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
 	if !isSet {
 		// Variable is not set, find out our path and set it
 		exe, err := os.Executable()
 		if err == nil {
-			os.Setenv(wunderctlBinaryPathEnvKey, exe)
+			value = exe
 		}
 	}
+	wunderctlBinaryPath = value
 }
 
 func init() {
