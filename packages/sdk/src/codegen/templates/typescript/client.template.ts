@@ -65,7 +65,7 @@ export type Queries = {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
-        liveQuery: {{liveQuery}}
+        {{#if liveQuery}}liveQuery: boolean{{/if}}
     }
 {{/each}}
 }
