@@ -203,7 +203,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"public, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"0"})
-	res.Headers().ValueEqual("X-Cache", []string{"MISS"})
+	res.Headers().ValueEqual(WG_CACHE_HEADER, []string{"MISS"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
 	handler.cacheConfig.public = false
@@ -218,7 +218,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"1"})
-	res.Headers().ValueEqual("X-Cache", []string{"HIT"})
+	res.Headers().ValueEqual(WG_CACHE_HEADER, []string{"HIT"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
 	assert.Equal(t, 1, resolver.invocations)
@@ -232,7 +232,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"1"})
-	res.Headers().ValueEqual("X-Cache", []string{"HIT"})
+	res.Headers().ValueEqual(WG_CACHE_HEADER, []string{"HIT"})
 	res.Body().Empty()
 
 	time.Sleep(time.Second * 2)
@@ -245,7 +245,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"0"})
-	res.Headers().ValueEqual("X-Cache", []string{"MISS"})
+	res.Headers().ValueEqual(WG_CACHE_HEADER, []string{"MISS"})
 	res.Body().Equal(`{"data":{"me":{"name":"Jens"}}}`)
 
 	assert.Equal(t, 2, resolver.invocations)
@@ -261,7 +261,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 	res.Headers().ValueEqual("Etag", []string{"W/\"15825766644480138524\""})
 	res.Headers().ValueEqual("Cache-Control", []string{"private, max-age=2, stale-while-revalidate=0"})
 	res.Headers().ValueEqual("Age", []string{"1"})
-	res.Headers().ValueEqual("X-Cache", []string{"HIT"})
+	res.Headers().ValueEqual(WG_CACHE_HEADER, []string{"HIT"})
 	res.Body().Empty()
 
 	assert.Equal(t, 2, resolver.invocations)
