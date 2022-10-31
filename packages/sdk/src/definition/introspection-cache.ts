@@ -7,10 +7,10 @@ import {
 	WG_ENABLE_INTROSPECTION_CACHE,
 	WG_ENABLE_INTROSPECTION_OFFLINE,
 } from './index';
+import * as crypto from 'crypto';
 import path from 'path';
 import fsP from 'fs/promises';
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
-import objectHash from 'object-hash';
 import { Logger } from '../logger';
 import { onParentProcessExit } from '../utils/process';
 
@@ -128,7 +128,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const cacheKey = objectHash(introspection);
+	const cacheKey = await makeCacheKey(introspection);
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
@@ -194,3 +194,44 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 
 	return api;
 };
+
+async function fileHash(hash: crypto.Hash, potentialPath: string): Promise<void> {
+	try {
+		let buffer = await fsP.readFile(potentialPath);
+		if (buffer) {
+			hash.update(buffer);
+		}
+	} catch (e: any) {
+		// If the error is because the entry does not exist or the
+		// entry is a directory, ignore it. Otherwise throw.
+		if (!(e instanceof Error && (e.message.indexOf('ENOENT') >= 0 || e.message.indexOf('ISDIR') >= 0))) {
+			throw e;
+		}
+	}
+}
+
+async function objectHash(hash: crypto.Hash, object: any): Promise<void> {
+	for (const k in object) {
+		hash.update(k);
+		const v = object[k];
+		if (typeof v === 'object' && v !== null) {
+			await objectHash(hash, v);
+		} else if (object.hasOwnProperty(k)) {
+			hash.update(typeof v === 'undefined' ? 'undefined ' : v.toString());
+			if (typeof v === 'string') {
+				// The value might reference a file. Try to read
+				// and hash it.
+				await fileHash(hash, v);
+				if (process.env.WG_DIR_ABS) {
+					await fileHash(hash, path.join(process.env.WG_DIR_ABS, v));
+				}
+			}
+		}
+	}
+}
+
+async function makeCacheKey(object: any): Promise<string> {
+	let hash = crypto.createHash('sha1');
+	await objectHash(hash, object);
+	return hash.digest('hex');
+}
