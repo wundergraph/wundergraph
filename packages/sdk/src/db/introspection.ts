@@ -192,8 +192,6 @@ export const cleanupPrismaSchema = (
 				introspection.replaceJSONTypeFields?.forEach((replace) => {
 					if (node.name.value.startsWith(replace.entityName)) {
 						insideJSONType = true;
-						replaceJSONType = replace;
-						replaceWith = replace.responseTypeReplacement;
 						currentTypeName = node.name.value;
 					}
 				});
@@ -205,13 +203,22 @@ export const cleanupPrismaSchema = (
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				if (insideJSONType && replaceJSONType && node.name.value === replaceJSONType.fieldName) {
-					insideJSONField = true;
-					if (!result.jsonTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
-						result.jsonTypeFields.push({
-							typeName: currentTypeName,
-							fieldName: node.name.value,
-						});
+				if (insideJSONType) {
+					introspection.replaceJSONTypeFields?.forEach((replace) => {
+						if (node.name.value.match(replace.fieldName)) {
+							insideJSONField = true;
+							replaceJSONType = replace;
+							replaceWith = replace.responseTypeReplacement;
+						}
+					});
+
+					if (insideJSONField) {
+						if (!result.jsonTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
+							result.jsonTypeFields.push({
+								typeName: currentTypeName,
+								fieldName: node.name.value,
+							});
+						}
 					}
 				}
 			},
@@ -225,8 +232,6 @@ export const cleanupPrismaSchema = (
 				introspection.replaceJSONTypeFields?.forEach((replace) => {
 					if (node.name.value.startsWith(replace.entityName)) {
 						insideJSONType = true;
-						replaceJSONType = replace;
-						replaceWith = replace.inputTypeReplacement;
 						currentTypeName = node.name.value;
 					}
 				});
@@ -238,8 +243,14 @@ export const cleanupPrismaSchema = (
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				if (insideJSONType && replaceJSONType && node.name.value === replaceJSONType.fieldName) {
-					insideJSONField = true;
+				if (insideJSONType) {
+					introspection.replaceJSONTypeFields?.forEach((replace) => {
+						if (node.name.value.match(replace.fieldName)) {
+							insideJSONField = true;
+							replaceJSONType = replace;
+							replaceWith = replace.inputTypeReplacement;
+						}
+					});
 				}
 
 				if (listInputFields.includes(node.name.value)) {

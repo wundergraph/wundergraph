@@ -377,6 +377,10 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
 	baseURL?: string;
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
 }
 
 export interface StaticApiCustom {

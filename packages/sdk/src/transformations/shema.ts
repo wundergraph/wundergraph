@@ -1,9 +1,19 @@
-import { GraphQLIntrospection, ReplaceJSONTypeFieldConfiguration } from '../definition';
+import { ReplaceJSONTypeFieldConfiguration } from '../definition';
 import { parse, print, visit } from 'graphql/index';
 
-const replaceCustomScalars = (schemaSDL: string, introspection: GraphQLIntrospection): string => {
+const replaceCustomScalars = <
+	T extends {
+		schemaExtension?: string | undefined;
+		replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[] | undefined;
+	}
+>(
+	schemaSDL: string,
+	introspection: T
+): string => {
 	if (introspection.schemaExtension) {
 		schemaSDL = schemaSDL + ' ' + introspection.schemaExtension;
+	} else {
+		return schemaSDL;
 	}
 
 	let insideJSONType = false;
@@ -23,6 +33,7 @@ const replaceCustomScalars = (schemaSDL: string, introspection: GraphQLIntrospec
 			},
 			leave: (_) => {
 				insideJSONType = false;
+				replaceJSONType = undefined;
 			},
 		},
 		FieldDefinition: {
@@ -51,6 +62,7 @@ const replaceCustomScalars = (schemaSDL: string, introspection: GraphQLIntrospec
 			},
 			leave: (_) => {
 				insideJSONType = false;
+				replaceJSONType = undefined;
 			},
 		},
 		InputValueDefinition: {
