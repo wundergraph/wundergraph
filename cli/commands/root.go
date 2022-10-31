@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -174,17 +173,15 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 }
 
 func setupWunderctlBinaryPath() {
-	for _, v := range os.Environ() {
-		if strings.HasPrefix(v, wunderctlBinaryPathEnvKey+"=") {
-			// Variable is set, maybe by us or maybe by the
-			// user, but we never override it
-			return
+	// Variable might be set, maybe by us or maybe by the
+	// user, but we never override it
+	_, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
+	if !isSet {
+		// Variable is not set, find out our path and set it
+		exe, err := os.Executable()
+		if err == nil {
+			os.Setenv(wunderctlBinaryPathEnvKey, exe)
 		}
-	}
-	// Variable is not set, find out our path and set it
-	exe, err := os.Executable()
-	if err == nil {
-		os.Setenv(wunderctlBinaryPathEnvKey, exe)
 	}
 }
 
