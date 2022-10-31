@@ -21,11 +21,13 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
+const UpCmdName = "up"
+
 var upCmdPrettyLogging bool
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:   "up",
+	Use:   UpCmdName,
 	Short: "Starts WunderGraph in development mode",
 	Long:  "Start the WunderGraph application in development mode and watch for changes",
 	RunE: func(cmd *cobra.Command, args []string) error {

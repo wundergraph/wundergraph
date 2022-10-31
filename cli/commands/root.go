@@ -70,12 +70,12 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
 		// because the command output data on stdout
-		case "loadoperations":
+		case LoadOperationsCmdName:
 			return nil
 			// up command has a different default for global pretty logging
 			// we can't overwrite the default value in the init function because
 			// it would overwrite the default value for all other commands
-		case "up":
+		case UpCmdName:
 			rootFlags.PrettyLogs = upCmdPrettyLogging
 		}
 
