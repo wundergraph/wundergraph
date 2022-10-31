@@ -1,6 +1,11 @@
 import { GraphQLSchema } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
+import {
+	GraphQLApi,
+	GraphQLFederationIntrospection,
+	GraphQLFederationIntrospectionInternal,
+	GraphQLIntrospection,
+} from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
 import { parse } from 'graphql/index';
@@ -71,57 +76,65 @@ export const fetchFederationServiceSDL = async (
 	return res.data.data._service.sdl;
 };
 
-export const introspectFederation = async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> =>
-	introspectWithCache(introspection, async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
-		const upstreams = introspection.upstreams.map(async (upstream, i) => {
-			let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
+export const introspectFederation = async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
+	const internalIntrospection: GraphQLFederationIntrospectionInternal = {
+		kind: 'graphql-federation',
+		...introspection,
+	};
+	return introspectWithCache(
+		internalIntrospection,
+		async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
+			const upstreams = introspection.upstreams.map(async (upstream, i) => {
+				let schema = upstream.loadSchemaFromString ? loadFile(upstream.loadSchemaFromString) : '';
 
-			const name = upstream.name ?? i.toString();
+				const name = upstream.name ?? i.toString();
 
-			if (schema === '' && upstream.url) {
-				const introspectionHeadersBuilder = new HeadersBuilder();
+				if (schema === '' && upstream.url) {
+					const introspectionHeadersBuilder = new HeadersBuilder();
 
-				if (upstream.headers !== undefined) {
-					upstream.headers(introspectionHeadersBuilder);
+					if (upstream.headers !== undefined) {
+						upstream.headers(introspectionHeadersBuilder);
+					}
+
+					if (upstream.introspection?.headers !== undefined) {
+						upstream.introspection?.headers(introspectionHeadersBuilder);
+					}
+					const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
+
+					schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
+						apiNamespace: introspection.apiNamespace,
+						upstreamName: name,
+					});
 				}
 
-				if (upstream.introspection?.headers !== undefined) {
-					upstream.introspection?.headers(introspectionHeadersBuilder);
+				if (schema == '') {
+					throw new Error(`Subgraph ${name} has not provided a schema`);
 				}
-				const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
-				schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
-					apiNamespace: introspection.apiNamespace,
-					upstreamName: name,
-				});
+				return {
+					name,
+					typeDefs: parse(schema),
+				};
+			});
+			const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
+			const compositionResult = composeServices(serviceList);
+			const errors = compositionResult.errors;
+
+			if (errors && errors?.length > 0) {
+				throw new Error(
+					`Service composition of federated subgraph failed: ${errors[0]}. Make sure all subgraphs can be composed to a supergaph.`
+				);
 			}
 
-			if (schema == '') {
-				throw new Error(`Subgraph ${name} has not provided a schema`);
-			}
+			const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
+				...upstream,
+				isFederation: true,
+				apiNamespace: introspection.apiNamespace,
+				id: upstream.id ?? introspection.id,
+			}));
 
-			return {
-				name,
-				typeDefs: parse(schema),
-			};
-		});
-		const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
-		const compositionResult = composeServices(serviceList);
-		const errors = compositionResult.errors;
-
-		if (errors && errors?.length > 0) {
-			throw new Error(
-				`Service composition of federated subgraph failed: ${errors[0]}. Make sure all subgraphs can be composed to a supergaph.`
-			);
+			const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));
+			return mergeApis([], ...apis) as GraphQLApi;
 		}
-
-		const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
-			...upstream,
-			isFederation: true,
-			apiNamespace: introspection.apiNamespace,
-			id: upstream.id ?? introspection.id,
-		}));
-
-		const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));
-		return mergeApis([], ...apis) as GraphQLApi;
-	});
+	);
+};

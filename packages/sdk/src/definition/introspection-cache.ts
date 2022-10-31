@@ -3,6 +3,7 @@ import {
 	ApiType,
 	DataSource,
 	IntrospectionConfiguration,
+	IntrospectionUnion,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
 	WG_ENABLE_INTROSPECTION_OFFLINE,
@@ -124,11 +125,17 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 	});
 };
 
-export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+export const introspectWithCache = async <Introspection extends IntrospectionUnion, A extends ApiType>(
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
 	const cacheKey = objectHash(introspection);
+
+	if (introspection.kind == 'openapi') {
+		if (introspection.source.kind === 'file') {
+			// TODO: read file, hash file and combine it with cacheKey
+		}
+	}
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
