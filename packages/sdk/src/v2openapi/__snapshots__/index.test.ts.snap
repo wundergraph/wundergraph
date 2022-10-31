@@ -1,5 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`arbitrary type: users_meta_schema 1`] = `
+"type Query {
+  api_getUsers: [api_User]
+  api_getUsersUserId(user_id: Int!): api_User
+  api_getSomeProperties(sortBy: String, sortOrder: Int): api_PropertiesResponse
+}
+
+type api_User {
+  id: Int
+  name: String
+  country_code: String
+  status_code: Int
+  contact: api_Contact
+}
+
+scalar JSON
+
+type api_PropertiesResponse {
+  properties: JSON
+}
+
+type api_Contact {
+  type: String
+  phone: String
+}
+
+input api_ContactInput {
+  type: String
+  phone: String
+}"
+`;
+
 exports[`complex oas3: complex_oas3_data_sources 1`] = `
 "[
   {

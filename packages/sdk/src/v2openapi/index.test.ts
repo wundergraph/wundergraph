@@ -1,5 +1,6 @@
 import { openApiSpecificationToRESTApiObject } from './index';
 import * as fs from 'fs';
+import path from 'path';
 
 const runTest = async (testFile: string, snapShot: string, statusCodeUnions?: boolean) => {
 	const exists = fs.existsSync(testFile);
@@ -92,4 +93,36 @@ test('subscription as object field', async () => {
 
 test('non alphanumeric fields', async () => {
 	await runTest('src/v2openapi/testdata/non_alphanumeric_fields.yaml', 'non_alphanumeric_fields');
+});
+
+test('arbitrary type', async () => {
+	const fileContents = fs.readFileSync(path.resolve(__dirname, './testdata/users_meta.json')).toString('utf-8');
+
+	const actual = await openApiSpecificationToRESTApiObject(fileContents, {
+		apiNamespace: 'api',
+		source: {
+			kind: 'string',
+			openAPISpec: fileContents,
+		},
+		schemaExtension: `
+				type Contact {
+					type: String
+					phone: String
+				}
+				input ContactInput {
+					type: String
+					phone: String
+				}
+				`,
+		replaceJSONTypeFields: [
+			{
+				entityName: `User`,
+				fieldName: `contact`,
+				responseTypeReplacement: `Contact`,
+				inputTypeReplacement: `ContactInput`,
+			},
+		],
+	});
+
+	expect(actual.Schema).toMatchSnapshot('users_meta_schema');
 });
