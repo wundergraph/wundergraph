@@ -231,7 +231,7 @@ export class Client {
 		return response.json();
 	}
 
-	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = any>(
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
 		options: RequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
