@@ -80,7 +80,7 @@ test('replaceCustomScalars', async () => {
 		  lng: Float
 		}
 		`,
-		replaceJSONTypeFields: [
+		replaceCustomScalarTypeFields: [
 			{
 				entityName: 'Landpad',
 				fieldName: 'location',

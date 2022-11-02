@@ -109,17 +109,12 @@ test('arbitrary type', async () => {
 					type: String
 					phone: String
 				}
-				input ContactInput {
-					type: String
-					phone: String
-				}
 				`,
-		replaceJSONTypeFields: [
+		replaceCustomScalarTypeFields: [
 			{
 				entityName: `User`,
 				fieldName: `contact`,
 				responseTypeReplacement: `Contact`,
-				inputTypeReplacement: `ContactInput`,
 			},
 		],
 	});

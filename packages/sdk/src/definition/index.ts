@@ -242,7 +242,7 @@ interface GraphQLIntrospectionOptions {
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
-	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospectionOptions {
@@ -260,10 +260,10 @@ export interface GraphQLFederationIntrospection extends IntrospectionConfigurati
 	apiNamespace?: string;
 }
 
-export interface ReplaceJSONTypeFieldConfiguration {
+export interface ReplaceCustomScalarTypeFieldConfiguration {
 	entityName: string;
 	fieldName: string;
-	inputTypeReplacement: string;
+	inputTypeReplacement?: string;
 	responseTypeReplacement: string;
 }
 
@@ -273,7 +273,7 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
-	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface IntrospectionConfiguration {
@@ -380,7 +380,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
-	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface StaticApiCustom {

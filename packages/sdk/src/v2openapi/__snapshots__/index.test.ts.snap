@@ -24,11 +24,6 @@ type api_PropertiesResponse {
 type api_Contact {
   type: String
   phone: String
-}
-
-input api_ContactInput {
-  type: String
-  phone: String
 }"
 `;
 

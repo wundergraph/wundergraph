@@ -1,14 +1,9 @@
-import { ReplaceJSONTypeFieldConfiguration } from '../definition';
+import { GraphQLIntrospection, OpenAPIIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
 import { parse, print, visit } from 'graphql/index';
 
-const replaceCustomScalars = <
-	T extends {
-		schemaExtension?: string | undefined;
-		replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[] | undefined;
-	}
->(
+const replaceCustomScalars = (
 	schemaSDL: string,
-	introspection: T
+	introspection: GraphQLIntrospection | OpenAPIIntrospection
 ): string => {
 	if (introspection.schemaExtension) {
 		schemaSDL = schemaSDL + ' ' + introspection.schemaExtension;
@@ -16,73 +11,73 @@ const replaceCustomScalars = <
 		return schemaSDL;
 	}
 
-	let insideJSONType = false;
-	let insideJSONField = false;
-	let replaceJSONType: ReplaceJSONTypeFieldConfiguration | undefined;
+	let insideCustomScalarType = false;
+	let insideCustomScalarField = false;
+	let replaceCustomScalarType: ReplaceCustomScalarTypeFieldConfiguration | undefined;
 	let replaceWith = '';
 
 	const ast = parse(schemaSDL);
 	const cleanAst = visit(ast, {
 		ObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceJSONTypeFields?.forEach((replace) => {
+				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 					if (node.name.value.match(replace.entityName)) {
-						insideJSONType = true;
+						insideCustomScalarType = true;
 					}
 				});
 			},
 			leave: (_) => {
-				insideJSONType = false;
-				replaceJSONType = undefined;
+				insideCustomScalarType = false;
+				replaceCustomScalarType = undefined;
 			},
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				if (insideJSONType) {
-					introspection.replaceJSONTypeFields?.forEach((replace) => {
+				if (insideCustomScalarType) {
+					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 						if (node.name.value.match(replace.fieldName)) {
-							insideJSONField = true;
-							replaceJSONType = replace;
+							insideCustomScalarField = true;
+							replaceCustomScalarType = replace;
 							replaceWith = replace.responseTypeReplacement;
 						}
 					});
 				}
 			},
 			leave: (_) => {
-				insideJSONField = false;
+				insideCustomScalarField = false;
 			},
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceJSONTypeFields?.forEach((replace) => {
+				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 					if (node.name.value.match(replace.entityName)) {
-						insideJSONType = true;
+						insideCustomScalarType = true;
 					}
 				});
 			},
 			leave: (_) => {
-				insideJSONType = false;
-				replaceJSONType = undefined;
+				insideCustomScalarType = false;
+				replaceCustomScalarType = undefined;
 			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				if (insideJSONType) {
-					introspection.replaceJSONTypeFields?.forEach((replace) => {
-						if (node.name.value.match(replace.fieldName)) {
-							insideJSONField = true;
-							replaceJSONType = replace;
+				if (insideCustomScalarType) {
+					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+						if (node.name.value.match(replace.fieldName) && replace.inputTypeReplacement) {
+							insideCustomScalarField = true;
+							replaceCustomScalarType = replace;
 							replaceWith = replace.inputTypeReplacement;
 						}
 					});
 				}
 			},
 			leave: (_) => {
-				insideJSONField = false;
+				insideCustomScalarField = false;
 			},
 		},
 		NamedType: (node) => {
-			if (insideJSONField && insideJSONType && replaceJSONType) {
+			if (insideCustomScalarField && insideCustomScalarType && replaceCustomScalarType) {
 				return {
 					...node,
 					name: {

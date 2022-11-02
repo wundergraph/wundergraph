@@ -34,7 +34,7 @@ test('cleanupPrismaSchema', async () => {
 					phone: String
 				}
 				`,
-		replaceJSONTypeFields: [
+		replaceCustomScalarTypeFields: [
 			{
 				entityName: `users`,
 				fieldName: `contact`,
