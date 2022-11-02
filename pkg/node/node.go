@@ -22,6 +22,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/httperror"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -356,7 +357,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		router.Use(func(handler http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if !limiter.Allow() {
-					http.Error(w, "too many requests", http.StatusTooManyRequests)
+					httperror.Error(w, "too many requests", http.StatusTooManyRequests)
 					return
 				}
 				handler.ServeHTTP(w, r)

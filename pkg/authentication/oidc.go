@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/jensneuse/abstractlogger"
 	"golang.org/x/oauth2"
+
+	"github.com/wundergraph/wundergraph/pkg/httperror"
 )
 
 type OpenIDConnectCookieHandler struct {
@@ -87,7 +89,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	authorizeRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		if provider == nil {
-			http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
+			httperror.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
 			return
 		}
 
@@ -168,7 +170,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	callbackRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		if provider == nil {
-			http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
+			httperror.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
 			return
 		}
 

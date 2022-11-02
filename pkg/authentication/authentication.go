@@ -24,6 +24,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/cachecontrol"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/httperror"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -355,7 +356,7 @@ func ValidateRedirectURIQueryParameter(matchString, matchRegex []string) func(ha
 				handler.ServeHTTP(w, r)
 				return
 			}
-			http.Error(w, "invalid redirect uri", http.StatusBadRequest)
+			httperror.Error(w, "invalid redirect uri", http.StatusBadRequest)
 		})
 	}
 }
@@ -813,7 +814,7 @@ type CSRFErrorHandler struct {
 
 func (u *CSRFErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resetUserCookies(w, r, !u.InsecureCookies)
-	http.Error(w, "forbidden", http.StatusForbidden)
+	httperror.Error(w, "forbidden", http.StatusForbidden)
 }
 
 // sanitizeDomain cleans up the host so that it can work on localhost

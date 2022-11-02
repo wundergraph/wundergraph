@@ -23,6 +23,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/httperror"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -196,7 +197,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(bodyBuf)
 	_, err := io.Copy(bodyBuf, r.Body)
 	if err != nil && !errors.Is(err, io.EOF) {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		httperror.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -210,7 +211,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			abstractlogger.Error(err),
 			abstractlogger.String("url", r.RequestURI),
 		)
-		http.Error(w, "bad request", http.StatusBadRequest)
+		httperror.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 
@@ -247,7 +248,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if resolveErr != nil {
 		h.log.Error("InternalApiHandler.ResolveGraphQLResponse", abstractlogger.Error(resolveErr))
-		http.Error(w, "unable to resolve", http.StatusInternalServerError)
+		httperror.Err(w, err, "unable to resolve")
 		return
 	}
 

@@ -16,6 +16,8 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"golang.org/x/net/context"
+
+	"github.com/wundergraph/wundergraph/pkg/httperror"
 )
 
 const MaxUploadSize = 20 * 1024 * 1024 // 20MB
@@ -134,7 +136,7 @@ func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
 	var result []UploadedFile
 	reader, err := r.MultipartReader()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperror.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -143,7 +145,7 @@ func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			httperror.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		// handle only Files
@@ -152,7 +154,7 @@ func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
 		}
 		info, err := s.handlePart(r.Context(), part)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			httperror.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		result = append(result, UploadedFile{info.Key})
@@ -160,7 +162,7 @@ func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	files, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		httperror.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
