@@ -19,7 +19,6 @@ import {
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
 import { loadFile } from '../codegen/templates/typescript';
-import { buildSubgraphSchema } from '@apollo/federation';
 import * as https from 'https';
 import { introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
@@ -27,6 +26,7 @@ import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQ
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
+import { buildSubgraphSchema } from '@apollo/federation';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -162,7 +162,9 @@ const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, head
 	if (introspection.loadSchemaFromString) {
 		try {
 			if (introspection.isFederation) {
-				return buildSubgraphSchema(parse(loadFile(introspection.loadSchemaFromString)));
+				const parsedSchema = parse(loadFile(introspection.loadSchemaFromString));
+				const subgraphSchema = buildSubgraphSchema(parsedSchema);
+				return subgraphSchema;
 			}
 			return buildSchema(loadFile(introspection.loadSchemaFromString));
 		} catch (e: any) {
