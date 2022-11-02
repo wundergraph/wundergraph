@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	rootPath            = "/"
+	rootEndpoint        = "/"
 	healthCheckEndpoint = "/health"
 )
 
@@ -443,8 +443,8 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}
 	}()
 
-	router.Handle(rootPath, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		template, err := nodetemplates.GetTemplateByPath(rootPath)
+	router.Handle(rootEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		template, err := nodetemplates.GetTemplateByPath(rootEndpoint)
 		health := n.GetHealth(w, hooksClient)
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		if err != nil {

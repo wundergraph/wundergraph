@@ -3,17 +3,9 @@
 	<title>WunderNode</title>
 	<meta charset="UTF-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-	<style>
-		@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block");
-		body {
-			background-size: 40px 40px;
-			background-image: radial-gradient(
-				circle,
-				#eedfdf 1px,
-				rgba(0, 0, 0, 0) 1px
-			);
-		}
-	</style>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=block" rel="stylesheet">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script>
 		tailwind.config = {
@@ -26,55 +18,39 @@
 			},
 		};
 	</script>
+	<style>
+		body {
+			background-size: 40px 40px;
+			background-image: radial-gradient(
+				circle,
+				#eedfdf 1px,
+				rgba(0, 0, 0, 0) 1px
+			);
+		}
+	</style>
 </head>
+
 <body
 	class="min-h-screen overflow-auto flex flex-col items-center justify-center container max-w-screen-md mx-auto px-4 py-12"
 >
 <h2 class="font-medium text-gray-600 text-xl">Powered by</h2>
-<h1
+<a
+	href="https://wundergraph.com"
 	class="mt-4 bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-5xl lg:text-6xl font-bold text-transparent"
 >
 	WunderGraph
-</h1>
-<div class="grid grid-cols-2 w-full gap-4 mt-12">
-	<a
-		href="/api/main/graphql"
-		class="flex flex-col border w-full rounded-md py-2 px-4 group hover:border-sky-500 bg-white"
-	>
-		<p
-			class="flex items-center gap-x-2 font-medium group-hover:gap-x-3 transition-all"
-		>
-            <span>Playground</span
-						>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="w-4 h-4"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-				/>
-			</svg>
-		</p>
-		<p class="text-gray-600 text-sm mt-2">
-			A GraphQL playground to test your queries and mutations.
-		</p>
-	</a>
+</a>
+<div class="flex flex-col lg:grid grid-cols-2 w-full gap-4 mt-12 lg:mt-24">
 	<a
 		href="https://docs.wundergraph.com"
 		target="_blank"
-		class="flex flex-col border w-full rounded-md py-2 px-4 group hover:border-sky-500 bg-white"
+		class="flex flex-col border w-full rounded-md py-2 px-4 group hover:border-sky-500 bg-white cols-span-2"
 	>
 		<p
 			class="flex items-center gap-x-2 font-medium group-hover:gap-x-3 transition-all"
 		>
-            <span>Docs</span
-						>
+          <span>Docs</span
+					>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				fill="none"
@@ -95,32 +71,42 @@
 		</p>
 	</a>
 </div>
-<div class="border w-full mt-12 rounded-md bg-white">
-	<table class="w-full text-sm text-left">
+<div class="border w-full mt-12 rounded-md bg-white relative">
+      <span
+				class="absolute text-sm bg-white px-2 text-xs -top-2 ml-3 text-gray-500 rounded-sm"
+			>Status</span
+			>
+	<table class="w-full text-sm text-left table-fixed">
 		<tr class="border-b hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-600">Server Status</th>
+			<th class="pb-4 pt-5 px-6 text-sky-800">Server Status</th>
 			<td class="text-gray-800 font-semibold">{{.ServerStatus}}</td>
 		</tr>
-		<tr class="border-b hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-600">Node Status</th>
+		<tr class="hover:bg-sky-50/50 transition-all">
+			<th class="py-4 px-6 text-sky-800">Node Status</th>
 			<td class="text-gray-800 font-semibold">{{.NodeStatus}}</td>
 		</tr>
+	</table>
+</div>
+<div class="border w-full mt-12 rounded-md bg-white relative">
+      <span
+				class="absolute text-sm bg-white px-2 text-xs -top-2 ml-3 text-gray-500 rounded-sm"
+			>Build Info</span
+			>
+	<table class="w-full text-sm text-left table-fixed">
 		<tr class="border-b hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-600">Version</th>
+			<th class="pb-4 pt-5 px-6 text-sky-800">Version</th>
 			<td class="text-gray-800 font-semibold">{{.BuildInfo.Version}}</td>
 		</tr>
 		<tr class="border-b hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-600">Commit</th>
+			<th class="py-4 px-6 text-sky-800">Commit</th>
 			<td class="text-gray-800 font-semibold">{{.BuildInfo.Commit}}</td>
 		</tr>
 		<tr class="border-b hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-600">Date</th>
-			<td class="text-gray-800 font-semibold">
-				{{.BuildInfo.Date}}
-			</td>
+			<th class="py-4 px-6 text-sky-800">Date</th>
+			<td class="text-gray-800 font-semibold">{{.BuildInfo.Date}}</td>
 		</tr>
 		<tr class="hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-600">Built By</th>
+			<th class="py-4 px-6 text-sky-800">Built By</th>
 			<td class="text-gray-800 font-semibold">{{.BuildInfo.BuiltBy}}</td>
 		</tr>
 	</table>

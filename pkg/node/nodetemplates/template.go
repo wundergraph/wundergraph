@@ -10,7 +10,7 @@ var (
 	//go:embed resources
 	res   embed.FS
 	pages = map[string]string{
-		"/": "resources/index.gohtml",
+		"/": "resources/index.html",
 	}
 )
 
