@@ -608,6 +608,9 @@ export const introspect = {
 			const spec = loadOpenApi(introspection);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
 		};
+		// If the source is a file we have all data required to perform the instrospection
+		// locally, which is also fast. Skip the cache in this case, so changes to the file
+		// are picked up immediately without requiring a cache flush.
 		if (introspection.source.kind === 'file') {
 			return generator(introspection);
 		}
