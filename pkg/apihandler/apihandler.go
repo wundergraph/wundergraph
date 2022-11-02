@@ -43,6 +43,7 @@ import (
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/cachecontrol"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -1123,11 +1124,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			w.Header()["ETag"] = []string{ETag}
 
-			if h.cacheConfig.public {
-				w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-			} else {
-				w.Header().Set("Cache-Control", fmt.Sprintf("private, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-			}
+			var cch cachecontrol.Header
+			cch.PublicOrPrivate(h.cacheConfig.public).
+				MaxAge(int(h.cacheConfig.maxAge)).
+				StaleWhileRevalidate(int(h.cacheConfig.staleWhileRevalidate)).
+				Set(w)
 
 			age := item.Age()
 			w.Header().Set("Age", fmt.Sprintf("%d", age))
@@ -1255,11 +1256,11 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header()["ETag"] = []string{ETag}
 
 	if h.cacheConfig.enable {
-		if h.cacheConfig.public {
-			w.Header().Set("Cache-Control", fmt.Sprintf("public, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-		} else {
-			w.Header().Set("Cache-Control", fmt.Sprintf("private, max-age=%d, stale-while-revalidate=%d", h.cacheConfig.maxAge, h.cacheConfig.staleWhileRevalidate))
-		}
+		var cch cachecontrol.Header
+		cch.PublicOrPrivate(h.cacheConfig.public).
+			MaxAge(int(h.cacheConfig.maxAge)).
+			StaleWhileRevalidate(int(h.cacheConfig.staleWhileRevalidate)).
+			Set(w)
 
 		w.Header().Set("Age", "0")
 
@@ -2254,8 +2255,8 @@ func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte
 }
 
 func setSubscriptionHeaders(w http.ResponseWriter) {
+	cachecontrol.Disabled().Set(w)
 	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	// allow unbuffered responses, it's used when it's necessary just to pass response through
 	// setting this to “yes” will allow the response to be cached

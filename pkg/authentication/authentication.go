@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/jensneuse/abstractlogger"
 
+	"github.com/wundergraph/wundergraph/pkg/cachecontrol"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -740,7 +741,8 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header()["ETag"] = []string{user.ETag}
-	w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
+	var h cachecontrol.Header
+	h.Private().MaxAge(0).StaleWhileRevalidate(60).Set(w)
 
 	user.RemoveInternalFields()
 	if r.Header.Get("Accept") != "application/json" {
