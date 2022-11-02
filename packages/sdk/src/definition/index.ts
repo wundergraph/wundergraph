@@ -603,11 +603,16 @@ export const introspect = {
 			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
 	federation: introspectFederation,
-	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> =>
-		introspectWithCache(introspection, async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 			const spec = loadOpenApi(introspection);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
-		}),
+		};
+		if (introspection.source.kind === 'file') {
+			return generator(introspection);
+		}
+		return introspectWithCache(introspection, generator);
+	},
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {
