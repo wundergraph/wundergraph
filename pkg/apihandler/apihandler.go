@@ -192,6 +192,10 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		abstractlogger.Int("numOfOperations", len(api.Operations)),
 	)
 
+	// Default Cache-Control, handlers might override it
+	defaultCacheControl := cachecontrol.Disabled()
+	r.router.Use(defaultCacheControl.Middleware())
+
 	if len(api.Hosts) > 0 {
 		r.router.Use(func(handler http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
