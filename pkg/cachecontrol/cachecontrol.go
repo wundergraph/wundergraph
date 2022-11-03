@@ -22,3 +22,10 @@ func EnableCache(w http.ResponseWriter, publicOrPrivate bool, maxAge int, staleW
 	header := fmt.Sprintf("%s, max-age=%d, stale-while-revalidate=%d", visibility, maxAge, staleWhileRevalidate)
 	w.Header().Set("Cache-Control", header)
 }
+
+// EnableForAuthentication sets Cache-Control headers in the response appropriate for
+// storing the response to an authentication request
+func EnableForAuthentication(w http.ResponseWriter) {
+	// Rationale: https://github.com/wundergraph/wundergraph/pull/310#discussion_r1013011396
+	EnableCache(w, false, 0, 60)
+}
