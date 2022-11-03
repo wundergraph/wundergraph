@@ -38,25 +38,18 @@ var startCmd = &cobra.Command{
 
 		if !excludeServer {
 			g.Go(func() error {
-				err := startWunderGraphServer(ctx)
-				if err != nil {
-					log.Error("Start server", abstractlogger.Error(err))
-				}
-				return err
+				return startWunderGraphServer(ctx)
 			})
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
-			if err != nil {
-				log.Error("Start node", abstractlogger.Error(err))
-			}
-			return err
+			return StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
 		})
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 
-		if err := g.Wait(); err != nil {
+		// Only exit with error code 1 when the server was not stopped by the signal
+		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
 			// Exit with error code 1 to indicate failure and restart
 			log.Fatal("WunderGraph process shutdown: %w", abstractlogger.Error(err))
 		}
