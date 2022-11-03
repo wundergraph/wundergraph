@@ -3,12 +3,12 @@ package commands
 import (
 	"context"
 	"fmt"
-	"github.com/jensneuse/abstractlogger"
 	"os"
 	"os/signal"
 	"path"
 	"syscall"
 
+	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
