@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.117.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.1...@wundergraph/sdk@0.117.2) (2022-11-03)
+
+### Bug Fixes
+
+* skip introspection cache when OpenAPI source is a file ([#309](https://github.com/wundergraph/wundergraph/issues/309)) ([911a551](https://github.com/wundergraph/wundergraph/commit/911a551ced23b5d455d0321f1dc2eeebe979d65d)) (@fiam)
+
 ## [0.117.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.0...@wundergraph/sdk@0.117.1) (2022-10-23)
 
 **Note:** Version bump only for package @wundergraph/sdk
