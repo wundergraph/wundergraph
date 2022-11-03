@@ -116,7 +116,7 @@ const db = introspect.postgresql({
             extra: String!
         }
     `,
-  replaceJSONTypeFields: [
+  replaceCustomScalarTypeFields: [
     {
       entityName: 'messages',
       fieldName: 'payload',
