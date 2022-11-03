@@ -144,20 +144,6 @@ configureWunderGraphApplication({
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3003'],
 	},
-	authentication: {
-		cookieBased: {
-			providers: [
-				authProviders.demo(),
-				authProviders.openIdConnect({
-					id: 'auth0',
-					issuer: new EnvironmentVariable('AUTH0_ISSUER'),
-					clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
-					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
-				}),
-			],
-			authorizedRedirectUriRegexes: ['http://localhost:3003*'],
-		},
-	},
 	/*links: [
           linkBuilder
               .source("userPosts")
