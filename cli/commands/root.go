@@ -182,8 +182,8 @@ func init() {
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
-	rootCmd.PersistentFlags().BoolVar(&disableEnvFile, "no-env", false, "disables loading environment variables from a file")
-	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", defaultDotEnvFilename, "allows you to set environment variables from an env file")
+	rootCmd.PersistentFlags().BoolVar(&disableEnvFile, "no-env-file", false, "disables loading environment variables from a file")
+	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env-file", "e", defaultDotEnvFilename, "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
