@@ -12,7 +12,8 @@ import (
 
 // Error is a wrapper over http.Error which also sets the appropriate response headers
 func Error(w http.ResponseWriter, error string, code int) {
-	cachecontrol.Disabled().Set(w)
+	var h cachecontrol.Header
+	h.DisableCache().Set(w)
 	http.Error(w, error, code)
 }
 

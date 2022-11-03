@@ -18,7 +18,7 @@ func testHeader(t *testing.T, expected string, fn func(h *Header)) {
 func TestValues(t *testing.T) {
 	t.Run("disabled", func(t *testing.T) {
 		testHeader(t, "no-cache, no-store, must-revalidate", func(h *Header) {
-			h.Disabled()
+			h.DisableCache()
 		})
 	})
 	t.Run("private then public", func(t *testing.T) {
@@ -42,10 +42,6 @@ func TestValues(t *testing.T) {
 			h.MaxAge(0).StaleWhileRevalidate(0)
 		})
 	})
-
-	var disabled Header
-	disabled.Disabled()
-	assert.Equal(t, disabled.String(), Disabled().String(), ".Disabled() should return the same header as Header.Disabled()")
 }
 
 func TestSet(t *testing.T) {

@@ -59,7 +59,9 @@ func (h *Header) Middleware() func(next http.Handler) http.Handler {
 	}
 }
 
-func (h *Header) Disabled() *Header {
+// DisableCache removes all previous values and populates the headers with
+// values to disable all HTTP caching.
+func (h *Header) DisableCache() *Header {
 	h.values = append([]string(nil), "no-cache", "no-store", "must-revalidate")
 	return h
 }
@@ -90,11 +92,4 @@ func (h *Header) MaxAge(seconds int) *Header {
 // StaleWhileRevalidate appends a stale-while-revalidate header
 func (h *Header) StaleWhileRevalidate(seconds int) *Header {
 	return h.intHeader("stale-while-revalidate", seconds)
-}
-
-// Disabled is a shorthand for creating an empty Header
-// and calling its Disabled method.
-func Disabled() *Header {
-	var h Header
-	return h.Disabled()
 }

@@ -193,7 +193,8 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	)
 
 	// Default Cache-Control, handlers might override it
-	defaultCacheControl := cachecontrol.Disabled()
+	var defaultCacheControl cachecontrol.Header
+	defaultCacheControl.DisableCache()
 	r.router.Use(defaultCacheControl.Middleware())
 
 	if len(api.Hosts) > 0 {
@@ -2260,7 +2261,9 @@ func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte
 }
 
 func setSubscriptionHeaders(w http.ResponseWriter) {
-	cachecontrol.Disabled().Set(w)
+	var cc cachecontrol.Header
+	cc.DisableCache()
+	cc.Set(w)
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Connection", "keep-alive")
 	// allow unbuffered responses, it's used when it's necessary just to pass response through
