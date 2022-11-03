@@ -16,7 +16,7 @@ There are a few requirements your project needs to have to be able to deploy to 
 
 # Setup your repository
 
-The fastest way to get started is to [fork our example repository](https://github.com/wundergraph/docker/fork).
+The fastest way to get started is to [fork our example repository](https://github.com/wundergraph/cloud-starter/fork).
 
 After forking the repo, or if you already have a repository with a WunderGraph project set up,
 head over to the cloud and log in with your Github account.
