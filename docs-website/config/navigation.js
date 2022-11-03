@@ -103,6 +103,10 @@ const navigation = [
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
 			{
+				title: 'Debugging',
+				href: '/docs/guides/debugging',
+			},
+			{
 				title: 'Inject Short-Lived Token into Upstream Requests',
 				href: '/docs/guides/inject-short-lived-token-into-upstream-requests',
 			},
