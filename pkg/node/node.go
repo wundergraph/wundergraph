@@ -324,18 +324,17 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 func (n *Node) GetHealth(w http.ResponseWriter, hooksClient *hooks.Client) HealthCheck {
 	serverStatus := "SKIP"
 	if n.options.hooksServerHealthCheck {
-		serverStatus = "OK"
+		serverStatus = "READY"
 		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
 		if !ok {
 			w.WriteHeader(http.StatusServiceUnavailable)
-			serverStatus = "DEAD"
+			serverStatus = "NOT_READY"
 		}
 	}
 
 	return HealthCheck{
-		ServerStatus: serverStatus,
-		NodeStatus:   "OK",
-		BuildInfo:    n.info,
+		Status:    serverStatus,
+		BuildInfo: n.info,
 	}
 }
 

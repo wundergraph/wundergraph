@@ -10,7 +10,6 @@ type GitHubAuthDemo struct {
 }
 
 type HealthCheck struct {
-	ServerStatus string    `json:"serverStatus"`
-	NodeStatus   string    `json:"nodeStatus"`
-	BuildInfo    BuildInfo `json:"buildInfo"`
+	Status    string    `json:"status"`
+	BuildInfo BuildInfo `json:"buildInfo"`
 }
