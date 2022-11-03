@@ -294,7 +294,6 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
-	upCmd.PersistentFlags().StringVar(&upCmdEnvFile, "env-file", ".env", "allows you to set environment variables from an env file")
 
 	rootCmd.AddCommand(upCmd)
 }

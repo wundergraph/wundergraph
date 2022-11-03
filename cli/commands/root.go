@@ -31,6 +31,7 @@ const (
 	serverEntryPointFilename = "wundergraph.server.ts"
 
 	defaultNodeGracefulTimeoutSeconds = 10
+	defaultEnvFileForUp               = ".env"
 )
 
 var (
@@ -42,7 +43,6 @@ var (
 	_wunderGraphDirConfig string
 	disableCache          bool
 	clearCache            bool
-	disableEnvFile        bool
 
 	rootFlags helpers.RootFlags
 
@@ -77,7 +77,10 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			// it would overwrite the default value for all other commands
 		case UpCmdName:
 			rootFlags.PrettyLogs = upCmdPrettyLogging
-			dotEnvFile = upCmdEnvFile
+			// Default value for wunderctl up
+			if dotEnvFile == "" {
+				dotEnvFile = defaultEnvFileForUp
+			}
 		}
 
 		logging.Init(rootFlags.PrettyLogs, rootFlags.DebugMode)
@@ -93,11 +96,15 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		zapLog := logging.Zap().With(zap.String("component", "@wundergraph/wunderctl"))
 		log = abstractlogger.NewZapLogger(zapLog, logLevel)
 
-		if !disableEnvFile && dotEnvFile != "" {
+		if dotEnvFile != "" {
 			err = godotenv.Load(dotEnvFile)
 			if err != nil {
-				log.Fatal("error loading env file",
-					abstractlogger.Error(err))
+				// If the error is due to the file not existing, we're running the up command
+				// and dotEnvFile has the default value for wunderctl up, swallow the error
+				if !os.IsNotExist(err) || cmd.Name() != UpCmdName || dotEnvFile != defaultEnvFileForUp {
+					log.Fatal("error loading env file",
+						abstractlogger.Error(err))
+				}
 			} else {
 				log.Debug("env file successfully loaded",
 					abstractlogger.String("file", dotEnvFile),
@@ -176,8 +183,7 @@ func init() {
 	viper.SetDefault("API_URL", "https://api.wundergraph.com")
 
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
-	rootCmd.PersistentFlags().BoolVar(&disableEnvFile, "no-env-file", false, "disables loading environment variables from a file")
-	rootCmd.PersistentFlags().StringVarP(&dotEnvFile, "env-file", "e", "", "allows you to set environment variables from an env file")
+	rootCmd.PersistentFlags().StringVarP(&dotEnvFile, "env-file", "e", "", "allows you to load environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
