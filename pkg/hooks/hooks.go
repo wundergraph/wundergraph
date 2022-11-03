@@ -212,12 +212,7 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 }
 
 func (c *Client) DoHealthCheckRequest(timeout time.Duration) (status bool) {
-	retryClient := c.httpClient
-	retryClient.RetryMax = 3
-	retryClient.HTTPClient.Timeout = timeout
-	retryClient.Logger = nil
-
-	resp, err := retryClient.Get(fmt.Sprintf("%s/health", c.serverUrl))
+	resp, err := c.httpClient.Get(fmt.Sprintf("%s/health", c.serverUrl))
 	if err != nil || resp.StatusCode != 200 {
 		return
 	}

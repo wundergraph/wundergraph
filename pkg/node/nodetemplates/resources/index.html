@@ -69,17 +69,24 @@
 			</th>
 			<td class="text-gray-800 font-semibold">
 				<div class="flex gap-x-3 items-center">
-					{{if eq .Status "NOT_READY"}}
+					<!-- Server is required for the node to be healthy  -->
+					{{if or (eq .NodeStatus "NOT_READY") (eq .ServerStatus "NOT_READY") }}
 					<span>Not Ready</span>
 					<span class="relative flex h-3 w-3">
           	<span class="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
 					</span>
 					{{ else }}
 					<span>
-					{{if eq .Status "READY"}}
+						<!-- Server is not required for the node to be healthy  -->
+					{{if eq .ServerStatus "SKIP"}}
 						Ready
 					{{ else }}
-						Skip
+						<!-- Determine the status of the server when the server is required for the node to be healthy -->
+						{{if eq .ServerStatus "READY"}}
+							Ready
+						{{ else }}
+							Not Ready
+						{{ end }}
 					{{ end }}
 					</span>
 					<span class="relative flex h-3 w-3">
