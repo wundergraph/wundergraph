@@ -45,7 +45,6 @@ var (
 	_wunderGraphDirConfig string
 	disableCache          bool
 	clearCache            bool
-	wunderctlBinaryPath   string
 
 	rootFlags helpers.RootFlags
 
@@ -69,7 +68,6 @@ wunderctl is gathering anonymous usage data so that we can better understand how
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		setupWunderctlBinaryPath()
 
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
@@ -173,18 +171,20 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	}
 }
 
-func setupWunderctlBinaryPath() {
-	// Variable might be set, maybe by us or maybe by the
-	// user, but we never override it
-	value, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
+// wunderctlBinaryPath() returns the path to the currently executing parent wunderctl
+// command which is then passed via wunderctlBinaryPathEnvKey to subprocesses. This
+// ensures than when the SDK calls back into wunderctl, the same copy is always used.
+func wunderctlBinaryPath() string {
+	// Check if a parent wunderctl set this for us
+	path, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
 	if !isSet {
 		// Variable is not set, find out our path and set it
 		exe, err := os.Executable()
 		if err == nil {
-			value = exe
+			path = exe
 		}
 	}
-	wunderctlBinaryPath = value
+	return path
 }
 
 func init() {
