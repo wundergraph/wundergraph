@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.117.1",
+  "version": "0.117.2",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -101,7 +101,7 @@
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@wundergraph/protobuf": "workspace:^0.97.0",
-    "@wundergraph/wunderctl": "workspace:>=0.114.2",
+    "@wundergraph/wunderctl": "workspace:>=0.115.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "colors": "^1.4.0",
