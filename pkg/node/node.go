@@ -321,22 +321,27 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("WunderNode shutdown complete")
 }
 
-func (n *Node) GetHealth(w http.ResponseWriter, hooksClient *hooks.Client) HealthCheck {
-	serverStatus := "SKIP"
-	if n.options.hooksServerHealthCheck {
-		serverStatus = "OK"
-		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
-		if !ok {
-			w.WriteHeader(http.StatusServiceUnavailable)
-			serverStatus = "DEAD"
-		}
+func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, bool) {
+	healthCheck := &HealthCheckReport{
+		ServerStatus: "NOT_READY",
+		// For now we assume that the server is ready
+		// because we don't have any health checks
+		NodeStatus: "READY",
+		BuildInfo:  n.info,
 	}
 
-	return HealthCheck{
-		ServerStatus: serverStatus,
-		NodeStatus:   "OK",
-		BuildInfo:    n.info,
+	if n.options.hooksServerHealthCheck {
+		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+		if ok {
+			healthCheck.ServerStatus = "READY"
+		} else {
+			return healthCheck, false
+		}
+	} else {
+		healthCheck.ServerStatus = "SKIP"
 	}
+
+	return healthCheck, true
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
@@ -445,24 +450,32 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	router.Handle(rootEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		template, err := nodetemplates.GetTemplateByPath(rootEndpoint)
-		health := n.GetHealth(w, hooksClient)
-		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		if err != nil {
 			n.log.Error("GetTemplateByPath", abstractlogger.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+
+		report, healthy := n.GetHealthReport(hooksClient)
+		if !healthy {
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
-		if err := template.Execute(w, health); err != nil {
+
+		if err := template.Execute(w, report); err != nil {
 			return
 		}
 	}))
 
 	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		health := n.GetHealth(w, hooksClient)
+		report, healthy := n.GetHealthReport(hooksClient)
+		if !healthy {
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}
+		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-		_ = json.NewEncoder(w).Encode(health)
+		_ = json.NewEncoder(w).Encode(report)
 	}))
 
 	n.server = &http.Server{

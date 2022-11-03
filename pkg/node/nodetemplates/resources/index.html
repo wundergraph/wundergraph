@@ -47,16 +47,16 @@
 			>Status</span
 			>
 	<table class="w-full text-sm text-left table-fixed">
-		<tr class="border-b hover:bg-sky-50/50 transition-all">
+		<tr class="hover:bg-sky-50/50 transition-all">
 			<th class="pb-4 pt-5 px-6 text-sky-800 ">
 				<div class="flex gap-x-2 items-center">
-					<span>Server Status</span>
+					<span>Status</span>
 					<div id="tooltip-light" role="tooltip"
 							 class="flex flex-col absolute invisible z-10 py-2 px-3 text-xs text-gray-600 bg-white rounded-lg border border-gray-200 shadow-sm opacity-0 tooltip">
 						<div class="flex flex-col font-normal">
-							<span>OK : Server is reachable and healthy</span>
-							<span>SKIP : Node run without server</span>
-							<span>DEAD : Server is not reachable</span>
+							<span>Ready : Server is reachable and healthy</span>
+							<span>Not Ready : Server is not reachable</span>
+							<span>Skip : Node runs in standalone mode</span>
 						</div>
 						<div class="tooltip-arrow" data-popper-arrow></div>
 					</div>
@@ -69,12 +69,26 @@
 			</th>
 			<td class="text-gray-800 font-semibold">
 				<div class="flex gap-x-3 items-center">
-					<span>{{.ServerStatus}}</span>
-					{{if eq .ServerStatus "DEAD"}}
+					<!-- Server is required for the node to be healthy  -->
+					{{if or (eq .NodeStatus "NOT_READY") (eq .ServerStatus "NOT_READY") }}
+					<span>Not Ready</span>
 					<span class="relative flex h-3 w-3">
           	<span class="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
 					</span>
 					{{ else }}
+					<span>
+						<!-- Server is not required for the node to be healthy  -->
+					{{if eq .ServerStatus "SKIP"}}
+						Ready
+					{{ else }}
+						<!-- Determine the status of the server when the server is required for the node to be healthy -->
+						{{if eq .ServerStatus "READY"}}
+							Ready
+						{{ else }}
+							Not Ready
+						{{ end }}
+					{{ end }}
+					</span>
 					<span class="relative flex h-3 w-3">
           	<span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75"></span>
           	<span class="relative inline-flex h-3 w-3 rounded-full bg-green-500"></span>
@@ -82,10 +96,6 @@
 					{{ end }}
 				</div>
 			</td>
-		</tr>
-		<tr class="hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-800">Node Status</th>
-			<td class="text-gray-800 font-semibold">{{.NodeStatus}}</td>
 		</tr>
 	</table>
 </div>
