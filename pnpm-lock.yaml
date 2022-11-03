@@ -177,7 +177,7 @@ importers:
     specifiers:
       '@apollo/composition': ^2.0.2
       '@apollo/federation': ^0.36.2
-      '@fastify/formbody': ^7.0.1
+      '@fastify/formbody': ^7.3.0
       '@graphql-tools/schema': ^8.3.10
       '@prisma/generator-helper': ^3.9.2
       '@types/axios': ^0.14.0
@@ -198,11 +198,11 @@ importers:
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
+      close-with-grace: ^1.1.0
       colors: ^1.4.0
       execa: 5.1.1
-      fastify: ^4.4.0
-      fastify-graceful-shutdown: ^3.2.0
-      fastify-plugin: ^4.2.0
+      fastify: ^4.9.2
+      fastify-plugin: ^4.3.0
       graphql: ^16.3.0
       graphql-helix: ^1.12.0
       handlebars: ^4.7.7
@@ -215,10 +215,10 @@ importers:
       node-fetch: ^2.6.7
       object-hash: ^2.2.0
       openapi-types: ^10.0.0
-      pino: ^8.4.2
-      pino-pretty: ^9.1.0
+      pino: ^8.7.0
+      pino-pretty: ^9.1.1
       postman-collection: ^4.1.1
-      prettier: ^2.5.0
+      prettier: ^2.7.1
       protobufjs: ^6.11.2
       swagger2openapi: ^7.0.8
       ts-jest: ^29.0.1
@@ -226,7 +226,7 @@ importers:
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
-      '@fastify/formbody': 7.0.1
+      '@fastify/formbody': 7.3.0
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
       '@web-std/fetch': 4.1.0
@@ -234,11 +234,11 @@ importers:
       '@wundergraph/wunderctl': link:../wunderctl
       axios: 0.26.1
       axios-retry: 3.3.1
+      close-with-grace: 1.1.0
       colors: 1.4.0
       execa: 5.1.1
-      fastify: 4.4.0
-      fastify-graceful-shutdown: 3.2.0
-      fastify-plugin: 4.2.0
+      fastify: 4.9.2
+      fastify-plugin: 4.3.0
       graphql: 16.4.0
       graphql-helix: 1.12.0_graphql@16.4.0
       handlebars: 4.7.7
@@ -248,10 +248,10 @@ importers:
       long: 5.2.0
       object-hash: 2.2.0
       openapi-types: 10.0.0
-      pino: 8.4.2
-      pino-pretty: 9.1.0
+      pino: 8.7.0
+      pino-pretty: 9.1.1
       postman-collection: 4.1.2
-      prettier: 2.6.2
+      prettier: 2.7.1
       protobufjs: 6.11.2
       swagger2openapi: 7.0.8
     devDependencies:
@@ -1188,8 +1188,8 @@ packages:
     engines: {node: '>=14.0.0', npm: '>=7.0.0'}
     dev: false
 
-  /@fastify/ajv-compiler/3.1.2:
-    resolution: {integrity: sha512-m2nzzQJeuVmeGOB9rnII9sZiY8AZ02a9WMQfMBfK1jxdFnxm3FPYKGbYpPjODj4halNogwpolyugbTNpnDCi0A==}
+  /@fastify/ajv-compiler/3.4.0:
+    resolution: {integrity: sha512-69JnK7Cot+ktn7LD5TikP3b7psBPX55tYpQa8WSumt8r117PCa2zwHnImfBtRWYExreJlI48hr0WZaVrTBGj7w==}
     dependencies:
       ajv: 8.11.0
       ajv-formats: 2.1.1
@@ -1204,16 +1204,17 @@ packages:
     resolution: {integrity: sha512-dPRyT40GiHRzSCll3/Jn2nPe25+E1VXc9tDwRAIKwFCxd5Np5wzgz1tmooWG3sV0qKgrBibihVoCna2ru4SEFg==}
     dev: false
 
-  /@fastify/fast-json-stringify-compiler/4.0.0:
-    resolution: {integrity: sha512-9pCi6c6tmGt/qfuf2koZQuSIG6ckP9q3mz+JoMmAq9eQ4EtA92sWoK7E0LJUn2FFTS/hp5kag+4+dWsV5ZfcXg==}
+  /@fastify/fast-json-stringify-compiler/4.1.0:
+    resolution: {integrity: sha512-cTKBV2J9+u6VaKDhX7HepSfPSzw+F+TSd+k0wzifj4rG+4E5PjSFJCk19P8R6tr/72cuzgGd+mbB3jFT6lvAgw==}
     dependencies:
       fast-json-stringify: 5.1.0
     dev: false
 
-  /@fastify/formbody/7.0.1:
-    resolution: {integrity: sha512-CY6IfzdtidHbZezyyXv7u9dzmb2Lv92HyOZDqANuFb++5ojsqoqIb8bJz11bSgPK0MDoqww/dH6DxZDMM8N4ng==}
+  /@fastify/formbody/7.3.0:
+    resolution: {integrity: sha512-4uHTS7wH0mkUoltk4wyJ966rs/TQP0BNDSCtyqRMy7p5adGg+5ERbYue/zGh/qI9yLDPN0K98u7Fw+lLEmBZJQ==}
     dependencies:
-      fastify-plugin: 3.0.1
+      fast-querystring: 1.0.0
+      fastify-plugin: 4.3.0
     dev: false
 
   /@gar/promisify/1.1.3:
@@ -4090,6 +4091,10 @@ packages:
     engines: {node: '>=0.8'}
     dev: true
 
+  /close-with-grace/1.1.0:
+    resolution: {integrity: sha512-6cCp71Y5tKw1o9sGVBOa9OwY4vJ+YoLpFcWiTt9YCBhYlcQi0z68EiiN9mJ6/401Za6TZ5YOZg012IHHZt15lw==}
+    dev: false
+
   /clsx/1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
     engines: {node: '>=6'}
@@ -5340,8 +5345,12 @@ packages:
       tmp: 0.0.33
     dev: true
 
-  /fast-copy/2.1.7:
-    resolution: {integrity: sha512-ozrGwyuCTAy7YgFCua8rmqmytECYk/JYAMXcswOcm0qvGoE3tPb7ivBeIHTOK2DiapBhDZgacIhzhQIKU5TCfA==}
+  /fast-copy/3.0.0:
+    resolution: {integrity: sha512-4HzS+9pQ5Yxtv13Lhs1Z1unMXamBdn5nA4bEi1abYpDNSpSp7ODYQ1KPMF6nTatfEzgH6/zPvXKU1zvHiUjWlA==}
+    dev: false
+
+  /fast-decode-uri-component/1.0.1:
+    resolution: {integrity: sha512-WKgKWg5eUxvRZGwW8FvfbaH7AXSh2cL+3j5fMGzUMCxWBJ3dV3a7Wz8y2f/uQ0e3B6WmodD3oS54jTQ9HVTIIg==}
     dev: false
 
   /fast-deep-equal/3.1.3:
@@ -5375,6 +5384,12 @@ packages:
     resolution: {integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==}
     dev: true
 
+  /fast-querystring/1.0.0:
+    resolution: {integrity: sha512-3LQi62IhQoDlmt4ULCYmh17vRO2EtS7hTSsG4WwoKWgV7GLMKBOecEh+aiavASnLx8I2y89OD33AGLo0ccRhzA==}
+    dependencies:
+      fast-decode-uri-component: 1.0.1
+    dev: false
+
   /fast-redact/3.1.1:
     resolution: {integrity: sha512-odVmjC8x8jNeMZ3C+rPMESzXVSEU8tSWSHv9HFxP2mm89G/1WwqhrerJDQm9Zus8X6aoRgQDThKqptdNA6bt+A==}
     engines: {node: '>=6'}
@@ -5399,27 +5414,27 @@ packages:
     resolution: {integrity: sha512-qKcDXmuZadJqdTm6vlCqioEbyewF60b/0LOFCcYN1B6BIZGlYJumWWOYs70SFYLDAH4YqdE1cxH/RKMG7rFxgA==}
     dev: false
 
-  /fastify-plugin/4.2.0:
-    resolution: {integrity: sha512-hovKzEXZc2YgeuXn41/2EA/IaIOdRu1pB9WKgnzDBj3lhKSdDCEsckHa7I6LiT/LhflvAQX7ZY8IQ6eBX0htTg==}
+  /fastify-plugin/4.3.0:
+    resolution: {integrity: sha512-M3+i368lV0OYTJ5TfClIoPKEKSOF7112iiPdwgfSR0gN98BjA1Nk+c6oBHtfcVt9KiMxl+EQKHC1QNWo3ZOpYQ==}
     dev: false
 
-  /fastify/4.4.0:
-    resolution: {integrity: sha512-ePI4g9vPJXIBF4YlVcDSLxjvtdTrlM8QzdgYAPFGdCH+rot+4MXoFFAUb10fGrIcRRjaq6CvcbIzxiWQzMMHkw==}
+  /fastify/4.9.2:
+    resolution: {integrity: sha512-Mk3hv7ZRet2huMYN6IJ8RGy1TAAC7LJsCEjxLf808zafAADNu43xRzbl7FSEIBxKyhntTM0F626Oc34LUNcUxQ==}
     dependencies:
-      '@fastify/ajv-compiler': 3.1.2
+      '@fastify/ajv-compiler': 3.4.0
       '@fastify/error': 3.0.0
-      '@fastify/fast-json-stringify-compiler': 4.0.0
+      '@fastify/fast-json-stringify-compiler': 4.1.0
       abstract-logging: 2.0.1
       avvio: 8.2.0
-      find-my-way: 7.0.1
-      light-my-request: 5.4.0
-      pino: 8.4.2
+      find-my-way: 7.3.1
+      light-my-request: 5.6.1
+      pino: 8.7.0
       process-warning: 2.0.0
       proxy-addr: 2.0.7
       rfdc: 1.3.0
-      secure-json-parse: 2.4.0
+      secure-json-parse: 2.5.0
       semver: 7.3.7
-      tiny-lru: 8.0.2
+      tiny-lru: 9.0.3
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5512,11 +5527,12 @@ packages:
       - supports-color
     dev: false
 
-  /find-my-way/7.0.1:
-    resolution: {integrity: sha512-w05SaOPg54KqBof/RDA+75n1R48V7ZZNPL3nR17jJJs5dgZpR3ivfrMWOyx7BVFQgCLhYRG05hfgFCohYvSUXA==}
+  /find-my-way/7.3.1:
+    resolution: {integrity: sha512-kGvM08SOkqvheLcuQ8GW9t/H901Qb9rZEbcNWbXopzy4jDRoaJpJoObPSKf4MnQLZ20ZTp7rL5MpF6rf+pqmyg==}
     engines: {node: '>=14'}
     dependencies:
       fast-deep-equal: 3.1.3
+      fast-querystring: 1.0.0
       safe-regex2: 2.0.0
     dev: false
 
@@ -7515,8 +7531,8 @@ packages:
       - supports-color
     dev: true
 
-  /light-my-request/5.4.0:
-    resolution: {integrity: sha512-lWwUibGSDifLsCGKVy5mCktifWGYiZUCzuKqXgrb3Na7wHPl8aPShxjDhUGQE3MI8k2wJSuvSJh5lyHkMnOTMg==}
+  /light-my-request/5.6.1:
+    resolution: {integrity: sha512-sbJnC1UBRivi9L1kICr3CESb82pNiPNB3TvtdIrZZqW0Qh8uDXvoywMmWKZlihDcmw952CMICCzM+54LDf+E+g==}
     dependencies:
       cookie: 0.5.0
       process-warning: 2.0.0
@@ -9144,13 +9160,13 @@ packages:
       split2: 4.1.0
     dev: false
 
-  /pino-pretty/9.1.0:
-    resolution: {integrity: sha512-IM6NY9LLo/dVgY7/prJhCh4rAJukafdt0ibxeNOWc2fxKMyTk90SOB9Ao2HfbtShT9QPeP0ePpJktksMhSQMYA==}
+  /pino-pretty/9.1.1:
+    resolution: {integrity: sha512-iJrnjgR4FWQIXZkUF48oNgoRI9BpyMhaEmihonHeCnZ6F50ZHAS4YGfGBT/ZVNsPmd+hzkIPGzjKdY08+/yAXw==}
     hasBin: true
     dependencies:
       colorette: 2.0.16
       dateformat: 4.6.3
-      fast-copy: 2.1.7
+      fast-copy: 3.0.0
       fast-safe-stringify: 2.1.1
       help-me: 4.1.0
       joycon: 3.1.1
@@ -9159,7 +9175,7 @@ packages:
       pino-abstract-transport: 1.0.0
       pump: 3.0.0
       readable-stream: 4.1.0
-      secure-json-parse: 2.4.0
+      secure-json-parse: 2.5.0
       sonic-boom: 3.2.0
       strip-json-comments: 3.1.1
     dev: false
@@ -9168,8 +9184,8 @@ packages:
     resolution: {integrity: sha512-mMMOwSKrmyl+Y12Ri2xhH1lbzQxwwpuru9VjyJpgFIH4asSj88F2csdMwN6+M5g1Ll4rmsYghHLQJw81tgZ7LQ==}
     dev: false
 
-  /pino/8.4.2:
-    resolution: {integrity: sha512-PlXDeGhJZfAuVay+wtlS02s5j8uisQveZExYdAm9MwwxUQSz9R7Q78XtjM2tTa4sa5KJmygimZjZxXXuHgV6ew==}
+  /pino/8.7.0:
+    resolution: {integrity: sha512-l9sA5uPxmZzwydhMWUcm1gI0YxNnYl8MfSr2h8cwLvOAzQLBLewzF247h/vqHe3/tt6fgtXeG9wdjjoetdI/vA==}
     hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
@@ -9442,6 +9458,7 @@ packages:
     resolution: {integrity: sha512-PkUpF+qoXTqhOeWL9fu7As8LXsIUZ1WYaJiY/a7McAQzxjk82OF0tibkFXVCDImZtWxbvojFjerkiLb0/q8mew==}
     engines: {node: '>=10.13.0'}
     hasBin: true
+    dev: true
 
   /prettier/2.7.1:
     resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
@@ -10107,8 +10124,8 @@ packages:
     dependencies:
       loose-envify: 1.4.0
 
-  /secure-json-parse/2.4.0:
-    resolution: {integrity: sha512-Q5Z/97nbON5t/L/sH6mY2EacfjVGwrCcSi5D3btRO2GZ8pf1K1UN7Z9H5J57hjVU2Qzxr1xO+FmBhOvEkzCMmg==}
+  /secure-json-parse/2.5.0:
+    resolution: {integrity: sha512-ZQruFgZnIWH+WyO9t5rWt4ZEGqCKPwhiw+YbzTwpmT9elgLrLcfuyUiSnwwjUiVy9r4VM3urtbNF1xmEh9IL2w==}
     dev: false
 
   /semver-diff/4.0.0:
@@ -10782,8 +10799,8 @@ packages:
       readable-stream: 3.6.0
     dev: true
 
-  /tiny-lru/8.0.2:
-    resolution: {integrity: sha512-ApGvZ6vVvTNdsmt676grvCkUCGwzG9IqXma5Z07xJgiC5L7akUMof5U8G2JTI9Rz/ovtVhJBlY6mNhEvtjzOIg==}
+  /tiny-lru/9.0.3:
+    resolution: {integrity: sha512-/i9GruRjXsnDgehxvy6iZ4AFNVxngEFbwzirhdulomMNPGPVV3ECMZOWSw0w4sRMZ9Al9m4jy08GPvRxRUGYlw==}
     engines: {node: '>=6'}
     dev: false
 
@@ -10921,7 +10938,7 @@ packages:
     resolution: {integrity: sha512-OaXnCKsRs0yrc0O7LFhnq/US2DB4Wd313cS+qjG2XMksZ74pF/jvMHkJdURXJiAo4kSahL2N4e8JOdwUjOMNdw==}
     dependencies:
       lodash: 4.17.21
-      prettier: 2.6.2
+      prettier: 2.7.1
     dev: false
 
   /ts-proto-descriptors/1.6.0:
@@ -11553,7 +11570,7 @@ packages:
     dependencies:
       '@apollo/composition': 2.0.2_graphql@16.4.0
       '@apollo/federation': 0.36.2_graphql@16.4.0
-      '@fastify/formbody': 7.0.1
+      '@fastify/formbody': 7.3.0
       '@graphql-tools/schema': 8.3.10_graphql@16.4.0
       '@prisma/generator-helper': 3.13.0
       '@remix-run/web-fetch': 4.2.0
@@ -11562,11 +11579,12 @@ packages:
       '@wundergraph/wunderctl': link:packages/wunderctl
       axios: 0.26.1
       axios-retry: 3.3.1
+      close-with-grace: 1.1.0
       colors: 1.4.0
       execa: 5.1.1
-      fastify: 4.4.0
+      fastify: 4.9.2
       fastify-graceful-shutdown: 3.2.0
-      fastify-plugin: 4.2.0
+      fastify-plugin: 4.3.0
       graphql: 16.4.0
       graphql-helix: 1.12.0_graphql@16.4.0
       handlebars: 4.7.7
@@ -11577,8 +11595,8 @@ packages:
       long: 5.2.0
       object-hash: 2.2.0
       openapi-types: 10.0.0
-      pino: 8.4.2
-      pino-pretty: 9.1.0
+      pino: 8.7.0
+      pino-pretty: 9.1.1
       postman-collection: 4.1.2
       prettier: 2.7.1
       protobufjs: 6.11.2
