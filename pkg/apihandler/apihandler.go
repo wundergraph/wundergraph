@@ -193,9 +193,12 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	)
 
 	// Default Cache-Control, handlers might override it
-	var defaultCacheControl cachecontrol.Header
-	defaultCacheControl.DisableCache()
-	r.router.Use(defaultCacheControl.Middleware())
+	r.router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cachecontrol.DisableCache(w)
+			next.ServeHTTP(w, r)
+		})
+	})
 
 	if len(api.Hosts) > 0 {
 		r.router.Use(func(handler http.Handler) http.Handler {
@@ -1130,11 +1133,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			w.Header()["ETag"] = []string{ETag}
 
-			var cch cachecontrol.Header
-			cch.PublicOrPrivate(h.cacheConfig.public).
-				MaxAge(int(h.cacheConfig.maxAge)).
-				StaleWhileRevalidate(int(h.cacheConfig.staleWhileRevalidate)).
-				Set(w)
+			cachecontrol.EnableCache(w, h.cacheConfig.public, int(h.cacheConfig.maxAge), int(h.cacheConfig.staleWhileRevalidate))
 
 			age := item.Age()
 			w.Header().Set("Age", fmt.Sprintf("%d", age))
@@ -1262,11 +1261,8 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header()["ETag"] = []string{ETag}
 
 	if h.cacheConfig.enable {
-		var cch cachecontrol.Header
-		cch.PublicOrPrivate(h.cacheConfig.public).
-			MaxAge(int(h.cacheConfig.maxAge)).
-			StaleWhileRevalidate(int(h.cacheConfig.staleWhileRevalidate)).
-			Set(w)
+
+		cachecontrol.EnableCache(w, h.cacheConfig.public, int(h.cacheConfig.maxAge), int(h.cacheConfig.staleWhileRevalidate))
 
 		w.Header().Set("Age", "0")
 
@@ -2261,9 +2257,7 @@ func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte
 }
 
 func setSubscriptionHeaders(w http.ResponseWriter) {
-	var cc cachecontrol.Header
-	cc.DisableCache()
-	cc.Set(w)
+	cachecontrol.DisableCache(w)
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Connection", "keep-alive")
 	// allow unbuffered responses, it's used when it's necessary just to pass response through

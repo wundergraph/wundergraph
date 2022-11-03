@@ -1,75 +1,43 @@
 package cachecontrol
 
 import (
-	"io"
-	"net/http"
 	"net/http/httptest"
+	"sort"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func testHeader(t *testing.T, expected string, fn func(h *Header)) {
-	var h Header
-	fn(&h)
-	assert.Equal(t, expected, h.String(), "header should have correct value")
-}
-
-func TestValues(t *testing.T) {
-	t.Run("disabled", func(t *testing.T) {
-		testHeader(t, "no-cache, no-store, must-revalidate", func(h *Header) {
-			h.DisableCache()
-		})
-	})
-	t.Run("private then public", func(t *testing.T) {
-		testHeader(t, "public", func(h *Header) {
-			h.Private().Public()
-		})
-	})
-
-	t.Run("public or private", func(t *testing.T) {
-		testHeader(t, "public", func(h *Header) {
-			h.PublicOrPrivate(true)
-		})
-
-		testHeader(t, "private", func(h *Header) {
-			h.PublicOrPrivate(false)
-		})
-	})
-
-	t.Run("int headers", func(t *testing.T) {
-		testHeader(t, "max-age=0, stale-while-revalidate=0", func(h *Header) {
-			h.MaxAge(0).StaleWhileRevalidate(0)
-		})
-	})
-}
-
-func TestSet(t *testing.T) {
+func TestDisableCache(t *testing.T) {
 	rec := httptest.NewRecorder()
-	var h Header
-	h.Public().Set(rec)
+	DisableCache(rec)
 	resp := rec.Result()
 	defer resp.Body.Close()
-	assert.Equal(t, h.String(), resp.Header.Get("Cache-Control"), "Set() should set Cache-Control")
+
+	expectedValues := []string{"no-cache", "no-store", "must-revalidate"}
+	sort.Strings(expectedValues)
+
+	actualValues := strings.Split(resp.Header.Get("Cache-Control"), ", ")
+	sort.Strings(actualValues)
+	assert.Equal(t, expectedValues, actualValues, "should set headers to disable caching")
 }
 
-func TestMiddleware(t *testing.T) {
+func TestEnableCache(t *testing.T) {
 	const (
-		helloWorld = "Hello World"
+		maxAge               = 13
+		staleWhileRevalidate = 37
 	)
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = io.WriteString(w, helloWorld)
-	})
-	var h Header
-	h.Private()
-	ts := httptest.NewServer(h.Middleware()(handler))
-	defer ts.Close()
-
-	resp, err := http.Get(ts.URL)
-	assert.Nil(t, err, "reading URL should not return an error")
+	rec := httptest.NewRecorder()
+	EnableCache(rec, true, maxAge, staleWhileRevalidate)
+	resp := rec.Result()
 	defer resp.Body.Close()
-	data, err := io.ReadAll(resp.Body)
-	assert.Nil(t, err, "reading body should not return an error")
-	assert.Equal(t, helloWorld, string(data), "returned data should match what handler wrote")
-	assert.Equal(t, h.String(), resp.Header.Get("Cache-Control"), "cache control should be the same as the Header")
+
+	expectedValues := []string{"public", "max-age=" + strconv.Itoa(maxAge), "stale-while-revalidate=" + strconv.Itoa(staleWhileRevalidate)}
+	sort.Strings(expectedValues)
+
+	actualValues := strings.Split(resp.Header.Get("Cache-Control"), ", ")
+	sort.Strings(actualValues)
+	assert.Equal(t, expectedValues, actualValues, "should set headers to enable caching")
 }

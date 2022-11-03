@@ -742,8 +742,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header()["ETag"] = []string{user.ETag}
-	var h cachecontrol.Header
-	h.Private().MaxAge(0).StaleWhileRevalidate(60).Set(w)
+	cachecontrol.EnableCache(w, false, 0, 60)
 
 	user.RemoveInternalFields()
 	if r.Header.Get("Accept") != "application/json" {

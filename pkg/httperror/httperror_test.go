@@ -23,6 +23,14 @@ func (tempError) Timeout() bool {
 	return true
 }
 
+func cacheControlDisabledHeader() string {
+	rec := httptest.NewRecorder()
+	cachecontrol.DisableCache(rec)
+	resp := rec.Result()
+	defer resp.Body.Close()
+	return resp.Header.Get("Cache-Control")
+}
+
 func TestError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	Error(rec, "error", http.StatusNotFound)
@@ -30,7 +38,7 @@ func TestError(t *testing.T) {
 	defer resp.Body.Close()
 
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode, "HTTP response code should match Error()")
-	assert.Equal(t, cachecontrol.Disabled().String(), resp.Header.Get("Cache-Control"), "Cache-Control must disable cache")
+	assert.Equal(t, cacheControlDisabledHeader(), resp.Header.Get("Cache-Control"), "Cache-Control must disable cache")
 
 	data, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err, "reading the body should not return an error")
