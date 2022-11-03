@@ -323,9 +323,11 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 
 func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, bool) {
 	healthCheck := &HealthCheckReport{
-		ServerStatus: "NOT_READY", // For now we assume that the server is ready
-		NodeStatus:   "READY",
-		BuildInfo:    n.info,
+		ServerStatus: "NOT_READY",
+		// For now we assume that the server is ready
+		// because we don't have any health checks
+		NodeStatus: "READY",
+		BuildInfo:  n.info,
 	}
 
 	if n.options.hooksServerHealthCheck {
