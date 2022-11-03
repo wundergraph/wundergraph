@@ -25,12 +25,14 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 const (
+	rootEndpoint        = "/"
 	healthCheckEndpoint = "/health"
 )
 
@@ -319,6 +321,24 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("WunderNode shutdown complete")
 }
 
+func (n *Node) GetHealth(w http.ResponseWriter, hooksClient *hooks.Client) HealthCheck {
+	serverStatus := "SKIP"
+	if n.options.hooksServerHealthCheck {
+		serverStatus = "OK"
+		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+		if !ok {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			serverStatus = "DEAD"
+		}
+	}
+
+	return HealthCheck{
+		ServerStatus: serverStatus,
+		NodeStatus:   "OK",
+		BuildInfo:    n.info,
+	}
+}
+
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	logLevel := nodeConfig.Api.Options.Logging.Level
 	if n.options.enableDebugMode {
@@ -423,22 +443,25 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}
 	}()
 
-	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		serverStatus := "SKIP"
-		if n.options.hooksServerHealthCheck {
-			serverStatus = "OK"
-			ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
-			if !ok {
-				w.WriteHeader(http.StatusServiceUnavailable)
-				serverStatus = "DEAD"
-			}
+	router.Handle(rootEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		template, err := nodetemplates.GetTemplateByPath(rootEndpoint)
+		health := n.GetHealth(w, hooksClient)
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		if err != nil {
+			n.log.Error("GetTemplateByPath", abstractlogger.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		if err := template.Execute(w, health); err != nil {
+			return
+		}
+	}))
 
-		health := HealthCheck{
-			ServerStatus: serverStatus,
-			NodeStatus:   "OK",
-			BuildInfo:    n.info,
-		}
+	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		health := n.GetHealth(w, hooksClient)
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 		_ = json.NewEncoder(w).Encode(health)
 	}))
 
