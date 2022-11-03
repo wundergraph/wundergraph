@@ -48,6 +48,10 @@
 			>
 	<table class="w-full text-sm text-left table-fixed">
 		<tr class="border-b hover:bg-sky-50/50 transition-all">
+			<th class="py-4 px-6 text-sky-800">Node Status</th>
+			<td class="text-gray-800 font-semibold">{{.NodeStatus}}</td>
+		</tr>
+		<tr class="hover:bg-sky-50/50 transition-all">
 			<th class="pb-4 pt-5 px-6 text-sky-800 ">
 				<div class="flex gap-x-2 items-center">
 					<span>Server Status</span>
@@ -82,10 +86,6 @@
 					{{ end }}
 				</div>
 			</td>
-		</tr>
-		<tr class="hover:bg-sky-50/50 transition-all">
-			<th class="py-4 px-6 text-sky-800">Node Status</th>
-			<td class="text-gray-800 font-semibold">{{.NodeStatus}}</td>
 		</tr>
 	</table>
 </div>
