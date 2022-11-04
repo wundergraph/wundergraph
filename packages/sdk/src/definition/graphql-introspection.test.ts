@@ -10,21 +10,21 @@ import { buildSubgraphSchema } from './graphql-introspection';
 
 axios.defaults.adapter = require('axios/lib/adapters/http');
 
-const fetchSDL = async (url: string, body: string) => {
-	const introspection = await fetch(url, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body,
-	});
-	return await introspection.json();
-};
-
 test('introspection via http', async () => {
 	/*
 	Uncomment this section if you want to update the test data from the real introspection endpoints.
 	
+	const fetchSDL = async (url: string, body: string) => {
+	const introspection = await fetch(url, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body,
+		});
+		return await introspection.json();
+	};
+
 	const sdlQuery = `{"query":"{_service{sdl}}"}`;
 	const introspectionQuery = JSON.stringify({
 		query: getIntrospectionQuery(),
