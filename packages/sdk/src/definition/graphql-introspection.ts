@@ -27,6 +27,7 @@ import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQ
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
+import transformSchema from '../transformations/shema';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -74,11 +75,8 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
 		schema = lexicographicSortSchema(schema);
 		const federationEnabled = isFederationService(schema);
-		const schemaSDL = cleanupSchema(
-			schema,
-			introspection.customFloatScalars || [],
-			introspection.customIntScalars || []
-		);
+		let schemaSDL = cleanupSchema(schema, introspection);
+		schemaSDL = transformSchema.replaceCustomScalars(schemaSDL, introspection);
 		const serviceSDL = !federationEnabled
 			? undefined
 			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
