@@ -3,10 +3,15 @@ import { configuration } from '../graphql/configuration';
 import {
 	buildClientSchema,
 	buildSchema,
+	DocumentNode,
 	getIntrospectionQuery,
 	GraphQLSchema,
-	parse,
 	lexicographicSortSchema,
+	ObjectTypeDefinitionNode,
+	ObjectTypeExtensionNode,
+	parse,
+	print,
+	printSchema,
 } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
@@ -19,7 +24,6 @@ import {
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
 import { loadFile } from '../codegen/templates/typescript';
-import { buildSubgraphSchema } from '@apollo/federation';
 import * as https from 'https';
 import { introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
@@ -27,6 +31,7 @@ import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQ
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
+import { mergeSchemas } from '@graphql-tools/schema';
 import transformSchema from '../transformations/shema';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
@@ -79,6 +84,8 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		schemaSDL = transformSchema.replaceCustomScalars(schemaSDL, introspection);
 		const serviceSDL = !federationEnabled
 			? undefined
+			: introspection.loadSchemaFromString
+			? loadFile(introspection.loadSchemaFromString)
 			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
 					apiNamespace: introspection.apiNamespace,
 			  });
@@ -160,7 +167,8 @@ const introspectGraphQLSchema = async (introspection: GraphQLIntrospection, head
 	if (introspection.loadSchemaFromString) {
 		try {
 			if (introspection.isFederation) {
-				return buildSubgraphSchema(parse(loadFile(introspection.loadSchemaFromString)));
+				const parsedSchema = parse(loadFile(introspection.loadSchemaFromString));
+				return buildSubgraphSchema(parsedSchema);
 			}
 			return buildSchema(loadFile(introspection.loadSchemaFromString));
 		} catch (e: any) {
@@ -240,4 +248,57 @@ const hasSubscriptions = (schema: GraphQLSchema): boolean => {
 	}
 	const fields = subscriptionType.getFields();
 	return Object.keys(fields).length !== 0;
+};
+
+const subgraphBaseSchema = `directive @key(fields: String!) on OBJECT | INTERFACE
+
+directive @extends on OBJECT | INTERFACE
+
+directive @external on OBJECT | FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+type Query {
+  _entities(representations: [_Any!]!): [_Entity]!
+  _service: _Service!
+}
+
+scalar _Entity
+
+scalar _Any
+
+type _Service {
+  """
+  The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied
+  """
+  sdl: String
+}`;
+
+export const buildSubgraphSchema = (schema: DocumentNode): GraphQLSchema => {
+	const entities = findEntityNames(schema);
+	// union _Entity = User | Product
+	const entityDefinition = entities.length > 0 ? `union _Entity = ${entities.join(' | ')}` : '';
+	const subgraphSchema = print(schema);
+	const merged = mergeSchemas({
+		schemas: [
+			buildSchema(subgraphSchema, { assumeValidSDL: true }),
+			buildSchema(subgraphBaseSchema, { assumeValidSDL: true }),
+		],
+	});
+	const withoutEntityUnion = printSchema(merged);
+	const withEntityUnion = withoutEntityUnion.replace('scalar _Entity', entityDefinition);
+	return lexicographicSortSchema(buildSchema(withEntityUnion, { assumeValidSDL: true }));
+};
+
+const findEntityNames = (schema: DocumentNode): string[] => {
+	return schema.definitions
+		.filter((node) => node.kind === 'ObjectTypeDefinition' || node.kind === 'ObjectTypeExtension')
+		.filter((node) =>
+			(node as ObjectTypeDefinitionNode | ObjectTypeExtensionNode).directives?.some(
+				(directive) => directive.name.value === 'key'
+			)
+		)
+		.map((node) => (node as ObjectTypeDefinitionNode | ObjectTypeExtensionNode).name.value);
 };
