@@ -1,4 +1,4 @@
-# WunderGraph simple example
+# WunderGraph cross API joins example
 
 #### Getting started
 
@@ -6,22 +6,10 @@
 npm install && npm start
 ```
 
-#### Get Dragons
+#### Get weather for a country capital
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Dragons
-```
-
-#### Get Missions
-
-```shell
-curl -X GET http://localhost:9991/app/main/operations/Missions
-```
-
-#### Call your custom GraphQL server
-
-```shell
-curl -X GET http://localhost:9991/app/main/operations/Hello
+curl -v --get --data-urlencode 'wg_variables={"countryCode": "ES"}' 'http://localhost:9991/api/main/operations/CountryWeather
 ```
 
 ## Learn More
