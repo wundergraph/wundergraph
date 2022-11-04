@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.119.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.118.0...@wundergraph/sdk@0.119.0) (2022-11-04)
+
+### Features
+
+* eng 640 compose subgraphs without apollo dependencies ([#315](https://github.com/wundergraph/wundergraph/issues/315)) ([628a183](https://github.com/wundergraph/wundergraph/commit/628a18303acb47df5a10118b17a4e88916b2903a)) (@jensneuse)
+* sdk, support schema extension ([#302](https://github.com/wundergraph/wundergraph/issues/302)) ([e952af6](https://github.com/wundergraph/wundergraph/commit/e952af61428d0592876362bc19155d45fec626f1)) (@YuriBuerov)
+
 ## [0.118.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.4...@wundergraph/sdk@0.118.0) (2022-11-03)
 
 ### Features
