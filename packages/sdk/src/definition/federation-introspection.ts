@@ -108,15 +108,6 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 				typeDefs: parse(schema),
 			};
 		});
-		const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
-		//const compositionResult = composeServices(serviceList);
-		//const errors = compositionResult.errors;
-
-		/*if (errors && errors?.length > 0) {
-			throw new Error(
-				`Service composition of federated subgraph failed: ${errors[0]}. Make sure all subgraphs can be composed to a supergaph.`
-			);
-		}*/
 
 		const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
 			...upstream,
