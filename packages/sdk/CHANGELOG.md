@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.118.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.4...@wundergraph/sdk@0.118.0) (2022-11-03)
+
+### Features
+
+* improve server graceful shutdown ([#314](https://github.com/wundergraph/wundergraph/issues/314)) ([14da07d](https://github.com/wundergraph/wundergraph/commit/14da07d6ca1b6c6cd1571e8322338c1684f92ff8)) (@StarpTech)
+
+## [0.117.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.3...@wundergraph/sdk@0.117.4) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.117.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.2...@wundergraph/sdk@0.117.3) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
 ## [0.117.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.1...@wundergraph/sdk@0.117.2) (2022-11-03)
 
 ### Bug Fixes
