@@ -1,5 +1,5 @@
 import { WunderGraphConfiguration } from '@wundergraph/protobuf';
-import FastifyGraceful from 'fastify-graceful-shutdown';
+import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
 import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
@@ -120,6 +120,7 @@ const _configureWunderGraphServer = <
 			wundergraphDir: process.env.WG_ABS_DIR!,
 			config: WG_CONFIG,
 			serverConfig,
+			// only in production because it has no value in development
 			gracefulShutdown: isProduction,
 			clientFactory,
 		}).catch((err) => {
@@ -239,13 +240,20 @@ export const createServer = async ({
 		fastify.log.info('Webhooks plugin registered');
 	}
 
-	// only in production because it slows down watch process in development
 	if (gracefulShutdown) {
-		await fastify.register(FastifyGraceful);
-		fastify.gracefulShutdown((signal, next) => {
-			fastify.log.info('graceful shutdown', { signal });
-			next();
-		});
+		const handler: closeWithGrace.CloseWithGraceAsyncCallback = async ({ manual, err, signal }) => {
+			if (err) {
+				fastify.log.error({ err, signal, manual }, 'error in graceful shutdown listeners');
+			}
+			fastify.log.info({ err, signal, manual }, 'graceful shutdown was initiated manually');
+
+			await fastify.close();
+			fastify.log.info({ err, signal, manual }, 'server process shutdown');
+		};
+		// exit the process gracefully (if possible)
+		// gracefully means we exit on signals and uncaught exceptions and the
+		// server has 500ms to close all connections before the process is killed
+		closeWithGrace({ delay: 500 }, handler);
 	}
 
 	return fastify;
