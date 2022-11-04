@@ -4,13 +4,23 @@ pageTitle: WunderGraph - Configure Schema Extension
 description:
 ---
 
-WunderGraph allows you to extend the GraphQL Schema and replace specific fields with a custom type.
-Using introspection configuration, you can specify which fields should be replaced with a custom type, and define the custom types.
+WunderGraph allows you to extend the GraphQL Schema of an origin and replace specific fields with a custom type.
+This is useful when you're integrating with a GraphQL API that uses custom scalars.
+Instead of using a generic `JSON` scalar, you can replace it with a dedicated type definition to improve type-safety and create a better developer experience.
 
-WunderGraph supports schema extensions for the following data sources: GraphQL, databases, and REST APIs.
+WunderGraph allows you to directly integrate with Databases like PostgreSQL, MySQL or MongoDB who support JSON data types.
+Thanks to custom schema extensions, you can give these `JSON` scalars much more meaning and make them more intuitive to use.
 
-To enable schema extension, you need to set the `schemaExtension` property in the `wundergraph.config.ts` file.
-And then, you need to specify which fields should be replaced with a custom type, using the `replaceCustomScalarTypeFields` property.
+But that's not all. As we're defining more specific types for the input type as well,
+we automatically get input validation.
+With a generic `JSON` scalar, users can use any valid JSON value as the input.
+With Custom Schema Extensions, you'll automatically get JSON Schema validation for the input,
+while being able to store the value in a JSON/JSONB column.
+
+Custom Schema Extensions are supported for GraphQL, REST (OAS) and Database-generated APIs.
+
+To enable Schema Extensions, you need to set the `schemaExtension` property in the introspection configuration for a data source in the `wundergraph.config.ts` file.
+Additionally, you need to specify which fields should be replaced with a custom type, using the `replaceCustomScalarTypeFields` property.
 
 `schemaExtension` defines the new type and input type that will be added to the GraphQL schema.
 
@@ -174,6 +184,9 @@ query {
 }
 ```
 
+Without the Custom Schema Extension,
+you couldn't be able to select the `phone` and `type` fields.
+
 Mutation:
 
 ```graphql
@@ -195,6 +208,10 @@ mutation (
   }
 }
 ```
+
+As we're generating an input type as well (`db_ContactInput`),
+users cannot use any arbitrary JSON data as input,
+but need to specify the `phone` and `type` fields.
 
 ## REST API with arbitrary JSON type
 
