@@ -1,0 +1,9 @@
+query {
+	db_findFirstusers {
+		name
+		email
+		contact {
+			phone
+		}
+	}
+}

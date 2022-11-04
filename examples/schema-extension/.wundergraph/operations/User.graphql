@@ -1,0 +1,11 @@
+mutation ($email: String!, $name: String!, $payload: db_ContactInput!) {
+	createOneusers: db_createOneusers(data: { name: $name, email: $email, contact: $payload }) {
+		id
+		name
+		email
+		contact {
+			phone
+			type
+		}
+	}
+}

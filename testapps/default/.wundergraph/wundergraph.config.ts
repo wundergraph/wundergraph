@@ -40,7 +40,7 @@ const jsp = introspect.openApi({
 
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
 const countries = introspect.graphql({
