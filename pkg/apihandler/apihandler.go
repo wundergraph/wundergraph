@@ -767,11 +767,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		err := h.resolver.ResolveGraphQLResponse(shared.Ctx, p.Response, nil, executionBuf)
 		if err != nil {
-			if errors.Is(err, context.Canceled) {
+			if shared.Ctx.Err() != nil {
+				http.Error(w, "Request timeout", http.StatusGatewayTimeout)
 				return
 			}
 			h.log.Error("ResolveGraphQLResponse", abstractlogger.Error(err))
-			http.Error(w, "bad request", http.StatusBadRequest)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 		_, err = executionBuf.WriteTo(w)
@@ -1209,8 +1210,12 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if err != nil {
+		if ctx.Err() != nil {
+			http.Error(w, "Request timeout", http.StatusGatewayTimeout)
+			return
+		}
 		h.log.Error("ResolveGraphQLResponse for query failed", abstractlogger.Error(err))
-		http.Error(w, "bad request", http.StatusBadRequest)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -1323,9 +1328,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		} else {
 			return nil, errors.New("CustomResolve liveQuery hook response is empty")
 		}
-		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
-			h.log.Debug("CustomResolve is skipped and empty response is written")
 			return out.Response, nil
 		}
 	}
@@ -1378,6 +1381,10 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 		var hookError bool
 		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
 		if err != nil {
+			if ctx.Err() != nil {
+				http.Error(w, "Request timeout", http.StatusGatewayTimeout)
+				return
+			}
 			hookError = true
 			h.log.Error("HandleLiveQueryEvent failed", abstractlogger.Error(err))
 			graphqlError := graphql.Response{
@@ -1609,6 +1616,10 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if resolveErr != nil {
+		if ctx.Err() != nil {
+			http.Error(w, "Request timeout", http.StatusGatewayTimeout)
+			return
+		}
 		h.log.Error("ResolveGraphQLResponse for mutation failed", abstractlogger.Error(resolveErr))
 		http.Error(w, "ResolveGraphQLResponse for mutation failed", http.StatusInternalServerError)
 		return
