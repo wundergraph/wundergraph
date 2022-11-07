@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.98.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.97.0...@wundergraph/protobuf@0.98.0) (2022-11-04)
+
+### Features
+
+* eng 640 compose subgraphs without apollo dependencies ([#315](https://github.com/wundergraph/wundergraph/issues/315)) ([628a183](https://github.com/wundergraph/wundergraph/commit/628a18303acb47df5a10118b17a4e88916b2903a)) (@jensneuse)
+
 ## [0.97.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.96.0...@wundergraph/protobuf@0.97.0) (2022-10-18)
 
 ### Features

@@ -33,7 +33,7 @@ var nodeStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl node start
 `,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
@@ -41,24 +41,22 @@ var nodeStartCmd = &cobra.Command{
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
-			return err
+			log.Fatal("Could not create node: %w", abstractlogger.Error(err))
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n, WithIdleHandler(stop))
-			if err != nil {
-				log.Error("Start node", abstractlogger.Error(err))
-			}
-			return err
+			return StartWunderGraphNode(n, WithIdleHandler(stop))
 		})
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 
-		if err := g.Wait(); err != nil {
-			return fmt.Errorf("WunderGraph process shutdown: %w", err)
+		// Only exit with error code 1 when the server was not stopped by the signal
+		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
+			// Exit with error code 1 to indicate failure and restart
+			log.Fatal("WunderGraph process shutdown: %w", abstractlogger.Error(err))
 		}
 
-		return nil
+		// exit code 0 to indicate success
 	},
 }
 

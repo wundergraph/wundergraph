@@ -1,0 +1,2064 @@
+{
+  "accountsSDL": {
+    "data": {
+      "_service": {
+        "sdl": "type Query @extends {\n  me: User\n}\n\ntype User @key(fields: \"id\") {\n  id: ID!\n  name: String\n  username: String\n}\n"
+      }
+    }
+  },
+  "productsSDL": {
+    "data": {
+      "_service": {
+        "sdl": "type Query @extends {\n  topProducts(first: Int = 5, random: Boolean): [Product]\n}\n\ntype Product @key(fields: \"upc\") {\n  upc: String!\n  name: String\n  price: Int\n  weight: Int\n}\n\ntype Subscription @extends {\n  updatedPrice: Product!\n}\n\ntype Mutation @extends {\n  setPrice(upc: String!, price: Int!): Product\n}"
+      }
+    }
+  },
+  "reviewsSDL": {
+    "data": {
+      "_service": {
+        "sdl": "type Review @key(fields: \"id\") {\n  id: ID!\n  body: String\n  author: User @provides(fields: \"username\")\n  product: Product\n}\n\ntype User @extends @key(fields: \"id\") {\n  id: ID! @external\n  username: String @external\n  reviews: [Review]\n}\n\ntype Product @extends @key(fields: \"upc\") {\n  upc: String! @external\n  reviews: [Review]\n}\n"
+      }
+    }
+  },
+  "inventorySDL": {
+    "data": {
+      "_service": {
+        "sdl": "type Product @extends @key(fields: \"upc\") {\n    upc: String! @external\n    weight: Int @external\n    price: Int @external\n    inStock: Boolean\n    shippingEstimate: Int @requires(fields: \"price weight\")\n}\n"
+      }
+    }
+  },
+  "accountsIntrospection": {
+    "data": {
+      "__schema": {
+        "queryType": {
+          "name": "Query"
+        },
+        "mutationType": null,
+        "subscriptionType": null,
+        "types": [
+          {
+            "kind": "OBJECT",
+            "name": "User",
+            "description": "",
+            "fields": [
+              {
+                "name": "id",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "name",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "username",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_Any",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Float",
+            "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Entity",
+            "description": "",
+            "fields": [
+              {
+                "name": "findUserByID",
+                "description": "",
+                "args": [
+                  {
+                    "name": "id",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "ID",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "User",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "description": "The `Boolean` scalar type represents `true` or `false`.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "ID",
+            "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as \"4\") or integer (such as 4) input value will be accepted as an ID.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_FieldSet",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "UNION",
+            "name": "_Entity",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": [
+              {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            ]
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Query",
+            "description": "",
+            "fields": [
+              {
+                "name": "me",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "User",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "_entities",
+                "description": "",
+                "args": [
+                  {
+                    "name": "representations",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "LIST",
+                        "name": null,
+                        "ofType": {
+                          "kind": "NON_NULL",
+                          "name": null,
+                          "ofType": {
+                            "kind": "SCALAR",
+                            "name": "_Any",
+                            "ofType": null
+                          }
+                        }
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "_Entity",
+                      "ofType": null
+                    }
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "_service",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "_Service",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "_Service",
+            "description": "",
+            "fields": [
+              {
+                "name": "sdl",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Int",
+            "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "String",
+            "description": "The `String`scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          }
+        ],
+        "directives": [
+          {
+            "name": "extends",
+            "description": "",
+            "locations": ["OBJECT"],
+            "args": []
+          },
+          {
+            "name": "include",
+            "description": "The @include directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional inclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "skip",
+            "description": "The @skip directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional exclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "deprecated",
+            "description": "The @deprecated directive is used within the type system definition language to indicate deprecated portions of a GraphQL service’s schema, such as deprecated fields on a type or deprecated enum values.",
+            "locations": ["FIELD_DEFINITION", "ENUM_VALUE"],
+            "args": [
+              {
+                "name": "reason",
+                "description": "",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": "\"No longer supported\""
+              }
+            ]
+          },
+          {
+            "name": "external",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": []
+          },
+          {
+            "name": "requires",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "provides",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "key",
+            "description": "",
+            "locations": ["OBJECT", "INTERFACE"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "productsIntrospection": {
+    "data": {
+      "__schema": {
+        "queryType": {
+          "name": "Query"
+        },
+        "mutationType": {
+          "name": "Mutation"
+        },
+        "subscriptionType": {
+          "name": "Subscription"
+        },
+        "types": [
+          {
+            "kind": "SCALAR",
+            "name": "Int",
+            "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Mutation",
+            "description": "",
+            "fields": [
+              {
+                "name": "setPrice",
+                "description": "",
+                "args": [
+                  {
+                    "name": "upc",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  },
+                  {
+                    "name": "price",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "Int",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Product",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "UNION",
+            "name": "_Entity",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": [
+              {
+                "kind": "OBJECT",
+                "name": "Product",
+                "ofType": null
+              }
+            ]
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Entity",
+            "description": "",
+            "fields": [
+              {
+                "name": "findProductByUpc",
+                "description": "",
+                "args": [
+                  {
+                    "name": "upc",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Product",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Float",
+            "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "String",
+            "description": "The `String`scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "ID",
+            "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as \"4\") or integer (such as 4) input value will be accepted as an ID.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Subscription",
+            "description": "",
+            "fields": [
+              {
+                "name": "updatedPrice",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Product",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_FieldSet",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_Any",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "description": "The `Boolean` scalar type represents `true` or `false`.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Query",
+            "description": "",
+            "fields": [
+              {
+                "name": "topProducts",
+                "description": "",
+                "args": [
+                  {
+                    "name": "first",
+                    "description": "",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Int",
+                      "ofType": null
+                    },
+                    "defaultValue": "5"
+                  },
+                  {
+                    "name": "random",
+                    "description": "",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Boolean",
+                      "ofType": null
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Product",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "_entities",
+                "description": "",
+                "args": [
+                  {
+                    "name": "representations",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "LIST",
+                        "name": null,
+                        "ofType": {
+                          "kind": "NON_NULL",
+                          "name": null,
+                          "ofType": {
+                            "kind": "SCALAR",
+                            "name": "_Any",
+                            "ofType": null
+                          }
+                        }
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "_Entity",
+                      "ofType": null
+                    }
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "_service",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "_Service",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Product",
+            "description": "",
+            "fields": [
+              {
+                "name": "upc",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "name",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "price",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "weight",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "_Service",
+            "description": "",
+            "fields": [
+              {
+                "name": "sdl",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          }
+        ],
+        "directives": [
+          {
+            "name": "requires",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "provides",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "key",
+            "description": "",
+            "locations": ["OBJECT", "INTERFACE"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "extends",
+            "description": "",
+            "locations": ["OBJECT"],
+            "args": []
+          },
+          {
+            "name": "include",
+            "description": "The @include directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional inclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "skip",
+            "description": "The @skip directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional exclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "deprecated",
+            "description": "The @deprecated directive is used within the type system definition language to indicate deprecated portions of a GraphQL service’s schema, such as deprecated fields on a type or deprecated enum values.",
+            "locations": ["FIELD_DEFINITION", "ENUM_VALUE"],
+            "args": [
+              {
+                "name": "reason",
+                "description": "",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": "\"No longer supported\""
+              }
+            ]
+          },
+          {
+            "name": "external",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": []
+          }
+        ]
+      }
+    }
+  },
+  "reviewsIntrospection": {
+    "data": {
+      "__schema": {
+        "queryType": {
+          "name": "Query"
+        },
+        "mutationType": null,
+        "subscriptionType": null,
+        "types": [
+          {
+            "kind": "SCALAR",
+            "name": "_Any",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Int",
+            "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Float",
+            "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "ID",
+            "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as \"4\") or integer (such as 4) input value will be accepted as an ID.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Product",
+            "description": "",
+            "fields": [
+              {
+                "name": "upc",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "reviews",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Review",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Review",
+            "description": "",
+            "fields": [
+              {
+                "name": "id",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "body",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "author",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "User",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "product",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Product",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Query",
+            "description": "",
+            "fields": [
+              {
+                "name": "_entities",
+                "description": "",
+                "args": [
+                  {
+                    "name": "representations",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "LIST",
+                        "name": null,
+                        "ofType": {
+                          "kind": "NON_NULL",
+                          "name": null,
+                          "ofType": {
+                            "kind": "SCALAR",
+                            "name": "_Any",
+                            "ofType": null
+                          }
+                        }
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "_Entity",
+                      "ofType": null
+                    }
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "_service",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "_Service",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Entity",
+            "description": "",
+            "fields": [
+              {
+                "name": "findProductByUpc",
+                "description": "",
+                "args": [
+                  {
+                    "name": "upc",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Product",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "findReviewByID",
+                "description": "",
+                "args": [
+                  {
+                    "name": "id",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "ID",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Review",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "findUserByID",
+                "description": "",
+                "args": [
+                  {
+                    "name": "id",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "ID",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "User",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "_Service",
+            "description": "",
+            "fields": [
+              {
+                "name": "sdl",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "String",
+            "description": "The `String`scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "User",
+            "description": "",
+            "fields": [
+              {
+                "name": "id",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "username",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "reviews",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Review",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "UNION",
+            "name": "_Entity",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": [
+              {
+                "kind": "OBJECT",
+                "name": "Product",
+                "ofType": null
+              },
+              {
+                "kind": "OBJECT",
+                "name": "Review",
+                "ofType": null
+              },
+              {
+                "kind": "OBJECT",
+                "name": "User",
+                "ofType": null
+              }
+            ]
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "description": "The `Boolean` scalar type represents `true` or `false`.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_FieldSet",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          }
+        ],
+        "directives": [
+          {
+            "name": "key",
+            "description": "",
+            "locations": ["OBJECT", "INTERFACE"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "extends",
+            "description": "",
+            "locations": ["OBJECT"],
+            "args": []
+          },
+          {
+            "name": "include",
+            "description": "The @include directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional inclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "skip",
+            "description": "The @skip directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional exclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "deprecated",
+            "description": "The @deprecated directive is used within the type system definition language to indicate deprecated portions of a GraphQL service’s schema, such as deprecated fields on a type or deprecated enum values.",
+            "locations": ["FIELD_DEFINITION", "ENUM_VALUE"],
+            "args": [
+              {
+                "name": "reason",
+                "description": "",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": "\"No longer supported\""
+              }
+            ]
+          },
+          {
+            "name": "external",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": []
+          },
+          {
+            "name": "requires",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "provides",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "inventoryIntrospection": {
+    "data": {
+      "__schema": {
+        "queryType": {
+          "name": "Query"
+        },
+        "mutationType": null,
+        "subscriptionType": null,
+        "types": [
+          {
+            "kind": "SCALAR",
+            "name": "Int",
+            "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "_Service",
+            "description": "",
+            "fields": [
+              {
+                "name": "sdl",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Query",
+            "description": "",
+            "fields": [
+              {
+                "name": "_entities",
+                "description": "",
+                "args": [
+                  {
+                    "name": "representations",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "LIST",
+                        "name": null,
+                        "ofType": {
+                          "kind": "NON_NULL",
+                          "name": null,
+                          "ofType": {
+                            "kind": "SCALAR",
+                            "name": "_Any",
+                            "ofType": null
+                          }
+                        }
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "UNION",
+                      "name": "_Entity",
+                      "ofType": null
+                    }
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "_service",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "_Service",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_Any",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "UNION",
+            "name": "_Entity",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": [
+              {
+                "kind": "OBJECT",
+                "name": "Product",
+                "ofType": null
+              }
+            ]
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Float",
+            "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "ID",
+            "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as \"4\") or integer (such as 4) input value will be accepted as an ID.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Product",
+            "description": "",
+            "fields": [
+              {
+                "name": "upc",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "weight",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "price",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "inStock",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "shippingEstimate",
+                "description": "",
+                "args": [],
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "_FieldSet",
+            "description": "",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "String",
+            "description": "The `String`scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "description": "The `Boolean` scalar type represents `true` or `false`.",
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Entity",
+            "description": "",
+            "fields": [
+              {
+                "name": "findProductByUpc",
+                "description": "",
+                "args": [
+                  {
+                    "name": "upc",
+                    "description": "",
+                    "type": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "SCALAR",
+                        "name": "String",
+                        "ofType": null
+                      }
+                    },
+                    "defaultValue": null
+                  }
+                ],
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "Product",
+                    "ofType": null
+                  }
+                },
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "enumValues": [],
+            "possibleTypes": []
+          }
+        ],
+        "directives": [
+          {
+            "name": "key",
+            "description": "",
+            "locations": ["OBJECT", "INTERFACE"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "extends",
+            "description": "",
+            "locations": ["OBJECT"],
+            "args": []
+          },
+          {
+            "name": "include",
+            "description": "The @include directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional inclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "skip",
+            "description": "The @skip directive may be provided for fields, fragment spreads, and inline fragments, and allows for conditional exclusion during execution as described by the if argument.",
+            "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+            "args": [
+              {
+                "name": "if",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "deprecated",
+            "description": "The @deprecated directive is used within the type system definition language to indicate deprecated portions of a GraphQL service’s schema, such as deprecated fields on a type or deprecated enum values.",
+            "locations": ["FIELD_DEFINITION", "ENUM_VALUE"],
+            "args": [
+              {
+                "name": "reason",
+                "description": "",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": "\"No longer supported\""
+              }
+            ]
+          },
+          {
+            "name": "external",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": []
+          },
+          {
+            "name": "requires",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          },
+          {
+            "name": "provides",
+            "description": "",
+            "locations": ["FIELD_DEFINITION"],
+            "args": [
+              {
+                "name": "fields",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "_FieldSet",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
