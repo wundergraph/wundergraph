@@ -252,7 +252,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	// Helper hook used in useQuery and useSubscription
 	const useSubscribeTo = (props: UseSubscribeToProps) => {
 		const { mutate } = useSWRConfig();
-		const { mutationKey, operationName, input, enabled, liveQuery, subscribeOnce, onSuccess, onError } = props;
+		const { mutationKey, operationName, input, enabled, liveQuery, subscribeOnce, resetOnMount, onSuccess, onError } =
+			props;
 
 		const startedAtRef = useRef<number | null>(null);
 
@@ -260,6 +261,12 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			isLoading: false,
 			isSubscribed: false,
 		});
+
+		useEffect(() => {
+			if (!startedAtRef.current && resetOnMount) {
+				mutate(mutationKey, null);
+			}
+		}, []);
 
 		useEffect(() => {
 			if (enabled) {

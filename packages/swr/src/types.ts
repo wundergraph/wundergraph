@@ -15,6 +15,7 @@ export type UseQueryOptions<Data, Error, Input, OperationName extends string, Li
 export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
 	operationName: OperationName;
 	subscribeOnce?: boolean;
+	resetOnMount?: boolean;
 	enabled?: boolean;
 	input?: Input;
 	onSuccess?(
@@ -42,6 +43,7 @@ export type UseMutationOptions<Data, Error, Input, OperationName extends string>
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	mutationKey: string;
 	enabled?: boolean;
+	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: GraphQLResponseError): void;
 }
