@@ -246,6 +246,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if resolveErr != nil {
+		if ctx.Err() != nil {
+			// e.g. client closed connection
+			return
+		}
 		h.log.Error("InternalApiHandler.ResolveGraphQLResponse", abstractlogger.Error(resolveErr))
 		http.Error(w, "unable to resolve", http.StatusInternalServerError)
 		return
