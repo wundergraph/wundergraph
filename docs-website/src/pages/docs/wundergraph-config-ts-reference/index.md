@@ -33,4 +33,5 @@ Here's an overview of all the different options to configure your WunderNode usi
 {% quick-link title="S3 file upload providers" icon="core" href="/docs/wundergraph-config-ts-reference/configure-s3-file-upload-providers" description="" /%}
 {% quick-link title="Advanced Security" icon="core" href="/docs/wundergraph-config-ts-reference/configure-advanced-security" description="" /%}
 {% quick-link title=".graphqlconfig" icon="core" href="/docs/wundergraph-config-ts-reference/configure-graphqlconfig" description="" /%}
+{% quick-link title="Schema Extension" icon="core" href="/docs/wundergraph-config-ts-reference/configure-schema-extension" description="" /%}
 {% /quick-links %}

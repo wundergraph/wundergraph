@@ -30,7 +30,7 @@ Here's a simple example:
 ```typescript
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
-  url: 'https://api.spacex.land/graphql/',
+  url: 'https://spacex-api.fly.dev/graphql/',
 })
 ```
 

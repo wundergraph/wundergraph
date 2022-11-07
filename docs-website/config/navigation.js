@@ -254,6 +254,10 @@ const navigation = [
 				title: 'GraphQl subscriptions hooks',
 				href: '/docs/examples/graphql-subscriptions-hooks',
 			},
+			{
+				title: 'WunderGraph schema extension',
+				href: '/docs/examples/schema-extension',
+			},
 		],
 	},
 	{
@@ -790,6 +794,10 @@ const navigation = [
 			{
 				title: '.graphqlconfig',
 				href: '/docs/wundergraph-config-ts-reference/configure-graphqlconfig',
+			},
+			{
+				title: 'Schema extension',
+				href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
 			},
 		],
 	},

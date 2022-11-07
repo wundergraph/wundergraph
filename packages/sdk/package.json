@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.117.4",
+  "version": "0.119.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -93,14 +93,12 @@
     "typescript": "^4.8.2"
   },
   "dependencies": {
-    "@apollo/composition": "^2.0.2",
-    "@apollo/federation": "^0.36.2",
     "@fastify/formbody": "^7.3.0",
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
-    "@wundergraph/protobuf": "workspace:^0.97.0",
-    "@wundergraph/wunderctl": "workspace:>=0.115.2",
+    "@wundergraph/protobuf": "workspace:^0.98.0",
+    "@wundergraph/wunderctl": "workspace:>=0.115.4",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",

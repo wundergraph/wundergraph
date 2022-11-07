@@ -49,6 +49,7 @@ import { mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
+import transformSchema from '../transformations/shema';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -138,8 +139,8 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		//const debug = print(filtered);
-		const schema = buildASTSchema(filtered);
+		const replaced = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
+		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
 			return {

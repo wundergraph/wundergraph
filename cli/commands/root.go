@@ -31,6 +31,8 @@ const (
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 
+	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
+
 	defaultNodeGracefulTimeoutSeconds = 10
 )
 
@@ -167,6 +169,22 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+// wunderctlBinaryPath() returns the path to the currently executing parent wunderctl
+// command which is then passed via wunderctlBinaryPathEnvKey to subprocesses. This
+// ensures than when the SDK calls back into wunderctl, the same copy is always used.
+func wunderctlBinaryPath() string {
+	// Check if a parent wunderctl set this for us
+	path, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
+	if !isSet {
+		// Variable is not set, find out our path and set it
+		exe, err := os.Executable()
+		if err == nil {
+			path = exe
+		}
+	}
+	return path
 }
 
 func init() {
