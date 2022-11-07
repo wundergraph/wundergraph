@@ -19,7 +19,9 @@ import {
 	UseSubscribeToProps,
 	UseSubscriptionOptions,
 	UseSubscriptionResponse,
+	UseUserOptions,
 } from './types';
+import { useWunderGraphContext } from './context';
 
 export const userSWRKey = 'wg_user';
 
@@ -94,10 +96,17 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	>(
 		options: UseQueryOptions<Data | undefined, GraphQLResponseError, Input, OperationName, LiveQuery>
 	) => {
-		const { operationName, liveQuery, enabled = true, input, ...swrConfig } = options;
+		const { operationName, liveQuery, enabled = true, ssr = true, input, ...swrConfig } = options;
 		const { onSuccess: onSuccessProp, onError: onErrorProp } = swrConfig;
 		const key = { operationName, input };
 		const _key = serialize(key);
+
+		const isSSR = typeof window === 'undefined' && ssr;
+		const context = useWunderGraphContext();
+		if (isSSR && context?.ssrCache && !context.ssrCache[_key]) {
+			context.ssrCache[_key] = queryFetcher(options);
+		}
+
 		const response = useSWR<Data | undefined, GraphQLResponseError>(
 			enabled ? key : null,
 			!liveQuery ? queryFetcher : null,
@@ -194,7 +203,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * const { data, error, isLoading } = useUser()
 	 * ```
 	 */
-	const useUser = (options?: FetchUserRequestOptions & { enabled?: boolean }, swrOptions?: SWRConfiguration) => {
+	const useUser = (options?: UseUserOptions, swrOptions?: SWRConfiguration) => {
 		const { enabled = true } = options || {};
 		return useSWR<Operations['user'], GraphQLResponseError>(
 			enabled ? userSWRKey : null,
@@ -252,7 +261,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	// Helper hook used in useQuery and useSubscription
 	const useSubscribeTo = (props: UseSubscribeToProps) => {
 		const { mutate } = useSWRConfig();
-		const { mutationKey, operationName, input, enabled, liveQuery, subscribeOnce, onSuccess, onError } = props;
+		const { mutationKey, operationName, input, enabled, liveQuery, subscribeOnce, resetOnMount, onSuccess, onError } =
+			props;
 
 		const startedAtRef = useRef<number | null>(null);
 
@@ -260,6 +270,12 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			isLoading: false,
 			isSubscribed: false,
 		});
+
+		useEffect(() => {
+			if (!startedAtRef.current && resetOnMount) {
+				mutate(mutationKey, null);
+			}
+		}, []);
 
 		useEffect(() => {
 			if (enabled) {
@@ -329,13 +345,14 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
 		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
 	>(
-		options: UseSubscriptionOptions<Data, GraphQLResponseError, Input, OperationName>
-	): UseSubscriptionResponse<Data> => {
+		options: UseSubscriptionOptions<Data | undefined, GraphQLResponseError, Input, OperationName>
+	): UseSubscriptionResponse<Data | undefined> => {
 		const {
 			enabled = true,
 			operationName,
 			input,
 			subscribeOnce,
+			resetOnMount,
 			onSuccess: onSuccessProp,
 			onError: onErrorProp,
 		} = options;
@@ -360,10 +377,11 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 
 		const { isLoading, isSubscribed } = useSubscribeTo({
 			mutationKey: _key,
+			enabled,
 			operationName,
 			input,
 			subscribeOnce,
-			enabled,
+			resetOnMount,
 			onSuccess,
 			onError,
 		});

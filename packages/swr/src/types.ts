@@ -1,6 +1,17 @@
-import { ClientResponse, GraphQLResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
+import {
+	ClientResponse,
+	FetchUserRequestOptions,
+	GraphQLResponseError,
+	SubscriptionRequestOptions,
+} from '@wundergraph/sdk/client';
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration } from 'swr/mutation';
+
+export type SSRCache = Record<string, any>;
+
+export interface WunderGraphContextValue {
+	ssrCache: SSRCache;
+}
 
 export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
 	SWRConfiguration<Data, Error>,
@@ -10,11 +21,13 @@ export type UseQueryOptions<Data, Error, Input, OperationName extends string, Li
 	liveQuery?: LiveQuery;
 	enabled?: boolean;
 	input?: Input;
+	ssr?: boolean;
 };
 
 export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
 	operationName: OperationName;
 	subscribeOnce?: boolean;
+	resetOnMount?: boolean;
 	enabled?: boolean;
 	input?: Input;
 	onSuccess?(
@@ -42,6 +55,7 @@ export type UseMutationOptions<Data, Error, Input, OperationName extends string>
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	mutationKey: string;
 	enabled?: boolean;
+	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: GraphQLResponseError): void;
 }
@@ -51,4 +65,8 @@ export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: GraphQLResponseError): void;
 	onAbort?(): void;
+}
+
+export interface UseUserOptions extends FetchUserRequestOptions {
+	enabled?: boolean;
 }

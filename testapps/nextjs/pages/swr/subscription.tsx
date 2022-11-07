@@ -6,6 +6,7 @@ import { useSubscription } from '../../lib/wundergraph';
 const Countdown: React.FC = () => {
 	const countdown = useSubscription({
 		operationName: 'Countdown',
+		resetOnMount: true,
 		input: {
 			from: 100,
 		},

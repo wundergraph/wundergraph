@@ -1,12 +1,17 @@
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
 
-import { SWRConfig } from 'swr';
+import { SWRConfig } from '@wundergraph/swr';
 
-import { useQuery } from '../../lib/wundergraph';
+import { withWunderGraph, useQuery, useUser } from '../../lib/wundergraph';
 import { useState } from 'react';
 import { NextPage } from 'next';
 import { WunderGraphPageProps } from '../../components/generated/nextjs';
+
+const User = () => {
+	const user = useUser();
+	return user.data ? <div>Logged in as: {user.data?.email}</div> : null;
+};
 
 const LiveWeather: React.FC<{ city: string; isLive: boolean }> = ({ city, isLive }) => {
 	const liveWeather = useQuery({
@@ -40,7 +45,6 @@ const SWR: NextPage<WunderGraphPageProps> = (props) => {
 	return (
 		<SWRConfig
 			value={{
-				fallback: props.ssrCache || {},
 				revalidateOnFocus: true,
 				onError: (err) => {
 					console.error(err);
@@ -59,6 +63,10 @@ const SWR: NextPage<WunderGraphPageProps> = (props) => {
 					<h2 className={styles.subTitle}>
 						... with <a href="https://wundergraph.com?utm_source=nextjs_starter">WunderGraph</a>
 					</h2>
+
+					<div style={{ paddingTop: '80px' }}>
+						<User />
+					</div>
 
 					<div style={{ paddingTop: '80px' }}>
 						<div style={{ marginBottom: '20px' }}>
@@ -92,4 +100,4 @@ const SWR: NextPage<WunderGraphPageProps> = (props) => {
 	);
 };
 
-export default SWR;
+export default withWunderGraph(SWR);

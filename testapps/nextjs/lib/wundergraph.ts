@@ -1,8 +1,9 @@
-import { createHooks } from '@wundergraph/swr';
-import { createClient, Operations } from '../components/generated/client';
+import { createWunderGraphNext } from '../components/generated/nextjs';
 
-const client = createClient();
+const wg = createWunderGraphNext({
+	ssr: true,
+});
 
-const { useQuery, useMutation, useSubscription, useUser } = createHooks<Operations>(client);
+const { client, withWunderGraph, useQuery, useMutation, useSubscription, useUser, useAuth, useFileUpload } = wg;
 
-export { useQuery, useMutation, useSubscription, useUser };
+export { client, withWunderGraph, useQuery, useMutation, useSubscription, useUser, useAuth, useFileUpload };

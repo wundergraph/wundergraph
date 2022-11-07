@@ -37,6 +37,12 @@ const SWR = () => {
 							<p>Realtime updates with useSubscription</p>
 						</div>
 					</NextLink>
+					<NextLink href="/swr/ssr">
+						<div className={styles.card}>
+							<h3>SSR</h3>
+							<p>Server side rendering</p>
+						</div>
+					</NextLink>
 				</div>
 			</main>
 
