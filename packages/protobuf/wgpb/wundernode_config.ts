@@ -1,6 +1,4 @@
 /* eslint-disable */
-import Long from 'long';
-import * as _m0 from 'protobufjs/minimal';
 
 export const protobufPackage = 'wgpb';
 
@@ -53,7 +51,7 @@ export function logLevelToJSON(object: LogLevel): string {
 		case LogLevel.FATAL:
 			return 'FATAL';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum LogLevel');
 	}
 }
 
@@ -82,7 +80,7 @@ export function authProviderKindToJSON(object: AuthProviderKind): string {
 		case AuthProviderKind.AuthProviderOIDC:
 			return 'AuthProviderOIDC';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum AuthProviderKind');
 	}
 }
 
@@ -117,7 +115,7 @@ export function apiCacheKindToJSON(object: ApiCacheKind): string {
 		case ApiCacheKind.REDIS_CACHE:
 			return 'REDIS_CACHE';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum ApiCacheKind');
 	}
 }
 
@@ -140,7 +138,7 @@ export function postResolveTransformationKindToJSON(object: PostResolveTransform
 		case PostResolveTransformationKind.GET_POST_RESOLVE_TRANSFORMATION:
 			return 'GET_POST_RESOLVE_TRANSFORMATION';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum PostResolveTransformationKind');
 	}
 }
 
@@ -175,7 +173,7 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
 		case InjectVariableKind.ENVIRONMENT_VARIABLE:
 			return 'ENVIRONMENT_VARIABLE';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum InjectVariableKind');
 	}
 }
 
@@ -234,7 +232,7 @@ export function claimToJSON(object: Claim): string {
 		case Claim.USERID:
 			return 'USERID';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum Claim');
 	}
 }
 
@@ -269,7 +267,7 @@ export function operationTypeToJSON(object: OperationType): string {
 		case OperationType.SUBSCRIPTION:
 			return 'SUBSCRIPTION';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum OperationType');
 	}
 }
 
@@ -334,7 +332,7 @@ export function dataSourceKindToJSON(object: DataSourceKind): string {
 		case DataSourceKind.SQLITE:
 			return 'SQLITE';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum DataSourceKind');
 	}
 }
 
@@ -363,7 +361,7 @@ export function upstreamAuthenticationKindToJSON(object: UpstreamAuthenticationK
 		case UpstreamAuthenticationKind.UpstreamAuthenticationJWTWithAccessTokenExchange:
 			return 'UpstreamAuthenticationJWTWithAccessTokenExchange';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum UpstreamAuthenticationKind');
 	}
 }
 
@@ -386,7 +384,7 @@ export function signingMethodToJSON(object: SigningMethod): string {
 		case SigningMethod.SigningMethodHS256:
 			return 'SigningMethodHS256';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum SigningMethod');
 	}
 }
 
@@ -433,7 +431,7 @@ export function hTTPMethodToJSON(object: HTTPMethod): string {
 		case HTTPMethod.OPTIONS:
 			return 'OPTIONS';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum HTTPMethod');
 	}
 }
 
@@ -462,7 +460,7 @@ export function argumentSourceToJSON(object: ArgumentSource): string {
 		case ArgumentSource.FIELD_ARGUMENT:
 			return 'FIELD_ARGUMENT';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum ArgumentSource');
 	}
 }
 
@@ -497,7 +495,7 @@ export function argumentRenderConfigurationToJSON(object: ArgumentRenderConfigur
 		case ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_ARRAY_CSV:
 			return 'RENDER_ARGUMENT_AS_ARRAY_CSV';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum ArgumentRenderConfiguration');
 	}
 }
 
@@ -520,7 +518,7 @@ export function webhookVerifierKindToJSON(object: WebhookVerifierKind): string {
 		case WebhookVerifierKind.HMAC_SHA256:
 			return 'HMAC_SHA256';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum WebhookVerifierKind');
 	}
 }
 
@@ -555,7 +553,7 @@ export function configurationVariableKindToJSON(object: ConfigurationVariableKin
 		case ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE:
 			return 'PLACEHOLDER_CONFIGURATION_VARIABLE';
 		default:
-			return 'UNKNOWN';
+			throw new globalThis.Error('Unrecognized enum value ' + object + ' for enum ConfigurationVariableKind');
 	}
 }
 
@@ -1473,9 +1471,7 @@ function createBaseInMemoryCacheConfig(): InMemoryCacheConfig {
 
 export const InMemoryCacheConfig = {
 	fromJSON(object: any): InMemoryCacheConfig {
-		return {
-			maxSize: isSet(object.maxSize) ? Number(object.maxSize) : 0,
-		};
+		return { maxSize: isSet(object.maxSize) ? Number(object.maxSize) : 0 };
 	},
 
 	toJSON(message: InMemoryCacheConfig): unknown {
@@ -1497,9 +1493,7 @@ function createBaseRedisCacheConfig(): RedisCacheConfig {
 
 export const RedisCacheConfig = {
 	fromJSON(object: any): RedisCacheConfig {
-		return {
-			redisUrlEnvVar: isSet(object.redisUrlEnvVar) ? String(object.redisUrlEnvVar) : '',
-		};
+		return { redisUrlEnvVar: isSet(object.redisUrlEnvVar) ? String(object.redisUrlEnvVar) : '' };
 	},
 
 	toJSON(message: RedisCacheConfig): unknown {
@@ -2048,9 +2042,7 @@ function createBaseOperationAuthenticationConfig(): OperationAuthenticationConfi
 
 export const OperationAuthenticationConfig = {
 	fromJSON(object: any): OperationAuthenticationConfig {
-		return {
-			authRequired: isSet(object.authRequired) ? Boolean(object.authRequired) : false,
-		};
+		return { authRequired: isSet(object.authRequired) ? Boolean(object.authRequired) : false };
 	},
 
 	toJSON(message: OperationAuthenticationConfig): unknown {
@@ -2538,9 +2530,7 @@ function createBaseDataSourceCustomStatic(): DataSourceCustomStatic {
 
 export const DataSourceCustomStatic = {
 	fromJSON(object: any): DataSourceCustomStatic {
-		return {
-			data: isSet(object.data) ? ConfigurationVariable.fromJSON(object.data) : undefined,
-		};
+		return { data: isSet(object.data) ? ConfigurationVariable.fromJSON(object.data) : undefined };
 	},
 
 	toJSON(message: DataSourceCustomStatic): unknown {
@@ -3432,9 +3422,7 @@ function createBaseNodeLogging(): NodeLogging {
 
 export const NodeLogging = {
 	fromJSON(object: any): NodeLogging {
-		return {
-			level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined,
-		};
+		return { level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined };
 	},
 
 	toJSON(message: NodeLogging): unknown {
@@ -3513,9 +3501,7 @@ function createBaseServerLogging(): ServerLogging {
 
 export const ServerLogging = {
 	fromJSON(object: any): ServerLogging {
-		return {
-			level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined,
-		};
+		return { level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined };
 	},
 
 	toJSON(message: ServerLogging): unknown {
@@ -3753,10 +3739,18 @@ declare var self: any | undefined;
 declare var window: any | undefined;
 declare var global: any | undefined;
 var globalThis: any = (() => {
-	if (typeof globalThis !== 'undefined') return globalThis;
-	if (typeof self !== 'undefined') return self;
-	if (typeof window !== 'undefined') return window;
-	if (typeof global !== 'undefined') return global;
+	if (typeof globalThis !== 'undefined') {
+		return globalThis;
+	}
+	if (typeof self !== 'undefined') {
+		return self;
+	}
+	if (typeof window !== 'undefined') {
+		return window;
+	}
+	if (typeof global !== 'undefined') {
+		return global;
+	}
 	throw 'Unable to locate global object';
 })();
 
@@ -3775,12 +3769,7 @@ export type DeepPartial<T> = T extends Builtin
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin
 	? P
-	: P & { [K in keyof P]: Exact<P[K], I[K]> } & Record<Exclude<keyof I, KeysOfUnion<P>>, never>;
-
-if (_m0.util.Long !== Long) {
-	_m0.util.Long = Long as any;
-	_m0.configure();
-}
+	: P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function isObject(value: any): boolean {
 	return typeof value === 'object' && value !== null;

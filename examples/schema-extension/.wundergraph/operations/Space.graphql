@@ -1,0 +1,11 @@
+query {
+	spacex_landpads {
+		id
+		location {
+			name
+			region
+			latitude
+			longitude
+		}
+	}
+}

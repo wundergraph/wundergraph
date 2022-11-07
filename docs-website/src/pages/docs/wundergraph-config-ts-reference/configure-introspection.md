@@ -64,7 +64,7 @@ we recommend setting the interval to a higher value to not overload the remote s
 // wundergraph.config.ts
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
-  url: 'https://api.spacex.land/graphql/',
+  url: 'https://spacex-api.fly.dev/graphql/',
   introspection: {
     pollingIntervalSeconds: 5,
   },
@@ -80,7 +80,7 @@ Set `disableCache` to true, and `wunderctl up` will ignore the cache for this da
 // wundergraph.config.ts
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
-  url: 'https://api.spacex.land/graphql/',
+  url: 'https://spacex-api.fly.dev/graphql/',
   introspection: {
     disableCache: true,
   },
