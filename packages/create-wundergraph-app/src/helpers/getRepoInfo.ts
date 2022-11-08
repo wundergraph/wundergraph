@@ -15,19 +15,10 @@ export const getRepoInfo = async (githubLink: string) => {
 		branch = repoInfo[3];
 		filePath = path.join(...repoInfo.slice(4));
 	}
-	// const repoContent = await got
-	//   .get(
-	//     `https://api.github.com/repos/${repoOwnerName}/${repoName}/contents/${filePath}`
-	//   )
-	//   .catch((e) => {
-	//     console.log("Error", e);
-	//     throw e;
-	//   });
 	return {
 		repoName,
 		repoOwnerName,
 		branch,
 		filePath,
-		// repoContent: JSON.parse(repoContent.body),
 	};
 };
