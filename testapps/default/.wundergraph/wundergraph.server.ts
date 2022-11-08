@@ -61,6 +61,25 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 				},
 			},
 		},
+		queries: {
+			Albums: {
+				preResolve: async (hook) => {
+					hook.log.info('preResolve hook for Albums');
+				},
+				postResolve: async (hook) => {
+					hook.log.info('postResolve hook for Albums');
+				},
+				mutatingPostResolve: async (hook) => {
+					hook.log.info('mutatingPostResolve hook for Albums');
+					return {
+						...hook.response,
+					};
+				},
+				customResolve: async (hook) => {
+					hook.log.info('customResolver hook for Albums');
+				},
+			},
+		},
 		mutations: {
 			SDL: {
 				mutatingPreResolve: async (hook) => {

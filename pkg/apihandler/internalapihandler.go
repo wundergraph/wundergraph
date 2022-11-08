@@ -245,16 +245,9 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(buf)
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if resolveErr != nil {
-		if ctx.Err() != nil {
-			// e.g. client closed connection
-			return
-		}
-		h.log.Error("InternalApiHandler.ResolveGraphQLResponse", abstractlogger.Error(resolveErr))
-		http.Error(w, "unable to resolve", http.StatusInternalServerError)
+	if done := handleOperationErr(h.log, resolveErr, w, "Internal API Handler ResolveGraphQLResponse failed", h.operation); done {
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = buf.WriteTo(w)
 }
