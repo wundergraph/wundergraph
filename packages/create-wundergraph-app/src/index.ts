@@ -18,8 +18,11 @@ const program = new Command('create-wundergraph-app')
 	.version('0.0.1')
 	.arguments('<project-name>')
 	.usage(`${chalk.green('<project-name>')} [options]`)
-	.option('-E, --example [name]', `Initialize a wundergraph app from the examples in wundergraph repository`)
-	.option('-L, --link [githubLink]', `Initialize a wundergraph app from the templates on GitHub`)
+	.option(
+		'-E, --example [name]',
+		`Initialize a Wundergraph app from the examples in the official Wundergraph repository`
+	)
+	.option('-L, --link [githubLink]', `Initialize a Wundergraph app from a GitHub URL`)
 	.action((name) => {
 		projectName = name;
 	});
