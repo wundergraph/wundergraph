@@ -61,7 +61,11 @@ const (
 	WG_LIVE         = WG_PREFIX + "live"
 	WG_VARIABLES    = WG_PREFIX + "variables"
 	WG_CACHE_HEADER = "X-Wg-Cache"
+
+	requestID = "requestID"
 )
+
+type requestIDKey struct{}
 
 type Builder struct {
 	router   *mux.Router
@@ -216,7 +220,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 				requestID = id
 			}
 
-			request = request.WithContext(context.WithValue(request.Context(), "requestID", requestID))
+			request = request.WithContext(context.WithValue(request.Context(), requestIDKey{}, requestID))
 			handler.ServeHTTP(w, request)
 		})
 	})
@@ -341,7 +345,7 @@ func logRequestMiddleware(logger io.Writer) mux.MiddlewareFunc {
 }
 
 func requestIDFromContext(ctx context.Context) string {
-	requestID, ok := ctx.Value("requestID").(string)
+	requestID, ok := ctx.Value(requestIDKey{}).(string)
 	if !ok {
 		return ""
 	}
@@ -713,7 +717,7 @@ var (
 )
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1028,7 +1032,7 @@ type QueryHandler struct {
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1498,7 +1502,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 }
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1703,7 +1707,7 @@ type SubscriptionHandler struct {
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
