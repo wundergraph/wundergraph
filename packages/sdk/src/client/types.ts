@@ -78,7 +78,7 @@ export interface GraphQLResponse<
 }
 
 export interface OperationRequestOptions<
-	OperationName extends string = string,
+	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
 > {
 	operationName: OperationName;
@@ -87,7 +87,7 @@ export interface OperationRequestOptions<
 }
 
 export interface SubscriptionRequestOptions<
-	OperationName extends string = string,
+	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
 > extends OperationRequestOptions<OperationName, Input> {
 	liveQuery?: Boolean;
