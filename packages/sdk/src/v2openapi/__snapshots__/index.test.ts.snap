@@ -21086,6 +21086,7 @@ type api_User {
   name: String
   country_code: String
   status_code: Int
+  uuid: String
 }
 
 type api_PropertiesResponse {
