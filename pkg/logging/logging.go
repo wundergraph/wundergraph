@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"os"
@@ -10,6 +11,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
+
+type RequestIDKey struct{}
 
 func New(prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
 	return newZapLogger(zapcore.AddSync(os.Stdout), prettyLogging, debug, level)
@@ -92,4 +95,13 @@ func FindLogLevel(logLevel string) (zapcore.Level, error) {
 	default:
 		return -1, fmt.Errorf("unknown log level: %s", logLevel)
 	}
+}
+
+func RequestIDFromContext(ctx context.Context) string {
+	requestID, ok := ctx.Value(RequestIDKey{}).(string)
+	if !ok {
+		return ""
+	}
+
+	return requestID
 }

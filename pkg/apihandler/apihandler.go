@@ -49,6 +49,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
@@ -64,8 +65,6 @@ const (
 
 	requestID = "requestID"
 )
-
-type requestIDKey struct{}
 
 type Builder struct {
 	router   *mux.Router
@@ -220,7 +219,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 				requestID = id
 			}
 
-			request = request.WithContext(context.WithValue(request.Context(), requestIDKey{}, requestID))
+			request = request.WithContext(context.WithValue(request.Context(), logging.RequestIDKey{}, requestID))
 			handler.ServeHTTP(w, request)
 		})
 	})
@@ -342,15 +341,6 @@ func logRequestMiddleware(logger io.Writer) mux.MiddlewareFunc {
 			handler.ServeHTTP(w, request)
 		})
 	}
-}
-
-func requestIDFromContext(ctx context.Context) string {
-	requestID, ok := ctx.Value(requestIDKey{}).(string)
-	if !ok {
-		return ""
-	}
-
-	return requestID
 }
 
 func mergeRequiredFields(fields plan.FieldConfigurations, fieldsRequired plan.FieldConfigurations) plan.FieldConfigurations {
@@ -717,7 +707,7 @@ var (
 )
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1032,7 +1022,7 @@ type QueryHandler struct {
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1472,7 +1462,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 }
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1643,7 +1633,7 @@ type SubscriptionHandler struct {
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, requestIDFromContext(r.Context())))
+	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {

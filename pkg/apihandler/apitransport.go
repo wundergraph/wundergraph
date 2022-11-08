@@ -20,6 +20,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -116,6 +117,7 @@ type Claims struct {
 }
 
 func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	request.Header.Set("X-Request-Id", logging.RequestIDFromContext(request.Context()))
 
 	if request.Header.Get("X-WG-Internal-GraphQL-API") == "true" {
 		return t.internalGraphQLRoundTrip(request)

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
@@ -184,15 +185,22 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	if err != nil {
 		return nil, err
 	}
+
 	r.Header.Set("Content-Type", "application/json")
+	if requestID := logging.RequestIDFromContext(ctx); requestID != "" {
+		r.Header.Set("X-Request-Id", requestID)
+	}
+
 	req, err := retryablehttp.FromRequest(r)
 	if err != nil {
 		return nil, err
 	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("middleware hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
 	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("middleware hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)
 	}
@@ -204,6 +212,7 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	if err != nil {
 		return nil, fmt.Errorf("response of middleware hook %s could not be decoded: %w", string(hook), err)
 	}
+
 	if hookRes.Error != "" {
 		return nil, fmt.Errorf("middleware hook %s failed with error: %s", string(hook), hookRes.Error)
 	}
