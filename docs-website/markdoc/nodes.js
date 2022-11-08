@@ -46,6 +46,13 @@ const nodes = {
 		},
 		render: (props) => <th {...props} />,
 	},
+	table: {
+		render: (props) => (
+			<div className="overflow-x-auto">
+				<table {...props} />
+			</div>
+		),
+	},
 	paragraph: {
 		transform: (node, config) => {
 			const attributes = node.transformAttributes(config)
