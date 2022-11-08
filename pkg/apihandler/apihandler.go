@@ -22,10 +22,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-uuid"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"go.uber.org/zap"
 	"golang.org/x/sync/singleflight"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -75,7 +75,7 @@ type Builder struct {
 
 	definition *ast.Document
 
-	log abstractlogger.Logger
+	log *zap.Logger
 
 	planConfig plan.Configuration
 
@@ -105,7 +105,7 @@ type BuilderConfig struct {
 }
 
 func NewBuilder(pool *pool.Pool,
-	log abstractlogger.Logger,
+	log *zap.Logger,
 	loader *engineconfigloader.EngineConfigLoader,
 	hooksClient *hooks.Client,
 	config BuilderConfig,
@@ -140,7 +140,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	for _, webhook := range api.Webhooks {
 		err = r.registerWebhook(webhook, api.PathPrefix)
 		if err != nil {
-			r.log.Error("register webhook", abstractlogger.Error(err))
+			r.log.Error("register webhook", zap.Error(err))
 		}
 	}
 
@@ -186,8 +186,8 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	// limiter := rate.NewLimiter(rate.Every(time.Second), 10)
 
 	r.log.Debug("configuring API",
-		abstractlogger.String("name", api.PathPrefix),
-		abstractlogger.Int("numOfOperations", len(api.Operations)),
+		zap.String("name", api.PathPrefix),
+		zap.Int("numOfOperations", len(api.Operations)),
 	)
 
 	if len(api.Hosts) > 0 {
@@ -208,6 +208,19 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		r.router.Use(logRequestMiddleware(os.Stderr))
 	}
 
+	r.router.Use(func(handler http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
+			requestID := request.Header.Get("X-Request-Id")
+			if requestID == "" {
+				id, _ := uuid.GenerateUUID()
+				requestID = id
+			}
+
+			request = request.WithContext(context.WithValue(request.Context(), "requestID", requestID))
+			handler.ServeHTTP(w, request)
+		})
+	})
+
 	if api.CorsConfiguration != nil {
 		corsMiddleware := cors.New(cors.Options{
 			MaxAge:           int(api.CorsConfiguration.MaxAge),
@@ -221,8 +234,8 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			return corsMiddleware.Handler(handler)
 		})
 		r.log.Debug("configuring CORS",
-			abstractlogger.String("api", api.PathPrefix),
-			abstractlogger.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
+			zap.String("api", api.PathPrefix),
+			zap.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
 		)
 	}
 
@@ -239,12 +252,12 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			r.log.Error("registerS3UploadClient", abstractlogger.Error(err))
+			r.log.Error("registerS3UploadClient", zap.Error(err))
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
 			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
-			r.log.Debug("register S3 provider", abstractlogger.String("provider", s3Provider.Name))
-			r.log.Debug("register S3 endpoint", abstractlogger.String("path", path.Join(r.api.PathPrefix, s3Path)))
+			r.log.Debug("register S3 provider", zap.String("provider", s3Provider.Name))
+			r.log.Debug("register S3 endpoint", zap.String("path", path.Join(r.api.PathPrefix, s3Path)))
 		}
 	}
 
@@ -261,7 +274,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	for _, operation := range api.Operations {
 		err = r.registerOperation(operation)
 		if err != nil {
-			r.log.Error("registerOperation", abstractlogger.Error(err))
+			r.log.Error("registerOperation", zap.Error(err))
 		}
 	}
 
@@ -280,8 +293,8 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		apiPath := "/graphql"
 		r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
 		r.log.Debug("registered GraphQLHandler",
-			abstractlogger.String("method", http.MethodPost),
-			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
+			zap.String("method", http.MethodPost),
+			zap.String("path", path.Join(api.PathPrefix, apiPath)),
 		)
 
 		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
@@ -292,8 +305,8 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		}
 		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
-			abstractlogger.String("method", http.MethodGet),
-			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
+			zap.String("method", http.MethodGet),
+			zap.String("path", path.Join(api.PathPrefix, apiPath)),
 		)
 
 	}
@@ -327,6 +340,15 @@ func logRequestMiddleware(logger io.Writer) mux.MiddlewareFunc {
 	}
 }
 
+func requestIDFromContext(ctx context.Context) string {
+	requestID, ok := ctx.Value("requestID").(string)
+	if !ok {
+		return ""
+	}
+
+	return requestID
+}
+
 func mergeRequiredFields(fields plan.FieldConfigurations, fieldsRequired plan.FieldConfigurations) plan.FieldConfigurations {
 WithNext:
 	for _, required := range fieldsRequired {
@@ -358,7 +380,7 @@ func (r *Builder) createSubRouter(router *mux.Router, pathPrefix string) *mux.Ro
 	route.PathPrefix(prefix)
 
 	r.log.Debug("create sub router",
-		abstractlogger.String("pathPrefix", prefix),
+		zap.String("pathPrefix", prefix),
 	)
 
 	return route.Subrouter()
@@ -396,9 +418,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 				OperationName: operation.Name,
 			})
 			r.log.Error("EndpointUnavailableHandler",
-				abstractlogger.String("Operation", operation.Name),
-				abstractlogger.String("Endpoint", apiPath),
-				abstractlogger.String("Help", "The Operation is not properly configured. This usually happens when there is a mismatch between GraphQL Schema and Operation. Please make sure, the Operation is valid. This can be supported best by enabling intellisense for GraphQL within your IDE."),
+				zap.String("Operation", operation.Name),
+				zap.String("Endpoint", apiPath),
+				zap.String("Help", "The Operation is not properly configured. This usually happens when there is a mismatch between GraphQL Schema and Operation. Please make sure, the Operation is valid. This can be supported best by enabling intellisense for GraphQL within your IDE."),
 			)
 		}
 	}()
@@ -497,14 +519,14 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		operationIsConfigured = true
 
 		r.log.Debug("registered QueryHandler",
-			abstractlogger.String("method", http.MethodGet),
-			abstractlogger.String("path", path.Join(r.api.PathPrefix, apiPath)),
-			abstractlogger.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			abstractlogger.Bool("cacheEnabled", handler.cacheConfig.enable),
-			abstractlogger.Int("cacheMaxAge", int(handler.cacheConfig.maxAge)),
-			abstractlogger.Int("cacheStaleWhileRevalidate", int(handler.cacheConfig.staleWhileRevalidate)),
-			abstractlogger.Bool("cachePublic", handler.cacheConfig.public),
-			abstractlogger.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
+			zap.String("method", http.MethodGet),
+			zap.String("path", path.Join(r.api.PathPrefix, apiPath)),
+			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
+			zap.Bool("cacheEnabled", handler.cacheConfig.enable),
+			zap.Int("cacheMaxAge", int(handler.cacheConfig.maxAge)),
+			zap.Int("cacheStaleWhileRevalidate", int(handler.cacheConfig.staleWhileRevalidate)),
+			zap.Bool("cachePublic", handler.cacheConfig.public),
+			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case ast.OperationTypeMutation:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
@@ -539,10 +561,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		operationIsConfigured = true
 
 		r.log.Debug("registered MutationHandler",
-			abstractlogger.String("method", http.MethodPost),
-			abstractlogger.String("path", path.Join(r.api.PathPrefix, apiPath)),
-			abstractlogger.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			abstractlogger.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
+			zap.String("method", http.MethodPost),
+			zap.String("path", path.Join(r.api.PathPrefix, apiPath)),
+			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
+			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case ast.OperationTypeSubscription:
 		subscriptionPlan, ok := preparedPlan.(*plan.SubscriptionResponsePlan)
@@ -578,15 +600,15 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		operationIsConfigured = true
 
 		r.log.Debug("registered SubscriptionHandler",
-			abstractlogger.String("method", http.MethodGet),
-			abstractlogger.String("path", path.Join(r.api.PathPrefix, apiPath)),
-			abstractlogger.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
-			abstractlogger.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
+			zap.String("method", http.MethodGet),
+			zap.String("path", path.Join(r.api.PathPrefix, apiPath)),
+			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
+			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
 	case ast.OperationTypeUnknown:
 		r.log.Debug("operation type unknown",
-			abstractlogger.String("name", operation.Name),
-			abstractlogger.String("content", operation.Content),
+			zap.String("name", operation.Name),
+			zap.String("content", operation.Content),
 		)
 	}
 
@@ -614,11 +636,11 @@ func (r *Builder) configureCache(api *Api) (err error) {
 	switch config.Kind {
 	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
 		r.log.Debug("configureCache",
-			abstractlogger.String("primaryHost", api.PrimaryHost),
-			abstractlogger.String("pathPrefix", api.PathPrefix),
-			abstractlogger.String("deploymentID", api.DeploymentId),
-			abstractlogger.String("cacheKind", config.Kind.String()),
-			abstractlogger.Int("cacheSize", int(config.InMemoryConfig.MaxSize)),
+			zap.String("primaryHost", api.PrimaryHost),
+			zap.String("pathPrefix", api.PathPrefix),
+			zap.String("deploymentID", api.DeploymentId),
+			zap.String("cacheKind", config.Kind.String()),
+			zap.Int("cacheSize", int(config.InMemoryConfig.MaxSize)),
 		)
 		r.cache, err = apicache.NewInMemory(config.InMemoryConfig.MaxSize)
 		return
@@ -627,22 +649,22 @@ func (r *Builder) configureCache(api *Api) (err error) {
 		redisAddr := os.Getenv(config.RedisConfig.RedisUrlEnvVar)
 
 		r.log.Debug("configureCache",
-			abstractlogger.String("primaryHost", api.PrimaryHost),
-			abstractlogger.String("pathPrefix", api.PathPrefix),
-			abstractlogger.String("deploymentID", api.DeploymentId),
-			abstractlogger.String("cacheKind", config.Kind.String()),
-			abstractlogger.String("envVar", config.RedisConfig.RedisUrlEnvVar),
-			abstractlogger.String("redisAddr", redisAddr),
+			zap.String("primaryHost", api.PrimaryHost),
+			zap.String("pathPrefix", api.PathPrefix),
+			zap.String("deploymentID", api.DeploymentId),
+			zap.String("cacheKind", config.Kind.String()),
+			zap.String("envVar", config.RedisConfig.RedisUrlEnvVar),
+			zap.String("redisAddr", redisAddr),
 		)
 
 		r.cache, err = apicache.NewRedis(redisAddr, r.log)
 		return
 	default:
 		r.log.Debug("configureCache",
-			abstractlogger.String("primaryHost", api.PrimaryHost),
-			abstractlogger.String("pathPrefix", api.PathPrefix),
-			abstractlogger.String("deploymentID", api.DeploymentId),
-			abstractlogger.String("cacheKind", config.Kind.String()),
+			zap.String("primaryHost", api.PrimaryHost),
+			zap.String("pathPrefix", api.PathPrefix),
+			zap.String("deploymentID", api.DeploymentId),
+			zap.String("cacheKind", config.Kind.String()),
 		)
 		r.cache = &apicache.NoOpCache{}
 		return
@@ -650,7 +672,7 @@ func (r *Builder) configureCache(api *Api) (err error) {
 }
 
 type GraphQLPlaygroundHandler struct {
-	log           abstractlogger.Logger
+	log           *zap.Logger
 	html          string
 	nodeUrl       string
 	apiPathPrefix string
@@ -671,7 +693,7 @@ type GraphQLHandler struct {
 	planConfig plan.Configuration
 	definition *ast.Document
 	resolver   *resolve.Resolver
-	log        abstractlogger.Logger
+	log        *zap.Logger
 	pool       *pool.Pool
 	sf         *singleflight.Group
 
@@ -691,6 +713,7 @@ var (
 )
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -733,10 +756,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = shared.Printer.Print(shared.Doc, h.definition, shared.Hash)
 	if err != nil {
+		requestLogger.Error("shared printer print failed", zap.Error(err))
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 	if shared.Report.HasErrors() {
+		requestLogger.Error("shared printer", zap.String("errors", shared.Report.Error()))
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -749,6 +774,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
 		if err != nil {
+			requestLogger.Error("prepare plan failed", zap.Error(err))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -770,18 +796,19 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
-			h.log.Error("ResolveGraphQLResponse", abstractlogger.Error(err))
+			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
 			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
 		_, err = executionBuf.WriteTo(w)
 		if err != nil {
-			h.log.Error("respond to client", abstractlogger.Error(err))
+			requestLogger.Error("respond to client", zap.Error(err))
 			return
 		}
 	case *plan.SubscriptionResponsePlan:
 		flushWriter, ok := getFlushWriter(shared.Ctx, r, w)
 		if !ok {
+			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
 			return
 		}
@@ -791,7 +818,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
-			h.log.Error("ResolveGraphQLSubscription", abstractlogger.Error(err))
+			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
 			return
 		}
 	case *plan.StreamingResponsePlan:
@@ -980,7 +1007,7 @@ func stringSliceContainsValue(list []string, value string) bool {
 
 type QueryHandler struct {
 	resolver               QueryResolver
-	log                    abstractlogger.Logger
+	log                    *zap.Logger
 	preparedPlan           *plan.SynchronousResponsePlan
 	extractedVariables     []byte
 	pool                   *pool.Pool
@@ -1001,7 +1028,7 @@ type QueryHandler struct {
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1022,7 +1049,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 
 	defer func() {
-
 		if cacheIsStale {
 			buf.Reset()
 			ctx.Context = context.WithValue(context.Background(), "user", authentication.UserFromContext(r.Context()))
@@ -1052,7 +1078,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(compactBuf)
 	err := json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
-		h.log.Error("Could not compact variables in query handler", abstractlogger.Bool("isLive", isLive))
+		requestLogger.Error("Could not compact variables in query handler", zap.Bool("isLive", isLive), zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -1069,7 +1095,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	flusher, flusherOk := w.(http.Flusher)
 	if isLive {
 		if !flusherOk {
-			h.log.Error("Could not flush in query handler", abstractlogger.Bool("isLive", isLive))
+			requestLogger.Error("Could not flush in query handler", zap.Bool("isLive", isLive))
 			http.Error(w, "requires flushing", http.StatusBadRequest)
 			return
 		}
@@ -1086,7 +1112,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MockResolve, hookData)
 		if err != nil {
-			h.log.Error("MockResolve query hook", abstractlogger.Error(err), abstractlogger.Bool("isLive", isLive))
+			requestLogger.Error("MockResolve query hook", zap.Error(err), zap.Bool("isLive", isLive))
 			http.Error(w, "MockResolve query hook failed", http.StatusInternalServerError)
 			return
 		}
@@ -1095,7 +1121,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write(out.Response)
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("MockResolve query hook response is empty", abstractlogger.Bool("isLive", isLive))
+			requestLogger.Error("MockResolve query hook response is empty", zap.Bool("isLive", isLive))
 			http.Error(w, "MockResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1103,7 +1129,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isLive {
-		h.handleLiveQuery(r, w, ctx, buf, flusher)
+		h.handleLiveQuery(r, w, ctx, buf, flusher, requestLogger)
 		return
 	}
 
@@ -1153,14 +1179,14 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
 		if err != nil {
-			h.log.Error("PreResolve query hook failed", abstractlogger.Error(err))
+			requestLogger.Error("PreResolve query hook failed", zap.Error(err))
 			http.Error(w, "PreResolve query hook failed", http.StatusInternalServerError)
 			return
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("PreResolve query hook response is empty")
+			requestLogger.Error("PreResolve query hook response is empty")
 			http.Error(w, "PreResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1170,7 +1196,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
 		if err != nil {
-			h.log.Error("MutatingPreResolve query hook failed", abstractlogger.Error(err))
+			requestLogger.Error("MutatingPreResolve query hook failed", zap.Error(err))
 			http.Error(w, "MutatingPreResolve query hook failed", http.StatusInternalServerError)
 			return
 		}
@@ -1178,7 +1204,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ctx.Variables = out.Input
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("MutatingPreResolve query hook response is empty")
+			requestLogger.Error("MutatingPreResolve query hook response is empty")
 			http.Error(w, "MutatingPreResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1188,20 +1214,20 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
 		if err != nil {
-			h.log.Error("CustomResolve query hook failed", abstractlogger.Error(err))
+			requestLogger.Error("CustomResolve query hook failed", zap.Error(err))
 			http.Error(w, "CustomResolve query hook failed", http.StatusBadRequest)
 			return
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("CustomResolve query hook response is empty")
+			requestLogger.Error("CustomResolve query hook response is empty")
 			http.Error(w, "CustomResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
-			h.log.Debug("CustomResolve is skipped and empty response is written")
+			requestLogger.Debug("CustomResolve is skipped and empty response is written")
 			_, _ = w.Write(out.Response)
 			return
 		}
@@ -1209,14 +1235,14 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if err != nil {
-		h.log.Error("ResolveGraphQLResponse for query failed", abstractlogger.Error(err))
+		requestLogger.Error("ResolveGraphQLResponse for query failed", zap.Error(err))
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 
 	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
 	if err != nil {
-		h.log.Error("Transform postResolve for query failed", abstractlogger.Error(err))
+		requestLogger.Error("Transform postResolve for query failed", zap.Error(err))
 		http.Error(w, "Transform postResolve for query failed", http.StatusInternalServerError)
 		return
 	}
@@ -1225,7 +1251,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
 		if err != nil {
-			h.log.Error("PostResolve query hook response is empty", abstractlogger.Error(err))
+			requestLogger.Error("PostResolve query hook response is empty", zap.Error(err))
 			http.Error(w, "PostResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1235,12 +1261,12 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
 		if err != nil {
-			h.log.Error("MutatingPostResolve query hook failed", abstractlogger.Error(err))
+			requestLogger.Error("MutatingPostResolve query hook failed", zap.Error(err))
 			http.Error(w, "MutatingPostResolve query hook failed", http.StatusInternalServerError)
 			return
 		}
 		if out == nil {
-			h.log.Error("MutatingPostResolve query hook response is empty")
+			requestLogger.Error("MutatingPostResolve query hook response is empty")
 			http.Error(w, "MutatingPostResolve query hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1278,13 +1304,13 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reader := bytes.NewReader(transformed)
 	_, err = reader.WriteTo(w)
 	if err != nil {
-		h.log.Error("Could not write response in query handler", abstractlogger.Error(err))
+		requestLogger.Error("Could not write response in query handler", zap.Error(err))
 		http.Error(w, "Could not write response in query handler", http.StatusInternalServerError)
 		return
 	}
 }
 
-func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
+func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer, requestLogger *zap.Logger) ([]byte, error) {
 	if h.hooksConfig.preResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
@@ -1308,7 +1334,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 			ctx.Variables = out.Input
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("MutatingPreResolve liveQuery hook response is empty")
+			requestLogger.Error("MutatingPreResolve liveQuery hook response is empty")
 		}
 	}
 
@@ -1325,7 +1351,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
-			h.log.Debug("CustomResolve is skipped and empty response is written")
+			requestLogger.Debug("CustomResolve is skipped and empty response is written")
 			return out.Response, nil
 		}
 	}
@@ -1363,7 +1389,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 	return transformed, nil
 }
 
-func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher) {
+func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
 	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
 	sse := r.URL.Query().Get("wg_sse") == "true"
 
@@ -1376,10 +1402,10 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	var lastHash uint64
 	for {
 		var hookError bool
-		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
+		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf, requestLogger)
 		if err != nil {
 			hookError = true
-			h.log.Error("HandleLiveQueryEvent failed", abstractlogger.Error(err))
+			requestLogger.Error("HandleLiveQueryEvent failed", zap.Error(err))
 			graphqlError := graphql.Response{
 				Errors: graphql.RequestErrors{
 					graphql.RequestError{
@@ -1389,7 +1415,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			}
 			graphqlErrorPayload, marshalErr := graphqlError.Marshal()
 			if marshalErr != nil {
-				h.log.Error("HandleLiveQueryEvent could not marshal graphql error", abstractlogger.Error(marshalErr))
+				requestLogger.Error("HandleLiveQueryEvent could not marshal graphql error", zap.Error(marshalErr))
 			} else {
 				response = graphqlErrorPayload
 			}
@@ -1423,7 +1449,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 		// After hook error we return the graphql compatible error to the client
 		// and abort the stream
 		if hookError {
-			h.log.Error("HandleLiveQueryEvent cancel due to hook error", abstractlogger.Error(err))
+			requestLogger.Error("HandleLiveQueryEvent cancel due to hook error", zap.Error(err))
 			return
 		}
 
@@ -1438,7 +1464,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 
 type MutationHandler struct {
 	resolver               *resolve.Resolver
-	log                    abstractlogger.Logger
+	log                    *zap.Logger
 	preparedPlan           *plan.SynchronousResponsePlan
 	extractedVariables     []byte
 	pool                   *pool.Pool
@@ -1472,7 +1498,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 }
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1497,6 +1523,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		_, err := io.Copy(variablesBuf, r.Body)
 		if err != nil {
+			requestLogger.Error("failed to copy variables buf", zap.Error(err))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -1517,6 +1544,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(compactBuf)
 	err := json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
+		requestLogger.Error("failed to compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -1540,7 +1568,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MockResolve, hookData)
 		if err != nil {
-			h.log.Error("MockResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("MockResolve mutation hook", zap.Error(err))
 			http.Error(w, "MockResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
@@ -1552,14 +1580,14 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
 		if err != nil {
-			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("PreResolve mutation hook", zap.Error(err))
 			http.Error(w, "PreResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("PreResolve mutation hook response is empty")
+			requestLogger.Error("PreResolve mutation hook response is empty")
 			http.Error(w, "PreResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1569,7 +1597,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
 		if err != nil {
-			h.log.Error("MutatingPostResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("MutatingPostResolve mutation hook", zap.Error(err))
 			http.Error(w, "MutatingPostResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
@@ -1578,7 +1606,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ctx.Variables = out.Input
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("MutatingPostResolve mutation hook response is empty")
+			requestLogger.Error("MutatingPostResolve mutation hook response is empty")
 			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1588,20 +1616,20 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
 		if err != nil {
-			h.log.Error("CustomResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("CustomResolve mutation hook", zap.Error(err))
 			http.Error(w, "CustomResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("CustomResolve mutation hook response is empty")
+			requestLogger.Error("CustomResolve mutation hook response is empty")
 			http.Error(w, "CustomResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
-			h.log.Debug("CustomResolve is skipped and empty response is written")
+			requestLogger.Debug("CustomResolve is skipped and empty response is written")
 			_, _ = w.Write(out.Response)
 			return
 		}
@@ -1609,14 +1637,14 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if resolveErr != nil {
-		h.log.Error("ResolveGraphQLResponse for mutation failed", abstractlogger.Error(resolveErr))
+		requestLogger.Error("ResolveGraphQLResponse for mutation failed", zap.Error(resolveErr))
 		http.Error(w, "ResolveGraphQLResponse for mutation failed", http.StatusInternalServerError)
 		return
 	}
 
 	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
 	if err != nil {
-		h.log.Error("PostResolveTransformer mutation hook failed", abstractlogger.Error(err))
+		requestLogger.Error("PostResolveTransformer mutation hook failed", zap.Error(err))
 		http.Error(w, "PostResolveTransformer mutation hook failed", http.StatusInternalServerError)
 		return
 	}
@@ -1625,7 +1653,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
 		if err != nil {
-			h.log.Error("PostResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("PostResolve mutation hook", zap.Error(err))
 			http.Error(w, "PostResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
@@ -1635,12 +1663,12 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
 		if err != nil {
-			h.log.Error("MutatingPostResolve query hook failed", abstractlogger.Error(err))
+			requestLogger.Error("MutatingPostResolve query hook failed", zap.Error(err))
 			http.Error(w, "MutatingPostResolve query hook failed", http.StatusInternalServerError)
 			return
 		}
 		if out == nil {
-			h.log.Error("MutatingPostResolve mutation hook response is empty")
+			requestLogger.Error("MutatingPostResolve mutation hook response is empty")
 			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1650,7 +1678,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	reader := bytes.NewReader(transformed)
 	_, err = reader.WriteTo(w)
 	if err != nil {
-		h.log.Error("Could not write response in mutation handler", abstractlogger.Error(err))
+		requestLogger.Error("Could not write response in mutation handler", zap.Error(err))
 		http.Error(w, "Could not write response in mutation handler", http.StatusInternalServerError)
 		return
 	}
@@ -1658,7 +1686,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type SubscriptionHandler struct {
 	resolver               *resolve.Resolver
-	log                    abstractlogger.Logger
+	log                    *zap.Logger
 	preparedPlan           *plan.SubscriptionResponsePlan
 	extractedVariables     []byte
 	pool                   *pool.Pool
@@ -1675,7 +1703,7 @@ type SubscriptionHandler struct {
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	requestLogger := h.log.With(zap.String("requestID", requestIDFromContext(r.Context())))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1700,6 +1728,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	defer pool.PutBytesBuffer(compactBuf)
 	err := json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
+		requestLogger.Error("Could not compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -1726,14 +1755,14 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
 		if err != nil {
-			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("PreResolve mutation hook", zap.Error(err))
 			http.Error(w, "PreResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("PreResolve mutation hook response is empty")
+			requestLogger.Error("PreResolve mutation hook response is empty")
 			http.Error(w, "PreResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1743,7 +1772,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
 		if err != nil {
-			h.log.Error("MutatingPostResolve mutation hook", abstractlogger.Error(err))
+			requestLogger.Error("MutatingPostResolve mutation hook", zap.Error(err))
 			http.Error(w, "MutatingPostResolve mutation hook failed", http.StatusInternalServerError)
 			return
 		}
@@ -1752,7 +1781,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			ctx.Variables = out.Input
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("MutatingPostResolve mutation hook response is empty")
+			requestLogger.Error("MutatingPostResolve mutation hook response is empty")
 			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
 			return
 		}
@@ -1763,7 +1792,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
 			_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
 			if err != nil {
-				h.log.Error("PostResolve subscription hook failed", abstractlogger.Error(err))
+				requestLogger.Error("PostResolve subscription hook failed", zap.Error(err))
 			}
 		}
 
@@ -1775,11 +1804,11 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
 			out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
 			if err != nil {
-				h.log.Error("MutatingPostResolve subscription hook failed", abstractlogger.Error(err))
+				requestLogger.Error("MutatingPostResolve subscription hook failed", zap.Error(err))
 				return nil, err
 			}
 			if out == nil {
-				h.log.Error("MutatingPostResolve subscription hook response is empty")
+				requestLogger.Error("MutatingPostResolve subscription hook response is empty")
 				return nil, errors.New("mutatingPostResolve hook response is empty")
 			}
 			return out.Response, nil
@@ -1793,7 +1822,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		if errors.Is(err, context.Canceled) {
 			return
 		}
-		h.log.Error("ResolveGraphQLSubscription", abstractlogger.Error(err))
+		requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
 		return
 	}
 }
@@ -2011,16 +2040,16 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		issuer := loadvariable.String(provider.OidcConfig.Issuer)
 		if issuer == "" {
 			r.log.Error("oidc issuer must not be empty",
-				abstractlogger.String("providerID", provider.Id),
+				zap.String("providerID", provider.Id),
 			)
 			continue
 		}
 		_, urlErr := url.ParseRequestURI(issuer)
 		if urlErr != nil {
 			r.log.Error("invalid oidc issuer, must be a valid URL",
-				abstractlogger.String("providerID", provider.Id),
-				abstractlogger.String("issuer", issuer),
-				abstractlogger.Error(urlErr),
+				zap.String("providerID", provider.Id),
+				zap.String("issuer", issuer),
+				zap.Error(urlErr),
 			)
 			continue
 		}
@@ -2031,20 +2060,20 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		req, err := http.NewRequest(http.MethodGet, introspectionURL, nil)
 		if err != nil {
 			r.log.Error("failed to create openid-configuration request",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			continue
 		}
 		resp, err := client.Do(req)
 		if err != nil {
 			r.log.Warn("failed to get openid-configuration",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			continue
 		}
 		if resp.StatusCode != http.StatusOK {
 			r.log.Error("failed to get openid-configuration",
-				abstractlogger.Int("status", resp.StatusCode),
+				zap.Int("status", resp.StatusCode),
 			)
 			continue
 		}
@@ -2052,7 +2081,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			r.log.Error("failed to read openid-configuration",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			continue
 		}
@@ -2060,13 +2089,13 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		err = json.Unmarshal(data, &config)
 		if err != nil {
 			r.log.Error("failed to decode openid-configuration",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			continue
 		}
 		if config.EndSessionEndpoint == "" {
 			r.log.Error("failed to get openid-configuration",
-				abstractlogger.String("end_session_endpoint", config.EndSessionEndpoint),
+				zap.String("end_session_endpoint", config.EndSessionEndpoint),
 			)
 			continue
 		}
@@ -2131,10 +2160,10 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			Log:                        r.log,
 		})
 		r.log.Debug("api.configureCookieProvider",
-			abstractlogger.String("provider", "github"),
-			abstractlogger.String("providerId", provider.Id),
-			abstractlogger.String("pathPrefix", pathPrefix),
-			abstractlogger.String("clientID", loadvariable.String(provider.GithubConfig.ClientId)),
+			zap.String("provider", "github"),
+			zap.String("providerId", provider.Id),
+			zap.String("pathPrefix", pathPrefix),
+			zap.String("clientID", loadvariable.String(provider.GithubConfig.ClientId)),
 		)
 	case wgpb.AuthProviderKind_AuthProviderOIDC:
 		if provider.OidcConfig == nil {
@@ -2167,11 +2196,11 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			Log:                        r.log,
 		})
 		r.log.Debug("api.configureCookieProvider",
-			abstractlogger.String("provider", "oidc"),
-			abstractlogger.String("providerId", provider.Id),
-			abstractlogger.String("pathPrefix", pathPrefix),
-			abstractlogger.String("issuer", loadvariable.String(provider.OidcConfig.Issuer)),
-			abstractlogger.String("clientID", loadvariable.String(provider.OidcConfig.ClientId)),
+			zap.String("provider", "oidc"),
+			zap.String("providerId", provider.Id),
+			zap.String("pathPrefix", pathPrefix),
+			zap.String("issuer", loadvariable.String(provider.OidcConfig.Issuer)),
+			zap.String("clientID", loadvariable.String(provider.OidcConfig.ClientId)),
 		)
 	}
 }

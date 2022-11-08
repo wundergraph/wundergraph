@@ -5,15 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
 	"syscall"
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -41,7 +40,7 @@ var nodeStartCmd = &cobra.Command{
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
-			log.Fatal("Could not create node: %w", abstractlogger.Error(err))
+			log.Fatal("Could not create node: %w", zap.Error(err))
 		}
 
 		g.Go(func() error {
@@ -53,7 +52,7 @@ var nodeStartCmd = &cobra.Command{
 		// Only exit with error code 1 when the server was not stopped by the signal
 		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph process shutdown: %w", abstractlogger.Error(err))
+			log.Fatal("WunderGraph process shutdown: %w", zap.Error(err))
 		}
 
 		// exit code 0 to indicate success
@@ -79,6 +78,7 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 type options struct {
 	hooksServerHealthCheck bool
 	idleHandler            func()
+	prettyLogging          bool
 }
 
 type Option func(options *options)
@@ -89,9 +89,9 @@ func WithHooksServerHealthCheck() Option {
 	}
 }
 
-func WithIdleHandler(idleHander func()) Option {
+func WithIdleHandler(idleHandler func()) Option {
 	return func(options *options) {
-		options.idleHandler = idleHander
+		options.idleHandler = idleHandler
 	}
 }
 
@@ -106,27 +106,27 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	data, err := ioutil.ReadFile(configFile)
+	data, err := os.ReadFile(configFile)
 	if err != nil {
-		log.Error("Failed to read file", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		log.Error("Failed to read file", zap.String("filePath", configFile), zap.Error(err))
 		return err
 	}
 
 	if len(data) == 0 {
-		log.Error("Config file is empty", abstractlogger.String("filePath", configFile))
+		log.Error("Config file is empty", zap.String("filePath", configFile))
 		return errors.New("config file is empty")
 	}
 
 	var graphConfig wgpb.WunderGraphConfiguration
 	err = json.Unmarshal(data, &graphConfig)
 	if err != nil {
-		log.Error("Failed to unmarshal", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		log.Error("Failed to unmarshal", zap.String("filePath", configFile), zap.Error(err))
 		return errors.New("failed to unmarshal config file")
 	}
 
 	wunderNodeConfig, err := node.CreateConfig(&graphConfig)
 	if err != nil {
-		log.Error("Failed to create config", abstractlogger.String("filePath", configFile), abstractlogger.Error(err))
+		log.Error("Failed to create config", zap.String("filePath", configFile), zap.Error(err))
 		return err
 	}
 
@@ -135,6 +135,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithDebugMode(rootFlags.DebugMode),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
+		node.WithPrettyLogging(rootFlags.PrettyLogs),
 	}
 
 	if shutdownAfterIdle > 0 {

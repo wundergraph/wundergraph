@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 )
 
-func NewHybridEngine(prismaSchema, wundergraphDir string, log abstractlogger.Logger) (HybridEngine, error) {
+func NewHybridEngine(prismaSchema, wundergraphDir string, log *zap.Logger) (HybridEngine, error) {
 	client := &http.Client{
 		Timeout: time.Second * 5,
 	}

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	gocmd "github.com/go-cmd/cmd"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
 
@@ -18,7 +18,7 @@ type Config struct {
 	// ScriptEnv are environment variables that are only set on the first script run.
 	FirstRunEnv   []string
 	AbsWorkingDir string
-	Logger        abstractlogger.Logger
+	Logger        *zap.Logger
 }
 
 type ScriptRunner struct {
@@ -31,7 +31,7 @@ type ScriptRunner struct {
 	absWorkingDir string
 	firstRun      bool
 	cmdDoneChan   chan struct{}
-	log           abstractlogger.Logger
+	log           *zap.Logger
 	cmd           *gocmd.Cmd
 }
 
@@ -94,8 +94,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	err := b.Stop()
 	if err != nil {
 		b.log.Debug("Stopping runner failed",
-			abstractlogger.String("runnerName", b.name),
-			abstractlogger.Error(err),
+			zap.String("runnerName", b.name),
+			zap.Error(err),
 		)
 	}
 
@@ -122,17 +122,17 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 			err := b.cmd.Stop()
 			if err != nil {
 				b.log.Error("Stopping runner failed",
-					abstractlogger.String("runnerName", b.name),
-					abstractlogger.Error(err),
+					zap.String("runnerName", b.name),
+					zap.Error(err),
 				)
 			}
 			status := b.cmd.Status()
 			b.log.Debug("Script runner context cancelled",
-				abstractlogger.String("runnerName", b.name),
-				abstractlogger.Int("exit", status.Exit),
-				abstractlogger.Any("startTs", status.StartTs),
-				abstractlogger.Any("stopTs", status.StopTs),
-				abstractlogger.Bool("complete", status.Complete),
+				zap.String("runnerName", b.name),
+				zap.Int("exit", status.Exit),
+				zap.Any("startTs", status.StartTs),
+				zap.Any("stopTs", status.StopTs),
+				zap.Bool("complete", status.Complete),
 			)
 		case <-b.cmd.Done():
 			status := b.cmd.Status()
@@ -141,31 +141,31 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 			// when we re-start the process after a watched file has changed
 			if status.Exit == -1 {
 				b.log.Debug("Script runner exited with -1 exit code",
-					abstractlogger.String("runnerName", b.name),
-					abstractlogger.Int("exit", status.Exit),
-					abstractlogger.Error(status.Error),
-					abstractlogger.Any("startTs", status.StartTs),
-					abstractlogger.Any("stopTs", status.StopTs),
-					abstractlogger.Bool("complete", status.Complete),
+					zap.String("runnerName", b.name),
+					zap.Int("exit", status.Exit),
+					zap.Error(status.Error),
+					zap.Any("startTs", status.StartTs),
+					zap.Any("stopTs", status.StopTs),
+					zap.Bool("complete", status.Complete),
 				)
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
 				b.log.Error("Script runner exited with non-zero exit code",
-					abstractlogger.String("runnerName", b.name),
-					abstractlogger.Int("exit", status.Exit),
-					abstractlogger.Error(status.Error),
-					abstractlogger.Any("startTs", status.StartTs),
-					abstractlogger.Any("stopTs", status.StopTs),
-					abstractlogger.Bool("complete", status.Complete),
+					zap.String("runnerName", b.name),
+					zap.Int("exit", status.Exit),
+					zap.Error(status.Error),
+					zap.Any("startTs", status.StartTs),
+					zap.Any("stopTs", status.StopTs),
+					zap.Bool("complete", status.Complete),
 				)
 			} else {
 				b.log.Debug("Script runner is done",
-					abstractlogger.String("runnerName", b.name),
-					abstractlogger.Int("exit", status.Exit),
-					abstractlogger.Any("startTs", status.StartTs),
-					abstractlogger.Any("stopTs", status.StopTs),
-					abstractlogger.Bool("complete", status.Complete),
+					zap.String("runnerName", b.name),
+					zap.Int("exit", status.Exit),
+					zap.Any("startTs", status.StartTs),
+					zap.Any("stopTs", status.StopTs),
+					zap.Bool("complete", status.Complete),
 				)
 			}
 		}
@@ -173,8 +173,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 
 	b.cmd.Start()
 	b.log.Debug("Start runner",
-		abstractlogger.String("runnerName", b.name),
-		abstractlogger.Error(err),
+		zap.String("runnerName", b.name),
+		zap.Error(err),
 	)
 
 	return doneChan

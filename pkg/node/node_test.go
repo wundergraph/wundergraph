@@ -16,11 +16,11 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/phayes/freeport"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -28,8 +28,7 @@ import (
 )
 
 func TestNode(t *testing.T) {
-	logging.Init(false, false)
-	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
+	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
@@ -129,7 +128,7 @@ func TestNode(t *testing.T) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 		},
 	}
@@ -203,8 +202,7 @@ func TestWebHooks(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	z, _ := zap.NewDevelopment()
-	logger := abstractlogger.NewZapLogger(z, abstractlogger.DebugLevel)
+	logger := logging.New(true, false, zapcore.DebugLevel)
 	node := New(ctx, BuildInfo{}, "", logger)
 
 	nodeConfig := WunderNodeConfig{
@@ -251,7 +249,7 @@ func TestWebHooks(t *testing.T) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 		},
 	}
@@ -287,8 +285,7 @@ func TestWebHooks(t *testing.T) {
 }
 
 func BenchmarkNode(t *testing.B) {
-	logging.Init(true, false)
-	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
+	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
@@ -349,7 +346,7 @@ func BenchmarkNode(t *testing.B) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{

@@ -10,7 +10,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 	"github.com/go-redis/cache/v8"
 	"github.com/go-redis/redis/v8"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 )
 
 type Cache interface {
@@ -75,10 +75,10 @@ func (i *InMemoryCache) Delete(ctx context.Context, key string) {
 
 type RedisCache struct {
 	c   *cache.Cache
-	log abstractlogger.Logger
+	log *zap.Logger
 }
 
-func NewRedis(connectionString string, log abstractlogger.Logger) (*RedisCache, error) {
+func NewRedis(connectionString string, log *zap.Logger) (*RedisCache, error) {
 
 	u, err := url.Parse(connectionString)
 	if err != nil {
@@ -118,7 +118,7 @@ func (r *RedisCache) SetWithTTL(key string, data []byte, ttl time.Duration) {
 	})
 	if err != nil {
 		r.log.Error("RedisCache.SetWithTTL",
-			abstractlogger.Error(err),
+			zap.Error(err),
 		)
 	}
 }
@@ -134,7 +134,7 @@ func (r *RedisCache) Set(key string, data []byte) {
 	})
 	if err != nil {
 		r.log.Error("RedisCache.Set",
-			abstractlogger.Error(err),
+			zap.Error(err),
 		)
 	}
 }
@@ -147,7 +147,7 @@ func (r *RedisCache) Get(ctx context.Context, key string) (CacheItem, bool) {
 			return CacheItem{}, false
 		}
 		r.log.Error("RedisCache.Get",
-			abstractlogger.Error(err),
+			zap.Error(err),
 		)
 		return CacheItem{}, false
 	}
@@ -158,7 +158,7 @@ func (r *RedisCache) Delete(ctx context.Context, key string) {
 	err := r.c.Delete(ctx, key)
 	if err != nil {
 		r.log.Error("RedisCache.Delete",
-			abstractlogger.Error(err),
+			zap.Error(err),
 		)
 	}
 }

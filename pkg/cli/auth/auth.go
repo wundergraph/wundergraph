@@ -10,9 +10,9 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
@@ -60,10 +60,10 @@ type AccessToken struct {
 type Authenticator struct {
 	authBaseUrl string
 	clientID    string
-	log         abstractlogger.Logger
+	log         *zap.Logger
 }
 
-func New(logger abstractlogger.Logger, authBaseUrl string, clientID string) *Authenticator {
+func New(logger *zap.Logger, authBaseUrl string, clientID string) *Authenticator {
 	return &Authenticator{
 		authBaseUrl: authBaseUrl,
 		clientID:    clientID,
@@ -74,7 +74,7 @@ func New(logger abstractlogger.Logger, authBaseUrl string, clientID string) *Aut
 func (a *Authenticator) Login() string {
 	defer func() {
 		if err := config.SaveConfig(viper.AllSettings()); err != nil {
-			a.log.Error("error saving config file", abstractlogger.Error(err))
+			a.log.Error("error saving config file", zap.Error(err))
 		}
 	}()
 
@@ -88,7 +88,7 @@ func (a *Authenticator) Login() string {
 		// check if we can issue a new access_token with the current refresh_token
 		token, err := a.refreshJWT(viper.GetString("auth.refresh_token"))
 		if err != nil {
-			a.log.Error("could not refresh jwt", abstractlogger.Error(err))
+			a.log.Error("could not refresh jwt", zap.Error(err))
 			// important: as fallback we always initiate the full device grant flow
 		}
 		if token != "" {
@@ -102,13 +102,13 @@ func (a *Authenticator) Login() string {
 
 	deviceResp, err := a.startDeviceGrantFlow()
 	if err != nil {
-		a.log.Error("could not start device grant flow", abstractlogger.Error(err))
+		a.log.Error("could not start device grant flow", zap.Error(err))
 		log.Fatal(err)
 	}
 
 	err = a.informUserAndOpenBrowser(deviceResp.UserCode, deviceResp.VerificationUri, deviceResp.VerificationUriComplete)
 	if err != nil {
-		a.log.Error("could not open browser", abstractlogger.Error(err))
+		a.log.Error("could not open browser", zap.Error(err))
 		log.Fatal(err)
 	}
 
@@ -116,7 +116,7 @@ func (a *Authenticator) Login() string {
 
 	token, err := a.startPolling(deviceResp.DeviceCode, deviceResp.Interval)
 	if err != nil {
-		a.log.Error("could not start polling", abstractlogger.Error(err))
+		a.log.Error("could not start polling", zap.Error(err))
 		log.Fatal(err)
 	}
 
@@ -126,7 +126,7 @@ func (a *Authenticator) Login() string {
 
 	err = wgClient.RegisterCliUserWithAccessToken()
 	if err != nil {
-		a.log.Error("could not register cli user", abstractlogger.Error(err))
+		a.log.Error("could not register cli user", zap.Error(err))
 		log.Fatal(err)
 	}
 
@@ -161,7 +161,7 @@ func (a *Authenticator) LoadRefreshAccessToken() string {
 		// check if we can issue a new access_token with the current refresh_token
 		token, err := a.refreshJWT(viper.GetString("auth.refresh_token"))
 		if err != nil {
-			a.log.Error("could not refresh jwt", abstractlogger.Error(err))
+			a.log.Error("could not refresh jwt", zap.Error(err))
 		}
 		if token != "" {
 			a.log.Debug("jwt was refreshed with refresh token")
@@ -180,7 +180,7 @@ func (a *Authenticator) Logout() {
 	delete(configMap, "auth")
 
 	if err := config.SaveConfig(configMap); err != nil {
-		a.log.Error("error saving config file", abstractlogger.Error(err))
+		a.log.Error("error saving config file", zap.Error(err))
 	}
 }
 
@@ -197,12 +197,12 @@ func (a *Authenticator) refreshJWT(refreshToken string) (string, error) {
 	})
 
 	if err != nil {
-		a.log.Error("post refresh token form failed", abstractlogger.Error(err))
+		a.log.Error("post refresh token form failed", zap.Error(err))
 		return "", err
 	}
 
 	if resp.StatusCode != 200 {
-		a.log.Error("post refresh token form failed", abstractlogger.Int("statusCode", resp.StatusCode))
+		a.log.Error("post refresh token form failed", zap.Int("statusCode", resp.StatusCode))
 		return "", fmt.Errorf("could not request for a new access token with refresh token, statusCode: %d", resp.StatusCode)
 	}
 
@@ -226,12 +226,12 @@ func (a *Authenticator) startDeviceGrantFlow() (*DeviceResponse, error) {
 	})
 
 	if err != nil {
-		a.log.Error("post device authorize form failed", abstractlogger.Error(err))
+		a.log.Error("post device authorize form failed", zap.Error(err))
 		return result, err
 	}
 
 	if resp.StatusCode != 200 {
-		a.log.Error("post device authorize form failed", abstractlogger.Int("statusCode", resp.StatusCode))
+		a.log.Error("post device authorize form failed", zap.Int("statusCode", resp.StatusCode))
 		return nil, fmt.Errorf("could not request for device code, statusCode: %d", resp.StatusCode)
 	}
 
@@ -254,8 +254,8 @@ func (a *Authenticator) startPolling(deviceCode string, retryInterval int) (*Acc
 	var result = &AccessToken{}
 
 	a.log.Debug("starting polling",
-		abstractlogger.String("deviceCode", deviceCode),
-		abstractlogger.Int("retryInterval", retryInterval),
+		zap.String("deviceCode", deviceCode),
+		zap.Int("retryInterval", retryInterval),
 	)
 
 	for {
@@ -266,12 +266,12 @@ func (a *Authenticator) startPolling(deviceCode string, retryInterval int) (*Acc
 		})
 
 		if err != nil {
-			a.log.Error("post token form failed", abstractlogger.Error(err))
+			a.log.Error("post token form failed", zap.Error(err))
 			return result, err
 		}
 
 		a.log.Debug("polling",
-			abstractlogger.Int("statusCode", resp.StatusCode),
+			zap.Int("statusCode", resp.StatusCode),
 		)
 
 		// 400 status code (StatusBadRequest) is our sign that the user
@@ -286,7 +286,7 @@ func (a *Authenticator) startPolling(deviceCode string, retryInterval int) (*Acc
 
 			continue
 		} else if resp.StatusCode != http.StatusOK {
-			a.log.Error("could not poll token", abstractlogger.Int("statusCode", resp.StatusCode))
+			a.log.Error("could not poll token", zap.Int("statusCode", resp.StatusCode))
 			return nil, fmt.Errorf("could not poll token, statusCode: %d", resp.StatusCode)
 		}
 
@@ -294,17 +294,17 @@ func (a *Authenticator) startPolling(deviceCode string, retryInterval int) (*Acc
 		err = json.NewDecoder(resp.Body).Decode(result)
 		_ = resp.Body.Close()
 		if err != nil {
-			a.log.Error("could not decode response", abstractlogger.Error(err))
+			a.log.Error("could not decode response", zap.Error(err))
 			continue
 		}
 
 		a.log.Debug("polling finished",
-			abstractlogger.String("accessToken", result.AccessToken),
-			abstractlogger.String("refreshToken", result.RefreshToken),
-			abstractlogger.Int("expiresIn", result.ExpiresIn),
-			abstractlogger.String("scope", result.Scope),
-			abstractlogger.String("tokenType", result.TokenType),
-			abstractlogger.String("idToken", result.IdToken),
+			zap.String("accessToken", result.AccessToken),
+			zap.String("refreshToken", result.RefreshToken),
+			zap.Int("expiresIn", result.ExpiresIn),
+			zap.String("scope", result.Scope),
+			zap.String("tokenType", result.TokenType),
+			zap.String("idToken", result.IdToken),
 		)
 
 		return result, nil

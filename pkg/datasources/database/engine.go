@@ -17,15 +17,15 @@ import (
 	"time"
 
 	"github.com/go-cmd/cmd"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/phayes/freeport"
 	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
 )
 
-func InstallPrismaDependencies(log abstractlogger.Logger, wundergraphDir string) error {
+func InstallPrismaDependencies(log *zap.Logger, wundergraphDir string) error {
 	engine := Engine{
 		log:            log,
 		wundergraphDir: wundergraphDir,
@@ -65,10 +65,10 @@ type Engine struct {
 	url                     string
 	cancel                  func()
 	client                  *http.Client
-	log                     abstractlogger.Logger
+	log                     *zap.Logger
 }
 
-func NewEngine(client *http.Client, log abstractlogger.Logger, wundergraphDir string) *Engine {
+func NewEngine(client *http.Client, log *zap.Logger, wundergraphDir string) *Engine {
 	return &Engine{
 		wundergraphDir: wundergraphDir,
 		client:         client,
@@ -268,7 +268,7 @@ func (e *Engine) ensurePrisma() error {
 	_, err = os.Lstat(e.queryEnginePath)
 	if os.IsNotExist(err) {
 		e.log.Info("downloading prisma query engine",
-			abstractlogger.String("path", e.queryEnginePath),
+			zap.String("path", e.queryEnginePath),
 		)
 		if err := binaries.FetchEngine(prismaPath, "query-engine", platform.BinaryPlatformName()); err != nil {
 			return err
@@ -279,7 +279,7 @@ func (e *Engine) ensurePrisma() error {
 	_, err = os.Lstat(e.introspectionEnginePath)
 	if os.IsNotExist(err) {
 		e.log.Info("downloading prisma introspection engine",
-			abstractlogger.String("path", e.introspectionEnginePath),
+			zap.String("path", e.introspectionEnginePath),
 		)
 		if err := binaries.FetchEngine(prismaPath, "introspection-engine", platform.BinaryPlatformName()); err != nil {
 			return err

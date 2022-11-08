@@ -13,7 +13,7 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
@@ -127,10 +127,10 @@ const (
 type Client struct {
 	serverUrl  string
 	httpClient *retryablehttp.Client
-	log        abstractlogger.Logger
+	log        *zap.Logger
 }
 
-func NewClient(serverUrl string, logger abstractlogger.Logger) *Client {
+func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
 	// retry timeout is a power of 2, use 3 to have a reasonable timeout of 6 seconds
 	// INFO: retryablehttp also handles retry-after headers
@@ -140,7 +140,7 @@ func NewClient(serverUrl string, logger abstractlogger.Logger) *Client {
 	httpClient.HTTPClient.Timeout = time.Minute * 1
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
 	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
-		logger.Debug("hook request call", abstractlogger.Int("attempt", attempt), abstractlogger.String("url", req.URL.String()))
+		logger.Debug("hook request call", zap.Int("attempt", attempt), zap.String("url", req.URL.String()))
 	}
 
 	return &Client{
