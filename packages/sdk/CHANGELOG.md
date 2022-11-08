@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.120.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.119.0...@wundergraph/sdk@0.120.0) (2022-11-08)
+
+### Features
+
+* createClient now returns typesafe client ([#307](https://github.com/wundergraph/wundergraph/issues/307)) ([803ebd5](https://github.com/wundergraph/wundergraph/commit/803ebd5d799688586a8a8abdde8cf5d7b2ea9557)) (@Pagebakers)
+
 ## [0.119.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.118.0...@wundergraph/sdk@0.119.0) (2022-11-04)
 
 ### Features
