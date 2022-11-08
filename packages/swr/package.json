@@ -6,7 +6,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -25,9 +26,19 @@
     "react-dom": "^16.8.0 || ^17.0.2 || ^18.0.0"
   },
   "devDependencies": {
-    "@types/react": "^18.0.15",
+    "@swc/core": "^1.3.14",
+    "@swc/jest": "^0.2.23",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@types/jest": "^28.1.1",
+    "@types/node-fetch": "2.6.2",
+    "@types/react": "^18.0.24",
     "@types/react-dom": "^18.0.6",
     "@wundergraph/sdk": "workspace:*",
+    "jest": "^29.0.3",
+    "jest-environment-jsdom": "^29.3.0",
+    "nock": "^13.2.9",
+    "node-fetch": "2.6.7",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "typescript": "^4.8.2"

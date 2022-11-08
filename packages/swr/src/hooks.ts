@@ -180,7 +180,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
 				// reset user in the cache and don't trigger a refetch
-				mutate(userSWRKey, null, { revalidate: false });
+				mutate(userSWRKey, null, { revalidate: false, populateCache: true });
 				return result;
 			},
 		};
