@@ -9,16 +9,6 @@ pnpm install
 pnpm build
 ```
 
-## Local Usage
-
-```shell
-node ./dist/index.js --help
-node ./dist/index.js --version
-node ./dist/index.js <project-name>
-node ./dist/index.js <project-name> -E <example-name>
-node ./dist/index.js <project-name> -L <github-link>
-```
-
 ## Usage
 
 ```shell
@@ -27,4 +17,14 @@ npx create-wundergraph-app --version
 npx create-wundergraph-app <project-name>
 npx create-wundergraph-app <project-name> -E <example-name>
 npx create-wundergraph-app <project-name> -L <github-link>
+```
+
+## Local Usage
+
+```shell
+node ./dist/index.js --help
+node ./dist/index.js --version
+node ./dist/index.js <project-name>
+node ./dist/index.js <project-name> -E <example-name>
+node ./dist/index.js <project-name> -L <github-link>
 ```
