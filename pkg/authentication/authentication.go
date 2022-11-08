@@ -304,6 +304,9 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	}
 	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
+		if ctx.Err() != nil {
+			return false, "", updatedUser
+		}
 		h.Log.Error("MutatingPostAuthentication queries hook", abstractlogger.Error(err))
 		return
 	}
