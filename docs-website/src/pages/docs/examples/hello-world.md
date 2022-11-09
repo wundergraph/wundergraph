@@ -18,7 +18,7 @@ As the data source, we add a single API, the SpaceX GraphQL API in this case.
 
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
-  url: 'https://api.spacex.land/graphql/',
+  url: 'https://spacex-api.fly.dev/graphql/',
 })
 
 const myApplication = new Application({

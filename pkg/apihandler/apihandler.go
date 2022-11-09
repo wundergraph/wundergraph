@@ -57,9 +57,10 @@ import (
 )
 
 const (
-	WG_PREFIX    = "wg_"
-	WG_LIVE      = WG_PREFIX + "live"
-	WG_VARIABLES = WG_PREFIX + "variables"
+	WG_PREFIX       = "wg_"
+	WG_LIVE         = WG_PREFIX + "live"
+	WG_VARIABLES    = WG_PREFIX + "variables"
+	WG_CACHE_HEADER = "X-Wg-Cache"
 )
 
 type Builder struct {
@@ -1084,20 +1085,13 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.mockResolve.enable {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MockResolve, hookData)
-		if err != nil {
-			h.log.Error("MockResolve query hook", abstractlogger.Error(err), abstractlogger.Bool("isLive", isLive))
-			http.Error(w, "MockResolve query hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mockResolve hook failed", h.operation); done {
 			return
 		}
-
-		if out != nil {
-			_, _ = w.Write(out.Response)
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("MockResolve query hook response is empty", abstractlogger.Bool("isLive", isLive))
-			http.Error(w, "MockResolve query hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "mockResolve hook out is nil", h.operation); done {
 			return
 		}
+		_, _ = w.Write(out.Response)
 		return
 	}
 
@@ -1111,7 +1105,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		item, hit := h.cache.Get(ctx.Context, cacheKey)
 		if hit {
 
-			w.Header().Set("X-Cache", "HIT")
+			w.Header().Set(WG_CACHE_HEADER, "HIT")
 
 			_, _ = buf.Write(item.Data)
 
@@ -1145,22 +1139,16 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			_, _ = buf.WriteTo(w)
 			return
 		}
-		w.Header().Set("X-Cache", "MISS")
+		w.Header().Set(WG_CACHE_HEADER, "MISS")
 	}
 
 	if h.hooksConfig.preResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if err != nil {
-			h.log.Error("PreResolve query hook failed", abstractlogger.Error(err))
-			http.Error(w, "PreResolve query hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "preResolve hook failed", h.operation); done {
 			return
 		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("PreResolve query hook response is empty")
-			http.Error(w, "PreResolve query hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "preResolve hook out is nil", h.operation); done {
 			return
 		}
 	}
@@ -1168,17 +1156,10 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.mutatingPreResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if err != nil {
-			h.log.Error("MutatingPreResolve query hook failed", abstractlogger.Error(err))
-			http.Error(w, "MutatingPreResolve query hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mutatingPreResolve hook failed", h.operation); done {
 			return
 		}
-		if out != nil {
-			ctx.Variables = out.Input
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("MutatingPreResolve query hook response is empty")
-			http.Error(w, "MutatingPreResolve query hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "mutatingPreResolve hook out is nil", h.operation); done {
 			return
 		}
 	}
@@ -1186,56 +1167,39 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.customResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
-		if err != nil {
-			h.log.Error("CustomResolve query hook failed", abstractlogger.Error(err))
-			http.Error(w, "CustomResolve query hook failed", http.StatusBadRequest)
+		if done := handleOperationErr(h.log, err, w, "customResolve hook failed", h.operation); done {
 			return
 		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("CustomResolve query hook response is empty")
-			http.Error(w, "CustomResolve query hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "customResolve hook out is nil", h.operation); done {
 			return
 		}
-		// when the hook is skipped
+		// the customResolve hook can indicate to "skip" by responding with "null"
+		// so, we only write the response if it's not null
 		if !bytes.Equal(out.Response, literal.NULL) {
-			h.log.Debug("CustomResolve is skipped and empty response is written")
 			_, _ = w.Write(out.Response)
 			return
 		}
 	}
 
 	err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if err != nil {
-		h.log.Error("ResolveGraphQLResponse for query failed", abstractlogger.Error(err))
-		http.Error(w, "bad request", http.StatusBadRequest)
+	if done := handleOperationErr(h.log, err, w, "ResolveGraphQLResponse failed", h.operation); done {
 		return
 	}
-
 	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
-	if err != nil {
-		h.log.Error("Transform postResolve for query failed", abstractlogger.Error(err))
-		http.Error(w, "Transform postResolve for query failed", http.StatusInternalServerError)
+	if done := handleOperationErr(h.log, err, w, "postResolveTransformer failed", h.operation); done {
 		return
 	}
-
 	if h.hooksConfig.postResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-		if err != nil {
-			h.log.Error("PostResolve query hook response is empty", abstractlogger.Error(err))
-			http.Error(w, "PostResolve query hook response is empty", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "postResolve hook failed", h.operation); done {
 			return
 		}
 	}
-
 	if h.hooksConfig.mutatingPostResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
-		if err != nil {
-			h.log.Error("MutatingPostResolve query hook failed", abstractlogger.Error(err))
-			http.Error(w, "MutatingPostResolve query hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mutatingPostResolve hook failed", h.operation); done {
 			return
 		}
 		if out == nil {
@@ -1276,9 +1240,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(transformed)
 	_, err = reader.WriteTo(w)
-	if err != nil {
-		h.log.Error("Could not write response in query handler", abstractlogger.Error(err))
-		http.Error(w, "Could not write response in query handler", http.StatusInternalServerError)
+	if done := handleOperationErr(h.log, err, w, "writing response failed", h.operation); done {
 		return
 	}
 }
@@ -1288,12 +1250,12 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("PreResolve liveQuery hook failed: %w", err)
+			return nil, fmt.Errorf("handleLiveQueryEvent preResolve hook failed: %w", err)
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			return nil, errors.New("PreResolve liveQuery hook response is empty")
+			return nil, errors.New("handleLiveQueryEvent preResolve hook response is nil")
 		}
 	}
 
@@ -1301,13 +1263,13 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("LiveQueryHandler.MutatingPreResolve hook failed: %w", err)
+			return nil, fmt.Errorf("handleLiveQueryEvent mutatingPreResolve hook failed: %w", err)
 		}
 		if out != nil {
 			ctx.Variables = out.Input
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			h.log.Error("MutatingPreResolve liveQuery hook response is empty")
+			h.log.Error("handleLiveQueryEvent mutatingPreResolve hook response is nil")
 		}
 	}
 
@@ -1315,12 +1277,12 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("CustomResolve liveQuery hook failed: %w", err)
+			return nil, fmt.Errorf("handleLiveQueryEvent customResolve hook failed: %w", err)
 		}
 		if out != nil {
 			updateContextHeaders(ctx, out.SetClientRequestHeaders)
 		} else {
-			return nil, errors.New("CustomResolve liveQuery hook response is empty")
+			return nil, errors.New("handleLiveQueryEvent customResolve hook response is nil")
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
@@ -1332,18 +1294,18 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 	requestBuf.Reset()
 	err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, requestBuf)
 	if err != nil {
-		return nil, fmt.Errorf("ResolveGraphQLResponse liveQuery hook failed: %w", err)
+		return nil, fmt.Errorf("handleLiveQueryEvent ResolveGraphQLResponse failed: %w", err)
 	}
 
 	transformed, err := h.postResolveTransformer.Transform(requestBuf.Bytes())
 	if err != nil {
-		return nil, fmt.Errorf("PostResolveTransformer liveQuery failed: %w", err)
+		return nil, fmt.Errorf("handleLiveQueryEvent postResolveTransformer.Transform failed: %w", err)
 	}
 	if h.hooksConfig.postResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("PostResolve liveQuery hook failed: %w", err)
+			return nil, fmt.Errorf("handleLiveQueryEvent postResolve hook failed: %w", err)
 		}
 	}
 
@@ -1351,10 +1313,10 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
 		if err != nil {
-			return nil, fmt.Errorf("MutatingPostResolve liveQuery hook failed: %w", err)
+			return nil, fmt.Errorf("handleLiveQueryEvent mutatingPostResolve hook failed: %w", err)
 		}
 		if out == nil {
-			return nil, errors.New("MutatingPostResolve liveQuery hook response is empty")
+			return nil, errors.New("handleLiveQueryEvent mutatingPostResolve hook response is nil")
 		}
 		transformed = out.Response
 	}
@@ -1377,8 +1339,16 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 		var hookError bool
 		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
 		if err != nil {
+			if errors.Is(err, context.Canceled) {
+				// context was canceled (e.g. client disconnected)
+				// we've already flushed a header, so we simply return
+				return
+			}
 			hookError = true
-			h.log.Error("HandleLiveQueryEvent failed", abstractlogger.Error(err))
+			h.log.Error("handleLiveQuery failed",
+				abstractlogger.Error(err),
+				abstractlogger.String("operation", h.operation.Name),
+			)
 			graphqlError := graphql.Response{
 				Errors: graphql.RequestErrors{
 					graphql.RequestError{
@@ -1388,7 +1358,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			}
 			graphqlErrorPayload, marshalErr := graphqlError.Marshal()
 			if marshalErr != nil {
-				h.log.Error("HandleLiveQueryEvent could not marshal graphql error", abstractlogger.Error(marshalErr))
+				h.log.Error("handleLiveQuery could not marshal graphql error", abstractlogger.Error(marshalErr))
 			} else {
 				response = graphqlErrorPayload
 			}
@@ -1422,7 +1392,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 		// After hook error we return the graphql compatible error to the client
 		// and abort the stream
 		if hookError {
-			h.log.Error("HandleLiveQueryEvent cancel due to hook error", abstractlogger.Error(err))
+			h.log.Error("handleLiveQuery cancel due to hook error", abstractlogger.Error(err))
 			return
 		}
 
@@ -1538,9 +1508,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.mockResolve.enable {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MockResolve, hookData)
-		if err != nil {
-			h.log.Error("MockResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "MockResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mockResolve hook failed", h.operation); done {
 			return
 		}
 		_, _ = w.Write(out.Response)
@@ -1550,16 +1518,10 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.preResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if err != nil {
-			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "PreResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "preResolve hook failed", h.operation); done {
 			return
 		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("PreResolve mutation hook response is empty")
-			http.Error(w, "PreResolve mutation hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "preResolve hook out is nil", h.operation); done {
 			return
 		}
 	}
@@ -1567,65 +1529,44 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.mutatingPreResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if err != nil {
-			h.log.Error("MutatingPostResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "MutatingPostResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mutatingPreResolve hook failed", h.operation); done {
 			return
 		}
-
-		if out != nil {
-			ctx.Variables = out.Input
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("MutatingPostResolve mutation hook response is empty")
-			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "mutatingPreResolve hook out is nil", h.operation); done {
 			return
 		}
+		ctx.Variables = out.Input
 	}
 
 	if h.hooksConfig.customResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
-		if err != nil {
-			h.log.Error("CustomResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "CustomResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "customResolve hook failed", h.operation); done {
 			return
 		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("CustomResolve mutation hook response is empty")
-			http.Error(w, "CustomResolve mutation hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "customResolve hook out is nil", h.operation); done {
 			return
 		}
 		// when the hook is skipped
 		if !bytes.Equal(out.Response, literal.NULL) {
-			h.log.Debug("CustomResolve is skipped and empty response is written")
 			_, _ = w.Write(out.Response)
 			return
 		}
 	}
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if resolveErr != nil {
-		h.log.Error("ResolveGraphQLResponse for mutation failed", abstractlogger.Error(resolveErr))
-		http.Error(w, "ResolveGraphQLResponse for mutation failed", http.StatusInternalServerError)
+	if done := handleOperationErr(h.log, resolveErr, w, "ResolveGraphQLResponse", h.operation); done {
 		return
 	}
 
 	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
-	if err != nil {
-		h.log.Error("PostResolveTransformer mutation hook failed", abstractlogger.Error(err))
-		http.Error(w, "PostResolveTransformer mutation hook failed", http.StatusInternalServerError)
+	if done := handleOperationErr(h.log, err, w, "postResolveTransformer", h.operation); done {
 		return
 	}
-
 	if h.hooksConfig.postResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-		if err != nil {
-			h.log.Error("PostResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "PostResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "postResolve hook failed", h.operation); done {
 			return
 		}
 	}
@@ -1633,14 +1574,10 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.hooksConfig.mutatingPostResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
-		if err != nil {
-			h.log.Error("MutatingPostResolve query hook failed", abstractlogger.Error(err))
-			http.Error(w, "MutatingPostResolve query hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mutatingPostResolve hook failed", h.operation); done {
 			return
 		}
-		if out == nil {
-			h.log.Error("MutatingPostResolve mutation hook response is empty")
-			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "mutatingPostResolve hook out is nil", h.operation); done {
 			return
 		}
 		transformed = out.Response
@@ -1648,9 +1585,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(transformed)
 	_, err = reader.WriteTo(w)
-	if err != nil {
-		h.log.Error("Could not write response in mutation handler", abstractlogger.Error(err))
-		http.Error(w, "Could not write response in mutation handler", http.StatusInternalServerError)
+	if done := handleOperationErr(h.log, err, w, "writing response failed", h.operation); done {
 		return
 	}
 }
@@ -1724,16 +1659,10 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if h.hooksConfig.preResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if err != nil {
-			h.log.Error("PreResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "PreResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "preResolve hook failed", h.operation); done {
 			return
 		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("PreResolve mutation hook response is empty")
-			http.Error(w, "PreResolve mutation hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "preResolve hook out is nil", h.operation); done {
 			return
 		}
 	}
@@ -1741,29 +1670,20 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	if h.hooksConfig.mutatingPreResolve {
 		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
 		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if err != nil {
-			h.log.Error("MutatingPostResolve mutation hook", abstractlogger.Error(err))
-			http.Error(w, "MutatingPostResolve mutation hook failed", http.StatusInternalServerError)
+		if done := handleOperationErr(h.log, err, w, "mutatingPreResolve hook failed", h.operation); done {
 			return
 		}
-
-		if out != nil {
-			ctx.Variables = out.Input
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			h.log.Error("MutatingPostResolve mutation hook response is empty")
-			http.Error(w, "MutatingPostResolve mutation hook response is empty", http.StatusInternalServerError)
+		if done := handleHookOut(ctx, w, h.log, out, "mutatingPreResolve hook out is nil", h.operation); done {
 			return
 		}
+		ctx.Variables = out.Input
 	}
 
 	if h.hooksConfig.postResolve {
 		var callback flushWriterPostResolveCallback = func(ctx *resolve.Context, resp []byte) {
 			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
 			_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-			if err != nil {
-				h.log.Error("PostResolve subscription hook failed", abstractlogger.Error(err))
-			}
+			_ = handleOperationErr(h.log, err, w, "postResolve hook failed", h.operation)
 		}
 
 		flushWriter.postResolveCallback = &callback
@@ -1774,6 +1694,10 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
 			out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
 			if err != nil {
+				if errors.Is(err, context.Canceled) {
+					// e.g. client closed connection
+					return nil, nil
+				}
 				h.log.Error("MutatingPostResolve subscription hook failed", abstractlogger.Error(err))
 				return nil, err
 			}
@@ -1790,8 +1714,11 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	err = h.resolver.ResolveGraphQLSubscription(ctx, h.preparedPlan.Response, flushWriter)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
+			// e.g. client closed connection
 			return
 		}
+		// if the deadline is exceeded (e.g. timeout), we don't have to return an HTTP error
+		// we've already flushed a response to the client
 		h.log.Error("ResolveGraphQLSubscription", abstractlogger.Error(err))
 		return
 	}
@@ -2036,7 +1963,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 		}
 		resp, err := client.Do(req)
 		if err != nil {
-			r.log.Error("failed to get openid-configuration",
+			r.log.Warn("failed to get openid-configuration",
 				abstractlogger.Error(err),
 			)
 			continue
@@ -2294,4 +2221,44 @@ func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter
 	}
 
 	return flushWriter, true
+}
+
+func handleHookOut(ctx *resolve.Context, w http.ResponseWriter, log abstractlogger.Logger, out *hooks.MiddlewareHookResponse, errorMessage string, operation *wgpb.Operation) (done bool) {
+	if out == nil {
+		log.Error(errorMessage,
+			abstractlogger.String("operationName", operation.Name),
+			abstractlogger.String("operationType", operation.OperationType.String()),
+		)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return true
+	}
+	updateContextHeaders(ctx, out.SetClientRequestHeaders)
+	return false
+}
+
+func handleOperationErr(log abstractlogger.Logger, err error, w http.ResponseWriter, errorMessage string, operation *wgpb.Operation) (done bool) {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, context.Canceled) {
+		// client closed connection
+		w.WriteHeader(499)
+		return true
+	}
+	if errors.Is(err, context.DeadlineExceeded) {
+		// request timeout exceeded
+		log.Error("request timeout exceeded",
+			abstractlogger.String("operationName", operation.Name),
+			abstractlogger.String("operationType", operation.OperationType.String()),
+		)
+		w.WriteHeader(http.StatusGatewayTimeout)
+		return true
+	}
+	log.Error(errorMessage,
+		abstractlogger.String("operationName", operation.Name),
+		abstractlogger.String("operationType", operation.OperationType.String()),
+		abstractlogger.Error(err),
+	)
+	http.Error(w, errorMessage, http.StatusInternalServerError)
+	return true
 }

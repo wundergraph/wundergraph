@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,7 +25,7 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts WunderGraph in production mode",
 	Long:  `Start runs WunderGraph Node and Server as a single process in production mode`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
@@ -34,34 +33,28 @@ var startCmd = &cobra.Command{
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
-			return err
+			log.Fatal("Could not create node: %w", abstractlogger.Error(err))
 		}
 
 		if !excludeServer {
 			g.Go(func() error {
-				err := startWunderGraphServer(ctx)
-				if err != nil {
-					log.Error("Start server", abstractlogger.Error(err))
-				}
-				return err
+				return startWunderGraphServer(ctx)
 			})
 		}
 
 		g.Go(func() error {
-			err := StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
-			if err != nil {
-				log.Error("Start node", abstractlogger.Error(err))
-			}
-			return err
+			return StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
 		})
 
 		n.HandleGracefulShutdown(gracefulTimeout)
 
-		if err := g.Wait(); err != nil {
-			return fmt.Errorf("WunderGraph process shutdown: %w", err)
+		// Only exit with error code 1 when the server was not stopped by the signal
+		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
+			// Exit with error code 1 to indicate failure and restart
+			log.Fatal("WunderGraph process shutdown: %w", abstractlogger.Error(err))
 		}
 
-		return nil
+		// exit code 0 to indicate success
 	},
 }
 

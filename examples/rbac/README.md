@@ -2,7 +2,7 @@
 
 This example demonstrates how to protect WunderGraph operations using Role Based Access Controls (RBAC). We integrate two APIs:
 
-1. (GraphQL) https://api.spacex.land/graphql/ is serving as our protected API.
+1. (GraphQL) https://spacex-api.fly.dev/graphql/ is serving as our protected API.
 2. (REST) https://api.github is needed to validate if the authenthicated user has starred our repository.
 
 All APIs have been integrated into a unified and fully typed interface. There are no unknown dependencies in your app.

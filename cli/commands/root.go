@@ -31,6 +31,8 @@ const (
 	configEntryPointFilename = "wundergraph.config.ts"
 	serverEntryPointFilename = "wundergraph.server.ts"
 
+	wunderctlBinaryPathEnvKey = "WUNDERCTL_BINARY_PATH"
+
 	defaultNodeGracefulTimeoutSeconds = 10
 )
 
@@ -66,16 +68,20 @@ wunderctl is gathering anonymous usage data so that we can better understand how
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+
 		switch cmd.Name() {
-		case "loadoperations":
-			// skip any setup for loadoperations to avoid logging anything
-			// as sdk uses stdout for the generated operations list
-			// TODO: migrate to writing it to a file
+		// skip any setup to avoid logging anything
+		// because the command output data on stdout
+		case LoadOperationsCmdName:
 			return nil
+			// up command has a different default for global pretty logging
+			// we can't overwrite the default value in the init function because
+			// it would overwrite the default value for all other commands
+		case UpCmdName:
+			rootFlags.PrettyLogs = upCmdPrettyLogging
 		}
 
 		logging.Init(rootFlags.PrettyLogs, rootFlags.DebugMode)
-
 		if rootFlags.DebugMode {
 			// override log level to debug
 			rootFlags.CliLogLevel = "debug"
@@ -165,6 +171,22 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	}
 }
 
+// wunderctlBinaryPath() returns the path to the currently executing parent wunderctl
+// command which is then passed via wunderctlBinaryPathEnvKey to subprocesses. This
+// ensures than when the SDK calls back into wunderctl, the same copy is always used.
+func wunderctlBinaryPath() string {
+	// Check if a parent wunderctl set this for us
+	path, isSet := os.LookupEnv(wunderctlBinaryPathEnvKey)
+	if !isSet {
+		// Variable is not set, find out our path and set it
+		exe, err := os.Executable()
+		if err == nil {
+			path = exe
+		}
+	}
+	return path
+}
+
 func init() {
 	config.InitConfig()
 
@@ -175,7 +197,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches the logging to human readable format")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")

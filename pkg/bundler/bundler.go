@@ -240,11 +240,17 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 				}
 			} else {
 				for _, message := range result.Errors {
+					location := message.Location
+					if location == nil {
+						location = &api.Location{
+							File: "<unknown>",
+						}
+					}
 					b.log.Error("Bundler build error",
 						abstractlogger.String("watcherName", b.name),
-						abstractlogger.String("file", message.Location.File),
-						abstractlogger.Int("line", message.Location.Line),
-						abstractlogger.Int("column", message.Location.Column),
+						abstractlogger.String("file", location.File),
+						abstractlogger.Int("line", location.Line),
+						abstractlogger.Int("column", location.Column),
 						abstractlogger.String("message", message.Text),
 					)
 				}

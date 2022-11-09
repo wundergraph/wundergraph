@@ -239,6 +239,10 @@ interface GraphQLIntrospectionOptions {
 	// so that the request context can be enriched
 	internal?: boolean;
 	skipRenameRootFields?: string[];
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface GraphQLIntrospection extends GraphQLUpstream, GraphQLIntrospectionOptions {
@@ -256,10 +260,10 @@ export interface GraphQLFederationIntrospection extends IntrospectionConfigurati
 	apiNamespace?: string;
 }
 
-export interface ReplaceJSONTypeFieldConfiguration {
+export interface ReplaceCustomScalarTypeFieldConfiguration {
 	entityName: string;
 	fieldName: string;
-	inputTypeReplacement: string;
+	inputTypeReplacement?: string;
 	responseTypeReplacement: string;
 }
 
@@ -269,7 +273,7 @@ export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
-	replaceJSONTypeFields?: ReplaceJSONTypeFieldConfiguration[];
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface IntrospectionConfiguration {
@@ -373,6 +377,10 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
 	baseURL?: string;
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
 export interface StaticApiCustom {
@@ -603,11 +611,19 @@ export const introspect = {
 			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
 	federation: introspectFederation,
-	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> =>
-		introspectWithCache(introspection, async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 			const spec = loadOpenApi(introspection);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
-		}),
+		};
+		// If the source is a file we have all data required to perform the instrospection
+		// locally, which is also fast. Skip the cache in this case, so changes to the file
+		// are picked up immediately without requiring a cache flush.
+		if (introspection.source.kind === 'file') {
+			return generator(introspection);
+		}
+		return introspectWithCache(introspection, generator);
+	},
 };
 
 export const buildUpstreamAuthentication = (upstream: HTTPUpstream): UpstreamAuthentication | undefined => {
