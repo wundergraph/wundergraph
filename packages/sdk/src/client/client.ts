@@ -231,14 +231,14 @@ export class Client {
 		return response.json();
 	}
 
-	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData extends any>(
-		subscription: RequestOptions,
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
+		options: RequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
 		if ('EventSource' in globalThis) {
-			return this.subscribeWithSSE<ResponseData>(subscription, cb);
+			return this.subscribeWithSSE<ResponseData>(options, cb);
 		}
-		for await (const event of this.subscribeWithFetch<ResponseData>(subscription)) {
+		for await (const event of this.subscribeWithFetch<ResponseData>(options)) {
 			cb(event);
 		}
 	}
@@ -350,7 +350,7 @@ export class Client {
 		};
 	}
 
-	public login = (authProviderID: string, redirectURI?: string) => {
+	public login(authProviderID: string, redirectURI?: string) {
 		// browser check
 		if (typeof window === 'undefined') {
 			throw new Error('login() can only be called in a browser environment');
@@ -366,9 +366,9 @@ export class Client {
 		);
 
 		window.location.assign(url);
-	};
+	}
 
-	public logout = async (options?: LogoutOptions): Promise<boolean> => {
+	public async logout(options?: LogoutOptions): Promise<boolean> {
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
@@ -383,5 +383,5 @@ export class Client {
 		});
 
 		return response.ok;
-	};
+	}
 }
