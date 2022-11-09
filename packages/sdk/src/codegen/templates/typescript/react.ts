@@ -7,12 +7,14 @@ import { OperationType } from '@wundergraph/protobuf';
 import { template as providerTemplate } from './react.provider.template';
 import { template as reactNativeProviderTemplate } from './react.native.provider.template';
 import { template as hooksTemplate } from './react.hooks.template';
-import { hasInput, isNotInternal } from './helpers';
+import { hasInput, isNotInternal, queries as allQueries } from './helpers';
 
 export class TypescriptReactProvider implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(providerTemplate);
+		const allOperations = allQueries(config.application, false);
 		const content = tmpl({
+			allOperations: allOperations,
 			hasAuthProviders: config.authentication.cookieBased.length !== 0,
 		});
 		return Promise.resolve([
@@ -28,7 +30,9 @@ export class TypescriptReactProvider implements Template {
 export class TypescriptReactNativeProvider implements Template {
 	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(reactNativeProviderTemplate);
+		const allOperations = allQueries(config.application, false);
 		const content = tmpl({
+			allOperations: allOperations,
 			hasAuthProviders: config.authentication.cookieBased.length !== 0,
 		});
 		return Promise.resolve([
