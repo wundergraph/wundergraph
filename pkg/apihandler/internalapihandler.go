@@ -191,6 +191,11 @@ type InternalApiHandler struct {
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log
+	if reqID := r.Header.Get("X-Request-Id"); reqID != "" {
+		requestLogger = requestLogger.With(zap.String(requestID, reqID))
+		r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+	}
+
 	r = setOperationMetaData(r, h.operation)
 
 	bodyBuf := pool.GetBytesBuffer()
@@ -213,11 +218,6 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		)
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
-	}
-
-	if reqID := clientRequest.Header.Get("X-Request-Id"); reqID != "" {
-		requestLogger = requestLogger.With(zap.String(requestID, reqID))
-		r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 	}
 
 	ctx := pool.GetCtx(r, clientRequest, pool.Config{
