@@ -399,42 +399,48 @@ class RESTApiBuilder {
 				return;
 			}
 			const componentSchema = resolved.schema;
-			ref = resolved.ref;
-			let fieldTypeName = ref;
-
-			if (objectKind === 'input') {
-				fieldTypeName = `${fieldTypeName}Input`;
-			}
-
-			const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
-			if (argumentName) {
-				this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
-			} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
-				fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
-				this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
+			const type = componentSchema.type
+			if (!componentSchema.enum && type && (['boolean', 'integer', 'number', 'string'] as JSONSchema7Type[]).includes(type)) {
+				// Primitive type references use the referenced schema as their own
+				schema = componentSchema
 			} else {
-				this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
-			}
-			if (isIntEnum) return;
+				ref = resolved.ref;
+				let fieldTypeName = ref;
 
-			const created = this.ensureType(
-				componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
-				fieldTypeName
-			);
-			if (!created) {
+				if (objectKind === 'input') {
+					fieldTypeName = `${fieldTypeName}Input`;
+				}
+
+				const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
+				if (argumentName) {
+					this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
+				} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
+					fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
+					this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
+				} else {
+					this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
+				}
+				if (isIntEnum) return;
+
+				const created = this.ensureType(
+					componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
+					fieldTypeName
+				);
+				if (!created) {
+					return;
+				}
+				this.traverseSchema({
+					isRootField: false,
+					objectKind,
+					schema: componentSchema,
+					enclosingTypes: [],
+					parentTypeName: fieldTypeName,
+					fieldName: '',
+					verb,
+					path,
+				});
 				return;
 			}
-			this.traverseSchema({
-				isRootField: false,
-				objectKind,
-				schema: componentSchema,
-				enclosingTypes: [],
-				parentTypeName: fieldTypeName,
-				fieldName: '',
-				verb,
-				path,
-			});
-			return;
 		}
 		if (schema.allOf) {
 			schema = (schema.allOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
