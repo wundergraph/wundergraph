@@ -29,6 +29,8 @@ export enum S3Provider {
 }
 
 export type UploadConfig = UploadRequestOptions<S3Provider>
+{{else}}
+export type UploadConfig = UploadRequestOptions<never>
 {{/if}}
 
 {{#if hasAuthProviders}}
