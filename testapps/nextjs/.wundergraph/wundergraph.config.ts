@@ -98,6 +98,14 @@ const counter = introspect.graphql({
 	apiNamespace: 'ws',
 	subscriptionsUseSSE: true,
 	url: 'http://localhost:3003/api/graphql',
+	loadSchemaFromString: `
+			type Query {
+				hello: String
+			}
+
+			type Subscription {
+				countdown(from: Int!): Int!
+			}`,
 });
 
 const myApplication = new Application({
