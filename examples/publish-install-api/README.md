@@ -30,7 +30,7 @@ npm run start
 3. Fetch dragons and weather data:
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/DragonsAndWeather
+curl http://localhost:9991/app/main/operations/DragonsAndWeather
 ```
 
 > **Note**: 🎓 For a more detailed example, see [WunderHub Start](https://hub.wundergraph.com/start).
