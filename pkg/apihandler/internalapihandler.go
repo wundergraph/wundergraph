@@ -190,7 +190,7 @@ type InternalApiHandler struct {
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
+	requestLogger := h.log
 	r = setOperationMetaData(r, h.operation)
 
 	bodyBuf := pool.GetBytesBuffer()
@@ -207,7 +207,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// this makes it possible to expose the original client request to hooks triggered by internal requests
 	clientRequest, err := NewRequestFromWunderGraphClientRequest(r.Context(), body)
 	if err != nil {
-		h.log.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+		requestLogger.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
 			zap.Error(err),
 			zap.String("url", r.RequestURI),
 		)
@@ -215,8 +215,9 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if requestID := clientRequest.Header.Get("X-Request-Id"); requestID != "" {
-		r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, requestID))
+	if reqID := clientRequest.Header.Get("X-Request-Id"); reqID != "" {
+		requestLogger = requestLogger.With(zap.String(requestID, reqID))
+		r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 	}
 
 	ctx := pool.GetCtx(r, clientRequest, pool.Config{
@@ -250,7 +251,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(buf)
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if done := handleOperationErr(h.log, resolveErr, w, "Internal API Handler ResolveGraphQLResponse failed", h.operation); done {
+	if done := handleOperationErr(requestLogger, resolveErr, w, "Internal API Handler ResolveGraphQLResponse failed", h.operation); done {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

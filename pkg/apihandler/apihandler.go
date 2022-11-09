@@ -63,7 +63,8 @@ const (
 	WG_VARIABLES    = WG_PREFIX + "variables"
 	WG_CACHE_HEADER = "X-Wg-Cache"
 
-	requestID = "requestID"
+	// logger field name must be aligned with fastify
+	requestID = "reqId"
 )
 
 type Builder struct {
