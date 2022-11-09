@@ -23,6 +23,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -212,6 +213,10 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		)
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
+	}
+
+	if requestID := clientRequest.Header.Get("X-Request-Id"); requestID != "" {
+		r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, requestID))
 	}
 
 	ctx := pool.GetCtx(r, clientRequest, pool.Config{
