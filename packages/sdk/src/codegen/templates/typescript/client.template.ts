@@ -53,7 +53,7 @@ export const defaultClientConfig: ClientConfig = {
     sdkVersion: "{{sdkVersion}}",
 }
 
-const operationMetadata: OperationMetadata = {
+export const operationMetadata: OperationMetadata = {
 {{#each allOperations}}
     {{operationName}}: {
         requiresAuthentication: {{requiresAuthentication}}

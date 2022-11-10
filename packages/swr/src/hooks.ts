@@ -1,43 +1,27 @@
 import useSWR, { SWRConfiguration, useSWRConfig } from 'swr';
-import useSWRMutation, { SWRMutationConfiguration } from 'swr/mutation';
+import useSWRMutation from 'swr/mutation';
 
-import {
-	OperationRequestOptions,
-	FetchUserRequestOptions,
-	GraphQLResponseError,
-	OperationsDefinition,
-	UploadRequestOptions,
-	LogoutOptions,
-	Client,
-} from '@wundergraph/sdk/client';
+import { GraphQLResponseError, OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+	QueryFetcher,
+	MutationFetcher,
 	SubscribeToOptions,
-	UseMutationOptions,
-	UseQueryOptions,
 	UseSubscribeToProps,
-	UseSubscriptionOptions,
-	UseSubscriptionResponse,
+	UseQueryHook,
+	UseUserOptions,
+	UseMutationHook,
+	UseSubscriptionHook,
+	UseUploadHook,
+	UseUserHook,
 } from './types';
 
 export const userSWRKey = 'wg_user';
 
 export const createHooks = <Operations extends OperationsDefinition>(client: Client) => {
-	const queryFetcher = async <
-		OperationName extends Extract<keyof Operations['queries'], string>,
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
-		RequestOptions extends OperationRequestOptions<
-			Extract<keyof Operations['queries'], string>,
-			Operations['queries'][OperationName]['input']
-		> = OperationRequestOptions<
-			Extract<keyof Operations['queries'], string>,
-			Operations['queries'][OperationName]['input']
-		>
-	>(
-		query: RequestOptions
-	) => {
-		const result = await client.query<RequestOptions, Data>(query);
+	const queryFetcher: QueryFetcher<Operations> = async (query) => {
+		const result = await client.query(query);
 
 		if (result.error) {
 			throw result.error;
@@ -46,20 +30,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		return result.data;
 	};
 
-	const mutationFetcher = async <
-		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
-		RequestOptions extends OperationRequestOptions<
-			Extract<keyof Operations['mutations'], string>,
-			Operations['mutations'][OperationName]['input']
-		> = OperationRequestOptions<
-			Extract<keyof Operations['mutations'], string>,
-			Operations['mutations'][OperationName]['input']
-		>
-	>(
-		mutation: RequestOptions
-	) => {
-		const result = await client.mutate<RequestOptions, Data>(mutation);
+	const mutationFetcher: MutationFetcher<Operations> = async (mutation) => {
+		const result = await client.mutate(mutation);
 
 		if (result.error) {
 			throw result.error;
@@ -86,26 +58,16 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * })
 	 * ```
 	 */
-	const useQuery = <
-		OperationName extends Extract<keyof Operations['queries'], string>,
-		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
-		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
-	>(
-		options: UseQueryOptions<Data | undefined, GraphQLResponseError, Input, OperationName, LiveQuery>
-	) => {
+	const useQuery: UseQueryHook<Operations> = (options) => {
 		const { operationName, liveQuery, enabled = true, input, ...swrConfig } = options;
 		const { onSuccess: onSuccessProp, onError: onErrorProp } = swrConfig;
 		const key = { operationName, input };
 		const _key = serialize(key);
-		const response = useSWR<Data | undefined, GraphQLResponseError>(
-			enabled ? key : null,
-			!liveQuery ? queryFetcher : null,
-			swrConfig
-		);
+
+		const response = useSWR(enabled ? key : null, !liveQuery ? queryFetcher : null, swrConfig);
 
 		const onSuccess = useCallback(
-			(response: Data) => {
+			(response: any) => {
 				onSuccessProp?.(response, _key, swrConfig as any);
 			},
 			[onSuccessProp, _key]
@@ -152,23 +114,19 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * })
 	 * ```
 	 */
-	const useMutation = <
-		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
-	>(
-		options: UseMutationOptions<Data, GraphQLResponseError, Input, OperationName>
-	) => {
+	const useMutation: UseMutationHook<Operations> = (options) => {
 		const { operationName, ...config } = options;
 
-		const fetcher = ((key: OperationName, { arg }: { arg: Input }) => {
-			return mutationFetcher({
-				operationName: key,
-				input: arg,
-			});
-		}) as unknown as Required<SWRMutationConfiguration<Data, GraphQLResponseError, Input, OperationName>>['fetcher'];
-
-		return useSWRMutation<Data, GraphQLResponseError, OperationName, Input>(operationName, fetcher, config);
+		return useSWRMutation(
+			operationName,
+			((key: string, { arg: input }: { arg?: object }) => {
+				return mutationFetcher({
+					operationName,
+					input,
+				});
+			}) as any,
+			config
+		);
 	};
 
 	const useAuth = () => {
@@ -191,16 +149,29 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 *
 	 * @usage
 	 * ```ts
-	 * const { data, error, isLoading } = useUser()
+	 * const { user, error, isLoading } = useUser()
 	 * ```
 	 */
-	const useUser = (options?: FetchUserRequestOptions & { enabled?: boolean }, swrOptions?: SWRConfiguration) => {
-		const { enabled = true } = options || {};
-		return useSWR<Operations['user'], GraphQLResponseError>(
+	const useUser: UseUserHook<Operations> = (options) => {
+		const { enabled = true, revalidate, ...swrOptions } = options || {};
+		const {
+			data: user,
+			error,
+			isLoading,
+			isValidating,
+			mutate,
+		} = useSWR<Operations['user'], GraphQLResponseError>(
 			enabled ? userSWRKey : null,
 			() => client.fetchUser(options),
 			swrOptions
 		);
+		return {
+			user,
+			error,
+			isLoading,
+			isValidating,
+			mutate,
+		};
 	};
 
 	/**
@@ -215,9 +186,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * }
 	 * ```
 	 */
-	const useFileUpload = (
-		config: SWRMutationConfiguration<string[], GraphQLResponseError, UploadRequestOptions, string>
-	) => {
+	const useFileUpload: UseUploadHook<Operations> = (config) => {
 		const { trigger, ...mutation } = useSWRMutation(
 			'uploadFiles',
 			async (key, { arg }) => {
@@ -225,7 +194,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 				return resp.fileKeys;
 			},
 			config
-		);
+		) as any;
 
 		return {
 			upload: trigger,
@@ -331,13 +300,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 *   operationName: 'Countdown',
 	 * })
 	 */
-	const useSubscription = <
-		OperationName extends Extract<keyof Operations['subscriptions'], string>,
-		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
-		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
-	>(
-		options: UseSubscriptionOptions<Data, GraphQLResponseError, Input, OperationName>
-	): UseSubscriptionResponse<Data> => {
+	const useSubscription: UseSubscriptionHook<Operations> = (options) => {
 		const {
 			enabled = true,
 			operationName,
@@ -352,7 +315,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		const { data, error } = useSWR(enabled ? key : null, null);
 
 		const onSuccess = useCallback(
-			(response: Data) => {
+			(response: object) => {
 				onSuccessProp?.(response, _key, options);
 			},
 			[onSuccessProp, _key]

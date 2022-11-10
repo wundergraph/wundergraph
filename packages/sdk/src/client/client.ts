@@ -35,6 +35,10 @@ export class Client {
 		return serialize(query);
 	}
 
+	public isAuthenticatedOperation(operationName: string) {
+		return !!this.options.operationMetadata?.[operationName]?.requiresAuthentication;
+	}
+
 	private operationUrl(operationName: string) {
 		return this.options.baseURL + '/' + this.options.applicationPath + '/operations/' + operationName;
 	}
