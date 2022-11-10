@@ -53,7 +53,7 @@ export const defaultClientConfig: ClientConfig = {
     sdkVersion: "{{sdkVersion}}",
 }
 
-const operationMetadata: OperationMetadata = {
+export const operationMetadata: OperationMetadata = {
 {{#each allOperations}}
     {{operationName}}: {
         requiresAuthentication: {{requiresAuthentication}}
@@ -102,7 +102,7 @@ export class WunderGraphClient extends Client {
 	}
 }
 
-export const createClient = (config?: Omit<ClientConfig, PrivateConfigProperties>) => {
+export const createClient = (config?: Partial<Omit<ClientConfig, PrivateConfigProperties>>) => {
 	return new WunderGraphClient({
 		...defaultClientConfig,
 		...config,
@@ -116,7 +116,7 @@ export type Queries = {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
-        liveQuery: {{liveQuery}}
+        {{#if liveQuery}}liveQuery: boolean{{/if}}
     }
 {{/each}}
 }

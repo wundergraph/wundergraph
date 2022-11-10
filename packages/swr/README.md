@@ -56,12 +56,10 @@ export const Home: React.FC<{ city: string }> = ({ city }) => {
     },
   });
 
-  const { mutate } = useMutation({
+  const { trigger } = useMutation({
     operationName: 'SetName',
   });
-  mutate({
-    input: { name },
-  });
+  trigger({ name });
 
   const { data, error } = useUser();
 
@@ -85,5 +83,5 @@ In case the context configuration isn't working, it's likely due to multiple ver
 To resolve this you can import SWRConfig directly from `@wundergraph/swr` to make sure the same instance is used.
 
 ```ts
-import { useSWR, SWRConfig, useSWRConfig } from '@wundergraph/swr';
+import { SWRConfig, useSWRConfig } from '@wundergraph/swr';
 ```
