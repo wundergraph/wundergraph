@@ -23,7 +23,7 @@ interface SSRConfig extends PublicConfiguration {
 }
 
 const SSRMiddleWare = ((useSWRNext: SWRHook) => {
-	return <Data, Error>(key: Key, fetcher: BareFetcher, config: SSRConfig) => {
+	return (key: Key, fetcher: BareFetcher, config: SSRConfig) => {
 		const swr = useSWRNext(key, fetcher, config);
 
 		const isSSR = typeof window === 'undefined' && config.ssr !== false;
