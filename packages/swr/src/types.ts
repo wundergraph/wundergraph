@@ -44,12 +44,6 @@ export type MutationFetcher<Operations extends OperationsDefinition> = {
 	): Promise<Data>;
 };
 
-export type SSRCache = Record<string, any>;
-
-export interface WunderGraphContextValue {
-	ssrCache: SSRCache;
-}
-
 export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
 	SWRConfiguration<Data, Error>,
 	'fetcher'
@@ -58,7 +52,6 @@ export type UseQueryOptions<Data, Error, Input, OperationName extends string, Li
 	liveQuery?: LiveQuery;
 	enabled?: boolean;
 	input?: Input;
-	ssr?: boolean;
 };
 
 export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {

@@ -102,7 +102,7 @@ export class WunderGraphClient extends Client {
 	}
 }
 
-export const createClient = (config?: Omit<ClientConfig, PrivateConfigProperties>) => {
+export const createClient = (config?: Partial<Omit<ClientConfig, PrivateConfigProperties>>) => {
 	return new WunderGraphClient({
 		...defaultClientConfig,
 		...config,
