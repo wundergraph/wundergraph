@@ -154,24 +154,11 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 */
 	const useUser: UseUserHook<Operations> = (options) => {
 		const { enabled = true, revalidate, ...swrOptions } = options || {};
-		const {
-			data: user,
-			error,
-			isLoading,
-			isValidating,
-			mutate,
-		} = useSWR<Operations['user'], GraphQLResponseError>(
+		return useSWR<Operations['user'], GraphQLResponseError>(
 			enabled ? userSWRKey : null,
 			() => client.fetchUser(options),
 			swrOptions
 		);
-		return {
-			user,
-			error,
-			isLoading,
-			isValidating,
-			mutate,
-		};
 	};
 
 	/**
