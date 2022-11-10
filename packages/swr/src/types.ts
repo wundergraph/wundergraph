@@ -140,12 +140,7 @@ export interface UseUserOptions<User> extends FetchUserRequestOptions, SWRConfig
 }
 
 export type UseUserHook<Operations extends OperationsDefinition> = {
-	(options?: UseUserOptions<Operations['user']>): Omit<
-		SWRResponse<Operations['user'], GraphQLResponseError>,
-		'data'
-	> & {
-		user: SWRResponse<Operations['user'], GraphQLResponseError>['data'];
-	};
+	(options?: UseUserOptions<Operations['user']>): SWRResponse<Operations['user'], GraphQLResponseError>;
 };
 
 export type UseUploadHook<Operations extends OperationsDefinition> = {

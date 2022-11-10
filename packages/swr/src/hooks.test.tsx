@@ -305,9 +305,9 @@ describe('SWR - useUser', () => {
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {
-			const { user, error } = useUser();
+			const { data, error } = useUser();
 
-			return <div>{user?.email}</div>;
+			return <div>{data?.email}</div>;
 		}
 
 		renderWithGlobalCache(<Page />);

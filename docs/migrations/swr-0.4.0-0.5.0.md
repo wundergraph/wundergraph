@@ -31,17 +31,3 @@ trigger({
   foo: 'bar',
 });
 ```
-
-2. useUser
-
-Old method:
-
-```ts
-const { data, error } = useUser({ enabled: false }, { refetchInterval: 10000 });
-```
-
-Updated to:
-
-```ts
-const { user, error } = useUser({ enabled: false, refetchInterval: 10000 });
-```
