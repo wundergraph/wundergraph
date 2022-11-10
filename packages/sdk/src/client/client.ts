@@ -36,7 +36,7 @@ export class Client {
 	}
 
 	private operationUrl(operationName: string) {
-		return this.options.baseURL + '/' + this.options.applicationPath + '/operations/' + operationName;
+		return this.options.baseURL + '/operations/' + operationName;
 	}
 
 	private addUrlParams(url: string, queryParams: URLSearchParams): string {
