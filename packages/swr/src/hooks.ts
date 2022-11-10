@@ -16,7 +16,6 @@ import {
 	UseUploadHook,
 	UseUserHook,
 } from './types';
-import { useWunderGraphContext } from './context';
 
 export const userSWRKey = 'wg_user';
 
