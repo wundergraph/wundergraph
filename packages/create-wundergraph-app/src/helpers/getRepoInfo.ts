@@ -4,7 +4,7 @@ import path from 'path';
 export const getRepoInfo = async (githubLink: string) => {
 	if (!githubLink.startsWith('https://github.com/')) {
 		console.log(chalk.red('The given link is not a github url'));
-		throw 'The given link is not a github url';
+		throw new Error('The given link is not a github url');
 	}
 	const repoInfo = githubLink.split('/').slice(3);
 	const repoOwnerName = repoInfo[0];

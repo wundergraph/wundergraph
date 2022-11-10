@@ -91,7 +91,7 @@ export const getRepository = async ({
 				});
 				if (!isBranchValid) {
 					console.log(chalk.red("The given branch name doesn't exist"));
-					throw "The given branch name doesn't exist";
+					throw new Error("The given branch name doesn't exist");
 				}
 			}
 			await retry(
