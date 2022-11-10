@@ -4,19 +4,61 @@ import { NextComponentType } from 'next';
 import { AppContextType, AppPropsType, NextPageContext } from 'next/dist/shared/lib/utils';
 import { NextRouter } from 'next/router';
 import { User } from '@wundergraph/sdk/client';
-import { SSRCache, WunderGraphProvider, userSWRKey, SWRConfig } from '@wundergraph/swr';
-import { WithWunderGraphOptions } from './types';
+import { serialize } from '@wundergraph/sdk/internal';
+import { userSWRKey, SWRConfig } from '@wundergraph/swr';
+import { BareFetcher, PublicConfiguration, SWRHook } from 'swr/_internal';
+import { WithWunderGraphOptions, SSRCache } from './types';
+
+import { useWunderGraphContext, WunderGraphProvider } from './context';
+import { Key, Middleware } from 'swr';
+
+const getOperationNameFromKey = (key: Key) => {
+	if (key && !Array.isArray(key) && typeof key === 'object' && 'operationName' in key) {
+		return key.operationName;
+	}
+};
+
+interface SSRConfig extends PublicConfiguration {
+	ssr?: boolean;
+}
+
+const SSRMiddleWare = ((useSWRNext: SWRHook) => {
+	return <Data, Error>(key: Key, fetcher: BareFetcher, config: SSRConfig) => {
+		const swr = useSWRNext(key, fetcher, config);
+
+		const isSSR = typeof window === 'undefined' && config.ssr !== false;
+		const context = useWunderGraphContext();
+
+		const operationName = getOperationNameFromKey(key);
+
+		if (!operationName || !context || !isSSR || !key) {
+			return swr;
+		}
+
+		const _key = serialize(key);
+
+		const { ssrCache, client, user } = context;
+
+		const shouldAuthenticate = client.isAuthenticatedOperation(operationName) && !user;
+
+		if (ssrCache && !ssrCache[_key] && fetcher && !shouldAuthenticate) {
+			ssrCache[_key] = fetcher(key);
+		}
+
+		return swr;
+	};
+}) as unknown as Middleware;
 
 export const withWunderGraph = (options: WithWunderGraphOptions) => {
 	return (AppOrPage: NextComponentType<any, any, any>): NextComponentType => {
 		const { client, userCacheKey = userSWRKey, context } = options;
 
-		const WithWunderGraph = (props: AppPropsType<NextRouter, any> & { ssrCache: SSRCache }) => {
-			const { ssrCache = {} } = props;
+		const WithWunderGraph = (props: AppPropsType<NextRouter, any> & { ssrCache: SSRCache; user: User }) => {
+			const { ssrCache = {}, user } = props;
 
 			return (
-				<WunderGraphProvider context={context} value={{ ssrCache }}>
-					<SWRConfig value={{ fallback: ssrCache }}>
+				<WunderGraphProvider context={context} value={{ ssrCache, client, user }}>
+					<SWRConfig value={{ fallback: ssrCache, use: [SSRMiddleWare] }}>
 						<AppOrPage {...props} />
 					</SWRConfig>
 				</WunderGraphProvider>
@@ -75,6 +117,7 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 				const prepassProps = {
 					pageProps: {
 						ssrCache,
+						user: ssrUser,
 						...pageProps,
 					},
 				};

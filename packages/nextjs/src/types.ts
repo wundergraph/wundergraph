@@ -1,5 +1,12 @@
-import { Client } from '@wundergraph/sdk/client';
-import { WunderGraphContextValue } from '@wundergraph/swr';
+import { Client, User } from '@wundergraph/sdk/client';
+
+export type SSRCache = Record<string, any>;
+
+export interface WunderGraphContextValue {
+	ssrCache: SSRCache;
+	client: Client;
+	user: User;
+}
 
 export interface WithWunderGraphOptions {
 	/**
@@ -30,3 +37,7 @@ export interface WithWunderGraphOptions {
 	 */
 	context?: React.Context<WunderGraphContextValue>;
 }
+
+export type ExtendOptions<Hook extends (...args: any) => any, Options = {}> = {
+	(options: Parameters<Hook>[0] & Options): ReturnType<Hook>;
+};

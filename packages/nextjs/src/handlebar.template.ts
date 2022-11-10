@@ -1,6 +1,6 @@
 //language=handlebars
 export const handlebarTemplate = `
-import { withWunderGraph, createHooks, WithWunderGraphOptions, SSRCache } from '@wundergraph/nextjs';
+import { createWunderGraphNext as createWunderGraphNextInternal, createHooks, WithWunderGraphOptions, SSRCache } from '@wundergraph/nextjs';
 import { User } from '@wundergraph/sdk/client';
 import { createClient, Operations, UserRole } from './client';
 
@@ -14,23 +14,20 @@ export interface CreateWunderGraphNextOptions extends Omit<WithWunderGraphOption
 }
 
 export const createWunderGraphNext = (options: CreateWunderGraphNextOptions) => {
-    const { baseURL, ...rest } = options;
-
+    const { baseURL, ...rest } = options
     const client = createClient(baseURL ? {
         baseURL
     } : undefined);
-
-    const hooks = createHooks<Operations>(client);
-
-    const _withWunderGraph = withWunderGraph({
+    
+    return createWunderGraphNextInternal<Operations>({
         client,
         ...rest
-    });
-
-    return {
-        withWunderGraph: _withWunderGraph,
-        client,
-        ...hooks
-    }
+    })
 }
+
+const { client, withWunderGraph, useQuery, useMutation, useSubscription, useUser, useAuth, useFileUpload } = createWunderGraphNext({
+	ssr: true,
+});
+
+export { client, withWunderGraph, useQuery, useMutation, useSubscription, useUser, useAuth, useFileUpload };
 `;

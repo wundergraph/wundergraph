@@ -1,6 +1,7 @@
 export { withWunderGraph } from './with-wundergraph';
 
-export type { WithWunderGraphOptions } from './types';
+export type { WithWunderGraphOptions, SSRCache } from './types';
 
 export { createHooks } from '@wundergraph/swr';
-export type { SSRCache } from '@wundergraph/swr';
+
+export { createWunderGraphNext } from './create-wundergraph';
