@@ -71,8 +71,7 @@ const jsonPlaceholder = introspect.openApi({
   },
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [postgres, spaceX, jsonPlaceholder, planetscale, federated],
 })
 ```

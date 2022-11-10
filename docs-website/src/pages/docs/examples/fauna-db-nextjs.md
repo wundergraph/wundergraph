@@ -60,8 +60,7 @@ const faunaDB = introspect.graphql({
     ),
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [faunaDB],
 })
 ```

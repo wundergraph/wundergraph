@@ -22,7 +22,6 @@ Then, add it to the `codeGenerators` of `configureWunderGraphApplication`:
 
 ```typescript
 configureWunderGraphApplication({
-  application: myApplication,
   server,
   operations,
   authorization: {

@@ -39,16 +39,13 @@ use extensively in these tutorials. At this point, we can run the development se
 to make sure our project is correctly initialized.
 
 ```shell
-$ npm start
-...
-2022-10-17T13:56:56+01:00	info	Starting WunderNode	...
-2022-10-17T13:56:56+01:00	debug	Initial Build successful ...
+npm start
 ```
 
 To check if our project is working, we can use `curl` to send a request:
 
 ```shell
-$ curl http://localhost:9991/app/main/operations/Continents
+curl http://localhost:9991/operations/Continents
 ```
 
 If our project is running correctly, we should see the following response:
@@ -114,13 +111,8 @@ const world = introspect.graphql({
   url: 'https://countries.trevorblades.com/',
 })
 
-const myApplication = new Application({
-  name: 'app',
-  apis: [world],
-})
-
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [world],
 })
 ```
 
@@ -168,9 +160,25 @@ code. Also, the namespace for the top level is now `world`.
 ```shell
 # Operation name "Continents" matches the filename of the operation
 # filename "Continents.graphql" without extension
-$ curl http://localhost:9991/app/main/operations/Continents
+curl http://localhost:9991/operations/Continents
+```
 
-{"data":{"world_continents":[{"code":"AF"},{"code":"AN"},{"code":"AS"},{"code":"EU"},{"code":"NA"},{"code":"OC"},{"code":"SA"}]}}
+Output:
+
+```json
+{
+  "data": {
+    "world_continents": [
+      { "code": "AF" },
+      { "code": "AN" },
+      { "code": "AS" },
+      { "code": "EU" },
+      { "code": "NA" },
+      { "code": "OC" },
+      { "code": "SA" }
+    ]
+  }
+}
 ```
 
 ## Filtering
@@ -195,9 +203,17 @@ query Continents($filter: world_ContinentFilterInput) {
 To test this, we need to send a request with the filter. To do so, we use the `wg_variables` parameter:
 
 ```shell
-$ curl --get --data-urlencode 'wg_variables={"filter":{"code":{"eq":"AF"}}}' http://localhost:9991/app/main/operations/Continents
+curl --get --data-urlencode 'wg_variables={"filter":{"code":{"eq":"AF"}}}' http://localhost:9991/operations/Continents
+```
 
-{"data":{"world_continents":[{"code":"AF"}]}
+Output:
+
+```json
+{
+  "data": {
+    "world_continents": [{ "code": "AF" }]
+  }
+}
 ```
 
 ## Exercises
