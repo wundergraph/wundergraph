@@ -12,6 +12,13 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+const (
+	RequestIDHeader = "X-Request-Id"
+
+	// logger field name must be aligned with fastify
+	requestIDField = "reqId"
+)
+
 type RequestIDKey struct{}
 
 func New(prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
@@ -104,4 +111,12 @@ func RequestIDFromContext(ctx context.Context) string {
 	}
 
 	return requestID
+}
+
+func WithRequestID(reqID string) zap.Field {
+	return zap.String(requestIDField, reqID)
+}
+
+func WithRequestIDFromContext(ctx context.Context) zap.Field {
+	return WithRequestID(RequestIDFromContext(ctx))
 }

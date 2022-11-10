@@ -62,9 +62,6 @@ const (
 	WG_LIVE         = WG_PREFIX + "live"
 	WG_VARIABLES    = WG_PREFIX + "variables"
 	WG_CACHE_HEADER = "X-Wg-Cache"
-
-	// logger field name must be aligned with fastify
-	requestID = "reqId"
 )
 
 type Builder struct {
@@ -214,7 +211,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 
 	r.router.Use(func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, request *http.Request) {
-			requestID := request.Header.Get("X-Request-Id")
+			requestID := request.Header.Get(logging.RequestIDHeader)
 			if requestID == "" {
 				id, _ := uuid.GenerateUUID()
 				requestID = id
@@ -708,7 +705,7 @@ var (
 )
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
+	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1023,7 +1020,7 @@ type QueryHandler struct {
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
+	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1463,7 +1460,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 }
 
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
+	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
@@ -1634,7 +1631,7 @@ type SubscriptionHandler struct {
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(zap.String(requestID, logging.RequestIDFromContext(r.Context())))
+	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {

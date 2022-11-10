@@ -187,9 +187,7 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	}
 
 	r.Header.Set("Content-Type", "application/json")
-	if requestID := logging.RequestIDFromContext(ctx); requestID != "" {
-		r.Header.Set("X-Request-Id", requestID)
-	}
+	r.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(ctx))
 
 	req, err := retryablehttp.FromRequest(r)
 	if err != nil {

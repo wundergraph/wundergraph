@@ -117,7 +117,7 @@ type Claims struct {
 }
 
 func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	request.Header.Set("X-Request-Id", logging.RequestIDFromContext(request.Context()))
+	request.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(request.Context()))
 
 	if request.Header.Get("X-WG-Internal-GraphQL-API") == "true" {
 		return t.internalGraphQLRoundTrip(request)

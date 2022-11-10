@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -304,7 +305,7 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	}
 	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
-		if ctx.Err() != nil {
+		if errors.Is(err, context.Canceled) {
 			return false, "", updatedUser
 		}
 		h.Log.Error("MutatingPostAuthentication queries hook", zap.Error(err))

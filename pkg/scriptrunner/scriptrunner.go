@@ -130,8 +130,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 			b.log.Debug("Script runner context cancelled",
 				zap.String("runnerName", b.name),
 				zap.Int("exit", status.Exit),
-				zap.Any("startTs", status.StartTs),
-				zap.Any("stopTs", status.StopTs),
+				zap.Int64("startTs", status.StartTs),
+				zap.Int64("stopTs", status.StopTs),
 				zap.Bool("complete", status.Complete),
 			)
 		case <-b.cmd.Done():
@@ -144,8 +144,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
 					zap.Error(status.Error),
-					zap.Any("startTs", status.StartTs),
-					zap.Any("stopTs", status.StopTs),
+					zap.Int64("startTs", status.StartTs),
+					zap.Int64("stopTs", status.StopTs),
 					zap.Bool("complete", status.Complete),
 				)
 				return
@@ -155,16 +155,16 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
 					zap.Error(status.Error),
-					zap.Any("startTs", status.StartTs),
-					zap.Any("stopTs", status.StopTs),
+					zap.Int64("startTs", status.StartTs),
+					zap.Int64("stopTs", status.StopTs),
 					zap.Bool("complete", status.Complete),
 				)
 			} else {
 				b.log.Debug("Script runner is done",
 					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
-					zap.Any("startTs", status.StartTs),
-					zap.Any("stopTs", status.StopTs),
+					zap.Int64("startTs", status.StartTs),
+					zap.Int64("stopTs", status.StopTs),
 					zap.Bool("complete", status.Complete),
 				)
 			}

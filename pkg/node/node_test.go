@@ -39,6 +39,7 @@ func TestNode(t *testing.T) {
 	defer userService.Close()
 
 	reviewService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		_, _ = w.Write([]byte(`{"data":{"_entities":[{"reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}}]}]}}`))
@@ -46,6 +47,7 @@ func TestNode(t *testing.T) {
 	defer reviewService.Close()
 
 	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		if bytes.Contains(req, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
@@ -154,6 +156,7 @@ func TestNode(t *testing.T) {
 
 	withHeaders := e.Builder(func(request *httpexpect.Request) {
 		request.WithHeader("Host", "jens.wundergraph.dev")
+		request.WithHeader("X-Request-Id", "67b77eab-d1a5-4cd8-b908-8443f24502b6")
 	})
 
 	myReviews := withHeaders.GET("/myApi/main/operations/MyReviews").

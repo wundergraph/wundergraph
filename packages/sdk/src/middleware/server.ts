@@ -164,7 +164,7 @@ export const createServer = async ({
 	const fastify = Fastify({
 		logger,
 		genReqId: (req) => {
-			return req.headers['x-request-id']?.toString() || uuidv4();
+			return req.headers['x-request-id']!.toString();
 		},
 	});
 

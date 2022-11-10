@@ -190,11 +190,9 @@ type InternalApiHandler struct {
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log
-	if reqID := r.Header.Get("X-Request-Id"); reqID != "" {
-		requestLogger = requestLogger.With(zap.String(requestID, reqID))
-		r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
-	}
+	reqID := r.Header.Get(logging.RequestIDHeader)
+	requestLogger := h.log.With(logging.WithRequestID(reqID))
+	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
 	r = setOperationMetaData(r, h.operation)
 
