@@ -17,7 +17,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-func New(config *wgpb.WebhookConfiguration, pathPrefix, hooksServerURL string, log abstractlogger.Logger) (http.Handler, error) {
+func New(config *wgpb.WebhookConfiguration, hooksServerURL string, log abstractlogger.Logger) (http.Handler, error) {
 	u, err := url.Parse(hooksServerURL)
 	if err != nil {
 		return nil, err
@@ -27,7 +27,6 @@ func New(config *wgpb.WebhookConfiguration, pathPrefix, hooksServerURL string, l
 		webhookName: config.Name,
 		log:         log,
 		proxy:       proxy,
-		pathPrefix:  "/" + pathPrefix,
 	}
 	if config.Verifier != nil {
 		switch config.Verifier.GetKind() {
@@ -51,18 +50,16 @@ type webhookHandler struct {
 	webhookName string
 	log         abstractlogger.Logger
 	proxy       *httputil.ReverseProxy
-	pathPrefix  string
 	verifier    verifier
 }
 
 func (h *webhookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	r.URL.Path = strings.TrimPrefix(r.URL.Path, h.pathPrefix)
 	if r.Body != nil && h.verifier != nil {
 		if !h.verifier.Verify(r) {
 			h.log.Error("Webhook verification failed",
 				abstractlogger.String("webhook", h.webhookName),
 				abstractlogger.String("kind", h.verifier.Kind()),
-				abstractlogger.String("path", h.pathPrefix+r.URL.Path),
+				abstractlogger.String("path", r.URL.Path),
 			)
 			w.WriteHeader(401)
 			return

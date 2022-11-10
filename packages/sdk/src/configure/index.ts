@@ -977,9 +977,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 	const types: TypeConfiguration[] = config.application.EngineConfiguration.Types;
 
 	const out: WunderGraphConfiguration = {
-		apiName: config.deployment.api.name,
 		apiId: config.deployment.api.id,
-		deploymentName: config.deployment.name,
 		environmentIds: [config.deployment.environment.id],
 		api: {
 			enableGraphqlEndpoint: false,

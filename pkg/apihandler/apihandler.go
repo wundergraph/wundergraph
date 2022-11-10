@@ -11,7 +11,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -135,10 +134,10 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		}
 	}
 
-	r.router = r.createSubRouter(router, api.PathPrefix)
+	r.router = r.createSubRouter(router)
 
 	for _, webhook := range api.Webhooks {
-		err = r.registerWebhook(webhook, api.PathPrefix)
+		err = r.registerWebhook(webhook)
 		if err != nil {
 			r.log.Error("register webhook", abstractlogger.Error(err))
 		}
@@ -186,7 +185,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	// limiter := rate.NewLimiter(rate.Every(time.Second), 10)
 
 	r.log.Debug("configuring API",
-		abstractlogger.String("name", api.PathPrefix),
 		abstractlogger.Int("numOfOperations", len(api.Operations)),
 	)
 
@@ -221,12 +219,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			return corsMiddleware.Handler(handler)
 		})
 		r.log.Debug("configuring CORS",
-			abstractlogger.String("api", api.PathPrefix),
 			abstractlogger.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
 		)
 	}
 
-	r.registerAuth(api.PathPrefix, r.insecureCookies)
+	r.registerAuth(r.insecureCookies)
 
 	for _, s3Provider := range api.S3UploadConfiguration {
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
@@ -244,7 +241,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
 			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
 			r.log.Debug("register S3 provider", abstractlogger.String("provider", s3Provider.Name))
-			r.log.Debug("register S3 endpoint", abstractlogger.String("path", path.Join(r.api.PathPrefix, s3Path)))
+			r.log.Debug("register S3 endpoint", abstractlogger.String("path", s3Path))
 		}
 	}
 
@@ -281,19 +278,18 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
 		r.log.Debug("registered GraphQLHandler",
 			abstractlogger.String("method", http.MethodPost),
-			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
+			abstractlogger.String("path", apiPath),
 		)
 
 		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
-			log:           r.log,
-			html:          graphiql.GetGraphiqlPlaygroundHTML(),
-			apiPathPrefix: api.PathPrefix,
-			nodeUrl:       api.Options.PublicNodeUrl,
+			log:     r.log,
+			html:    graphiql.GetGraphiqlPlaygroundHTML(),
+			nodeUrl: api.Options.PublicNodeUrl,
 		}
 		r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
 		r.log.Debug("registered GraphQLPlaygroundHandler",
 			abstractlogger.String("method", http.MethodGet),
-			abstractlogger.String("path", path.Join(api.PathPrefix, apiPath)),
+			abstractlogger.String("path", apiPath),
 		)
 
 	}
@@ -349,23 +345,13 @@ WithNext:
 	return fields
 }
 
-func (r *Builder) createSubRouter(router *mux.Router, pathPrefix string) *mux.Router {
-
+func (r *Builder) createSubRouter(router *mux.Router) *mux.Router {
 	route := router.NewRoute()
-
-	// add api path prefix
-	prefix := fmt.Sprintf("/%s", pathPrefix)
-	route.PathPrefix(prefix)
-
-	r.log.Debug("create sub router",
-		abstractlogger.String("pathPrefix", prefix),
-	)
-
 	return route.Subrouter()
 }
 
-func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration, pathPrefix string) error {
-	handler, err := webhookhandler.New(config, pathPrefix, r.hooksServerURL, r.log)
+func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
+	handler, err := webhookhandler.New(config, r.hooksServerURL, r.log)
 	if err != nil {
 		return err
 	}
@@ -498,7 +484,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 		r.log.Debug("registered QueryHandler",
 			abstractlogger.String("method", http.MethodGet),
-			abstractlogger.String("path", path.Join(r.api.PathPrefix, apiPath)),
+			abstractlogger.String("path", apiPath),
 			abstractlogger.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
 			abstractlogger.Bool("cacheEnabled", handler.cacheConfig.enable),
 			abstractlogger.Int("cacheMaxAge", int(handler.cacheConfig.maxAge)),
@@ -540,7 +526,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 		r.log.Debug("registered MutationHandler",
 			abstractlogger.String("method", http.MethodPost),
-			abstractlogger.String("path", path.Join(r.api.PathPrefix, apiPath)),
+			abstractlogger.String("path", apiPath),
 			abstractlogger.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
 			abstractlogger.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
@@ -579,7 +565,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 		r.log.Debug("registered SubscriptionHandler",
 			abstractlogger.String("method", http.MethodGet),
-			abstractlogger.String("path", path.Join(r.api.PathPrefix, apiPath)),
+			abstractlogger.String("path", apiPath),
 			abstractlogger.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
 			abstractlogger.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
@@ -615,7 +601,6 @@ func (r *Builder) configureCache(api *Api) (err error) {
 	case wgpb.ApiCacheKind_IN_MEMORY_CACHE:
 		r.log.Debug("configureCache",
 			abstractlogger.String("primaryHost", api.PrimaryHost),
-			abstractlogger.String("pathPrefix", api.PathPrefix),
 			abstractlogger.String("deploymentID", api.DeploymentId),
 			abstractlogger.String("cacheKind", config.Kind.String()),
 			abstractlogger.Int("cacheSize", int(config.InMemoryConfig.MaxSize)),
@@ -628,7 +613,6 @@ func (r *Builder) configureCache(api *Api) (err error) {
 
 		r.log.Debug("configureCache",
 			abstractlogger.String("primaryHost", api.PrimaryHost),
-			abstractlogger.String("pathPrefix", api.PathPrefix),
 			abstractlogger.String("deploymentID", api.DeploymentId),
 			abstractlogger.String("cacheKind", config.Kind.String()),
 			abstractlogger.String("envVar", config.RedisConfig.RedisUrlEnvVar),
@@ -640,7 +624,6 @@ func (r *Builder) configureCache(api *Api) (err error) {
 	default:
 		r.log.Debug("configureCache",
 			abstractlogger.String("primaryHost", api.PrimaryHost),
-			abstractlogger.String("pathPrefix", api.PathPrefix),
 			abstractlogger.String("deploymentID", api.DeploymentId),
 			abstractlogger.String("cacheKind", config.Kind.String()),
 		)
@@ -650,16 +633,13 @@ func (r *Builder) configureCache(api *Api) (err error) {
 }
 
 type GraphQLPlaygroundHandler struct {
-	log           abstractlogger.Logger
-	html          string
-	nodeUrl       string
-	apiPathPrefix string
+	log     abstractlogger.Logger
+	html    string
+	nodeUrl string
 }
 
 func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	apiURL := fmt.Sprintf("%s/%s", strings.TrimSuffix(h.nodeUrl, "/"), strings.TrimPrefix(h.apiPathPrefix, "/"))
-
-	tpl := strings.Replace(h.html, "{{apiURL}}", apiURL, 1)
+	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
 	resp := []byte(tpl)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -1834,7 +1814,7 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 	return left
 }
 
-func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
+func (r *Builder) registerAuth(insecureCookies bool) {
 
 	var (
 		hashKey, blockKey, csrfSecret []byte
@@ -1880,7 +1860,6 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 
 	r.router.Use(authentication.NewLoadUserMw(loadUserConfig))
 	r.router.Use(authentication.NewCSRFMw(authentication.CSRFConfig{
-		Path:            pathPrefix,
 		InsecureCookies: insecureCookies,
 		Secret:          csrfSecret,
 	}))
@@ -1900,10 +1879,10 @@ func (r *Builder) registerAuth(pathPrefix string, insecureCookies bool) {
 	})
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
-	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks, pathPrefix)
+	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)
 }
 
-func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks, pathPrefix string) {
+func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks) {
 
 	router.Path("/user/logout").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.UserLogoutHandler{
 		InsecureCookies:                  r.insecureCookies,
@@ -1916,7 +1895,7 @@ func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securec
 	}
 
 	for _, provider := range r.api.AuthenticationConfig.CookieBased.Providers {
-		r.configureCookieProvider(router, provider, cookie, pathPrefix)
+		r.configureCookieProvider(router, provider, cookie)
 	}
 }
 
@@ -2011,7 +1990,7 @@ type OpenIDConnectConfiguration struct {
 	EndSessionEndpoint    string `json:"end_session_endpoint"`
 }
 
-func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie, pathPrefix string) {
+func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie) {
 
 	router.Use(authentication.RedirectAlreadyAuthenticatedUsers(
 		loadvariable.Strings(r.api.AuthenticationConfig.CookieBased.AuthorizedRedirectUris),
@@ -2046,7 +2025,6 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			ClientID:           loadvariable.String(provider.GithubConfig.ClientId),
 			ClientSecret:       loadvariable.String(provider.GithubConfig.ClientSecret),
 			ProviderID:         provider.Id,
-			PathPrefix:         pathPrefix,
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
@@ -2059,7 +2037,6 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		r.log.Debug("api.configureCookieProvider",
 			abstractlogger.String("provider", "github"),
 			abstractlogger.String("providerId", provider.Id),
-			abstractlogger.String("pathPrefix", pathPrefix),
 			abstractlogger.String("clientID", loadvariable.String(provider.GithubConfig.ClientId)),
 		)
 	case wgpb.AuthProviderKind_AuthProviderOIDC:
@@ -2082,7 +2059,6 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			ClientSecret:       loadvariable.String(provider.OidcConfig.ClientSecret),
 			QueryParameters:    queryParameters,
 			ProviderID:         provider.Id,
-			PathPrefix:         pathPrefix,
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
@@ -2095,7 +2071,6 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 		r.log.Debug("api.configureCookieProvider",
 			abstractlogger.String("provider", "oidc"),
 			abstractlogger.String("providerId", provider.Id),
-			abstractlogger.String("pathPrefix", pathPrefix),
 			abstractlogger.String("issuer", loadvariable.String(provider.OidcConfig.Issuer)),
 			abstractlogger.String("clientID", loadvariable.String(provider.OidcConfig.ClientId)),
 		)

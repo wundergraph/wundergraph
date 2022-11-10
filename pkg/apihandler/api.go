@@ -28,7 +28,6 @@ type Options struct {
 type Api struct {
 	PrimaryHost           string
 	Hosts                 []string
-	PathPrefix            string
 	EngineConfiguration   *wgpb.EngineConfiguration
 	EnableSingleFlight    bool
 	EnableGraphqlEndpoint bool
