@@ -1,14 +1,15 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { FC, useState } from 'react';
-import { AuthProviders, useLiveQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useQuery, useUser, useAuth, withWunderGraph } from '../components/generated/nextjs';
 
 const JobsPage: NextPage = () => {
-	const { user, login, logout } = useWunderGraph();
+	const { data: user, isValidating } = useUser();
+	const { login, logout } = useAuth();
 	const [city, setCity] = useState<string>('Berlin');
 	const onClick = () => {
 		if (user === null || user === undefined) {
-			login(AuthProviders.auth0);
+			login('github');
 		} else {
 			logout();
 		}
@@ -66,22 +67,24 @@ const JobsPage: NextPage = () => {
 };
 
 const ProtectedLiveWeather: FC<{ city: string }> = ({ city }) => {
-	const liveWeather = useLiveQuery.ProtectedWeather({
+	const liveWeather = useQuery({
+		operationName: 'ProtectedWeather',
 		input: { forCity: city },
+		liveQuery: true,
+		ssr: true,
 	});
 	return (
 		<div>
-			{liveWeather.result.status === 'requires_authentication' && <p>LiveQuery waiting for user to be authenticated</p>}
-			{liveWeather.result.status === 'loading' && <p>Loading...</p>}
-			{liveWeather.result.status === 'error' && <p>Error</p>}
-			{liveWeather.result.status === 'ok' && (
+			{liveWeather.isLoading && <p>Loading...</p>}
+			{liveWeather.error && <p>Error</p>}
+			{liveWeather.data && (
 				<div>
-					<h3>City: {liveWeather.result.data.getCityByName?.name}</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.coord)}</p>
+					<h3>City: {liveWeather.data.getCityByName?.name}</h3>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.coord)}</p>
 					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.temperature)}</p>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.temperature)}</p>
 					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.result.data.getCityByName?.weather?.wind)}</p>
+					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.wind)}</p>
 				</div>
 			)}
 		</div>

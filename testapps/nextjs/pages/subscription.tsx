@@ -1,41 +1,18 @@
 import Head from 'next/head';
 import styles from '../../styles/Home.module.css';
 
-import { useState } from 'react';
-import { useMutation } from '../../lib/wundergraph';
+import { useSubscription } from '../components/generated/nextjs';
 
-const NameForm = () => {
-	const mutation = useMutation({
-		operationName: 'SetName',
-		onSuccess(data, key, config) {
-			console.log(data, key, config);
+const Countdown: React.FC = () => {
+	const countdown = useSubscription({
+		operationName: 'Countdown',
+		resetOnMount: true,
+		input: {
+			from: 100,
 		},
 	});
 
-	const [name, setName] = useState('');
-
-	return (
-		<div>
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					mutation.trigger({
-						name,
-					});
-				}}
-			>
-				<div>
-					<label>
-						Name
-						<input name="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
-					</label>
-					<button type="submit">Submit</button>
-				</div>
-
-				<p>{JSON.stringify(mutation.data)}</p>
-			</form>
-		</div>
-	);
+	return <div>{JSON.stringify(countdown)}</div>;
 };
 
 const SWR = () => {
@@ -55,8 +32,8 @@ const SWR = () => {
 				<p className={styles.description}>Take a look at the examples below...</p>
 
 				<div style={{ paddingTop: '80px' }}>
-					<h3>Mutation</h3>
-					<NameForm />
+					<h3>Subscription</h3>
+					<Countdown />
 				</div>
 			</main>
 
