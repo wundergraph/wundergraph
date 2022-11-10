@@ -1,23 +1,18 @@
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
-
-import { useState } from 'react';
+import styles from '../../styles/Home.module.css';
 
 // import SWRConfig from the WunderGraph package,
 // otherwise it's possible to run into issues where the context is not shared.
-import { createHooks, SWRConfig } from '@wundergraph/swr';
+import { SWRConfig } from '@wundergraph/swr';
 
-import { createClient, Operations } from '../components/generated/client';
+import { useQuery } from '../../lib/wundergraph';
+import { useState } from 'react';
 
-const client = createClient();
-
-const { useQuery, useMutation, useUser } = createHooks<Operations>(client);
-
-const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
+const LiveWeather: React.FC<{ city: string; isLive: boolean }> = ({ city, isLive }) => {
 	const liveWeather = useQuery({
 		operationName: 'Weather',
 		input: { forCity: city },
-		liveQuery: true,
+		liveQuery: isLive,
 	});
 
 	return (
@@ -38,39 +33,9 @@ const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
 	);
 };
 
-const NameForm = () => {
-	const mutation = useMutation({
-		operationName: 'SetName',
-	});
-
-	const [name, setName] = useState('');
-
-	return (
-		<div>
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					mutation.mutate({
-						input: { name },
-					});
-				}}
-			>
-				<div>
-					<label>
-						Name
-						<input name="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
-					</label>
-				</div>
-				<button type="submit">Submit</button>
-
-				<p>{JSON.stringify(mutation.data)}</p>
-			</form>
-		</div>
-	);
-};
-
 const SWR = () => {
-	const { data, error } = useUser();
+	const [city, setCity] = useState('Berlin');
+	const [isLive, setLive] = useState(false);
 
 	return (
 		<SWRConfig
@@ -93,21 +58,21 @@ const SWR = () => {
 					<h2 className={styles.subTitle}>
 						... with <a href="https://wundergraph.com?utm_source=nextjs_starter">WunderGraph</a>
 					</h2>
-					<p className={styles.description}>Take a look at the examples below...</p>
+
+					<div style={{ paddingTop: '80px' }}>
+						<div style={{ marginBottom: '20px' }}>
+							<button onClick={() => setLive(!isLive)}>{isLive ? 'Disable' : 'Enable'} LiveQuery</button>
+						</div>
+						<div>
+							<label>
+								City: <input placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+							</label>
+						</div>
+						<div>
+							<LiveWeather city={city} isLive={isLive} />
+						</div>
+					</div>
 				</main>
-
-				<div>
-					<h2>User</h2>
-					{JSON.stringify(data)}
-				</div>
-
-				<div>
-					<LiveWeather city="Berlin" />
-				</div>
-
-				<div>
-					<NameForm />
-				</div>
 
 				<footer className={styles.footer}>
 					Powered by{' '}
