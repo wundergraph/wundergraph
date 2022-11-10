@@ -13,10 +13,12 @@ export const getRepository = async ({
 	exampleName,
 	githubLink,
 	projectName,
+	directoryPath,
 }: {
 	exampleName?: string;
 	githubLink?: string;
 	projectName: string;
+	directoryPath?: string;
 }) => {
 	try {
 		const wgGradient = gradient(['#a855f7', '#ec4899']);
@@ -30,7 +32,7 @@ export const getRepository = async ({
 		);
 
 		if (!exampleName && !githubLink) {
-			const resolvedProjectPath = await createDirectory(projectName);
+			const resolvedProjectPath = await createDirectory(projectName, directoryPath);
 			const examples = await getExamplesList();
 			const selectedExampleName = await inquirer.prompt({
 				name: 'selectExample',
@@ -55,7 +57,7 @@ export const getRepository = async ({
 		}
 		if (exampleName) {
 			const selectedExampleName = await checkIfValidExample(exampleName);
-			const resolvedProjectPath = await createDirectory(projectName);
+			const resolvedProjectPath = await createDirectory(projectName, directoryPath);
 			await retry(
 				() =>
 					downloadAndExtractRepo({
@@ -72,7 +74,7 @@ export const getRepository = async ({
 			return 'success';
 		} else if (githubLink) {
 			const { repoName, repoOwnerName, branch, filePath } = await getRepoInfo(githubLink);
-			const resolvedProjectPath = await createDirectory(projectName);
+			const resolvedProjectPath = await createDirectory(projectName, directoryPath);
 			let selectedBranchName = branch;
 			if (branch === '') {
 				const branchPrompt = await inquirer.prompt({
@@ -89,7 +91,7 @@ export const getRepository = async ({
 				});
 				if (!isBranchValid) {
 					console.log(chalk.red("The given branch name doesn't exist"));
-					process.exit(1);
+					throw "The given branch name doesn't exist";
 				}
 			}
 			await retry(
@@ -109,7 +111,6 @@ export const getRepository = async ({
 		}
 		return '';
 	} catch (e) {
-		console.error('Error', e);
 		throw e;
 	}
 };

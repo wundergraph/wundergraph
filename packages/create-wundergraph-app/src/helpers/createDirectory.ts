@@ -4,8 +4,10 @@ import inquirer from 'inquirer';
 import logSymbols from 'log-symbols';
 import path from 'path';
 
-export const createDirectory = async (projectName: string) => {
-	const currentDirectory = process.cwd();
+export const createDirectory = async (projectName: string, directoryPath?: string) => {
+	let currentDirectory: string;
+	if (!directoryPath) currentDirectory = process.cwd();
+	else currentDirectory = directoryPath;
 	const resolvedProjectPath = path.join(currentDirectory, projectName);
 	try {
 		await fsp.access(resolvedProjectPath);
