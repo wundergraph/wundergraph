@@ -22,7 +22,6 @@ import { WebhooksConfig } from '../webhooks/types';
 import { ServerLogger, resolveServerLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
-import { v4 as uuidv4 } from 'uuid';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
