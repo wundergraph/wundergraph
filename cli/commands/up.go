@@ -186,7 +186,7 @@ var upCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
+			log.Info("hooks EntryPoint not found, skipping", abstractlogger.String("file", serverEntryPointFilename))
 			onAfterBuild = func() error {
 				// generate new config
 				<-configRunner.Run(ctx)
