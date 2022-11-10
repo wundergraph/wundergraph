@@ -1,11 +1,4 @@
-import {
-	Application,
-	authProviders,
-	configureWunderGraphApplication,
-	cors,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import { golangClient } from '@wundergraph/golang-client';
@@ -66,14 +59,9 @@ const db = introspect.sqlite({
 	databaseURL: 'file:./db.sqlite',
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [jsp, weather, countries, spacex, chinook, db],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [jsp, weather, countries, spacex, chinook, db],
 	server,
 	operations,
 	authorization: {
