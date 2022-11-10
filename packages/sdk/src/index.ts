@@ -64,7 +64,7 @@ export type {
 export type { WebhookVerifierConfiguration } from './webhooks/verifiers';
 
 export { default as templates } from './codegen/templates';
-export { Application, introspect, createMockApi, Api } from './definition';
+export { introspect, createMockApi, Api } from './definition';
 export { configureWunderGraphApplication, configurePublishWunderGraphAPI, resolveIntegration } from './configure';
 export { configureWunderGraphOperations, enableAuth, enableCaching, disableAuth } from './configure/operations';
 export { configureWunderGraphServer } from './middleware/server';
