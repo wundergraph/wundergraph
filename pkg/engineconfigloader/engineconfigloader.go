@@ -219,7 +219,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			factory.HTTPClient = client
 		}
 
-		if ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
+		if ds.CustomGraphql.HooksConfiguration != nil && ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
 			factory.OnWsConnectionInitCallback = d.onWsConnectionInitCallback(ds.Id)
 		}
 
