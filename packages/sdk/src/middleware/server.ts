@@ -163,7 +163,7 @@ export const createServer = async ({
 	const fastify = Fastify({
 		logger,
 		genReqId: (req) => {
-			return req.headers['x-request-id']!.toString();
+			return req.headers['x-request-id']?.toString() || '';
 		},
 	});
 
