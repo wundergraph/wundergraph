@@ -908,9 +908,7 @@ export interface ArgumentConfiguration {
 export interface WunderGraphConfiguration {
   api: UserDefinedApi | undefined;
   apiId: string;
-  deploymentName: string;
   environmentIds: string[];
-  apiName: string;
   dangerouslyEnableGraphQLEndpoint: boolean;
 }
 
@@ -3118,14 +3116,7 @@ export const ArgumentConfiguration = {
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-  return {
-    api: undefined,
-    apiId: "",
-    deploymentName: "",
-    environmentIds: [],
-    apiName: "",
-    dangerouslyEnableGraphQLEndpoint: false,
-  };
+  return { api: undefined, apiId: "", environmentIds: [], dangerouslyEnableGraphQLEndpoint: false };
 }
 
 export const WunderGraphConfiguration = {
@@ -3133,9 +3124,7 @@ export const WunderGraphConfiguration = {
     return {
       api: isSet(object.api) ? UserDefinedApi.fromJSON(object.api) : undefined,
       apiId: isSet(object.apiId) ? String(object.apiId) : "",
-      deploymentName: isSet(object.deploymentName) ? String(object.deploymentName) : "",
       environmentIds: Array.isArray(object?.environmentIds) ? object.environmentIds.map((e: any) => String(e)) : [],
-      apiName: isSet(object.apiName) ? String(object.apiName) : "",
       dangerouslyEnableGraphQLEndpoint: isSet(object.dangerouslyEnableGraphQLEndpoint)
         ? Boolean(object.dangerouslyEnableGraphQLEndpoint)
         : false,
@@ -3146,13 +3135,11 @@ export const WunderGraphConfiguration = {
     const obj: any = {};
     message.api !== undefined && (obj.api = message.api ? UserDefinedApi.toJSON(message.api) : undefined);
     message.apiId !== undefined && (obj.apiId = message.apiId);
-    message.deploymentName !== undefined && (obj.deploymentName = message.deploymentName);
     if (message.environmentIds) {
       obj.environmentIds = message.environmentIds.map((e) => e);
     } else {
       obj.environmentIds = [];
     }
-    message.apiName !== undefined && (obj.apiName = message.apiName);
     message.dangerouslyEnableGraphQLEndpoint !== undefined &&
       (obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
     return obj;
@@ -3164,9 +3151,7 @@ export const WunderGraphConfiguration = {
       ? UserDefinedApi.fromPartial(object.api)
       : undefined;
     message.apiId = object.apiId ?? "";
-    message.deploymentName = object.deploymentName ?? "";
     message.environmentIds = object.environmentIds?.map((e) => e) || [];
-    message.apiName = object.apiName ?? "";
     message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
     return message;
   },
