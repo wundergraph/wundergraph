@@ -4,11 +4,11 @@ import { FC, useState } from 'react';
 import { useQuery, useUser, useAuth, withWunderGraph } from '../components/generated/nextjs';
 
 const JobsPage: NextPage = () => {
-	const { user } = useUser();
+	const user = useUser();
 	const { login, logout } = useAuth();
 	const [city, setCity] = useState<string>('Berlin');
 	const onClick = () => {
-		if (user === null || user === undefined) {
+		if (!user.data) {
 			login('github');
 		} else {
 			logout();
