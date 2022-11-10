@@ -4,7 +4,7 @@ import { FC, useState } from 'react';
 import { useQuery, useUser, useAuth, withWunderGraph } from '../components/generated/nextjs';
 
 const JobsPage: NextPage = () => {
-	const { data: user, isValidating } = useUser();
+	const { user } = useUser();
 	const { login, logout } = useAuth();
 	const [city, setCity] = useState<string>('Berlin');
 	const onClick = () => {

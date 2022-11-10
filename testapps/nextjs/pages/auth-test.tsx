@@ -8,7 +8,7 @@ const Page = () => {
 		},
 	});
 	const { login, logout } = useAuth();
-	const { data: user } = useUser();
+	const { user } = useUser();
 
 	return (
 		<div>
