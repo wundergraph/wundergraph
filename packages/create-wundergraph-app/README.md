@@ -14,8 +14,18 @@ pnpm build
 ```shell
 npx create-wundergraph-app --help
 npx create-wundergraph-app --version
+```
+
+### Clone an example from the official WunderGraph Repository
+
+```shell
 npx create-wundergraph-app <project-name>
 npx create-wundergraph-app <project-name> -E <example-name>
+```
+
+### Clone an arbitrary WunderGraph Template Repository
+
+```shell
 npx create-wundergraph-app <project-name> -L <github-link>
 ```
 
