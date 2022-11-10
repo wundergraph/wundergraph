@@ -37,7 +37,3 @@ export interface WithWunderGraphOptions {
 	 */
 	context?: React.Context<WunderGraphContextValue>;
 }
-
-export type ExtendOptions<Hook extends (...args: any) => any, Options = {}> = {
-	(options: Parameters<Hook>[0] & Options): ReturnType<Hook>;
-};

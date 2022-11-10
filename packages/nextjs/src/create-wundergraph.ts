@@ -1,6 +1,6 @@
 import { OperationsDefinition } from '@wundergraph/sdk/client';
-import { createHooks, UseQueryHook } from '@wundergraph/swr';
-import { ExtendOptions, WithWunderGraphOptions } from './types';
+import { createHooks, UseQueryHook, UseSubscriptionHook } from '@wundergraph/swr';
+import { WithWunderGraphOptions } from './types';
 import { withWunderGraph } from './with-wundergraph';
 
 export const createWunderGraphNext = <Operations extends OperationsDefinition>(options: WithWunderGraphOptions) => {
@@ -18,5 +18,6 @@ export const createWunderGraphNext = <Operations extends OperationsDefinition>(o
 		client,
 		...hooks,
 		useQuery: hooks.useQuery as UseQueryHook<Operations, { ssr?: boolean }>,
+		useSubscription: hooks.useSubscription as UseSubscriptionHook<Operations, { ssr?: boolean }>,
 	};
 };
