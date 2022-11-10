@@ -61,7 +61,7 @@ export const Home: React.FC<{ city: string }> = ({ city }) => {
   });
   trigger({ name });
 
-  const { data, error } = useUser();
+  const { user, error } = useUser();
 
   const { upload, data, error } = useFileUpload();
 
