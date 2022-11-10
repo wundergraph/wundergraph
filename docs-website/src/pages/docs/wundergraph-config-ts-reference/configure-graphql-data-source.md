@@ -17,8 +17,7 @@ const countries = introspect.graphql({
   requestTimeoutSeconds: 10, // optional
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [countries],
 })
 ```

@@ -25,6 +25,10 @@ const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
 })
+
+configureWunderGraphApplication({
+  apis: [weather, countries],
+})
 ```
 
 ## Operation Definition
@@ -74,7 +78,7 @@ query (
 ### Step-by-step explanation
 
 As WunderGraph uses a GraphQL to JSON RPC compiler,
-the client starts by requesting the Resource `/api/main/operations/Weather?continent=Europe`,
+the client starts by requesting the Resource `/operations/Weather?continent=Europe`,
 so we're essentially asking to execute the `Weather` operation with the `continent` parameter set to `Europe`.
 
 The server will then validate if the user is authenticated (if enabled) and will return 401 if not.

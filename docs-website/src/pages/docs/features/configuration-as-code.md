@@ -31,12 +31,8 @@ const db = introspect.postgresql({
   database_querystring:
     'postgresql://admin:admin@localhost:54322/example?schema=public',
 })
-const myApplication = new Application({
-  name: 'app',
-  apis: [db],
-})
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [db],
   hooksConfiguration: wunderGraphHooks.config,
   codeGenerators: [
     {
