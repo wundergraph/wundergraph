@@ -170,7 +170,7 @@ export class Client {
 	private async getCSRFToken(): Promise<string> {
 		// request a new CSRF token if we don't have one
 		if (!this.csrfToken) {
-			const res = await this.fetch(this.options.baseURL + '/' + this.options.applicationPath + '/auth/cookie/csrf', {
+			const res = await this.fetch(`${this.options.baseURL}/auth/cookie/csrf`, {
 				headers: {
 					...this.baseHeaders,
 					Accept: 'text/plain',
@@ -230,13 +230,10 @@ export class Client {
 			revalidate: options?.revalidate ? 'true' : 'false',
 		});
 
-		const response = await this.fetchJson(
-			this.addUrlParams(`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/user`, params),
-			{
-				method: 'GET',
-				signal: options?.abortSignal,
-			}
-		);
+		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/cookie/user`, params), {
+			method: 'GET',
+			signal: options?.abortSignal,
+		});
 		if (!response.ok) {
 			throw new ResponseError(`Response is not ok`, response.status);
 		}
@@ -353,7 +350,7 @@ export class Client {
 		});
 
 		const response = await this.fetch(
-			this.addUrlParams(`${this.options.baseURL}/${this.options.applicationPath}/s3/${config.provider}/upload`, params),
+			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
 				headers: {
 					// Dont set the content-type header, the browser will set it for us + boundary
@@ -391,10 +388,7 @@ export class Client {
 			redirect_uri: redirectURI || window.location.toString(),
 		});
 
-		const url = this.addUrlParams(
-			`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/authorize/${authProviderID}`,
-			params
-		);
+		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/authorize/${authProviderID}`, params);
 
 		window.location.assign(url);
 	}
@@ -404,10 +398,7 @@ export class Client {
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
 
-		const url = this.addUrlParams(
-			`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/user/logout`,
-			params
-		);
+		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/user/logout`, params);
 
 		const response = await this.fetch(url, {
 			method: 'GET',

@@ -28,7 +28,6 @@ const createClient = (overrides?: Partial<ClientConfig>) => {
 		sdkVersion: '1.0.0',
 		baseURL: 'https://api.com',
 		applicationHash: '123',
-		applicationPath: 'app',
 		customFetch: fetch as any,
 		operationMetadata: {
 			Weather: {

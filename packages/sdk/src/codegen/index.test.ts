@@ -442,7 +442,6 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				deployment: {
-					path: '/',
 					api: {
 						id: '',
 					},

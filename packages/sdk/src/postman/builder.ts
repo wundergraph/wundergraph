@@ -4,7 +4,6 @@ import { Collection, Request } from 'postman-collection';
 import { GraphQLOperation } from '../graphql/operations';
 
 export interface PostmanBuilderOptions {
-	applicationPath: string;
 	baseURL: string;
 }
 

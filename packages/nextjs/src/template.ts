@@ -21,7 +21,6 @@ export class NextJsTemplate implements Template {
 		const content = tmpl({
 			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
-			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			modelImports: modelImports(config.application, false, true),

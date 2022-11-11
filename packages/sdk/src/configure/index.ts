@@ -244,7 +244,6 @@ interface ResolvedDeployment {
 		id: string;
 		baseUrl: string;
 	};
-	path: string;
 }
 
 interface S3UploadConfiguration {
@@ -308,7 +307,6 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const deploymentConfiguration: ResolvedDeployment = {
 		api,
 		environment,
-		path: '/',
 	};
 
 	const cors: CorsConfiguration = {
@@ -894,7 +892,6 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			done();
 
 			const postman = PostmanBuilder(app.Operations, {
-				applicationPath: resolved.deployment.path,
 				baseURL: publicNodeUrl,
 			});
 			fs.writeFileSync(
