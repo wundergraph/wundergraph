@@ -1,0 +1,6 @@
+{
+	jsp2_getPost(id: 1) {
+		id
+		title
+	}
+}

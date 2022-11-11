@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -351,14 +352,24 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				typeMappings[i].StatusCodeByteString = []byte(strconv.Itoa(int(in.CustomRest.StatusCodeTypeMappings[i].StatusCode)))
 			}
 
-			fetchUrl := buildFetchUrl(
+			fetchURL := buildFetchUrl(
 				loadvariable.String(in.CustomRest.Fetch.GetUrl()),
 				loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()),
 				loadvariable.String(in.CustomRest.Fetch.GetPath()))
 
+			// resolves arguments like {{ .arguments.tld }} are allowed
+			// unresolved arguments like {tld} are not allowed
+
+			allowed := regexp.MustCompile(`\{\{[^\}]+\}\}`)
+			withoutAllowedArgs := allowed.ReplaceAllString(fetchURL, "")
+			disallowed := regexp.MustCompile(`\{.*\}`)
+			if disallowed.MatchString(withoutAllowedArgs) {
+				return nil, fmt.Errorf("fetchUrl %q contains a placeholder, which is not supported. Placeholders are only allowed when using a static string as the baseURL", fetchURL)
+			}
+
 			restConfig := oas_datasource.Configuration{
 				Fetch: oas_datasource.FetchConfiguration{
-					URL:           fetchUrl,
+					URL:           fetchURL,
 					Method:        in.CustomRest.Fetch.Method.String(),
 					Header:        header,
 					Query:         query,
