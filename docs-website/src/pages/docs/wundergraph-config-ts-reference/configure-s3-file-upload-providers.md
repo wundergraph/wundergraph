@@ -38,5 +38,5 @@ Once configured, `wunderctl up` should show the registration of the S3 storage p
 
 ```shell
 {"level":"debug","ts":"2021-10-18T12:04:30.362585+02:00","msg":"register S3 provider","provider":"minio"}
-{"level":"debug","ts":"2021-10-18T12:04:30.362605+02:00","msg":"register S3 endpoint","path":"api/main/s3/minio/upload"}
+{"level":"debug","ts":"2021-10-18T12:04:30.362605+02:00","msg":"register S3 endpoint","path":"/s3/minio/upload"}
 ```
