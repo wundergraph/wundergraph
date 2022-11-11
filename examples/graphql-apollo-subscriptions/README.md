@@ -7,7 +7,7 @@ Start the chat server:
 ```bash
 cd chat
 go mod download
-go run /server/server.go
+go run server/server.go
 ```
 
 Playground running on: http://localhost:8085
