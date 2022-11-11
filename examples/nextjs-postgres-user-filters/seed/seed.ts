@@ -1,19 +1,22 @@
-import { Client } from '../.wundergraph/generated/wundergraph.client';
+import { createClient } from '../.wundergraph/generated/client';
 import fetch from 'node-fetch';
 
 const seed = async () => {
-	const client = new Client({
-		customFetch: (input, init) => fetch(input, init),
+	const client = createClient({
+		customFetch: fetch as any,
+		baseURL: 'http://localhost:9991/',
 	});
-	const user = await client.query.UserByEmail({
+	const user = await client.query({
+		operationName: 'UserByEmail',
 		input: {
 			email: 'jens@wundergraph.com',
 		},
 	});
-	if (user.status === 'ok' && user.body.data.db_findFirstUser) {
+	if (user?.data?.db_findFirstUser) {
 		return;
 	}
-	const nodes = await client.mutation.CreateNode({
+	const nodes = await client.mutate({
+		operationName: 'CreateNode',
 		input: {
 			data: [
 				{
@@ -36,7 +39,8 @@ const seed = async () => {
 		},
 	});
 	console.log('seed:nodes', nodes);
-	const out = await client.mutation.CreateUser({
+	const out = await client.mutate({
+		operationName: 'CreateUser',
 		input: {
 			data: {
 				name: 'Jens',

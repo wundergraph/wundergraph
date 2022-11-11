@@ -30,7 +30,7 @@ const federatedApi = introspect.federation({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [federatedApi, db],
+	apis: [federatedApi],
 });
 
 // configureWunderGraph emits the configuration
