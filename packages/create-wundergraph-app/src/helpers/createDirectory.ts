@@ -22,10 +22,11 @@ export const createDirectory = async (projectName: string, directoryPath?: strin
 			await fsp.mkdir(resolvedProjectPath, { recursive: true });
 		} else {
 			console.log(chalk.red('Please retry the command with a different project name'));
-			process.exit(1);
+			throw new Error('Please retry the command with a different project name');
 		}
-	} catch (e) {
+	} catch (e: any) {
 		// comes to the catch block when it cant find the directory
+		if (e.message === 'Please retry the command with a different project name') throw e;
 		await fsp.mkdir(resolvedProjectPath, { recursive: true });
 	}
 	process.chdir(resolvedProjectPath);
