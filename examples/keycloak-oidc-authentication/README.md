@@ -7,9 +7,9 @@
 1. Go to [GitHub profile settings](https://github.com/settings/developers) and create a new OAuth app.
 2. Generate client secret
 3. Set authorization callback URL to: `http://localhost:8080/realms/demo/broker/github/endpoint`, and home page URL to: `http://localhost:3000`
-4. Copy the `Client ID` and `Client Secret` to the clipboard
-5. Rename the `.example.env` file to `.env`
-6. Paste the credentials into the `.env` file
+4. Rename the `.example.env` file to `.env`
+5. Copy `Client ID` as set it as `GITHUB_APP_CLIENT_ID` in the `.env` file
+6. Click on `Generate a new client secret` copy the secret and set as `GITHUB_APP_CLIENT_SECRET` in the `.env` file
 
 ### 2. Install & Start
 
