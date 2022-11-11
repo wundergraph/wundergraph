@@ -1,3 +1,3 @@
-{
+query {
 	gql_hello
 }

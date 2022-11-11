@@ -9,20 +9,21 @@ npm install && npm start
 #### Get all Continents
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Continents
+curl http://localhost:9991/app/main/operations/Continents
 ```
 
 #### Get Andorra
 
 ```shell
-curl --location -g --request GET 'http://localhost:9991/app/main/operations/Countries?wg_variables={ "filter": {"code": { "eq": "AD" } } }' \
---header 'Content-Type: application/json'
+curl --get --data-urlencode 'wg_variables={ "filter": {"code": { "eq": "AD" } } }' \
+    --header 'Content-Type: application/json' \
+    http://localhost:9991/app/main/operations/Countries
 ```
 
 #### Call your custom GraphQL server
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Hello
+curl http://localhost:9991/app/main/operations/Hello
 ```
 
 ## Learn More

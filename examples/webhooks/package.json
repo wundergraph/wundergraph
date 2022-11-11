@@ -6,7 +6,7 @@
     "start": "run-p wundergraph open",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
-    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/app/main/webhooks/Dragons",
+    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/app/main/webhooks/github",
     "wunderctl": "wunderctl",
     "check": "tsc --noEmit"
   },

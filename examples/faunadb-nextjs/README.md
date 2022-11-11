@@ -15,7 +15,7 @@ We are going to make your database accessible through JSON-RPC to your Next.js a
     - Region Group: Choose the one that works best for you.
     - [x] Use demo data.
 
-3.  Create a API token under `Security`.
+3.  Create a a secret key under `Security`.
 
     - Database: `test`
     - Role: `Admin`
