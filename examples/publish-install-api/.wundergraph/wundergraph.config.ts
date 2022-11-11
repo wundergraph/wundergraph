@@ -1,5 +1,4 @@
 import {
-	Application,
 	configurePublishWunderGraphAPI,
 	configureWunderGraphApplication,
 	cors,
@@ -29,15 +28,9 @@ const weatherApi = introspect.graphql({
         .addStaticHeader("Authorization", new EnvironmentVariable("AUTH_TOKEN"))*/
 });
 
-// uncomment this section to use the weather and spacex API
-const myApplication = new Application({
-	name: 'app',
-	apis: [weatherApi, integrations.starptech.spacex()],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [weatherApi, integrations.starptech.spacex()],
 	cors: {
 		...cors.allowAll,
 		allowedOrigins:
