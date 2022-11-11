@@ -21,7 +21,7 @@ npm install && npm start
 #### Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Chat
+curl -N http://localhost:9991/operations/Chat
 ```
 
 Go to the playground and run the following query:

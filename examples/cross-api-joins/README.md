@@ -9,7 +9,7 @@ npm install && npm start
 #### Get weather for a country capital
 
 ```shell
-curl -v --get --data-urlencode 'wg_variables={"countryCode": "ES"}' 'http://localhost:9991/api/main/operations/CountryWeather
+curl -v --get --data-urlencode 'wg_variables={"countryCode": "ES"}' 'http://localhost:9991/operations/CountryWeather
 ```
 
 ## Learn More
