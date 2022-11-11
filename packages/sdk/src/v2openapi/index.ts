@@ -31,6 +31,7 @@ import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
+	ConfigurationVariable,
 	ConfigurationVariableKind,
 	DataSourceKind,
 	FieldConfiguration,
@@ -45,7 +46,7 @@ import {
 	applyNameSpaceToGraphQLSchema,
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
-import { mapInputVariable } from '../configure/variables';
+import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
@@ -399,10 +400,14 @@ class RESTApiBuilder {
 				return;
 			}
 			const componentSchema = resolved.schema;
-			const type = componentSchema.type
-			if (!componentSchema.enum && type && (['boolean', 'integer', 'number', 'string'] as JSONSchema7Type[]).includes(type)) {
+			const type = componentSchema.type;
+			if (
+				!componentSchema.enum &&
+				type &&
+				(['boolean', 'integer', 'number', 'string'] as JSONSchema7Type[]).includes(type)
+			) {
 				// Primitive type references use the referenced schema as their own
-				schema = componentSchema
+				schema = componentSchema;
 			} else {
 				ref = resolved.ref;
 				let fieldTypeName = ref;
@@ -674,7 +679,7 @@ class RESTApiBuilder {
 		};
 		return true;
 	};
-	private baseURL = (): string => {
+	private baseURL = (): InputVariable => {
 		if (this.introspection.baseURL) {
 			return this.introspection.baseURL;
 		}
@@ -684,7 +689,13 @@ class RESTApiBuilder {
 		const secure = this.spec.servers.find((server) => server.url.startsWith('https'));
 		return secure ? secure.url : this.spec.servers[0].url;
 	};
-	private cleanupBaseURL = (url: string): string => {
+	private cleanupBaseURL = (url: InputVariable): InputVariable => {
+		if ((url as EnvironmentVariable).name) {
+			return url;
+		}
+		if (typeof url !== 'string') {
+			throw new Error('url must be an environment variable or a string');
+		}
 		return url.replace(/{[a-zA-Z]+}/, (str) => {
 			const arg = this.sanitizeName(str.substring(1, str.length - 1));
 			this.baseUrlArgs.push(arg);
