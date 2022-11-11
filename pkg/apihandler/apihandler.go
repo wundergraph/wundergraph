@@ -189,6 +189,18 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		zap.Int("numOfOperations", len(api.Operations)),
 	)
 
+	// Redirect from old-style URL, for temporary backwards compatibility
+	r.router.MatcherFunc(func(r *http.Request, rm *mux.RouteMatch) bool {
+		components := strings.Split(r.URL.Path, "/")
+		return len(components) > 2 && components[2] == "main"
+	}).HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		components := strings.Split(req.URL.Path, "/")
+		location := "/" + strings.Join(components[3:], "/")
+		w.Header().Set("Location", location)
+		w.WriteHeader(http.StatusPermanentRedirect)
+		r.log.Warn("this URL is deprecated and will be removed in a future release", zap.String("URL", req.URL.Path))
+	})
+
 	if len(api.Hosts) > 0 {
 		r.router.Use(func(handler http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
