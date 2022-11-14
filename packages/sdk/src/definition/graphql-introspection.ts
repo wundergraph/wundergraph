@@ -80,8 +80,8 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
 		schema = lexicographicSortSchema(schema);
 		const federationEnabled = isFederationService(schema);
-		let schemaSDL = cleanupSchema(schema, introspection);
-		schemaSDL = transformSchema.replaceCustomScalars(schemaSDL, introspection);
+		const upstreamSchema = cleanupSchema(schema, introspection);
+		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
 		const serviceSDL = !federationEnabled
 			? undefined
 			: introspection.loadSchemaFromString
@@ -142,10 +142,11 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							Enabled: federationEnabled,
 							ServiceSDL: serviceSDL || '',
 						},
-						UpstreamSchema: schemaSDL,
+						UpstreamSchema: upstreamSchema,
 						HooksConfiguration: {
 							onWSTransportConnectionInit: false,
 						},
+						CustomScalarTypeFields: customScalarTypeFields,
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
 					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,

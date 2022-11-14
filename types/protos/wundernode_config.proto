@@ -275,6 +275,7 @@ message DataSourceCustom_GraphQL {
 	GraphQLFederationConfiguration federation = 3;
 	string upstreamSchema = 4;
 	GraphQLDataSourceHooksConfiguration hooksConfiguration = 5;
+	repeated SingleTypeField customScalarTypeFields = 6;
 }
 
 message DataSourceCustom_Database {
