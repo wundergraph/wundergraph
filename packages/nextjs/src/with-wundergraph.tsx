@@ -27,7 +27,7 @@ interface SSRConfig extends PublicConfiguration {
 }
 
 const SSRMiddleWare = ((useSWRNext: SWRHook) => {
-	return (key: Key, fetcher: BareFetcher, config: SSRConfig) => {
+	return (key: Key, fetcher: BareFetcher | null, config: SSRConfig) => {
 		const swr = useSWRNext(key, fetcher, config);
 
 		const isSSR = typeof window === 'undefined' && config.ssr !== false;
@@ -45,9 +45,10 @@ const SSRMiddleWare = ((useSWRNext: SWRHook) => {
 
 		const shouldAuthenticate = client.isAuthenticatedOperation(operationName) && !user;
 
-		if (!fetcher && liveQuery) {
+		let ssrFetcher = fetcher;
+		if (!ssrFetcher && liveQuery) {
 			// Live queries and subscriptions don't have a fetcher so we create one to fetch the initial data on SSR.
-			fetcher = async () => {
+			ssrFetcher = async () => {
 				const result = await client.query({ operationName, input, subscribeOnce: true });
 				if (result.error) {
 					throw result.error;
@@ -56,8 +57,8 @@ const SSRMiddleWare = ((useSWRNext: SWRHook) => {
 			};
 		}
 
-		if (ssrCache && !ssrCache[_key] && fetcher && !shouldAuthenticate) {
-			ssrCache[_key] = fetcher(key);
+		if (ssrCache && !ssrCache[_key] && ssrFetcher && !shouldAuthenticate) {
+			ssrCache[_key] = ssrFetcher(key);
 		}
 
 		return swr;
