@@ -13,8 +13,7 @@ const counter = introspect.graphql({
   url: 'http://127.0.0.1:4000/graphql',
 });
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [counter],
 });
 ```
