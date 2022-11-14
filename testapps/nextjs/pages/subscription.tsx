@@ -1,12 +1,11 @@
 import Head from 'next/head';
-import styles from '../../styles/Home.module.css';
+import styles from '../styles/Home.module.css';
 
-import { useSubscription } from '../components/generated/nextjs';
+import { useSubscription, withWunderGraph } from '../components/generated/nextjs';
 
 const Countdown: React.FC = () => {
 	const countdown = useSubscription({
 		operationName: 'Countdown',
-		resetOnMount: true,
 		input: {
 			from: 100,
 		},
@@ -53,4 +52,6 @@ const SWR = () => {
 	);
 };
 
-export default SWR;
+export default withWunderGraph(SWR, {
+	ssr: true,
+});
