@@ -46,16 +46,14 @@ const LiveWeather: FC<{ city: string }> = ({ city }) => {
 	});
 	return (
 		<div>
-			{!liveWeather.isLoading && (
-				<div>
-					<h3>City: {liveWeather.data?.getCityByName?.name}</h3>
-					<p>{JSON.stringify(liveWeather.data?.getCityByName?.coord)}</p>
-					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.data?.getCityByName?.weather?.temperature)}</p>
-					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.data?.getCityByName?.weather?.wind)}</p>
-				</div>
-			)}
+			<div>
+				<h3>City: {liveWeather.data?.getCityByName?.name}</h3>
+				<p>{JSON.stringify(liveWeather.data?.getCityByName?.coord)}</p>
+				<h3>Temperature</h3>
+				<p>{JSON.stringify(liveWeather.data?.getCityByName?.weather?.temperature)}</p>
+				<h3>Wind</h3>
+				<p>{JSON.stringify(liveWeather.data?.getCityByName?.weather?.wind)}</p>
+			</div>
 		</div>
 	);
 };
