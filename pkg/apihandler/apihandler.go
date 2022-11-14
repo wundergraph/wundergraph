@@ -194,11 +194,10 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		components := strings.Split(r.URL.Path, "/")
 		return len(components) > 2 && components[2] == "main"
 	}).HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		components := strings.Split(req.URL.Path, "/")
-		location := "/" + strings.Join(components[3:], "/")
-		w.Header().Set("Location", location)
-		w.WriteHeader(http.StatusPermanentRedirect)
 		r.log.Warn("this URL is deprecated and will be removed in a future release", zap.String("URL", req.URL.Path))
+		components := strings.Split(req.URL.Path, "/")
+		req.URL.Path = "/" + strings.Join(components[3:], "/")
+		r.router.ServeHTTP(w, req)
 	})
 
 	if len(api.Hosts) > 0 {
