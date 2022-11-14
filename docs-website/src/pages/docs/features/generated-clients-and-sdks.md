@@ -49,22 +49,28 @@ interface Props {
 }
 
 const IndexPage: NextPage<Props> = ({ products }) => {
-  const {
-    client: { login, logout },
-    user,
-  } = useWunderGraph()
-  const fakeProducts = useQuery.FakeProducts({
+  const { login, logout } = useAuth()
+  const user = useUser()
+  const fakeProducts = useQuery({
+    operationName: 'FakeProducts',
     input: { first: 5 },
     initialState: products,
   })
-  const { mutate: setPrice, response: price } = useMutation.SetPrice({
+  const price = useMutation({
+    operationName: 'SetPrice',
     input: { price: 0, upc: '1' },
   })
-  const priceUpdate = useSubscription.PriceUpdates()
-  const oasUsers = useQuery.OasUsers({ refetchOnWindowFocus: true })
-  const countries = useQuery.Countries()
-  const { response: liveProducts } = useLiveQuery.TopProducts()
-  const users = useQuery.Users()
+  const priceUpdate = useSubscription({ operationName: 'PriceUpdates' })
+  const oasUsers = useQuery({
+    operationName: 'OasUsers',
+    refetchOnWindowFocus: true,
+  })
+  const countries = useQuery({ operationName: 'Countries' })
+  const liveProducts = useQuery({
+    operationName: 'TopProducts',
+    liveQuery: true,
+  })
+  const users = useQuery({ operationName: 'Users' })
   return (
     <div>
       <h1>Hello Wundergraph</h1>
