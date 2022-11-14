@@ -297,7 +297,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			onSuccess: onSuccessProp,
 			onError: onErrorProp,
 		} = options;
-		const key = { operationName, input };
+		const key = { operationName, input, subscription: true };
 		const _key = serialize(key);
 
 		const { data, error } = useSWR(enabled ? key : null, null);

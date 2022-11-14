@@ -4,6 +4,7 @@ export type SSRCache = Record<string, any>;
 
 export interface WunderGraphContextValue {
 	ssrCache: SSRCache;
+	ssr: boolean;
 	client: Client;
 	user: User;
 }
