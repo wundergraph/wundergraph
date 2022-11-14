@@ -17,9 +17,7 @@ following their [official instructions](https://nodejs.org).
 
 ```shell
 # Init a new project with the Next.js starter kit
-npx -y @wundergraph/wunderctl init \
-	--template nextjs-starter \
-	-o my-project
+npx create-wundergraph-app my-project -E nextjs
 
 # Move the the project directory
 cd my-project
