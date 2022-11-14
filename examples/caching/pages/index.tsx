@@ -2,9 +2,11 @@ import { NextPage } from 'next';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const stores = useQuery.Dragons();
+	const dragons = useQuery({
+		operationName: 'Dragons',
+	});
 	const refresh = () => {
-		stores.refetch();
+		dragons.mutate();
 	};
 	return (
 		<div>
@@ -57,7 +59,7 @@ const Home: NextPage = () => {
 							<code className="font-mono font-medium text-sky-500 font-bold">60s</code> in the browser & server-side in
 							memory.
 						</p>
-						<code className="p-3">{JSON.stringify(stores, null, 2)}</code>
+						<code className="p-3">{JSON.stringify(dragons, null, 2)}</code>
 					</div>
 					<div className="flex justify-center mt-8">
 						<button
@@ -67,7 +69,7 @@ const Home: NextPage = () => {
 							<svg
 								stroke="currentColor"
 								fill="currentColor"
-								stroke-width="0"
+								strokeWidth="0"
 								viewBox="0 0 24 24"
 								className="w-6 h-6 mr-2 -ml-1"
 								height="1em"
