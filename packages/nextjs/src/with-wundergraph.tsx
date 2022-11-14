@@ -50,8 +50,12 @@ const SSRMiddleWare = ((useSWRNext: SWRHook) => {
 }) as unknown as Middleware;
 
 export const withWunderGraph = (options: WithWunderGraphOptions) => {
-	return (AppOrPage: NextComponentType<any, any, any>): NextComponentType => {
-		const { client, userCacheKey = userSWRKey, context } = options;
+	return (AppOrPage: NextComponentType<any, any, any>, overrideOptions?: WithWunderGraphOptions): NextComponentType => {
+		const _options = {
+			...options,
+			...overrideOptions,
+		};
+		const { client, userCacheKey = userSWRKey, context, ssr, fetchUserSSR, logPrerenderTime } = _options;
 
 		const WithWunderGraph = (props: AppPropsType<NextRouter, any> & { ssrCache: SSRCache; user: User }) => {
 			const { ssrCache = {}, user } = props;
@@ -65,7 +69,7 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 			);
 		};
 
-		if (AppOrPage.getInitialProps || options.ssr) {
+		if (AppOrPage.getInitialProps || ssr) {
 			WithWunderGraph.getInitialProps = async (appOrPageCtx: AppContextType) => {
 				const AppTree = appOrPageCtx.AppTree;
 				const isApp = !!appOrPageCtx.Component;
@@ -87,7 +91,7 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 
 				const getAppTreeProps = (props: Record<string, unknown>) => (isApp ? { pageProps: props } : props);
 
-				if (typeof window !== 'undefined' || !options.ssr) {
+				if (typeof window !== 'undefined' || !ssr) {
 					// we're on the client
 					// no need to do all the SSR stuff.
 					return getAppTreeProps(pageProps);
@@ -102,13 +106,13 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 
 				let ssrUser: User | null = null;
 
-				if (options?.fetchUserSSR !== false) {
+				if (fetchUserSSR !== false) {
 					try {
 						ssrUser = await client.fetchUser();
 					} catch (e) {}
 				}
 
-				const start = options?.logPrerenderTime ? process.hrtime() : undefined;
+				const start = logPrerenderTime ? process.hrtime() : undefined;
 
 				if (ssrUser) {
 					ssrCache[userCacheKey] = ssrUser;
@@ -139,7 +143,7 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 					}
 				}
 
-				if (options?.logPrerenderTime && start) {
+				if (logPrerenderTime && start) {
 					const precision = 3; // 3 decimal places
 					const elapsed = process.hrtime(start)[1] / 1000000; // divide by a million to get nano to milli
 					console.log(process.hrtime(start)[0] + ' s, ' + elapsed.toFixed(precision) + ' ms - render'); // print message + time
