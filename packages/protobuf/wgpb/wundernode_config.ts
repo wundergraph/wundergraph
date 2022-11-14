@@ -775,6 +775,7 @@ export interface DataSourceCustomGraphQL {
 	upstreamSchema: string;
 	hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
 	customScalarTypeFields: SingleTypeField[];
+	graphQLSchema: string;
 }
 
 export interface DataSourceCustomDatabase {
@@ -2379,6 +2380,7 @@ function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
 		upstreamSchema: '',
 		hooksConfiguration: undefined,
 		customScalarTypeFields: [],
+		graphQLSchema: '',
 	};
 }
 
@@ -2397,6 +2399,7 @@ export const DataSourceCustomGraphQL = {
 			customScalarTypeFields: Array.isArray(object?.customScalarTypeFields)
 				? object.customScalarTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
 				: [],
+			graphQLSchema: isSet(object.graphQLSchema) ? String(object.graphQLSchema) : '',
 		};
 	},
 
@@ -2421,6 +2424,7 @@ export const DataSourceCustomGraphQL = {
 		} else {
 			obj.customScalarTypeFields = [];
 		}
+		message.graphQLSchema !== undefined && (obj.graphQLSchema = message.graphQLSchema);
 		return obj;
 	},
 
@@ -2442,6 +2446,7 @@ export const DataSourceCustomGraphQL = {
 				? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
 				: undefined;
 		message.customScalarTypeFields = object.customScalarTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];
+		message.graphQLSchema = object.graphQLSchema ?? '';
 		return message;
 	},
 };

@@ -430,6 +430,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
 				UpstreamSchema:         in.CustomGraphql.UpstreamSchema,
+				GraphQLSchema:          in.CustomGraphql.GraphQLSchema,
 				CustomScalarTypeFields: customScalarTypeFields,
 			})
 		case wgpb.DataSourceKind_POSTGRESQL,

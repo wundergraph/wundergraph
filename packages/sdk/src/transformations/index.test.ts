@@ -49,6 +49,7 @@ test('renameTypes', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							GraphQLSchema: '',
 							HooksConfiguration: {
 								onWSTransportConnectionInit: false,
 							},
@@ -119,6 +120,7 @@ test('renameTypes', async () => {
 						urlEncodeBody: false,
 					},
 					UpstreamSchema: '',
+					GraphQLSchema: '',
 					HooksConfiguration: {
 						onWSTransportConnectionInit: false,
 					},
@@ -190,6 +192,7 @@ test('renameTypeFields', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							GraphQLSchema: '',
 							HooksConfiguration: {
 								onWSTransportConnectionInit: false,
 							},
@@ -279,6 +282,7 @@ test('renameTypeFields', async () => {
 								urlEncodeBody: false,
 							},
 							UpstreamSchema: '',
+							GraphQLSchema: '',
 							HooksConfiguration: {
 								onWSTransportConnectionInit: false,
 							},

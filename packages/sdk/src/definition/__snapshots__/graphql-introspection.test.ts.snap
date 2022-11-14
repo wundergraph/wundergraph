@@ -65,6 +65,17 @@ type User @key(fields: "id") {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": """""""
+type Query {
+  me: User
+}
+
+""""""
+type User {
+  id: ID!
+  name: String
+  username: String
+}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -216,6 +227,29 @@ type Product @extends @key(fields: "upc") {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": """""""
+type Product {
+  reviews: [Review]
+  upc: String!
+}
+
+""""""
+type Query
+
+""""""
+type Review {
+  author: User
+  body: String
+  id: ID!
+  product: Product
+}
+
+""""""
+type User {
+  id: ID!
+  reviews: [Review]
+  username: String
+}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -374,6 +408,28 @@ type Mutation @extends {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": """""""
+type Mutation {
+  setPrice(price: Int!, upc: String!): Product
+}
+
+""""""
+type Product {
+  name: String
+  price: Int
+  upc: String!
+  weight: Int
+}
+
+""""""
+type Query {
+  topProducts(first: Int = 5, random: Boolean): [Product]
+}
+
+""""""
+type Subscription {
+  updatedPrice: Product!
+}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -524,6 +580,17 @@ type Subscription {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": """""""
+type Product {
+  inStock: Boolean
+  price: Int
+  shippingEstimate: Int
+  upc: String!
+  weight: Int
+}
+
+""""""
+type Query",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -1313,6 +1380,15 @@ type User @key(fields: "id") {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": "type Query {
+  me: User
+}
+
+type User {
+  id: ID!
+  name: String
+  username: String
+}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -1462,6 +1538,25 @@ type Product @extends @key(fields: "upc") {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": "type Product {
+  reviews: [Review]
+  upc: String!
+}
+
+type Query
+
+type Review {
+  author: User
+  body: String
+  id: ID!
+  product: Product
+}
+
+type User {
+  id: ID!
+  reviews: [Review]
+  username: String
+}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -1616,6 +1711,24 @@ type Mutation @extends {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": "type Mutation {
+  setPrice(price: Int!, upc: String!): Product
+}
+
+type Product {
+  name: String
+  price: Int
+  upc: String!
+  weight: Int
+}
+
+type Query {
+  topProducts(first: Int = 5, random: Boolean): [Product]
+}
+
+type Subscription {
+  updatedPrice: Product!
+}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },
@@ -1762,6 +1875,15 @@ type Subscription {
           },
           "urlEncodeBody": false,
         },
+        "GraphQLSchema": "type Product {
+  inStock: Boolean
+  price: Int
+  shippingEstimate: Int
+  upc: String!
+  weight: Int
+}
+
+type Query",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },

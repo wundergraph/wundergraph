@@ -422,6 +422,7 @@ export interface GraphQLApiCustom {
 	UpstreamSchema: string;
 	HooksConfiguration: GraphQLDataSourceHooksConfiguration;
 	CustomScalarTypeFields: SingleTypeField[];
+	GraphQLSchema: string;
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {

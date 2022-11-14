@@ -143,6 +143,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							ServiceSDL: serviceSDL || '',
 						},
 						UpstreamSchema: upstreamSchema,
+						GraphQLSchema: schemaSDL,
 						HooksConfiguration: {
 							onWSTransportConnectionInit: false,
 						},

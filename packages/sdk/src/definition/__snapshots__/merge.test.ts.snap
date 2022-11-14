@@ -76,6 +76,7 @@ exports[`Should be merged: merged_apis 1`] = `
           "urlEncodeBody": false
         },
         "UpstreamSchema": "",
+        "GraphQLSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
         },
@@ -156,6 +157,7 @@ exports[`Should be merged: merged_apis 1`] = `
           "urlEncodeBody": false
         },
         "UpstreamSchema": "",
+        "GraphQLSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
         },
@@ -254,6 +256,7 @@ exports[`Should be merged: merged_apis 1`] = `
           "urlEncodeBody": false
         },
         "UpstreamSchema": "",
+        "GraphQLSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
         },
@@ -332,6 +335,7 @@ exports[`Should be merged: merged_apis 1`] = `
           "urlEncodeBody": false
         },
         "UpstreamSchema": "",
+        "GraphQLSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
         },
