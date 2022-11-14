@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 )
 
 type apiError struct {
@@ -18,10 +18,10 @@ type Client struct {
 	accessToken string
 	baseURL     string
 	client      *http.Client
-	log         abstractlogger.Logger
+	log         *zap.Logger
 }
 
-func New(accessToken string, baseURL string, client *http.Client, log abstractlogger.Logger) *Client {
+func New(accessToken string, baseURL string, client *http.Client, log *zap.Logger) *Client {
 	return &Client{
 		accessToken: accessToken,
 		baseURL:     baseURL,
@@ -115,7 +115,7 @@ func (c *Client) PublishApiDependency(dependency ApiDependency) error {
 		var apiErr apiError
 		err := json.NewDecoder(resp.Body).Decode(&apiErr)
 		if err != nil {
-			c.log.Error("could not encode api error", abstractlogger.Error(err))
+			c.log.Error("could not encode api error", zap.Error(err))
 		}
 		return fmt.Errorf("could not publish api '%s', statusCode: %d", dependency.Name, resp.StatusCode)
 	}

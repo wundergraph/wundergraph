@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 func TestInMemoryCache(t *testing.T) {
@@ -28,7 +28,7 @@ func TestInMemoryCache(t *testing.T) {
 
 func TestRedisCache(t *testing.T) {
 
-	cache, err := NewRedis("0.0.0.0:55001", abstractlogger.NoopLogger)
+	cache, err := NewRedis("0.0.0.0:55001", zap.NewNop())
 	assert.NoError(t, err)
 
 	cache.SetWithTTL("foo", []byte("bar"), time.Second)

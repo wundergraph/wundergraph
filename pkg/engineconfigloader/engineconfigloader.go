@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
@@ -55,7 +55,7 @@ type DefaultFactoryResolver struct {
 }
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper,
-	debug bool, log abstractlogger.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
+	debug bool, log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
 
 	defaultHttpClient := &http.Client{
 		Timeout:   transportFactory.DefaultTransportTimeout(),

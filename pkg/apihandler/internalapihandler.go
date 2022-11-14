@@ -13,7 +13,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
@@ -23,13 +23,14 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 type InternalBuilder struct {
 	pool            *pool.Pool
-	log             abstractlogger.Logger
+	log             *zap.Logger
 	loader          *engineconfigloader.EngineConfigLoader
 	api             *Api
 	planConfig      plan.Configuration
@@ -39,7 +40,7 @@ type InternalBuilder struct {
 	renameTypeNames []resolve.RenameTypeName
 }
 
-func NewInternalBuilder(pool *pool.Pool, log abstractlogger.Logger, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
+func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
 	return &InternalBuilder{
 		pool:   pool,
 		log:    log,
@@ -78,8 +79,8 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	}
 
 	i.log.Debug("configuring API",
-		abstractlogger.String("name", api.PathPrefix),
-		abstractlogger.Int("numOfOperations", len(api.Operations)),
+		zap.String("name", api.PathPrefix),
+		zap.Int("numOfOperations", len(api.Operations)),
 	)
 
 	route := router.NewRoute()
@@ -100,7 +101,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	for _, operation := range api.Operations {
 		err = i.registerOperation(operation)
 		if err != nil {
-			i.log.Error("registerOperation", abstractlogger.Error(err))
+			i.log.Error("registerOperation", zap.Error(err))
 		}
 	}
 
@@ -182,13 +183,16 @@ type InternalApiHandler struct {
 	preparedPlan       *plan.SynchronousResponsePlan
 	operation          *wgpb.Operation
 	extractedVariables []byte
-	log                abstractlogger.Logger
+	log                *zap.Logger
 	resolver           *resolve.Resolver
 	bearerCache        sync.Map
 	renameTypeNames    []resolve.RenameTypeName
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	reqID := r.Header.Get(logging.RequestIDHeader)
+	requestLogger := h.log.With(logging.WithRequestID(reqID))
+	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
 
 	r = setOperationMetaData(r, h.operation)
 
@@ -206,9 +210,9 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// this makes it possible to expose the original client request to hooks triggered by internal requests
 	clientRequest, err := NewRequestFromWunderGraphClientRequest(r.Context(), body)
 	if err != nil {
-		h.log.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
-			abstractlogger.Error(err),
-			abstractlogger.String("url", r.RequestURI),
+		requestLogger.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+			zap.Error(err),
+			zap.String("url", r.RequestURI),
 		)
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
@@ -245,7 +249,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer pool.PutBytesBuffer(buf)
 
 	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if done := handleOperationErr(h.log, resolveErr, w, "Internal API Handler ResolveGraphQLResponse failed", h.operation); done {
+	if done := handleOperationErr(requestLogger, resolveErr, w, "Internal API Handler ResolveGraphQLResponse failed", h.operation); done {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
