@@ -30,7 +30,7 @@ We've pre-defined two GraphQL Operations in the operations directory for you:
 
 You've got multiple options to use the API.
 Let's first have a look at GraphiQL.
-To do so, head over to http://127.0.0.1:9991/app/main/graphql.
+To do so, head over to http://localhost:9991/app/main/graphql.
 
 ### GraphiQL
 
@@ -74,13 +74,13 @@ Now, let's query our JSON-RPC API:
 ### Get the Users
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Users
+curl http://localhost:9991/app/main/operations/Users
 ```
 
 ### Get the Messages
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Messages
+curl GET http://localhost:9991/app/main/operations/Messages
 ```
 
 ## Wrap up

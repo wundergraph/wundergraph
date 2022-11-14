@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.4.9...@wundergraph/swr@0.5.0) (2022-11-11)
+
+### Features
+
+* improved SWR hooks api, useMutation result no longer cached and updated to SWR 2.0 ([#305](https://github.com/wundergraph/wundergraph/issues/305)) ([fc4848b](https://github.com/wundergraph/wundergraph/commit/fc4848b3f15b447a487b31bd3d152f134c6f3aeb)) (@Pagebakers)
+
 ## [0.4.9](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.4.8...@wundergraph/swr@0.4.9) (2022-11-08)
 
 **Note:** Version bump only for package @wundergraph/swr

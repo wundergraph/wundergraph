@@ -9,7 +9,9 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			UserNodes: {
 				mutatingPreResolve: async ({ internalClient }) => {
 					const user = await internalClient.queries.UserByEmail({
-						input: { email: 'jens@wundergraph.com' },
+						input: {
+							email: 'jens@wundergraph.com',
+						},
 					});
 					return {
 						where: {

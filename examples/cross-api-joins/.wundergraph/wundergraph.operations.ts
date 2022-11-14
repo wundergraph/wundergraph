@@ -27,14 +27,5 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
 		subscriptions: (config) => ({
 			...config,
 		}),
-		custom: {
-			Dragons: (config) => ({
-				...config,
-				caching: {
-					...config.caching,
-					enable: true,
-				},
-			}),
-		},
 	},
 });
