@@ -69,13 +69,29 @@ We've simply dropped `/app/main` from the URL structure.
 ## Migration
 
 {% callout type="warning" %}
-This change is backwards compatible, no action required!
+This is a breaking change that might require some changes to your code
 {% /callout %}
 
-If you don't want to migrate your application right now, you don't have to.
-Additionally, the changes we've made allow you to call your application on the old URL structure with a placeholder for the application name:
+Instead of passing your APIs to `Application` and calling `configureWunderGraphApplication()`
+with it, pass your APIs directly to `configureWunderGraphApplication()`. For example:
 
-The following URLs will all be valid:
+```diff
+-const myApplication = new Application({
+-  name: 'app',
+-  apis: [jsp, weather, countries, spacex, chinook, db],
+-})
+-
+ configureWunderGraphApplication({
+-  application: myApplication,
++  apis: [jsp, weather, countries, spacex, chinook, db],
+ })
+```
+
+In order to avoid breaking APIs that you might have exposed to third parties we've temporarily
+kept application URLs backwards compatible. Using the old URL structure will generate a
+warning.
+
+The following URLs continue to work, but are deprecated:
 
 ```shell
 http://localhost:9991/app/main/operations/Weather?city=Berlin
