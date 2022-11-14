@@ -139,10 +139,10 @@ const navigation = [
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
-			{
+			/*{
 				title: 'NextJS Full-Stack Tutorial',
 				href: '/docs/tutorials/nextjs-full-stack-tutorial',
-			},
+			},*/
 		],
 	},
 	{
@@ -198,12 +198,8 @@ const navigation = [
 				href: '/docs/examples/postgresql',
 			},
 			{
-				title: 'PostgreSQL & Prisma',
-				href: '/docs/examples/postgresql-prisma',
-			},
-			{
-				title: 'Publish Install API using WunderHub',
-				href: '/docs/examples/publish-install-api',
+				title: 'NextJS & PostgreSQL & Prisma',
+				href: '/docs/examples/nextjs-postgresql-prisma',
 			},
 			{
 				title: 'Apollo Federation',
