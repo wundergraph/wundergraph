@@ -13,10 +13,11 @@ One of our prime directives is that we, ourselves, want the best possible develo
 
 For that reason, we've built WunderGraph in a way that enables developers to easily build WunderGraph applications on their local machine.
 
-Once you have a WunderGraph application initialized you're able to start your local dev environment with one single command:
+Once you have a WunderGraph application initialized you're able to start your local dev environment with the commands:
 
 ```shell
-wunderctl init
+npx create-wundergraph-app <project-name> -E simple
+cd <project-name>
 npm install && npm start
 ```
 
