@@ -57,8 +57,8 @@ const JobsPage: NextPage = () => {
 				</a>
 			</p>
 			<h2>Login State</h2>
-			<div>{user ? <p>{JSON.stringify(user)}</p> : <p>Not logged in</p>}</div>
-			<button onClick={onClick}>{!user ? 'Login' : 'Logout'}</button>
+			<div>{user.data ? <p>{JSON.stringify(user)}</p> : <p>Not logged in</p>}</div>
+			<button onClick={onClick}>{!user.data ? 'Login' : 'Logout'}</button>
 			<h2>Enter City Search</h2>
 			<input value={city} onChange={(e) => setCity(e.target.value)} />
 			<ProtectedLiveWeather city={city} />
