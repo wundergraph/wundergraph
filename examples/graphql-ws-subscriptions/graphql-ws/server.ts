@@ -51,10 +51,10 @@ fastify.register(async (fastify) => {
 	fastify.get('/graphql', { websocket: true }, makeHandler({ schema }));
 });
 
-fastify.listen(4000, '127.0.0.1', (err) => {
+fastify.listen({ port: 4000, host: '127.0.0.1' }, (err) => {
 	if (err) {
 		fastify.log.error(err);
 		return process.exit(1);
 	}
-	console.log('Listening to port 4000');
+	console.log('Listening on port 4000');
 });
