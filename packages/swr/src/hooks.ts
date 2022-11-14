@@ -61,7 +61,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	const useQuery: UseQueryHook<Operations> = (options) => {
 		const { operationName, liveQuery, enabled = true, input, ...swrConfig } = options;
 		const { onSuccess: onSuccessProp, onError: onErrorProp } = swrConfig;
-		const key = { operationName, input };
+		const key = liveQuery ? { operationName, input, liveQuery } : { operationName, input };
 		const _key = serialize(key);
 
 		const response = useSWR(enabled ? key : null, !liveQuery ? queryFetcher : null, swrConfig);
