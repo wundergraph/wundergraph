@@ -68,7 +68,7 @@ expectType<GraphQLResponseError | undefined>(subError);
 const {
 	data: mutData,
 	error: mutError,
-	mutate,
+	trigger,
 } = useMutation({
 	operationName: 'CreateUser',
 });
@@ -77,11 +77,8 @@ expectType<Operations['mutations']['CreateUser']['data']>(mutData);
 expectType<GraphQLResponseError | undefined>(mutError);
 
 expectType<Promise<any>>(
-	mutate({
-		revalidate: true,
-		input: {
-			name: 'John Doe',
-		},
+	trigger({
+		name: 'John Doe',
 	})
 );
 

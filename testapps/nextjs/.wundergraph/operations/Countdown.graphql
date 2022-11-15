@@ -1,0 +1,3 @@
+subscription ($from: Int!) {
+	countdown: ws_countdown(from: $from)
+}

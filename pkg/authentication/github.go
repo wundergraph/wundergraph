@@ -11,15 +11,15 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
 
 type GithubCookieHandler struct {
-	log abstractlogger.Logger
+	log *zap.Logger
 }
 
-func NewGithubCookieHandler(log abstractlogger.Logger) *GithubCookieHandler {
+func NewGithubCookieHandler(log *zap.Logger) *GithubCookieHandler {
 	return &GithubCookieHandler{
 		log: log,
 	}
@@ -137,7 +137,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		state, err := r.Cookie("state")
 		if err != nil {
 			g.log.Error("GithubCookieHandler state missing",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -145,7 +145,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 
 		if r.URL.Query().Get("state") != state.Value {
 			g.log.Error("GithubCookieHandler state mismatch",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -154,7 +154,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		redirectURI, err := r.Cookie("redirect_uri")
 		if err != nil {
 			g.log.Error("GithubCookieHandler redirect uri missing",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -174,7 +174,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
 		if err != nil {
 			g.log.Error("GithubCookieHandler.exchange.token",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -183,7 +183,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		req, err := http.NewRequest(http.MethodGet, "https://api.github.com/user", nil)
 		if err != nil {
 			g.log.Error("GithubCookieHandler.userInfo.request",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -198,7 +198,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		res, err := client.Do(req)
 		if err != nil {
 			g.log.Error("GithubCookieHandler.userInfo.request.do",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -213,7 +213,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		err = json.NewDecoder(res.Body).Decode(&userInfo)
 		if err != nil {
 			g.log.Error("GithubCookieHandler.userInfo.decode",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -222,7 +222,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		req, err = http.NewRequest(http.MethodGet, "https://api.github.com/user/emails", nil)
 		if err != nil {
 			g.log.Error("GithubCookieHandler.user.emails.request",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -234,7 +234,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		res, err = client.Do(req)
 		if err != nil {
 			g.log.Error("GithubCookieHandler.user.emails.request.do",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -249,7 +249,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		err = json.NewDecoder(res.Body).Decode(&userEmails)
 		if err != nil {
 			g.log.Error("GithubCookieHandler.decode.userEmails",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			return
 		}
@@ -303,7 +303,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
 			if err != nil {
 				g.log.Error("GithubCookieHandler.user.Save",
-					abstractlogger.Error(err),
+					zap.Error(err),
 				)
 				return
 			}

@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"syscall"
 
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -41,7 +41,7 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 // some IDEs, like Goland, don't send a SIGINT to the process group
 // this leads to the middleware hooks server (sub-process) not being killed
 // on subsequent runs of the up command, we're not able to listen on the same port
-func KillExistingHooksProcess(serverListenPort int, log abstractlogger.Logger) {
+func KillExistingHooksProcess(serverListenPort int, log *zap.Logger) {
 	if runtime.GOOS == "windows" {
 		command := fmt.Sprintf("(Get-NetTCPConnection -LocalPort %d).OwningProcess -Force", serverListenPort)
 		execCmd(exec.Command("Stop-Process", "-Id", command), serverListenPort, log)
@@ -51,7 +51,7 @@ func KillExistingHooksProcess(serverListenPort int, log abstractlogger.Logger) {
 	}
 }
 
-func execCmd(cmd *exec.Cmd, serverListenPort int, log abstractlogger.Logger) {
+func execCmd(cmd *exec.Cmd, serverListenPort int, log *zap.Logger) {
 	var waitStatus syscall.WaitStatus
 	if err := cmd.Run(); err != nil {
 		log.Debug(fmt.Sprintf("Error: %s", err.Error()))
@@ -63,7 +63,7 @@ func execCmd(cmd *exec.Cmd, serverListenPort int, log abstractlogger.Logger) {
 	} else {
 		waitStatus = cmd.ProcessState.Sys().(syscall.WaitStatus)
 		log.Debug("Successfully killed existing middleware process",
-			abstractlogger.Int("port", serverListenPort),
+			zap.Int("port", serverListenPort),
 		)
 	}
 }

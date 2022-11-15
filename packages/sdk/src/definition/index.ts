@@ -376,7 +376,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
-	baseURL?: string;
+	baseURL?: InputVariable;
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;

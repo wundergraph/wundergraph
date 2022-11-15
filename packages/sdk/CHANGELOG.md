@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.121.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.120.0...@wundergraph/sdk@0.121.0) (2022-11-11)
+
+### Features
+
+* allow static string with placeholder OR environment variable for OAS baseURL ([41b7ce6](https://github.com/wundergraph/wundergraph/commit/41b7ce6a02b5159fbdff522a881a61da37221cd0)) (@jensneuse)
+* improved SWR hooks api, useMutation result no longer cached and updated to SWR 2.0 ([#305](https://github.com/wundergraph/wundergraph/issues/305)) ([fc4848b](https://github.com/wundergraph/wundergraph/commit/fc4848b3f15b447a487b31bd3d152f134c6f3aeb)) (@Pagebakers)
+
+### Bug Fixes
+
+* errors when wundergraph.server.ts does not exist ([#327](https://github.com/wundergraph/wundergraph/issues/327)) ([5df223d](https://github.com/wundergraph/wundergraph/commit/5df223d9f7428b36e7d7f95632007d966f624e10)) (@fiam)
+* make baseURL optional ([#330](https://github.com/wundergraph/wundergraph/issues/330)) ([fcb7133](https://github.com/wundergraph/wundergraph/commit/fcb7133c62fe7ae8057584860857e858e6e2a8d9)) (@Pagebakers)
+* **oas:** use primitive schema references as the field schema ([#326](https://github.com/wundergraph/wundergraph/issues/326)) ([3a6d636](https://github.com/wundergraph/wundergraph/commit/3a6d6367a81dd7aed91b84950897258c775790dd)) (@acdn-sglanzer)
+* operation metadata in react provider ([#293](https://github.com/wundergraph/wundergraph/issues/293)) ([ad02a27](https://github.com/wundergraph/wundergraph/commit/ad02a27af5dddbcf8e1126e5bf32c949005630b2)) (@rwest202)
+* set upload type when s3 is not configured ([#324](https://github.com/wundergraph/wundergraph/issues/324)) ([68b34d7](https://github.com/wundergraph/wundergraph/commit/68b34d7b5436dfe8d88c7e3a27e0975a263e5034)) (@Pagebakers)
+
+## [0.120.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.119.0...@wundergraph/sdk@0.120.0) (2022-11-08)
+
+### Features
+
+* createClient now returns typesafe client ([#307](https://github.com/wundergraph/wundergraph/issues/307)) ([803ebd5](https://github.com/wundergraph/wundergraph/commit/803ebd5d799688586a8a8abdde8cf5d7b2ea9557)) (@Pagebakers)
+
 ## [0.119.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.118.0...@wundergraph/sdk@0.119.0) (2022-11-04)
 
 ### Features

@@ -21,6 +21,15 @@ export interface Config {
     };
 }
 
+const operationMetadata: OperationMetadata = {
+{{#each allOperations}}
+    {{operationName}}: {
+        requiresAuthentication: {{requiresAuthentication}}
+        }
+    {{#unless @last}},{{/unless}}
+{{/each}}
+}
+
 export const WunderGraphContext = createContext<Config | undefined>(undefined);
 
 export interface Props {
@@ -36,7 +45,7 @@ export const WunderGraphProvider: FunctionComponent<Props> = ({ endpoint, extraH
     const [refetchMountedQueries, setRefetchMountedQueries] = useState(new Date());
     const queryCache: {[key:string]:Object} = {};
     const client = useMemo<Client>(() => {
-        const client = new Client({baseURL: endpoint, extraHeaders, customFetch });
+        const client = new Client({baseURL: endpoint, extraHeaders, customFetch, operationMetadata});
         client.setLogoutCallback(()=>{
             Object.keys(queryCache).forEach(key => {
                 delete queryCache[key];

@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 )
@@ -26,7 +26,7 @@ type Bundler struct {
 	absWorkingDir         string
 	watchPaths            []*watcher.WatchPath
 	ignorePaths           []string
-	log                   abstractlogger.Logger
+	log                   *zap.Logger
 	skipWatchOnEntryPoint bool
 	outFile               string
 	outDir                string
@@ -39,7 +39,7 @@ type Bundler struct {
 
 type Config struct {
 	Name                  string
-	Logger                abstractlogger.Logger
+	Logger                *zap.Logger
 	AbsWorkingDir         string
 	SkipWatchOnEntryPoint bool
 	EntryPoints           []string
@@ -72,23 +72,23 @@ func (b *Bundler) Bundle() error {
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
 			b.log.Error("Build failed",
-				abstractlogger.String("bundlerName", b.name),
-				abstractlogger.Any("errors", b.buildResult.Errors),
+				zap.String("bundlerName", b.name),
+				zap.Any("errors", b.buildResult.Errors),
 			)
 			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
-		b.log.Debug("Build successful", abstractlogger.String("bundlerName", b.name))
+		b.log.Debug("Build successful", zap.String("bundlerName", b.name))
 	} else {
 		buildResult := b.initialBuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
 			b.log.Error("Initial Build failed",
-				abstractlogger.String("bundlerName", b.name),
-				abstractlogger.Any("errors", b.buildResult.Errors),
+				zap.String("bundlerName", b.name),
+				zap.Any("errors", b.buildResult.Errors),
 			)
 			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
-		b.log.Debug("Initial Build successful", abstractlogger.String("bundlerName", b.name))
+		b.log.Debug("Initial Build successful", zap.String("bundlerName", b.name))
 	}
 	if b.onAfterBundle != nil {
 		return b.onAfterBundle()
@@ -106,11 +106,11 @@ func (b *Bundler) Watch(ctx context.Context) {
 	}
 	if len(b.watchPaths) > 0 {
 		b.log.Debug("Watching for file changes",
-			abstractlogger.String("bundlerName", b.name),
-			abstractlogger.String("outFile", b.outFile),
-			abstractlogger.Strings("externalImports", b.externalImports),
-			abstractlogger.Any("watchPaths", b.watchPaths),
-			abstractlogger.Strings("fileLoaders", b.fileLoaders),
+			zap.String("bundlerName", b.name),
+			zap.String("outFile", b.outFile),
+			zap.Strings("externalImports", b.externalImports),
+			zap.Any("watchPaths", b.watchPaths),
+			zap.Strings("fileLoaders", b.fileLoaders),
 		)
 		b.watch(ctx, b.buildResult.Rebuild)
 	}
@@ -120,10 +120,10 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 	b.Bundle()
 	if len(b.watchPaths) > 0 {
 		b.log.Debug("Watching for file changes",
-			abstractlogger.String("bundlerName", b.name),
-			abstractlogger.String("outFile", b.outFile),
-			abstractlogger.Strings("externalImports", b.externalImports),
-			abstractlogger.Strings("fileLoaders", b.fileLoaders),
+			zap.String("bundlerName", b.name),
+			zap.String("outFile", b.outFile),
+			zap.Strings("externalImports", b.externalImports),
+			zap.Strings("fileLoaders", b.fileLoaders),
 		)
 		b.watch(ctx, b.buildResult.Rebuild)
 	}
@@ -191,7 +191,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 					defer b.mu.Unlock()
 					b.watchPaths = append(b.watchPaths, &watcher.WatchPath{Path: file})
 				} else {
-					b.log.Error("Bundler watching limit exceeded", abstractlogger.String("bundlerName", b.name), abstractlogger.Int("limit", watchFileLimit), abstractlogger.Error(err))
+					b.log.Error("Bundler watching limit exceeded", zap.String("bundlerName", b.name), zap.Int("limit", watchFileLimit), zap.Error(err))
 				}
 			}
 		}
@@ -247,11 +247,11 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 						}
 					}
 					b.log.Error("Bundler build error",
-						abstractlogger.String("watcherName", b.name),
-						abstractlogger.String("file", location.File),
-						abstractlogger.Int("line", location.Line),
-						abstractlogger.Int("column", location.Column),
-						abstractlogger.String("message", message.Text),
+						zap.String("watcherName", b.name),
+						zap.String("file", location.File),
+						zap.Int("line", location.Line),
+						zap.Int("column", location.Column),
+						zap.String("message", message.Text),
 					)
 				}
 			}
@@ -259,8 +259,8 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 		})
 		if err != nil {
 			b.log.Error("Could not watch files",
-				abstractlogger.String("watcherName", b.name),
-				abstractlogger.Error(err),
+				zap.String("watcherName", b.name),
+				zap.Error(err),
 			)
 		}
 	}()

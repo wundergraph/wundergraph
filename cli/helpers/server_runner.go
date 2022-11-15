@@ -3,7 +3,7 @@ package helpers
 import (
 	"fmt"
 
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 )
@@ -15,7 +15,7 @@ type ServerRunConfig struct {
 	Env               []string
 }
 
-func NewServerRunner(log abstractlogger.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
+func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
 	hooksEnv := []string{
 		"START_HOOKS_SERVER=true",
 		fmt.Sprintf("WG_ABS_DIR=%s", cfg.WunderGraphDirAbs),

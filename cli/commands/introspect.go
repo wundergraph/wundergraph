@@ -7,8 +7,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var (
@@ -35,7 +35,7 @@ func emitIntrospectionResult(result DatabaseIntrospectionResult) {
 	data, err := json.Marshal(result)
 	if err != nil {
 		log.Error("Error while marshalling introspection result: %s",
-			abstractlogger.Error(err),
+			zap.Error(err),
 		)
 		return
 	}
@@ -45,7 +45,7 @@ func emitIntrospectionResult(result DatabaseIntrospectionResult) {
 			err = os.MkdirAll(dir, 0755)
 			if err != nil {
 				log.Error("Error while creating directory for introspection result: %s",
-					abstractlogger.Error(err),
+					zap.Error(err),
 				)
 				return
 			}
@@ -53,7 +53,7 @@ func emitIntrospectionResult(result DatabaseIntrospectionResult) {
 		err = ioutil.WriteFile(introspectionOutputFile, data, os.ModePerm)
 		if err != nil {
 			log.Error("Error while writing introspection result to file: %s",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			return
 		}
