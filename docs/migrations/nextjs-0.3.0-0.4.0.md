@@ -76,7 +76,7 @@ trigger({
 
 ### useLiveQuery
 
-useLiveQuery no longer exists, you can pass `liveQuery: true` to useQuery to turn it into a live query (if it is supported)
+useLiveQuery no longer exists, you can pass `liveQuery: true` to useQuery to turn it into a live query (unless live query is disable for a specific query).
 
 ```ts
 const { data, error } = useQuery({
