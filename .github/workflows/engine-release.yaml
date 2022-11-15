@@ -15,6 +15,7 @@ jobs:
   goreleaser-darwin:
     name: Release MacOS build
     runs-on: 'macos-latest'
+    timeout-minutes: 20
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -74,6 +75,7 @@ jobs:
   goreleaser-linux:
     name: Release Linux build
     runs-on: 'ubuntu-latest'
+    timeout-minutes: 20
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -116,6 +118,7 @@ jobs:
   goreleaser-win:
     name: Release Windows build
     runs-on: 'windows-latest'
+    timeout-minutes: 20
     steps:
       - name: Prepare git
         # To fix the EOL issues on Windows runners, we need to disable autocrlf. See actions/checkout#135 for more info.
@@ -169,6 +172,7 @@ jobs:
       - goreleaser-win
       - goreleaser-darwin
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
         with:
