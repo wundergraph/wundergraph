@@ -22,9 +22,9 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 
 		const WithWunderGraph = (props: AppPropsType<NextRouter, any> & { ssrCache: SSRCache; user: User }) => {
 			const { ssrCache = {}, user } = props;
-
+			const providerProps = { context, ssrCache, ssr, client, user };
 			return (
-				<WunderGraphProvider context={context} value={{ ssrCache, ssr, client, user }}>
+				<WunderGraphProvider {...providerProps}>
 					<SWRConfig value={{ fallback: ssrCache, use: [SSRMiddleWare] }}>
 						<AppOrPage {...props} />
 					</SWRConfig>

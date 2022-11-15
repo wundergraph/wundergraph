@@ -2,11 +2,20 @@ import { Client, User } from '@wundergraph/sdk/client';
 
 export type SSRCache = Record<string, any>;
 
+export interface WunderGraphProviderProps {
+	children: React.ReactNode;
+	client: Client;
+	context?: React.Context<WunderGraphContextValue | null>;
+	ssrCache?: SSRCache;
+	user?: User;
+	ssr?: boolean;
+}
+
 export interface WunderGraphContextValue {
 	ssrCache: SSRCache;
 	ssr: boolean;
 	client: Client;
-	user: User;
+	user?: User;
 }
 
 export interface WithWunderGraphOptions {
@@ -36,5 +45,5 @@ export interface WithWunderGraphOptions {
 	/**
 	 * Custom WunderGraph cache context.
 	 */
-	context?: React.Context<WunderGraphContextValue>;
+	context?: React.Context<WunderGraphContextValue | null>;
 }

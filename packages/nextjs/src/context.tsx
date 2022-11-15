@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { WunderGraphContextValue } from './types';
+import { WunderGraphContextValue, WunderGraphProviderProps } from './types';
 
 const defaultContext = React.createContext<WunderGraphContextValue | null>(null);
 
@@ -15,10 +15,8 @@ export const useWunderGraphContext = (context?: React.Context<WunderGraphContext
 	return React.useContext(getWunderGraphContext(context));
 };
 
-export const WunderGraphProvider = (props: any) => {
-	const { children, context, value } = props;
-
+export const WunderGraphProvider = (props: WunderGraphProviderProps) => {
+	const { children, context, client, ssrCache = {}, ssr = true, user } = props;
 	const { Provider } = getWunderGraphContext(context);
-
-	return <Provider value={value}>{children}</Provider>;
+	return <Provider value={{ client, ssrCache, user, ssr }}>{children}</Provider>;
 };
