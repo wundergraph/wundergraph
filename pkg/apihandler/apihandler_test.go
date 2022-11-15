@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
@@ -59,7 +59,7 @@ func TestQueryHandler_VariablesIgnore(t *testing.T) {
 				validateCalled = true
 			},
 		},
-		log: &abstractlogger.Noop{},
+		log: zap.NewNop(),
 		preparedPlan: &plan.SynchronousResponsePlan{
 			Response: &resolve.GraphQLResponse{},
 		},
@@ -107,7 +107,7 @@ func TestQueryHandler_ETag(t *testing.T) {
 		resolver: &FakeResolver{
 			response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
 		},
-		log: &abstractlogger.Noop{},
+		log: zap.NewNop(),
 		preparedPlan: &plan.SynchronousResponsePlan{
 			Response: &resolve.GraphQLResponse{},
 		},
@@ -164,7 +164,7 @@ func TestQueryHandler_Caching(t *testing.T) {
 
 	handler := &QueryHandler{
 		resolver: resolver,
-		log:      &abstractlogger.Noop{},
+		log:      zap.NewNop(),
 		preparedPlan: &plan.SynchronousResponsePlan{
 			Response: &resolve.GraphQLResponse{},
 		},

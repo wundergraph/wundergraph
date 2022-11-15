@@ -13,7 +13,7 @@ import (
 	"text/template"
 
 	"github.com/fatih/color"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
@@ -23,14 +23,14 @@ const (
 )
 
 type Manifest struct {
-	log            abstractlogger.Logger
+	log            *zap.Logger
 	client         *v2wundergraphapi.Client
 	Dependencies   []string `json:"dependencies"`
 	wundergraphDir string
 	hasChanges     bool
 }
 
-func New(log abstractlogger.Logger, client *v2wundergraphapi.Client, wundergraphDir string) *Manifest {
+func New(log *zap.Logger, client *v2wundergraphapi.Client, wundergraphDir string) *Manifest {
 	return &Manifest{
 		log:            log,
 		client:         client,
@@ -64,7 +64,7 @@ func (m *Manifest) removeDuplicates() {
 			}
 			if dependency == dependency2 {
 				m.log.Info("removing duplicate dependency",
-					abstractlogger.String("dependency", dependency),
+					zap.String("dependency", dependency),
 				)
 				m.hasChanges = true
 				m.Dependencies = append(m.Dependencies[:j], m.Dependencies[j+1:]...)
@@ -103,7 +103,7 @@ func (m *Manifest) AddDependencies(dependencies []string) error {
 	}
 	m.Dependencies = append(m.Dependencies, dependencies...)
 	m.log.Info("added dependencies to wundergraph.manifest.json",
-		abstractlogger.Strings("dependencies", dependencies),
+		zap.Strings("dependencies", dependencies),
 	)
 
 	green := color.New(color.FgHiGreen)
@@ -122,7 +122,7 @@ func (m *Manifest) RemoveDependencies(dependencies []string) error {
 		for i, d := range m.Dependencies {
 			if d == dependency {
 				m.log.Info("dependency removed",
-					abstractlogger.String("dependency", dependency),
+					zap.String("dependency", dependency),
 				)
 				m.Dependencies = append(m.Dependencies[:i], m.Dependencies[i+1:]...)
 				m.hasChanges = true
@@ -146,20 +146,20 @@ func (m *Manifest) RenderIntegrationsTemplate(out io.Writer) error {
 	apis := make([]*v2wundergraphapi.ApiDependency, 0, len(m.Dependencies))
 
 	for i := range m.Dependencies {
-		m.log.Debug("Fetch dependency", abstractlogger.String("dependency", m.Dependencies[i]))
+		m.log.Debug("Fetch dependency", zap.String("dependency", m.Dependencies[i]))
 
 		dependency, err := m.client.GetApiDependency(m.Dependencies[i])
 		if err != nil {
 			m.log.Error("failed to load dependency, skipping",
-				abstractlogger.String("dependency", m.Dependencies[i]),
-				abstractlogger.Error(err),
+				zap.String("dependency", m.Dependencies[i]),
+				zap.Error(err),
 			)
 			red := color.New(color.FgHiRed)
 			_, _ = red.Printf("Failed to load API dependency '%s', please try again.\n", m.Dependencies[i])
 			continue
 		}
 		m.log.Info("dependency resolved",
-			abstractlogger.String("dependency", m.Dependencies[i]),
+			zap.String("dependency", m.Dependencies[i]),
 		)
 		apis = append(apis, dependency)
 	}
@@ -205,8 +205,8 @@ WithNext:
 		apiJSON, err := json.Marshal(dependency)
 		if err != nil {
 			m.log.Error("failed to stringify api",
-				abstractlogger.String("dependency", dependency.Name),
-				abstractlogger.Error(err),
+				zap.String("dependency", dependency.Name),
+				zap.Error(err),
 			)
 			continue
 		}

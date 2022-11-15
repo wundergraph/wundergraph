@@ -14,7 +14,7 @@ import (
 
 	"github.com/bep/debounce"
 	"github.com/fsnotify/fsnotify"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -74,10 +74,10 @@ type Config struct {
 type Watcher struct {
 	name   string
 	config *Config
-	log    abstractlogger.Logger
+	log    *zap.Logger
 }
 
-func NewWatcher(name string, config *Config, log abstractlogger.Logger) *Watcher {
+func NewWatcher(name string, config *Config, log *zap.Logger) *Watcher {
 	return &Watcher{
 		name:   name,
 		config: config,
@@ -100,7 +100,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		pathset.Add(path)
 		debounce(func() {
 			paths := pathset.Flush()
-			b.log.Debug("File change detected", abstractlogger.String("watcherName", b.name), abstractlogger.Strings("paths", paths))
+			b.log.Debug("File change detected", zap.String("watcherName", b.name), zap.Strings("paths", paths))
 			if err := fn(paths); err != nil {
 				errorCh <- err
 			}
@@ -219,8 +219,8 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 				// Skip errors for optional directories
 				if wPath.Optional && os.IsNotExist(err) {
 					b.log.Debug("skip watch because optional path not found",
-						abstractlogger.String("watcherName", b.name),
-						abstractlogger.String("path", wPath.Path),
+						zap.String("watcherName", b.name),
+						zap.String("path", wPath.Path),
 					)
 					return nil
 				}

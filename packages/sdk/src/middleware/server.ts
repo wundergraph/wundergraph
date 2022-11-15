@@ -162,6 +162,9 @@ export const createServer = async ({
 
 	const fastify = Fastify({
 		logger,
+		genReqId: (req) => {
+			return req.headers['x-request-id']?.toString() || '';
+		},
 	});
 
 	fastify.decorateRequest('ctx', null);
@@ -212,7 +215,7 @@ export const createServer = async ({
 					requestURI: req.body.__wg.clientRequest?.requestURI || '',
 					method: req.body.__wg.clientRequest?.method || 'GET',
 				},
-				internalClient: clientFactory({}, req.body.__wg.clientRequest),
+				internalClient: clientFactory({ 'x-request-id': req.id }, req.body.__wg.clientRequest),
 			};
 		});
 

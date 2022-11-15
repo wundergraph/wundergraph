@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/tidwall/sjson"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astnormalization"
@@ -50,7 +50,7 @@ type Planner struct {
 	engineFactory *LazyEngineFactory
 
 	debug bool
-	log   abstractlogger.Logger
+	log   *zap.Logger
 
 	insideJsonField bool
 	jsonFieldRef    int
@@ -874,7 +874,7 @@ type Factory struct {
 	Client        *http.Client
 	engineFactory LazyEngineFactory
 	Debug         bool
-	Log           abstractlogger.Logger
+	Log           *zap.Logger
 }
 
 func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
@@ -998,7 +998,7 @@ func (e *LazyEngine) initEngineAndExecute(ctx context.Context, request []byte, o
 	e.m.Lock()
 	defer e.m.Unlock()
 	var err error
-	e.engine, err = NewHybridEngine(e.prismaSchema, e.wundergraphDir, abstractlogger.NoopLogger)
+	e.engine, err = NewHybridEngine(e.prismaSchema, e.wundergraphDir, zap.NewNop())
 	if err != nil {
 		return err
 	}
@@ -1012,7 +1012,7 @@ func (e *LazyEngine) initEngineAndExecute(ctx context.Context, request []byte, o
 type Source struct {
 	engine *LazyEngine
 	debug  bool
-	log    abstractlogger.Logger
+	log    *zap.Logger
 }
 
 // {"query":"{findFirstusers(where: {name: {contains: null}}){name id updatedat}}","variables":{}}
@@ -1066,15 +1066,15 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 	for {
 		if s.debug {
 			s.log.Debug("database.Source.Execute",
-				abstractlogger.ByteString("request", request),
+				zap.ByteString("request", request),
 			)
 		}
 		err = s.engine.Execute(ctx, request, buf)
 		if err != nil {
 			if s.debug {
 				s.log.Debug("database.Source.Execute.Error",
-					abstractlogger.ByteString("request", request),
-					abstractlogger.Error(err),
+					zap.ByteString("request", request),
+					zap.Error(err),
 				)
 			}
 			if ctx.Err() != nil {
@@ -1096,8 +1096,8 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 
 	if s.debug {
 		s.log.Debug("database.Source.Execute.Succeed",
-			abstractlogger.ByteString("request", request),
-			abstractlogger.String("response", buf.String()),
+			zap.ByteString("request", request),
+			zap.String("response", buf.String()),
 		)
 	}
 	_, err = buf.WriteTo(w)
