@@ -57,7 +57,7 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 				if (typeof window !== 'undefined' || !ssr) {
 					// we're on the client
 					// no need to do all the SSR stuff.
-					return getAppTreeProps(pageProps);
+					return getAppTreeProps({ ...pageProps, ssrCache });
 				}
 
 				const cookieHeader = ctx.req?.headers.cookie;
