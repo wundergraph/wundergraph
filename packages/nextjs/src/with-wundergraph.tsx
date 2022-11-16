@@ -83,7 +83,7 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 						ssrUser = await client.fetchUser();
 					} catch (e: any) {
 						if ((e instanceof ResponseError && e.statusCode !== 404 && e.statusCode !== 401) || logFetchErrors)
-							console.error(e);
+							console.error('[WunderGraph] Unable to fetch user for SSR', e);
 					}
 				}
 
