@@ -352,19 +352,17 @@ describe('React Query - useSubscription', () => {
 	const { useSubscription } = createHooks<Operations>(client);
 
 	it('should subscribe', async () => {
-		// web streams not supported in node-fetch, but we check if the hook returns isLoading
-		const scope = nockQuery('Countdown', {
-			wg_live: 'true',
-		})
-			.once()
-			.reply(200, {
-				data: {
-					count: '100',
-				},
-			});
+		// web streams not supported in node-fetch, we use subscribeOnce to test
+		const scope = nock('https://api.com')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.matchHeader('accept', 'application/json')
+			.matchHeader('content-type', 'application/json')
+			.get('/app/operations/Countdown')
+			.query({ wg_api_hash: '123', wg_variables: '{}', wg_subscribe_once: 'true' })
+			.reply(200, { data: { count: 100 } });
 
 		function Page() {
-			const { data, error, isSubscribed } = useSubscription({
+			const { data } = useSubscription({
 				operationName: 'Countdown',
 				subscribeOnce: true,
 			});
