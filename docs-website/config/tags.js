@@ -23,6 +23,7 @@ const tags = {
 	'WunderGraph Server':
 		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'Architecture Introduction': '/docs/architecture/architecture-diagram',
+	join: '/docs/features/cross-api-joins-to-compose-apis',
 	'Cross API JOIN': '/docs/features/cross-api-joins-to-compose-apis',
 	JOINs: '/docs/features/cross-api-joins-to-compose-apis',
 	'GraphQL to JSON RPC compiler': '/docs/features/graphql-to-json-rpc-compiler',
