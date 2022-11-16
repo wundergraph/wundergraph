@@ -32,7 +32,6 @@ const db = introspect.graphql({
   },
 })
 
-// configureWunderGraph emits the configuration
 configureWunderGraphApplication({
   apis: [db],
   server,
