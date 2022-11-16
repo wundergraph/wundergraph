@@ -255,7 +255,6 @@ describe('React Query - useUser', () => {
 	const { useUser } = createHooks(client);
 
 	it('should return user', async () => {
-		// web streams not supported in node-fetch, but we check if the hook returns isLoading
 		const scope = nock('https://api.com')
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
