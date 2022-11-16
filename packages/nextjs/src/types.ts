@@ -43,6 +43,10 @@ export interface WithWunderGraphOptions {
 	 */
 	logPrerenderTime?: boolean;
 	/**
+	 * Log fetch errors to console.
+	 */
+	logFetchErrors?: boolean;
+	/**
 	 * Custom WunderGraph cache context.
 	 */
 	context?: React.Context<WunderGraphContextValue | null>;

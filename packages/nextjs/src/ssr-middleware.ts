@@ -51,9 +51,7 @@ export const SSRMiddleWare = ((useSWRNext: SWRHook) => {
 		}
 
 		if (ssrCache && !ssrCache[_key] && ssrFetcher && !shouldAuthenticate) {
-			// We swallow errors here, since there is no official way to pass errors back to the SWR fallback.
-			// Unless we use our own cache instance, but that might break compatibility with other apps.
-			ssrCache[_key] = ssrFetcher(key).catch(() => {});
+			ssrCache[_key] = ssrFetcher(key);
 		}
 
 		return swr;

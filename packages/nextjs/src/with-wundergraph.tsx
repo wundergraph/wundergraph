@@ -18,7 +18,15 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 			...options,
 			...overrideOptions,
 		};
-		const { client, userCacheKey = userSWRKey, context, ssr, fetchUserSSR, logPrerenderTime } = _options;
+		const {
+			client,
+			userCacheKey = userSWRKey,
+			context,
+			ssr,
+			fetchUserSSR,
+			logPrerenderTime,
+			logFetchErrors,
+		} = _options;
 
 		const WithWunderGraph = (props: AppPropsType<NextRouter, any> & { ssrCache: SSRCache; user: User }) => {
 			const { ssrCache = {}, user } = props;
@@ -72,7 +80,9 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 				if (fetchUserSSR !== false) {
 					try {
 						ssrUser = await client.fetchUser();
-					} catch (e) {}
+					} catch (e) {
+						if (logFetchErrors) console.error(e);
+					}
 				}
 
 				const start = logPrerenderTime ? process.hrtime() : undefined;
@@ -98,7 +108,13 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 						value: ssrCache[key],
 					})) as { key: string; value: Promise<any> }[];
 				if (keys.length !== 0) {
-					const promises = keys.map((key) => key.value);
+					const promises = keys.map((key) => {
+						// We swallow errors here, since there is no official way to pass errors back to the SWR fallback.
+						// Unless we use our own cache instance, but that might break compatibility with other apps.
+						return key.value.catch((e) => {
+							if (logFetchErrors) console.error(e);
+						});
+					});
 					const results = await Promise.all(promises);
 					for (let i = 0; i < keys.length; i++) {
 						const key = keys[i].key;
