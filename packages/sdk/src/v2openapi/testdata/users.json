@@ -111,6 +111,9 @@
           },
           "status_code": {
             "$ref": "#/components/schemas/StatusCode"
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/UUID"
           }
         }
       },
@@ -136,6 +139,10 @@
         "enum": [0, 1, 2],
         "type": "integer",
         "format": "int32"
+      },
+      "UUID": {
+        "type": "string",
+        "format": "uuid"
       }
     }
   }

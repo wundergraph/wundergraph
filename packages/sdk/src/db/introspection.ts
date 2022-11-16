@@ -1,6 +1,6 @@
 import { wunderctlExecAsync } from '../wunderctlexec';
 import { InputValueDefinitionNode, parse, parseType, print, TypeNode, visit } from 'graphql';
-import { DatabaseIntrospection, ReplaceJSONTypeFieldConfiguration } from '../definition';
+import { DatabaseIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
 import { DMMF } from '@prisma/generator-helper';
 import { NamedTypeNode } from 'graphql/language/ast';
@@ -178,9 +178,9 @@ export const cleanupPrismaSchema = (
 		result.graphql_schema = result.graphql_schema + ' ' + introspection.schemaExtension;
 	}
 
-	let insideJSONType = false;
-	let insideJSONField = false;
-	let replaceJSONType: ReplaceJSONTypeFieldConfiguration | undefined;
+	let insideCustomScalarType = false;
+	let insideCustomScalarField = false;
+	let replaceCustomScalarType: ReplaceCustomScalarTypeFieldConfiguration | undefined;
 	let currentTypeName = '';
 	let replaceWith = '';
 	let currentInputObjectTypeName = '';
@@ -189,57 +189,68 @@ export const cleanupPrismaSchema = (
 	const cleaned = visit(document, {
 		ObjectTypeDefinition: {
 			enter: (node) => {
-				introspection.replaceJSONTypeFields?.forEach((replace) => {
+				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 					if (node.name.value.startsWith(replace.entityName)) {
-						insideJSONType = true;
-						replaceJSONType = replace;
-						replaceWith = replace.responseTypeReplacement;
+						insideCustomScalarType = true;
 						currentTypeName = node.name.value;
 					}
 				});
 			},
 			leave: () => {
-				insideJSONType = false;
-				replaceJSONType = undefined;
+				insideCustomScalarType = false;
+				replaceCustomScalarType = undefined;
 			},
 		},
 		FieldDefinition: {
 			enter: (node) => {
-				if (insideJSONType && replaceJSONType && node.name.value === replaceJSONType.fieldName) {
-					insideJSONField = true;
-					if (!result.jsonTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
-						result.jsonTypeFields.push({
-							typeName: currentTypeName,
-							fieldName: node.name.value,
-						});
+				if (insideCustomScalarType) {
+					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+						if (node.name.value.match(replace.fieldName)) {
+							insideCustomScalarField = true;
+							replaceCustomScalarType = replace;
+							replaceWith = replace.responseTypeReplacement;
+						}
+					});
+
+					if (insideCustomScalarField) {
+						if (!result.jsonTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
+							result.jsonTypeFields.push({
+								typeName: currentTypeName,
+								fieldName: node.name.value,
+							});
+						}
 					}
 				}
 			},
 			leave: () => {
-				insideJSONField = false;
+				insideCustomScalarField = false;
 			},
 		},
 		InputObjectTypeDefinition: {
 			enter: (node) => {
 				currentInputObjectTypeName = node.name.value;
-				introspection.replaceJSONTypeFields?.forEach((replace) => {
+				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 					if (node.name.value.startsWith(replace.entityName)) {
-						insideJSONType = true;
-						replaceJSONType = replace;
-						replaceWith = replace.inputTypeReplacement;
+						insideCustomScalarType = true;
 						currentTypeName = node.name.value;
 					}
 				});
 			},
 			leave: () => {
-				insideJSONType = false;
-				replaceJSONType = undefined;
+				insideCustomScalarType = false;
+				replaceCustomScalarType = undefined;
 			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
-				if (insideJSONType && replaceJSONType && node.name.value === replaceJSONType.fieldName) {
-					insideJSONField = true;
+				if (insideCustomScalarType) {
+					introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
+						if (node.name.value.match(replace.fieldName) && replace.inputTypeReplacement) {
+							insideCustomScalarField = true;
+							replaceCustomScalarType = replace;
+							replaceWith = replace.inputTypeReplacement;
+						}
+					});
 				}
 
 				if (listInputFields.includes(node.name.value)) {
@@ -266,7 +277,7 @@ export const cleanupPrismaSchema = (
 				}
 			},
 			leave: () => {
-				insideJSONField = false;
+				insideCustomScalarField = false;
 			},
 		},
 		NamedType: (node) => {
@@ -293,7 +304,7 @@ export const cleanupPrismaSchema = (
 					result.interpolateVariableDefinitionAsJSON.push(replaceWith);
 				}
 
-				if (insideJSONField && insideJSONType && replaceJSONType) {
+				if (insideCustomScalarField && insideCustomScalarType && replaceCustomScalarType) {
 					return {
 						...node,
 						name: {

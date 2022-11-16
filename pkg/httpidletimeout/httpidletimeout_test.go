@@ -2,6 +2,7 @@ package httpidletimeout
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -16,15 +17,10 @@ const (
 	maxWait         = timeoutDuration * 2
 )
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(100 * time.Millisecond)
-	_, _ = io.WriteString(w, "Hello World")
-}
-
-func sendDummyRequest(handler http.Handler) {
+func sendDummyRequest(handler http.Handler, path string) {
 	var w httptest.ResponseRecorder
 	u := url.URL{
-		Path: "/",
+		Path: path,
 	}
 	r := http.Request{
 		Method: "GET",
@@ -58,13 +54,13 @@ func TestResetTimeout(t *testing.T) {
 	// Send a bunch of requests in parallel to ensure we are handling
 	// multiple requests at the same time.
 	for ii := 0; ii < 100; ii++ {
-		go sendDummyRequest(server)
+		go sendDummyRequest(server, "/")
 	}
 
 	increment := timeoutDuration / 2
 	for d := time.Duration(0); d < maxWait; d += increment {
 		time.AfterFunc(d, func() {
-			sendDummyRequest(server)
+			sendDummyRequest(server, "/")
 		})
 	}
 
@@ -108,7 +104,7 @@ func TestLongLivedRequest(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), maxWait)
 	defer cancel()
 
-	go sendDummyRequest(server)
+	go sendDummyRequest(server, "/")
 
 	if err := m.Wait(ctx); err == nil {
 		t.Error("middleware triggered too soon")
@@ -127,4 +123,64 @@ func TestMultipleTriggers(t *testing.T) {
 	m.Wait(ctx)
 	m.Wait(ctx)
 	check.Stop()
+}
+
+func TestSkip(t *testing.T) {
+	const (
+		skipPath          = "/test"
+		expectedSkipCount = 1
+	)
+	skipCount := 0
+	m := New(timeoutDuration, WithSkip(func(r *http.Request) bool {
+		if r.URL.Path == skipPath {
+			skipCount += 1
+			return true
+		}
+		return false
+	}))
+
+	m.Start()
+	defer m.Cancel()
+
+	server := http.NewServeMux()
+	server.Handle("/", m.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "Hello World")
+	})))
+
+	time.AfterFunc(maxWait/2, func() {
+		sendDummyRequest(server, skipPath)
+	})
+
+	time.AfterFunc(maxWait*3/2, func() {
+		sendDummyRequest(server, "/")
+	})
+
+	ctx1, cancel1 := context.WithTimeout(context.Background(), timeoutDuration)
+	defer cancel1()
+
+	ctx2, cancel2 := context.WithTimeout(context.Background(), timeoutDuration*2)
+	defer cancel2()
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		if err := m.Wait(ctx1); !errors.Is(err, context.DeadlineExceeded) {
+			t.Errorf("expecting %s, got %s instead", context.DeadlineExceeded, err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err := m.Wait(ctx2); err != nil {
+			t.Errorf("idle timer resetted incorrectly: %s", err)
+		}
+	}()
+
+	wg.Wait()
+
+	if skipCount != expectedSkipCount {
+		t.Errorf("expecting skipCount = %d, got %d instead", expectedSkipCount, skipCount)
+	}
 }

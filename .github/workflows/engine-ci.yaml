@@ -9,6 +9,9 @@ on:
       - 'types/**/*'
       - 'go.mod'
       - 'go.sum'
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/go/node.yaml'
+      - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
   pull_request:
@@ -20,6 +23,9 @@ on:
       - 'types/**/*'
       - 'go.mod'
       - 'go.sum'
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/go/node.yaml'
+      - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
 
@@ -34,6 +40,7 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       minio:
         image: minio/minio:edge-cicd
@@ -73,6 +80,9 @@ jobs:
 
       - name: Linters
         uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.50
+          args: --timeout 2m
 
       - name: Run unit and integration tests
         run: make test-go

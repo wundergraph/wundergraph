@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.23...@wundergraph/nextjs@0.3.24) (2022-11-11)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.3.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.22...@wundergraph/nextjs@0.3.23) (2022-11-08)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.3.22](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.21...@wundergraph/nextjs@0.3.22) (2022-11-04)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.3.21](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.20...@wundergraph/nextjs@0.3.21) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.3.20](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.19...@wundergraph/nextjs@0.3.20) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.3.19](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.18...@wundergraph/nextjs@0.3.19) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.3.18](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.17...@wundergraph/nextjs@0.3.18) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.3.17](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.16...@wundergraph/nextjs@0.3.17) (2022-10-23)
 
 **Note:** Version bump only for package @wundergraph/nextjs

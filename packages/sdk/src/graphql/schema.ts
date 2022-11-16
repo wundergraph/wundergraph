@@ -10,12 +10,12 @@ import {
 	StringValueNode,
 	visit,
 } from 'graphql';
+import { GraphQLIntrospection } from '../definition';
 
-export const cleanupSchema = (
-	schema: GraphQLSchema,
-	customFloatScalars: string[],
-	customIntScalars: string[]
-): string => {
+export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): string => {
+	const customFloatScalars = introspection.customFloatScalars || [];
+	const customIntScalars = introspection.customIntScalars || [];
+
 	const printed = printSchema(schema);
 	const ast = parse(printed);
 	const queryTypeName = schema.getQueryType()?.name;
@@ -217,5 +217,6 @@ export const cleanupSchema = (
 			},
 		},
 	});
+
 	return print(cleanAst);
 };

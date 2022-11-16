@@ -52,5 +52,8 @@ export const wunderctlName = (): string => {
 export const binaryDir = path.join(__dirname, '..', 'download');
 
 export const wunderctlBinaryPath = (): string => {
+	if (process.env.WUNDERCTL_BINARY_PATH) {
+		return process.env.WUNDERCTL_BINARY_PATH;
+	}
 	return path.join(binaryDir, wunderctlName());
 };

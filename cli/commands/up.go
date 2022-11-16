@@ -9,8 +9,8 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
@@ -21,13 +21,16 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
+const UpCmdName = "up"
+
+var upCmdPrettyLogging bool
+
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:   "up",
-	Short: "Start the WunderGraph application in the current dir",
-	Long:  `Make sure wundergraph.config.json is present or set the flag accordingly`,
+	Use:   UpCmdName,
+	Short: "Starts WunderGraph in development mode",
+	Long:  "Start the WunderGraph application in development mode and watch for changes",
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
@@ -55,10 +58,10 @@ var upCmd = &cobra.Command{
 		defer stop()
 
 		log.Info("Starting WunderNode",
-			abstractlogger.String("version", BuildInfo.Version),
-			abstractlogger.String("commit", BuildInfo.Commit),
-			abstractlogger.String("date", BuildInfo.Date),
-			abstractlogger.String("builtBy", BuildInfo.BuiltBy),
+			zap.String("version", BuildInfo.Version),
+			zap.String("commit", BuildInfo.Commit),
+			zap.String("date", BuildInfo.Date),
+			zap.String("builtBy", BuildInfo.BuiltBy),
 		)
 
 		introspectionCacheDir := path.Join(wunderGraphDir, "cache", "introspection")
@@ -82,6 +85,7 @@ var upCmd = &cobra.Command{
 			ScriptEnv: append(helpers.CliEnv(rootFlags),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
 			),
 		})
 
@@ -97,6 +101,7 @@ var upCmd = &cobra.Command{
 				"WG_DATA_SOURCE_POLLING_MODE=true",
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
 			),
 		})
 
@@ -129,7 +134,7 @@ var upCmd = &cobra.Command{
 					OutDir:        webhooksOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
-						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
 						return nil
 					},
 				})
@@ -144,7 +149,7 @@ var upCmd = &cobra.Command{
 			hookServerRunner = helpers.NewServerRunner(log, srvCfg)
 
 			onAfterBuild = func() error {
-				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
 				// generate new config
 				<-configRunner.Run(ctx)
@@ -181,7 +186,7 @@ var upCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
+			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
 			onAfterBuild = func() error {
 				// generate new config
 				<-configRunner.Run(ctx)
@@ -191,7 +196,7 @@ var upCmd = &cobra.Command{
 					<-configIntrospectionRunner.Run(ctx)
 				}()
 
-				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
 				return nil
 			}
@@ -222,9 +227,9 @@ var upCmd = &cobra.Command{
 		err = configBundler.Bundle()
 		if err != nil {
 			log.Error("could not bundle",
-				abstractlogger.String("bundlerName", "config-bundler"),
-				abstractlogger.String("watcher", "config"),
-				abstractlogger.Error(err),
+				zap.String("bundlerName", "config-bundler"),
+				zap.String("watcher", "config"),
+				zap.Error(err),
 			)
 		}
 
@@ -245,8 +250,8 @@ var upCmd = &cobra.Command{
 			})
 			if err != nil {
 				log.Error("watcher",
-					abstractlogger.String("watcher", "config"),
-					abstractlogger.Error(err),
+					zap.String("watcher", "config"),
+					zap.Error(err),
 				)
 			}
 		}()
@@ -261,10 +266,11 @@ var upCmd = &cobra.Command{
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
+				node.WithPrettyLogging(rootFlags.PrettyLogs),
 				node.WithDevMode(),
 			)
 			if err != nil {
-				log.Error("node exited", abstractlogger.Error(err))
+				log.Error("node exited", zap.Error(err))
 				// exit context because we can't recover from a server start error
 				cancel()
 			}
@@ -289,7 +295,7 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
-	upCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "switches the logging to human readable format")
+	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
 
 	rootCmd.AddCommand(upCmd)
 }

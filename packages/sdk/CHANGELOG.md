@@ -3,6 +3,54 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.121.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.120.0...@wundergraph/sdk@0.121.0) (2022-11-11)
+
+### Features
+
+* allow static string with placeholder OR environment variable for OAS baseURL ([41b7ce6](https://github.com/wundergraph/wundergraph/commit/41b7ce6a02b5159fbdff522a881a61da37221cd0)) (@jensneuse)
+* improved SWR hooks api, useMutation result no longer cached and updated to SWR 2.0 ([#305](https://github.com/wundergraph/wundergraph/issues/305)) ([fc4848b](https://github.com/wundergraph/wundergraph/commit/fc4848b3f15b447a487b31bd3d152f134c6f3aeb)) (@Pagebakers)
+
+### Bug Fixes
+
+* errors when wundergraph.server.ts does not exist ([#327](https://github.com/wundergraph/wundergraph/issues/327)) ([5df223d](https://github.com/wundergraph/wundergraph/commit/5df223d9f7428b36e7d7f95632007d966f624e10)) (@fiam)
+* make baseURL optional ([#330](https://github.com/wundergraph/wundergraph/issues/330)) ([fcb7133](https://github.com/wundergraph/wundergraph/commit/fcb7133c62fe7ae8057584860857e858e6e2a8d9)) (@Pagebakers)
+* **oas:** use primitive schema references as the field schema ([#326](https://github.com/wundergraph/wundergraph/issues/326)) ([3a6d636](https://github.com/wundergraph/wundergraph/commit/3a6d6367a81dd7aed91b84950897258c775790dd)) (@acdn-sglanzer)
+* operation metadata in react provider ([#293](https://github.com/wundergraph/wundergraph/issues/293)) ([ad02a27](https://github.com/wundergraph/wundergraph/commit/ad02a27af5dddbcf8e1126e5bf32c949005630b2)) (@rwest202)
+* set upload type when s3 is not configured ([#324](https://github.com/wundergraph/wundergraph/issues/324)) ([68b34d7](https://github.com/wundergraph/wundergraph/commit/68b34d7b5436dfe8d88c7e3a27e0975a263e5034)) (@Pagebakers)
+
+## [0.120.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.119.0...@wundergraph/sdk@0.120.0) (2022-11-08)
+
+### Features
+
+* createClient now returns typesafe client ([#307](https://github.com/wundergraph/wundergraph/issues/307)) ([803ebd5](https://github.com/wundergraph/wundergraph/commit/803ebd5d799688586a8a8abdde8cf5d7b2ea9557)) (@Pagebakers)
+
+## [0.119.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.118.0...@wundergraph/sdk@0.119.0) (2022-11-04)
+
+### Features
+
+* eng 640 compose subgraphs without apollo dependencies ([#315](https://github.com/wundergraph/wundergraph/issues/315)) ([628a183](https://github.com/wundergraph/wundergraph/commit/628a18303acb47df5a10118b17a4e88916b2903a)) (@jensneuse)
+* sdk, support schema extension ([#302](https://github.com/wundergraph/wundergraph/issues/302)) ([e952af6](https://github.com/wundergraph/wundergraph/commit/e952af61428d0592876362bc19155d45fec626f1)) (@YuriBuerov)
+
+## [0.118.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.4...@wundergraph/sdk@0.118.0) (2022-11-03)
+
+### Features
+
+* improve server graceful shutdown ([#314](https://github.com/wundergraph/wundergraph/issues/314)) ([14da07d](https://github.com/wundergraph/wundergraph/commit/14da07d6ca1b6c6cd1571e8322338c1684f92ff8)) (@StarpTech)
+
+## [0.117.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.3...@wundergraph/sdk@0.117.4) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.117.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.2...@wundergraph/sdk@0.117.3) (2022-11-03)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.117.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.1...@wundergraph/sdk@0.117.2) (2022-11-03)
+
+### Bug Fixes
+
+* skip introspection cache when OpenAPI source is a file ([#309](https://github.com/wundergraph/wundergraph/issues/309)) ([911a551](https://github.com/wundergraph/wundergraph/commit/911a551ced23b5d455d0321f1dc2eeebe979d65d)) (@fiam)
+
 ## [0.117.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.117.0...@wundergraph/sdk@0.117.1) (2022-10-23)
 
 **Note:** Version bump only for package @wundergraph/sdk

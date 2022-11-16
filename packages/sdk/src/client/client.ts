@@ -35,6 +35,10 @@ export class Client {
 		return serialize(query);
 	}
 
+	public isAuthenticatedOperation(operationName: string) {
+		return !!this.options.operationMetadata?.[operationName]?.requiresAuthentication;
+	}
+
 	private operationUrl(operationName: string) {
 		return this.options.baseURL + '/' + this.options.applicationPath + '/operations/' + operationName;
 	}
@@ -231,14 +235,14 @@ export class Client {
 		return response.json();
 	}
 
-	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData extends any>(
-		subscription: RequestOptions,
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
+		options: RequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
 		if ('EventSource' in globalThis) {
-			return this.subscribeWithSSE<ResponseData>(subscription, cb);
+			return this.subscribeWithSSE<ResponseData>(options, cb);
 		}
-		for await (const event of this.subscribeWithFetch<ResponseData>(subscription)) {
+		for await (const event of this.subscribeWithFetch<ResponseData>(options)) {
 			cb(event);
 		}
 	}
@@ -247,23 +251,31 @@ export class Client {
 		subscription: SubscriptionRequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
-		const params = new URLSearchParams({
-			wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
-			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.liveQuery ? 'true' : 'false',
-			wg_sse: 'true',
+		return new Promise<void>((resolve, reject) => {
+			const params = new URLSearchParams({
+				wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
+				wg_variables: this.stringifyInput(subscription.input),
+				wg_live: subscription?.liveQuery ? 'true' : 'false',
+				wg_sse: 'true',
+			});
+			const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
+			const eventSource = new EventSource(url, {
+				withCredentials: true,
+			});
+			eventSource.addEventListener('error', () => {
+				reject(new Error(`SSE connection error: ${subscription.operationName}`));
+			});
+			eventSource.addEventListener('open', () => {
+				resolve();
+			});
+			eventSource.addEventListener('message', (ev) => {
+				const jsonResp = JSON.parse(ev.data);
+				cb(this.convertGraphQLResponse(jsonResp));
+			});
+			if (subscription?.abortSignal) {
+				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
+			}
 		});
-		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
-		const eventSource = new EventSource(url, {
-			withCredentials: true,
-		});
-		eventSource.addEventListener('message', (ev) => {
-			const jsonResp = JSON.parse(ev.data);
-			cb(this.convertGraphQLResponse(jsonResp));
-		});
-		if (subscription?.abortSignal) {
-			subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
-		}
 	}
 
 	private async *subscribeWithFetch<ResponseData = any>(
@@ -350,7 +362,7 @@ export class Client {
 		};
 	}
 
-	public login = (authProviderID: string, redirectURI?: string) => {
+	public login(authProviderID: string, redirectURI?: string) {
 		// browser check
 		if (typeof window === 'undefined') {
 			throw new Error('login() can only be called in a browser environment');
@@ -366,9 +378,9 @@ export class Client {
 		);
 
 		window.location.assign(url);
-	};
+	}
 
-	public logout = async (options?: LogoutOptions): Promise<boolean> => {
+	public async logout(options?: LogoutOptions): Promise<boolean> {
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
@@ -383,5 +395,5 @@ export class Client {
 		});
 
 		return response.ok;
-	};
+	}
 }

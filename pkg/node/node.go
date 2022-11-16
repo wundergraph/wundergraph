@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
 
@@ -25,18 +25,24 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-func New(ctx context.Context, info BuildInfo, wundergraphDir string, log abstractlogger.Logger) *Node {
+const (
+	rootEndpoint        = "/"
+	healthCheckEndpoint = "/health"
+)
+
+func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Logger) *Node {
 	return &Node{
 		info:           info,
 		ctx:            ctx,
 		configCh:       make(chan WunderNodeConfig),
 		pool:           pool.New(),
-		log:            log,
+		log:            log.With(zap.String("component", "@wundergraph/node")),
 		WundergraphDir: wundergraphDir,
 		apiClient: &fasthttp.Client{
 			ReadTimeout:              time.Second * 10,
@@ -56,7 +62,7 @@ type Node struct {
 	configCh       chan WunderNodeConfig
 	server         *http.Server
 	pool           *pool.Pool
-	log            abstractlogger.Logger
+	log            *zap.Logger
 	apiClient      *fasthttp.Client
 	options        options
 	WundergraphDir string
@@ -82,6 +88,7 @@ type options struct {
 	idleHandler             func()
 	hooksServerHealthCheck  bool
 	healthCheckTimeout      time.Duration
+	prettyLogging           bool
 }
 
 type Option func(options *options)
@@ -152,6 +159,12 @@ func WithDebugMode(enable bool) Option {
 	}
 }
 
+func WithPrettyLogging(enable bool) Option {
+	return func(options *options) {
+		options.prettyLogging = enable
+	}
+}
+
 func WithForceHttpsRedirects(forceHttpsRedirects bool) Option {
 	return func(options *options) {
 		options.forceHttpsRedirects = forceHttpsRedirects
@@ -187,7 +200,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			err := n.startServer(*options.staticConfig)
 			if err != nil {
 				n.log.Error("could not start a node",
-					abstractlogger.Error(err),
+					zap.Error(err),
 				)
 				return err
 			}
@@ -195,14 +208,14 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		})
 	case options.fileSystemConfig != nil:
 		n.log.Info("Api config: file polling",
-			abstractlogger.String("config_file_name", *options.fileSystemConfig),
+			zap.String("config_file_name", *options.fileSystemConfig),
 		)
 		if options.configFileChange != nil {
 			g.Go(func() error {
 				err := n.reconfigureOnConfigUpdate()
 				if err != nil {
 					n.log.Error("could not reconfigure config update",
-						abstractlogger.Error(err),
+						zap.Error(err),
 					)
 					return err
 				}
@@ -213,7 +226,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 				err := n.filePollConfig(*options.fileSystemConfig)
 				if err != nil {
 					n.log.Error("could not load config",
-						abstractlogger.Error(err),
+						zap.Error(err),
 					)
 					return err
 				}
@@ -269,8 +282,8 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 				})
 			} else {
 				n.log.Error("failed to listen to ipv6. Did you forget to enable ipv6?",
-					abstractlogger.String("ip", nip),
-					abstractlogger.Error(err),
+					zap.String("ip", nip),
+					zap.Error(err),
 				)
 			}
 		} else {
@@ -304,24 +317,49 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("Initialize WunderNode shutdown ....")
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
-	n.log.Info("Graceful shutdown WunderNode ...", abstractlogger.String("gracefulTimeout", gracefulTimeoutDur.String()))
+	n.log.Info("Graceful shutdown WunderNode ...", zap.String("gracefulTimeout", gracefulTimeoutDur.String()))
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), gracefulTimeoutDur)
 	defer cancel()
 
 	if err := n.Shutdown(shutdownCtx); err != nil {
-		n.log.Error("Error during WunderNode shutdown", abstractlogger.Error(err))
+		n.log.Error("Error during WunderNode shutdown", zap.Error(err))
 	}
 
 	n.log.Info("WunderNode shutdown complete")
 }
 
+func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, bool) {
+	healthCheck := &HealthCheckReport{
+		ServerStatus: "NOT_READY",
+		// For now we assume that the server is ready
+		// because we don't have any health checks
+		NodeStatus: "READY",
+		BuildInfo:  n.info,
+	}
+
+	if n.options.hooksServerHealthCheck {
+		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+		if ok {
+			healthCheck.ServerStatus = "READY"
+		} else {
+			return healthCheck, false
+		}
+	} else {
+		healthCheck.ServerStatus = "SKIP"
+	}
+
+	return healthCheck, true
+}
+
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	logLevel := nodeConfig.Api.Options.Logging.Level
 	if n.options.enableDebugMode {
-		logLevel = abstractlogger.DebugLevel
+		logLevel = zapcore.DebugLevel
 	}
 
-	n.log = abstractlogger.NewZapLogger(logging.Zap().With(zap.String("component", "@wundergraph/node")), logLevel)
+	n.log = logging.
+		New(n.options.prettyLogging, n.options.enableDebugMode, logLevel).
+		With(zap.String("component", "@wundergraph/node"))
 
 	router := mux.NewRouter()
 
@@ -348,7 +386,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	if !valid {
 		n.log.Error("API config invalid",
-			abstractlogger.Strings("errors", messages),
+			zap.Strings("errors", messages),
 		)
 		return errors.New("API config invalid")
 	}
@@ -375,7 +413,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
 
 	n.log.Debug("http.Client.Transport",
-		abstractlogger.Bool("enableDebugMode", n.options.enableDebugMode),
+		zap.Bool("enableDebugMode", n.options.enableDebugMode),
 	)
 
 	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(
@@ -402,13 +440,13 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	publicClosers, err := builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
-		n.log.Error("BuildAndMountApiHandler", abstractlogger.Error(err))
+		n.log.Error("BuildAndMountApiHandler", zap.Error(err))
 	}
 	streamClosers = append(streamClosers, publicClosers...)
 
 	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
 	if err != nil {
-		n.log.Error("BuildAndMountInternalApiHandler", abstractlogger.Error(err))
+		n.log.Error("BuildAndMountInternalApiHandler", zap.Error(err))
 	}
 
 	streamClosers = append(streamClosers, internalClosers...)
@@ -419,23 +457,35 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}
 	}()
 
-	router.Handle("/health", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		serverStatus := "SKIP"
-		if n.options.hooksServerHealthCheck {
-			serverStatus = "OK"
-			ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
-			if !ok {
-				w.WriteHeader(http.StatusServiceUnavailable)
-				serverStatus = "DEAD"
-			}
+	router.Handle(rootEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		template, err := nodetemplates.GetTemplateByPath(rootEndpoint)
+		if err != nil {
+			n.log.Error("GetTemplateByPath", zap.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 
-		health := HealthCheck{
-			ServerStatus: serverStatus,
-			NodeStatus:   "OK",
-			BuildInfo:    n.info,
+		report, healthy := n.GetHealthReport(hooksClient)
+		if !healthy {
+			w.WriteHeader(http.StatusServiceUnavailable)
 		}
-		_ = json.NewEncoder(w).Encode(health)
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Content-Type", "text/html")
+
+		if err := template.Execute(w, report); err != nil {
+			n.log.Error("template.Execute", zap.Error(err))
+			return
+		}
+	}))
+
+	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		report, healthy := n.GetHealthReport(hooksClient)
+		if !healthy {
+			w.WriteHeader(http.StatusServiceUnavailable)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		_ = json.NewEncoder(w).Encode(report)
 	}))
 
 	n.server = &http.Server{
@@ -447,7 +497,12 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	if n.options.idleTimeout > 0 {
-		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout)
+		opts := []httpidletimeout.Option{
+			httpidletimeout.WithSkip(func(r *http.Request) bool {
+				return r.URL.Path == healthCheckEndpoint
+			}),
+		}
+		timeoutMiddleware := httpidletimeout.New(n.options.idleTimeout, opts...)
 		router.Use(timeoutMiddleware.Handler)
 		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
 		timeoutMiddleware.Start()
@@ -468,13 +523,13 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		l := listener
 		g.Go(func() error {
 			n.log.Info("listening on",
-				abstractlogger.String("addr", l.Addr().String()),
+				zap.String("addr", l.Addr().String()),
 			)
 
 			if err := n.server.Serve(l); err != nil {
 				if err == http.ErrServerClosed {
 					n.log.Debug("listener closed",
-						abstractlogger.String("addr", l.Addr().String()),
+						zap.String("addr", l.Addr().String()),
 					)
 					return nil
 				}
@@ -485,7 +540,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	n.log.Debug("public node url",
-		abstractlogger.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
+		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
 	return g.Wait()
@@ -589,7 +644,7 @@ func (n *Node) filePollConfig(filePath string) error {
 func (n *Node) reloadFileConfig(filePath string) error {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		n.log.Error("reloadFileConfig ioutil.ReadFile", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
+		n.log.Error("reloadFileConfig ioutil.ReadFile", zap.String("filePath", filePath), zap.Error(err))
 		return err
 	}
 	if len(data) == 0 {
@@ -598,13 +653,13 @@ func (n *Node) reloadFileConfig(filePath string) error {
 	var graphConfig wgpb.WunderGraphConfiguration
 	err = json.Unmarshal(data, &graphConfig)
 	if err != nil {
-		n.log.Error("reloadFileConfig json.Unmarshal", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
+		n.log.Error("reloadFileConfig json.Unmarshal", zap.String("filePath", filePath), zap.Error(err))
 		return err
 	}
 
 	config, err := CreateConfig(&graphConfig)
 	if err != nil {
-		n.log.Error("reloadFileConfig CreateConfig", abstractlogger.String("filePath", filePath), abstractlogger.Error(err))
+		n.log.Error("reloadFileConfig CreateConfig", zap.String("filePath", filePath), zap.Error(err))
 		return err
 	}
 

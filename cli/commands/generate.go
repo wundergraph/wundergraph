@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
@@ -62,6 +62,7 @@ var generateCmd = &cobra.Command{
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
 			),
 		})
 		defer func() {
@@ -69,8 +70,8 @@ var generateCmd = &cobra.Command{
 			err := configRunner.Stop()
 			if err != nil {
 				log.Error("Stopping runner failed",
-					abstractlogger.String("runnerName", "config-runner"),
-					abstractlogger.Error(err),
+					zap.String("runnerName", "config-runner"),
+					zap.Error(err),
 				)
 			}
 		}()
@@ -96,7 +97,7 @@ var generateCmd = &cobra.Command{
 					OutDir:        webhooksOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
-						log.Debug("Webhooks bundled!", abstractlogger.String("bundlerName", "webhooks-bundler"))
+						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
 						return nil
 					},
 				})
@@ -134,12 +135,12 @@ var generateCmd = &cobra.Command{
 				}
 
 				err := wg.Wait()
-				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
 				return err
 			}
 		} else {
-			_, _ = white.Printf("Hooks EntryPoint not found, skipping. File: %s\n", serverEntryPointFilename)
+			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
 			onAfterBuild = func() error {
 				<-configRunner.Run(ctx)
 
@@ -149,7 +150,7 @@ var generateCmd = &cobra.Command{
 					)
 				}
 
-				log.Debug("Config built!", abstractlogger.String("bundlerName", "config-bundler"))
+				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
 				return nil
 			}

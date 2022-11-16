@@ -26,7 +26,6 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hetiansu5/urlquery v1.2.7
-	github.com/jensneuse/abstractlogger v0.0.4
 	github.com/jensneuse/goprisma v0.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/klauspost/compress v1.14.4
@@ -75,6 +74,7 @@ require (
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/jensneuse/abstractlogger v0.0.4 // indirect
 	github.com/jensneuse/byte-template v0.0.0-20200214152254-4f3cf06e5c68 // indirect
 	github.com/jensneuse/pipeline v0.0.0-20200117120358-9fb4de085cd6 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

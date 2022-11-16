@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -26,16 +27,17 @@ var serverStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl server start
 `,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
 		err := startWunderGraphServer(ctx)
 		if err != nil {
-			return err
+			// Exit with error code 1 to indicate failure and restart
+			log.Fatal("WunderGraph server process shutdown: %w", zap.Error(err))
 		}
 
-		return nil
+		// exit code 0 to indicate success
 	},
 }
 

@@ -90,7 +90,27 @@ const graphQLAPI = introspect.graphql({
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+	url: 'https://spacex-api.fly.dev/graphql/',
+});
+
+const counter = introspect.graphql({
+	id: 'counter',
+	apiNamespace: 'ws',
+	subscriptionsUseSSE: true,
+	url: 'http://localhost:3003/api/graphql',
+	loadSchemaFromString: `
+			type Query {
+				hello: String
+			}
+
+			type Subscription {
+				countdown(from: Int!): Int!
+			}
+			
+			schema {
+				query: Query
+				subscription: Subscription
+			}`,
 });
 
 const myApplication = new Application({
@@ -98,6 +118,7 @@ const myApplication = new Application({
 	apis: [
 		weather,
 		spaceX,
+		counter,
 		//jspFieldsRenamed,
 		/*federatedApi,
             openAPI,

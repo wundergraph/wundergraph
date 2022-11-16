@@ -1,44 +1,15 @@
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import styles from '../../styles/Home.module.css';
 
 import { useState } from 'react';
-import { createHooks } from '@wundergraph/swr';
-
-import { createClient, Operations } from '../components/generated/client';
-import { withWunderGraph } from '../components/generated/nextjs';
-
-const client = createClient();
-
-const { useQuery, useMutation } = createHooks<Operations>(client);
-
-const LiveWeather: React.FC<{ city: string }> = ({ city }) => {
-	const liveWeather = useQuery({
-		operationName: 'Weather',
-		input: { forCity: city },
-		liveQuery: true,
-	});
-
-	return (
-		<div>
-			{liveWeather.isValidating && <p>Loading...</p>}
-			{liveWeather.error && <p>Error</p>}
-			{liveWeather.data && (
-				<div>
-					<h3>City: {liveWeather.data.getCityByName?.name}</h3>
-					<p>{JSON.stringify(liveWeather.data.getCityByName?.coord)}</p>
-					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.temperature)}</p>
-					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.wind)}</p>
-				</div>
-			)}
-		</div>
-	);
-};
+import { useMutation } from '../../lib/wundergraph';
 
 const NameForm = () => {
 	const mutation = useMutation({
 		operationName: 'SetName',
+		onSuccess(data, key, config) {
+			console.log(data, key, config);
+		},
 	});
 
 	const [name, setName] = useState('');
@@ -48,8 +19,8 @@ const NameForm = () => {
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
-					mutation.mutate({
-						input: { name },
+					mutation.trigger({
+						name,
 					});
 				}}
 			>
@@ -58,8 +29,8 @@ const NameForm = () => {
 						Name
 						<input name="name" value={name} onChange={(e) => setName(e.currentTarget.value)} />
 					</label>
+					<button type="submit">Submit</button>
 				</div>
-				<button type="submit">Submit</button>
 
 				<p>{JSON.stringify(mutation.data)}</p>
 			</form>
@@ -67,7 +38,7 @@ const NameForm = () => {
 	);
 };
 
-const SWRWithProvider = () => {
+const SWR = () => {
 	return (
 		<div className={styles.container}>
 			<Head>
@@ -82,15 +53,12 @@ const SWRWithProvider = () => {
 					... with <a href="https://wundergraph.com?utm_source=nextjs_starter">WunderGraph</a>
 				</h2>
 				<p className={styles.description}>Take a look at the examples below...</p>
+
+				<div style={{ paddingTop: '80px' }}>
+					<h3>Mutation</h3>
+					<NameForm />
+				</div>
 			</main>
-
-			<div>
-				<LiveWeather city="Berlin" />
-			</div>
-
-			<div>
-				<NameForm />
-			</div>
 
 			<footer className={styles.footer}>
 				Powered by{' '}
@@ -108,6 +76,4 @@ const SWRWithProvider = () => {
 	);
 };
 
-export default withWunderGraph(SWRWithProvider, {
-	client,
-});
+export default SWR;

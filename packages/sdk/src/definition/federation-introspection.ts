@@ -1,11 +1,9 @@
-import { GraphQLSchema } from 'graphql';
+import { DocumentNode, GraphQLSchema } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
 import { parse } from 'graphql/index';
-import { ServiceDefinition } from '@apollo/federation';
-import { composeServices } from '@apollo/composition';
 import { mergeApis } from './merge';
 import { introspectWithCache } from './introspection-cache';
 import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';
@@ -71,6 +69,11 @@ export const fetchFederationServiceSDL = async (
 	return res.data.data._service.sdl;
 };
 
+export interface ServiceDefinition {
+	typeDefs: DocumentNode;
+	name: string;
+}
+
 export const introspectFederation = async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> =>
 	introspectWithCache(introspection, async (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
 		const upstreams = introspection.upstreams.map(async (upstream, i) => {
@@ -105,15 +108,6 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 				typeDefs: parse(schema),
 			};
 		});
-		const serviceList: ServiceDefinition[] = await Promise.all(upstreams);
-		const compositionResult = composeServices(serviceList);
-		const errors = compositionResult.errors;
-
-		if (errors && errors?.length > 0) {
-			throw new Error(
-				`Service composition of federated subgraph failed: ${errors[0]}. Make sure all subgraphs can be composed to a supergaph.`
-			);
-		}
 
 		const graphQLIntrospections: GraphQLIntrospection[] = introspection.upstreams.map((upstream) => ({
 			...upstream,

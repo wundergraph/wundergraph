@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,7 +21,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/securecookie"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
@@ -32,7 +33,7 @@ func init() {
 }
 
 type UserLoader struct {
-	log             abstractlogger.Logger
+	log             *zap.Logger
 	s               *securecookie.SecureCookie
 	cache           *ristretto.Cache
 	client          *http.Client
@@ -53,7 +54,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 	if exists {
 		*user = fromCache.(User)
 		u.log.Debug("user loaded from cache",
-			abstractlogger.String("sub", user.UserID),
+			zap.String("sub", user.UserID),
 		)
 		return nil
 	}
@@ -245,7 +246,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 
 type Hooks struct {
 	Client                     *hooks.Client
-	Log                        abstractlogger.Logger
+	Log                        *zap.Logger
 	PostAuthentication         bool
 	MutatingPostAuthentication bool
 	PostLogout                 bool
@@ -257,14 +258,14 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 	}
 	hookData := []byte(`{}`)
 	if userJson, err := json.Marshal(user); err != nil {
-		h.Log.Error("Could not marshal user", abstractlogger.Error(err))
+		h.Log.Error("Could not marshal user", zap.Error(err))
 		return
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
 	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
 	if err != nil {
-		h.Log.Error("PostAuthentication queries hook", abstractlogger.Error(err))
+		h.Log.Error("PostAuthentication queries hook", zap.Error(err))
 		return
 	}
 }
@@ -275,14 +276,14 @@ func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
 	}
 	hookData := []byte(`{}`)
 	if userJson, err := json.Marshal(user); err != nil {
-		h.Log.Error("Could not marshal user", abstractlogger.Error(err))
+		h.Log.Error("Could not marshal user", zap.Error(err))
 		return
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
 	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData)
 	if err != nil {
-		h.Log.Error("PostLogout queries hook", abstractlogger.Error(err))
+		h.Log.Error("PostLogout queries hook", zap.Error(err))
 	}
 }
 
@@ -304,7 +305,10 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	}
 	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
 	if err != nil {
-		h.Log.Error("MutatingPostAuthentication queries hook", abstractlogger.Error(err))
+		if errors.Is(err, context.Canceled) {
+			return false, "", updatedUser
+		}
+		h.Log.Error("MutatingPostAuthentication queries hook", zap.Error(err))
 		return
 	}
 	if out.Error != "" {
@@ -548,7 +552,7 @@ func (e *RBACEnforcer) containsOne(slice []string, one string) bool {
 }
 
 type LoadUserConfig struct {
-	Log           abstractlogger.Logger
+	Log           *zap.Logger
 	Cookie        *securecookie.SecureCookie
 	JwksProviders []*wgpb.JwksAuthProvider
 	Hooks         Hooks
@@ -566,8 +570,8 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 			userInfoURL, err := url.Parse(userInfoEndpoint)
 			if err != nil {
 				config.Log.Error("jwks userInfo endpoint invalid URL",
-					abstractlogger.Error(err),
-					abstractlogger.String("URL", userInfoEndpoint),
+					zap.Error(err),
+					zap.String("URL", userInfoEndpoint),
 				)
 				continue
 			}
@@ -579,8 +583,8 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 				cancel()
 				if err != nil {
 					config.Log.Error("loading jwks from URL failed",
-						abstractlogger.Error(err),
-						abstractlogger.String("URL", jwksURL),
+						zap.Error(err),
+						zap.String("URL", jwksURL),
 					)
 					continue
 				}
@@ -596,8 +600,8 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 				jwks, err := keyfunc.NewJSON(json.RawMessage(js))
 				if err != nil {
 					config.Log.Error("loading jwks from JSON failed",
-						abstractlogger.Error(err),
-						abstractlogger.String("JSON", js),
+						zap.Error(err),
+						zap.String("JSON", js),
 					)
 					continue
 				}
@@ -626,7 +630,7 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 
 	if err != nil {
 		config.Log.Error("unable to instantiate user loader cache",
-			abstractlogger.Error(err),
+			zap.Error(err),
 		)
 	}
 
@@ -677,7 +681,7 @@ func (_ TokenUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type CookieUserHandler struct {
 	HasRevalidateHook bool
 	MWClient          *hooks.Client
-	Log               abstractlogger.Logger
+	Log               *zap.Logger
 	Host              string
 	InsecureCookies   bool
 	Cookie            *securecookie.SecureCookie
@@ -692,7 +696,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
 		hookData := []byte(`{}`)
 		if userJson, err := json.Marshal(user); err != nil {
-			u.Log.Error("Could not marshal user", abstractlogger.Error(err))
+			u.Log.Error("Could not marshal user", zap.Error(err))
 			http.NotFound(w, r)
 			return
 		} else {
@@ -706,19 +710,19 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
 		if err != nil {
-			u.Log.Error("RevalidateAuthentication request failed", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication request failed", zap.Error(err))
 			http.NotFound(w, r)
 			return
 		}
 		if out.Error != "" {
-			u.Log.Error("RevalidateAuthentication returned an error", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication returned an error", zap.Error(err))
 			http.NotFound(w, r)
 			return
 		}
 		var res MutatingPostAuthenticationResponse
 		err = json.Unmarshal(out.Response, &res)
 		if res.Status != "ok" {
-			u.Log.Error("RevalidateAuthentication status is not ok", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication status is not ok", zap.Error(err))
 			http.NotFound(w, r)
 			return
 		}
@@ -727,7 +731,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		user = &res.User
 		err = user.Save(u.Cookie, w, r, u.Host, u.InsecureCookies)
 		if err != nil {
-			u.Log.Error("RevalidateAuthentication could not save cookie", abstractlogger.Error(err))
+			u.Log.Error("RevalidateAuthentication could not save cookie", zap.Error(err))
 			http.NotFound(w, r)
 			return
 		}

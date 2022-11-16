@@ -16,7 +16,7 @@ Let's start by configuring WunderGraph.
 // wundergraph.config.ts
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
-  url: 'https://api.spacex.land/graphql/',
+  url: 'https://spacex-api.fly.dev/graphql/',
 })
 
 const myApplication = new Application({
@@ -50,7 +50,7 @@ import { createHooks } from '@wundergraph/swr'
 
 export const client = createClient()
 
-export const { useQuery, useMutation, useSubscription } =
+export const { useQuery, useMutation, useSubscription, useUser, useAuth } =
   createHooks<Operations>(client)
 ```
 
@@ -93,14 +93,12 @@ import { NextPage } from 'next'
 import { useMutation } from '../lib/wundergraph'
 
 const Home: NextPage = () => {
-  const { data, error, mutate } = useMutation({
+  const { data, error, trigger } = useMutation({
     operationName: 'Dragons',
   })
   const onClick = () => {
-    mutate({
-      input: {
-        name: 'test',
-      },
+    trigger({
+      name: 'test',
     })
   }
   return (
@@ -188,5 +186,5 @@ In case the context configuration isn't working, it's likely due to multiple ver
 To resolve this you can import SWR directly from `@wundergraph/swr` to make sure the same instance is used.
 
 ```ts
-import { useSWR, SWRConfig, useSWRConfig } from '@wundergraph/swr'
+import { SWRConfig, useSWRConfig } from '@wundergraph/swr'
 ```

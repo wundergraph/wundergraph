@@ -23,6 +23,7 @@ jobs:
   tag-release:
     name: Create a new release
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
         with:

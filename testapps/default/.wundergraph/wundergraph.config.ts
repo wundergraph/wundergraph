@@ -3,6 +3,7 @@ import {
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -17,6 +18,16 @@ const jsp = introspect.openApi({
 		filePath: '../json_placeholder.json',
 	},
 	baseURL: 'https://jsonplaceholder.typicode.{tld}',
+	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
+});
+
+const jsp2 = introspect.openApi({
+	apiNamespace: 'jsp2',
+	source: {
+		kind: 'file',
+		filePath: '../json_placeholder.json',
+	},
+	baseURL: new EnvironmentVariable('JSP_BASE_URL'),
 	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
@@ -40,7 +51,7 @@ const jsp = introspect.openApi({
 
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
 const countries = introspect.graphql({
@@ -68,7 +79,7 @@ const db = introspect.sqlite({
 
 const myApplication = new Application({
 	name: 'app',
-	apis: [jsp, weather, countries, spacex, chinook, db],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2],
 });
 
 // configureWunderGraph emits the configuration

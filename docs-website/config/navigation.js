@@ -103,6 +103,10 @@ const navigation = [
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
 			{
+				title: 'Debugging',
+				href: '/docs/guides/debugging',
+			},
+			{
 				title: 'Inject Short-Lived Token into Upstream Requests',
 				href: '/docs/guides/inject-short-lived-token-into-upstream-requests',
 			},
@@ -138,6 +142,15 @@ const navigation = [
 			{
 				title: 'NextJS Full-Stack Tutorial',
 				href: '/docs/tutorials/nextjs-full-stack-tutorial',
+			},
+		],
+	},
+	{
+		title: 'Cloud',
+		links: [
+			{
+				title: 'Deploy to WunderGraph Cloud',
+				href: '/docs/cloud/deployments',
 			},
 		],
 	},
@@ -240,6 +253,10 @@ const navigation = [
 			{
 				title: 'GraphQl subscriptions hooks',
 				href: '/docs/examples/graphql-subscriptions-hooks',
+			},
+			{
+				title: 'WunderGraph schema extension',
+				href: '/docs/examples/schema-extension',
 			},
 		],
 	},
@@ -777,6 +794,10 @@ const navigation = [
 			{
 				title: '.graphqlconfig',
 				href: '/docs/wundergraph-config-ts-reference/configure-graphqlconfig',
+			},
+			{
+				title: 'Schema extension',
+				href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
 			},
 		],
 	},
