@@ -20,6 +20,7 @@ import {
 	applyNamespaceToDirectiveConfiguration,
 	applyNameSpaceToFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
+	applyNameSpaceToSingleTypeFields,
 	applyNameSpaceToTypeFields,
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
@@ -143,11 +144,14 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							ServiceSDL: serviceSDL || '',
 						},
 						UpstreamSchema: upstreamSchema,
-						GraphQLSchema: schemaSDL,
 						HooksConfiguration: {
 							onWSTransportConnectionInit: false,
 						},
-						CustomScalarTypeFields: customScalarTypeFields,
+						CustomScalarTypeFields: applyNameSpaceToSingleTypeFields(
+							customScalarTypeFields,
+							graphQLSchema,
+							introspection.apiNamespace
+						),
 					},
 					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
 					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,

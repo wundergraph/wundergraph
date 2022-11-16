@@ -1081,7 +1081,6 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 					useSSE: graphql.Subscription.UseSSE,
 				},
 				upstreamSchema: graphql.UpstreamSchema,
-				graphQLSchema: graphql.GraphQLSchema,
 				hooksConfiguration: graphql.HooksConfiguration,
 				customScalarTypeFields: graphql.CustomScalarTypeFields,
 			};

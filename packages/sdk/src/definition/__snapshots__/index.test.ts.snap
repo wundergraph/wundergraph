@@ -65,22 +65,6 @@ GraphQLApi {
           },
           "urlEncodeBody": false,
         },
-        "GraphQLSchema": "type Query {
-  user: User
-}
-
-type RegisteredUser implements User {
-  displayName: String!
-  hasVerifiedEmail: Boolean!
-  id: ID!
-  isLoggedIn: Boolean!
-}
-
-interface User {
-  displayName: String!
-  id: ID!
-  isLoggedIn: Boolean!
-}",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false,
         },

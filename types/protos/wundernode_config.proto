@@ -276,7 +276,6 @@ message DataSourceCustom_GraphQL {
 	string upstreamSchema = 4;
 	GraphQLDataSourceHooksConfiguration hooksConfiguration = 5;
 	repeated SingleTypeField customScalarTypeFields = 6;
-	string graphQLSchema = 7;
 }
 
 message DataSourceCustom_Database {
