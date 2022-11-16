@@ -43,7 +43,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('accept', 'application/json')
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.get('/app/operations/' + operationName)
+		.get('/operations/' + operationName)
 		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
 };
 
