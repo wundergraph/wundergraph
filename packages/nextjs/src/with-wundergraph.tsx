@@ -8,6 +8,7 @@ import { userSWRKey, SWRConfig } from '@wundergraph/swr';
 import { WithWunderGraphOptions, SSRCache } from './types';
 import { WunderGraphProvider } from './context';
 import { SSRMiddleWare } from './ssr-middleware';
+import { ResponseError } from '@wundergraph/sdk/dist/client/ResponseError';
 
 export const withWunderGraph = (options: WithWunderGraphOptions) => {
 	return (
@@ -81,7 +82,8 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 					try {
 						ssrUser = await client.fetchUser();
 					} catch (e: any) {
-						if ((e.statusCode !== 404 && e.statusCode !== 401) || logFetchErrors) console.error(e);
+						if ((e instanceof ResponseError && e.statusCode !== 404 && e.statusCode !== 401) || logFetchErrors)
+							console.error(e);
 					}
 				}
 
