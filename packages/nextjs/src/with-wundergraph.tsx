@@ -3,7 +3,7 @@ import ssrPrepass from 'react-ssr-prepass';
 import { NextComponentType } from 'next';
 import { AppContextType, AppPropsType, NextPageContext } from 'next/dist/shared/lib/utils';
 import { NextRouter } from 'next/router';
-import { User } from '@wundergraph/sdk/client';
+import { GraphQLResponseError, User } from '@wundergraph/sdk/client';
 import { userSWRKey, SWRConfig } from '@wundergraph/swr';
 import { WithWunderGraphOptions, SSRCache } from './types';
 import { WunderGraphProvider } from './context';
@@ -80,8 +80,8 @@ export const withWunderGraph = (options: WithWunderGraphOptions) => {
 				if (fetchUserSSR !== false) {
 					try {
 						ssrUser = await client.fetchUser();
-					} catch (e) {
-						if (logFetchErrors) console.error(e);
+					} catch (e: any) {
+						if ((e.statusCode !== 404 && e.statusCode !== 401) || logFetchErrors) console.error(e);
 					}
 				}
 
