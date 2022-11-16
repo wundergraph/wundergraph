@@ -1,12 +1,12 @@
 import { NextPage } from 'next';
 import { useState } from 'react';
 import styles from '../styles/Home.module.css';
-import { S3Provider, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useFileUpload, withWunderGraph } from '../components/generated/nextjs';
 
 const UploadPage: NextPage = () => {
 	const [files, setFiles] = useState<FileList>();
 	const [data, setData] = useState<string[]>([]);
-	const { uploadFiles } = useWunderGraph();
+	const { upload } = useFileUpload({});
 	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) setFiles(e.target.files);
 	};
@@ -16,11 +16,11 @@ const UploadPage: NextPage = () => {
 			return;
 		}
 		try {
-			const result = await uploadFiles({
-				provider: S3Provider.minio,
+			const result = await upload({
+				provider: 'minio',
 				files,
 			});
-			setData(result.fileKeys);
+			result && setData(result);
 		} catch (e) {
 			console.error("Couldn't upload files", e);
 		}

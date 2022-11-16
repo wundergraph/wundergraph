@@ -2,9 +2,11 @@ import { NextPage } from 'next';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const user = useQuery.Dragons();
+	const dragons = useQuery({
+		operationName: 'Dragons',
+	});
 	const refresh = () => {
-		user.refetch();
+		dragons.mutate();
 	};
 	return (
 		<div>
@@ -55,7 +57,7 @@ const Home: NextPage = () => {
 							This is the result of your <code className="font-mono font-medium text-amber-500 font-bold">Dragons</code>{' '}
 							operation.
 						</p>
-						<code className="p-3">{JSON.stringify(user, null, 2)}</code>
+						<code className="p-3">{JSON.stringify(dragons, null, 2)}</code>
 					</div>
 					<div className="flex justify-center mt-8">
 						<button

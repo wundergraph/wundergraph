@@ -2,6 +2,7 @@ import { Client, ClientConfig, OperationRequestOptions } from './index';
 import nock from 'nock';
 import fetch from 'node-fetch';
 import { ResponseError } from './ResponseError';
+import { QueryRequestOptions } from './types';
 
 const newClient = (overrides?: Partial<ClientConfig>) => {
 	return new Client({
@@ -152,7 +153,7 @@ describe('Client', () => {
 					],
 				});
 
-			const resp = await client.query<OperationRequestOptions<'Weather'>>({
+			const resp = await client.query<QueryRequestOptions<'Weather'>>({
 				operationName: 'Weather',
 			});
 
@@ -171,7 +172,7 @@ describe('Client', () => {
 				.once()
 				.reply(500);
 
-			const resp = await client.query<OperationRequestOptions<'Weather'>>({
+			const resp = await client.query<QueryRequestOptions<'Weather'>>({
 				operationName: 'Weather',
 			});
 
