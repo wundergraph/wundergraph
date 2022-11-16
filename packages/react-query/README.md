@@ -1,16 +1,16 @@
-# WunderGraph SWR Integration
+# WunderGraph React Query Integration
 
-![wunderctl](https://img.shields.io/npm/v/@wundergraph/swr.svg)
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/react-query.svg)
 
-This package provides a type-safe integration of [SWR](https://swr.vercel.app/) with WunderGraph.
-SWR is a React Hooks library for data fetching. With just one hook, you can significantly simplify the data fetching logic in your project. And it also covered in all aspects of speed, correctness, and stability to help you build better experiences.
+This package provides a type-safe integration of [React Query](https://tanstack.com/query/v4/docs/overview) with WunderGraph.
+React Query is a data fetching library for React. With just one hook, you can significantly simplify the data fetching logic in your project. And it also covered in all aspects of speed, correctness, and stability to help you build better experiences.
 
 > **Warning**: Only works with WunderGraph.
 
 ## Getting Started
 
 ```shell
-npm install @wundergraph/swr
+npm install @wundergraph/react-query @tanstack/react-query
 ```
 
 Before you can use the hooks, you need to modify your code generation to include the base typescript client.
@@ -31,57 +31,122 @@ configureWunderGraphApplication({
 
 Second, run `wunderctl generate` to generate the code.
 
-Now you can use the hooks.
+Now you can configure the hooks. Create a new file, for example `lib/wundergraph.ts` and add the following code:
 
 ```ts
-import { createHooks } from '@wundergraph/swr';
+import { createHooks } from '@wundergraph/react-query';
 import { createClient, Operations } from './components/generated/client';
 
-const { useQuery, useMutation, useSubscription, useUser, useFileUpload, useAuth } = createHooks<Operations>(
-  createClient({ baseURL: 'https://your-wundernode.com', extraHeaders: {}, customFetch: undefined })
-);
+const client = createClient(); // Typesafe WunderGraph client
 
-export const Home: React.FC<{ city: string }> = ({ city }) => {
-  const { error, data, isValidating } = useQuery({
-    operationName: 'Weather',
-    input: { forCity: city },
-    liveQuery: true,
-  });
+export const { useQuery, useMutation, useSubscription, useUser, useFileUpload, useAuth } =
+  createHooks<Operations>(client);
+```
 
-  const { data: subData, error: subError } = useSubscription({
-    enabled: true,
-    operationName: 'Weather',
-    input: {
-      forCity: 'Berlin',
-    },
-  });
+In your `App.tsx` add QueryClientProvider:
 
-  const { trigger } = useMutation({
-    operationName: 'SetName',
-  });
-  trigger({ name });
+```tsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-  const { data, error } = useUser();
+const queryClient = new QueryClient();
 
-  const { upload, data, error } = useFileUpload();
+export default App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <div>...</div>
+    </QueryClientProvider>
+  );
+}
+```
 
-  const { login, logout } = useAuth();
-};
+Now you can use the hooks in your components:
+
+### useQuery
+
+```ts
+const { data, error, isLoading } = useQuery({
+  operationName: 'Weather',
+  input: { forCity: city },
+});
+```
+
+### useQuery (Live query)
+
+```ts
+const { data, error, isLoading, isSubscribed } = useQuery({
+  operationName: 'Weather',
+  input: { forCity: city },
+  liveQuery: true,
+});
+```
+
+### useSubscription
+
+```ts
+const { data, error, isLoading, isSubscribed } = useSubscription({
+  operationName: 'Weather',
+  input: {
+    forCity: 'Berlin',
+  },
+});
+```
+
+### useMutation
+
+```ts
+const { data, mutate, mutateAsync } = useMutation({
+  operationName: 'SetName',
+});
+
+mutate({ name: 'WunderGraph' });
+
+await mutateAsync({ name: 'WunderGraph' });
+```
+
+### useFileUpload
+
+```ts
+const { upload, data: fileKeys, error } = useFileUpload();
+
+upload({
+  provider: 'minio',
+  files: new FileList(),
+});
+```
+
+### useAuth
+
+```ts
+const { login, logout } = useAuth();
+
+login('github');
+
+logout({ logoutOpenidConnectProvider: true });
+```
+
+### useUser
+
+```ts
+const { data: user, error } = useUser();
+```
+
+### queryKey
+
+You can use the `queryKey` helper function to create a unique key for the query in a typesafe way. This is useful if you want to invalidate the query after mutating.
+
+```ts
+const queryClient = useQueryClient();
+
+const { mutate, mutateAsync } = useMutation({
+  operationName: 'SetName',
+  onSuccess() {
+    queryClient.invalidateQueries(queryKey({ operationName: 'Profile' }));
+  },
+});
+
+mutate({ name: 'WunderGraph' });
 ```
 
 ## Options
 
-You can use all available options from [SWR](https://swr.vercel.app/docs/options) with the hooks.
-Due to the fact that we use the operationName + variables as **key**, you can't use the `key` option as usual.
-In order to use [conditional-fetching](https://swr.vercel.app/docs/conditional-fetching) you can use the `enabled` option.
-
-## Global Configuration
-
-You can configure the hooks globally by using the [SWRConfig](https://swr.vercel.app/docs/global-configuration) context.
-
-In case the context configuration isn't working, it's likely due to multiple versions of SWR being installed.
-To resolve this you can import SWRConfig directly from `@wundergraph/swr` to make sure the same instance is used.
-
-```ts
-import { SWRConfig, useSWRConfig } from '@wundergraph/swr';
-```
+You can use all available options from [React Query](https://tanstack.com/query/v4/docs/reference/useQuery) with the hooks.
