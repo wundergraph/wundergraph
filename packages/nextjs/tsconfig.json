@@ -9,5 +9,6 @@
     "outDir": "./dist",
     "typeRoots": ["./node_modules/@types", "./src/typedefinitions"]
   },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

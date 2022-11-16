@@ -1,10 +1,10 @@
 ---
-title: Next.js + SWR Example
-pageTitle: WunderGraph - Examples - Next.js - SWR
+title: Vite + SWR
+pageTitle: WunderGraph - Examples - Vite - SWR
 description:
 ---
 
-[The Next.js + SWR example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-swr) demonstrates the power of
+[Vite + SWR example](https://github.com/wundergraph/wundergraph/tree/main/examples/vite-swr) demonstrates the power of
 code generation,
 when it comes to integrating WunderGraph with data fetching libraries like [SWR](https://swr.vercel.app/).
 
@@ -31,7 +31,7 @@ configureWunderGraphApplication({
   codeGenerators: [
     {
       templates: [templates.typescript.client],
-      path: '../components/generated',
+      path: '../generated',
     },
   ],
 })
@@ -44,7 +44,7 @@ Next up is setting up the SWR hooks.
 ```ts
 // lib/wundergraph.ts
 
-import { createClient, Operations } from '../components/generated/client'
+import { createClient, Operations } from '../generated/client'
 
 import { createHooks } from '@wundergraph/swr'
 
@@ -69,13 +69,12 @@ query Dragons {
 }
 ```
 
-## Run Queries from Next.js
+## Run a Query
 
 ```typescript
-import { NextPage } from 'next'
 import { useQuery } from '../lib/wundergraph'
 
-const Home: NextPage = () => {
+const App = () => {
   const { data, error } = useQuery({
     // This is allows conditional fetching https://swr.vercel.app/docs/conditional-fetching
     enabled: true,
@@ -83,16 +82,30 @@ const Home: NextPage = () => {
   })
   return <div>{JSON.stringify(data)}</div>
 }
-export default Home
+export default App
 ```
 
-## Run Mutations from Next.js
+## Run a LiveQuery
 
 ```typescript
-import { NextPage } from 'next'
+import { useQuery } from '../lib/wundergraph'
+
+const App = () => {
+  const { data, error } = useQuery({
+    operationName: 'Dragons',
+    liveQuery: true,
+  })
+  return <div>{JSON.stringify(data)}</div>
+}
+export default App
+```
+
+## Run Mutations
+
+```typescript
 import { useMutation } from '../lib/wundergraph'
 
-const Home: NextPage = () => {
+const App = () => {
   const { data, error, trigger } = useMutation({
     operationName: 'Dragons',
   })
@@ -108,38 +121,31 @@ const Home: NextPage = () => {
     </div>
   )
 }
-export default Home
+export default App
 ```
 
-## Run Subscriptions from Next.js
-
-> Note: Subscriptions are currently not supported with SSR.
+## Run Subscriptions
 
 ```typescript
-import { NextPage } from 'next'
 import { useSubscription } from '../lib/wundergraph'
 
-const Home: NextPage = () => {
+const App = () => {
   const { data, error } = useSubscription({
     operationName: 'Dragons',
-    input: {
-      name: 'test',
-    },
   })
   return <div>{JSON.stringify(data)}</div>
 }
-export default Home
+export default App
 ```
 
-## Authentication from Next.js
+## Authentication
 
 > Note: Logout() will trigger a refetch of the user.
 
 ```typescript
-import { NextPage } from 'next'
 import { useAuth, useUser } from '../lib/wundergraph'
 
-const Home: NextPage = () => {
+const App = () => {
   const { login, logout } = useAuth()
   const { data, error } = useUser()
   // Conditional fetching
@@ -147,21 +153,20 @@ const Home: NextPage = () => {
   return (
     <div>
       {JSON.stringify(data)}
-      <button onClick={() => login(AuthProviderId.github)}>Login</button>
+      <button onClick={() => login('github')}>Login</button>
       <button onClick={() => logout()}>Login</button>
     </div>
   )
 }
-export default Home
+export default App
 ```
 
-## File upload from Next.js
+## File upload
 
 ```typescript
-import { NextPage } from 'next'
 import { useFileUpload } from '../lib/wundergraph'
 
-const Home: NextPage = () => {
+const App = () => {
   const { upload, data, error } = useFileUpload()
   const onUpload = () => {
     upload({
@@ -175,7 +180,7 @@ const Home: NextPage = () => {
     </div>
   )
 }
-export default Home
+export default App
 ```
 
 ## Global Configuration

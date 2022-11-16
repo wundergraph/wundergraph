@@ -1,4 +1,4 @@
-import { createClient } from '../.wundergraph/generated/client';
+import { createClient } from '../components/generated/client';
 import fetch from 'node-fetch';
 
 const seed = async () => {

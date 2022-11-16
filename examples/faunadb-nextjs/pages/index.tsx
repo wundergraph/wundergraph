@@ -2,9 +2,11 @@ import { NextPage } from 'next';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const stores = useQuery.AllStores();
+	const stores = useQuery({
+		operationName: 'AllStores',
+	});
 	const refresh = () => {
-		stores.refetch();
+		stores.mutate();
 	};
 	return (
 		<div>

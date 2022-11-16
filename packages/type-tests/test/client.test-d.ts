@@ -49,7 +49,7 @@ expectType<Promise<ClientResponse<any>>>(
 
 // Subscription
 
-expectType<Promise<void>>(
+expectType<Promise<void | ClientResponse<{ id: string }>>>(
 	client.subscribe<SubscriptionRequestOptions<'Weather', { lat: number }>, { id: string }>(
 		{
 			operationName: 'Weather',
@@ -61,7 +61,7 @@ expectType<Promise<void>>(
 	)
 );
 
-expectType<Promise<void>>(
+expectType<Promise<void | ClientResponse<unknown>>>(
 	client.subscribe(
 		{
 			operationName: 'Weather',

@@ -1,7 +1,8 @@
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Enums = () => {
-	const data = useQuery.Test({
+	const data = useQuery({
+		operationName: 'Test',
 		input: {
 			input: ['EnumValueA'],
 		},

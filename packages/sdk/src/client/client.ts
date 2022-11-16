@@ -6,6 +6,7 @@ import {
 	Headers,
 	LogoutOptions,
 	OperationRequestOptions,
+	QueryRequestOptions,
 	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
@@ -140,15 +141,23 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async query<RequestOptions extends OperationRequestOptions, ResponseData = any>(
+	public async query<RequestOptions extends QueryRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
+		const params = {
+			wg_variables: this.stringifyInput(options.input),
+			wg_api_hash: this.options.applicationHash,
+		};
 		const url = this.addUrlParams(
 			this.operationUrl(options.operationName),
-			new URLSearchParams({
-				wg_variables: this.stringifyInput(options.input),
-				wg_api_hash: this.options.applicationHash,
-			})
+			new URLSearchParams(
+				options.subscribeOnce
+					? {
+							wg_subscribe_once: options.subscribeOnce ? 'true' : 'false',
+							...params,
+					  }
+					: params
+			)
 		);
 		const resp = await this.fetchJson(url, {
 			method: 'GET',
@@ -235,10 +244,21 @@ export class Client {
 		return response.json();
 	}
 
+	/**
+	 * Set up subscriptions over SSE with fallback to web streams.
+	 * When called with subscribeOnce it will return the response directly
+	 * without setting up a subscription.
+	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
+	 */
 	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
 		options: RequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
+		if (options.subscribeOnce) {
+			const result = await this.query<RequestOptions, ResponseData>(options);
+			cb(result);
+			return result;
+		}
 		if ('EventSource' in globalThis) {
 			return this.subscribeWithSSE<ResponseData>(options, cb);
 		}
@@ -253,7 +273,6 @@ export class Client {
 	) {
 		return new Promise<void>((resolve, reject) => {
 			const params = new URLSearchParams({
-				wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
 				wg_variables: this.stringifyInput(subscription.input),
 				wg_live: subscription?.liveQuery ? 'true' : 'false',
 				wg_sse: 'true',
