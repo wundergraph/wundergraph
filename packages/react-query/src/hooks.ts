@@ -18,6 +18,7 @@ import {
 	UseSubscriptionHook,
 	UseUploadHook,
 	UseUserHook,
+	QueryKey,
 } from './types';
 
 export const userQueryKey = 'wg_user';
@@ -43,6 +44,10 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		return result.data;
 	};
 
+	const queryKey: QueryKey<Operations> = ({ operationName, input }) => {
+		return [operationName, input];
+	};
+
 	/**
 	 * Execute a WunderGraph query.
 	 *
@@ -64,11 +69,10 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	const useQuery: UseQueryHook<Operations> = (options) => {
 		const { operationName, liveQuery, input, ...queryOptions } = options;
 		const queryHash = serialize([operationName, input]);
+
 		const result = useTanstackQuery(
-			[operationName, input],
-			({ signal }: QueryFunctionContext) => {
-				return queryFetcher({ operationName, input, abortSignal: signal });
-			},
+			queryKey({ operationName, input }),
+			({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
 			queryOptions
 		);
 
@@ -225,7 +229,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 
 		useEffect(() => {
 			if (!startedAtRef.current && resetOnMount) {
-				client.setQueryData([operationName, input], null);
+				client.removeQueries([operationName, input]);
 			}
 		}, []);
 
@@ -257,7 +261,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 						}
 
 						// Promise is not handled because we are not interested in the result
-						// Errors are handled by SWR internally
+						// Errors are handled by React Query internally
 						client.setQueryData([operationName, input], () => {
 							if (result.error) {
 								throw result.error;
@@ -342,5 +346,6 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		useMutation,
 		useQuery,
 		useSubscription,
+		queryKey,
 	};
 };

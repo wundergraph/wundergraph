@@ -47,6 +47,16 @@ export type MutationFetcher<Operations extends OperationsDefinition> = {
 	): Promise<Data>;
 };
 
+export type QueryKey<Operations extends OperationsDefinition> = {
+	<
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input']
+	>(query: {
+		operationName: OperationName;
+		input?: Input;
+	}): (OperationName | Input | undefined)[];
+};
+
 export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
 	UseTanstackQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>,
 	'queryKey' | 'queryFn'

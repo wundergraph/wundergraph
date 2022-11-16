@@ -1,27 +1,61 @@
-import { act, waitFor, screen, render } from '@testing-library/react';
+import { act, waitFor, screen, render, fireEvent } from '@testing-library/react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 
-import { Client, ClientConfig } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
 
 import { createHooks } from './hooks';
+
+export type Queries = {
+	Weather: {
+		data: any;
+		requiresAuthentication: false;
+		liveQuery: boolean;
+	};
+};
+
+export type Mutations = {
+	SetNameWithoutAuth: {
+		input: { name: string };
+		data: { id: string };
+		requiresAuthentication: false;
+	};
+	SetName: {
+		input: { name: string };
+		data: { id: string };
+		requiresAuthentication: true;
+	};
+};
+
+export type Subscriptions = {
+	Countdown: {
+		input: { from: number };
+		data: { count: number };
+		requiresAuthentication: false;
+	};
+};
+
+export interface Operations
+	extends OperationsDefinition<Queries, Mutations, Subscriptions, string, 'minio', 'github'> {}
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
 }
 
 const _renderWithConfig = (element: React.ReactElement, config: any): ReturnType<typeof render> => {
-	const TestSWRConfig = ({ children }: { children: React.ReactNode }) => (
+	const TestProvider = ({ children }: { children: React.ReactNode }) => (
 		<QueryClientProvider client={config.client}>{children}</QueryClientProvider>
 	);
-	return render(element, { wrapper: TestSWRConfig });
+	return render(element, { wrapper: TestProvider });
 };
 
-export const renderWithClient = (element: React.ReactElement): ReturnType<typeof _renderWithConfig> => {
-	const client = new QueryClient();
-	return _renderWithConfig(element, { client });
+export const renderWithClient = (
+	element: React.ReactElement,
+	queryClient: QueryClient
+): ReturnType<typeof _renderWithConfig> => {
+	return _renderWithConfig(element, { client: queryClient });
 };
 
 const createClient = (overrides?: Partial<ClientConfig>) => {
@@ -33,7 +67,7 @@ const createClient = (overrides?: Partial<ClientConfig>) => {
 		customFetch: fetch as any,
 		operationMetadata: {
 			Weather: {
-				requiresAuthentication: true,
+				requiresAuthentication: false,
 			},
 			SetName: {
 				requiresAuthentication: true,
@@ -81,7 +115,7 @@ const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = 
 describe('React Query - createHooks', () => {
 	const client = createClient();
 
-	const hooks = createHooks(client);
+	const hooks = createHooks<Operations>(client);
 
 	it('should be able to init hooks', async () => {
 		expect(hooks).toBeTruthy();
@@ -91,7 +125,15 @@ describe('React Query - createHooks', () => {
 describe('React Query - useQuery', () => {
 	const client = createClient();
 
-	const { useQuery } = createHooks(client);
+	const queryCache = new QueryCache();
+	const queryClient = new QueryClient({ queryCache });
+
+	beforeEach(() => {
+		queryClient.clear();
+		nock.cleanAll();
+	});
+
+	const { useQuery } = createHooks<Operations>(client);
 
 	it('should return data', async () => {
 		const scope = nockQuery()
@@ -110,7 +152,7 @@ describe('React Query - useQuery', () => {
 			return <div>Response: {data?.id}</div>;
 		}
 
-		renderWithClient(<Page />);
+		renderWithClient(<Page />, queryClient);
 
 		await waitFor(() => {
 			screen.getByText('Response: 1');
@@ -122,26 +164,33 @@ describe('React Query - useQuery', () => {
 	it('should be disabled', async () => {
 		const scope = nockQuery().reply(200, {
 			data: {
-				id: '1',
+				id: '2',
 			},
 		});
 
 		function Page() {
 			const { data, isFetched } = useQuery({
 				operationName: 'Weather',
+				input: {
+					forCity: 'berlin',
+				},
 				enabled: false,
 			});
 
-			return <div>{isFetched ? 'true' : 'false'}</div>;
+			return (
+				<div>
+					<div>Fetched: {isFetched ? 'true' : 'false'}</div>
+				</div>
+			);
 		}
 
-		renderWithClient(<Page />);
+		renderWithClient(<Page />, queryClient);
 
-		screen.getByText('false');
+		screen.getByText('Fetched: false');
 
 		await act(() => sleep(150));
 
-		screen.getByText('false');
+		screen.getByText('Fetched: false');
 
 		expect(() => scope.done()).toThrow();
 	});
@@ -150,7 +199,15 @@ describe('React Query - useQuery', () => {
 describe('React Query - useMutation', () => {
 	const client = createClient();
 
-	const { useMutation } = createHooks(client);
+	const queryCache = new QueryCache();
+	const queryClient = new QueryClient({ queryCache });
+
+	beforeEach(() => {
+		queryClient.clear();
+		nock.cleanAll();
+	});
+
+	const { useMutation, useQuery, queryKey } = createHooks<Operations>(client);
 
 	it('should trigger mutation with auth', async () => {
 		const { mutation, csrfScope } = nockMutation('SetName', { name: 'Rick Astley' }, true);
@@ -173,7 +230,7 @@ describe('React Query - useMutation', () => {
 			return <div>{data?.id}</div>;
 		}
 
-		renderWithClient(<Page />);
+		renderWithClient(<Page />, queryClient);
 
 		await waitFor(() => {
 			screen.getByText('Never gonna give you up');
@@ -193,7 +250,7 @@ describe('React Query - useMutation', () => {
 		});
 
 		function Page() {
-			const { data, error, isLoading, status, mutate } = useMutation({
+			const { data, mutate } = useMutation({
 				operationName: 'SetNameWithoutAuth',
 			});
 
@@ -204,7 +261,7 @@ describe('React Query - useMutation', () => {
 			return <div>{data?.id}</div>;
 		}
 
-		renderWithClient(<Page />);
+		renderWithClient(<Page />, queryClient);
 
 		await waitFor(() => {
 			screen.getByText('1');
@@ -214,45 +271,130 @@ describe('React Query - useMutation', () => {
 
 		scope.done();
 	});
+
+	it('should invalidate query', async () => {
+		const scope = nockQuery()
+			.reply(200, {
+				data: {
+					id: '1',
+					name: 'Test',
+				},
+			})
+			.matchHeader('accept', 'application/json')
+			.matchHeader('content-type', 'application/json')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.post('/app/operations/SetName', { name: 'Rick Astley' })
+			.query({ wg_api_hash: '123' })
+			.reply(200, { data: { id: '1', name: 'Rick Astley' } })
+			.matchHeader('accept', 'application/json')
+			.matchHeader('content-type', 'application/json')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.get('/app/operations/Weather')
+			.query({ wg_api_hash: '123', wg_variables: '{}' })
+			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
+
+		function Page() {
+			const queryClient = useQueryClient();
+
+			const query = useQuery({
+				operationName: 'Weather',
+			});
+
+			const { mutate } = useMutation({
+				operationName: 'SetName',
+				onSuccess: (data, input) => {
+					queryClient.invalidateQueries(queryKey({ operationName: 'Weather' }));
+				},
+			});
+
+			const onClick = () => {
+				mutate({ name: 'Rick Astley' });
+			};
+
+			return (
+				<div>
+					<div>{query.data?.name}</div>
+					<button onClick={onClick}>submit</button>
+				</div>
+			);
+		}
+
+		renderWithClient(<Page />, queryClient);
+
+		await waitFor(() => {
+			screen.getByText('Test');
+		});
+
+		fireEvent.click(screen.getByText('submit'));
+
+		await waitFor(() => {
+			screen.getByText('Rick Astley');
+		});
+
+		scope.done();
+	});
 });
 
 describe('React Query - useSubscription', () => {
 	const client = createClient();
 
-	const { useSubscription } = createHooks(client);
+	const queryCache = new QueryCache();
+	const queryClient = new QueryClient({ queryCache });
+
+	beforeEach(() => {
+		queryCache.clear();
+	});
+
+	afterAll(() => {
+		queryCache.clear();
+	});
+
+	const { useSubscription } = createHooks<Operations>(client);
 
 	it('should subscribe', async () => {
 		// web streams not supported in node-fetch, but we check if the hook returns isLoading
-		const scope = nockQuery('Weather', {
+		const scope = nockQuery('Countdown', {
 			wg_live: 'true',
-		}).reply(200, {
-			data: {
-				id: '1',
-			},
-		});
-
-		function Page() {
-			const { data, error, isLoading, isSubscribed } = useSubscription({
-				operationName: 'Weather',
+		})
+			.once()
+			.reply(200, {
+				data: {
+					count: '100',
+				},
 			});
 
-			return <div>{isLoading ? 'true' : data?.id}</div>;
+		function Page() {
+			const { data, error, isSubscribed } = useSubscription({
+				operationName: 'Countdown',
+				subscribeOnce: true,
+			});
+
+			return <div>{data?.count ? data.count : 'loading'}</div>;
 		}
 
-		renderWithClient(<Page />);
+		renderWithClient(<Page />, queryClient);
 
-		screen.getByText('true');
+		screen.getByText('loading');
 
-		waitFor(() => {
-			screen.getByText('1');
+		await waitFor(() => {
+			screen.getByText('100');
 		});
+
+		scope.done();
 	});
 });
 
 describe('React Query - useUser', () => {
 	const client = createClient();
 
-	const { useUser } = createHooks(client);
+	const queryCache = new QueryCache();
+	const queryClient = new QueryClient({ queryCache });
+
+	beforeEach(() => {
+		queryCache.clear();
+	});
+
+	const { useUser } = createHooks<Operations>(client);
 
 	it('should return user', async () => {
 		const scope = nock('https://api.com')
@@ -268,7 +410,7 @@ describe('React Query - useUser', () => {
 			return <div>{data?.email}</div>;
 		}
 
-		renderWithClient(<Page />);
+		renderWithClient(<Page />, queryClient);
 
 		await waitFor(() => {
 			screen.getByText('info@wundergraph.com');
