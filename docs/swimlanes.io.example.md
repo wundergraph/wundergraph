@@ -5,7 +5,7 @@ Client -> WunderGraph Server: Request
 note:
 HTTP GET
 
-/api/main/operations/Weather?continent=Europe
+/operations/Weather?continent=Europe
 
 WunderGraph Server -> WunderGraph Server: Validate Authentication
 

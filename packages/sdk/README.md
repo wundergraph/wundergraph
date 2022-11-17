@@ -15,8 +15,7 @@ The WunderGraph SDK works best in combination with the WunderGraph CLI, wunderct
 ## Getting Started
 
 ```shell
-npm install @wundergraph/wunderctl
-npx -p @wundergraph/wunderctl wunderctl init
+npx create-wundergraph-app <project-name> -E simple
 ```
 
 # Exports

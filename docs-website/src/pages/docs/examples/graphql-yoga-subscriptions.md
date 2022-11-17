@@ -25,11 +25,11 @@ npm install && npm start
 ## Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Counter
+curl -N http://localhost:9991/operations/Counter
 ```
 
 ## SSE output
 
 ```shell
- curl -N http://localhost:9991/app/main/operations/Counter\?wg_sse\=true
+ curl -N http://localhost:9991/operations/Counter\?wg_sse\=true
 ```

@@ -19,8 +19,7 @@ const db = introspect.sqlserver({
   },
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [db],
 })
 ```

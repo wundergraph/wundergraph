@@ -23,8 +23,7 @@ const secureUpstream = introspect.graphql({
     builder.addClientRequestHeader('Authorization', 'Authorization'),
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [secureUpstream],
 })
 ```

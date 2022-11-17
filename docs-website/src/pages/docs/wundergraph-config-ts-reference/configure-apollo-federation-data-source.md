@@ -35,8 +35,7 @@ const federatedApi = introspect.federation({
   ],
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [federatedApi],
 })
 ```

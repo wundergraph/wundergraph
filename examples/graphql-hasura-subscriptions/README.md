@@ -28,17 +28,17 @@ npm install && npm start
 #### Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Users
+curl -N http://localhost:9991/operations/Users
 ```
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Todo
+curl -N http://localhost:9991/operations/Todo
 ```
 
 #### SSE output
 
 ```shell
- curl -N http://localhost:9991/app/main/operations/Users\?wg_sse\=true
+ curl -N http://localhost:9991/operations/Users\?wg_sse\=true
 ```
 
 #### Playground

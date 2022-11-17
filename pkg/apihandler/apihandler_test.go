@@ -84,7 +84,7 @@ func TestQueryHandler_VariablesIgnore(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	res := e.GET("/api/main/operations").
+	res := e.GET("/operations").
 		WithQuery("id", `123`).
 		WithQuery("unknown", `456`).
 		Expect()
@@ -131,7 +131,7 @@ func TestQueryHandler_ETag(t *testing.T) {
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
 
-	res := e.GET("/api/main/operations").
+	res := e.GET("/operations").
 		WithQuery("wg_variables", `{"id":123}`).
 		Expect()
 

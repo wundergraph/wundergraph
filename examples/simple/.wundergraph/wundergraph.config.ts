@@ -1,11 +1,4 @@
-import {
-	Application,
-	configureWunderGraphApplication,
-	cors,
-	EnvironmentVariable,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -69,19 +62,14 @@ const countries = introspect.graphql({
 	url: 'https://countries.trevorblades.com/',
 });
 
-const myApplication = new Application({
-	name: 'app',
+// configureWunderGraph emits the configuration
+configureWunderGraphApplication({
 	apis: [
 		countries,
 		/*federatedApi,
         openAPI,
         graphQLAPI*/
 	],
-});
-
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	application: myApplication,
 	server,
 	operations,
 	codeGenerators: [
