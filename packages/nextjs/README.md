@@ -33,13 +33,21 @@ configureWunderGraphApplication({
 
 ```tsx
 // pages/authentication.ts
-import { useQuery, useMutation, useLiveQuery, AuthProviders } from '.wundergraph/generated/nextjs';
+import {
+  withWunderGraph,
+  useQuery,
+  useMutation,
+  useSubscription,
+  useAuth,
+  useUser,
+} from '.wundergraph/generated/nextjs';
 
 const Example: ExamplePage = () => {
-  const { user, login, logout } = useWunderGraph();
+  const { login, logout } = useAuth();
+  const { data: user } = useUser();
   const onClick = () => {
     if (user === null || user === undefined) {
-      login(AuthProviders.github);
+      login('github');
     } else {
       logout();
     }
