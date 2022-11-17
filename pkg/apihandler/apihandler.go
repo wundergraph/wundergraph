@@ -438,7 +438,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 	operationType := getOperationType(shared.Doc, r.definition, operation.Name)
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), r.enableDebugMode)
+	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
@@ -1060,9 +1060,8 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	valid := h.variablesValidator.Validate(ctx, ctx.Variables)
+	valid := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
 	if !valid {
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -1496,9 +1495,8 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = []byte("{}")
 	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
-	valid := h.variablesValidator.Validate(ctx, ctx.Variables)
+	valid := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
 	if !valid {
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -1646,9 +1644,8 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
-	valid := h.variablesValidator.Validate(ctx, ctx.Variables)
+	valid := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
 	if !valid {
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
