@@ -128,10 +128,10 @@ configureWunderGraphApplication({
 })
 ```
 
-Now on running the 'curl' command `curl http://localhost:9991/app/main/operations/Continents` , we get an error
+You will notice that our WunderGraph node now starts producing some errors:
 
 ```
-404 page not found
+{"level":"error","message":"error normalizing operation: external: field: countries_continents not defined on type...
 ```
 
 Can you spot what happened? We'll help you: we changed the namespace that our API data source
