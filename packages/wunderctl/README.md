@@ -8,11 +8,10 @@ This package is not required if you have already installed [`@wundergraph/sdk`](
 ## Getting Started
 
 ```shell
-# Create starter project
-npx @wundergraph/wunderctl init
+# Install wunderctl
+npx @wundergraph/wunderctl
 # Help
 npx @wundergraph/wunderctl --help
 ```
 
 > **Warning**: Please use the Go [release](https://github.com/wundergraph/wundergraph/releases) binary to start the wundergraph server in production.
-

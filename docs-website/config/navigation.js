@@ -541,6 +541,10 @@ const navigation = [
 				href: '/docs/components-of-wundergraph',
 			},
 			{
+				title: 'create-wundergraph-app',
+				href: '/docs/components-of-wundergraph/create-wundergraph-app',
+			},
+			{
 				title: 'wunderctl',
 				href: '/docs/components-of-wundergraph/wunderctl',
 			},

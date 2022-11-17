@@ -11,7 +11,7 @@ WunderGraph applications are just Node packages, so if you're already familiar w
 it you'll feel right at home. Otherwise, we'll help you with the basics.
 
 Our very first project will build a Virtual Graph over a GraphQL which provides information
-about countries.
+about continents and countries.
 
 This tutorial assumes some familiarity with GraphQL. If you're not familiar with it, you can
 take a look at their [introduction](https://graphql.org/learn/).
@@ -23,7 +23,7 @@ to save us some typing.
 
 ```shell
 # Init a new project with the application template
-npx -y @wundergraph/wunderctl init -o world
+npx create-wundergraph-app world -E simple
 ```
 
 This will create our new application in the `world` directory. Once it finishes,
@@ -106,6 +106,8 @@ import {
   configureWunderGraphApplication,
   introspect,
 } from '@wundergraph/sdk'
+import server from './wundergraph.server'
+import operations from './wundergraph.operations'
 
 const world = introspect.graphql({
   // Namespace inside our virtual graph
@@ -121,6 +123,8 @@ const myApplication = new Application({
 
 configureWunderGraphApplication({
   application: myApplication,
+  server,
+  operations,
 })
 ```
 
