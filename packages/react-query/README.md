@@ -106,9 +106,14 @@ await mutateAsync({ name: 'WunderGraph' });
 ### useFileUpload
 
 ```ts
-const { upload, data: fileKeys, error } = useFileUpload();
+const { upload, uploadAsync, data: fileKeys, error } = useFileUpload();
 
 upload({
+  provider: 'minio',
+  files: new FileList(),
+});
+
+await upload({
   provider: 'minio',
   files: new FileList(),
 });

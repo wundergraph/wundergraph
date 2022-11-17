@@ -183,7 +183,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * ```
 	 */
 	const useFileUpload: UseUploadHook<Operations> = (options) => {
-		const { mutate, ...mutation } = useTanstackMutation(
+		const { mutate, mutateAsync, ...mutation } = useTanstackMutation(
 			['uploadFiles'],
 			async (input) => {
 				const resp = await client.uploadFiles(input);
@@ -194,6 +194,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 
 		return {
 			upload: mutate,
+			uploadAsync: mutateAsync,
 			...mutation,
 		};
 	};

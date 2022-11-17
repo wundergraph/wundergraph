@@ -154,5 +154,10 @@ export type UseUploadHook<Operations extends OperationsDefinition> = {
 		'mutate'
 	> & {
 		upload: UseMutationResult<string[], GraphQLResponseError, UploadRequestOptions<Operations['s3Provider']>>['mutate'];
+		uploadAsync: UseMutationResult<
+			string[],
+			GraphQLResponseError,
+			UploadRequestOptions<Operations['s3Provider']>
+		>['mutateAsync'];
 	};
 };
