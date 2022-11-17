@@ -20,7 +20,7 @@
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
-    "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql} pkg/templates/assets/templates/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
+    "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --git-dry-run",
     "preview:version:packages-next": "lerna version prerelease --git-dry-run",
