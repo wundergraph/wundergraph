@@ -37,7 +37,6 @@ const { useSubscription, useQuery, useMutation, useUser } = createHooks<Operatio
 	new Client({
 		baseURL: 'http://localhost:8080',
 		applicationHash: 'my-application-hash',
-		applicationPath: 'app',
 		sdkVersion: '0.0.0',
 	})
 );

@@ -11,20 +11,12 @@ export const generateDotGraphQLConfig = (
 	options: DotGraphQLConfigOptions
 ): Config => {
 	let config: Config = {
-		projects: {},
-	};
-
-	const app = wunderGraphConfig.application;
-	const deployment = 'main';
-
-	config.projects[app.name] = {
-		name: app.name,
-		schemaPath: path.join(options.nested ? '.wundergraph' : '', 'generated', `wundergraph.${app.name}.schema.graphql`),
-		extensions: {
-			endpoints: {
-				[app.name]: {
+		project: {
+			schemaPath: path.join(options.nested ? '.wundergraph' : '', 'generated', `wundergraph.schema.graphql`),
+			extensions: {
+				endpoint: {
 					introspect: false,
-					url: `${options.baseURL}/${app.name}/${deployment}/graphql`,
+					url: `${options.baseURL}/graphql`,
 					headers: {
 						'user-agent': 'WunderGraph Client',
 					},
@@ -37,25 +29,16 @@ export const generateDotGraphQLConfig = (
 };
 
 interface Config {
-	projects: Projects;
-}
-
-interface Projects {
-	[project: string]: Project;
+	project: Project;
 }
 
 interface Project {
-	name: string;
 	schemaPath: string;
 	extensions: Extensions;
 }
 
 interface Extensions {
-	endpoints: Endpoints;
-}
-
-interface Endpoints {
-	[name: string]: Endpoint;
+	endpoint: Endpoint;
 }
 
 interface Endpoint {
