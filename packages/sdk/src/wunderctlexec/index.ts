@@ -20,15 +20,21 @@ export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnVal
 	});
 };
 
-export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
+export type Subprocess = execa.ExecaChildProcess;
+
+export const wunderctlSubprocess = (args: WunderCtlExecArgs): Subprocess => {
 	const file = wunderCtlFile();
 	const cmdArgs = wunderCtlArgs(args.cmd);
 
-	const subprocess = execa(file, cmdArgs, {
+	return execa(file, cmdArgs, {
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
 		extendEnv: true,
 	});
+};
+
+export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
+	const subprocess = wunderctlSubprocess(args);
 	subprocess.stdout?.pipe(process.stdout);
 	subprocess.stderr?.pipe(process.stderr);
 
