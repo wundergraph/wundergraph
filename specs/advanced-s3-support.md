@@ -94,7 +94,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
         internalClient.mutate({
           operationName: 'fileMeta',
           input: {
-            key
+            key: fileKey
           }
         })
       }
