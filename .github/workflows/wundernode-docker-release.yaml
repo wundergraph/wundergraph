@@ -9,6 +9,7 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: 'false'
     steps:
       - uses: actions/checkout@v3

@@ -59,23 +59,22 @@ Btw. , this works with any environment that can send FormData using HTTP Request
 const UploadPage: NextPage = () => {
   const [files, setFiles] = useState<FileList>()
   const [data, setData] = useState([])
-  const { client } = useWunderGraph()
+
+  const { upload, data } = useFileUpload()
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiles(e.target.files)
   }
   const onSubmit = async (e: React.FormEvent<Element>) => {
     e.preventDefault()
-    const formData = new FormData()
-    for (const key of Object.keys(files)) {
-      formData.append('files', files[key])
-    }
-    const result = await client.uploadFiles({
-      provider: S3Provider.do,
-      formData,
+
+    const result = await upload({
+      provider: 'minio'
+      files,
     })
-    if (result.status === 'ok') {
-      setData(result.body)
+
+    if (result) {
+      setData(result)
     }
   }
 
@@ -106,9 +105,9 @@ const UploadPage: NextPage = () => {
               <li>
                 <a
                   target="_blank"
-                  href={`http://127.0.0.1:9000/uploads/${file.key}`}
+                  href={`http://127.0.0.1:9000/uploads/${file}`}
                 >
-                  {file.key}
+                  {file}
                 </a>
               </li>
             ))}

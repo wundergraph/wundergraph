@@ -1,7 +1,7 @@
 import Head from 'next/head';
-import styles from '../../styles/Home.module.css';
+import styles from '../styles/Home.module.css';
 
-import { useSubscription } from '../../lib/wundergraph';
+import { useSubscription, withWunderGraph } from '../components/generated/nextjs';
 
 const Countdown: React.FC = () => {
 	const countdown = useSubscription({
@@ -52,4 +52,6 @@ const SWR = () => {
 	);
 };
 
-export default SWR;
+export default withWunderGraph(SWR, {
+	ssr: true,
+});

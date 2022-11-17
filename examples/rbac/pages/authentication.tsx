@@ -1,19 +1,21 @@
 import { NextPage } from 'next';
-import { AuthProvider, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useAuth, useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const { result, refetch } = useQuery.Dragons();
+	const result = useQuery({
+		operationName: 'Dragons',
+	});
 
-	const { login, logout, user } = useWunderGraph();
+	const { login, logout } = useAuth();
 
 	const loginGithub = () => {
-		login(AuthProvider.github);
+		login('github');
 	};
 	const logoutGithub = () => {
 		logout();
 	};
 	const getDragons = () => {
-		refetch();
+		result.mutate();
 	};
 
 	return (

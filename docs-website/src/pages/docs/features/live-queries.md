@@ -46,12 +46,12 @@ Calling this Live-Query from the clients looks very similar to a regular Query:
 
 ```typescript jsx
 const IndexPage = () => {
-  const { response: liveProducts } = useLiveQuery.TopProducts()
-  return <div>{JSON.stringify(liveProducts)}</div>
+  const response = useQuery({ operationName: 'TopProducts', liveQuery: true })
+  return <div>{JSON.stringify(response)}</div>
 }
 ```
 
-Swap `useQuery` for `useLiveQuery` and you're done.
+Add `liveQuery: true` and you're done.
 The UI will update automatically when the data changes.
 
 ## Why Server-Side Polling is amazing
