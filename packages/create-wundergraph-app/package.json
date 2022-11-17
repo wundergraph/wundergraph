@@ -13,6 +13,10 @@
   "bin": {
     "create-wundergraph-app": "./dist/index.js"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
   "keywords": [],
   "author": {
     "name": "WunderGraph Maintainers",
