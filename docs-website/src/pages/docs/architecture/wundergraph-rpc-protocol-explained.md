@@ -20,16 +20,14 @@ WunderGraph uses a GraphQL to JSON RPC compiler which turns GraphQL Operations i
 The basic URL structure for WunderGraph Operations is:
 
 ```
-https://<hostname>/<application>/<version>/operations/<operation>
+https://<hostname>/operations/<operation>
 ```
 
 Assuming that your domain is `example.com`,
-your application name is `app`,
-and the version (e.g. branch) is `main`,
 then the URL for the `getUser` Operation would be:
 
 ```
-https://example.com/app/main/operations/getUser
+https://example.com/operations/getUser
 ```
 
 ### Status Codes
@@ -49,13 +47,13 @@ For sending input variables, there are two ways to do it:
 In the URL query string:
 
 ```
-GET https://<hostname>/<application>/<version>/operations/<operationName>?name=Jannik
+GET https://<hostname>/operations/<operationName>?name=Jannik
 ```
 
 As a URL encoded JSON object using the `wg_variables` query parameter:
 
 ```
-GET https://<hostname>/<application>/<version>/operations/<operationName>?wg_variables={"name":"Jannik"}
+GET https://<hostname>/operations/<operationName>?wg_variables={"name":"Jannik"}
 ```
 
 The first method is convenient if you have a flat list of variables and want to use a client like Postman or curl.
@@ -70,7 +68,7 @@ Mutations are executed by sending a `POST` request to the URL.
 The variables are sent as JSON in the request body.
 
 ```
-POST https://<hostname>/<application>/<version>/operations/<operationName>
+POST https://<hostname>/operations/<operationName>
 Content-Type: application/json
 
 {
@@ -92,7 +90,7 @@ The response is a stream of JSON objects,
 Input variables are sent the same way as queries.
 
 ```
-GET https://<hostname>/<application>/<version>/operations/<operationName>?name=Jannik
+GET https://<hostname>/operations/<operationName>?name=Jannik
 ```
 
 The server will not end the stream.
@@ -120,7 +118,7 @@ Clients must add the `wg_live` query parameter to the URL,
 to indicate that they want to receive live updates.
 
 ```
-GET https://<hostname>/<application>/<version>/operations/<operationName>?name=Jannik&wg_live=true
+GET https://<hostname>/operations/<operationName>?name=Jannik&wg_live=true
 ```
 
 ## Response format
@@ -156,7 +154,7 @@ To start the authentication flow,
 the client should send a `GET` request to the URL:
 
 ```
-GET https://<hostname>/<application>/<version>/auth/cookie/authorize/<authProviderID>
+GET https://<hostname>/auth/cookie/authorize/<authProviderID>
 ```
 
 The client must send a `redirect_uri` query parameter to the URL.
@@ -167,7 +165,7 @@ Once the authentication was successful, and the user cookie is set,
 the user can be fetched sending a `GET` request to the URL:
 
 ```
-GET https://<hostname>/<application>/<version>/auth/cookie/user
+GET https://<hostname>/auth/cookie/user
 ```
 
 The client may add an optional `revalidate=true` query parameter to the URL.
@@ -198,7 +196,7 @@ The client needs to acquire a CSRF token and set it in the `X-CSRF-Token` header
 To get the token, the client needs to call the `csrf` endpoint.
 
 ```
-GET https://<hostname>/<application>/<version>/auth/cookie/csrf
+GET https://<hostname>/auth/cookie/csrf
 ```
 
 The response contains the cookie in text format.
@@ -213,7 +211,7 @@ Files are sent as multipart/form-data encoded HTTP requests.
 Files need to be added as a `files` field to the multipart object and sent as a `POST` request to the following URL:
 
 ```
-POST https://<hostname>/<application>/<version>/s3/<storageID>/upload
+POST https://<hostname>/s3/<storageID>/upload
 ```
 
 The response contains a json object with the field `fileKeys`,

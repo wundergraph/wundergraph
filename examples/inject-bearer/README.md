@@ -9,7 +9,7 @@
 3. Copy the `Issuer`, `Client ID` and `Client Secret` to the clipboard
 4. Rename the `.example.env` file to `.env`
 5. Paste the credentials into the `.env` file
-6. Set the Callback URL on Auth0 to http://localhost:9991/api/main/auth/cookie/callback/auth0
+6. Set the Callback URL on Auth0 to http://localhost:9991/auth/cookie/callback/auth0
 
 ### 2. Install & Start
 

@@ -19,8 +19,7 @@ const db = introspect.sqlite({
   },
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [db],
 })
 ```

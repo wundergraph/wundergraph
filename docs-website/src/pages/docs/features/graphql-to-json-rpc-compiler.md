@@ -50,7 +50,7 @@ query TopProducts {
 WunderGraph automatically builds an endpoint on your local dev environment which you could curl like this:
 
 ```shell
-curl http://localhost:9991/api/main/operations/TopProducts
+curl http://localhost:9991/operations/TopProducts
 ```
 
 Write any Query/Mutation/Subscription during development.

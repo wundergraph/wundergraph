@@ -4,7 +4,6 @@ import { Collection, Request } from 'postman-collection';
 import { GraphQLOperation } from '../graphql/operations';
 
 export interface PostmanBuilderOptions {
-	applicationPath: string;
 	baseURL: string;
 }
 
@@ -29,7 +28,7 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	mutationGroup.describe('All your mutation operations');
 
 	operations.forEach((op) => {
-		const operationURL = `{{apiBaseUrl}}/${options.applicationPath}/operations/${op.Name}`;
+		const operationURL = `{{apiBaseUrl}}/operations/${op.Name}`;
 
 		let paths: JSONSchemaParameterPath[] = [];
 		buildPath([], false, op.VariablesSchema, paths);

@@ -1,4 +1,4 @@
-import { Application, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -7,14 +7,9 @@ const db = introspect.postgresql({
 	databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [db],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [db],
 	server,
 	operations,
 	codeGenerators: [

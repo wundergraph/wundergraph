@@ -24,7 +24,6 @@ export class TypeScriptLegacyWebClient implements Template {
 			modelImports: modelImports(config.application, false),
 			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
-			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),
 			queries: _queries,
 			liveQueries: _liveQueries,

@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -77,14 +76,9 @@ const db = introspect.sqlite({
 	databaseURL: 'file:./db.sqlite',
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2],
 	server,
 	operations,
 	authorization: {

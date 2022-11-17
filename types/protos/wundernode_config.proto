@@ -425,10 +425,8 @@ enum ArgumentRenderConfiguration {
 message WunderGraphConfiguration {
 	UserDefinedApi api = 1;
 	string apiId = 2;
-	string deploymentName = 3;
-	repeated string environmentIds = 4;
-	string apiName = 5;
-	bool dangerouslyEnableGraphQLEndpoint = 6;
+	repeated string environmentIds = 3;
+	bool dangerouslyEnableGraphQLEndpoint = 4;
 }
 
 message S3UploadConfiguration {

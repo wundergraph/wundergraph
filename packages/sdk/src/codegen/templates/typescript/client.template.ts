@@ -48,7 +48,6 @@ export interface AuthProvider {
 
 export const defaultClientConfig: ClientConfig = {
     applicationHash: "{{applicationHash}}",
-    applicationPath: "{{applicationPath}}",
     baseURL: "{{baseURL}}",
     sdkVersion: "{{sdkVersion}}",
 }
@@ -62,7 +61,7 @@ export const operationMetadata: OperationMetadata = {
 {{/each}}
 }
 
-type PrivateConfigProperties = 'applicationHash' | 'applicationPath' | 'sdkVersion' | 'operationMetadata'
+type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata'
 
 export class WunderGraphClient extends Client {
 	query<

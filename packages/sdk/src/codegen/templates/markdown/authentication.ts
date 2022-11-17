@@ -20,9 +20,6 @@ export class AuthenticationProviderConfiguration implements Template {
 							break;
 					}
 					return {
-						apiName: config.application.Name,
-						branch: config.deployment.name,
-						hostPort: config.deployment.environment.name,
 						protocol: 'http',
 						providerID: p.id,
 						providerKind,
@@ -49,7 +46,4 @@ interface Provider {
 	providerID: string;
 	providerKind: string;
 	protocol: string;
-	hostPort: string;
-	apiName: string;
-	branch: string;
 }

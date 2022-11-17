@@ -43,7 +43,6 @@ export interface OperationDefinition {
 
 export interface ClientConfig {
 	applicationHash: string;
-	applicationPath: string;
 	baseURL: string;
 	sdkVersion: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;

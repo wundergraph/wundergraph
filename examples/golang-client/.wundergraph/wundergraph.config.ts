@@ -1,4 +1,4 @@
-import { Application, configureWunderGraphApplication, cors, EnvironmentVariable, introspect } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect } from '@wundergraph/sdk';
 import { golangClient } from '@wundergraph/golang-client';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
@@ -8,14 +8,9 @@ const countries = introspect.graphql({
 	url: 'https://countries.trevorblades.com/',
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [countries],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [countries],
 	server,
 	operations,
 	codeGenerators: [

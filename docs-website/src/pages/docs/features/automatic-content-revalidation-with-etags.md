@@ -23,7 +23,7 @@ query TopProducts {
 The generated Endpoint for this Query will look like this:
 
 ```shell
-curl http://localhost:9111/api/main/TopProducts
+curl http://localhost:9111/TopProducts
 ```
 
 Amongst all the reasons we've discussed in the [previous](/docs/features/graphql-to-json-rpc-compiler) section, there's one important aspect we'd like to highlight.

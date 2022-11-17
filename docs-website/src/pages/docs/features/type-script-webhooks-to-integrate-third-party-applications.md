@@ -48,7 +48,7 @@ const webhook: Webhook<
 export default webhook
 ```
 
-After adding your first webhook, you can test it by calling `http://127.0.0.1:9991/app/main/webhooks/github`. It should return `{ hello: 'github' }`.
+After adding your first webhook, you can test it by calling `http://127.0.0.1:9991/webhooks/github`. It should return `{ hello: 'github' }`.
 
 ## Access the original client request
 
