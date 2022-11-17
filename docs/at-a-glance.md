@@ -32,14 +32,10 @@ const stripe = introspect.openApi({
   },
 });
 
-// combine all three APIs into a unified GraphQL Schema
-const myApplication = new Application({
-  apis: [db, stripe, ms],
-});
-
-// call this function to build your WunderGraph configuration
+// call this function to build your WunderGraph configuration,
+// combining all three APIs into a unified GraphQL Schema
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [db, stripe, ms],
   authentication: {
     cookieBased: {
       providers: [

@@ -42,7 +42,6 @@ const createClient = (overrides?: Partial<ClientConfig>) => {
 		sdkVersion: '1.0.0',
 		baseURL: 'https://api.com',
 		applicationHash: '123',
-		applicationPath: 'app',
 		customFetch: fetch as any,
 		operationMetadata: {
 			Weather: {
@@ -64,7 +63,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('accept', 'application/json')
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.get('/app/operations/' + operationName)
+		.get('/operations/' + operationName)
 		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
 };
 
@@ -72,13 +71,13 @@ const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = 
 	const csrfScope = nock('https://api.com')
 		.matchHeader('accept', 'text/plain')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.get('/app/auth/cookie/csrf')
+		.get('/auth/cookie/csrf')
 		.reply(200, 'csrf');
 	const mutation = nock('https://api.com')
 		.matchHeader('accept', 'application/json')
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.post('/app/operations/' + operationName, wgParams)
+		.post('/operations/' + operationName, wgParams)
 		.query({ wg_api_hash: '123' });
 
 	if (authenticated) {
@@ -301,7 +300,7 @@ describe('SWR - useUser', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.get('/app/auth/cookie/user')
+			.get('/auth/cookie/user')
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {

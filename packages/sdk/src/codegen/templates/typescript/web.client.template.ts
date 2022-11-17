@@ -43,7 +43,6 @@ export class Client {
         this._client = new WunderGraphClient({
             baseURL,
             applicationHash: "{{ applicationHash }}",
-            applicationPath: "{{ applicationPath }}",
             sdkVersion: "{{ sdkVersion }}",
             ...rest
         });

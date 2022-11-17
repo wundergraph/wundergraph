@@ -56,13 +56,7 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 
 		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeUrl) {
 			const nodeUrl = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeUrl);
-
-			clientFactory = internalClientFactory(
-				WG_CONFIG.apiName,
-				WG_CONFIG.deploymentName,
-				WG_CONFIG.api.operations,
-				nodeUrl
-			);
+			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeUrl);
 		} else {
 			throw new Error('User defined api is not set.');
 		}

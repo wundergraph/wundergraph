@@ -9,7 +9,6 @@ import {
 
 const client = new Client({
 	baseURL: 'https://api.com',
-	applicationPath: 'app',
 	applicationHash: '123',
 	customFetch: fetch as any,
 	sdkVersion: '1.0.0',

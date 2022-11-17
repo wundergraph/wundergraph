@@ -18,7 +18,7 @@ configureWunderGraphApplication({
 ## Enable GraphQL Endpoint
 
 Setting this to `true` will enable the GraphQL endpoint.
-This means that the WunderGraph server will expose a GraphQL endpoint at `/<application-name>/main/graphql`.
+This means that the WunderGraph server will expose a GraphQL endpoint at `/graphql`.
 If you open this endpoint in the browser, you will see the GraphQL Playground,
 which can be used to explore the GraphQL schema and try out GraphQL Operations.
 

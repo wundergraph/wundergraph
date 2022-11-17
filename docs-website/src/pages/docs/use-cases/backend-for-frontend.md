@@ -60,8 +60,7 @@ const countries = introspect.graphql({
   url: 'https://countries.trevorblades.com/',
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [weather, countries],
 })
 ```
