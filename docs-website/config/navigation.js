@@ -183,8 +183,8 @@ const navigation = [
 				href: '/docs/examples/nextjs',
 			},
 			{
-				title: 'NextJS + SWR',
-				href: '/docs/examples/nextjs-swr',
+				title: 'Vite + SWR',
+				href: '/docs/examples/vite-swr',
 			},
 			{
 				title: 'Hooks',

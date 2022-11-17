@@ -1,0 +1,6 @@
+query ($input: [gql_TestEnum]!) {
+	gql_testField(inputEnum: $input) {
+		enumList
+		stringList
+	}
+}

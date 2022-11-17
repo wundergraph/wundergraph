@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.24...@wundergraph/nextjs@0.4.0) (2022-11-17)
+
+### Features
+
+* **breaking:** the Next.js client now uses SWR ([#319](https://github.com/wundergraph/wundergraph/issues/319)) ([020cd74](https://github.com/wundergraph/wundergraph/commit/020cd74091517faedcd97071d48a19395cbcd9bf)) (@Pagebakers)
+
 ## [0.3.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.23...@wundergraph/nextjs@0.3.24) (2022-11-11)
 
 **Note:** Version bump only for package @wundergraph/nextjs
