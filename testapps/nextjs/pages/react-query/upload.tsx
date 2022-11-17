@@ -1,12 +1,12 @@
 import { NextPage } from 'next';
 import { useState } from 'react';
 import styles from '../../styles/Home.module.css';
-import { useFileUpload } from '../../components/generated/nextjs';
+import { useFileUpload } from '../../lib/react-query';
 
 const UploadPage: NextPage = () => {
 	const [files, setFiles] = useState<FileList>();
 	const [data, setData] = useState<string[]>([]);
-	const { upload } = useFileUpload({});
+	const { uploadAsync } = useFileUpload({});
 	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) setFiles(e.target.files);
 	};
@@ -16,7 +16,7 @@ const UploadPage: NextPage = () => {
 			return;
 		}
 		try {
-			const result = await upload({
+			const result = await uploadAsync({
 				provider: 'minio',
 				files,
 			});
