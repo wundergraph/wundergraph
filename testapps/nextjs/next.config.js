@@ -4,6 +4,7 @@ const nextConfig = {
 	reactStrictMode: true,
 	swcMinify: true,
 	webpack: (config, options) => {
+		// This is to make sure the React Query context is working correctly in the monorepo, since PNPM installs the react-query package twice.
 		if (options.isServer) {
 			config.externals = ['@tanstack/react-query', ...config.externals];
 		}
