@@ -497,9 +497,11 @@ importers:
   testapps/nextjs:
     specifiers:
       '@graphql-yoga/node': ^2.13.13
+      '@tanstack/react-query': ^4.16.1
       '@types/node': ^17.0.27
       '@types/react': ^18.0.7
       '@wundergraph/nextjs': workspace:*
+      '@wundergraph/react-query': workspace:^0.1.0
       '@wundergraph/sdk': workspace:*
       '@wundergraph/swr': workspace:*
       concurrently: ^6.0.0
@@ -513,7 +515,9 @@ importers:
       wait-on: ^6.0.0
     dependencies:
       '@graphql-yoga/node': 2.13.13_graphql@16.6.0
+      '@tanstack/react-query': 4.16.1_biqbaboplfbrettd7655fr4n2y
       '@wundergraph/nextjs': link:../../packages/nextjs
+      '@wundergraph/react-query': link:../../packages/react-query
       '@wundergraph/sdk': link:../../packages/sdk
       '@wundergraph/swr': link:../../packages/swr
       next: 12.3.2_biqbaboplfbrettd7655fr4n2y
@@ -3332,7 +3336,6 @@ packages:
 
   /@tanstack/query-core/4.15.1:
     resolution: {integrity: sha512-+UfqJsNbPIVo0a9ANW0ZxtjiMfGLaaoIaL9vZeVycvmBuWywJGtSi7fgPVMCPdZQFOzMsaXaOsDtSKQD5xLRVQ==}
-    dev: true
 
   /@tanstack/react-query/4.16.1_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-PDE9u49wSDykPazlCoLFevUpceLjQ0Mm8i6038HgtTEKb/aoVnUZdlUP7C392ds3Cd75+EGlHU7qpEX06R7d9Q==}
@@ -3350,7 +3353,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       use-sync-external-store: 1.2.0_react@18.2.0
-    dev: true
 
   /@testing-library/dom/8.19.0:
     resolution: {integrity: sha512-6YWYPPpxG3e/xOo6HIWwB/58HukkwIVTOaZ0VwdMVjhRUX/01E4FtQbck9GazOOj7MXHc5RBzMrU86iBJHbI+A==}
@@ -5132,8 +5134,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      JSONStream: 1.3.5
       is-text-path: 1.0.1
+      JSONStream: 1.3.5
       lodash: 4.17.21
       meow: 8.1.2
       split2: 3.2.2
