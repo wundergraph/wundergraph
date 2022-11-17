@@ -86,6 +86,13 @@ export interface OperationRequestOptions<
 	input?: Input;
 }
 
+export interface QueryRequestOptions<
+	OperationName extends string = any,
+	Input extends object | undefined = object | undefined
+> extends OperationRequestOptions<OperationName, Input> {
+	subscribeOnce?: Boolean;
+}
+
 export interface SubscriptionRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined

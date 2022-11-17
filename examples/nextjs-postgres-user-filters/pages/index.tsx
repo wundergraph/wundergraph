@@ -1,11 +1,13 @@
 import { NextPage } from 'next';
-import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const user = useLiveQuery.UserByEmail({
+	const user = useQuery({
+		operationName: 'UserByEmail',
 		input: {
 			email: 'jens@wundergraph.com',
 		},
+		liveQuery: true,
 	});
 	return (
 		<div>
