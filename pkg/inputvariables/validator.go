@@ -38,7 +38,7 @@ func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Wr
 		return true
 	}
 	if v.disableVerboseErrors {
-		_, _ = errOut.Write([]byte("Bad Request: Invalid input"))
+		_, _ = io.WriteString(errOut, "Bad Request: Invalid input")
 	} else {
 		validationError := ValidationError{
 			Message: "Bad Request: Invalid input",
