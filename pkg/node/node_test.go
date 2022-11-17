@@ -174,6 +174,21 @@ func TestNode(t *testing.T) {
 		Expect().Status(http.StatusOK).Body().Raw()
 	goldie.Assert(t, "top products with query", prettyJSON(topProductsWithQuery))
 
+	topProductsWithInvalidQuery := withHeaders.GET("/myApi/main/operations/TopProducts").
+		WithQuery("first", true).
+		Expect().Status(http.StatusBadRequest).Body().Raw()
+	goldie.Assert(t, "top products with invalid query", prettyJSON(topProductsWithInvalidQuery))
+
+	topProductsWithQueryAsWgVariables := withHeaders.GET("/myApi/main/operations/TopProducts").
+		WithQuery("wg_variables", `{"first":1}`).
+		Expect().Status(http.StatusOK).Body().Raw()
+	goldie.Assert(t, "top products with query as wg variables", prettyJSON(topProductsWithQueryAsWgVariables))
+
+	topProductsWithInvalidQueryAsWgVariables := withHeaders.GET("/myApi/main/operations/TopProducts").
+		WithQuery("wg_variables", `{"first":true}`).
+		Expect().Status(http.StatusBadRequest).Body().Raw()
+	goldie.Assert(t, "top products with invalid query as wg variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
+
 	request := GraphQLRequest{
 		OperationName: "MyReviews",
 		Query:         federationTestQuery,
