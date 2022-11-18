@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.4.0...@wundergraph/nextjs@0.5.0) (2022-11-18)
+
+### Features
+
+* remove app/main from URL structure ([#335](https://github.com/wundergraph/wundergraph/issues/335)) ([e49e585](https://github.com/wundergraph/wundergraph/commit/e49e585528297126b93958105e80b68f1943d781)), closes [#333](https://github.com/wundergraph/wundergraph/issues/333) (@fiam)
+
 ## [0.4.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.24...@wundergraph/nextjs@0.4.0) (2022-11-17)
 
 ### Features
