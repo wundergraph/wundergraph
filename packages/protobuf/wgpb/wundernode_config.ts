@@ -776,6 +776,7 @@ export interface DataSourceCustomGraphQL {
   federation: GraphQLFederationConfiguration | undefined;
   upstreamSchema: string;
   hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
+  customScalarTypeFields: SingleTypeField[];
 }
 
 export interface DataSourceCustomDatabase {
@@ -2346,6 +2347,7 @@ function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
     federation: undefined,
     upstreamSchema: "",
     hooksConfiguration: undefined,
+    customScalarTypeFields: [],
   };
 }
 
@@ -2361,6 +2363,9 @@ export const DataSourceCustomGraphQL = {
       hooksConfiguration: isSet(object.hooksConfiguration)
         ? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
         : undefined,
+      customScalarTypeFields: Array.isArray(object?.customScalarTypeFields)
+        ? object.customScalarTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
+        : [],
     };
   },
 
@@ -2376,6 +2381,11 @@ export const DataSourceCustomGraphQL = {
     message.hooksConfiguration !== undefined && (obj.hooksConfiguration = message.hooksConfiguration
       ? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
       : undefined);
+    if (message.customScalarTypeFields) {
+      obj.customScalarTypeFields = message.customScalarTypeFields.map((e) => e ? SingleTypeField.toJSON(e) : undefined);
+    } else {
+      obj.customScalarTypeFields = [];
+    }
     return obj;
   },
 
@@ -2394,6 +2404,7 @@ export const DataSourceCustomGraphQL = {
     message.hooksConfiguration = (object.hooksConfiguration !== undefined && object.hooksConfiguration !== null)
       ? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
       : undefined;
+    message.customScalarTypeFields = object.customScalarTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];
     return message;
   },
 };

@@ -64,18 +64,7 @@ paths:
                           type: string
                         type:
                           type: string
-                          enum:
-                            [
-                                BROWSER,
-                                DESKTOP,
-                                LAPTOP,
-                                MOBILE,
-                                OTHER,
-                                SERVER,
-                                TABLET,
-                                TV,
-                                UNKNOWN,
-                            ]
+                          enum: [BROWSER, DESKTOP, LAPTOP, MOBILE, OTHER, SERVER, TABLET, TV, UNKNOWN]
               required:
                 - code
       responses:

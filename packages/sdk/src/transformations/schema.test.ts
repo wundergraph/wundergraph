@@ -1,5 +1,6 @@
 import { GraphQLIntrospection } from '../definition';
 import transformSchema from './shema';
+import { assert } from 'chai';
 
 test('replaceCustomScalars', async () => {
 	const schema = `
@@ -102,7 +103,22 @@ test('replaceCustomScalars', async () => {
 		],
 	};
 
-	const result = transformSchema.replaceCustomScalars(schema, introspection);
+	const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(schema, introspection);
+	assert.equal(customScalarTypeFields.length, 3);
+	assert.deepEqual(customScalarTypeFields, [
+		{
+			typeName: 'Landpad',
+			fieldName: 'location',
+		},
+		{
+			typeName: 'Landpad',
+			fieldName: 'geo',
+		},
+		{
+			typeName: 'Capsule',
+			fieldName: 'location',
+		},
+	]);
 
-	expect(result).toMatchSnapshot();
+	expect(schemaSDL).toMatchSnapshot();
 });

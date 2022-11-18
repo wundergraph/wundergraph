@@ -15,6 +15,7 @@ Api {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Query @extends {
@@ -157,6 +158,7 @@ type User {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Review @key(fields: "id") {
@@ -314,6 +316,7 @@ type User {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Query @extends {
@@ -473,6 +476,7 @@ type Subscription {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Product @extends @key(fields: "upc") {
@@ -1259,6 +1263,7 @@ Api {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Query @extends {
@@ -1399,6 +1404,7 @@ type User {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Review @key(fields: "id") {
@@ -1552,6 +1558,7 @@ type User {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Query @extends {
@@ -1707,6 +1714,7 @@ type Subscription {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": true,
           "ServiceSDL": "type Product @extends @key(fields: "upc") {
