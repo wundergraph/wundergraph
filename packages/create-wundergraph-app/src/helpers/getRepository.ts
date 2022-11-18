@@ -7,12 +7,20 @@ import { createDirectory } from './createDirectory';
 import { downloadAndExtractRepo } from './download';
 import { checkIfValidExample, getExamplesList } from './examples';
 import { getRepoInfo } from './getRepoInfo';
+import { getRepoTags } from './getRepoTags';
 import { validateBranch } from './validateBranch';
+
+const resolveLatestWundergraphRef = async () => {
+	const tags = await getRepoTags('https://github.com/wundergraph/wundergraph', '@wundergraph/sdk');
+	return tags[tags.length - 1];
+};
 
 const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: string; githubLink?: string }) => {
 	try {
+		let ref = '';
 		if (!exampleName && !githubLink) {
-			const examples = await getExamplesList();
+			ref = await resolveLatestWundergraphRef();
+			const examples = await getExamplesList(ref);
 			const selectedExampleName = await inquirer.prompt({
 				name: 'selectExample',
 				type: 'list',
@@ -22,16 +30,19 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 			return {
 				repoOwnerName: 'wundergraph',
 				repoName: 'wundergraph',
-				branch: 'main',
+				ref: ref,
 				filePath: `examples/${selectedExampleName['selectExample']}`,
 			};
 		}
 		if (exampleName) {
-			const selectedExampleName = await checkIfValidExample(exampleName);
+			if (!ref) {
+				ref = await resolveLatestWundergraphRef();
+			}
+			const selectedExampleName = await checkIfValidExample(exampleName, ref);
 			return {
 				repoOwnerName: 'wundergraph',
 				repoName: 'wundergraph',
-				branch: 'main',
+				ref: 'main',
 				filePath: `examples/${selectedExampleName}`,
 			};
 		} else if (githubLink) {
@@ -58,11 +69,11 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 			return {
 				repoOwnerName: repoOwnerName,
 				repoName: repoName,
-				branch: selectedBranchName,
+				ref: selectedBranchName,
 				filePath: filePath,
 			};
 		}
-		return { repoOwnerName: '', repoName: '', branch: '', filePath: '' };
+		return { repoOwnerName: '', repoName: '', ref: '', filePath: '' };
 	} catch (e) {
 		throw e;
 	}
@@ -90,8 +101,8 @@ export const getRepository = async ({
 			)
 		);
 		const resolvedProjectPath = await createDirectory(projectName, directoryPath);
-		const { repoOwnerName, repoName, branch, filePath } = await resolveRepository({ exampleName, githubLink });
-		if (repoOwnerName === '' || repoName === '' || branch === '') {
+		const { repoOwnerName, repoName, ref, filePath } = await resolveRepository({ exampleName, githubLink });
+		if (repoOwnerName === '' || repoName === '' || ref === '') {
 			console.log(chalk.red('Could not resolve the repository details. Please try again.'));
 			throw new Error('Could not resolve the repository details. Please try again.');
 		}
@@ -101,7 +112,7 @@ export const getRepository = async ({
 					root: resolvedProjectPath,
 					repoOwnerName: repoOwnerName,
 					repoName: repoName,
-					branch: branch,
+					ref: ref,
 					filePath: filePath,
 				}),
 			{

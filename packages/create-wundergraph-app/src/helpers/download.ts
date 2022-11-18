@@ -24,24 +24,24 @@ export const downloadTar = async (url: string) => {
 export const downloadAndExtractRepo = async ({
 	root,
 	repoName,
-	branch,
+	ref,
 	repoOwnerName,
 	filePath,
 }: {
 	root: string;
 	repoName: string;
-	branch: string;
+	ref: string;
 	repoOwnerName: string;
 	filePath?: string;
 }) => {
 	try {
 		const spinner = ora('Loading..').start();
-		const tempFile = await downloadTar(`https://codeload.github.com/${repoOwnerName}/${repoName}/tar.gz/${branch}`);
+		const tempFile = await downloadTar(`https://codeload.github.com/${repoOwnerName}/${repoName}/tar.gz/${ref}`);
 		await tar.x({
 			file: tempFile,
 			cwd: root,
 			strip: filePath ? filePath.split('/').length + 1 : 1,
-			filter: (p) => p.startsWith(`${repoName}-${branch}${filePath ? `/${filePath}/` : ''}`),
+			filter: (p) => p.startsWith(`${repoName}-${ref}${filePath ? `/${filePath}/` : ''}`),
 		});
 		await fsp.unlink(tempFile);
 		spinner.succeed(chalk.green('Successfully cloned the repository'));
