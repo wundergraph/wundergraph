@@ -467,6 +467,10 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks/nextjs',
 			},
 			{
+				title: 'ViteJS',
+				href: '/docs/supported-frontend-frameworks/vite-js',
+			},
+			{
 				title: 'iOS / Swift / Objective-C',
 				href: '/docs/supported-frontend-frameworks/ios-swift-objective-c',
 			},
