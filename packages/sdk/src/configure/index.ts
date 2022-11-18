@@ -1067,6 +1067,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 				},
 				upstreamSchema: graphql.UpstreamSchema,
 				hooksConfiguration: graphql.HooksConfiguration,
+				customScalarTypeFields: graphql.CustomScalarTypeFields,
 			};
 			break;
 		case DataSourceKind.POSTGRESQL:
