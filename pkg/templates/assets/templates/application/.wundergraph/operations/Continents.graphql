@@ -1,6 +1,0 @@
-query Continents {
-	countries_continents {
-		name
-		code
-	}
-}

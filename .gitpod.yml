@@ -4,7 +4,7 @@ tasks:
     command: |
       export WG_ALLOWED_ORIGIN="https://9991-$GITPOD_WORKSPACE_ID.$GITPOD_WORKSPACE_CLUSTER_HOST"
       echo "$WG_ALLOWED_ORIGIN"
-      npx --yes concurrently "npm start" "npx --yes wait-on $(gp url 9991) && gp preview $(gp url 9991)/app/main/operations/Continents"
+      npx --yes concurrently "npm start" "npx --yes wait-on $(gp url 9991) && gp preview $(gp url 9991)/operations/Continents"
     name: 'Start app'
 # Ports to expose on workspace startup
 ports:

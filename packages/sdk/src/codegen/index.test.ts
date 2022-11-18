@@ -117,7 +117,6 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				application: {
-					Name: 'Test',
 					EngineConfiguration: new Api<any>('', [], [], [], []),
 					EnableSingleFlight: true,
 					S3UploadProvider: [],
@@ -443,17 +442,13 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					},
 				},
 				deployment: {
-					path: 'api/main',
 					api: {
 						id: '',
-						name: 'api',
 					},
 					environment: {
-						name: 'main',
 						baseUrl: 'http://localhost:9991',
 						id: '',
 					},
-					name: 'main',
 				},
 				authentication: {
 					cookieBased: [],

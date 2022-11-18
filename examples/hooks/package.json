@@ -6,12 +6,12 @@
     "start": "run-p wundergraph open",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
-    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/app/main/operations/Dragons",
+    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/operations/Dragons",
     "wunderctl": "wunderctl",
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.119.0",
+    "@wundergraph/sdk": "^0.122.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

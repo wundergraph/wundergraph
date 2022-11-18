@@ -9,7 +9,6 @@ import {
 
 const client = new Client({
 	baseURL: 'https://api.com',
-	applicationPath: 'app',
 	applicationHash: '123',
 	customFetch: fetch as any,
 	sdkVersion: '1.0.0',
@@ -49,7 +48,7 @@ expectType<Promise<ClientResponse<any>>>(
 
 // Subscription
 
-expectType<Promise<void>>(
+expectType<Promise<void | ClientResponse<{ id: string }>>>(
 	client.subscribe<SubscriptionRequestOptions<'Weather', { lat: number }>, { id: string }>(
 		{
 			operationName: 'Weather',
@@ -61,7 +60,7 @@ expectType<Promise<void>>(
 	)
 );
 
-expectType<Promise<void>>(
+expectType<Promise<void | ClientResponse<unknown>>>(
 	client.subscribe(
 		{
 			operationName: 'Weather',

@@ -1,11 +1,4 @@
-import {
-	Application,
-	authProviders,
-	configureWunderGraphApplication,
-	cors,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 import operations from './wundergraph.operations';
@@ -26,14 +19,9 @@ const spaceX = introspect.graphql({
 	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
-const myApplication = new Application({
-	name: 'api',
-	apis: [spaceX, github],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [spaceX, github],
 	server,
 	operations,
 	codeGenerators: [
@@ -41,7 +29,7 @@ configureWunderGraphApplication({
 			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
 		},
 		{
-			templates: [new NextJsTemplate()],
+			templates: [templates.typescript.client, new NextJsTemplate()],
 			path: '../components/generated',
 		},
 	],

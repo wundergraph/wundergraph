@@ -19,13 +19,8 @@ const spaceX = introspect.graphql({
   url: 'https://spacex-api.fly.dev/graphql/',
 })
 
-const myApplication = new Application({
-  name: 'app',
-  apis: [spaceX],
-})
-
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [spaceX],
   server,
   operations,
   codeGenerators: [
@@ -37,7 +32,7 @@ configureWunderGraphApplication({
       ],
     },
     {
-      templates: [new NextJsTemplate()],
+      templates: [templates.typescript.client, new NextJsTemplate()],
       path: '../components/generated',
     },
   ],
@@ -69,7 +64,7 @@ import { NextPage } from 'next'
 import { useQuery, withWunderGraph } from '../components/generated/nextjs'
 
 const Home: NextPage = () => {
-  const dragons = useQuery.Dragons()
+  const dragons = useQuery({ operationName: 'Dragons' })
   return <div>{JSON.stringify(dragons)}</div>
 }
 export default withWunderGraph(Home)

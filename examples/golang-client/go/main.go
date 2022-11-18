@@ -11,7 +11,7 @@ import (
 func main() {
 	// Create a new client
 	httpClient := &http.Client{}
-	wgClient := client.New(httpClient, "http://localhost:9991/app/main/operations")
+	wgClient := client.New(httpClient, "http://localhost:9991/operations")
 	resp, err := wgClient.Queries().Continents(context.Background())
 	if err != nil {
 		log.Fatal("Could not request your WunderNode", err)

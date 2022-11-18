@@ -1,16 +1,19 @@
 import { NextPage } from 'next';
-import { AuthProviders, useQuery, useWunderGraph, withWunderGraph } from '../components/generated/nextjs';
+import { useAuth, useQuery, useUser, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const { user, login } = useWunderGraph();
-	const stores = useQuery.Country();
+	const { login } = useAuth();
+	const user = useUser();
+	const result = useQuery({
+		operationName: 'Country',
+	});
 	const refresh = () => {
-		stores.refetch();
+		result.mutate();
 	};
 	return (
 		<div>
 			<p>{JSON.stringify(user)}</p>
-			<button onClick={() => login(AuthProviders.auth0)}>login</button>
+			<button onClick={() => login('auth0')}>login</button>
 			<div className="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32">
 				<div className="flex justify-center">
 					<div className="w-40 text-cyan-400 dark:text-white">
@@ -58,7 +61,7 @@ const Home: NextPage = () => {
 							This is the result of your{' '}
 							<code className="font-mono font-medium text-amber-500 font-bold">AllStores</code> operation.
 						</p>
-						<code className="p-3">{JSON.stringify(stores, null, 2)}</code>
+						<code className="p-3">{JSON.stringify(result, null, 2)}</code>
 					</div>
 					<div className="flex justify-center mt-8">
 						<button

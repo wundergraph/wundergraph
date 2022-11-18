@@ -11,7 +11,7 @@ WunderGraph applications are just Node packages, so if you're already familiar w
 it you'll feel right at home. Otherwise, we'll help you with the basics.
 
 Our very first project will build a Virtual Graph over a GraphQL which provides information
-about countries.
+about continents and countries.
 
 This tutorial assumes some familiarity with GraphQL. If you're not familiar with it, you can
 take a look at their [introduction](https://graphql.org/learn/).
@@ -23,7 +23,7 @@ to save us some typing.
 
 ```shell
 # Init a new project with the application template
-npx -y @wundergraph/wunderctl init -o world
+npx create-wundergraph-app world -E simple
 ```
 
 This will create our new application in the `world` directory. Once it finishes,
@@ -39,16 +39,13 @@ use extensively in these tutorials. At this point, we can run the development se
 to make sure our project is correctly initialized.
 
 ```shell
-$ npm start
-...
-2022-10-17T13:56:56+01:00	info	Starting WunderNode	...
-2022-10-17T13:56:56+01:00	debug	Initial Build successful ...
+npm start
 ```
 
 To check if our project is working, we can use `curl` to send a request:
 
 ```shell
-$ curl http://localhost:9991/app/main/operations/Continents
+curl http://localhost:9991/operations/Continents
 ```
 
 If our project is running correctly, we should see the following response:
@@ -106,6 +103,8 @@ import {
   configureWunderGraphApplication,
   introspect,
 } from '@wundergraph/sdk'
+import server from './wundergraph.server'
+import operations from './wundergraph.operations'
 
 const world = introspect.graphql({
   // Namespace inside our virtual graph
@@ -114,13 +113,10 @@ const world = introspect.graphql({
   url: 'https://countries.trevorblades.com/',
 })
 
-const myApplication = new Application({
-  name: 'app',
-  apis: [world],
-})
-
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [world],
+  server,
+  operations,
 })
 ```
 
@@ -168,9 +164,25 @@ code. Also, the namespace for the top level is now `world`.
 ```shell
 # Operation name "Continents" matches the filename of the operation
 # filename "Continents.graphql" without extension
-$ curl http://localhost:9991/app/main/operations/Continents
+curl http://localhost:9991/operations/Continents
+```
 
-{"data":{"world_continents":[{"code":"AF"},{"code":"AN"},{"code":"AS"},{"code":"EU"},{"code":"NA"},{"code":"OC"},{"code":"SA"}]}}
+Output:
+
+```json
+{
+  "data": {
+    "world_continents": [
+      { "code": "AF" },
+      { "code": "AN" },
+      { "code": "AS" },
+      { "code": "EU" },
+      { "code": "NA" },
+      { "code": "OC" },
+      { "code": "SA" }
+    ]
+  }
+}
 ```
 
 ## Filtering
@@ -195,9 +207,17 @@ query Continents($filter: world_ContinentFilterInput) {
 To test this, we need to send a request with the filter. To do so, we use the `wg_variables` parameter:
 
 ```shell
-$ curl --get --data-urlencode 'wg_variables={"filter":{"code":{"eq":"AF"}}}' http://localhost:9991/app/main/operations/Continents
+curl --get --data-urlencode 'wg_variables={"filter":{"code":{"eq":"AF"}}}' http://localhost:9991/operations/Continents
+```
 
-{"data":{"world_continents":[{"code":"AF"}]}
+Output:
+
+```json
+{
+  "data": {
+    "world_continents": [{ "code": "AF" }]
+  }
+}
 ```
 
 ## Exercises

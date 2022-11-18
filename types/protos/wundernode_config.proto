@@ -275,6 +275,7 @@ message DataSourceCustom_GraphQL {
 	GraphQLFederationConfiguration federation = 3;
 	string upstreamSchema = 4;
 	GraphQLDataSourceHooksConfiguration hooksConfiguration = 5;
+	repeated SingleTypeField customScalarTypeFields = 6;
 }
 
 message DataSourceCustom_Database {
@@ -424,10 +425,8 @@ enum ArgumentRenderConfiguration {
 message WunderGraphConfiguration {
 	UserDefinedApi api = 1;
 	string apiId = 2;
-	string deploymentName = 3;
-	repeated string environmentIds = 4;
-	string apiName = 5;
-	bool dangerouslyEnableGraphQLEndpoint = 6;
+	repeated string environmentIds = 3;
+	bool dangerouslyEnableGraphQLEndpoint = 4;
 }
 
 message S3UploadConfiguration {

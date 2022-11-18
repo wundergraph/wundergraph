@@ -3,7 +3,9 @@ import styles from '../styles/Home.module.css';
 import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const JobsPage: NextPage = () => {
-	const launches = useQuery.PastLaunches({ refetchOnWindowFocus: true });
+	const launches = useQuery({
+		operationName: 'PastLaunches',
+	});
 	return (
 		<div className={styles.examplesContainer}>
 			<h1>Cached SpaceX rocket launches</h1>
@@ -25,21 +27,20 @@ const JobsPage: NextPage = () => {
 				Additionally, if you re-focus the Browser window/tab you'll see a network request kick off to refresh the page.
 			</p>
 			<ul>
-				{launches.result.status === 'ok' &&
-					launches.result.data.spacex_launchesPast.map((launch, i) => (
-						<li key={i}>
-							<h3>{launch.mission_name}</h3>
-							<p>{launch.rocket.rocket_name}</p>
-							<p>{launch.launch_site.site_name_long}</p>
-							<a target="_blank" href={launch.links.article_link}>
-								Article
-							</a>
-							&nbsp;&nbsp;
-							<a target="_blank" href={launch.links.video_link}>
-								Video
-							</a>
-						</li>
-					))}
+				{launches.data?.spacex_launchesPast?.map((launch, i) => (
+					<li key={i}>
+						<h3>{launch.mission_name}</h3>
+						<p>{launch.rocket?.rocket_name}</p>
+						<p>{launch.launch_site?.site_name_long}</p>
+						<a target="_blank" href={launch.links?.article_link}>
+							Article
+						</a>
+						&nbsp;&nbsp;
+						<a target="_blank" href={launch.links?.video_link}>
+							Video
+						</a>
+					</li>
+				))}
 			</ul>
 		</div>
 	);

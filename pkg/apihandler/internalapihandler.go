@@ -79,13 +79,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	}
 
 	i.log.Debug("configuring API",
-		zap.String("name", api.PathPrefix),
 		zap.Int("numOfOperations", len(api.Operations)),
 	)
 
 	route := router.NewRoute()
-	route.PathPrefix(fmt.Sprintf("/%s", api.PathPrefix))
-
 	i.router = route.Subrouter()
 
 	// RenameTo is the correct name for the origin

@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.116.0",
+  "version": "0.118.0",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -13,14 +13,14 @@
   },
   "homepage": "https://wundergraph.com",
   "scripts": {
-    "build": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' --filter='!./docs-website' build",
+    "build": "pnpm -r run --filter='!@test/postgres' --filter='!@test/mtls' --filter='!@test/vite' --filter='!./docs-website' build",
     "build:libs": "pnpm -r run --filter='./packages/*' --filter='!./docs-website' build",
     "build:sdk": "pnpm -r run --filter='./packages/sdk' build",
     "watch:libs": "pnpm -r --parallel run --filter='./packages/*' --filter='!./docs-website' build --watch",
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
-    "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql} pkg/templates/assets/templates/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
+    "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
     "preview:version:packages": "lerna version --git-dry-run",
     "preview:version:packages-next": "lerna version prerelease --git-dry-run",

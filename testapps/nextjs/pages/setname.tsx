@@ -3,13 +3,15 @@ import { useState } from 'react';
 
 const SetName = () => {
 	const [name, setName] = useState<string>('');
-	const { mutate, result } = useMutation.SetName();
+	const { trigger, data } = useMutation({
+		operationName: 'SetName',
+	});
 	return (
 		<div>
 			<h1>SetName</h1>
 			<input value={name} onChange={(e) => setName(e.target.value)} />
-			<button onClick={() => mutate({ input: { name } })}>setname</button>
-			<p>{JSON.stringify(result)}</p>
+			<button onClick={() => trigger({ name })}>setname</button>
+			<p>{JSON.stringify(data)}</p>
 		</div>
 	);
 };

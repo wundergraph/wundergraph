@@ -31,9 +31,6 @@ test-ts:
 
 test: test-go test-ts
 
-format-templates:
-	pnpx prettier --write pkg/templates/assets/templates --ignore-unknown
-
 golang-ci:
 	 golangci-lint run
 
@@ -64,9 +61,5 @@ run:
 
 install:
 	cd cmd/wunderctl && go install
-
-update-examples:
-	cd examples && rm -rf simple && mkdir simple && cd simple && wunderctl init
-
 
 .PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio

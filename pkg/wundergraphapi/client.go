@@ -247,7 +247,6 @@ func (c *Client) CreateOrUpdateDeployment(input CreateOrUpdateDeploymentInput) (
 		Variables: map[string]interface{}{
 			"input": map[string]interface{}{
 				"apiID":          input.WunderGraphConfiguration.ApiId,
-				"name":           input.WunderGraphConfiguration.DeploymentName,
 				"config":         string(configData),
 				"environmentIDs": input.WunderGraphConfiguration.EnvironmentIds,
 			},
