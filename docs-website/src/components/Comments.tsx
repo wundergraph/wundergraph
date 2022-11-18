@@ -4,7 +4,7 @@ import { useTheme } from 'next-themes'
 const Comments = () => {
 	const { theme, systemTheme } = useTheme()
 	return (
-		<div className="my-8">
+		<div className="my-8 bg-white dark:bg-gray-950">
 			<Giscus
 				id="comments"
 				repo="wundergraph/wundergraph"
