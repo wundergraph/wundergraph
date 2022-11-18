@@ -30,13 +30,31 @@ type ApiTransportFactory interface {
 	DefaultTransportTimeout() time.Duration
 }
 
+// ApiTransportHijacker allows intercepting http.RoundTripper instances used by
+// the ApiTransportFactory before they're used, potentially wrapping, replacing
+// or mocking them.
+type ApiTransportHijacker func(tripper http.RoundTripper) http.RoundTripper
+
 type apiTransportFactory struct {
 	api             *Api
 	hooksClient     *hooks.Client
+	hijacker        ApiTransportHijacker
 	enableDebugMode bool
 }
 
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, hijacker ApiTransportHijacker, enableDebugMode bool) ApiTransportFactory {
+	return &apiTransportFactory{
+		api:             api,
+		hooksClient:     hooksClient,
+		hijacker:        hijacker,
+		enableDebugMode: enableDebugMode,
+	}
+}
+
 func (f *apiTransportFactory) RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
+	if f.hijacker != nil {
+		tripper = f.hijacker(tripper)
+	}
 	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableDebugMode, enableStreamingMode)
 }
 
@@ -55,15 +73,8 @@ type ApiTransport struct {
 	enableStreamingMode        bool
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) ApiTransportFactory {
-	return &apiTransportFactory{
-		api:             api,
-		hooksClient:     hooksClient,
-		enableDebugMode: enableDebugMode,
-	}
-}
-
 func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool, enableStreamingMode bool) http.RoundTripper {
+	// XXX: Replace with http.DefaultTransport for mock
 	transport := &ApiTransport{
 		roundTripper:               tripper,
 		debugMode:                  enableDebugMode,

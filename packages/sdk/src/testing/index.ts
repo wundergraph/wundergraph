@@ -1,4 +1,11 @@
+import fastify, { FastifyInstance, FastifyRequest } from 'fastify';
+
 import { Subprocess, wunderctlExec, wunderctlSubprocess } from '../wunderctlexec';
+
+import { HTTPMock, HttpMockFn, Headers, Request, RequestImpl, HTTPMockOptions } from './http';
+
+export type { Request, HTTPMockOptions } from './http';
+export { Headers, Response } from './http';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
@@ -45,8 +52,11 @@ type TestFn = TestPlainFn | TestPromiseFn;
  * running tests within WunderGraph applications.
  */
 export class Server {
-	private readonly rootUrl: string;
+	private readonly rootUrl: URL;
 	private readonly options: ServerOptions;
+	private readonly httpMocks: HTTPMock[];
+	private server?: FastifyInstance;
+	private serverAddr?: string;
 	private subprocess?: Subprocess;
 
 	/**
@@ -68,8 +78,13 @@ export class Server {
 		if (!url) {
 			throw new Error('could not determine node URL');
 		}
-		this.rootUrl = url;
+		try {
+			this.rootUrl = new URL(url);
+		} catch (e: any) {
+			throw new Error(`invalid node URL: ${e}`);
+		}
 		this.options = this.applyOptions(opts);
+		this.httpMocks = [];
 	}
 
 	private applyOptions(opts?: Partial<ServerOptions>): ServerOptions {
@@ -96,13 +111,13 @@ export class Server {
 	 * it does nothing.
 	 */
 	async spinUp(): Promise<void> {
+		await this.startHTTPServer();
 		if (this.subprocess) {
 			// Already running
 			return;
 		}
-		this.subprocess = wunderctlSubprocess({
-			cmd: ['up'],
-		});
+		let cmd = ['up', '--intercept-http', `${this.serverAddr ?? ''}/http`];
+		this.subprocess = wunderctlSubprocess({ cmd });
 		this.subprocess?.stdout?.pipe(process.stdout);
 		this.subprocess?.stderr?.pipe(process.stderr);
 		const health = this.url('/health');
@@ -131,6 +146,7 @@ export class Server {
 	 * it does nothing.
 	 */
 	async tearDown(): Promise<void> {
+		await this.stopHTTPServer();
 		if (this.subprocess) {
 			this.subprocess.kill('SIGTERM', {
 				forceKillAfterTimeout: 3000,
@@ -146,6 +162,82 @@ export class Server {
 		if (this.options.tearDown || opts?.tearDown) {
 			return this.tearDown();
 		}
+	}
+
+	private async startHTTPServer(): Promise<void> {
+		if (this.server) {
+			return;
+		}
+		const server = fastify();
+		await this.setupHTTPServer(server);
+		this.server = server;
+		this.serverAddr = await this.server.listen();
+	}
+
+	private async setupHTTPServer(server: FastifyInstance): Promise<void> {
+		await server.register(require('@fastify/formbody'));
+		server.addContentTypeParser(/.*/, (_, body, done) => done(null, body));
+		server.all('/http', async (request, reply) => {
+			const handler = this.matchHTTPMockHandler(request);
+			if (handler) {
+				const resp = await handler(this.convertRequest(request));
+				for (const [k, v] of resp.headers) {
+					reply.header(k, v);
+				}
+				reply.status(resp.status);
+				return await resp.text();
+			}
+			reply.status(599);
+		});
+	}
+
+	private async stopHTTPServer(): Promise<void> {
+		if (!this.server) {
+			return;
+		}
+		this.server.close();
+		this.server = undefined;
+		this.serverAddr = undefined;
+	}
+
+	private matchHTTPMockHandler(request: FastifyRequest): HttpMockFn | undefined {
+		const url = request.raw.headers['x-request-url'];
+		for (let mock of this.httpMocks) {
+			if (mock.url === url && (!mock.method || mock.method.toUpperCase() == request.method.toUpperCase())) {
+				return mock.handler;
+			}
+		}
+		return undefined;
+	}
+
+	private convertRequest(request: FastifyRequest): Request {
+		const url = request.raw.headers['x-request-url'] as string;
+		let headers = new Headers();
+		for (const key in request.headers) {
+			if (key !== 'x-request-url') {
+				const values = request.headers[key];
+				if (values) {
+					if (Array.isArray(values)) {
+						headers.set(key, (values as string[]).join(','));
+					} else {
+						headers.set(key, values);
+					}
+				}
+			}
+		}
+		const body = ((request.body as any)?.raw ?? '') as string;
+		return new RequestImpl(request.method, url, headers, body);
+	}
+
+	/**
+	 * Register a mock for HTTP(s) requests to the given URL
+	 */
+	httpMock(url: string, handler: HttpMockFn, opts?: Partial<HTTPMockOptions>) {
+		this.httpMocks.push({
+			url: url,
+			method: opts?.method ?? '',
+			handler,
+		});
 	}
 
 	/**

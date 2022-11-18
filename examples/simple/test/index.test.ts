@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import fetch from 'node-fetch';
-import { Server } from '@wundergraph/sdk/testing';
+import { Server, Response } from '@wundergraph/sdk/testing';
 
 import { createClient } from '../.wundergraph/generated/client';
 
@@ -34,4 +34,25 @@ describe('add', () => {
 			expect(result.data?.countries_continents.length).toBe(7);
 		})
 	);
+
+	test('continents with mocked origin', () => {
+		wg.httpMock('https://countries.trevorblades.com/', () => {
+			// No Antarctica!
+			const data =
+				'{"data":{"countries_continents":[{"name":"Africa","code":"AF"},{"name":"Asia","code":"AS"},{"name":"Europe","code":"EU"},{"name":"North America","code":"NA"},{"name":"Oceania","code":"OC"},{"name":"South America","code":"SA"}]}}';
+			return new Response(data, {
+				headers: {
+					foo: 'bar',
+				},
+			});
+		});
+		return wg.test(async () => {
+			const client = createClient({ customFetch: fetch as any });
+			const result = await client.query({
+				operationName: 'Continents',
+			});
+			// We've removed Antarctica!
+			expect(result.data?.countries_continents.length).toBe(6);
+		})();
+	});
 });
