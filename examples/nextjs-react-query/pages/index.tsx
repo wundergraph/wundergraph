@@ -1,12 +1,14 @@
 import { NextPage } from 'next';
 import { useQuery } from '../lib/react-query';
+import Nav from '../components/Nav';
 
 const Home: NextPage = () => {
 	const dragons = useQuery({
 		operationName: 'Dragons',
 	});
 	return (
-		<div>
+		<div className={'w-full'}>
+			<Nav />
 			<div className="relative max-w-5xl mx-auto pt-20 sm:pt-24 lg:pt-32">
 				<div className="flex justify-center">
 					<div className="w-40 text-cyan-400 dark:text-white">
