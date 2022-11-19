@@ -35,8 +35,8 @@ const Home: NextPage = () => {
 									<code className="font-mono font-medium text-amber-500 font-bold">Dragons</code> operation.
 								</p>
 								<ul>
-									{dragons.data?.spacex_dragons?.map((dragon, index) => {
-										return <li key={index}>{JSON.stringify(dragon)}</li>;
+									{dragons.data?.spacex_dragons?.map((dragon) => {
+										return <li key={dragon.id}>{JSON.stringify(dragon)}</li>;
 									})}
 								</ul>
 							</div>
