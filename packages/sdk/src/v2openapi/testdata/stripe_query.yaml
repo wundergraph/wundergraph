@@ -5,7 +5,7 @@ info:
   version: 1.0.0
   contact: {}
 servers:
-  - url: "http://localhost:8111"
+  - url: 'http://localhost:8111'
 paths:
   /v1/checkout/sessions:
     post:
@@ -33,7 +33,7 @@ paths:
                   type: string
                 mode:
                   type: string
-                  default: "payment"
+                  default: 'payment'
               required:
                 - line_items
                 - success_url

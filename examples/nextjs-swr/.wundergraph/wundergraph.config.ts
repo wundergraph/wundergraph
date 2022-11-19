@@ -14,8 +14,11 @@ configureWunderGraphApplication({
 	operations,
 	codeGenerators: [
 		{
+			templates: [...templates.typescript.all],
+		},
+		{
 			templates: [templates.typescript.client],
-			path: '../components/generated',
+			path: '../../components/generated',
 		},
 	],
 	cors: {

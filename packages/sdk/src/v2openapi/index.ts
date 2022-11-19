@@ -140,7 +140,10 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const replaced = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
+		const { schemaSDL: replaced, customScalarTypeFields } = transformSchema.replaceCustomScalars(
+			print(filtered),
+			this.introspection
+		);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
