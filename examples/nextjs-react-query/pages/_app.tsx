@@ -1,6 +1,8 @@
 import Head from 'next/head';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function MyApp({ Component, pageProps }) {
+	const queryClient = new QueryClient();
 	return (
 		<>
 			<Head>
@@ -9,7 +11,9 @@ function MyApp({ Component, pageProps }) {
 				<script src="https://cdn.tailwindcss.com"></script>
 			</Head>
 			<main className="flex dark:bg-slate-800 min-h-screen justify-center">
-				<Component {...pageProps} />
+				<QueryClientProvider client={queryClient}>
+					<Component {...pageProps} />
+				</QueryClientProvider>
 			</main>
 		</>
 	);
