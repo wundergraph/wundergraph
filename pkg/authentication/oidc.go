@@ -114,7 +114,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		cookiePath := fmt.Sprintf("/%s/auth/cookie/callback/%s", config.PathPrefix, config.ProviderID)
+		cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
 		cookieDomain := sanitizeDomain(r.Host)
 
 		c := &http.Cookie{
