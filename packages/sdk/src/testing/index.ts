@@ -260,4 +260,13 @@ export class Server {
 			}
 		};
 	}
+
+	/** Shorthand method for creating a test with Server.test() and running it
+	 * @param fn Test function to run
+	 * @param opts Optional TestOptions
+	 * @returns Nothing
+	 */
+	runTest(fn: TestFn, opts?: TestOptions): Promise<void> {
+		return this.test(fn, opts)();
+	}
 }

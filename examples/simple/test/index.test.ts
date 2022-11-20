@@ -46,13 +46,13 @@ describe('add', () => {
 				},
 			});
 		});
-		return wg.test(async () => {
+		return wg.runTest(async () => {
 			const client = createClient({ customFetch: fetch as any });
 			const result = await client.query({
 				operationName: 'Continents',
 			});
 			// We've removed Antarctica!
 			expect(result.data?.countries_continents.length).toBe(6);
-		})();
+		});
 	});
 });
