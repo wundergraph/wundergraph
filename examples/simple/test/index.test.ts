@@ -10,7 +10,7 @@ describe('add', () => {
 	test(
 		'country by code',
 		wg.test(async () => {
-			const client = createClient({ customFetch: fetch as any });
+			const client = createClient(wg.clientConfig());
 			const result = await client.query({
 				operationName: 'Countries',
 				input: {
@@ -27,7 +27,7 @@ describe('add', () => {
 	test(
 		'continents',
 		wg.test(async () => {
-			const client = createClient({ customFetch: fetch as any });
+			const client = createClient(wg.clientConfig());
 			const result = await client.query({
 				operationName: 'Continents',
 			});
@@ -47,7 +47,7 @@ describe('add', () => {
 			});
 		});
 		return wg.runTest(async () => {
-			const client = createClient({ customFetch: fetch as any });
+			const client = createClient(wg.clientConfig());
 			const result = await client.query({
 				operationName: 'Continents',
 			});

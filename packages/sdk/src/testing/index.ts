@@ -269,4 +269,16 @@ export class Server {
 	runTest(fn: TestFn, opts?: TestOptions): Promise<void> {
 		return this.test(fn, opts)();
 	}
+
+	/**
+	 * Returns a configuration suitable for createClient() which allows
+	 * the testing framework to intercept requests.
+	 *
+	 * @returns A ClientConfig-compatible object
+	 */
+	clientConfig(): { customFetch: any } {
+		return {
+			customFetch: this.options.fetch,
+		};
+	}
 }
