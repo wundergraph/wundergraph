@@ -1,0 +1,7 @@
+query Todos {
+	hasura_todos(order_by: { id: desc }) {
+		id
+		title
+		user_id
+	}
+}

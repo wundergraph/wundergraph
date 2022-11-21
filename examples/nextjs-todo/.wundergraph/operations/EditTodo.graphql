@@ -1,0 +1,5 @@
+mutation ($id: hasura_todos_pk_columns_input!, $title: String!) {
+	hasura_update_todos_by_pk(pk_columns: $id, _set: { title: $title }) {
+		id
+	}
+}

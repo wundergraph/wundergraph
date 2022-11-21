@@ -1,0 +1,5 @@
+mutation ($title: String!) {
+	hasura_insert_todos_one(object: { title: $title }) {
+		id
+	}
+}

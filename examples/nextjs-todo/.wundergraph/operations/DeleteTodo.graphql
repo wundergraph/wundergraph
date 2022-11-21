@@ -1,0 +1,5 @@
+mutation ($id: Int!) {
+	hasura_delete_todos_by_pk(id: $id) {
+		id
+	}
+}
