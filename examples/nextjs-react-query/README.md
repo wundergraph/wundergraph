@@ -1,6 +1,6 @@
-# WunderGraph Next.js Starter
+# WunderGraph Next.js React Query Starter
 
-This example demonstrates how to use WunderGraph with Next.js. We are going to make your data-source accessible through JSON-RPC to your Next.js app.
+This example demonstrates how to use WunderGraph with Next.js and React Query. We are going to make your data-source accessible through JSON-RPC to your Next.js app.
 
 ## Getting Started
 
