@@ -5,11 +5,11 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 import React from 'react';
 
-import { createWunderGraphNext } from './create-wundergraph';
 import { serialize } from '@wundergraph/sdk/internal';
-import { SWRConfig } from 'swr';
 import { userSWRKey } from '@wundergraph/swr';
+import { SWRConfig } from 'swr';
 import { useWunderGraphContext } from './context';
+import { createWunderGraphNext } from './create-wundergraph';
 
 const renderWithWunderGraph = (element: React.ReactElement, config?: any) => {
 	const Wrapper = ({ children }: { children: React.ReactNode }) => children;
