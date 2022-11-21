@@ -1,12 +1,10 @@
 ---
 title: React Native
 pageTitle: WunderGraph - React Native
-description:
+description: WunderGraph is the easiest way to consume GraphQL APIs in React Native.
 ---
 
-WunderGraph has official support for React Native.
-Examples are coming soon.
+WunderGraph has official support for React, so it's also possible to use WunderGraph in React Native.
 
-If you're planning to use WunderGraph commercially,
-we're also able to speed up the development of required features with our dedicated support team.
-Please reach out to our Sales Team if you're interested in learning more about our services.
+We're currently working on adding demos and documentation for React Native.
+This page will be updated as soon as we have more information.
