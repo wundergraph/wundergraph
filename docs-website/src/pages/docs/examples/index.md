@@ -19,8 +19,7 @@ Here's an overview of all the available examples.
 {% quick-link title="FaunaDB Next.js" icon="core" href="/docs/examples/fauna-db-nextjs" description="This example demonstrates how to integrate FaunaDB into your WunderGraph applications." /%}
 {% quick-link title="Inject Bearer Token" icon="core" href="/docs/examples/inject-bearer-token" description="This example demonstrates how to inject a bearer token into your upstream requests." /%}
 {% quick-link title="PostgreSQL" icon="core" href="/docs/examples/postgresql" description="This example demonstrates how to use PostgreSQL in WunderGraph." /%}
-{% quick-link title="PostgreSQL Prisma" icon="core" href="/docs/examples/postgresql-prisma" description="This example demonstrates how to use PostgreSQL and Prisma in WunderGraph." /%}
-{% quick-link title="Publish & Install API using WunderHub" icon="core" href="/docs/examples/publish-install-api" description="This example demonstrates how to publish and install an API using WunderHub." /%}
+{% quick-link title="NextJS PostgreSQL Prisma" icon="core" href="/docs/examples/nextjs-postgresql-prisma" description="This example demonstrates how to use NextJS, PostgreSQL and Prisma in WunderGraph." /%}
 {% quick-link title="Apollo Federation" icon="core" href="/docs/examples/apollo-federation" description="This example demonstrates how to use Apollo Federation in WunderGraph." /%}
 {% quick-link title="Auth0 OpenID Connect Authentication" icon="core" href="/docs/examples/auth0-openid-connect-authentication" description="This example demonstrates how to use Auth0 OpenID Connect Authentication in WunderGraph." /%}
 {% quick-link title="Fragments" icon="core" href="/docs/examples/fragments" description="This example show how to use GraphQL Fragments with WunderGraph." /%}

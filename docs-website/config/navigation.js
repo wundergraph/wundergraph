@@ -152,10 +152,10 @@ const navigation = [
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
-			{
+			/*{
 				title: 'NextJS Full-Stack Tutorial',
 				href: '/docs/tutorials/nextjs-full-stack-tutorial',
-			},
+			},*/
 		],
 	},
 	{
@@ -220,12 +220,8 @@ const navigation = [
 				href: '/docs/examples/postgresql',
 			},
 			{
-				title: 'PostgreSQL & Prisma',
-				href: '/docs/examples/postgresql-prisma',
-			},
-			{
-				title: 'Publish Install API using WunderHub',
-				href: '/docs/examples/publish-install-api',
+				title: 'NextJS & PostgreSQL & Prisma',
+				href: '/docs/examples/nextjs-postgresql-prisma',
 			},
 			{
 				title: 'Apollo Federation',
@@ -248,7 +244,7 @@ const navigation = [
 				href: '/docs/examples/graphql-apollo-subscriptions',
 			},
 			{
-				title: 'GraphQl yoga subscriptions',
+				title: 'GraphQl Yoga subscriptions',
 				href: '/docs/examples/graphql-yoga-subscriptions',
 			},
 			{
@@ -260,7 +256,7 @@ const navigation = [
 				href: '/docs/examples/graphql-ws-subscriptions',
 			},
 			{
-				title: 'GraphQl hasura WS subscriptions',
+				title: 'GraphQl Hasura WS subscriptions',
 				href: '/docs/examples/graphql-hasura-subscriptions',
 			},
 			{
@@ -469,6 +465,10 @@ const navigation = [
 			{
 				title: 'NextJS',
 				href: '/docs/supported-frontend-frameworks/nextjs',
+			},
+			{
+				title: 'ViteJS',
+				href: '/docs/supported-frontend-frameworks/vite-js',
 			},
 			{
 				title: 'iOS / Swift / Objective-C',
