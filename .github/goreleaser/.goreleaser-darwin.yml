@@ -80,6 +80,8 @@ release:
     This is a new release of the command-line interface (CLI) {{.ProjectName}}.
     It allows you to create, deploy and manage your WunderGraph application.
     Please check the [readme](https://github.com/wundergraph/wundergraph) or [documentation](https://wundergraph.com/docs) if you want to learn more.
+
+    For breaking changes, please check the [migration](/docs/migrations) guidelines for more information.
   github:
     owner: wundergraph
     name: wundergraph

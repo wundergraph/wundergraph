@@ -38,7 +38,6 @@ type OpenIDConnectConfig struct {
 	ClientSecret       string
 	QueryParameters    []QueryParameter
 	ProviderID         string
-	PathPrefix         string
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
@@ -114,7 +113,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		cookiePath := fmt.Sprintf("/%s/auth/cookie/callback/%s", config.PathPrefix, config.ProviderID)
+		cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
 		cookieDomain := sanitizeDomain(r.Host)
 
 		c := &http.Cookie{
@@ -284,7 +283,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, config.PathPrefix, "/auth/cookie/user"))
+		redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, "/auth/cookie/user"))
 
 		http.Redirect(w, r, redirect, http.StatusFound)
 	})

@@ -43,7 +43,7 @@ The next time, the client makes the same request to the same endpoint, it's goin
 If this header matches the existing ETag,
 which we revalidate on the WunderNode,
 we simply return a 304 "Not Modified" response.
-This saves bandwidth, time and compute, making clien-side revalidation of content very cheap.
+This saves bandwidth, time and compute, making client-side revalidation of content very cheap.
 
 Second, we can use standard Cache-Control headers to instruct the client to cache data.
 In combination with ETags and the stale-while-revalidate directive,
