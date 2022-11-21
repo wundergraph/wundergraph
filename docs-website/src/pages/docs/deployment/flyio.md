@@ -49,11 +49,6 @@ After the deployment is finished, you can open the app in your browser by runnin
 fly open
 ```
 
-If everything went well, you should see something like:
-
-```
-WunderNode Status: OK
-BuildInfo: {Version:0.110.0 Commit:778737fe0a65dac05d7379bae177252862792a2d Date:2022-09-19T16:02:38Z BuiltBy:ci}
-```
+If everything went well, you should see a beautiful WunderGraph landing page.
 
 Congrats! 🥳 You just deployed your WunderNode to Fly.io
