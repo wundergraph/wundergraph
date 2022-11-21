@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.123.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.123.0...@wundergraph/sdk@0.123.2) (2022-11-20)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.123.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.123.0...@wundergraph/sdk@0.123.1) (2022-11-20)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.123.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.122.0...@wundergraph/sdk@0.123.0) (2022-11-18)
+
+### Features
+
+* remove app/main from URL structure ([#335](https://github.com/wundergraph/wundergraph/issues/335)) ([e49e585](https://github.com/wundergraph/wundergraph/commit/e49e585528297126b93958105e80b68f1943d781)), closes [#333](https://github.com/wundergraph/wundergraph/issues/333) (@fiam)
+* sdk, schema extension fields config ([#336](https://github.com/wundergraph/wundergraph/issues/336)) ([ca09b3c](https://github.com/wundergraph/wundergraph/commit/ca09b3cf2002763b7ea53a7d50f6dce50d08c120)) (@YuriBuerov)
+
 ## [0.122.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.121.0...@wundergraph/sdk@0.122.0) (2022-11-17)
 
 ### Features
