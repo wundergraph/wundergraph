@@ -13,6 +13,8 @@ For this scenario, we need to introspect two APIs,
 a weather and a countries GraphQL API:
 
 ```typescript
+import { configureWunderGraphApplication } from './index'
+
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://graphql-weather-api.herokuapp.com/',
@@ -23,8 +25,7 @@ const countries = introspect.graphql({
   url: 'https://countries.trevorblades.com/',
 })
 
-const myApplication = new Application({
-  name: 'api',
+configureWunderGraphApplication({
   apis: [weather, countries],
 })
 ```

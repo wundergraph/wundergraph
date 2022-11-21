@@ -10,7 +10,7 @@
    ```
 3. Make a request
    ```
-   curl -X GET http://localhost:9991/app/main/operations/Dragons
+   curl -X GET http://localhost:9991/operations/Dragons
    ```
 
 ## Cheat Sheet

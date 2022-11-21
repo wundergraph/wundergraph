@@ -1,11 +1,4 @@
-import {
-	Application,
-	configureWunderGraphApplication,
-	cors,
-	EnvironmentVariable,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -31,14 +24,9 @@ const counter = introspect.graphql({
 	url: 'http://127.0.0.1:4000/graphql',
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [counter],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [counter],
 	server,
 	operations,
 	codeGenerators: [

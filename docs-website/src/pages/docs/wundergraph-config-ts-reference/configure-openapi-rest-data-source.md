@@ -21,8 +21,7 @@ const jsp = introspect.openApi({
   },
   requestTimeoutSeconds: 10, // optional
 })
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [jsp],
 })
 ```

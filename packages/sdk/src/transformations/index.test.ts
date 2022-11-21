@@ -52,6 +52,7 @@ test('renameTypes', async () => {
 							HooksConfiguration: {
 								onWSTransportConnectionInit: false,
 							},
+							CustomScalarTypeFields: [],
 						},
 						Directives: [],
 						RequestTimeoutSeconds: 0,
@@ -121,6 +122,7 @@ test('renameTypes', async () => {
 					HooksConfiguration: {
 						onWSTransportConnectionInit: false,
 					},
+					CustomScalarTypeFields: [],
 				},
 				Directives: [],
 				RequestTimeoutSeconds: 0,
@@ -191,6 +193,7 @@ test('renameTypeFields', async () => {
 							HooksConfiguration: {
 								onWSTransportConnectionInit: false,
 							},
+							CustomScalarTypeFields: [],
 						},
 						Directives: [],
 						RequestTimeoutSeconds: 0,
@@ -279,6 +282,7 @@ test('renameTypeFields', async () => {
 							HooksConfiguration: {
 								onWSTransportConnectionInit: false,
 							},
+							CustomScalarTypeFields: [],
 						},
 						Directives: [],
 						RequestTimeoutSeconds: 0,

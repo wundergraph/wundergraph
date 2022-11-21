@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -7,8 +6,8 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
-import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import server from './wundergraph.server';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -91,8 +90,8 @@ const graphQLAPI = introspect.graphql({
         .addClientRequestHeader("Authorization","Authorization")
 });*/
 
-const myApplication = new Application({
-	name: 'api',
+// configureWunderGraph emits the configuration
+configureWunderGraphApplication({
 	apis: [
 		weather,
 		spaceX,
@@ -101,11 +100,6 @@ const myApplication = new Application({
             openAPI,
             graphQLAPI*/
 	],
-});
-
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	application: myApplication,
 	server,
 	operations,
 	// S3 Server

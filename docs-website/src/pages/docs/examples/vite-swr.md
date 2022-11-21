@@ -19,13 +19,8 @@ const spaceX = introspect.graphql({
   url: 'https://spacex-api.fly.dev/graphql/',
 })
 
-const myApplication = new Application({
-  name: 'app',
-  apis: [spaceX],
-})
-
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [spaceX],
   server,
   operations,
   codeGenerators: [

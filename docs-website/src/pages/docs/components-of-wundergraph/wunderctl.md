@@ -5,8 +5,7 @@ description:
 ---
 
 The WunderGraph cli, also called `wunderctl` is the main entry point to use WunderGraph.
-You can use it to start new projects, e.g. using `wunderctl init`,
-you can generate code with `wunderctl generate`,
+You can generate code with `wunderctl generate`,
 and you can use the WunderGraph Hub to manage API dependencies via `wunderctl add` or `wunderctl publish`.
 
 The cli is written in Go, and it's available [in our monorepo](https://github.com/wundergraph/wundergraph).

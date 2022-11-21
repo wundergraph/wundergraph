@@ -34,7 +34,7 @@ The configuration for namespaces is straight forward.
 When using the `introspect` API of the SDK,
 add the `apiNamespace` field.
 
-If you know fore sure that two APIs don't collide, and you wish to merge them into the same namespace,
+If you know for sure that two APIs don't collide, and you wish to merge them into the same namespace,
 just use the identical name.
 
 ```typescript
@@ -71,8 +71,7 @@ const jsonPlaceholder = introspect.openApi({
   },
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [postgres, spaceX, jsonPlaceholder, planetscale, federated],
 })
 ```

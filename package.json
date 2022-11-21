@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "0.116.0",
+  "version": "0.118.1",
   "name": "wundergraph",
   "license": "Apache-2.0",
   "author": {
@@ -20,10 +20,10 @@
     "watch:sdk": "pnpm -r run --filter='./packages/sdk' watch",
     "test": "pnpm run -r test",
     "format": "prettier --write --loglevel silent **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
-    "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql} pkg/templates/assets/templates/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
+    "format:examples": "prettier --write --loglevel silent examples/**/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}",
     "codegen": "pnpm run --filter='./packages/protobuf' build",
-    "preview:version:packages": "lerna version --git-dry-run",
-    "preview:version:packages-next": "lerna version prerelease --git-dry-run",
+    "preview:version:packages": "lerna version --dry-run",
+    "preview:version:packages-next": "lerna version prerelease --dry-run",
     "ci:publish:packages": "lerna publish --allow-branch main --yes",
     "ci:publish:packages-next": "lerna publish prerelease --allow-branch next --yes",
     "release-it": "release-it",
@@ -72,7 +72,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.0.1",
     "@commitlint/config-conventional": "^17.0.0",
-    "@lerna-lite/cli": "1.11.1",
+    "@lerna-lite/cli": "1.12.0",
     "@milahu/patch-package-with-pnpm-support": "6.4.10",
     "@release-it/bumper": "^4.0.0",
     "husky": "^8.0.1",

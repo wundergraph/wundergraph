@@ -1,5 +1,4 @@
 import {
-	Application,
 	configurePublishWunderGraphAPI,
 	configureWunderGraphApplication,
 	cors,
@@ -20,14 +19,9 @@ const countries = introspect.graphql({
 	url: 'https://countries.trevorblades.com/',
 });
 
-const myApplication = new Application({
-	name: 'api',
-	apis: [weather, countries],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [weather, countries],
 	server,
 	operations,
 	codeGenerators: [

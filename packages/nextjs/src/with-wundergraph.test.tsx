@@ -5,11 +5,11 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 import React from 'react';
 
-import { createWunderGraphNext } from './create-wundergraph';
 import { serialize } from '@wundergraph/sdk/internal';
-import { SWRConfig } from 'swr';
 import { userSWRKey } from '@wundergraph/swr';
+import { SWRConfig } from 'swr';
 import { useWunderGraphContext } from './context';
+import { createWunderGraphNext } from './create-wundergraph';
 
 const renderWithWunderGraph = (element: React.ReactElement, config?: any) => {
 	const Wrapper = ({ children }: { children: React.ReactNode }) => children;
@@ -28,7 +28,6 @@ const createClient = (overrides?: Partial<ClientConfig>) => {
 		sdkVersion: '1.0.0',
 		baseURL: 'https://api.com',
 		applicationHash: '123',
-		applicationPath: 'app',
 		customFetch: fetch as any,
 		operationMetadata: {
 			Weather: {
@@ -44,7 +43,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('accept', 'application/json')
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.get('/app/operations/' + operationName)
+		.get('/operations/' + operationName)
 		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
 };
 

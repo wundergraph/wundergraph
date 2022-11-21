@@ -63,6 +63,19 @@ const navigation = [
 		],
 	},
 	{
+		title: 'Pre 1.0 Changes',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/pre-1-0-changes',
+			},
+			{
+				title: 'Simplifying the WunderGraph URL Structure',
+				href: '/docs/pre-1-0-changes/simplifying-the-wundergraph-url-structure',
+			},
+		],
+	},
+	{
 		title: 'Architecture',
 		links: [
 			{
@@ -539,6 +552,10 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/components-of-wundergraph',
+			},
+			{
+				title: 'create-wundergraph-app',
+				href: '/docs/components-of-wundergraph/create-wundergraph-app',
 			},
 			{
 				title: 'wunderctl',
