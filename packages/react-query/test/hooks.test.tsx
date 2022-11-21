@@ -6,7 +6,7 @@ import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/cli
 import nock from 'nock';
 import fetch from 'node-fetch';
 
-import { createHooks } from './hooks';
+import { createHooks } from '../src/hooks';
 
 export type Queries = {
 	Weather: {
@@ -84,7 +84,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('accept', 'application/json')
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.get('/app/operations/' + operationName)
+		.get('/operations/' + operationName)
 		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
 };
 
@@ -92,13 +92,13 @@ const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = 
 	const csrfScope = nock('https://api.com')
 		.matchHeader('accept', 'text/plain')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.get('/app/auth/cookie/csrf')
+		.get('/auth/cookie/csrf')
 		.reply(200, 'csrf');
 	const mutation = nock('https://api.com')
 		.matchHeader('accept', 'application/json')
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
-		.post('/app/operations/' + operationName, wgParams)
+		.post('/operations/' + operationName, wgParams)
 		.query({ wg_api_hash: '123' });
 
 	if (authenticated) {
@@ -282,13 +282,13 @@ describe('React Query - useMutation', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.post('/app/operations/SetName', { name: 'Rick Astley' })
+			.post('/operations/SetName', { name: 'Rick Astley' })
 			.query({ wg_api_hash: '123' })
 			.reply(200, { data: { id: '1', name: 'Rick Astley' } })
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.get('/app/operations/Weather')
+			.get('/operations/Weather')
 			.query({ wg_api_hash: '123', wg_variables: '{}' })
 			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
 
@@ -356,7 +356,7 @@ describe('React Query - useSubscription', () => {
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
-			.get('/app/operations/Countdown')
+			.get('/operations/Countdown')
 			.query({ wg_api_hash: '123', wg_variables: '{}', wg_subscribe_once: 'true' })
 			.reply(200, { data: { count: 100 } });
 
@@ -398,7 +398,7 @@ describe('React Query - useUser', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.get('/app/auth/cookie/user')
+			.get('/auth/cookie/user')
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {

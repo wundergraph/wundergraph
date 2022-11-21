@@ -8,6 +8,6 @@
     "jsx": "react",
     "outDir": "./dist"
   },
-  "include": ["src/**/*", "test/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
