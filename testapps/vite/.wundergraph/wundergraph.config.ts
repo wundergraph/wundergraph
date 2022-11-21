@@ -6,8 +6,8 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
-import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import server from './wundergraph.server';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -143,7 +143,7 @@ configureWunderGraphApplication({
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:5173/authentication', 'http://localhost:5173/auth-test'],
+			authorizedRedirectUriRegexes: ['http://localhost:5173*'],
 		},
 	},
 	/*links: [
