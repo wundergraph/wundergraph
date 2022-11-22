@@ -1,0 +1,5 @@
+mutation ($title: String!) {
+	db_createOneTodo(data: { title: $title }) {
+		id
+	}
+}

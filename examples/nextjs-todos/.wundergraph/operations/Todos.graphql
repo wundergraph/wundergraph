@@ -1,0 +1,6 @@
+query Todos {
+	db_findManyTodo {
+		id
+		title
+	}
+}
