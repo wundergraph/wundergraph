@@ -1,7 +1,7 @@
-import { createHooks } from '@wundergraph/swr';
 import { Client, OperationsDefinition, GraphQLResponseError, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { SWRResponse } from 'swr';
+import { createHooks } from '../src/hooks';
 
 interface Operations extends OperationsDefinition {
 	queries: {

@@ -6,7 +6,7 @@ import { Client, ClientConfig } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
 
-import { createHooks } from './hooks';
+import { createHooks } from '../src/hooks';
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));

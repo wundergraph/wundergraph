@@ -13,7 +13,7 @@
     "test": "jest && tsd"
   },
   "tsd": {
-    "directory": "test"
+    "directory": "tests"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
