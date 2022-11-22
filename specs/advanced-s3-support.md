@@ -24,20 +24,20 @@ required capabilities.
 
 ### Configuration
 
-The first part of the solution is configuration. Multiple uploaders (`uploads`) can be configured per S3 provider,
+The first part of the solution is configuration. Multiple profiles (`uploadProfiles`) can be configured per S3 provider,
 eg different restrictions for different file types, like profile pictures or blog images.
 In the configuration we can define file restrictions and meta information validation. Meta information can be supplied by the client and used to generate file keys, or used post upload to store file metadata in the database.
 
 This configuration can then be used for validation on the server and client side.
 
-In case no `uploads` configuration is added, upload behaves as the current implementation, where files are upload in the bucket root with their original filename.
+In case no `uploadProfiles` configuration is added, upload behaves as the current implementation, where files are upload in the bucket root with their original filename.
 
 ```ts
 configureWunderGraphApplication({
   s3UploadProvider: [
     new S3UploadProvider({
       name: 'minio',
-      uploads: {
+      uploadProfiles: {
         avatar: {
           maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
           maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
@@ -105,7 +105,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 
 ### TypeScript Client
 
-The `upload` configuration id and meta information can be passed to the `uploadFile` method of the TypeScript client. All properties will be typesafe based on the generated configuration.
+The `profile` configuration id and meta information can be passed to the `uploadFile` method of the TypeScript client. All properties will be typesafe based on the generated configuration.
 
 ```ts
 const client = new WunderGraphClient();
@@ -113,7 +113,7 @@ const client = new WunderGraphClient();
 const { fileKeys } = await client.uploadFiles({
   files: files,
   provider: 'minio',
-  upload: 'avatar',
+  profile: 'avatar',
   meta: {
     postId: '123',
   },
@@ -126,7 +126,7 @@ Files can be validated.
 client.validateFiles({
   files: files,
   provider: 'minio',
-  upload: 'avatar',
+  profile: 'avatar',
   meta: {
     postId: '123',
   },
@@ -140,7 +140,7 @@ Calling upload will validate the files client side and throw an error if the fil
 ```ts
 const { data, error, isLoading, upload } = useUploadFiles({
   provider: 'minio',
-  upload: 'avatar',
+  profile: 'avatar',
 });
 
 const keys = await upload({
