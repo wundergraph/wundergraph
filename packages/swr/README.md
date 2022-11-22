@@ -10,7 +10,7 @@ SWR is a React Hooks library for data fetching. With just one hook, you can sign
 ## Getting Started
 
 ```shell
-npm install @wundergraph/swr
+npm install @wundergraph/swr swr@2.0.0-rc.0
 ```
 
 Before you can use the hooks, you need to modify your code generation to include the base typescript client.
