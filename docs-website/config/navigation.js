@@ -948,6 +948,10 @@ const navigation = [
 				title: 'React Query',
 				href: '/docs/clients-reference/react-query',
 			},
+			{
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
+			},
 		],
 	},
 	{
