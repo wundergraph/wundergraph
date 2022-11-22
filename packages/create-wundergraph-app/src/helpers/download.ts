@@ -41,7 +41,10 @@ export const downloadAndExtractRepo = async ({
 			file: tempFile,
 			cwd: root,
 			strip: filePath ? filePath.split('/').length + 1 : 1,
-			filter: (p) => p.startsWith(`${repoName}-${ref}${filePath ? `/${filePath}/` : ''}`),
+			filter: (p) => {
+				const rel = p.split('/').slice(1).join('/');
+				return rel.startsWith(`${filePath ? `${filePath}/` : ''}`);
+			},
 		});
 		await fsp.unlink(tempFile);
 		spinner.succeed(chalk.green('Successfully cloned the repository'));
