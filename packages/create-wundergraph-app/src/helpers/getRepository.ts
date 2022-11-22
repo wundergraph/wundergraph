@@ -42,7 +42,7 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 			return {
 				repoOwnerName: 'wundergraph',
 				repoName: 'wundergraph',
-				ref: 'main',
+				ref: ref,
 				filePath: `examples/${selectedExampleName}`,
 			};
 		} else if (githubLink) {
