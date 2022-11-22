@@ -32,6 +32,8 @@ const typescriptAll = [
 	new WunderGraphWebhooksPlugin(),
 	new Operations(),
 	new JsonSchema(),
+	new TypeScriptClient(),
+	new TypeScriptLinkBuilder(),
 ];
 
 const templates = {
