@@ -10,6 +10,7 @@ import {
 	TypeScriptResponseModels,
 	ResolvedWunderGraphConfig,
 	GraphQLOperation,
+	TypeScriptClient,
 } from '@wundergraph/sdk';
 import { modelImports } from '@wundergraph/sdk/internal';
 import hash from 'object-hash';
@@ -64,6 +65,7 @@ export class NextJsTemplate implements Template {
 
 	dependencies(): Template[] {
 		return [
+			new TypeScriptClient(),
 			new TypeScriptInputModels(),
 			new TypeScriptResponseModels(),
 			new TypeScriptResponseDataModels(),
