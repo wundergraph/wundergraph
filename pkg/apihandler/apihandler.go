@@ -194,8 +194,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		components := strings.Split(r.URL.Path, "/")
 		return len(components) > 2 && components[2] == "main"
 	}).HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		r.log.Warn("this URL is deprecated and will be removed in a future release", zap.String("URL", req.URL.Path))
 		components := strings.Split(req.URL.Path, "/")
+		prefix := strings.Join(components[:3], "/")
+		const format = "URLs with the %q prefix are deprecated and will be removed in a future release, " +
+			"see https://github.com/wundergraph/wundergraph/blob/main/docs/migrations/sdk-0.122.0-0.123.0.md"
+		r.log.Warn(fmt.Sprintf(format, prefix), zap.String("URL", req.URL.Path))
 		req.URL.Path = "/" + strings.Join(components[3:], "/")
 		r.router.ServeHTTP(w, req)
 	})
