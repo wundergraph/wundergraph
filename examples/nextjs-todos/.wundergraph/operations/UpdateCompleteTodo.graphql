@@ -1,0 +1,5 @@
+mutation ($id: Int!, $complete: db_BoolFieldUpdateOperationsInput) {
+	db_updateOneTodo(where: { id: $id }, data: { completed: $complete }) {
+		id
+	}
+}

@@ -26,10 +26,13 @@
   "devDependencies": {
     "@types/node": "^17.0.15",
     "@types/react": "^18.0.6",
+    "autoprefixer": "^10.4.13",
     "node-fetch": "^2.6.7",
     "npm-run-all": "^4.1.5",
     "open-cli": "^7.0.1",
+    "postcss": "^8.4.19",
     "prisma": "^4.0.0",
+    "tailwindcss": "^3.2.4",
     "ts-node": "^10.8.0",
     "typescript": "^4.8.2",
     "wait-on": "^6.0.1"

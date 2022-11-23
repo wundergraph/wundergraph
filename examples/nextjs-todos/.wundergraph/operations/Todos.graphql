@@ -1,6 +1,7 @@
 query Todos {
-	db_findManyTodo {
+	db_findManyTodo(orderBy: { id: asc }) {
 		id
 		title
+		completed
 	}
 }

@@ -1,5 +1,5 @@
 mutation ($title: String!) {
-	db_createOneTodo(data: { title: $title }) {
+	db_createOneTodo(data: { title: $title, completed: false }) {
 		id
 	}
 }
