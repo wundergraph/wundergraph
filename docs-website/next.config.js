@@ -17,6 +17,11 @@ const nextConfig = {
 				destination: '/',
 				permanent: true,
 			},
+			{
+				source: '/docs/examples/nextjs-swr',
+				destination: '/docs/examples/nextjs',
+				permanent: true,
+			},
 		]
 	},
 }
