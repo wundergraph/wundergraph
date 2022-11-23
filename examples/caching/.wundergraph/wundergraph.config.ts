@@ -19,7 +19,7 @@ configureWunderGraphApplication({
 		},
 		{
 			templates: [templates.typescript.client, new NextJsTemplate()],
-			path: '../components/generated',
+			path: '/../components/generated',
 		},
 	],
 	cors: {
