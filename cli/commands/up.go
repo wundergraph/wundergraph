@@ -2,7 +2,9 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,6 +29,11 @@ const UpCmdName = "up"
 
 var upCmdPrettyLogging bool
 var interceptHttp string
+
+const (
+	mockStatusCodeContinue = 599
+	mockStatusCodeErr      = 598
+)
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -62,10 +69,18 @@ var upCmd = &cobra.Command{
 					if err != nil {
 						return nil, err
 					}
-					// TODO: StatusCode to disable network
-					if resp.StatusCode == 599 {
+					if resp.StatusCode == mockStatusCodeContinue {
 						// Send the request to the next transport
 						return nil, httpinterceptor.ErrContinue
+					}
+					if resp.StatusCode == mockStatusCodeErr {
+						// Error message from hijacker
+						defer resp.Body.Close()
+						data, err := io.ReadAll(resp.Body)
+						if err != nil {
+							return nil, err
+						}
+						return nil, errors.New(string(data))
 					}
 					return resp, err
 				}))
