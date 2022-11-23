@@ -23,24 +23,9 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * @default 5
 	 */
 	startupTimeoutSeconds: number;
-	/**
-	 * Wether to automatically tear down the server after each
-	 * test.
-	 *
-	 * @default true
-	 */
-	tearDown: boolean;
 }
 
-export interface TestOptions {
-	/**
-	 * Wether to tear down the server after the test. This is only
-	 * useful when ServerOptions.tearDown is false.
-	 *
-	 * @default false
-	 */
-	tearDown: boolean;
-}
+export interface TestOptions {}
 
 type TestPlainFn = (server: Server) => void;
 type TestPromiseFn = (server: Server) => Promise<void>;
@@ -55,6 +40,7 @@ export class Server<ClientType extends Client = Client> {
 	private readonly rootUrl: URL;
 	private readonly options: ServerOptions<ClientType>;
 	private subprocess?: Subprocess;
+	private runningTestCount: number = 0;
 
 	/**
 	 * Initialize a Server instance. Typically, a shared Server will
@@ -90,7 +76,6 @@ export class Server<ClientType extends Client = Client> {
 		const defaultOptions: ServerOptions<ClientType> = {
 			fetch: opts?.fetch ?? fetch,
 			startupTimeoutSeconds: 5,
-			tearDown: true,
 			createClient: () => {
 				throw new Error(
 					'cannot create a client because createClient() is not available - use ServerOptions.createClient to provide it'
@@ -126,9 +111,9 @@ export class Server<ClientType extends Client = Client> {
 			return;
 		}
 		let cmd = ['node', 'start'];
-		this.subprocess = wunderctlSubprocess({ cmd });
-		this.subprocess?.stdout?.pipe(process.stdout);
-		this.subprocess?.stderr?.pipe(process.stderr);
+		const subprocess = wunderctlSubprocess({ cmd });
+		subprocess?.stdout?.pipe(process.stdout);
+		subprocess?.stderr?.pipe(process.stderr);
 		const health = this.url('/health');
 		const started = new Date().getTime();
 		const maxWaitMs = this.options.startupTimeoutSeconds * 1000;
@@ -148,6 +133,8 @@ export class Server<ClientType extends Client = Client> {
 				}
 			}
 		}
+		// Server is up and running
+		this.subprocess = subprocess;
 	}
 
 	/**
@@ -161,14 +148,28 @@ export class Server<ClientType extends Client = Client> {
 			});
 			try {
 				await this.subprocess;
-			} catch (e: any) {}
+			} catch (e: any) {
+				console.error(`error shutting down ${e}`);
+			}
 			this.subprocess = undefined;
 		}
 	}
 
-	private async tearDownIfNeeded(opts?: TestOptions): Promise<void> {
-		if (this.options.tearDown || opts?.tearDown) {
-			return this.tearDown();
+	private async beforeTest(): Promise<void> {
+		this.runningTestCount++;
+		return this.spinUp();
+	}
+
+	private async afterTest(): Promise<void> {
+		if (--this.runningTestCount == 0) {
+			// Wait 100ms to tear down, so if multiple tests
+			// are ran in a sequence, we avoid tearing down
+			// and setting the server for each one of them.
+			setTimeout(async () => {
+				if (this.runningTestCount == 0) {
+					return this.tearDown();
+				}
+			}, 100);
 		}
 	}
 
@@ -182,13 +183,10 @@ export class Server<ClientType extends Client = Client> {
 	test(fn: TestFn, opts?: TestOptions): () => Promise<void> {
 		return async (): Promise<void> => {
 			try {
-				await this.spinUp();
+				await this.beforeTest();
 				await fn(this);
-			} catch (e: any) {
-				await this.tearDown();
-				throw e;
 			} finally {
-				await this.tearDownIfNeeded(opts);
+				await this.afterTest();
 			}
 		};
 	}
