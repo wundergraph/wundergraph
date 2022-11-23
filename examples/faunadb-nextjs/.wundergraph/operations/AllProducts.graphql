@@ -1,0 +1,7 @@
+query {
+  faunaDB_allProducts {
+    data {
+      name
+    }
+  }
+}
