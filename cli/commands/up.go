@@ -2,10 +2,7 @@ package commands
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"os/signal"
 	"path"
@@ -18,7 +15,6 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/httpinterceptor"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
@@ -28,12 +24,6 @@ import (
 const UpCmdName = "up"
 
 var upCmdPrettyLogging bool
-var interceptHttp string
-
-const (
-	mockStatusCodeContinue = 599
-	mockStatusCodeErr      = 598
-)
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -53,38 +43,6 @@ var upCmd = &cobra.Command{
 		_, err = files.CodeFilePath(wunderGraphDir, configEntryPointFilename)
 		if err != nil {
 			return err
-		}
-
-		var nodeOptions []node.Option
-
-		if interceptHttp != "" {
-			nodeOptions = append(nodeOptions, node.WithHTTPRoundTripperHijacker(func(roundTripper http.RoundTripper) http.RoundTripper {
-				return httpinterceptor.New(roundTripper, httpinterceptor.Func(func(r *http.Request) (*http.Response, error) {
-					req, err := http.NewRequest(r.Method, interceptHttp, r.Body)
-					if err != nil {
-						return nil, err
-					}
-					req.Header.Add("X-Request-Url", r.URL.String())
-					resp, err := http.DefaultClient.Do(req)
-					if err != nil {
-						return nil, err
-					}
-					if resp.StatusCode == mockStatusCodeContinue {
-						// Send the request to the next transport
-						return nil, httpinterceptor.ErrContinue
-					}
-					if resp.StatusCode == mockStatusCodeErr {
-						// Error message from hijacker
-						defer resp.Body.Close()
-						data, err := io.ReadAll(resp.Body)
-						if err != nil {
-							return nil, err
-						}
-						return nil, errors.New(string(data))
-					}
-					return resp, err
-				}))
-			}))
 		}
 
 		// optional, no error check
@@ -301,7 +259,7 @@ var upCmd = &cobra.Command{
 		n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 		go func() {
 			configFile := path.Join(wunderGraphDir, "generated", "wundergraph.config.json")
-			nodeOptions = append(nodeOptions,
+			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
 				node.WithDebugMode(rootFlags.DebugMode),
@@ -309,8 +267,8 @@ var upCmd = &cobra.Command{
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
 				node.WithPrettyLogging(rootFlags.PrettyLogs),
-				node.WithDevMode())
-			err := n.StartBlocking(nodeOptions...)
+				node.WithDevMode(),
+			)
 			if err != nil {
 				log.Error("node exited", zap.Error(err))
 				// exit context because we can't recover from a server start error
@@ -338,7 +296,6 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
-	upCmd.PersistentFlags().StringVar(&interceptHttp, "intercept-http", "", "intercepts HTTP(S) requests using the given URL")
 
 	rootCmd.AddCommand(upCmd)
 }

@@ -68,10 +68,6 @@ type Node struct {
 	WundergraphDir string
 }
 
-// HTTPRoundTripperHijacker represents a type that given an http.RoundTripper
-// returns another one, potentially wrapping or ignoring the one passed
-type HTTPRoundTripperHijacker func(roundTripper http.RoundTripper) http.RoundTripper
-
 type options struct {
 	staticConfig        *WunderNodeConfig
 	fileSystemConfig    *string
@@ -84,16 +80,15 @@ type options struct {
 		requests    int
 		perDuration time.Duration
 	}
-	disableGracefulShutdown  bool
-	insecureCookies          bool
-	githubAuthDemo           GitHubAuthDemo
-	devMode                  bool
-	idleTimeout              time.Duration
-	idleHandler              func()
-	hooksServerHealthCheck   bool
-	healthCheckTimeout       time.Duration
-	prettyLogging            bool
-	httpRoundTripperHijacker HTTPRoundTripperHijacker
+	disableGracefulShutdown bool
+	insecureCookies         bool
+	githubAuthDemo          GitHubAuthDemo
+	devMode                 bool
+	idleTimeout             time.Duration
+	idleHandler             func()
+	hooksServerHealthCheck  bool
+	healthCheckTimeout      time.Duration
+	prettyLogging           bool
 }
 
 type Option func(options *options)
@@ -184,15 +179,6 @@ func WithIdleTimeout(idleTimeout time.Duration, idleHandler func()) Option {
 	return func(options *options) {
 		options.idleTimeout = idleTimeout
 		options.idleHandler = idleHandler
-	}
-}
-
-// WithHTTPRoundTripperHijacker sets a wrapper for the http.RoundTrippers used
-// by the Node, allowing intercepting and mocking network connections. See
-// HTTPRoundTripperHijacker for more information.
-func WithHTTPRoundTripperHijacker(hijacker HTTPRoundTripperHijacker) Option {
-	return func(options *options) {
-		options.httpRoundTripperHijacker = hijacker
 	}
 }
 
@@ -424,12 +410,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 
 	hooksClient := hooks.NewClient(serverUrl, n.log)
 
-	var hijacker apihandler.ApiTransportHijacker
-	if n.options.httpRoundTripperHijacker != nil {
-		hijacker = apihandler.ApiTransportHijacker(n.options.httpRoundTripperHijacker)
-	}
-
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, hijacker, n.options.enableDebugMode)
+	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
 
 	n.log.Debug("http.Client.Transport",
 		zap.Bool("enableDebugMode", n.options.enableDebugMode),

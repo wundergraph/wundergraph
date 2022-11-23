@@ -1,13 +1,6 @@
-import fastify, { FastifyInstance, FastifyRequest } from 'fastify';
-
 import { Subprocess, wunderctlExec, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
 import { ClientConfigInit } from '../client/types';
-
-import { HTTPMock, HttpMockFn, Headers, Request, RequestImpl, HTTPMockOptions } from './http';
-
-export type { Request, HTTPMockOptions } from './http';
-export { Headers, Response } from './http';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
@@ -61,9 +54,6 @@ type TestFn = TestPlainFn | TestPromiseFn;
 export class Server<ClientType extends Client = Client> {
 	private readonly rootUrl: URL;
 	private readonly options: ServerOptions<ClientType>;
-	private readonly httpMocks: HTTPMock[];
-	private server?: FastifyInstance;
-	private serverAddr?: string;
 	private subprocess?: Subprocess;
 
 	/**
@@ -91,7 +81,6 @@ export class Server<ClientType extends Client = Client> {
 			throw new Error(`invalid node URL: ${e}`);
 		}
 		this.options = this.applyOptions(opts);
-		this.httpMocks = [];
 	}
 
 	private applyOptions(opts?: Partial<ServerOptions<ClientType>>): ServerOptions<ClientType> {
@@ -132,12 +121,11 @@ export class Server<ClientType extends Client = Client> {
 	 * it does nothing.
 	 */
 	async spinUp(): Promise<void> {
-		await this.startHTTPServer();
 		if (this.subprocess) {
 			// Already running
 			return;
 		}
-		let cmd = ['up', '--intercept-http', `${this.serverAddr ?? ''}/http`];
+		let cmd = ['up'];
 		this.subprocess = wunderctlSubprocess({ cmd });
 		this.subprocess?.stdout?.pipe(process.stdout);
 		this.subprocess?.stderr?.pipe(process.stderr);
@@ -167,7 +155,6 @@ export class Server<ClientType extends Client = Client> {
 	 * it does nothing.
 	 */
 	async tearDown(): Promise<void> {
-		await this.stopHTTPServer();
 		if (this.subprocess) {
 			this.subprocess.kill('SIGTERM', {
 				forceKillAfterTimeout: 3000,
@@ -183,82 +170,6 @@ export class Server<ClientType extends Client = Client> {
 		if (this.options.tearDown || opts?.tearDown) {
 			return this.tearDown();
 		}
-	}
-
-	private async startHTTPServer(): Promise<void> {
-		if (this.server) {
-			return;
-		}
-		const server = fastify();
-		await this.setupHTTPServer(server);
-		this.server = server;
-		this.serverAddr = await this.server.listen();
-	}
-
-	private async setupHTTPServer(server: FastifyInstance): Promise<void> {
-		await server.register(require('@fastify/formbody'));
-		server.addContentTypeParser(/.*/, (_, body, done) => done(null, body));
-		server.all('/http', async (request, reply) => {
-			const handler = this.matchHTTPMockHandler(request);
-			if (handler) {
-				const resp = await handler(this.convertRequest(request));
-				for (const [k, v] of resp.headers) {
-					reply.header(k, v);
-				}
-				reply.status(resp.status);
-				return await resp.text();
-			}
-			reply.status(599);
-		});
-	}
-
-	private async stopHTTPServer(): Promise<void> {
-		if (!this.server) {
-			return;
-		}
-		this.server.close();
-		this.server = undefined;
-		this.serverAddr = undefined;
-	}
-
-	private matchHTTPMockHandler(request: FastifyRequest): HttpMockFn | undefined {
-		const url = request.raw.headers['x-request-url'];
-		for (let mock of this.httpMocks) {
-			if (mock.url === url && (!mock.method || mock.method.toUpperCase() == request.method.toUpperCase())) {
-				return mock.handler;
-			}
-		}
-		return undefined;
-	}
-
-	private convertRequest(request: FastifyRequest): Request {
-		const url = request.raw.headers['x-request-url'] as string;
-		let headers = new Headers();
-		for (const key in request.headers) {
-			if (key !== 'x-request-url') {
-				const values = request.headers[key];
-				if (values) {
-					if (Array.isArray(values)) {
-						headers.set(key, (values as string[]).join(','));
-					} else {
-						headers.set(key, values);
-					}
-				}
-			}
-		}
-		const body = ((request.body as any)?.raw ?? '') as string;
-		return new RequestImpl(request.method, url, headers, body);
-	}
-
-	/**
-	 * Register a mock for HTTP(s) requests to the given URL
-	 */
-	httpMock(url: string, handler: HttpMockFn, opts?: Partial<HTTPMockOptions>) {
-		this.httpMocks.push({
-			url: url,
-			method: opts?.method ?? '',
-			handler,
-		});
 	}
 
 	/**
