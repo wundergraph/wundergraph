@@ -125,7 +125,7 @@ export class Server<ClientType extends Client = Client> {
 			// Already running
 			return;
 		}
-		let cmd = ['up'];
+		let cmd = ['node', 'start'];
 		this.subprocess = wunderctlSubprocess({ cmd });
 		this.subprocess?.stdout?.pipe(process.stdout);
 		this.subprocess?.stderr?.pipe(process.stderr);
