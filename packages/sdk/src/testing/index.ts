@@ -1,6 +1,8 @@
 import fastify, { FastifyInstance, FastifyRequest } from 'fastify';
 
 import { Subprocess, wunderctlExec, wunderctlSubprocess } from '../wunderctlexec';
+import { Client } from '../client';
+import { ClientConfigInit } from '../client/types';
 
 import { HTTPMock, HttpMockFn, Headers, Request, RequestImpl, HTTPMockOptions } from './http';
 
@@ -9,7 +11,12 @@ export { Headers, Response } from './http';
 
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
-export interface ServerOptions {
+export interface ServerOptions<ClientType extends Client = Client> {
+	/**
+	 * createClient from the generated TypeScript WunderGraph client.
+	 * Allows getting the client with appropriate options via Server.client.
+	 */
+	createClient: (config?: ClientConfigInit) => ClientType;
 	/**
 	 * fetch function to use internally.
 	 *
@@ -51,9 +58,9 @@ type TestFn = TestPlainFn | TestPromiseFn;
  * Wrapper around the WunderGraph node, intended to simplify
  * running tests within WunderGraph applications.
  */
-export class Server {
+export class Server<ClientType extends Client = Client> {
 	private readonly rootUrl: URL;
-	private readonly options: ServerOptions;
+	private readonly options: ServerOptions<ClientType>;
 	private readonly httpMocks: HTTPMock[];
 	private server?: FastifyInstance;
 	private serverAddr?: string;
@@ -67,7 +74,7 @@ export class Server {
 	 *
 	 * @param opts Optional ServerOptions
 	 */
-	constructor(opts?: Partial<ServerOptions>) {
+	constructor(opts?: Partial<ServerOptions<ClientType>>) {
 		const result = wunderctlExec({
 			cmd: ['node', 'url'],
 		});
@@ -87,14 +94,19 @@ export class Server {
 		this.httpMocks = [];
 	}
 
-	private applyOptions(opts?: Partial<ServerOptions>): ServerOptions {
+	private applyOptions(opts?: Partial<ServerOptions<ClientType>>): ServerOptions<ClientType> {
 		if (typeof fetch === 'undefined' && !opts?.fetch) {
 			throw new Error(`fetch() is not defined - use ServerOptions.fetch to provide it`);
 		}
-		const defaultOptions: ServerOptions = {
+		const defaultOptions: ServerOptions<ClientType> = {
 			fetch: opts?.fetch ?? fetch,
 			startupTimeoutSeconds: 5,
 			tearDown: true,
+			createClient: () => {
+				throw new Error(
+					'cannot create a client because createClient() is not available - use ServerOptions.createClient to provide it'
+				);
+			},
 		};
 		return {
 			...defaultOptions,
@@ -104,6 +116,15 @@ export class Server {
 
 	private url(rel: string): string {
 		return this.rootUrl + rel;
+	}
+
+	/**
+	 * Create a WunderGraph TypeScript client
+	 *
+	 * @returns Client configured for testing
+	 */
+	client(): ClientType {
+		return this.options.createClient(this.clientConfig());
 	}
 
 	/**

@@ -5,13 +5,12 @@ import { Server, Response } from '@wundergraph/sdk/testing';
 import { createClient } from '../.wundergraph/generated/client';
 
 describe('add', () => {
-	const wg = new Server({ fetch: fetch as any });
+	const wg = new Server({ createClient, fetch: fetch as any });
 
 	test(
 		'country by code',
 		wg.test(async () => {
-			const client = createClient(wg.clientConfig());
-			const result = await client.query({
+			const result = await wg.client().query({
 				operationName: 'Countries',
 				input: {
 					filter: {
@@ -27,8 +26,7 @@ describe('add', () => {
 	test(
 		'continents',
 		wg.test(async () => {
-			const client = createClient(wg.clientConfig());
-			const result = await client.query({
+			const result = await wg.client().query({
 				operationName: 'Continents',
 			});
 			expect(result.data?.countries_continents.length).toBe(7);
@@ -47,7 +45,7 @@ describe('add', () => {
 			});
 		});
 		return wg.runTest(async () => {
-			const client = createClient(wg.clientConfig());
+			const client = wg.client();
 			const result = await client.query({
 				operationName: 'Continents',
 			});

@@ -50,6 +50,9 @@ export interface ClientConfig {
 	operationMetadata?: OperationMetadata;
 }
 
+type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata';
+export type ClientConfigInit = Partial<Omit<ClientConfig, PrivateConfigProperties>>;
+
 export type SubscriptionEventHandler<Data = any> = (resp: ClientResponse<Data>) => void;
 
 export interface GraphQLErrorLocation {
