@@ -2,9 +2,11 @@ import { NextPage } from 'next';
 import { withWunderGraph, useQuery, useMutation } from '../components/generated/nextjs';
 import { Fragment, useRef, useState } from 'react';
 import { EditTodoInput, EditTodoResponseData, UpdateCompleteTodoInput } from '../components/generated/models';
+
 const Home: NextPage = () => {
 	const [title, setTitle] = useState('');
 	const titleRef = useRef();
+
 	const todos = useQuery({
 		operationName: 'Todos',
 		liveQuery: true,
@@ -49,7 +51,7 @@ const Home: NextPage = () => {
 							</a>
 							<span className="ml-4 text-2xl bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
 								{' '}
-								Wundergraph Todo{' '}
+								WunderGraph Todo{' '}
 							</span>
 						</div>
 					</div>
@@ -65,7 +67,6 @@ const Home: NextPage = () => {
 							}}
 							className="
 							mb-2
-						
 							bg-gray-600
 							py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75"
 						/>
@@ -96,6 +97,7 @@ const Home: NextPage = () => {
 		</Fragment>
 	);
 };
+
 function TodoItem({ todo, lastItem }: any) {
 	const [currentTodo, setCurrentTodo] = useState(todo);
 	const [editMode, setEditMode] = useState(false);
@@ -262,17 +264,22 @@ function TodoItem({ todo, lastItem }: any) {
 		</Fragment>
 	);
 }
+
 function NavBar() {
 	return (
 		<nav className="px-2 py-2.5 sm:px-4 bg-gray-900 border-solid border-0 border-b border-zinc-700">
 			<div>
-				<a href="#" className="flex items-center px-5 py-2">
-					<span className="self-center text-2xl font-semibold whitespace-nowrap bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+				<div className="flex items-center px-5 py-2">
+					<a href="https://wundergraph.com" target="_blank">
+						<img src="/wundergraph.svg" className="h-12 pr-3" alt="WunderGraph logo" />
+					</a>
+					<span className="self-center text-xl font-semibold whitespace-nowrap bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
 						WunderGraph
 					</span>
-				</a>
+				</div>
 			</div>
 		</nav>
 	);
 }
+
 export default withWunderGraph(Home);
