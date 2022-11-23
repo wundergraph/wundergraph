@@ -1,17 +1,13 @@
 import { NextPage } from 'next';
-import { withWunderGraph, useMutation, useQuery } from '../components/generated/nextjs';
+import { withWunderGraph, useQuery, useMutation } from '../components/generated/nextjs';
 import { Fragment, useRef, useState } from 'react';
-import { EditTodoInput, UpdateCompleteTodoInput } from '../components/generated/models';
-
+import { EditTodoInput, EditTodoResponseData, UpdateCompleteTodoInput } from '../components/generated/models';
 const Home: NextPage = () => {
 	const [title, setTitle] = useState('');
 	const titleRef = useRef();
 	const todos = useQuery({
 		operationName: 'Todos',
 		liveQuery: true,
-		// onError(error) {
-		// 	alert(error.message);
-		// }
 	});
 	const createTodo = useMutation({
 		operationName: 'CreateTodo',
@@ -19,9 +15,7 @@ const Home: NextPage = () => {
 
 	async function addTodo() {
 		if (title.trim().length > 0) {
-			let createTodoResponse = await createTodo.trigger({
-				title: title,
-			});
+			let createTodoResponse = await createTodo.trigger({ title: title });
 			if (!createTodoResponse.db_createOneTodo) {
 				alert('Oops! Add failed');
 			} else {
@@ -45,40 +39,50 @@ const Home: NextPage = () => {
 
 	return (
 		<Fragment>
-			<div className={'w-full bg-zinc-700'}>
-				<div className={'flex flex-col justify-center items-center h-full'}>
-					<div className="relative">
+			<NavBar />
+			<div className={`flex flex-col items-center h-[200vh] w-full bg-gray-900`}>
+				<div className={'mt-[10%]'}>
+					<div className={'mb-5 w-72'}>
+						<div className={'flex items-center flex-end'}>
+							<a href="https://wundergraph.com" target="_blank">
+								<img src="/wundergraph.svg" className="h-16" alt="WunderGraph logo" />
+							</a>
+							<span className="ml-4 text-2xl bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+								{' '}
+								Wundergraph Todo{' '}
+							</span>
+						</div>
+					</div>
+					<div className={'relative'}>
 						<input
 							ref={titleRef}
 							placeholder={'Add todo'}
+							type="text"
 							onKeyDown={titleKeyHandler}
 							value={title}
 							onChange={(e) => {
 								setTitle(e.target.value);
 							}}
-							type="text"
-							className=" py-3 px-8 rounded-md text-sm bg-gray-200"
+							className="
+							mb-2
+						
+							bg-gray-600
+							py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75"
 						/>
-						<div className="absolute inset-y-0 right-0 flex items-center cursor-pointer z-20 pr-4">
-							<div
-								onClick={addTodo}
-								className={'flex flex-col justify-center p-1 ml-2 cursor-pointer hover:bg-zinc-300 hover:rounded'}
+						<div onClick={addTodo} className={'absolute right-3 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								strokeWidth={1.5}
+								stroke="white"
+								className="w-7 h-6"
 							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-									strokeWidth={1.5}
-									stroke="black"
-									className="w-6 h-6"
-								>
-									<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-								</svg>
-							</div>
+								<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+							</svg>
 						</div>
 					</div>
-					<br />
-					<ul>
+					<div className={'absolute mt-2'}>
 						{todos?.data?.db_findManyTodo?.map((todo, index) => {
 							return (
 								<div key={todo.id}>
@@ -86,15 +90,13 @@ const Home: NextPage = () => {
 								</div>
 							);
 						})}
-					</ul>
+					</div>
 				</div>
 			</div>
 		</Fragment>
 	);
 };
-
 function TodoItem({ todo, lastItem }: any) {
-	const titleRef = useRef();
 	const [currentTodo, setCurrentTodo] = useState(todo);
 	const [editMode, setEditMode] = useState(false);
 
@@ -138,13 +140,22 @@ function TodoItem({ todo, lastItem }: any) {
 
 	async function editTodo() {
 		if (currentTodo.title.trim().length > 0) {
+			let updatedTodo: EditTodoResponseData = {
+				db_updateOneTodo: {
+					id: currentTodo.id,
+				},
+			};
 			let updateTodoTitle: EditTodoInput = {
 				id: currentTodo.id,
 				title: {
 					set: currentTodo.title,
 				},
 			};
-			let updateTodoTitleResponse = await updateTodo.trigger(updateTodoTitle);
+			let updateTodoTitleResponse = await updateTodo.trigger(updateTodoTitle, {
+				rollbackOnError: true,
+				optimisticData: updatedTodo,
+			});
+
 			if (updateTodoTitleResponse.db_updateOneTodo) {
 				setEditMode(false);
 			} else {
@@ -169,17 +180,54 @@ function TodoItem({ todo, lastItem }: any) {
 		}
 	}
 
+	function enableEditMode() {
+		setEditMode(true);
+	}
+
 	return (
 		<Fragment>
-			<div
-				className={`hover:bg-zinc-600 hover:rounded flex justify-between py-2 px-8 m-2 ${
-					!lastItem ? `border-solid border-0 border-b border-zinc-500` : ''
-				}`}
-			>
-				{editMode ? (
-					<div>
+			{!editMode && (
+				<div
+					className={`
+					flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded 
+					${!lastItem ? `border-solid border-0 border-b border-zinc-500` : ''}`}
+				>
+					<Fragment>
+						<div className="flex items-center mb-2">
+							<input
+								type="checkbox"
+								onChange={updateCompletedStatus}
+								checked={currentTodo.completed}
+								className={'h-4 w-4 rounded-full accent-pink-500'}
+							/>
+							<div
+								onClick={enableEditMode}
+								className={`cursor-pointer ml-3 text-sm font-medium text-gray-300  ${
+									currentTodo.completed ? 'line-through' : ''
+								}`}
+							>
+								<span className={'break-all'}>{todo.title}</span>
+							</div>
+						</div>
+						<div onClick={() => deleteTodo(todo.id)} className={'flex flex-col justify-start ml-2 cursor-pointer'}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								strokeWidth={1.5}
+								stroke="#fafafa"
+								className="w-5 h-5 hover:bg-zinc-500 hover:rounded"
+							>
+								<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+							</svg>
+						</div>
+					</Fragment>
+				</div>
+			)}
+			{editMode && (
+				<Fragment>
+					<div className={'relative'}>
 						<input
-							ref={titleRef}
 							type="text"
 							onKeyDown={titleKeyHandler}
 							value={currentTodo.title}
@@ -189,64 +237,42 @@ function TodoItem({ todo, lastItem }: any) {
 									title: e.target.value,
 								});
 							}}
-							className="py-2 px-4 rounded-md text-sm bg-zinc-400 text-white bg-opacity-50 bg-transparent border-none"
+							className={`${editMode ? 'mb-1' : ''}
+							${currentTodo.completed ? 'line-through' : ''}
+								border-solid border-0 border-b border-pink-400
+								py-3 pl-5 pr-10 w-72 bg-gray-900 text-white focus:outline-none 
+								`}
 						/>
-					</div>
-				) : (
-					<div className="flex items-center mb-2">
-						<input
-							type="checkbox"
-							onChange={updateCompletedStatus}
-							checked={currentTodo.completed}
-							className="text-indigo-600 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 w-4 h-4 rounded accent-green-300 text-gray-200 "
-						/>
-						<label
-							onClick={() => setEditMode(true)}
-							className={`cursor-pointer ml-3 text-sm font-medium text-gray-300 ${
-								currentTodo.completed ? 'line-through' : ''
-							}`}
-						>
-							{todo.title}
-						</label>
-					</div>
-				)}
 
-				{editMode ? (
-					<div
-						onClick={editTodo}
-						className={'flex flex-col justify-center ml-2 cursor-pointer hover:bg-zinc-500 hover:rounded'}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							strokeWidth={1.5}
-							stroke="#fafafa"
-							className="w-6 h-6"
-						>
-							<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-						</svg>
+						<div onClick={editTodo} className={'absolute right-6 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								strokeWidth={1.5}
+								stroke="white"
+								className="w-6 h-6"
+							>
+								<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+							</svg>
+						</div>
 					</div>
-				) : (
-					<div
-						onClick={() => deleteTodo(todo.id)}
-						className={'flex flex-col justify-center ml-2 cursor-pointer hover:bg-zinc-500 hover:rounded'}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							strokeWidth={1.5}
-							stroke="#fafafa"
-							className="w-5 h-5"
-						>
-							<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-						</svg>
-					</div>
-				)}
-			</div>
+				</Fragment>
+			)}
 		</Fragment>
 	);
 }
-
+function NavBar() {
+	return (
+		<nav className="px-2 py-2.5 sm:px-4 bg-gray-900 border-solid border-0 border-b border-zinc-700">
+			<div>
+				<a href="#" className="flex items-center px-5 py-2">
+					<span className="self-center text-2xl font-semibold whitespace-nowrap bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+						WunderGraph
+					</span>
+				</a>
+			</div>
+		</nav>
+	);
+}
 export default withWunderGraph(Home);
