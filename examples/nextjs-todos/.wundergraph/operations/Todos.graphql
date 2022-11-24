@@ -3,5 +3,6 @@ query Todos {
 		id
 		title
 		completed
+		order
 	}
 }
