@@ -2,6 +2,7 @@ import { NextPage } from 'next';
 import { withWunderGraph, useQuery, useMutation } from '../components/generated/nextjs';
 import { Fragment, useRef, useState } from 'react';
 import { EditTodoInput, EditTodoResponseData, UpdateCompleteTodoInput } from '../components/generated/models';
+import { mutate } from 'swr';
 
 const Home: NextPage = () => {
 	const [title, setTitle] = useState('');
@@ -9,7 +10,6 @@ const Home: NextPage = () => {
 
 	const todos = useQuery({
 		operationName: 'Todos',
-		liveQuery: true,
 	});
 	const createTodo = useMutation({
 		operationName: 'CreateTodo',
@@ -17,12 +17,25 @@ const Home: NextPage = () => {
 
 	async function addTodo() {
 		if (title.trim().length > 0) {
-			let createTodoResponse = await createTodo.trigger({ title: title });
-			if (!createTodoResponse.db_createOneTodo) {
-				alert('Oops! Add failed');
-			} else {
-				cancelAdd();
-			}
+			let addTodoData = { title: title };
+			await mutate(
+				{
+					operationName: 'Todos',
+				},
+				async () => {
+					const result = await createTodo.trigger(addTodoData);
+					cancelAdd();
+					return {
+						getTodo: result.db_createOneTodo,
+					};
+				},
+				{
+					optimisticData: {
+						getTodo: addTodoData,
+					},
+					rollbackOnError: true,
+				}
+			);
 		}
 	}
 
@@ -112,57 +125,55 @@ function TodoItem({ todo, lastItem }: any) {
 
 	async function updateCompletedStatus(e) {
 		let newCheckedStatus: boolean = e.target.checked;
-		setCurrentTodo({
-			...currentTodo,
-			completed: newCheckedStatus,
-		});
 		let updateCompleteTodoStatus: UpdateCompleteTodoInput = {
 			id: currentTodo.id,
 			complete: {
 				set: newCheckedStatus,
 			},
 		};
-		let updateCompleteTodoStatusResponse = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
-
-		if (!updateCompleteTodoStatusResponse.db_updateOneTodo) {
-			alert('Oops! Update Failed');
-			setCurrentTodo({
-				...currentTodo,
-				completed: !newCheckedStatus,
+		await mutate({ operationName: 'Todos' }, async (todos) => {
+			const updatedCompleteTodoStatus = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
+			let updatedTodos = todos.db_findManyTodo.map((todo) => {
+				if (todo.id === updatedCompleteTodoStatus.db_updateOneTodo.id) {
+					return updatedCompleteTodoStatus.db_updateOneTodo;
+				}
+				return todo;
 			});
-		}
+			return updatedTodos;
+		});
 	}
-
 	async function deleteTodo(id: number) {
-		const deleteResult = await deleteTodoOperation.trigger({ id: id });
-		if (!deleteResult.db_deleteOneTodo) {
-			alert('Oops! Delete failed');
-		}
+		const deleteTodoArg = { id: id };
+		await mutate(
+			{
+				operationName: 'Todos',
+			},
+			async (todos) => {
+				const deletedTodo = await deleteTodoOperation.trigger(deleteTodoArg);
+				let filteredTodos = todos.db_findManyTodo.filter((todo) => todo.id !== deletedTodo.db_deleteOneTodo.id);
+				return filteredTodos;
+			}
+		);
 	}
 
 	async function editTodo() {
 		if (currentTodo.title.trim().length > 0) {
-			let updatedTodo: EditTodoResponseData = {
-				db_updateOneTodo: {
-					id: currentTodo.id,
-				},
-			};
 			let updateTodoTitle: EditTodoInput = {
 				id: currentTodo.id,
 				title: {
 					set: currentTodo.title,
 				},
 			};
-			let updateTodoTitleResponse = await updateTodo.trigger(updateTodoTitle, {
-				rollbackOnError: true,
-				optimisticData: updatedTodo,
+			await mutate({ operationName: 'Todos' }, async (todos) => {
+				const updatedTodo = await updateTodo.trigger(updateTodoTitle);
+				let updatedTodos = todos.db_findManyTodo.map((todo) => {
+					if (todo.id === updatedTodo.db_updateOneTodo.id) {
+						return updatedTodo.db_updateOneTodo;
+					}
+					return todo;
+				});
+				return updatedTodos;
 			});
-
-			if (updateTodoTitleResponse.db_updateOneTodo) {
-				setEditMode(false);
-			} else {
-				alert('Oops! Update Failed');
-			}
 		}
 	}
 
