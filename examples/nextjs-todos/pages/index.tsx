@@ -1,48 +1,32 @@
 import { NextPage } from 'next';
 import { withWunderGraph, useQuery, useMutation } from '../components/generated/nextjs';
-import { Fragment, useRef, useState } from 'react';
-import { EditTodoInput, EditTodoResponseData, UpdateCompleteTodoInput } from '../components/generated/models';
+import React, { Fragment, useRef, useState } from 'react';
+import { DeleteTodoInput, EditTodoInput, UpdateCompleteTodoInput } from '../components/generated/models';
 import { mutate } from 'swr';
 
 const Home: NextPage = () => {
-	const [title, setTitle] = useState('');
-	const titleRef = useRef();
-
-	const todos = useQuery({
-		operationName: 'Todos',
-	});
-	const createTodo = useMutation({
-		operationName: 'CreateTodo',
-	});
+	const [title, setTitle] = useState<string>('');
+	const titleRef = useRef<HTMLInputElement>();
+	const todos = useQuery({ operationName: 'Todos' });
+	const createTodo = useMutation({ operationName: 'CreateTodo' });
 
 	async function addTodo() {
 		if (title.trim().length > 0) {
 			let addTodoData = { title: title };
-			await mutate(
-				{
-					operationName: 'Todos',
-				},
-				async () => {
-					const result = await createTodo.trigger(addTodoData);
+			await mutate({ operationName: 'Todos' }, async (todosItems) => {
+				const newTodo = await createTodo.trigger(addTodoData);
+				if (newTodo.db_createOneTodo) {
+					let addedItem = { id: newTodo.db_createOneTodo.id, title: addTodoData.title, completed: false };
+					todosItems.db_findManyTodo.push(addedItem);
 					cancelAdd();
-					return {
-						getTodo: result.db_createOneTodo,
-					};
-				},
-				{
-					optimisticData: {
-						getTodo: addTodoData,
-					},
-					rollbackOnError: true,
 				}
-			);
+				return todosItems;
+			});
 		}
 	}
-
-	async function titleKeyHandler(event) {
+	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Escape') {
-			// @ts-ignore
-			titleRef.current.blur();
+			cancelAdd();
 		} else if (event.key === 'Enter') {
 			await addTodo();
 		}
@@ -50,12 +34,13 @@ const Home: NextPage = () => {
 
 	function cancelAdd() {
 		setTitle('');
+		titleRef.current.blur();
 	}
 
 	return (
 		<Fragment>
 			<NavBar />
-			<div className={`flex flex-col items-center h-[200vh] w-full bg-gray-900`}>
+			<div className={'flex flex-col items-center h-[200vh] w-full bg-gray-900'}>
 				<div className={'mt-[10%]'}>
 					<div className={'mb-5 w-72'}>
 						<div className={'flex items-center flex-end'}>
@@ -78,10 +63,9 @@ const Home: NextPage = () => {
 							onChange={(e) => {
 								setTitle(e.target.value);
 							}}
-							className="
-							mb-2
-							bg-gray-600
-							py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75"
+							className={
+								'mb-2 bg-gray-600 py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75'
+							}
 						/>
 						<div onClick={addTodo} className={'absolute right-3 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}>
 							<svg
@@ -97,7 +81,7 @@ const Home: NextPage = () => {
 						</div>
 					</div>
 					<div className={'absolute mt-2'}>
-						{todos?.data?.db_findManyTodo?.map((todo, index) => {
+						{todos?.data?.db_findManyTodo?.map((todo, index: number) => {
 							return (
 								<div key={todo.id}>
 									<TodoItem todo={todo} lastItem={index === todos.data.db_findManyTodo.length - 1} />
@@ -111,9 +95,9 @@ const Home: NextPage = () => {
 	);
 };
 
-function TodoItem({ todo, lastItem }: any) {
+function TodoItem({ todo, lastItem }) {
 	const [currentTodo, setCurrentTodo] = useState(todo);
-	const [editMode, setEditMode] = useState(false);
+	const [editMode, setEditMode] = useState<boolean>(false);
 
 	const updateCompleteTodo = useMutation({
 		operationName: 'UpdateCompleteTodo',
@@ -123,7 +107,7 @@ function TodoItem({ todo, lastItem }: any) {
 	});
 	const updateTodo = useMutation({ operationName: 'EditTodo' });
 
-	async function updateCompletedStatus(e) {
+	async function updateCompletedStatus(e: React.ChangeEvent<HTMLInputElement>) {
 		let newCheckedStatus: boolean = e.target.checked;
 		let updateCompleteTodoStatus: UpdateCompleteTodoInput = {
 			id: currentTodo.id,
@@ -142,18 +126,17 @@ function TodoItem({ todo, lastItem }: any) {
 			return updatedTodos;
 		});
 	}
+
 	async function deleteTodo(id: number) {
-		const deleteTodoArg = { id: id };
-		await mutate(
-			{
-				operationName: 'Todos',
-			},
-			async (todos) => {
-				const deletedTodo = await deleteTodoOperation.trigger(deleteTodoArg);
-				let filteredTodos = todos.db_findManyTodo.filter((todo) => todo.id !== deletedTodo.db_deleteOneTodo.id);
-				return filteredTodos;
+		const deleteTodoArg: DeleteTodoInput = { id: id };
+		await mutate({ operationName: 'Todos' }, async (todos) => {
+			const deletedTodo = await deleteTodoOperation.trigger(deleteTodoArg);
+			if (!deletedTodo.db_deleteOneTodo) {
+				return todos.db_findManyTodo;
 			}
-		);
+			let filteredTodos = todos.db_findManyTodo.filter((todo) => todo.id !== deletedTodo.db_deleteOneTodo.id);
+			return filteredTodos;
+		});
 	}
 
 	async function editTodo() {
@@ -164,6 +147,7 @@ function TodoItem({ todo, lastItem }: any) {
 					set: currentTodo.title,
 				},
 			};
+
 			await mutate({ operationName: 'Todos' }, async (todos) => {
 				const updatedTodo = await updateTodo.trigger(updateTodoTitle);
 				let updatedTodos = todos.db_findManyTodo.map((todo) => {
@@ -185,7 +169,7 @@ function TodoItem({ todo, lastItem }: any) {
 		setEditMode(false);
 	}
 
-	async function titleKeyHandler(event) {
+	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Escape') {
 			cancelEdit();
 		} else if (event.key === 'Enter') {
@@ -201,8 +185,7 @@ function TodoItem({ todo, lastItem }: any) {
 		<Fragment>
 			{!editMode && (
 				<div
-					className={`
-					flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded 
+					className={`flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded
 					${!lastItem ? `border-solid border-0 border-b border-zinc-500` : ''}`}
 				>
 					<Fragment>
