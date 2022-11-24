@@ -407,6 +407,14 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				subscriptionUrl = fetchUrl
 			}
 
+			customScalarTypeFields := make([]graphql_datasource.SingleTypeField, len(in.CustomGraphql.CustomScalarTypeFields))
+			for i, v := range in.CustomGraphql.CustomScalarTypeFields {
+				customScalarTypeFields[i] = graphql_datasource.SingleTypeField{
+					TypeName:  v.TypeName,
+					FieldName: v.FieldName,
+				}
+			}
+
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -421,7 +429,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					URL:    subscriptionUrl,
 					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
-				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
+				UpstreamSchema:         in.CustomGraphql.UpstreamSchema,
+				CustomScalarTypeFields: customScalarTypeFields,
 			})
 		case wgpb.DataSourceKind_POSTGRESQL,
 			wgpb.DataSourceKind_MYSQL,

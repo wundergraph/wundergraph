@@ -1,20 +1,28 @@
 import { GraphQLIntrospection, OpenAPIIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
 import { parse, print, visit } from 'graphql/index';
+import { SingleTypeField } from '@wundergraph/protobuf';
+
+export interface ReplaceCustomScalarsResult {
+	schemaSDL: string;
+	customScalarTypeFields: SingleTypeField[];
+}
 
 const replaceCustomScalars = (
 	schemaSDL: string,
 	introspection: GraphQLIntrospection | OpenAPIIntrospection
-): string => {
+): ReplaceCustomScalarsResult => {
 	if (introspection.schemaExtension) {
 		schemaSDL = schemaSDL + ' ' + introspection.schemaExtension;
 	} else {
-		return schemaSDL;
+		return { schemaSDL, customScalarTypeFields: [] };
 	}
 
 	let insideCustomScalarType = false;
 	let insideCustomScalarField = false;
 	let replaceCustomScalarType: ReplaceCustomScalarTypeFieldConfiguration | undefined;
 	let replaceWith = '';
+	let currentTypeName = '';
+	let customScalarTypeFields: SingleTypeField[] = [];
 
 	const ast = parse(schemaSDL);
 	const cleanAst = visit(ast, {
@@ -23,6 +31,7 @@ const replaceCustomScalars = (
 				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 					if (node.name.value.match(replace.entityName)) {
 						insideCustomScalarType = true;
+						currentTypeName = node.name.value;
 					}
 				});
 			},
@@ -42,6 +51,15 @@ const replaceCustomScalars = (
 						}
 					});
 				}
+
+				if (insideCustomScalarField) {
+					if (!customScalarTypeFields.some((f) => f.typeName === currentTypeName && f.fieldName === node.name.value)) {
+						customScalarTypeFields.push({
+							typeName: currentTypeName,
+							fieldName: node.name.value,
+						});
+					}
+				}
 			},
 			leave: (_) => {
 				insideCustomScalarField = false;
@@ -52,6 +70,7 @@ const replaceCustomScalars = (
 				introspection.replaceCustomScalarTypeFields?.forEach((replace) => {
 					if (node.name.value.match(replace.entityName)) {
 						insideCustomScalarType = true;
+						currentTypeName = node.name.value;
 					}
 				});
 			},
@@ -89,7 +108,9 @@ const replaceCustomScalars = (
 		},
 	});
 
-	return print(cleanAst);
+	const schema = print(cleanAst);
+
+	return { schemaSDL: schema, customScalarTypeFields: customScalarTypeFields };
 };
 
 const transformSchema = {

@@ -1,7 +1,8 @@
-import { createHooks } from '@wundergraph/swr';
+import { createHooks } from '../src/hooks';
 import { Client, OperationsDefinition, GraphQLResponseError, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
-import { SWRResponse } from 'swr';
+import { UseQueryResult } from '@tanstack/react-query';
+import { QueryKey } from '../src/types';
 
 interface Operations extends OperationsDefinition {
 	queries: {
@@ -33,7 +34,7 @@ interface Operations extends OperationsDefinition {
 	};
 }
 
-const { useSubscription, useQuery, useMutation, useUser } = createHooks<Operations>(
+const { useSubscription, useQuery, useMutation, useUser, queryKey } = createHooks<Operations>(
 	new Client({
 		baseURL: 'http://localhost:8080',
 		applicationHash: 'my-application-hash',
@@ -50,7 +51,7 @@ const { data: queryData, error: queryError } = useQuery({
 });
 
 expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<GraphQLResponseError | undefined>(queryError);
+expectType<GraphQLResponseError | null>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
@@ -62,29 +63,38 @@ const { data: subData, error: subError } = useSubscription({
 });
 
 expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<GraphQLResponseError | undefined>(subError);
+expectType<GraphQLResponseError | null>(subError);
 
 const {
 	data: mutData,
 	error: mutError,
-	trigger,
+	mutate,
+	mutateAsync,
 } = useMutation({
 	operationName: 'CreateUser',
 });
 
 expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<GraphQLResponseError | undefined>(mutError);
+expectType<GraphQLResponseError | null>(mutError);
 
-expectType<Promise<any>>(
-	trigger({
+expectType<void>(
+	mutate({
 		name: 'John Doe',
 	})
 );
 
-expectType<SWRResponse<User<string>, GraphQLResponseError>>(useUser());
-expectType<SWRResponse<User<string>, GraphQLResponseError>>(
+expectType<Promise<any>>(
+	mutateAsync({
+		name: 'John Doe',
+	})
+);
+
+expectType<UseQueryResult<User<string>, GraphQLResponseError>>(useUser());
+expectType<UseQueryResult<User<string>, GraphQLResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,
 	})
 );
+
+expectType<('Weather' | { city: string } | undefined)[]>(queryKey({ operationName: 'Weather' }));
