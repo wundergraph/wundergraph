@@ -29,6 +29,7 @@ function TodoItem({ todo, lastItem }) {
 		};
 		performEditOperation(null, updateCompleteTodoStatus);
 	}
+
 	async function editTodo() {
 		if (currentTodo.title.trim().length > 0) {
 			let updateTodoTitle: EditTodoInput = {
@@ -40,6 +41,7 @@ function TodoItem({ todo, lastItem }) {
 			performEditOperation(updateTodoTitle, null);
 		}
 	}
+
 	/*
 	 * Shared function to update todo title or completed status
 	 * one of the input must be null and other must be either EditTodoInput or UpdateCompleteTodoInput
@@ -75,7 +77,7 @@ function TodoItem({ todo, lastItem }) {
 				}
 				return modifyTodos;
 			},
-			{ revalidate: false, rollbackOnError: true }
+			{ revalidate: true, rollbackOnError: true }
 		);
 	}
 
@@ -94,19 +96,21 @@ function TodoItem({ todo, lastItem }) {
 				}
 				return filteredTodos;
 			},
-			{ revalidate: false, rollbackOnError: true }
+			{ revalidate: true, rollbackOnError: true }
 		);
 	}
 
 	function clearEdit() {
 		setEditMode(false);
 	}
+
 	function resetTitle() {
 		setCurrentTodo({
 			...currentTodo,
 			title: todo.title,
 		});
 	}
+
 	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Escape') {
 			clearEdit();
@@ -139,8 +143,9 @@ function TodoItem({ todo, lastItem }) {
 							</form>
 							<div
 								onClick={enableEditMode}
-								className={`cursor-pointer ml-3 text-sm font-medium text-gray-300  
-								${currentTodo.completed ? 'line-through' : ''}`}
+								className={`cursor-pointer ml-3 text-sm font-medium text-gray-300 ${
+									currentTodo.completed ? 'line-through' : ''
+								}`}
 							>
 								<span className={'break-all'}>{currentTodo.title}</span>
 							</div>

@@ -4,19 +4,33 @@ import React, { Fragment, useRef, useState } from 'react';
 import TodoItem from '../components/TodoItem';
 import NavBar from '../components/Navbar';
 import { mutate } from 'swr';
+import { Reorder } from 'framer-motion';
+import { db_IntFieldUpdateOperationsInput } from '../components/generated/models';
+interface TodoOrder {
+	id: number;
+	order: db_IntFieldUpdateOperationsInput;
+}
 
 const Home: NextPage = () => {
+	const createTodo = useMutation({ operationName: 'CreateTodo' });
+	const updateTodoOrder = useMutation({ operationName: 'UpdateTodoOrder' });
+
 	const [title, setTitle] = useState<string>('');
 	const titleRef = useRef<HTMLInputElement>();
-	const todos = useQuery({
-		operationName: 'Todos',
-	});
+	const [currentTodos, setCurrentTodos] = useState<any>([]);
+	const [prevTodos, setPrevTodos] = useState<any>([]);
 
-	const createTodo = useMutation({ operationName: 'CreateTodo' });
+	useQuery({
+		operationName: 'Todos',
+		onSuccess: (data) => {
+			setCurrentTodos(data.db_findManyTodo);
+			setPrevTodos(data.db_findManyTodo);
+		},
+	});
 
 	async function addTodo() {
 		if (title.trim().length > 0) {
-			mutate(
+			await mutate(
 				{ operationName: 'Todos' },
 				async (todos) => {
 					if (todos) {
@@ -36,7 +50,7 @@ const Home: NextPage = () => {
 						return newTodos;
 					}
 				},
-				{ revalidate: false, rollbackOnError: true }
+				{ revalidate: true, rollbackOnError: true }
 			);
 		}
 	}
@@ -52,6 +66,29 @@ const Home: NextPage = () => {
 	function clearAdd() {
 		setTitle('');
 		titleRef.current.blur();
+	}
+
+	function handleReorder(newOrder) {
+		let newItems = [];
+		let itemsMap = new Map();
+
+		for (let i = 0; i < currentTodos.length; i++) {
+			let item = currentTodos[i];
+			itemsMap.set(item.order, item);
+		}
+		for (let i = 0; i < newOrder.length; i++) {
+			newItems.push(itemsMap.get(newOrder[i]));
+		}
+		setCurrentTodos([...newItems]);
+	}
+	async function updateDragAndDropOrder() {
+		let newOrder: TodoOrder[] = [];
+		for (let i = 0; i < currentTodos.length; i++) {
+			let item = currentTodos[i];
+			let order = { id: item.id, order: { set: prevTodos[i].order } };
+			newOrder.push(order);
+		}
+		await Promise.all(newOrder.map((item: TodoOrder) => updateTodoOrder.trigger(item)));
 	}
 
 	return (
@@ -97,10 +134,16 @@ const Home: NextPage = () => {
 							</svg>
 						</div>
 					</div>
-					<div className={'absolute mt-2'}>
-						{todos?.data?.db_findManyTodo?.map((todo, index: number) => (
-							<TodoItem key={todo.id} todo={todo} lastItem={index === todos.data.db_findManyTodo.length - 1} />
-						))}
+					<div className={'mt-2'}>
+						<div className={'absolute mt-1 -ml-1'}>
+							<Reorder.Group axis="y" values={currentTodos.map((c) => c.order)} onReorder={handleReorder}>
+								{currentTodos.map((todo, index: number) => (
+									<Reorder.Item onDragEnd={updateDragAndDropOrder} key={todo.order} value={todo.order}>
+										<TodoItem todo={todo} lastItem={index === currentTodos.length - 1} />
+									</Reorder.Item>
+								))}
+							</Reorder.Group>
+						</div>
 					</div>
 				</div>
 			</div>
