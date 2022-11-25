@@ -49,7 +49,6 @@ import path from 'path';
 import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
-import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
@@ -1122,9 +1121,7 @@ export const configurePublishWunderGraphAPI = (configuration: PublishConfigurati
 	const outFile = path.join('generated', `${configuration.organization}.${configuration.name}.api.json`);
 	_configurePublishWunderGraphAPI(configuration, outFile)
 		.then(() => {
-			Logger.info(
-				colors.blue(`${configuration.organization}/${configuration.name} API configuration written to ${outFile}`)
-			);
+			Logger.info(`${configuration.organization}/${configuration.name} API configuration written to ${outFile}`);
 			if (process.env.WUNDERGRAPH_PUBLISH_API === 'true') {
 				try {
 					const result = wunderctlExec({
@@ -1132,14 +1129,14 @@ export const configurePublishWunderGraphAPI = (configuration: PublishConfigurati
 						timeout: 1000 * 5,
 					});
 					if (result?.failed) {
-						Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
+						Logger.error(`Failed to publish ${configuration.organization}/${configuration.name}`);
 					}
 				} catch (e) {
-					Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
+					Logger.error(`Failed to publish ${configuration.organization}/${configuration.name}`);
 				}
 			} else {
-				Logger.info(colors.blue(`You can now publish the API using the following command:`));
-				Logger.info(colors.green(`wunderctl publish ${configuration.organization}/${configuration.name}`));
+				Logger.info(`You can now publish the API using the following command:`);
+				Logger.info(`wunderctl publish ${configuration.organization}/${configuration.name}`);
 			}
 		})
 		.catch((err) => {
