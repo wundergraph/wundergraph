@@ -2036,6 +2036,9 @@ func (e openIDConnectConfigurationMissingFieldError) Error() string {
 
 func (c *OpenIDConnectConfiguration) Validate() error {
 	// See https://openid.net/specs/openid-connect-discovery-1_0.html
+	//
+	// Note that our implementation uses userinfo_endpoint and hence we
+	// make it required, but can work without jwks_uri so we make it optional
 	if c.Issuer == "" {
 		return openIDConnectConfigurationMissingFieldError("issuer")
 	}
@@ -2046,8 +2049,8 @@ func (c *OpenIDConnectConfiguration) Validate() error {
 		// TODO: This might be optional with Implicit Flow?
 		return openIDConnectConfigurationMissingFieldError("token_endpoint")
 	}
-	if c.JwksUri == "" {
-		return openIDConnectConfigurationMissingFieldError("jwks_uri")
+	if c.UserinfoEndpoint == "" {
+		return openIDConnectConfigurationMissingFieldError("userinfo_endpoint")
 	}
 	return nil
 }
