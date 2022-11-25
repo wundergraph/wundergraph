@@ -16,6 +16,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/astprinter"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
+	"github.com/wundergraph/graphql-go-tools/pkg/astvisitor"
 )
 
 type Loader struct {
@@ -158,11 +159,12 @@ func (l *Loader) loadOperation(file GqlFile, normalizer *astnormalization.Operat
 	if report.HasErrors() {
 		return "", fmt.Errorf("error parsing operation: %s", report.Error())
 	}
-	if len(doc.OperationDefinitions) > 1 {
+	ops := l.countOperations(&doc, schemaDocument)
+	if ops > 1 {
 		return "", fmt.Errorf("graphql document must contain at most one operation: %s", file.FilePath)
 	}
 
-	if len(doc.OperationDefinitions) == 0 {
+	if ops == 0 {
 		return "", infoError(fmt.Sprintf("%s is empty, skipping", file))
 	}
 
@@ -179,6 +181,22 @@ func (l *Loader) loadOperation(file GqlFile, normalizer *astnormalization.Operat
 	}
 
 	return namedOperation, nil
+}
+
+type opCounter struct {
+	count int
+}
+
+func (c *opCounter) EnterOperationDefinition(ref int) {
+	c.count += 1
+}
+
+func (l *Loader) countOperations(doc *ast.Document, schema *ast.Document) int {
+	walker := astvisitor.NewWalker(0)
+	counter := &opCounter{}
+	walker.RegisterEnterOperationVisitor(counter)
+	walker.Walk(doc, schema, nil)
+	return counter.count
 }
 
 func (l *Loader) loadFragments(schemaDocument *ast.Document, fragmentsRootPath string) (string, error) {
