@@ -1,0 +1,28 @@
+# This query cannot pass validation!
+query FetchNewMessages($last_received_id: Int, $last_received_ts: hasura_timestamptz) {
+	hasura_message(
+		order_by: { timestamp: asc }
+		where: {
+			_and: {
+				id: { _neq: $last_received_id }
+				timestamp: { _gte: $last_received_ts }
+				text: { _is_null: false }
+			}
+		}
+	) {
+		id
+		text
+		username
+		timestamp
+	}
+}
+
+# But this query is fine
+# query FetchMessages($last_received_id: Int) {
+# 	hasura_message(where: { id: { _neq: $last_received_id } }) {
+# 		id
+# 		text
+# 		username
+# 		timestamp
+# 	}
+# }

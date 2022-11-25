@@ -1,0 +1,6 @@
+subscription SubscribeToOnlineUsers {
+	hasura_user_online(order_by: { username: asc }) {
+		id
+		username
+	}
+}

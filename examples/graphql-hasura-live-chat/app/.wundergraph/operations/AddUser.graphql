@@ -1,0 +1,6 @@
+mutation AddUser($username: String!) {
+	hasura_insert_user_one(object: { username: $username }) {
+		id
+		username
+	}
+}

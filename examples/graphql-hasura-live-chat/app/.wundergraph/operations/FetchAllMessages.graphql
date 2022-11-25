@@ -1,0 +1,19 @@
+# This query passes validation but fails to return any data!
+query FetchAllMessages($text_is_empty: Boolean) {
+	hasura_message(order_by: { timestamp: asc }, where: { text: { _is_null: $text_is_empty } }) {
+		id
+		text
+		username
+		timestamp
+	}
+}
+
+# This simpler query works normally though
+# query FetchAllMessages {
+# 	hasura_message(order_by: { timestamp: asc }) {
+# 		id
+# 		text
+# 		username
+# 		timestamp
+# 	}
+# }
