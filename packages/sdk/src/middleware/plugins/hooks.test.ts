@@ -28,6 +28,7 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 						content: '',
 					},
 				],
+				invalidOperationNames: [],
 				engineConfiguration: undefined,
 				corsConfiguration: undefined,
 				authenticationConfig: undefined,
