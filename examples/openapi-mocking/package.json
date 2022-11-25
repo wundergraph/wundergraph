@@ -1,0 +1,19 @@
+{
+  "name": "wundergraph-openapi-mocking",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "wunderctl up --debug",
+    "generate": "wunderctl generate up --debug",
+    "check": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@wundergraph/sdk": "^0.123.0",
+    "graphql": "^16.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.2"
+  }
+}
