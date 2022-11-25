@@ -406,6 +406,7 @@ func (r *Builder) registerInvalidOperation(name string) {
 	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
 	route.Handler(&EndpointUnavailableHandler{
 		OperationName: name,
+		Logger:        r.log,
 	})
 	r.log.Error("EndpointUnavailableHandler",
 		zap.String("Operation", name),
@@ -2157,9 +2158,11 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 
 type EndpointUnavailableHandler struct {
 	OperationName string
+	Logger        *zap.Logger
 }
 
-func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	m.Logger.Error("operation not available", zap.String("operationName", m.OperationName), zap.String("URL", r.URL.Path))
 	http.Error(w, fmt.Sprintf("Endpoint not available for Operation: %s, please check the logs.", m.OperationName), http.StatusServiceUnavailable)
 }
 
