@@ -2011,7 +2011,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			continue
 		}
 		if config.EndSessionEndpoint == "" {
-			r.log.Warn("issuer doesn't support end_session_endpoint", zap.String("issuer", issuer))
+			r.log.Debug("issuer doesn't support end_session_endpoint", zap.String("issuer", issuer))
 		}
 		issuerLogoutURLs[issuer] = config.EndSessionEndpoint
 	}
