@@ -287,7 +287,6 @@ importers:
       '@prisma/generator-helper': ^3.9.2
       '@types/axios': ^0.14.0
       '@types/chai': ^4.2.22
-      '@types/colors': ^1.2.1
       '@types/cors': ^2.8.10
       '@types/debug': ^4.1.7
       '@types/jest': ^28.1.1
@@ -304,7 +303,6 @@ importers:
       axios-retry: ^3.3.1
       chai: ^4.3.4
       close-with-grace: ^1.1.0
-      colors: ^1.4.0
       execa: 5.1.1
       fastify: ^4.9.2
       fastify-plugin: ^4.3.0
@@ -339,7 +337,6 @@ importers:
       axios: 0.26.1
       axios-retry: 3.3.1
       close-with-grace: 1.1.0
-      colors: 1.4.0
       execa: 5.1.1
       fastify: 4.9.2
       fastify-plugin: 4.3.0
@@ -361,7 +358,6 @@ importers:
     devDependencies:
       '@types/axios': 0.14.0
       '@types/chai': 4.3.3
-      '@types/colors': 1.2.1
       '@types/cors': 2.8.12
       '@types/debug': 4.1.7
       '@types/jest': 28.1.8
@@ -3659,13 +3655,6 @@ packages:
     resolution: {integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==}
     dev: true
 
-  /@types/colors/1.2.1:
-    resolution: {integrity: sha512-7jNkpfN2lVO07nJ1RWzyMnNhH/I5N9iWuMPx9pedptxJ4MODf8rRV0lbJi6RakQ4sKQk231Fw4e2W9n3D7gZ3w==}
-    deprecated: This is a stub types definition. colors provides its own type definitions, so you don't need this installed.
-    dependencies:
-      colors: 1.4.0
-    dev: true
-
   /@types/cors/2.8.12:
     resolution: {integrity: sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==}
     dev: true
@@ -5183,6 +5172,7 @@ packages:
   /colors/1.4.0:
     resolution: {integrity: sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==}
     engines: {node: '>=0.1.90'}
+    dev: false
 
   /columnify/1.6.0:
     resolution: {integrity: sha512-lomjuFZKfM6MSAnV9aCZC9sc0qGbmZdfygNv+nCpqVkSKdCxCklLtd16O0EILGkImHw9ZpHkAnHaB+8Zxq5W6Q==}
