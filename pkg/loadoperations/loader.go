@@ -2,6 +2,7 @@ package loadoperations
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -121,8 +122,9 @@ func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath stri
 		operation, err := l.loadOperation(file, normalizer, fragments, &schemaDocument)
 		if err != nil {
 			out.Invalid = append(out.Invalid, file.OperationName)
-			if ierr, ok := err.(infoError); ok && ierr.IsInfo() {
-				out.Info = append(out.Errors, ierr.Error())
+			var ierr infoError
+			if errors.As(err, &ierr) {
+				out.Info = append(out.Errors, err.Error())
 			} else {
 				out.Errors = append(out.Errors, err.Error())
 			}
