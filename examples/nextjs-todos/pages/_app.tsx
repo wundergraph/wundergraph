@@ -9,12 +9,10 @@ function MyApp({ Component, pageProps }) {
 				<script src="https://cdn.tailwindcss.com"></script>
 				<title>Todo</title>
 			</Head>
-			{/*<main className="flex min-h-screen justify-center">*/}
 			<main>
 				<Component {...pageProps} />
 			</main>
 		</>
 	);
 }
-
 export default MyApp;
