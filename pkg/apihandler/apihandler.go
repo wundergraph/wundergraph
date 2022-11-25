@@ -1985,7 +1985,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			continue
 		}
 		if resp.StatusCode != http.StatusOK {
-			r.log.Error("failed to get openid-configuration",
+			r.log.Error("failed to get openid-configuration, provider returned an HTTP error",
 				zap.Int("status", resp.StatusCode),
 			)
 			continue
@@ -2006,11 +2006,12 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			)
 			continue
 		}
-		if config.EndSessionEndpoint == "" {
-			r.log.Error("failed to get openid-configuration",
-				zap.String("end_session_endpoint", config.EndSessionEndpoint),
-			)
+		if err := config.Validate(); err != nil {
+			r.log.Warn("failed to get openid-configuration", zap.Error(err))
 			continue
+		}
+		if config.EndSessionEndpoint == "" {
+			r.log.Warn("issuer doesn't support end_session_endpoint", zap.String("issuer", issuer))
 		}
 		issuerLogoutURLs[issuer] = config.EndSessionEndpoint
 	}
@@ -2025,6 +2026,30 @@ type OpenIDConnectConfiguration struct {
 	UserinfoEndpoint      string `json:"userinfo_endpoint"`
 	JwksUri               string `json:"jwks_uri"`
 	EndSessionEndpoint    string `json:"end_session_endpoint"`
+}
+
+type openIDConnectConfigurationMissingFieldError string
+
+func (e openIDConnectConfigurationMissingFieldError) Error() string {
+	return fmt.Sprintf("missing field %q", string(e))
+}
+
+func (c *OpenIDConnectConfiguration) Validate() error {
+	// See https://openid.net/specs/openid-connect-discovery-1_0.html
+	if c.Issuer == "" {
+		return openIDConnectConfigurationMissingFieldError("issuer")
+	}
+	if c.AuthorizationEndpoint == "" {
+		return openIDConnectConfigurationMissingFieldError("authorization_endpoint")
+	}
+	if c.TokenEndpoint == "" {
+		// TODO: This might be optional with Implicit Flow?
+		return openIDConnectConfigurationMissingFieldError("token_endpoint")
+	}
+	if c.JwksUri == "" {
+		return openIDConnectConfigurationMissingFieldError("jwks_uri")
+	}
+	return nil
 }
 
 func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie) {
