@@ -1,0 +1,5 @@
+mutation ($userId: Int!) {
+	hasura_update_user_by_pk(pk_columns: { id: $userId }, _set: { last_seen: "now()" }) {
+		id
+	}
+}

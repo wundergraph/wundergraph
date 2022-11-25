@@ -1,0 +1,8 @@
+mutation InsertMessage($message: hasura_message_insert_input!) {
+	hasura_insert_message_one(object: $message) {
+		id
+		timestamp
+		text
+		username
+	}
+}
