@@ -1,5 +1,5 @@
 mutation ($text: String!) {
-	notes_postNotesNew(text: $text) {
+	notes_newNote(text: $text) {
 		id
 	}
 }

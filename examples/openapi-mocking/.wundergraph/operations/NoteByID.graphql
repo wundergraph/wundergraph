@@ -1,5 +1,5 @@
 query ($id: Int!) {
-	notes_getNotesNoteByNoteID(noteID: $id) {
+	notes_noteByID(noteID: $id) {
 		id
 		text
 	}

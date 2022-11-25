@@ -15,7 +15,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 					if (text != null) {
 						return {
 							data: {
-								notes_getNotesNoteByNoteID: {
+								notes_noteByID: {
 									id: noteID,
 									text: text,
 								},
@@ -40,7 +40,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 
 					return {
 						data: {
-							notes_postNotesNew: {
+							notes_newNote: {
 								id: nextID,
 							},
 						},

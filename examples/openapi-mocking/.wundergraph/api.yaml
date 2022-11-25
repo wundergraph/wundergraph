@@ -12,6 +12,7 @@ paths:
   /notes/note/{noteID}:
     get:
       summary: Returns a note by ID
+      operationId: noteByID
       parameters:
         - name: noteID
           in: path
@@ -43,6 +44,7 @@ paths:
   /notes/new:
     post:
       summary: Creates a new note
+      operationId: newNote
       parameters:
         - name: text
           in: body

@@ -21,7 +21,7 @@ curl -d text=Hello http://localhost:9991/operations/NewNote
 Notice the returned JSON with the newly created ID:
 
 ```json
-{ "data": { "notes_postNotesNew": { "id": 1 } } }
+{ "data": { "notes_newNote": { "id": 1 } } }
 ```
 
 #### Get a note
