@@ -58,7 +58,7 @@ var generateCmd = &cobra.Command{
 				helpers.CliEnv(rootFlags),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
-				"WG_THROW_ON_INVALID_OPERATION=true",
+				"WG_THROW_ON_OPERATION_LOADING_ERROR=true",
 				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
