@@ -129,7 +129,7 @@ function TodoItem({ todo, lastItem }) {
 			{!editMode && (
 				<div
 					className={`flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded
-					${!lastItem ? `border-solid border-0 border-b border-zinc-500` : ''}`}
+					${!lastItem ? `border-solid border-0 border-b border-zinc-500` : ``}`}
 				>
 					<Fragment>
 						<div className="flex items-center mb-2">
@@ -144,7 +144,7 @@ function TodoItem({ todo, lastItem }) {
 							<div
 								onClick={enableEditMode}
 								className={`cursor-pointer ml-3 text-sm font-medium text-gray-300 ${
-									currentTodo.completed ? 'line-through' : ''
+									currentTodo.completed ? `line-through` : ``
 								}`}
 							>
 								<span className={'break-all'}>{currentTodo.title}</span>
@@ -182,8 +182,8 @@ function TodoItem({ todo, lastItem }) {
 								});
 							}}
 							className={`
-							${editMode ? 'mb-1' : ''} 
-							${currentTodo.completed ? 'line-through' : ''}
+							${editMode ? `mb-1` : ``} 
+							${currentTodo.completed ? `line-through` : ``}
 								border-solid border-0 border-b border-pink-400
 								py-3 pl-5 pr-10 w-72 bg-gray-900 text-white focus:outline-none 
 								`}
