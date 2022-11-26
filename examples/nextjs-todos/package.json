@@ -1,5 +1,5 @@
 {
-  "name": "wundergraph-nextjs-postgres-prisma",
+  "name": "wundergraph-nextjs-todo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
