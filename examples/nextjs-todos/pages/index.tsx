@@ -5,51 +5,86 @@ import TodoItem from '../components/TodoItem';
 import NavBar from '../components/Navbar';
 import { useSWRConfig } from 'swr';
 import { Reorder } from 'framer-motion';
-import { db_IntFieldUpdateOperationsInput } from '../components/generated/models';
-
-interface TodoOrder {
-	id: number;
-	order: db_IntFieldUpdateOperationsInput;
-}
+import {
+	DeleteTodoInput,
+	EditTodoInput,
+	EditTodoResponseData,
+	UpdateCompleteTodoInput,
+} from '../components/generated/models';
+import { TodoOrder } from '../interfaces';
 
 const Home: NextPage = () => {
 	const { mutate } = useSWRConfig();
-	const createTodo = useMutation({ operationName: 'CreateTodo' });
-	const updateTodoOrder = useMutation({ operationName: 'UpdateTodoOrder' });
-
-	const [title, setTitle] = useState<string>('');
-	const titleRef = useRef<HTMLInputElement>();
-	const [currentTodos, setCurrentTodos] = useState<any>([]);
-	const [prevTodos, setPrevTodos] = useState<any>([]);
-
 	const allTodos = useQuery({
 		operationName: 'Todos',
 		onSuccess: (data) => {
-			setCurrentTodos(data.db_findManyTodo);
 			setPrevTodos(data.db_findManyTodo);
 		},
 	});
+	const updateCompleteTodo = useMutation({ operationName: 'UpdateCompleteTodo' });
+	const updateTodo = useMutation({ operationName: 'EditTodo' });
+	const updateTodoOrder = useMutation({ operationName: 'UpdateTodoOrder' });
 
-	function handleReorder(newOrder) {
-		let newItems = [];
-		let itemsMap = new Map();
+	const createTodo = useMutation({ operationName: 'CreateTodo' });
+	const deleteTodoOperation = useMutation({ operationName: 'DeleteTodo' });
 
-		for (let i = 0; i < allTodos.data.db_findManyTodo.length; i++) {
-			let item = allTodos.data.db_findManyTodo[i];
-			itemsMap.set(item.order, item);
-		}
+	const [title, setTitle] = useState<string>('');
+	const titleRef = useRef<HTMLInputElement>();
+	const [prevTodos, setPrevTodos] = useState<any>([]);
 
-		for (let i = 0; i < newOrder.length; i++) {
-			newItems.push(itemsMap.get(newOrder[i]));
-		}
+	// todo operations
+	async function updateCompleteStatus(updateCompleteTodoStatus: UpdateCompleteTodoInput) {
+		let optimisticTodos = [...allTodos.data.db_findManyTodo];
+		let id = updateCompleteTodoStatus.id;
+		let index = optimisticTodos.findIndex((t) => t.id === id);
+		let todoToUpdate = { ...optimisticTodos[index] };
+		todoToUpdate.completed = updateCompleteTodoStatus.complete.set;
 
-		let optimisticData = { db_findManyTodo: newItems };
-		mutate(
+		optimisticTodos[index] = { ...todoToUpdate };
+		let optimisticData = { db_findManyTodo: optimisticTodos };
+		await mutate(
 			{ operationName: 'Todos' },
-			async () => {
-				return { db_findManyTodo: newItems };
+			async (allTodos) => {
+				//make deep copy of todos
+				let modifyTodos = JSON.parse(JSON.stringify(allTodos));
+				let updateResponse: EditTodoResponseData;
+				updateResponse = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
+				if (updateResponse.db_updateOneTodo) {
+					modifyTodos.db_findManyTodo.map((currTodo) => {
+						if (currTodo.id === updateResponse.db_updateOneTodo.id) {
+							currTodo.completed = updateCompleteTodoStatus.complete.set;
+						}
+					});
+				}
+				return modifyTodos;
 			},
-			{ optimisticData: optimisticData, revalidate: false, rollbackOnError: true }
+			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
+		);
+	}
+	async function updateTitle(updateTodoTitle: EditTodoInput) {
+		let optimisticTodos = [...allTodos.data.db_findManyTodo];
+		let id = updateTodoTitle.id;
+		let index = optimisticTodos.findIndex((t) => t.id === id);
+		let todoToUpdate = { ...optimisticTodos[index] };
+		todoToUpdate.title = updateTodoTitle.title.set;
+		optimisticTodos[index] = { ...todoToUpdate };
+		let optimisticData = { db_findManyTodo: optimisticTodos };
+		await mutate(
+			{ operationName: 'Todos' },
+			async (allTodos) => {
+				//make deep copy of todos
+				let modifyTodos = JSON.parse(JSON.stringify(allTodos));
+				let updateResponse: EditTodoResponseData = await updateTodo.trigger(updateTodoTitle);
+				if (updateResponse.db_updateOneTodo) {
+					modifyTodos.db_findManyTodo.map((currTodo) => {
+						if (currTodo.id === updateResponse.db_updateOneTodo.id) {
+							currTodo.title = updateTodoTitle.title.set;
+						}
+					});
+				}
+				return modifyTodos;
+			},
+			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
 		);
 	}
 
@@ -84,6 +119,63 @@ const Home: NextPage = () => {
 			);
 		}
 	}
+	async function deleteTodo(id: number) {
+		const deleteTodoArg: DeleteTodoInput = { id: id };
+		let optimisticTodos = [...allTodos.data.db_findManyTodo];
+		optimisticTodos = optimisticTodos.filter((t) => t.id !== id);
+		let optimisticData = { db_findManyTodo: optimisticTodos };
+		await mutate(
+			{ operationName: 'Todos' },
+			async (todos) => {
+				//make deep copy of todos
+				let filteredTodos = JSON.parse(JSON.stringify(todos));
+				const deletedTodo = await deleteTodoOperation.trigger(deleteTodoArg);
+				if (deletedTodo.db_deleteOneTodo) {
+					filteredTodos.db_findManyTodo = filteredTodos.db_findManyTodo.filter(
+						(todo) => todo.id !== deletedTodo.db_deleteOneTodo.id
+					);
+				}
+				return filteredTodos;
+			},
+			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
+		);
+	}
+
+	//reorder todos
+	function handleReorder(newOrder: number[]) {
+		let newItems = [];
+		let itemsMap = new Map();
+
+		for (let i = 0; i < allTodos.data.db_findManyTodo.length; i++) {
+			let item = allTodos.data.db_findManyTodo[i];
+			itemsMap.set(item.order, item);
+		}
+
+		for (let i = 0; i < newOrder.length; i++) {
+			newItems.push(itemsMap.get(newOrder[i]));
+		}
+
+		let optimisticData = { db_findManyTodo: newItems };
+		mutate(
+			{ operationName: 'Todos' },
+			async () => {
+				return { db_findManyTodo: newItems };
+			},
+			{ optimisticData: optimisticData, revalidate: false, rollbackOnError: true }
+		);
+	}
+	async function updateDragAndDropOrder() {
+		let newOrder: TodoOrder[] = [];
+		let newOrderMap = new Map();
+
+		for (let i = 0; i < allTodos.data.db_findManyTodo.length; i++) {
+			let item = allTodos.data.db_findManyTodo[i];
+			let order = { id: item.id, order: { set: prevTodos[i].order } };
+			newOrderMap.set(item.id, order.id);
+			newOrder.push(order);
+		}
+		await Promise.all(newOrder.map((item: TodoOrder) => updateTodoOrder.trigger(item)));
+	}
 
 	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
 		if (event.key === 'Escape') {
@@ -96,19 +188,6 @@ const Home: NextPage = () => {
 	function clearAdd() {
 		setTitle('');
 		titleRef.current.blur();
-	}
-
-	async function updateDragAndDropOrder() {
-		let newOrder: TodoOrder[] = [];
-		let newOrderMap = new Map();
-
-		for (let i = 0; i < allTodos.data.db_findManyTodo.length; i++) {
-			let item = allTodos.data.db_findManyTodo[i];
-			let order = { id: item.id, order: { set: prevTodos[i].order } };
-			newOrderMap.set(item.id, order.id);
-			newOrder.push(order);
-		}
-		await Promise.all(newOrder.map((item: TodoOrder) => updateTodoOrder.trigger(item)));
 	}
 
 	return (
@@ -164,7 +243,13 @@ const Home: NextPage = () => {
 								>
 									{allTodos?.data.db_findManyTodo.map((todo, index: number) => (
 										<Reorder.Item onDragEnd={updateDragAndDropOrder} key={todo.order} value={todo.order}>
-											<TodoItem allTodos={allTodos} todo={todo} lastItem={index === currentTodos.length - 1} />
+											<TodoItem
+												todo={todo}
+												deleteTodo={deleteTodo}
+												updateTitle={updateTitle}
+												updateCompleteStatus={updateCompleteStatus}
+												lastItem={index === allTodos.data.db_findManyTodo.length - 1}
+											/>
 										</Reorder.Item>
 									))}
 								</Reorder.Group>

@@ -1,23 +1,15 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { useMutation } from './generated/nextjs';
-import { DeleteTodoInput, EditTodoInput, EditTodoResponseData, UpdateCompleteTodoInput } from './generated/models';
-import { mutate } from 'swr';
+import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
+import { TodoItemProp } from '../interfaces';
+function TodoItem(props: TodoItemProp) {
+	const { todo, lastItem, deleteTodo, updateTitle, updateCompleteStatus } = props;
 
-function TodoItem({ allTodos, todo, lastItem }) {
 	const [currentTodo, setCurrentTodo] = useState(todo);
 	useEffect(() => {
 		setCurrentTodo(todo);
 	}, [todo]);
 
 	const [editMode, setEditMode] = useState<boolean>(false);
-
-	const updateCompleteTodo = useMutation({
-		operationName: 'UpdateCompleteTodo',
-	});
-	const deleteTodoOperation = useMutation({
-		operationName: 'DeleteTodo',
-	});
-	const updateTodo = useMutation({ operationName: 'EditTodo' });
 
 	async function updateCompletedStatus(e: React.ChangeEvent<HTMLInputElement>) {
 		let newCheckedStatus: boolean = e.target.checked;
@@ -27,10 +19,9 @@ function TodoItem({ allTodos, todo, lastItem }) {
 				set: newCheckedStatus,
 			},
 		};
-		performEditOperation(null, updateCompleteTodoStatus);
+		updateCompleteStatus(updateCompleteTodoStatus);
 	}
-
-	async function editTodo() {
+	async function editTodoTile() {
 		if (currentTodo.title.trim().length > 0) {
 			let updateTodoTitle: EditTodoInput = {
 				id: currentTodo.id,
@@ -38,86 +29,14 @@ function TodoItem({ allTodos, todo, lastItem }) {
 					set: currentTodo.title,
 				},
 			};
-			performEditOperation(updateTodoTitle, null);
+			updateTitle(updateTodoTitle);
+			clearEdit();
 		}
-	}
-
-	/*
-	 * Shared function to update todo title or completed status
-	 * one of the input must be null and other must be either EditTodoInput or UpdateCompleteTodoInput
-	 * */
-	async function performEditOperation(
-		updateTodoTitle: EditTodoInput,
-		updateCompleteTodoStatus: UpdateCompleteTodoInput
-	) {
-		let optimisticTodos = [...allTodos.data.db_findManyTodo];
-		let id = updateTodoTitle ? updateTodoTitle.id : updateCompleteTodoStatus.id;
-		let index = optimisticTodos.findIndex((todo) => todo.id === id);
-		let todoToUpdate = { ...optimisticTodos[index] };
-		if (updateTodoTitle) {
-			todoToUpdate.title = updateTodoTitle.title.set;
-		} else {
-			todoToUpdate.completed = updateCompleteTodoStatus.complete.set;
-		}
-		optimisticTodos[index] = { ...todoToUpdate };
-		let optimisticData = { db_findManyTodo: optimisticTodos };
-		await mutate(
-			{ operationName: 'Todos' },
-			async (allTodos) => {
-				//make deep copy of todos
-				let modifyTodos = JSON.parse(JSON.stringify(allTodos));
-				let updateResponse: EditTodoResponseData;
-				if (updateTodoTitle) {
-					updateResponse = await updateTodo.trigger(updateTodoTitle);
-				} else {
-					updateResponse = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
-				}
-				if (updateResponse.db_updateOneTodo) {
-					modifyTodos.db_findManyTodo.map((currTodo) => {
-						if (currTodo.id === updateResponse.db_updateOneTodo.id) {
-							if (updateTodoTitle) {
-								currTodo.title = updateTodoTitle.title.set;
-							} else {
-								currTodo.completed = updateCompleteTodoStatus.complete.set;
-							}
-						}
-					});
-				}
-				if (updateTodoTitle) {
-					clearEdit();
-				}
-				return modifyTodos;
-			},
-			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
-		);
-	}
-
-	async function deleteTodo(id: number) {
-		const deleteTodoArg: DeleteTodoInput = { id: id };
-		let optimisticTodos = [...allTodos.data.db_findManyTodo];
-		optimisticTodos = optimisticTodos.filter((todo) => todo.id !== id);
-		let optimisticData = { db_findManyTodo: optimisticTodos };
-		await mutate(
-			{ operationName: 'Todos' },
-			async (todos) => {
-				//make deep copy of todos
-				let filteredTodos = JSON.parse(JSON.stringify(todos));
-				const deletedTodo = await deleteTodoOperation.trigger(deleteTodoArg);
-				if (deletedTodo.db_deleteOneTodo) {
-					filteredTodos.db_findManyTodo = filteredTodos.db_findManyTodo.filter(
-						(todo) => todo.id !== deletedTodo.db_deleteOneTodo.id
-					);
-				}
-				return filteredTodos;
-			},
-			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
-		);
 	}
 
 	function clearEdit() {
 		setEditMode(false);
 	}
-
 	function resetTitle() {
 		setCurrentTodo({
 			...currentTodo,
@@ -130,7 +49,7 @@ function TodoItem({ allTodos, todo, lastItem }) {
 			clearEdit();
 			resetTitle();
 		} else if (event.key === 'Enter') {
-			await editTodo();
+			await editTodoTile();
 		}
 	}
 
@@ -203,7 +122,10 @@ function TodoItem({ allTodos, todo, lastItem }) {
 								`}
 						/>
 
-						<div onClick={editTodo} className={'absolute right-6 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}>
+						<div
+							onClick={editTodoTile}
+							className={'absolute right-6 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}
+						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
