@@ -1,6 +1,8 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
 import { TodoItemProp } from '../interfaces';
+import clsx from 'clsx';
+
 function TodoItem(props: TodoItemProp) {
 	const { todo, lastItem, deleteTodo, updateTitle, updateCompleteStatus } = props;
 
@@ -21,6 +23,7 @@ function TodoItem(props: TodoItemProp) {
 		};
 		updateCompleteStatus(updateCompleteTodoStatus);
 	}
+
 	async function editTodoTile() {
 		if (currentTodo.title.trim().length > 0) {
 			let updateTodoTitle: EditTodoInput = {
@@ -37,6 +40,7 @@ function TodoItem(props: TodoItemProp) {
 	function clearEdit() {
 		setEditMode(false);
 	}
+
 	function resetTitle() {
 		setCurrentTodo({
 			...currentTodo,
@@ -61,8 +65,10 @@ function TodoItem(props: TodoItemProp) {
 		<Fragment>
 			{!editMode && (
 				<div
-					className={`flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded
-					${!lastItem ? `border-solid border-0 border-b border-zinc-500` : ``}`}
+					className={clsx(
+						['flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded'],
+						[!lastItem && 'border-solid border-0 border-b border-zinc-600']
+					)}
 				>
 					<Fragment>
 						<div className="flex items-center mb-2">
@@ -76,9 +82,10 @@ function TodoItem(props: TodoItemProp) {
 							</form>
 							<div
 								onClick={enableEditMode}
-								className={`cursor-pointer ml-3 text-sm font-medium text-gray-300 ${
-									currentTodo.completed ? `line-through` : ``
-								}`}
+								className={clsx(
+									['cursor-pointer ml-3 text-sm font-medium text-gray-300'],
+									[currentTodo.completed && 'line-through']
+								)}
 							>
 								<span className={'break-all'}>{currentTodo.title}</span>
 							</div>
@@ -114,12 +121,12 @@ function TodoItem(props: TodoItemProp) {
 									title: e.target.value,
 								});
 							}}
-							className={`
-							${editMode ? `mb-1` : ``} 
-							${currentTodo.completed ? `line-through` : ``}
-								border-solid border-0 border-b border-pink-400
-								py-3 pl-5 pr-10 w-72 bg-gray-900 text-white focus:outline-none 
-								`}
+							className={clsx(
+								[currentTodo.completed && 'line-through', editMode && 'mb-1'],
+								[
+									'border-solid border-0 border-b border-pink-400 py-3 pl-5 pr-10 w-72 bg-gray-900 text-white focus:outline-none',
+								]
+							)}
 						/>
 
 						<div
