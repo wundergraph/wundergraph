@@ -1,7 +1,7 @@
-import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
-import server from './wundergraph.server';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import operations from './wundergraph.operations';
+import server from './wundergraph.server';
 
 const db = introspect.postgresql({
 	apiNamespace: 'db',

@@ -1,5 +1,3 @@
-import React from 'react';
-
 function NavBar() {
 	return (
 		<nav className="px-2 py-2.5 sm:px-4 bg-gray-900 border-solid border-0 border-b border-zinc-700">

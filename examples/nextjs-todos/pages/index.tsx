@@ -1,10 +1,10 @@
-import { NextPage } from 'next';
-import { withWunderGraph, useQuery, useMutation } from '../components/generated/nextjs';
-import React, { Fragment, useRef, useState } from 'react';
-import TodoItem from '../components/TodoItem';
-import NavBar from '../components/Navbar';
-import { useSWRConfig } from 'swr';
 import { Reorder } from 'framer-motion';
+import { NextPage } from 'next';
+import React, { Fragment, useRef, useState } from 'react';
+import { useSWRConfig } from 'swr';
+import { useMutation, useQuery, withWunderGraph } from '../components/generated/nextjs';
+import NavBar from '../components/Navbar';
+import TodoItem from '../components/TodoItem';
 
 import {
 	DeleteTodoInput,

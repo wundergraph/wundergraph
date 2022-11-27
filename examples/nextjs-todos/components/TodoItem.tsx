@@ -1,7 +1,7 @@
-import React, { Fragment, useEffect, useState } from 'react';
-import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
-import { TodoItemProp } from '../interfaces';
 import clsx from 'clsx';
+import React, { Fragment, useEffect, useState } from 'react';
+import { TodoItemProp } from '../interfaces';
+import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
 
 function TodoItem(props: TodoItemProp) {
 	const { todo, lastItem, deleteTodo, updateTitle, updateCompleteStatus } = props;
