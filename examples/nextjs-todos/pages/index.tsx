@@ -3,15 +3,17 @@ import { withWunderGraph, useQuery, useMutation } from '../components/generated/
 import React, { Fragment, useRef, useState } from 'react';
 import TodoItem from '../components/TodoItem';
 import NavBar from '../components/Navbar';
-import { mutate } from 'swr';
+import { useSWRConfig } from 'swr';
 import { Reorder } from 'framer-motion';
 import { db_IntFieldUpdateOperationsInput } from '../components/generated/models';
+
 interface TodoOrder {
 	id: number;
 	order: db_IntFieldUpdateOperationsInput;
 }
 
 const Home: NextPage = () => {
+	const { mutate } = useSWRConfig();
 	const createTodo = useMutation({ operationName: 'CreateTodo' });
 	const updateTodoOrder = useMutation({ operationName: 'UpdateTodoOrder' });
 
@@ -20,7 +22,7 @@ const Home: NextPage = () => {
 	const [currentTodos, setCurrentTodos] = useState<any>([]);
 	const [prevTodos, setPrevTodos] = useState<any>([]);
 
-	useQuery({
+	const allTodos = useQuery({
 		operationName: 'Todos',
 		onSuccess: (data) => {
 			setCurrentTodos(data.db_findManyTodo);
@@ -28,9 +30,41 @@ const Home: NextPage = () => {
 		},
 	});
 
+	function handleReorder(newOrder) {
+		let newItems = [];
+		let itemsMap = new Map();
+
+		for (let i = 0; i < allTodos.data.db_findManyTodo.length; i++) {
+			let item = allTodos.data.db_findManyTodo[i];
+			itemsMap.set(item.order, item);
+		}
+
+		for (let i = 0; i < newOrder.length; i++) {
+			newItems.push(itemsMap.get(newOrder[i]));
+		}
+
+		let optimisticData = { db_findManyTodo: newItems };
+		mutate(
+			{ operationName: 'Todos' },
+			async () => {
+				return { db_findManyTodo: newItems };
+			},
+			{ optimisticData: optimisticData, revalidate: false, rollbackOnError: true }
+		);
+	}
+
 	async function addTodo() {
 		if (title.trim().length > 0) {
-			await mutate(
+			let newItem = {
+				id: 99999,
+				title: title,
+				completed: false,
+				order: 99999,
+			};
+			let optimisticTodos = [...allTodos.data.db_findManyTodo];
+			optimisticTodos.unshift(newItem);
+			let optimisticData = { db_findManyTodo: optimisticTodos };
+			mutate(
 				{ operationName: 'Todos' },
 				async (todos) => {
 					if (todos) {
@@ -38,19 +72,15 @@ const Home: NextPage = () => {
 						let newTodos = JSON.parse(JSON.stringify(todos));
 						let savedTodo = await createTodo.trigger({ title: title });
 						if (savedTodo.db_createOneTodo) {
-							let saveItem = {
-								id: savedTodo.db_createOneTodo.id,
-								title: title,
-								completed: false,
-								order: savedTodo.db_createOneTodo.id,
-							};
-							newTodos.db_findManyTodo.push(saveItem);
+							newItem.id = savedTodo.db_createOneTodo.id;
+							newItem.order = savedTodo.db_createOneTodo.id;
+							newTodos.db_findManyTodo.unshift(newItem);
 						}
 						clearAdd();
 						return newTodos;
 					}
 				},
-				{ revalidate: true, rollbackOnError: true }
+				{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
 			);
 		}
 	}
@@ -68,24 +98,14 @@ const Home: NextPage = () => {
 		titleRef.current.blur();
 	}
 
-	function handleReorder(newOrder) {
-		let newItems = [];
-		let itemsMap = new Map();
-
-		for (let i = 0; i < currentTodos.length; i++) {
-			let item = currentTodos[i];
-			itemsMap.set(item.order, item);
-		}
-		for (let i = 0; i < newOrder.length; i++) {
-			newItems.push(itemsMap.get(newOrder[i]));
-		}
-		setCurrentTodos([...newItems]);
-	}
 	async function updateDragAndDropOrder() {
 		let newOrder: TodoOrder[] = [];
-		for (let i = 0; i < currentTodos.length; i++) {
-			let item = currentTodos[i];
+		let newOrderMap = new Map();
+
+		for (let i = 0; i < allTodos.data.db_findManyTodo.length; i++) {
+			let item = allTodos.data.db_findManyTodo[i];
 			let order = { id: item.id, order: { set: prevTodos[i].order } };
+			newOrderMap.set(item.id, order.id);
 			newOrder.push(order);
 		}
 		await Promise.all(newOrder.map((item: TodoOrder) => updateTodoOrder.trigger(item)));
@@ -136,13 +156,19 @@ const Home: NextPage = () => {
 					</div>
 					<div className={'mt-2'}>
 						<div className={'absolute mt-1 -ml-1'}>
-							<Reorder.Group axis="y" values={currentTodos.map((c) => c.order)} onReorder={handleReorder}>
-								{currentTodos.map((todo, index: number) => (
-									<Reorder.Item onDragEnd={updateDragAndDropOrder} key={todo.order} value={todo.order}>
-										<TodoItem todo={todo} lastItem={index === currentTodos.length - 1} />
-									</Reorder.Item>
-								))}
-							</Reorder.Group>
+							{allTodos?.data?.db_findManyTodo && (
+								<Reorder.Group
+									axis="y"
+									values={allTodos.data.db_findManyTodo.map((c) => c.order)}
+									onReorder={handleReorder}
+								>
+									{allTodos?.data.db_findManyTodo.map((todo, index: number) => (
+										<Reorder.Item onDragEnd={updateDragAndDropOrder} key={todo.order} value={todo.order}>
+											<TodoItem allTodos={allTodos} todo={todo} lastItem={index === currentTodos.length - 1} />
+										</Reorder.Item>
+									))}
+								</Reorder.Group>
+							)}
 						</div>
 					</div>
 				</div>

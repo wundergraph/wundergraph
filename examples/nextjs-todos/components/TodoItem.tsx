@@ -3,7 +3,7 @@ import { useMutation } from './generated/nextjs';
 import { DeleteTodoInput, EditTodoInput, EditTodoResponseData, UpdateCompleteTodoInput } from './generated/models';
 import { mutate } from 'swr';
 
-function TodoItem({ todo, lastItem }) {
+function TodoItem({ allTodos, todo, lastItem }) {
 	const [currentTodo, setCurrentTodo] = useState(todo);
 	useEffect(() => {
 		setCurrentTodo(todo);
@@ -50,6 +50,17 @@ function TodoItem({ todo, lastItem }) {
 		updateTodoTitle: EditTodoInput,
 		updateCompleteTodoStatus: UpdateCompleteTodoInput
 	) {
+		let optimisticTodos = [...allTodos.data.db_findManyTodo];
+		let id = updateTodoTitle ? updateTodoTitle.id : updateCompleteTodoStatus.id;
+		let index = optimisticTodos.findIndex((todo) => todo.id === id);
+		let todoToUpdate = { ...optimisticTodos[index] };
+		if (updateTodoTitle) {
+			todoToUpdate.title = updateTodoTitle.title.set;
+		} else {
+			todoToUpdate.completed = updateCompleteTodoStatus.complete.set;
+		}
+		optimisticTodos[index] = { ...todoToUpdate };
+		let optimisticData = { db_findManyTodo: optimisticTodos };
 		await mutate(
 			{ operationName: 'Todos' },
 			async (allTodos) => {
@@ -77,12 +88,15 @@ function TodoItem({ todo, lastItem }) {
 				}
 				return modifyTodos;
 			},
-			{ revalidate: true, rollbackOnError: true }
+			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
 		);
 	}
 
 	async function deleteTodo(id: number) {
 		const deleteTodoArg: DeleteTodoInput = { id: id };
+		let optimisticTodos = [...allTodos.data.db_findManyTodo];
+		optimisticTodos = optimisticTodos.filter((todo) => todo.id !== id);
+		let optimisticData = { db_findManyTodo: optimisticTodos };
 		await mutate(
 			{ operationName: 'Todos' },
 			async (todos) => {
@@ -96,7 +110,7 @@ function TodoItem({ todo, lastItem }) {
 				}
 				return filteredTodos;
 			},
-			{ revalidate: true, rollbackOnError: true }
+			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
 		);
 	}
 

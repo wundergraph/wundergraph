@@ -1,5 +1,5 @@
 query Todos {
-	db_findManyTodo(orderBy: { order: asc }) {
+	db_findManyTodo(orderBy: { order: desc }) {
 		id
 		title
 		completed
