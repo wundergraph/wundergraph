@@ -81,7 +81,7 @@ function TodoItem(props: TodoItemProp) {
 								onChange={updateCompletedStatus}
 								type="checkbox"
 								checked={currentTodo.completed}
-								className={'mt-0.2 h-4 w-4 rounded-full accent-pink-500'}
+								className={'h-4 w-4 rounded-full accent-pink-500'}
 							/>
 							<div
 								onClick={enableEditMode}
