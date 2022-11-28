@@ -71,7 +71,7 @@ function TodoItem(props: TodoItemProp) {
 			{!editMode && (
 				<div
 					className={clsx(
-						['flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded'],
+						['flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md'],
 						[!lastItem && 'border-solid border-0 border-b border-zinc-600']
 					)}
 				>

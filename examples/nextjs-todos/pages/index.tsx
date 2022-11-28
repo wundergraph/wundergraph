@@ -6,7 +6,9 @@ import { useMutation, useQuery, withWunderGraph } from '../components/generated/
 import TodoItem from '../components/TodoItem';
 
 import {
+	CreateTodoResponseData,
 	DeleteTodoInput,
+	DeleteTodoResponseData,
 	EditTodoInput,
 	EditTodoResponseData,
 	UpdateCompleteTodoInput,
@@ -33,22 +35,76 @@ const Home: NextPage = () => {
 	const [prevTodos, setPrevTodos] = useState<any>([]);
 
 	// todo operations
-	async function updateCompleteStatus(updateCompleteTodoStatus: UpdateCompleteTodoInput) {
-		let optimisticTodos = [...allTodos.data.db_findManyTodo];
-		let id = updateCompleteTodoStatus.id;
-		let index = optimisticTodos.findIndex((t) => t.id === id);
-		let todoToUpdate = { ...optimisticTodos[index] };
-		todoToUpdate.completed = updateCompleteTodoStatus.complete.set;
+	async function addTodo() {
+		if (title.trim().length > 0) {
+			// random id: generate random number between 95000 and 13200000
+			let id: number = Math.floor(Math.random() * (13200000 - 95000 + 1) + 95000);
+			let newItem = {
+				id: id,
+				title: title,
+				completed: false,
+				order: id,
+			};
+			let newTodos = [...allTodos.data.db_findManyTodo];
+			newTodos.unshift(newItem);
+			let newTodosData = { db_findManyTodo: newTodos };
+			mutate(
+				{ operationName: 'Todos' },
+				async (todos) => {
+					if (todos) {
+						//make deep copy of todos
+						let newTodos = JSON.parse(JSON.stringify(todos));
+						let savedTodo: CreateTodoResponseData = await createTodo.trigger({ title: title });
+						if (savedTodo.db_createOneTodo) {
+							newItem.id = savedTodo.db_createOneTodo.id;
+							newItem.order = savedTodo.db_createOneTodo.id;
+							newTodos.db_findManyTodo.unshift(newItem);
+						}
+						clearAdd();
+						return newTodos;
+					}
+				},
+				{ optimisticData: newTodosData, revalidate: true, rollbackOnError: true }
+			);
+		}
+	}
 
-		optimisticTodos[index] = { ...todoToUpdate };
-		let optimisticData = { db_findManyTodo: optimisticTodos };
+	async function deleteTodo(id: number) {
+		const deleteTodoArg: DeleteTodoInput = { id: id };
+		let filteredTodos = [...allTodos.data.db_findManyTodo];
+		filteredTodos = filteredTodos.filter((t) => t.id !== id);
+		let remainingTodos = { db_findManyTodo: filteredTodos };
+		await mutate(
+			{ operationName: 'Todos' },
+			async (todos) => {
+				//make deep copy of todos
+				let filteredTodos = JSON.parse(JSON.stringify(todos));
+				const deletedTodo: DeleteTodoResponseData = await deleteTodoOperation.trigger(deleteTodoArg);
+				if (deletedTodo.db_deleteOneTodo) {
+					filteredTodos.db_findManyTodo = filteredTodos.db_findManyTodo.filter(
+						(todo) => todo.id !== deletedTodo.db_deleteOneTodo.id
+					);
+				}
+				return filteredTodos;
+			},
+			{ optimisticData: remainingTodos, revalidate: true, rollbackOnError: true }
+		);
+	}
+
+	async function updateCompleteStatus(updateCompleteTodoStatus: UpdateCompleteTodoInput) {
+		let currentTodos = [...allTodos.data.db_findManyTodo];
+		let id = updateCompleteTodoStatus.id;
+		let indexToBeUpdate = currentTodos.findIndex((t) => t.id === id);
+		let todoToBeUpdate = { ...currentTodos[indexToBeUpdate] };
+		todoToBeUpdate.completed = updateCompleteTodoStatus.complete.set;
+		currentTodos[indexToBeUpdate] = { ...todoToBeUpdate };
+		let updatedTodoData = { db_findManyTodo: currentTodos };
 		await mutate(
 			{ operationName: 'Todos' },
 			async (todos) => {
 				//make deep copy of todos
 				let modifyTodos = JSON.parse(JSON.stringify(todos));
-				let updateResponse: EditTodoResponseData;
-				updateResponse = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
+				let updateResponse: EditTodoResponseData = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
 				if (updateResponse.db_updateOneTodo) {
 					modifyTodos.db_findManyTodo.map((currTodo) => {
 						if (currTodo.id === updateResponse.db_updateOneTodo.id) {
@@ -58,17 +114,18 @@ const Home: NextPage = () => {
 				}
 				return modifyTodos;
 			},
-			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
+			{ optimisticData: updatedTodoData, revalidate: true, rollbackOnError: true }
 		);
 	}
+
 	async function updateTitle(updateTodoTitle: EditTodoInput) {
-		let optimisticTodos = [...allTodos.data.db_findManyTodo];
+		let currentTodos = [...allTodos.data.db_findManyTodo];
 		let id = updateTodoTitle.id;
-		let index = optimisticTodos.findIndex((t) => t.id === id);
-		let todoToUpdate = { ...optimisticTodos[index] };
-		todoToUpdate.title = updateTodoTitle.title.set;
-		optimisticTodos[index] = { ...todoToUpdate };
-		let optimisticData = { db_findManyTodo: optimisticTodos };
+		let indexToBeUpdate = currentTodos.findIndex((t) => t.id === id);
+		let todoToBeUpdate = { ...currentTodos[indexToBeUpdate] };
+		todoToBeUpdate.title = updateTodoTitle.title.set;
+		currentTodos[indexToBeUpdate] = { ...todoToBeUpdate };
+		let updatedTodoData = { db_findManyTodo: currentTodos };
 		await mutate(
 			{ operationName: 'Todos' },
 			async (todos) => {
@@ -84,63 +141,10 @@ const Home: NextPage = () => {
 				}
 				return modifyTodos;
 			},
-			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
-		);
-	}
-	async function addTodo() {
-		if (title.trim().length > 0) {
-			let newItem = {
-				id: 9999999,
-				title: title,
-				completed: false,
-				order: 9999999,
-			};
-			let optimisticTodos = [...allTodos.data.db_findManyTodo];
-			optimisticTodos.unshift(newItem);
-			let optimisticData = { db_findManyTodo: optimisticTodos };
-			mutate(
-				{ operationName: 'Todos' },
-				async (todos) => {
-					if (todos) {
-						//make deep copy of todos
-						let newTodos = JSON.parse(JSON.stringify(todos));
-						let savedTodo = await createTodo.trigger({ title: title });
-						if (savedTodo.db_createOneTodo) {
-							newItem.id = savedTodo.db_createOneTodo.id;
-							newItem.order = savedTodo.db_createOneTodo.id;
-							newTodos.db_findManyTodo.unshift(newItem);
-						}
-						clearAdd();
-						return newTodos;
-					}
-				},
-				{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
-			);
-		}
-	}
-	async function deleteTodo(id: number) {
-		const deleteTodoArg: DeleteTodoInput = { id: id };
-		let optimisticTodos = [...allTodos.data.db_findManyTodo];
-		optimisticTodos = optimisticTodos.filter((t) => t.id !== id);
-		let optimisticData = { db_findManyTodo: optimisticTodos };
-		await mutate(
-			{ operationName: 'Todos' },
-			async (todos) => {
-				//make deep copy of todos
-				let filteredTodos = JSON.parse(JSON.stringify(todos));
-				const deletedTodo = await deleteTodoOperation.trigger(deleteTodoArg);
-				if (deletedTodo.db_deleteOneTodo) {
-					filteredTodos.db_findManyTodo = filteredTodos.db_findManyTodo.filter(
-						(todo) => todo.id !== deletedTodo.db_deleteOneTodo.id
-					);
-				}
-				return filteredTodos;
-			},
-			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
+			{ optimisticData: updatedTodoData, revalidate: true, rollbackOnError: true }
 		);
 	}
 
-	//reorder todos
 	function handleReorder(newOrder: number[]) {
 		let newItems = [];
 		let itemsMap = new Map();
@@ -154,15 +158,16 @@ const Home: NextPage = () => {
 			newItems.push(itemsMap.get(newOrder[i]));
 		}
 
-		let optimisticData = { db_findManyTodo: newItems };
+		let updatedReorder = { db_findManyTodo: newItems };
 		mutate(
 			{ operationName: 'Todos' },
 			async () => {
 				return { db_findManyTodo: newItems };
 			},
-			{ optimisticData: optimisticData, revalidate: false, rollbackOnError: true }
+			{ optimisticData: updatedReorder, revalidate: false, rollbackOnError: true }
 		);
 	}
+
 	async function updateDragAndDropOrder() {
 		let newOrder: TodoOrder[] = [];
 		let newOrderMap = new Map();
@@ -262,5 +267,4 @@ const Home: NextPage = () => {
 		</Fragment>
 	);
 };
-
 export default withWunderGraph(Home);
