@@ -3,7 +3,7 @@ import { NextPage } from 'next';
 import React, { Fragment, useRef, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { useMutation, useQuery, withWunderGraph } from '../components/generated/nextjs';
-import TodoItem from '../components/TodoItem';
+import TodoItem from "../components/TodoItem";
 
 import {
 	CreateTodoResponseData,
@@ -11,7 +11,7 @@ import {
 	DeleteTodoResponseData,
 	EditTodoInput,
 	EditTodoResponseData,
-	UpdateCompleteTodoInput,
+	UpdateCompleteTodoInput
 } from '../components/generated/models';
 import { TodoOrder } from '../interfaces';
 
