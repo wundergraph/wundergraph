@@ -3,7 +3,6 @@ import { NextPage } from 'next';
 import React, { Fragment, useRef, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { useMutation, useQuery, withWunderGraph } from '../components/generated/nextjs';
-import NavBar from '../components/Navbar';
 import TodoItem from '../components/TodoItem';
 
 import {
@@ -193,15 +192,14 @@ const Home: NextPage = () => {
 
 	return (
 		<Fragment>
-			<NavBar />
-			<div className={'flex flex-col items-center h-[200vh] w-full bg-gray-900'}>
+			<div className={'flex flex-col items-center w-full'}>
 				<div className={'mt-[10%]'}>
 					<div className={'mb-5 w-72'}>
 						<div className={'flex items-center flex-end'}>
 							<a href="https://wundergraph.com" target="_blank">
-								<img src="/wundergraph.svg" className="h-16" alt="WunderGraph logo" />
+								<img src="/wundergraph.svg" className="h-12" alt="WunderGraph logo" />
 							</a>
-							<span className="ml-4 text-2xl bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+							<span className="mt-2 ml-2 text-2xl bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
 								{' '}
 								WunderGraph{' '}
 							</span>
@@ -218,17 +216,20 @@ const Home: NextPage = () => {
 								setTitle(e.target.value);
 							}}
 							className={
-								'mb-2 bg-gray-600 py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75'
+								'bg-gray-600 py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75'
 							}
 						/>
-						<div onClick={addTodo} className={'absolute right-3 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}>
+						<div
+							onClick={addTodo}
+							className={'absolute right-1.5 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}
+						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
 								strokeWidth={1.5}
 								stroke="white"
-								className="w-7 h-6"
+								className="w-6 h-6"
 							>
 								<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 							</svg>
@@ -243,7 +244,7 @@ const Home: NextPage = () => {
 									onReorder={handleReorder}
 								>
 									{allTodos?.data.db_findManyTodo.map((todo, index: number) => (
-										<Reorder.Item onDragEnd={updateDragAndDropOrder} key={todo.order} value={todo.order}>
+										<Reorder.Item onDragEnd={updateDragAndDropOrder} key={todo.id} value={todo.order}>
 											<TodoItem
 												todo={todo}
 												deleteTodo={deleteTodo}

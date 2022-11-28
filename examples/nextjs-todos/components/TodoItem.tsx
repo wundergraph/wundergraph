@@ -1,15 +1,20 @@
 import clsx from 'clsx';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { TodoItemProp } from '../interfaces';
 import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
 
 function TodoItem(props: TodoItemProp) {
 	const { todo, lastItem, deleteTodo, updateTitle, updateCompleteStatus } = props;
 
-	const [currentTodo, setCurrentTodo] = useState(todo);
-	useEffect(() => {
-		setCurrentTodo(todo);
+	const initialCurrentTodo = useMemo(() => {
+		return todo;
 	}, [todo]);
+
+	const [currentTodo, setCurrentTodo] = useState(initialCurrentTodo);
+
+	useEffect(() => {
+		setCurrentTodo(initialCurrentTodo);
+	}, [initialCurrentTodo]);
 
 	const [editMode, setEditMode] = useState<boolean>(false);
 
@@ -66,18 +71,18 @@ function TodoItem(props: TodoItemProp) {
 			{!editMode && (
 				<div
 					className={clsx(
-						['flex justify-between pt-4 pb-2 m-2 px-2 hover:px-3 w-72 hover:bg-zinc-600 hover:rounded'],
+						['flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded'],
 						[!lastItem && 'border-solid border-0 border-b border-zinc-600']
 					)}
 				>
 					<Fragment>
-						<div className="flex items-center mb-2">
+						<div className="flex items-center mb-1 mt-1">
 							<form>
 								<input
 									onChange={updateCompletedStatus}
 									type="checkbox"
 									checked={currentTodo.completed}
-									className={'mt-1 h-4 w-4 rounded-full accent-pink-500'}
+									className={'mt-1.5 h-4 w-4 rounded-full accent-pink-500'}
 								/>
 							</form>
 							<div
@@ -92,7 +97,7 @@ function TodoItem(props: TodoItemProp) {
 						</div>
 						<div
 							onClick={() => deleteTodo(currentTodo.id)}
-							className={'flex flex-col justify-start ml-2 cursor-pointer'}
+							className={'flex flex-col justify-start ml-5 mt-1.5 cursor-pointer'}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -124,14 +129,14 @@ function TodoItem(props: TodoItemProp) {
 							className={clsx(
 								[currentTodo.completed && 'line-through', editMode && 'mb-1'],
 								[
-									'border-solid border-0 border-b border-pink-400 py-3 pl-5 pr-10 w-72 bg-gray-900 text-white focus:outline-none',
+									`py-3 pl-5 ml-2 border-solid border-0 border-b border-pink-400 w-72 bg-gray-900 text-white focus:outline-none`,
 								]
 							)}
 						/>
 
 						<div
 							onClick={editTodoTile}
-							className={'absolute right-6 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}
+							className={'absolute right-4 top-4 cursor-pointer hover:bg-zinc-500 hover:rounded'}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -139,7 +144,7 @@ function TodoItem(props: TodoItemProp) {
 								viewBox="0 0 24 24"
 								strokeWidth={1.5}
 								stroke="white"
-								className="w-6 h-6"
+								className="w-5 h-5"
 							>
 								<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
 							</svg>
