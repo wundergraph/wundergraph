@@ -2,7 +2,7 @@ import {
 	db_IntFieldUpdateOperationsInput,
 	EditTodoInput,
 	UpdateCompleteTodoInput,
-} from './components/generated/models';
+} from "./components/generated/models";
 
 export interface TodoOrder {
 	id: number;

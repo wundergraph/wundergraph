@@ -1,9 +1,9 @@
-import { Reorder } from 'framer-motion';
-import { NextPage } from 'next';
-import React, { Fragment, useRef, useState } from 'react';
-import { useSWRConfig } from 'swr';
-import { useMutation, useQuery, withWunderGraph } from '../components/generated/nextjs';
-import TodoItem from '../components/TodoItem';
+import { Reorder } from "framer-motion";
+import { NextPage } from "next";
+import React, { Fragment, useRef, useState } from "react";
+import { useSWRConfig } from "swr";
+import { useMutation, useQuery, withWunderGraph } from "../components/generated/nextjs";
+import TodoItem from "../components/TodoItem";
 
 import {
 	CreateTodoResponseData,
@@ -12,25 +12,25 @@ import {
 	EditTodoInput,
 	EditTodoResponseData,
 	UpdateCompleteTodoInput,
-} from '../components/generated/models';
-import { TodoOrder } from '../interfaces';
+} from "../components/generated/models";
+import { TodoOrder } from "../interfaces";
 
 const Home: NextPage = () => {
 	const { mutate } = useSWRConfig();
 	const allTodos = useQuery({
-		operationName: 'Todos',
+		operationName: "Todos",
 		onSuccess: (data) => {
 			setPrevTodos(data.db_findManyTodo);
 		},
 	});
-	const updateCompleteTodo = useMutation({ operationName: 'UpdateCompleteTodo' });
-	const updateTodo = useMutation({ operationName: 'EditTodo' });
-	const updateTodoOrder = useMutation({ operationName: 'UpdateTodoOrder' });
+	const updateCompleteTodo = useMutation({ operationName: "UpdateCompleteTodo" });
+	const updateTodo = useMutation({ operationName: "EditTodo" });
+	const updateTodoOrder = useMutation({ operationName: "UpdateTodoOrder" });
 
-	const createTodo = useMutation({ operationName: 'CreateTodo' });
-	const deleteTodoOperation = useMutation({ operationName: 'DeleteTodo' });
+	const createTodo = useMutation({ operationName: "CreateTodo" });
+	const deleteTodoOperation = useMutation({ operationName: "DeleteTodo" });
 
-	const [title, setTitle] = useState<string>('');
+	const [title, setTitle] = useState<string>("");
 	const titleRef = useRef<HTMLInputElement>();
 	const [prevTodos, setPrevTodos] = useState<any>([]);
 
@@ -49,7 +49,7 @@ const Home: NextPage = () => {
 			newTodos.unshift(newItem);
 			let newTodosData = { db_findManyTodo: newTodos };
 			mutate(
-				{ operationName: 'Todos' },
+				{ operationName: "Todos" },
 				async (todos) => {
 					if (todos) {
 						//make deep copy of todos
@@ -75,7 +75,7 @@ const Home: NextPage = () => {
 		filteredTodos = filteredTodos.filter((t) => t.id !== id);
 		let remainingTodos = { db_findManyTodo: filteredTodos };
 		await mutate(
-			{ operationName: 'Todos' },
+			{ operationName: "Todos" },
 			async (todos) => {
 				//make deep copy of todos
 				let filteredTodos = JSON.parse(JSON.stringify(todos));
@@ -100,7 +100,7 @@ const Home: NextPage = () => {
 		currentTodos[indexToBeUpdate] = { ...todoToBeUpdate };
 		let updatedTodoData = { db_findManyTodo: currentTodos };
 		await mutate(
-			{ operationName: 'Todos' },
+			{ operationName: "Todos" },
 			async (todos) => {
 				//make deep copy of todos
 				let modifyTodos = JSON.parse(JSON.stringify(todos));
@@ -127,7 +127,7 @@ const Home: NextPage = () => {
 		currentTodos[indexToBeUpdate] = { ...todoToBeUpdate };
 		let updatedTodoData = { db_findManyTodo: currentTodos };
 		await mutate(
-			{ operationName: 'Todos' },
+			{ operationName: "Todos" },
 			async (todos) => {
 				//make deep copy of todos
 				let modifyTodos = JSON.parse(JSON.stringify(todos));
@@ -160,7 +160,7 @@ const Home: NextPage = () => {
 
 		let updatedReorder = { db_findManyTodo: newItems };
 		mutate(
-			{ operationName: 'Todos' },
+			{ operationName: "Todos" },
 			async () => {
 				return { db_findManyTodo: newItems };
 			},
@@ -182,37 +182,37 @@ const Home: NextPage = () => {
 	}
 
 	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			clearAdd();
-		} else if (event.key === 'Enter') {
+		} else if (event.key === "Enter") {
 			await addTodo();
 		}
 	}
 
 	function clearAdd() {
-		setTitle('');
+		setTitle("");
 		titleRef.current.blur();
 	}
 
 	return (
 		<Fragment>
-			<div className={'flex flex-col items-center w-full'}>
-				<div className={'mt-[10%]'}>
-					<div className={'mb-5 w-72'}>
-						<div className={'flex items-center flex-end'}>
+			<div className={"flex flex-col items-center w-full"}>
+				<div className={"mt-[10%]"}>
+					<div className={"mb-5 w-72"}>
+						<div className={"flex items-center flex-end"}>
 							<a href="https://wundergraph.com" target="_blank">
 								<img src="/wundergraph.svg" className="h-12" alt="WunderGraph logo" />
 							</a>
 							<span className="mt-2 ml-2 text-2xl bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-								{' '}
-								WunderGraph{' '}
+								{" "}
+								WunderGraph{" "}
 							</span>
 						</div>
 					</div>
-					<div className={'relative'}>
+					<div className={"relative"}>
 						<input
 							ref={titleRef}
-							placeholder={'Add todo'}
+							placeholder={"Add todo"}
 							type="text"
 							onKeyDown={titleKeyHandler}
 							value={title}
@@ -220,12 +220,12 @@ const Home: NextPage = () => {
 								setTitle(e.target.value);
 							}}
 							className={
-								'bg-gray-600 py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75'
+								"bg-gray-600 py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75"
 							}
 						/>
 						<div
 							onClick={addTodo}
-							className={'absolute right-1.5 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded'}
+							className={"absolute right-1.5 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded"}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -239,8 +239,8 @@ const Home: NextPage = () => {
 							</svg>
 						</div>
 					</div>
-					<div className={'mt-2'}>
-						<div className={'absolute mt-1 -ml-1'}>
+					<div className={"mt-2"}>
+						<div className={"absolute mt-1 -ml-1"}>
 							{allTodos?.data?.db_findManyTodo && (
 								<Reorder.Group
 									axis="y"
