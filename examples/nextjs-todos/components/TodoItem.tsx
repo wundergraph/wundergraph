@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { TodoItemProp } from '../interfaces';
 import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
 

@@ -44,9 +44,9 @@ const Home: NextPage = () => {
 		let optimisticData = { db_findManyTodo: optimisticTodos };
 		await mutate(
 			{ operationName: 'Todos' },
-			async (allTodos) => {
+			async (todos) => {
 				//make deep copy of todos
-				let modifyTodos = JSON.parse(JSON.stringify(allTodos));
+				let modifyTodos = JSON.parse(JSON.stringify(todos));
 				let updateResponse: EditTodoResponseData;
 				updateResponse = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
 				if (updateResponse.db_updateOneTodo) {
@@ -71,9 +71,9 @@ const Home: NextPage = () => {
 		let optimisticData = { db_findManyTodo: optimisticTodos };
 		await mutate(
 			{ operationName: 'Todos' },
-			async (allTodos) => {
+			async (todos) => {
 				//make deep copy of todos
-				let modifyTodos = JSON.parse(JSON.stringify(allTodos));
+				let modifyTodos = JSON.parse(JSON.stringify(todos));
 				let updateResponse: EditTodoResponseData = await updateTodo.trigger(updateTodoTitle);
 				if (updateResponse.db_updateOneTodo) {
 					modifyTodos.db_findManyTodo.map((currTodo) => {
@@ -87,14 +87,13 @@ const Home: NextPage = () => {
 			{ optimisticData: optimisticData, revalidate: true, rollbackOnError: true }
 		);
 	}
-
 	async function addTodo() {
 		if (title.trim().length > 0) {
 			let newItem = {
-				id: 99999,
+				id: 9999999,
 				title: title,
 				completed: false,
-				order: 99999,
+				order: 9999999,
 			};
 			let optimisticTodos = [...allTodos.data.db_findManyTodo];
 			optimisticTodos.unshift(newItem);
