@@ -1,4 +1,4 @@
-import Document, { Head, Html, Main, NextScript } from "next/document";
+import Document, { Head, Html, Main, NextScript } from 'next/document';
 
 export default class CustomDocument extends Document {
 	render() {
@@ -10,7 +10,7 @@ export default class CustomDocument extends Document {
 					<script src="https://cdn.tailwindcss.com"></script>
 					<title>Todo app</title>
 				</Head>
-				<body className={"bg-gray-900"}>
+				<body className={'bg-gray-900'}>
 					<Main />
 					<NextScript />
 				</body>
