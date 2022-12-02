@@ -160,12 +160,8 @@ func (l *Loader) loadOperation(file GqlFile, normalizer *astnormalization.Operat
 		return "", fmt.Errorf("error parsing operation: %s", report.Error())
 	}
 	ops := l.countOperations(&doc, schemaDocument)
-	if ops > 1 {
-		return "", fmt.Errorf("graphql document must contain at most one operation: %s", file.FilePath)
-	}
-
-	if ops == 0 {
-		return "", infoError(fmt.Sprintf("%s is empty, skipping", file))
+	if ops != 1 {
+		return "", fmt.Errorf("graphql document must contain exactly one operation: %s", file.FilePath)
 	}
 
 	normalizer.NormalizeOperation(&doc, schemaDocument, &report)
