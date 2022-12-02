@@ -13,7 +13,7 @@ const weatherApi = introspect.graphql({
 	// if the user of your API will use namespacing themselves, they'll have a double namespace, e.g.: weather_weather_api
 	// For that reason, only apply a namespace when you publish multiple APIs combined and a namespace is required to avoid collisions
 	// If this is the case, you should consider publishing both APIs separately under a different name
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 	/*headers: builder => builder
         // add a static Header to all upstream Requests
         .addStaticHeader("AuthToken", "staticToken")
