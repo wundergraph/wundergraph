@@ -1,10 +1,13 @@
-# WunderGraph Postgres Starter
+# WunderGraph Todo App
 
-This example demonstrates how to use WunderGraph with Next.js & Postgres. We are going to make your database accessible through JSON-RPC to your Next.js app.
+The Todo App demonstrates how to use WunderGraph with Next.js & Postgres with SWR.
 
-This example also make use of Subscriptions & Live Queries.
-Subscriptions and Live Queries are a fundamental feature to build modern, reactive applications.
-WunderGraph supports GraphQL Subscriptions and Live Queries (via server-side polling) out of the box, no additional configuration is required.
+Key features of the App are
+
+- Create, read, update, delete todos
+  - Mark Todos as complete
+- Optimistic updates
+- Drag and drop support with database
 
 ## Getting Started
 
@@ -15,10 +18,7 @@ npm install && npm start
 ```
 
 After a while, a new browser tab will open,
-and you can start exploring the application.
 If no tab is open, navigate to [http://localhost:3000](http://localhost:3000).
-
-You should now see a greeting from one of our Founders. =)
 
 Running WunderGraph will automatically introspect the database and generate an API for you.
 You can add more Operations (e.g. Queries or Mutations) by adding more "\*.graphql" files to the directory `./wundergraph/operations`.
@@ -31,7 +31,7 @@ e.g. `npm run migrate "add pets"`.
 
 ## Seeding the Database
 
-Once you've defined one or more Mutations in `./wundergraph/operations` (see CreateUser.graphql as an example),
+Once you've defined one or more Mutations in `./wundergraph/operations` (see CreateTodo.graphql as an example),
 you're able to use the generated TypeScript client to seed the Database.
 
 Modify `./seed/seed.ts` and run `npm run seed`.
