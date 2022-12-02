@@ -204,8 +204,7 @@ const Home: NextPage = () => {
 								<img src="/wundergraph.svg" className="h-12" alt="WunderGraph logo" />
 							</a>
 							<span className="mt-2 ml-2 text-2xl bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-								{" "}
-								WunderGraph{" "}
+								WunderGraph
 							</span>
 						</div>
 					</div>
