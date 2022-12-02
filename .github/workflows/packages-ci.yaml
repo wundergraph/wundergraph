@@ -7,7 +7,7 @@ on:
     paths:
       - 'packages/**/*'
       - '.github/actions/go/action.yaml'
-      - '.github/actions/go/node.yaml'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
@@ -20,7 +20,7 @@ on:
     paths:
       - 'packages/**/*'
       - '.github/actions/go/action.yaml'
-      - '.github/actions/go/node.yaml'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
