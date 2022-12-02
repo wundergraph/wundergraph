@@ -1,25 +1,25 @@
-import { Reorder } from 'framer-motion';
-import { NextPage } from 'next';
-import React, { Fragment, useRef, useState } from 'react';
-import { useSWRConfig } from 'swr';
-import { useMutation, useQuery, withWunderGraph } from '../components/generated/nextjs';
-import TodoItem from '../components/TodoItem';
+import { Reorder } from "framer-motion";
+import { NextPage } from "next";
+import React, { Fragment, useRef, useState } from "react";
+import { useSWRConfig } from "swr";
+import { useMutation, useQuery, withWunderGraph } from "../components/generated/nextjs";
+import TodoItem from "../components/TodoItem";
 
-import { TodoOrder } from '../interfaces';
-import useAddMutation from '../hooks/useAddTodoMutation';
+import { TodoOrder } from "../interfaces";
+import useAddMutation from "../hooks/useAddTodoMutation";
 
 const Home: NextPage = () => {
 	const { mutate } = useSWRConfig();
 	const createTodo = useAddMutation();
 	const allTodos = useQuery({
-		operationName: 'Todos',
+		operationName: "Todos",
 		onSuccess: (data) => {
 			setPrevTodos(data.db_findManyTodo);
 		},
 	});
-	const updateTodoOrder = useMutation({ operationName: 'UpdateTodoOrder' });
+	const updateTodoOrder = useMutation({ operationName: "UpdateTodoOrder" });
 
-	const [title, setTitle] = useState<string>('');
+	const [title, setTitle] = useState<string>("");
 	const titleRef = useRef<HTMLInputElement>();
 	const [prevTodos, setPrevTodos] = useState<any>([]);
 
@@ -44,7 +44,7 @@ const Home: NextPage = () => {
 
 		let updatedReorder = { db_findManyTodo: newItems };
 		mutate(
-			{ operationName: 'Todos' },
+			{ operationName: "Todos" },
 			async () => {
 				return { db_findManyTodo: newItems };
 			},
@@ -64,15 +64,15 @@ const Home: NextPage = () => {
 		await Promise.all(newOrder.map((item: TodoOrder) => updateTodoOrder.trigger(item)));
 	}
 	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			clearAdd();
-		} else if (event.key === 'Enter') {
+		} else if (event.key === "Enter") {
 			await addTodo();
 		}
 	}
 
 	function clearAdd() {
-		setTitle('');
+		setTitle("");
 		titleRef.current.blur();
 	}
 

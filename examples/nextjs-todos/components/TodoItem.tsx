@@ -1,10 +1,10 @@
-import clsx from 'clsx';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import { TodoItemProp } from '../interfaces';
-import { EditTodoInput, UpdateCompleteTodoInput } from './generated/models';
-import useUpdateTitleMutation from '../hooks/useUpdateTitleMutation';
-import useUpdateCompleteStatusMutation from '../hooks/useUpdateCompleteStatusMutation';
-import useDeleteTodoMutation from '../hooks/useDeleteTodoMutation';
+import clsx from "clsx";
+import React, { Fragment, useState } from "react";
+import { TodoItemProp } from "../interfaces";
+import { EditTodoInput, UpdateCompleteTodoInput } from "./generated/models";
+import useUpdateTitleMutation from "../hooks/useUpdateTitleMutation";
+import useUpdateCompleteStatusMutation from "../hooks/useUpdateCompleteStatusMutation";
+import useDeleteTodoMutation from "../hooks/useDeleteTodoMutation";
 
 function TodoItem(props: TodoItemProp) {
 	const { todo, allTodos, lastItem } = props;
@@ -52,10 +52,10 @@ function TodoItem(props: TodoItemProp) {
 	}
 
 	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			clearEdit();
 			resetTitle();
-		} else if (event.key === 'Enter') {
+		} else if (event.key === "Enter") {
 			await editTodoTile();
 		}
 	}
@@ -69,8 +69,8 @@ function TodoItem(props: TodoItemProp) {
 			{!editMode && (
 				<div
 					className={clsx(
-						['flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md'],
-						[!lastItem && 'border-solid border-0 border-b border-zinc-600']
+						["flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md"],
+						[!lastItem && "border-solid border-0 border-b border-zinc-600"]
 					)}
 				>
 					<Fragment>
@@ -84,8 +84,8 @@ function TodoItem(props: TodoItemProp) {
 							<div
 								onClick={enableEditMode}
 								className={clsx(
-									['cursor-pointer ml-3 text-sm font-medium text-gray-300'],
-									[completed && 'line-through']
+									["cursor-pointer ml-3 text-sm font-medium text-gray-300"],
+									[completed && "line-through"]
 								)}
 							>
 								<span className="break-all">{title}</span>
@@ -115,9 +115,9 @@ function TodoItem(props: TodoItemProp) {
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							className={clsx(
-								[completed && 'line-through', editMode && 'mb-1'],
+								[completed && "line-through", editMode && "mb-1"],
 								[
-									'py-3 pl-5 ml-2 border-solid border-0 border-b border-pink-400 w-72 bg-gray-900 text-white focus:outline-none',
+									"py-3 pl-5 ml-2 border-solid border-0 border-b border-pink-400 w-72 bg-gray-900 text-white focus:outline-none",
 								]
 							)}
 						/>
