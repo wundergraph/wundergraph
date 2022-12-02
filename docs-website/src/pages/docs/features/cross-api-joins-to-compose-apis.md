@@ -17,7 +17,7 @@ one to query the capitals and the other to query the weather data.
 // wundergraph.config.ts
 const weather = introspect.graphql({
   apiNamespace: 'weather',
-  url: 'https://graphql-weather-api.herokuapp.com/',
+  url: 'https://weather-api.wundergraph.com/',
 })
 
 const countries = introspect.graphql({
