@@ -11,55 +11,45 @@ function TodoItem(props: TodoItemProp) {
     const editTodoTitle = useUpdateTitleMutation();
     const updateCompleteTodo = useUpdateCompleteStatusMutation();
     const deleteTodo = useDeleteTodoMutation();
-
-    const initialCurrentTodo = useMemo(() => {
-        return todo;
-    }, [todo]);
-    const [currentTodo, setCurrentTodo] = useState(initialCurrentTodo);
-    useEffect(() => {
-        setCurrentTodo(initialCurrentTodo);
-    }, [initialCurrentTodo]);
-
+    const [title, setTitle] = useState<string>(todo.title);
+    const [completed, setCompleted] = useState<boolean>(todo.completed);
     const [editMode, setEditMode] = useState<boolean>(false);
 
     async function updateCompletedStatus(e: React.ChangeEvent<HTMLInputElement>) {
         let newCheckedStatus: boolean = e.target.checked;
         let updateCompleteTodoStatus: UpdateCompleteTodoInput = {
-            id: currentTodo.id,
+            id: todo.id,
             complete: {
                 set: newCheckedStatus
             }
         };
+        setCompleted(newCheckedStatus);
         await updateCompleteTodo({updateCompleteTodoStatus, allTodos});
-    }
 
-    async function deleteTodoItem(id: number) {
+    }
+    async function deleteTodoItem() {
+        let id: number = todo.id;
         await deleteTodo({id, allTodos});
     }
-
     async function editTodoTile() {
-        if (currentTodo.title.trim().length > 0) {
+        if (title.trim().length > 0) {
             let updateTodoTitle: EditTodoInput = {
-                id: currentTodo.id,
+                id: todo.id,
                 title: {
-                    set: currentTodo.title
+                    set: title
                 }
             };
-            await editTodoTitle({allTodos, updateTodoTitle});
             clearEdit();
+            await editTodoTitle({allTodos, updateTodoTitle});
         }
     }
-
 
     function clearEdit() {
         setEditMode(false);
     }
 
     function resetTitle() {
-        setCurrentTodo({
-            ...currentTodo,
-            title: todo.title
-        });
+        setTitle(todo.title);
     }
 
     async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -89,21 +79,21 @@ function TodoItem(props: TodoItemProp) {
                             <input
                                 onChange={updateCompletedStatus}
                                 type="checkbox"
-                                checked={currentTodo.completed}
+                                checked={completed}
                                 className={"h-4 w-4 rounded-full accent-pink-500"}
                             />
                             <div
                                 onClick={enableEditMode}
                                 className={clsx(
                                     ["cursor-pointer ml-3 text-sm font-medium text-gray-300"],
-                                    [currentTodo.completed && "line-through"]
+                                    [completed && "line-through"]
                                 )}
                             >
-                                <span className={"break-all"}>{currentTodo.title}</span>
+                                <span className={"break-all"}>{title}</span>
                             </div>
                         </div>
                         <div
-                            onClick={() => deleteTodoItem(currentTodo.id)}
+                            onClick={deleteTodoItem}
                             className={"flex flex-col justify-start ml-5 cursor-pointer"}
                         >
                             <svg
@@ -126,21 +116,15 @@ function TodoItem(props: TodoItemProp) {
                         <input
                             type="text"
                             onKeyDown={titleKeyHandler}
-                            value={currentTodo.title}
-                            onChange={(e) => {
-                                setCurrentTodo({
-                                    ...currentTodo,
-                                    title: e.target.value
-                                });
-                            }}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                             className={clsx(
-                                [currentTodo.completed && "line-through", editMode && "mb-1"],
+                                [completed && "line-through", editMode && "mb-1"],
                                 [
                                     "py-3 pl-5 ml-2 border-solid border-0 border-b border-pink-400 w-72 bg-gray-900 text-white focus:outline-none"
                                 ]
                             )}
                         />
-
                         <div
                             onClick={editTodoTile}
                             className={"absolute right-4 top-4 cursor-pointer hover:bg-zinc-500 hover:rounded"}
