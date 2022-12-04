@@ -1,0 +1,5 @@
+mutation ($startOrder: Int, $endOrder: Int){
+    db_updateManyTodo(where: {order: {lte: $startOrder, gt: $endOrder}}, data: {order: {decrement: 1}}) {
+        count
+    }
+}

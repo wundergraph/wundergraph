@@ -2,17 +2,17 @@ import {DeleteTodoInput, DeleteTodoResponseData} from "../components/generated/m
 import {useMutation} from "../components/generated/nextjs";
 import {mutate} from "swr";
 
-function useDeleteTodoMutation () {
-    const deleteTodo = useMutation({ operationName: "DeleteTodo" });
+function useDeleteTodoMutation() {
+    const deleteTodo = useMutation({operationName: "DeleteTodo"});
     return function ({id, allTodos}) {
         return new Promise(async (resolve) => {
-            const deleteTodoArg: DeleteTodoInput = { id: id };
+            const deleteTodoArg: DeleteTodoInput = {id: id};
             let filteredTodos = [...allTodos.data.db_findManyTodo];
             filteredTodos = filteredTodos.filter((t) => t.id !== id);
-            let remainingTodos = { db_findManyTodo: filteredTodos };
+            let remainingTodos = {db_findManyTodo: filteredTodos};
             let deletedTodo: DeleteTodoResponseData;
             await mutate(
-                { operationName: "Todos" },
+                {operationName: "Todos"},
                 async (todos) => {
                     //make deep copy of todos
                     let filteredTodos = JSON.parse(JSON.stringify(todos));
@@ -24,11 +24,11 @@ function useDeleteTodoMutation () {
                     }
                     return filteredTodos;
                 },
-                { optimisticData: remainingTodos, revalidate: true, rollbackOnError: true }
+                {optimisticData: remainingTodos, revalidate: true, rollbackOnError: true}
             );
-            resolve(deletedTodo)
-        })
-    }
+            resolve(deletedTodo);
+        });
+    };
 }
-export default useDeleteTodoMutation
 
+export default useDeleteTodoMutation;

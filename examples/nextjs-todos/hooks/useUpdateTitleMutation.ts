@@ -2,8 +2,8 @@ import {EditTodoResponseData} from "../components/generated/models";
 import {mutate} from "swr";
 import {useMutation} from "../components/generated/nextjs";
 
-function useUpdateTitleMutation () {
-    const updateTodo = useMutation({ operationName: "EditTodo" });
+function useUpdateTitleMutation() {
+    const updateTodo = useMutation({operationName: "EditTodo"});
     return function ({updateTodoTitle, allTodos}) {
         return new Promise(async (resolve) => {
             let currentTodos = [...allTodos.data.db_findManyTodo];
@@ -29,10 +29,11 @@ function useUpdateTitleMutation () {
                     }
                     return modifyTodos;
                 },
-                {optimisticData: updatedTodoData, revalidate: true, rollbackOnError: true}
+                {optimisticData: updatedTodoData, revalidate: true}
             );
-            resolve(updateResponse)
-        })
-    }
+            resolve(updateResponse);
+        });
+    };
 }
-export default useUpdateTitleMutation
+
+export default useUpdateTitleMutation;

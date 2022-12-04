@@ -1,5 +1,5 @@
-mutation ($title: String!) {
-	db_createOneTodo(data: { title: $title, completed: false }) {
+mutation ($title: String!, $order: Int!) {
+	db_createOneTodo(data: { title: $title, order: $order, completed: false }) {
 		id
 	}
 }
