@@ -14,7 +14,6 @@ const Home: NextPage = () => {
     const allTodos = useQuery({
         operationName: "Todos",
         onSuccess: (data) => {
-            console.log("data", data.db_findManyTodo);
             setOldTodos(data.db_findManyTodo);
         }
     });
