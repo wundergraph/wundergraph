@@ -1,5 +1,5 @@
-mutation ($startOrder: Int, $endOrder: Int){
-    db_updateManyTodo(where: {order: {gte: $startOrder, lt: $endOrder}}, data: {order: {increment: 1}}) {
+mutation ($newOrder: Int, $oldOrder: Int){
+    db_updateManyTodo(where: {order: {gte: $newOrder, lt: $oldOrder}}, data: {order: {increment: 1}}) {
         count
     }
 }

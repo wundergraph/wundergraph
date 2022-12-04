@@ -14,6 +14,7 @@ const Home: NextPage = () => {
     const allTodos = useQuery({
         operationName: "Todos",
         onSuccess: (data) => {
+            console.log(data);
             setOldTodos(data.db_findManyTodo);
         }
     });
@@ -23,7 +24,6 @@ const Home: NextPage = () => {
     const [oldTodos, setOldTodos] = useState([]);
     const [title, setTitle] = useState<string>("");
     const titleRef = useRef<HTMLInputElement>();
-
 
     /*
     * Only a single pair of adjacent items are swapped at any given reorder
@@ -48,6 +48,10 @@ const Home: NextPage = () => {
         );
     }
 
+    /*
+    * item: the item being dragged
+    * index: the index of the item after the drag
+    * */
     async function reorderItems(item: any, index: number) {
         let newOrder: number = oldTodos[index].order;
         let oldOrder = item.order;

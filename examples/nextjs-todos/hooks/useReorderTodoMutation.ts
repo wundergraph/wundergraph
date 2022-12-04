@@ -19,8 +19,8 @@ function useReorderTodoMutation() {
                 }
             };
             let reorderTodosInput: ReorderTodosDragDownInput | ReorderTodosDragUpInput = {
-                startOrder: newOrder,
-                endOrder: oldOrder
+                newOrder: newOrder,
+                oldOrder: oldOrder
             };
             let todosReorder: ReorderTodosDragUpResponseData | ReorderTodosDragDownResponseData;
 
