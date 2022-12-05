@@ -196,6 +196,10 @@ const navigation = [
 				href: '/docs/examples/nextjs',
 			},
 			{
+				title: 'NextJS + React Query',
+				href: '/docs/examples/nextjs-react-query',
+			},
+			{
 				title: 'Vite + SWR',
 				href: '/docs/examples/vite-swr',
 			},
@@ -455,7 +459,7 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks',
 			},
 			{
-				title: 'React-JS',
+				title: 'React',
 				href: '/docs/supported-frontend-frameworks/react-js',
 			},
 			{
@@ -463,7 +467,7 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks/react-native',
 			},
 			{
-				title: 'NextJS',
+				title: 'Next.js',
 				href: '/docs/supported-frontend-frameworks/nextjs',
 			},
 			{
@@ -926,6 +930,27 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-manifest-json-reference',
+			},
+		],
+	},
+	{
+		title: 'Clients reference',
+		links: [
+			{
+				title: 'TypeScript Client',
+				href: '/docs/clients-reference/typescript-client',
+			},
+			{
+				title: 'SWR',
+				href: '/docs/clients-reference/swr',
+			},
+			{
+				title: 'React Query',
+				href: '/docs/clients-reference/react-query',
+			},
+			{
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
 			},
 		],
 	},

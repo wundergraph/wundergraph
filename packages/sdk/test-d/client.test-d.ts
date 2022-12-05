@@ -1,11 +1,5 @@
 import { expectType } from 'tsd';
-import {
-	Client,
-	ClientResponse,
-	OperationRequestOptions,
-	SubscriptionRequestOptions,
-	User,
-} from '@wundergraph/sdk/client';
+import { Client, ClientResponse, OperationRequestOptions, SubscriptionRequestOptions, User } from '../src/client';
 
 const client = new Client({
 	baseURL: 'https://api.com',

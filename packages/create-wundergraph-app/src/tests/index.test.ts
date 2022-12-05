@@ -1,7 +1,9 @@
 import fs, { promises as fsp } from 'fs';
 import path from 'path';
-import { getRepository } from '../helpers/getRepository';
 import { tmpdir } from 'os';
+
+import { getRepository } from '../helpers/getRepository';
+import { getRepoTags } from '../helpers/getRepoTags';
 
 jest.setTimeout(20000);
 test('The command should clone the repository using example name and github link and return "success"', async () => {
@@ -47,4 +49,12 @@ test('The command should clone the repository using example name and github link
 		await fsp.access(path.join(tempDirectory, secondRepoName));
 		fs.rmSync(path.join(tempDirectory, secondRepoName), { recursive: true, force: true });
 	} catch (e) {}
+});
+
+test('should return the tags for wundergraph/wundergraph', async () => {
+	const prefix = '@wundergraph/sdk';
+	const tags = await getRepoTags('https://github.com/wundergraph/wundergraph', prefix);
+	expect(tags.length).toBeGreaterThan(0);
+	expect(tags[0].startsWith(prefix)).toBeTruthy();
+	expect(tags[tags.length - 1].startsWith(prefix)).toBeTruthy();
 });

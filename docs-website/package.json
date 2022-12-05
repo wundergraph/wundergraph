@@ -12,7 +12,7 @@
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
     "@docsearch/react": "^3.1.1",
-    "@giscus/react": "^2.2.0",
+    "@giscus/react": "2.2.0",
     "@headlessui/react": "^1.6.5",
     "@heroicons/react": "^1.0.6",
     "@markdoc/markdoc": "^0.1.3",
