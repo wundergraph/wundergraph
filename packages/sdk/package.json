@@ -63,19 +63,21 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "tsd": {
-    "directory": "test-d"
+    "directory": "./test-d",
+    "compilerOptions": {
+      "typeRoots": []
+    }
   },
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "jest && tsd",
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.22",
-    "@types/colors": "^1.2.1",
     "@types/cors": "^2.8.10",
     "@types/debug": "^4.1.7",
     "@types/jest": "^28.1.1",
@@ -90,6 +92,7 @@
     "nock": "^13.2.9",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.1",
+    "tsd": "^0.24.1",
     "typescript": "^4.8.2"
   },
   "dependencies": {
@@ -102,7 +105,6 @@
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
-    "colors": "^1.4.0",
     "execa": "5.1.1",
     "fastify": "^4.9.2",
     "fastify-plugin": "^4.3.0",

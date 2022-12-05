@@ -415,7 +415,7 @@ test('Should collide because weather and countries API has an enum called Langua
 						UseSSE: false,
 					},
 					Fetch: {
-						url: mapInputVariable('https://graphql-weather-api.herokuapp.com'),
+						url: mapInputVariable('https://weather-api.wundergraph.com'),
 						baseUrl: mapInputVariable(''),
 						path: mapInputVariable(''),
 						method: HTTPMethod.POST,

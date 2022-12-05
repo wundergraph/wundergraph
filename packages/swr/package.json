@@ -6,8 +6,11 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "jest"
+    "build": "tsc -p tsconfig.build.json",
+    "test": "jest && tsd"
+  },
+  "tsd": {
+    "directory": "tests"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
@@ -43,7 +46,8 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "swr": "^2.0.0-rc.0",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.2",
+    "tsd": "^0.24.1"
   },
   "homepage": "https://wundergraph.com",
   "author": {

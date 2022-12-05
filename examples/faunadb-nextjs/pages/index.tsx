@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useQuery } from '../lib/wundergraph';
 
 const Home: NextPage = () => {
 	const stores = useQuery({
@@ -98,4 +98,4 @@ const Home: NextPage = () => {
 	);
 };
 
-export default withWunderGraph(Home);
+export default Home;
