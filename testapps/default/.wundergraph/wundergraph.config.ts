@@ -1,8 +1,8 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -17,6 +17,16 @@ const jsp = introspect.openApi({
 		filePath: '../json_placeholder.json',
 	},
 	baseURL: 'https://jsonplaceholder.typicode.{tld}',
+	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
+});
+
+const jsp2 = introspect.openApi({
+	apiNamespace: 'jsp2',
+	source: {
+		kind: 'file',
+		filePath: '../json_placeholder.json',
+	},
+	baseURL: new EnvironmentVariable('JSP_BASE_URL'),
 	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
@@ -50,7 +60,7 @@ const countries = introspect.graphql({
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 	introspection: {
 		pollingIntervalSeconds: 5,
 	},
@@ -66,14 +76,9 @@ const db = introspect.sqlite({
 	databaseURL: 'file:./db.sqlite',
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [jsp, weather, countries, spacex, chinook, db],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2],
 	server,
 	operations,
 	authorization: {

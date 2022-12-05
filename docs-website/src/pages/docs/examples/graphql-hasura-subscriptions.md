@@ -11,7 +11,7 @@ description:
 - Go to: https://hasura.io/learn/graphql/graphiql
 
 You will need to complete a simple signup form (just mail and password) to get access to the
-GraphiQL interface, and obtain token.
+GraphiQL interface, and obtain an access token.
 
 - Set the authorization header, using the token you obtained from the previous step,
   replace `Secret` with your token:
@@ -34,17 +34,17 @@ npm install && npm start
 ## Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Users
+curl -N http://localhost:9991/operations/Users
 ```
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Todo
+curl -N http://localhost:9991/operations/Todo
 ```
 
 ## SSE output
 
 ```shell
- curl -N http://localhost:9991/app/main/operations/Users\?wg_sse\=true
+ curl -N http://localhost:9991/operations/Users\?wg_sse\=true
 ```
 
 ## Playground

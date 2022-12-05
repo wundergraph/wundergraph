@@ -19,12 +19,12 @@ export interface ArgumentReplacement {
 	renameTypeTo: string;
 }
 
-export interface CleanupSchema {
-	schemaSDL: string;
+export interface CleanupSchemaResult {
+	upstreamSchema: string;
 	argumentReplacements: ArgumentReplacement[];
 }
 
-export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): CleanupSchema => {
+export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): CleanupSchemaResult => {
 	const customFloatScalars = introspection.customFloatScalars || [];
 	const customIntScalars = introspection.customIntScalars || [];
 
@@ -290,7 +290,7 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 	});
 
 	return {
-		schemaSDL: print(cleanAst),
+		upstreamSchema: print(cleanAst),
 		argumentReplacements,
 	};
 };

@@ -6,6 +6,7 @@ import {
 	Headers,
 	LogoutOptions,
 	OperationRequestOptions,
+	QueryRequestOptions,
 	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
@@ -35,8 +36,12 @@ export class Client {
 		return serialize(query);
 	}
 
+	public isAuthenticatedOperation(operationName: string) {
+		return !!this.options.operationMetadata?.[operationName]?.requiresAuthentication;
+	}
+
 	private operationUrl(operationName: string) {
-		return this.options.baseURL + '/' + this.options.applicationPath + '/operations/' + operationName;
+		return this.options.baseURL + '/operations/' + operationName;
 	}
 
 	private addUrlParams(url: string, queryParams: URLSearchParams): string {
@@ -136,15 +141,23 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async query<RequestOptions extends OperationRequestOptions, ResponseData = any>(
+	public async query<RequestOptions extends QueryRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
+		const params = {
+			wg_variables: this.stringifyInput(options.input),
+			wg_api_hash: this.options.applicationHash,
+		};
 		const url = this.addUrlParams(
 			this.operationUrl(options.operationName),
-			new URLSearchParams({
-				wg_variables: this.stringifyInput(options.input),
-				wg_api_hash: this.options.applicationHash,
-			})
+			new URLSearchParams(
+				options.subscribeOnce
+					? {
+							wg_subscribe_once: options.subscribeOnce ? 'true' : 'false',
+							...params,
+					  }
+					: params
+			)
 		);
 		const resp = await this.fetchJson(url, {
 			method: 'GET',
@@ -157,7 +170,7 @@ export class Client {
 	private async getCSRFToken(): Promise<string> {
 		// request a new CSRF token if we don't have one
 		if (!this.csrfToken) {
-			const res = await this.fetch(this.options.baseURL + '/' + this.options.applicationPath + '/auth/cookie/csrf', {
+			const res = await this.fetch(`${this.options.baseURL}/auth/cookie/csrf`, {
 				headers: {
 					...this.baseHeaders,
 					Accept: 'text/plain',
@@ -217,13 +230,10 @@ export class Client {
 			revalidate: options?.revalidate ? 'true' : 'false',
 		});
 
-		const response = await this.fetchJson(
-			this.addUrlParams(`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/user`, params),
-			{
-				method: 'GET',
-				signal: options?.abortSignal,
-			}
-		);
+		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/cookie/user`, params), {
+			method: 'GET',
+			signal: options?.abortSignal,
+		});
 		if (!response.ok) {
 			throw new ResponseError(`Response is not ok`, response.status);
 		}
@@ -231,10 +241,21 @@ export class Client {
 		return response.json();
 	}
 
+	/**
+	 * Set up subscriptions over SSE with fallback to web streams.
+	 * When called with subscribeOnce it will return the response directly
+	 * without setting up a subscription.
+	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
+	 */
 	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
 		options: RequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
+		if (options.subscribeOnce) {
+			const result = await this.query<RequestOptions, ResponseData>(options);
+			cb(result);
+			return result;
+		}
 		if ('EventSource' in globalThis) {
 			return this.subscribeWithSSE<ResponseData>(options, cb);
 		}
@@ -247,23 +268,30 @@ export class Client {
 		subscription: SubscriptionRequestOptions,
 		cb: SubscriptionEventHandler<ResponseData>
 	) {
-		const params = new URLSearchParams({
-			wg_subscribe_once: subscription.subscribeOnce ? 'true' : 'false',
-			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.liveQuery ? 'true' : 'false',
-			wg_sse: 'true',
+		return new Promise<void>((resolve, reject) => {
+			const params = new URLSearchParams({
+				wg_variables: this.stringifyInput(subscription.input),
+				wg_live: subscription?.liveQuery ? 'true' : 'false',
+				wg_sse: 'true',
+			});
+			const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
+			const eventSource = new EventSource(url, {
+				withCredentials: true,
+			});
+			eventSource.addEventListener('error', () => {
+				reject(new Error(`SSE connection error: ${subscription.operationName}`));
+			});
+			eventSource.addEventListener('open', () => {
+				resolve();
+			});
+			eventSource.addEventListener('message', (ev) => {
+				const jsonResp = JSON.parse(ev.data);
+				cb(this.convertGraphQLResponse(jsonResp));
+			});
+			if (subscription?.abortSignal) {
+				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
+			}
 		});
-		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
-		const eventSource = new EventSource(url, {
-			withCredentials: true,
-		});
-		eventSource.addEventListener('message', (ev) => {
-			const jsonResp = JSON.parse(ev.data);
-			cb(this.convertGraphQLResponse(jsonResp));
-		});
-		if (subscription?.abortSignal) {
-			subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
-		}
 	}
 
 	private async *subscribeWithFetch<ResponseData = any>(
@@ -322,7 +350,7 @@ export class Client {
 		});
 
 		const response = await this.fetch(
-			this.addUrlParams(`${this.options.baseURL}/${this.options.applicationPath}/s3/${config.provider}/upload`, params),
+			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
 				headers: {
 					// Dont set the content-type header, the browser will set it for us + boundary
@@ -360,10 +388,7 @@ export class Client {
 			redirect_uri: redirectURI || window.location.toString(),
 		});
 
-		const url = this.addUrlParams(
-			`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/authorize/${authProviderID}`,
-			params
-		);
+		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/authorize/${authProviderID}`, params);
 
 		window.location.assign(url);
 	}
@@ -373,10 +398,7 @@ export class Client {
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
 
-		const url = this.addUrlParams(
-			`${this.options.baseURL}/${this.options.applicationPath}/auth/cookie/user/logout`,
-			params
-		);
+		const url = this.addUrlParams(`${this.options.baseURL}/auth/cookie/user/logout`, params);
 
 		const response = await this.fetch(url, {
 			method: 'GET',

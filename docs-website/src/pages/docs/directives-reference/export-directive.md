@@ -23,7 +23,7 @@ To achieve this, we could use the following two APIs:
 // wundergraph.config.ts
 const weather = introspect.graphql({
   apiNamespace: 'weather',
-  url: 'https://graphql-weather-api.herokuapp.com/',
+  url: 'https://weather-api.wundergraph.com/',
 })
 
 const countries = introspect.graphql({

@@ -17,7 +17,7 @@
   "scripts": {
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run nextDev\" \"npm run wundergraph\" \"npm run browser\"",
-    "wundergraph": "wunderctl up --debug",
+    "wundergraph": "wunderctl up",
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:3003\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3003",
     "build": "pnpm generate && next build && pnpm check",
@@ -26,13 +26,16 @@
     "start": "next start --port 3003"
   },
   "dependencies": {
+    "@graphql-yoga/node": "^2.13.13",
+    "@tanstack/react-query": "^4.16.1",
     "@wundergraph/nextjs": "workspace:*",
+    "@wundergraph/react-query": "workspace:^0.1.0",
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/swr": "workspace:*",
     "next": "^12.1.6",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "swr": "^1.3.0"
+    "swr": "^2.0.0-rc.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.27",

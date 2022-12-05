@@ -1,19 +1,21 @@
-import { Client } from '../.wundergraph/generated/wundergraph.client';
+import { createClient } from '../components/generated/client';
 import fetch from 'node-fetch';
 
 const seed = async () => {
-	const client = new Client({
-		customFetch: (input, init) => fetch(input, init),
+	const client = createClient({
+		customFetch: fetch as any,
 	});
-	const user = await client.query.UserByEmail({
+	const user = await client.query({
+		operationName: 'UserByEmail',
 		input: {
 			email: 'jens@wundergraph.com',
 		},
 	});
-	if (user.status === 'ok' && user.body.data.db_findFirstUser) {
+	if (user?.data?.db_findFirstUser) {
 		return;
 	}
-	const out = await client.mutation.CreateUser({
+	const out = await client.mutate({
+		operationName: 'CreateUser',
 		input: {
 			name: 'Jens',
 			bio: 'Founder@WunderGraph',

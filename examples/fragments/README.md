@@ -15,7 +15,7 @@ npm install && npm start
 This example uses Operation-local fragments. (operations/LocalFragment.graphql)
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/LocalFragment
+curl http://localhost:9991/operations/LocalFragment
 ```
 
 #### Global Fragments (Dragons)
@@ -23,7 +23,7 @@ curl -X GET http://localhost:9991/app/main/operations/LocalFragment
 This example uses global fragments. (operations/GlobalFragment.graphql)
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/GlobalFragment
+curl http://localhost:9991/operations/GlobalFragment
 ```
 
 ## Learn More

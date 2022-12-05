@@ -21,7 +21,7 @@ env:
 
 jobs:
   stable-version:
-    timeout-minutes: 10
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.type == 'stable' }}
     steps:

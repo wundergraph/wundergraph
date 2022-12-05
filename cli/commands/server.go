@@ -8,8 +8,8 @@ import (
 	"path"
 	"syscall"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -34,7 +34,7 @@ var serverStartCmd = &cobra.Command{
 		err := startWunderGraphServer(ctx)
 		if err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph server process shutdown: %w", abstractlogger.Error(err))
+			log.Fatal("WunderGraph server process shutdown: %w", zap.Error(err))
 		}
 
 		// exit code 0 to indicate success

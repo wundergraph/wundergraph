@@ -3,6 +3,9 @@ import { useTheme } from 'next-themes'
 
 const Comments = () => {
 	const { theme, systemTheme } = useTheme()
+	// we don't want to render Comments during development
+	// because Giscus doesn't work in development (iframe issues)
+	if (process.env.NODE_ENV === 'development') return null
 	return (
 		<div className="my-8">
 			<Giscus

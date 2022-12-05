@@ -12,16 +12,16 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2"
 )
 
 type OpenIDConnectCookieHandler struct {
-	log    abstractlogger.Logger
+	log    *zap.Logger
 	claims ClaimsInfo
 }
 
-func NewOpenIDConnectCookieHandler(log abstractlogger.Logger) *OpenIDConnectCookieHandler {
+func NewOpenIDConnectCookieHandler(log *zap.Logger) *OpenIDConnectCookieHandler {
 	return &OpenIDConnectCookieHandler{
 		log: log,
 	}
@@ -38,7 +38,6 @@ type OpenIDConnectConfig struct {
 	ClientSecret       string
 	QueryParameters    []QueryParameter
 	ProviderID         string
-	PathPrefix         string
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
@@ -67,8 +66,8 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 	if !h.isValidIssuer(config.Issuer) {
 		h.log.Error("oidc.Register failed, invalid issuer, must be valid URL",
-			abstractlogger.String("providerID", config.ProviderID),
-			abstractlogger.String("issuer", config.Issuer),
+			zap.String("providerID", config.ProviderID),
+			zap.String("issuer", config.Issuer),
 		)
 		return
 	}
@@ -80,7 +79,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 	err := provider.Claims(&h.claims)
 	if err != nil {
-		h.log.Error("oidc.provider.ClaimsInfo", abstractlogger.Error(err))
+		h.log.Error("oidc.provider.ClaimsInfo", zap.Error(err))
 		return
 	}
 
@@ -114,7 +113,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		cookiePath := fmt.Sprintf("/%s/auth/cookie/callback/%s", config.PathPrefix, config.ProviderID)
+		cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
 		cookieDomain := sanitizeDomain(r.Host)
 
 		c := &http.Cookie{
@@ -175,7 +174,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 		state, err := r.Cookie("state")
 		if err != nil {
 			h.log.Error("GithubCookieHandler state missing",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -183,7 +182,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 		if r.URL.Query().Get("state") != state.Value {
 			h.log.Error("GithubCookieHandler state mismatch",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -192,7 +191,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 		redirectURI, err := r.Cookie("redirect_uri")
 		if err != nil {
 			h.log.Error("GithubCookieHandler redirect uri missing",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -209,7 +208,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 		oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
 		if err != nil {
 			h.log.Error("GithubCookieHandler.exchange.token",
-				abstractlogger.Error(err),
+				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -227,7 +226,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 		userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
 		if err != nil {
-			h.log.Error("oidc.provider.UserInfo", abstractlogger.Error(err))
+			h.log.Error("oidc.provider.UserInfo", zap.Error(err))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -235,7 +234,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 		var claims Claims
 		err = userInfo.Claims(&claims)
 		if err != nil {
-			h.log.Error("oidc.userInfo.Claims", abstractlogger.Error(err))
+			h.log.Error("oidc.userInfo.Claims", zap.Error(err))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -267,7 +266,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
 			if err != nil {
 				h.log.Error("OpenIDConnectCookieHandler.user.Save",
-					abstractlogger.Error(err),
+					zap.Error(err),
 				)
 				return
 			}
@@ -284,7 +283,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 			return
 		}
 
-		redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, config.PathPrefix, "/auth/cookie/user"))
+		redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, "/auth/cookie/user"))
 
 		http.Redirect(w, r, redirect, http.StatusFound)
 	})
@@ -307,8 +306,8 @@ func (h *OpenIDConnectCookieHandler) createProvider(ctx context.Context, config 
 		provider, err = oidc.NewProvider(ctx, config.Issuer)
 		if err != nil {
 			h.log.Error("oidc.createProvider failed, issuer name mismatch, auth provider not configured",
-				abstractlogger.Error(originalErr),
-				abstractlogger.Error(err),
+				zap.Error(originalErr),
+				zap.Error(err),
 			)
 		}
 	}

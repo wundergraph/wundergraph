@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 )
 
-func IntrospectPrismaDatabase(introspectionSchema, wundergraphDir string, log abstractlogger.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
+func IntrospectPrismaDatabase(introspectionSchema, wundergraphDir string, log *zap.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
 	engine := NewEngine(
 		&http.Client{
 			Timeout: time.Second * 10,

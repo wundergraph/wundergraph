@@ -1,11 +1,5 @@
-import useSWR from 'swr';
+export { createHooks, userSWRKey } from './hooks';
 
-export { createHooks } from './hooks';
-
-export type { UseMutationOptions, UseSubscriptionOptions, MutateOptions, UseQueryOptions } from './hooks';
+export * from './types';
 
 export { SWRConfig, useSWRConfig } from 'swr';
-
-export type { SWRConfiguration } from 'swr';
-
-export { useSWR };

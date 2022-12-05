@@ -9,17 +9,17 @@ npm install && npm start
 #### Get Dragons
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Dragons
+curl -X GET http://localhost:9991/operations/Dragons
 ```
 
 #### Get Missions
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Missions
+curl -X GET http://localhost:9991/operations/Missions
 ```
 
 #### Call your custom GraphQL server
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Hello
+curl -X GET http://localhost:9991/operations/Hello
 ```

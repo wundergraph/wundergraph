@@ -10,7 +10,7 @@ on:
       - 'go.mod'
       - 'go.sum'
       - '.github/actions/go/action.yaml'
-      - '.github/actions/go/node.yaml'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
@@ -24,7 +24,7 @@ on:
       - 'go.mod'
       - 'go.sum'
       - '.github/actions/go/action.yaml'
-      - '.github/actions/go/node.yaml'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
@@ -40,6 +40,7 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       minio:
         image: minio/minio:edge-cicd

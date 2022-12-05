@@ -24,6 +24,7 @@ GraphQLApi {
         },
       ],
       "Custom": {
+        "CustomScalarTypeFields": [],
         "Federation": {
           "Enabled": false,
           "ServiceSDL": "",

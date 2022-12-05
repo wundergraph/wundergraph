@@ -78,7 +78,8 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
-        }
+        },
+        "CustomScalarTypeFields": []
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0
@@ -157,7 +158,8 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
-        }
+        },
+        "CustomScalarTypeFields": []
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0
@@ -254,7 +256,8 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
-        }
+        },
+        "CustomScalarTypeFields": []
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0
@@ -331,7 +334,8 @@ exports[`Should be merged: merged_apis 1`] = `
         "UpstreamSchema": "",
         "HooksConfiguration": {
           "onWSTransportConnectionInit": false
-        }
+        },
+        "CustomScalarTypeFields": []
       },
       "Directives": [],
       "RequestTimeoutSeconds": 0

@@ -1,56 +1,27 @@
-import useSWR, { mutate, SWRConfiguration, SWRResponse, MutatorOptions } from 'swr';
-import {
-	OperationRequestOptions,
-	SubscriptionRequestOptions,
-	FetchUserRequestOptions,
-	GraphQLResponseError,
-	ClientResponse,
-	OperationsDefinition,
-	UploadRequestOptions,
-	LogoutOptions,
-	Client,
-} from '@wundergraph/sdk/client';
+import useSWR, { SWRConfiguration, useSWRConfig } from 'swr';
+import useSWRMutation from 'swr/mutation';
+
+import { GraphQLResponseError, OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
-import { useEffect, useState } from 'react';
-import { Error } from '@wundergraph/sdk';
-
-export type UseQueryOptions<OperationName, Input, LiveQuery> = SWRConfiguration & {
-	operationName: OperationName;
-	liveQuery?: LiveQuery;
-	enabled?: boolean;
-	input?: Input;
-};
-
-export type UseSubscriptionOptions<OperationName, Input> = SWRConfiguration & {
-	operationName: OperationName;
-	subscribeOnce?: boolean;
-	enabled?: boolean;
-	input?: Input;
-};
-
-export type UseMutationOptions<OperationName> = SWRConfiguration & {
-	operationName: OperationName;
-};
-
-export type MutateOptions<Input, Data> = MutatorOptions<Data> & { input?: Input };
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+	QueryFetcher,
+	MutationFetcher,
+	SubscribeToOptions,
+	UseSubscribeToProps,
+	UseQueryHook,
+	UseUserOptions,
+	UseMutationHook,
+	UseSubscriptionHook,
+	UseUploadHook,
+	UseUserHook,
+} from './types';
 
 export const userSWRKey = 'wg_user';
 
 export const createHooks = <Operations extends OperationsDefinition>(client: Client) => {
-	const queryFetcher = async <
-		OperationName extends Extract<keyof Operations['queries'], string>,
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
-		RequestOptions extends OperationRequestOptions<
-			Extract<keyof Operations['queries'], string>,
-			Operations['queries'][OperationName]['input']
-		> = OperationRequestOptions<
-			Extract<keyof Operations['queries'], string>,
-			Operations['queries'][OperationName]['input']
-		>
-	>(
-		query: RequestOptions
-	) => {
-		const result = await client.query<RequestOptions, Data>(query);
+	const queryFetcher: QueryFetcher<Operations> = async (query) => {
+		const result = await client.query(query);
 
 		if (result.error) {
 			throw result.error;
@@ -59,20 +30,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		return result.data;
 	};
 
-	const mutationFetcher = async <
-		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
-		RequestOptions extends OperationRequestOptions<
-			Extract<keyof Operations['mutations'], string>,
-			Operations['mutations'][OperationName]['input']
-		> = OperationRequestOptions<
-			Extract<keyof Operations['mutations'], string>,
-			Operations['mutations'][OperationName]['input']
-		>
-	>(
-		mutation: RequestOptions
-	) => {
-		const result = await client.mutate<RequestOptions, Data>(mutation);
+	const mutationFetcher: MutationFetcher<Operations> = async (mutation) => {
+		const result = await client.mutate(mutation);
 
 		if (result.error) {
 			throw result.error;
@@ -81,71 +40,120 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		return result.data;
 	};
 
-	const useQuery = <
-		OperationName extends Extract<keyof Operations['queries'], string>,
-		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
-		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
-	>(
-		options: UseQueryOptions<OperationName, Input, LiveQuery>
-	) => {
+	/**
+	 * Execute a WunderGraph query.
+	 *
+	 * @usage
+	 * ```ts
+	 * const { data, error, isValidating } = useQuery({
+	 *   operationName: 'Weather',
+	 * })
+	 * ```
+	 *
+	 * All queries support liveQuery by default, enabling this will set up a realtime subscription.
+	 * ```ts
+	 * const { data, error, isLoading, isSubscribed } = useQuery({
+	 *   operationName: 'Weather',
+	 *   liveQuery: true,
+	 * })
+	 * ```
+	 */
+	const useQuery: UseQueryHook<Operations> = (options) => {
 		const { operationName, liveQuery, enabled = true, input, ...swrConfig } = options;
-		const key = { operationName, input };
+		const { onSuccess: onSuccessProp, onError: onErrorProp } = swrConfig;
+		const key = liveQuery ? { operationName, input, liveQuery } : { operationName, input };
 		const _key = serialize(key);
-		const response = useSWR<Data | undefined, GraphQLResponseError>(
-			enabled ? key : null,
-			!liveQuery ? queryFetcher : null,
-			swrConfig
+
+		const response = useSWR(enabled ? key : null, !liveQuery ? queryFetcher : null, swrConfig);
+
+		const onSuccess = useCallback(
+			(response: any) => {
+				onSuccessProp?.(response, _key, swrConfig as any);
+			},
+			[onSuccessProp, _key]
 		);
 
-		useEffect(() => {
-			let unsubscribe: () => void;
-			if (liveQuery && enabled) {
-				unsubscribe = subscribeTo({ operationName, input, liveQuery });
-			}
-			return () => {
-				unsubscribe?.();
+		const onError = useCallback(
+			(err: GraphQLResponseError) => {
+				onErrorProp?.(err, _key, swrConfig as any);
+			},
+			[onErrorProp, _key]
+		);
+
+		const subscription = useSubscribeTo({
+			mutationKey: _key,
+			operationName,
+			input,
+			liveQuery,
+			enabled: enabled && liveQuery,
+			onSuccess,
+			onError,
+		});
+
+		if (liveQuery) {
+			return {
+				...response,
+				...subscription,
 			};
-		}, [liveQuery, enabled, _key]);
+		}
 
 		return response;
 	};
 
-	const useMutation = <
-		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
-	>(
-		options: UseMutationOptions<OperationName>
-	) => {
+	/**
+	 * Execute a WunderGraph mutation.
+	 *
+	 * @usage
+	 * ```ts
+	 * const { trigger, data, error, isLoading } = useMutation({
+	 *   operationName: 'SetName'
+	 * })
+	 *
+	 * trigger({
+	 *   name: 'John Doe'
+	 * })
+	 * ```
+	 */
+	const useMutation: UseMutationHook<Operations> = (options) => {
 		const { operationName, ...config } = options;
-		const response = useSWR<Data, GraphQLResponseError>(operationName, null, config);
 
-		return {
-			...response,
-			async mutate(options?: MutateOptions<Input, Data>): Promise<Data | undefined> {
-				return response.mutate(() => {
-					return mutationFetcher({ operationName, input: options?.input });
-				}, options);
-			},
-		};
+		return useSWRMutation(
+			operationName,
+			((key: string, { arg: input }: { arg?: object }) => {
+				return mutationFetcher({
+					operationName,
+					input,
+				});
+			}) as any,
+			config
+		);
 	};
 
 	const useAuth = () => {
+		const { mutate } = useSWRConfig();
+
 		return {
 			login: (authProviderID: Operations['authProvider'], redirectURI?: string | undefined) =>
 				client.login(authProviderID, redirectURI),
 			logout: async (options?: LogoutOptions | undefined) => {
 				const result = await client.logout(options);
 				// reset user in the cache and don't trigger a refetch
-				mutate(userSWRKey, null, { revalidate: false });
+				mutate(userSWRKey, null, { revalidate: false, populateCache: true });
 				return result;
 			},
 		};
 	};
 
-	const useUser = (options?: FetchUserRequestOptions & { enabled?: boolean }, swrOptions?: SWRConfiguration) => {
-		const { enabled = true } = options || {};
+	/**
+	 * Return the logged in user.
+	 *
+	 * @usage
+	 * ```ts
+	 * const { user, error, isLoading } = useUser()
+	 * ```
+	 */
+	const useUser: UseUserHook<Operations> = (options) => {
+		const { enabled = true, revalidate, ...swrOptions } = options || {};
 		return useSWR<Operations['user'], GraphQLResponseError>(
 			enabled ? userSWRKey : null,
 			() => client.fetchUser(options),
@@ -153,80 +161,178 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		);
 	};
 
-	const useFileUpload = () => {
-		const [uploadResult, setUploadResult] = useState<{ data?: string[]; error?: Error }>(() => ({
-			data: undefined,
-			error: undefined,
-		}));
-		return {
-			data: uploadResult,
-			upload: async (options: UploadRequestOptions): Promise<string[] | undefined> => {
-				try {
-					const resp = await client.uploadFiles(options);
-					setUploadResult({ data: resp.fileKeys, error: undefined });
-					return resp.fileKeys;
-				} catch (err: any) {
-					setUploadResult({ data: undefined, error: err });
-				}
-			},
-		};
-	};
-
 	/**
-	 * This is will subscribe to an operation and mutate the SWR state on result.
+	 * Upload a file to S3 compatible storage.
 	 *
 	 * @usage
 	 * ```ts
-	 * const unsubscribe = subscribeTo({ operationName: 'hello', world: 'World' })
+	 * const { upload, data, error } = useFileUpload()
+	 *
+	 * const uploadFile = (file: File) => {
+	 *  upload(file)
+	 * }
 	 * ```
 	 */
-	const subscribeTo = (options: SubscriptionRequestOptions) => {
+	const useFileUpload: UseUploadHook<Operations> = (config) => {
+		const { trigger, ...mutation } = useSWRMutation(
+			'uploadFiles',
+			async (key, { arg }) => {
+				const resp = await client.uploadFiles(arg);
+				return resp.fileKeys;
+			},
+			config
+		) as any;
+
+		return {
+			upload: trigger,
+			...mutation,
+		};
+	};
+
+	// Set up a subscription that can be aborted.
+	const subscribeTo = (options: SubscribeToOptions) => {
 		const abort = new AbortController();
 
-		options.abortSignal = abort.signal;
+		const { onSuccess, onError, onResult, onAbort, ...subscription } = options;
 
-		client.subscribe(options, (result: ClientResponse) => {
-			// Promise is not handled because we are not interested in the result
-			// Errors are handled by SWR internally
-			mutate({ operationName: options.operationName, input: options.input }, () => {
-				if (result.error) {
-					throw result.error;
-				}
-				return result.data;
-			});
-		});
+		subscription.abortSignal = abort.signal;
+
+		client.subscribe(subscription, onResult).catch(onError);
+
 		return () => {
+			onAbort?.();
 			abort.abort();
 		};
 	};
 
-	const useSubscription = <
-		OperationName extends Extract<keyof Operations['subscriptions'], string>,
-		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
-		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
-	>(
-		options: UseSubscriptionOptions<OperationName, Input>
-	): SWRResponse<Data, GraphQLResponseError> => {
-		const { enabled = true, operationName, input, subscribeOnce, ...swrConfig } = options;
-		const key = { operationName, input };
-		const _key = serialize(key);
-		const response = useSWR(enabled ? key : null, null, swrConfig);
+	// Helper hook used in useQuery and useSubscription
+	const useSubscribeTo = (props: UseSubscribeToProps) => {
+		const { mutate } = useSWRConfig();
+		const { mutationKey, operationName, input, enabled, liveQuery, subscribeOnce, resetOnMount, onSuccess, onError } =
+			props;
+
+		const startedAtRef = useRef<number | null>(null);
+
+		const [state, setState] = useState({
+			isLoading: false,
+			isSubscribed: false,
+		});
 
 		useEffect(() => {
-			let unsubscribe: () => void;
+			if (!startedAtRef.current && resetOnMount) {
+				mutate(mutationKey, null);
+			}
+		}, []);
+
+		useEffect(() => {
+			if (enabled) {
+				setState({ isLoading: true, isSubscribed: false });
+			}
+		}, [enabled]);
+
+		useEffect(() => {
+			let unsubscribe: ReturnType<typeof subscribeTo>;
+
 			if (enabled) {
 				unsubscribe = subscribeTo({
-					subscribeOnce,
 					operationName,
 					input,
+					liveQuery,
+					subscribeOnce,
+					onError(error) {
+						setState({ isLoading: false, isSubscribed: false });
+						onError?.(error);
+						startedAtRef.current = null;
+					},
+					onResult(result) {
+						if (!startedAtRef.current) {
+							setState({ isLoading: false, isSubscribed: true });
+							onSuccess?.(result);
+							startedAtRef.current = new Date().getTime();
+						}
+
+						// Promise is not handled because we are not interested in the result
+						// Errors are handled by SWR internally
+						mutate(mutationKey, () => {
+							if (result.error) {
+								throw result.error;
+							}
+
+							return result.data;
+						});
+					},
+					onAbort() {
+						setState({ isLoading: false, isSubscribed: false });
+						startedAtRef.current = null;
+					},
 				});
 			}
+
 			return () => {
 				unsubscribe?.();
 			};
-		}, [enabled, _key]);
+		}, [mutationKey, enabled, liveQuery, subscribeOnce, onSuccess, onError]);
 
-		return response;
+		return state;
+	};
+
+	/**
+	 * useSubscription
+	 *
+	 * Subscribe to subscription operations.
+	 *
+	 * @usage
+	 * ```ts
+	 * const { data, error, isLoading, isSubscribed } = useSubscription({
+	 *   operationName: 'Countdown',
+	 * })
+	 */
+	const useSubscription: UseSubscriptionHook<Operations> = (options) => {
+		const {
+			enabled = true,
+			operationName,
+			input,
+			subscribeOnce,
+			resetOnMount,
+			onSuccess: onSuccessProp,
+			onError: onErrorProp,
+		} = options;
+		const key = { operationName, input, subscription: true };
+		const _key = serialize(key);
+
+		const { data, error } = useSWR(enabled ? key : null, null);
+
+		const onSuccess = useCallback(
+			(response: object) => {
+				onSuccessProp?.(response, _key, options);
+			},
+			[onSuccessProp, _key]
+		);
+
+		const onError = useCallback(
+			(error: GraphQLResponseError) => {
+				onErrorProp?.(error, _key, options);
+			},
+			[onErrorProp, _key]
+		);
+
+		const { isLoading, isSubscribed } = useSubscribeTo({
+			mutationKey: _key,
+			enabled,
+			operationName,
+			input,
+			subscribeOnce,
+			resetOnMount,
+			onSuccess,
+			onError,
+		});
+
+		return {
+			isLoading,
+			isSubscribed,
+			data,
+			error,
+		};
 	};
 
 	return {

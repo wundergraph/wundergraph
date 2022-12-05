@@ -7,7 +7,7 @@ on:
     paths:
       - 'packages/**/*'
       - '.github/actions/go/action.yaml'
-      - '.github/actions/go/node.yaml'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
@@ -20,7 +20,7 @@ on:
     paths:
       - 'packages/**/*'
       - '.github/actions/go/action.yaml'
-      - '.github/actions/go/node.yaml'
+      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
       - '!packages/*-testapp/**'
       - 'examples/**/*'
@@ -38,6 +38,7 @@ env:
 jobs:
   build_test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
         with:
@@ -53,7 +54,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Nextjs builds
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/packages/nextjs-testapp/.next/cache

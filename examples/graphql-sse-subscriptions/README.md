@@ -39,19 +39,13 @@ npm install && npm start
 #### Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Sse
+curl -N http://localhost:9991/operations/Sse
 ```
 
 #### SSE output
 
 ```shell
- curl -N http://localhost:9991/app/main/operations/Sse\?wg_sse\=true
-```
-
-#### Call your custom GraphQL server
-
-```shell
-curl -X GET http://localhost:9991/app/main/operations/Hello
+ curl -N 'http://localhost:9991/operations/Sse?wg_sse=true'
 ```
 
 ## Learn More

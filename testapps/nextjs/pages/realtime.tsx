@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import styles from '../styles/Home.module.css';
 import { FC, useState } from 'react';
-import { useLiveQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const RealtimePage: NextPage = () => {
 	const [city, setCity] = useState<string>('Berlin');
@@ -39,21 +39,21 @@ const RealtimePage: NextPage = () => {
 };
 
 const LiveWeather: FC<{ city: string }> = ({ city }) => {
-	const { result: liveWeather } = useLiveQuery.Weather({
+	const liveWeather = useQuery({
+		operationName: 'Weather',
 		input: { forCity: city },
+		liveQuery: true,
 	});
 	return (
 		<div>
-			{liveWeather.status === 'ok' && (
-				<div>
-					<h3>City: {liveWeather.data.getCityByName?.name}</h3>
-					<p>{JSON.stringify(liveWeather.data.getCityByName?.coord)}</p>
-					<h3>Temperature</h3>
-					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.temperature)}</p>
-					<h3>Wind</h3>
-					<p>{JSON.stringify(liveWeather.data.getCityByName?.weather?.wind)}</p>
-				</div>
-			)}
+			<div>
+				<h3>City: {liveWeather.data?.getCityByName?.name}</h3>
+				<p>{JSON.stringify(liveWeather.data?.getCityByName?.coord)}</p>
+				<h3>Temperature</h3>
+				<p>{JSON.stringify(liveWeather.data?.getCityByName?.weather?.temperature)}</p>
+				<h3>Wind</h3>
+				<p>{JSON.stringify(liveWeather.data?.getCityByName?.weather?.wind)}</p>
+			</div>
 		</div>
 	);
 };

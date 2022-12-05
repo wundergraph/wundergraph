@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -14,7 +13,7 @@ import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 /*const jsonPlaceholder = introspect.openApi({
@@ -93,21 +92,37 @@ const spaceX = introspect.graphql({
 	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
-const myApplication = new Application({
-	name: 'api',
+const counter = introspect.graphql({
+	id: 'counter',
+	apiNamespace: 'ws',
+	subscriptionsUseSSE: true,
+	url: 'http://localhost:3003/api/graphql',
+	loadSchemaFromString: `
+			type Query {
+				hello: String
+			}
+
+			type Subscription {
+				countdown(from: Int!): Int!
+			}
+			
+			schema {
+				query: Query
+				subscription: Subscription
+			}`,
+});
+
+// configureWunderGraph emits the configuration
+configureWunderGraphApplication({
 	apis: [
 		weather,
 		spaceX,
+		counter,
 		//jspFieldsRenamed,
 		/*federatedApi,
             openAPI,
             graphQLAPI*/
 	],
-});
-
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	application: myApplication,
 	server,
 	operations,
 	// S3 Server

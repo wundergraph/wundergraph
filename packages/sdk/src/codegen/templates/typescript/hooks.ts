@@ -16,7 +16,6 @@ export class WunderGraphHooksPlugin implements Template {
 		const _internalMutations = operations(config.application, OperationType.MUTATION, true);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
 		const content = tmpl({
-			applicationName: config.application.Name,
 			modelImports: modelImports(config.application, true),
 			operationNamesUnion: config.application.Operations.map((o) => `"${o.Name}"`).join(' | ') || 'never',
 			dataSourcesUnion:

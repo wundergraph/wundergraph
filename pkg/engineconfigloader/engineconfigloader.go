@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/staticdatasource"
@@ -54,7 +55,7 @@ type DefaultFactoryResolver struct {
 }
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper,
-	debug bool, log abstractlogger.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
+	debug bool, log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
 
 	defaultHttpClient := &http.Client{
 		Timeout:   transportFactory.DefaultTransportTimeout(),
@@ -219,7 +220,7 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 			factory.HTTPClient = client
 		}
 
-		if ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
+		if ds.CustomGraphql.HooksConfiguration != nil && ds.CustomGraphql.HooksConfiguration.OnWSTransportConnectionInit {
 			factory.OnWsConnectionInitCallback = d.onWsConnectionInitCallback(ds.Id)
 		}
 
@@ -351,14 +352,24 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				typeMappings[i].StatusCodeByteString = []byte(strconv.Itoa(int(in.CustomRest.StatusCodeTypeMappings[i].StatusCode)))
 			}
 
-			fetchUrl := buildFetchUrl(
+			fetchURL := buildFetchUrl(
 				loadvariable.String(in.CustomRest.Fetch.GetUrl()),
 				loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()),
 				loadvariable.String(in.CustomRest.Fetch.GetPath()))
 
+			// resolves arguments like {{ .arguments.tld }} are allowed
+			// unresolved arguments like {tld} are not allowed
+
+			allowed := regexp.MustCompile(`\{\{[^\}]+\}\}`)
+			withoutAllowedArgs := allowed.ReplaceAllString(fetchURL, "")
+			disallowed := regexp.MustCompile(`\{.*\}`)
+			if disallowed.MatchString(withoutAllowedArgs) {
+				return nil, fmt.Errorf("fetchUrl %q contains a placeholder, which is not supported. Placeholders are only allowed when using a static string as the baseURL", fetchURL)
+			}
+
 			restConfig := oas_datasource.Configuration{
 				Fetch: oas_datasource.FetchConfiguration{
-					URL:           fetchUrl,
+					URL:           fetchURL,
 					Method:        in.CustomRest.Fetch.Method.String(),
 					Header:        header,
 					Query:         query,
@@ -396,6 +407,14 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				subscriptionUrl = fetchUrl
 			}
 
+			customScalarTypeFields := make([]graphql_datasource.SingleTypeField, len(in.CustomGraphql.CustomScalarTypeFields))
+			for i, v := range in.CustomGraphql.CustomScalarTypeFields {
+				customScalarTypeFields[i] = graphql_datasource.SingleTypeField{
+					TypeName:  v.TypeName,
+					FieldName: v.FieldName,
+				}
+			}
+
 			out.Custom = graphql_datasource.ConfigJson(graphql_datasource.Configuration{
 				Fetch: graphql_datasource.FetchConfiguration{
 					URL:    fetchUrl,
@@ -410,7 +429,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 					URL:    subscriptionUrl,
 					UseSSE: in.CustomGraphql.Subscription.UseSSE,
 				},
-				UpstreamSchema: in.CustomGraphql.UpstreamSchema,
+				UpstreamSchema:         in.CustomGraphql.UpstreamSchema,
+				CustomScalarTypeFields: customScalarTypeFields,
 			})
 		case wgpb.DataSourceKind_POSTGRESQL,
 			wgpb.DataSourceKind_MYSQL,

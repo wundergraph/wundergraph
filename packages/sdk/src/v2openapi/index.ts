@@ -31,6 +31,7 @@ import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
+	ConfigurationVariable,
 	ConfigurationVariableKind,
 	DataSourceKind,
 	FieldConfiguration,
@@ -45,7 +46,7 @@ import {
 	applyNameSpaceToGraphQLSchema,
 	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
-import { mapInputVariable } from '../configure/variables';
+import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
@@ -139,7 +140,10 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const replaced = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
+		const { schemaSDL: replaced, customScalarTypeFields } = transformSchema.replaceCustomScalars(
+			print(filtered),
+			this.introspection
+		);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -400,42 +404,52 @@ class RESTApiBuilder {
 				return;
 			}
 			const componentSchema = resolved.schema;
-			ref = resolved.ref;
-			let fieldTypeName = ref;
-
-			if (objectKind === 'input') {
-				fieldTypeName = `${fieldTypeName}Input`;
-			}
-
-			const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
-			if (argumentName) {
-				this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
-			} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
-				fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
-				this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
+			const type = componentSchema.type;
+			if (
+				!componentSchema.enum &&
+				type &&
+				(['boolean', 'integer', 'number', 'string'] as JSONSchema7Type[]).includes(type)
+			) {
+				// Primitive type references use the referenced schema as their own
+				schema = componentSchema;
 			} else {
-				this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
-			}
-			if (isIntEnum) return;
+				ref = resolved.ref;
+				let fieldTypeName = ref;
 
-			const created = this.ensureType(
-				componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
-				fieldTypeName
-			);
-			if (!created) {
+				if (objectKind === 'input') {
+					fieldTypeName = `${fieldTypeName}Input`;
+				}
+
+				const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
+				if (argumentName) {
+					this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
+				} else if (this.statusCodeUnions && isRootField && objectKind === 'type') {
+					fieldTypeName = this.buildFieldTypeName(ref, responseObjectDescription || '', statusCode || '');
+					this.addResponseUnionField(parentTypeName, objectKind, fieldName, fieldTypeName, statusCode || '', false);
+				} else {
+					this.addField(parentTypeName, objectKind, fieldName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
+				}
+				if (isIntEnum) return;
+
+				const created = this.ensureType(
+					componentSchema.enum && componentSchema.type === 'string' ? 'enum' : objectKind,
+					fieldTypeName
+				);
+				if (!created) {
+					return;
+				}
+				this.traverseSchema({
+					isRootField: false,
+					objectKind,
+					schema: componentSchema,
+					enclosingTypes: [],
+					parentTypeName: fieldTypeName,
+					fieldName: '',
+					verb,
+					path,
+				});
 				return;
 			}
-			this.traverseSchema({
-				isRootField: false,
-				objectKind,
-				schema: componentSchema,
-				enclosingTypes: [],
-				parentTypeName: fieldTypeName,
-				fieldName: '',
-				verb,
-				path,
-			});
-			return;
 		}
 		if (schema.allOf) {
 			schema = (schema.allOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
@@ -669,7 +683,7 @@ class RESTApiBuilder {
 		};
 		return true;
 	};
-	private baseURL = (): string => {
+	private baseURL = (): InputVariable => {
 		if (this.introspection.baseURL) {
 			return this.introspection.baseURL;
 		}
@@ -679,7 +693,13 @@ class RESTApiBuilder {
 		const secure = this.spec.servers.find((server) => server.url.startsWith('https'));
 		return secure ? secure.url : this.spec.servers[0].url;
 	};
-	private cleanupBaseURL = (url: string): string => {
+	private cleanupBaseURL = (url: InputVariable): InputVariable => {
+		if ((url as EnvironmentVariable).name) {
+			return url;
+		}
+		if (typeof url !== 'string') {
+			throw new Error('url must be an environment variable or a string');
+		}
 		return url.replace(/{[a-zA-Z]+}/, (str) => {
 			const arg = this.sanitizeName(str.substring(1, str.length - 1));
 			this.baseUrlArgs.push(arg);

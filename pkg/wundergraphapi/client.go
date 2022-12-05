@@ -10,7 +10,7 @@ import (
 
 	"github.com/andybalholm/brotli"
 	"github.com/buger/jsonparser"
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -19,10 +19,10 @@ type Client struct {
 	accessToken string
 	baseURL     string
 	client      *http.Client
-	log         abstractlogger.Logger
+	log         *zap.Logger
 }
 
-func New(accessToken, baseURL string, log abstractlogger.Logger) *Client {
+func New(accessToken, baseURL string, log *zap.Logger) *Client {
 	return &Client{
 		accessToken: accessToken,
 		client: &http.Client{
@@ -247,7 +247,6 @@ func (c *Client) CreateOrUpdateDeployment(input CreateOrUpdateDeploymentInput) (
 		Variables: map[string]interface{}{
 			"input": map[string]interface{}{
 				"apiID":          input.WunderGraphConfiguration.ApiId,
-				"name":           input.WunderGraphConfiguration.DeploymentName,
 				"config":         string(configData),
 				"environmentIDs": input.WunderGraphConfiguration.EnvironmentIds,
 			},
@@ -265,32 +264,32 @@ func (c *Client) SendWunderNodeAnalytics(data []byte) {
 	writer := brotli.NewWriterLevel(buf, brotli.DefaultCompression)
 	_, err := writer.Write(data)
 	if err != nil {
-		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.http.NewRequest", abstractlogger.Error(err))
+		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.http.NewRequest", zap.Error(err))
 		return
 	}
 
 	err = writer.Flush()
 	if err != nil {
-		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.writer.Flush", abstractlogger.Error(err))
+		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.writer.Flush", zap.Error(err))
 		return
 	}
 
 	req, err := http.NewRequest(http.MethodPost, c.baseURL+"/wundernode/analytics", buf)
 	if err != nil {
-		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.http.NewRequest", abstractlogger.Error(err))
+		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.http.NewRequest", zap.Error(err))
 		return
 	}
 	req.Header.Set("Content-Encoding", "br")
 	req.Header.Set("Authorization", "Bearer "+c.accessToken)
 	res, err := c.client.Do(req)
 	if err != nil {
-		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.client.Do", abstractlogger.Error(err))
+		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.client.Do", zap.Error(err))
 		return
 	}
 	if res.StatusCode != http.StatusOK {
 		c.log.Error("wundergraphapi.Client.SendWunderNodeAnalytics.res.StatusCode",
-			abstractlogger.Int("code", res.StatusCode),
-			abstractlogger.String("message", res.Status),
+			zap.Int("code", res.StatusCode),
+			zap.String("message", res.Status),
 		)
 	}
 }

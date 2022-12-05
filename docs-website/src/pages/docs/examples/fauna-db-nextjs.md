@@ -60,8 +60,7 @@ const faunaDB = introspect.graphql({
     ),
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [faunaDB],
 })
 ```
@@ -88,7 +87,7 @@ query AllStores {
 
 ```typescript
 const Home: NextPage = () => {
-  const stores = useQuery.AllStores()
+  const stores = useQuery({ operationName: 'AllStores' })
   return (
     <div>
       {stores.data?.allStores.data?.map((store) => (

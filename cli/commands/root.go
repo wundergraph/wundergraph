@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,7 +39,7 @@ var (
 	BuildInfo             node.BuildInfo
 	GitHubAuthDemo        node.GitHubAuthDemo
 	DotEnvFile            string
-	log                   abstractlogger.Logger
+	log                   *zap.Logger
 	serviceToken          string
 	_wunderGraphDirConfig string
 	disableCache          bool
@@ -81,7 +80,6 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			rootFlags.PrettyLogs = upCmdPrettyLogging
 		}
 
-		logging.Init(rootFlags.PrettyLogs, rootFlags.DebugMode)
 		if rootFlags.DebugMode {
 			// override log level to debug
 			rootFlags.CliLogLevel = "debug"
@@ -91,8 +89,10 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 		if err != nil {
 			return err
 		}
-		zapLog := logging.Zap().With(zap.String("component", "@wundergraph/wunderctl"))
-		log = abstractlogger.NewZapLogger(zapLog, logLevel)
+
+		log = logging.
+			New(rootFlags.PrettyLogs, rootFlags.DebugMode, logLevel).
+			With(zap.String("component", "@wundergraph/wunderctl"))
 
 		err = godotenv.Load(DotEnvFile)
 		if err != nil {
@@ -100,11 +100,11 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 				log.Debug("starting without env file")
 			} else {
 				log.Fatal("error loading env file",
-					abstractlogger.Error(err))
+					zap.Error(err))
 			}
 		} else {
 			log.Debug("env file successfully loaded",
-				abstractlogger.String("file", DotEnvFile),
+				zap.String("file", DotEnvFile),
 			)
 		}
 

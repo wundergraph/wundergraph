@@ -3,7 +3,7 @@ package apihandler
 import (
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -14,7 +14,7 @@ type Listener struct {
 }
 
 type Logging struct {
-	Level abstractlogger.Level
+	Level zapcore.Level
 }
 
 type Options struct {
@@ -28,7 +28,6 @@ type Options struct {
 type Api struct {
 	PrimaryHost           string
 	Hosts                 []string
-	PathPrefix            string
 	EngineConfiguration   *wgpb.EngineConfiguration
 	EnableSingleFlight    bool
 	EnableGraphqlEndpoint bool

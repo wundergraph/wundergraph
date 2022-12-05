@@ -1278,8 +1278,11 @@ export const loadOperations = (schemaFileName: string): string => {
 	const output = result?.stdout;
 	if (output) {
 		const out = JSON.parse(output) as LoadOperationsOutput;
-		out.info?.forEach((info) => Logger.info(info));
-		out.errors?.forEach((info) => Logger.info(info));
+		out.info?.forEach((msg) => Logger.info(msg));
+		out.errors?.forEach((msg) => Logger.error(msg));
+		if ((out.errors?.length ?? 0) > 0 && out?.errors?.[0]) {
+			throw new Error(out.errors[0]);
+		}
 		return out.files?.map((file) => file.content).join(' ') || '';
 	}
 	return '';

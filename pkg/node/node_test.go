@@ -16,11 +16,11 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/jensneuse/abstractlogger"
 	"github.com/phayes/freeport"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -28,8 +28,7 @@ import (
 )
 
 func TestNode(t *testing.T) {
-	logging.Init(false, false)
-	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
+	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
@@ -40,6 +39,7 @@ func TestNode(t *testing.T) {
 	defer userService.Close()
 
 	reviewService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		_, _ = w.Write([]byte(`{"data":{"_entities":[{"reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}}]}]}}`))
@@ -47,6 +47,7 @@ func TestNode(t *testing.T) {
 	defer reviewService.Close()
 
 	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
 		if bytes.Contains(req, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
@@ -85,7 +86,6 @@ func TestNode(t *testing.T) {
 		},
 		Api: &apihandler.Api{
 			Hosts:                 []string{"jens.wundergraph.dev"},
-			PathPrefix:            "myApi/main",
 			EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
 			EnableSingleFlight:    true,
 			EnableGraphqlEndpoint: true,
@@ -129,7 +129,7 @@ func TestNode(t *testing.T) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 		},
 	}
@@ -150,37 +150,52 @@ func TestNode(t *testing.T) {
 		Reporter: httpexpect.NewRequireReporter(t),
 	})
 
-	e.GET("/myApi").Expect().Status(http.StatusNotFound)
-	e.GET("/myApi/main/operations/MyReviews").Expect().Status(http.StatusNotFound)
+	e.GET("/operations/MyReviews").Expect().Status(http.StatusNotFound)
 
 	withHeaders := e.Builder(func(request *httpexpect.Request) {
 		request.WithHeader("Host", "jens.wundergraph.dev")
+		request.WithHeader("X-Request-Id", "67b77eab-d1a5-4cd8-b908-8443f24502b6")
 	})
 
-	myReviews := withHeaders.GET("/myApi/main/operations/MyReviews").
+	myReviews := withHeaders.GET("/operations/MyReviews").
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
 	goldie.Assert(t, "get my reviews json rpc", prettyJSON(myReviews))
 
-	topProductsWithoutQuery := withHeaders.GET("/myApi/main/operations/TopProducts").
+	topProductsWithoutQuery := withHeaders.GET("/operations/TopProducts").
 		Expect().Status(http.StatusOK).Body().Raw()
 	goldie.Assert(t, "top products without query", prettyJSON(topProductsWithoutQuery))
 
-	topProductsWithQuery := withHeaders.GET("/myApi/main/operations/TopProducts").
+	topProductsWithQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", 1).
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
 	goldie.Assert(t, "top products with query", prettyJSON(topProductsWithQuery))
+
+	topProductsWithInvalidQuery := withHeaders.GET("/operations/TopProducts").
+		WithQuery("first", true).
+		Expect().Status(http.StatusBadRequest).Body().Raw()
+	goldie.Assert(t, "top products with invalid query", prettyJSON(topProductsWithInvalidQuery))
+
+	topProductsWithQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
+		WithQuery("wg_variables", `{"first":1}`).
+		Expect().Status(http.StatusOK).Body().Raw()
+	goldie.Assert(t, "top products with query as wg variables", prettyJSON(topProductsWithQueryAsWgVariables))
+
+	topProductsWithInvalidQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
+		WithQuery("wg_variables", `{"first":true}`).
+		Expect().Status(http.StatusBadRequest).Body().Raw()
+	goldie.Assert(t, "top products with invalid query as wg variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
 
 	request := GraphQLRequest{
 		OperationName: "MyReviews",
 		Query:         federationTestQuery,
 	}
 
-	actual := withHeaders.POST("/myApi/main/graphql").WithJSON(request).Expect().Status(http.StatusOK).Body().Raw()
+	actual := withHeaders.POST("/graphql").WithJSON(request).Expect().Status(http.StatusOK).Body().Raw()
 	goldie.Assert(t, "post my reviews graphql", prettyJSON(actual))
 
-	withHeaders.GET("/myApi/main/graphql").Expect().Status(http.StatusOK).Text(
+	withHeaders.GET("/graphql").Expect().Status(http.StatusOK).Text(
 		httpexpect.ContentOpts{MediaType: "text/html"})
 }
 
@@ -203,8 +218,7 @@ func TestWebHooks(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	z, _ := zap.NewDevelopment()
-	logger := abstractlogger.NewZapLogger(z, abstractlogger.DebugLevel)
+	logger := logging.New(true, false, zapcore.DebugLevel)
 	node := New(ctx, BuildInfo{}, "", logger)
 
 	nodeConfig := WunderNodeConfig{
@@ -217,7 +231,6 @@ func TestWebHooks(t *testing.T) {
 		},
 		Api: &apihandler.Api{
 			Hosts:                 []string{"localhost"},
-			PathPrefix:            "api/main",
 			EnableSingleFlight:    true,
 			EnableGraphqlEndpoint: true,
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
@@ -251,7 +264,7 @@ func TestWebHooks(t *testing.T) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 		},
 	}
@@ -276,19 +289,18 @@ func TestWebHooks(t *testing.T) {
 	_, _ = hash.Write([]byte("ok"))
 	signatureString := hex.EncodeToString(hash.Sum(nil))
 
-	e.GET("/api/main/webhooks/github").Expect().Status(http.StatusOK)
-	e.GET("/api/main/webhooks/stripe").Expect().Status(http.StatusOK)
-	e.GET("/api/main/webhooks/undefined").Expect().Status(http.StatusNotFound)
+	e.GET("/webhooks/github").Expect().Status(http.StatusOK)
+	e.GET("/webhooks/stripe").Expect().Status(http.StatusOK)
+	e.GET("/webhooks/undefined").Expect().Status(http.StatusNotFound)
 	// We can't return 200 otherwise we would accept the delivery of the webhook and the publisher might not redeliver it.
-	e.POST("/api/main/webhooks/github-protected").Expect().Status(http.StatusUnauthorized)
-	e.POST("/api/main/webhooks/github-protected").WithBytes([]byte("ok")).WithHeader("X-Hub-Signature", fmt.Sprintf("sha256=%s", signatureString)).Expect().Status(http.StatusOK)
+	e.POST("/webhooks/github-protected").Expect().Status(http.StatusUnauthorized)
+	e.POST("/webhooks/github-protected").WithBytes([]byte("ok")).WithHeader("X-Hub-Signature", fmt.Sprintf("sha256=%s", signatureString)).Expect().Status(http.StatusOK)
 
 	assert.Equal(t, []string{"/webhooks/github", "/webhooks/stripe", "/webhooks/github-protected"}, paths)
 }
 
 func BenchmarkNode(t *testing.B) {
-	logging.Init(true, false)
-	logger := abstractlogger.NewZapLogger(logging.Zap(), abstractlogger.DebugLevel)
+	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
@@ -325,7 +337,6 @@ func BenchmarkNode(t *testing.B) {
 		},
 		Api: &apihandler.Api{
 			Hosts:                 []string{"jens.wundergraph.dev"},
-			PathPrefix:            "myApi",
 			EngineConfiguration:   federationPlanConfiguration(userService.URL, productService.URL, reviewService.URL),
 			EnableSingleFlight:    true,
 			EnableGraphqlEndpoint: true,
@@ -349,7 +360,7 @@ func BenchmarkNode(t *testing.B) {
 					Host: "127.0.0.1",
 					Port: uint16(port),
 				},
-				Logging: apihandler.Logging{Level: abstractlogger.ErrorLevel},
+				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{

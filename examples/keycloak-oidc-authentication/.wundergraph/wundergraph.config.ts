@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -16,14 +15,9 @@ const countries = introspect.graphql({
 	url: 'https://countries.trevorblades.com/graphql',
 });
 
-const myApplication = new Application({
-	name: 'api',
-	apis: [countries],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [countries],
 	server,
 	operations,
 	codeGenerators: [
@@ -31,7 +25,7 @@ configureWunderGraphApplication({
 			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
 		},
 		{
-			templates: [new NextJsTemplate()],
+			templates: [templates.typescript.client, new NextJsTemplate()],
 			path: '../components/generated',
 		},
 	],

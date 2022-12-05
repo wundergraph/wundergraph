@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jensneuse/abstractlogger"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -33,7 +33,7 @@ var startCmd = &cobra.Command{
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
-			log.Fatal("Could not create node: %w", abstractlogger.Error(err))
+			log.Fatal("Could not create node: %w", zap.Error(err))
 		}
 
 		if !excludeServer {
@@ -51,7 +51,7 @@ var startCmd = &cobra.Command{
 		// Only exit with error code 1 when the server was not stopped by the signal
 		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph process shutdown: %w", abstractlogger.Error(err))
+			log.Fatal("WunderGraph process shutdown: %w", zap.Error(err))
 		}
 
 		// exit code 0 to indicate success

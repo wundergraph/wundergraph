@@ -10,7 +10,7 @@ Install the dependencies and run the complete example in one command:
 npm install && npm start
 ```
 
-After `npm start` has been executed, your browser should open a new tab and navigate to [`http://localhost:9991/app/main/webhooks/github`](http://localhost:9991/app/main/webhooks/github).
+After `npm start` has been executed, your browser should open a new tab and navigate to [`http://localhost:9991/webhooks/github`](http://localhost:9991/webhooks/github).
 
 ## Learn More
 

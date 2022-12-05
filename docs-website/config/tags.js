@@ -5,6 +5,8 @@ const tags = {
 	'WunderGraph SDK': '/docs/components-of-wundergraph/wundergraph-sdk',
 	'TypeScript SDK': '/docs/components-of-wundergraph/wundergraph-sdk',
 	'WunderGraph CLI': '/docs/components-of-wundergraph/wunderctl',
+	'create-wundergraph-app':
+		'/docs/components-of-wundergraph/create-wundergraph-app',
 	CLI: '/docs/components-of-wundergraph/wunderctl',
 	wunderctl: '/docs/components-of-wundergraph/wunderctl',
 	'_join field': '/docs/core-concepts/_join-field',
@@ -23,6 +25,7 @@ const tags = {
 	'WunderGraph Server':
 		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'Architecture Introduction': '/docs/architecture/architecture-diagram',
+	join: '/docs/features/cross-api-joins-to-compose-apis',
 	'Cross API JOIN': '/docs/features/cross-api-joins-to-compose-apis',
 	JOINs: '/docs/features/cross-api-joins-to-compose-apis',
 	'GraphQL to JSON RPC compiler': '/docs/features/graphql-to-json-rpc-compiler',

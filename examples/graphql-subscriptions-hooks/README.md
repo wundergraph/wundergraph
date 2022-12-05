@@ -13,8 +13,7 @@ const counter = introspect.graphql({
   url: 'http://127.0.0.1:4000/graphql',
 });
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [counter],
 });
 ```
@@ -92,7 +91,7 @@ npm install && npm start
 #### Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Ws\?from\=5
+curl -N 'http://localhost:9991/operations/Ws?from=5'
 ```
 
 - Check the output.

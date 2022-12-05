@@ -20,8 +20,8 @@ import {
 
 export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
-		.map((api) => api.DataSources)
-		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue]);
+		.map((api) => api.DataSources || [])
+		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
 	const fields = mergeApiFields(apis);
 	const types = mergeTypeConfigurations(apis);
 	const schema = mergeApiSchemas(roles, apis, dataSources, fields);
@@ -32,8 +32,8 @@ export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[])
 const mergeApiFields = <T extends {} = {}>(apis: Api<T>[]): FieldConfiguration[] => {
 	const fields: FieldConfiguration[] = [];
 	apis
-		.map((a) => a.Fields)
-		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue])
+		.map((a) => a.Fields || [])
+		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], [])
 		.forEach((f) => {
 			const existing = fields.find(
 				(existing) => existing.typeName === f.typeName && existing.fieldName === f.fieldName
@@ -61,15 +61,17 @@ const mergeApiFields = <T extends {} = {}>(apis: Api<T>[]): FieldConfiguration[]
 
 const mergeTypeConfigurations = <T extends {} = {}>(apis: Api<T>[]): TypeConfiguration[] => {
 	const out: TypeConfiguration[] = [];
-	apis.forEach((api) => {
-		api.Types.forEach((conf) => {
-			const exists = out.find((existing) => existing.typeName === conf.typeName) !== undefined;
-			if (exists) {
-				return;
-			}
-			out.push(conf);
-		});
-	});
+	apis
+		.map((api) => api.Types || [])
+		.forEach((types) =>
+			types.forEach((conf) => {
+				const exists = out.find((existing) => existing.typeName === conf.typeName) !== undefined;
+				if (exists) {
+					return;
+				}
+				out.push(conf);
+			})
+		);
 	return out;
 };
 
@@ -390,11 +392,15 @@ const mergeApiSchemas = <T extends {} = {}>(
 	dataSources: DataSource[],
 	fields: FieldConfiguration[]
 ): string => {
-	const graphQLSchemas = apis.map((api, i) => {
-		return buildSchema(api.Schema, {
-			assumeValidSDL: true,
-		});
-	});
+	const graphQLSchemas = apis
+		.map((api, i) => {
+			return api.Schema
+				? buildSchema(api.Schema, {
+						assumeValidSDL: true,
+				  })
+				: null;
+		})
+		.flatMap((schema) => (schema ? [schema] : []));
 
 	graphQLSchemas.push(
 		buildSchema(baseSchema, {

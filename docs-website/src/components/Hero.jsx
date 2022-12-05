@@ -10,7 +10,10 @@ import blurIndigoImage from '@/images/blur-indigo.png'
 import { CodeBlock } from './CodeBlock'
 const codeLanguage = 'shell'
 const code = `# Create a new project
-npx -y @wundergraph/wunderctl init \\\n\t--template nextjs-starter
+npx create-wundergraph-app my-project -E nextjs
+
+# Move the the project directory
+cd my-project
 
 # Install dependencies and start
 npm i && npm start`

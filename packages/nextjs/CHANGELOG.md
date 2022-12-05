@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.5.0...@wundergraph/nextjs@0.5.2) (2022-11-20)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.5.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.5.0...@wundergraph/nextjs@0.5.1) (2022-11-20)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.5.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.4.0...@wundergraph/nextjs@0.5.0) (2022-11-18)
+
+### Features
+
+* remove app/main from URL structure ([#335](https://github.com/wundergraph/wundergraph/issues/335)) ([e49e585](https://github.com/wundergraph/wundergraph/commit/e49e585528297126b93958105e80b68f1943d781)), closes [#333](https://github.com/wundergraph/wundergraph/issues/333) (@fiam)
+
+## [0.4.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.24...@wundergraph/nextjs@0.4.0) (2022-11-17)
+
+### Features
+
+* **breaking:** the Next.js client now uses SWR ([#319](https://github.com/wundergraph/wundergraph/issues/319)) ([020cd74](https://github.com/wundergraph/wundergraph/commit/020cd74091517faedcd97071d48a19395cbcd9bf)) (@Pagebakers)
+
+## [0.3.24](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.23...@wundergraph/nextjs@0.3.24) (2022-11-11)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.3.23](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.3.22...@wundergraph/nextjs@0.3.23) (2022-11-08)
 
 **Note:** Version bump only for package @wundergraph/nextjs

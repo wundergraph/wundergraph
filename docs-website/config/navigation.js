@@ -63,6 +63,19 @@ const navigation = [
 		],
 	},
 	{
+		title: 'Pre 1.0 Changes',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/pre-1-0-changes',
+			},
+			{
+				title: 'Simplifying the WunderGraph URL Structure',
+				href: '/docs/pre-1-0-changes/simplifying-the-wundergraph-url-structure',
+			},
+		],
+	},
+	{
 		title: 'Architecture',
 		links: [
 			{
@@ -139,9 +152,18 @@ const navigation = [
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
-			{
+			/*{
 				title: 'NextJS Full-Stack Tutorial',
 				href: '/docs/tutorials/nextjs-full-stack-tutorial',
+			},*/
+		],
+	},
+	{
+		title: 'Cloud',
+		links: [
+			{
+				title: 'Deploy to WunderGraph Cloud',
+				href: '/docs/cloud/deployments',
 			},
 		],
 	},
@@ -174,8 +196,12 @@ const navigation = [
 				href: '/docs/examples/nextjs',
 			},
 			{
-				title: 'NextJS + SWR',
-				href: '/docs/examples/nextjs-swr',
+				title: 'NextJS + React Query',
+				href: '/docs/examples/nextjs-react-query',
+			},
+			{
+				title: 'Vite + SWR',
+				href: '/docs/examples/vite-swr',
 			},
 			{
 				title: 'Hooks',
@@ -198,12 +224,8 @@ const navigation = [
 				href: '/docs/examples/postgresql',
 			},
 			{
-				title: 'PostgreSQL & Prisma',
-				href: '/docs/examples/postgresql-prisma',
-			},
-			{
-				title: 'Publish Install API using WunderHub',
-				href: '/docs/examples/publish-install-api',
+				title: 'NextJS & PostgreSQL & Prisma',
+				href: '/docs/examples/nextjs-postgresql-prisma',
 			},
 			{
 				title: 'Apollo Federation',
@@ -226,7 +248,7 @@ const navigation = [
 				href: '/docs/examples/graphql-apollo-subscriptions',
 			},
 			{
-				title: 'GraphQl yoga subscriptions',
+				title: 'GraphQl Yoga subscriptions',
 				href: '/docs/examples/graphql-yoga-subscriptions',
 			},
 			{
@@ -238,7 +260,7 @@ const navigation = [
 				href: '/docs/examples/graphql-ws-subscriptions',
 			},
 			{
-				title: 'GraphQl hasura WS subscriptions',
+				title: 'GraphQl Hasura WS subscriptions',
 				href: '/docs/examples/graphql-hasura-subscriptions',
 			},
 			{
@@ -437,7 +459,7 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks',
 			},
 			{
-				title: 'React-JS',
+				title: 'React',
 				href: '/docs/supported-frontend-frameworks/react-js',
 			},
 			{
@@ -445,8 +467,12 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks/react-native',
 			},
 			{
-				title: 'NextJS',
+				title: 'Next.js',
 				href: '/docs/supported-frontend-frameworks/nextjs',
+			},
+			{
+				title: 'ViteJS',
+				href: '/docs/supported-frontend-frameworks/vite-js',
 			},
 			{
 				title: 'iOS / Swift / Objective-C',
@@ -530,6 +556,10 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/components-of-wundergraph',
+			},
+			{
+				title: 'create-wundergraph-app',
+				href: '/docs/components-of-wundergraph/create-wundergraph-app',
 			},
 			{
 				title: 'wunderctl',
@@ -900,6 +930,27 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-manifest-json-reference',
+			},
+		],
+	},
+	{
+		title: 'Clients reference',
+		links: [
+			{
+				title: 'TypeScript Client',
+				href: '/docs/clients-reference/typescript-client',
+			},
+			{
+				title: 'SWR',
+				href: '/docs/clients-reference/swr',
+			},
+			{
+				title: 'React Query',
+				href: '/docs/clients-reference/react-query',
+			},
+			{
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
 			},
 		],
 	},

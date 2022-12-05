@@ -774,6 +774,7 @@ export interface DataSourceCustomGraphQL {
 	federation: GraphQLFederationConfiguration | undefined;
 	upstreamSchema: string;
 	hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
+	customScalarTypeFields: SingleTypeField[];
 }
 
 export interface DataSourceCustomDatabase {
@@ -905,9 +906,7 @@ export interface ArgumentConfiguration {
 export interface WunderGraphConfiguration {
 	api: UserDefinedApi | undefined;
 	apiId: string;
-	deploymentName: string;
 	environmentIds: string[];
-	apiName: string;
 	dangerouslyEnableGraphQLEndpoint: boolean;
 }
 
@@ -2378,6 +2377,7 @@ function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
 		federation: undefined,
 		upstreamSchema: '',
 		hooksConfiguration: undefined,
+		customScalarTypeFields: [],
 	};
 }
 
@@ -2393,6 +2393,9 @@ export const DataSourceCustomGraphQL = {
 			hooksConfiguration: isSet(object.hooksConfiguration)
 				? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
 				: undefined,
+			customScalarTypeFields: Array.isArray(object?.customScalarTypeFields)
+				? object.customScalarTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
+				: [],
 		};
 	},
 
@@ -2410,6 +2413,13 @@ export const DataSourceCustomGraphQL = {
 			(obj.hooksConfiguration = message.hooksConfiguration
 				? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
 				: undefined);
+		if (message.customScalarTypeFields) {
+			obj.customScalarTypeFields = message.customScalarTypeFields.map((e) =>
+				e ? SingleTypeField.toJSON(e) : undefined
+			);
+		} else {
+			obj.customScalarTypeFields = [];
+		}
 		return obj;
 	},
 
@@ -2430,6 +2440,7 @@ export const DataSourceCustomGraphQL = {
 			object.hooksConfiguration !== undefined && object.hooksConfiguration !== null
 				? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
 				: undefined;
+		message.customScalarTypeFields = object.customScalarTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];
 		return message;
 	},
 };
@@ -3146,14 +3157,7 @@ export const ArgumentConfiguration = {
 };
 
 function createBaseWunderGraphConfiguration(): WunderGraphConfiguration {
-	return {
-		api: undefined,
-		apiId: '',
-		deploymentName: '',
-		environmentIds: [],
-		apiName: '',
-		dangerouslyEnableGraphQLEndpoint: false,
-	};
+	return { api: undefined, apiId: '', environmentIds: [], dangerouslyEnableGraphQLEndpoint: false };
 }
 
 export const WunderGraphConfiguration = {
@@ -3161,9 +3165,7 @@ export const WunderGraphConfiguration = {
 		return {
 			api: isSet(object.api) ? UserDefinedApi.fromJSON(object.api) : undefined,
 			apiId: isSet(object.apiId) ? String(object.apiId) : '',
-			deploymentName: isSet(object.deploymentName) ? String(object.deploymentName) : '',
 			environmentIds: Array.isArray(object?.environmentIds) ? object.environmentIds.map((e: any) => String(e)) : [],
-			apiName: isSet(object.apiName) ? String(object.apiName) : '',
 			dangerouslyEnableGraphQLEndpoint: isSet(object.dangerouslyEnableGraphQLEndpoint)
 				? Boolean(object.dangerouslyEnableGraphQLEndpoint)
 				: false,
@@ -3174,13 +3176,11 @@ export const WunderGraphConfiguration = {
 		const obj: any = {};
 		message.api !== undefined && (obj.api = message.api ? UserDefinedApi.toJSON(message.api) : undefined);
 		message.apiId !== undefined && (obj.apiId = message.apiId);
-		message.deploymentName !== undefined && (obj.deploymentName = message.deploymentName);
 		if (message.environmentIds) {
 			obj.environmentIds = message.environmentIds.map((e) => e);
 		} else {
 			obj.environmentIds = [];
 		}
-		message.apiName !== undefined && (obj.apiName = message.apiName);
 		message.dangerouslyEnableGraphQLEndpoint !== undefined &&
 			(obj.dangerouslyEnableGraphQLEndpoint = message.dangerouslyEnableGraphQLEndpoint);
 		return obj;
@@ -3190,9 +3190,7 @@ export const WunderGraphConfiguration = {
 		const message = createBaseWunderGraphConfiguration();
 		message.api = object.api !== undefined && object.api !== null ? UserDefinedApi.fromPartial(object.api) : undefined;
 		message.apiId = object.apiId ?? '';
-		message.deploymentName = object.deploymentName ?? '';
 		message.environmentIds = object.environmentIds?.map((e) => e) || [];
-		message.apiName = object.apiName ?? '';
 		message.dangerouslyEnableGraphQLEndpoint = object.dangerouslyEnableGraphQLEndpoint ?? false;
 		return message;
 	},

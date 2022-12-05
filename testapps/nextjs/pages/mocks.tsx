@@ -3,7 +3,9 @@ import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 import styles from '../styles/Home.module.css';
 
 const Mocks: NextPage = () => {
-	const weather = useQuery.FakeWeather();
+	const weather = useQuery({
+		operationName: 'FakeWeather',
+	});
 	return (
 		<div>
 			<h1>Mocks: Fake Weather</h1>

@@ -43,7 +43,6 @@ export interface OperationDefinition {
 
 export interface ClientConfig {
 	applicationHash: string;
-	applicationPath: string;
 	baseURL: string;
 	sdkVersion: string;
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
@@ -84,6 +83,13 @@ export interface OperationRequestOptions<
 	operationName: OperationName;
 	abortSignal?: AbortSignal;
 	input?: Input;
+}
+
+export interface QueryRequestOptions<
+	OperationName extends string = any,
+	Input extends object | undefined = object | undefined
+> extends OperationRequestOptions<OperationName, Input> {
+	subscribeOnce?: Boolean;
 }
 
 export interface SubscriptionRequestOptions<

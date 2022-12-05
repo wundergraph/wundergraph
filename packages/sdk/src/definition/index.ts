@@ -48,21 +48,6 @@ export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTIO
 // Only use the instrospection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 
-export interface ApplicationConfig {
-	name: string;
-	apis: Promise<Api<any>>[];
-}
-
-export class Application {
-	constructor(config: ApplicationConfig) {
-		this.name = config.name;
-		this.apis = config.apis;
-	}
-
-	name: string;
-	apis: Promise<Api<any>>[];
-}
-
 export interface RenameType {
 	from: string;
 	to: string;
@@ -376,7 +361,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	// by default, only the status 200 response is mapped, which keeps the GraphQL API flat
 	// by enabling statusCodeUnions, you have to unwrap the response union via fragments for each response
 	statusCodeUnions?: boolean;
-	baseURL?: string;
+	baseURL?: InputVariable;
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
 	schemaExtension?: string;
@@ -421,6 +406,7 @@ export interface GraphQLApiCustom {
 	};
 	UpstreamSchema: string;
 	HooksConfiguration: GraphQLDataSourceHooksConfiguration;
+	CustomScalarTypeFields: SingleTypeField[];
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {

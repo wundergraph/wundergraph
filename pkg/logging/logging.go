@@ -1,29 +1,28 @@
 package logging
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/jensneuse/abstractlogger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var singleZap *zap.Logger
+const (
+	RequestIDHeader = "X-Request-Id"
 
-func Zap() *zap.Logger {
-	if singleZap == nil {
-		panic("zap logger not initialized")
-	}
+	// logger field name must be aligned with fastify
+	requestIDField = "reqId"
+)
 
-	return singleZap
-}
+type RequestIDKey struct{}
 
-func Init(prettyLogging bool, debug bool) {
-	singleZap = newZapLogger(zapcore.AddSync(os.Stdout), prettyLogging, debug)
+func New(prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
+	return newZapLogger(zapcore.AddSync(os.Stdout), prettyLogging, debug, level)
 }
 
 func zapBaseEncoderConfig() zapcore.EncoderConfig {
@@ -51,7 +50,7 @@ func zapConsoleEncoder() zapcore.Encoder {
 	return zapcore.NewConsoleEncoder(ec)
 }
 
-func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool) *zap.Logger {
+func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, level zapcore.Level) *zap.Logger {
 	var encoder zapcore.Encoder
 	var zapOpts []zap.Option
 
@@ -62,13 +61,13 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool) *z
 	}
 
 	if debug {
-		zapOpts = append(zapOpts, zap.AddCaller(), zap.AddCallerSkip(1), zap.AddStacktrace(zap.ErrorLevel))
+		zapOpts = append(zapOpts, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
 	}
 
 	zapLogger := zap.New(zapcore.NewCore(
 		encoder,
 		syncer,
-		zap.DebugLevel,
+		level,
 	), zapOpts...)
 
 	if prettyLogging {
@@ -86,21 +85,38 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool) *z
 	)
 }
 
-func FindLogLevel(logLevel string) (abstractlogger.Level, error) {
+func FindLogLevel(logLevel string) (zapcore.Level, error) {
 	switch strings.ToUpper(logLevel) {
 	case "DEBUG":
-		return abstractlogger.DebugLevel, nil
+		return zap.DebugLevel, nil
 	case "INFO":
-		return abstractlogger.InfoLevel, nil
+		return zap.InfoLevel, nil
 	case "WARNING":
-		return abstractlogger.WarnLevel, nil
+		return zap.WarnLevel, nil
 	case "ERROR":
-		return abstractlogger.ErrorLevel, nil
+		return zap.ErrorLevel, nil
 	case "FATAL":
-		return abstractlogger.FatalLevel, nil
+		return zap.FatalLevel, nil
 	case "PANIC":
-		return abstractlogger.PanicLevel, nil
+		return zap.PanicLevel, nil
 	default:
 		return -1, fmt.Errorf("unknown log level: %s", logLevel)
 	}
+}
+
+func RequestIDFromContext(ctx context.Context) string {
+	requestID, ok := ctx.Value(RequestIDKey{}).(string)
+	if !ok {
+		return ""
+	}
+
+	return requestID
+}
+
+func WithRequestID(reqID string) zap.Field {
+	return zap.String(requestIDField, reqID)
+}
+
+func WithRequestIDFromContext(ctx context.Context) zap.Field {
+	return WithRequestID(RequestIDFromContext(ctx))
 }

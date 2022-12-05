@@ -19,22 +19,13 @@ const spaceX = introspect.graphql({
   url: 'https://spacex-api.fly.dev/graphql/',
 })
 
-const myApplication = new Application({
-  name: 'app',
-  apis: [spaceX],
-})
-
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [spaceX],
   server,
   operations,
   codeGenerators: [
     {
-      templates: [
-        ...templates.typescript.all,
-        templates.typescript.operations,
-        templates.typescript.linkBuilder,
-      ],
+      templates: [...templates.typescript.all],
     },
     {
       templates: [new NextJsTemplate()],
@@ -69,7 +60,7 @@ import { NextPage } from 'next'
 import { useQuery, withWunderGraph } from '../components/generated/nextjs'
 
 const Home: NextPage = () => {
-  const dragons = useQuery.Dragons()
+  const dragons = useQuery({ operationName: 'Dragons' })
   return <div>{JSON.stringify(dragons)}</div>
 }
 export default withWunderGraph(Home)
@@ -81,3 +72,7 @@ so all you have to do is to import he `useQuery` hook and call your newly create
 
 Wrapping the Page in `withWunderGraph` will make sure that Server Side Rendering (SSR) works,
 that's it.
+
+## What's next
+
+Check out the [Next.js client documentation](/docs/clients-reference/nextjs) for more information.
