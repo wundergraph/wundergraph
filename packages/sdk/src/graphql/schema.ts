@@ -12,7 +12,19 @@ import {
 } from 'graphql';
 import { GraphQLIntrospection } from '../definition';
 
-export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): string => {
+export interface ArgumentReplacement {
+	fieldName: string;
+	typeName: string;
+	argName: string;
+	renameTypeTo: string;
+}
+
+export interface CleanupSchema {
+	schemaSDL: string;
+	argumentReplacements: ArgumentReplacement[];
+}
+
+export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): CleanupSchema => {
 	const customFloatScalars = introspection.customFloatScalars || [];
 	const customIntScalars = introspection.customIntScalars || [];
 
@@ -21,6 +33,11 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 	const queryTypeName = schema.getQueryType()?.name;
 	const mutationTypeName = schema.getMutationType()?.name;
 	const subscriptionTypeName = schema.getSubscriptionType()?.name;
+	const argumentReplacements: ArgumentReplacement[] = [];
+	let fieldName: undefined | string;
+	let argName: undefined | string;
+	let typeName: undefined | string;
+
 	const cleanAst = visit(ast, {
 		SchemaDefinition: (node) => {
 			const operationTypes: OperationTypeDefinitionNode[] = [];
@@ -69,45 +86,75 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			};
 			return schemaNode;
 		},
-		ObjectTypeDefinition: (node) => {
-			if (node.name.value === queryTypeName) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Query',
-					},
-				};
-			}
+		InterfaceTypeDefinition: {
+			enter: (node) => {
+				typeName = node.name.value;
+			},
+			leave: () => {
+				typeName = undefined;
+			},
+		},
+		ObjectTypeExtension: {
+			enter: (node) => {
+				typeName = node.name.value;
+			},
+			leave: () => {
+				typeName = undefined;
+			},
+		},
+		InterfaceTypeExtension: {
+			enter: (node) => {
+				typeName = node.name.value;
+			},
+			leave: () => {
+				typeName = undefined;
+			},
+		},
+		ObjectTypeDefinition: {
+			enter: (node) => {
+				typeName = node.name.value;
+				if (node.name.value === queryTypeName) {
+					return {
+						...node,
+						name: {
+							...node.name,
+							value: 'Query',
+						},
+					};
+				}
 
-			if (node.name.value === mutationTypeName) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Mutation',
-					},
-				};
-			}
+				if (node.name.value === mutationTypeName) {
+					return {
+						...node,
+						name: {
+							...node.name,
+							value: 'Mutation',
+						},
+					};
+				}
 
-			if (node.name.value === subscriptionTypeName) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Subscription',
-					},
-				};
-			}
+				if (node.name.value === subscriptionTypeName) {
+					return {
+						...node,
+						name: {
+							...node.name,
+							value: 'Subscription',
+						},
+					};
+				}
 
-			switch (node.name.value) {
-				case '_Service':
-				case 'Entity':
+				switch (node.name.value) {
+					case '_Service':
+					case 'Entity':
+						return null;
+				}
+				if (node.name.value.startsWith('__')) {
 					return null;
-			}
-			if (node.name.value.startsWith('__')) {
-				return null;
-			}
+				}
+			},
+			leave: (node) => {
+				typeName = undefined;
+			},
 		},
 		UnionTypeDefinition: (node) => {
 			switch (node.name.value) {
@@ -136,6 +183,14 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 		},
 		NamedType: (node) => {
 			if (customFloatScalars.includes(node.name.value)) {
+				if (argName && fieldName && typeName) {
+					argumentReplacements.push({
+						argName,
+						fieldName,
+						typeName,
+						renameTypeTo: node.name.value,
+					});
+				}
 				return {
 					...node,
 					name: {
@@ -145,6 +200,14 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 				};
 			}
 			if (customIntScalars.includes(node.name.value)) {
+				if (argName && fieldName && typeName) {
+					argumentReplacements.push({
+						argName,
+						fieldName,
+						typeName,
+						renameTypeTo: node.name.value,
+					});
+				}
 				return {
 					...node,
 					name: {
@@ -166,6 +229,7 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 		},
 		FieldDefinition: {
 			enter: (node) => {
+				fieldName = node.name.value;
 				switch (node.name.value) {
 					case '_entities':
 					case '_service':
@@ -193,9 +257,13 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 					}
 				}
 			},
+			leave: (node) => {
+				fieldName = undefined;
+			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
+				argName = node.name.value;
 				if (node.description) {
 					if (node.description.value === '') {
 						return {
@@ -215,8 +283,14 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 					}
 				}
 			},
+			leave: (node) => {
+				argName = undefined;
+			},
 		},
 	});
 
-	return print(cleanAst);
+	return {
+		schemaSDL: print(cleanAst),
+		argumentReplacements,
+	};
 };

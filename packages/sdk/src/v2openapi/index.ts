@@ -49,7 +49,7 @@ import { mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
-import transformSchema from '../transformations/shema';
+import transformSchema from '../transformations/schema';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -335,6 +335,7 @@ class RESTApiBuilder {
 							renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_ARRAY_CSV,
 							sourceType: ArgumentSource.FIELD_ARGUMENT,
 							sourcePath: [param.name],
+							renameTypeTo: '',
 						});
 					}
 					break;

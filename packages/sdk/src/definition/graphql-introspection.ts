@@ -32,7 +32,7 @@ import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
-import transformSchema from '../transformations/shema';
+import transformSchema from '../transformations/schema';
 
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
@@ -80,7 +80,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
 		schema = lexicographicSortSchema(schema);
 		const federationEnabled = isFederationService(schema);
-		let schemaSDL = cleanupSchema(schema, introspection);
+		let { schemaSDL, argumentReplacements } = cleanupSchema(schema, introspection);
 		schemaSDL = transformSchema.replaceCustomScalars(schemaSDL, introspection);
 		const serviceSDL = !federationEnabled
 			? undefined
@@ -92,7 +92,11 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
-		const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
+		const { RootNodes, ChildNodes, Fields } = configuration(
+			schemaDocumentNode,
+			serviceDocumentNode,
+			argumentReplacements
+		);
 		const subscriptionsEnabled = hasSubscriptions(schema);
 		if (introspection.internal === true) {
 			headers['X-WG-Internal-GraphQL-API'] = {

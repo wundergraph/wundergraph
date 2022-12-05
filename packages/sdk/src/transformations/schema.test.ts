@@ -1,5 +1,5 @@
 import { GraphQLIntrospection } from '../definition';
-import transformSchema from './shema';
+import transformSchema from './schema';
 
 test('replaceCustomScalars', async () => {
 	const schema = `

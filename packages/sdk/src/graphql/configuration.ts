@@ -15,6 +15,7 @@ import {
 	TypeConfiguration,
 	TypeField,
 } from '@wundergraph/protobuf';
+import { ArgumentReplacement } from './schema';
 
 export interface GraphQLConfiguration {
 	RootNodes: TypeField[];
@@ -23,22 +24,31 @@ export interface GraphQLConfiguration {
 	Types: TypeConfiguration[];
 }
 
-export const configuration = (schema: DocumentNode, serviceSDL?: DocumentNode): GraphQLConfiguration => {
+export const configuration = (
+	schema: DocumentNode,
+	serviceSDL?: DocumentNode,
+	argumentReplacements?: ArgumentReplacement[]
+): GraphQLConfiguration => {
 	const config: GraphQLConfiguration = {
 		RootNodes: [],
 		ChildNodes: [],
 		Fields: [],
 		Types: [],
 	};
+	const replacements = argumentReplacements || [];
 	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config);
+		visitSchema(serviceSDL, config, replacements);
 	} else {
-		visitSchema(schema, config);
+		visitSchema(schema, config, replacements);
 	}
 	return config;
 };
 
-const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
+const visitSchema = (
+	schema: DocumentNode,
+	config: GraphQLConfiguration,
+	argumentReplacements: ArgumentReplacement[]
+) => {
 	let typeName: undefined | string;
 	let fieldName: undefined | string;
 	let isExtensionType = false;
@@ -183,7 +193,7 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 				if (!fieldName || !typeName) {
 					return;
 				}
-				addFieldArgument(typeName, fieldName, node.name.value, config);
+				addFieldArgument(typeName, fieldName, node.name.value, config, argumentReplacements);
 			},
 		},
 	});
@@ -241,12 +251,22 @@ const addField = (typeField: TypeField, field: string) => {
 	typeField.fieldNames.push(field);
 };
 
-const addFieldArgument = (typeName: string, fieldName: string, argName: string, config: GraphQLConfiguration) => {
+const addFieldArgument = (
+	typeName: string,
+	fieldName: string,
+	argName: string,
+	config: GraphQLConfiguration,
+	argumentReplacements: ArgumentReplacement[]
+) => {
+	const replacement = argumentReplacements.find((argument) => {
+		return argument.argName == argName && argument.fieldName == fieldName && argument.typeName == typeName;
+	});
 	const arg: ArgumentConfiguration = {
 		name: argName,
 		sourceType: ArgumentSource.FIELD_ARGUMENT,
 		sourcePath: [],
 		renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_DEFAULT,
+		renameTypeTo: replacement?.renameTypeTo || '',
 	};
 	let field: FieldConfiguration | undefined = config.Fields.find(
 		(f) => f.typeName === typeName && f.typeName === fieldName
