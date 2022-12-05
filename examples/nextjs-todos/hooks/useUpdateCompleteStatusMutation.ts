@@ -1,39 +1,46 @@
-import {EditTodoResponseData} from "../components/generated/models";
-import {mutate} from "swr";
-import {useMutation} from "../components/generated/nextjs";
+import { useSWRConfig } from 'swr';
+import { useMutation, useQuery } from '../components/generated/nextjs';
 
 function useUpdateCompleteStatusMutation() {
-    const updateCompleteTodo = useMutation({operationName: "UpdateCompleteTodo"});
-    return function ({updateCompleteTodoStatus, allTodos}) {
-        return new Promise(async (resolve) => {
-            let currentTodos = [...allTodos.data.db_findManyTodo];
-            let id = updateCompleteTodoStatus.id;
-            let indexToBeUpdate = currentTodos.findIndex((t) => t.id === id);
-            let todoToBeUpdate = {...currentTodos[indexToBeUpdate]};
-            todoToBeUpdate.completed = updateCompleteTodoStatus.complete.set;
-            currentTodos[indexToBeUpdate] = {...todoToBeUpdate};
-            let updatedTodoData = {db_findManyTodo: currentTodos};
-            let updateResponse: EditTodoResponseData;
-            await mutate(
-                {operationName: "Todos"},
-                async (todos) => {
-                    //make deep copy of todos
-                    let modifyTodos = JSON.parse(JSON.stringify(todos));
-                    updateResponse = await updateCompleteTodo.trigger(updateCompleteTodoStatus);
-                    if (updateResponse.db_updateOneTodo) {
-                        modifyTodos.db_findManyTodo.map((currTodo) => {
-                            if (currTodo.id === updateResponse.db_updateOneTodo.id) {
-                                currTodo.completed = updateCompleteTodoStatus.complete.set;
-                            }
-                        });
-                    }
-                    return modifyTodos;
-                },
-                {optimisticData: updatedTodoData, revalidate: true}
-            );
-            resolve(updateResponse);
-        });
-    };
+	const { mutate } = useSWRConfig();
+	const { data } = useQuery({ operationName: 'Todos' });
+	const todos = data?.todos;
+	const updateCompleteTodo = useMutation({ operationName: 'UpdateCompleteTodo' });
+
+	const trigger: typeof updateCompleteTodo.trigger = async (input, options) => {
+		if (!todos || !input) {
+			return updateCompleteTodo.trigger(input, options);
+		}
+		const updatedTodos = [...todos];
+		const item = updatedTodos.find((t) => t.id === input?.id);
+
+		if (item) {
+			item.completed = input.complete;
+		}
+
+		mutate(
+			{
+				operationName: 'Todos',
+			},
+			() => {
+				return updateCompleteTodo.trigger(input, options);
+			},
+			{
+				optimisticData: {
+					todos: updatedTodos,
+				},
+				populateCache: false,
+				revalidate: true,
+				rollbackOnError: true,
+				...options,
+			}
+		);
+	};
+
+	return {
+		...updateCompleteTodo,
+		trigger,
+	};
 }
 
 export default useUpdateCompleteStatusMutation;

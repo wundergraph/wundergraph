@@ -1,0 +1,5 @@
+query @internalOperation {
+	lastTodo: db_findFirstTodo(orderBy: { order: asc }) {
+		order
+	}
+}

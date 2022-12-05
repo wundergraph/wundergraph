@@ -1,5 +1,6 @@
-mutation ($id: Int, $order: db_IntFieldUpdateOperationsInput) {
-	db_updateOneTodo(where: { id: $id }, data: { order: $order }) {
+mutation ($id: Int!, $order: Int!) {
+	todo: db_updateOneTodo(where: { id: $id }, data: { order: { set: $order } }) {
 		id
+		order
 	}
 }
