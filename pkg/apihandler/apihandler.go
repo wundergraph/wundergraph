@@ -411,7 +411,7 @@ func (r *Builder) registerInvalidOperation(name string) {
 	r.log.Error("EndpointUnavailableHandler",
 		zap.String("Operation", name),
 		zap.String("Endpoint", apiPath),
-		zap.String("Help", "The Operation is not properly configured. This usually happens when there is a mismatch between GraphQL Schema and Operation. Please make sure, the Operation is valid. This can be supported best by enabling intellisense for GraphQL within your IDE."),
+		zap.String("Help", "This operation is invalid. Please, check the logs"),
 	)
 }
 
