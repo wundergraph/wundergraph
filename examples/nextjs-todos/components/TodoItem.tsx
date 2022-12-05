@@ -60,9 +60,9 @@ function TodoItem(props: TodoItemProps) {
 	return (
 		<Fragment>
 			{!editMode && (
-				<div className="flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md last-of-type:border-0">
+				<div className="group flex justify-between items-center justify-center py-4 my-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md last-of-type:border-0">
 					<Fragment>
-						<div className="flex items-center mb-1 mx-1">
+						<div className="flex items-center mx-1">
 							<input
 								onChange={updateCompletedStatus}
 								type="checkbox"
@@ -79,7 +79,7 @@ function TodoItem(props: TodoItemProps) {
 								<span className="break-all">{title}</span>
 							</div>
 						</div>
-						<div onClick={deleteTodoItem} className="flex flex-col justify-start ml-5 cursor-pointer">
+						<div onClick={deleteTodoItem} className="flex-col items-center ml-5 cursor-pointer hidden group-hover:flex">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -102,9 +102,10 @@ function TodoItem(props: TodoItemProps) {
 							onKeyDown={titleKeyHandler}
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
+							autoFocus
 							className={clsx(
 								[completed && 'line-through', editMode && 'mb-1'],
-								'py-3 pl-10 pr-2 ml-2 h-12 border-solid  w-72 text-sm bg-zinc-500 rounded text-white focus:outline-none '
+								'py-3 pl-10 pr-2  h-12 border-solid  w-72 text-sm bg-zinc-500 rounded text-white focus:outline-none '
 							)}
 						/>
 						<div

@@ -22,7 +22,7 @@ const Home: NextPage = () => {
 					</div>
 					<AddTodo />
 					<div className="mt-2">
-						<div className="absolute mt-1 -ml-1">
+						<div className="absolute">
 							<TodoList />
 						</div>
 					</div>
