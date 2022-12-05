@@ -30,4 +30,4 @@ Some IDEs, like VSCode, will not search for the `.graphqlconfig` file in sub dir
 This means that you will have to manually move the `.graphqlconfig` file to the root directory and fix the path to the GraphQL Schema.
 {% /callout %}
 
-The GraphQL Schema is usually located in `.wundergraph/generated/wundergraph.schema.graphql`.
+The GraphQL Schema is located in `.wundergraph/generated/wundergraph.schema.graphql`.
