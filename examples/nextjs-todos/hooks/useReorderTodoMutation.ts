@@ -6,7 +6,6 @@ function useReorderTodoMutation() {
 	const mutation = useMutation({
 		operationName: 'UpdateTodoOrder',
 		onSuccess() {
-			console.log('onsuccess');
 			mutate({ operationName: 'Todos' });
 		},
 		onError() {

@@ -60,12 +60,7 @@ function TodoItem(props: TodoItemProps) {
 	return (
 		<Fragment>
 			{!editMode && (
-				<div
-					className={clsx(
-						['flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md']
-						// [!lastItem && 'border-solid border-0 border-b border-zinc-600']
-					)}
-				>
+				<div className="flex justify-between pt-4 pb-2 m-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md last-of-type:border-0">
 					<Fragment>
 						<div className="flex items-center mb-1 mx-1">
 							<input
@@ -75,15 +70,13 @@ function TodoItem(props: TodoItemProps) {
 								className="h-4 w-4 rounded-full accent-pink-500"
 							/>
 							<div
-								onClick={enableEditMode}
+								onDoubleClick={enableEditMode}
 								className={clsx(
 									['cursor-pointer ml-3 text-sm font-medium text-gray-300'],
 									[completed && 'line-through']
 								)}
 							>
-								<span className="break-all">
-									{title} - {todo.id} - {todo.order}
-								</span>
+								<span className="break-all">{title}</span>
 							</div>
 						</div>
 						<div onClick={deleteTodoItem} className="flex flex-col justify-start ml-5 cursor-pointer">
@@ -111,14 +104,12 @@ function TodoItem(props: TodoItemProps) {
 							onChange={(e) => setTitle(e.target.value)}
 							className={clsx(
 								[completed && 'line-through', editMode && 'mb-1'],
-								[
-									'py-3 pl-5 ml-2 border-solid border-0 border-b border-pink-400 w-72 bg-gray-900 text-white focus:outline-none',
-								]
+								'py-3 pl-10 pr-2 ml-2 h-12 border-solid  w-72 text-sm bg-zinc-500 rounded text-white focus:outline-none '
 							)}
 						/>
 						<div
 							onClick={editTodoTile}
-							className="absolute right-4 top-4 cursor-pointer hover:bg-zinc-500 hover:rounded"
+							className="absolute right-4 top-3.5 cursor-pointer hover:bg-zinc-500 hover:rounded"
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
