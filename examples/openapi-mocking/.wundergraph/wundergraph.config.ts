@@ -1,27 +1,19 @@
-import {
-	configurePublishWunderGraphAPI,
-	configureWunderGraphApplication,
-	cors,
-	EnvironmentVariable,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const weather = introspect.graphql({
-	apiNamespace: 'weather',
-	url: 'https://weather-api.wundergraph.com/',
-});
-
-const countries = introspect.graphql({
-	apiNamespace: 'countries',
-	url: 'https://countries.trevorblades.com/',
+const notes = introspect.openApi({
+	apiNamespace: 'notes',
+	source: {
+		kind: 'file',
+		filePath: './api.yaml',
+	},
+	baseURL: 'http://localhost:8090/',
 });
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [weather, countries],
+	apis: [notes],
 	server,
 	operations,
 	codeGenerators: [
@@ -31,6 +23,7 @@ configureWunderGraphApplication({
 				...templates.typescript.all,
 				templates.typescript.operations,
 				templates.typescript.linkBuilder,
+				templates.typescript.client,
 			],
 			// create-react-app expects all code to be inside /src
 			// path: "../frontend/src/generated",
