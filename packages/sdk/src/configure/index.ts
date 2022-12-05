@@ -231,6 +231,7 @@ export interface ResolvedApplication {
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
+	InvalidOperationNames: string[];
 	CorsConfiguration: CorsConfiguration;
 	S3UploadProvider: S3Provider;
 }
@@ -583,6 +584,7 @@ const resolveApplications = async (
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
+		InvalidOperationNames: [],
 		CorsConfiguration: cors,
 		S3UploadProvider: s3,
 	});
@@ -653,12 +655,14 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				});
 			}
 
-			const operationsContent = loadOperations(schemaFileName);
+			const loadedOperations = loadOperations(schemaFileName);
+			const operationsContent = loadedOperations.content;
 			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
 				keepFromClaimVariables: false,
 				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
 			});
 			app.Operations = operations.operations;
+			app.InvalidOperationNames = loadedOperations.invalidOperationNames;
 			if (app.Operations && config.operations !== undefined) {
 				app.Operations = app.Operations.map((op) => {
 					const cfg = config.operations!;
@@ -968,6 +972,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		api: {
 			enableGraphqlEndpoint: false,
 			operations: operations,
+			invalidOperationNames: config.application.InvalidOperationNames,
 			engineConfiguration: {
 				defaultFlushInterval: config.application.EngineConfiguration.DefaultFlushInterval,
 				graphqlSchema: config.application.EngineConfiguration.Schema,
