@@ -39,9 +39,9 @@ This command will install the necessary dependencies for the WunderGraph reposit
 make
 ```
 
-### Ensure that you use your local wunderctl
+### Use your local wunderctl binary if you test SDK changes
 
-Before you run any example, you need to ensure that you use your local wunderctl binary. This is necessary because the examples are using the downloaded wunderctl binary from the GithHub.
+Before you run any testapp, you need to ensure that you use your local wunderctl binary. This is necessary because the examples are using the downloaded wunderctl binary from GithHub.
 
 ```bash
 # Install the wunderctl binary in your GOBIN.
