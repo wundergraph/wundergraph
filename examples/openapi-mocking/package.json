@@ -5,7 +5,8 @@
   "scripts": {
     "start": "wunderctl up --debug",
     "generate": "wunderctl generate up --debug",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "test": "ava"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,16 @@
     "graphql": "^16.3.0"
   },
   "devDependencies": {
+    "ava": "^5.1.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.8.2"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
   }
 }
