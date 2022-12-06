@@ -25,6 +25,12 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * @default 5
 	 */
 	startupTimeoutSeconds: number;
+	/**
+	 * Enable debug logging
+	 *
+	 * @default false
+	 */
+	debug: boolean;
 }
 
 export interface TestOptions {}
@@ -61,13 +67,14 @@ export class Server<ClientType extends Client = Client> {
 			throw new Error(`fetch() is not defined - use ServerOptions.fetch to provide it`);
 		}
 		const defaultOptions: ServerOptions<ClientType> = {
-			fetch: opts?.fetch ?? fetch,
-			startupTimeoutSeconds: 5,
 			createClient: () => {
 				throw new Error(
 					'cannot create a client because createClient() is not available - use ServerOptions.createClient to provide it'
 				);
 			},
+			fetch: opts?.fetch ?? fetch,
+			startupTimeoutSeconds: 5,
+			debug: false,
 		};
 		return {
 			...defaultOptions,
@@ -97,32 +104,31 @@ export class Server<ClientType extends Client = Client> {
 			// Already running
 			return;
 		}
-		let nodePort = await this.freeport();
-		let serverPort = await this.freeport();
-		this.nodeUrl = `http://localhost:${nodePort}/`;
-		let cmd = ['node', 'start', '-l', 'warning'];
-		let env = {
-			WG_CLOUD: 'true',
-			WG_NODE_URL: this.nodeUrl,
-			WG_NODE_HOST: '0.0.0.0',
-			WG_NODE_PORT: nodePort.toString(),
-			WG_SERVER_URL: `http://localhost:${serverPort}/`,
-			WG_SERVER_HOST: '0.0.0.0',
-			WG_SERVER_PORT: serverPort.toString(),
-		};
-		const subprocess = wunderctlSubprocess({ cmd, env });
-		subprocess?.stdout?.pipe(process.stdout);
-		subprocess?.stderr?.pipe(process.stderr);
+		let { manageServer, env } = await this.setupEnvironment();
+		this.nodeUrl = env['WG_NODE_URL'];
+		let subprocess: Subprocess | undefined;
+		if (manageServer) {
+			let cmd = ['start'];
+			if (this.options.debug || process.env.WG_TEST_DEBUG) {
+				cmd.push('--debug', '--pretty-logging');
+			} else {
+				cmd.push('--cli-log-level', 'warning');
+			}
+			subprocess = wunderctlSubprocess({ cmd, env });
+			subprocess?.stdout?.pipe(process.stdout);
+			subprocess?.stderr?.pipe(process.stderr);
+		}
 		const health = this.url('/health');
 		const started = new Date().getTime();
 		const maxWaitMs = this.options.startupTimeoutSeconds * 1000;
 		while (true) {
 			try {
 				const controller = new AbortController();
-				const id = setTimeout(() => controller.abort(), 50);
-				const result = await this.options.fetch(health, { signal: controller.signal });
+				const id = setTimeout(() => controller.abort(), 500);
+				const resp = await this.options.fetch(health, { signal: controller.signal });
 				clearTimeout(id);
-				if (result.status == 200) {
+				if (resp.status == 200) {
+					const data = await resp.json();
 					break;
 				}
 			} catch (e: any) {
@@ -219,5 +225,32 @@ export class Server<ClientType extends Client = Client> {
 		const port = address.port;
 		await new Promise((resolve) => server.close(resolve));
 		return port;
+	}
+
+	private async setupEnvironment(): Promise<{ manageServer: boolean; env: Record<string, string> }> {
+		if (process.env.WG_NODE_URL) {
+			// Assume there's a server running managed by someone else,
+			// trim trailing slash and proceed
+			const url = process.env.WG_NODE_URL.replace(/\/+$/, '');
+			return {
+				manageServer: false,
+				env: { WG_NODE_URL: url },
+			};
+		}
+		// Generate random ports
+		let nodePort = await this.freeport();
+		let serverPort = await this.freeport();
+		return {
+			manageServer: true,
+			env: {
+				WG_CLOUD: 'true',
+				WG_NODE_URL: `http://localhost:${nodePort}`,
+				WG_NODE_HOST: '0.0.0.0',
+				WG_NODE_PORT: nodePort.toString(),
+				WG_SERVER_URL: `http://localhost:${serverPort}`,
+				WG_SERVER_HOST: '0.0.0.0',
+				WG_SERVER_PORT: serverPort.toString(),
+			},
+		};
 	}
 }
