@@ -1,10 +1,10 @@
-import clsx from 'clsx';
-import React, { Fragment, useState } from 'react';
+import clsx from "clsx";
+import React, { Fragment, useState } from "react";
 
-import useUpdateTitleMutation from '../hooks/useUpdateTitleMutation';
-import useUpdateCompleteStatusMutation from '../hooks/useUpdateCompleteStatusMutation';
-import useDeleteTodoMutation from '../hooks/useDeleteTodoMutation';
-import { Todo } from '../types';
+import useDeleteTodoMutation from "../hooks/useDeleteTodoMutation";
+import useUpdateCompleteStatusMutation from "../hooks/useUpdateCompleteStatusMutation";
+import useUpdateTitleMutation from "../hooks/useUpdateTitleMutation";
+import { Todo } from "../types";
 
 interface TodoItemProps {
 	todo: Todo;
@@ -45,10 +45,10 @@ function TodoItem(props: TodoItemProps) {
 	}
 
 	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			clearEdit();
 			resetTitle();
-		} else if (event.key === 'Enter') {
+		} else if (event.key === "Enter") {
 			await editTodoTile();
 		}
 	}
@@ -72,8 +72,8 @@ function TodoItem(props: TodoItemProps) {
 							<div
 								onDoubleClick={enableEditMode}
 								className={clsx(
-									['cursor-pointer ml-3 text-sm font-medium text-gray-300'],
-									[completed && 'line-through']
+									["cursor-pointer ml-3 text-sm font-medium text-gray-300"],
+									[completed && "line-through"]
 								)}
 							>
 								<span className="break-all">{title}</span>
@@ -104,8 +104,8 @@ function TodoItem(props: TodoItemProps) {
 							onChange={(e) => setTitle(e.target.value)}
 							autoFocus
 							className={clsx(
-								[completed && 'line-through', editMode && 'mb-1'],
-								'py-3 pl-10 pr-2  h-12 border-solid  w-72 text-sm bg-zinc-500 rounded text-white focus:outline-none '
+								[completed && "line-through", editMode && "mb-1"],
+								"py-3 pl-10 pr-2  h-12 border-solid  w-72 text-sm bg-zinc-500 rounded text-white focus:outline-none "
 							)}
 						/>
 						<div

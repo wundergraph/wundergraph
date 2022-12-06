@@ -1,9 +1,9 @@
-import { NextPage } from 'next';
-import React, { Fragment } from 'react';
-import AddTodo from '../components/AddTodo';
-import { withWunderGraph } from '../components/generated/nextjs';
+import { NextPage } from "next";
+import { Fragment } from "react";
+import AddTodo from "../components/AddTodo";
+import { withWunderGraph } from "../components/generated/nextjs";
 
-import TodoList from '../components/TodoList';
+import TodoList from "../components/TodoList";
 
 const Home: NextPage = () => {
 	return (

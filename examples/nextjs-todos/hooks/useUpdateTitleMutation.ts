@@ -1,12 +1,12 @@
-import { useSWRConfig } from 'swr';
-import { useMutation, useQuery } from '../components/generated/nextjs';
+import { useSWRConfig } from "swr";
+import { useMutation, useQuery } from "../components/generated/nextjs";
 
 function useUpdateTitleMutation() {
 	const { mutate } = useSWRConfig();
-	const { data } = useQuery({ operationName: 'Todos' });
+	const { data } = useQuery({ operationName: "Todos" });
 	const todos = data?.todos;
 
-	const updateTodo = useMutation({ operationName: 'EditTodo' });
+	const updateTodo = useMutation({ operationName: "EditTodo" });
 
 	const trigger: typeof updateTodo.trigger = async (input, options) => {
 		if (!todos || !input) {
@@ -21,7 +21,7 @@ function useUpdateTitleMutation() {
 
 		await mutate(
 			{
-				operationName: 'Todos',
+				operationName: "Todos",
 			},
 			async () => {
 				return updateTodo.trigger(input, options);

@@ -1,13 +1,13 @@
-import { useMutation, useQuery } from '../components/generated/nextjs';
-import { mutate } from 'swr';
-import { Todos } from '../types';
+import { mutate } from "swr";
+import { useMutation, useQuery } from "../components/generated/nextjs";
+import { Todos } from "../types";
 
 function useAddMutation() {
-	const { data } = useQuery({ operationName: 'Todos' });
+	const { data } = useQuery({ operationName: "Todos" });
 	const todos = data?.todos;
 
 	const createTodo = useMutation({
-		operationName: 'CreateTodo',
+		operationName: "CreateTodo",
 	});
 
 	function getNextMaxOrder(todos: Todos) {
@@ -35,7 +35,7 @@ function useAddMutation() {
 
 		// we optimistically update the cache with the new todo.
 		return mutate(
-			{ operationName: 'Todos' },
+			{ operationName: "Todos" },
 			() => {
 				return createTodo.trigger(input);
 			},

@@ -1,11 +1,11 @@
-import { useSWRConfig } from 'swr';
-import { useMutation, useQuery } from '../components/generated/nextjs';
+import { useSWRConfig } from "swr";
+import { useMutation, useQuery } from "../components/generated/nextjs";
 
 function useUpdateCompleteStatusMutation() {
 	const { mutate } = useSWRConfig();
-	const { data } = useQuery({ operationName: 'Todos' });
+	const { data } = useQuery({ operationName: "Todos" });
 	const todos = data?.todos;
-	const updateCompleteTodo = useMutation({ operationName: 'UpdateCompleteTodo' });
+	const updateCompleteTodo = useMutation({ operationName: "UpdateCompleteTodo" });
 
 	const trigger: typeof updateCompleteTodo.trigger = async (input, options) => {
 		if (!todos || !input) {
@@ -20,7 +20,7 @@ function useUpdateCompleteStatusMutation() {
 
 		mutate(
 			{
-				operationName: 'Todos',
+				operationName: "Todos",
 			},
 			() => {
 				return updateCompleteTodo.trigger(input, options);

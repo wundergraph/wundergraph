@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
-import useAddMutation from '../hooks/useAddTodoMutation';
+import { useRef, useState } from "react";
+import useAddMutation from "../hooks/useAddTodoMutation";
 
 const AddTodo = () => {
 	const createTodo = useAddMutation();
 
-	const [title, setTitle] = useState<string>('');
+	const [title, setTitle] = useState<string>("");
 
 	const titleRef = useRef<HTMLInputElement>(null);
 
@@ -16,15 +16,15 @@ const AddTodo = () => {
 	}
 
 	function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === 'Escape') {
+		if (event.key === "Escape") {
 			clearAdd();
-		} else if (event.key === 'Enter') {
+		} else if (event.key === "Enter") {
 			addTodo();
 		}
 	}
 
 	function clearAdd() {
-		setTitle('');
+		setTitle("");
 	}
 
 	return (
