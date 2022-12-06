@@ -927,6 +927,7 @@ export interface UserDefinedApi {
   engineConfiguration: EngineConfiguration | undefined;
   enableGraphqlEndpoint: boolean;
   operations: Operation[];
+  invalidOperationNames: string[];
   corsConfiguration: CorsConfiguration | undefined;
   authenticationConfig: ApiAuthenticationConfig | undefined;
   s3UploadConfiguration: S3UploadConfiguration[];
@@ -3242,6 +3243,7 @@ function createBaseUserDefinedApi(): UserDefinedApi {
     engineConfiguration: undefined,
     enableGraphqlEndpoint: false,
     operations: [],
+    invalidOperationNames: [],
     corsConfiguration: undefined,
     authenticationConfig: undefined,
     s3UploadConfiguration: [],
@@ -3260,6 +3262,9 @@ export const UserDefinedApi = {
         : undefined,
       enableGraphqlEndpoint: isSet(object.enableGraphqlEndpoint) ? Boolean(object.enableGraphqlEndpoint) : false,
       operations: Array.isArray(object?.operations) ? object.operations.map((e: any) => Operation.fromJSON(e)) : [],
+      invalidOperationNames: Array.isArray(object?.invalidOperationNames)
+        ? object.invalidOperationNames.map((e: any) => String(e))
+        : [],
       corsConfiguration: isSet(object.corsConfiguration)
         ? CorsConfiguration.fromJSON(object.corsConfiguration)
         : undefined,
@@ -3290,6 +3295,11 @@ export const UserDefinedApi = {
       obj.operations = message.operations.map((e) => e ? Operation.toJSON(e) : undefined);
     } else {
       obj.operations = [];
+    }
+    if (message.invalidOperationNames) {
+      obj.invalidOperationNames = message.invalidOperationNames.map((e) => e);
+    } else {
+      obj.invalidOperationNames = [];
     }
     message.corsConfiguration !== undefined && (obj.corsConfiguration = message.corsConfiguration
       ? CorsConfiguration.toJSON(message.corsConfiguration)
@@ -3328,6 +3338,7 @@ export const UserDefinedApi = {
       : undefined;
     message.enableGraphqlEndpoint = object.enableGraphqlEndpoint ?? false;
     message.operations = object.operations?.map((e) => Operation.fromPartial(e)) || [];
+    message.invalidOperationNames = object.invalidOperationNames?.map((e) => e) || [];
     message.corsConfiguration = (object.corsConfiguration !== undefined && object.corsConfiguration !== null)
       ? CorsConfiguration.fromPartial(object.corsConfiguration)
       : undefined;

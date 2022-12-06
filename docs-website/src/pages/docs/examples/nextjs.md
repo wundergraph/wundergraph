@@ -72,3 +72,7 @@ so all you have to do is to import he `useQuery` hook and call your newly create
 
 Wrapping the Page in `withWunderGraph` will make sure that Server Side Rendering (SSR) works,
 that's it.
+
+## What's next
+
+Check out the [Next.js client documentation](/docs/clients-reference/nextjs) for more information.

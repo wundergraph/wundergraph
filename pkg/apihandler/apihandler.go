@@ -194,8 +194,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		components := strings.Split(r.URL.Path, "/")
 		return len(components) > 2 && components[2] == "main"
 	}).HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		r.log.Warn("this URL is deprecated and will be removed in a future release", zap.String("URL", req.URL.Path))
 		components := strings.Split(req.URL.Path, "/")
+		prefix := strings.Join(components[:3], "/")
+		const format = "URLs with the %q prefix are deprecated and will be removed in a future release, " +
+			"see https://github.com/wundergraph/wundergraph/blob/main/docs/migrations/sdk-0.122.0-0.123.0.md"
+		r.log.Warn(fmt.Sprintf(format, prefix), zap.String("URL", req.URL.Path))
 		req.URL.Path = "/" + strings.Join(components[3:], "/")
 		r.router.ServeHTTP(w, req)
 	})
@@ -285,6 +288,10 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		if err != nil {
 			r.log.Error("registerOperation", zap.Error(err))
 		}
+	}
+
+	for _, operationName := range api.InvalidOperationNames {
+		r.registerInvalidOperation(operationName)
 	}
 
 	if api.EnableGraphqlEndpoint {
@@ -390,13 +397,31 @@ func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
 	return nil
 }
 
+func (r *Builder) operationApiPath(name string) string {
+	return fmt.Sprintf("/operations/%s", name)
+}
+
+func (r *Builder) registerInvalidOperation(name string) {
+	apiPath := r.operationApiPath((name))
+	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
+	route.Handler(&EndpointUnavailableHandler{
+		OperationName: name,
+		Logger:        r.log,
+	})
+	r.log.Error("EndpointUnavailableHandler",
+		zap.String("Operation", name),
+		zap.String("Endpoint", apiPath),
+		zap.String("Help", "This operation is invalid. Please, check the logs"),
+	)
+}
+
 func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 	if operation.Internal {
 		return nil
 	}
 
-	apiPath := fmt.Sprintf("/operations/%s", operation.Name)
+	apiPath := r.operationApiPath(operation.Name)
 
 	var (
 		operationIsConfigured bool
@@ -404,15 +429,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 	defer func() {
 		if !operationIsConfigured {
-			route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
-			route.Handler(&EndpointUnavailableHandler{
-				OperationName: operation.Name,
-			})
-			r.log.Error("EndpointUnavailableHandler",
-				zap.String("Operation", operation.Name),
-				zap.String("Endpoint", apiPath),
-				zap.String("Help", "The Operation is not properly configured. This usually happens when there is a mismatch between GraphQL Schema and Operation. Please make sure, the Operation is valid. This can be supported best by enabling intellisense for GraphQL within your IDE."),
-			)
+			r.registerInvalidOperation(operation.Name)
 		}
 	}()
 
@@ -1982,7 +1999,7 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			continue
 		}
 		if resp.StatusCode != http.StatusOK {
-			r.log.Error("failed to get openid-configuration",
+			r.log.Error("failed to get openid-configuration, provider returned an HTTP error",
 				zap.Int("status", resp.StatusCode),
 			)
 			continue
@@ -2003,11 +2020,12 @@ func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
 			)
 			continue
 		}
-		if config.EndSessionEndpoint == "" {
-			r.log.Error("failed to get openid-configuration",
-				zap.String("end_session_endpoint", config.EndSessionEndpoint),
-			)
+		if err := config.Validate(); err != nil {
+			r.log.Warn("failed to get openid-configuration", zap.Error(err))
 			continue
+		}
+		if config.EndSessionEndpoint == "" {
+			r.log.Debug("issuer doesn't support end_session_endpoint", zap.String("issuer", issuer))
 		}
 		issuerLogoutURLs[issuer] = config.EndSessionEndpoint
 	}
@@ -2022,6 +2040,33 @@ type OpenIDConnectConfiguration struct {
 	UserinfoEndpoint      string `json:"userinfo_endpoint"`
 	JwksUri               string `json:"jwks_uri"`
 	EndSessionEndpoint    string `json:"end_session_endpoint"`
+}
+
+type openIDConnectConfigurationMissingFieldError string
+
+func (e openIDConnectConfigurationMissingFieldError) Error() string {
+	return fmt.Sprintf("missing field %q", string(e))
+}
+
+func (c *OpenIDConnectConfiguration) Validate() error {
+	// See https://openid.net/specs/openid-connect-discovery-1_0.html
+	//
+	// Note that our implementation uses userinfo_endpoint and hence we
+	// make it required, but can work without jwks_uri so we make it optional
+	if c.Issuer == "" {
+		return openIDConnectConfigurationMissingFieldError("issuer")
+	}
+	if c.AuthorizationEndpoint == "" {
+		return openIDConnectConfigurationMissingFieldError("authorization_endpoint")
+	}
+	if c.TokenEndpoint == "" {
+		// TODO: This might be optional with Implicit Flow?
+		return openIDConnectConfigurationMissingFieldError("token_endpoint")
+	}
+	if c.UserinfoEndpoint == "" {
+		return openIDConnectConfigurationMissingFieldError("userinfo_endpoint")
+	}
+	return nil
 }
 
 func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie) {
@@ -2113,9 +2158,11 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 
 type EndpointUnavailableHandler struct {
 	OperationName string
+	Logger        *zap.Logger
 }
 
-func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
+func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	m.Logger.Error("operation not available", zap.String("operationName", m.OperationName), zap.String("URL", r.URL.Path))
 	http.Error(w, fmt.Sprintf("Endpoint not available for Operation: %s, please check the logs.", m.OperationName), http.StatusServiceUnavailable)
 }
 

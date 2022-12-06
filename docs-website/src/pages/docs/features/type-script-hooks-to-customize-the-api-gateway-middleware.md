@@ -180,7 +180,7 @@ Making all Operations accessible from the hooks environment simplifies app devel
 In combination with the `@internalOperation` directive,
 it's possible to define Operations exclusively for internal purposes.
 This way, there's no need for an additional ORM or database client as the database is already accessible through Queries and Mutations.
-You stack becomes less complex, you have to deal with less complexity and your workflows are simplified.
+Your stack becomes less complex, you have to deal with less complexity and your workflows are simplified.
 
 ## How to
 
