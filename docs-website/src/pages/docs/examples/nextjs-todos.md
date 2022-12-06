@@ -1,13 +1,13 @@
 # WunderGraph Todo App
 
-The Todo App demonstrates how to use WunderGraph with Next.js & Postgres with SWR.
+The Todo App demonstrates how to use WunderGraph with Next.js & PostgreSQL.
 
-Key features of the App are
+Key features of the App are:
 
 - Create, read, update, delete todos
-  - Mark Todos as complete
+  - Mark todos as complete
+  - Reorder todos
 - Optimistic updates
-- Drag and drop support with database
 
 ## Getting Started
 
@@ -28,13 +28,6 @@ Each file becomes an Operation. The Operation name is not relevant, the file nam
 
 Change the `schema.prisma` file and run `npm run migrate %your_migration_name%`,
 e.g. `npm run migrate "add pets"`.
-
-## Seeding the Database
-
-Once you've defined one or more Mutations in `./wundergraph/operations` (see CreateTodo.graphql as an example),
-you're able to use the generated TypeScript client to seed the Database.
-
-Modify `./seed/seed.ts` and run `npm run seed`.
 
 ## Cleanup
 
