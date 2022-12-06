@@ -1,4 +1,4 @@
-import { createClient, Operations } from '../graphql/client';
+import { createClient, Operations } from '../generated/client';
 
 import { createHooks } from '@wundergraph/swr';
 
