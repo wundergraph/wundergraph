@@ -1,4 +1,10 @@
-# WunderGraph Todo App
+---
+title:
+pageTitle: Next.js Todo App
+description:
+---
+
+# Next.js Todo App
 
 The Todo App demonstrates how to use WunderGraph with Next.js & PostgreSQL.
 
