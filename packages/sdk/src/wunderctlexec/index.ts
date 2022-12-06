@@ -4,6 +4,7 @@ import { wunderctlBinaryPath } from '@wundergraph/wunderctl';
 
 export interface WunderCtlExecArgs {
 	cmd: string[];
+	env?: Record<string, string>;
 	timeout?: number;
 }
 
@@ -15,6 +16,7 @@ export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnVal
 		encoding: 'utf-8',
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
+		env: args.env ?? {},
 		extendEnv: true,
 		stdio: 'pipe',
 	});
@@ -29,6 +31,7 @@ export const wunderctlSubprocess = (args: WunderCtlExecArgs): Subprocess => {
 	return execa(file, cmdArgs, {
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
+		env: args.env ?? {},
 		extendEnv: true,
 	});
 };
