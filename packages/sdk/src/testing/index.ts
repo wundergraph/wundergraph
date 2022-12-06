@@ -1,4 +1,6 @@
-import { Subprocess, wunderctlExec, wunderctlSubprocess } from '../wunderctlexec';
+import net from 'net';
+
+import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
 import { ClientConfigInit } from '../client/types';
 
@@ -37,8 +39,8 @@ type TestFn = TestPlainFn | TestPromiseFn;
  * running tests within WunderGraph applications.
  */
 export class Server<ClientType extends Client = Client> {
-	private readonly rootUrl: URL;
 	private readonly options: ServerOptions<ClientType>;
+	private nodeUrl: string = '';
 	private subprocess?: Subprocess;
 	private runningTestCount: number = 0;
 
@@ -51,21 +53,6 @@ export class Server<ClientType extends Client = Client> {
 	 * @param opts Optional ServerOptions
 	 */
 	constructor(opts?: Partial<ServerOptions<ClientType>>) {
-		const result = wunderctlExec({
-			cmd: ['node', 'url'],
-		});
-		if (result?.failed) {
-			throw new Error(result?.stderr);
-		}
-		const url = result?.stdout.trim();
-		if (!url) {
-			throw new Error('could not determine node URL');
-		}
-		try {
-			this.rootUrl = new URL(url);
-		} catch (e: any) {
-			throw new Error(`invalid node URL: ${e}`);
-		}
 		this.options = this.applyOptions(opts);
 	}
 
@@ -89,7 +76,7 @@ export class Server<ClientType extends Client = Client> {
 	}
 
 	private url(rel: string): string {
-		return this.rootUrl + rel;
+		return this.nodeUrl + rel;
 	}
 
 	/**
@@ -110,8 +97,20 @@ export class Server<ClientType extends Client = Client> {
 			// Already running
 			return;
 		}
-		let cmd = ['node', 'start'];
-		const subprocess = wunderctlSubprocess({ cmd });
+		let nodePort = await this.freeport();
+		let serverPort = await this.freeport();
+		this.nodeUrl = `http://localhost:${nodePort}/`;
+		let cmd = ['node', 'start', '-l', 'warning'];
+		let env = {
+			WG_CLOUD: 'true',
+			WG_NODE_URL: this.nodeUrl,
+			WG_NODE_HOST: '0.0.0.0',
+			WG_NODE_PORT: nodePort.toString(),
+			WG_SERVER_URL: `http://localhost:${serverPort}/`,
+			WG_SERVER_HOST: '0.0.0.0',
+			WG_SERVER_PORT: serverPort.toString(),
+		};
+		const subprocess = wunderctlSubprocess({ cmd, env });
 		subprocess?.stdout?.pipe(process.stdout);
 		subprocess?.stderr?.pipe(process.stderr);
 		const health = this.url('/health');
@@ -202,13 +201,23 @@ export class Server<ClientType extends Client = Client> {
 
 	/**
 	 * Returns a configuration suitable for createClient() which allows
-	 * the testing framework to intercept requests.
+	 * the testing framework to serve requests.
 	 *
 	 * @returns A ClientConfig-compatible object
 	 */
-	clientConfig(): { customFetch: any } {
+	clientConfig(): ClientConfigInit {
 		return {
+			baseURL: this.nodeUrl,
 			customFetch: this.options.fetch,
 		};
+	}
+
+	private async freeport(): Promise<number> {
+		const server = net.createServer();
+		await new Promise<void>((resolve, reject) => server.listen(0, resolve).on('error', reject));
+		const address = server.address() as net.AddressInfo;
+		const port = address.port;
+		await new Promise((resolve) => server.close(resolve));
+		return port;
 	}
 }
