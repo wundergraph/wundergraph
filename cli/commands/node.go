@@ -59,28 +59,8 @@ var nodeStartCmd = &cobra.Command{
 	},
 }
 
-var nodeUrlCmd = &cobra.Command{
-	Use:   "url",
-	Short: "url prints the WunderGraph node URL",
-	Run: func(cmd *cobra.Command, args []string) {
-		ctx := context.Background()
-		n, err := NewWunderGraphNode(ctx)
-		if err != nil {
-			log.Fatal("Could not create node: %w", zap.Error(err))
-		}
-		config, err := CreateWunderGraphNodeConfiguration(n)
-		if err != nil {
-			if err != nil {
-				log.Fatal("Could not create node configuration: %w", zap.Error(err))
-			}
-		}
-		fmt.Println(config.Api.Options.PublicNodeUrl)
-	},
-}
-
 func init() {
 	nodeCmd.AddCommand(nodeStartCmd)
-	nodeCmd.AddCommand(nodeUrlCmd)
 	rootCmd.AddCommand(nodeCmd)
 
 	nodeStartCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
@@ -115,51 +95,43 @@ func WithIdleHandler(idleHandler func()) Option {
 	}
 }
 
-func CreateWunderGraphNodeConfiguration(n *node.Node) (*node.WunderNodeConfig, error) {
-	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
-	if !files.FileExists(configFile) {
-		return nil, fmt.Errorf("could not find configuration file: %s", configFile)
-	}
-
-	data, err := os.ReadFile(configFile)
-	if err != nil {
-		log.Error("Failed to read file", zap.String("filePath", configFile), zap.Error(err))
-		return nil, err
-	}
-
-	if len(data) == 0 {
-		log.Error("Config file is empty", zap.String("filePath", configFile))
-		return nil, errors.New("config file is empty")
-	}
-
-	var graphConfig wgpb.WunderGraphConfiguration
-	err = json.Unmarshal(data, &graphConfig)
-	if err != nil {
-		log.Error("Failed to unmarshal", zap.String("filePath", configFile), zap.Error(err))
-		return nil, errors.New("failed to unmarshal config file")
-	}
-
-	wunderNodeConfig, err := node.CreateConfig(&graphConfig)
-	if err != nil {
-		log.Error("Failed to create config", zap.String("filePath", configFile), zap.Error(err))
-		return nil, err
-	}
-	return wunderNodeConfig, nil
-}
-
 func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 	var options options
 	for i := range opts {
 		opts[i](&options)
 	}
 
-	config, err := CreateWunderGraphNodeConfiguration(n)
+	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
+	if !files.FileExists(configFile) {
+		return fmt.Errorf("could not find configuration file: %s", configFile)
+	}
+
+	data, err := os.ReadFile(configFile)
 	if err != nil {
+		log.Error("Failed to read file", zap.String("filePath", configFile), zap.Error(err))
+		return err
+	}
+
+	if len(data) == 0 {
+		log.Error("Config file is empty", zap.String("filePath", configFile))
+		return errors.New("config file is empty")
+	}
+
+	var graphConfig wgpb.WunderGraphConfiguration
+	err = json.Unmarshal(data, &graphConfig)
+	if err != nil {
+		log.Error("Failed to unmarshal", zap.String("filePath", configFile), zap.Error(err))
+		return errors.New("failed to unmarshal config file")
+	}
+
+	wunderNodeConfig, err := node.CreateConfig(&graphConfig)
+	if err != nil {
+		log.Error("Failed to create config", zap.String("filePath", configFile), zap.Error(err))
 		return err
 	}
 
 	nodeOpts := []node.Option{
-		node.WithStaticWunderNodeConfig(config),
+		node.WithStaticWunderNodeConfig(wunderNodeConfig),
 		node.WithDebugMode(rootFlags.DebugMode),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),

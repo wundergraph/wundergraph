@@ -40,7 +40,7 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Lo
 	return &Node{
 		info:           info,
 		ctx:            ctx,
-		configCh:       make(chan *WunderNodeConfig),
+		configCh:       make(chan WunderNodeConfig),
 		pool:           pool.New(),
 		log:            log.With(zap.String("component", "@wundergraph/node")),
 		WundergraphDir: wundergraphDir,
@@ -59,7 +59,7 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Lo
 type Node struct {
 	ctx            context.Context
 	info           BuildInfo
-	configCh       chan *WunderNodeConfig
+	configCh       chan WunderNodeConfig
 	server         *http.Server
 	pool           *pool.Pool
 	log            *zap.Logger
@@ -100,9 +100,9 @@ func WithHooksServerHealthCheck(timeout time.Duration) Option {
 	}
 }
 
-func WithStaticWunderNodeConfig(config *WunderNodeConfig) Option {
+func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	return func(options *options) {
-		options.staticConfig = config
+		options.staticConfig = &config
 	}
 }
 
@@ -197,7 +197,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		n.log.Info("Api config: static")
 
 		g.Go(func() error {
-			err := n.startServer(options.staticConfig)
+			err := n.startServer(*options.staticConfig)
 			if err != nil {
 				n.log.Error("could not start a node",
 					zap.Error(err),
@@ -351,7 +351,7 @@ func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, b
 	return healthCheck, true
 }
 
-func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
+func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	logLevel := nodeConfig.Api.Options.Logging.Level
 	if n.options.enableDebugMode {
 		logLevel = zapcore.DebugLevel

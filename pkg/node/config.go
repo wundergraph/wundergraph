@@ -23,7 +23,7 @@ type WunderNodeConfig struct {
 	Api    *apihandler.Api
 }
 
-func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig, error) {
+func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig, error) {
 	const (
 		defaultTimeout = 10 * time.Second
 	)
@@ -32,7 +32,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 
 	logLevel, err := logging.FindLogLevel(logLevelStr)
 	if err != nil {
-		return nil, err
+		return WunderNodeConfig{}, err
 	}
 
 	listener := &apihandler.Listener{
@@ -45,7 +45,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds) * time.Second
 	}
 
-	config := &WunderNodeConfig{
+	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
 			Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
