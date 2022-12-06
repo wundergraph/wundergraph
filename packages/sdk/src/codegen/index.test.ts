@@ -432,6 +432,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							Internal: false,
 						},
 					],
+					InvalidOperationNames: [],
 					CorsConfiguration: {
 						maxAge: 120,
 						exposedHeaders: ['*'],

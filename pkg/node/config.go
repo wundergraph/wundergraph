@@ -53,6 +53,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 			EnableSingleFlight:    true,
 			EnableGraphqlEndpoint: graphConfig.DangerouslyEnableGraphQLEndpoint,
 			Operations:            graphConfig.Api.Operations,
+			InvalidOperationNames: graphConfig.Api.InvalidOperationNames,
 			CorsConfiguration:     graphConfig.Api.CorsConfiguration,
 			S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
 			CacheConfig: &wgpb.ApiCacheConfig{
