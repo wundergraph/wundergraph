@@ -1,24 +1,24 @@
-import { Reorder } from "framer-motion";
-import { useState } from "react";
-import { useSWRConfig } from "swr";
+import { Reorder } from 'framer-motion';
+import { useState } from 'react';
+import { useSWRConfig } from 'swr';
 
-import { useQuery } from "../components/generated/nextjs";
-import TodoItem from "../components/TodoItem";
+import { useQuery } from '../components/generated/nextjs';
+import TodoItem from '../components/TodoItem';
 
-import useReorderTodoMutation from "../hooks/useReorderTodoMutation";
-import { Todo, Todos } from "../types";
+import useReorderTodoMutation from '../hooks/useReorderTodoMutation';
+import { Todo, Todos } from '../types';
 
 const TodoList = () => {
 	const { mutate } = useSWRConfig();
 	const { data } = useQuery({
-		operationName: "Todos",
+		operationName: 'Todos',
 	});
 	const todos = data?.todos;
 	const [previousTodos, setPreviousTodos] = useState<Todo[] | undefined>(undefined);
 	const reorderTodo = useReorderTodoMutation();
 
 	function handleReorder(newOrder: Todos) {
-		mutate({ operationName: "Todos" }, { todos: newOrder }, { revalidate: false });
+		mutate({ operationName: 'Todos' }, { todos: newOrder }, { revalidate: false });
 	}
 
 	async function reorderItems(item: Todo, index: number) {

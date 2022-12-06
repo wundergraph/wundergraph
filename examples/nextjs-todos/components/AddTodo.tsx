@@ -1,10 +1,13 @@
-import { useRef, useState } from "react";
-import useAddMutation from "../hooks/useAddTodoMutation";
+import { useRef, useState } from 'react';
+import { CheckIcon } from '@heroicons/react/24/solid';
+
+import useAddMutation from '../hooks/useAddTodoMutation';
+import clsx from 'clsx';
 
 const AddTodo = () => {
 	const createTodo = useAddMutation();
 
-	const [title, setTitle] = useState<string>("");
+	const [title, setTitle] = useState<string>('');
 
 	const titleRef = useRef<HTMLInputElement>(null);
 
@@ -16,15 +19,15 @@ const AddTodo = () => {
 	}
 
 	function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === "Escape") {
+		if (event.key === 'Escape') {
 			clearAdd();
-		} else if (event.key === "Enter") {
+		} else if (event.key === 'Enter') {
 			addTodo();
 		}
 	}
 
 	function clearAdd() {
-		setTitle("");
+		setTitle('');
 	}
 
 	return (
@@ -38,20 +41,17 @@ const AddTodo = () => {
 				onChange={(e) => {
 					setTitle(e.target.value);
 				}}
-				className="bg-gray-600 py-3 pl-5 pr-10 w-72 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-opacity-75"
+				className="py-2.5 pl-5 h-11 pr-10 w-72 rounded-md border-slate-600 bg-slate-800 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500  transition"
 			/>
-			<div onClick={addTodo} className="absolute right-1.5 top-3 cursor-pointer hover:bg-zinc-500 hover:rounded">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					fill="none"
-					viewBox="0 0 24 24"
-					strokeWidth={1.5}
-					stroke="white"
-					className="w-6 h-6"
-				>
-					<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-				</svg>
-			</div>
+			<button
+				onClick={addTodo}
+				className={clsx(
+					'absolute transition right-1 top-1 h-9 w-9 flex items-center justify-center cursor-pointer hover:bg-gray-700 rounded text-white',
+					{ 'opacity-40': title.trim().length === 0 }
+				)}
+			>
+				<CheckIcon className="w-6 h-6" />
+			</button>
 		</div>
 	);
 };

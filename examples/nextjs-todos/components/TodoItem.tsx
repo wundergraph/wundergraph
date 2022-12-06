@@ -1,10 +1,11 @@
-import clsx from "clsx";
-import React, { Fragment, useState } from "react";
+import clsx from 'clsx';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
-import useDeleteTodoMutation from "../hooks/useDeleteTodoMutation";
-import useUpdateCompleteStatusMutation from "../hooks/useUpdateCompleteStatusMutation";
-import useUpdateTitleMutation from "../hooks/useUpdateTitleMutation";
-import { Todo } from "../types";
+import useDeleteTodoMutation from '../hooks/useDeleteTodoMutation';
+import useUpdateCompleteStatusMutation from '../hooks/useUpdateCompleteStatusMutation';
+import useUpdateTitleMutation from '../hooks/useUpdateTitleMutation';
+import { Todo } from '../types';
 
 interface TodoItemProps {
 	todo: Todo;
@@ -15,12 +16,31 @@ function TodoItem(props: TodoItemProps) {
 	const editTodoTitle = useUpdateTitleMutation();
 	const updateCompleteTodo = useUpdateCompleteStatusMutation();
 	const deleteTodo = useDeleteTodoMutation();
+	const inputRef = useRef<HTMLInputElement>(null);
 	const [title, setTitle] = useState<string>(todo.title);
 	const [completed, setCompleted] = useState<boolean>(todo.completed);
 	const [editMode, setEditMode] = useState<boolean>(false);
 
+	useEffect(() => {
+		const listener = (event: MouseEvent | TouchEvent) => {
+			const target = event.target as HTMLElement;
+			if (!inputRef.current || inputRef.current.contains(target)) {
+				return;
+			}
+			setEditMode(false);
+		};
+		if (editMode) {
+			document.addEventListener('mousedown', listener);
+			document.addEventListener('touchstart', listener);
+		}
+		return () => {
+			document.removeEventListener('mousedown', listener);
+			document.removeEventListener('touchstart', listener);
+		};
+	}, [editMode]);
+
 	function updateCompletedStatus(e: React.ChangeEvent<HTMLInputElement>) {
-		let newCheckedStatus: boolean = e.target.checked;
+		const newCheckedStatus = e.target.checked;
 		setCompleted(newCheckedStatus);
 		updateCompleteTodo.trigger({ id: todo.id, complete: newCheckedStatus }, { throwOnError: false });
 	}
@@ -44,89 +64,80 @@ function TodoItem(props: TodoItemProps) {
 		setTitle(todo.title);
 	}
 
-	async function titleKeyHandler(event: React.KeyboardEvent<HTMLInputElement>) {
-		if (event.key === "Escape") {
+	function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+		if (event.key === 'Escape') {
 			clearEdit();
 			resetTitle();
-		} else if (event.key === "Enter") {
-			await editTodoTile();
+		} else if (event.key === 'Enter') {
+			editTodoTile();
 		}
 	}
 
 	function enableEditMode() {
 		setEditMode(true);
+		setTimeout(() => {
+			inputRef.current?.focus();
+		});
 	}
 
 	return (
-		<Fragment>
-			{!editMode && (
-				<div className="group flex justify-between items-center justify-center py-4 my-2 px-2 w-72 hover:bg-zinc-600 hover:rounded-md last-of-type:border-0">
-					<Fragment>
-						<div className="flex items-center mx-1">
-							<input
-								onChange={updateCompletedStatus}
-								type="checkbox"
-								checked={completed}
-								className="h-4 w-4 rounded-full accent-pink-500"
-							/>
-							<div
-								onDoubleClick={enableEditMode}
-								className={clsx(
-									["cursor-pointer ml-3 text-sm font-medium text-gray-300"],
-									[completed && "line-through"]
-								)}
-							>
-								<span className="break-all">{title}</span>
-							</div>
-						</div>
-						<div onClick={deleteTodoItem} className="flex-col items-center ml-5 cursor-pointer hidden group-hover:flex">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="#fafafa"
-								className="w-5 h-5 hover:bg-zinc-500 hover:rounded"
-							>
-								<path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-							</svg>
-						</div>
-					</Fragment>
-				</div>
+		<div
+			className={clsx(
+				'group flex justify-between items-center py-3 my-2 pl-2 pr-1 w-72 h-11 transition hover:bg-slate-800 rounded-md relative',
+				editMode && 'bg-slate-800'
 			)}
-			{editMode && (
+		>
+			{!editMode ? (
 				<Fragment>
-					<div className="relative">
+					<div className="flex flex-1 items-center mx-1">
 						<input
-							type="text"
-							onKeyDown={titleKeyHandler}
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-							autoFocus
-							className={clsx(
-								[completed && "line-through", editMode && "mb-1"],
-								"py-3 pl-10 pr-2  h-12 border-solid  w-72 text-sm bg-zinc-500 rounded text-white focus:outline-none "
-							)}
+							onChange={updateCompletedStatus}
+							type="checkbox"
+							checked={completed}
+							className="h-4 w-4 rounded-full transition cursor-pointer accent-pink-500 border-gray-500 bg-slate-800 text-pink-600 focus:ring-pink-500 focus:ring-1 focus:border-pink-500 hover:ring-1 focus:ring-offset-0 hover:border-pink-500 ring-pink-500"
 						/>
 						<div
-							onClick={editTodoTile}
-							className="absolute right-4 top-3.5 cursor-pointer hover:bg-zinc-500 hover:rounded"
+							onDoubleClick={enableEditMode}
+							className={clsx('flex-1 cursor-pointer ml-3 text-sm font-medium text-gray-300', [
+								completed && 'line-through',
+							])}
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="white"
-								className="w-5 h-5"
-							>
-								<path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-							</svg>
+							<span className="break-all">{title}</span>
 						</div>
+					</div>
+					<div
+						onClick={deleteTodoItem}
+						className="flex-col items-center justify-center ml-5  h-9 w-9 transition cursor-pointer hidden group-hover:flex text-white opacity-50 hover:opacity-100 hover:bg-gray-700 rounded"
+					>
+						<XMarkIcon className="w-6 h-6" />
+					</div>
+				</Fragment>
+			) : (
+				<Fragment>
+					<div className="relative w-full">
+						<input
+							ref={inputRef}
+							type="text"
+							onKeyDown={handleKeyDown}
+							value={title}
+							onChange={(e) => setTitle(e.target.value)}
+							className={clsx(
+								'py-2.5 pl-8 pr-2 h-11 -mt-[1px] border-0 w-full leadig-0 text-sm font-medium bg-slate-800 rounded text-white focus:outline-none focus:border-0 focus:ring-0'
+							)}
+						/>
+						<button
+							onClick={editTodoTile}
+							className={clsx(
+								'absolute transition right-0 top-1 -mt-[1px] h-9 w-9 flex items-center justify-center cursor-pointer hover:bg-gray-700 rounded text-white',
+								{ 'opacity-40': title.trim().length === 0 }
+							)}
+						>
+							<CheckIcon className="w-6 h-6" />
+						</button>
 					</div>
 				</Fragment>
 			)}
-		</Fragment>
+		</div>
 	);
 }
 

@@ -16,6 +16,8 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.13",
+    "@tailwindcss/forms": "^0.5.3",
     "@wundergraph/nextjs": "^0.5.2",
     "@wundergraph/sdk": "^0.123.2",
     "clsx": "^1.2.1",
@@ -35,6 +37,7 @@
     "open-cli": "^7.0.1",
     "postcss": "^8.4.19",
     "prisma": "^4.0.0",
+    "tailwindcss": "^3.2.4",
     "ts-node": "^10.8.0",
     "typescript": "^4.8.2",
     "wait-on": "^6.0.1"
