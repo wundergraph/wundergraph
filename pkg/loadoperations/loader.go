@@ -2,6 +2,7 @@ package loadoperations
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -15,6 +16,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/astprinter"
 	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
+	"github.com/wundergraph/graphql-go-tools/pkg/astvisitor"
 )
 
 type Loader struct {
@@ -27,9 +29,10 @@ type GqlFile struct {
 }
 
 type Output struct {
-	Files  []GqlFile `json:"files"`
-	Errors []string  `json:"errors"`
-	Info   []string  `json:"info"`
+	Files   []GqlFile `json:"files"`
+	Invalid []string  `json:"invalid"`
+	Errors  []string  `json:"errors"`
+	Info    []string  `json:"info"`
 }
 
 func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath string) string {
@@ -116,37 +119,20 @@ func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath stri
 
 	normalizer := astnormalization.NewWithOpts(astnormalization.WithRemoveFragmentDefinitions())
 
-	for i, file := range out.Files {
-		content, err := ioutil.ReadFile(file.FilePath)
+	for ii, file := range out.Files {
+		operation, err := l.loadOperation(file, normalizer, fragments, &schemaDocument)
 		if err != nil {
-			out.Errors = append(out.Errors, fmt.Sprintf("error reading file: %s", err.Error()))
-			continue
+			out.Invalid = append(out.Invalid, file.OperationName)
+			var ierr infoError
+			if errors.As(err, &ierr) {
+				out.Info = append(out.Errors, err.Error())
+			} else {
+				out.Errors = append(out.Errors, err.Error())
+			}
 		}
-		doc, report := astparser.ParseGraphqlDocumentString(string(content) + fragments)
-		if report.HasErrors() {
-			out.Errors = append(out.Errors, fmt.Sprintf("error parsing operation: %s", report.Error()))
-			continue
+		if operation != "" {
+			out.Files[ii].Content = operation
 		}
-		if len(doc.OperationDefinitions) != 1 {
-			out.Errors = append(out.Errors, fmt.Sprintf("graphql document must contain exactly one operation: %s\n", file.FilePath))
-			continue
-		}
-
-		normalizer.NormalizeOperation(&doc, &schemaDocument, &report)
-		if report.HasErrors() {
-			out.Errors = append(out.Errors, fmt.Sprintf("error normalizing operation: %s, operationFilePath: %s", report.Error(), file.FilePath))
-			continue
-		}
-
-		nameRef := doc.Input.AppendInputString(file.OperationName)
-		doc.OperationDefinitions[0].Name = nameRef
-		namedOperation, err := astprinter.PrintString(&doc, nil)
-		if err != nil {
-			out.Errors = append(out.Errors, fmt.Sprintf("error printing named operation: %s", err.Error()))
-			continue
-		}
-
-		out.Files[i].Content = namedOperation
 	}
 
 	encodedOutput, err := json.Marshal(out)
@@ -157,6 +143,56 @@ func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath stri
 		encodedOutput, _ = json.Marshal(out)
 	}
 	return string(encodedOutput)
+}
+
+type infoError string
+
+func (e infoError) IsInfo() bool  { return true }
+func (e infoError) Error() string { return string(e) }
+
+func (l *Loader) loadOperation(file GqlFile, normalizer *astnormalization.OperationNormalizer, fragments string, schemaDocument *ast.Document) (string, error) {
+	content, err := ioutil.ReadFile(file.FilePath)
+	if err != nil {
+		return "", fmt.Errorf("error reading file: %w", err)
+	}
+	doc, report := astparser.ParseGraphqlDocumentString(string(content) + fragments)
+	if report.HasErrors() {
+		return "", fmt.Errorf("error parsing operation: %s", report.Error())
+	}
+	ops := l.countOperations(&doc, schemaDocument)
+	if ops != 1 {
+		return "", fmt.Errorf("graphql document must contain exactly one operation: %s", file.FilePath)
+	}
+
+	normalizer.NormalizeOperation(&doc, schemaDocument, &report)
+	if report.HasErrors() {
+		return "", fmt.Errorf("error normalizing operation: %s, operationFilePath: %s", report.Error(), file.FilePath)
+	}
+
+	nameRef := doc.Input.AppendInputString(file.OperationName)
+	doc.OperationDefinitions[0].Name = nameRef
+	namedOperation, err := astprinter.PrintString(&doc, nil)
+	if err != nil {
+		return "", fmt.Errorf("error printing named operation: %s", err.Error())
+	}
+
+	return namedOperation, nil
+}
+
+type opCounter struct {
+	count int
+}
+
+func (c *opCounter) EnterOperationDefinition(ref int) {
+	c.count += 1
+}
+
+func (l *Loader) countOperations(doc *ast.Document, schema *ast.Document) int {
+	walker := astvisitor.NewWalker(0)
+	counter := &opCounter{}
+	walker.RegisterEnterOperationVisitor(counter)
+	walker.Walk(doc, schema, nil)
+	return counter.count
 }
 
 func (l *Loader) loadFragments(schemaDocument *ast.Document, fragmentsRootPath string) (string, error) {
