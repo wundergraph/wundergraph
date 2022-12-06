@@ -1,5 +1,5 @@
 import { Reorder } from 'framer-motion';
-import React from 'react';
+import React, { useState } from 'react';
 import { useSWRConfig } from 'swr';
 
 import { useQuery } from '../components/generated/nextjs';
@@ -14,26 +14,30 @@ const TodoList = () => {
 		operationName: 'Todos',
 	});
 	const todos = data?.todos;
-
+	const [previousTodos, setPreviousTodos] = useState<Todo[] | undefined>(undefined);
 	const reorderTodo = useReorderTodoMutation();
 
 	function handleReorder(newOrder: Todos) {
-		// optimistically update the order
 		mutate({ operationName: 'Todos' }, { todos: newOrder }, { revalidate: false });
 	}
 
-	function reorderItems(item: Todo, index: number) {
-		const newOrder = index + 1;
-		const oldOrder = item.order;
-
-		if (newOrder && newOrder !== oldOrder) {
-			reorderTodo.trigger({ id: item.id, order: newOrder }, { throwOnError: false });
+	async function reorderItems(item: Todo, index: number) {
+		if (previousTodos) {
+			const newOrder = previousTodos[index].order;
+			const oldOrder = item.order;
+			if (newOrder && newOrder !== oldOrder) {
+				reorderTodo.trigger({ id: item.id, order: newOrder }, { throwOnError: false });
+			}
 		}
 	}
+
 	return todos ? (
 		<Reorder.Group axis="y" values={todos} onReorder={handleReorder}>
 			{todos.map((todo, index: number) => (
 				<Reorder.Item
+					onDragStart={() => {
+						setPreviousTodos(JSON.parse(JSON.stringify(todos)));
+					}}
 					onDragEnd={() => {
 						reorderItems(todo, index);
 					}}

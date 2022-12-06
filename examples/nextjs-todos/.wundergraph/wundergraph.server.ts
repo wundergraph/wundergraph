@@ -9,13 +9,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			CreateTodo: {
 				mutatingPreResolve: async ({ input, internalClient }) => {
 					const { data } = await internalClient.queries.GetLastOrder();
-
-					if (!data?.lastTodo?.order) {
-						return { ...input, order: 1 };
+					let order = 1;
+					if (data && data.lastTodo.length === 1) {
+						order = data.lastTodo[0].order + 1;
 					}
-
-					const order = data.lastTodo.order + 1;
-
 					return {
 						...input,
 						order,
