@@ -10,8 +10,8 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				mutatingPreResolve: async ({ input, internalClient }) => {
 					const { data } = await internalClient.queries.GetLastOrder();
 					let order = 1;
-					if (data && data.lastTodo.length === 1) {
-						order = data.lastTodo[0].order + 1;
+					if (data?.lastItem) {
+						order = data.lastItem.order + 1;
 					}
 					return {
 						...input,

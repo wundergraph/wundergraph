@@ -1,5 +1,5 @@
 query @internalOperation {
-	lastTodo: db_findManyTodo(take: 1, skip: 0, orderBy: { order: desc }) {
+	lastItem: db_findFirstTodo(orderBy: [{ order: desc }]) {
 		order
 	}
 }
