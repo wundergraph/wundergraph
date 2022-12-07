@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	validEmptySchema = `{"type":"object","properties":{},"additionalProperties":false}`
-	validSchema      = `{"type":"object","properties":{"id":{"type":"string"}},"additionalProperties":false,"required":["id"]}`
-	brokenSchema     = `{"type":"object","properties":{"id":{"type":"foo"}},"additionalProperties":false,"required":["id"]}`
+	validEmptySchema       = `{"type":"object","properties":{},"additionalProperties":false}`
+	validSchema            = `{"type":"object","properties":{"id":{"type":"string"}},"additionalProperties":false,"required":["id"]}`
+	validNestedArraySchema = `{"type":"object","properties":{"foo":{"type":"string"},"bar":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"}},"additionalProperties":false,"required":["id"]}}},"additionalProperties":false,"required":["foo","bar"]}`
+	brokenSchema           = `{"type":"object","properties":{"id":{"type":"foo"}},"additionalProperties":false,"required":["id"]}`
 )
 
 func TestValidator_Validate(t *testing.T) {
@@ -59,6 +60,18 @@ func TestValidator_Validate(t *testing.T) {
 	actual = validator.Validate(context.Background(), []byte(`{}`), out)
 	assert.Equal(t, false, actual)
 	assert.Equal(t, `{"Message":"Bad Request: Invalid input","Input":{},"Errors":[{"propertyPath":"/","invalidValue":{},"message":"\"id\" value is required"}]}
+`, out.String())
+
+	out.Reset()
+	validator, err = NewValidator(validNestedArraySchema, false)
+	assert.NoError(t, err)
+	actual = validator.Validate(context.Background(), []byte(`{"foo":"bar","bar":[{"id":"bar"}]}`), out)
+	assert.Equal(t, true, actual)
+
+	out.Reset()
+	actual = validator.Validate(context.Background(), []byte(`{"foo":"bar","bar":[{"id":true}]}`), out)
+	assert.Equal(t, false, actual)
+	assert.Equal(t, `{"Message":"Bad Request: Invalid input","Input":{"foo":"bar","bar":[{"id":true}]},"Errors":[{"propertyPath":"/bar/0/id","invalidValue":true,"message":"type should be string, got boolean"}]}
 `, out.String())
 }
 
