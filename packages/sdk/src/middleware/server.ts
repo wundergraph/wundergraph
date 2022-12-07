@@ -19,7 +19,7 @@ import {
 	WunderGraphServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
-import { ServerLogger, resolveServerLogLevel } from '../logger';
+import { ServerLogger, resolvePinoLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 
@@ -150,8 +150,8 @@ export const createServer = async ({
 	gracefulShutdown,
 	clientFactory,
 }: ServerRunOptions): Promise<FastifyInstance> => {
-	if (config.api?.serverOptions?.logger?.level && process.env.WG_DEBUG_MODE !== 'true') {
-		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
+	if (logger) {
+		logger.level = resolvePinoLogLevel();
 	}
 
 	const fastify = Fastify({

@@ -3,15 +3,6 @@ package wgpb;
 
 option go_package = "github.com/wundergraph/wundergraph/pkg/wgpb";
 
-enum LogLevel {
-	DEBUG = 0;
-	INFO = 1;
-	ERROR = 2;
-	WARNING = 3;
-	PANIC = 4;
-	FATAL = 5;
-}
-
 message ApiAuthenticationConfig {
 	CookieBasedAuthentication cookieBased = 1;
 	ApiAuthenticationHooks hooks = 2;
@@ -458,26 +449,16 @@ message ListenerOptions {
 	ConfigurationVariable port = 2;
 }
 
-message NodeLogging {
-	ConfigurationVariable level = 1;
-}
-
 message NodeOptions {
 	ConfigurationVariable nodeUrl = 1;
 	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
-	NodeLogging logger = 3;
 	int64 defaultRequestTimeoutSeconds = 5;
-}
-
-message ServerLogging {
-	ConfigurationVariable level = 1;
 }
 
 message ServerOptions {
 	ConfigurationVariable serverUrl = 1;
 	ListenerOptions listen = 2;
-	ServerLogging logger = 3;
 }
 
 message WebhookConfiguration {

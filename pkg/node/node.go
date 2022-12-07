@@ -15,7 +15,6 @@ import (
 	"github.com/pires/go-proxyproto"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
 
@@ -24,7 +23,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
@@ -352,15 +350,6 @@ func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, b
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
-	logLevel := nodeConfig.Api.Options.Logging.Level
-	if n.options.enableDebugMode {
-		logLevel = zapcore.DebugLevel
-	}
-
-	n.log = logging.
-		New(n.options.prettyLogging, n.options.enableDebugMode, logLevel).
-		With(zap.String("component", "@wundergraph/node"))
-
 	router := mux.NewRouter()
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()

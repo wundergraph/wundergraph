@@ -3,8 +3,6 @@ package apihandler
 import (
 	"time"
 
-	"go.uber.org/zap/zapcore"
-
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -13,15 +11,10 @@ type Listener struct {
 	Port uint16
 }
 
-type Logging struct {
-	Level zapcore.Level
-}
-
 type Options struct {
 	ServerUrl      string
 	PublicNodeUrl  string
 	Listener       *Listener
-	Logging        Logging
 	DefaultTimeout time.Duration
 }
 

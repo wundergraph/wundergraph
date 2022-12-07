@@ -2,59 +2,6 @@
 
 export const protobufPackage = "wgpb";
 
-export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  ERROR = 2,
-  WARNING = 3,
-  PANIC = 4,
-  FATAL = 5,
-}
-
-export function logLevelFromJSON(object: any): LogLevel {
-  switch (object) {
-    case 0:
-    case "DEBUG":
-      return LogLevel.DEBUG;
-    case 1:
-    case "INFO":
-      return LogLevel.INFO;
-    case 2:
-    case "ERROR":
-      return LogLevel.ERROR;
-    case 3:
-    case "WARNING":
-      return LogLevel.WARNING;
-    case 4:
-    case "PANIC":
-      return LogLevel.PANIC;
-    case 5:
-    case "FATAL":
-      return LogLevel.FATAL;
-    default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum LogLevel");
-  }
-}
-
-export function logLevelToJSON(object: LogLevel): string {
-  switch (object) {
-    case LogLevel.DEBUG:
-      return "DEBUG";
-    case LogLevel.INFO:
-      return "INFO";
-    case LogLevel.ERROR:
-      return "ERROR";
-    case LogLevel.WARNING:
-      return "WARNING";
-    case LogLevel.PANIC:
-      return "PANIC";
-    case LogLevel.FATAL:
-      return "FATAL";
-    default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum LogLevel");
-  }
-}
-
 export enum AuthProviderKind {
   AuthProviderGithub = 0,
   AuthProviderOIDC = 1,
@@ -942,26 +889,16 @@ export interface ListenerOptions {
   port: ConfigurationVariable | undefined;
 }
 
-export interface NodeLogging {
-  level: ConfigurationVariable | undefined;
-}
-
 export interface NodeOptions {
   nodeUrl: ConfigurationVariable | undefined;
   publicNodeUrl: ConfigurationVariable | undefined;
   listen: ListenerOptions | undefined;
-  logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
-}
-
-export interface ServerLogging {
-  level: ConfigurationVariable | undefined;
 }
 
 export interface ServerOptions {
   serverUrl: ConfigurationVariable | undefined;
   listen: ListenerOptions | undefined;
-  logger: ServerLogging | undefined;
 }
 
 export interface WebhookConfiguration {
@@ -3390,39 +3327,8 @@ export const ListenerOptions = {
   },
 };
 
-function createBaseNodeLogging(): NodeLogging {
-  return { level: undefined };
-}
-
-export const NodeLogging = {
-  fromJSON(object: any): NodeLogging {
-    return { level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined };
-  },
-
-  toJSON(message: NodeLogging): unknown {
-    const obj: any = {};
-    message.level !== undefined &&
-      (obj.level = message.level ? ConfigurationVariable.toJSON(message.level) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<NodeLogging>, I>>(object: I): NodeLogging {
-    const message = createBaseNodeLogging();
-    message.level = (object.level !== undefined && object.level !== null)
-      ? ConfigurationVariable.fromPartial(object.level)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseNodeOptions(): NodeOptions {
-  return {
-    nodeUrl: undefined,
-    publicNodeUrl: undefined,
-    listen: undefined,
-    logger: undefined,
-    defaultRequestTimeoutSeconds: 0,
-  };
+  return { nodeUrl: undefined, publicNodeUrl: undefined, listen: undefined, defaultRequestTimeoutSeconds: 0 };
 }
 
 export const NodeOptions = {
@@ -3431,7 +3337,6 @@ export const NodeOptions = {
       nodeUrl: isSet(object.nodeUrl) ? ConfigurationVariable.fromJSON(object.nodeUrl) : undefined,
       publicNodeUrl: isSet(object.publicNodeUrl) ? ConfigurationVariable.fromJSON(object.publicNodeUrl) : undefined,
       listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
-      logger: isSet(object.logger) ? NodeLogging.fromJSON(object.logger) : undefined,
       defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
@@ -3445,7 +3350,6 @@ export const NodeOptions = {
     message.publicNodeUrl !== undefined &&
       (obj.publicNodeUrl = message.publicNodeUrl ? ConfigurationVariable.toJSON(message.publicNodeUrl) : undefined);
     message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
-    message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
     message.defaultRequestTimeoutSeconds !== undefined &&
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
     return obj;
@@ -3462,41 +3366,13 @@ export const NodeOptions = {
     message.listen = (object.listen !== undefined && object.listen !== null)
       ? ListenerOptions.fromPartial(object.listen)
       : undefined;
-    message.logger = (object.logger !== undefined && object.logger !== null)
-      ? NodeLogging.fromPartial(object.logger)
-      : undefined;
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
     return message;
   },
 };
 
-function createBaseServerLogging(): ServerLogging {
-  return { level: undefined };
-}
-
-export const ServerLogging = {
-  fromJSON(object: any): ServerLogging {
-    return { level: isSet(object.level) ? ConfigurationVariable.fromJSON(object.level) : undefined };
-  },
-
-  toJSON(message: ServerLogging): unknown {
-    const obj: any = {};
-    message.level !== undefined &&
-      (obj.level = message.level ? ConfigurationVariable.toJSON(message.level) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<ServerLogging>, I>>(object: I): ServerLogging {
-    const message = createBaseServerLogging();
-    message.level = (object.level !== undefined && object.level !== null)
-      ? ConfigurationVariable.fromPartial(object.level)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseServerOptions(): ServerOptions {
-  return { serverUrl: undefined, listen: undefined, logger: undefined };
+  return { serverUrl: undefined, listen: undefined };
 }
 
 export const ServerOptions = {
@@ -3504,7 +3380,6 @@ export const ServerOptions = {
     return {
       serverUrl: isSet(object.serverUrl) ? ConfigurationVariable.fromJSON(object.serverUrl) : undefined,
       listen: isSet(object.listen) ? ListenerOptions.fromJSON(object.listen) : undefined,
-      logger: isSet(object.logger) ? ServerLogging.fromJSON(object.logger) : undefined,
     };
   },
 
@@ -3513,7 +3388,6 @@ export const ServerOptions = {
     message.serverUrl !== undefined &&
       (obj.serverUrl = message.serverUrl ? ConfigurationVariable.toJSON(message.serverUrl) : undefined);
     message.listen !== undefined && (obj.listen = message.listen ? ListenerOptions.toJSON(message.listen) : undefined);
-    message.logger !== undefined && (obj.logger = message.logger ? ServerLogging.toJSON(message.logger) : undefined);
     return obj;
   },
 
@@ -3524,9 +3398,6 @@ export const ServerOptions = {
       : undefined;
     message.listen = (object.listen !== undefined && object.listen !== null)
       ? ListenerOptions.fromPartial(object.listen)
-      : undefined;
-    message.logger = (object.logger !== undefined && object.logger !== null)
-      ? ServerLogging.fromPartial(object.logger)
       : undefined;
     return message;
   },

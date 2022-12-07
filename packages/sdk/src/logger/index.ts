@@ -1,9 +1,7 @@
-import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/protobuf';
-import { resolveConfigurationVariable } from '../configure/variables';
 import { pino } from 'pino';
 import pretty from 'pino-pretty';
 
-export enum PinoLogLevel {
+enum PinoLogLevel {
 	Fatal = 'fatal',
 	Error = 'error',
 	Warn = 'warn',
@@ -13,44 +11,38 @@ export enum PinoLogLevel {
 	Silent = 'silent',
 }
 
-export const resolveServerLogLevel = (level: ConfigurationVariable): PinoLogLevel => {
-	const stringLevel = resolveConfigurationVariable(level);
+export const resolvePinoLogLevel = (): PinoLogLevel => {
+	if (process.env.WG_DEBUG_MODE === 'true') {
+		return PinoLogLevel.Debug;
+	}
+	if (!process.env.WG_CLI_LOG_LEVEL) {
+		return PinoLogLevel.Info;
+	}
 
-	return resolvePinoLogLevel(stringLevel);
-};
-
-const resolvePinoLogLevel = (level: string): PinoLogLevel => {
-	const stringLevel = level.toUpperCase();
-	const wgLogLevel = logLevelFromJSON(stringLevel);
-	switch (wgLogLevel) {
-		case LogLevel.FATAL:
+	const level = process.env.WG_CLI_LOG_LEVEL.toUpperCase();
+	switch (level) {
+		case 'FATAL':
 			return PinoLogLevel.Fatal;
-		case LogLevel.PANIC:
+		case 'PANIC':
 			return PinoLogLevel.Fatal;
-		case LogLevel.WARNING:
+		case 'WARNING':
 			return PinoLogLevel.Warn;
-		case LogLevel.ERROR:
+		case 'ERROR':
 			return PinoLogLevel.Error;
-		case LogLevel.INFO:
+		case 'INFO':
 			return PinoLogLevel.Info;
-		case LogLevel.DEBUG:
+		case 'DEBUG':
 			return PinoLogLevel.Debug;
 		default:
-			throw new Error(`Unknown log level: ${wgLogLevel}`);
+			throw new Error(`Unknown log level: ${level}`);
 	}
 };
 
 const initLogger = (): pino.Logger => {
 	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
-	const logLevel =
-		process.env.WG_DEBUG_MODE === 'true'
-			? PinoLogLevel.Debug
-			: process.env.WG_CLI_LOG_LEVEL
-			? resolvePinoLogLevel(process.env.WG_CLI_LOG_LEVEL)
-			: PinoLogLevel.Info;
 
 	let options: pino.LoggerOptions = {
-		level: logLevel,
+		level: resolvePinoLogLevel(),
 		formatters: {
 			level(label, number) {
 				return { level: label };

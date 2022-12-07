@@ -6,7 +6,6 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -27,13 +26,6 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 	const (
 		defaultTimeout = 10 * time.Second
 	)
-
-	logLevelStr := loadvariable.String(graphConfig.Api.NodeOptions.Logger.Level)
-
-	logLevel, err := logging.FindLogLevel(logLevelStr)
-	if err != nil {
-		return WunderNodeConfig{}, err
-	}
 
 	listener := &apihandler.Listener{
 		Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
@@ -65,12 +57,9 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 			AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
 			Webhooks:             graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
-				ServerUrl:     loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
-				PublicNodeUrl: loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
-				Listener:      listener,
-				Logging: apihandler.Logging{
-					Level: logLevel,
-				},
+				ServerUrl:      loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
+				PublicNodeUrl:  loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
+				Listener:       listener,
 				DefaultTimeout: defaultRequestTimeout,
 			},
 		},
