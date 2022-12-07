@@ -14,7 +14,7 @@ configureWunderGraphApplication({
 	operations,
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations],
+			templates: [...templates.typescript.all],
 		},
 	],
 	cors: {
