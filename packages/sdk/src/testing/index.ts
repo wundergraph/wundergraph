@@ -33,8 +33,6 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	debug: boolean;
 }
 
-export interface TestOptions {}
-
 type TestPlainFn = (server: Server) => void;
 type TestPromiseFn = (server: Server) => Promise<void>;
 
@@ -182,10 +180,9 @@ export class Server<ClientType extends Client = Client> {
 	 * Wrap a test function to automatically set up the server and tear it down (if needed)
 	 *
 	 * @param fn Test function to run
-	 * @param opts Optional TestOptions
 	 * @returns Async function wrapping the test function
 	 */
-	test(fn: TestFn, opts?: TestOptions): () => Promise<void> {
+	test(fn: TestFn): () => Promise<void> {
 		return async (): Promise<void> => {
 			try {
 				await this.beforeTest();
@@ -198,11 +195,10 @@ export class Server<ClientType extends Client = Client> {
 
 	/** Shorthand method for creating a test with Server.test() and running it
 	 * @param fn Test function to run
-	 * @param opts Optional TestOptions
 	 * @returns Nothing
 	 */
-	runTest(fn: TestFn, opts?: TestOptions): Promise<void> {
-		return this.test(fn, opts)();
+	runTest(fn: TestFn): Promise<void> {
+		return this.test(fn)();
 	}
 
 	/**
