@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.0](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.1.0...create-wundergraph-app@0.2.0) (2022-12-06)
+
+### Features
+
+* **create-wundergraph-app:** download latest tag instead of main ([#349](https://github.com/wundergraph/wundergraph/issues/349)) ([a1b82a1](https://github.com/wundergraph/wundergraph/commit/a1b82a1204401e538b3341e797e19f8e67b69095)) (@fiam)
+
 ## 0.1.0 (2022-11-18)
 
 ### Features
