@@ -6,7 +6,7 @@ description: This guide shows how to test your WunderGraph applications
 
 ## Headless testing
 
-WunderGraph comes with builtin support for running tests against your APIs, using a our type-safe
+WunderGraph comes with builtin support for running tests against your APIs, using a our
 TypeScript client. Our `Server` implementation sets up your WunderGraph server, runs your tests,
 and finally tears everything down.
 
