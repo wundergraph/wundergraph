@@ -29,6 +29,7 @@ import {
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
+import { WG_THROW_ON_OPERATION_LOADING_ERROR } from '../definition';
 import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
 
@@ -1255,6 +1256,7 @@ const handleTransformDirective = (
 
 interface LoadOperationsOutput {
 	files?: GqlFile[];
+	invalid?: string[];
 	errors?: string[];
 	info?: string[];
 }
@@ -1265,7 +1267,12 @@ interface GqlFile {
 	content: string;
 }
 
-export const loadOperations = (schemaFileName: string): string => {
+interface LoadedOperations {
+	content: string;
+	invalidOperationNames: string[];
+}
+
+export const loadOperations = (schemaFileName: string): LoadedOperations => {
 	const operationsPath = path.join(process.cwd(), 'operations');
 	const fragmentsPath = path.join(process.cwd(), 'fragments');
 	const schemaFilePath = path.join(process.cwd(), 'generated', schemaFileName);
@@ -1276,16 +1283,22 @@ export const loadOperations = (schemaFileName: string): string => {
 		throw new Error(result?.stderr);
 	}
 	const output = result?.stdout;
+	let content = '';
+	let invalidOperationNames: string[] = [];
 	if (output) {
 		const out = JSON.parse(output) as LoadOperationsOutput;
 		out.info?.forEach((msg) => Logger.info(msg));
 		out.errors?.forEach((msg) => Logger.error(msg));
-		if ((out.errors?.length ?? 0) > 0 && out?.errors?.[0]) {
+		if (WG_THROW_ON_OPERATION_LOADING_ERROR && (out.errors?.length ?? 0) > 0 && out?.errors?.[0]) {
 			throw new Error(out.errors[0]);
 		}
-		return out.files?.map((file) => file.content).join(' ') || '';
+		content = out.files?.map((file) => file.content).join(' ') || '';
+		invalidOperationNames = out.invalid ?? [];
 	}
-	return '';
+	return {
+		content,
+		invalidOperationNames,
+	};
 };
 
 export const removeHookVariables = (operation: string): string => {
