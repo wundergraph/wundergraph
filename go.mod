@@ -142,4 +142,4 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
-replace github.com/wundergraph/wundergraph/types => ./types
+// replace github.com/wundergraph/graphql-go-tools => ../graphql-go-tools

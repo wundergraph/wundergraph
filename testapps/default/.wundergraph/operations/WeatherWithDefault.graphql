@@ -1,0 +1,11 @@
+query MyQuery($name: String = "Bern") {
+	weather_getCityByName(name: $name) {
+		name
+		id
+		weather {
+			temperature {
+				actual
+			}
+		}
+	}
+}
