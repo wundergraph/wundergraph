@@ -3,7 +3,7 @@ export const handlebarTemplate = `
 import {
 	Client,
 	ClientConfig,
-	ClientConfigInit,
+	CreateClientConfig,
 	User,
 	UploadRequestOptions,
 	OperationMetadata,
@@ -100,7 +100,7 @@ export class WunderGraphClient extends Client {
 	}
 }
 
-export const createClient = (config?: ClientConfigInit) => {
+export const createClient = (config?: CreateClientConfig) => {
 	return new WunderGraphClient({
 		...defaultClientConfig,
 		...config,

@@ -11,7 +11,7 @@ export type {
 	OperationRequestOptions,
 	GraphQLError,
 	ClientConfig,
-	ClientConfigInit,
+	CreateClientConfig,
 	JSONObject,
 	JSONValue,
 	SubscriptionResult,

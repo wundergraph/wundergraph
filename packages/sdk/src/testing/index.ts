@@ -2,7 +2,7 @@ import net from 'net';
 
 import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
-import { ClientConfigInit } from '../client/types';
+import { CreateClientConfig } from '../client/types';
 
 const readyStatus = 'READY';
 interface ServerHealth {
@@ -17,7 +17,7 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * createClient from the generated TypeScript WunderGraph client.
 	 * Allows getting the client with appropriate options via Server.client.
 	 */
-	createClient: (config?: ClientConfigInit) => ClientType;
+	createClient: (config?: CreateClientConfig) => ClientType;
 	/**
 	 * fetch function to use internally.
 	 *
@@ -96,7 +96,7 @@ export class Server<ClientType extends Client = Client> {
 	 * @returns Client configured for testing
 	 */
 	client(): ClientType {
-		return this.options.createClient(this.clientConfig());
+		return this.options.createClient(this.createClientConfig());
 	}
 
 	/**
@@ -215,9 +215,9 @@ export class Server<ClientType extends Client = Client> {
 	 * Returns a configuration suitable for createClient() which allows
 	 * the testing framework to serve requests.
 	 *
-	 * @returns A ClientConfig-compatible object
+	 * @returns A CreateClientConfig instance
 	 */
-	clientConfig(): ClientConfigInit {
+	createClientConfig(): CreateClientConfig {
 		return {
 			baseURL: this.nodeUrl,
 			customFetch: this.options.fetch,
