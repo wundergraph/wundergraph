@@ -155,12 +155,14 @@ export class Server<ClientType extends Client = Client> {
 	async tearDown(): Promise<void> {
 		if (this.subprocess) {
 			this.subprocess.kill('SIGTERM', {
-				forceKillAfterTimeout: 3000,
+				forceKillAfterTimeout: 100,
 			});
 			try {
 				await this.subprocess;
 			} catch (e: any) {
-				console.error(`error shutting down ${e}`);
+				if (!(e instanceof Error && e.message.indexOf('SIGKILL') >= 0)) {
+					console.error(`error shutting down ${e}`);
+				}
 			}
 			this.subprocess = undefined;
 		}
