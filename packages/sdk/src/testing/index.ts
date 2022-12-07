@@ -99,7 +99,7 @@ export class Server<ClientType extends Client = Client> {
 	 * Start the server. If the server is already running,
 	 * it does nothing.
 	 */
-	async spinUp(): Promise<void> {
+	async setUp(): Promise<void> {
 		if (this.subprocess) {
 			// Already running
 			return;
@@ -162,7 +162,7 @@ export class Server<ClientType extends Client = Client> {
 
 	private async beforeTest(): Promise<void> {
 		this.runningTestCount++;
-		return this.spinUp();
+		return this.setUp();
 	}
 
 	private async afterTest(): Promise<void> {
@@ -179,7 +179,7 @@ export class Server<ClientType extends Client = Client> {
 	}
 
 	/**
-	 * Wrap a test function to automatically spin up the server and tear it down (if needed)
+	 * Wrap a test function to automatically set up the server and tear it down (if needed)
 	 *
 	 * @param fn Test function to run
 	 * @param opts Optional TestOptions
