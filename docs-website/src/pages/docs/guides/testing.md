@@ -10,7 +10,7 @@ WunderGraph comes with builtin support for running tests against your APIs, usin
 TypeScript client. Our `Server` implementation sets up your WunderGraph server, runs your tests,
 and finally tears everything down.
 
-Our testing library is framework agnostic, so you can use it coupled with your preferred test
+Our testing library is framework agnostic, so you can use it with your preferred test
 framework. We use both [Jest](https://jestjs.io) and [ava](https://github.com/avajs/ava) for
 these examples, but they should be easily adaptable to any testing framework.
 
@@ -52,9 +52,9 @@ import { createClient } from '../.wundergraph/generated/client'
 import { describe, expect, test } from '@jest/globals'
 ```
 
-You can create as many `Server` instances as you like, they will run in parallel without interfering
-with each other, but to make your tests as fast as possible we recommend creating a single instance
-per file.
+We recommended creating as little `Server` instances as possible and sharing them between
+multiple tests. These minimizes the number of times the server starts and stops, making your tests
+faster.
 
 ```typescript
 const wg = new Server({ createClient })
@@ -90,7 +90,7 @@ to wrap your test functions with `wg.test()`:
 
 ```typescript
 beforeAll(async () => {
-  await wg.setupUp()
+  await wg.setUp()
 })
 
 afterAll(async () => {
@@ -120,9 +120,9 @@ import { createClient } from '../.wundergraph/generated/client'
 import { test } from 'ava'
 ```
 
-You can create as many `Server` instances as you like, they will run in parallel without interfering
-with each other, but to make your tests as fast as possible we recommend creating a single instance
-per file.
+We recommended creating as little `Server` instances as possible and sharing them between
+multiple tests. These minimizes the number of times the server starts and stops, making your tests
+faster.
 
 ```typescript
 const wg = new Server({ createClient })
@@ -132,7 +132,7 @@ Use Ava's setup and teardown functions to setup our testing server:
 
 ```typescript
 test.before(async (t) => {
-  await wg.setupUp()
+  await wg.setUp()
 })
 
 test.after(async (t) => {
