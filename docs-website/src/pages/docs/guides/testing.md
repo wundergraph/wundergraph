@@ -90,7 +90,7 @@ to wrap your test functions with `wg.test()`:
 
 ```typescript
 beforeAll(async () => {
-  await wg.spinUp()
+  await wg.setupUp()
 })
 
 afterAll(async () => {
@@ -132,7 +132,7 @@ Use Ava's setup and teardown functions to setup our testing server:
 
 ```typescript
 test.before(async (t) => {
-  await wg.spinUp()
+  await wg.setupUp()
 })
 
 test.after(async (t) => {
