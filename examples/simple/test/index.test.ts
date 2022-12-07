@@ -4,9 +4,9 @@ import { Server } from '@wundergraph/sdk/testing';
 
 import { createClient } from '../.wundergraph/generated/client';
 
-describe('add', () => {
-	const wg = new Server({ createClient, fetch: fetch as any });
+const wg = new Server({ createClient, fetch: fetch as any });
 
+describe('test Countries API', () => {
 	test(
 		'country by code',
 		wg.test(async () => {
