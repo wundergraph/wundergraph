@@ -195,6 +195,10 @@ const navigation = [
 				href: '/docs/examples/caching',
 			},
 			{
+				title: 'Expo + SWR',
+				href: '/docs/examples/expo-swr',
+			},
+			{
 				title: 'FaunaDB NextJS',
 				href: '/docs/examples/fauna-db-nextjs',
 			},
