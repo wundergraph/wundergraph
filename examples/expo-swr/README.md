@@ -1,4 +1,6 @@
-# WunderGraph Application
+# WunderGraph Expo Example
+
+This example shows the bare minimum configuration to get WunderGraph up and running with React Native, using Expo and SWR.
 
 #### Getting started
 
@@ -6,20 +8,4 @@
 npm install && npm start
 ```
 
-#### Get Dragons
-
-```shell
-curl -X GET http://localhost:9991/app/main/operations/Dragons
-```
-
-#### Get Missions
-
-```shell
-curl -X GET http://localhost:9991/app/main/operations/Missions
-```
-
-#### Call your custom GraphQL server
-
-```shell
-curl -X GET http://localhost:9991/app/main/operations/Hello
-```
+Use the Expo CLI to choose which device you want to run the app on.

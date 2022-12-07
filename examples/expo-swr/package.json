@@ -1,4 +1,7 @@
 {
+  "name": "wundergraph-expo-swr-example",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "@expo/webpack-config": "^0.17.2",
     "@wundergraph/sdk": "^0.123.2",
@@ -28,8 +31,5 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
-  },
-  "version": "1.0.0",
-  "private": true,
-  "name": "expo-swr"
+  }
 }
