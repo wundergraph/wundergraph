@@ -4,6 +4,12 @@ import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
 import { ClientConfigInit } from '../client/types';
 
+const readyStatus = 'READY';
+interface ServerHealth {
+	serverStatus: string;
+	nodeStatus: string;
+}
+
 type FetchFn = (input: RequestInfo | URL, init?: RequestInit | undefined) => Promise<Response>;
 
 export interface ServerOptions<ClientType extends Client = Client> {
@@ -126,8 +132,10 @@ export class Server<ClientType extends Client = Client> {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				clearTimeout(id);
 				if (resp.status == 200) {
-					const data = await resp.json();
-					break;
+					const data = (await resp.json()) as ServerHealth;
+					if (data.nodeStatus === readyStatus && data.serverStatus === readyStatus) {
+						break;
+					}
 				}
 			} catch (e: any) {
 				if (maxWaitMs > 0 && new Date().getTime() - started > maxWaitMs) {
