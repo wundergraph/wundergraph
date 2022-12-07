@@ -10,6 +10,7 @@ import {
 	TypeScriptResponseModels,
 	ResolvedWunderGraphConfig,
 	GraphQLOperation,
+	TypeScriptClient,
 } from '@wundergraph/sdk';
 import { modelImports } from '@wundergraph/sdk/internal';
 import hash from 'object-hash';
@@ -21,7 +22,6 @@ export class NextJsTemplate implements Template {
 		const content = tmpl({
 			baseURL: config.deployment.environment.baseUrl,
 			sdkVersion: config.sdkVersion,
-			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			modelImports: modelImports(config.application, false, true),
@@ -65,6 +65,7 @@ export class NextJsTemplate implements Template {
 
 	dependencies(): Template[] {
 		return [
+			new TypeScriptClient(),
 			new TypeScriptInputModels(),
 			new TypeScriptResponseModels(),
 			new TypeScriptResponseDataModels(),

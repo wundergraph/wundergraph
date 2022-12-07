@@ -10,7 +10,7 @@ Install the dependencies and run the complete example in one command:
 npm install && npm start
 ```
 
-After `npm start` has been executed, your browser should open a new tab and navigate to [`http://localhost:9991/app/main/operations/Dragons`](http://localhost:9991/app/main/operations/Dragons). In the console, you can see logs emitted by the `mutatingPostResolve` hook.
+After `npm start` has been executed, your browser should open a new tab and navigate to [`http://localhost:9991/operations/Dragons`](http://localhost:9991/operations/Dragons). In the console, you can see logs emitted by the `mutatingPostResolve` hook.
 
 ## Learn More
 

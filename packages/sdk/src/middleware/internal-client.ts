@@ -38,12 +38,7 @@ export interface InternalClientFactory {
 
 // internalClientFactory is a factory function that creates an internal client.
 // this function should be only called once on startup.
-export const internalClientFactory = (
-	apiName: string,
-	deploymentName: string,
-	operations: Operation[],
-	baseNodeUrl: string
-): InternalClientFactory => {
+export const internalClientFactory = (operations: Operation[], baseNodeUrl: string): InternalClientFactory => {
 	const baseOperations: Operations & InternalClientRequestContext = {
 		context: {
 			clientRequest: undefined,
@@ -98,7 +93,7 @@ export const internalClientFactory = (
 		extraHeaders?: { [key: string]: string };
 		clientRequest: any;
 	}): Promise<any> => {
-		const url = `${baseNodeUrl}/internal/${apiName}/${deploymentName}/operations/` + options.operationName;
+		const url = `${baseNodeUrl}/internal/operations/${options.operationName}`;
 		const headers = Object.assign(
 			{},
 			{

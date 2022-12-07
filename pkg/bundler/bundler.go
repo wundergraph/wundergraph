@@ -147,8 +147,8 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		External: append(b.externalImports, "./node_modules/*"),
 		Engines: []api.Engine{
 			// https://nodejs.org/en/about/releases/
-			{Name: api.EngineNode, Version: "14"}, // Maintenance
-			{Name: api.EngineNode, Version: "16"}, // LTS
+			{Name: api.EngineNode, Version: "16"}, // Maintenance
+			{Name: api.EngineNode, Version: "18"}, // LTS
 		},
 		Write:       true,
 		TreeShaking: api.TreeShakingTrue,
@@ -236,7 +236,7 @@ func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
 			result := rebuild()
 			if len(result.Errors) == 0 {
 				if b.onAfterBundle != nil {
-					b.onAfterBundle()
+					_ = b.onAfterBundle()
 				}
 			} else {
 				for _, message := range result.Errors {

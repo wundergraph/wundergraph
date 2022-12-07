@@ -20,7 +20,6 @@ import { Client } from '@wundergraph/sdk/client';
 
 const client = new Client({
   applicationHash: '1f7dac83',
-  applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
   sdkVersion: '0.95.0',
 });
@@ -44,7 +43,6 @@ import fetch from 'node-fetch';
 
 const client = new Client({
   applicationHash: '1f7dac83',
-  applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
   sdkVersion: '0.95.0',
   customFetch: fetch,
@@ -62,7 +60,6 @@ import { fetch } from 'whatwg-fetch';
 
 const client = new Client({
   applicationHash: '1f7dac83',
-  applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
   sdkVersion: '0.95.0',
   customFetch: fetch,
@@ -74,7 +71,6 @@ const client = new Client({
 ```ts
 const client = new Client({
   applicationHash: '1f7dac83',
-  applicationPath: 'api/main',
   baseURL: 'http://localhost:9991',
   sdkVersion: '0.95.0',
   extraHeaders: {

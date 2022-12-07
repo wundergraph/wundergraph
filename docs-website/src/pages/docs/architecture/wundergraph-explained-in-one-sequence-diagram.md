@@ -18,12 +18,16 @@ First, let's add two APIs to our application.
 // wundergraph.config.ts
 const weather = introspect.graphql({
   apiNamespace: 'weather',
-  url: 'https://graphql-weather-api.herokuapp.com/',
+  url: 'https://weather-api.wundergraph.com/',
 })
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
+})
+
+configureWunderGraphApplication({
+  apis: [weather, countries],
 })
 ```
 
@@ -74,7 +78,7 @@ query (
 ### Step-by-step explanation
 
 As WunderGraph uses a GraphQL to JSON RPC compiler,
-the client starts by requesting the Resource `/api/main/operations/Weather?continent=Europe`,
+the client starts by requesting the Resource `/operations/Weather?continent=Europe`,
 so we're essentially asking to execute the `Weather` operation with the `continent` parameter set to `Europe`.
 
 The server will then validate if the user is authenticated (if enabled) and will return 401 if not.

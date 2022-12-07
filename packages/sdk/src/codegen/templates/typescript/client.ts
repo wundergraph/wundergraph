@@ -22,7 +22,6 @@ export class TypeScriptClient implements Template {
 			baseURL: config.deployment.environment.baseUrl,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 			sdkVersion: config.sdkVersion,
-			applicationPath: config.deployment.path,
 			applicationHash: hash(config).substring(0, 8),
 			queries: _queries,
 			allOperations: allOperations,

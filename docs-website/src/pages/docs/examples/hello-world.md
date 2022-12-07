@@ -21,8 +21,7 @@ const spaceX = introspect.graphql({
   url: 'https://spacex-api.fly.dev/graphql/',
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [spaceX],
 })
 ```
@@ -46,5 +45,5 @@ query Dragons {
 Now, we can run the application using `npm run start` and access the generated RPC API.
 
 ```bash
-$ curl http://localhost:9991/app/main/operations/Dragons
+curl http://localhost:9991/operations/Dragons
 ```

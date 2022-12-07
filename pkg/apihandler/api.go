@@ -28,11 +28,11 @@ type Options struct {
 type Api struct {
 	PrimaryHost           string
 	Hosts                 []string
-	PathPrefix            string
 	EngineConfiguration   *wgpb.EngineConfiguration
 	EnableSingleFlight    bool
 	EnableGraphqlEndpoint bool
 	Operations            []*wgpb.Operation
+	InvalidOperationNames []string
 	CorsConfiguration     *wgpb.CorsConfiguration
 	DeploymentId          string
 	CacheConfig           *wgpb.ApiCacheConfig // TODO: extract from proto

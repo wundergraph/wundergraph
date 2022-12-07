@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"path"
 	"strings"
 	"time"
 
@@ -29,7 +28,6 @@ type GithubConfig struct {
 	ClientID           string
 	ClientSecret       string
 	ProviderID         string
-	PathPrefix         string
 	InsecureCookies    bool
 	ForceRedirectHttps bool
 	Cookie             *securecookie.SecureCookie
@@ -80,7 +78,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			return
 		}
 
-		cookiePath := fmt.Sprintf("/%s/auth/cookie/callback/%s", config.PathPrefix, config.ProviderID)
+		cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
 		cookieDomain := sanitizeDomain(r.Host)
 
 		c := &http.Cookie{
@@ -319,7 +317,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			return
 		}
 
-		redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, config.PathPrefix, "/auth/cookie/user"))
+		redirect := fmt.Sprintf("%s://%s", scheme, "/auth/cookie/user")
 
 		//http.Redirect(w, r, redirect, http.StatusFound)
 		_, _ = fmt.Fprintf(w, "<html><head><script>window.location.replace('%s');</script></head></html>", redirect)
