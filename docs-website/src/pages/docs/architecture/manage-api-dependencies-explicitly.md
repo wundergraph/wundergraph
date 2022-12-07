@@ -109,7 +109,7 @@ Here's an example. Let's add two API dependencies to our project:
 // wundergraph.config.ts
 const weather = introspect.graphql({
   apiNamespace: 'weather',
-  url: 'https://graphql-weather-api.herokuapp.com/',
+  url: 'https://weather-api.wundergraph.com/',
 })
 
 const countries = introspect.graphql({

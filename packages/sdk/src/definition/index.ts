@@ -47,21 +47,8 @@ export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_M
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
 // Only use the instrospection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
-
-export interface ApplicationConfig {
-	name: string;
-	apis: Promise<Api<any>>[];
-}
-
-export class Application {
-	constructor(config: ApplicationConfig) {
-		this.name = config.name;
-		this.apis = config.apis;
-	}
-
-	name: string;
-	apis: Promise<Api<any>>[];
-}
+// When true, throw an exception an error is found while loading operations
+export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
 
 export interface RenameType {
 	from: string;
@@ -421,6 +408,7 @@ export interface GraphQLApiCustom {
 	};
 	UpstreamSchema: string;
 	HooksConfiguration: GraphQLDataSourceHooksConfiguration;
+	CustomScalarTypeFields: SingleTypeField[];
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {

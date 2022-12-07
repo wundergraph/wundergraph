@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -19,14 +18,10 @@ const spaceX = introspect.graphql({
 		insecureSkipVerify: true,
 	},
 });
-const myApplication = new Application({
-	name: 'app',
-	apis: [spaceX],
-});
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [spaceX],
 	server,
 	operations,
 	codeGenerators: [

@@ -1,5 +1,4 @@
 import {
-	Application,
 	configurePublishWunderGraphAPI,
 	configureWunderGraphApplication,
 	cors,
@@ -12,7 +11,7 @@ import operations from './wundergraph.operations';
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 const countries = introspect.graphql({
@@ -20,14 +19,9 @@ const countries = introspect.graphql({
 	url: 'https://countries.trevorblades.com/',
 });
 
-const myApplication = new Application({
-	name: 'api',
-	apis: [weather, countries],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [weather, countries],
 	server,
 	operations,
 	codeGenerators: [

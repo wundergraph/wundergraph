@@ -26,8 +26,7 @@ const db = introspect.postgresql({
   databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [db],
 })
 ```
@@ -52,7 +51,7 @@ Let's query all messages.
 ## Call the generated RPC Endpoint
 
 ```shell
-curl -X GET http://localhost:9991/app/main/operations/Messages
+curl -X GET http://localhost:9991/operations/Messages
 ```
 
 And we're done!

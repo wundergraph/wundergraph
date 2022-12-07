@@ -2,4 +2,6 @@ node_modules
 wgpb
 tsconfig.json
 .gitignore
+.npmignore
+.npmrc
 dist/tsconfig.tsbuildinfo

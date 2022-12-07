@@ -48,7 +48,7 @@ configureWunderGraphApplication({
       providers: [
         authProviders.openIdConnect({
           id: 'keycloak',
-          clientId: EnvironmentVariable.from('KEYCLOAK_CLIENT_ID'),
+          clientId: new EnvironmentVariable('KEYCLOAK_CLIENT_ID'),
           clientSecret: new EnvironmentVariable('KEYCLOAK_CLIENT_SECRET'),
           issuer: new EnvironmentVariable('KEYCLOAK_ISSUER'),
         }),

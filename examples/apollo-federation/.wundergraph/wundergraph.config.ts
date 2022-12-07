@@ -1,11 +1,4 @@
-import {
-	Application,
-	authProviders,
-	configureWunderGraphApplication,
-	cors,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
@@ -28,14 +21,9 @@ const federatedApi = introspect.federation({
 	],
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [federatedApi],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [federatedApi],
 	server,
 	operations,
 	codeGenerators: [

@@ -4,7 +4,7 @@ import { OperationType } from '@wundergraph/protobuf';
 import { FastifyRequestBody, OnConnectionInitHookRequestBody, WunderGraphHooksAndServerConfig } from '../types';
 
 export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) => {
-	const clientFactory = internalClientFactory('app', 'app', [], 'http://localhost:9991');
+	const clientFactory = internalClientFactory([], 'http://localhost:9991');
 
 	const fastify = await createServer({
 		wundergraphDir: '',
@@ -28,6 +28,7 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 						content: '',
 					},
 				],
+				invalidOperationNames: [],
 				engineConfiguration: undefined,
 				corsConfiguration: undefined,
 				authenticationConfig: undefined,
@@ -39,8 +40,6 @@ export const getFastify = async (serverConfig: WunderGraphHooksAndServerConfig) 
 				webhooks: [],
 			},
 			apiId: '',
-			apiName: '',
-			deploymentName: '',
 			dangerouslyEnableGraphQLEndpoint: false,
 			environmentIds: [],
 		},

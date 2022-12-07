@@ -2,7 +2,6 @@ package node
 
 import (
 	"fmt"
-	"path"
 	"time"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
@@ -50,11 +49,11 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
 			Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
-			PathPrefix:            path.Join(graphConfig.ApiName, graphConfig.DeploymentName),
 			EngineConfiguration:   graphConfig.Api.EngineConfiguration,
 			EnableSingleFlight:    true,
 			EnableGraphqlEndpoint: graphConfig.DangerouslyEnableGraphQLEndpoint,
 			Operations:            graphConfig.Api.Operations,
+			InvalidOperationNames: graphConfig.Api.InvalidOperationNames,
 			CorsConfiguration:     graphConfig.Api.CorsConfiguration,
 			S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
 			CacheConfig: &wgpb.ApiCacheConfig{

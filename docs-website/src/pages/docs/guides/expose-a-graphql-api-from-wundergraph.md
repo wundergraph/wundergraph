@@ -29,7 +29,7 @@ configureWunderGraphApplication({
 })
 ```
 
-Your GraphQL Endpoint will be available at `http://localhost:9991/api/main/graphql`.
+Your GraphQL Endpoint will be available at `http://localhost:9991/graphql`.
 
 ## Why you should not follow this guide
 

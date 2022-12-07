@@ -31,7 +31,6 @@ And import it somewhere in your project, for example in `App.tsx`.
 ```
 import { NativeEventSource, EventSourcePolyfill } from 'event-source-polyfill';
 global.EventSource = NativeEventSource || EventSourcePolyfill;
-
 ```
 
 ## Data source configuration

@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -20,14 +19,9 @@ const faunaDB = introspect.graphql({
 	},
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [faunaDB],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [faunaDB],
 	server,
 	operations,
 	codeGenerators: [

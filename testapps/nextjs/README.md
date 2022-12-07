@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with `wunderctl init`
+This is a [Next.js](https://nextjs.org/) project bootstrapped with `npx create-wundergraph-app`
 
 ## Getting Started
 

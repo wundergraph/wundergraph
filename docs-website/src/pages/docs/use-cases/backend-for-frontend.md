@@ -52,7 +52,7 @@ Here's a quick example of an application defined using WunderGraph:
 // wundergraph.config.ts
 const weather = introspect.graphql({
   apiNamespace: 'weather',
-  url: 'https://graphql-weather-api.herokuapp.com/',
+  url: 'https://weather-api.wundergraph.com/',
 })
 
 const countries = introspect.graphql({
@@ -60,8 +60,7 @@ const countries = introspect.graphql({
   url: 'https://countries.trevorblades.com/',
 })
 
-const myApplication = new Application({
-  name: 'app',
+configureWunderGraphApplication({
   apis: [weather, countries],
 })
 ```

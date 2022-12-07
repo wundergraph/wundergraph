@@ -31,12 +31,8 @@ const db = introspect.postgresql({
   database_querystring:
     'postgresql://admin:admin@localhost:54322/example?schema=public',
 })
-const myApplication = new Application({
-  name: 'app',
-  apis: [db],
-})
 configureWunderGraphApplication({
-  application: myApplication,
+  apis: [db],
   hooksConfiguration: wunderGraphHooks.config,
   codeGenerators: [
     {
@@ -76,13 +72,13 @@ creates an Application from it and then builds your WunderGraph configuration in
 
 ## Getting Started
 
-The easiest way to get started is using our CLI, wunderctl.
+The easiest way to get started is using our 'create-wundergraph-app' npx command.
 
 To start a new project use the following command,
 is scaffolds all required files:
 
 ```
-wunderctl init
+npx create-wundergraph-app <project-name>
 ```
 
 More documentation on the configuration wundergraph.config.ts reference.

@@ -32,7 +32,7 @@ The `.graphqlconfig` file is a JSON file, it usually looks like this:
         "endpoints": {
           "app": {
             "introspect": false,
-            "url": "http://localhost:9991/app/main/graphql",
+            "url": "http://localhost:9991/graphql",
             "headers": {
               "user-agent": "WunderGraph Client"
             }

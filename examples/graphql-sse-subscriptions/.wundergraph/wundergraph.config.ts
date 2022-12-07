@@ -1,11 +1,4 @@
-import {
-	Application,
-	configureWunderGraphApplication,
-	cors,
-	EnvironmentVariable,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -31,14 +24,9 @@ const greetings = introspect.graphql({
 	subscriptionsUseSSE: true,
 });
 
-const myApplication = new Application({
-	name: 'app',
-	apis: [greetings],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [greetings],
 	server,
 	operations,
 	codeGenerators: [

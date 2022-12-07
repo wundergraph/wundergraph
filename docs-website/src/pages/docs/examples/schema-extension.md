@@ -21,17 +21,17 @@ npm install && npm start
 ## Get Landpad
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Space
+curl -N http://localhost:9991/operations/Space
 ```
 
 ## Get Users
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Users
+curl -N http://localhost:9991/operations/Users
 ```
 
 ## Create User
 
 ```shell
-curl -d '{"email":"test@wundergraph.com","name":"Test","payload": {"type":"mobile","phone":"12345"}}' -H "Content-Type: application/json" -X POST http://localhost:9991/app/main/operations/User
+curl -d '{"email":"test@wundergraph.com","name":"Test","payload": {"type":"mobile","phone":"12345"}}' -H "Content-Type: application/json" -X POST http://localhost:9991/operations/User
 ```

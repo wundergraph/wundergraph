@@ -1,5 +1,4 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
@@ -7,8 +6,8 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
-import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import server from './wundergraph.server';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -17,7 +16,7 @@ const spaceX = introspect.graphql({
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 /*const jsonPlaceholder = introspect.openApi({
@@ -91,8 +90,8 @@ const graphQLAPI = introspect.graphql({
         .addClientRequestHeader("Authorization","Authorization")
 });*/
 
-const myApplication = new Application({
-	name: 'api',
+// configureWunderGraph emits the configuration
+configureWunderGraphApplication({
 	apis: [
 		weather,
 		spaceX,
@@ -101,11 +100,6 @@ const myApplication = new Application({
             openAPI,
             graphQLAPI*/
 	],
-});
-
-// configureWunderGraph emits the configuration
-configureWunderGraphApplication({
-	application: myApplication,
 	server,
 	operations,
 	// S3 Server
@@ -149,7 +143,7 @@ configureWunderGraphApplication({
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:5173/authentication', 'http://localhost:5173/auth-test'],
+			authorizedRedirectUriRegexes: ['http://localhost:5173*'],
 		},
 	},
 	/*links: [

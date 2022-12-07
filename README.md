@@ -73,6 +73,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Publish & Install APIs](./examples/publish-install-api)
 - [Dockerize WunderGraph](https://github.com/wundergraph/docker)
 - [Typesafe Golang Client](/examples/golang-client)
+- [OpenAPI and mocking](/examples/openapi-mocking)
 
 ## The WunderGraph Stack
 
@@ -119,7 +120,7 @@ have a look at these [annotated example snippets](docs/at-a-glance.md).
 This section provides a high-level overview of how WunderGraph works and its most consumer centric components. For a
 more thorough introduction, visit the [architecture](./docs/architecture) documentation.
 
-After initializing your first WunderGraph application with `npx @wundergraph/wunderctl init`, you have a NPM package and
+After initializing your first WunderGraph application with `npx create-wundergraph-app <project-name> -E simple`, you have a NPM package and
 a `.wundergraph` folder. This folder contains the following files:
 
 - `wundergraph.config.ts` - The primary config file for your WunderGraph application. Add data-sources and more.

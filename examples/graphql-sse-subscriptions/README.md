@@ -39,13 +39,13 @@ npm install && npm start
 #### Check results
 
 ```shell
-curl -N http://localhost:9991/app/main/operations/Sse
+curl -N http://localhost:9991/operations/Sse
 ```
 
 #### SSE output
 
 ```shell
- curl -N 'http://localhost:9991/app/main/operations/Sse?wg_sse=true'
+ curl -N 'http://localhost:9991/operations/Sse?wg_sse=true'
 ```
 
 ## Learn More
