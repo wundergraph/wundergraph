@@ -7,11 +7,11 @@ import { createClient } from './.wundergraph/generated/client';
 const wg = new Server({ createClient });
 
 test.before(async (t) => {
-	await wg.setUp();
+	await wg.start();
 });
 
 test.after(async (t) => {
-	await wg.tearDown();
+	await wg.stop();
 });
 
 test('create a note', async (t) => {

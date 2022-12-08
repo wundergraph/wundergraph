@@ -39,11 +39,6 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	debug: boolean;
 }
 
-type TestPlainFn = (server: Server) => void;
-type TestPromiseFn = (server: Server) => Promise<void>;
-
-type TestFn = TestPlainFn | TestPromiseFn;
-
 /**
  * Wrapper around the WunderGraph node, intended to simplify
  * running tests within WunderGraph applications.
@@ -103,7 +98,7 @@ export class Server<ClientType extends Client = Client> {
 	 * Start the server. If the server is already running,
 	 * it does nothing.
 	 */
-	async setUp(): Promise<void> {
+	async start(): Promise<void> {
 		if (this.subprocess) {
 			// Already running
 			return;
@@ -139,7 +134,7 @@ export class Server<ClientType extends Client = Client> {
 				}
 			} catch (e: any) {
 				if (maxWaitMs > 0 && new Date().getTime() - started > maxWaitMs) {
-					await this.tearDown();
+					await this.stop();
 					throw new Error(`could not start WunderGraph node: ${e}`);
 				}
 			}
@@ -152,7 +147,7 @@ export class Server<ClientType extends Client = Client> {
 	 * Stop the server. If the server isn't running,
 	 * it does nothing.
 	 */
-	async tearDown(): Promise<void> {
+	async stop(): Promise<void> {
 		if (this.subprocess) {
 			this.subprocess.kill('SIGTERM', {
 				forceKillAfterTimeout: 100,
@@ -167,50 +162,6 @@ export class Server<ClientType extends Client = Client> {
 			this.subprocess = undefined;
 		}
 	}
-
-	private async beforeTest(): Promise<void> {
-		this.runningTestCount++;
-		return this.setUp();
-	}
-
-	private async afterTest(): Promise<void> {
-		if (--this.runningTestCount == 0) {
-			// Wait 100ms to tear down, so if multiple tests
-			// are ran in a sequence, we avoid tearing down
-			// and setting the server for each one of them.
-			setTimeout(async () => {
-				if (this.runningTestCount == 0) {
-					return this.tearDown();
-				}
-			}, 100);
-		}
-	}
-
-	/**
-	 * Wrap a test function to automatically set up the server and tear it down (if needed)
-	 *
-	 * @param fn Test function to run
-	 * @returns Async function wrapping the test function
-	 */
-	test(fn: TestFn): () => Promise<void> {
-		return async (): Promise<void> => {
-			try {
-				await this.beforeTest();
-				await fn(this);
-			} finally {
-				await this.afterTest();
-			}
-		};
-	}
-
-	/** Shorthand method for creating a test with Server.test() and running it
-	 * @param fn Test function to run
-	 * @returns Nothing
-	 */
-	runTest(fn: TestFn): Promise<void> {
-		return this.test(fn)();
-	}
-
 	/**
 	 * Returns a configuration suitable for createClient() which allows
 	 * the testing framework to serve requests.

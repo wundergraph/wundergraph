@@ -60,14 +60,31 @@ faster.
 const wg = new Server({ createClient })
 ```
 
-Finally, define your tests as a Jest test function but wrapped with `wg.test()`. This will take care
-of automatically setting up and tearing down the server.
+Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
 
 ```typescript
-test(
-  'country by code',
-  // Wrap your function with wg.test()
-  wg.test(async () => {
+beforeAll(async () => {
+  await wg.start()
+})
+
+afterAll(async () => {
+  await wg.stop()
+})
+```
+
+Finally, define your tests as Jest test functions:
+
+```typescript
+test('continents', async () => {
+  // Use the TypeScript client to perform queries or mutations against your API
+  const result = await wg.client().query({
+    operationName: 'Continents',
+  })
+  // Use Jest for assertions
+  expect(result.data?.countries_continents.length).toBe(7)
+})
+
+test('country by code', async () => {
     // Use the TypeScript client to perform queries or mutations against your API
     const result = await wg.client().query({
       operationName: 'Countries',
@@ -82,27 +99,6 @@ test(
     expect(andorra?.name).toBe('Andorra')
   })
 )
-```
-
-If you prefer to start and stop the server with Jest instead of relying on the automatic
-management by the library, use Jest's `beforeAll()` and `afterAll()`, the you don't need
-to wrap your test functions with `wg.test()`:
-
-```typescript
-beforeAll(async () => {
-  await wg.setUp()
-})
-
-afterAll(async () => {
-  await wg.tearDown()
-})
-
-test('continents', async () => {
-  const result = await wg.client().query({
-    operationName: 'Continents',
-  })
-  expect(result.data?.countries_continents.length).toBe(7)
-})
 ```
 
 If you'd like to see a full example using Jest for testing, check our [simple example](https://github.com/wundergraph/wundergraph/tree/main/examples/simple).
@@ -128,15 +124,15 @@ faster.
 const wg = new Server({ createClient })
 ```
 
-Use Ava's setup and teardown functions to setup our testing server:
+Use Ava's `test.before()` and `test.after()` functions to setup our testing server:
 
 ```typescript
 test.before(async (t) => {
-  await wg.setUp()
+  await wg.start()
 })
 
 test.after(async (t) => {
-  await wg.tearDown()
+  await wg.stop()
 })
 ```
 

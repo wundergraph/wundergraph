@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fetch from 'node-fetch';
 import { Server } from '@wundergraph/sdk/testing';
 
@@ -6,30 +6,32 @@ import { createClient } from '../.wundergraph/generated/client';
 
 const wg = new Server({ createClient, fetch: fetch as any });
 
-describe('test Countries API', () => {
-	test(
-		'country by code',
-		wg.test(async () => {
-			const result = await wg.client().query({
-				operationName: 'Countries',
-				input: {
-					filter: {
-						code: { eq: 'AD' },
-					},
-				},
-			});
-			const andorra = result.data?.countries_countries[0];
-			expect(andorra?.name).toBe('Andorra');
-		})
-	);
+beforeAll(async () => {
+	await wg.start();
+});
 
-	test(
-		'continents',
-		wg.test(async () => {
-			const result = await wg.client().query({
-				operationName: 'Continents',
-			});
-			expect(result.data?.countries_continents.length).toBe(7);
-		})
-	);
+afterAll(async () => {
+	await wg.stop();
+});
+
+describe('test Countries API', () => {
+	test('country by code', async () => {
+		const result = await wg.client().query({
+			operationName: 'Countries',
+			input: {
+				filter: {
+					code: { eq: 'AD' },
+				},
+			},
+		});
+		const andorra = result.data?.countries_countries[0];
+		expect(andorra?.name).toBe('Andorra');
+	});
+
+	test('continents', async () => {
+		const result = await wg.client().query({
+			operationName: 'Continents',
+		});
+		expect(result.data?.countries_continents.length).toBe(7);
+	});
 });
