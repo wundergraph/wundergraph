@@ -83,13 +83,19 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const federationEnabled = isFederationService(schema);
 		const upstreamSchema = cleanupSchema(schema, introspection);
 		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
-		const serviceSDL = !federationEnabled
-			? undefined
-			: introspection.loadSchemaFromString
-			? loadFile(introspection.loadSchemaFromString)
-			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
+		let serviceSDL: string | undefined;
+		if (federationEnabled) {
+			if (introspection.loadSchemaFromString) {
+				serviceSDL = loadFile(introspection.loadSchemaFromString);
+			} else {
+				if (!introspection.url) {
+					throw new Error('introspection URL is not defined');
+				}
+				serviceSDL = await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
 					apiNamespace: introspection.apiNamespace,
-			  });
+				});
+			}
+		}
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
@@ -215,6 +221,12 @@ const introspectGraphQLAPI = async (
 	};
 
 	if (introspection.mTLS) {
+		if (!introspection.mTLS.key) {
+			throw new Error('introspection mTLS key is not defined');
+		}
+		if (!introspection.mTLS.cert) {
+			throw new Error('introspection mTLS cert is not defined');
+		}
 		opts.httpsAgent = new https.Agent({
 			key: resolveVariable(introspection.mTLS.key),
 			cert: resolveVariable(introspection.mTLS.cert),
@@ -224,6 +236,9 @@ const introspectGraphQLAPI = async (
 
 	let res: AxiosResponse | undefined;
 	try {
+		if (!introspection.url) {
+			throw new Error('introspection URL is not defined');
+		}
 		res = await Fetcher().post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
 		throw new Error(
