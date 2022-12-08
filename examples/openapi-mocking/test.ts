@@ -1,10 +1,8 @@
 import test from 'ava';
 
-import { WunderGraphTestServer } from '@wundergraph/sdk/testing';
+import { WunderGraphTestServer } from './.wundergraph/generated/testing';
 
-import { createClient } from './.wundergraph/generated/client';
-
-const wg = new WunderGraphTestServer({ createClient });
+const wg = new WunderGraphTestServer();
 
 test.before(async (t) => {
 	await wg.start();

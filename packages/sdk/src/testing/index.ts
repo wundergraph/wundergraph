@@ -47,7 +47,6 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	private readonly options: ServerOptions<ClientType>;
 	private nodeUrl: string = '';
 	private subprocess?: Subprocess;
-	private runningTestCount: number = 0;
 
 	/**
 	 * Initialize a Server instance. Typically, a shared Server will
@@ -169,6 +168,9 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 * @returns A CreateClientConfig instance
 	 */
 	createClientConfig(): CreateClientConfig {
+		if (!this.nodeUrl) {
+			throw new Error(`testing server is not started`);
+		}
 		return {
 			baseURL: this.nodeUrl,
 			customFetch: this.options.fetch,
