@@ -129,7 +129,8 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.7.1",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8"
+    "swagger2openapi": "^7.0.8",
+    "ts-retry-promise": "^0.7.0"
   },
   "jest": {
     "preset": "ts-jest",

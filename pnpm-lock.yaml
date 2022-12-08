@@ -325,6 +325,7 @@ importers:
       protobufjs: ^6.11.2
       swagger2openapi: ^7.0.8
       ts-jest: ^29.0.1
+      ts-retry-promise: ^0.7.0
       tsd: ^0.24.1
       typescript: ^4.8.2
     dependencies:
@@ -355,6 +356,7 @@ importers:
       prettier: 2.7.1
       protobufjs: 6.11.3
       swagger2openapi: 7.0.8
+      ts-retry-promise: 0.7.0
     devDependencies:
       '@types/axios': 0.14.0
       '@types/chai': 4.3.3
@@ -13453,6 +13455,11 @@ packages:
       protobufjs: 6.11.3
       ts-poet: 6.1.0
       ts-proto-descriptors: 1.7.1
+    dev: false
+
+  /ts-retry-promise/0.7.0:
+    resolution: {integrity: sha512-x6yWZXC4BfXy4UyMweOFvbS1yJ/Y5biSz/mEPiILtJZLrqD3ZxIpzVOGGgifHHdaSe3WxzFRtsRbychI6zofOg==}
+    engines: {node: '>=6'}
     dev: false
 
   /tsconfig-paths/3.14.1:

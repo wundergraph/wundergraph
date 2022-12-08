@@ -1,5 +1,7 @@
 import net from 'net';
 
+import { retry } from 'ts-retry-promise';
+
 import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
 import { CreateClientConfig } from '../client/types';
@@ -28,7 +30,7 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * Time to wait for the WunderGraph node to start up,
 	 * in seconds.
 	 *
-	 * @default 5
+	 * @default 3
 	 */
 	startupTimeoutSeconds: number;
 	/**
@@ -71,7 +73,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				);
 			},
 			fetch: opts?.fetch ?? fetch,
-			startupTimeoutSeconds: 5,
+			startupTimeoutSeconds: 3,
 			debug: false,
 		};
 		return {
@@ -117,27 +119,30 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			subprocess?.stderr?.pipe(process.stderr);
 		}
 		const health = this.url('/health');
-		const started = new Date().getTime();
 		const maxWaitMs = this.options.startupTimeoutSeconds * 1000;
-		while (true) {
+		const msPerRetry = 100;
+		const retries = maxWaitMs / msPerRetry;
+		const checkHealth = async () => {
 			const controller = new AbortController();
-			const id = setTimeout(() => controller.abort(), 500);
+			const id = setTimeout(() => controller.abort(), msPerRetry);
 			try {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
 					const data = (await resp.json()) as ServerHealth;
 					if (data.nodeStatus === readyStatus && data.serverStatus === readyStatus) {
-						break;
+						return true;
 					}
-				}
-			} catch (e: any) {
-				if (maxWaitMs > 0 && new Date().getTime() - started > maxWaitMs) {
-					await this.stop();
-					throw new Error(`could not start WunderGraph node: ${e}`);
+					throw new Error(`server is not yet ready ${data}`);
 				}
 			} finally {
 				clearTimeout(id);
 			}
+		};
+		try {
+			await retry(checkHealth, { retries: retries });
+		} catch (e: any) {
+			await this.stop();
+			throw new Error(`could not start WunderGraph server: ${e}`);
 		}
 		// Server is up and running
 		this.subprocess = subprocess;
