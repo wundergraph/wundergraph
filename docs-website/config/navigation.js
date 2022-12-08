@@ -275,6 +275,10 @@ const navigation = [
 				title: 'WunderGraph schema extension',
 				href: '/docs/examples/schema-extension',
 			},
+			{
+				title: 'Next.js Todos',
+				href: '/docs/examples/nextjs-todos',
+			},
 		],
 	},
 	{
