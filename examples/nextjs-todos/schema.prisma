@@ -1,0 +1,11 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://admin:admin@localhost:54322/example?schema=public"
+}
+
+model Todo {
+  id        Int     @id @default(autoincrement())
+  title     String
+  completed Boolean
+  order     Int     @default(0)
+}
