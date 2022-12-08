@@ -3,11 +3,12 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import logSymbols from 'log-symbols';
 import { getRepository } from './helpers/getRepository';
+import packageJson from '../package.json';
 
 let projectName = '';
 
 const program = new Command('create-wundergraph-app')
-	.version('0.0.1')
+	.version(packageJson.version)
 	.arguments('<project-name>')
 	.usage(`${chalk.green('<project-name>')} [options]`)
 	.option(
