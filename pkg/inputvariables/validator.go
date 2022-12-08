@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"net/http"
 
 	"github.com/qri-io/jsonschema"
 )
@@ -73,21 +72,4 @@ func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Wr
 		}
 	}
 	return false, nil
-}
-
-func NewValidationWriter(w http.ResponseWriter) *ValidationWriter {
-	return &ValidationWriter{w: w}
-}
-
-type ValidationWriter struct {
-	w              http.ResponseWriter
-	didWriteHeader bool
-}
-
-func (v *ValidationWriter) Write(p []byte) (n int, err error) {
-	if !v.didWriteHeader {
-		v.w.WriteHeader(http.StatusBadRequest)
-		v.didWriteHeader = true
-	}
-	return v.w.Write(p)
 }

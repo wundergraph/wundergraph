@@ -1070,19 +1070,13 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	valid, err := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
-	if err != nil {
-		requestLogger.Error("failed to validate variables", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !valid {
+	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
 		return
 	}
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err = json.Compact(compactBuf, ctx.Variables)
+	err := json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables in query handler", zap.Bool("isLive", isLive), zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1510,19 +1504,14 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = []byte("{}")
 	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
-	valid, err := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
-	if err != nil {
-		requestLogger.Error("failed to validate variables", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !valid {
+
+	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
 		return
 	}
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err = json.Compact(compactBuf, ctx.Variables)
+	err := json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
 		requestLogger.Error("failed to compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -1664,19 +1653,14 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
-	valid, err := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
-	if err != nil {
-		requestLogger.Error("failed to validate variables", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !valid {
+
+	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
 		return
 	}
 
 	compactBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(compactBuf)
-	err = json.Compact(compactBuf, ctx.Variables)
+	err := json.Compact(compactBuf, ctx.Variables)
 	if err != nil {
 		requestLogger.Error("Could not compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
@@ -2331,5 +2315,23 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		zap.Error(err),
 	)
 	http.Error(w, errorMessage, http.StatusInternalServerError)
+	return true
+}
+
+func validateInputVariables(log *zap.Logger, ctx *resolve.Context, validator *inputvariables.Validator, w http.ResponseWriter) bool {
+	var buf bytes.Buffer
+	valid, err := validator.Validate(ctx, ctx.Variables, &buf)
+	if err != nil {
+		log.Error("failed to validate input variables", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return false
+	}
+	if !valid {
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := io.Copy(w, &buf); err != nil {
+			log.Error("copying validation to response", zap.Error(err))
+		}
+		return false
+	}
 	return true
 }
