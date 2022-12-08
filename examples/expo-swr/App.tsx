@@ -10,17 +10,16 @@ import 'url-search-params-polyfill';
 // global.EventSource = NativeEventSource || EventSourcePolyfill;
 
 export default function App() {
-	const { data, isLoading } = useQuery({
+	const { data, isLoading, error } = useQuery({
 		operationName: 'Dragons',
 	});
 
 	return (
 		<View style={styles.container}>
-			{isLoading ? (
-				<Text>Loading...</Text>
-			) : (
+			{isLoading && <Text>Loading...</Text>}
+			{data && (
 				<View>
-					{data?.spacex_dragons?.map((dragon) => (
+					{data.spacex_dragons?.map((dragon) => (
 						<View style={styles.dragon} key={dragon.name}>
 							<View style={dragon?.active ? styles.active : styles.inactive} />
 							<Text key={dragon.name}>{dragon.name} </Text>
@@ -28,6 +27,7 @@ export default function App() {
 					))}
 				</View>
 			)}
+			{error && <Text>Something went wrong</Text>}
 		</View>
 	);
 }

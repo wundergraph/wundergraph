@@ -10,6 +10,21 @@ npm install && npm start
 
 Use the Expo CLI to choose which device you want to run the app on.
 
+### Android Development
+
+In case you get a blank screen or errors out, chances are your device/emulator is not able to communicate with the node running on localhost:9991.
+To fix this run
+
+```bash
+adb reverse tcp:9991 tcp:9991
+```
+
+To undo
+
+```bash
+adb reverse --remove tcp:9991
+```
+
 ## Important compatibility notes
 
 ### Package exports
