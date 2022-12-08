@@ -64,11 +64,11 @@ Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
 
 ```typescript
 beforeAll(async () => {
-  await wg.start()
+  await wg.start();
 })
 
 afterAll(async () => {
-  await wg.stop()
+  await wg.stop();
 })
 ```
 
@@ -128,11 +128,11 @@ Use Ava's `test.before()` and `test.after()` functions to setup our testing serv
 
 ```typescript
 test.before(async (t) => {
-  await wg.start()
+  await wg.start();
 })
 
 test.after(async (t) => {
-  await wg.stop()
+  await wg.stop();
 })
 ```
 
