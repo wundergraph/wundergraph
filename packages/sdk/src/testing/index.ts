@@ -120,11 +120,10 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		const started = new Date().getTime();
 		const maxWaitMs = this.options.startupTimeoutSeconds * 1000;
 		while (true) {
+			const controller = new AbortController();
+			const id = setTimeout(() => controller.abort(), 500);
 			try {
-				const controller = new AbortController();
-				const id = setTimeout(() => controller.abort(), 500);
 				const resp = await this.options.fetch(health, { signal: controller.signal });
-				clearTimeout(id);
 				if (resp.status == 200) {
 					const data = (await resp.json()) as ServerHealth;
 					if (data.nodeStatus === readyStatus && data.serverStatus === readyStatus) {
@@ -136,6 +135,8 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 					await this.stop();
 					throw new Error(`could not start WunderGraph node: ${e}`);
 				}
+			} finally {
+				clearTimeout(id);
 			}
 		}
 		// Server is up and running
