@@ -19,28 +19,34 @@ func TestValidator_Validate(t *testing.T) {
 	validator, err := NewValidator(validEmptySchema, true)
 	assert.NoError(t, err)
 
-	actual := validator.Validate(context.Background(), []byte(`{}`), io.Discard)
+	actual, err := validator.Validate(context.Background(), []byte(`{}`), io.Discard)
+	assert.Nil(t, err)
 	assert.Equal(t, true, actual)
 
-	actual = validator.Validate(context.Background(), []byte(``), io.Discard)
+	actual, err = validator.Validate(context.Background(), []byte(``), io.Discard)
+	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 
-	actual = validator.Validate(context.Background(), []byte(`{"foo":"bar"}`), io.Discard)
+	actual, err = validator.Validate(context.Background(), []byte(`{"foo":"bar"}`), io.Discard)
+	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 
 	validator, err = NewValidator(validSchema, true)
 	assert.NoError(t, err)
 
 	out := &bytes.Buffer{}
-	actual = validator.Validate(context.Background(), []byte(`{"id":"bar"}`), out)
+	actual, err = validator.Validate(context.Background(), []byte(`{"id":"bar"}`), out)
+	assert.Nil(t, err)
 	assert.Equal(t, true, actual)
 	assert.Equal(t, "", out.String())
 
-	actual = validator.Validate(context.Background(), []byte(`{"id":true}`), out)
+	actual, err = validator.Validate(context.Background(), []byte(`{"id":true}`), out)
+	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 	assert.Equal(t, "Bad Request: Invalid input", out.String())
 
-	actual = validator.Validate(context.Background(), []byte(`{"id":"bar","foo":"bar"}`), io.Discard)
+	actual, err = validator.Validate(context.Background(), []byte(`{"id":"bar","foo":"bar"}`), io.Discard)
+	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 
 	validator, err = NewValidator(brokenSchema, true)
@@ -50,13 +56,15 @@ func TestValidator_Validate(t *testing.T) {
 	assert.NoError(t, err)
 
 	out.Reset()
-	actual = validator.Validate(context.Background(), []byte(`{"id":true}`), out)
+	actual, err = validator.Validate(context.Background(), []byte(`{"id":true}`), out)
+	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 	assert.Equal(t, `{"Message":"Bad Request: Invalid input","Input":{"id":true},"Errors":[{"propertyPath":"/id","invalidValue":true,"message":"type should be string, got boolean"}]}
 `, out.String())
 
 	out.Reset()
-	actual = validator.Validate(context.Background(), []byte(`{}`), out)
+	actual, err = validator.Validate(context.Background(), []byte(`{}`), out)
+	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 	assert.Equal(t, `{"Message":"Bad Request: Invalid input","Input":{},"Errors":[{"propertyPath":"/","invalidValue":{},"message":"\"id\" value is required"}]}
 `, out.String())
