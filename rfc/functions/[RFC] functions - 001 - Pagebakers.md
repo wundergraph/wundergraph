@@ -21,6 +21,7 @@ This RFC introduces a new concept that allows you to write operations as functio
 - Input validation.
 - Support hooks (or similar functionality)
 - Allow to override response headers.
+- Generate JSON schema for the input types.
 
 ## Solution
 
@@ -98,7 +99,54 @@ export default operation()
   });
 ```
 
-Based on the return signature of `query()` or `mutation()` the operation type is inferred by the WunderNode. Allowing you to have queries and mutations side by side in the same folder.
+### Subscription
+
+```ts
+import { operation } from '../generated/operations';
+
+type Input = {
+  from: number;
+};
+
+export default operation()
+  .input((input: Input) => {
+    if (!input.from) {
+      throw new Error('From is required');
+    }
+    return input;
+  })
+  .subscription(async function* (_, { from }) {
+    for (let i = from; i >= 0; i--) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      yield { countdown: i };
+    }
+  });
+```
+
+### GraphQL operations
+
+```ts
+import { operation } from '../generated/operations';
+
+type Input = {
+  city: number;
+};
+
+export default operation().input((input: Input) => {
+  if (!input.city) {
+    throw new Error('City is required');
+  }
+  return input;
+}).graphql(gql`
+    query ($city: Int!) {
+      Weather(forCity: $city) {
+        ...
+      }
+    }
+  `);
+```
+
+Based on the return signature of `query()`, `mutation()`, `subscription()`, `graphql()` the operation type is inferred by the WunderNode. Allowing you to have operation types side by side in the same folder.
 
 #### Middleware
 
@@ -168,6 +216,38 @@ export default operation()
   });
 ```
 
+#### RBAC
+
+Adding authorize without any arguments require users to be logged in to execute the operation.
+
+```ts
+import { operation } from '../generated/operations';
+
+export default operation()
+  .input(z.object({ city: z.string() }))
+  .authorize()
+  .query(async ({ input, internalClient }) => {
+    const result = await internalClient.Weather({ name: input.city });
+    return result;
+  });
+```
+
+It also supports RBAC properties.
+
+```ts
+import { operation } from '../generated/operations';
+
+export default operation()
+  .input(z.object({ city: z.string() }))
+  .authorize({
+    requireMatchAll: ['superadmin', 'user'],
+  })
+  .query(async ({ input, internalClient }) => {
+    const result = await internalClient.Weather({ name: input.city });
+    return result;
+  });
+```
+
 ## Error handling
 
 TBD
@@ -175,3 +255,24 @@ TBD
 ## Modifying request headers
 
 TBD
+
+## Internals
+
+The `operation` factory method is just some sugar coating to fully benefit automatic type inferring and keeping the operation definitions clean and easy to read.
+It returns an object similar to the webhooks API.
+
+```ts
+type OperationResult = {
+  {
+    statusCode: number;
+    headers: Record<string, string>;
+    body: any;
+  }
+}
+
+type Operation = {
+  input: (input: Input) => Input;
+  type: 'query' | 'mutation';
+  handler: (props: HandlerProps) => OperationResult;
+}
+```
