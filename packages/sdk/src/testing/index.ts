@@ -43,7 +43,7 @@ export interface ServerOptions<ClientType extends Client = Client> {
  * Wrapper around the WunderGraph node, intended to simplify
  * running tests within WunderGraph applications.
  */
-export class Server<ClientType extends Client = Client> {
+export class WunderGraphTestServer<ClientType extends Client = Client> {
 	private readonly options: ServerOptions<ClientType>;
 	private nodeUrl: string = '';
 	private subprocess?: Subprocess;
