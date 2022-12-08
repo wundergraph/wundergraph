@@ -27,13 +27,6 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 */
 	fetch: FetchFn;
 	/**
-	 * Time to wait for the WunderGraph node to start up,
-	 * in seconds.
-	 *
-	 * @default 3
-	 */
-	startupTimeoutSeconds: number;
-	/**
 	 * Enable debug logging
 	 *
 	 * @default false
@@ -73,7 +66,6 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				);
 			},
 			fetch: opts?.fetch ?? fetch,
-			startupTimeoutSeconds: 3,
 			debug: false,
 		};
 		return {
@@ -119,12 +111,9 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			subprocess?.stderr?.pipe(process.stderr);
 		}
 		const health = this.url('/health');
-		const maxWaitMs = this.options.startupTimeoutSeconds * 1000;
-		const msPerRetry = 100;
-		const retries = maxWaitMs / msPerRetry;
 		const checkHealth = async () => {
 			const controller = new AbortController();
-			const id = setTimeout(() => controller.abort(), msPerRetry);
+			const id = setTimeout(() => controller.abort(), 5000);
 			try {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
@@ -139,7 +128,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: retries });
+			await retry(checkHealth, { retries: 10 });
 		} catch (e: any) {
 			await this.stop();
 			throw new Error(`could not start WunderGraph server: ${e}`);
