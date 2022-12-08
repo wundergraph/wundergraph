@@ -24,7 +24,7 @@ export const AnnouncementBanner: FC = () => {
 					<span className="relative inline-flex h-3 w-3 rounded-full bg-white"></span>
 				</span>
 				<span className="text-slate-50 dark:text-slate-100">
-					Get Early Access to{' '}
+					Join the waitlist for{' '}
 					<span className="font-bold">
 						WunderGraph Cloud - &quot; The Vercel for Backend &quot;
 					</span>
