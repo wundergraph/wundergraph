@@ -115,8 +115,8 @@ export default operation()
     }
     return input;
   })
-  .subscription(async function* (_, { from }) {
-    for (let i = from; i >= 0; i--) {
+  .subscription(async function* ({ input }) {
+    for (let i = input.from; i >= 0; i--) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       yield { countdown: i };
     }
