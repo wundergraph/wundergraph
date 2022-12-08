@@ -3,9 +3,10 @@ package node
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
+
+	"github.com/docker/go-units"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	defaultInMemoryCacheSize    = 128 // MB
+	defaultInMemoryCacheSize    = int64(128 * units.MB)
 	wgInMemoryCacheConfigEnvKey = "WG_IN_MEMORY_CACHE"
 )
 
@@ -58,16 +59,16 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 	if strings.ToLower(inMemoryCacheConfig) != "off" {
 		cacheSize := defaultInMemoryCacheSize
 		if inMemoryCacheConfig != "" {
-			cacheSize, err = strconv.Atoi(inMemoryCacheConfig)
+			cacheSize, err = units.RAMInBytes(inMemoryCacheConfig)
 			if err != nil {
-				return WunderNodeConfig{}, fmt.Errorf("invalid %s = %q, must be either off or an integer number: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
+				return WunderNodeConfig{}, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
 			}
 		}
 		if cacheSize > 0 {
 			cacheConfig = &wgpb.ApiCacheConfig{
 				Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
 				InMemoryConfig: &wgpb.InMemoryCacheConfig{
-					MaxSize: int64(cacheSize) * 1024 * 1024,
+					MaxSize: cacheSize,
 				},
 			}
 		}

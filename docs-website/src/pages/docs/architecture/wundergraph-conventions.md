@@ -99,7 +99,7 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 | `WG_SERVER_URL`      | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
 | `WG_SERVER_HOST`     | The host of the `WunderGraph Server`.                   | `127.0.0.1`             |
 | `WG_SERVER_PORT`     | The port of the `WunderGraph Server`.                   | `9992`                  |
-| `WG_IN_MEMORY_CACHE` | Size of the in-memory cache in MB or `off`.             | `128`                   |
+| `WG_IN_MEMORY_CACHE` | Size of the in-memory cache (number + suffix) or `off`. | `128MB`                 |
 
 ### Available log levels
 
