@@ -1,0 +1,5 @@
+mutation ($id: Int!, $complete: Boolean!) {
+	db_updateOneTodo(where: { id: $id }, data: { completed: { set: $complete } }) {
+		id
+	}
+}
