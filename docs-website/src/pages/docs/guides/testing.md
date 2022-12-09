@@ -7,8 +7,8 @@ description: This guide shows how to test your WunderGraph applications
 ## Integration testing
 
 WunderGraph comes with builtin support for running tests against your APIs, using a our
-TypeScript client. Use our `WunderGraphTestServer` implementation to set up your WunderGraph
-server, runs your test, and finally tear everything down.
+TypeScript client. Leverage our testing server implementation to set up your WunderGraph
+server, run your test, and finally tear everything down.
 
 Our testing library is framework agnostic, so you can use it with your preferred test
 framework. We use both [Jest](https://jestjs.io) and [ava](https://github.com/avajs/ava) for
@@ -41,34 +41,34 @@ instance ready to query the server set up by the testing library.
 
 ### Testing with Jest
 
-Create your test file and import `WunderGraphTestServer` from `./.wundergraph/generated/testing`. Note
+Create your test file and import `createTestServer` from `./.wundergraph/generated/testing`. Note
 that depending on your project's settings, the path might be slightly different depending on where
 you generate your templates.
 
 ```typescript
-import { WunderGraphTestServer } from '../.wundergraph/generated/testing'
+import { createTestServer } from '../.wundergraph/generated/testing'
 
 // Imports from Jest
 import { describe, expect, test } from '@jest/globals'
 ```
 
-We recommended creating as few `WunderGraphTestServer` instances as possible and sharing them between
+We recommended creating as few testing server instances as possible and sharing them between
 multiple tests. These minimizes the number of times the server starts and stops, making your tests
 faster.
 
 ```typescript
-const wg = new WunderGraphTestServer()
+const wg = new createTestServer()
 ```
 
 Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
 
 ```typescript
 beforeAll(async () => {
-  await wg.start();
+  await wg.start()
 })
 
 afterAll(async () => {
-  await wg.stop();
+  await wg.stop()
 })
 ```
 
@@ -105,34 +105,34 @@ If you'd like to see a full example using Jest for testing, check our [simple ex
 
 ### Testing with Ava
 
-Create your test file and import `WunderGraphTestServer` from `./.wundergraph/generated/testing`. Note
+Create your test file and import `createTestServer` from `./.wundergraph/generated/testing`. Note
 that depending on your project's settings, the path might be slightly different depending on where
 you generate your templates.
 
 ```typescript
-import { WunderGraphTestServer } from '../.wundergraph/generated/testing'
+import { createTestServer } from '../.wundergraph/generated/testing'
 
 // Imports from Ava
 import { test } from 'ava'
 ```
 
-We recommended creating as few `WunderGraphTestServer` instances as possible and sharing them between
+We recommended creating as few testing server instances as possible and sharing them between
 multiple tests. These minimizes the number of times the server starts and stops, making your tests
 faster.
 
 ```typescript
-const wg = new WunderGraphTestServer()
+const wg = createTestServer()
 ```
 
 Use Ava's `test.before()` and `test.after()` functions to setup our testing server:
 
 ```typescript
 test.before(async (t) => {
-  await wg.start();
+  await wg.start()
 })
 
 test.after(async (t) => {
-  await wg.stop();
+  await wg.stop()
 })
 ```
 

@@ -1,8 +1,8 @@
 import test from 'ava';
 
-import { WunderGraphTestServer } from './.wundergraph/generated/testing';
+import { createTestServer } from './.wundergraph/generated/testing';
 
-const wg = new WunderGraphTestServer();
+const wg = createTestServer();
 
 test.before(async (t) => {
 	await wg.start();

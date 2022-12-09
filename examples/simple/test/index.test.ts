@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import fetch from 'node-fetch';
-import { WunderGraphTestServer } from '../.wundergraph/generated/testing';
+import { createTestServer } from '../.wundergraph/generated/testing';
 
-const wg = new WunderGraphTestServer({ fetch: fetch as any });
+const wg = createTestServer({ fetch: fetch as any });
 
 beforeAll(async () => {
 	await wg.start();
