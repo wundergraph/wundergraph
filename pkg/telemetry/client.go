@@ -19,8 +19,8 @@ const (
 )
 
 type Client interface {
-	// Flush sends all metrics to the server. It will also stop all duration trackers.
-	Flush() error
+	// CreateBatch creates an immutable set of metrics and returns a functions that sends all metrics to the server.
+	CreateBatch() func() error
 	// Track adds a simple metric to the client.
 	Track(metric Metric)
 	// TrackDuration starts a duration metric. The duration will be stop when the callback is called.
@@ -115,51 +115,54 @@ func (c *client) TrackDuration(metricFn func() Metric) {
 	c.durationMetricFns = append(c.durationMetricFns, metricFn)
 }
 
-func (c *client) Flush() error {
+func (c *client) CreateBatch() func() error {
+	var metrics []Metric
+
+	metrics = append(metrics, c.metrics...)
+
 	for _, fn := range c.durationMetricFns {
-		c.metrics = append(c.metrics, fn())
+		metrics = append(metrics, fn())
 	}
 
-	if c.log != nil && c.debug {
-		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
-		for _, m := range c.metrics {
-			c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value))
+	c.metrics = []Metric{}
+	c.durationMetricFns = []func() Metric{}
+
+	return func() error {
+		if c.log != nil && c.debug {
+			c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
+			for _, m := range metrics {
+				c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value))
+			}
 		}
+
+		data, err := json.Marshal(MetricRequest{
+			Metrics:    metrics,
+			ClientInfo: c.clientInfo,
+		})
+		if err != nil {
+			return err
+		}
+
+		req, err := http.NewRequest("POST", c.address+"/operations/CollectMetricsV1", bytes.NewBuffer(data))
+		if err != nil {
+			return err
+		}
+
+		req.Header.Set("User-Agent", userAgent)
+		req.Header.Add("Content-Type", "application/json")
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("error sending telemetry data: %s, statusCode: %d", string(data), resp.StatusCode)
+		}
+
+		return nil
 	}
-
-	data, err := json.Marshal(MetricRequest{
-		Metrics:    c.metrics,
-		ClientInfo: c.clientInfo,
-	})
-	if err != nil {
-		return err
-	}
-
-	// Reset metrics
-	defer (func() {
-		c.metrics = []Metric{}
-		c.durationMetricFns = []func() Metric{}
-	})()
-
-	req, err := http.NewRequest("POST", c.address+"/operations/CollectMetricsV1", bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("error sending telemetry data: %s, statusCode: %d", string(data), resp.StatusCode)
-	}
-
-	return nil
 }
 
 // NewUsageMetric creates a simple metric. The value will be 1.
@@ -170,7 +173,7 @@ func NewUsageMetric(name string) Metric {
 	}
 }
 
-// NewDurationMetric starts a duration metric. The duration will be stop when Flush is called.
+// NewDurationMetric starts a duration metric. The duration will be stop when CreateBatch is called.
 func NewDurationMetric(name string) func() Metric {
 	start := time.Now()
 	return func() Metric {

@@ -140,13 +140,16 @@ var rootCmd = &cobra.Command{
 
 				TelemetryClient.Track(cmdUsageMetric)
 
+				// Prepare an immutable batch of telemetry data
+				flush := TelemetryClient.CreateBatch()
+
 				// Track the usage of the command immediately
 				// without blocking the command execution
 				// In unlikely case that the command is done before the actual flush
 				// the metric will be flushed again after the command execution (see Execute())
 				// This is also the place when the duration metric is processed
 				go func() {
-					err := TelemetryClient.Flush()
+					err := flush()
 					if rootFlags.TelemetryDebugMode {
 						if err != nil {
 							log.Error("Could not send telemetry data", zap.Error(err))
@@ -154,12 +157,12 @@ var rootCmd = &cobra.Command{
 							log.Info("Telemetry data sent")
 						}
 					}
-
-					// Track command duration.
-					// We have to do it after the first flush to not send the metric too early
-					// The data is sent on the next flush which is done after the command is finished
-					TelemetryClient.TrackDuration(cmdDurationMetric)
 				}()
+
+				// Track command duration.
+				// We have to do it after the first flush to not send the metric too early
+				// The data is sent on the next flush which is done after the command is finished
+				TelemetryClient.TrackDuration(cmdDurationMetric)
 			}
 		}
 
@@ -194,8 +197,11 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 
 func FlushTelemetry() {
 	if TelemetryClient != nil && rootFlags.Telemetry {
+		// Prepare an immutable batch of telemetry data
+		flush := TelemetryClient.CreateBatch()
+
 		// Send telemetry data
-		err := TelemetryClient.Flush()
+		err := flush()
 		if rootFlags.TelemetryDebugMode {
 			if err != nil {
 				log.Error("Could not send telemetry data", zap.Error(err))
