@@ -128,7 +128,7 @@ var rootCmd = &cobra.Command{
 
 				metricName := cmd.Name()
 				if cmd.HasParent() {
-					metricName = telemetry.BuildMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
+					metricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
 				}
 
 				metricUsageName := telemetry.CmdUsageMetricName(metricName)
