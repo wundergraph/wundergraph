@@ -134,7 +134,7 @@ var rootCmd = &cobra.Command{
 				}
 
 				metricUsageName := telemetry.CmdUsageMetricName(metricName)
-				TelemetryClient.Counter(metricUsageName)
+				TelemetryClient.TrackSimple(metricUsageName)
 
 				// Send telemetry data
 				go func() {
@@ -151,7 +151,7 @@ var rootCmd = &cobra.Command{
 					// We have to do it after the flush to not send the metric too early
 					// The data is sent on the next flush
 					metricDurationName := telemetry.CmdDurationMetricName(metricName)
-					TelemetryClient.Duration(metricDurationName)
+					TelemetryClient.TrackDuration(metricDurationName)
 				}()
 			}
 		}

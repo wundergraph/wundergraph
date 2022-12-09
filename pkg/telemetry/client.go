@@ -21,12 +21,12 @@ const (
 type Client interface {
 	// Flush sends all metrics to the server. It will also stop all duration trackers.
 	Flush() error
-	// Counter increments a counter metric
-	Counter(name string)
-	// Duration starts a duration metric
-	Duration(name string)
-	// Gauge sets a gauge metric
-	Gauge(name string, value float64)
+	// TrackSimple adds a simple metric to the client. The value will be 1.
+	TrackSimple(name string)
+	// TrackDuration starts a duration metric. The duration will be stop when Flush is called.
+	TrackDuration(name string)
+	// TrackGauge adds a metric which value can be any float64.
+	TrackGauge(name string, value float64)
 }
 
 type ClientOption func(*client)
@@ -108,21 +108,21 @@ type MetricClientInfo struct {
 	AnonymousID      string `json:"anonymousID,omitempty"`
 }
 
-func (c *client) Counter(name string) {
+func (c *client) TrackSimple(name string) {
 	c.metrics = append(c.metrics, Metric{
 		Name:  name,
 		Value: 1,
 	})
 }
 
-func (c *client) Gauge(name string, value float64) {
+func (c *client) TrackGauge(name string, value float64) {
 	c.metrics = append(c.metrics, Metric{
 		Name:  name,
 		Value: value,
 	})
 }
 
-func (c *client) Duration(name string) {
+func (c *client) TrackDuration(name string) {
 	c.durationTracker.Start(name)
 }
 
