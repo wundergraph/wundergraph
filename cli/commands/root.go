@@ -12,6 +12,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
@@ -56,33 +58,24 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "wunderctl",
 	Short: "wunderctl is the cli to manage, build and debug your WunderGraph applications",
-	Long: `wunderctl is the cli to manage, build and debug your WunderGraph applications
-
-Simply running "wunderctl" will check the wundergraph.manifest.json in the current directory and install all dependencies. 
-
-wunderctl is gathering anonymous usage data so that we can better understand how it's being used and improve it.
-You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
-`,
+	Long:  `wunderctl is the cli to manage, build and debug your WunderGraph applications.`,
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-		switch cmd.Name() {
-		case UpCmdName:
-			TelemetryClient.Gauge(telemetry.WunderctlUpCmdDuration, TelemetryDurationTracker.Stop(telemetry.WunderctlUpCmdDuration).Seconds())
-		}
+		if rootFlags.Telemetry && cmd.Annotations["telemetry"] == "true" {
+			metricDurationName := telemetry.CmdDurationMetricName(strings.ToUpper(cmd.Name()))
+			TelemetryClient.Gauge(metricDurationName, TelemetryDurationTracker.Stop(metricDurationName).Seconds())
 
-		err := TelemetryClient.Flush(telemetry.MetricClientInfo{
-			IsDevelopment:    false,
-			WunderctlVersion: BuildInfo.Version,
-			IsCI:             os.Getenv("CI") != "",
-			AnonymousID:      viper.GetString("anonymousid"),
-		})
-		if err != nil {
-			log.Debug("failed to flush telemetry", zap.Error(err))
+			// Send telemetry data
+			err := TelemetryClient.Flush()
+			if rootFlags.TelemetryDebugMode {
+				if err != nil {
+					log.Error("Could not send telemetry data", zap.Error(err))
+				} else {
+					log.Info("Telemetry data sent")
+				}
+			}
 		}
 	},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		TelemetryClient = telemetry.NewClient(viper.GetString("API_URL"), telemetry.WithTimeout(3))
-		TelemetryDurationTracker = telemetry.NewDurationTracker()
-
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
 		// because the command output data on stdout
@@ -93,9 +86,6 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			// it would overwrite the default value for all other commands
 		case UpCmdName:
 			rootFlags.PrettyLogs = upCmdPrettyLogging
-
-			TelemetryDurationTracker.Start(telemetry.WunderctlUpCmdDuration)
-			TelemetryClient.Increment(telemetry.WunderctlUpCmdUsage)
 		}
 
 		if rootFlags.DebugMode {
@@ -134,6 +124,39 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			cacheDir := filepath.Join(wunderGraphDir, "cache")
 			if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
 				return err
+			}
+		}
+
+		if rootFlags.Telemetry {
+			TelemetryClient = telemetry.NewClient(
+				viper.GetString("API_URL"),
+				telemetry.MetricClientInfo{
+					WunderctlVersion: BuildInfo.Version,
+					IsCI:             os.Getenv("CI") != "",
+					AnonymousID:      viper.GetString("anonymousid"),
+				},
+				telemetry.WithTimeout(3*time.Second),
+				telemetry.WithLogger(log),
+				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+			)
+			TelemetryDurationTracker = telemetry.NewDurationTracker()
+
+			if cmd.Annotations["telemetry"] == "true" {
+				metricDurationName := telemetry.CmdDurationMetricName(strings.ToUpper(cmd.Name()))
+				TelemetryDurationTracker.Start(metricDurationName)
+
+				metricUsageName := telemetry.CmdUsageMetricName(strings.ToUpper(cmd.Name()))
+				TelemetryClient.Counter(metricUsageName)
+
+				// Send telemetry data
+				err := TelemetryClient.Flush()
+				if rootFlags.TelemetryDebugMode {
+					if err != nil {
+						log.Error("Could not send telemetry data", zap.Error(err))
+					} else {
+						log.Info("Telemetry data sent")
+					}
+				}
 			}
 		}
 
@@ -180,6 +203,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", true, "enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", false, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")

@@ -25,6 +25,9 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts WunderGraph in production mode",
 	Long:  `Start runs WunderGraph Node and Server as a single process in production mode`,
+	Annotations: map[string]string{
+		"telemetry": "true",
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()

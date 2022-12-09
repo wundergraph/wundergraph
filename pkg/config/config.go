@@ -71,7 +71,7 @@ func initViper() {
 		}
 	}
 
-	viper.SetEnvPrefix("WUNDERGRAPH")
+	viper.SetEnvPrefix("WG")
 	viper.AutomaticEnv()
 }
 

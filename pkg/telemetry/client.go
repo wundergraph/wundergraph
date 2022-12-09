@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/go-retryablehttp"
+	"go.uber.org/zap"
 	"net/http"
 	"runtime"
 	"strings"
@@ -18,12 +19,24 @@ const (
 )
 
 type Client interface {
-	Flush(clientInfo MetricClientInfo) error
-	Increment(name string) error
+	Flush() error
+	Counter(name string) error
 	Gauge(name string, value float64) error
 }
 
 type ClientOption func(*client)
+
+func WithDebug(debug bool) ClientOption {
+	return func(c *client) {
+		c.debug = debug
+	}
+}
+
+func WithLogger(logger *zap.Logger) ClientOption {
+	return func(c *client) {
+		c.log = logger
+	}
+}
 
 func WithTimeout(timeout time.Duration) ClientOption {
 	return func(c *client) {
@@ -35,14 +48,21 @@ type client struct {
 	address    string
 	httpClient *http.Client
 	timeout    time.Duration
-	metrics    []metric
+	metrics    []Metric
+	debug      bool
+	clientInfo MetricClientInfo
+	log        *zap.Logger
 }
 
-func NewClient(address string, opts ...ClientOption) Client {
+func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption) Client {
 	c := &client{
-		address: address,
-		metrics: []metric{},
+		address:    address,
+		clientInfo: clientInfo,
+		metrics:    []Metric{},
 	}
+
+	c.clientInfo.OsName = strings.ToUpper(runtime.GOOS)
+	c.clientInfo.CpuCount = runtime.NumCPU()
 
 	for _, opt := range opts {
 		opt(c)
@@ -64,50 +84,56 @@ func NewClient(address string, opts ...ClientOption) Client {
 }
 
 type MetricRequest struct {
-	Metrics    []metric         `json:"metrics"`
+	Metrics    []Metric         `json:"metrics"`
 	ClientInfo MetricClientInfo `json:"clientInfo"`
 }
 
-type metric struct {
-	name  string  `json:"name"`
-	value float64 `json:"value"`
+type Metric struct {
+	Name  string  `json:"name"`
+	Value float64 `json:"value"`
 }
 
 type MetricClientInfo struct {
 	OsName           string `json:"osName,omitempty"`
 	CpuCount         int    `json:"cpuCount,omitempty"`
-	IsDevelopment    bool   `json:"isDevelopment,omitempty"`
 	IsCI             bool   `json:"isCI,omitempty"`
 	WunderctlVersion string `json:"wunderctlVersion,omitempty"`
 	AnonymousID      string `json:"anonymousID,omitempty"`
 }
 
-func (c *client) Increment(name string) error {
-	c.metrics = append(c.metrics, metric{
-		name: name,
+func (c *client) Counter(name string) error {
+	c.metrics = append(c.metrics, Metric{
+		Name:  name,
+		Value: 1,
 	})
 	return nil
 }
 
 func (c *client) Gauge(name string, value float64) error {
-	c.metrics = append(c.metrics, metric{
-		name:  name,
-		value: value,
+	c.metrics = append(c.metrics, Metric{
+		Name:  name,
+		Value: value,
 	})
 	return nil
 }
 
-func (c *client) Flush(clientInfo MetricClientInfo) error {
-	clientInfo.OsName = strings.ToUpper(runtime.GOOS)
-	clientInfo.CpuCount = runtime.NumCPU()
+func (c *client) Flush() error {
+	if c.log != nil && c.debug {
+		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
+		for _, m := range c.metrics {
+			c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value))
+		}
+	}
 
 	data, err := json.Marshal(MetricRequest{
 		Metrics:    c.metrics,
-		ClientInfo: clientInfo,
+		ClientInfo: c.clientInfo,
 	})
 	if err != nil {
 		return err
 	}
+
+	c.metrics = []Metric{}
 
 	req, err := http.NewRequest("POST", c.address+"/operations/CollectMetricsV1", bytes.NewBuffer(data))
 	if err != nil {
@@ -121,12 +147,11 @@ func (c *client) Flush(clientInfo MetricClientInfo) error {
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("error sending telemetry data: %s, statusCode: %d", string(data), resp.StatusCode)
 	}
-
-	c.metrics = []metric{}
 
 	return nil
 }

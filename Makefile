@@ -45,7 +45,6 @@ codegen-go: install-proto
 
 codegen: install-proto codegen-go
 	pnpm codegen
-	go generate ./...
 
 build: codegen
 	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath

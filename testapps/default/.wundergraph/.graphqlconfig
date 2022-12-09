@@ -4,7 +4,7 @@
     "extensions": {
       "endpoint": {
         "introspect": false,
-        "url": "http://localhost:4001/graphql",
+        "url": "http://localhost:9991/graphql",
         "headers": {
           "user-agent": "WunderGraph Client"
         }
