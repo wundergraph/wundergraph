@@ -170,6 +170,7 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 			FlushTelemetry()
 			os.Exit(1)
 		} else {
+			FlushTelemetry()
 			os.Exit(0)
 		}
 	}()
