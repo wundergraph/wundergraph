@@ -31,16 +31,15 @@ const (
 )
 
 var (
-	BuildInfo                node.BuildInfo
-	GitHubAuthDemo           node.GitHubAuthDemo
-	TelemetryClient          telemetry.Client
-	TelemetryDurationTracker *telemetry.DurationTracker
-	DotEnvFile               string
-	log                      *zap.Logger
-	serviceToken             string
-	_wunderGraphDirConfig    string
-	disableCache             bool
-	clearCache               bool
+	BuildInfo             node.BuildInfo
+	GitHubAuthDemo        node.GitHubAuthDemo
+	TelemetryClient       telemetry.Client
+	DotEnvFile            string
+	log                   *zap.Logger
+	serviceToken          string
+	_wunderGraphDirConfig string
+	disableCache          bool
+	clearCache            bool
 
 	rootFlags helpers.RootFlags
 
@@ -123,7 +122,6 @@ var rootCmd = &cobra.Command{
 				telemetry.WithLogger(log),
 				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
 			)
-			TelemetryDurationTracker = telemetry.NewDurationTracker()
 
 			// Check if we want to track telemetry for this command
 			if cmd.Annotations["telemetry"] == "true" {
