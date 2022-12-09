@@ -14,5 +14,11 @@ protoc  \
 outfile="../pkg/wgpb/wundernode_config.pb.go"
 tmp="${outfile}.tmp"
 
-# Remove comments with version numbers
+# To avoid requiring contributors to use the same exact protoc version, allowing
+# slightly different but compatible versions, remove the version numbers that the
+# Go generator drops into the file.
+#
+# To make supported both Linux and macOS easier, use grep with a regular expression
+# instead of sed commands (grep is not that different between BSD and Linux, while
+# sed has more significant incompatibilities between both OSes).
 grep -v "^//.*protoc.*v" ${outfile} > ${tmp} && mv -f ${tmp} ${outfile} && rm -f ${tmp}
