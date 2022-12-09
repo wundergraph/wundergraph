@@ -145,7 +145,9 @@ var rootCmd = &cobra.Command{
 						}
 					}
 
-					// Track command duration. We have to do it after the flush to not send the metric too early
+					// Track command duration.
+					// We have to do it after the flush to not send the metric too early
+					// The data is sent on the next flush
 					metricDurationName := telemetry.CmdDurationMetricName(metricName)
 					TelemetryClient.Duration(metricDurationName)
 				}()
