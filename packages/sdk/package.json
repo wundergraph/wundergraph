@@ -11,6 +11,10 @@
       "types": "./dist/client/index.d.ts",
       "default": "./dist/client/index.js"
     },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
+    },
     "./internal": {
       "types": "./dist/internal/index.d.ts",
       "default": "./dist/internal/index.js"
@@ -28,6 +32,9 @@
     "*": {
       "client": [
         "./dist/client"
+      ],
+      "testing": [
+        "./dist/testing"
       ],
       "internal": [
         "./dist/internal"
@@ -122,7 +129,8 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.7.1",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8"
+    "swagger2openapi": "^7.0.8",
+    "ts-retry-promise": "^0.7.0"
   },
   "jest": {
     "preset": "ts-jest",
