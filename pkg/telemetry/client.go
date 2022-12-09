@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -19,12 +20,15 @@ const (
 )
 
 type Client interface {
-	// CreateBatch creates an immutable set of metrics and returns a functions that sends all metrics to the server.
-	CreateBatch() func() error
+	// PrepareBatch creates an immutable set of metrics and returns a functions that sends all metrics to the server.
+	// The function is safe for concurrent use.
+	PrepareBatch() func() error
 	// Track adds a simple metric to the client.
+	// The function is safe for concurrent use.
 	Track(metric Metric)
 	// TrackDuration starts a duration metric. The duration will be stop when the callback is called.
 	// The callback will be called when Flush is called.
+	// The function is safe for concurrent use.
 	TrackDuration(metricFn func() Metric)
 }
 
@@ -49,6 +53,8 @@ func WithTimeout(timeout time.Duration) ClientOption {
 }
 
 type client struct {
+	sync.Mutex
+
 	address           string
 	httpClient        *http.Client
 	timeout           time.Duration
@@ -108,24 +114,28 @@ type MetricClientInfo struct {
 }
 
 func (c *client) Track(metric Metric) {
+	c.Lock()
+	defer c.Unlock()
 	c.metrics = append(c.metrics, metric)
 }
 
 func (c *client) TrackDuration(metricFn func() Metric) {
+	c.Lock()
+	defer c.Unlock()
 	c.durationMetricFns = append(c.durationMetricFns, metricFn)
 }
 
-func (c *client) CreateBatch() func() error {
+func (c *client) PrepareBatch() func() error {
 	var metrics []Metric
-
-	metrics = append(metrics, c.metrics...)
 
 	for _, fn := range c.durationMetricFns {
 		metrics = append(metrics, fn())
 	}
 
+	c.Lock()
 	c.metrics = []Metric{}
 	c.durationMetricFns = []func() Metric{}
+	c.Unlock()
 
 	return func() error {
 		if c.log != nil && c.debug {
@@ -173,7 +183,7 @@ func NewUsageMetric(name string) Metric {
 	}
 }
 
-// NewDurationMetric starts a duration metric. The duration will be stop when CreateBatch is called.
+// NewDurationMetric starts a duration metric. The duration will be stop when PrepareBatch is called.
 func NewDurationMetric(name string) func() Metric {
 	start := time.Now()
 	return func() Metric {
