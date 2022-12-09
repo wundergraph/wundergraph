@@ -32,9 +32,9 @@ npx create-wundergraph-app <project-name> -L <github-link>
 ## Local Usage
 
 ```shell
-node ./dist/index.js --help
-node ./dist/index.js --version
-node ./dist/index.js <project-name>
-node ./dist/index.js <project-name> -E <example-name>
-node ./dist/index.js <project-name> -L <github-link>
+node ./dist/src/index.js --help
+node ./dist/src/index.js --version
+node ./dist/src/index.js <project-name>
+node ./dist/src/index.js <project-name> -E <example-name>
+node ./dist/src/index.js <project-name> -L <github-link>
 ```

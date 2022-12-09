@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.6.0...@wundergraph/nextjs@0.6.1) (2022-12-08)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.6.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.5.2...@wundergraph/nextjs@0.6.0) (2022-12-06)
+
+### Features
+
+* react query client ([#340](https://github.com/wundergraph/wundergraph/issues/340)) ([c5769a4](https://github.com/wundergraph/wundergraph/commit/c5769a422970e8eaf626dd767cf09252789bcd1f)) (@Pagebakers)
+
+### Bug Fixes
+
+* generate all required templates ([#360](https://github.com/wundergraph/wundergraph/issues/360)) ([ce2f130](https://github.com/wundergraph/wundergraph/commit/ce2f130829dfc4e4c7e468fcdc364bc7adef00d2)) (@JivusAyrus)
+
 ## [0.5.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.5.0...@wundergraph/nextjs@0.5.2) (2022-11-20)
 
 **Note:** Version bump only for package @wundergraph/nextjs

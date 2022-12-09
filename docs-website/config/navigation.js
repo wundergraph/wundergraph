@@ -116,6 +116,10 @@ const navigation = [
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
 			{
+				title: 'Testing',
+				href: '/docs/guides/testing',
+			},
+			{
 				title: 'Debugging',
 				href: '/docs/guides/debugging',
 			},
@@ -270,6 +274,10 @@ const navigation = [
 			{
 				title: 'WunderGraph schema extension',
 				href: '/docs/examples/schema-extension',
+			},
+			{
+				title: 'Next.js Todos',
+				href: '/docs/examples/nextjs-todos',
 			},
 		],
 	},

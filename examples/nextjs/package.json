@@ -11,12 +11,13 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.5.0",
-    "@wundergraph/sdk": "^0.123.0",
+    "@wundergraph/nextjs": "^0.6.1",
+    "@wundergraph/sdk": "^0.124.1",
     "graphql": "^16.3.0",
     "next": "^12.1.6",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "swr": "^2.0.0-rc.3"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",

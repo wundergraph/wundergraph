@@ -1,0 +1,6 @@
+mutation ($id: Int!, $order: Int!) {
+	todo: db_updateOneTodo(where: { id: $id }, data: { order: { set: $order } }) {
+		id
+		order
+	}
+}
