@@ -1,0 +1,56 @@
+name: Examples CI
+on:
+  push:
+    branches:
+      - main
+      - next
+  pull_request:
+    branches:
+      - main
+      - next
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+env:
+  WORKING_DIRECTORY: '.'
+  CI: true
+
+jobs:
+  build_test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/go
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: '18'
+
+      - name: Bootstrap PNPM workspace
+        run: ./scripts/pnpm.sh
+
+      - name: Build libs
+        run: pnpm build:libs
+
+      - name: Build wunderctl
+        run: |
+          make install
+          echo "WUNDERCTL_BINARY_PATH=$(which wunderctl)" >> $GITHUB_ENV
+
+      - name: Add examples to workspace
+        run: echo "  - 'examples/*'" >> pnpm-workspace.yaml
+
+      - name: Test example
+        working-directory: ./examples/simple
+        run: ../../scripts/test-example.sh
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
