@@ -127,32 +127,33 @@ var rootCmd = &cobra.Command{
 
 			// Check if we want to track telemetry for this command
 			if cmd.Annotations["telemetry"] == "true" {
-
 				metricName := cmd.Name()
 				if cmd.HasParent() {
 					metricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
 				}
 
+				metricDurationName := telemetry.CmdDurationMetricName(metricName)
+				cmdDurationMetric := telemetry.NewDurationMetric(metricDurationName)
+
 				metricUsageName := telemetry.CmdUsageMetricName(metricName)
-				TelemetryClient.TrackSimple(metricUsageName)
+				cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
-				// Send telemetry data
-				go func() {
-					err := TelemetryClient.Flush()
-					if rootFlags.TelemetryDebugMode {
-						if err != nil {
-							log.Error("Could not send telemetry data", zap.Error(err))
-						} else {
-							log.Info("Telemetry data sent")
-						}
+				TelemetryClient.Track(cmdUsageMetric)
+
+				// Track the usage of the command immediately
+				err := TelemetryClient.Flush()
+				if rootFlags.TelemetryDebugMode {
+					if err != nil {
+						log.Error("Could not send telemetry data", zap.Error(err))
+					} else {
+						log.Info("Telemetry data sent")
 					}
+				}
 
-					// Track command duration.
-					// We have to do it after the flush to not send the metric too early
-					// The data is sent on the next flush
-					metricDurationName := telemetry.CmdDurationMetricName(metricName)
-					TelemetryClient.TrackDuration(metricDurationName)
-				}()
+				// Track command duration.
+				// We have to do it after the flush to not send the metric too early
+				// The data is sent on the next flush which is done after the command is finished
+				TelemetryClient.TrackDuration(cmdDurationMetric)
 			}
 		}
 

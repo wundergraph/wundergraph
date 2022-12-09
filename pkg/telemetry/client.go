@@ -21,12 +21,11 @@ const (
 type Client interface {
 	// Flush sends all metrics to the server. It will also stop all duration trackers.
 	Flush() error
-	// TrackSimple adds a simple metric to the client. The value will be 1.
-	TrackSimple(name string)
-	// TrackDuration starts a duration metric. The duration will be stop when Flush is called.
-	TrackDuration(name string)
-	// TrackGauge adds a metric which value can be any float64.
-	TrackGauge(name string, value float64)
+	// Track adds a simple metric to the client.
+	Track(metric Metric)
+	// TrackDuration starts a duration metric. The duration will be stop when the callback is called.
+	// The callback will be called when Flush is called.
+	TrackDuration(metricFn func() Metric)
 }
 
 type ClientOption func(*client)
@@ -50,22 +49,22 @@ func WithTimeout(timeout time.Duration) ClientOption {
 }
 
 type client struct {
-	address         string
-	httpClient      *http.Client
-	timeout         time.Duration
-	metrics         []Metric
-	debug           bool
-	clientInfo      MetricClientInfo
-	durationTracker *DurationTracker
-	log             *zap.Logger
+	address           string
+	httpClient        *http.Client
+	timeout           time.Duration
+	metrics           []Metric
+	durationMetricFns []func() Metric
+	debug             bool
+	clientInfo        MetricClientInfo
+	log               *zap.Logger
 }
 
 func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption) Client {
 	c := &client{
-		address:         address,
-		clientInfo:      clientInfo,
-		metrics:         []Metric{},
-		durationTracker: NewDurationTracker(),
+		address:           address,
+		clientInfo:        clientInfo,
+		metrics:           []Metric{},
+		durationMetricFns: []func() Metric{},
 	}
 
 	c.clientInfo.OsName = strings.ToUpper(runtime.GOOS)
@@ -108,38 +107,24 @@ type MetricClientInfo struct {
 	AnonymousID      string `json:"anonymousID,omitempty"`
 }
 
-func (c *client) TrackSimple(name string) {
-	c.metrics = append(c.metrics, Metric{
-		Name:  name,
-		Value: 1,
-	})
+func (c *client) Track(metric Metric) {
+	c.metrics = append(c.metrics, metric)
 }
 
-func (c *client) TrackGauge(name string, value float64) {
-	c.metrics = append(c.metrics, Metric{
-		Name:  name,
-		Value: value,
-	})
-}
-
-func (c *client) TrackDuration(name string) {
-	c.durationTracker.Start(name)
+func (c *client) TrackDuration(metricFn func() Metric) {
+	c.durationMetricFns = append(c.durationMetricFns, metricFn)
 }
 
 func (c *client) Flush() error {
+	for _, fn := range c.durationMetricFns {
+		c.metrics = append(c.metrics, fn())
+	}
+
 	if c.log != nil && c.debug {
 		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
 		for _, m := range c.metrics {
 			c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value))
 		}
-	}
-
-	for name, _ := range c.durationTracker.Tracks() {
-		d := c.durationTracker.Stop(name)
-		c.metrics = append(c.metrics, Metric{
-			Name:  name,
-			Value: d.Seconds(),
-		})
 	}
 
 	data, err := json.Marshal(MetricRequest{
@@ -153,6 +138,7 @@ func (c *client) Flush() error {
 	// Reset metrics
 	defer (func() {
 		c.metrics = []Metric{}
+		c.durationMetricFns = []func() Metric{}
 	})()
 
 	req, err := http.NewRequest("POST", c.address+"/operations/CollectMetricsV1", bytes.NewBuffer(data))
@@ -174,4 +160,31 @@ func (c *client) Flush() error {
 	}
 
 	return nil
+}
+
+// NewUsageMetric creates a simple metric. The value will be 1.
+func NewUsageMetric(name string) Metric {
+	return Metric{
+		Name:  name,
+		Value: 1,
+	}
+}
+
+// NewDurationMetric starts a duration metric. The duration will be stop when Flush is called.
+func NewDurationMetric(name string) func() Metric {
+	start := time.Now()
+	return func() Metric {
+		return Metric{
+			Name:  name,
+			Value: time.Since(start).Seconds(),
+		}
+	}
+}
+
+// NewGaugeMetric creates a metric which value can be any float64.
+func NewGaugeMetric(name string, value float64) Metric {
+	return Metric{
+		Name:  name,
+		Value: 1,
+	}
 }
