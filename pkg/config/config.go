@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/segmentio/ksuid"
 	"io/ioutil"
 	"log"
 	"os"
@@ -61,6 +62,15 @@ func initViper() {
 		fmt.Println("Error loading config", err)
 	}
 
+	// Init anonymous user id that is used to distinguish between different users
+	if !viper.InConfig("anonymousID") {
+		viper.Set("anonymousID", ksuid.New().String())
+		allSettings := viper.AllSettings()
+		if err := SaveConfig(allSettings); err != nil {
+			log.Printf("Could not save config: %v\n", err)
+		}
+	}
+
 	viper.SetEnvPrefix("WUNDERGRAPH")
 	viper.AutomaticEnv()
 }
@@ -76,7 +86,7 @@ func loadConfig() error {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			ioutil.WriteFile(ConfigFilePath(), []byte("{}"), 0600)
+			ioutil.WriteFile(ConfigFilePath(), []byte(`{}`), 0600)
 		} else {
 			log.Fatalf("could not read config: %v\n", err)
 		}
@@ -102,13 +112,9 @@ func SaveConfig(allSettings map[string]interface{}) error {
 	return ioutil.WriteFile(ConfigFilePath(), data, 0600)
 }
 
-var writeableConfigKeys = []string{"auth"}
+var writeableConfigKeys = []string{"auth", "anonymousid"}
 
 func persistConfigKey(key string) bool {
-	if viper.InConfig(key) {
-		return true
-	}
-
 	for _, k := range writeableConfigKeys {
 		if k == key || strings.HasPrefix(key, k+".") {
 			return true

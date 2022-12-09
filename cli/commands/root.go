@@ -3,26 +3,21 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"io/fs"
-	"net/http"
-	"os"
-	"path/filepath"
-	"time"
-
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"go.uber.org/zap"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
-	"github.com/wundergraph/wundergraph/pkg/cli/auth"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/logging"
-	"github.com/wundergraph/wundergraph/pkg/manifest"
 	"github.com/wundergraph/wundergraph/pkg/node"
-	"github.com/wundergraph/wundergraph/pkg/v2wundergraphapi"
 )
 
 const (
@@ -36,14 +31,16 @@ const (
 )
 
 var (
-	BuildInfo             node.BuildInfo
-	GitHubAuthDemo        node.GitHubAuthDemo
-	DotEnvFile            string
-	log                   *zap.Logger
-	serviceToken          string
-	_wunderGraphDirConfig string
-	disableCache          bool
-	clearCache            bool
+	BuildInfo                node.BuildInfo
+	GitHubAuthDemo           node.GitHubAuthDemo
+	TelemetryClient          telemetry.Client
+	TelemetryDurationTracker *telemetry.DurationTracker
+	DotEnvFile               string
+	log                      *zap.Logger
+	serviceToken             string
+	_wunderGraphDirConfig    string
+	disableCache             bool
+	clearCache               bool
 
 	rootFlags helpers.RootFlags
 
@@ -66,7 +63,25 @@ Simply running "wunderctl" will check the wundergraph.manifest.json in the curre
 wunderctl is gathering anonymous usage data so that we can better understand how it's being used and improve it.
 You can opt out of this by setting the following environment variable: WUNDERGRAPH_DISABLE_METRICS
 `,
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		switch cmd.Name() {
+		case UpCmdName:
+			TelemetryClient.Gauge(telemetry.WunderctlUpCmdDuration, TelemetryDurationTracker.Stop(telemetry.WunderctlUpCmdDuration).Seconds())
+		}
+
+		err := TelemetryClient.Flush(telemetry.MetricClientInfo{
+			IsDevelopment:    false,
+			WunderctlVersion: BuildInfo.Version,
+			IsCI:             os.Getenv("CI") != "",
+			AnonymousID:      viper.GetString("anonymousid"),
+		})
+		if err != nil {
+			log.Debug("failed to flush telemetry", zap.Error(err))
+		}
+	},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		TelemetryClient = telemetry.NewClient(viper.GetString("API_URL"), telemetry.WithTimeout(3))
+		TelemetryDurationTracker = telemetry.NewDurationTracker()
 
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
@@ -78,6 +93,9 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 			// it would overwrite the default value for all other commands
 		case UpCmdName:
 			rootFlags.PrettyLogs = upCmdPrettyLogging
+
+			TelemetryDurationTracker.Start(telemetry.WunderctlUpCmdDuration)
+			TelemetryClient.Increment(telemetry.WunderctlUpCmdUsage)
 		}
 
 		if rootFlags.DebugMode {
@@ -121,39 +139,6 @@ You can opt out of this by setting the following environment variable: WUNDERGRA
 
 		return nil
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		client := InitWunderGraphApiClient()
-		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-		if err != nil {
-			return err
-		}
-		man := manifest.New(log, client, wunderGraphDir)
-		err = man.Load()
-		if err != nil {
-			return fmt.Errorf("unable to load wundergraph.manifest.json")
-		}
-		err = man.PersistChanges()
-		if err != nil {
-			return fmt.Errorf("unable to persist manifest changes")
-		}
-		err = man.WriteIntegrationsFile()
-		if err != nil {
-			return fmt.Errorf("unable to write integrations file")
-		}
-		_, _ = green.Printf("API dependencies updated\n")
-		return nil
-	},
-}
-
-func InitWunderGraphApiClient() *v2wundergraphapi.Client {
-	token := authenticator().LoadRefreshAccessToken()
-	return InitWunderGraphApiClientWithToken(token)
-}
-
-func InitWunderGraphApiClientWithToken(token string) *v2wundergraphapi.Client {
-	return v2wundergraphapi.New(token, viper.GetString("API_URL"), &http.Client{
-		Timeout: time.Second * 10,
-	}, log)
 }
 
 type BuildTimeConfig struct {
@@ -190,9 +175,7 @@ func wunderctlBinaryPath() string {
 func init() {
 	config.InitConfig()
 
-	viper.SetDefault("OAUTH_CLIENT_ID", "wundergraph-production-cli")
-	viper.SetDefault("OAUTH_BASE_URL", "https://accounts.wundergraph.com/auth/realms/master")
-	viper.SetDefault("API_URL", "https://api.wundergraph.com")
+	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
 
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
@@ -201,11 +184,4 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
-}
-
-func authenticator() *auth.Authenticator {
-	return auth.New(log,
-		viper.GetString("OAUTH_BASE_URL"),
-		viper.GetString("OAUTH_CLIENT_ID"),
-	)
 }
