@@ -177,6 +177,7 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 	var err error
 
 	defer func() {
+		// In case of a panic or error we want to flush the telemetry data
 		if r := recover(); r != nil || err != nil {
 			FlushTelemetry()
 			os.Exit(1)
