@@ -56,6 +56,8 @@ var rootCmd = &cobra.Command{
 	Use:   "wunderctl",
 	Short: "wunderctl is the cli to manage, build and debug your WunderGraph applications",
 	Long:  `wunderctl is the cli to manage, build and debug your WunderGraph applications.`,
+	// Don't show usage on error
+	SilenceUsage: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
