@@ -28,33 +28,17 @@ func NewValidator(schema string, disableVerboseErrors bool) (*Validator, error) 
 }
 
 type jsonError struct {
-	Message string `json:"Message"`
+	Message string `json:"message"`
 }
 
 func (e *jsonError) Error() string {
 	return e.Message
 }
 
-// mirrored from jsonschema.KeyError to provide a slightly different JSON serialization
-type keyError struct {
-	PropertyPath string      `json:"PropertyPath,omitempty"`
-	InvalidValue interface{} `json:"InvalidValue,omitempty"`
-	Message      string      `json:"Message"`
-}
-
-func (v keyError) Error() string {
-	if v.PropertyPath != "" && v.InvalidValue != nil {
-		return fmt.Sprintf("%s: %s %s", v.PropertyPath, jsonschema.InvalidValueString(v.InvalidValue), v.Message)
-	} else if v.PropertyPath != "" {
-		return fmt.Sprintf("%s: %s", v.PropertyPath, v.Message)
-	}
-	return v.Message
-}
-
 type ValidationError struct {
-	Message string
-	Input   json.RawMessage
-	Errors  []error
+	Message string          `json:"message,omitempty"`
+	Input   json.RawMessage `json:"input,omitempty"`
+	Errors  []error         `json:"errors,omitempty"`
 }
 
 func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Writer) (valid bool, err error) {
@@ -84,11 +68,7 @@ func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Wr
 		} else {
 			input = variables
 			for _, v := range errs {
-				validationErrors = append(validationErrors, &keyError{
-					PropertyPath: v.PropertyPath,
-					InvalidValue: v.InvalidValue,
-					Message:      v.Message,
-				})
+				validationErrors = append(validationErrors, v)
 			}
 		}
 		validationError := ValidationError{

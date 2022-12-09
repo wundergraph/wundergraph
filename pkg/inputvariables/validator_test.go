@@ -49,7 +49,7 @@ func TestValidator_Validate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
 
-	validator, err = NewValidator(brokenSchema, true)
+	_, err = NewValidator(brokenSchema, true)
 	assert.Error(t, err)
 
 	validator, err = NewValidator(validSchema, false)
@@ -59,14 +59,14 @@ func TestValidator_Validate(t *testing.T) {
 	actual, err = validator.Validate(context.Background(), []byte(`{"id":true}`), out)
 	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
-	assert.Equal(t, `{"Message":"Bad Request: Invalid input","Input":{"id":true},"Errors":[{"propertyPath":"/id","invalidValue":true,"message":"type should be string, got boolean"}]}
+	assert.Equal(t, `{"message":"Bad Request: Invalid input","input":{"id":true},"errors":[{"propertyPath":"/id","invalidValue":true,"message":"type should be string, got boolean"}]}
 `, out.String())
 
 	out.Reset()
 	actual, err = validator.Validate(context.Background(), []byte(`{}`), out)
 	assert.Nil(t, err)
 	assert.Equal(t, false, actual)
-	assert.Equal(t, `{"Message":"Bad Request: Invalid input","Input":{},"Errors":[{"propertyPath":"/","invalidValue":{},"message":"\"id\" value is required"}]}
+	assert.Equal(t, `{"message":"Bad Request: Invalid input","input":{},"errors":[{"propertyPath":"/","invalidValue":{},"message":"\"id\" value is required"}]}
 `, out.String())
 }
 
