@@ -27,6 +27,9 @@ var serverStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl server start
 `,
+	Annotations: map[string]string{
+		"telemetry": "true",
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
