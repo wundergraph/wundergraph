@@ -11,9 +11,8 @@ protoc  \
   --experimental_allow_proto3_optional \
   wundernode_config.proto
 
-outfile='../pkg/wgpb/wundernode_config.pb.go'
+outfile="../pkg/wgpb/wundernode_config.pb.go"
+tmp="${outfile}.tmp"
 
-# Remove version numbers. Generating the backup is required
-# for compatibility with both GNU and BSD sed variants.
-sed -i.bak '2,4d' ${outfile}
-rm -f ${outfile}.bak
+# Remove comments with version numbers
+grep -v "^//.*protoc.*v" ${outfile} > ${tmp} && mv -f ${tmp} ${outfile} && rm -f ${tmp}
