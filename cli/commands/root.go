@@ -141,19 +141,25 @@ var rootCmd = &cobra.Command{
 				TelemetryClient.Track(cmdUsageMetric)
 
 				// Track the usage of the command immediately
-				err := TelemetryClient.Flush()
-				if rootFlags.TelemetryDebugMode {
-					if err != nil {
-						log.Error("Could not send telemetry data", zap.Error(err))
-					} else {
-						log.Info("Telemetry data sent")
+				// without blocking the command execution
+				// In unlikely case that the command is done before the actual flush
+				// the metric will be flushed again after the command execution
+				// This is also the place where the duration metric is processed
+				go func() {
+					err := TelemetryClient.Flush()
+					if rootFlags.TelemetryDebugMode {
+						if err != nil {
+							log.Error("Could not send telemetry data", zap.Error(err))
+						} else {
+							log.Info("Telemetry data sent")
+						}
 					}
-				}
 
-				// Track command duration.
-				// We have to do it after the flush to not send the metric too early
-				// The data is sent on the next flush which is done after the command is finished
-				TelemetryClient.TrackDuration(cmdDurationMetric)
+					// Track command duration.
+					// We have to do it after the first flush to not send the metric too early
+					// The data is sent on the next flush which is done after the command is finished
+					TelemetryClient.TrackDuration(cmdDurationMetric)
+				}()
 			}
 		}
 
