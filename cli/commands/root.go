@@ -144,7 +144,7 @@ var rootCmd = &cobra.Command{
 				// without blocking the command execution
 				// In unlikely case that the command is done before the actual flush
 				// the metric will be flushed again after the command execution (see Execute())
-				// This is also the place where the duration metric is processed
+				// This is also the place when the duration metric is processed
 				go func() {
 					err := TelemetryClient.Flush()
 					if rootFlags.TelemetryDebugMode {
