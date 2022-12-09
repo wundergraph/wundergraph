@@ -27,17 +27,19 @@ var serverStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl server start
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
 		err := startWunderGraphServer(ctx)
 		if err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph server process shutdown: %w", zap.Error(err))
+			log.Error("WunderGraph server process shutdown: %w", zap.Error(err))
+			return err
 		}
 
 		// exit code 0 to indicate success
+		return nil
 	},
 }
 

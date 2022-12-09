@@ -12,3 +12,7 @@ func CmdUsageMetricName(cmdName string) string {
 func CmdDurationMetricName(cmdName string) string {
 	return fmt.Sprintf("WUNDERCTL_%s_CMD_DURATION", strings.ToUpper(cmdName))
 }
+
+func BuildMetricNameWithParent(parentCmdName, cmdName string) string {
+	return strings.Join([]string{strings.ToUpper(parentCmdName), strings.ToUpper(cmdName)}, "_")
+}

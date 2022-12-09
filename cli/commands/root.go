@@ -2,7 +2,6 @@ package commands
 
 import (
 	"errors"
-	"fmt"
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -12,7 +11,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
@@ -59,22 +57,6 @@ var rootCmd = &cobra.Command{
 	Use:   "wunderctl",
 	Short: "wunderctl is the cli to manage, build and debug your WunderGraph applications",
 	Long:  `wunderctl is the cli to manage, build and debug your WunderGraph applications.`,
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-		if rootFlags.Telemetry && cmd.Annotations["telemetry"] == "true" {
-			metricDurationName := telemetry.CmdDurationMetricName(strings.ToUpper(cmd.Name()))
-			TelemetryClient.Gauge(metricDurationName, TelemetryDurationTracker.Stop(metricDurationName).Seconds())
-
-			// Send telemetry data
-			err := TelemetryClient.Flush()
-			if rootFlags.TelemetryDebugMode {
-				if err != nil {
-					log.Error("Could not send telemetry data", zap.Error(err))
-				} else {
-					log.Info("Telemetry data sent")
-				}
-			}
-		}
-	},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		switch cmd.Name() {
 		// skip any setup to avoid logging anything
@@ -107,8 +89,9 @@ var rootCmd = &cobra.Command{
 			if _, ok := err.(*fs.PathError); ok {
 				log.Debug("starting without env file")
 			} else {
-				log.Fatal("error loading env file",
+				log.Error("error loading env file",
 					zap.Error(err))
+				return err
 			}
 		} else {
 			log.Debug("env file successfully loaded",
@@ -127,6 +110,7 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Check if telemetry is enabled
 		if rootFlags.Telemetry {
 			TelemetryClient = telemetry.NewClient(
 				viper.GetString("API_URL"),
@@ -141,22 +125,32 @@ var rootCmd = &cobra.Command{
 			)
 			TelemetryDurationTracker = telemetry.NewDurationTracker()
 
+			// Check if we want to track telemetry for this command
 			if cmd.Annotations["telemetry"] == "true" {
-				metricDurationName := telemetry.CmdDurationMetricName(strings.ToUpper(cmd.Name()))
-				TelemetryDurationTracker.Start(metricDurationName)
 
-				metricUsageName := telemetry.CmdUsageMetricName(strings.ToUpper(cmd.Name()))
-				TelemetryClient.Counter(metricUsageName)
+				metricName := cmd.Name()
+				if cmd.HasParent() {
+					metricName = telemetry.BuildMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
+				}
+
+				metricUsageName := telemetry.CmdUsageMetricName(metricName)
+				_ = TelemetryClient.Counter(metricUsageName)
 
 				// Send telemetry data
-				err := TelemetryClient.Flush()
-				if rootFlags.TelemetryDebugMode {
-					if err != nil {
-						log.Error("Could not send telemetry data", zap.Error(err))
-					} else {
-						log.Info("Telemetry data sent")
+				go func() {
+					err := TelemetryClient.Flush()
+					if rootFlags.TelemetryDebugMode {
+						if err != nil {
+							log.Error("Could not send telemetry data", zap.Error(err))
+						} else {
+							log.Info("Telemetry data sent")
+						}
 					}
-				}
+
+					// Track command duration. We have to do it after the flush to not send the metric too early
+					metricDurationName := telemetry.CmdDurationMetricName(metricName)
+					_ = TelemetryClient.Duration(metricDurationName)
+				}()
 			}
 		}
 
@@ -171,11 +165,33 @@ type BuildTimeConfig struct {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
+	var err error
+
+	defer func() {
+		if r := recover(); r != nil || err != nil {
+			FlushTelemetry()
+			os.Exit(1)
+		} else {
+			os.Exit(0)
+		}
+	}()
+
 	BuildInfo = buildInfo
 	GitHubAuthDemo = githubAuthDemo
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	err = rootCmd.Execute()
+}
+
+func FlushTelemetry() {
+	if TelemetryClient != nil && rootFlags.Telemetry {
+		// Send telemetry data
+		err := TelemetryClient.Flush()
+		if rootFlags.TelemetryDebugMode {
+			if err != nil {
+				log.Error("Could not send telemetry data", zap.Error(err))
+			} else {
+				log.Info("Telemetry data sent")
+			}
+		}
 	}
 }
 

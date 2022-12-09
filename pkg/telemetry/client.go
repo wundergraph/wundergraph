@@ -19,8 +19,13 @@ const (
 )
 
 type Client interface {
+	// Flush sends all metrics to the server. It will also stop all duration trackers.
 	Flush() error
+	// Counter increments a counter metric
 	Counter(name string) error
+	// Duration starts a duration metric
+	Duration(name string) error
+	// Gauge sets a gauge metric
 	Gauge(name string, value float64) error
 }
 
@@ -45,20 +50,22 @@ func WithTimeout(timeout time.Duration) ClientOption {
 }
 
 type client struct {
-	address    string
-	httpClient *http.Client
-	timeout    time.Duration
-	metrics    []Metric
-	debug      bool
-	clientInfo MetricClientInfo
-	log        *zap.Logger
+	address         string
+	httpClient      *http.Client
+	timeout         time.Duration
+	metrics         []Metric
+	debug           bool
+	clientInfo      MetricClientInfo
+	durationTracker *DurationTracker
+	log             *zap.Logger
 }
 
 func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption) Client {
 	c := &client{
-		address:    address,
-		clientInfo: clientInfo,
-		metrics:    []Metric{},
+		address:         address,
+		clientInfo:      clientInfo,
+		metrics:         []Metric{},
+		durationTracker: NewDurationTracker(),
 	}
 
 	c.clientInfo.OsName = strings.ToUpper(runtime.GOOS)
@@ -117,12 +124,25 @@ func (c *client) Gauge(name string, value float64) error {
 	return nil
 }
 
+func (c *client) Duration(name string) error {
+	c.durationTracker.Start(name)
+	return nil
+}
+
 func (c *client) Flush() error {
 	if c.log != nil && c.debug {
 		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
 		for _, m := range c.metrics {
 			c.log.Info("Telemetry Metric", zap.String("Name", m.Name), zap.Float64("Value", m.Value))
 		}
+	}
+
+	for name, _ := range c.durationTracker.Tracks() {
+		d := c.durationTracker.Stop(name)
+		c.metrics = append(c.metrics, Metric{
+			Name:  name,
+			Value: d.Seconds(),
+		})
 	}
 
 	data, err := json.Marshal(MetricRequest{
@@ -133,7 +153,10 @@ func (c *client) Flush() error {
 		return err
 	}
 
-	c.metrics = []Metric{}
+	// Reset metrics
+	defer (func() {
+		c.metrics = []Metric{}
+	})()
 
 	req, err := http.NewRequest("POST", c.address+"/operations/CollectMetricsV1", bytes.NewBuffer(data))
 	if err != nil {

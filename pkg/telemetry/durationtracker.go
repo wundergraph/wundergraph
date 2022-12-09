@@ -26,3 +26,7 @@ func (d *DurationTracker) Stop(name string) time.Duration {
 
 	return time.Since(start)
 }
+
+func (d *DurationTracker) Tracks() map[string]time.Time {
+	return d.tracks
+}

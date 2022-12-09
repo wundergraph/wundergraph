@@ -28,7 +28,7 @@ var startCmd = &cobra.Command{
 	Annotations: map[string]string{
 		"telemetry": "true",
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
@@ -36,7 +36,8 @@ var startCmd = &cobra.Command{
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
-			log.Fatal("Could not create node: %w", zap.Error(err))
+			log.Error("Could not create node: %w", zap.Error(err))
+			return err
 		}
 
 		if !excludeServer {
@@ -54,10 +55,12 @@ var startCmd = &cobra.Command{
 		// Only exit with error code 1 when the server was not stopped by the signal
 		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph process shutdown: %w", zap.Error(err))
+			log.Error("WunderGraph start process shutdown: %w", zap.Error(err))
+			return err
 		}
 
 		// exit code 0 to indicate success
+		return nil
 	},
 }
 
