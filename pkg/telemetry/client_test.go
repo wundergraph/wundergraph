@@ -48,13 +48,7 @@ func TestSendUsageMetric(t *testing.T) {
 		WithTimeout(2*time.Second),
 	)
 
-	client.Track(Metric{
-		Name:  "foo",
-		Value: 1,
-	})
-
-	flush := client.PrepareBatch()
-	err := flush()
+	err := client.Send([]Metric{NewUsageMetric("foo")})
 
 	assert.NoError(t, err)
 }
@@ -95,10 +89,7 @@ func TestSendDurationMetric(t *testing.T) {
 
 	time.Sleep(100 * time.Microsecond)
 
-	client.TrackDuration(m)
-
-	flush := client.PrepareBatch()
-	err := flush()
+	err := client.Send([]Metric{m()})
 
 	assert.NoError(t, err)
 }

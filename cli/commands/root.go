@@ -6,18 +6,17 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/wundergraph/wundergraph/cli/helpers"
+	"github.com/wundergraph/wundergraph/pkg/config"
+	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/logging"
+	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"go.uber.org/zap"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/wundergraph/wundergraph/cli/helpers"
-	"github.com/wundergraph/wundergraph/pkg/config"
-	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/logging"
-	"github.com/wundergraph/wundergraph/pkg/node"
 )
 
 const (
@@ -37,6 +36,7 @@ var (
 	DotEnvFile            string
 	log                   *zap.Logger
 	serviceToken          string
+	cmdDurationMetric     telemetry.DurationMetric
 	_wunderGraphDirConfig string
 	disableCache          bool
 	clearCache            bool
@@ -113,38 +113,34 @@ var rootCmd = &cobra.Command{
 
 		// Check if telemetry is enabled
 		if rootFlags.Telemetry {
-			TelemetryClient = telemetry.NewClient(
-				viper.GetString("API_URL"),
-				telemetry.MetricClientInfo{
-					WunderctlVersion: BuildInfo.Version,
-					IsCI:             os.Getenv("CI") != "",
-					AnonymousID:      viper.GetString("anonymousid"),
-				},
-				telemetry.WithTimeout(3*time.Second),
-				telemetry.WithLogger(log),
-				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
-			)
-
 			// Check if we want to track telemetry for this command
 			if cmd.Annotations["telemetry"] == "true" {
+				TelemetryClient = telemetry.NewClient(
+					viper.GetString("API_URL"),
+					telemetry.MetricClientInfo{
+						WunderctlVersion: BuildInfo.Version,
+						IsCI:             os.Getenv("CI") != "",
+						AnonymousID:      viper.GetString("anonymousid"),
+					},
+					telemetry.WithTimeout(3*time.Second),
+					telemetry.WithLogger(log),
+					telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+				)
+
 				metricName := cmd.Name()
 				if cmd.HasParent() {
 					metricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
 				}
 
 				metricDurationName := telemetry.CmdDurationMetricName(metricName)
-				cmdDurationMetric := telemetry.NewDurationMetric(metricDurationName)
+				cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
 
 				metricUsageName := telemetry.CmdUsageMetricName(metricName)
 				cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
-				TelemetryClient.Track(cmdUsageMetric)
+				err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
 
-				// Create a batch of metrics which will be sent to the server
-				flusher := TelemetryClient.PrepareBatch()
-
-				// Track the usage of the command immediately
-				err := flusher()
+				// AddMetric the usage of the command immediately
 				if rootFlags.TelemetryDebugMode {
 					if err != nil {
 						log.Error("Could not send telemetry data", zap.Error(err))
@@ -152,11 +148,6 @@ var rootCmd = &cobra.Command{
 						log.Info("Telemetry data sent")
 					}
 				}
-
-				// Track command duration.
-				// The data is sent on the next flush
-				// which is done after the command is finished
-				TelemetryClient.TrackDuration(cmdDurationMetric)
 			}
 		}
 
@@ -190,11 +181,8 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 }
 
 func FlushTelemetry() {
-	if TelemetryClient != nil && rootFlags.Telemetry {
-		// Create a batch of metrics which will be sent to the server
-		flusher := TelemetryClient.PrepareBatch()
-		// Send telemetry data
-		err := flusher()
+	if TelemetryClient != nil && rootFlags.Telemetry && cmdDurationMetric != nil {
+		err := TelemetryClient.Send([]telemetry.Metric{cmdDurationMetric()})
 		if rootFlags.TelemetryDebugMode {
 			if err != nil {
 				log.Error("Could not send telemetry data", zap.Error(err))
