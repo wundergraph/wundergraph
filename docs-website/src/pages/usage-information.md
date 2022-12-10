@@ -77,6 +77,4 @@ No data we collect is personally identifiable.
 
 ## How Do I Opt-Out?
 
-You may opt out-by running the WunderGraph command with `--telemetry=false` or globally with an environment variable `WG_TELEMETRY_DISABLED=1`.
-
-`wunderctl up --telemetry=false`
+You may opt out-by running the WunderGraph command with `wunderctl up --telemetry=false` or globally with an environment variable `WG_TELEMETRY_DISABLED=1`.
