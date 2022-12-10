@@ -6,7 +6,7 @@ hideTableOfContents: true
 fullWidthContent: true
 ---
 
-# Collected Usage Information
+## Collected Usage Information
 
 At WunderGraph, we are dedicated to delivering a top-notch solution that surpasses the expectations of our users and community. We are committed to continuously improving and enhancing WunderGraph. To achieve this, WunderGraph includes a feature that collects completely anonymous and non-sensitive data from all users. This data is aggregated and provides us with a better overall understanding of how WunderGraph is being used and interacted with.
 
@@ -18,16 +18,16 @@ We are committed to our community and engaging in hands-on testing to understand
 
 Usage data allows us to answer and make choices around these questions, without having to bother you :)
 
-- What features are most popular among users and how are they being used?
-- How long does it take for users to set up a project, and is an increase in installation time an indication of user difficulty or a complicated process?
-- What errors are users encountering?
-- What are the most commonly used Integrations?
-- Should we prioritize compatibility with a specific version of Node.js based on usage among our community?
-- What are the most commonly used plugins?
+- **What features are most popular among users and how are they being used?**
+- **How long does it take for users to set up a project, and is an increase in installation time an indication of user difficulty or a complicated process?**
+- **What errors are users encountering?**
+- **What are the most commonly used Integrations?**
+- **Should we prioritize compatibility with a specific version of Node.js based on usage among our community?**
+- **What are the most commonly used plugins?**
 
-# What is being collected?
+## What is being collected?
 
-- Command Invoked ( `wunderctl up, wunderctl generate)
+- Command Invoked ( `wunderctl up`, `wunderctl generate`)
 - Version of WunderGraph
 - General machine information (OS)
 - Which plugins are present in your project
@@ -47,42 +47,42 @@ An example telemetry event looks like this:
 }
 ```
 
-#What about Sensitive Data (e.g. Secrets)?
+## What about Sensitive Data (e.g. Secrets)?
 
 We do not collect any metrics which may contain sensitive data.
 
 We take your privacy and our security very seriously. Next.js telemetry falls under the security disclosure policy.
 
-#Will This Data Be Shared?
+## Will This Data Be Shared?
 
 The data we collect is completely anonymous, not traceable to the source, and only meaningful in aggregate form.
 
 No data we collect is personally identifiable.
 
-#How Do I Opt-Out?
+##How Do I Opt-Out?
 
 You may opt out-by running wunder telemetry disable in the root of your project directory:
 
 `px wunder telemetry disable`
 
-# Or
+#### Or
 
 `yarn wunder telemetry disable`
 
 You may check the status of telemetry collection at any time by running next telemetry status in the root of your project directory:
 
-npx wunder telemetry status
+`npx wunder telemetry status`
 
-# Or
+#### Or
 
-yarn wunder telemetry status
+`yarn wunder telemetry status`
 
 You may re-enable telemetry if you'd like to re-join the program by running the following in the root of your project directory:
 
-npx wunder telemetry enable
+`npx wunder telemetry enable`
 
-# Or
+#### Or
 
-yarn wunder telemetry enable
+`yarn wunder telemetry enable`
 
-You may also opt-out by setting an environment variable: WUNDER_TELEMETRY_DISABLED=1.
+You may also opt-out by setting an environment variable: WUND`ER_TELEMETRY_DISABLED=1`.
