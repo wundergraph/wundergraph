@@ -156,10 +156,10 @@ const navigation = [
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
-			/*{
-				title: 'NextJS Full-Stack Tutorial',
-				href: '/docs/tutorials/nextjs-full-stack-tutorial',
-			},*/
+			{
+				title: 'Nextjs Todos Tutorial',
+				href: '/docs/tutorials/nextjs-todos-tutorial',
+			},
 		],
 	},
 	{
