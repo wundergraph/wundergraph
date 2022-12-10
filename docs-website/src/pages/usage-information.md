@@ -18,12 +18,12 @@ We are committed to our community and engaging in hands-on testing to understand
 
 Usage data allows us to answer and make choices around these questions, without having to bother you :)
 
-- **What features are most popular among users and how are they being used?**
-- **How long does it take for users to set up a project, and is an increase in installation time an indication of user difficulty or a complicated process?**
-- **What errors are users encountering?**
-- **What are the most commonly used Integrations?**
-- **Should we prioritize compatibility with a specific version of Node.js based on usage among our community?**
-- **What are the most commonly used plugins?**
+- What features are most popular among users and how are they being used?
+- How long does it take for users to set up a project, and is an increase in installation time an indication of user difficulty or a complicated process?
+- What errors are users encountering?
+- What are the most commonly used Integrations?
+- Should we prioritize compatibility with a specific version of Node.js based on usage among our community?
+- What are the most commonly used plugins?
 
 ## What is being collected?
 
@@ -59,7 +59,7 @@ The data we collect is completely anonymous, not traceable to the source, and on
 
 No data we collect is personally identifiable.
 
-##How Do I Opt-Out?
+## How Do I Opt-Out?
 
 You may opt out-by running wunder telemetry disable in the root of your project directory:
 
