@@ -12,7 +12,7 @@ At WunderGraph, we are dedicated to delivering a top-notch solution that surpass
 
 ## Why do we do this?
 
-The number of developers using WunderGraph is growing exponentially and due to this, we are committed to delivering the best possible experience for our users.
+The number of developers using WunderGraph is growing constantly and due to this, we are committed to delivering the best possible experience for our users.
 
 We are committed to our community and engaging in hands-on testing to understand and meet their needs. However, we also recognize the importance of collecting data to inform our development efforts. By collecting usage data, we can gain precious insights into how our platform is being used and we are better informed to make decisions about its future direction. This allows us to deliver the best possible experience for our users while also staying ahead of the curve in a rapidly evolving industry.
 
@@ -23,26 +23,37 @@ Usage data allows us to answer and make choices around these questions, without 
 - What errors are users encountering?
 - What are the most commonly used Integrations?
 - Should we prioritize compatibility with a specific version of Node.js based on usage among our community?
-- What are the most commonly used plugins?
+- What are the most commonly used data-sources?
 
 ## What is being collected?
 
-- Command Invoked ( `wunderctl up`, `wunderctl generate`)
+- Command Invoked e.g. ( `wunderctl up`, `wunderctl generate`)
+- Duration of e.g. `wunderctl up`
 - Version of WunderGraph
-- General machine information (OS)
-- Which plugins are present in your project
-- Duration of `wunderctl up` and size of application(total number of operations)
+- Anonymized User ID
+- General machine information:
+  - Operating System
+  - CPU
 
-You can view exactly what is being collected by setting the following environment variable: WUNDER_TELEMETRY_DEBUG=1. When this environment variable is set, data will not be sent to us. The data will only be printed out to the stderr stream, prefixed with [telemetry].
+> Note: This list is regularly audited to ensure its accuracy.
+
+## What is anonymized User ID?
+
+We create a random ID on the first usage of WunderGraph and store it in `~/wundergraph.config.json`. We need this ID to be able to identify how many users are using WunderGraph and to be able to distinguish between different users in our analytics.
+The ID is completely anonymous and does not contain any personal information.
+
+You can view exactly what is being collected by setting the following environment variable: `WUNDER_TELEMETRY_DEBUG=1`. The data will be printed out to the stdout stream.
 
 An example telemetry event looks like this:
 
 ```JSON
 {
-  "eventName": "WUNDER_VERSION",
-  "payload": {
-    "version": "1.0.5",
-    "isDevelopment": false
+  "metrics": [{ "name": "WUNDERCTL_UP_CMD_USAGE" }],
+  "clientInfo": {
+    "osName": "LINUX",
+    "cpuCount": 32,
+    "wunderctlVersion": "dev",
+    "anonymousID": "2Ie8ynG6f1hTKs3EVjItsy0DBcn"
   }
 }
 ```
@@ -61,28 +72,6 @@ No data we collect is personally identifiable.
 
 ## How Do I Opt-Out?
 
-You may opt out-by running wunder telemetry disable in the root of your project directory:
+You may opt out-by running the wundergraph command with `--telemetry=false`:
 
-`px wunder telemetry disable`
-
-#### Or
-
-`yarn wunder telemetry disable`
-
-You may check the status of telemetry collection at any time by running next telemetry status in the root of your project directory:
-
-`npx wunder telemetry status`
-
-#### Or
-
-`yarn wunder telemetry status`
-
-You may re-enable telemetry if you'd like to re-join the program by running the following in the root of your project directory:
-
-`npx wunder telemetry enable`
-
-#### Or
-
-`yarn wunder telemetry enable`
-
-You may also opt-out by setting an environment variable: WUND`ER_TELEMETRY_DISABLED=1`.
+`wunderctl up --telemetry=false`
