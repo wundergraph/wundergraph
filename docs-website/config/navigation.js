@@ -14,6 +14,10 @@ const navigation = [
 				title: 'Manifesto',
 				href: '/manifesto',
 			},
+			{
+				title: 'Usage Information',
+				href: '/usage-information',
+			},
 		],
 	},
 	{
