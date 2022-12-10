@@ -42,7 +42,7 @@ Usage data allows us to answer and make choices around these questions, without 
 We create a random ID on the first usage of WunderGraph and store it in `~/wundergraph.config.json`. We need this ID to be able to identify how many users are using WunderGraph and to be able to distinguish between different users in our analytics.
 The ID is completely anonymous and does not contain any personal information.
 
-You can view exactly what is being collected by setting the following environment variable: `WUNDER_TELEMETRY_DEBUG=1`. The data will be printed out to the stdout stream.
+You can view exactly what is being collected by setting the following environment variable: `WUNDER_TELEMETRY_DEBUG=true`. The data will be printed out to the stdout stream.
 
 An example telemetry event looks like this:
 
