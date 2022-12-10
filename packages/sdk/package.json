@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.124.0",
+  "version": "0.124.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -10,6 +10,10 @@
     "./client": {
       "types": "./dist/client/index.d.ts",
       "default": "./dist/client/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
     },
     "./internal": {
       "types": "./dist/internal/index.d.ts",
@@ -28,6 +32,9 @@
     "*": {
       "client": [
         "./dist/client"
+      ],
+      "testing": [
+        "./dist/testing"
       ],
       "internal": [
         "./dist/internal"
@@ -101,7 +108,7 @@
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@wundergraph/protobuf": "workspace:^0.100.0",
-    "@wundergraph/wunderctl": "workspace:>=0.119.0",
+    "@wundergraph/wunderctl": "workspace:>=0.119.1",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
@@ -122,7 +129,8 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.7.1",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8"
+    "swagger2openapi": "^7.0.8",
+    "ts-retry-promise": "^0.7.0"
   },
   "jest": {
     "preset": "ts-jest",
