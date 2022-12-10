@@ -42,10 +42,10 @@ Usage data allows us to answer and make choices around these questions, without 
 We create a random ID on the first usage of WunderGraph and store it in `~/wundergraph.config.json`. We need this ID to be able to identify how many users are using WunderGraph and to be able to distinguish between different users in our analytics.
 The ID is completely anonymous and does not contain any personal information.
 
-You can view exactly what is being collected by setting the following flag `--telemetry-debug`. The data will be printed out to the stdout stream as `info` log level.
+You can view exactly what is being collected by running a WunderGraph command with the flag `wunderctl up --telemetry-debug` or globally with an environment variable `WG_TELEMETRY_DEBUG=1`. The data will be printed out to the stdout stream as `info` log level.
 
 ```json
-{"level":"info","time":1670675762208,"msg":"Telemetry client info","hostname":"pop-os","pid":38159,"component":"@wundergraph/wunderctl","clientInfo":{"osName":"LINUX","cpuCount":32,"wunderctlVersion":"dev","anonymousID":"2Ie8ynG6f1hTKs3EVjItsy0DBcn"}}                                                                               13:34:24
+{"level":"info","time":1670675762208,"msg":"Telemetry client info","hostname":"pop-os","pid":38159,"component":"@wundergraph/wunderctl","clientInfo":{"osName":"LINUX","cpuCount":32,"wunderctlVersion":"dev","anonymousID":"2Ie8ynG6f1hTKs3EVjItsy0DBcn"}}
 {"level":"info","time":1670675762208,"msg":"Telemetry Metric","hostname":"pop-os","pid":38159,"component":"@wundergraph/wunderctl","Name":"WUNDERCTL_WUNDERCTL_GENERATE_CMD_USAGE","Value":1}
 ```
 
@@ -77,6 +77,6 @@ No data we collect is personally identifiable.
 
 ## How Do I Opt-Out?
 
-You may opt out-by running the wundergraph command with `--telemetry=false`:
+You may opt out-by running the WunderGraph command with `--telemetry=false` or globally with an environment variable `WG_TELEMETRY_DISABLED=1`.
 
 `wunderctl up --telemetry=false`
