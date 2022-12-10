@@ -127,15 +127,15 @@ var rootCmd = &cobra.Command{
 					telemetry.WithDebug(rootFlags.TelemetryDebugMode),
 				)
 
-				metricName := cmd.Name()
+				cmdMetricName := cmd.Name()
 				if cmd.HasParent() {
-					metricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
+					cmdMetricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
 				}
 
-				metricDurationName := telemetry.CmdDurationMetricName(metricName)
+				metricDurationName := telemetry.CmdDurationMetricName(cmdMetricName)
 				cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
 
-				metricUsageName := telemetry.CmdUsageMetricName(metricName)
+				metricUsageName := telemetry.CmdUsageMetricName(cmdMetricName)
 				cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
 				err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
