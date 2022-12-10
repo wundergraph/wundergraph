@@ -37,7 +37,7 @@ Usage data allows us to answer and make choices around these questions, without 
 
 > Note: This list is regularly audited to ensure its accuracy.
 
-## What is anonymized User ID?
+## What is an anonymized User ID?
 
 We create a random ID on the first usage of WunderGraph and store it in `~/wundergraph.config.json`. We need this ID to be able to identify how many users are using WunderGraph and to be able to distinguish between different users in our analytics.
 The ID is completely anonymous and does not contain any personal information.
