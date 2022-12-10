@@ -73,8 +73,12 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 		durationMetricFns: []func() Metric{},
 	}
 
-	c.clientInfo.OsName = strings.ToUpper(runtime.GOOS)
-	c.clientInfo.CpuCount = runtime.NumCPU()
+	if clientInfo.CpuCount == 0 {
+		c.clientInfo.CpuCount = runtime.NumCPU()
+	}
+	if clientInfo.OsName == "" {
+		c.clientInfo.OsName = strings.ToUpper(runtime.GOOS)
+	}
 
 	for _, opt := range opts {
 		opt(c)
@@ -127,6 +131,8 @@ func (c *client) TrackDuration(metricFn func() Metric) {
 
 func (c *client) PrepareBatch() func() error {
 	var metrics []Metric
+
+	metrics = append(metrics, c.metrics...)
 
 	for _, fn := range c.durationMetricFns {
 		metrics = append(metrics, fn())
