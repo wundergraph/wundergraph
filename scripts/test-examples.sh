@@ -2,7 +2,7 @@
 
 
 # These require 3rd party accounts
-SKIP="graphql-hasura-subscriptions"
+SKIP="faunadb-nextjs graphql-hasura-subscriptions"
 
 # These are broken
 SKIP="${SKIP} nextjs-todos schema-extension vite-swr"
