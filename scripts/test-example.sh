@@ -40,6 +40,7 @@ services_pid=
 if grep -q '"services"' package.json; then
     npm run services &
     services_pid=$!
+    sleep 5
 fi
 
 # Generate WunderGraph files
