@@ -16,6 +16,7 @@ pnpm install --no-frozen-lockfile
 # If we have a Docker cluster, bring it up
 if test -f docker-compose.yml; then
     docker-compose up -d
+    # Wait for container services to start
     sleep 5
 fi
 
