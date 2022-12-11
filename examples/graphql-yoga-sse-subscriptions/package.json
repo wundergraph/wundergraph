@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "run-p yoga wundergraph",
+    "start": "run-p start:services wundergraph",
+    "start:services": "ts-node yoga/server.ts",
     "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
-    "yoga": "ts-node yoga/server.ts",
-    "services": "run-p yoga",
     "check": "tsc --noEmit"
   },
   "author": "",

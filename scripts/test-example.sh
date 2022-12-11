@@ -37,8 +37,8 @@ fi
 
 # Check for a script to bring up the required services
 services_pid=
-if grep -q '"services"' package.json; then
-    pnpm run services &
+if grep -q '"start:services"' package.json; then
+    pnpm run start:services &
     services_pid=$!
     sleep 5
 fi
