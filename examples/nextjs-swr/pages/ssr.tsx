@@ -129,7 +129,7 @@ const Dragons = () => {
 };
 
 export const getServerSideProps = async () => {
-	const { data, error } = await client.query<OperationRequestOptions<'Dragons'>, DragonsResponseData>({
+	const { data, error } = await client.query({
 		operationName: 'Dragons',
 	});
 
