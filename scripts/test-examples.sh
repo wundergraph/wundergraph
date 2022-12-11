@@ -15,7 +15,8 @@ for example in `ls -d */`; do
         echo Skipping ${example}...
         continue
     fi
-    pushd ${example}
+    echo Testing ${example}...
+    cd ${example}
     ../../scripts/test-example.sh
-    popd
+    cd -
 done
