@@ -12,10 +12,11 @@ set -e
 grep '@wundergraph' package.json | awk '{gsub(/"|:/, "", $1); print $1"@workspace"}'| xargs pnpm install
 pnpm install --no-frozen-lockfile
 
+docker_compose_yml=`find . -name docker-compose.yml`
 
 # If we have a Docker cluster, bring it up
-if test -f docker-compose.yml; then
-    docker-compose up -d
+if test -f ${docker_compose_yml}; then
+    cd `dirname ${docker_compose_yml}` && docker-compose up -d && cd -
     # Wait for container services to start
     sleep 5
 fi
@@ -31,8 +32,8 @@ else
 fi
 
 # If we have a Docker cluster, clean it up
-if test -f docker-compose.yml; then
-    docker-compose down
+if test -f ${docker_compose_yml}; then
+    cd `dirname ${docker_compose_yml}` && docker-compose down && cd -
 fi
 
 # Restore package.json
