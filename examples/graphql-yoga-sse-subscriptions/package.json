@@ -6,6 +6,7 @@
     "start": "run-p yoga wundergraph",
     "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
     "yoga": "ts-node yoga/server.ts",
+    "services": "run-p yoga",
     "check": "tsc --noEmit"
   },
   "author": "",
