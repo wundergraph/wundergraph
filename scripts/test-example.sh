@@ -18,6 +18,10 @@ fi
 set -x
 set -e
 
+# Wipe cache and generated files. This should have no impact in
+# CI, but helps when testing locally
+rm -fr .wundergraph/generated .wundergraph/cache
+
 # Replace @wundergraph with workspace versions
 grep '@wundergraph' package.json | awk '{gsub(/"|:/, "", $1); print $1"@workspace"}'| xargs pnpm install
 pnpm install --no-frozen-lockfile
