@@ -1,5 +1,15 @@
 #!/bin/sh
 
+kill_with_children() {
+    local pid=$1
+    if children="`pgrep -P $pid`"; then
+        for child in $children; do
+            kill_with_children $child
+        done
+    fi
+    kill $pid
+}
+
 if ! test -f package.json || ! test -d ../../examples; then
     echo "Run this from the example directory" 1>&2
     exit 1
@@ -21,14 +31,25 @@ if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
     sleep 5
 fi
 
+# Check for a script to bring up the required services
+services_pid=
+if grep -q '"services"' package.json; then
+    npm run services &
+    services_pid=$!
+fi
+
 # Generate WunderGraph files
 wunderctl generate
 
 # Run test if available, otherwise just type-check
-if grep '"test"' package.json > /dev/null; then
+if grep -q '"test"' package.json; then
     pnpm test
 else
     pnpm check
+fi
+
+if test ! -z ${services_pid}; then
+    kill_with_children ${services_pid}
 fi
 
 # If we have a Docker cluster, clean it up
