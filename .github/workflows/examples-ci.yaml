@@ -48,6 +48,10 @@ jobs:
       - name: Add examples to workspace
         run: echo "  - 'examples/*'" >> pnpm-workspace.yaml
 
+      - name: Setup Docker image cache
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
       - name: Test examples
         run: ./scripts/test-examples.sh
 
