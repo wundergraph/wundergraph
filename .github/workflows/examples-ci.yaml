@@ -48,9 +48,11 @@ jobs:
       - name: Add examples to workspace
         run: echo "  - 'examples/*'" >> pnpm-workspace.yaml
 
-      - name: Test example
-        working-directory: ./examples/simple
-        run: ../../scripts/test-example.sh
+      - name: Test examples
+        run: ./scripts/test-examples.sh
+
+      - name: Restore workspace
+        run: git checkout pnpm-workspace.yaml
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
