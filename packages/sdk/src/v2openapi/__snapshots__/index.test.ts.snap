@@ -19111,6 +19111,244 @@ type api_AdAccountDataInsight {
 }"
 `;
 
+exports[`parameters and enums with periods: parameter_names_period_data_sources 1`] = `
+"[
+  {
+    "RootNodes": [
+      {
+        "typeName": "Query",
+        "fieldNames": [
+          "api_getUsers"
+        ]
+      }
+    ],
+    "Kind": 1,
+    "Custom": {
+      "Fetch": {
+        "method": 0,
+        "path": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "/users"
+        },
+        "baseUrl": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "http://localhost:8881"
+        },
+        "url": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "body": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "header": {},
+        "query": [],
+        "urlEncodeBody": false
+      },
+      "Subscription": {
+        "Enabled": false
+      },
+      "DefaultTypeName": "",
+      "StatusCodeTypeMappings": []
+    },
+    "ChildNodes": [],
+    "Directives": [],
+    "RequestTimeoutSeconds": 0
+  },
+  {
+    "RootNodes": [
+      {
+        "typeName": "Query",
+        "fieldNames": [
+          "api_getUsersUserId"
+        ]
+      }
+    ],
+    "Kind": 1,
+    "Custom": {
+      "Fetch": {
+        "method": 0,
+        "path": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "/users/{{ .arguments.user_id }}"
+        },
+        "baseUrl": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "http://localhost:8881"
+        },
+        "url": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "body": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "header": {},
+        "query": [],
+        "urlEncodeBody": false
+      },
+      "Subscription": {
+        "Enabled": false
+      },
+      "DefaultTypeName": "",
+      "StatusCodeTypeMappings": []
+    },
+    "ChildNodes": [],
+    "Directives": [],
+    "RequestTimeoutSeconds": 0
+  },
+  {
+    "RootNodes": [
+      {
+        "typeName": "Query",
+        "fieldNames": [
+          "api_getSomeProperties"
+        ]
+      }
+    ],
+    "Kind": 1,
+    "Custom": {
+      "Fetch": {
+        "method": 0,
+        "path": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "/some/properties"
+        },
+        "baseUrl": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": "http://localhost:8881"
+        },
+        "url": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "body": {
+          "kind": 0,
+          "environmentVariableDefaultValue": "",
+          "environmentVariableName": "",
+          "placeholderVariableName": "",
+          "staticVariableContent": ""
+        },
+        "header": {},
+        "query": [
+          {
+            "name": "sortBy",
+            "value": "{{ .arguments.sortBy }}"
+          },
+          {
+            "name": "sort.order",
+            "value": "{{ .arguments.sort.order }}"
+          }
+        ],
+        "urlEncodeBody": false
+      },
+      "Subscription": {
+        "Enabled": false
+      },
+      "DefaultTypeName": "",
+      "StatusCodeTypeMappings": []
+    },
+    "ChildNodes": [],
+    "Directives": [],
+    "RequestTimeoutSeconds": 0
+  }
+]"
+`;
+
+exports[`parameters and enums with periods: parameter_names_period_fields 1`] = `
+"[
+  {
+    "typeName": "Query",
+    "fieldName": "api_getUsers",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": false
+  },
+  {
+    "typeName": "Query",
+    "fieldName": "api_getUsersUserId",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": false
+  },
+  {
+    "typeName": "Query",
+    "fieldName": "api_getSomeProperties",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": false
+  }
+]"
+`;
+
+exports[`parameters and enums with periods: parameter_names_period_schema 1`] = `
+"type Query {
+  api_getUsers: [api_User]
+  api_getUsersUserId(user_id: Int!): api_User
+  api_getSomeProperties(sortBy: String, sortOrder: [api_getSomeProperties_sortOrder]): api_PropertiesResponse
+}
+
+type api_User {
+  id: Int
+  name: String
+  country_code: String
+  status_code: Int
+  contact: JSON
+}
+
+scalar JSON
+
+type api_PropertiesResponse {
+  properties: JSON
+}
+
+enum api_getSomeProperties_sortOrder {
+  sort_orderAsc
+  sort_orderDesc
+}"
+`;
+
 exports[`petstore: petstore_data_sources 1`] = `
 "[
   {

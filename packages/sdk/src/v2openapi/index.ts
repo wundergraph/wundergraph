@@ -288,7 +288,7 @@ class RESTApiBuilder {
 			this.traverseSchema({
 				parentTypeName: parentType,
 				fieldName: fieldName,
-				argumentName: param.name,
+				argumentName: this.prettyParamEnumName(param.name),
 				schema,
 				isRootField: true,
 				verb,
@@ -933,7 +933,7 @@ class RESTApiBuilder {
 				kind: Kind.ENUM_VALUE_DEFINITION,
 				name: {
 					kind: Kind.NAME,
-					value: value,
+					value: this.prettyParamEnumName(value),
 				},
 			});
 		});
@@ -1155,9 +1155,14 @@ class RESTApiBuilder {
 			},
 		};
 	};
+	private prettyParamEnumName = (input: string): string => {
+		let underscore = input.split('.').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		return underscore;
+	};
 	private prettyFieldName = (input: string): string => {
 		let underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
 		underscore = underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
+		underscore = underscore.split('.').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
 		return underscore.replace(/\/+/g, '_');
 	};
 	private resolveFieldName = (operationObject: OpenAPIV3.OperationObject, path: string, verb: HTTPMethod): string => {
