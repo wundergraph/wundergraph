@@ -15,7 +15,7 @@ pnpm install --no-frozen-lockfile
 docker_compose_yml=`find . -name docker-compose.yml`
 
 # If we have a Docker cluster, bring it up
-if test -f ${docker_compose_yml}; then
+if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
     cd `dirname ${docker_compose_yml}` && docker-compose up -d && cd -
     # Wait for container services to start
     sleep 5
@@ -32,7 +32,7 @@ else
 fi
 
 # If we have a Docker cluster, clean it up
-if test -f ${docker_compose_yml}; then
+if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
     cd `dirname ${docker_compose_yml}` && docker-compose down && cd -
 fi
 
