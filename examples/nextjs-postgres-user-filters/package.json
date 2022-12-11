@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run start:docker-compose && wait-on -d 5000 tcp:54322 && npm run setup && run-p dev wundergraph seed",
-    "start:docker-compose": "docker-compose up -d",
+    "start": "npm run start:container && wait-on -d 5000 tcp:54322 && npm run setup && run-p dev wundergraph seed",
+    "start:container": "docker-compose up -d",
     "setup": "npm run migrate init",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate",
