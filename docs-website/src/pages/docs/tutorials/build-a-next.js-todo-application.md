@@ -1,6 +1,6 @@
 ---
-title: Nextjs Todos Tutorials
-pageTitle: Nextjs Todos Tutorials
+title: Build a Next.js Todo application
+pageTitle: Build a Next.js Todo application
 ---
 
 ## Getting Started
@@ -143,12 +143,6 @@ model Todo {
 
 The `order` field in Todo decides the reordering of todos. We will discuss later in the tutorial how to do reordering.
 
-To generate types and code for Todo, close the app, remove the cache and restart.
-
-- Close the app
-- Remove .wundergraph/cache
-- npm start
-
 ## Todo display
 
 ```graphql
@@ -223,7 +217,6 @@ interface TodoItemProps {
 }
 
 function TodoItem(props: TodoItemProps) {
-  console.log(props)
   const { todo } = props
   const [title, setTitle] = useState<string>(todo.title)
   return (

@@ -157,8 +157,8 @@ const navigation = [
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
 			{
-				title: 'Nextjs Todos Tutorial',
-				href: '/docs/tutorials/nextjs-todos-tutorial',
+				title: 'Build a Next.js Todo application',
+				href: '/docs/tutorials/build-a-next.js-todo-application',
 			},
 		],
 	},
