@@ -14,7 +14,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/go-cmd/cmd"
@@ -314,7 +313,9 @@ func (e *Engine) StopQueryEngine() {
 		// way to tell it apart from an interesting failure
 	case <-time.After(prismaExitTimeout):
 		e.log.Warn(fmt.Sprintf("prisma didn't exit after %s, killing", prismaExitTimeout))
-		syscall.Kill(e.cmd.Process.Pid, syscall.SIGKILL)
+		if err := e.cmd.Process.Kill(); err != nil {
+			e.log.Error("killing prisma", zap.Error(err))
+		}
 	}
 	close(exitCh)
 	e.cmd = nil
