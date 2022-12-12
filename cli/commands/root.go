@@ -125,10 +125,7 @@ var rootCmd = &cobra.Command{
 				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
 			)
 
-			cmdMetricName := cmd.Name()
-			if cmd.HasParent() {
-				cmdMetricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
-			}
+			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
 
 			metricDurationName := telemetry.CmdDurationMetricName(cmdMetricName)
 			cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
