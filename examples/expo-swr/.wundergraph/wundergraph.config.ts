@@ -1,29 +1,29 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
-import { golangClient } from '@wundergraph/golang-client';
+import { configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const countries = introspect.graphql({
-	apiNamespace: 'countries',
-	url: 'https://countries.trevorblades.com/',
+const spaceX = introspect.graphql({
+	apiNamespace: 'spacex',
+	url: 'https://api.spacex.land/graphql/',
 });
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [countries],
+	apis: [
+		spaceX,
+		/*federatedApi,
+        openAPI,
+        graphQLAPI*/
+	],
 	server,
 	operations,
 	codeGenerators: [
 		{
-			templates: templates.typescript.all,
+			templates: [...templates.typescript.all],
 		},
 		{
-			templates: [
-				...golangClient.all({
-					packageName: 'client',
-				}),
-			],
-			path: '../go/pkg/client',
+			templates: [templates.typescript.client],
+			path: '../generated',
 		},
 	],
 	cors: {
@@ -34,7 +34,7 @@ configureWunderGraphApplication({
 						// change this before deploying to production to the actual domain where you're deploying your app
 						'http://localhost:3000',
 				  ]
-				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
+				: ['http://localhost:3000'],
 	},
 	dotGraphQLConfig: {
 		hasDotWunderGraphDirectory: false,
