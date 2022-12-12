@@ -14,5 +14,6 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": [".wundergraph/**/*.ts"]
+  "include": [".wundergraph/**/*.ts"],
+  "extends": "expo/tsconfig.base"
 }

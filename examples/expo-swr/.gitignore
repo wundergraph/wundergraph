@@ -4,7 +4,6 @@
 .idea
 
 # WunderGraph build output
-.wundergraph/cache
 .wundergraph/generated
 
 # dependencies

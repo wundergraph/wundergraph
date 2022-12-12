@@ -10,11 +10,11 @@ Our official recommendation is to use the native [swr integration](https://githu
 
 We've built the client generation very flexible,
 so you can use the WunderGraph TypeScript client,
-combine it with the swr integration,
-and use it with frameworks like NextJS, Vite, or even plain React.
+combine it with the SWR integration,
+and use it with frameworks like Next.JS, Vite, or even plain React.
 
 ## Examples of using Next.js and WunderGraph
 
 If you're looking for examples, here's a list:
 
-- [Vite swr](https://github.com/wundergraph/wundergraph/tree/main/examples/vite-swr)
+- [Vite SWR](https://github.com/wundergraph/wundergraph/tree/main/examples/vite-swr)
