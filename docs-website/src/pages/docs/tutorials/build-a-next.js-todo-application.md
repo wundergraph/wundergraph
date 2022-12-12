@@ -153,7 +153,7 @@ query Todos {
 
 Verify the Todos query with `curl`
 
-```curl
+```shell
  curl http://localhost:9991/operations/Todos
 ```
 
