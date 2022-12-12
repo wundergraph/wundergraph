@@ -1,6 +1,6 @@
 # RFC - Typesafe environment variables
 
-This RFC proposes a standard for defining and using type-safe environment variables in applications. The goal of this proposal is to provide a consistent and type-safe way to access and use environment variables, while also allowing for easy validation and error-handling.
+This RFC proposes a standard for defining and using type-safe environment variables in WunderGraph. The goal of this proposal is to provide a consistent and type-safe way to access and use environment variables, while also allowing for easy validation and error-handling.
 
 ## Motivation
 
