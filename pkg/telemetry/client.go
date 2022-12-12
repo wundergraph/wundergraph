@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-retryablehttp"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
+	"go.uber.org/zap"
 )
 
 var userAgent = "wg-telemetry-client"

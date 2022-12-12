@@ -2,8 +2,9 @@ package telemetry
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 func UsageMetricSuffix(cmdName string) string {

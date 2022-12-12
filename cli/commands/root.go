@@ -2,21 +2,23 @@ package commands
 
 import (
 	"errors"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
-	"go.uber.org/zap"
-	"io/fs"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 const (

@@ -2,12 +2,13 @@ package telemetry
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSendUsageMetric(t *testing.T) {

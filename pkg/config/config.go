@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/segmentio/ksuid"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/segmentio/ksuid"
 	"github.com/spf13/viper"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
