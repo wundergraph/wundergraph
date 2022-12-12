@@ -676,6 +676,15 @@ func (r *Builder) configureCache(api *Api) (err error) {
 	}
 }
 
+func (r *Builder) Close() error {
+	if closer, ok := r.cache.(io.Closer); ok {
+		if err := closer.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type GraphQLPlaygroundHandler struct {
 	log     *zap.Logger
 	html    string
