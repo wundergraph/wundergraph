@@ -57,7 +57,7 @@ multiple tests. These minimizes the number of times the server starts and stops,
 faster.
 
 ```typescript
-const wg = new createTestServer()
+const wg = createTestServer()
 ```
 
 Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
