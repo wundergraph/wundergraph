@@ -134,6 +134,12 @@ model Todo {
 }
 ```
 
+Run the migrate comand and generate code for Todo.
+
+```typescript
+ npm run migrate add Todo && wunderctl generate —no-cache
+```
+
 The `order` field in Todo decides the reordering of todos. We will discuss later in the tutorial how to do reordering.
 
 ## Todo display
