@@ -301,7 +301,7 @@ func (e *Engine) StopQueryEngine() {
 		return
 	}
 	e.cancel()
-	exitCh := make(chan error, 1)
+	exitCh := make(chan error)
 	go func() {
 		exitCh <- e.cmd.Wait()
 	}()
