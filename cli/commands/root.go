@@ -117,7 +117,7 @@ var rootCmd = &cobra.Command{
 				viper.GetString("API_URL"),
 				telemetry.MetricClientInfo{
 					WunderctlVersion: BuildInfo.Version,
-					IsCI:             os.Getenv("CI") != "",
+					IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
 					AnonymousID:      viper.GetString("anonymousid"),
 				},
 				telemetry.WithTimeout(3*time.Second),

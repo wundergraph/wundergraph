@@ -108,7 +108,7 @@ type GraphQLError struct {
 type MetricClientInfo struct {
 	OsName           string `json:"osName,omitempty"`
 	CpuCount         int    `json:"cpuCount,omitempty"`
-	IsCI             bool   `json:"isCI,omitempty"`
+	IsCI             bool   `json:"isCI"`
 	WunderctlVersion string `json:"wunderctlVersion,omitempty"`
 	AnonymousID      string `json:"anonymousID,omitempty"`
 }
