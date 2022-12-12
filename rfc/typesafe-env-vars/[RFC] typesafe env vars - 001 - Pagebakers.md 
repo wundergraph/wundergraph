@@ -4,7 +4,7 @@ This RFC proposes a standard for defining and using type-safe environment variab
 
 ## Motivation
 
-The use of environment variables can be error-prone due to their lack of type safety. It's easy to overlook missing environment variables and this is no built-in autocompletion when accessing environment variables.
+The use of environment variables can be error-prone due to their lack of type safety. It's easy to overlook missing environment variables and there is no built-in autocompletion when accessing `process.env` or `EnvironmentVariable`.
 
 Problems that this RFC tries to solve are;
 
