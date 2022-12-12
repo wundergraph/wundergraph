@@ -7,7 +7,8 @@
     "start:services": "docker-compose up -d",
     "start:api": "wunderctl up --debug",
     "cleanup": "docker-compose down -v",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
