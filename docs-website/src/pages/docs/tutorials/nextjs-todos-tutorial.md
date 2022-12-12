@@ -5,35 +5,105 @@ pageTitle: Nextjs Todos Tutorials
 
 ## Getting Started
 
-This is how our final app looks like
+In this tutorial, we will build a todo app with the following features:
 
-Start by creating a new project from nextjs postgress template
+- Create, read, update, and delete todos
+  - Mark todos as complete
+  - Reorder todos
+- Optimistic updates
+
+![Todo application demo](https://ucarecdn.com/b472fc65-1d32-400f-a2df-9d7b78d3e2b9/Todoappshow.gif)
+
+Make sure you have docker installed and up and running. If you don't have the docker setup, check [docker](https://docs.docker.com/get-docker/).
+
+Start by creating a new project using the nextjs postgres template.
 
 ```typescript
-# Init a new project with the nextjs postgress template
+# Init a new project with the nextjs postgres template
 npx create-wundergraph-app nextjs-todos -E nextjs-postgres-prisma
 ```
 
-This will create the app in the `nextjs-todos` directory. Once it finishes, cd into it and run `npm i` to download the WunderGraph SDK.
-
-Navigate to project
+This will create the app in the `nextjs-todos` directory once it finishes, cd into it.
 
 ```typescript
 cd nextjs-todos
 ```
 
-Install dependencies and start the app
+Install dependencies and configure tailwindcss.
 
 ```typescript
-npm i && npm start
+npm install @heroicons/react @tailwindcss/forms clsx framer-motion
 ```
 
-## Setup background color for page
+Next, configure tailwindcss.
 
-Create a new page in `pages` folder `_document.ts` and paste
+```js
+// postcss.config.js
+
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+```
+
+```js
+// tailwind.config.js
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {},
+  },
+  plugins: [require('@tailwindcss/forms')],
+}
+```
+
+```css
+/* styles/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
 
 ```typescript
-// pages/_document.ts
+// pages/_app.tsx
+
+import { AppProps } from 'next/app'
+import Head from 'next/head'
+import '../styles/globals.css'
+
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  return (
+    <>
+      <Head>
+        <title>Todo app</title>
+      </Head>
+      <main>
+        <Component {...pageProps} />
+      </main>
+    </>
+  )
+}
+
+export default MyApp
+```
+
+```typescript
+npm install && npm start
+```
+
+## Setup app background
+
+```typescript
+// pages/_document.tsx
 
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
@@ -58,15 +128,10 @@ export default class CustomDocument extends Document {
 }
 ```
 
-## Setting up postgress and Todo model
+## Todo model
 
 ```typescript
 // schema.prisma
-
-datasource db {
-  provider = "postgresql"
-  url      = "postgresql://admin:admin@localhost:54322/example?schema=public"
-}
 
 model Todo {
   id        Int     @id @default(autoincrement())
@@ -76,52 +141,132 @@ model Todo {
 }
 ```
 
-The `order` field in Todo decide the `drag and drop` order of todos, we will discuss later in the tutorial how to do drag and drop.
+The `order` field in Todo decides the reordering of todos. We will discuss later in the tutorial how to do reordering.
 
-## Starter page screen
+To generate types and code for Todo, close the app, remove the cache and restart.
 
-```typescript
-// pages/index.tsx
-import { NextPage } from 'next'
-import { Fragment } from 'react'
-import AddTodo from '../components/AddTodo'
-import { withWunderGraph } from '../components/generated/nextjs'
-import TodoList from '../components/TodoList'
+- Close the app
+- Remove .wundergraph/cache
+- npm start
 
-const Home: NextPage = () => {
-  return (
-    <Fragment>
-      <div className="align-center flex w-full flex-col items-center">
-        <div className="mt-[10%]">
-          <div className="mb-10 w-72">
-            <div className="flex items-center justify-center">
-              <a href="https://wundergraph.com" target="_blank">
-                <img
-                  src="/wundergraph.svg"
-                  className="h-8"
-                  alt="WunderGraph logo"
-                />
-              </a>
-              <span className="ml-3 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-3xl font-semibold text-transparent">
-                WunderTodo
-              </span>
-            </div>
-          </div>
-          <AddTodo />
-          <div className="mt-4">
-            <TodoList />
-          </div>
-        </div>
-      </div>
-    </Fragment>
-  )
+## Todo display
+
+```graphql
+# .generated/operations/Todos.graphql
+
+query Todos {
+  todos: db_findManyTodo(orderBy: { order: asc }) {
+    id
+    title
+    completed
+    order
+  }
 }
 ```
 
-The starter page looks like this
-![Wundergraph starter page](https://drive.google.com/file/d/18WDbRfuIKHal6NsCqqfnfo8dwW8npne-/view)
+Verify the Todos query with `curl`
 
-## Add Todos
+```curl
+ curl http://localhost:9991/operations/Todos
+```
+
+Response
+
+```json
+{ "data": { "todos": [] } }
+```
+
+There are no todos but we can verify the query is working fine.
+
+```typescript
+// types/index.d.ts
+
+import { TodoResponseData } from '../components/generated/models'
+
+export type Todo = Required<TodoResponseData>['todo']
+export type Todos = Required<TodosResponseData>['todos']
+```
+
+```typescript
+// components/TodoList.tsx
+
+import { useQuery } from '../components/generated/nextjs'
+import { Fragment } from 'react'
+import TodoItem from './TodoItem'
+
+const TodoList = () => {
+  const { data } = useQuery({
+    operationName: 'Todos',
+  })
+  const todos = data?.todos
+  return (
+    <Fragment>
+      {todos
+        ? todos.map((todo) => <TodoItem key={todo.id} todo={todo} />)
+        : null}
+    </Fragment>
+  )
+}
+export default TodoList
+```
+
+```typescript
+// components/TodoItem.tsx
+
+import clsx from 'clsx'
+import { Fragment, useState } from 'react'
+
+import { Todo } from '../types'
+
+interface TodoItemProps {
+  todo: Todo
+}
+
+function TodoItem(props: TodoItemProps) {
+  console.log(props)
+  const { todo } = props
+  const [title, setTitle] = useState<string>(todo.title)
+  return (
+    <div
+      className={clsx(
+        'group relative my-2 flex h-11 w-72 items-center justify-between rounded-md py-3 pl-2 pr-1 transition hover:bg-slate-800'
+      )}
+    >
+      <Fragment>
+        <div className="mx-1 flex flex-1 items-center">
+          <div
+            className={clsx(
+              'ml-3 flex-1 cursor-pointer text-sm font-medium text-gray-300'
+            )}
+          >
+            <span className="break-all">{title}</span>
+          </div>
+        </div>
+      </Fragment>
+    </div>
+  )
+}
+
+export default TodoItem
+```
+
+We will extend and add more code to `TodoItem` and `TodoList` in the later part of the tutorial.
+
+## Add Todo
+
+```graphql
+# .wundergraph/operations/CreateTodo.graphql
+
+mutation ($title: String!, $order: Int! @internal) {
+  todo: db_createOneTodo(
+    data: { title: $title, completed: false, order: $order }
+  ) {
+    id
+  }
+}
+```
+
+We've used the @internal directive to set the order as an internal variable and remove it from the client.
 
 ```typescript
 // components/AddTodo.tsx
@@ -187,10 +332,8 @@ const AddTodo = () => {
 export default AddTodo
 ```
 
-### useAddMutation
-
 ```typescript
-// hooks/useAddMutation.tsx
+// hooks/useAddTodoMutation.tsx
 
 import { mutate } from 'swr'
 import { useMutation, useQuery } from '../components/generated/nextjs'
@@ -253,7 +396,82 @@ function useAddMutation() {
 export default useAddMutation
 ```
 
-### Create Todo on Server
+### Optimistic updates
+
+With the optimistic update, the UI updates instantly without waiting for the `mutation` to resolve from the server; in case of failure, revert to the previous UI state with `rollbackOnError = true.`
+
+Use [SWR](https://swr.vercel.app/) for optimistic updates.
+
+- `optimisticData`: Data to immediately update the Todos client cache.
+- `populateCache = true`: Should the result of the `createTodo` mutation be written to the Todos cache.
+- `revalidate = true`: Should the Todos cache revalidate once the `createTodo` mutation resolves.
+- `rollbackOnError = true`: Should Todo local cache revert to the previous state to ensure the user sees the correct data if the `createTodo` mutation fails.
+
+## Display Items
+
+Copy the below WunderGraph svg and paste it into `public/wundergraph.svg`.
+
+```svg
+<svg width="660.7" height="649.8" viewBox="0 0 174.81 171.926" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="m131.737 89.532-14.182 24.077-18.124-30.877-18.097 30.824-31.247-53.975C61.305 44.553 79.217 34.87 99.43 34.87a61.728 61.728 0 0 1 32.967 9.499 16.764 16.764 0 0 0-.29 3.069c0 9.101 7.381 16.457 16.456 16.457 9.076 0 16.458-7.382 16.458-16.457 0-9.102-7.382-16.457-16.458-16.457-2.46 0-4.815.555-6.905 1.534-12.118-7.99-26.617-12.673-42.228-12.673-22.886 0-43.391 9.975-57.414 25.823L31.354 27.196a16.33 16.33 0 0 0 2.937-9.366c0-9.102-7.382-16.457-16.457-16.457-9.075 0-16.457 7.382-16.457 16.457 0 9.075 7.382 16.457 16.457 16.457.476 0 .926-.026 1.402-.08L33.047 58.1C26.46 69.397 22.73 82.6 22.73 96.57c0 21.194 8.572 40.376 22.463 54.267 13.89 13.89 33.073 22.463 54.266 22.463 39.952 0 72.866-30.612 76.385-69.718.212-2.328.344-4.63.344-7.011v-7.012h-44.45zm-32.28 68.792c-17.065 0-32.49-6.959-43.655-18.098-11.166-11.165-18.124-26.617-18.124-43.656 0-8.07 1.534-15.796 4.418-22.887l39.106 67.654 18.256-30.876 18.124 30.823 22.172-37.703h20.981c-3.44 30.824-29.554 54.743-61.277 54.743z" style="stroke-width:.264583" transform="translate(-1.377 -1.373)"/></svg>
+```
+
+```typescript
+// pages/index.tsx
+
+import { NextPage } from 'next'
+import { Fragment } from 'react'
+import AddTodo from '../components/AddTodo'
+import { withWunderGraph } from '../components/generated/nextjs'
+
+import TodoList from '../components/TodoList'
+
+const Home: NextPage = () => {
+  return (
+    <Fragment>
+      <div className="align-center flex w-full flex-col items-center">
+        <div className="mt-[10%]">
+          <div className="mb-10 w-72">
+            <div className="flex items-center justify-center">
+              <a href="https://wundergraph.com" target="_blank">
+                <img
+                  src="/wundergraph.svg"
+                  className="h-8"
+                  alt="WunderGraph logo"
+                />
+              </a>
+              <span className="ml-3 bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-3xl font-semibold text-transparent">
+                WunderTodo
+              </span>
+            </div>
+          </div>
+          <AddTodo />
+          <div className="mt-4">
+            <TodoList />
+          </div>
+        </div>
+      </div>
+    </Fragment>
+  )
+}
+
+export default withWunderGraph(Home)
+```
+
+![Display and add Todo](https://ucarecdn.com/830183b0-cbb1-4648-9bee-c91737d4532d/Todoappaddtodopageresize.png)
+
+```graphql
+# .wundergraph/operations/GetLastOrder.graphql
+
+query @internalOperation {
+  lastItem: db_findFirstTodo(orderBy: [{ order: desc }]) {
+    order
+  }
+}
+```
+
+{% callout type="warning" %}
+`GetLastOrder` finds the todo with max order. The operation is marked @internalOperation Directive, which means it is only accessible from the server.
+{% /callout %}
 
 ```typescript
 // .wundergraph/wundergraph.server.ts
@@ -284,91 +502,13 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 }))
 ```
 
-## Get Todos
-
-```graphql
-# .generated/operations/Todos.graphql
-
-query Todos {
-  todos: db_findManyTodo(orderBy: { order: asc }) {
-    id
-    title
-    completed
-    order
-  }
-}
-```
-
-### Display all
-
-```typescript
-// components/TodoList.tsx
-
-import { useQuery } from '../components/generated/nextjs'
-import TodoItem from '../components/TodoItem'
-
-const TodoList = () => {
-  const { data } = useQuery({
-    operationName: 'Todos',
-  })
-  const todos = data?.todos
-  return todos
-    ? todos.map((todo) => <TodoItem key={todo.id} todo={todo} />)
-    : null
-}
-export default TodoList
-```
-
-## Todo Item
-
-We have a simple design for todo item
-
-```typescript
-// components/TodoItem.tsx
-
-import clsx from 'clsx'
-import { Fragment, useState } from 'react'
-
-import { Todo } from '../types'
-
-interface TodoItemProps {
-  todo: Todo
-}
-
-function TodoItem(props: TodoItemProps) {
-  console.log(props)
-  const { todo } = props
-  const [title, setTitle] = useState<string>(todo.title)
-  return (
-    <div
-      className={clsx(
-        'group relative my-2 flex h-11 w-72 items-center justify-between rounded-md py-3 pl-2 pr-1 transition hover:bg-slate-800'
-      )}
-    >
-      <Fragment>
-        <div className="mx-1 flex flex-1 items-center">
-          <div
-            className={clsx(
-              'ml-3 flex-1 cursor-pointer text-sm font-medium text-gray-300'
-            )}
-          >
-            <span className="break-all">{title}</span>
-          </div>
-        </div>
-      </Fragment>
-    </div>
-  )
-}
-
-export default TodoItem
-```
+The `mutatingPreResolve` hook gets called before the `CreateTodo` gets resolved. We set the order to `1` if there are no todos; otherwise, we set it to `max order + 1`
 
 ## Delete Todo
 
-Deleting todo is simple we need to create
-
 ```graphql
-# operations/DeleteTodo.graphql
+# .wundergraph/operations/DeleteTodo.graphql
+
 mutation ($id: Int!) {
   db_deleteOneTodo(where: { id: $id }) {
     id
@@ -385,8 +525,6 @@ function deleteTodoItem() {
   deleteTodo.trigger({ id: todo.id }, { throwOnError: false })
 }
 ```
-
-Note below how we filter and remove the element and do optimistic update using SWR
 
 ```typescript
 // hooks/useDeleteTodoMutation.tsx
@@ -430,16 +568,621 @@ export default useDeleteTodoMutation
 ```
 
 {% callout type="warning" %}
-When no options were provided you still could override default values by setting WG environment variables
+Observe how we optimistically update the data by filtering the deleted item.
 {% /callout %}
 
-## Todo app operations
+## Update Todo
 
-| Operation             | Action                             | Excuted On |
-| --------------------- | ---------------------------------- | ---------- |
-| `CreateTodo`          | Create a new todo                  | Server     |
-| `Todos`               | Gets all Todos                     | Client     |
-| `UpdateTodoOrder`     | Mark todo complete or uncompleted  | Server     |
-| `EditTodo`            | Update todo title                  | Client     |
-| `UpdateCompleteTodos` | Mark todo completed or uncompleted | Client     |
-| `DeleteTodo`          | Delete existing todo               | Client     |
+### Complete Todo
+
+```graphql
+# .wundergraph/operations/UpdateCompleteTodo.graphql
+
+mutation ($id: Int!, $complete: Boolean!) {
+  db_updateOneTodo(
+    where: { id: $id }
+    data: { completed: { set: $complete } }
+  ) {
+    id
+  }
+}
+```
+
+```typescript
+// components/TodoItem.tsx
+
+const updateCompleteTodo = useUpdateCompleteStatusMutation()
+const [completed, setCompleted] = useState<boolean>(todo.completed)
+
+function updateCompletedStatus(e: React.ChangeEvent<HTMLInputElement>) {
+  const newCheckedStatus = e.target.checked
+  setCompleted(newCheckedStatus)
+  updateCompleteTodo.trigger(
+    { id: todo.id, complete: newCheckedStatus },
+    { throwOnError: false }
+  )
+}
+```
+
+```typescript
+// hooks/useUpdateCompleteStatusMutation.tsx
+
+import { useSWRConfig } from 'swr'
+import { useMutation, useQuery } from '../components/generated/nextjs'
+
+function useUpdateCompleteStatusMutation() {
+  const { mutate } = useSWRConfig()
+  const { data } = useQuery({ operationName: 'Todos' })
+  const todos = data?.todos
+  const updateCompleteTodo = useMutation({
+    operationName: 'UpdateCompleteTodo',
+  })
+
+  const trigger: typeof updateCompleteTodo.trigger = async (input, options) => {
+    if (!todos || !input) {
+      return updateCompleteTodo.trigger(input, options)
+    }
+    const updatedTodos = [...todos]
+    const item = updatedTodos.find((t) => t.id === input?.id)
+
+    if (item) {
+      item.completed = input.complete
+    }
+
+    mutate(
+      {
+        operationName: 'Todos',
+      },
+      () => {
+        return updateCompleteTodo.trigger(input, options)
+      },
+      {
+        optimisticData: {
+          todos: updatedTodos,
+        },
+        populateCache: false,
+        revalidate: true,
+        rollbackOnError: true,
+        ...options,
+      }
+    )
+  }
+
+  return {
+    ...updateCompleteTodo,
+    trigger,
+  }
+}
+
+export default useUpdateCompleteStatusMutation
+```
+
+### Edit Title
+
+```graphql
+# .wundergraph/operations/EditTodo.graphql
+
+mutation ($id: Int, $title: String!) {
+  db_updateOneTodo(where: { id: $id }, data: { title: { set: $title } }) {
+    id
+  }
+}
+```
+
+```typescript
+// components/TodoItem.tsx
+
+const editTodoTitle = useUpdateTitleMutation()
+const [title, setTitle] = useState<string>(todo.title)
+const [editMode, setEditMode] = useState<boolean>(false)
+
+function editTodoTile() {
+  if (title.trim().length > 0) {
+    clearEdit()
+    editTodoTitle.trigger({ id: todo.id, title }, { throwOnError: false })
+  }
+}
+function clearEdit() {
+  setEditMode(false)
+}
+```
+
+```typescript
+//hooks/useUpdateTitleMutation.ts
+
+import { useSWRConfig } from 'swr'
+import { useMutation, useQuery } from '../components/generated/nextjs'
+
+function useUpdateTitleMutation() {
+  const { mutate } = useSWRConfig()
+  const { data } = useQuery({ operationName: 'Todos' })
+  const todos = data?.todos
+
+  const updateTodo = useMutation({ operationName: 'EditTodo' })
+
+  const trigger: typeof updateTodo.trigger = async (input, options) => {
+    if (!todos || !input) {
+      return updateTodo.trigger(input, options)
+    }
+    const updatedTodos = [...todos]
+    const item = updatedTodos.find((t) => t.id === input?.id)
+
+    if (item) {
+      item.title = input.title
+    }
+
+    await mutate(
+      {
+        operationName: 'Todos',
+      },
+      async () => {
+        return updateTodo.trigger(input, options)
+      },
+      {
+        optimisticData: {
+          todos: updatedTodos,
+        },
+        populateCache: false,
+        revalidate: true,
+        rollbackOnError: true,
+        ...options,
+      }
+    )
+  }
+
+  return {
+    ...updateTodo,
+    trigger,
+  }
+}
+
+export default useUpdateTitleMutation
+```
+
+{% callout type="warning" %}
+Observe how we optimistically update `Complete Todo` and `Edit Todo`.
+{% /callout %}
+
+## Reorder Todos
+
+Let us discuss the most exciting part of the app: how do we do todos `reordering`?
+
+- Use the `order` property of todos; the first inserted item has order `1` and subsequently inserted todos have `max order + 1`.
+- Upon reordering items, send the `id` of the `dragged` item together with `newOrder` to the server and run.
+  - Use item `id` to find the `oldOrder` using `GetLastOrder`.
+    - If the `newOrder` is less than the `oldOrder`, increase the order value of all items that are >= newOrder and < oldOrder.
+    - Else, If the newOrder is greater than the oldOrder, decrease the order value of all items that are <= newOrder and > oldOrder.
+  - Update the item order to newOrder.
+
+```graphql
+# .wundergraph/operations/ReorderTodosDragDown.graphql
+
+mutation ($newOrder: Int, $oldOrder: Int) @internalOperation {
+  db_updateManyTodo(
+    where: { order: { gte: $newOrder, lt: $oldOrder } }
+    data: { order: { increment: 1 } }
+  ) {
+    count
+  }
+}
+```
+
+```graphql
+# .wundergraph/operations/ReorderTodosDragUp.graphql
+
+mutation ($newOrder: Int, $oldOrder: Int) @internalOperation {
+  db_updateManyTodo(
+    where: { order: { gt: $oldOrder, lte: $newOrder } }
+    data: { order: { decrement: 1 } }
+  ) {
+    count
+  }
+}
+```
+
+```graphql
+# .wundergraph/operations/UpdateTodoOrder.graphql
+
+mutation ($id: Int!, $order: Int!) {
+  todo: db_updateOneTodo(where: { id: $id }, data: { order: { set: $order } }) {
+    id
+    order
+  }
+}
+```
+
+```graphql
+# .wundergraph/operations/Todo.graphql
+
+query Todo($id: Int!) {
+  todo: db_findFirstTodo(where: { id: { equals: $id } }) {
+    id
+    title
+    completed
+    order
+  }
+}
+```
+
+```typescript
+
+// ./wundergraph/wundergraph.server.ts
+
+import {configureWunderGraphServer} from "@wundergraph/sdk";
+import type {HooksConfig} from "./generated/wundergraph.hooks";
+import type {InternalClient} from "./generated/wundergraph.internal.client";
+
+export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+    hooks: {
+        queries: {},
+        mutations: {
+            CreateTodo:{...},
+            UpdateTodoOrder: {
+                preResolve: async ({input, internalClient}) => {
+                    const {data} = await internalClient.queries.Todo({
+                        input: {id: input.id}
+                    });
+
+                    if (!data?.todo) {
+                        return;
+                    }
+
+                    if (data.todo.order > input.order) {
+                        await internalClient.mutations.ReorderTodosDragDown({
+                            input: {
+                                newOrder: input.order,
+                                oldOrder: data.todo.order
+                            }
+                        });
+                    } else if (data.todo.order <= input.order) {
+                        await internalClient.mutations.ReorderTodosDragUp({
+                            input: {
+                                newOrder: input.order,
+                                oldOrder: data.todo.order
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+}));
+```
+
+The preResolve hook gets resolved before the `UpdateTodoOrder` mutation.
+
+The preResolve increment/decrement by one the order of all items that moved except the dragged item. At last, with the `UpdateTodoOrder` dragged item gets updated with a new order.
+
+```typescript
+// hooks/useReorderTodoMutation.tsx
+
+import { useSWRConfig } from 'swr'
+import { useMutation } from '../components/generated/nextjs'
+
+function useReorderTodoMutation() {
+  const { mutate } = useSWRConfig()
+  const mutation = useMutation({
+    operationName: 'UpdateTodoOrder',
+    onSuccess() {
+      mutate({ operationName: 'Todos' })
+    },
+    onError() {
+      mutate({ operationName: 'Todos' })
+    },
+  })
+  return mutation
+}
+
+export default useReorderTodoMutation
+```
+
+Next update TodoList component to support reordering.
+
+```typescript
+//components/TodoList.tsx
+
+import { Reorder } from 'framer-motion'
+import { useState } from 'react'
+import { useSWRConfig } from 'swr'
+
+import { useQuery } from '../components/generated/nextjs'
+import TodoItem from '../components/TodoItem'
+
+import useReorderTodoMutation from '../hooks/useReorderTodoMutation'
+import { Todo, Todos } from '../types'
+
+const TodoList = () => {
+  const { mutate } = useSWRConfig()
+  const { data } = useQuery({
+    operationName: 'Todos',
+  })
+  const todos = data?.todos
+  const [previousTodos, setPreviousTodos] = useState<Todo[] | undefined>(
+    undefined
+  )
+  const reorderTodo = useReorderTodoMutation()
+
+  function handleReorder(newOrder: Todos) {
+    mutate(
+      { operationName: 'Todos' },
+      { todos: newOrder },
+      { revalidate: false }
+    )
+  }
+
+  async function reorderItems(item: Todo, index: number) {
+    if (previousTodos) {
+      const newOrder = previousTodos[index].order
+      const oldOrder = item.order
+      if (newOrder && newOrder !== oldOrder) {
+        reorderTodo.trigger(
+          { id: item.id, order: newOrder },
+          { throwOnError: false }
+        )
+      }
+    }
+  }
+
+  return todos ? (
+    <Reorder.Group axis="y" values={todos} onReorder={handleReorder}>
+      {todos.map((todo, index: number) => (
+        <Reorder.Item
+          onDragStart={() => {
+            setPreviousTodos(JSON.parse(JSON.stringify(todos)))
+          }}
+          onDragEnd={() => {
+            reorderItems(todo, index)
+          }}
+          key={todo.id}
+          value={todo}
+        >
+          <TodoItem todo={todo} />
+        </Reorder.Item>
+      ))}
+    </Reorder.Group>
+  ) : null
+}
+
+export default TodoList
+```
+
+Let us break down what is happening here
+
+- The `previousTodos` contains todos before the start of the drag; when the drag ends, the new order gets updated in `todos`.
+- `handleReorder` gets executed on the swap of each item; this updates the `Todos` cache.
+- `onDragEnd,` we make the server call to update the order.
+  - Use `previousTodos` to find the `newOrder` of the dragged item. `newOrder = previousTodos[index].order.`
+  - Invoke the `useReorderTodoMutation` hook passing item `id` and `newOrder` to make an update on the server.
+
+## Todo List and Item
+
+Now we can update `TodoList` and `TodoItem` with all features.
+
+```typescript
+// components/TodoList.tsx
+
+import { Reorder } from 'framer-motion'
+import { useState } from 'react'
+import { useSWRConfig } from 'swr'
+
+import { useQuery } from '../components/generated/nextjs'
+import TodoItem from '../components/TodoItem'
+
+import useReorderTodoMutation from '../hooks/useReorderTodoMutation'
+import { Todo, Todos } from '../types'
+
+const TodoList = () => {
+  const { mutate } = useSWRConfig()
+  const { data } = useQuery({
+    operationName: 'Todos',
+  })
+  const todos = data?.todos
+  const [previousTodos, setPreviousTodos] = useState<Todo[] | undefined>(
+    undefined
+  )
+  const reorderTodo = useReorderTodoMutation()
+
+  function handleReorder(newOrder: Todos) {
+    mutate(
+      { operationName: 'Todos' },
+      { todos: newOrder },
+      { revalidate: false }
+    )
+  }
+
+  async function reorderItems(item: Todo, index: number) {
+    if (previousTodos) {
+      const newOrder = previousTodos[index].order
+      const oldOrder = item.order
+      if (newOrder && newOrder !== oldOrder) {
+        reorderTodo.trigger(
+          { id: item.id, order: newOrder },
+          { throwOnError: false }
+        )
+      }
+    }
+  }
+
+  return todos ? (
+    <Reorder.Group axis="y" values={todos} onReorder={handleReorder}>
+      {todos.map((todo, index: number) => (
+        <Reorder.Item
+          onDragStart={() => {
+            setPreviousTodos(JSON.parse(JSON.stringify(todos)))
+          }}
+          onDragEnd={() => {
+            reorderItems(todo, index)
+          }}
+          key={todo.id}
+          value={todo}
+        >
+          <TodoItem todo={todo} />
+        </Reorder.Item>
+      ))}
+    </Reorder.Group>
+  ) : null
+}
+
+export default TodoList
+```
+
+```typescript
+// components/TodoItem.tsx
+
+import clsx from 'clsx'
+import React, { Fragment, useEffect, useRef, useState } from 'react'
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid'
+
+import useDeleteTodoMutation from '../hooks/useDeleteTodoMutation'
+import useUpdateCompleteStatusMutation from '../hooks/useUpdateCompleteStatusMutation'
+import useUpdateTitleMutation from '../hooks/useUpdateTitleMutation'
+import { Todo } from '../types'
+
+interface TodoItemProps {
+  todo: Todo
+}
+
+function TodoItem(props: TodoItemProps) {
+  const { todo } = props
+  const editTodoTitle = useUpdateTitleMutation()
+  const updateCompleteTodo = useUpdateCompleteStatusMutation()
+  const deleteTodo = useDeleteTodoMutation()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [title, setTitle] = useState<string>(todo.title)
+  const [completed, setCompleted] = useState<boolean>(todo.completed)
+  const [editMode, setEditMode] = useState<boolean>(false)
+
+  useEffect(() => {
+    const listener = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as HTMLElement
+      if (!inputRef.current || inputRef.current.contains(target)) {
+        return
+      }
+      setEditMode(false)
+    }
+    if (editMode) {
+      document.addEventListener('mousedown', listener)
+      document.addEventListener('touchstart', listener)
+    }
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [editMode])
+
+  function updateCompletedStatus(e: React.ChangeEvent<HTMLInputElement>) {
+    const newCheckedStatus = e.target.checked
+    setCompleted(newCheckedStatus)
+    updateCompleteTodo.trigger(
+      { id: todo.id, complete: newCheckedStatus },
+      { throwOnError: false }
+    )
+  }
+
+  function deleteTodoItem() {
+    deleteTodo.trigger({ id: todo.id }, { throwOnError: false })
+  }
+
+  function editTodoTile() {
+    if (title.trim().length > 0) {
+      clearEdit()
+      editTodoTitle.trigger({ id: todo.id, title }, { throwOnError: false })
+    }
+  }
+
+  function clearEdit() {
+    setEditMode(false)
+  }
+
+  function resetTitle() {
+    setTitle(todo.title)
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Escape') {
+      clearEdit()
+      resetTitle()
+    } else if (event.key === 'Enter') {
+      editTodoTile()
+    }
+  }
+
+  function enableEditMode() {
+    setEditMode(true)
+    setTimeout(() => {
+      inputRef.current?.focus()
+    })
+  }
+
+  return (
+    <div
+      className={clsx(
+        'group relative my-2 flex h-11 w-72 items-center justify-between rounded-md py-3 pl-2 pr-1 transition hover:bg-slate-800',
+        editMode && 'bg-slate-800'
+      )}
+    >
+      {!editMode ? (
+        <Fragment>
+          <div className="mx-1 flex flex-1 items-center">
+            <input
+              onChange={updateCompletedStatus}
+              type="checkbox"
+              checked={completed}
+              className="h-4 w-4 cursor-pointer rounded-full border-gray-500 bg-slate-800 text-pink-600 accent-pink-500 ring-pink-500 transition hover:border-pink-500 hover:ring-1 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:ring-offset-0"
+            />
+            <div
+              onDoubleClick={enableEditMode}
+              className={clsx(
+                'ml-3 flex-1 cursor-pointer text-sm font-medium text-gray-300',
+                [completed && 'line-through']
+              )}
+            >
+              <span className="break-all">{title}</span>
+            </div>
+          </div>
+          <div
+            onClick={deleteTodoItem}
+            className="ml-5 hidden h-9 w-9  cursor-pointer flex-col items-center justify-center rounded text-white opacity-50 transition hover:bg-gray-700 hover:opacity-100 group-hover:flex"
+          >
+            <XMarkIcon className="h-6 w-6" />
+          </div>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <div className="relative w-full">
+            <input
+              ref={inputRef}
+              type="text"
+              onKeyDown={handleKeyDown}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className={clsx(
+                'leadig-0 -mt-[1px] h-11 w-full rounded border-0 bg-slate-800 py-2.5 pl-8 pr-2 text-sm font-medium text-white focus:border-0 focus:outline-none focus:ring-0'
+              )}
+            />
+            <button
+              onClick={editTodoTile}
+              className={clsx(
+                'absolute right-0 top-1 -mt-[1px] flex h-9 w-9 cursor-pointer items-center justify-center rounded text-white transition hover:bg-gray-700',
+                { 'opacity-40': title.trim().length === 0 }
+              )}
+            >
+              <CheckIcon className="h-6 w-6" />
+            </button>
+          </div>
+        </Fragment>
+      )}
+    </div>
+  )
+}
+
+export default TodoItem
+```
+
+{% callout type="warning" %}
+Look closely at the `TodoList` and `TodoItem` changes; they combine all the abovementioned ideas. It is a lot of code to digest. I suggest spending some time understanding how all of it fits.
+{% /callout %}
+
+## Wrap up
+
+Congratulations! you have just built a todo app from scratch! check the code [Todo App Code](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-todos) to run it locally and try to experiment with and see how it works.
