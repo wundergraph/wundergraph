@@ -19,13 +19,13 @@ import (
 var configDir string
 
 // InitConfig - Initialises config file for Viper
-func InitConfig() {
+func InitConfig(isTelemetryEnabled bool) {
 	if err := initConfigDir(); err != nil {
 		fmt.Println("Error accessing config directory at $HOME/.wundergraph", err)
 		return
 	}
 
-	initViper()
+	initViper(isTelemetryEnabled)
 }
 
 // ConfigDir - Returns Directory holding the Config file
@@ -57,13 +57,13 @@ func initConfigDir() error {
 	return nil
 }
 
-func initViper() {
+func initViper(isTelemetryEnabled bool) {
 	if err := loadConfig(); err != nil {
 		fmt.Println("Error loading config", err)
 	}
 
 	// Init anonymous user id that is used to distinguish between different users
-	if !viper.InConfig("anonymousID") {
+	if isTelemetryEnabled && !viper.InConfig("anonymousID") {
 		viper.Set("anonymousID", ksuid.New().String())
 		allSettings := viper.AllSettings()
 		if err := SaveConfig(allSettings); err != nil {

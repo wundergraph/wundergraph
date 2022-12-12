@@ -111,44 +111,42 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		// Check if telemetry is enabled
-		if rootFlags.Telemetry {
-			// Check if we want to track telemetry for this command
-			if cmd.Annotations["telemetry"] == "true" {
-				TelemetryClient = telemetry.NewClient(
-					viper.GetString("API_URL"),
-					telemetry.MetricClientInfo{
-						WunderctlVersion: BuildInfo.Version,
-						IsCI:             os.Getenv("CI") != "",
-						AnonymousID:      viper.GetString("anonymousid"),
-					},
-					telemetry.WithTimeout(3*time.Second),
-					telemetry.WithLogger(log),
-					telemetry.WithDebug(rootFlags.TelemetryDebugMode),
-				)
+		// Check if we want to track telemetry for this command
+		if rootFlags.Telemetry && cmd.Annotations["telemetry"] == "true" {
+			TelemetryClient = telemetry.NewClient(
+				viper.GetString("API_URL"),
+				telemetry.MetricClientInfo{
+					WunderctlVersion: BuildInfo.Version,
+					IsCI:             os.Getenv("CI") != "",
+					AnonymousID:      viper.GetString("anonymousid"),
+				},
+				telemetry.WithTimeout(3*time.Second),
+				telemetry.WithLogger(log),
+				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+			)
 
-				cmdMetricName := cmd.Name()
-				if cmd.HasParent() {
-					cmdMetricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
-				}
+			cmdMetricName := cmd.Name()
+			if cmd.HasParent() {
+				cmdMetricName = telemetry.CmdMetricNameWithParent(cmd.Parent().Name(), cmd.Name())
+			}
 
-				metricDurationName := telemetry.CmdDurationMetricName(cmdMetricName)
-				cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
+			metricDurationName := telemetry.CmdDurationMetricName(cmdMetricName)
+			cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
 
-				metricUsageName := telemetry.CmdUsageMetricName(cmdMetricName)
-				cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
+			metricUsageName := telemetry.CmdUsageMetricName(cmdMetricName)
+			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
-				err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
+			err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
 
-				// AddMetric the usage of the command immediately
-				if rootFlags.TelemetryDebugMode {
-					if err != nil {
-						log.Error("Could not send telemetry data", zap.Error(err))
-					} else {
-						log.Info("Telemetry data sent")
-					}
+			// AddMetric the usage of the command immediately
+			if rootFlags.TelemetryDebugMode {
+				if err != nil {
+					log.Error("Could not send telemetry data", zap.Error(err))
+				} else {
+					log.Info("Telemetry data sent")
 				}
 			}
+
 		}
 
 		return nil
@@ -210,7 +208,7 @@ func wunderctlBinaryPath() string {
 }
 
 func init() {
-	config.InitConfig()
+	config.InitConfig(rootFlags.Telemetry)
 
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
 

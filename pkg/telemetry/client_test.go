@@ -33,6 +33,18 @@ func TestSendUsageMetric(t *testing.T) {
 		assert.Equal(t, metricReq.ClientInfo.CpuCount, 1)
 
 		res.WriteHeader(http.StatusOK)
+
+		var graphqlResp GraphQLResponse
+		graphqlResp.Data = map[string]interface{}{
+			"CollectMetricsV1": map[string]interface{}{
+				"success": true,
+			},
+		}
+
+		respData, err := json.Marshal(graphqlResp)
+		assert.NoError(t, err)
+
+		res.Write(respData)
 	}))
 
 	defer testServer.Close()
@@ -53,6 +65,43 @@ func TestSendUsageMetric(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestSendFailOnGraphQLError(t *testing.T) {
+
+	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		// Validate method and auth header
+		assert.Equal(t, "POST", req.Method)
+
+		res.WriteHeader(http.StatusOK)
+
+		var graphqlResp GraphQLResponse
+		graphqlResp.Errors = []GraphQLError{
+			{"Error"},
+		}
+
+		respData, err := json.Marshal(graphqlResp)
+		assert.NoError(t, err)
+
+		res.Write(respData)
+	}))
+
+	defer testServer.Close()
+
+	client := NewClient(testServer.URL,
+		MetricClientInfo{
+			OsName:           "LINUX",
+			CpuCount:         1,
+			IsCI:             false,
+			WunderctlVersion: "0.100.1",
+			AnonymousID:      "123456",
+		},
+		WithTimeout(2*time.Second),
+	)
+
+	err := client.Send([]Metric{NewUsageMetric("foo")})
+
+	assert.Error(t, err, "Expected error on graphql error")
+}
+
 func TestSendDurationMetric(t *testing.T) {
 
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
@@ -67,9 +116,21 @@ func TestSendDurationMetric(t *testing.T) {
 		_ = json.Unmarshal(metrics, &metricReq)
 
 		assert.Equal(t, metricReq.Metrics[0].Name, "up")
-		assert.GreaterOrEqual(t, metricReq.Metrics[0].Value, 0.001)
+		assert.GreaterOrEqual(t, metricReq.Metrics[0].Value, 0.01)
 
 		res.WriteHeader(http.StatusOK)
+
+		var graphqlResp GraphQLResponse
+		graphqlResp.Data = map[string]interface{}{
+			"CollectMetricsV1": map[string]interface{}{
+				"success": true,
+			},
+		}
+
+		respData, err := json.Marshal(graphqlResp)
+		assert.NoError(t, err)
+
+		res.Write(respData)
 	}))
 
 	defer testServer.Close()
@@ -87,7 +148,7 @@ func TestSendDurationMetric(t *testing.T) {
 
 	m := NewDurationMetric("up")
 
-	time.Sleep(100 * time.Microsecond)
+	time.Sleep(10 * time.Millisecond)
 
 	err := client.Send([]Metric{m()})
 

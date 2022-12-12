@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-retryablehttp"
 	"go.uber.org/zap"
+	"io"
 	"net/http"
 	"runtime"
 	"strings"
@@ -95,6 +96,15 @@ type Metric struct {
 	Value float64 `json:"value"`
 }
 
+type GraphQLResponse struct {
+	Data   interface{} `json:"data"`
+	Errors []GraphQLError
+}
+
+type GraphQLError struct {
+	Message string `json:"message"`
+}
+
 type MetricClientInfo struct {
 	OsName           string `json:"osName,omitempty"`
 	CpuCount         int    `json:"cpuCount,omitempty"`
@@ -135,6 +145,21 @@ func (c *client) Send(metrics []Metric) error {
 
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("error sending telemetry data: %s, statusCode: %d", string(data), resp.StatusCode)
+	}
+
+	respData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var graphqlResp GraphQLResponse
+	err = json.Unmarshal(respData, &graphqlResp)
+	if err != nil {
+		return err
+	}
+
+	if len(graphqlResp.Errors) > 0 {
+		return fmt.Errorf("error sending telemetry data: %s, statusCode: %d, errors: %s", string(data), resp.StatusCode, graphqlResp.Errors[0].Message)
 	}
 
 	return nil
