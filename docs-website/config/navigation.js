@@ -116,6 +116,10 @@ const navigation = [
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
 			{
+				title: 'Testing',
+				href: '/docs/guides/testing',
+			},
+			{
 				title: 'Debugging',
 				href: '/docs/guides/debugging',
 			},
@@ -210,6 +214,10 @@ const navigation = [
 			{
 				title: 'Caching',
 				href: '/docs/examples/caching',
+			},
+			{
+				title: 'Expo + SWR',
+				href: '/docs/examples/expo-swr',
 			},
 			{
 				title: 'FaunaDB NextJS',
