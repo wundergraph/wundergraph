@@ -67,7 +67,7 @@ An example telemetry event looks like this:
 
 We do not collect any metrics which may contain sensitive data.
 
-We take your privacy and our security very seriously. WunderGraph telemetry falls under the security disclosure policy.
+We take your privacy and the security of our platform very seriously. WunderGraph telemetry falls under the security disclosure policy.
 
 ## Will This Data Be Shared?
 
