@@ -55,7 +55,25 @@ import env from '.wundergraph/wundergraph.env';
 env.WG_NODE_URL; // http://localhost:9991
 env.OAUTH_CLIENT_ID;
 
-new EnvironmentVariable(env.WG_SERVER_PORT, '9992');
+new EnvironmentVariable('WG_SERVER_PORT', '9992');
+```
+
+### EvironmentVariable
+
+When the config is generated we also generate a type declaration for `EnvironmentVariable`.
+
+```
+declare global {
+    interface WundergraphEnv {
+      NODE_ENV: 'development' | 'production';
+      WG_SERVER_PORT?: string;
+      OAUTH_CLIENT_ID: string;
+    }
+}
+```
+
+```ts
+new EnvironmentVariable('WG_SERVER_PORT')
 ```
 
 ### configureEnv
