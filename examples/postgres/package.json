@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "npm run start:services && wait-on -d 5000 tcp:54322 && npm run start:api",
-    "start:services": "docker-compose up -d",
+    "start": "npm run start:container && wait-on -d 5000 tcp:54322 && npm run start:api",
+    "start:container": "docker-compose up -d",
     "start:api": "wunderctl up --debug",
     "cleanup": "docker-compose down -v",
     "check": "tsc --noEmit"
