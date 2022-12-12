@@ -18,6 +18,7 @@ require (
 	github.com/go-cmd/cmd v1.4.1
 	github.com/go-redis/cache/v8 v8.4.1
 	github.com/go-redis/redis/v8 v8.10.0
+	github.com/gofrs/flock v0.8.1
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
@@ -129,7 +130,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/exp v0.0.0-20201221025956-e89b829e73ea // indirect
-	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
