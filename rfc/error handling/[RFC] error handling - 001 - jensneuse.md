@@ -48,8 +48,8 @@ The body will contain an error message that describes the problem in the followi
 
 ```json
 {
-  "Message": "Bad Request: Invalid input",
-  "Input": {
+  "message": "Bad Request: Invalid input",
+  "input": {
     "foo": "bar",
     "bar": [
       {
@@ -57,7 +57,7 @@ The body will contain an error message that describes the problem in the followi
       }
     ]
   },
-  "Errors": [
+  "errors": [
     {
       "propertyPath": "/bar/0/id",
       "invalidValue": true,
@@ -69,14 +69,21 @@ The body will contain an error message that describes the problem in the followi
 
 This allows the caller to easily understand what input WunderGraph extracted from the request and what the problem was.
 
-## Client implementations
+## Status Codes
 
 Clients need to be able to handle the following cases:
 
-- 200 & 304 => return the response, handle errors if the response contains errors
+- 200 & 304 => return the response
+- 206 => handle errors and (optional) partial response
 - 400 => handle the input validation error
 - 401 => handle the auth error
 - 404 => handle the host not found error
 - 500 => handle the internal server error
 - 503 => handle the misconfigured operation error
 - 504 => handle the timeout error
+
+## Client Implementations
+
+Clients need to be able to react to all different status codes.
+E.g. a client should handle GraphQL errors in the response when the response code is 206.
+If the status code is 400, the client needs to handle the validation errors object.
