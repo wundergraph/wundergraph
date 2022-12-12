@@ -1,5 +1,36 @@
 #!/bin/sh
 
+usage()
+{
+  echo "Usage: $0 [-u]" 1>&2
+  echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
+  echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
+  exit 2
+}
+
+update_package_json="no"
+
+args=`getopt uh $*`
+if test $? -ne 0; then
+    usage
+fi
+set -- $args
+
+while :; do
+    case "$1" in
+        -u)
+            update_package_json="yes"
+            shift
+        ;;
+        -h)
+            usage
+        ;;
+        --)
+            shift; break
+            ;;
+    esac
+done
+
 kill_with_children() {
     local pid=$1
     if children="`pgrep -P $pid`"; then
@@ -22,9 +53,13 @@ set -e
 # CI, but helps when testing locally
 rm -fr .wundergraph/generated .wundergraph/cache
 
-# Replace @wundergraph with workspace versions
-grep '@wundergraph' package.json | awk '{gsub(/"|:/, "", $1); print $1"@workspace"}'| xargs pnpm install
-pnpm install --no-frozen-lockfile
+# Replace @wundergraph dependencies with workspace
+if test ${update_package_json} == "yes"; then
+    sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' package.json
+    rm -fr package.json.bak
+
+    pnpm install
+fi
 
 docker_compose_yml=`find . -name docker-compose.yml`
 
@@ -50,11 +85,13 @@ fi
 # Generate WunderGraph files
 wunderctl generate
 
-# Run test if available, otherwise just type-check
+# Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
     pnpm test
-else
+elif grep -q '"check"' package.json; then
     pnpm check
+elif grep -q '"build"' package.json; then
+    pnpm build
 fi
 
 if test ! -z ${services_pid}; then
@@ -67,4 +104,6 @@ if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
 fi
 
 # Restore package.json
-git checkout -f package.json
+if test ${update_package_json} == "yes"; then
+    git checkout -f package.json
+fi
