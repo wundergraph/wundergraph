@@ -127,10 +127,10 @@ var rootCmd = &cobra.Command{
 
 			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
 
-			metricDurationName := telemetry.CmdDurationMetricName(cmdMetricName)
+			metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
 			cmdDurationMetric = telemetry.NewDurationMetric(metricDurationName)
 
-			metricUsageName := telemetry.CmdUsageMetricName(cmdMetricName)
+			metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
 			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
 			err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
