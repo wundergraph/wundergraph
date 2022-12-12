@@ -32,20 +32,13 @@ cd nextjs-todos
 Install dependencies and configure tailwindcss.
 
 ```typescript
-npm install @heroicons/react @tailwindcss/forms clsx framer-motion
+npm install @heroicons/react clsx framer-motion
 ```
 
-Next, configure tailwindcss.
-
-```js
-// postcss.config.js
-
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
+```typescript
+npm install -D tailwindcss postcss autoprefixer
+npm install @tailwindcss/forms
+npx tailwindcss init -p
 ```
 
 ```js
