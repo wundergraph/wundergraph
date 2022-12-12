@@ -14,6 +14,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/go-cmd/cmd"
@@ -63,6 +64,7 @@ type Engine struct {
 	queryEnginePath         string
 	introspectionEnginePath string
 	url                     string
+	cmd                     *exec.Cmd
 	cancel                  func()
 	client                  *http.Client
 	log                     *zap.Logger
@@ -238,18 +240,19 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	port := strconv.Itoa(freePort)
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel
-	cmd := exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
+	e.cmd = exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
 	// ensure that prisma starts with the dir set to the .wundergraph directory
 	// this is important for sqlite support as it's expected that the path of the sqlite file is the same
 	// (relative to the .wundergraph directory) during introspection and at runtime
-	cmd.Dir = e.wundergraphDir
-	cmd.Env = append(cmd.Env, "PRISMA_DML="+schema)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	e.cmd.Dir = e.wundergraphDir
+	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+	e.cmd.Stdout = os.Stdout
+	e.cmd.Stderr = os.Stderr
 	e.url = "http://localhost:" + port
-	go func() {
-		_ = cmd.Start()
-	}()
+	if err := e.cmd.Start(); err != nil {
+		e.StopQueryEngine()
+		return err
+	}
 	return nil
 }
 
@@ -299,6 +302,23 @@ func (e *Engine) StopQueryEngine() {
 		return
 	}
 	e.cancel()
+	exitCh := make(chan error, 1)
+	go func() {
+		exitCh <- e.cmd.Wait()
+	}()
+	const prismaExitTimeout = 5 * time.Second
+	select {
+	case <-exitCh:
+		// Ignore errors here, since killing the process with a signal
+		// will cause Wait() to return an error and there's no cross-platform
+		// way to tell it apart from an interesting failure
+	case <-time.After(prismaExitTimeout):
+		e.log.Warn(fmt.Sprintf("prisma didn't exit after %s, killing", prismaExitTimeout))
+		syscall.Kill(e.cmd.Process.Pid, syscall.SIGKILL)
+	}
+	close(exitCh)
+	e.cmd = nil
+	e.cancel = nil
 }
 
 func (e *Engine) WaitUntilReady(ctx context.Context) error {
