@@ -190,7 +190,7 @@ func FlushTelemetry() {
 	}
 }
 
-// wunderctlBinaryPath() returns the path to the currently executing parent wunderctl test
+// wunderctlBinaryPath() returns the path to the currently executing parent wunderctl
 // command which is then passed via wunderctlBinaryPathEnvKey to subprocesses. This
 // ensures than when the SDK calls back into wunderctl, the same copy is always used.
 func wunderctlBinaryPath() string {
