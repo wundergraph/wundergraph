@@ -1,10 +1,10 @@
 ---
-title: React Native
-pageTitle: WunderGraph - React Native
-description: WunderGraph is the easiest way to consume GraphQL APIs in React Native.
+title: Expo + SWR Example
+pageTitle: WunderGraph - Examples - Expo + SWR
+description:
 ---
 
-WunderGraph has official support for React Native. You can use the WunderGraph TypeScript client or SWR package to consume WunderGraph APIs in React Native.
+This example shows the bare minimum configuration to get WunderGraph up and running with React Native, using [Expo](https://expo.io/) and [SWR](https://swr.vercel.app/).
 
 ## Important
 
@@ -75,9 +75,38 @@ import { NativeEventSource, EventSourcePolyfill } from 'event-source-polyfill';
 global.EventSource = NativeEventSource || EventSourcePolyfill;
 ```
 
-## Examples of using React Native with WunderGraph
+## Data source configuration
 
-- [Expo + SWR example](/docs/examples/expo-swr)
+As the data source, we add a single API, the SpaceX GraphQL API in this case.
 
-If you've got any questions,
-please join our Discord Community and ask away.
+```typescript
+// wundergraph.config.ts
+
+const spaceX = introspect.graphql({
+  apiNamespace: 'spacex',
+  url: 'https://spacex-api.fly.dev/graphql/',
+})
+
+const myApplication = new Application({
+  name: 'app',
+  apis: [spaceX],
+})
+```
+
+## Operation configuration
+
+Next, we configure a simple Operation.
+
+```graphql
+# .wundergraph/operations/Dragons.graphql
+query Dragons {
+  spacex_dragons {
+    name
+    active
+  }
+}
+```
+
+## Running the application
+
+Now, we can run the application using `npm run start`, this will start WunderGraph and Expo. Use the Expo CLI to choose which device you want to run the app on.

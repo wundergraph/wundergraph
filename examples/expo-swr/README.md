@@ -1,12 +1,31 @@
----
-title: React Native
-pageTitle: WunderGraph - React Native
-description: WunderGraph is the easiest way to consume GraphQL APIs in React Native.
----
+# WunderGraph Expo Example
 
-WunderGraph has official support for React Native. You can use the WunderGraph TypeScript client or SWR package to consume WunderGraph APIs in React Native.
+This example shows the bare minimum configuration to get WunderGraph up and running with React Native, using Expo and SWR.
 
-## Important
+## Getting started
+
+```shell
+npm install && npm start
+```
+
+Use the Expo CLI to choose which device you want to run the app on.
+
+### Android Development
+
+In case you get a blank screen or errors out, chances are your device/emulator is not able to communicate with the node running on localhost:9991.
+To fix this run
+
+```bash
+adb reverse tcp:9991 tcp:9991
+```
+
+To undo
+
+```bash
+adb reverse --remove tcp:9991
+```
+
+## Important compatibility notes
 
 ### Package exports
 
@@ -14,9 +33,9 @@ React Native doesn't support the new Node.js exports field yet. Add this configu
 
 ```js
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require('expo/metro-config')
+const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(__dirname)
+const config = getDefaultConfig(__dirname);
 
 module.exports = {
   ...config,
@@ -25,25 +44,17 @@ module.exports = {
     resolveRequest: (context, moduleName, platform) => {
       // React Native doesn't support exports field in package.json, so we resolve it manually.
       if (moduleName.startsWith('@wundergraph/sdk/client')) {
-        return context.resolveRequest(
-          context,
-          '@wundergraph/sdk/dist/client',
-          platform
-        )
+        return context.resolveRequest(context, '@wundergraph/sdk/dist/client', platform);
       }
 
       if (moduleName.startsWith('@wundergraph/sdk/internal')) {
-        return context.resolveRequest(
-          context,
-          '@wundergraph/sdk/dist/internal',
-          platform
-        )
+        return context.resolveRequest(context, '@wundergraph/sdk/dist/internal', platform);
       }
 
-      return context.resolveRequest(context, moduleName, platform)
+      return context.resolveRequest(context, moduleName, platform);
     },
   },
-}
+};
 ```
 
 ### Fetch Api
@@ -74,10 +85,3 @@ And import it somewhere in your project, for example in `App.tsx`.
 import { NativeEventSource, EventSourcePolyfill } from 'event-source-polyfill';
 global.EventSource = NativeEventSource || EventSourcePolyfill;
 ```
-
-## Examples of using React Native with WunderGraph
-
-- [Expo + SWR example](/docs/examples/expo-swr)
-
-If you've got any questions,
-please join our Discord Community and ask away.

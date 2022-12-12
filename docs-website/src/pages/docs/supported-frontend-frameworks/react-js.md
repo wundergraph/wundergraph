@@ -7,17 +7,17 @@ description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQ
 WunderGraph has official support for React.js and Next.js.
 
 What's more, we're not just supporting React,
-but also integrate with state management libraries like swr and React Query / Tanstack Query.
+but also integrate with state management libraries like SWR and React Query / Tanstack Query.
 
 All WunderGraph React integrations are pluggable,
 and you're free to choose the integration that fits your needs best.
 You can stay very low level and just use the generated TypeScript client,
-or you use a higher level integration, like swr with NextJS and Server Side Rendering.
+or you use a higher level integration, like SWR with NextJS and Server Side Rendering.
 
 It's also possible to just use fetch and combine it with the generated TypeScript models.
 Have a look at the WunderGraph Protocol to learn more about using the JSON-RPC API directly.
 
-That said, the easiest way to use WunderGraph in React is by using the swr integration.
+That said, the easiest way to use WunderGraph in React is by using the SWR integration.
 
 Let's assume, we've defined a virtual Graph with a Weather API and defined an operation to get the current weather for a given city.
 Here's how the integration would look like.
@@ -46,7 +46,7 @@ query ($forCity: String!) {
 ```
 
 WunderGraph will automatically "compile" this Operation into a JSON-RPC API,
-and generate a TypeSafe swr hook for you,
+and generate a TypeSafe SWR hook for you,
 which we can call from our React component/Next.js page.
 
 ```typescript jsx
@@ -86,7 +86,7 @@ But in this case, we're simply using server-side polling to get the latest weath
 
 Note that although most of our examples use Next.js,
 you can also use WunderGraph in pure React.
-Have a look at the [swr integration](https://github.com/wundergraph/wundergraph/blob/main/packages/swr/README.md),
+Have a look at the [SWR integration](https://github.com/wundergraph/wundergraph/blob/main/packages/SWR/README.md),
 it does not depend on Next.js.
 You can use it with Vite, Create React App, or any other React project.
 
@@ -95,9 +95,10 @@ You can use it with Vite, Create React App, or any other React project.
 If you're interested in trying out WunderGraph with React,
 have a look at the following examples:
 
-- [NextJS + swr](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-swr)
-- [FaunaDB + NextJS](https://github.com/wundergraph/wundergraph/tree/main/examples/faunadb-nextjs)
-- [NextJS + PostgreSQL + Prisma](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-postgres-prisma)
+- [Next.js + SWR](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-SWR)
+- [Next.js + React Query](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-react-query)
+- [FaunaDB + Next.js](https://github.com/wundergraph/wundergraph/tree/main/examples/faunadb-nextjs)
+- [Next.js + PostgreSQL + Prisma](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-postgres-prisma)
 
 If you've got any questions,
 please join our Discord Community and ask away.
