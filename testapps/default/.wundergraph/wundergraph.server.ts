@@ -24,7 +24,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 	},
 	hooks: {
 		authentication: {
-			postAuthentication: async ({ user, internalClient }) => {},
+			postAuthentication: async ({ user }) => {},
 			mutatingPostAuthentication: async ({ user }) => {
 				return {
 					user: {
