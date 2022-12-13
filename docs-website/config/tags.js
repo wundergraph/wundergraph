@@ -272,6 +272,8 @@ const tags = {
 		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	WG_SERVER_PORT:
 		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_IN_MEMORY_CACHE:
+		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	'reach out to our Sales Team': 'https://wundergraph.com/contact/sales',
 	'Sales Team': 'https://wundergraph.com/contact/sales',
 	Sales: 'https://wundergraph.com/contact/sales',

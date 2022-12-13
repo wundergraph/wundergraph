@@ -2,12 +2,21 @@ package node
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"time"
+
+	"github.com/docker/go-units"
 
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
+)
+
+const (
+	defaultInMemoryCacheSize    = int64(128 * units.MB)
+	wgInMemoryCacheConfigEnvKey = "WG_IN_MEMORY_CACHE"
 )
 
 type Server struct {
@@ -45,6 +54,26 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds) * time.Second
 	}
 
+	var cacheConfig *wgpb.ApiCacheConfig
+	inMemoryCacheConfig := os.Getenv(wgInMemoryCacheConfigEnvKey)
+	if strings.ToLower(inMemoryCacheConfig) != "off" {
+		cacheSize := defaultInMemoryCacheSize
+		if inMemoryCacheConfig != "" {
+			cacheSize, err = units.RAMInBytes(inMemoryCacheConfig)
+			if err != nil {
+				return WunderNodeConfig{}, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
+			}
+		}
+		if cacheSize > 0 {
+			cacheConfig = &wgpb.ApiCacheConfig{
+				Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
+				InMemoryConfig: &wgpb.InMemoryCacheConfig{
+					MaxSize: cacheSize,
+				},
+			}
+		}
+	}
+
 	config := WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
@@ -56,14 +85,9 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 			InvalidOperationNames: graphConfig.Api.InvalidOperationNames,
 			CorsConfiguration:     graphConfig.Api.CorsConfiguration,
 			S3UploadConfiguration: graphConfig.Api.S3UploadConfiguration,
-			CacheConfig: &wgpb.ApiCacheConfig{
-				Kind: wgpb.ApiCacheKind_IN_MEMORY_CACHE,
-				InMemoryConfig: &wgpb.InMemoryCacheConfig{
-					MaxSize: 1e9,
-				},
-			},
-			AuthenticationConfig: graphConfig.Api.AuthenticationConfig,
-			Webhooks:             graphConfig.Api.Webhooks,
+			CacheConfig:           cacheConfig,
+			AuthenticationConfig:  graphConfig.Api.AuthenticationConfig,
+			Webhooks:              graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
 				ServerUrl:     loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
 				PublicNodeUrl: loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
