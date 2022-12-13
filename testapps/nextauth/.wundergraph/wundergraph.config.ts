@@ -30,7 +30,8 @@ configureWunderGraphApplication({
 		tokenBased: {
 			providers: [
 				{
-					userInfoEndpoint: 'http://localhost:3000/api/auth/session',
+					userInfoEndpoint: 'http://localhost:3000/api/auth/userInfo',
+					userInfoCacheTtlSeconds: 0,
 				},
 			],
 		},
