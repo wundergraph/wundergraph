@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         test: ${{ fromJson(needs.collect.outputs.matrix) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v3
