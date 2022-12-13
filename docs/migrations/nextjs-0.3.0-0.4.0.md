@@ -10,7 +10,7 @@ Next.js 0.4.0 has been fully rewritten and now uses SWR to manage client server 
 
 SWR is a new peer dependency of `@wundergraph/nextjs`, add it to your project.
 
-`npm i swr@^2.0.0-rc.0`
+`npm i swr@^2.0.0`
 
 ## Generated code
 
