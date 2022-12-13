@@ -54,7 +54,7 @@ set -e
 rm -fr .wundergraph/generated .wundergraph/cache
 
 # Replace @wundergraph dependencies with workspace
-if test ${update_package_json} == "yes"; then
+if test ${update_package_json} = "yes"; then
     sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' package.json
     rm -fr package.json.bak
 
@@ -67,7 +67,7 @@ docker_compose_yml=`find . -name docker-compose.yml`
 if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
     cd `dirname ${docker_compose_yml}` && docker-compose up -d && cd -
     # Wait for container services to start
-    sleep 5
+    sleep 1
 fi
 
 # Check for a script to bring up the required services
@@ -75,7 +75,7 @@ services_pid=
 if grep -q '"start:services"' package.json; then
     pnpm run start:services &
     services_pid=$!
-    sleep 5
+    sleep 1
 fi
 
 if grep -q '"setup"' package.json; then
@@ -104,6 +104,6 @@ if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
 fi
 
 # Restore package.json
-if test ${update_package_json} == "yes"; then
+if test ${update_package_json} = "yes"; then
     git checkout -f package.json
 fi
