@@ -55,6 +55,7 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "tsd": "^0.24.1",
+    "tsup": "^6.5.0",
     "typescript": "^4.8.2"
   },
   "homepage": "https://wundergraph.com",
@@ -66,8 +67,5 @@
     "react-query",
     "wundergraph",
     "react"
-  ],
-  "dependencies": {
-    "tsup": "^6.5.0"
-  }
+  ]
 }
