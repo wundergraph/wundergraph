@@ -3,6 +3,7 @@ export const handlebarTemplate = `
 import {
 	Client,
 	ClientConfig,
+	CreateClientConfig,
 	User,
 	UploadRequestOptions,
 	OperationMetadata,
@@ -61,8 +62,6 @@ export const operationMetadata: OperationMetadata = {
 {{/each}}
 }
 
-type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata'
-
 export class WunderGraphClient extends Client {
 	query<
 		OperationName extends Extract<keyof Operations['queries'], string>,
@@ -96,12 +95,12 @@ export class WunderGraphClient extends Client {
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
 	}
-	public async fetchUser<TUser extends User = User<UserRole>>(options: FetchUserRequestOptions) {
+	public async fetchUser<TUser extends User = User<UserRole>>(options?: FetchUserRequestOptions) {
 		return super.fetchUser<TUser>(options);
 	}
 }
 
-export const createClient = (config?: Partial<Omit<ClientConfig, PrivateConfigProperties>>) => {
+export const createClient = (config?: CreateClientConfig) => {
 	return new WunderGraphClient({
 		...defaultClientConfig,
 		...config,

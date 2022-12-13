@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/segmentio/ksuid"
 	"github.com/spf13/viper"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
@@ -18,13 +19,13 @@ import (
 var configDir string
 
 // InitConfig - Initialises config file for Viper
-func InitConfig() {
+func InitConfig(isTelemetryEnabled bool) {
 	if err := initConfigDir(); err != nil {
 		fmt.Println("Error accessing config directory at $HOME/.wundergraph", err)
 		return
 	}
 
-	initViper()
+	initViper(isTelemetryEnabled)
 }
 
 // ConfigDir - Returns Directory holding the Config file
@@ -56,12 +57,21 @@ func initConfigDir() error {
 	return nil
 }
 
-func initViper() {
+func initViper(isTelemetryEnabled bool) {
 	if err := loadConfig(); err != nil {
 		fmt.Println("Error loading config", err)
 	}
 
-	viper.SetEnvPrefix("WUNDERGRAPH")
+	// Init anonymous user id that is used to distinguish between different users
+	if isTelemetryEnabled && !viper.InConfig("anonymousID") {
+		viper.Set("anonymousID", ksuid.New().String())
+		allSettings := viper.AllSettings()
+		if err := SaveConfig(allSettings); err != nil {
+			log.Printf("Could not save config: %v\n", err)
+		}
+	}
+
+	viper.SetEnvPrefix("WG")
 	viper.AutomaticEnv()
 }
 
@@ -76,7 +86,7 @@ func loadConfig() error {
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			ioutil.WriteFile(ConfigFilePath(), []byte("{}"), 0600)
+			ioutil.WriteFile(ConfigFilePath(), []byte(`{}`), 0600)
 		} else {
 			log.Fatalf("could not read config: %v\n", err)
 		}
@@ -102,13 +112,9 @@ func SaveConfig(allSettings map[string]interface{}) error {
 	return ioutil.WriteFile(ConfigFilePath(), data, 0600)
 }
 
-var writeableConfigKeys = []string{"auth"}
+var writeableConfigKeys = []string{"auth", "anonymousid"}
 
 func persistConfigKey(key string) bool {
-	if viper.InConfig(key) {
-		return true
-	}
-
 	for _, k := range writeableConfigKeys {
 		if k == key || strings.HasPrefix(key, k+".") {
 			return true
