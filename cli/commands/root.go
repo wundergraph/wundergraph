@@ -207,15 +207,17 @@ func wunderctlBinaryPath() string {
 }
 
 func init() {
-	config.InitConfig(rootFlags.Telemetry)
+	isTelemetryEnabled := os.Getenv("WG_TELEMETRY_DISABLED") == ""
+	telemetryDebugEnabled := os.Getenv("WG_TELEMETRY_DEBUG") != ""
 
+	config.InitConfig(isTelemetryEnabled)
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
 
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
 	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", os.Getenv("WG_TELEMETRY_DISABLED") == "", "enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", os.Getenv("WG_TELEMETRY_DEBUG") != "", "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", isTelemetryEnabled, "enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", telemetryDebugEnabled, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
