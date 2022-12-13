@@ -30,6 +30,9 @@ var generateCmd = &cobra.Command{
  server start'. All files are stored to .wundergraph/generated. The local
  introspection cache has precedence. You can overwrite this behavior by passing
  --no-cache to the command`,
+	Annotations: map[string]string{
+		"telemetry": "true",
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
@@ -59,7 +62,6 @@ var generateCmd = &cobra.Command{
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				"WG_THROW_ON_OPERATION_LOADING_ERROR=true",
-				fmt.Sprintf("WUNDERGRAPH_PUBLISH_API=%t", generateAndPublish),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
