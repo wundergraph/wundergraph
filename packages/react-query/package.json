@@ -4,12 +4,20 @@
   "license": "Apache-2.0",
   "description": "WunderGraph React Query Integration",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsup src/index.ts --dts --format esm,cjs",
     "test": "jest && tsd"
   },
   "tsd": {
@@ -58,5 +66,8 @@
     "react-query",
     "wundergraph",
     "react"
-  ]
+  ],
+  "dependencies": {
+    "tsup": "^6.5.0"
+  }
 }
