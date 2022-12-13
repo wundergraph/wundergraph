@@ -20,6 +20,6 @@ describe('Test cross API joins', () => {
 				countryCode: 'ES',
 			},
 		});
-		expect(result.data?.country.capital).toBe('Madrid');
+		expect(result.data?.country?.[0].capital).toBe('Madrid');
 	});
 });
