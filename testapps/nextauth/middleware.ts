@@ -14,9 +14,11 @@ export function middleware(request: NextRequest) {
 		'http://localhost:9991'
 	);
 
-	const response = NextResponse.rewrite(url);
-
-	response.headers.set('Authorization', `Bearer ${token}`);
+	const response = NextResponse.rewrite(url, {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
 
 	return response;
 }
