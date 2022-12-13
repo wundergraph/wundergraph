@@ -457,6 +457,7 @@ importers:
       pg: ^8.7.3
       postgraphile: ^4.12.9
       typescript: ^4.8.2
+      zod: ^3.20.2
     dependencies:
       '@types/node': 14.18.33
       '@wundergraph/golang-client': link:../../packages/golang-client
@@ -466,6 +467,7 @@ importers:
       pg: 8.8.0
       postgraphile: 4.12.11
       typescript: 4.8.4
+      zod: 3.20.2
 
   testapps/mtls:
     specifiers:
@@ -14240,6 +14242,10 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
+
+  /zod/3.20.2:
+    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
+    dev: false
 
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
