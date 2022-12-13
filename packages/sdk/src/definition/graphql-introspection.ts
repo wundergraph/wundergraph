@@ -89,7 +89,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 				serviceSDL = loadFile(introspection.loadSchemaFromString);
 			} else {
 				if (!introspection.url) {
-					throw new Error('introspection URL is not defined');
+					throw new Error(`introspection URL is not defined for API ${introspection.apiNamespace}`);
 				}
 				serviceSDL = await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
 					apiNamespace: introspection.apiNamespace,
@@ -222,10 +222,10 @@ const introspectGraphQLAPI = async (
 
 	if (introspection.mTLS) {
 		if (!introspection.mTLS.key) {
-			throw new Error('introspection mTLS key is not defined');
+			throw new Error(`introspection mTLS key is not defined in API ${introspection.apiNamespace}`);
 		}
 		if (!introspection.mTLS.cert) {
-			throw new Error('introspection mTLS cert is not defined');
+			throw new Error(`introspection mTLS cert is not defined in API ${introspection.apiNamespace}`);
 		}
 		opts.httpsAgent = new https.Agent({
 			key: resolveVariable(introspection.mTLS.key),
@@ -237,7 +237,7 @@ const introspectGraphQLAPI = async (
 	let res: AxiosResponse | undefined;
 	try {
 		if (!introspection.url) {
-			throw new Error('introspection URL is not defined');
+			throw new Error(`introspection URL is not defined for API ${introspection.apiNamespace}`);
 		}
 		res = await Fetcher().post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
