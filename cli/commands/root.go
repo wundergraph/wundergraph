@@ -211,6 +211,8 @@ func init() {
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
 
 	config.InitConfig(!isTelemetryDisabled)
+
+	// Can be overwritten by WG_API_URL=<url> env variable
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
 
 	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
