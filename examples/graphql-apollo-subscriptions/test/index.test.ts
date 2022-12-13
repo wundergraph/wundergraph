@@ -1,36 +1,81 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import { ClientResponse } from '@wundergraph/sdk/client';
 import { ChatResponseData } from '../.wundergraph/generated/models';
-import fetch from 'node-fetch';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
-const wg = createTestServer({ fetch: fetch as any });
+beforeAll(async () => {});
 
-beforeAll(async () => {
-	await wg.start();
-});
-
-afterAll(async () => {
-	await wg.stop();
-});
+afterAll(async () => {});
 
 describe('test chat subscription', () => {
 	test('subscribeOnce', async () => {
-		let data: ChatResponseData | undefined;
-		const result = (await wg.client().subscribe(
-			{
-				operationName: 'Chat',
-				subscribeOnce: true,
-			},
-			(resp) => {
-				expect(resp.error).toBeFalsy();
-				data = resp.data;
-			}
-		)) as ClientResponse<ChatResponseData>;
+		const wg = createTestServer();
+		await wg.start();
+		try {
+			let data: ChatResponseData | undefined;
+			const result = (await wg.client().subscribe(
+				{
+					operationName: 'Chat',
+					subscribeOnce: true,
+				},
+				(resp) => {
+					expect(resp.error).toBeFalsy();
+					data = resp.data;
+				}
+			)) as ClientResponse<ChatResponseData>;
 
-		expect(result.error).toBeFalsy();
-		expect(result?.data?.chat_messageAdded.id.length).toBeGreaterThan(0);
-		expect(result.data?.chat_messageAdded.id).toBe(data?.chat_messageAdded.id);
-		expect(result.data?.chat_messageAdded.text).toBe(data?.chat_messageAdded.text);
+			expect(result.error).toBeFalsy();
+			expect(result?.data?.chat_messageAdded.id.length).toBeGreaterThan(0);
+			expect(result.data?.chat_messageAdded.id).toBe(data?.chat_messageAdded.id);
+			expect(result.data?.chat_messageAdded.text).toBe(data?.chat_messageAdded.text);
+		} finally {
+			await wg.stop();
+		}
+	});
+	test('subscribeMultiple', async () => {
+		const controller = new AbortController();
+		const doFetch = (req: any) => {
+			return fetch(req, {
+				signal: controller.signal,
+			});
+		};
+		const wg = createTestServer({ fetch: doFetch });
+		await wg.start();
+		try {
+			let data: ChatResponseData[] = [];
+			const subscription = wg.client().subscribe(
+				{
+					operationName: 'Chat',
+				},
+				(resp) => {
+					expect(resp.error).toBeFalsy();
+					if (resp.data) {
+						data.push(resp.data);
+					}
+				}
+			);
+
+			// Send an update
+			const helloWorld = 'Hello World!';
+			const payload = {
+				operationName: 'SendMessage',
+				query: `mutation SendMessage {post(roomName: "test", username: "me", text: "${helloWorld}") { id text } }`,
+			};
+			const headers = new Headers({ 'Content-Type': 'application/json' });
+			const resp = await fetch('http://localhost:8085/query', {
+				method: 'POST',
+				body: JSON.stringify(payload) as any,
+				headers: headers,
+			});
+			setTimeout(() => controller.abort(), 100);
+			try {
+				await subscription;
+			} catch (e: any) {}
+			expect(data.length).toBe(2);
+			expect(data[0].chat_messageAdded.text).not.toBe(helloWorld);
+			expect(data[1].chat_messageAdded.text).toBe(helloWorld);
+		} finally {
+			await wg.stop();
+		}
 	});
 });
