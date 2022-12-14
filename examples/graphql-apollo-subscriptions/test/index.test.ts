@@ -1,11 +1,8 @@
-import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
+
 import { ClientResponse } from '@wundergraph/sdk/client';
 import { ChatResponseData } from '../.wundergraph/generated/models';
 import { createTestServer } from '../.wundergraph/generated/testing';
-
-beforeAll(async () => {});
-
-afterAll(async () => {});
 
 describe('test chat subscription', () => {
 	test('subscribeOnce', async () => {
