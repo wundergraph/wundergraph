@@ -14,12 +14,12 @@ afterAll(async () => {
 	await wg.stop();
 });
 
-describe('test chat subscription', () => {
+describe('test counter subscription', () => {
 	test('subscribeOnce', async () => {
 		let data: CounterResponseData | undefined;
 		const result = (await wg.client().subscribe(
 			{
-				operationName: 'Chat',
+				operationName: 'Counter',
 				subscribeOnce: true,
 			},
 			(resp) => {
