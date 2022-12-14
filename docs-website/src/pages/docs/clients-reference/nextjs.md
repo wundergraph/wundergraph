@@ -9,7 +9,7 @@ The Next.js client uses [SWR](/docs/clients-reference/swr) under the hood.
 ## Installation
 
 ```bash
-npm i @wundergraph/nextjs swr@2.0.0-rc.0
+npm i @wundergraph/nextjs swr
 ```
 
 ## Configuration
