@@ -2,13 +2,14 @@
 
 usage()
 {
-  echo "Usage: $0 [-u]" 1>&2
+  echo "Usage: $0 [-u] [-p]" 1>&2
   echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
   echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
   exit 2
 }
 
 update_package_json="no"
+npm=npm
 
 args=`getopt uh $*`
 if test $? -ne 0; then
@@ -20,6 +21,10 @@ while :; do
     case "$1" in
         -u)
             update_package_json="yes"
+            shift
+        ;;
+        -p)
+            npm=pnpm
             shift
         ;;
         -h)
@@ -58,7 +63,11 @@ if test ${update_package_json} = "yes"; then
     sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' package.json
     rm -fr package.json.bak
 
-    pnpm install
+    ${npm} install
+fi
+
+if ! test -d node_modules; then
+    ${npm} install
 fi
 
 docker_compose_yml=`find . -name docker-compose.yml`
@@ -73,13 +82,13 @@ fi
 # Check for a script to bring up the required services
 services_pid=
 if grep -q '"start:services"' package.json; then
-    pnpm run start:services &
+    ${npm} run start:services &
     services_pid=$!
     sleep 1
 fi
 
 if grep -q '"setup"' package.json; then
-    pnpm run setup
+    ${npm} run setup
 fi
 
 # Generate WunderGraph files
@@ -87,11 +96,11 @@ wunderctl generate
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
-    pnpm test
+    ${npm} test
 elif grep -q '"check"' package.json; then
-    pnpm check
+    ${npm} check
 elif grep -q '"build"' package.json; then
-    pnpm build
+    ${npm} build
 fi
 
 if test ! -z ${services_pid}; then

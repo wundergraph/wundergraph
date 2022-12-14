@@ -1,5 +1,19 @@
 #!/bin/sh
 
+target=workspace
+single_args=
+
+case "$1" in
+    release)
+        target=release
+        single_args="-p"
+    ;;
+    *)
+        break
+    ;;
+esac
+
+
 set -e
 
 # These require 3rd party accounts
@@ -11,13 +25,15 @@ SKIP="${SKIP} nextjs-todos publish-install-api vite-swr"
 # Move to repo root
 cd `dirname ${0}`/../..
 
-# Add examples to workspace
-echo "  - 'examples/*'" >> pnpm-workspace.yaml
+if test ${target} = "workspace"; then
+    # Add examples to workspace
+    echo "  - 'examples/*'" >> pnpm-workspace.yaml
 
-# Replace dependencies with workspace
-find examples -name package.json -exec sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' {} \;
-find examples -name package.json.bak -exec rm {} \;
-pnpm install --no-frozen-lockfile
+    # Replace dependencies with workspace
+    find examples -name package.json -exec sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' {} \;
+    find examples -name package.json.bak -exec rm {} \;
+    pnpm install --no-frozen-lockfile
+fi
 
 # Move to repo root
 cd `dirname ${0}`/../..
@@ -34,13 +50,15 @@ for example in `ls -d */`; do
     fi
     echo Testing ${example}...
     cd ${example}
-    ../../scripts/test-examples/single.sh
+    ../../scripts/test-examples/single.sh ${single_args}
     cd ..
 done
 cd ..
 
-# Restore package.json files in examples
-find examples -name package.json | grep -v '\.next' | xargs git checkout
+if test ${target} = "workspace"; then
+    # Restore package.json files in examples
+    find examples -name package.json | grep -v '\.next' | xargs git checkout
 
-# Restore workspace and lockfile
-git checkout pnpm-workspace.yaml pnpm-lock.yaml
+    # Restore workspace and lockfile
+    git checkout pnpm-workspace.yaml pnpm-lock.yaml
+fi

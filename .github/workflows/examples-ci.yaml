@@ -1,13 +1,25 @@
 name: Examples CI
 on:
-  push:
-    branches:
-      - main
-      - next
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: Run against
+        required: true
+        options:
+          - workspace
+          - release
   pull_request:
     branches:
       - main
       - next
+    paths:
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/node/action.yaml'
+      - '.github/workflows/examples-ci.yaml'
+      - 'examples/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
