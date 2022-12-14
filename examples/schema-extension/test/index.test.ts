@@ -17,6 +17,7 @@ describe('Test Users API', () => {
 		const result = await wg.client().query({
 			operationName: 'Users',
 		});
-		expect(result.data?.db_findFirstusers.name).toBe('Jens@WunderGraph');
+		expect(result.error).toBeFalsy();
+		expect(result.data?.db_findFirstusers?.name).toBe('Jens@WunderGraph');
 	});
 });
