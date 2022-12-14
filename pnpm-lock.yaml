@@ -198,7 +198,7 @@ importers:
       react: 18.2.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
-      swr: ^2.0.0-rc.0
+      swr: ^2.0.0
       typescript: ^4.8.2
     dependencies:
       '@wundergraph/protobuf': link:../protobuf
@@ -224,7 +224,7 @@ importers:
       node-fetch: 2.6.7
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      swr: 2.0.0-rc.0_react@18.2.0
+      swr: 2.0.0_react@18.2.0
       typescript: 4.8.4
 
   packages/protobuf:
@@ -399,7 +399,7 @@ importers:
       react: 18.2.0
       react-dom: ^18.1.0
       react-ssr-prepass: ^1.5.0
-      swr: ^2.0.0-rc.0
+      swr: ^2.0.0
       tsd: ^0.24.1
       typescript: ^4.8.2
     dependencies:
@@ -420,7 +420,7 @@ importers:
       node-fetch: 2.6.7
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      swr: 2.0.0-rc.0_react@18.2.0
+      swr: 2.0.0_react@18.2.0
       tsd: 0.24.1
       typescript: 4.8.4
 
@@ -506,7 +506,7 @@ importers:
       open-cli: ^7.0.1
       react: 18.2.0
       react-dom: ^18.1.0
-      swr: ^2.0.0-rc.0
+      swr: ^2.0.0
       typescript: ^4.8.2
       wait-on: ^6.0.0
     dependencies:
@@ -519,7 +519,7 @@ importers:
       next: 12.3.2_biqbaboplfbrettd7655fr4n2y
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      swr: 2.0.0-rc.0_react@18.2.0
+      swr: 2.0.0_react@18.2.0
     devDependencies:
       '@types/node': 17.0.45
       '@types/react': 18.0.24
@@ -557,7 +557,7 @@ importers:
       react: 18.2.0
       react-dom: ^18.1.0
       react-router-dom: ^6.4.3
-      swr: ^2.0.0-rc.0
+      swr: ^2.0.0
       typescript: ^4.6.4
       vite: ^3.0.0
       wait-on: ^6.0.0
@@ -566,7 +566,7 @@ importers:
       '@wundergraph/swr': link:../../packages/swr
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
-      swr: 2.0.0-rc.0_react@18.2.0
+      swr: 2.0.0_react@18.2.0
     devDependencies:
       '@types/react': 18.0.24
       '@types/react-dom': 18.0.8
@@ -13219,8 +13219,8 @@ packages:
       - encoding
     dev: false
 
-  /swr/2.0.0-rc.0_react@18.2.0:
-    resolution: {integrity: sha512-QOp+4Cqnb/uuLKeuRDh7aT+ws6wSWWKPqfyIpBXK8DM3IugOYeLO5v+390I0p1MIfRd0CQlAIJZBEgmHaTfDuA==}
+  /swr/2.0.0_react@18.2.0:
+    resolution: {integrity: sha512-IhUx5yPkX+Fut3h0SqZycnaNLXLXsb2ECFq0Y29cxnK7d8r7auY2JWNbCW3IX+EqXUg3rwNJFlhrw5Ye/b6k7w==}
     engines: {pnpm: '7'}
     peerDependencies:
       react: ^16.11.0 || ^17.0.0 || ^18.0.0
