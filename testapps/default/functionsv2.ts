@@ -25,14 +25,6 @@ class Builder<Input, Response> {
 		builder._handler = handler;
 		return builder;
 	}
-
-	public build() {
-		return {
-			type: this.type,
-			input: this.inputSchema,
-			handler: this._handler,
-		};
-	}
 }
 
 type ExtractInput<B> = B extends Builder<infer T, any> ? T : never;
