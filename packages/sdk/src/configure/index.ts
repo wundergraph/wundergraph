@@ -49,7 +49,6 @@ import path from 'path';
 import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
 import { wunderctlExec } from '../wunderctlexec';
-import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
@@ -232,6 +231,7 @@ export interface ResolvedApplication {
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
+	InvalidOperationNames: string[];
 	CorsConfiguration: CorsConfiguration;
 	S3UploadProvider: S3Provider;
 }
@@ -584,6 +584,7 @@ const resolveApplications = async (
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
+		InvalidOperationNames: [],
 		CorsConfiguration: cors,
 		S3UploadProvider: s3,
 	});
@@ -654,12 +655,14 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				});
 			}
 
-			const operationsContent = loadOperations(schemaFileName);
+			const loadedOperations = loadOperations(schemaFileName);
+			const operationsContent = loadedOperations.content;
 			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
 				keepFromClaimVariables: false,
 				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
 			});
 			app.Operations = operations.operations;
+			app.InvalidOperationNames = loadedOperations.invalidOperationNames;
 			if (app.Operations && config.operations !== undefined) {
 				app.Operations = app.Operations.map((op) => {
 					const cfg = config.operations!;
@@ -969,6 +972,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		api: {
 			enableGraphqlEndpoint: false,
 			operations: operations,
+			invalidOperationNames: config.application.InvalidOperationNames,
 			engineConfiguration: {
 				defaultFlushInterval: config.application.EngineConfiguration.DefaultFlushInterval,
 				graphqlSchema: config.application.EngineConfiguration.Schema,
@@ -1087,157 +1091,6 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	}
 
 	return out;
-};
-
-export interface PublishConfiguration {
-	organization: string;
-	name: string;
-	apis: Promise<Api<any>>[];
-	isPublic: boolean;
-	repositoryUrl?: string;
-	shortDescription: string;
-	markdownDescriptionFile?: string;
-	keywords: string[];
-}
-
-export interface PublishResult {
-	organization: string;
-	name: string;
-	shortDescription: string;
-	markdownDescription: string;
-	isPublic: boolean;
-	keywords: string[];
-	definition: Api<any>;
-	repositoryUrl: string;
-	sdkVersion: string;
-	placeholders: PublishConfigurationPlaceholder[];
-}
-
-interface PublishConfigurationPlaceholder {
-	name: string;
-	optional: boolean;
-}
-
-export const configurePublishWunderGraphAPI = (configuration: PublishConfiguration) => {
-	const outFile = path.join('generated', `${configuration.organization}.${configuration.name}.api.json`);
-	_configurePublishWunderGraphAPI(configuration, outFile)
-		.then(() => {
-			Logger.info(
-				colors.blue(`${configuration.organization}/${configuration.name} API configuration written to ${outFile}`)
-			);
-			if (process.env.WUNDERGRAPH_PUBLISH_API === 'true') {
-				try {
-					const result = wunderctlExec({
-						cmd: ['publish', configuration.organization + '/' + configuration.name],
-						timeout: 1000 * 5,
-					});
-					if (result?.failed) {
-						Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
-					}
-				} catch (e) {
-					Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
-				}
-			} else {
-				Logger.info(colors.blue(`You can now publish the API using the following command:`));
-				Logger.info(colors.green(`wunderctl publish ${configuration.organization}/${configuration.name}`));
-			}
-		})
-		.catch((err) => {
-			Logger.error(`Failed to create publish configuration for ${configuration.organization}/${configuration.name}`);
-			Logger.error(err);
-		});
-};
-
-const _configurePublishWunderGraphAPI = async (configuration: PublishConfiguration, outFile: string) => {
-	const resolvedApis = await Promise.all(configuration.apis);
-	const merged = mergeApis([], ...resolvedApis);
-	const markdownDescription = configuration.markdownDescriptionFile
-		? fs.readFileSync(configuration.markdownDescriptionFile, 'utf-8')
-		: '';
-	const out: PublishResult = {
-		organization: configuration.organization,
-		name: configuration.name,
-		keywords: configuration.keywords,
-		shortDescription: configuration.shortDescription || '',
-		markdownDescription,
-		isPublic: configuration.isPublic,
-		repositoryUrl: configuration.repositoryUrl || '',
-		sdkVersion: SDK_VERSION,
-		definition: merged,
-		placeholders: [],
-	};
-	merged.Schema = removeBaseSchema(merged.Schema);
-	merged.Schema = stripIgnoredCharacters(merged.Schema);
-	merged.DataSources = merged.DataSources.filter(
-		(ds) =>
-			!(
-				ds.Kind === DataSourceKind.STATIC &&
-				ds.RootNodes.length === 1 &&
-				ds.RootNodes[0].fieldNames.length === 1 &&
-				ds.RootNodes[0].fieldNames[0] === '_join'
-			)
-	);
-	merged.Fields = merged.Fields.filter((field) => !(field.fieldName === '_join'));
-	const printed = JSON.stringify(out, (key, value) => {
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).placeholderVariableName !== undefined
-		) {
-			out.placeholders.push({
-				name: (value as ConfigurationVariable).placeholderVariableName,
-				optional: false,
-			});
-		}
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).environmentVariableName !== undefined
-		) {
-			out.placeholders.push({
-				name: (value as ConfigurationVariable).environmentVariableName,
-				optional: true,
-			});
-		}
-		return value;
-	});
-	fs.writeFileSync(outFile, printed);
-};
-
-export const parsePublishResultWithVariables = (raw: string, variables: { [key: string]: string }): PublishResult => {
-	return JSON.parse(raw, (key, value) => {
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).environmentVariableName !== undefined
-		) {
-			if (variables[(value as ConfigurationVariable).environmentVariableName] !== undefined) {
-				return mapInputVariable(variables[(value as ConfigurationVariable).environmentVariableName]);
-			}
-		}
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).placeholderVariableName !== undefined
-		) {
-			if (variables[(value as ConfigurationVariable).placeholderVariableName] !== undefined) {
-				return mapInputVariable(variables[(value as ConfigurationVariable).placeholderVariableName]);
-			}
-		}
-		return value;
-	});
-};
-
-export const resolveIntegration = (
-	rawApi: string,
-	variables: { [key: string]: string },
-	apiNamespace?: string
-): Promise<Api<any>> => {
-	let published: PublishResult = parsePublishResultWithVariables(rawApi, variables);
-	if (apiNamespace) {
-		return Promise.resolve(applyNamespaceToApi(published.definition, apiNamespace, []));
-	}
-	return Promise.resolve(published.definition);
 };
 
 export const customGqlServerMountPath = (name: string): string => {

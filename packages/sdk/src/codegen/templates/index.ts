@@ -16,6 +16,7 @@ import { AuthenticationProviderConfiguration } from './markdown/authentication';
 import { WunderGraphWebhooksPlugin } from './typescript/webhooks';
 import { TypeScriptClient } from './typescript/client';
 import { TypeScriptLegacyWebClient } from './typescript/web.client';
+import { TypeScriptTesting } from './typescript/testing';
 
 const typescriptModels = [
 	new TypeScriptInputModels(),
@@ -32,6 +33,9 @@ const typescriptAll = [
 	new WunderGraphWebhooksPlugin(),
 	new Operations(),
 	new JsonSchema(),
+	new TypeScriptClient(),
+	new TypeScriptLinkBuilder(),
+	new TypeScriptTesting(),
 ];
 
 const templates = {
@@ -41,6 +45,7 @@ const templates = {
 		inputModels: new TypeScriptInputModels(),
 		responseModels: new TypeScriptResponseModels(),
 		client: new TypeScriptClient(),
+		testing: new TypeScriptTesting(),
 		all: [...typescriptAll, new AuthenticationProviderConfiguration()],
 		fastifyServer: new WunderGraphServer(),
 		fastifyHooksPlugin: new WunderGraphHooksPlugin(),

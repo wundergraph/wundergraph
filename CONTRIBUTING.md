@@ -39,6 +39,17 @@ This command will install the necessary dependencies for the WunderGraph reposit
 make
 ```
 
+### Use your local wunderctl binary if you test SDK changes
+
+Before you run any testapp, you need to ensure that you use your local wunderctl binary. This is necessary because the examples are using the downloaded wunderctl binary from GithHub.
+
+```bash
+# Install the wunderctl binary in your GOBIN.
+make install
+# Set this environment variable to use your local wunderctl binary.
+WUNDERCTL_BINARY_PATH="$(which wunderctl)"
+```
+
 ### Run the tests
 
 This command will run all Go and NPM tests.

@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.123.2",
+  "version": "0.124.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -10,6 +10,10 @@
     "./client": {
       "types": "./dist/client/index.d.ts",
       "default": "./dist/client/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
     },
     "./internal": {
       "types": "./dist/internal/index.d.ts",
@@ -28,6 +32,9 @@
     "*": {
       "client": [
         "./dist/client"
+      ],
+      "testing": [
+        "./dist/testing"
       ],
       "internal": [
         "./dist/internal"
@@ -63,19 +70,21 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "tsd": {
-    "directory": "test-d"
+    "directory": "./test-d",
+    "compilerOptions": {
+      "typeRoots": []
+    }
   },
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest",
+    "test": "jest && tsd",
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.22",
-    "@types/colors": "^1.2.1",
     "@types/cors": "^2.8.10",
     "@types/debug": "^4.1.7",
     "@types/jest": "^28.1.1",
@@ -90,6 +99,7 @@
     "nock": "^13.2.9",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.1",
+    "tsd": "^0.24.1",
     "typescript": "^4.8.2"
   },
   "dependencies": {
@@ -97,12 +107,11 @@
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
-    "@wundergraph/protobuf": "workspace:^0.99.0",
-    "@wundergraph/wunderctl": "workspace:>=0.118.1",
+    "@wundergraph/protobuf": "workspace:^0.100.0",
+    "@wundergraph/wunderctl": "workspace:>=0.119.1",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
-    "colors": "^1.4.0",
     "execa": "5.1.1",
     "fastify": "^4.9.2",
     "fastify-plugin": "^4.3.0",
@@ -120,7 +129,8 @@
     "postman-collection": "^4.1.1",
     "prettier": "^2.7.1",
     "protobufjs": "^6.11.2",
-    "swagger2openapi": "^7.0.8"
+    "swagger2openapi": "^7.0.8",
+    "ts-retry-promise": "^0.7.0"
   },
   "jest": {
     "preset": "ts-jest",

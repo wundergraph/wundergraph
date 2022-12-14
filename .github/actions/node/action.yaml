@@ -18,14 +18,14 @@ runs:
   steps:
     - uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: ${{ inputs.node-version }}
 
     - name: Install Protoc
       uses: abelfodil/protoc-action@v1
       with:
         protoc-version: '21.5'
 
-    - uses: pnpm/action-setup@v2.2.2
+    - uses: pnpm/action-setup@v2.2.4
       id: pnpm-install
       with:
         version: 7.9.0
@@ -35,7 +35,7 @@ runs:
       shell: bash
       id: pnpm-cache
       run: |
-        echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+        echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
     - uses: actions/cache@v3
       name: Setup pnpm cache

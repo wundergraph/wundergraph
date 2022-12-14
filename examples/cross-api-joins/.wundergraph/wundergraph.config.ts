@@ -1,17 +1,10 @@
-import {
-	configurePublishWunderGraphAPI,
-	configureWunderGraphApplication,
-	cors,
-	EnvironmentVariable,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 const countries = introspect.graphql({
@@ -29,8 +22,6 @@ configureWunderGraphApplication({
 			templates: [
 				// use all the typescript react templates to generate a client
 				...templates.typescript.all,
-				templates.typescript.operations,
-				templates.typescript.linkBuilder,
 			],
 			// create-react-app expects all code to be inside /src
 			// path: "../frontend/src/generated",

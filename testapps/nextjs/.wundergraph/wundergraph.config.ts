@@ -13,7 +13,7 @@ import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 /*const jsonPlaceholder = introspect.openApi({
@@ -144,11 +144,7 @@ configureWunderGraphApplication({
 	],
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
-		},
-		{
-			templates: [templates.typescript.client],
-			path: '../components/generated',
+			templates: [...templates.typescript.all],
 		},
 		{
 			templates: [new NextJsTemplate()],
