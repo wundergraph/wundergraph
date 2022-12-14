@@ -1,13 +1,13 @@
 {
-  "Errors": [
+  "errors": [
     {
       "invalidValue": true,
       "message": "type should be one of: number,null, got boolean",
       "propertyPath": "/first"
     }
   ],
-  "Input": {
+  "input": {
     "first": true
   },
-  "Message": "Bad Request: Invalid input"
+  "message": "Bad Request: Invalid input"
 }
