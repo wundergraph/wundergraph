@@ -9,7 +9,7 @@ usage()
 }
 
 update_package_json="no"
-npm=npm
+npm=pnpm
 
 args=`getopt uh $*`
 if test $? -ne 0; then
@@ -24,7 +24,7 @@ while :; do
             shift
         ;;
         -p)
-            npm=pnpm
+            npm=npm
             shift
         ;;
         -h)
@@ -98,9 +98,9 @@ wunderctl generate
 if grep -q '"test"' package.json; then
     ${npm} test
 elif grep -q '"check"' package.json; then
-    ${npm} check
+    ${npm} run check
 elif grep -q '"build"' package.json; then
-    ${npm} build
+    ${npm} run build
 fi
 
 if test ! -z ${services_pid}; then
