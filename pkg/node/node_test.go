@@ -127,7 +127,7 @@ func TestNode(t *testing.T) {
 			},
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
@@ -276,7 +276,7 @@ func TestInMemoryCache(t *testing.T) {
 			},
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
@@ -383,7 +383,7 @@ func TestWebHooks(t *testing.T) {
 			Options: &apihandler.Options{
 				ServerUrl: testServer.URL,
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
@@ -479,7 +479,7 @@ func BenchmarkNode(t *testing.B) {
 			},
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},

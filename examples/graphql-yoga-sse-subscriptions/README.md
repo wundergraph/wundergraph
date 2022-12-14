@@ -5,7 +5,7 @@
 ```typescript
 const counter = introspect.graphql({
   apiNamespace: 'counter',
-  url: 'http://127.0.0.1:4000/graphql',
+  url: 'http://localhost:4000/graphql',
   subscriptionsUseSSE: true,
 });
 ```
