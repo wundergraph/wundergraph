@@ -6,6 +6,7 @@
     "moduleResolution": "node",
     "declarationDir": "./dist",
     "jsx": "react",
+    "incremental": false,
     "outDir": "./dist"
   },
   "include": ["src/**/*", "tests"],
