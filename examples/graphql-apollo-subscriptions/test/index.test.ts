@@ -62,16 +62,20 @@ describe('test chat subscription', () => {
 				query: `mutation SendMessage {post(roomName: "test", username: "me", text: "${helloWorld}") { id text } }`,
 			};
 			const headers = new Headers({ 'Content-Type': 'application/json' });
-			const resp = await fetch('http://localhost:8085/query', {
-				method: 'POST',
-				body: JSON.stringify(payload) as any,
-				headers: headers,
-			});
-			setTimeout(() => controller.abort(), 100);
+			for (let ii = 0; ii < 10; ii++) {
+				const resp = await fetch('http://localhost:8085/query', {
+					method: 'POST',
+					body: JSON.stringify(payload) as any,
+					headers: headers,
+				});
+				await resp.text();
+				await new Promise((resolve) => setTimeout(resolve, 100));
+			}
+			setTimeout(() => controller.abort(), 500);
 			try {
 				await subscription;
 			} catch (e: any) {}
-			expect(data.length).toBe(2);
+			expect(data.length).toBeGreaterThan(1);
 			expect(data[0].chat_messageAdded.text).not.toBe(helloWorld);
 			expect(data[1].chat_messageAdded.text).toBe(helloWorld);
 		} finally {
