@@ -17,12 +17,14 @@ describe('Test users and messages API', () => {
 		const result = await wg.client().query({
 			operationName: 'Users',
 		});
-		expect(result.data?.db_findFirstusers.name).toBe('Jens@WunderGraph');
+		expect(result.error).toBeFalsy();
+		expect(result.data?.db_findFirstusers?.name).toBe('Jens@WunderGraph');
 	});
 	test('messages', async () => {
 		const result = await wg.client().query({
 			operationName: 'Messages',
 		});
+		expect(result.error).toBeFalsy();
 		expect(result.data?.db_findManymessages.length).toBe(3);
 	});
 });
