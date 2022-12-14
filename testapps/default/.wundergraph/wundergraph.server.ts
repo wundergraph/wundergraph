@@ -111,7 +111,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 			serverName: 'sdl',
 			schema: buildSchema(`
                 type Query {
-                    sdlField: String!
+                    sdlField(sdl: String!): String!
                 }
                 type Mutation {
                     setSdlField(sdl: String!): String!
@@ -119,7 +119,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
             `),
 			customResolverFactory: async (ctx) => {
 				return {
-					sdlField: () => 'Hello World',
+					sdlField: (args: any) => 'Hello, ' + args.sdl,
 					setSdlField: (args: any) => 'Hello, ' + args.sdl,
 				};
 			},
