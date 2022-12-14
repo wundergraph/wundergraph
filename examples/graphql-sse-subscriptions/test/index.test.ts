@@ -14,12 +14,12 @@ afterAll(async () => {
 	await wg.stop();
 });
 
-describe('test chat subscription', () => {
+describe('test sse subscription', () => {
 	test('subscribeOnce', async () => {
 		let data: SseResponseData | undefined;
 		const result = (await wg.client().subscribe(
 			{
-				operationName: 'Chat',
+				operationName: 'Sse',
 				subscribeOnce: true,
 			},
 			(resp) => {
@@ -27,7 +27,6 @@ describe('test chat subscription', () => {
 				data = resp.data;
 			}
 		)) as ClientResponse<SseResponseData>;
-
 		expect(result.error).toBeFalsy();
 		expect(result.data?.sse_greetings).toBe(data?.sse_greetings);
 	});
