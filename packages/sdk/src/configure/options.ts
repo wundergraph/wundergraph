@@ -16,7 +16,7 @@ export enum WgEnv {
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
 
-const defaultHost = '127.0.0.1';
+const defaultHost = 'localhost';
 const defaultNodePort = '9991';
 const defaultServerPort = '9992';
 
