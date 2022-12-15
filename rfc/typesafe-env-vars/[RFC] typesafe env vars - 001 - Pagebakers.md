@@ -23,7 +23,7 @@ A new `wundergraph.env.ts` configuration where all available environment variabl
 import { z } from 'zod';
 import { configureEnv } from '@wundergraph/sdk';
 
-const schema = z.object({
+export const schema = z.object({
 	NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 	OAUTH_CLIENT_ID: z.string().describe('OAuth Client ID'),
 	SQLITE_DB: z.string().optional(),
