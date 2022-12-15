@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.125.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.124.1...@wundergraph/sdk@0.125.0) (2022-12-14)
+
+### Features
+
+* add WunderGraph testing library ([#345](https://github.com/wundergraph/wundergraph/issues/345)) ([13d47b5](https://github.com/wundergraph/wundergraph/commit/13d47b50e7f54dba1c6f7188204c285d8de523c4)) (@fiam)
+* implement telemetry ([#424](https://github.com/wundergraph/wundergraph/issues/424)) ([8cd3d29](https://github.com/wundergraph/wundergraph/commit/8cd3d299e39afcd0bce6c1e6c2459e268a09af7b)) (@StarpTech)
+
+### Bug Fixes
+
+* nextjs-swr example ([#434](https://github.com/wundergraph/wundergraph/issues/434)) ([0cae074](https://github.com/wundergraph/wundergraph/commit/0cae0746a0dc36a8a5f8514e4c078363afab3b94)) (@fiam)
+
 ## [0.124.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.124.0...@wundergraph/sdk@0.124.1) (2022-12-08)
 
 **Note:** Version bump only for package @wundergraph/sdk

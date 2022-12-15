@@ -9,7 +9,7 @@ WunderGraph codegen template plugin to add deep Next.js integration.
 ## Getting Started
 
 ```shell
-npm install @wundergraph/nextjs swr@2.0.0-rc.0
+npm install @wundergraph/nextjs swr
 ```
 
 ### 1. Register the codegen template

@@ -14,11 +14,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.124.1",
+    "@wundergraph/sdk": "^0.125.0",
     "@wundergraph/swr": "^0.5.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "swr": "^2.0.0-rc.3"
+    "swr": "^2.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.15",
