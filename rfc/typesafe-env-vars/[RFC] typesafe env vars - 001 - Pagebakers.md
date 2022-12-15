@@ -23,7 +23,7 @@ A new `wundergraph.env.ts` configuration where all available environment variabl
 import { z } from 'zod';
 import { configureEnv } from '@wundergraph/sdk';
 
-export const schema = z.object({
+const schema = z.object({
 	NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 	OAUTH_CLIENT_ID: z.string().describe('OAuth Client ID'),
 	SQLITE_DB: z.string().optional(),
@@ -34,14 +34,16 @@ export default configureEnv(schema);
 
 configureEnvironment accepts any schema definition that supports a `safeParse` method. It parses `process.env` and adds the configured variables to the return object. If a required env var is missing the validator will throw an error and the WunderNode will fail to run on production, and will be in error state in dev mode, untill the variable has been configured.
 
-There is no difference between build/runtime variables. We make sure process.env is setup with WG defaults (like cookie secrets) before running validation. 
+There is no difference between build/runtime variables. We make sure process.env is setup with WG defaults (like cookie secrets) before running validation.
+
+configureEnv returns the parsed schema (in JSON Schema format) and the env object. The parsed schema is used for validation in the WunderNode, but we'll also use it in the Cloud to prefill environment variables int the project settings.
 
 ### Usage
 
 Instead of using `process.env.VAR` we now have typesafe access to our environment variables like so;
 
 ```ts
-import env from '.wundergraph/wundergraph.env';
+import { env } from '.wundergraph/wundergraph.env';
 
 env.WG_NODE_URL; // http://localhost:9991
 env.OAUTH_CLIENT_ID;
