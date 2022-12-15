@@ -32,18 +32,9 @@ const schema = z.object({
 export default configureEnv(schema);
 ```
 
-configureEnvironment accepts any schema definition that supports a `safeParse` method. It parses `process.env` and also adds the built-in WG\_ variables to the object. If a required env var is missing the validator will throw an error and the WunderNode will fail to run on production, and will be in error state in dev mode, untill the variable has been configured.
+configureEnvironment accepts any schema definition that supports a `safeParse` method. It parses `process.env` and adds the configured variables to the return object. If a required env var is missing the validator will throw an error and the WunderNode will fail to run on production, and will be in error state in dev mode, untill the variable has been configured.
 
-| Variable name        | Description                                             | Default value           |
-| -------------------- | ------------------------------------------------------- | ----------------------- |
-| `WG_LOG_LEVEL`       | The log level of the `WunderNode`/`WunderGraph Server`. | `info`                  |
-| `WG_NODE_URL`        | The internal URL of the `WunderNode`.                   | `http://localhost:9991` |
-| `WG_PUBLIC_NODE_URL` | The publicly available URL of the `WunderNode`.         | `http://localhost:9991` |
-| `WG_NODE_HOST`       | The host of the `WunderNode`.                           | `127.0.0.1`             |
-| `WG_NODE_PORT`       | The port of the `WunderNode`.                           | `9991`                  |
-| `WG_SERVER_URL`      | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
-| `WG_SERVER_HOST`     | The host of the `WunderGraph Server`.                   | `127.0.0.1`             |
-| `WG_SERVER_PORT`     | The port of the `WunderGraph Server`.                   | `9992`                  |
+There is no difference between build/runtime variables. We make sure process.env is setup with WG defaults (like cookie secrets) before running validation. 
 
 ### Usage
 
@@ -66,14 +57,14 @@ When the config is generated we also generate a type declaration for `Environmen
 declare global {
     interface WundergraphEnv {
       NODE_ENV: 'development' | 'production';
-      WG_SERVER_PORT?: string;
       OAUTH_CLIENT_ID: string;
+      [key: string]: string // we need this because there might be untyped variables available like the WG_ variables.
     }
 }
 ```
 
 ```ts
-new EnvironmentVariable('WG_SERVER_PORT')
+new EnvironmentVariable('OAUTH_CLIENT_ID')
 ```
 
 ### configureEnv
@@ -96,7 +87,3 @@ const configureEnv = (schema: AnySchema) => {
 	};
 };
 ```
-
-### Questions
-
-Should we also support defining client side variables? (And NEXT_PUBLIC support?), and throwing errors when server ENV is accessed client side?
