@@ -785,14 +785,15 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
 		if err != nil {
-			requestLogger.Error("prepare plan failed", zap.Error(err))
+			requestLogger.Error("prepare plan failed", zap.Error(shared.Report))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
 
 	if len(prepared.variables) != 0 {
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
+		// we have to merge query variables into extracted variables to been able to override default values
+		shared.Ctx.Variables = MergeJsonRightIntoLeft(prepared.variables, shared.Ctx.Variables)
 	}
 
 	switch p := prepared.preparedPlan.(type) {
@@ -1096,7 +1097,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1531,7 +1532,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1680,7 +1681,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
