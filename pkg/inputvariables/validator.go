@@ -3,8 +3,9 @@ package inputvariables
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/qri-io/jsonschema"
 )
@@ -26,43 +27,58 @@ func NewValidator(schema string, disableVerboseErrors bool) (*Validator, error) 
 	return &validator, nil
 }
 
-type ValidationError struct {
-	Message string
-	Input   json.RawMessage
-	Errors  []jsonschema.KeyError
+type jsonError struct {
+	Message string `json:"message"`
 }
 
-func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Writer) (valid bool) {
+func (e *jsonError) Error() string {
+	return e.Message
+}
+
+type ValidationError struct {
+	Message string          `json:"message,omitempty"`
+	Input   json.RawMessage `json:"input,omitempty"`
+	Errors  []error         `json:"errors,omitempty"`
+}
+
+func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Writer) (valid bool, err error) {
 	errs, err := v.schema.ValidateBytes(ctx, variables)
 	if err == nil && len(errs) == 0 {
-		return true
+		return true, nil
 	}
 	if v.disableVerboseErrors {
-		_, _ = io.WriteString(errOut, "Bad Request: Invalid input")
+		if _, err := io.WriteString(errOut, "Bad Request: Invalid input"); err != nil {
+			return false, err
+		}
 	} else {
+		var input []byte
+		var validationErrors []error
+		if err != nil {
+			// if err is non nil, JSON might be invalid and we cannot
+			// send it back to the client as json.RawMessage because it
+			// will fail to serialize
+			//
+			// Unwrap the error to include the offset in the input, since json.SyntaxError.Error()
+			// doesn't include it
+			var syntaxErr *json.SyntaxError
+			if errors.As(err, &syntaxErr) {
+				err = fmt.Errorf("invalid JSON at offset %v: %w", syntaxErr.Offset, syntaxErr)
+			}
+			validationErrors = append(validationErrors, &jsonError{Message: err.Error()})
+		} else {
+			input = variables
+			for _, v := range errs {
+				validationErrors = append(validationErrors, v)
+			}
+		}
 		validationError := ValidationError{
 			Message: "Bad Request: Invalid input",
-			Input:   variables,
-			Errors:  errs,
+			Input:   input,
+			Errors:  validationErrors,
 		}
-		_ = json.NewEncoder(errOut).Encode(validationError)
+		if err := json.NewEncoder(errOut).Encode(validationError); err != nil {
+			return false, err
+		}
 	}
-	return false
-}
-
-func NewValidationWriter(w http.ResponseWriter) *ValidationWriter {
-	return &ValidationWriter{w: w}
-}
-
-type ValidationWriter struct {
-	w              http.ResponseWriter
-	didWriteHeader bool
-}
-
-func (v *ValidationWriter) Write(p []byte) (n int, err error) {
-	if !v.didWriteHeader {
-		v.w.WriteHeader(http.StatusBadRequest)
-		v.didWriteHeader = true
-	}
-	return v.w.Write(p)
+	return false, nil
 }

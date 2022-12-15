@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.126.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.125.0...@wundergraph/sdk@0.126.0) (2022-12-15)
+
+### Features
+
+* listen on both IPv4 and IPv6 by default ([#451](https://github.com/wundergraph/wundergraph/issues/451)) ([b1fd332](https://github.com/wundergraph/wundergraph/commit/b1fd332dcaf8c15209b8329f0c96cb1d4c4972ab)) (@fiam)
+
+## [0.125.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.124.1...@wundergraph/sdk@0.125.0) (2022-12-14)
+
+### Features
+
+* add WunderGraph testing library ([#345](https://github.com/wundergraph/wundergraph/issues/345)) ([13d47b5](https://github.com/wundergraph/wundergraph/commit/13d47b50e7f54dba1c6f7188204c285d8de523c4)) (@fiam)
+* implement telemetry ([#424](https://github.com/wundergraph/wundergraph/issues/424)) ([8cd3d29](https://github.com/wundergraph/wundergraph/commit/8cd3d299e39afcd0bce6c1e6c2459e268a09af7b)) (@StarpTech)
+
+### Bug Fixes
+
+* nextjs-swr example ([#434](https://github.com/wundergraph/wundergraph/issues/434)) ([0cae074](https://github.com/wundergraph/wundergraph/commit/0cae0746a0dc36a8a5f8514e4c078363afab3b94)) (@fiam)
+
 ## [0.124.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.124.0...@wundergraph/sdk@0.124.1) (2022-12-08)
 
 **Note:** Version bump only for package @wundergraph/sdk

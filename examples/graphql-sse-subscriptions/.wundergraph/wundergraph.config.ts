@@ -19,7 +19,7 @@ type Subscription {
 
 const greetings = introspect.graphql({
 	apiNamespace: 'sse',
-	url: 'http://127.0.0.1:4000/graphql/stream',
+	url: 'http://localhost:4000/graphql/stream',
 	loadSchemaFromString: schema,
 	subscriptionsUseSSE: true,
 });

@@ -69,6 +69,11 @@ jobs:
         with:
           protoc-version: '21.5'
 
+      - name: Setup wunderctl
+        run: |
+          make install
+          echo WUNDERCTL_BINARY_PATH=$(which wunderctl) >> $GITHUB_ENV
+
       - name: Bootstrap PNPM workspace
         run: ./scripts/pnpm.sh
 

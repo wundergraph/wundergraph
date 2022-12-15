@@ -676,6 +676,15 @@ func (r *Builder) configureCache(api *Api) (err error) {
 	}
 }
 
+func (r *Builder) Close() error {
+	if closer, ok := r.cache.(io.Closer); ok {
+		if err := closer.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type GraphQLPlaygroundHandler struct {
 	log     *zap.Logger
 	html    string
@@ -776,14 +785,15 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
 		if err != nil {
-			requestLogger.Error("prepare plan failed", zap.Error(err))
+			requestLogger.Error("prepare plan failed", zap.Error(shared.Report))
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
 
 	if len(prepared.variables) != 0 {
-		shared.Ctx.Variables = MergeJsonRightIntoLeft(shared.Ctx.Variables, prepared.variables)
+		// we have to merge query variables into extracted variables to been able to override default values
+		shared.Ctx.Variables = MergeJsonRightIntoLeft(prepared.variables, shared.Ctx.Variables)
 	}
 
 	switch p := prepared.preparedPlan.(type) {
@@ -1070,8 +1080,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	valid := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
-	if !valid {
+	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
 		return
 	}
 
@@ -1088,7 +1097,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1505,8 +1514,8 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = []byte("{}")
 	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
-	valid := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
-	if !valid {
+
+	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
 		return
 	}
 
@@ -1523,7 +1532,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
@@ -1654,8 +1663,8 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
-	valid := h.variablesValidator.Validate(ctx, ctx.Variables, inputvariables.NewValidationWriter(w))
-	if !valid {
+
+	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
 		return
 	}
 
@@ -1672,7 +1681,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = h.jsonStringInterpolator.Interpolate(ctx.Variables)
 
 	if len(h.extractedVariables) != 0 {
-		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
@@ -2316,5 +2325,23 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		zap.Error(err),
 	)
 	http.Error(w, errorMessage, http.StatusInternalServerError)
+	return true
+}
+
+func validateInputVariables(log *zap.Logger, ctx *resolve.Context, validator *inputvariables.Validator, w http.ResponseWriter) bool {
+	var buf bytes.Buffer
+	valid, err := validator.Validate(ctx, ctx.Variables, &buf)
+	if err != nil {
+		log.Error("failed to validate input variables", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return false
+	}
+	if !valid {
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := io.Copy(w, &buf); err != nil {
+			log.Error("copying validation to response", zap.Error(err))
+		}
+		return false
+	}
 	return true
 }

@@ -14,13 +14,13 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/client": "^3.6.9",
-    "@wundergraph/nextjs": "^0.6.0",
-    "swr": "^2.0.0-rc.3",
-    "@wundergraph/sdk": "^0.124.0",
+    "@wundergraph/nextjs": "^0.7.0",
+    "@wundergraph/sdk": "^0.125.0",
     "graphql": "^16.5.0",
     "next": "^12.1.6",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "swr": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",
