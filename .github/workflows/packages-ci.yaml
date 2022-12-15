@@ -76,7 +76,12 @@ jobs:
         run: pnpm build
 
       - name: Format source code
-        run: pnpm format && pnpm format:examples
+        uses: creyD/prettier_action@v4.2
+        with:
+          prettier_options: --check
+          only_changed: True
+          dry: True
+          prettier_version: '2.6.2'
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
