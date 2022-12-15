@@ -107,7 +107,7 @@ const UploadPage: NextPage = () => {
               <li>
                 <a
                   target="_blank"
-                  href={`http://127.0.0.1:9000/uploads/${file}`}
+                  href={`http://localhost:9000/uploads/${file}`}
                 >
                   {file}
                 </a>

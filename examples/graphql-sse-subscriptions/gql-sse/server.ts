@@ -52,5 +52,5 @@ fastify.all('/graphql/stream', (req, res) =>
 	)
 );
 
-fastify.listen(4000, '127.0.0.1');
+fastify.listen(4000, 'localhost');
 console.log('Listening to port 4000');
