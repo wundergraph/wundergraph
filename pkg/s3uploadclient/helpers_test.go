@@ -12,7 +12,7 @@ import (
 )
 
 func initClient() *s3uploadclient.S3UploadClient {
-	client, err := s3uploadclient.NewS3UploadClient("127.0.0.1:9000", s3uploadclient.Options{
+	client, err := s3uploadclient.NewS3UploadClient("localhost:9000", s3uploadclient.Options{
 		BucketName:      "uploads",
 		BucketLocation:  "eu-central-1",
 		AccessKeyID:     "test",
