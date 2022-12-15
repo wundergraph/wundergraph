@@ -89,6 +89,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		if err != nil {
 			return err
 		}
+
 		tempUser = User{
 			ProviderName:  "token",
 			ProviderID:    cfg.issuer,
@@ -737,7 +738,7 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if r.Header.Get("If-None-Match") == user.ETag {
+	if tag := r.Header.Get("If-None-Match"); tag != "" && tag == user.ETag {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
