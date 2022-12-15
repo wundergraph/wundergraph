@@ -29,7 +29,7 @@ const server = createServer({
 			},
 		},
 	},
-	hostname: '127.0.0.1',
+	hostname: 'localhost',
 	port: 4000,
 });
 
