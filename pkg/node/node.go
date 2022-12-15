@@ -60,6 +60,7 @@ type Node struct {
 	ctx            context.Context
 	info           BuildInfo
 	configCh       chan WunderNodeConfig
+	builder        *apihandler.Builder
 	server         *http.Server
 	pool           *pool.Pool
 	log            *zap.Logger
@@ -248,8 +249,17 @@ func (n *Node) Shutdown(ctx context.Context) error {
 }
 
 func (n *Node) Close() error {
+	if n.builder != nil {
+		if err := n.builder.Close(); err != nil {
+			return err
+		}
+		n.builder = nil
+	}
 	if n.server != nil {
-		return n.server.Close()
+		if err := n.server.Close(); err != nil {
+			return err
+		}
+		n.server = nil
 	}
 	return nil
 }
@@ -435,10 +445,10 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		DevMode:                    n.options.devMode,
 	}
 
-	builder := apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
+	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
 	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
 
-	publicClosers, err := builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
+	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
 		n.log.Error("BuildAndMountApiHandler", zap.Error(err))
 	}

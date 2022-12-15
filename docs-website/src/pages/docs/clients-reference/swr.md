@@ -8,10 +8,10 @@ The SWR Client is our default client for React projects. It's a lightweight wrap
 
 ## Installation
 
-> Note: The client depends on SWR version 2.0.0-rc.0.
+> Note: The client depends on SWR version 2.0.0.
 
 ```bash
-npm i @wundergraph/swr swr@2.0.0-rc.0
+npm i @wundergraph/swr swr
 ```
 
 ## Configuration
