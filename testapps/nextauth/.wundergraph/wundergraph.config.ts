@@ -31,7 +31,6 @@ configureWunderGraphApplication({
 			providers: [
 				{
 					userInfoEndpoint: 'http://localhost:3000/api/auth/userInfo',
-					userInfoCacheTtlSeconds: 0,
 				},
 			],
 		},
