@@ -48,7 +48,7 @@ import { env } from '.wundergraph/wundergraph.env';
 env.WG_NODE_URL; // http://localhost:9991
 env.OAUTH_CLIENT_ID;
 
-new EnvironmentVariable('WG_SERVER_PORT', '9992');
+new EnvironmentVariable('OAUTH_CLIENT_ID');
 ```
 
 ### EvironmentVariable
