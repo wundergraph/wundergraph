@@ -4,8 +4,11 @@ import type { InternalClient } from './generated/wundergraph.internal.client';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
-		queries: {},
-		mutations: {},
+		authentication: {
+			postAuthentication: async (hook) => {
+				console.log(hook);
+			},
+		},
 	},
 	graphqlServers: [],
 }));

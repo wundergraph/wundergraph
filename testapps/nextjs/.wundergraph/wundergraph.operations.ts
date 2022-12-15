@@ -5,7 +5,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
 	operations: {
 		defaultConfig: {
 			authentication: {
-				required: false,
+				required: true,
 			},
 		},
 		queries: (config) => ({
