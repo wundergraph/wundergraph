@@ -20,11 +20,11 @@ npm install && npm start
 Once the introspection is complete,
 you can have a look at the generated GraphQL Schema:
 
-`examples/postgres/.wundergraph/generated/wundergraph.app.schema.graphql`
+`postgres/.wundergraph/generated/wundergraph.schema.graphql`
 
 We've pre-defined two GraphQL Operations in the operations directory for you:
 
-`examples/postgres/.wundergraph/operations`
+`postgres/.wundergraph/operations`
 
 ## Interacting with the API
 
