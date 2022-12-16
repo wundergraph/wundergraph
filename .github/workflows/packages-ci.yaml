@@ -87,7 +87,7 @@ jobs:
       - name: Format source code
         uses: creyD/prettier_action@v4.2
         with:
-          prettier_options: --check -- ${{ steps.changed-files.outputs.all_changed_files }}
+          prettier_options: --check --ignore .prettierignore -- ${{ steps.changed-files.outputs.all_changed_files }}
           prettier_version: '2.6.2'
           dry: True
 
