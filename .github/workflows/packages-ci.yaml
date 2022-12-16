@@ -84,7 +84,6 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v34
         with:
-          max_fetch_depth: '0'
           fetch_depth: 0
 
       - name: Format source code
@@ -99,3 +98,5 @@ jobs:
 
       - name: Run all NPM tests
         run: pnpm test
+        env:
+          WUNDERCTL_BINARY_PATH: '~/go/bin/wunderctl'
