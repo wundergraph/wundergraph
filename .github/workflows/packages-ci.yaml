@@ -84,7 +84,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v34
         with:
-          base_sha: ${{ steps.last_successful_commit_push.outputs.base }}
+          base_sha: ${{ github.event.pull_request.base.sha }}
 
       - name: Format source code
         uses: creyD/prettier_action@v4.2
