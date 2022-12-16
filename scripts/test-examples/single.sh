@@ -2,16 +2,13 @@
 
 usage()
 {
-  echo "Usage: $0 [-u] [-p]" 1>&2
+  echo "Usage: $0 [-u]" 1>&2
   echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
   echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
   exit 2
 }
 
 update_package_json="no"
-# On Linux using pnpm always results in a "ELIFECYCLE Command failed. Exit code: 1" error
-# For this reason we use npm as the default
-npm=npm
 
 kill_with_children() {
     local pid=$1
@@ -33,10 +30,6 @@ while :; do
     case "$1" in
         -u)
             update_package_json="yes"
-            shift
-        ;;
-        -p)
-            npm=npm
             shift
         ;;
         -h)
@@ -65,27 +58,23 @@ if test ${update_package_json} = "yes"; then
     sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' package.json
     rm -fr package.json.bak
 
-    ${npm} install
+    # We're replacing modules with workspace copies, need to use
+    # pnpm to install since npm doesn't understand workspaces
+    pnpm install
 fi
 
 if ! test -d node_modules; then
-    ${npm} install
+    npm install
 fi
 
 # Check for a script to bring up the required services
-services_pid=
-if grep -q '"start:services"' package.json; then
-    ${npm} run start:services &
-    services_pid=$!
-    if grep -q '"wait-on:services"' package.json; then
-        ${npm} run wait-on:services
-    else
-        sleep 1
-    fi
-fi
+npm start
+pid=$!
 
-if grep -q '"setup"' package.json; then
-    ${npm} run setup
+if grep -q '"wait-on:services"' package.json; then
+    npm run wait-on:services
+else
+    sleep 1
 fi
 
 # Generate WunderGraph files
@@ -93,17 +82,21 @@ npm run generate
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
-    ${npm} test
+    NODE_URL=http://localhost:9991 npm test
 elif grep -q '"check"' package.json; then
-    ${npm} run check
+    npm run check
 elif grep -q '"build"' package.json; then
-    ${npm} run build
+    npm run build
+fi
+
+if grep -q '"playwright"' package.json; then
+  npx -- playwright test
 fi
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
 		echo "Cleaning up"
-    ${npm} run cleanup
+    npm run cleanup
 fi
 
 # Kill all services we started in "start:services"
@@ -113,6 +106,19 @@ if test ! -z ${services_pid}; then
 			kill_with_children ${services_pid}
 	fi
 fi
+
+
+# If we have playwright based tests, run them
+# Note that we always run these with npx
+if test -f playwright.config.ts; then
+    npx -- playwright test --headed
+
+    # playwright might have restarted the container, stop it but ignore errors
+    if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
+        cd `dirname ${docker_compose_yml}` && docker-compose down || true && cd -
+    fi
+fi
+
 # Restore package.json
 if test ${update_package_json} = "yes"; then
     git checkout -f package.json
