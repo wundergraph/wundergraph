@@ -4,7 +4,6 @@ import fetch from 'node-fetch';
 const seed = async () => {
 	const client = createClient({
 		customFetch: fetch as any,
-		baseURL: 'http://localhost:9991/',
 	});
 	const user = await client.query({
 		operationName: 'UserByEmail',
