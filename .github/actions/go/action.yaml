@@ -16,5 +16,4 @@ runs:
     - uses: actions/setup-go@v3
       with:
         go-version: ${{ inputs.go-version }}
-        cache-dependency-path: go.sum
         cache: true
