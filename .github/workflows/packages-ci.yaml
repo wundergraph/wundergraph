@@ -89,6 +89,7 @@ jobs:
         with:
           prettier_options: --check -- ${{ steps.changed-files.outputs.all_changed_files }}
           prettier_version: '2.6.2'
+          dry: True
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
