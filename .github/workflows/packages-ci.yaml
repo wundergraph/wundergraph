@@ -80,16 +80,25 @@ jobs:
       - name: Build all libs + apps
         run: pnpm build
 
-      - name: Get changed files
-        id: changed-files
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+      - uses: nrwl/nx-set-shas@v3
+        id: last_successful_commit_push
+        with:
+          main-branch-name: ${{ steps.branch-name.outputs.current_branch }} # Get the last successful commit for the current branch.
+
+      - name: Run changed-files with the commit of the last successful test workflow run
+        id: changed-files-base-sha-push
         uses: tj-actions/changed-files@v34
         with:
-          base_sha: ${{ github.event.pull_request.base.sha }}
+          base_sha: ${{ steps.last_successful_commit_push.outputs.base }}
 
       - name: Format source code
         uses: creyD/prettier_action@v4.2
         with:
-          prettier_options: --check --ignore .prettierignore -- ${{ steps.changed-files.outputs.all_changed_files }}
+          prettier_options: --check --ignore .prettierignore -- ${{ steps.changed-files-base-sha-push.outputs.all_changed_files }}
           prettier_version: '2.6.2'
           dry: True
 
