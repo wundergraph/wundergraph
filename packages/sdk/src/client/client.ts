@@ -179,7 +179,7 @@ export class Client {
 			this.csrfToken = await res.text();
 
 			if (!this.csrfToken) {
-				throw new Error('Failed to get CSRF token');
+				throw new Error('Failed to get CSRF token. Please make sure you are authenticated.');
 			}
 		}
 		return this.csrfToken;
