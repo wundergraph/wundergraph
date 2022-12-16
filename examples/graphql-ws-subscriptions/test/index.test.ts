@@ -29,6 +29,7 @@ describe('test ws subscription', () => {
 		)) as ClientResponse<WsResponseData>;
 
 		expect(result.error).toBeFalsy();
+		expect(result.data?.ws_greetings).toBe('Hi');
 		expect(result.data?.ws_greetings).toBe(data?.ws_greetings);
 	});
 });

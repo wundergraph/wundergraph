@@ -84,7 +84,11 @@ services_pid=
 if grep -q '"start:services"' package.json; then
     ${npm} run start:services &
     services_pid=$!
-    sleep 1
+    if grep -q '"wait-on:services"' package.json; then
+        ${npm} run wait-on:services
+    else
+        sleep 1
+    fi
 fi
 
 if grep -q '"setup"' package.json; then

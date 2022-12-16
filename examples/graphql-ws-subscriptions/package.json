@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "start": "run-p start:services wundergraph",
-    "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
+    "wait-on:services": "wait-on tcp:4000",
+    "wundergraph": "$npm_execpath run wait-on:services && wunderctl up --debug",
     "start:services": "ts-node graphql-ws/server.ts",
     "check": "tsc --noEmit",
     "test": "jest"
