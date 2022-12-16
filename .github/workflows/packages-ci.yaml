@@ -80,23 +80,11 @@ jobs:
       - name: Build all libs + apps
         run: pnpm build
 
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v34
-        with:
-          fetch_depth: 0
-
-      - name: Format source code
-        uses: creyD/prettier_action@v4.2
-        with:
-          prettier_options: --check --ignore .prettierignore -- ${{ steps.changed-files.outputs.all_changed_files }}
-          prettier_version: '2.6.2'
-          dry: True
+      - name: Check if git is not dirty after generating files
+        run: eval "pnpx prettier --check $(git diff --name-only -r ${{ github.base_ref }} | xargs)"
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
 
       - name: Run all NPM tests
         run: pnpm test
-        env:
-          WUNDERCTL_BINARY_PATH: '~/go/bin/wunderctl'
