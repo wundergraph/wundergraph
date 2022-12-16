@@ -331,6 +331,13 @@ export class Client {
 		}
 	}
 
+	private async isAuthenticatedByCookie() {
+		const response = await this.fetchJson(`${this.options.baseURL}/auth/cookie/user`, {
+			method: 'GET',
+		});
+		return !!response.ok;
+	}
+
 	/**
 	 * Uploads one or more files to the server. Authentication is required. The method throws an error if the files
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
@@ -343,19 +350,28 @@ export class Client {
 				formData.append('files', file);
 			}
 		}
-		const csrfToken = await this.getCSRFToken();
+
+		let csrfToken = '';
+		const isAuthenticated = await this.isAuthenticatedByCookie();
+		if (isAuthenticated) {
+			csrfToken = await this.getCSRFToken();
+		}
 
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});
 
+		let headers = {};
+		if (csrfToken) {
+			headers = {
+				'X-CSRF-Token': csrfToken,
+			};
+		}
+
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
-				headers: {
-					// Dont set the content-type header, the browser will set it for us + boundary
-					'X-CSRF-Token': csrfToken,
-				},
+				headers,
 				body: formData,
 				method: 'POST',
 				signal: config.abortSignal,
