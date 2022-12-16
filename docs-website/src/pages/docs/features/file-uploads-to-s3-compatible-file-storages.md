@@ -45,6 +45,8 @@ E.g. you can use Minio on localhost and DigitalOcean spaces when running in prod
 Additionally,
 you're able to swap storage providers or buckets without changing the client itself.
 
+> Note: Currently, you need to be authenticated to perform file uploads.
+
 ## How does it work?
 
 1. Configure your S3 Bucket (see reference below for more info)
