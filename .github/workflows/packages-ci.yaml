@@ -83,8 +83,8 @@ jobs:
       - name: Format source code
         uses: creyD/prettier_action@v4.2
         with:
+          prettier_options: --check **/*.{js,jsx,ts,tsx,md,mdx,yml,yaml,css,json,graphql,gql}
           only_changed: True
-          dry: True
           prettier_version: '2.6.2'
 
       - name: Check if git is not dirty after generating files
