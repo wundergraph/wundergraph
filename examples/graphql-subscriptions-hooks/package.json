@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "run-p ws:server wundergraph",
+    "start": "run-p start:services wundergraph",
     "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
-    "ws:server": "ts-node graphql-ws/server.ts",
+    "start:services": "ts-node graphql-ws/server.ts",
     "check": "tsc --noEmit",
     "test": "jest"
   },
