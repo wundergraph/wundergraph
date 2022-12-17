@@ -14,12 +14,14 @@ instructions for setting it up and running.
 
 Examples are expected to include the following node scripts:
 
-    - `postinstall` (optional, Development & CI): prepare the start e.g. by copying .env.example to .env
-    - `start`: (development) starts the example with a single command
-    - `start:services` (optional, Development & CI): start any local services (docker, additonal server) required by the example
-    - `wait-on:services` (optional, Development & CI): wait for the services to be ready and exit immediately
-    - `setup` (optional, Development & CI): setup the example (e.g. migration) after the services are ready
-    - `cleanup` (optional, Development & CI): stops or remove all provisioned resources
+    1. `postinstall` (optional, Development & CI): prepare the start e.g. by copying .env.example to .env
+    2. `start`: (required, development) starts the example with a single command
+    3. `start:services` (optional, Development & CI): start any local services (docker, additonal server) required by the example
+    4. `wait-on:services` (optional, Development & CI): wait for the services to be ready and exit immediately
+    5. `generate` (required): generates the wundergraph build
+    6. `setup` (optional, Development & CI): setup the example (e.g. migration) after the environment is ready
+    7. `test` (optional, Development & CI): runs the tests for the example
+    8. `cleanup` (optional, Development & CI): stops or remove all provisioned resources
 
 If the example uses containers, it should have a `docker-compose.yml` file at the top. `package.json` should
 include a `start:container` script that runs `docker-compose up -d`.
@@ -28,3 +30,7 @@ For packages with tests, there should be a `test` script that runs the test suit
 
 If the example requires environment variables to be set, provide an `.env.example` file as well as
 instructions (e.g. where to create an account). The script `postinstall` should copy `.env.example` to `.env`. The `.env` file should be ignored by git.
+
+## Package manager
+
+All examples should use `npm` as the package manager.
