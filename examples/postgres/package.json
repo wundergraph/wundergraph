@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "npm run start:container && wait-on -d 5000 tcp:54322 && npm run start:api",
+    "prestart": "cp -n .env.example .env",
     "start:container": "docker-compose up -d",
     "start:api": "wunderctl up --debug",
     "cleanup": "docker-compose down -v",

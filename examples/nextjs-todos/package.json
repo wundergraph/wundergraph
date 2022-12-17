@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npm run start:services && wait-on -d 5000 tcp:54322 && npm run migrate init && run-p dev wundergraph open",
+    "prestart": "cp -n .env.example .env",
     "start:services": "docker-compose up -d",
     "wundergraph": "wunderctl up --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",

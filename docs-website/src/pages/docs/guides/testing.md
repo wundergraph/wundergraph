@@ -63,13 +63,8 @@ const wg = createTestServer()
 Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
 
 ```typescript
-beforeAll(async () => {
-  await wg.start()
-})
-
-afterAll(async () => {
-  await wg.stop()
-})
+beforeAll(() => wg.start())
+afterAll(() => wg.stop())
 ```
 
 Finally, define your tests as Jest test functions:
@@ -127,13 +122,8 @@ const wg = createTestServer()
 Use Ava's `test.before()` and `test.after()` functions to setup our testing server:
 
 ```typescript
-test.before(async (t) => {
-  await wg.start()
-})
-
-test.after(async (t) => {
-  await wg.stop()
-})
+test.before(() => wg.start())
+test.after(() => wg.stop())
 ```
 
 Finally, define your functions:
@@ -156,5 +146,9 @@ test('create a note', async (t) => {
   )
 })
 ```
+
+## Loading Environment Variables
+
+WunderGraph has builtin support for loading environment variables from `.env`. For testing, we use `.env.test.local`. None of these files should be committed to git. In your CI, you should use plain environment variables that come from your secret store.
 
 For an example using Ava for testing, check our [openapi-mocking example](https://github.com/wundergraph/wundergraph/tree/main/examples).

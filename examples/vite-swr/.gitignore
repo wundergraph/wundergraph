@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# jest compilation
+test/*.js
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

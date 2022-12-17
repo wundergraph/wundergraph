@@ -2,15 +2,9 @@ import test from 'ava';
 
 import { createTestServer } from './.wundergraph/generated/testing';
 
-const wg = createTestServer();
-
-test.before(async (t) => {
-	await wg.start();
-});
-
-test.after(async (t) => {
-	await wg.stop();
-});
+const wg = createTestServer({ fetch: fetch as any });
+beforeAll(() => wg.start());
+afterAll(() => wg.stop());
 
 test('create a note', async (t) => {
 	const result = await wg.client().mutate({

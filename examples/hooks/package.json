@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "run-p wundergraph open",
+    "prestart": "cp -n .env.example .env",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/operations/Dragons",
