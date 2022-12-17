@@ -149,6 +149,6 @@ test('create a note', async (t) => {
 
 ## Loading Environment Variables
 
-WunderGraph has builtin support for loading environment variables from `.env`. For testing, we use `.env.test.local`. None of these files should be committed to git. In your CI, you should use plain environment variables that come from your secret store.
+WunderGraph has builtin support for loading environment variables from `.env`. None of these files should be committed to git. In your CI, you should use plain environment variables that come from your secret store.
 
 For an example using Ava for testing, check our [openapi-mocking example](https://github.com/wundergraph/wundergraph/tree/main/examples).
