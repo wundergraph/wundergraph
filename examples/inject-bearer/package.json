@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "setup": "npm run prestart",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
