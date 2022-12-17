@@ -70,15 +70,6 @@ if ! test -d node_modules; then
     ${npm} install
 fi
 
-docker_compose_yml=`find . -name docker-compose.yml`
-
-# If we have a Docker cluster, bring it up
-if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
-    cd `dirname ${docker_compose_yml}` && docker-compose up -d && cd -
-    # Wait for container services to start
-    sleep 1
-fi
-
 # Check for a script to bring up the required services
 services_pid=
 if grep -q '"start:services"' package.json; then
@@ -112,8 +103,8 @@ if test ! -z ${services_pid}; then
 fi
 
 # If we have a Docker cluster, clean it up
-if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
-    cd `dirname ${docker_compose_yml}` && docker-compose down && cd -
+if grep -q '"cleanup"' package.json; then
+    ${npm} run cleanup
 fi
 
 # Restore package.json

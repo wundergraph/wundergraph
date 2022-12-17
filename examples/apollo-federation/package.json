@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "start": "run-p -l start:container generate:api && run-p wundergraph start:nextjs open:browser",
-    "prestart": "cp -n .env.example .env",
-    "setup": "npm run prestart",
+    "postinstall": "cp -n .env.example .env",
     "start:container": "cd federation && docker-compose up -d",
     "start:nextjs": "next dev",
     "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
@@ -13,7 +12,7 @@
     "generate": "wunderctl generate --debug",
     "generate:api": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004 && npm run generate",
     "start:api": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004 && cd npm run wundergraph",
-    "cleanup": "cd federation && docker-compose down",
+    "cleanup": "cd federation && docker-compose down -v",
     "check": "tsc --noEmit",
     "test": "jest"
   },
