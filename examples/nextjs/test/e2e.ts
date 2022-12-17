@@ -13,7 +13,7 @@ test('example loads and displays data', async ({ page }) => {
 		return !data.isValidating;
 	};
 
-	await page.goto('http://localhost:3000/');
+	await page.goto('/');
 	const result = page.locator('#result');
 
 	await page.waitForFunction(hasFinishedLoading);
@@ -22,7 +22,7 @@ test('example loads and displays data', async ({ page }) => {
 
 	const refresh = page.getByRole('button', { name: 'refresh' });
 	await refresh.click();
-	expect(JSON.parse(await result.textContent()).isValidating).toBeTruthy();
+	expect(JSON.parse((await result.textContent()) ?? '').isValidating).toBeTruthy();
 
 	await page.waitForFunction(hasFinishedValidating);
 	expect(await result.textContent()).toContain('spacex_dragons');
