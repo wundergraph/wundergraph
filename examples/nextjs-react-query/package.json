@@ -6,6 +6,7 @@
     "start": "run-p dev wundergraph open",
     "postinstall": "cp -n .env.example .env",
     "wundergraph": "wunderctl up --debug",
+    "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "build": "next build",
     "dev": "next dev",

@@ -75,7 +75,7 @@ if grep -q '"setup"' package.json; then
 fi
 
 # Generate WunderGraph files
-wunderctl generate
+npm run generate
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then

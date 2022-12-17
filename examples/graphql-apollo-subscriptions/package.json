@@ -6,6 +6,7 @@
     "start": "run-p start:services start:server",
     "start:server": "wait-on tcp:8085 && wunderctl up --debug",
     "start:services": "cd chat && go run server/server.go",
+    "generate": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
   },

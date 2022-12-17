@@ -7,7 +7,7 @@
     "postinstall": "cp -n .env.example .env",
     "clean": "rimraf ./.next",
     "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate",
+    "generate": "wunderctl generate --debug",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
     "build": "npm run generate && tsc && vite build",

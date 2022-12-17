@@ -9,6 +9,7 @@
     "wait-on:services": "wait-on -d 5000 tcp:54322",
     "start:api": "wunderctl up --debug",
     "cleanup": "docker-compose down -v",
+    "generate": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
   },
