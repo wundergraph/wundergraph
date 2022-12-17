@@ -36,16 +36,6 @@ while :; do
     esac
 done
 
-kill_with_children() {
-    local pid=$1
-    if children="`pgrep -P $pid`"; then
-        for child in $children; do
-            kill_with_children $child
-        done
-    fi
-    kill $pid
-}
-
 if ! test -f package.json || ! test -d ../../examples; then
     echo "Run this from the example directory" 1>&2
     exit 1
@@ -70,18 +60,6 @@ if ! test -d node_modules; then
     ${npm} install
 fi
 
-# Check for a script to bring up the required services
-services_pid=
-if grep -q '"start:services"' package.json; then
-    ${npm} run start:services &
-    services_pid=$!
-    if grep -q '"wait-on:services"' package.json; then
-        ${npm} run wait-on:services
-    else
-        sleep 1
-    fi
-fi
-
 if grep -q '"setup"' package.json; then
     ${npm} run setup
 fi
@@ -98,11 +76,7 @@ elif grep -q '"build"' package.json; then
     ${npm} run build
 fi
 
-if test ! -z ${services_pid}; then
-    kill_with_children ${services_pid}
-fi
-
-# If we have a Docker cluster, clean it up
+# If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
     ${npm} run cleanup
 fi
