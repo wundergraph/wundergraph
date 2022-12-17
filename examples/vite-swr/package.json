@@ -5,6 +5,7 @@
   "scripts": {
     "start": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
     "prestart": "cp -n .env.example .env",
+    "setup": "npm run prestart",
     "clean": "rimraf ./.next",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate",

@@ -14,10 +14,12 @@ instructions for setting it up and running.
 
 Examples are expected to include the following node scripts:
 
-    - `start:services` (optional): start any local services required by the example (no containers)
-    - `start`: starts all the services as well containers and runs wunderctl up --debug
-    - `prestart`: e.g. copying .env.example to .env
-    - `cleanup`: stops or remove all provisioned resources
+    - `start:services` (optional, Development & CI): start any local services required by the example (no containers)
+    - `wait-on:services` (optional, Development & CI): wait for the services to be ready
+    - `setup` (optional, CI): setup the example for testing
+    - `start`: (development) starts all the services as well containers and runs wunderctl up --debug
+    - `prestart` (development, optional): e.g. copying .env.example to .env
+    - `cleanup` (optional, Development & CI): stops or remove all provisioned resources
 
 If the example uses containers, it should have a `docker-compose.yml` file at the top. `package.json` should
 include a `start:container` script that runs `docker-compose up -d`.

@@ -5,6 +5,7 @@
   "scripts": {
     "start": "run-p -l start:container generate:api && run-p wundergraph start:nextjs open:browser",
     "prestart": "cp -n .env.example .env",
+    "setup": "npm run prestart",
     "start:container": "cd federation && docker-compose up -d",
     "start:nextjs": "next dev",
     "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",

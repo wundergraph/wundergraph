@@ -5,6 +5,7 @@
   "scripts": {
     "start": "run-p dev wundergraph open",
     "prestart": "cp -n .env.example .env",
+    "setup": "npm run prestart",
     "wundergraph": "wunderctl up --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
     "build": "next build",

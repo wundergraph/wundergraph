@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run start:container && npm run setup && npm run generate && run-p dev wundergraph seed",
     "prestart": "cp -n .env.example .env",
-    "setup": "wait-on -d 5000 tcp:54322 && npm run migrate init",
+    "setup": "npm run prestart && wait-on -d 5000 tcp:54322 && npm run migrate init",
     "start:container": "docker-compose up -d",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate",
