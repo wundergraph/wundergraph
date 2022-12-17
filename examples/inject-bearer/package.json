@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "prestart": "cp -n .env.example .env",
     "setup": "npm run prestart",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
