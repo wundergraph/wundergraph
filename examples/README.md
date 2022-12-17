@@ -16,7 +16,7 @@ Examples are expected to include the following node scripts:
 
     - `start:services` (optional, Development & CI): start any local services required by the example (no containers)
     - `wait-on:services` (optional, Development & CI): wait for the services to be ready
-    - `setup` (optional, CI): setup the example for testing
+    - `setup` (optional, Development & CI): setup the example (e.g. create a database) or act as entrypoint to summary the process
     - `start`: (development) starts all the services as well containers and runs wunderctl up --debug
     - `prestart` (development, optional): e.g. copying .env.example to .env
     - `cleanup` (optional, Development & CI): stops or remove all provisioned resources
