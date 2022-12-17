@@ -59,7 +59,9 @@ const Home: NextPage = () => {
 							<code className="font-mono font-medium text-amber-500 font-bold">UserByEmail</code> operation. The client
 							is only updated when the underlying database changes.
 						</p>
-						<code className="p-3">{JSON.stringify(user, null, 2)}</code>
+						<code className="p-3" id="result">
+							{JSON.stringify(user, null, 2)}
+						</code>
 					</div>
 				</div>
 				<footer className="flex justify-between text-gray-400">
