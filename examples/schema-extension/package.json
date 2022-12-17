@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "npm run start:container && wait-on -d 5000 tcp:54322 && npm run start:api",
+    "start": "npm run start:container && npm run wait-on:services && npm run start:api",
     "prestart": "cp -n .env.example .env",
+    "wait-on:services": "wait-on -d 5000 tcp:54322",
     "setup": "npm run prestart",
     "start:api": "wunderctl up --debug",
     "start:container": "docker-compose up -d",
-    "generate": "wunderctl generate up --debug",
+    "generate": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
   },
