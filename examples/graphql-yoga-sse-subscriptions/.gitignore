@@ -6,6 +6,9 @@
 # jest compilation
 test/*.js
 
+# compiled output
+yoga/*.js
+
 # WunderGraph build output
 .wundergraph/cache
 .wundergraph/generated
