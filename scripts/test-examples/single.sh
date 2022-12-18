@@ -89,6 +89,11 @@ elif grep -q '"build"' package.json; then
     ${npm} run build
 fi
 
+# If we have something to cleanup e.g. a Docker cluster, do it
+if grep -q '"cleanup"' package.json; then
+    ${npm} run cleanup
+fi
+
 # Kill the processes + child processes that we started in start:services
 kill --verbose "$(ps -o pid= --ppid services_pid)" || true
 
