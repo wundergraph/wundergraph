@@ -57,7 +57,7 @@ const Home: NextPage = () => {
 							This is the result of your <code className="font-mono font-medium text-amber-500 font-bold">Dragons</code>{' '}
 							operation.
 						</p>
-						<code className="p-3" id="result">
+						<code className="p-3" data-testid="result">
 							{JSON.stringify(dragons, null, 2)}
 						</code>
 					</div>
