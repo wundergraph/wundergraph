@@ -111,7 +111,8 @@ fi
 # If we have playwright based tests, run them
 # Note that we always run these with npx
 if test -f playwright.config.ts; then
-    npx -- playwright test --headed
+    npx -- playwright install --with-deps chromium
+    npx -- playwright test
 
     # playwright might have restarted the container, stop it but ignore errors
     if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
