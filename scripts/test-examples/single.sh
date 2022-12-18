@@ -107,11 +107,12 @@ if grep -q '"cleanup"' package.json; then
 fi
 
 # Kill all services we started in "start:services"
-if ps -p $services_pid > /dev/null; then
-	  echo "Killing services"
-		kill_with_children ${services_pid}
+if test ! -z ${services_pid}; then
+	if ps -p $services_pid > /dev/null; then
+			echo "Killing services"
+			kill_with_children ${services_pid}
+	fi
 fi
-
 # Restore package.json
 if test ${update_package_json} = "yes"; then
     git checkout -f package.json
