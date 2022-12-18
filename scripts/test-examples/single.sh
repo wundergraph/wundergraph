@@ -104,7 +104,10 @@ fi
 if grep -q '"cleanup"' package.json; then
 		echo "Cleaning up"
     ${npm} run cleanup
-elif test ! -z ${services_pid}; then
+fi
+
+# Kill all services we started in "start:services"
+if test ! -z ${services_pid}; then
 	  echo "Killing services"
 		kill_with_children ${services_pid}
 fi
