@@ -1,15 +1,27 @@
 #!/bin/sh
 
+trap "kill 0" EXIT
+
 usage()
 {
   echo "Usage: $0 [-u] [-p]" 1>&2
   echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
-  echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
+  echo "It must be run from the example directory e.g. ../../scripts/test-examples/single.sh" 1>&2
   exit 2
 }
 
 update_package_json="no"
 npm=pnpm
+
+kill_with_children() {
+    local pid=$1
+    if children="`pgrep -P $pid`"; then
+        for child in $children; do
+            kill_with_children $child
+        done
+    fi
+    kill $pid
+}
 
 args=`getopt uh $*`
 if test $? -ne 0; then
@@ -60,12 +72,12 @@ if ! test -d node_modules; then
     ${npm} install
 fi
 
-services_pid=""
 # Check for a script to bring up the required services
+services_pid=""
 if grep -q '"start:services"' package.json; then
     ${npm} run start:services &
-    # Get the PID of the last process
-    services_pid=$!
+		# Get the PID of the last process
+		services_pid=$!
     if grep -q '"wait-on:services"' package.json; then
         ${npm} run wait-on:services
     else
@@ -89,13 +101,16 @@ elif grep -q '"build"' package.json; then
     ${npm} run build
 fi
 
-# If we have something to cleanup e.g. a Docker cluster, do it
+# If we have something to cleanup, do it
 if grep -q '"cleanup"' package.json; then
     ${npm} run cleanup
 fi
 
-# Kill the processes + child processes that we started in start:services
-kill --verbose "$(ps -o pid= --ppid services_pid)" || true
+# Ensure we kill all services + childs which we started with "start:services"
+if test ! -z ${services_pid}; then
+	  echo "Killing services PID ${services_pid}"
+		kill_with_children ${services_pid}
+fi
 
 # Restore package.json
 if test ${update_package_json} = "yes"; then
