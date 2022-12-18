@@ -9,6 +9,8 @@ usage()
 }
 
 update_package_json="no"
+# On Linux using pnpm always results in a "ELIFECYCLE Command failed. Exit code: 1" error
+# For this reason we use npm as the default
 npm=npm
 
 kill_with_children() {
