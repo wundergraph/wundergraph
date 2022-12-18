@@ -60,9 +60,12 @@ if ! test -d node_modules; then
     ${npm} install
 fi
 
+services_pid=""
 # Check for a script to bring up the required services
 if grep -q '"start:services"' package.json; then
     ${npm} run start:services &
+    # Get the PID of the last process
+    services_pid=$!
     if grep -q '"wait-on:services"' package.json; then
         ${npm} run wait-on:services
     else
@@ -86,10 +89,8 @@ elif grep -q '"build"' package.json; then
     ${npm} run build
 fi
 
-# If we have something to cleanup e.g. a Docker cluster, do it
-if grep -q '"cleanup"' package.json; then
-    ${npm} run cleanup
-fi
+# Kill the processes + child processes that we started in start:services
+kill --verbose "$(ps -o pid= --ppid services_pid)" || true
 
 # Restore package.json
 if test ${update_package_json} = "yes"; then
