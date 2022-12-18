@@ -21,7 +21,7 @@ Examples are expected to include the following node scripts:
     5. `generate` (required): generates the wundergraph build
     6. `setup` (optional, Development & CI): setup the example (e.g. migration) after the environment is ready
     7. `test` (optional, Development & CI): runs the tests for the example
-    8. `cleanup` (optional, Development & CI): stops or remove all provisioned resources
+    8. `cleanup` (optional, Development & CI): stops,remove all provisioned resources
 
 If the example uses containers, it should have a `docker-compose.yml` file at the top. `package.json` should
 include a `start:container` script that runs `docker-compose up -d`.

@@ -6,6 +6,7 @@
     "start": "run-p start:services start:server",
     "start:server": "wait-on tcp:8085 && wunderctl up --debug",
     "start:services": "cd chat && go run server/server.go",
+    "cleanup": "kill-port 8085",
     "generate": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
@@ -24,6 +25,7 @@
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.2",
-    "wait-on": "^6.0.0"
+    "wait-on": "^6.0.0",
+    "kill-port": "^2.0.1"
   }
 }
