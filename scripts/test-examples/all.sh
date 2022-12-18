@@ -20,7 +20,7 @@ set -e
 SKIP="faunadb-nextjs graphql-hasura-subscriptions"
 
 # These are broken
-SKIP="${SKIP} nextjs-todos publish-install-api vite-swr"
+SKIP="${SKIP} nextjs-todos vite-swr"
 
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
@@ -43,11 +43,12 @@ cd `dirname ${0}`/../..
 
 cd examples
 for example in `ls -d */`; do
-    if test ! -z "${TEST_FILTER}" && ! echo "${TEST_FILTER}" | grep -q -w `basename ${example}`; then
+    if test ! -z "${TEST_FILTER}" && ! echo "${TEST_FILTER}" | grep -q -E "(^| )`basename ${example}`($| )"; then
+    echo "filter ${example}"
         continue
     fi
 
-    if echo ${SKIP} | grep -q -w `basename ${example}`; then
+    if echo ${SKIP} | grep -q -E "(^| )`basename ${example}`($| )"; then
         echo Skipping ${example}...
         continue
     fi
