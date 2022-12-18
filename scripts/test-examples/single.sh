@@ -9,7 +9,17 @@ usage()
 }
 
 update_package_json="no"
-npm=pnpm
+npm=npm
+
+kill_with_children() {
+    local pid=$1
+    if children="`pgrep -P $pid`"; then
+        for child in $children; do
+            kill_with_children $child
+        done
+    fi
+    kill $pid
+}
 
 args=`getopt uh $*`
 if test $? -ne 0; then
@@ -61,8 +71,10 @@ if ! test -d node_modules; then
 fi
 
 # Check for a script to bring up the required services
+services_pid=
 if grep -q '"start:services"' package.json; then
     ${npm} run start:services &
+    services_pid=$!
     if grep -q '"wait-on:services"' package.json; then
         ${npm} run wait-on:services
     else
@@ -88,7 +100,11 @@ fi
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
+		echo "Cleaning up"
     ${npm} run cleanup
+elif test ! -z ${services_pid}; then
+	  echo "Killing services"
+		kill_with_children ${services_pid}
 fi
 
 # Restore package.json
