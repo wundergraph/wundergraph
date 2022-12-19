@@ -1,15 +1,6 @@
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { devices } from '@playwright/test';
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 const config: PlaywrightTestConfig = {
 	testMatch: /e2e.*\.ts/,
 	testDir: './test',
@@ -51,48 +42,6 @@ const config: PlaywrightTestConfig = {
 				...devices['Desktop Chrome'],
 			},
 		},
-
-		// {
-		//   name: 'firefox',
-		//   use: {
-		//     ...devices['Desktop Firefox'],
-		//   },
-		// },
-
-		// {
-		//   name: 'webkit',
-		//   use: {
-		//     ...devices['Desktop Safari'],
-		//   },
-		// },
-
-		/* Test against mobile viewports. */
-		// {
-		//   name: 'Mobile Chrome',
-		//   use: {
-		//     ...devices['Pixel 5'],
-		//   },
-		// },
-		// {
-		//   name: 'Mobile Safari',
-		//   use: {
-		//     ...devices['iPhone 12'],
-		//   },
-		// },
-
-		/* Test against branded browsers. */
-		// {
-		//   name: 'Microsoft Edge',
-		//   use: {
-		//     channel: 'msedge',
-		//   },
-		// },
-		// {
-		//   name: 'Google Chrome',
-		//   use: {
-		//     channel: 'chrome',
-		//   },
-		// },
 	],
 
 	/* Folder for test artifacts such as screenshots, videos, traces, etc. */
