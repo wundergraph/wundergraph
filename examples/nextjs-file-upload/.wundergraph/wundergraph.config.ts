@@ -1,5 +1,5 @@
-import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+import { authProviders, configureWunderGraphApplication, cors, EnvironmentVariable, templates } from '@wundergraph/sdk';
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
@@ -30,7 +30,14 @@ configureWunderGraphApplication({
 	},
 	authentication: {
 		cookieBased: {
-			providers: [authProviders.demo()],
+			providers: [
+				authProviders.demo(),
+				authProviders.github({
+					id: 'github',
+					clientId: new EnvironmentVariable('GITHUB_CLIENT_ID'),
+					clientSecret: new EnvironmentVariable('GITHUB_CLIENT_SECRET'),
+				}),
+			],
 			authorizedRedirectUris: ['http://localhost:3000'],
 		},
 	},
