@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "run-p wundergraph open",
+    "postinstall": "cp -n .env.example .env",
     "wundergraph": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/operations/Dragons",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@types/node": "^17.0.15",
     "node-fetch": "^2.6.7",
+    "@types/node-fetch": "^2.6.2",
     "npm-run-all": "^4.1.5",
     "open-cli": "^7.0.1",
     "ts-node": "^10.8.0",

@@ -1,6 +1,7 @@
 import net from 'net';
 
 import { retry } from 'ts-retry-promise';
+import terminate from 'terminate/promise';
 
 import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
@@ -143,9 +144,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 */
 	async stop(): Promise<void> {
 		if (this.subprocess) {
-			this.subprocess.kill('SIGTERM', {
-				forceKillAfterTimeout: 100,
-			});
+			await terminate(this.subprocess.pid);
 			try {
 				await this.subprocess;
 			} catch (e: any) {

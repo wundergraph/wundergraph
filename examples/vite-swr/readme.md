@@ -11,7 +11,7 @@ SWR is a React library for data fetching. With just one hook, you can significan
 Install the dependencies and run the complete example in one command:
 
 ```shell
-npm install && npm run dev
+npm install && npm start
 ```
 
 After a while, a new browser tab will open,
