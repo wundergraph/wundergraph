@@ -8,6 +8,8 @@ import { Client } from '../client';
 import { CreateClientConfig } from '../client/types';
 
 const readyStatus = 'READY';
+const skipStatus = 'SKIP';
+
 interface ServerHealth {
 	serverStatus: string;
 	nodeStatus: string;
@@ -119,7 +121,10 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
 					const data = (await resp.json()) as ServerHealth;
-					if (data.nodeStatus === readyStatus && data.serverStatus === readyStatus) {
+					if (
+						data.nodeStatus === readyStatus &&
+						(data.serverStatus === readyStatus || data.serverStatus == skipStatus)
+					) {
 						return true;
 					}
 					throw new Error(`server is not yet ready ${data}`);
