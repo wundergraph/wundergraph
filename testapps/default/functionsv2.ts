@@ -1,5 +1,6 @@
 import { z } from 'zod';
-
+import { Selection, SelectionSet } from '@timkendall/tql';
+import { IQuery, ISchema, query, Result, $ } from './orm';
 class Builder<Input, Response> {
 	private type: 'query' | 'mutation' | 'subscription' = 'query';
 	private inputSchema: z.ZodObject<any> | undefined;
@@ -44,14 +45,51 @@ const getX = createOperation()
 		};
 	});
 
+// create execute function that extracts variabls via Variables<T> and Response via Result<ISchema, IQuery, SelectionSet<T>>
+const execute = <T extends ReadonlyArray<Selection>>(query: T): Promise<Result<ISchema, IQuery, SelectionSet<T>>> => {
+	return Promise.resolve({} as Result<ISchema, IQuery, SelectionSet<T>>);
+};
+
 const userByID = createOperation()
 	.query()
-	.input(z.object({ userByID: z.number() }).required())
+	.input(z.object({ userByID: z.number() }))
 	.handler(async ({ userByID }) => {
+		const user = await execute(
+			query((t) => [t.jsp_getUser({ id: userByID, tld: 'com' }, (u) => [u.id(), u.name(), u.email()])])
+		);
+
+		const germany = await execute(
+			query((q) => [
+				q.countries_countries({ filter: { code: { eq: 'DE' } } }, (c) => [c.code(), c.name(), c.capital()]),
+			])
+		);
+
+		const posts = await execute(
+			query((q) => [
+				q.db_findManyPost({ take: 10, where: $('where') }, (p) => [
+					p.id(),
+					p.User((u) => [
+						u.id(),
+						//u.email(),
+						u.name(),
+					]),
+				]),
+			])
+		);
+
+		if (germany.countries_countries.length !== 1) {
+			throw new Error('Germany not found');
+		}
+
+		const { name, ...userWithoutName } = user.jsp_getUser!;
+
 		return {
-			id: userByID,
-			name: 'test',
-			userAge: 20,
+			user: {
+				...userWithoutName,
+				userName: name,
+			},
+			germany: germany.countries_countries[0],
+			posts: posts.db_findManyPost!,
 		};
 	});
 
@@ -85,7 +123,7 @@ class Client<Definitions> {
 const client = new Client<Queries>();
 
 const out = await client.useQuery('x', {
-	x: 123,
+	x: 1,
 	y: 'true',
 });
 
@@ -96,6 +134,12 @@ const out2 = await client.useQuery('userByID', {
 	userByID: 1,
 });
 
-console.log(out2.id);
-console.log(out2.userAge);
-console.log(out2.name);
+console.log(out2.user.id);
+console.log(out2.user.name);
+console.log(out2.user.email);
+
+console.log(out2.germany.capital);
+
+console.log(out2.posts[0].id);
+console.log(out2.posts[0].User.id);
+console.log(out2.posts[0].User.email);

@@ -19,9 +19,12 @@
     "start": "wunderctl start --debug",
     "generate": "wunderctl generate --debug",
     "build": "pnpm generate && pnpm check",
-    "check": "tsc"
+    "check": "tsc",
+    "generate-orm": "npx @timkendall/tql-gen .wundergraph/generated/wundergraph.schema.graphql -o orm.ts"
   },
   "dependencies": {
+    "@graphql-typed-document-node/core": "^3.1.1",
+    "@timkendall/tql": "1.0.0-rc.8",
     "@types/node": "^14.14.37",
     "@wundergraph/golang-client": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
@@ -29,7 +32,7 @@
     "openapi-to-graphql": "^2.2.5",
     "pg": "^8.7.3",
     "postgraphile": "^4.12.9",
-    "typescript": "^4.8.2",
+    "typescript": "^4.9.4",
     "zod": "^3.20.2"
   },
   "sideEffects": false
