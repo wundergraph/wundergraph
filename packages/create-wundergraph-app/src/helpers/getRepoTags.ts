@@ -8,7 +8,7 @@ dotenv.config();
 export const getRepoTags = async (githubLink: string, prefix?: string) => {
 	const { repoName, repoOwnerName } = await getRepoInfo(githubLink);
 	let options;
-	if (process.env.CI as unknown as boolean) {
+	if (process.env.GITHUB_TOKEN) {
 		options = { headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } };
 	}
 

@@ -86,5 +86,4 @@ jobs:
       - name: Run all NPM tests
         run: pnpm test
         env:
-          CI: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
