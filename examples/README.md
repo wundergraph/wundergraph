@@ -24,7 +24,7 @@ Examples are expected to include the following node scripts:
     8. `cleanup` (optional, Development & CI): stops,remove all provisioned resources e.g. shutdown docker containers or kill processes
 
 If the example uses containers, it should have a `docker-compose.yml` file at the top. `package.json` should
-include a `start:container` script that runs `docker-compose up -d`.
+include a `start:services` script that runs `docker-compose up -d` and a `cleanup` script that runs `docker-compose down -v`.
 
 For packages with tests, there should be a `test` script that runs the test suite.
 
