@@ -6,12 +6,12 @@ docker-compose up -d
 sleep 3
 
 function setupMinio () {
-    docker-compose exec minio1 mc alias set myminio/ http://127.0.0.1:9000 minio minio123
-    docker-compose exec minio1 mc admin user add myminio test 12345678
-    docker-compose exec minio1 mc admin policy set myminio readwrite user=test
-    docker-compose exec minio1 mc admin user info myminio test
-    docker-compose exec minio1 mc mb myminio/uploads
-    docker-compose exec minio1 mc policy set public myminio/uploads
+    docker-compose exec minio mc alias set myminio/ http://127.0.0.1:9000 minio minio123
+    docker-compose exec minio mc admin user add myminio test 12345678
+    docker-compose exec minio mc admin policy set myminio readwrite user=test
+    docker-compose exec minio mc admin user info myminio test
+    docker-compose exec minio mc mb myminio/uploads
+    docker-compose exec minio mc policy set public myminio/uploads
 	return $?
 }
 

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "run-p dev wundergraph open",
+    "start": "run-p start:container dev wundergraph open",
+    "start:container": "cd minio && sh ./setup.sh",
     "wundergraph": "wunderctl up --debug",
-    "storage": "cd minio && sh ./setup.sh",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "build": "next build",
     "dev": "next dev",
