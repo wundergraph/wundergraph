@@ -33,7 +33,7 @@ configureWunderGraphApplication({
 			providers: [
 				authProviders.demo(),
 				authProviders.github({
-					id: 'github',
+					id: 'gitHub',
 					clientId: new EnvironmentVariable('GITHUB_CLIENT_ID'),
 					clientSecret: new EnvironmentVariable('GITHUB_CLIENT_SECRET'),
 				}),
