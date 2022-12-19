@@ -5,14 +5,8 @@ import fetch from 'node-fetch';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
 const wg = createTestServer({ fetch: fetch as any });
-
-beforeAll(async () => {
-	await wg.start();
-});
-
-afterAll(async () => {
-	await wg.stop();
-});
+beforeAll(() => wg.start());
+afterAll(() => wg.stop());
 
 describe('test ws subscription', () => {
 	test('subscribeOnce', async () => {
@@ -29,6 +23,7 @@ describe('test ws subscription', () => {
 		)) as ClientResponse<WsResponseData>;
 
 		expect(result.error).toBeFalsy();
+		expect(result.data?.ws_greetings).toBe('Hi');
 		expect(result.data?.ws_greetings).toBe(data?.ws_greetings);
 	});
 });

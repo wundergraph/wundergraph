@@ -24,7 +24,7 @@ We are going to make your database accessible through JSON-RPC to your Next.js a
 4.  Write down the secret displayed: if you lose it, you have to create
     a new one (the secret is only ever displayed once).
 
-5.  Rename the file `example.env` to `.env`.
+5.  Rename the file `.env.example` to `.env`.
 
 6.  In `.env`:
 

@@ -5,14 +5,8 @@ import { GlobalFragmentResponseData, LocalFragmentResponseData } from '../.wunde
 import { createTestServer } from '../.wundergraph/generated/testing';
 
 const wg = createTestServer({ fetch: fetch as any });
-
-beforeAll(async () => {
-	await wg.start();
-});
-
-afterAll(async () => {
-	await wg.stop();
-});
+beforeAll(() => wg.start());
+afterAll(() => wg.stop());
 
 describe('Test Fragments', () => {
 	test('local fragment', async () => {
