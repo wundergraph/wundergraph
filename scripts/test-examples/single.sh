@@ -8,16 +8,18 @@ usage()
   exit 2
 }
 
+default_node_url=http://localhost:9991
 update_package_json="no"
 
 kill_with_children() {
     local pid=$1
-    if children="`pgrep -P $pid`"; then
+    if children="`pgrep -P ${pid}`"; then
         for child in $children; do
-            kill_with_children $child
+            kill_with_children ${child}
         done
     fi
-    kill $pid
+    # Ignore errors here
+    kill ${pid} 2> /dev/null || true
 }
 
 args=`getopt uh $*`
@@ -46,7 +48,6 @@ if ! test -f package.json || ! test -d ../../examples; then
     exit 1
 fi
 
-set -x
 set -e
 
 # Wipe cache and generated files. This should have no impact in
@@ -68,8 +69,11 @@ if ! test -d node_modules; then
 fi
 
 # Check for a script to bring up the required services
-npm start
+npm start &
 pid=$!
+
+# Kill all services we started in "start" at exit
+# trap kill_with_children ${pid} EXIT
 
 if grep -q '"wait-on:services"' package.json; then
     npm run wait-on:services
@@ -78,46 +82,34 @@ else
 fi
 
 # Generate WunderGraph files
-npm run generate
+#npm run generate
+
+# Wait for code generation to complete
+while ! test -f .wundergraph/generated/bundle/server.js; do
+    sleep 0.1
+done
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
-    NODE_URL=http://localhost:9991 npm test
+    WG_NODE_URL=${default_node_url} npm test
 elif grep -q '"check"' package.json; then
     npm run check
 elif grep -q '"build"' package.json; then
     npm run build
 fi
 
-if grep -q '"playwright"' package.json; then
-  npx -- playwright test
+if grep -q '"test:playwright"' package.json; then
+    # This is a no-op if playwright is already installed
+    npx -- playwright install --with-deps chromium
+    WG_NODE_URL=${default_node_url} npm run test:playwright
 fi
+
+kill_with_children ${pid}
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
-		echo "Cleaning up"
+	echo "Cleaning up"
     npm run cleanup
-fi
-
-# Kill all services we started in "start:services"
-if test ! -z ${services_pid}; then
-	if ps -p $services_pid > /dev/null; then
-			echo "Killing services"
-			kill_with_children ${services_pid}
-	fi
-fi
-
-
-# If we have playwright based tests, run them
-# Note that we always run these with npx
-if test -f playwright.config.ts; then
-    npx -- playwright install --with-deps chromium
-    npx -- playwright test
-
-    # playwright might have restarted the container, stop it but ignore errors
-    if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
-        cd `dirname ${docker_compose_yml}` && docker-compose down || true && cd -
-    fi
 fi
 
 # Restore package.json
