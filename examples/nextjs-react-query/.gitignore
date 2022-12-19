@@ -3,6 +3,9 @@
 .vscode
 .idea
 
+# jest compilation
+test/*.js
+
 # WunderGraph build output
 .wundergraph/cache
 .wundergraph/generated
