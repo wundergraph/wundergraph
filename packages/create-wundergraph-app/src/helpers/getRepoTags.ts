@@ -1,12 +1,19 @@
 import got from 'got';
 
 import { getRepoInfo } from './getRepoInfo';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 export const getRepoTags = async (githubLink: string, prefix?: string) => {
 	const { repoName, repoOwnerName } = await getRepoInfo(githubLink);
+	let options;
+	if (process.env.CI as unknown as boolean) {
+		options = { headers: { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } };
+	}
 
 	const response = await got
-		.get(`https://api.github.com/repos/${repoOwnerName}/${repoName}/git/refs/tags`)
+		.get(`https://api.github.com/repos/${repoOwnerName}/${repoName}/git/refs/tags`, options)
 		.catch((e) => {
 			throw e;
 		});
