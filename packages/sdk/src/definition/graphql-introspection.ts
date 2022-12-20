@@ -35,6 +35,13 @@ import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
 import transformSchema from '../transformations/shema';
 
+class MissingKeyError extends Error {
+	constructor(private key: string, private introspection: GraphQLIntrospection) {
+		super(`${key} is not defined in your ${introspection.apiNamespace} datasource`);
+		Object.setPrototypeOf(this, MissingKeyError.prototype);
+	}
+}
+
 export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HTTPHeader }): Record<string, string> => {
 	const baseHeaders: Record<string, string> = {
 		'Content-Type': 'application/json',
@@ -83,13 +90,19 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const federationEnabled = isFederationService(schema);
 		const upstreamSchema = cleanupSchema(schema, introspection);
 		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
-		const serviceSDL = !federationEnabled
-			? undefined
-			: introspection.loadSchemaFromString
-			? loadFile(introspection.loadSchemaFromString)
-			: await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
+		let serviceSDL: string | undefined;
+		if (federationEnabled) {
+			if (introspection.loadSchemaFromString) {
+				serviceSDL = loadFile(introspection.loadSchemaFromString);
+			} else {
+				if (!introspection.url) {
+					throw new MissingKeyError('url', introspection);
+				}
+				serviceSDL = await fetchFederationServiceSDL(resolveVariable(introspection.url), introspectionHeaders, {
 					apiNamespace: introspection.apiNamespace,
-			  });
+				});
+			}
+		}
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
@@ -215,6 +228,12 @@ const introspectGraphQLAPI = async (
 	};
 
 	if (introspection.mTLS) {
+		if (!introspection.mTLS.key) {
+			throw new MissingKeyError('mTLS.key', introspection);
+		}
+		if (!introspection.mTLS.cert) {
+			throw new MissingKeyError('mTLS.cert', introspection);
+		}
 		opts.httpsAgent = new https.Agent({
 			key: resolveVariable(introspection.mTLS.key),
 			cert: resolveVariable(introspection.mTLS.cert),
@@ -224,6 +243,9 @@ const introspectGraphQLAPI = async (
 
 	let res: AxiosResponse | undefined;
 	try {
+		if (!introspection.url) {
+			throw new MissingKeyError('url', introspection);
+		}
 		res = await Fetcher().post(resolveVariable(introspection.url), data, opts);
 	} catch (e: any) {
 		throw new Error(

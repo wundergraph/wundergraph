@@ -82,6 +82,9 @@ export const introspectPrismaDatabaseWithRetries = async (
 	databaseSchema: DatabaseSchema,
 	maxRetries: number
 ): Promise<PrismaDatabaseIntrospectionResult> => {
+	if (!introspection.databaseURL) {
+		throw new Error('database URL is not defined');
+	}
 	const resolvedURL = resolveVariable(introspection.databaseURL);
 	for (let i = 0; i < maxRetries; i++) {
 		try {
