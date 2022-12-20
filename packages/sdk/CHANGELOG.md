@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.127.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.126.0...@wundergraph/sdk@0.127.0) (2022-12-20)
+
+### Features
+
+* **ci:** add CI workflow for examples ([#428](https://github.com/wundergraph/wundergraph/issues/428)) ([72c1616](https://github.com/wundergraph/wundergraph/commit/72c16160205cd2e61ffcf493c9eb488214ff42cb)) (@fiam)
+
+### Bug Fixes
+
+* csrf and authenticated uploads ([#456](https://github.com/wundergraph/wundergraph/issues/456)) ([6138a98](https://github.com/wundergraph/wundergraph/commit/6138a98c20286e9693ab9df0245006c2d73043ab)) (@thisisnithin)
+* detect server ready when the hooks server health check is disabled ([#462](https://github.com/wundergraph/wundergraph/issues/462)) ([e324f1c](https://github.com/wundergraph/wundergraph/commit/e324f1c681d83658ce0300e2e938ffbb73a3c779)) (@fiam)
+
 ## [0.126.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.125.0...@wundergraph/sdk@0.126.0) (2022-12-15)
 
 ### Features
