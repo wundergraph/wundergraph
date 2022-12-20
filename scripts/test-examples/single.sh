@@ -85,7 +85,7 @@ fi
 #npm run generate
 
 # Wait for code generation to complete
-while ! test -f .wundergraph/generated/bundle/server.js; do
+while ! test -f .wundergraph/generated/bundle/config.js; do
     sleep 0.1
 done
 
