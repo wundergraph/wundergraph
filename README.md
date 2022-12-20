@@ -73,6 +73,7 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Publish & Install APIs](./examples/publish-install-api)
 - [Dockerize WunderGraph](https://github.com/wundergraph/docker)
 - [Typesafe Golang Client](/examples/golang-client)
+- [Typesafe Node.js Client](/examples/nodejs-ts-client)
 - [OpenAPI and mocking](/examples/openapi-mocking)
 
 ## The WunderGraph Stack
