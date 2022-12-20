@@ -1,7 +1,6 @@
 # WunderGraph Node.js + TypeScript Client
 
-This is a simple example of how to use the WunderGraph Node.js + TypeScript client.
-The TypeScript client is auto-generated and type-safe.
+This is a simple example of how to use the WunderGraph auto-generated and type-safe client with Node.js and TypeScript.
 
 #### Getting started
 
