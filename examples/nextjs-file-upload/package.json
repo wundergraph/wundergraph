@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npm run start:services && run-p dev wundergraph open",
-    "start:services": "cd minio && sh ./setup.sh",
+    "start:services": "cd minio && ./setup.sh",
     "postinstall": "cp -n .env.example .env",
     "generate": "wunderctl generate --debug",
     "wundergraph": "wunderctl up --debug",
