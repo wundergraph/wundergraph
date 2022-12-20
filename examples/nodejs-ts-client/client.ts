@@ -6,7 +6,7 @@ async function main() {
 		// The URL of your WunderGraph server
 		baseURL: 'http://localhost:9991',
 		// The fetch implementation to use. Defaults to the global fetch.
-		// Fetch is provided by Node.js only version 18.0.0 and above.
+		// Fetch is provided by Node.js only with version 18.0.0 and above.
 		// This example use a polyfill for backwards compatibility.
 		customFetch: fetch as any,
 		// Additional headers to send with every request. Defaults to an empty object.
