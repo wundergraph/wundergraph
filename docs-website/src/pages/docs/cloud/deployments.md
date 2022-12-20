@@ -54,3 +54,5 @@ and execute it during the deployment process.
 The WunderGraph Cloud officially supports the `turborepo`, which is a type of monorepo that allows for faster and more efficient builds.
 If your repository is set as a `turborepo`, no additional steps are required for deployment.
 The WunderGraph Cloud will automatically recognize and deploy your `turborepo` project.
+
+To test this feature, you can fork the [turborepo example repository](https://github.com/wundergraph/turbo-wunder-svelte/fork).
