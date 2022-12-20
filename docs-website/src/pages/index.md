@@ -42,6 +42,14 @@ Learn how to use and configure WunderGraph. {% .lead %}
 
 {% /quick-links %}
 
+## WunderGraph Cloud
+
+{% quick-links %}
+
+{% quick-link title="Deployments" icon="core" href="/docs/cloud/deployments" description="Experience the power of seamless deployment with WunderGraph Cloud - just a few clicks, and you're live" /%}
+
+{% /quick-links %}
+
 ## Join the community / getting help
 
 If you need help, you can find us on [GitHub](https://github.com/wundergraph/wundergraph) or on our [Discord](https://wundergraph.com/discord) server.
