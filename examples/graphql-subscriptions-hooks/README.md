@@ -10,7 +10,7 @@ const counter = introspect.graphql({
   id: 'counter',
   apiNamespace: 'ws',
   loadSchemaFromString: schema,
-  url: 'http://127.0.0.1:4000/graphql',
+  url: 'http://localhost:4000/graphql',
 });
 
 configureWunderGraphApplication({

@@ -41,7 +41,7 @@ Each option when unset will get a value from the `Default Environment Variables`
 
 | Option          | Default Value           | Default Environment Variable |
 | --------------- | ----------------------- | ---------------------------- |
-| `listen.host`   | `127.0.0.1`             | `WG_NODE_HOST`               |
+| `listen.host`   | `localhost`             | `WG_NODE_HOST`               |
 | `listen.port`   | `9991`                  | `WG_NODE_PORT`               |
 | `nodeUrl`       | `http://localhost:9991` | `WG_NODE_URL`                |
 | `publicNodeUrl` | `http://localhost:9991` | `WG_PUBLIC_NODE_URL`         |
@@ -84,7 +84,7 @@ When using custom environment variables, you need to make sure that the environm
 configureWunderGraphApplication({
   options: {
     listen: {
-      host: '127.0.0.1',
+      host: 'localhost',
       port: '4444',
     },
     nodeUrl: 'http://my-internal-network-node:4444/',
@@ -104,7 +104,7 @@ import { EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk'
 configureWunderGraphApplication({
   options: {
     listen: {
-      host: new EnvironmentVariable('NODE_HOST', '127.0.0.1'),
+      host: new EnvironmentVariable('NODE_HOST', 'localhost'),
       port: new EnvironmentVariable('NODE_PORT', '4444'),
     },
     nodeUrl: new EnvironmentVariable('NODE_URL', 'http://localhost:4444/'),
@@ -132,7 +132,7 @@ import { EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk'
 configureWunderGraphApplication({
   options: {
     listen: {
-      host: new EnvironmentVariable(WgEnv.NodeHost, '127.0.0.1'),
+      host: new EnvironmentVariable(WgEnv.NodeHost, 'localhost'),
       port: new EnvironmentVariable(WgEnv.NodePort, '9991'),
     },
     nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991/'),
@@ -150,7 +150,7 @@ configureWunderGraphApplication({
 configureWunderGraphApplication({
   options: {
     listen: {
-      host: new EnvironmentVariable('WG_NODE_HOST', '127.0.0.1'),
+      host: new EnvironmentVariable('WG_NODE_HOST', 'localhost'),
       port: new EnvironmentVariable('WG_NODE_PORT', '9991'),
     },
     nodeUrl: new EnvironmentVariable('WG_NODE_URL', 'http://localhost:9991/'),
