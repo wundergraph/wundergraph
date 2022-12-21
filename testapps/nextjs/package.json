@@ -29,7 +29,7 @@
     "@graphql-yoga/node": "^2.13.13",
     "@tanstack/react-query": "^4.16.1",
     "@wundergraph/nextjs": "workspace:*",
-    "@wundergraph/react-query": "workspace:^0.1.0",
+    "@wundergraph/react-query": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/swr": "workspace:*",
     "next": "^12.1.6",
