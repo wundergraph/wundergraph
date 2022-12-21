@@ -357,6 +357,8 @@ export class Client {
 				headers: {
 					// Dont set the content-type header, the browser will set it for us + boundary
 					'X-CSRF-Token': csrfToken,
+					'X-Upload-Profile': config.profile ?? '',
+					'X-Metadata': config.meta ? JSON.stringify(config.meta) : '',
 				},
 				body: formData,
 				method: 'POST',

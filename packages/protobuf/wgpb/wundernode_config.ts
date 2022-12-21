@@ -913,6 +913,13 @@ export interface WunderGraphConfiguration {
   dangerouslyEnableGraphQLEndpoint: boolean;
 }
 
+export interface S3UploadProfile {
+  maxAllowedUploadSizeBytes: number;
+  maxAllowedFiles: number;
+  allowedMimeTypes: string[];
+  allowedFileExtensions: string[];
+}
+
 export interface S3UploadConfiguration {
   name: string;
   endpoint: ConfigurationVariable | undefined;
@@ -921,6 +928,12 @@ export interface S3UploadConfiguration {
   bucketName: ConfigurationVariable | undefined;
   bucketLocation: ConfigurationVariable | undefined;
   useSSL: boolean;
+  uploadProfiles: { [key: string]: S3UploadProfile };
+}
+
+export interface S3UploadConfiguration_UploadProfilesEntry {
+  key: string;
+  value: S3UploadProfile | undefined;
 }
 
 export interface UserDefinedApi {
@@ -3169,6 +3182,52 @@ export const WunderGraphConfiguration = {
   },
 };
 
+function createBaseS3UploadProfile(): S3UploadProfile {
+  return { maxAllowedUploadSizeBytes: 0, maxAllowedFiles: 0, allowedMimeTypes: [], allowedFileExtensions: [] };
+}
+
+export const S3UploadProfile = {
+  fromJSON(object: any): S3UploadProfile {
+    return {
+      maxAllowedUploadSizeBytes: isSet(object.maxAllowedUploadSizeBytes) ? Number(object.maxAllowedUploadSizeBytes) : 0,
+      maxAllowedFiles: isSet(object.maxAllowedFiles) ? Number(object.maxAllowedFiles) : 0,
+      allowedMimeTypes: Array.isArray(object?.allowedMimeTypes)
+        ? object.allowedMimeTypes.map((e: any) => String(e))
+        : [],
+      allowedFileExtensions: Array.isArray(object?.allowedFileExtensions)
+        ? object.allowedFileExtensions.map((e: any) => String(e))
+        : [],
+    };
+  },
+
+  toJSON(message: S3UploadProfile): unknown {
+    const obj: any = {};
+    message.maxAllowedUploadSizeBytes !== undefined &&
+      (obj.maxAllowedUploadSizeBytes = Math.round(message.maxAllowedUploadSizeBytes));
+    message.maxAllowedFiles !== undefined && (obj.maxAllowedFiles = Math.round(message.maxAllowedFiles));
+    if (message.allowedMimeTypes) {
+      obj.allowedMimeTypes = message.allowedMimeTypes.map((e) => e);
+    } else {
+      obj.allowedMimeTypes = [];
+    }
+    if (message.allowedFileExtensions) {
+      obj.allowedFileExtensions = message.allowedFileExtensions.map((e) => e);
+    } else {
+      obj.allowedFileExtensions = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<S3UploadProfile>, I>>(object: I): S3UploadProfile {
+    const message = createBaseS3UploadProfile();
+    message.maxAllowedUploadSizeBytes = object.maxAllowedUploadSizeBytes ?? 0;
+    message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
+    message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];
+    message.allowedFileExtensions = object.allowedFileExtensions?.map((e) => e) || [];
+    return message;
+  },
+};
+
 function createBaseS3UploadConfiguration(): S3UploadConfiguration {
   return {
     name: "",
@@ -3178,6 +3237,7 @@ function createBaseS3UploadConfiguration(): S3UploadConfiguration {
     bucketName: undefined,
     bucketLocation: undefined,
     useSSL: false,
+    uploadProfiles: {},
   };
 }
 
@@ -3193,6 +3253,12 @@ export const S3UploadConfiguration = {
       bucketName: isSet(object.bucketName) ? ConfigurationVariable.fromJSON(object.bucketName) : undefined,
       bucketLocation: isSet(object.bucketLocation) ? ConfigurationVariable.fromJSON(object.bucketLocation) : undefined,
       useSSL: isSet(object.useSSL) ? Boolean(object.useSSL) : false,
+      uploadProfiles: isObject(object.uploadProfiles)
+        ? Object.entries(object.uploadProfiles).reduce<{ [key: string]: S3UploadProfile }>((acc, [key, value]) => {
+          acc[key] = S3UploadProfile.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
     };
   },
 
@@ -3212,6 +3278,12 @@ export const S3UploadConfiguration = {
     message.bucketLocation !== undefined &&
       (obj.bucketLocation = message.bucketLocation ? ConfigurationVariable.toJSON(message.bucketLocation) : undefined);
     message.useSSL !== undefined && (obj.useSSL = message.useSSL);
+    obj.uploadProfiles = {};
+    if (message.uploadProfiles) {
+      Object.entries(message.uploadProfiles).forEach(([k, v]) => {
+        obj.uploadProfiles[k] = S3UploadProfile.toJSON(v);
+      });
+    }
     return obj;
   },
 
@@ -3234,6 +3306,46 @@ export const S3UploadConfiguration = {
       ? ConfigurationVariable.fromPartial(object.bucketLocation)
       : undefined;
     message.useSSL = object.useSSL ?? false;
+    message.uploadProfiles = Object.entries(object.uploadProfiles ?? {}).reduce<{ [key: string]: S3UploadProfile }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = S3UploadProfile.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseS3UploadConfiguration_UploadProfilesEntry(): S3UploadConfiguration_UploadProfilesEntry {
+  return { key: "", value: undefined };
+}
+
+export const S3UploadConfiguration_UploadProfilesEntry = {
+  fromJSON(object: any): S3UploadConfiguration_UploadProfilesEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? S3UploadProfile.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: S3UploadConfiguration_UploadProfilesEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? S3UploadProfile.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<S3UploadConfiguration_UploadProfilesEntry>, I>>(
+    object: I,
+  ): S3UploadConfiguration_UploadProfilesEntry {
+    const message = createBaseS3UploadConfiguration_UploadProfilesEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? S3UploadProfile.fromPartial(object.value)
+      : undefined;
     return message;
   },
 };

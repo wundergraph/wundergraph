@@ -1011,6 +1011,18 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				typeConfigurations: types,
 			},
 			s3UploadConfiguration: config.application.S3UploadProvider.map((provider) => {
+				let uploadProfiles: { [key: string]: any } = {};
+				if (provider.uploadProfiles) {
+					for (const key in provider.uploadProfiles) {
+						const profile = provider.uploadProfiles[key];
+						uploadProfiles[key] = {
+							maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
+							maxAllowedFiles: profile.maxAllowedFiles ?? -1,
+							allowedMimeTypes: profile.allowedMimeTypes ?? [],
+							allowedFileExtensions: profile.allowedFileExtensions ?? [],
+						};
+					}
+				}
 				return {
 					name: provider.name,
 					accessKeyID: mapInputVariable(provider.accessKeyID),
@@ -1019,6 +1031,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
 					useSSL: provider.useSSL,
+					uploadProfiles: uploadProfiles,
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,

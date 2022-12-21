@@ -254,13 +254,27 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	r.registerAuth(r.insecureCookies)
 
 	for _, s3Provider := range api.S3UploadConfiguration {
+		var profiles map[string]*s3uploadclient.UploadProfile
+		for name, profile := range s3Provider.UploadProfiles {
+			if profiles == nil {
+				profiles = make(map[string]*s3uploadclient.UploadProfile)
+			}
+			profiles[name] = &s3uploadclient.UploadProfile{
+				MaxFileSizeBytes:      int(profile.MaxAllowedUploadSizeBytes),
+				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
+				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
+				AllowedFileExtensions: append([]string(nil), profile.AllowedFileExtensions...),
+			}
+		}
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
 			s3uploadclient.Options{
+				Logger:          r.log,
 				BucketName:      loadvariable.String(s3Provider.BucketName),
 				BucketLocation:  loadvariable.String(s3Provider.BucketLocation),
 				AccessKeyID:     loadvariable.String(s3Provider.AccessKeyID),
 				SecretAccessKey: loadvariable.String(s3Provider.SecretAccessKey),
 				UseSSL:          s3Provider.UseSSL,
+				Profiles:        profiles,
 			},
 		)
 		if err != nil {
