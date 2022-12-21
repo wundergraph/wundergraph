@@ -1,15 +1,6 @@
-# This query cannot pass validation
 subscription SubscribeToUserTyping($selfId: Int) {
 	hasura_user_typing(where: { id: { _neq: $selfId } }, limit: 1, order_by: { last_typed: desc }) {
 		last_typed
 		username
 	}
 }
-
-# But this simpler query is fine
-# subscription SubscribeToUserTyping($selfId: Int) {
-# 	hasura_user_typing(where: { id: { _neq: $selfId } }, limit: 1) {
-# 		last_typed
-# 		username
-# 	}
-# }
