@@ -10,7 +10,7 @@
     "start:nextjs": "next dev",
     "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "generate:api": "wunderctl generate --debug",
     "cleanup": "cd federation && docker-compose down -v",
     "check": "tsc --noEmit",
     "test": "jest"
