@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.1...create-wundergraph-app@0.2.2) (2022-12-21)
+
+### Bug Fixes
+
+* use github token for getTags API to increase the rate limit ([#467](https://github.com/wundergraph/wundergraph/issues/467)) ([8c92f6a](https://github.com/wundergraph/wundergraph/commit/8c92f6a1268b42dadcf4aedcf20bfc0cf0fca618)) (@JivusAyrus)
+
 ## [0.2.1](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.0...create-wundergraph-app@0.2.1) (2022-12-08)
 
 ### Bug Fixes
