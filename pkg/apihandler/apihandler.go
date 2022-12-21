@@ -402,7 +402,7 @@ func (r *Builder) operationApiPath(name string) string {
 }
 
 func (r *Builder) registerInvalidOperation(name string) {
-	apiPath := r.operationApiPath((name))
+	apiPath := r.operationApiPath(name)
 	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
 	route.Handler(&EndpointUnavailableHandler{
 		OperationName: name,
@@ -446,7 +446,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	if shared.Report.HasErrors() {
 		return fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
 	}
-	
+
 	state := shared.Validation.Validate(shared.Doc, r.definition, shared.Report)
 	if state != astvalidation.Valid {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)

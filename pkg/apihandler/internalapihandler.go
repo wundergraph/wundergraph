@@ -122,7 +122,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	if shared.Report.HasErrors() {
 		return fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
 	}
-	
+
 	state := shared.Validation.Validate(shared.Doc, i.definition, shared.Report)
 	if state != astvalidation.Valid {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
