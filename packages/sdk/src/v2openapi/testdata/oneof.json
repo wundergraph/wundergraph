@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "kyc_workflow",
+    "description": "",
+    "contact": {
+      "name": ""
+    },
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api"
+    }
+  ],
+  "paths": {
+    "/status/{user_id}": {
+      "get": {
+        "tags": ["routes"],
+        "description": "",
+        "operationId": "status",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "description": "User's e-mail",
+            "required": true,
+            "deprecated": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KYC status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An error occured while retrieving KYC status"
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StatusResponse": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["screen", "workflowId", "status"],
+            "properties": {
+              "screen": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["Ongoing"]
+              },
+              "workflowId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["workflowId", "status"],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["Completed"]
+              },
+              "workflowId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["token", "workflowId", "status"],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["Verified"]
+              },
+              "token": {
+                "type": "string"
+              },
+              "workflowId": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "discriminator": {
+          "propertyName": "status"
+        }
+      }
+    }
+  }
+}

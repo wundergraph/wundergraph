@@ -26,12 +26,11 @@ import {
 	UnionTypeDefinitionNode,
 	visit,
 } from 'graphql';
-import { JSONSchema7 as JSONSchema, JSONSchema7Type } from 'json-schema';
+import { JSONSchema7 as JSONSchema, JSONSchema7Definition, JSONSchema7Type } from 'json-schema';
 import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
-	ConfigurationVariable,
 	ConfigurationVariableKind,
 	DataSourceKind,
 	FieldConfiguration,
@@ -403,6 +402,30 @@ class RESTApiBuilder {
 				return;
 			}
 			const componentSchema = resolved.schema;
+			if (componentSchema.oneOf && componentSchema.oneOf.length) {
+				if (!this.isValidOneOfSchema(componentSchema)) {
+					return;
+				}
+				const members: string[] = [];
+				componentSchema.oneOf.forEach((oneOf) => {
+					const oneOfSchema = oneOf as JSONSchema;
+
+					this.traverseSchema({
+						argumentName,
+						fieldName,
+						enclosingTypes,
+						parentTypeName,
+						isRootField,
+						objectKind,
+						path,
+						verb,
+						schema: oneOfSchema,
+					});
+				});
+				this.addField(parentTypeName, objectKind, fieldName, resolved.ref, enclosingTypes);
+				//this.ensureUnionType(resolved.ref, members);
+				return;
+			}
 			const type = componentSchema.type;
 			if (
 				!componentSchema.enum &&
@@ -596,6 +619,24 @@ class RESTApiBuilder {
 					});
 				});
 		}
+	};
+	private isValidOneOfSchema = (schema: JSONSchema | undefined): boolean => {
+		if (!schema) {
+			return false;
+		}
+		if (!Array.isArray(schema.oneOf)) {
+			return false;
+		}
+		if ((schema as any).discriminator === undefined || (schema as any).discriminator.propertyName) {
+			return false;
+		}
+		for (const item of schema.oneOf || []) {
+			const schema = item as JSONSchema;
+			if (schema.type !== 'object' || !schema.properties || !schema.$ref) {
+				return false;
+			}
+		}
+		return true;
 	};
 	private buildFieldTypeName = (fieldTypeName: string, description: string, statusCode: string): string => {
 		if (description !== '') {

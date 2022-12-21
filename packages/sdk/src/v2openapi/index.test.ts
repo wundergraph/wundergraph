@@ -95,6 +95,10 @@ test('non alphanumeric fields', async () => {
 	await runTest('src/v2openapi/testdata/non_alphanumeric_fields.yaml', 'non_alphanumeric_fields');
 });
 
+test('oneOf', async () => {
+	await runTest('src/v2openapi/testdata/oneof.json', 'oneof');
+});
+
 test('arbitrary type', async () => {
 	const fileContents = fs.readFileSync(path.resolve(__dirname, './testdata/users_meta.json')).toString('utf-8');
 
