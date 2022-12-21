@@ -501,7 +501,7 @@ importers:
       '@types/node': ^17.0.27
       '@types/react': ^18.0.7
       '@wundergraph/nextjs': workspace:*
-      '@wundergraph/react-query': workspace:^0.1.0
+      '@wundergraph/react-query': workspace:*
       '@wundergraph/sdk': workspace:*
       '@wundergraph/swr': workspace:*
       concurrently: ^6.0.0
