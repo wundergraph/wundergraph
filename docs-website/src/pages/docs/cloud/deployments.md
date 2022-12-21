@@ -48,11 +48,11 @@ your repository must meet the following criteria:
 2. Workspaces are configured in the root `package.json` file or `pnpm-workspace.yaml` file.
 3. The WunderGraph project itself should not contain its own lock file, otherwise it will be deployed as a standalone project.
 
-If the repository meets these requirements, the WunderGraph Cloud will check for a build command in the root `package.json` file
+If the repository meets these requirements, WunderGraph Cloud will check for a build command in the root `package.json` file
 and execute it during the deployment process.
 
-The WunderGraph Cloud officially supports the `turborepo`, which is a type of monorepo that allows for faster and more efficient builds.
+The WunderGraph Cloud officially supports `turborepo`, which is a type of monorepo that allows for faster and more efficient builds.
 If your repository is set as a `turborepo`, no additional steps are required for deployment.
 The WunderGraph Cloud will automatically recognize and deploy your `turborepo` project.
 
-To test this feature, you can fork the [turborepo example repository](https://github.com/wundergraph/turbo-wunder-svelte/fork).
+To test this feature, you can [fork our turborepo example repository](https://github.com/wundergraph/cloud-starter-turbo/fork).
