@@ -36,7 +36,7 @@ export class TypeScriptClient implements Template {
 			hasAuthProviders: config.authentication.cookieBased.length !== 0,
 			authProviders: config.authentication.cookieBased.map((provider) => provider.id),
 			hasS3Providers: config.application.S3UploadProvider.length !== 0,
-			s3Providers: config.application.S3UploadProvider.map((provider) => provider.name),
+			s3Providers: config.application.S3UploadProvider,
 			hasS3Provider: config.application.S3UploadProvider.length > 0,
 			s3Provider: config.application.S3UploadProvider,
 		});

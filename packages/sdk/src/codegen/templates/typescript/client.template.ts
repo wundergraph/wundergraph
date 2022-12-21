@@ -22,17 +22,38 @@ export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
 
 {{#if hasS3Provider}}
 export interface UploadResponse { key: string }
-
-export enum S3Provider {
-    {{#each s3Provider }}
-    "{{name}}" = "{{name}}",
-    {{/each}}
-}
-
-export type UploadConfig = UploadRequestOptions<S3Provider>
-{{else}}
-export type UploadConfig = UploadRequestOptions<never>
 {{/if}}
+
+export type S3UploadProfileNames = {
+	{{#each s3Provider }}
+		{{#if uploadProfiles}}
+		{{name}}: {{#each uploadProfiles}}'{{@key}}'{{#unless @last}} | {{/unless}}{{/each}},
+		{{/if}}
+	{{/each}}
+};
+
+const S3UploadProfiles = {
+	{{#each s3Provider }}
+	{{name}}: {
+		{{#each uploadProfiles}}
+			{{@key}}: {
+				{{#if this.maxAllowedUploadSizeBytes includeZero=true}}
+				maxAllowedUploadSizeBytes: {{this.maxAllowedUploadSizeBytes}},
+				{{/if}}
+				{{#if this.maxAllowedFiles includeZero=true}}
+				maxAllowedFiles: {{this.maxAllowedFiles}},
+				{{/if}}
+				{{#if this.allowedMimeTypes}}
+				allowedMimeTypes: [{{#each this.allowedMimeTypes}}'{{this}}',{{/each}}],
+				{{/if}}
+				{{#if this.allowedFileExtensions}}
+				allowedFileExtensions: [{{#each this.allowedFileExtensions}}'{{this}}',{{/each}}],
+				{{/if}}
+			},
+		{{/each}}
+	},
+	{{/each}}
+}
 
 {{#if hasAuthProviders}}
 export enum AuthProviderId {
@@ -89,8 +110,12 @@ export class WunderGraphClient extends Client {
 	) {
 		return super.subscribe(options, cb);
 	}
-	public async uploadFiles(config: UploadConfig) {
-		return super.uploadFiles(config);
+	public async uploadFiles<
+		ProviderName extends Extract<keyof S3UploadProfileNames, string>,
+		Config extends UploadRequestOptions<ProviderName, S3UploadProfileNames[ProviderName]>
+	>(config: Config) {
+		const profile = config.profile ? S3UploadProfiles[config.provider][config.profile] : undefined;
+		return super.uploadFiles(config, profile);
 	}
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
@@ -150,5 +175,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Provider}}, keyof typeof S3Provider{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Provider}}, Extract<keyof S3UploadProfileNames, string>{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;

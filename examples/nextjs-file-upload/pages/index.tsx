@@ -1,10 +1,11 @@
 import { NextPage } from 'next';
 import Image from 'next/image';
 import { useState } from 'react';
+import { createClient } from '../components/generated/client';
 import { useAuth, useFileUpload, useUser, withWunderGraph } from '../components/generated/nextjs';
 
 const Upload = () => {
-	const { login } = useAuth();
+	const { login, logout } = useAuth();
 	const { data: user } = useUser();
 
 	const [files, setFiles] = useState<FileList>();
@@ -21,6 +22,11 @@ const Upload = () => {
 		if (!files) {
 			return;
 		}
+		const c = createClient();
+		c.uploadFiles({
+			provider: 'minio',
+			files: files,
+		});
 		try {
 			const result = await upload({
 				provider: 'minio',
@@ -65,6 +71,9 @@ const Upload = () => {
 					</li>
 				))}
 			</ul>
+			<button className="bg-white text-black p-2 rounded w-full mt-4" type="button" onClick={() => logout()}>
+				Logout
+			</button>
 		</div>
 	);
 };

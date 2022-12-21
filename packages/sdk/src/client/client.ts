@@ -7,6 +7,7 @@ import {
 	LogoutOptions,
 	OperationRequestOptions,
 	QueryRequestOptions,
+	S3UploadProfile,
 	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
@@ -336,7 +337,8 @@ export class Client {
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
-	public async uploadFiles(config: UploadRequestOptions): Promise<UploadResponse> {
+	public async uploadFiles(config: UploadRequestOptions, profile?: S3UploadProfile): Promise<UploadResponse> {
+		this.validateFiles(config, profile);
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
 			if (file instanceof Blob) {
@@ -376,6 +378,42 @@ export class Client {
 		return {
 			fileKeys: json.map((x) => x.key),
 		};
+	}
+
+	public validateFiles(config: UploadRequestOptions, profile?: S3UploadProfile) {
+		if (profile?.maxAllowedFiles && config.files.length > profile.maxAllowedFiles) {
+			throw new Error(`uploading ${config.files.length} exceeds the maximum allowed (${profile.maxAllowedFiles})`);
+		}
+		for (const file of config.files) {
+			if (profile?.maxAllowedUploadSizeBytes && file.size > profile.maxAllowedUploadSizeBytes) {
+				throw new Error(
+					`file ${file.name} with size ${file.size} exceeds the maximum allowed (${profile.maxAllowedUploadSizeBytes})`
+				);
+			}
+			if (profile?.allowedFileExtensions && file.name.includes('.')) {
+				const ext = file.name.substring(file.name.indexOf('.') + 1).toLowerCase();
+				if (ext) {
+					if (profile.allowedFileExtensions.findIndex((item) => item.toLocaleLowerCase()) < 0) {
+						throw new Error(`file ${file.name} with extension ${ext} is not allowed`);
+					}
+				}
+			}
+			if (profile?.allowedMimeTypes) {
+				const mimeType = file.type;
+				const idx = profile.allowedMimeTypes.findIndex((item) => {
+					// Full match
+					if (item == mimeType) {
+						return true;
+					}
+					// Try wildcard match. This is a bit brittle but it should be fine
+					// as long as profile?.allowedMimeTypes contains only valid entries
+					return mimeType.match(new RegExp(item.replace('*', '.*')));
+				});
+				if (idx < 0) {
+					throw new Error(`file ${file.name} with MIME type ${mimeType} is not allowed`);
+				}
+			}
+		}
 	}
 
 	public login(authProviderID: string, redirectURI?: string) {

@@ -13,6 +13,28 @@ configureWunderGraphApplication({
 			bucketLocation: 'eu-central-1',
 			bucketName: 'uploads',
 			useSSL: false,
+			uploadProfiles: {
+				avatar: {
+					maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
+					maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
+					allowedMimeTypes: ['image/png', 'image/jpeg'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
+					allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
+				},
+				coverPicture: {
+					// meta: {
+					//   type: 'object',
+					//   properties: {
+					// 	postId: {
+					// 	  type: 'string',
+					// 	},
+					//   },
+					// },
+					maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
+					maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
+					allowedMimeTypes: ['image/*'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
+					allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
+				},
+			},
 		},
 	],
 	codeGenerators: [

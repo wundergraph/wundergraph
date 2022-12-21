@@ -1,6 +1,9 @@
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 
+import { S3UploadProfile, S3UploadProfiles } from '../configure/index';
+export type { S3UploadProfile, S3UploadProfiles };
+
 export type Headers = { [key: string]: string };
 
 export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
@@ -108,8 +111,14 @@ export interface SubscriptionResult {
 	data: any;
 }
 
-export interface UploadRequestOptions<ProviderName extends string = string> {
+export interface UploadRequestOptions<
+	ProviderName extends string = string,
+	UploadProfile extends string = string,
+	Meta extends any = any
+> {
 	provider: ProviderName;
+	profile?: UploadProfile;
+	meta?: Meta;
 	files: FileList;
 	abortSignal?: AbortSignal;
 }

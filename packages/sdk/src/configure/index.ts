@@ -246,6 +246,35 @@ interface ResolvedDeployment {
 	};
 }
 
+export interface S3UploadProfile {
+	/**
+	 * Maximum file size, in bytes
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
+	maxAllowedUploadSizeBytes?: number;
+	/**
+	 * Maximum number of files
+	 *
+	 * @default unlimited
+	 */
+	maxAllowedFiles?: number;
+	/**
+	 * List of mime-types allowed to be uploaded, case insensitive
+	 *
+	 * @default Any type
+	 */
+	allowedMimeTypes?: string[];
+	/**
+	 * Allowed file extensions, case insensitive
+	 *
+	 * @default Any extension
+	 */
+	allowedFileExtensions?: string[];
+}
+
+export type S3UploadProfiles = Record<string, S3UploadProfile>;
+
 interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
@@ -254,6 +283,7 @@ interface S3UploadConfiguration {
 	bucketName: InputVariable;
 	bucketLocation: InputVariable;
 	useSSL: boolean;
+	uploadProfiles?: S3UploadProfiles;
 }
 
 export interface ResolvedWunderGraphConfig {
