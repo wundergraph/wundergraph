@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.3](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.2...create-wundergraph-app@0.2.3) (2022-12-21)
+
+### Bug Fixes
+
+* **create:** move dotenv from devDependencies to dependencies ([#483](https://github.com/wundergraph/wundergraph/issues/483)) ([65c9ffc](https://github.com/wundergraph/wundergraph/commit/65c9ffc338d6be409d8d5118c3ba62a1014864b4)), closes [#482](https://github.com/wundergraph/wundergraph/issues/482) (@fiam)
+
 ## [0.2.2](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.1...create-wundergraph-app@0.2.2) (2022-12-21)
 
 ### Bug Fixes
