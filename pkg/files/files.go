@@ -41,9 +41,12 @@ func FindWunderGraphDir(wundergraphDir string) (string, error) {
 			if err != nil {
 				return err
 			}
+
 			if info.IsDir() && info.Name() == "node_modules" {
 				return filepath.SkipDir
-			} else if !info.IsDir() && info.Name() == WunderGraphConfigFilename {
+			}
+
+			if !info.IsDir() && info.Name() == WunderGraphConfigFilename {
 				wgDir = filepath.Dir(path)
 				return io.EOF
 			}
