@@ -9,7 +9,8 @@ In this scenario, we're using a local PostgreSQL database via docker-compose.
 
 ## Getting started
 
-Install the dependencies and run the application.
+1. Copy the `.env.example` file to `.env` and fill in the required values.
+2. Install the dependencies and run the complete example in one command:
 
 ```shell
 npm install && npm start

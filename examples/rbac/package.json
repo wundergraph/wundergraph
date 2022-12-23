@@ -5,9 +5,9 @@
   "scripts": {
     "start": "run-p dev wundergraph open",
     "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000/authentication",
-    "build": "next build",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
     "check": "tsc --noEmit",
     "dev": "next dev"
   },

@@ -25,7 +25,7 @@
   "scripts": {
     "start": "run-p wunder expo",
     "wunder": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "build": "wunderctl generate --debug",
     "wunderctl": "wunderctl",
     "expo": "expo start",
     "android": "expo start --android",

@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
-    "generate": "wunderctl generate up --debug",
+    "build": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
   },

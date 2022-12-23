@@ -4,10 +4,10 @@
   "description": "",
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "build": "next build",
+    "wundergraph": "wunderctl up --debug",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
     "dev": "next dev",
     "check": "tsc --noEmit"
   },

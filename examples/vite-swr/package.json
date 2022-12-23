@@ -4,13 +4,12 @@
   "version": "0.0.0",
   "scripts": {
     "start": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
-    "postinstall": "cp -n .env.example .env",
     "clean": "rimraf ./.next",
     "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
-    "build": "npm run generate && tsc && vite build",
+    "build": "wunderctl generate --debug",
+    "build:all": "npm run build && tsc && vite build",
     "preview": "vite preview",
     "test": "jest"
   },
