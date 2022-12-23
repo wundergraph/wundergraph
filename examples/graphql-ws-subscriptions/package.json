@@ -6,7 +6,7 @@
     "start": "run-p start:services wundergraph",
     "wait-on:services": "wait-on tcp:4000",
     "wundergraph": "$npm_execpath run wait-on:services && wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "build": "wunderctl generate --debug",
     "start:services": "ts-node graphql-ws/server.ts",
     "check": "tsc --noEmit",
     "test": "jest"
