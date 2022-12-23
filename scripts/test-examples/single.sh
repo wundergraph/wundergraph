@@ -68,7 +68,8 @@ if test ${update_package_json} = "yes"; then
     ${npm} install
 fi
 
-# If we have a default .env file, copy it to .env to use default values
+# If we have an example .env.example file
+# copy it to .env to use default values in the CI
 if [ -e ".env.example" ]; then
 	cp -n .env.example .env
 fi
