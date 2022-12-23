@@ -80,6 +80,9 @@ directive @fromClaim(
   name: Claim
 ) on VARIABLE_DEFINITION
 
+"Enables removing variables with null values from the operation."
+directive @removeNullVariables on QUERY | MUTATION
+
 enum Claim {
 	USERID
   EMAIL
