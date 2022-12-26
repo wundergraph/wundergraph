@@ -30,7 +30,7 @@ import (
 
 func TestNode(t *testing.T) {
 	g := goldie.New(t, goldie.WithFixtureDir("fixtures"))
-	
+
 	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -204,7 +204,7 @@ func TestNode(t *testing.T) {
 
 func TestInMemoryCache(t *testing.T) {
 	g := goldie.New(t, goldie.WithFixtureDir("fixtures"))
-	
+
 	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
