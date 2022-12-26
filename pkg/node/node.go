@@ -272,55 +272,14 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 	host, port := configuration.Host, configuration.Port
 
 	var listeners []net.Listener
-	var localhostIPs []net.IP
 
-	// If listening to 'localhost', listen to both localhost or ::1 if they are available.
-	if host == "localhost" {
-		localhostIPs, _ = net.LookupIP(host)
+	listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
+	if err != nil {
+		return nil, err
 	}
-
-	for _, ip := range localhostIPs {
-		nip := ip.String()
-		// isIPv6
-		if strings.Contains(nip, ":") {
-			// Filter out link-local addresses
-			if strings.HasPrefix(nip, "fe80:") {
-				continue
-			}
-			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%d", nip, port))
-			// in some cases e.g when ipv6 is not enabled in docker, listen will error
-			// in that case we ignore this error and try to listen to next ip
-			if err == nil {
-				listeners = append(listeners, &proxyproto.Listener{
-					Listener: listener,
-				})
-			} else {
-				n.log.Error("failed to listen to ipv6. Did you forget to enable ipv6?",
-					zap.String("ip", nip),
-					zap.Error(err),
-				)
-			}
-		} else {
-			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", nip, port))
-			if err != nil {
-				return nil, err
-			}
-			listeners = append(listeners, &proxyproto.Listener{
-				Listener: listener,
-			})
-		}
-	}
-
-	// when we didn't listen to additional localhostIPs we will listen only to the host
-	if len(localhostIPs) == 0 {
-		listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
-		if err != nil {
-			return nil, err
-		}
-		listeners = append(listeners, &proxyproto.Listener{
-			Listener: listener,
-		})
-	}
+	listeners = append(listeners, &proxyproto.Listener{
+		Listener: listener,
+	})
 
 	return listeners, nil
 }
