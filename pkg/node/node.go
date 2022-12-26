@@ -264,24 +264,21 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
+func (n *Node) newListener(configuration *apihandler.Listener) (net.Listener, error) {
 	cfg := net.ListenConfig{
 		KeepAlive: 90 * time.Second,
 	}
 
 	host, port := configuration.Host, configuration.Port
 
-	var listeners []net.Listener
-
-	listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
+	listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		return nil, err
 	}
-	listeners = append(listeners, &proxyproto.Listener{
-		Listener: listener,
-	})
 
-	return listeners, nil
+	return &proxyproto.Listener{
+		Listener: listener,
+	}, nil
 }
 
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
@@ -480,43 +477,35 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
 		timeoutMiddleware.Start()
 		go func() {
-			timeoutMiddleware.Wait(n.ctx)
+			_ = timeoutMiddleware.Wait(n.ctx)
 			n.options.idleHandler()
 		}()
 	}
 
-	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
+	listener, err := n.newListener(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		return err
 	}
 
-	g, _ := errgroup.WithContext(n.ctx)
+	n.log.Info("listening on",
+		zap.String("addr", listener.Addr().String()),
+	)
 
-	for _, listener := range listeners {
-		l := listener
-		g.Go(func() error {
-			n.log.Info("listening on",
-				zap.String("addr", l.Addr().String()),
+	if err := n.server.Serve(listener); err != nil {
+		if err == http.ErrServerClosed {
+			n.log.Debug("listener closed",
+				zap.String("addr", listener.Addr().String()),
 			)
-
-			if err := n.server.Serve(l); err != nil {
-				if err == http.ErrServerClosed {
-					n.log.Debug("listener closed",
-						zap.String("addr", l.Addr().String()),
-					)
-					return nil
-				}
-				return err
-			}
 			return nil
-		})
+		}
+		return err
 	}
 
 	n.log.Debug("public node url",
 		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
-	return g.Wait()
+	return nil
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
