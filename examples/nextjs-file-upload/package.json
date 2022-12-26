@@ -5,11 +5,9 @@
   "scripts": {
     "start": "npm run start:services && run-p dev wundergraph open",
     "start:services": "cd minio && sh ./setup.sh",
-    "postinstall": "cp -n .env.example .env",
-    "generate": "wunderctl generate --debug",
-    "wundergraph": "wunderctl up --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "build": "next build",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
     "dev": "next dev",
     "check": "tsc --noEmit",
     "cleanup": "cd minio && docker-compose down -v"

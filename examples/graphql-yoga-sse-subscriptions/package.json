@@ -7,7 +7,7 @@
     "start:services": "ts-node yoga/server.ts",
     "wait-on:services": "wait-on tcp:4000",
     "wundergraph": "npm run wait-on:services && wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "build": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
   },

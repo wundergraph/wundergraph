@@ -20,7 +20,8 @@
     "packages/protobuf",
     "packages/golang-client",
     "packages/swr",
-    "packages/create-wundergraph-app"
+    "packages/create-wundergraph-app",
+    "packages/react-query"
   ],
   "npmClient": "pnpm",
   "version": "independent"
