@@ -271,7 +271,14 @@ func (n *Node) newListener(configuration *apihandler.Listener) (net.Listener, er
 
 	host, port := configuration.Host, configuration.Port
 
-	listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", host, port))
+	bindProto := "tcp"
+	// If they've passed 0.0.0.0, we only want to bind on IPv4
+	// rather than golang's dual stack default
+	if host == "0.0.0.0" {
+		bindProto = "tcp4"
+	}
+
+	listener, err := cfg.Listen(context.Background(), bindProto, fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
 		return nil, err
 	}
