@@ -11,18 +11,6 @@ import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
 
-export const isFederationService = (schema: GraphQLSchema): boolean => {
-	const queryType = schema.getQueryType();
-	if (queryType === undefined || queryType === null) {
-		return false;
-	}
-	const fields = queryType.getFields();
-	if (fields === undefined) {
-		return false;
-	}
-	return Object.keys(fields).indexOf('_service') !== -1;
-};
-
 export const fetchFederationServiceSDL = async (
 	url: string,
 	headers?: Record<string, string>,
