@@ -1,6 +1,6 @@
 import localImported from './../../local-import';
 import { buildSchema } from 'graphql';
-import type { Webhook, WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk';
+import type { Webhook, WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk/server';
 import type { InternalClient } from '../generated/wundergraph.internal.client';
 
 const webhook: Webhook<

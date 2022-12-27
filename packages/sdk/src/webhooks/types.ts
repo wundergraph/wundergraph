@@ -1,4 +1,4 @@
-import { InternalClient } from '../server/internal-client';
+import { InternalClient } from '../server';
 import { RequestMethod } from '../server/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure/variables';

@@ -16,7 +16,7 @@
   },
   "scripts": {
     "dev": "wunderctl up --debug",
-    "build": "tsup .wundergraph/wundergraph.server.ts --dts --format esm,cjs",
+    "build": "pnpm generate && pnpm check",
     "start": "wunderctl start --debug",
     "generate": "wunderctl generate --debug",
     "check": "tsc"

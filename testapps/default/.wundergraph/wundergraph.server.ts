@@ -1,6 +1,4 @@
-import { configureWunderGraphServer } from '@wundergraph/sdk/server';
-import { GithubWebhookVerifier } from '@wundergraph/sdk/dist/webhooks/verifiers';
-import { EnvironmentVariable } from '@wundergraph/sdk/dist/configure/variables';
+import { configureWunderGraphServer, GithubWebhookVerifier, EnvironmentVariable } from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { WebhooksConfig } from './generated/wundergraph.webhooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
