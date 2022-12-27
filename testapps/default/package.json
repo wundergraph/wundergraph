@@ -16,16 +16,16 @@
   },
   "scripts": {
     "dev": "wunderctl up --debug",
+    "build": "tsup .wundergraph/wundergraph.server.ts --dts --format esm,cjs",
     "start": "wunderctl start --debug",
     "generate": "wunderctl generate --debug",
-    "build": "pnpm generate && pnpm check",
     "check": "tsc"
   },
   "dependencies": {
     "@types/node": "^14.14.37",
-    "@wundergraph/sdk": "workspace:*",
     "@wundergraph/golang-client": "workspace:*",
-    "graphql": "^16.3.0",
+    "@wundergraph/sdk": "workspace:*",
+    "graphql": "^16.6.0",
     "openapi-to-graphql": "^2.2.5",
     "pg": "^8.7.3",
     "postgraphile": "^4.12.9",

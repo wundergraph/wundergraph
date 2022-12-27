@@ -1,5 +1,5 @@
-import { InternalClient } from '../middleware/internal-client';
-import { RequestMethod } from '../middleware/types';
+import { InternalClient } from '../server/internal-client';
+import { RequestMethod } from '../server/types';
 import { WebhookVerifierKind } from './verifiers';
 import { EnvironmentVariable } from '../configure/variables';
 

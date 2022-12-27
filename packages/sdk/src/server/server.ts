@@ -6,7 +6,6 @@ import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
 import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
 import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
-import { customGqlServerMountPath, HooksConfiguration } from '../configure';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
@@ -14,6 +13,7 @@ import path from 'path';
 import fs from 'fs';
 import {
 	FastifyRequestBody,
+	HooksConfiguration,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
@@ -22,6 +22,7 @@ import { WebhooksConfig } from '../webhooks/types';
 import { ServerLogger, resolveServerLogLevel } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
+import { customGqlServerMountPath } from './util';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -93,6 +94,7 @@ const _configureWunderGraphServer = <
 			if (seenServer[server.serverName]) {
 				throw new Error(`A server with the name '${server.serverName}' has been already registered!`);
 			}
+			server.routeUrl = customGqlServerMountPath(server.serverName);
 			seenServer[server.serverName] = true;
 		});
 	}
