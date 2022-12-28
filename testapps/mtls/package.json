@@ -16,6 +16,7 @@
   },
   "scripts": {
     "dev": "wunderctl up --debug",
+    "start:server": "cd server && go run main.go",
     "generate": "wunderctl generate --debug",
     "check": "tsc"
   },
