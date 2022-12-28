@@ -1,12 +1,11 @@
-import { Dirent } from 'fs';
-const { readdir } = require('fs').promises;
+import { Dirent, promises } from 'fs';
 import path from 'path';
 
 /**
  * Returns the list webhook files in the directory.
  */
 export const getWebhooks = async (dir: string): Promise<{ filePath: string; name: string }[]> => {
-	const list = await readdir(dir, { withFileTypes: true });
+	const list = await promises.readdir(dir, { withFileTypes: true });
 	return list
 		.filter((file: Dirent) => {
 			return file.isFile() && !file.name.endsWith('.d.ts') && file.name.endsWith('.ts');
@@ -14,7 +13,7 @@ export const getWebhooks = async (dir: string): Promise<{ filePath: string; name
 		.map((entry: Dirent) => {
 			return {
 				// ts is transpiled to js
-				filePath: path.join(dir, entry.name.replace('.ts', '.js')),
+				filePath: path.join(dir, entry.name.replace('.ts', '.mjs')),
 				// we need to know the name of the file to compare it with the webhooks settings
 				// in the config
 				name: path.basename(entry.name, '.ts'),

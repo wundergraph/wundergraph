@@ -2,6 +2,7 @@ import { FastifyPluginAsync } from 'fastify';
 import path from 'path';
 import { Webhook, WebhookHeaders, WebhookQuery } from '../../webhooks/types';
 import { Headers } from '@web-std/fetch';
+import formBody from '@fastify/formbody';
 import { WebhookConfiguration } from '@wundergraph/protobuf';
 import { InternalClientFactory } from '../internal-client';
 import { RequestMethod } from '../types';
@@ -18,7 +19,7 @@ interface FastifyWebHooksOptions {
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
-	await fastify.register(require('@fastify/formbody'));
+	await fastify.register(formBody);
 
 	for (const hook of config.webhooks) {
 		try {
