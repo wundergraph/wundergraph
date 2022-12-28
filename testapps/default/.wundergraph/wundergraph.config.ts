@@ -110,6 +110,12 @@ configureWunderGraphApplication({
 				  ]
 				: ['http://localhost:3000'],
 	},
+	authentication: {
+		cookieBased: {
+			providers: [authProviders.demo()],
+			authorizedRedirectUris: ['http://localhost:3000'],
+		},
+	},
 	security: {
 		enableGraphQLEndpoint: true,
 	},
