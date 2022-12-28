@@ -1,6 +1,11 @@
 import { OperationType } from '@wundergraph/protobuf';
 import { JSONSchema7Definition } from 'json-schema';
-import { Collection, Request } from 'postman-collection';
+
+// The requested module 'postman-collection' is a CommonJS module, which may not support all module.exports as named exports.
+// CommonJS modules can always be imported via the default export, for example using:
+import pkg from 'postman-collection';
+const { Collection, Request } = pkg;
+
 import { GraphQLOperation } from '../graphql/operations';
 
 export interface PostmanBuilderOptions {
