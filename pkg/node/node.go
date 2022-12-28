@@ -271,14 +271,21 @@ func (n *Node) newListener(configuration *apihandler.Listener) (net.Listener, er
 
 	host, port := configuration.Host, configuration.Port
 
-	bindProto := "tcp"
-	// If they've passed 0.0.0.0, we only want to bind on IPv4
-	// rather than golang's dual stack default
-	if host == "0.0.0.0" {
+	bindProto := ""
+	address := ""
+	// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
+	// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
+	// to pass the network as tcp4. Dual stack has produced some issues in container environments
+	// for those reasons we are using tcp4 or tcp6 explicitly.
+	if IsIPv4(host) {
 		bindProto = "tcp4"
+		address = fmt.Sprintf("%s:%d", host, port)
+	} else if IsIPv6(host) {
+		bindProto = "tcp6"
+		address = fmt.Sprintf("[%s]:%d", host, port)
 	}
 
-	listener, err := cfg.Listen(context.Background(), bindProto, fmt.Sprintf("%s:%d", host, port))
+	listener, err := cfg.Listen(context.Background(), bindProto, address)
 	if err != nil {
 		return nil, err
 	}
@@ -647,4 +654,12 @@ func uniqueStrings(slice []string) []string {
 		}
 	}
 	return list
+}
+
+func IsIPv4(address string) bool {
+	return strings.Count(address, ":") < 2
+}
+
+func IsIPv6(address string) bool {
+	return strings.Count(address, ":") >= 2
 }
