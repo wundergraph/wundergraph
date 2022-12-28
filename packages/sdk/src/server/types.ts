@@ -1,11 +1,11 @@
-import { InternalClient, InternalClientFactory } from './internal-client';
-import { FastifyLoggerInstance } from 'fastify';
-import { Headers } from '@web-std/fetch';
-import { GraphQLServerConfig } from './plugins/graphql';
-import { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
-import { WebhooksConfig } from '../webhooks/types';
-import { InputVariable } from '../configure/variables';
-import { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
+import type { InternalClient, InternalClientFactory } from './internal-client';
+import type { FastifyLoggerInstance } from 'fastify';
+import type { Headers } from '@web-std/fetch';
+import type { GraphQLServerConfig } from './plugins/graphql';
+import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import type { WebhooksConfig } from '../webhooks/types';
+import type { InputVariable } from '../configure/variables';
+import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
