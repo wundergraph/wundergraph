@@ -31,6 +31,8 @@ type Bundler struct {
 	outFile               string
 	outDir                string
 	externalImports       []string
+	esm                   bool
+	outExtensions         map[string]string
 	fileLoaders           []string
 	mu                    sync.Mutex
 	buildResult           *api.BuildResult
@@ -44,6 +46,8 @@ type Config struct {
 	SkipWatchOnEntryPoint bool
 	EntryPoints           []string
 	WatchPaths            []*watcher.WatchPath
+	OutExtensions         map[string]string
+	ESM                   bool
 	IgnorePaths           []string
 	OutFile               string
 	OutDir                string
@@ -58,8 +62,10 @@ func NewBundler(config Config) *Bundler {
 		outDir:                config.OutDir,
 		entryPoints:           config.EntryPoints,
 		watchPaths:            config.WatchPaths,
+		esm:                   config.ESM,
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
+		outExtensions:         config.OutExtensions,
 		onAfterBundle:         config.OnAfterBundle,
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
@@ -130,6 +136,14 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 }
 
 func (b *Bundler) initialBuild() api.BuildResult {
+	var format api.Format
+
+	if b.esm {
+		format = api.FormatESModule
+	} else {
+		format = api.FormatCommonJS
+	}
+
 	options := api.BuildOptions{
 		Outfile:       b.outFile,
 		Outdir:        b.outDir,
@@ -142,9 +156,10 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		Loader: map[string]api.Loader{
 			".json": api.LoaderJSON,
 		},
-		Format:   api.FormatCommonJS,
-		Color:    api.ColorAlways,
-		External: append(b.externalImports, "./node_modules/*"),
+		OutExtensions: b.outExtensions,
+		Format:        format,
+		Color:         api.ColorAlways,
+		External:      append(b.externalImports, "./node_modules/*"),
 		Engines: []api.Engine{
 			// https://nodejs.org/en/about/releases/
 			{Name: api.EngineNode, Version: "16"}, // Maintenance

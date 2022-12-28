@@ -49,7 +49,7 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		configOutFile := path.Join("generated", "bundle", "config.js")
+		configOutFile := path.Join("generated", "bundle", "config.mjs")
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -82,7 +82,7 @@ var generateCmd = &cobra.Command{
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
-			serverOutFile := path.Join(wunderGraphDir, "generated", "bundle", "server.js")
+			serverOutFile := path.Join(wunderGraphDir, "generated", "bundle", "server.mjs")
 			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 			webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 
@@ -99,6 +99,10 @@ var generateCmd = &cobra.Command{
 					AbsWorkingDir: wunderGraphDir,
 					OutDir:        webhooksOutDir,
 					Logger:        log,
+					ESM:           true,
+					OutExtensions: map[string]string{
+						".js": ".mjs",
+					},
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
 						return nil
@@ -111,7 +115,11 @@ var generateCmd = &cobra.Command{
 				AbsWorkingDir: wunderGraphDir,
 				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
-				Logger:        log,
+				ESM:           true,
+				OutExtensions: map[string]string{
+					".js": ".mjs",
+				},
+				Logger: log,
 			})
 
 			onAfterBuild = func() error {
@@ -165,6 +173,10 @@ var generateCmd = &cobra.Command{
 			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
 			Logger:        log,
+			ESM:           true,
+			OutExtensions: map[string]string{
+				".js": ".mjs",
+			},
 			IgnorePaths: []string{
 				"generated",
 				"node_modules",

@@ -5,22 +5,27 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
       "default": "./dist/index.js"
     },
     "./client": {
       "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.mjs",
       "default": "./dist/client/index.js"
     },
     "./testing": {
       "types": "./dist/testing/index.d.ts",
+      "import": "./dist/testing/index.mjs",
       "default": "./dist/testing/index.js"
     },
     "./internal": {
       "types": "./dist/internal/index.d.ts",
+      "import": "./dist/internal/index.mjs",
       "default": "./dist/internal/index.js"
     },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.mjs",
       "default": "./dist/logger/index.js"
     },
     "./dist/*": {
@@ -78,6 +83,7 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
+    "build:tsup": "tsup --dts --clean --treeshake recommended --format cjs,esm ./src/index.ts ./src/client/index.ts ./src/logger/index.ts ./src/testing/index.ts ./src/internal/index.ts",
     "watch": "tsc -w",
     "test": "jest && tsd",
     "test:int": "TEST_INTEGRATION=true jest"
@@ -100,6 +106,7 @@
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.1",
     "tsd": "^0.24.1",
+    "tsup": "^6.5.0",
     "typescript": "^4.8.2"
   },
   "dependencies": {

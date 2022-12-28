@@ -7,6 +7,7 @@
     "declarationDir": "./dist",
     "jsx": "react",
     "outDir": "./dist",
+    "incremental": false,
     "typeRoots": ["./node_modules/@types", "./src/typedefinitions"]
   },
   "include": ["src/**/*"],
