@@ -19,6 +19,7 @@ const watchFileLimit = 1000
 
 // NonNodeModuleReg copied from https://github.com/egoist/tsup/blob/dev/src/esbuild/external.ts#L5
 var NonNodeModuleReg = regexp.MustCompile(`^[^./]|^\.[^./]|^\.\.[^/]`) // Must not start with "/" or "./" or "../"
+var ServerNonNodeModuleReg = regexp.MustCompile(`^os`) 
 
 type Bundler struct {
 	name                  string
@@ -151,6 +152,10 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		Bundle:        true,
 		Incremental:   true,
 		Platform:      api.PlatformNode,
+		Target:					api.ESNext,
+		Banner: 			 map[string]string{
+      "js":  "import { createRequire } from 'module';const require = createRequire(import.meta.url);",
+    },
 		Sourcemap:     api.SourceMapLinked,
 		AbsWorkingDir: b.absWorkingDir,
 		Loader: map[string]api.Loader{
@@ -159,7 +164,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		OutExtensions: b.outExtensions,
 		Format:        format,
 		Color:         api.ColorAlways,
-		External:      append(b.externalImports, "./node_modules/*"),
+		External:      []string{"os"}, //append(b.externalImports, "./node_modules/*"),
 		Engines: []api.Engine{
 			// https://nodejs.org/en/about/releases/
 			{Name: api.EngineNode, Version: "16"}, // Maintenance
@@ -218,9 +223,12 @@ func (b *Bundler) initialBuild() api.BuildResult {
 			build.OnResolve(api.OnResolveOptions{Filter: `.*`},
 				func(args api.OnResolveArgs) (api.OnResolveResult, error) {
 					file := filepath.Join(args.ResolveDir, args.Path)
-
+				
 					if args.Kind == api.ResolveJSImportStatement || (!b.skipWatchOnEntryPoint && args.Kind == api.ResolveEntryPoint) {
 						isExternal := NonNodeModuleReg.MatchString(args.Path)
+						if b.name == "server-bundler" {
+							isExternal = ServerNonNodeModuleReg.MatchString(args.Path)
+						}
 						if isExternal {
 							return api.OnResolveResult{
 								External: true,
