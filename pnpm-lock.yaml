@@ -461,7 +461,6 @@ importers:
       '@wundergraph/golang-client': workspace:*
       '@wundergraph/sdk': workspace:*
       graphql: ^16.3.0
-      openapi-to-graphql: ^2.6.3
       pg: ^8.7.3
       postgraphile: ^4.12.9
       typescript: ^4.8.2
@@ -470,7 +469,6 @@ importers:
       '@wundergraph/golang-client': link:../../packages/golang-client
       '@wundergraph/sdk': link:../../packages/sdk
       graphql: 16.6.0
-      openapi-to-graphql: 2.6.3_graphql@16.6.0
       pg: 8.8.0
       postgraphile: 4.12.11
       typescript: 4.8.4
