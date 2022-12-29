@@ -1,12 +1,15 @@
 import net from 'net';
 
 import { retry } from 'ts-retry-promise';
+import terminate from 'terminate/promise';
 
 import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
 import { Client } from '../client';
 import { CreateClientConfig } from '../client/types';
 
 const readyStatus = 'READY';
+const skipStatus = 'SKIP';
+
 interface ServerHealth {
 	serverStatus: string;
 	nodeStatus: string;
@@ -118,7 +121,10 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
 					const data = (await resp.json()) as ServerHealth;
-					if (data.nodeStatus === readyStatus && data.serverStatus === readyStatus) {
+					if (
+						data.nodeStatus === readyStatus &&
+						(data.serverStatus === readyStatus || data.serverStatus == skipStatus)
+					) {
 						return true;
 					}
 					throw new Error(`server is not yet ready ${data}`);
@@ -143,9 +149,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 */
 	async stop(): Promise<void> {
 		if (this.subprocess) {
-			this.subprocess.kill('SIGTERM', {
-				forceKillAfterTimeout: 100,
-			});
+			await terminate(this.subprocess.pid);
 			try {
 				await this.subprocess;
 			} catch (e: any) {
@@ -198,10 +202,10 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			manageServer: true,
 			env: {
 				WG_CLOUD: 'true',
-				WG_NODE_URL: `http://localhost:${nodePort}`,
+				WG_NODE_URL: `http://0.0.0.0:${nodePort}`,
 				WG_NODE_HOST: '0.0.0.0',
 				WG_NODE_PORT: nodePort.toString(),
-				WG_SERVER_URL: `http://localhost:${serverPort}`,
+				WG_SERVER_URL: `http://0.0.0.0:${serverPort}`,
 				WG_SERVER_HOST: '0.0.0.0',
 				WG_SERVER_PORT: serverPort.toString(),
 			},

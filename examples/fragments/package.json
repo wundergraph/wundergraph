@@ -1,19 +1,26 @@
 {
-  "name": "wundergraph-simple",
+  "name": "wundergraph-fragmnets",
   "version": "1.0.0",
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
-    "check": "tsc --noEmit"
+    "build": "wunderctl generate --debug",
+    "check": "tsc --noEmit",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.125.0",
+    "@wundergraph/sdk": "^0.129.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {
+    "@jest/globals": "^29.3.1",
     "@types/node": "^14.14.37",
+    "@types/node-fetch": "^2.6.2",
+    "jest": "^29.3.1",
+    "node-fetch": "^2.6.7",
+    "ts-jest": "^29.0.3",
     "typescript": "^4.8.2"
   }
 }

@@ -1,0 +1,34 @@
+{
+  "name": "wundergraph-nextjs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run start:services && run-p dev wundergraph open",
+    "start:services": "cd minio && sh ./setup.sh",
+    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
+    "dev": "next dev",
+    "check": "tsc --noEmit",
+    "cleanup": "cd minio && docker-compose down -v"
+  },
+  "dependencies": {
+    "@wundergraph/nextjs": "^0.7.4",
+    "@wundergraph/sdk": "^0.129.0",
+    "graphql": "^16.3.0",
+    "next": "^12.1.6",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "swr": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.15",
+    "@types/react": "^18.0.6",
+    "node-fetch": "^2.6.7",
+    "npm-run-all": "^4.1.5",
+    "open-cli": "^7.0.1",
+    "ts-node": "^10.8.0",
+    "typescript": "^4.8.2",
+    "wait-on": "^6.0.1"
+  }
+}

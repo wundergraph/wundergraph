@@ -93,6 +93,7 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 				}
 				const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
+				// upstream.url is truthy at this point, no need to check
 				schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
 					apiNamespace: introspection.apiNamespace,
 					upstreamName: name,
