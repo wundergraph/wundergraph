@@ -56,8 +56,12 @@ export type { InputVariable } from '../configure/variables';
 
 export type { FastifyLoggerInstance } from 'fastify';
 
+// Implementations
+
 export { configureWunderGraphServer } from './server';
 
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from '../webhooks/verifiers';
 
 export { EnvironmentVariable } from '../configure/variables';
+
+export { WgEnv } from '../configure/options';
