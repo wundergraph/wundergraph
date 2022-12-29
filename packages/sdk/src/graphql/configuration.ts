@@ -15,6 +15,10 @@ import {
 	TypeConfiguration,
 	TypeField,
 } from '@wundergraph/protobuf';
+import { TypeNode } from 'graphql/language/ast';
+import { Kind } from 'graphql/language/kinds';
+
+const DefaultJsonTypes = ['JSON', 'JSONObject'];
 
 export interface GraphQLConfiguration {
 	RootNodes: TypeField[];
@@ -38,6 +42,11 @@ export const configuration = (schema: DocumentNode, serviceSDL?: DocumentNode): 
 	return config;
 };
 
+interface JsonTypeField {
+	typeName: string;
+	fieldName: string;
+}
+
 const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 	let typeName: undefined | string;
 	let fieldName: undefined | string;
@@ -46,6 +55,7 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 	let isEntity = false;
 	let isExternalField = false;
 	let entityFields: string[] = [];
+	let jsonFields: JsonTypeField[] = [];
 
 	const graphQLSchema = buildASTSchema(schema, { assumeValidSDL: true });
 
@@ -139,6 +149,10 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 		FieldDefinition: {
 			enter: (node) => {
 				fieldName = node.name.value;
+
+				if (isJsonField(node.type, DefaultJsonTypes)) {
+					jsonFields.push({ typeName: typeName!, fieldName: fieldName! });
+				}
 			},
 			leave: () => {
 				if (typeName === undefined || fieldName === undefined) {
@@ -187,6 +201,8 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 			},
 		},
 	});
+
+	addJsonFieldConfigurations(config, jsonFields);
 };
 
 const parseSelectionSet = (selectionSet: string): SelectionSetNode => {
@@ -248,9 +264,7 @@ const addFieldArgument = (typeName: string, fieldName: string, argName: string, 
 		sourcePath: [],
 		renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_DEFAULT,
 	};
-	let field: FieldConfiguration | undefined = config.Fields.find(
-		(f) => f.typeName === typeName && f.typeName === fieldName
-	);
+	let field: FieldConfiguration | undefined = findField(config.Fields, typeName, fieldName);
 	if (!field) {
 		config.Fields.push({
 			typeName: typeName,
@@ -292,7 +306,7 @@ const addRequiredField = (
 	config: GraphQLConfiguration,
 	requiredFieldName: string
 ) => {
-	const field = config.Fields.find((f) => f.typeName === typeName && f.typeName === fieldName);
+	let field: FieldConfiguration | undefined = findField(config.Fields, typeName, fieldName);
 	if (!field) {
 		config.Fields.push({
 			typeName: typeName,
@@ -314,4 +328,51 @@ const addRequiredField = (
 		return;
 	}
 	field.requiresFields.push(requiredFieldName);
+};
+
+const addJsonFieldConfigurations = (config: GraphQLConfiguration, jsonFields: JsonTypeField[]) => {
+	for (const jsonField of jsonFields) {
+		let field: FieldConfiguration | undefined = findField(config.Fields, jsonField.typeName, jsonField.fieldName);
+
+		if (field) {
+			field.unescapeResponseJson = true;
+		} else {
+			config.Fields.push({
+				typeName: jsonField.typeName,
+				fieldName: jsonField.fieldName,
+				argumentsConfiguration: [],
+				disableDefaultFieldMapping: false,
+				path: [],
+				requiresFields: [],
+				unescapeResponseJson: true,
+			});
+		}
+	}
+};
+
+const findField = (fields: FieldConfiguration[], typeName: string, fieldName: string) => {
+	return fields.find((f) => f.typeName === typeName && f.fieldName === fieldName);
+};
+
+const isJsonField = (type: TypeNode, jsonTypes: string[]) => {
+	const namedTypeName = resolveNamedTypeName(type);
+
+	for (const jsonType of jsonTypes) {
+		if (namedTypeName === jsonType) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+const resolveNamedTypeName = (type: TypeNode): string => {
+	switch (type.kind) {
+		case Kind.NON_NULL_TYPE:
+			return resolveNamedTypeName(type.type);
+		case Kind.LIST_TYPE:
+			return resolveNamedTypeName(type.type);
+		default:
+			return type.name.value;
+	}
 };
