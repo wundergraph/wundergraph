@@ -135,17 +135,19 @@ var rootCmd = &cobra.Command{
 			metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
 			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
-			err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
+			// Send telemetry in a goroutine to not block the command
+			go func() {
+				err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
 
-			// AddMetric the usage of the command immediately
-			if rootFlags.TelemetryDebugMode {
-				if err != nil {
-					log.Error("Could not send telemetry data", zap.Error(err))
-				} else {
-					log.Info("Telemetry data sent")
+				// AddMetric the usage of the command immediately
+				if rootFlags.TelemetryDebugMode {
+					if err != nil {
+						log.Error("Could not send telemetry data", zap.Error(err))
+					} else {
+						log.Info("Telemetry data sent")
+					}
 				}
-			}
-
+			}()
 		}
 
 		return nil

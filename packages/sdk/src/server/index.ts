@@ -47,12 +47,21 @@ export type {
 	WebhookQuery,
 	WebhookConfiguration,
 } from '../webhooks/types';
+
+export type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
+
 export type { WebhookVerifierConfiguration } from '../webhooks/verifiers';
 
+export type { InputVariable } from '../configure/variables';
+
 export type { FastifyLoggerInstance } from 'fastify';
+
+// Implementations
 
 export { configureWunderGraphServer } from './server';
 
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from '../webhooks/verifiers';
 
 export { EnvironmentVariable } from '../configure/variables';
+
+export { WgEnv } from '../configure/options';

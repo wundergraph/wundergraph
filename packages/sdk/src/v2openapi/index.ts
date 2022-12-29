@@ -31,7 +31,6 @@ import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
-	ConfigurationVariable,
 	ConfigurationVariableKind,
 	DataSourceKind,
 	FieldConfiguration,
@@ -50,7 +49,7 @@ import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configu
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
-import transformSchema from '../transformations/shema';
+import transformSchema from '../transformations/schema';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
