@@ -4,7 +4,7 @@ import {
 	EnvironmentVariable,
 	GithubWebhookVerifier,
 	WebhookVerifierKind,
-} from '@wundergraph/sdk';
+} from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { WebhooksConfig } from './generated/wundergraph.webhooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
