@@ -1,4 +1,3 @@
-import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
@@ -13,6 +12,7 @@ import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
 
+import type { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
 import type { HooksRouteConfig } from './plugins/hooks';
 import type { WebHookRouteConfig } from './plugins/webhooks';
@@ -88,7 +88,7 @@ const _configureWunderGraphServer = <
 	/**
 	 * Configure the custom GraphQL servers
 	 */
-	if (serverConfig.graphqlServers) {
+	if (serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0) {
 		let seenServer: { [key: string]: boolean } = {};
 		serverConfig.graphqlServers.forEach((server) => {
 			if (seenServer[server.serverName]) {
@@ -215,12 +215,12 @@ export const createServer = async ({
 			};
 		});
 
-		if (serverConfig?.hooks) {
+		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
 			await fastify.register(require('./plugins/hooks'), { ...serverConfig.hooks, config });
 			fastify.log.info('Hooks plugin registered');
 		}
 
-		if (serverConfig.graphqlServers) {
+		if (serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0) {
 			for await (const server of serverConfig.graphqlServers) {
 				const routeUrl = customGqlServerMountPath(server.serverName);
 				await fastify.register(require('./plugins/graphql'), { ...server, routeUrl: routeUrl });
@@ -230,7 +230,7 @@ export const createServer = async ({
 		}
 	});
 
-	if (config.api) {
+	if (config.api?.webhooks && config.api.webhooks.length > 0) {
 		await fastify.register(require('./plugins/webhooks'), {
 			wundergraphDir,
 			webhooks: config.api.webhooks,
