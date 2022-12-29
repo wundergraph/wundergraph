@@ -19,6 +19,10 @@
       "types": "./dist/internal/index.d.ts",
       "default": "./dist/internal/index.js"
     },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
@@ -38,6 +42,9 @@
       ],
       "internal": [
         "./dist/internal"
+      ],
+      "server": [
+        "./dist/server"
       ],
       "internal/logger": [
         "./dist/logger"
@@ -113,10 +120,10 @@
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
     "execa": "5.1.1",
-    "fastify": "^4.9.2",
-    "fastify-plugin": "^4.3.0",
-    "graphql": "^16.3.0",
-    "graphql-helix": "^1.12.0",
+    "fastify": "^4.10.2",
+    "fastify-plugin": "^4.4.0",
+    "graphql": "^16.6.0",
+    "graphql-helix": "^1.13.0",
     "handlebars": "^4.7.7",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
@@ -124,7 +131,7 @@
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
     "openapi-types": "^10.0.0",
-    "pino": "^8.7.0",
+    "pino": "^8.8.0",
     "pino-pretty": "^9.1.1",
     "postman-collection": "^4.1.1",
     "prettier": "^2.7.1",
