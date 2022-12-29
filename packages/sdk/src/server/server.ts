@@ -2,27 +2,27 @@ import { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
-import HooksPlugin, { HooksRouteConfig } from './plugins/hooks';
-import FastifyWebhooksPlugin, { WebHookRouteConfig } from './plugins/webhooks';
-import GraphQLServerPlugin from './plugins/graphql';
 import Fastify, { FastifyInstance } from 'fastify';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
-import {
+import { ServerLogger, resolveServerLogLevel } from '../logger';
+import { resolveConfigurationVariable } from '../configure/variables';
+import { onParentProcessExit } from '../utils/process';
+import { customGqlServerMountPath } from './util';
+
+import type { WebhooksConfig } from '../webhooks/types';
+import type { HooksRouteConfig } from './plugins/hooks';
+import type { WebHookRouteConfig } from './plugins/webhooks';
+import type {
 	FastifyRequestBody,
 	HooksConfiguration,
 	ServerRunOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 } from './types';
-import { WebhooksConfig } from '../webhooks/types';
-import { ServerLogger, resolveServerLogLevel } from '../logger';
-import { resolveConfigurationVariable } from '../configure/variables';
-import { onParentProcessExit } from '../utils/process';
-import { customGqlServerMountPath } from './util';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -216,14 +216,14 @@ export const createServer = async ({
 		});
 
 		if (serverConfig?.hooks) {
-			await fastify.register(HooksPlugin, { ...serverConfig.hooks, config });
+			await fastify.register(require('./plugins/hooks'), { ...serverConfig.hooks, config });
 			fastify.log.info('Hooks plugin registered');
 		}
 
 		if (serverConfig.graphqlServers) {
 			for await (const server of serverConfig.graphqlServers) {
 				const routeUrl = customGqlServerMountPath(server.serverName);
-				await fastify.register(GraphQLServerPlugin, { ...server, routeUrl: routeUrl });
+				await fastify.register(require('./plugins/graphql'), { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
 				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
 			}
@@ -231,7 +231,7 @@ export const createServer = async ({
 	});
 
 	if (config.api) {
-		await fastify.register(FastifyWebhooksPlugin, {
+		await fastify.register(require('./plugins/webhooks'), {
 			wundergraphDir,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,

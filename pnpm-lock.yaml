@@ -305,15 +305,15 @@ importers:
       '@web-std/fetch': ^4.1.0
       '@wundergraph/protobuf': workspace:^0.100.0
       '@wundergraph/wunderctl': workspace:>=0.121.0
-      axios: ^0.26.1
+      axios: ^0.27.2
       axios-retry: ^3.3.1
       chai: ^4.3.4
       close-with-grace: ^1.1.0
       execa: 5.1.1
-      fastify: ^4.9.2
-      fastify-plugin: ^4.3.0
-      graphql: ^16.3.0
-      graphql-helix: ^1.12.0
+      fastify: ^4.10.2
+      fastify-plugin: ^4.4.0
+      graphql: ^16.6.0
+      graphql-helix: ^1.13.0
       handlebars: ^4.7.7
       jest: ^29.0.3
       js-yaml: ^4.1.0
@@ -324,7 +324,7 @@ importers:
       node-fetch: ^2.6.7
       object-hash: ^2.2.0
       openapi-types: ^10.0.0
-      pino: ^8.7.0
+      pino: ^8.8.0
       pino-pretty: ^9.1.1
       postman-collection: ^4.1.1
       prettier: ^2.7.1
@@ -342,12 +342,12 @@ importers:
       '@web-std/fetch': 4.1.0
       '@wundergraph/protobuf': link:../protobuf
       '@wundergraph/wunderctl': link:../wunderctl
-      axios: 0.26.1
+      axios: 0.27.2
       axios-retry: 3.3.1
       close-with-grace: 1.1.0
       execa: 5.1.1
-      fastify: 4.9.2
-      fastify-plugin: 4.3.0
+      fastify: 4.10.2
+      fastify-plugin: 4.4.0
       graphql: 16.6.0
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
@@ -357,7 +357,7 @@ importers:
       long: 5.2.1
       object-hash: 2.2.0
       openapi-types: 10.0.0
-      pino: 8.7.0
+      pino: 8.8.0
       pino-pretty: 9.1.1
       postman-collection: 4.1.5
       prettier: 2.7.1
@@ -459,7 +459,6 @@ importers:
       '@wundergraph/golang-client': workspace:*
       '@wundergraph/sdk': workspace:*
       graphql: ^16.6.0
-      openapi-to-graphql: ^2.2.5
       pg: ^8.7.3
       postgraphile: ^4.12.9
       typescript: ^4.8.2
@@ -468,7 +467,6 @@ importers:
       '@wundergraph/golang-client': link:../../packages/golang-client
       '@wundergraph/sdk': link:../../packages/sdk
       graphql: 16.6.0
-      openapi-to-graphql: 2.6.3_graphql@16.6.0
       pg: 8.8.0
       postgraphile: 4.12.11
       typescript: 4.8.4
@@ -1431,7 +1429,7 @@ packages:
     resolution: {integrity: sha512-4uHTS7wH0mkUoltk4wyJ966rs/TQP0BNDSCtyqRMy7p5adGg+5ERbYue/zGh/qI9yLDPN0K98u7Fw+lLEmBZJQ==}
     dependencies:
       fast-querystring: 1.0.0
-      fastify-plugin: 4.3.0
+      fastify-plugin: 4.4.0
     dev: false
 
   /@gar/promisify/1.1.3:
@@ -3632,7 +3630,7 @@ packages:
     resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
     deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
     dependencies:
-      axios: 0.26.1
+      axios: 0.27.2
     transitivePeerDependencies:
       - debug
     dev: true
@@ -4554,20 +4552,21 @@ packages:
       - debug
     dev: true
 
-  /axios/0.26.1:
+  /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
       follow-redirects: 1.15.2
     transitivePeerDependencies:
       - debug
+    dev: false
 
-  /axios/0.26.1_debug@4.3.4:
-    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
+  /axios/0.27.2:
+    resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
+      form-data: 4.0.0
     transitivePeerDependencies:
       - debug
-    dev: false
 
   /axobject-query/2.2.0:
     resolution: {integrity: sha512-Td525n+iPOOyUQIeBfcASuG6uJsDOITl7Mds5gFyerkWiX7qhUTdYUBlSgNMyVqtSJqwpt1kXGLdUt6SykLMRA==}
@@ -6820,23 +6819,28 @@ packages:
     resolution: {integrity: sha512-M3+i368lV0OYTJ5TfClIoPKEKSOF7112iiPdwgfSR0gN98BjA1Nk+c6oBHtfcVt9KiMxl+EQKHC1QNWo3ZOpYQ==}
     dev: false
 
-  /fastify/4.9.2:
-    resolution: {integrity: sha512-Mk3hv7ZRet2huMYN6IJ8RGy1TAAC7LJsCEjxLf808zafAADNu43xRzbl7FSEIBxKyhntTM0F626Oc34LUNcUxQ==}
+  /fastify-plugin/4.4.0:
+    resolution: {integrity: sha512-ovwFQG2qNy3jcCROiWpr94Hs0le+c7N/3t7m9aVwbFhkxcR/esp2xu25dP8e617HpQdmeDv+gFX4zagdUhDByw==}
+    dev: false
+
+  /fastify/4.10.2:
+    resolution: {integrity: sha512-0T+4zI6N3S8ex0LCZi3H4FasJR4AzWw834fUkPWvV8r6GBJkLmAOfFxH8f5V29Plef24IK0QSQD/tz1Nx+1UOA==}
     dependencies:
       '@fastify/ajv-compiler': 3.4.0
       '@fastify/error': 3.0.0
       '@fastify/fast-json-stringify-compiler': 4.1.0
       abstract-logging: 2.0.1
       avvio: 8.2.0
+      content-type: 1.0.4
       find-my-way: 7.3.1
       light-my-request: 5.6.1
-      pino: 8.7.0
+      pino: 8.8.0
       process-warning: 2.0.0
       proxy-addr: 2.0.7
       rfdc: 1.3.0
       secure-json-parse: 2.5.0
       semver: 7.3.8
-      tiny-lru: 9.0.3
+      tiny-lru: 10.0.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -6995,18 +6999,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-
-  /follow-redirects/1.15.2_debug@4.3.4:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-    dependencies:
-      debug: 4.3.4
-    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -11573,8 +11565,8 @@ packages:
     resolution: {integrity: sha512-mMMOwSKrmyl+Y12Ri2xhH1lbzQxwwpuru9VjyJpgFIH4asSj88F2csdMwN6+M5g1Ll4rmsYghHLQJw81tgZ7LQ==}
     dev: false
 
-  /pino/8.7.0:
-    resolution: {integrity: sha512-l9sA5uPxmZzwydhMWUcm1gI0YxNnYl8MfSr2h8cwLvOAzQLBLewzF247h/vqHe3/tt6fgtXeG9wdjjoetdI/vA==}
+  /pino/8.8.0:
+    resolution: {integrity: sha512-cF8iGYeu2ODg2gIwgAHcPrtR63ILJz3f7gkogaHC/TXVVXxZgInmNYiIpDYEwgEkxZti2Se6P2W2DxlBIZe6eQ==}
     hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
@@ -13424,8 +13416,8 @@ packages:
       readable-stream: 3.6.0
     dev: true
 
-  /tiny-lru/9.0.3:
-    resolution: {integrity: sha512-/i9GruRjXsnDgehxvy6iZ4AFNVxngEFbwzirhdulomMNPGPVV3ECMZOWSw0w4sRMZ9Al9m4jy08GPvRxRUGYlw==}
+  /tiny-lru/10.0.1:
+    resolution: {integrity: sha512-Vst+6kEsWvb17Zpz14sRJV/f8bUWKhqm6Dc+v08iShmIJ/WxqWytHzCTd6m88pS33rE2zpX34TRmOpAJPloNCA==}
     engines: {node: '>=6'}
     dev: false
 
@@ -14484,14 +14476,14 @@ packages:
       '@web-std/fetch': 4.1.0
       '@wundergraph/protobuf': link:packages/protobuf
       '@wundergraph/wunderctl': link:packages/wunderctl
-      axios: 0.26.1
+      axios: 0.27.2
       axios-retry: 3.3.1
       close-with-grace: 1.1.0
       colors: 1.4.0
       execa: 5.1.1
-      fastify: 4.9.2
+      fastify: 4.10.2
       fastify-graceful-shutdown: 3.4.0
-      fastify-plugin: 4.3.0
+      fastify-plugin: 4.4.0
       graphql: 16.6.0
       graphql-helix: 1.13.0_graphql@16.6.0
       handlebars: 4.7.7
@@ -14501,7 +14493,7 @@ packages:
       long: 5.2.1
       object-hash: 2.2.0
       openapi-types: 10.0.0
-      pino: 8.7.0
+      pino: 8.8.0
       pino-pretty: 9.1.1
       postman-collection: 4.1.5
       prettier: 2.7.1
