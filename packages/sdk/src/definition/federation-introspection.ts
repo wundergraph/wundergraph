@@ -1,9 +1,8 @@
-import { DocumentNode, GraphQLSchema } from 'graphql';
+import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
-import { parse } from 'graphql/index';
 import { mergeApis } from './merge';
 import { introspectWithCache } from './introspection-cache';
 import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';

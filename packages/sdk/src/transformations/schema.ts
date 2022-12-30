@@ -1,5 +1,5 @@
 import { GraphQLIntrospection, OpenAPIIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
-import { parse, print, visit } from 'graphql/index';
+import { parse, print, visit } from 'graphql';
 import { SingleTypeField } from '@wundergraph/protobuf';
 
 export interface ReplaceCustomScalarsResult {
