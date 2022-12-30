@@ -33,7 +33,7 @@ import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
-import transformSchema from '../transformations/shema';
+import transformSchema from '../transformations/schema';
 
 class MissingKeyError extends Error {
 	constructor(private key: string, private introspection: GraphQLIntrospection) {

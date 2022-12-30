@@ -1,8 +1,6 @@
 # Wundergraph TypeScript Client
 
-![wundergraph-client](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
-
-This is the base implementation of the WunderGraph HTTP protocol in TypeScript that can be used on both browser and server environments.
+This directory contains the base implementation of the WunderGraph HTTP protocol in TypeScript that can be used on both browser and server environments.
 It's used as the base interface for the Web client, React and Next.js implementations.
 
 Use it to build your own 3rd party integration with WunderGraph.

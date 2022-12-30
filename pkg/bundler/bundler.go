@@ -22,6 +22,7 @@ var NonNodeModuleReg = regexp.MustCompile(`^[^./]|^\.[^./]|^\.\.[^/]`) // Must n
 
 type Bundler struct {
 	name                  string
+	production            bool
 	entryPoints           []string
 	absWorkingDir         string
 	watchPaths            []*watcher.WatchPath
@@ -30,7 +31,6 @@ type Bundler struct {
 	skipWatchOnEntryPoint bool
 	outFile               string
 	outDir                string
-	externalImports       []string
 	fileLoaders           []string
 	mu                    sync.Mutex
 	buildResult           *api.BuildResult
@@ -39,6 +39,7 @@ type Bundler struct {
 
 type Config struct {
 	Name                  string
+	Production            bool
 	Logger                *zap.Logger
 	AbsWorkingDir         string
 	SkipWatchOnEntryPoint bool
@@ -53,6 +54,7 @@ type Config struct {
 func NewBundler(config Config) *Bundler {
 	return &Bundler{
 		name:                  config.Name,
+		production:            config.Production,
 		absWorkingDir:         config.AbsWorkingDir,
 		outFile:               config.OutFile,
 		outDir:                config.OutDir,
@@ -108,7 +110,6 @@ func (b *Bundler) Watch(ctx context.Context) {
 		b.log.Debug("Watching for file changes",
 			zap.String("bundlerName", b.name),
 			zap.String("outFile", b.outFile),
-			zap.Strings("externalImports", b.externalImports),
 			zap.Any("watchPaths", b.watchPaths),
 			zap.Strings("fileLoaders", b.fileLoaders),
 		)
@@ -122,7 +123,6 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 		b.log.Debug("Watching for file changes",
 			zap.String("bundlerName", b.name),
 			zap.String("outFile", b.outFile),
-			zap.Strings("externalImports", b.externalImports),
 			zap.Strings("fileLoaders", b.fileLoaders),
 		)
 		b.watch(ctx, b.buildResult.Rebuild)
@@ -131,27 +131,34 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 
 func (b *Bundler) initialBuild() api.BuildResult {
 	options := api.BuildOptions{
-		Outfile:       b.outFile,
-		Outdir:        b.outDir,
-		EntryPoints:   b.entryPoints,
-		Bundle:        true,
-		Incremental:   true,
-		Platform:      api.PlatformNode,
-		Sourcemap:     api.SourceMapLinked,
+		Outfile:     b.outFile,
+		Outdir:      b.outDir,
+		EntryPoints: b.entryPoints,
+		Bundle:      true,
+		Incremental: true,
+		Platform:    api.PlatformNode,
+		Sourcemap:   api.SourceMapLinked,
+		// Don't bundle external modules
+		Packages:      api.PackagesExternal,
 		AbsWorkingDir: b.absWorkingDir,
 		Loader: map[string]api.Loader{
 			".json": api.LoaderJSON,
 		},
-		Format:   api.FormatCommonJS,
-		Color:    api.ColorAlways,
-		External: append(b.externalImports, "./node_modules/*"),
+		Format: api.FormatCommonJS,
+		Color:  api.ColorAlways,
 		Engines: []api.Engine{
 			// https://nodejs.org/en/about/releases/
 			{Name: api.EngineNode, Version: "16"}, // Maintenance
 			{Name: api.EngineNode, Version: "18"}, // LTS
 		},
-		Write:       true,
-		TreeShaking: api.TreeShakingTrue,
+		Write: true,
+	}
+
+	if b.production {
+		options.MinifySyntax = true
+		options.TreeShaking = api.TreeShakingTrue
+		options.MinifyIdentifiers = true
+		options.MinifyWhitespace = true
 	}
 
 	watchTypescriptFile := func(file string) {
@@ -207,9 +214,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 					if args.Kind == api.ResolveJSImportStatement || (!b.skipWatchOnEntryPoint && args.Kind == api.ResolveEntryPoint) {
 						isExternal := NonNodeModuleReg.MatchString(args.Path)
 						if isExternal {
-							return api.OnResolveResult{
-								External: true,
-							}, nil
+							return api.OnResolveResult{}, nil
 						}
 						watchTypescriptFile(file)
 					}
@@ -222,6 +227,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 		options.Loader[loader] = api.LoaderText
 	}
 	result := api.Build(options)
+
 	return result
 }
 

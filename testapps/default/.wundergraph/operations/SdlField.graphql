@@ -1,3 +1,0 @@
-query ($sdl: String!) {
-	sdl_sdlField(sdl: $sdl)
-}
