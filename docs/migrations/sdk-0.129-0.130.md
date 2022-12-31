@@ -2,7 +2,7 @@
 
 | Version range | Migration complexity | Info                                              |
 | ------------- | -------------------- | ------------------------------------------------- |
-| 0.122-0.123.x | low                  | Provide new SDK entry point for server components |
+| 0.129-0.130.x | low                  | Provide new SDK entry point for server components |
 
 ## Update `wundergraph.server.ts` to match the imports
 
