@@ -6,7 +6,7 @@ import os from 'os';
 import rimraf from 'rimraf';
 import { logger } from './logger';
 import path from 'path';
-import debug from 'debug';
+import type debug from 'debug';
 
 export const installer = async (version: string, installDir: string, binaryName: string) => {
 	const log = logger.extend('install');
@@ -18,10 +18,9 @@ export const installer = async (version: string, installDir: string, binaryName:
 
 	if (locker.exists()) {
 		log(`Lock file already exists, skipping the download of the binary ${version}`);
-		// That's a convenience for the cloud, so we don't have to download the binary every time
-		// or have to find the binary in the docker container
+		// That's a convenience for the cloud, so we have a fixed path to current binary
 		if (process.env.WG_CLOUD === 'true') {
-			log(`copy binary to wundergraph home directory`);
+			log(`copy binary to wundergraph home bin directory`);
 			CopyBinToWgDir(log, binaryPath, binaryName);
 		}
 		return;
@@ -57,10 +56,9 @@ export const installer = async (version: string, installDir: string, binaryName:
 			log(`make binary executable`);
 			chmodX(binaryPath);
 
-			// That's a convenience for the cloud, so we don't have to download the binary every time
-			// or have to find the binary in the docker container
+			// That's a convenience for the cloud, so we have a fixed path to current binary
 			if (process.env.WG_CLOUD === 'true') {
-				log(`copy binary to wundergraph home directory`);
+				log(`copy binary to wundergraph home bin directory`);
 				CopyBinToWgDir(log, binaryPath, binaryName);
 			}
 		});
