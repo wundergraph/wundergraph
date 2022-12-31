@@ -2,19 +2,28 @@ import axios from 'axios';
 import { x } from 'tar';
 import { downloadURL } from './binarypath';
 import * as fs from 'fs';
+import os from 'os';
 import rimraf from 'rimraf';
 import { logger } from './logger';
 import path from 'path';
+import debug from 'debug';
 
 export const installer = async (version: string, installDir: string, binaryName: string) => {
 	const log = logger.extend('install');
 	const error = logger.extend('error:install');
 
 	const lockFile = path.join(installDir, 'download-lock');
+	const binaryPath = path.join(installDir, binaryName);
 	const locker = LockFile(version, lockFile);
 
 	if (locker.exists()) {
 		log(`Lock file already exists, skipping the download of the binary ${version}`);
+		// That's a convenience for the cloud, so we don't have to download the binary every time
+		// or have to find the binary in the docker container
+		if (process.env.WG_CLOUD === 'true') {
+			log(`copy binary to wundergraph home directory`);
+			CopyBinToWgDir(log, binaryPath, binaryName);
+		}
 		return;
 	}
 
@@ -24,7 +33,6 @@ export const installer = async (version: string, installDir: string, binaryName:
 
 	locker.create();
 
-	const binaryPath = path.join(installDir, binaryName);
 	if (fs.existsSync(binaryPath)) {
 		log(`removing existing binary at ${binaryPath}`);
 		rimraf(binaryPath, (err) => {
@@ -48,6 +56,13 @@ export const installer = async (version: string, installDir: string, binaryName:
 			log(`wunderctl v${version} installed/updated`);
 			log(`make binary executable`);
 			chmodX(binaryPath);
+
+			// That's a convenience for the cloud, so we don't have to download the binary every time
+			// or have to find the binary in the docker container
+			if (process.env.WG_CLOUD === 'true') {
+				log(`copy binary to wundergraph home directory`);
+				CopyBinToWgDir(log, binaryPath, binaryName);
+			}
 		});
 		outStream.addListener('error', (err) => {
 			error('Error installing wunderctl: ' + err.message);
@@ -58,6 +73,12 @@ export const installer = async (version: string, installDir: string, binaryName:
 		error('Error installing wunderctl: ' + e.message);
 	}
 };
+
+function CopyBinToWgDir(log: debug.Debugger, filePath: string, relTargetPath: string) {
+	const binDir = path.join(os.homedir(), '.wundergraph', 'bin');
+	fs.mkdirSync(binDir, { recursive: true });
+	fs.copyFileSync(filePath, path.join(binDir, relTargetPath));
+}
 
 function LockFile(version: string, lockFile: string) {
 	let createdLockFile = false;
