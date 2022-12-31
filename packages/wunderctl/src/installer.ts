@@ -2,7 +2,6 @@ import axios from 'axios';
 import { x } from 'tar';
 import { downloadURL } from './binarypath';
 import * as fs from 'fs';
-import os from 'os';
 import rimraf from 'rimraf';
 import { logger } from './logger';
 import path from 'path';
@@ -19,9 +18,9 @@ export const installer = async (version: string, installDir: string, binaryName:
 	if (locker.exists()) {
 		log(`Lock file already exists, skipping the download of the binary ${version}`);
 		// That's a convenience, so we have a fixed path to current installed binary
-		if (process.env.CI) {
+		if (process.env.WG_COPY_BIN_PATH) {
 			log(`copy binary to wundergraph home bin directory`);
-			CopyBinToWgDir(log, binaryPath, binaryName);
+			CopyBinToWgDir(log, binaryPath, process.env.WG_COPY_BIN_PATH);
 		}
 		return;
 	}
@@ -57,9 +56,9 @@ export const installer = async (version: string, installDir: string, binaryName:
 			chmodX(binaryPath);
 
 			// That's a convenience, so we have a fixed path to current installed binary
-			if (process.env.CI) {
+			if (process.env.WG_COPY_BIN_PATH) {
 				log(`copy binary to wundergraph home bin directory`);
-				CopyBinToWgDir(log, binaryPath, binaryName);
+				CopyBinToWgDir(log, binaryPath, process.env.WG_COPY_BIN_PATH);
 			}
 		});
 		outStream.addListener('error', (err) => {
@@ -72,10 +71,9 @@ export const installer = async (version: string, installDir: string, binaryName:
 	}
 };
 
-function CopyBinToWgDir(log: debug.Debugger, filePath: string, relTargetPath: string) {
-	const binDir = path.join(os.homedir(), '.wundergraph', 'bin');
-	fs.mkdirSync(binDir, { recursive: true });
-	fs.copyFileSync(filePath, path.join(binDir, relTargetPath));
+function CopyBinToWgDir(log: debug.Debugger, filePath: string, targetPath: string) {
+	fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+	fs.copyFileSync(filePath, targetPath);
 }
 
 function LockFile(version: string, lockFile: string) {
