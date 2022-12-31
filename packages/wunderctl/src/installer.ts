@@ -98,10 +98,7 @@ function LockFile(version: string, lockFile: string) {
 		exists: () => {
 			if (fs.existsSync(lockFile)) {
 				const data = fs.readFileSync(lockFile, 'utf-8');
-				if (data === version) {
-					return true;
-				}
-				return false;
+				return data === version;
 			}
 		},
 	};
