@@ -17,3 +17,7 @@ npx @wundergraph/wunderctl --help
 ```
 
 > **Warning**: Please use the Go [release](https://github.com/wundergraph/wundergraph/releases) binary to start the wundergraph server in production.
+
+## Misc
+
+You can pass `WG_COPY_BIN_PATH` to copy the installed binary to a specific path. This is useful if you want to use the binary in your CI/CD pipeline.
