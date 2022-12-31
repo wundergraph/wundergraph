@@ -133,10 +133,10 @@ type Client struct {
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
-	// retry timeout is a power of 2, use 3 to have a reasonable timeout of 6 seconds
 	// INFO: retryablehttp also handles retry-after headers
-	httpClient.RetryMax = 3
-	httpClient.RetryWaitMin = time.Second * 1
+	httpClient.RetryMax = 10
+	// keep it low to increase the chance that the server is fast to start
+	httpClient.RetryWaitMin = time.Millisecond * 100
 	httpClient.RetryWaitMax = time.Second * 30
 	httpClient.HTTPClient.Timeout = time.Minute * 1
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)

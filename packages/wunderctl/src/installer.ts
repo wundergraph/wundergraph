@@ -21,6 +21,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 		if (process.env.WG_COPY_BIN_PATH) {
 			log(`copy v${version} binary to ${process.env.WG_COPY_BIN_PATH}`);
 			copyFileRecursive(log, binaryPath, process.env.WG_COPY_BIN_PATH);
+			log(`binary copied`);
 		}
 		return;
 	}
@@ -59,6 +60,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 			if (process.env.WG_COPY_BIN_PATH) {
 				log(`copy v${version} binary to ${process.env.WG_COPY_BIN_PATH}`);
 				copyFileRecursive(log, binaryPath, process.env.WG_COPY_BIN_PATH);
+				log(`binary copied`);
 			}
 		});
 		outStream.addListener('error', (err) => {
