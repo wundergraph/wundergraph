@@ -20,7 +20,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 		// That's a convenience, so we have a fixed path to current installed binary
 		if (process.env.WG_COPY_BIN_PATH) {
 			log(`copy binary to wundergraph home bin directory`);
-			CopyBinToWgDir(log, binaryPath, process.env.WG_COPY_BIN_PATH);
+			copyFileRecursive(log, binaryPath, process.env.WG_COPY_BIN_PATH);
 		}
 		return;
 	}
@@ -58,7 +58,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 			// That's a convenience, so we have a fixed path to current installed binary
 			if (process.env.WG_COPY_BIN_PATH) {
 				log(`copy binary to wundergraph home bin directory`);
-				CopyBinToWgDir(log, binaryPath, process.env.WG_COPY_BIN_PATH);
+				copyFileRecursive(log, binaryPath, process.env.WG_COPY_BIN_PATH);
 			}
 		});
 		outStream.addListener('error', (err) => {
@@ -71,7 +71,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 	}
 };
 
-function CopyBinToWgDir(log: debug.Debugger, filePath: string, targetPath: string) {
+function copyFileRecursive(log: debug.Debugger, filePath: string, targetPath: string) {
 	fs.mkdirSync(path.dirname(targetPath), { recursive: true });
 	fs.copyFileSync(filePath, targetPath);
 }
