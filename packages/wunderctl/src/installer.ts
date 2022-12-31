@@ -71,9 +71,9 @@ export const installer = async (version: string, installDir: string, binaryName:
 	}
 };
 
-function copyFileRecursive(log: debug.Debugger, filePath: string, targetPath: string) {
-	fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-	fs.copyFileSync(filePath, targetPath);
+function copyFileRecursive(log: debug.Debugger, sourceFilePath: string, targetFilePath: string) {
+	fs.mkdirSync(path.dirname(targetFilePath), { recursive: true });
+	fs.copyFileSync(sourceFilePath, targetFilePath);
 }
 
 function LockFile(version: string, lockFile: string) {
