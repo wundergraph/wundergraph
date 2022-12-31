@@ -18,8 +18,8 @@ export const installer = async (version: string, installDir: string, binaryName:
 
 	if (locker.exists()) {
 		log(`Lock file already exists, skipping the download of the binary ${version}`);
-		// That's a convenience for the cloud, so we have a fixed path to current binary
-		if (process.env.WG_CLOUD === 'true') {
+		// That's a convenience, so we have a fixed path to current installed binary
+		if (process.env.CI) {
 			log(`copy binary to wundergraph home bin directory`);
 			CopyBinToWgDir(log, binaryPath, binaryName);
 		}
@@ -56,8 +56,8 @@ export const installer = async (version: string, installDir: string, binaryName:
 			log(`make binary executable`);
 			chmodX(binaryPath);
 
-			// That's a convenience for the cloud, so we have a fixed path to current binary
-			if (process.env.WG_CLOUD === 'true') {
+			// That's a convenience, so we have a fixed path to current installed binary
+			if (process.env.CI) {
 				log(`copy binary to wundergraph home bin directory`);
 				CopyBinToWgDir(log, binaryPath, binaryName);
 			}
