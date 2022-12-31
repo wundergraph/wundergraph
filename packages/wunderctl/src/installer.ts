@@ -19,7 +19,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 		log(`Lock file already exists, skipping the download of the binary ${version}`);
 		// That's a convenience, so we have a fixed path to current installed binary
 		if (process.env.WG_COPY_BIN_PATH) {
-			log(`copy binary to wundergraph home bin directory`);
+			log(`copy binary to ${process.env.WG_COPY_BIN_PATH}`);
 			copyFileRecursive(log, binaryPath, process.env.WG_COPY_BIN_PATH);
 		}
 		return;
@@ -57,7 +57,7 @@ export const installer = async (version: string, installDir: string, binaryName:
 
 			// That's a convenience, so we have a fixed path to current installed binary
 			if (process.env.WG_COPY_BIN_PATH) {
-				log(`copy binary to wundergraph home bin directory`);
+				log(`copy binary to ${process.env.WG_COPY_BIN_PATH}`);
 				copyFileRecursive(log, binaryPath, process.env.WG_COPY_BIN_PATH);
 			}
 		});
