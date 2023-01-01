@@ -19,9 +19,11 @@ import {
 	WunderGraphServerConfig,
 } from './types';
 import { WebhooksConfig } from '../webhooks/types';
-import { ServerLogger, resolveServerLogLevel } from '../logger';
+import { resolveServerLogLevel, ServerLogger } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
+import type { LoadOperationsOutput } from '../graphql/operations';
+import FastifyFunctionsPlugin from './plugins/functions';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -235,6 +237,24 @@ export const createServer = async ({
 			internalClientFactory: clientFactory,
 		});
 		fastify.log.info('Webhooks plugin registered');
+	}
+
+	const operationsConfigFile = fs.readFileSync(
+		path.join(wundergraphDir, 'generated', 'wundergraph.operations.json'),
+		'utf-8'
+	);
+	const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
+
+	if (
+		operationsConfig &&
+		operationsConfig.typescript_operation_files &&
+		operationsConfig.typescript_operation_files.length
+	) {
+		await fastify.register(FastifyFunctionsPlugin, {
+			operations: operationsConfig.typescript_operation_files,
+			internalClientFactory: clientFactory,
+		});
+		fastify.log.info('Functions plugin registered');
 	}
 
 	if (gracefulShutdown) {

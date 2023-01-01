@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/operations"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
@@ -74,6 +75,8 @@ var upCmd = &cobra.Command{
 		configOutFile := path.Join("generated", "bundle", "config.js")
 		serverOutFile := path.Join("generated", "bundle", "server.js")
 		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
+		operationsDir := path.Join(wunderGraphDir, operations.DirectoryName)
+		operationsOutDir := path.Join("generated", "bundle", "operations")
 
 		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
@@ -86,6 +89,7 @@ var upCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(helpers.CliEnv(rootFlags),
+				fmt.Sprintf("WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true"),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
@@ -110,6 +114,7 @@ var upCmd = &cobra.Command{
 
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var webhooksBundler *bundler.Bundler
+		var operationsBundler *bundler.Bundler
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
@@ -143,6 +148,24 @@ var upCmd = &cobra.Command{
 				})
 			}
 
+			if files.DirectoryExists(operationsDir) {
+				operationsPaths, err := operations.GetPaths(wunderGraphDir)
+				if err != nil {
+					return err
+				}
+				operationsBundler = bundler.NewBundler(bundler.Config{
+					Name:          "operations-bundler",
+					EntryPoints:   operationsPaths,
+					AbsWorkingDir: wunderGraphDir,
+					OutDir:        operationsOutDir,
+					Logger:        log,
+					OnAfterBundle: func() error {
+						log.Debug("Operations bundled!", zap.String("bundlerName", "operations-bundler"))
+						return nil
+					},
+				})
+			}
+
 			srvCfg := &helpers.ServerRunConfig{
 				WunderGraphDirAbs: wunderGraphDir,
 				ServerScriptFile:  serverOutFile,
@@ -153,6 +176,15 @@ var upCmd = &cobra.Command{
 
 			onAfterBuild = func() error {
 				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
+
+				if operationsBundler != nil {
+					// operationsBundler need to run before configRunner because it influences the config
+					// e.g. the JSON Schema for operations inputs needs to be available in the config
+					err := operationsBundler.Bundle()
+					if err != nil {
+						return err
+					}
+				}
 
 				// generate new config
 				<-configRunner.Run(ctx)
@@ -217,6 +249,7 @@ var upCmd = &cobra.Command{
 				// all webhook filenames are stored in the config
 				// we are going to create HTTP routes on the node for all of them
 				{Path: webhooksDir, Optional: true},
+				{Path: operationsDir, Optional: true},
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
 				// in that case we want to rerun the script to build a new config
 				{Path: introspectionCacheDir},

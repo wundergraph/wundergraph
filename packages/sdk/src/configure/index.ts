@@ -9,9 +9,16 @@ import {
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
-import { mergeApis, removeBaseSchema } from '../definition/merge';
+import { mergeApis } from '../definition/merge';
 import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
-import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
+import {
+	GraphQLOperation,
+	loadOperations,
+	LoadOperationsOutput,
+	ParsedOperations,
+	parseGraphQLOperations,
+	removeHookVariables,
+} from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
@@ -24,6 +31,7 @@ import {
 	DataSourceKind,
 	FieldConfiguration,
 	Operation,
+	OperationExecutionEngine,
 	OperationType,
 	PostResolveTransformationKind,
 	TypeConfiguration,
@@ -41,14 +49,11 @@ import {
 	parse,
 	parseType,
 	print,
-	stripIgnoredCharacters,
 	visit,
 } from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
-import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
-import { wunderctlExec } from '../wunderctlexec';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
@@ -69,6 +74,8 @@ import {
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import { InternalClient } from '../middleware/internal-client';
 import { Logger } from '../logger';
+import { NodeJSOperation } from '../operations/operations';
+import zodToJsonSchema from 'zod-to-json-schema';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -206,6 +213,7 @@ export interface HooksConfiguration<
 	[HooksConfigurationOperationType.Mutations]?: Mutations;
 	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
 }
+
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;
@@ -656,13 +664,9 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			}
 
 			const loadedOperations = loadOperations(schemaFileName);
-			const operationsContent = loadedOperations.content;
-			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
-				keepFromClaimVariables: false,
-				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
-			});
+			const operations = await resolveOperationsConfigurations(resolved, loadedOperations);
 			app.Operations = operations.operations;
-			app.InvalidOperationNames = loadedOperations.invalidOperationNames;
+			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
 				app.Operations = app.Operations.map((op) => {
 					const cfg = config.operations!;
@@ -932,10 +936,12 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
+		path: op.PathName,
 		responseSchema: JSON.stringify(op.ResponseSchema),
 		variablesSchema: JSON.stringify(op.VariablesSchema),
 		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
 		operationType: op.OperationType,
+		engine: op.ExecutionEngine,
 		cacheConfig: op.CacheConfig || {
 			enable: false,
 			maxAge: 0,
@@ -1099,4 +1105,68 @@ export const customGqlServerMountPath = (name: string): string => {
 
 const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+
+const resolveOperationsConfigurations = async (
+	config: ResolvedWunderGraphConfig,
+	loadedOperations: LoadOperationsOutput
+): Promise<ParsedOperations> => {
+	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
+		keepFromClaimVariables: false,
+		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
+	});
+	const nodeJSOperations: GraphQLOperation[] = [];
+	if (loadedOperations.typescript_operation_files)
+		for (const file of loadedOperations.typescript_operation_files) {
+			const nodeJsOperation: NodeJSOperation<any, any> = (await import(file.module_path)).default;
+			const operation: GraphQLOperation = {
+				Name: file.operation_name.replace('/', '_'),
+				PathName: file.operation_name,
+				Content: '',
+				OperationType: OperationType.QUERY,
+				ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+				VariablesSchema: { type: 'object', properties: {} },
+				InterpolationVariablesSchema: { type: 'object', properties: {} },
+				InternalVariablesSchema: { type: 'object', properties: {} },
+				InjectedVariablesSchema: { type: 'object', properties: {} },
+				ResponseSchema: { type: 'object', properties: {} },
+				AuthenticationConfig: {
+					required: false,
+				},
+				AuthorizationConfig: {
+					claims: [],
+					roleConfig: {
+						requireMatchAll: [],
+						requireMatchAny: [],
+						denyMatchAll: [],
+						denyMatchAny: [],
+					},
+				},
+				HooksConfiguration: {
+					preResolve: false,
+					postResolve: false,
+					mutatingPreResolve: false,
+					mutatingPostResolve: false,
+					mockResolve: {
+						enable: false,
+						subscriptionPollingIntervalMillis: 0,
+					},
+					httpTransportOnResponse: false,
+					httpTransportOnRequest: false,
+					customResolve: false,
+				},
+				VariablesConfiguration: {
+					injectVariables: [],
+				},
+				Internal: false,
+				PostResolveTransformations: undefined,
+			};
+			if (nodeJsOperation.inputSchema) {
+				operation.VariablesSchema = zodToJsonSchema(nodeJsOperation.inputSchema) as any;
+			}
+			nodeJSOperations.push(operation);
+		}
+	return {
+		operations: [...graphQLOperations.operations, ...nodeJSOperations],
+	};
 };

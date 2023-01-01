@@ -111,6 +111,13 @@ message Operation {
 	bool internal = 13;
 	string interpolationVariablesSchema = 14;
 	repeated PostResolveTransformation postResolveTransformations = 15;
+	OperationExecutionEngine engine = 16;
+	string path = 17;
+}
+
+enum OperationExecutionEngine {
+	ENGINE_GRAPHQL = 0;
+	ENGINE_NODEJS = 1;
 }
 
 message PostResolveTransformation {

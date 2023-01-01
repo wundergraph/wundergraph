@@ -421,7 +421,11 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return nil
 	}
 
-	apiPath := r.operationApiPath(operation.Name)
+	apiPath := r.operationApiPath(operation.Path)
+
+	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
+		return r.registerNodejsOperation(operation, apiPath)
+	}
 
 	var (
 		operationIsConfigured bool
@@ -452,10 +456,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
+	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, "", shared.Report)
 	shared.Postprocess.Process(preparedPlan)
-
-	operationType := getOperationType(shared.Doc, r.definition, operation.Name)
 
 	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
@@ -476,8 +478,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
-	switch operationType {
-	case ast.OperationTypeQuery:
+	switch operation.OperationType {
+	case wgpb.OperationType_QUERY:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
 		if !ok {
 			break
@@ -539,7 +541,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.Bool("cachePublic", handler.cacheConfig.public),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
-	case ast.OperationTypeMutation:
+	case wgpb.OperationType_MUTATION:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
 		if !ok {
 			break
@@ -577,7 +579,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
-	case ast.OperationTypeSubscription:
+	case wgpb.OperationType_SUBSCRIPTION:
 		subscriptionPlan, ok := preparedPlan.(*plan.SubscriptionResponsePlan)
 		if !ok {
 			break
@@ -616,7 +618,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			zap.Bool("mock", operation.HooksConfiguration.MockResolve.Enable),
 			zap.Bool("authRequired", operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired),
 		)
-	case ast.OperationTypeUnknown:
+	default:
 		r.log.Debug("operation type unknown",
 			zap.String("name", operation.Name),
 			zap.String("content", operation.Content),
@@ -1086,7 +1088,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
+	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1521,7 +1523,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
+	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -1670,7 +1672,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 
-	if !validateInputVariables(requestLogger, ctx, h.variablesValidator, w) {
+	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
@@ -2171,6 +2173,143 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 	}
 }
 
+func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath string) error {
+	var (
+		route *mux.Route
+	)
+
+	if operation.OperationType == wgpb.OperationType_MUTATION {
+		route = r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
+	} else {
+		// query and subscription
+		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
+	}
+
+	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	if err != nil {
+		return err
+	}
+
+	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	if err != nil {
+		return err
+	}
+
+	handler := &FunctionsHandler{
+		operation:            operation,
+		log:                  r.log,
+		variablesValidator:   variablesValidator,
+		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
+		hooksClient:          r.middlewareClient,
+		queryParamsAllowList: r.generateQueryArgumentsAllowList(operation.VariablesSchema),
+		stringInterpolator:   stringInterpolator,
+	}
+
+	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
+		route.Handler(authentication.RequiresAuthentication(handler))
+	} else {
+		route.Handler(handler)
+	}
+
+	r.log.Debug("registered FunctionsHandler",
+		zap.String("operation", operation.Name),
+		zap.String("path", apiPath),
+		zap.String("method", operation.OperationType.String()),
+	)
+
+	return nil
+}
+
+type FunctionsHandler struct {
+	operation            *wgpb.Operation
+	log                  *zap.Logger
+	variablesValidator   *inputvariables.Validator
+	rbacEnforcer         *authentication.RBACEnforcer
+	hooksClient          *hooks.Client
+	queryParamsAllowList []string
+	stringInterpolator   *interpolate.StringInterpolator
+}
+
+func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
+	r = setOperationMetaData(r, h.operation)
+
+	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	variablesBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(variablesBuf)
+
+	var (
+		variables []byte
+	)
+
+	ct := r.Header.Get("Content-Type")
+	if r.Method == http.MethodGet {
+		variables = parseQueryVariables(r, h.queryParamsAllowList)
+	} else if ct == "application/x-www-form-urlencoded" {
+		variables = h.parseFormVariables(r)
+	} else {
+		_, err := io.Copy(variablesBuf, r.Body)
+		if err != nil {
+			requestLogger.Error("failed to copy variables buf", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		variables = variablesBuf.Bytes()
+	}
+
+	if len(variables) == 0 {
+		variables = []byte("{}")
+	} else {
+		variables = h.stringInterpolator.Interpolate(variables)
+	}
+
+	variablesBuf.Reset()
+	err := json.Compact(variablesBuf, variables)
+	if err != nil {
+		requestLogger.Error("failed to compact variables", zap.Error(err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	variables = variablesBuf.Bytes()
+
+	if !validateInputVariables(r.Context(), requestLogger, variables, h.variablesValidator, w) {
+		return
+	}
+
+	out, err := h.hooksClient.DoFunctionRequest(r.Context(), h.operation.Path, variables)
+	if err != nil {
+		requestLogger.Error("failed to call function", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(out.Response)
+}
+
+func (h *FunctionsHandler) parseFormVariables(r *http.Request) []byte {
+	rawVariables := "{}"
+	if err := r.ParseForm(); err == nil {
+		for name, val := range r.Form {
+			if len(val) == 0 || strings.HasSuffix(val[0], WG_PREFIX) {
+				continue
+			}
+			// check if the user works with JSON values
+			if gjson.Valid(val[0]) {
+				rawVariables, _ = sjson.SetRaw(rawVariables, name, val[0])
+			} else {
+				rawVariables, _ = sjson.Set(rawVariables, name, val[0])
+			}
+		}
+	}
+	return []byte(rawVariables)
+}
+
 type EndpointUnavailableHandler struct {
 	OperationName string
 	Logger        *zap.Logger
@@ -2334,9 +2473,9 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 	return true
 }
 
-func validateInputVariables(log *zap.Logger, ctx *resolve.Context, validator *inputvariables.Validator, w http.ResponseWriter) bool {
+func validateInputVariables(ctx context.Context, log *zap.Logger, variables []byte, validator *inputvariables.Validator, w http.ResponseWriter) bool {
 	var buf bytes.Buffer
-	valid, err := validator.Validate(ctx, ctx.Variables, &buf)
+	valid, err := validator.Validate(ctx, variables, &buf)
 	if err != nil {
 		log.Error("failed to validate input variables", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)

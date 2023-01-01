@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/operations"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
@@ -85,8 +86,11 @@ var generateCmd = &cobra.Command{
 			serverOutFile := path.Join(wunderGraphDir, "generated", "bundle", "server.js")
 			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
 			webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
+			operationsDir := path.Join(wunderGraphDir, operations.DirectoryName)
+			operationsOutDir := path.Join("generated", "bundle", "operations")
 
 			var webhooksBundler *bundler.Bundler
+			var operationsBundler *bundler.Bundler
 
 			if files.DirectoryExists(webhooksDir) {
 				webhookPaths, err := webhooks.GetWebhooks(wunderGraphDir)
@@ -101,6 +105,24 @@ var generateCmd = &cobra.Command{
 					Logger:        log,
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
+						return nil
+					},
+				})
+			}
+
+			if files.DirectoryExists(operationsDir) {
+				operationsPaths, err := operations.GetPaths(wunderGraphDir)
+				if err != nil {
+					return err
+				}
+				operationsBundler = bundler.NewBundler(bundler.Config{
+					Name:          "operations-bundler",
+					EntryPoints:   operationsPaths,
+					AbsWorkingDir: wunderGraphDir,
+					OutDir:        operationsOutDir,
+					Logger:        log,
+					OnAfterBundle: func() error {
+						log.Debug("Operations bundled!", zap.String("bundlerName", "operations-bundler"))
 						return nil
 					},
 				})
@@ -137,11 +159,24 @@ var generateCmd = &cobra.Command{
 					})
 				}
 
+				if operationsBundler != nil {
+					wg.Go(func() error {
+						// bundle operations
+						return operationsBundler.Bundle()
+					})
+				}
+
 				err := wg.Wait()
 				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
 				return err
 			}
+
+			err = operationsBundler.Bundle()
+			if err != nil {
+				return err
+			}
+
 		} else {
 			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
 			onAfterBuild = func() error {

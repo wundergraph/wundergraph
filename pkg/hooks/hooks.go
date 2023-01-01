@@ -162,6 +162,45 @@ func (c *Client) DoOperationRequest(ctx context.Context, operationName string, h
 	return c.doRequest(ctx, "operation/"+operationName, hook, jsonData)
 }
 
+func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte) (*MiddlewareHookResponse, error) {
+	jsonData = c.setInternalHookData(ctx, jsonData)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+
+	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(ctx))
+
+	req, err := retryablehttp.FromRequest(r)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error calling function %s: %w", operationName, err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
+	}
+
+	dec := json.NewDecoder(resp.Body)
+
+	var hookRes MiddlewareHookResponse
+	err = dec.Decode(&hookRes)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding function response: %w", err)
+	}
+
+	if hookRes.Error != "" {
+		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
+	}
+
+	return &hookRes, nil
+}
+
 func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
 	return c.doRequest(ctx, "authentication", hook, jsonData)
 }

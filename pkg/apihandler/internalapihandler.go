@@ -107,6 +107,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 
+	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
+		return nil
+	}
+
 	shared := i.pool.GetShared(context.Background(), i.planConfig, pool.Config{
 		RenameTypeNames: i.renameTypeNames,
 	})

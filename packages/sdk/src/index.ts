@@ -85,3 +85,5 @@ export { TypeScriptClient } from './codegen/templates/typescript/client';
 export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } from './webhooks/verifiers';
 export { PlaceHolder } from './configure/variables';
 export { EnvironmentVariable } from './configure/variables';
+
+export { createOperation } from './operations/operations';

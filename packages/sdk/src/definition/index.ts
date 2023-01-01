@@ -50,6 +50,8 @@ export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECT
 // When true, throw an exception an error is found while loading operations
 export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
 
+export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
+
 export interface RenameType {
 	from: string;
 	to: string;
