@@ -133,11 +133,13 @@ type Client struct {
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
-	// INFO: retryablehttp also handles retry-after headers
-	httpClient.RetryMax = 10
-	// keep it low to increase the chance that the server is fast to start
-	httpClient.RetryWaitMin = time.Millisecond * 100
-	httpClient.RetryWaitMax = time.Second * 30
+	// we will try 20 times with a constant delay of 100ms after max 2s we will give up
+	httpClient.RetryMax = 20
+	// keep it low and linear to increase the chance
+	// that we can continue as soon as the server is back from a cold start
+	httpClient.Backoff = retryablehttp.LinearJitterBackoff
+	httpClient.RetryWaitMax = 100 * time.Millisecond
+	httpClient.RetryWaitMin = 100 * time.Millisecond
 	httpClient.HTTPClient.Timeout = time.Minute * 1
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
 	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
