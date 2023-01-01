@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -129,6 +132,8 @@ type Client struct {
 	serverUrl  string
 	httpClient *retryablehttp.Client
 	log        *zap.Logger
+	hostPort   string
+	init       *sync.Once
 }
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
@@ -146,10 +151,30 @@ func NewClient(serverUrl string, logger *zap.Logger) *Client {
 		logger.Debug("hook request call", zap.Int("attempt", attempt), zap.String("url", req.URL.String()))
 	}
 
+	u, _ := url.Parse(serverUrl)
+
 	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,
+		hostPort:   net.JoinHostPort(u.Hostname(), u.Port()),
+		init:       &sync.Once{},
 	}
+}
+
+func (c *Client) waitForServer() {
+	c.init.Do(func() {
+		timeout := time.Now().Add(time.Second * 2)
+		for {
+			conn, err := net.Dial("tcp4", c.hostPort)
+			if err == nil {
+				conn.Close()
+				return
+			}
+			if time.Now().After(timeout) {
+				return
+			}
+		}
+	})
 }
 
 func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
@@ -182,6 +207,7 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byt
 }
 
 func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	c.waitForServer()
 	jsonData = c.setInternalHookData(ctx, jsonData)
 	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -220,8 +246,13 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	return &hookRes, nil
 }
 
-func (c *Client) DoHealthCheckRequest(timeout time.Duration) (status bool) {
-	resp, err := c.httpClient.Get(fmt.Sprintf("%s/health", c.serverUrl))
+func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
+	c.waitForServer()
+	req, err := retryablehttp.NewRequestWithContext(ctx, "GET", c.serverUrl+"/health", nil)
+	if err != nil {
+		return false
+	}
+	resp, err := c.httpClient.Do(req)
 	if err != nil || resp.StatusCode != 200 {
 		return
 	}
