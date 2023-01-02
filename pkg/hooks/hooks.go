@@ -7,11 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
-	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/buger/jsonparser"
@@ -133,48 +130,24 @@ type Client struct {
 	httpClient *retryablehttp.Client
 	log        *zap.Logger
 	hostPort   string
-	init       *sync.Once
 }
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
-	// we will try 20 times with a constant delay of 100ms after max 2s we will give up
-	httpClient.RetryMax = 20
+	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
+	httpClient.RetryMax = 40
 	// keep it low and linear to increase the chance
 	// that we can continue as soon as the server is back from a cold start
 	httpClient.Backoff = retryablehttp.LinearJitterBackoff
-	httpClient.RetryWaitMax = 100 * time.Millisecond
-	httpClient.RetryWaitMin = 100 * time.Millisecond
+	httpClient.RetryWaitMax = 50 * time.Millisecond
+	httpClient.RetryWaitMin = 50 * time.Millisecond
 	httpClient.HTTPClient.Timeout = time.Minute * 1
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
-	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
-		logger.Debug("hook request call", zap.Int("attempt", attempt), zap.String("url", req.URL.String()))
-	}
-
-	u, _ := url.Parse(serverUrl)
 
 	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,
-		hostPort:   net.JoinHostPort(u.Hostname(), u.Port()),
-		init:       &sync.Once{},
 	}
-}
-
-func (c *Client) waitForServer() {
-	c.init.Do(func() {
-		timeout := time.Now().Add(time.Second * 2)
-		for {
-			conn, err := net.Dial("tcp4", c.hostPort)
-			if err == nil {
-				conn.Close()
-				return
-			}
-			if time.Now().After(timeout) {
-				return
-			}
-		}
-	})
 }
 
 func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
@@ -207,7 +180,6 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byt
 }
 
 func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	c.waitForServer()
 	jsonData = c.setInternalHookData(ctx, jsonData)
 	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -247,7 +219,6 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 }
 
 func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
-	c.waitForServer()
 	req, err := retryablehttp.NewRequestWithContext(ctx, "GET", c.serverUrl+"/health", nil)
 	if err != nil {
 		return false
