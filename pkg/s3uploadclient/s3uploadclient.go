@@ -41,7 +41,6 @@ type S3UploadClient struct {
 type preparedProfile struct {
 	UploadProfile
 	allowedMimeTypesRegexps []*regexp.Regexp
-	hookPrefix              string
 }
 
 // UploadProfile specifies options like maximum file size and allowed
