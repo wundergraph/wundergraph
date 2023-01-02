@@ -150,5 +150,3 @@ export interface User<Role extends string = string> {
 export interface LogoutOptions {
 	logoutOpenidConnectProvider?: boolean;
 }
-
-export type ClientAuthentication = 'none' | 'cookie' | 'token';

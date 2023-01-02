@@ -1,5 +1,4 @@
 import {
-	ClientAuthentication,
 	ClientConfig,
 	ClientResponse,
 	FetchUserRequestOptions,

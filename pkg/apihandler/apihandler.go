@@ -1940,13 +1940,13 @@ func (r *Builder) registerAuth(insecureCookies bool) {
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
 
-	// fallbacks for old token user path
+	// fallback for old token user path
 	// @deprecated use /auth/user instead
 	r.router.Path("/auth/token/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
 
 	cookieBasedAuth := r.router.PathPrefix("/auth/cookie").Subrouter()
 
-	// fallbacks for old cookie user path
+	// fallback for old cookie user path
 	// @deprecated use /auth/user instead
 	cookieBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
 

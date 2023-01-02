@@ -18,7 +18,6 @@ export class TypeScriptClient implements Template {
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
 		const hasAuthProviders = config.authentication.cookieBased.length !== 0;
-		const hasTokenAuth = config.authentication.tokenBased.length !== 0;
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,
