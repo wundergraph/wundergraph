@@ -2,7 +2,7 @@
 
 | Version range   | Migration complexity | Info                          |
 | --------------- | -------------------- | ----------------------------- |
-| 0.122.0-0.123.0 | low                  | Application class was removed |
+| 0.123.0-0.124.0 | low                  | Application class was removed |
 
 1. `Application` class has been removed. Instead, pass you APIs directly to `configureWunderGraphApplication()`:
 

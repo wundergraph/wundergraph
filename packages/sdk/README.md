@@ -20,20 +20,8 @@ npx create-wundergraph-app <project-name> -E simple
 
 # Exports
 
-## Client
-
-This is the base javascript implementation for all WunderGraph clients.
-
-```ts
-import { Client } from '@wundergraph/sdk/client';
-```
-
-## Internal
-
-This is only intended for internal plugin development. No api compatibility guarantees.
-
-> **Warning**: The api may change at any time.
-
-```ts
-import { visitJSONSchema } from '@wundergraph/sdk/internal';
-```
+- [@wundergraph/sdk/client](./client)
+- [@wundergraph/sdk/internal](./internal)
+- [@wundergraph/sdk/internal/logger](./logger)
+- [@wundergraph/sdk/server](./server)
+- [@wundergraph/sdk/testing](./testing)

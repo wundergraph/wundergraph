@@ -1,5 +1,5 @@
 import { GraphQLIntrospection } from '../definition';
-import transformSchema from './shema';
+import transformSchema from './schema';
 import { assert } from 'chai';
 
 test('replaceCustomScalars', async () => {

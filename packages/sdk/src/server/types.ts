@@ -1,11 +1,11 @@
-import { InternalClient, InternalClientFactory } from './internal-client';
-import { FastifyLoggerInstance } from 'fastify';
-import { Headers } from '@web-std/fetch';
-import { HooksConfiguration } from '../configure';
-import { GraphQLServerConfig } from './plugins/graphql';
-import { WunderGraphConfiguration } from '@wundergraph/protobuf';
-import { WebhooksConfig } from '../webhooks/types';
-import { ServerOptions } from '../configure/options';
+import type { InternalClient, InternalClientFactory } from './internal-client';
+import type { FastifyLoggerInstance } from 'fastify';
+import type { Headers } from '@web-std/fetch';
+import type { GraphQLServerConfig } from './plugins/graphql';
+import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import type { WebhooksConfig } from '../webhooks/types';
+import type { InputVariable } from '../configure/variables';
+import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -158,4 +158,98 @@ export interface AuthenticationOK<User extends WunderGraphUser> {
 export interface AuthenticationDeny {
 	status: 'deny';
 	message: string;
+}
+
+export enum HooksConfigurationOperationType {
+	Queries = 'queries',
+	Mutations = 'mutations',
+	Subscriptions = 'subscriptions',
+}
+
+export interface OperationHookFunction {
+	(...args: any[]): Promise<any>;
+}
+
+export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
+	mockResolve?: AsyncFn;
+	preResolve?: AsyncFn;
+	postResolve?: AsyncFn;
+	mutatingPreResolve?: AsyncFn;
+	mutatingPostResolve?: AsyncFn;
+	customResolve?: AsyncFn;
+}
+
+// Any is used here because the exact type of the hooks is not known at compile time
+// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
+export type OperationHooks = Record<string, any>;
+
+export interface HooksConfiguration<
+	Queries extends OperationHooks = OperationHooks,
+	Mutations extends OperationHooks = OperationHooks,
+	Subscriptions extends OperationHooks = OperationHooks,
+	User extends WunderGraphUser = WunderGraphUser,
+	// Any is used here because the exact type of the base client is not known at compile time
+	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
+	IC extends InternalClient = InternalClient<any, any>
+> {
+	global?: {
+		httpTransport?: {
+			onOriginRequest?: {
+				hook: OperationHookFunction;
+				enableForOperations?: string[];
+				enableForAllOperations?: boolean;
+			};
+			onOriginResponse?: {
+				hook: OperationHookFunction;
+				enableForOperations?: string[];
+				enableForAllOperations?: boolean;
+			};
+		};
+		wsTransport?: {
+			onConnectionInit?: {
+				hook: OperationHookFunction;
+				enableForDataSources: string[];
+			};
+		};
+	};
+	authentication?: {
+		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
+		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
+		revalidate?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
+		postLogout?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
+	};
+	[HooksConfigurationOperationType.Queries]?: Queries;
+	[HooksConfigurationOperationType.Mutations]?: Mutations;
+	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
+}
+
+export interface ServerOptions {
+	serverUrl?: InputVariable;
+	listen?: ListenOptions;
+	logger?: ServerLogger;
+}
+
+export interface MandatoryServerOptions {
+	serverUrl: InputVariable;
+	listen: {
+		host: InputVariable;
+		port: InputVariable;
+	};
+	logger: {
+		level: InputVariable<LoggerLevel>;
+	};
+}
+
+export interface ResolvedServerOptions {
+	serverUrl: ConfigurationVariable;
+	listen: ResolvedListenOptions;
+	logger: ResolvedServerLogger;
+}
+
+export interface ServerLogger {
+	level?: InputVariable<LoggerLevel>;
+}
+
+export interface ResolvedServerLogger {
+	level: ConfigurationVariable;
 }

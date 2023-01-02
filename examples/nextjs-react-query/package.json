@@ -1,5 +1,5 @@
 {
-  "name": "wundergraph-nextjs",
+  "name": "wundergraph-nextjs-react-query",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^4.16.1",
-    "@wundergraph/nextjs": "^0.7.4",
-    "@wundergraph/react-query": "^0.1.0",
-    "@wundergraph/sdk": "^0.129.0",
+    "@wundergraph/nextjs": "^0.7.7",
+    "@wundergraph/react-query": "^0.2.1",
+    "@wundergraph/sdk": "^0.130.2",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",
