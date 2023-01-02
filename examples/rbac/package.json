@@ -5,15 +5,15 @@
   "scripts": {
     "start": "run-p dev wundergraph open",
     "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000/authentication",
-    "build": "next build",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
     "check": "tsc --noEmit",
     "dev": "next dev"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.7.0",
-    "@wundergraph/sdk": "^0.125.0",
+    "@wundergraph/nextjs": "^0.7.7",
+    "@wundergraph/sdk": "^0.130.2",
     "graphql": "^16.3.0",
     "next": "^12.1.6",
     "react": "^18.0.0",

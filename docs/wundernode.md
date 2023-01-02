@@ -2,7 +2,7 @@
 
 #### Server listen
 
-`wunderctl up` Starts the server with default host `127.0.0.1` and port `9991`.
+`wunderctl up` Starts the server with default host `localhost` and port `9991`.
 
 By default, the server will listen on the address(es) (IPv4 and IPv6) resolved by `localhost` when no specific address is provided.
 If listening on any available interface is desired, then specifying `WG_NODE_HOST=0.0.0.0` for the address will

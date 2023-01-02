@@ -1,7 +1,7 @@
 import { ConfigurationVariable } from '@wundergraph/protobuf';
 import { EnvironmentVariable, InputVariable, mapInputVariable } from './variables';
 
-const isCloud = process.env.WG_CLOUD === 'true';
+export const isCloud = process.env.WG_CLOUD === 'true';
 
 export enum WgEnv {
 	LogLevel = 'WG_LOG_LEVEL',
@@ -16,9 +16,9 @@ export enum WgEnv {
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
 
-const defaultHost = '127.0.0.1';
-const defaultNodePort = '9991';
-const defaultServerPort = '9992';
+export const defaultHost = 'localhost';
+export const defaultNodePort = '9991';
+export const defaultServerPort = '9992';
 
 const DefaultNodeOptions = {
 	listen: {
@@ -31,17 +31,6 @@ const DefaultNodeOptions = {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
 	defaultRequestTimeoutSeconds: 0,
-};
-
-const DefaultServerOptions: MandatoryServerOptions = {
-	listen: {
-		host: new EnvironmentVariable(WgEnv.ServerHost, defaultHost),
-		port: new EnvironmentVariable(WgEnv.ServerPort, defaultServerPort),
-	},
-	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${defaultServerPort}`),
-	logger: {
-		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
-	},
 };
 
 export interface ListenOptions {
@@ -83,38 +72,7 @@ export interface ResolvedNodeOptions {
 	defaultRequestTimeoutSeconds: number;
 }
 
-export interface ServerOptions {
-	serverUrl?: InputVariable;
-	listen?: ListenOptions;
-	logger?: ServerLogger;
-}
-
-export interface MandatoryServerOptions {
-	serverUrl: InputVariable;
-	listen: {
-		host: InputVariable;
-		port: InputVariable;
-	};
-	logger: {
-		level: InputVariable<LoggerLevel>;
-	};
-}
-
-export interface ResolvedServerOptions {
-	serverUrl: ConfigurationVariable;
-	listen: ResolvedListenOptions;
-	logger: ResolvedServerLogger;
-}
-
-export interface ServerLogger {
-	level?: InputVariable<LoggerLevel>;
-}
-
-export interface ResolvedServerLogger {
-	level: ConfigurationVariable;
-}
-
-const fallbackUrl = (defaultPort: string, listen?: ListenOptions) => {
+export const fallbackUrl = (defaultPort: string, listen?: ListenOptions) => {
 	return `http://${listen?.host || 'localhost'}:${listen?.port || defaultPort}`;
 };
 
@@ -149,35 +107,5 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 			level: mapInputVariable(nodeOptions.logger.level),
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
-	};
-};
-
-export const serverOptionsWithDefaults = (options?: ServerOptions): MandatoryServerOptions => {
-	return isCloud
-		? DefaultServerOptions
-		: {
-				serverUrl:
-					options?.serverUrl ||
-					new EnvironmentVariable(WgEnv.ServerUrl, fallbackUrl(defaultServerPort, options?.listen)),
-				listen: {
-					host: options?.listen?.host || DefaultServerOptions.listen.host,
-					port: options?.listen?.port || DefaultServerOptions.listen.port,
-				},
-				logger: {
-					level: options?.logger?.level || DefaultServerOptions.logger.level,
-				},
-		  };
-};
-
-export const resolveServerOptions = (options: MandatoryServerOptions): ResolvedServerOptions => {
-	return {
-		serverUrl: mapInputVariable(options.serverUrl),
-		listen: {
-			host: mapInputVariable(options.listen.host),
-			port: mapInputVariable(options.listen.port),
-		},
-		logger: {
-			level: mapInputVariable(options.logger.level),
-		},
 	};
 };

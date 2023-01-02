@@ -18,7 +18,7 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/phayes/freeport"
-	"github.com/sebdah/goldie"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -29,6 +29,8 @@ import (
 )
 
 func TestNode(t *testing.T) {
+	g := goldie.New(t, goldie.WithFixtureDir("fixtures"))
+
 	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	userService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +53,7 @@ func TestNode(t *testing.T) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		if bytes.Contains(req, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+		if bytes.Contains(req, []byte(`{"variables":{"first":null},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
 			_, _ = w.Write([]byte(`{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`))
 			return
 		}
@@ -127,7 +129,7 @@ func TestNode(t *testing.T) {
 			},
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
@@ -161,32 +163,32 @@ func TestNode(t *testing.T) {
 	myReviews := withHeaders.GET("/operations/MyReviews").
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
-	goldie.Assert(t, "get my reviews json rpc", prettyJSON(myReviews))
+	g.Assert(t, "get my reviews json rpc", prettyJSON(myReviews))
 
 	topProductsWithoutQuery := withHeaders.GET("/operations/TopProducts").
 		Expect().Status(http.StatusOK).Body().Raw()
-	goldie.Assert(t, "top products without query", prettyJSON(topProductsWithoutQuery))
+	g.Assert(t, "top products without query", prettyJSON(topProductsWithoutQuery))
 
 	topProductsWithQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", 1).
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
-	goldie.Assert(t, "top products with query", prettyJSON(topProductsWithQuery))
+	g.Assert(t, "top products with query", prettyJSON(topProductsWithQuery))
 
 	topProductsWithInvalidQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", true).
 		Expect().Status(http.StatusBadRequest).Body().Raw()
-	goldie.Assert(t, "top products with invalid query", prettyJSON(topProductsWithInvalidQuery))
+	g.Assert(t, "top products with invalid query", prettyJSON(topProductsWithInvalidQuery))
 
 	topProductsWithQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
 		WithQuery("wg_variables", `{"first":1}`).
 		Expect().Status(http.StatusOK).Body().Raw()
-	goldie.Assert(t, "top products with query as wg variables", prettyJSON(topProductsWithQueryAsWgVariables))
+	g.Assert(t, "top products with query as wg variables", prettyJSON(topProductsWithQueryAsWgVariables))
 
 	topProductsWithInvalidQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
 		WithQuery("wg_variables", `{"first":true}`).
 		Expect().Status(http.StatusBadRequest).Body().Raw()
-	goldie.Assert(t, "top products with invalid query as wg variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
+	g.Assert(t, "top products with invalid query as wg variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
 
 	request := GraphQLRequest{
 		OperationName: "MyReviews",
@@ -194,13 +196,15 @@ func TestNode(t *testing.T) {
 	}
 
 	actual := withHeaders.POST("/graphql").WithJSON(request).Expect().Status(http.StatusOK).Body().Raw()
-	goldie.Assert(t, "post my reviews graphql", prettyJSON(actual))
+	g.Assert(t, "post my reviews graphql", prettyJSON(actual))
 
 	withHeaders.GET("/graphql").Expect().Status(http.StatusOK).Text(
 		httpexpect.ContentOpts{MediaType: "text/html"})
 }
 
 func TestInMemoryCache(t *testing.T) {
+	g := goldie.New(t, goldie.WithFixtureDir("fixtures"))
+
 	logger := logging.New(true, false, zapcore.DebugLevel)
 
 	productService := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -208,7 +212,7 @@ func TestInMemoryCache(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if bytes.Contains(data, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+		if bytes.Contains(data, []byte(`{"variables":{"first":null},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
 			if _, err := io.WriteString(w, `{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`); err != nil {
 				t.Fatal(err)
 			}
@@ -276,7 +280,7 @@ func TestInMemoryCache(t *testing.T) {
 			},
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
@@ -312,13 +316,13 @@ func TestInMemoryCache(t *testing.T) {
 	// Send a request to populate the cache
 	cold := withHeaders.GET("/operations/TopProducts").Expect()
 	cold.Status(http.StatusOK).Header(cacheHeaderName).Equal("MISS")
-	goldie.Assert(t, expectedDataName, prettyJSON(cold.Body().Raw()))
+	g.Assert(t, expectedDataName, prettyJSON(cold.Body().Raw()))
 
 	// Close the origin, so request can only be answered from the in-memory cache
 	productService.Close()
 	hot := withHeaders.GET("/operations/TopProducts").Expect()
 	hot.Status(http.StatusOK).Header(cacheHeaderName).Equal("HIT")
-	goldie.Assert(t, expectedDataName, prettyJSON(hot.Body().Raw()))
+	g.Assert(t, expectedDataName, prettyJSON(hot.Body().Raw()))
 }
 
 func TestWebHooks(t *testing.T) {
@@ -383,7 +387,7 @@ func TestWebHooks(t *testing.T) {
 			Options: &apihandler.Options{
 				ServerUrl: testServer.URL,
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
@@ -479,7 +483,7 @@ func BenchmarkNode(t *testing.B) {
 			},
 			Options: &apihandler.Options{
 				Listener: &apihandler.Listener{
-					Host: "127.0.0.1",
+					Host: "localhost",
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},

@@ -264,61 +264,35 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
+func (n *Node) newListener(configuration *apihandler.Listener) (net.Listener, error) {
 	cfg := net.ListenConfig{
 		KeepAlive: 90 * time.Second,
 	}
 
 	host, port := configuration.Host, configuration.Port
 
-	var listeners []net.Listener
-	var localhostIPs []net.IP
-
-	// If listening to 'localhost', listen to both 127.0.0.1 or ::1 if they are available.
-	if host == "localhost" {
-		localhostIPs, _ = net.LookupIP(host)
+	bindProto := ""
+	address := ""
+	// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
+	// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
+	// to pass the network as tcp4. Dual stack has produced some issues in container environments
+	// for those reasons we are using tcp4 or tcp6 explicitly.
+	if IsIPv4(host) {
+		bindProto = "tcp4"
+		address = fmt.Sprintf("%s:%d", host, port)
+	} else if IsIPv6(host) {
+		bindProto = "tcp6"
+		address = fmt.Sprintf("[%s]:%d", host, port)
 	}
 
-	for _, ip := range localhostIPs {
-		nip := ip.String()
-		// isIPv6
-		if strings.Contains(nip, ":") {
-			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%d", nip, port))
-			// in some cases e.g when ipv6 is not enabled in docker, listen will error
-			// in that case we ignore this error and try to listen to next ip
-			if err == nil {
-				listeners = append(listeners, &proxyproto.Listener{
-					Listener: listener,
-				})
-			} else {
-				n.log.Error("failed to listen to ipv6. Did you forget to enable ipv6?",
-					zap.String("ip", nip),
-					zap.Error(err),
-				)
-			}
-		} else {
-			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", nip, port))
-			if err != nil {
-				return nil, err
-			}
-			listeners = append(listeners, &proxyproto.Listener{
-				Listener: listener,
-			})
-		}
+	listener, err := cfg.Listen(context.Background(), bindProto, address)
+	if err != nil {
+		return nil, err
 	}
 
-	// when we didn't listen to additional localhostIPs we will listen only to the host
-	if len(localhostIPs) == 0 {
-		listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
-		if err != nil {
-			return nil, err
-		}
-		listeners = append(listeners, &proxyproto.Listener{
-			Listener: listener,
-		})
-	}
-
-	return listeners, nil
+	return &proxyproto.Listener{
+		Listener: listener,
+	}, nil
 }
 
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
@@ -338,7 +312,7 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("WunderNode shutdown complete")
 }
 
-func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, bool) {
+func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (*HealthCheckReport, bool) {
 	healthCheck := &HealthCheckReport{
 		ServerStatus: "NOT_READY",
 		// For now we assume that the server is ready
@@ -348,7 +322,9 @@ func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, b
 	}
 
 	if n.options.hooksServerHealthCheck {
-		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+		ctx, cancel := context.WithTimeout(ctx, n.options.healthCheckTimeout)
+		defer cancel()
+		ok := hooksClient.DoHealthCheckRequest(ctx)
 		if ok {
 			healthCheck.ServerStatus = "READY"
 		} else {
@@ -475,7 +451,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 			return
 		}
 
-		report, healthy := n.GetHealthReport(hooksClient)
+		report, healthy := n.GetHealthReport(r.Context(), hooksClient)
 		if !healthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
@@ -489,7 +465,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}))
 
 	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		report, healthy := n.GetHealthReport(hooksClient)
+		report, healthy := n.GetHealthReport(r.Context(), hooksClient)
 		if !healthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
@@ -517,43 +493,35 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
 		timeoutMiddleware.Start()
 		go func() {
-			timeoutMiddleware.Wait(n.ctx)
+			_ = timeoutMiddleware.Wait(n.ctx)
 			n.options.idleHandler()
 		}()
 	}
 
-	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
+	listener, err := n.newListener(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		return err
 	}
 
-	g, _ := errgroup.WithContext(n.ctx)
+	n.log.Info("listening on",
+		zap.String("addr", listener.Addr().String()),
+	)
 
-	for _, listener := range listeners {
-		l := listener
-		g.Go(func() error {
-			n.log.Info("listening on",
-				zap.String("addr", l.Addr().String()),
+	if err := n.server.Serve(listener); err != nil {
+		if err == http.ErrServerClosed {
+			n.log.Debug("listener closed",
+				zap.String("addr", listener.Addr().String()),
 			)
-
-			if err := n.server.Serve(l); err != nil {
-				if err == http.ErrServerClosed {
-					n.log.Debug("listener closed",
-						zap.String("addr", l.Addr().String()),
-					)
-					return nil
-				}
-				return err
-			}
 			return nil
-		})
+		}
+		return err
 	}
 
 	n.log.Debug("public node url",
 		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
-	return g.Wait()
+	return nil
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
@@ -688,4 +656,12 @@ func uniqueStrings(slice []string) []string {
 		}
 	}
 	return list
+}
+
+func IsIPv4(address string) bool {
+	return strings.Count(address, ":") < 2
+}
+
+func IsIPv6(address string) bool {
+	return strings.Count(address, ":") >= 2
 }

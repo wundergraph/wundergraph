@@ -33,7 +33,7 @@ Each option when unset will get a value from the `Default Environment Variables`
 
 | Option         | Default Value           | Default Environment Variable |
 | -------------- | ----------------------- | ---------------------------- |
-| `listen.host`  | `127.0.0.1`             | `WG_SERVER_HOST`             |
+| `listen.host`  | `localhost`             | `WG_SERVER_HOST`             |
 | `listen.port`  | `9992`                  | `WG_SERVER_PORT`             |
 | `serverUrl`    | `http://localhost:9992` | `WG_SERVER_URL`              |
 | `logger.level` | `info`                  | `WG_LOG_LEVEL`               |
@@ -66,7 +66,7 @@ When using custom environment variables, you need to make sure that the environm
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
-      host: '127.0.0.1',
+      host: 'localhost',
       port: '5555',
     },
     serverUrl: 'http://localhost:5555/',
@@ -80,12 +80,12 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 ### Configure options with custom environment variables
 
 ```typescript
-import { EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk'
+import { configureWunderGraphServer, EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk/server'
 
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
-      host: new EnvironmentVariable('SERVER_HOST', '127.0.0.1'),
+      host: new EnvironmentVariable('SERVER_HOST', 'localhost'),
       port: new EnvironmentVariable('SERVER_PORT', '4444'),
     },
     serverUrl: new EnvironmentVariable('SERVER_URL', 'http://localhost:4444/'),
@@ -103,13 +103,13 @@ This configuration illustrates what options you will get when options are not pr
 By using default environment variables names you could stick with Wundergraph Default behaviour but supply different default values.
 
 ```typescript
-import { EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk'
+import { configureWunderGraphServer, EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk/server'
 
 // use WgEnv enum to set variable names
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
-      host: new EnvironmentVariable(WgEnv.ServerHost, '127.0.0.1'),
+      host: new EnvironmentVariable(WgEnv.ServerHost, 'localhost'),
       port: new EnvironmentVariable(WgEnv.ServerPort, '9992'),
     },
     serverUrl: new EnvironmentVariable(
@@ -126,7 +126,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
     listen: {
-      host: new EnvironmentVariable('WG_SERVER_HOST', '127.0.0.1'),
+      host: new EnvironmentVariable('WG_SERVER_HOST', 'localhost'),
       port: new EnvironmentVariable('WG_SERVER_PORT', '9992'),
     },
     serverUrl: new EnvironmentVariable(

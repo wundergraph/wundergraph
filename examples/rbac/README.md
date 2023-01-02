@@ -9,7 +9,8 @@ All APIs have been integrated into a unified and fully typed interface. There ar
 
 ## Getting Started
 
-Install the dependencies and run the complete example in one command:
+1. Copy the `.env.example` file to `.env` and fill in the required values.
+2. Install the dependencies and run the complete example in one command:
 
 ```shell
 npm install && npm start

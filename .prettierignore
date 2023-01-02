@@ -21,3 +21,9 @@ logs
 .idea
 
 CHANGELOG.md
+
+# Ignore go files
+*.go
+
+# Generated PB files
+packages/protobuf/wgpb

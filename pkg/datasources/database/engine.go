@@ -12,17 +12,21 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-cmd/cmd"
+	"github.com/gofrs/flock"
 	"github.com/phayes/freeport"
 	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
+
+	"github.com/wundergraph/wundergraph/cli/helpers"
 )
 
 func InstallPrismaDependencies(log *zap.Logger, wundergraphDir string) error {
@@ -257,15 +261,28 @@ func (e *Engine) StartQueryEngine(schema string) error {
 
 func (e *Engine) ensurePrisma() error {
 
-	prismaPath := path.Join(e.wundergraphDir, "generated", "prisma")
-
-	err := os.MkdirAll(prismaPath, os.ModePerm)
+	cacheDir, err := helpers.GlobalWunderGraphCacheDir()
 	if err != nil {
+		return fmt.Errorf("retrieving cache dir: %w", err)
+	}
+
+	prismaPath := filepath.Join(cacheDir, "prisma")
+
+	if err := os.MkdirAll(prismaPath, os.ModePerm); err != nil {
 		return err
 	}
 
 	e.queryEnginePath = path.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
 	e.introspectionEnginePath = path.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+
+	// Acquire a file lock before trying to download
+	lockPath := filepath.Join(prismaPath, ".lock")
+	lock := flock.New(lockPath)
+
+	if err := lock.Lock(); err != nil {
+		return fmt.Errorf("creating prisma lockfile: %w", err)
+	}
+	defer lock.Unlock()
 
 	_, err = os.Lstat(e.queryEnginePath)
 	if os.IsNotExist(err) {

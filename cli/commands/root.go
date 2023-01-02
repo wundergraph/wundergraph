@@ -135,17 +135,19 @@ var rootCmd = &cobra.Command{
 			metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
 			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
-			err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
+			// Send telemetry in a goroutine to not block the command
+			go func() {
+				err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
 
-			// AddMetric the usage of the command immediately
-			if rootFlags.TelemetryDebugMode {
-				if err != nil {
-					log.Error("Could not send telemetry data", zap.Error(err))
-				} else {
-					log.Info("Telemetry data sent")
+				// AddMetric the usage of the command immediately
+				if rootFlags.TelemetryDebugMode {
+					if err != nil {
+						log.Error("Could not send telemetry data", zap.Error(err))
+					} else {
+						log.Info("Telemetry data sent")
+					}
 				}
-			}
-
+			}()
 		}
 
 		return nil
@@ -221,7 +223,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
-	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", files.WunderGraphDirName, "path to your .wundergraph directory")
+	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
 }
