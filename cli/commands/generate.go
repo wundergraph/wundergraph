@@ -99,6 +99,7 @@ var generateCmd = &cobra.Command{
 				}
 				webhooksBundler = bundler.NewBundler(bundler.Config{
 					Name:          "webhooks-bundler",
+					Production:    true,
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
 					OutDir:        webhooksOutDir,
@@ -130,6 +131,7 @@ var generateCmd = &cobra.Command{
 
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
+				Production:    true,
 				AbsWorkingDir: wunderGraphDir,
 				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
@@ -196,6 +198,7 @@ var generateCmd = &cobra.Command{
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
+			Production:    true,
 			AbsWorkingDir: wunderGraphDir,
 			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,

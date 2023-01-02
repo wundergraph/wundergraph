@@ -58,21 +58,14 @@ import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsCon
 import {
 	AuthenticationHookRequest,
 	AuthenticationResponse,
+	ResolvedServerOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphUser,
-} from '../middleware/types';
+} from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
-import {
-	NodeOptions,
-	ResolvedNodeOptions,
-	ResolvedServerOptions,
-	resolveNodeOptions,
-	resolveServerOptions,
-	serverOptionsWithDefaults,
-} from './options';
+import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { InternalClient } from '../middleware/internal-client';
 import { Logger } from '../logger';
 import { NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -331,13 +324,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	};
 
 	const graphqlApis = config.server?.graphqlServers?.map((gs) => {
-		const serverPath = customGqlServerMountPath(gs.serverName);
-
 		return introspectGraphqlServer({
 			skipRenameRootFields: gs.skipRenameRootFields,
 			url: '',
 			baseUrl: serverOptions.serverUrl,
-			path: serverPath,
+			path: gs.routeUrl,
 			apiNamespace: gs.apiNamespace,
 			schema: gs.schema,
 		});
@@ -1097,10 +1088,6 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	}
 
 	return out;
-};
-
-export const customGqlServerMountPath = (name: string): string => {
-	return `/gqls/${name}/graphql`;
 };
 
 const trimTrailingSlash = (url: string): string => {

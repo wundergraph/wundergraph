@@ -312,7 +312,7 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("WunderNode shutdown complete")
 }
 
-func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, bool) {
+func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (*HealthCheckReport, bool) {
 	healthCheck := &HealthCheckReport{
 		ServerStatus: "NOT_READY",
 		// For now we assume that the server is ready
@@ -322,7 +322,9 @@ func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, b
 	}
 
 	if n.options.hooksServerHealthCheck {
-		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+		ctx, cancel := context.WithTimeout(ctx, n.options.healthCheckTimeout)
+		defer cancel()
+		ok := hooksClient.DoHealthCheckRequest(ctx)
 		if ok {
 			healthCheck.ServerStatus = "READY"
 		} else {
@@ -449,7 +451,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 			return
 		}
 
-		report, healthy := n.GetHealthReport(hooksClient)
+		report, healthy := n.GetHealthReport(r.Context(), hooksClient)
 		if !healthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
@@ -463,7 +465,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}))
 
 	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		report, healthy := n.GetHealthReport(hooksClient)
+		report, healthy := n.GetHealthReport(r.Context(), hooksClient)
 		if !healthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}

@@ -11,7 +11,7 @@ require (
 	github.com/dgraph-io/ristretto v0.0.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/go-units v0.5.0
-	github.com/evanw/esbuild v0.15.18
+	github.com/evanw/esbuild v0.16.10
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.0

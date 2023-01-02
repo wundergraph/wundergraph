@@ -1,11 +1,13 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import { ClientRequestHeaders, WunderGraphRequest, WunderGraphResponse } from '../types';
 import {
+	ClientRequestHeaders,
 	HooksConfiguration,
 	HooksConfigurationOperationType,
 	OperationHookFunction,
 	OperationHooksConfiguration,
-} from '../../configure';
+	WunderGraphRequest,
+	WunderGraphResponse,
+} from '../types';
 import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@web-std/fetch';

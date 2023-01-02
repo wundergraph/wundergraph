@@ -1,4 +1,4 @@
-import { configureWunderGraphServer, EnvironmentVariable, GithubWebhookVerifier } from '@wundergraph/sdk';
+import { configureWunderGraphServer, GithubWebhookVerifier, EnvironmentVariable } from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { WebhooksConfig } from './generated/wundergraph.webhooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
@@ -12,8 +12,6 @@ import {
 	GraphQLString,
 	GraphQLUnionType,
 } from 'graphql';
-import { createGraphQLSchema } from 'openapi-to-graphql';
-import jsonPlaceholder from './../json_placeholder.json';
 import type { SDLResponse } from './generated/models';
 
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
@@ -100,12 +98,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 		},
 	},
 	graphqlServers: [
-		{
-			apiNamespace: 'ibm_jsp',
-			serverName: 'ibm_jsp',
-			// @ts-ignore
-			schema: createGraphQLSchema([jsonPlaceholder]).then((r) => r.schema),
-		},
 		{
 			apiNamespace: 'sdl',
 			serverName: 'sdl',
