@@ -48,6 +48,7 @@ export interface ClientConfig {
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
+	csrfEnabled?: boolean;
 }
 
 type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata';
@@ -149,3 +150,5 @@ export interface User<Role extends string = string> {
 export interface LogoutOptions {
 	logoutOpenidConnectProvider?: boolean;
 }
+
+export type ClientAuthentication = 'none' | 'cookie' | 'token';

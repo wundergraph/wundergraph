@@ -49,6 +49,9 @@ configureWunderGraphApplication({
 				},
 			],
 		},
+		cookieBased: {
+			providers: [],
+		},
 	},
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',

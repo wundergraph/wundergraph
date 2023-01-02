@@ -1,4 +1,5 @@
 import {
+	ClientAuthentication,
 	ClientConfig,
 	ClientResponse,
 	FetchUserRequestOptions,
@@ -26,11 +27,14 @@ export class Client {
 		};
 
 		this.extraHeaders = { ...options.extraHeaders };
+
+		this.csrfEnabled = options.csrfEnabled ?? true;
 	}
 
 	private readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
+	private csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
 		return serialize(query);
@@ -205,7 +209,8 @@ export class Client {
 		if (
 			this.options.operationMetadata &&
 			this.options.operationMetadata[options.operationName] &&
-			this.options.operationMetadata[options.operationName].requiresAuthentication
+			this.options.operationMetadata[options.operationName].requiresAuthentication &&
+			this.csrfEnabled
 		) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
@@ -230,7 +235,7 @@ export class Client {
 			revalidate: options?.revalidate ? 'true' : 'false',
 		});
 
-		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/cookie/user`, params), {
+		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/user`, params), {
 			method: 'GET',
 			signal: options?.abortSignal,
 		});
@@ -343,7 +348,12 @@ export class Client {
 				formData.append('files', file);
 			}
 		}
-		const csrfToken = await this.getCSRFToken();
+
+		const headers: Headers = {};
+
+		if (this.csrfEnabled) {
+			headers['X-CSRF-Token'] = await this.getCSRFToken();
+		}
 
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
@@ -352,10 +362,8 @@ export class Client {
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
-				headers: {
-					// Dont set the content-type header, the browser will set it for us + boundary
-					'X-CSRF-Token': csrfToken,
-				},
+				// Dont set the content-type header, the browser will set it for us + boundary
+				headers,
 				body: formData,
 				method: 'POST',
 				signal: config.abortSignal,
