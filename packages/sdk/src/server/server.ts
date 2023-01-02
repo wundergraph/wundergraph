@@ -23,10 +23,6 @@ import type {
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 } from './types';
-import { WebhooksConfig } from '../webhooks/types';
-import { resolveServerLogLevel, ServerLogger } from '../logger';
-import { resolveConfigurationVariable } from '../configure/variables';
-import { onParentProcessExit } from '../utils/process';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 

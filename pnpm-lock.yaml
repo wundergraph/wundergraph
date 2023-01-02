@@ -335,6 +335,8 @@ importers:
       ts-retry-promise: ^0.7.0
       tsd: ^0.24.1
       typescript: ^4.8.2
+      zod: ^3.20.2
+      zod-to-json-schema: ^3.20.1
     dependencies:
       '@fastify/formbody': 7.3.0
       '@graphql-tools/schema': 8.5.1_graphql@16.6.0
@@ -365,6 +367,8 @@ importers:
       swagger2openapi: 7.0.8
       terminate: 2.5.0
       ts-retry-promise: 0.7.0
+      zod: 3.20.2
+      zod-to-json-schema: 3.20.1_zod@3.20.2
     devDependencies:
       '@types/axios': 0.14.0
       '@types/chai': 4.3.3
@@ -453,15 +457,27 @@ importers:
       '@types/tar': 4.0.5
       typescript: 4.8.4
 
+  testapps/cloud-starter:
+    specifiers:
+      '@types/node': ^14.14.37
+      '@wundergraph/sdk': ^0.130.2
+      typescript: ^4.8.2
+    dependencies:
+      '@wundergraph/sdk': link:../../packages/sdk
+    devDependencies:
+      '@types/node': 14.18.33
+      typescript: 4.8.4
+
   testapps/default:
     specifiers:
       '@types/node': ^14.14.37
       '@wundergraph/golang-client': workspace:*
       '@wundergraph/sdk': workspace:*
-      graphql: ^16.6.0
+      graphql: ^16.3.0
       pg: ^8.7.3
       postgraphile: ^4.12.9
       typescript: ^4.8.2
+      zod: ^3.20.2
     dependencies:
       '@types/node': 14.18.33
       '@wundergraph/golang-client': link:../../packages/golang-client
@@ -470,6 +486,7 @@ importers:
       pg: 8.8.0
       postgraphile: 4.12.11
       typescript: 4.8.4
+      zod: 3.20.2
 
   testapps/mtls:
     specifiers:
@@ -14478,6 +14495,18 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /zod-to-json-schema/3.20.1_zod@3.20.2:
+    resolution: {integrity: sha512-U+zmNJUKqzv92E+LdEYv0g2LxBLks4HAwfC6cue8jXby5PAeSEPGO4xV9Sl4zmLYyFvJkm0FOfOs6orUO+AI1w==}
+    peerDependencies:
+      zod: ^3.20.0
+    dependencies:
+      zod: 3.20.2
+    dev: false
+
+  /zod/3.20.2:
+    resolution: {integrity: sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==}
+    dev: false
+
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
@@ -14515,6 +14544,8 @@ packages:
       swagger2openapi: 7.0.8
       terminate: 2.5.0
       ts-retry-promise: 0.7.0
+      zod: 3.20.2
+      zod-to-json-schema: 3.20.1_zod@3.20.2
     transitivePeerDependencies:
       - debug
       - encoding
