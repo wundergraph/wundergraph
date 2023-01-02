@@ -8,9 +8,24 @@ const spaceX = introspect.graphql({
 	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
+const gql = introspect.graphql({
+	apiNamespace: 'gql',
+	url: 'http://localhost:3000/api/graphql',
+	loadSchemaFromString() {
+		return `
+			type Query {
+				hello: String!
+			}
+			type Mutation {
+				setName(name: String!): String!
+			}
+		`;
+	},
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [spaceX],
+	apis: [spaceX, gql],
 	server,
 	operations,
 	codeGenerators: [

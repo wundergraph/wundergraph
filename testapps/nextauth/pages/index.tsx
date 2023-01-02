@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import { signIn, signOut, useSession } from 'next-auth/react';
 
-import { useQuery, useUser, withWunderGraph } from '../lib/wundergraph';
+import { useMutation, useQuery, useUser, withWunderGraph } from '../lib/wundergraph';
 
 const Home: NextPage = () => {
 	const { data: session, status } = useSession();
@@ -13,6 +13,11 @@ const Home: NextPage = () => {
 
 	const user = useUser({
 		enabled: status === 'authenticated',
+		// revalidate: true,
+	});
+
+	const mutation = useMutation({
+		operationName: 'SetName',
 	});
 
 	if (session) {
@@ -23,6 +28,20 @@ const Home: NextPage = () => {
 				<p>User: {JSON.stringify(user.data)}</p>
 				<br />
 				<button onClick={() => signOut()}>Sign out</button>
+
+				<button
+					onClick={() =>
+						mutation.trigger({
+							name: 'Test',
+						})
+					}
+				>
+					Mutate
+				</button>
+
+				<code>
+					<pre>{JSON.stringify(mutation.data, null, 2)}</pre>
+				</code>
 			</div>
 		);
 	}
