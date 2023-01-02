@@ -15,6 +15,7 @@ export class WunderGraphHooksPlugin implements Template {
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _internalMutations = operations(config.application, OperationType.MUTATION, true);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
+		const _uploadProviders = config.application.S3UploadProvider;
 		const content = tmpl({
 			modelImports: modelImports(config.application, true),
 			operationNamesUnion: config.application.Operations.map((o) => `"${o.Name}"`).join(' | ') || 'never',
@@ -33,6 +34,8 @@ export class WunderGraphHooksPlugin implements Template {
 			hasInternalQueries: _internalQueries.length !== 0,
 			internalMutations: _internalMutations,
 			hasInternalMutations: _internalMutations.length !== 0,
+			hasUploadProviders: _uploadProviders.length !== 0,
+			uploadProviders: _uploadProviders,
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 		});
 		return Promise.resolve([

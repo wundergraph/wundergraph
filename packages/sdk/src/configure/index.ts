@@ -9,7 +9,7 @@ import {
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
-import { mergeApis, removeBaseSchema } from '../definition/merge';
+import { mergeApis } from '../definition/merge';
 import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
 import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
@@ -28,6 +28,7 @@ import {
 	PostResolveTransformationKind,
 	TypeConfiguration,
 	WebhookConfiguration,
+	S3UploadProfile as _S3UploadProfile,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
@@ -41,14 +42,11 @@ import {
 	parse,
 	parseType,
 	print,
-	stripIgnoredCharacters,
 	visit,
 } from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
-import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
-import { wunderctlExec } from '../wunderctlexec';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
@@ -148,6 +146,7 @@ export enum HooksConfigurationOperationType {
 	Queries = 'queries',
 	Mutations = 'mutations',
 	Subscriptions = 'subscriptions',
+	Uploads = 'uploads',
 }
 
 export interface OperationHookFunction {
@@ -167,10 +166,17 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 // We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
 export type OperationHooks = Record<string, any>;
 
+export interface UploadHooksConfiguration<AsyncFn = OperationHookFunction> {
+	preUpload?: AsyncFn;
+}
+
+export type UploadHooks = Record<string, any>;
+
 export interface HooksConfiguration<
 	Queries extends OperationHooks = OperationHooks,
 	Mutations extends OperationHooks = OperationHooks,
 	Subscriptions extends OperationHooks = OperationHooks,
+	Uploads extends UploadHooks = UploadHooks,
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
 	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
@@ -205,6 +211,7 @@ export interface HooksConfiguration<
 	[HooksConfigurationOperationType.Queries]?: Queries;
 	[HooksConfigurationOperationType.Mutations]?: Mutations;
 	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
+	[HooksConfigurationOperationType.Uploads]?: Uploads;
 }
 export interface DeploymentAPI {
 	apiConfig: () => {
@@ -233,7 +240,7 @@ export interface ResolvedApplication {
 	Operations: GraphQLOperation[];
 	InvalidOperationNames: string[];
 	CorsConfiguration: CorsConfiguration;
-	S3UploadProvider: S3Provider;
+	S3UploadProvider: ResolvedS3UploadConfiguration[];
 }
 
 interface ResolvedDeployment {
@@ -284,6 +291,14 @@ interface S3UploadConfiguration {
 	bucketLocation: InputVariable;
 	useSSL: boolean;
 	uploadProfiles?: S3UploadProfiles;
+}
+
+export interface ResolvedS3UploadProfile extends Required<S3UploadProfile> {
+	preUploadHook: boolean;
+}
+
+interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'uploadProfiles'> {
+	uploadProfiles: Record<string, ResolvedS3UploadProfile>;
 }
 
 export interface ResolvedWunderGraphConfig {
@@ -372,7 +387,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const apps = config.apis;
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
+	const resolved = await resolveApplication(roles, apps, cors, config.s3UploadProvider, config?.server?.hooks);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -600,26 +615,50 @@ const updateArguments = (dataSource: DataSource, fieldInfo: FieldInfo, link: Lin
 	return JSON.parse(json);
 };
 
-const resolveApplications = async (
+const resolveUploadConfiguration = (
+	configuration: S3UploadConfiguration,
+	hooks?: HooksConfiguration
+): ResolvedS3UploadConfiguration => {
+	let uploadProfiles: Record<string, ResolvedS3UploadProfile> = {};
+	if (configuration?.uploadProfiles) {
+		const configurationHooks = hooks?.uploads ? hooks.uploads[configuration.name] : undefined;
+		for (const key in configuration.uploadProfiles) {
+			const profile = configuration.uploadProfiles[key];
+			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
+
+			uploadProfiles[key] = {
+				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
+				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
+				allowedMimeTypes: profile.allowedMimeTypes ?? [],
+				allowedFileExtensions: profile.allowedFileExtensions ?? [],
+				preUploadHook: profileHooks?.preUpload !== undefined,
+			};
+		}
+	}
+	return {
+		...configuration,
+		uploadProfiles,
+	};
+};
+
+const resolveApplication = async (
 	roles: string[],
 	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
-	s3: S3Provider
-): Promise<ResolvedApplication[]> => {
-	const out: ResolvedApplication[] = [];
-
+	s3?: S3Provider,
+	hooks?: HooksConfiguration
+): Promise<ResolvedApplication> => {
 	const resolvedApis = await Promise.all(apis);
 	const merged = mergeApis(roles, ...resolvedApis);
-	out.push({
+	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
+	return {
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
 		InvalidOperationNames: [],
 		CorsConfiguration: cors,
-		S3UploadProvider: s3,
-	});
-
-	return out;
+		S3UploadProvider: s3Configurations,
+	};
 };
 
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
@@ -1011,15 +1050,18 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				typeConfigurations: types,
 			},
 			s3UploadConfiguration: config.application.S3UploadProvider.map((provider) => {
-				let uploadProfiles: { [key: string]: any } = {};
+				let uploadProfiles: { [key: string]: _S3UploadProfile } = {};
 				if (provider.uploadProfiles) {
 					for (const key in provider.uploadProfiles) {
-						const profile = provider.uploadProfiles[key];
+						const resolved = provider.uploadProfiles[key];
 						uploadProfiles[key] = {
-							maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
-							maxAllowedFiles: profile.maxAllowedFiles ?? -1,
-							allowedMimeTypes: profile.allowedMimeTypes ?? [],
-							allowedFileExtensions: profile.allowedFileExtensions ?? [],
+							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
+							maxAllowedFiles: resolved.maxAllowedFiles,
+							allowedMimeTypes: resolved.allowedMimeTypes,
+							allowedFileExtensions: resolved.allowedFileExtensions,
+							hooks: {
+								preUpload: resolved.preUploadHook,
+							},
 						};
 					}
 				}

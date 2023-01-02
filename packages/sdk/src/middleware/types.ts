@@ -49,6 +49,36 @@ export interface AuthenticationRequestContext<User extends WunderGraphUser = Wun
 	user: User;
 }
 
+export interface WunderGraphFile {
+	/**
+	 * Filename of the file, as returned by the browser.
+	 */
+	readonly name: string;
+	/**
+	 * Size of the file, in bytes
+	 */
+	readonly size: number;
+	/**
+	 * File mimetype
+	 */
+	readonly type: string;
+}
+
+export interface FilePreuploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
+	/**
+	 * The user that is currently logged in, if any.
+	 */
+	user?: User;
+	/**
+	 * File to be uploaded
+	 */
+	file: WunderGraphFile;
+	/**
+	 * Metadata received from the client
+	 */
+	meta: any;
+}
+
 export interface ClientRequestHeaders extends Headers {}
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -159,3 +189,13 @@ export interface AuthenticationDeny {
 	status: 'deny';
 	message: string;
 }
+
+export interface UploadHookFileResponse {
+	fileKey: string;
+}
+
+export interface UploadHookErrorResponse {
+	error: string;
+}
+
+export type PreUploadHookResponse = UploadHookErrorResponse | undefined | Promise<UploadHookErrorResponse | undefined>;

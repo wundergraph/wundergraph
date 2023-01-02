@@ -1,10 +1,11 @@
 import { FastifyPluginAsync, RawReplyDefaultExpression, RouteHandlerMethod } from 'fastify';
-import { ClientRequestHeaders, WunderGraphRequest, WunderGraphResponse } from '../types';
+import { ClientRequestHeaders, WunderGraphFile, WunderGraphRequest, WunderGraphResponse } from '../types';
 import {
 	HooksConfiguration,
 	HooksConfigurationOperationType,
 	OperationHookFunction,
 	OperationHooksConfiguration,
+	UploadHooks,
 } from '../../configure';
 import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
@@ -469,6 +470,44 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		});
 	}
 
+	const preUpload = (providerName: string, profileName: string, handler: any) => {
+		fastify.post<{
+			Body: {
+				file: WunderGraphFile;
+				meta: any;
+			};
+		}>(`/upload/${providerName}/${profileName}/preUpload`, async (request, reply) => {
+			reply.type('application/json').code(200);
+			try {
+				const result = await handler({
+					...request.ctx,
+					file: request.body.file,
+					response: request.body.meta,
+				});
+				return result || {};
+			} catch (err) {
+				request.log.error(err);
+				reply.code(500);
+				return { error: err };
+			}
+		});
+	};
+
+	function registerUploadHooks(hooks: UploadHooks): number {
+		let count = 0;
+		for (const providerName in hooks) {
+			const provider = hooks[providerName];
+			for (const profileName in provider) {
+				const profile = provider[profileName];
+				if (profile.preUpload !== undefined) {
+					count++;
+					preUpload(providerName, profileName, profile.preUpload);
+				}
+			}
+		}
+		return count;
+	}
+
 	// queries
 	const queryOperations = config?.[HooksConfigurationOperationType.Queries];
 	if (queryOperations) {
@@ -488,6 +527,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	if (subscriptionOperations) {
 		registerOperationHooks(subscriptions, subscriptionOperations);
 		fastify.log.debug(`Registered (${subscriptions.length}) subscription operations`);
+	}
+
+	// uploads
+	const uploadOperations = config?.[HooksConfigurationOperationType.Uploads];
+	if (uploadOperations) {
+		const registered = registerUploadHooks(uploadOperations);
+		fastify.log.debug(`Registered (${registered}) upload hooks`);
 	}
 };
 

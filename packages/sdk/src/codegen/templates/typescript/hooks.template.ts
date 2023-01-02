@@ -1,7 +1,7 @@
 //language=handlebars
 export const template = `
 import { {{ modelImports }} } from "./models"
-import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration, WsTransportOnConnectionInitResponse } from "@wundergraph/sdk";
+import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration, WsTransportOnConnectionInitResponse, FilePreuploadHookRequest, PreUploadHookResponse } from "@wundergraph/sdk";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 
@@ -101,7 +101,7 @@ export interface HookRequestWithInput<Input> extends HookRequest {
 		input: Input; 
 }
 						
-export interface HooksConfig extends HooksConfiguration<Queries, Mutations, Subscriptions, User, InternalClient> {
+export interface HooksConfig extends HooksConfiguration<Queries, Mutations, Subscriptions, Uploads, User, InternalClient> {
     global?: GlobalHooksConfig;
     authentication?: {
         postAuthentication?: (hook: AuthenticationHookRequest<User, InternalClient>) => Promise<void>;
@@ -110,14 +110,17 @@ export interface HooksConfig extends HooksConfiguration<Queries, Mutations, Subs
         postLogout?: (hook: AuthenticationHookRequest<User, InternalClient>) => Promise<void>;
     };
 		{{#if hasQueries}}
-				queries?: Queries,
+				queries?: Queries;
 		{{/if}}
 		{{#if hasMutations}}
-				mutations?: Mutations
+				mutations?: Mutations;
 		{{/if}}
 		{{#if hasSubscriptions}}
-				subscriptions?: Subscriptions
+				subscriptions?: Subscriptions;
 		{{/if}}
+        {{#if hasUploadProviders}}
+                uploads?: Uploads;
+        {{/if}}
 }
 
 export interface Queries {
@@ -161,5 +164,17 @@ export interface Subscriptions {
         }
 		{{/each}}
 {{/if}}
+}
+
+export interface Uploads {
+    {{#each uploadProviders}}
+        {{name}}?: {
+            {{#each uploadProfiles}}
+                {{@key}}?: {
+                    preUpload?: (hook: FilePreuploadHookRequest<User>) => PreUploadHookResponse;
+                }
+            {{/each}}
+        }
+    {{/each}}
 }
 `;

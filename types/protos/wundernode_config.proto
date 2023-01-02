@@ -429,11 +429,16 @@ message WunderGraphConfiguration {
 	bool dangerouslyEnableGraphQLEndpoint = 4;
 }
 
+message S3UploadProfileHooksConfiguration {
+	bool preUpload = 1;
+}
+
 message S3UploadProfile {
 	int32 maxAllowedUploadSizeBytes = 1;
 	int32 maxAllowedFiles = 2;
 	repeated string allowedMimeTypes = 3;
 	repeated string allowedFileExtensions = 4;
+	S3UploadProfileHooksConfiguration hooks = 5;
 }
 
 message S3UploadConfiguration {

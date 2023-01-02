@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -125,6 +126,12 @@ const (
 	WsTransportOnConnectionInit MiddlewareHook = "onConnectionInit"
 )
 
+type UploadHook string
+
+const (
+	PreUpload UploadHook = "preUpload"
+)
+
 type Client struct {
 	serverUrl  string
 	httpClient *retryablehttp.Client
@@ -147,6 +154,7 @@ func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	return &Client{
 		serverUrl:  serverUrl,
 		httpClient: httpClient,
+		log:        logger,
 	}
 }
 
@@ -164,6 +172,10 @@ func (c *Client) DoOperationRequest(ctx context.Context, operationName string, h
 
 func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
 	return c.doRequest(ctx, "authentication", hook, jsonData)
+}
+
+func (c *Client) DoUploadRequest(ctx context.Context, providerName string, profileName string, hook UploadHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	return c.doRequest(ctx, path.Join("upload", providerName, profileName), MiddlewareHook(hook), jsonData)
 }
 
 func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byte {

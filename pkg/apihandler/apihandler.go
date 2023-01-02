@@ -264,6 +264,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
 				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
 				AllowedFileExtensions: append([]string(nil), profile.AllowedFileExtensions...),
+				UsePreUploadHook:      profile.Hooks.PreUpload,
 			}
 		}
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
@@ -275,6 +276,8 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 				SecretAccessKey: loadvariable.String(s3Provider.SecretAccessKey),
 				UseSSL:          s3Provider.UseSSL,
 				Profiles:        profiles,
+				HooksClient:     r.middlewareClient,
+				Name:            s3Provider.Name,
 			},
 		)
 		if err != nil {

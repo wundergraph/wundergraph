@@ -913,11 +913,16 @@ export interface WunderGraphConfiguration {
   dangerouslyEnableGraphQLEndpoint: boolean;
 }
 
+export interface S3UploadProfileHooksConfiguration {
+  preUpload: boolean;
+}
+
 export interface S3UploadProfile {
   maxAllowedUploadSizeBytes: number;
   maxAllowedFiles: number;
   allowedMimeTypes: string[];
   allowedFileExtensions: string[];
+  hooks: S3UploadProfileHooksConfiguration | undefined;
 }
 
 export interface S3UploadConfiguration {
@@ -3182,8 +3187,38 @@ export const WunderGraphConfiguration = {
   },
 };
 
+function createBaseS3UploadProfileHooksConfiguration(): S3UploadProfileHooksConfiguration {
+  return { preUpload: false };
+}
+
+export const S3UploadProfileHooksConfiguration = {
+  fromJSON(object: any): S3UploadProfileHooksConfiguration {
+    return { preUpload: isSet(object.preUpload) ? Boolean(object.preUpload) : false };
+  },
+
+  toJSON(message: S3UploadProfileHooksConfiguration): unknown {
+    const obj: any = {};
+    message.preUpload !== undefined && (obj.preUpload = message.preUpload);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<S3UploadProfileHooksConfiguration>, I>>(
+    object: I,
+  ): S3UploadProfileHooksConfiguration {
+    const message = createBaseS3UploadProfileHooksConfiguration();
+    message.preUpload = object.preUpload ?? false;
+    return message;
+  },
+};
+
 function createBaseS3UploadProfile(): S3UploadProfile {
-  return { maxAllowedUploadSizeBytes: 0, maxAllowedFiles: 0, allowedMimeTypes: [], allowedFileExtensions: [] };
+  return {
+    maxAllowedUploadSizeBytes: 0,
+    maxAllowedFiles: 0,
+    allowedMimeTypes: [],
+    allowedFileExtensions: [],
+    hooks: undefined,
+  };
 }
 
 export const S3UploadProfile = {
@@ -3197,6 +3232,7 @@ export const S3UploadProfile = {
       allowedFileExtensions: Array.isArray(object?.allowedFileExtensions)
         ? object.allowedFileExtensions.map((e: any) => String(e))
         : [],
+      hooks: isSet(object.hooks) ? S3UploadProfileHooksConfiguration.fromJSON(object.hooks) : undefined,
     };
   },
 
@@ -3215,6 +3251,8 @@ export const S3UploadProfile = {
     } else {
       obj.allowedFileExtensions = [];
     }
+    message.hooks !== undefined &&
+      (obj.hooks = message.hooks ? S3UploadProfileHooksConfiguration.toJSON(message.hooks) : undefined);
     return obj;
   },
 
@@ -3224,6 +3262,9 @@ export const S3UploadProfile = {
     message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
     message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];
     message.allowedFileExtensions = object.allowedFileExtensions?.map((e) => e) || [];
+    message.hooks = (object.hooks !== undefined && object.hooks !== null)
+      ? S3UploadProfileHooksConfiguration.fromPartial(object.hooks)
+      : undefined;
     return message;
   },
 };

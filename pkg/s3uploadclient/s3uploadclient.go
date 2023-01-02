@@ -3,6 +3,7 @@ package s3uploadclient
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -15,9 +16,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
@@ -30,11 +34,14 @@ type S3UploadClient struct {
 	bucketName     string
 	bucketLocation string
 	profiles       map[string]*preparedProfile
+	hooksClient    *hooks.Client
+	name           string
 }
 
 type preparedProfile struct {
-	*UploadProfile
+	UploadProfile
 	allowedMimeTypesRegexps []*regexp.Regexp
+	hookPrefix              string
 }
 
 // UploadProfile specifies options like maximum file size and allowed
@@ -48,6 +55,8 @@ type UploadProfile struct {
 	AllowedMimeTypes []string
 	// Allowed file extensions, case insensitive
 	AllowedFileExtensions []string
+	// Wether to use the PreUpload middleware hook
+	UsePreUploadHook bool
 }
 
 type Options struct {
@@ -60,6 +69,11 @@ type Options struct {
 	// Profiles available for this. Key is the profile name while
 	// the value is an UploadProfile. Note that it might be empty.
 	Profiles map[string]*UploadProfile
+	// Client for executing hooks
+	HooksClient *hooks.Client
+	// Client name, must be set when using hooks because the name
+	// is part of the hook URL.
+	Name string
 }
 
 type UploadResponse struct {
@@ -111,15 +125,13 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		// Since we're only looking for exact matches here, we can sort the
 		// extensions and make search a bit faster
 		sort.Strings(allowedFileExtensions)
-		profiles[name] = &preparedProfile{
-			UploadProfile: &UploadProfile{
-				MaxFileSizeBytes:      profile.MaxFileSizeBytes,
-				MaxAllowedFiles:       profile.MaxAllowedFiles,
-				AllowedMimeTypes:      allowedMimeTypes,
-				AllowedFileExtensions: allowedFileExtensions,
-			},
+		pp := &preparedProfile{
+			UploadProfile:           *profile,
 			allowedMimeTypesRegexps: allowedMimeTypesRegexps,
 		}
+		pp.AllowedMimeTypes = allowedMimeTypes
+		pp.AllowedFileExtensions = allowedFileExtensions
+		profiles[name] = pp
 	}
 
 	s := &S3UploadClient{
@@ -127,6 +139,8 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		bucketName:     s3Options.BucketName,
 		bucketLocation: s3Options.BucketLocation,
 		profiles:       profiles,
+		hooksClient:    s3Options.HooksClient,
+		name:           s3Options.Name,
 	}
 
 	err = s.createBucket()
@@ -155,7 +169,7 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 
 	// find type based on file header, populated when *multipart.Part created
 	// if empty, contentType will be assigned by FPutObject
-	contentType := part.Header.Get("Content-Type")
+	contentType := contentTypeFromPart(part)
 
 	// creates a temporary unique file in the temp folder of the OS
 	dst, err := os.CreateTemp("", fmt.Sprintf("wundergraph-upload.*.%s", extension))
@@ -187,7 +201,7 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 		if profile == nil {
 			return nil, fmt.Errorf("profile %q does not exist in upload provider %s", profileName, s.client.EndpointURL())
 		}
-		if err := s.validateFile(ctx, profile, part, dst); err != nil {
+		if err := s.validateFile(ctx, r, profileName, profile, part, dst); err != nil {
 			return nil, err
 		}
 	}
@@ -197,7 +211,7 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 	info, err := s.client.FPutObject(ctx, s.bucketName, filename, dst.Name(), minio.PutObjectOptions{
 		ContentType: contentType,
 		UserMetadata: map[string]string{
-			"metadata":           r.Header.Get("X-Metadata"),
+			"metadata":           fileMetadataFromRequest(r),
 			"original-filename":  part.FileName(),
 			"original-extension": extension,
 			"original-size":      strconv.FormatInt(written, 10),
@@ -210,19 +224,29 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 	return &info, nil
 }
 
-func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProfile, part *multipart.Part, tempFile *os.File) error {
-	// Only stat() if we actually have a file size limit
+func (s *S3UploadClient) fileSize(tempFile *os.File) (int64, error) {
+	st, err := os.Stat(tempFile.Name())
+	if err != nil {
+		return 0, fmt.Errorf("error stat'ing temporary file: %w", err)
+	}
+	return st.Size(), nil
+}
+
+func (s *S3UploadClient) validateFile(ctx context.Context, r *http.Request, profileName string, profile *preparedProfile, part *multipart.Part, tempFile *os.File) error {
+	// Only stat() if we actually have a file size limit or if we have a hook
+	fileSize := int64(-1)
 	if profile.MaxFileSizeBytes >= 0 {
-		st, err := os.Stat(tempFile.Name())
+		var err error
+		fileSize, err = s.fileSize(tempFile)
 		if err != nil {
-			return fmt.Errorf("error stat'ing temporary file when validating profile: %w", err)
+			return fmt.Errorf("error validating profile: %w", err)
 		}
-		if st.Size() > int64(profile.MaxFileSizeBytes) {
-			return fmt.Errorf("file with %d bytes exceeds the %d maximum", st.Size(), profile.MaxFileSizeBytes)
+		if fileSize > int64(profile.MaxFileSizeBytes) {
+			return fmt.Errorf("file with %d bytes exceeds the %d maximum", fileSize, profile.MaxFileSizeBytes)
 		}
 	}
 	if mc := len(profile.AllowedMimeTypes); mc > 0 {
-		contentType := strings.ToLower(part.Header.Get("Content-Type"))
+		contentType := strings.ToLower(contentTypeFromPart(part))
 		valid := false
 		for ii, mt := range profile.AllowedMimeTypes {
 			// Direct match
@@ -238,7 +262,7 @@ func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProf
 			}
 		}
 		if !valid {
-			return fmt.Errorf("file withe MIME type %s is not allowed (%s)", contentType, strings.Join(profile.AllowedFileExtensions, ", "))
+			return fmt.Errorf("file with MIME type %s is not allowed (%s)", contentType, strings.Join(profile.AllowedFileExtensions, ", "))
 
 		}
 	}
@@ -246,7 +270,28 @@ func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProf
 		ext := filepath.Ext(part.FileName())
 		pos := sort.SearchStrings(profile.AllowedFileExtensions, ext)
 		if pos >= ec || profile.AllowedFileExtensions[pos] != ext {
-			return fmt.Errorf("file withe extension %s is not allowed (%s)", ext, strings.Join(profile.AllowedFileExtensions, ", "))
+			return fmt.Errorf("file with extension %s is not allowed (%s)", ext, strings.Join(profile.AllowedFileExtensions, ", "))
+		}
+	}
+	if profile.UsePreUploadHook {
+		if fileSize < 0 {
+			var err error
+			fileSize, err = s.fileSize(tempFile)
+			if err != nil {
+				return fmt.Errorf("error preparing hook data: %w", err)
+			}
+		}
+		var buf []byte
+		data, err := hookData(buf, r, part, fileSize)
+		if err != nil {
+			return fmt.Errorf("error preparing hook data: %w", err)
+		}
+		resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data)
+		if err != nil {
+			return err
+		}
+		if resp.Error != "" {
+			return errors.New(resp.Error)
 		}
 	}
 	return nil
@@ -301,4 +346,50 @@ func (s *S3UploadClient) handlePart(ctx context.Context, r *http.Request, part *
 	}
 
 	return info, nil
+}
+
+type hookFile struct {
+	Name     string `json:"name"`
+	Size     int64  `json:"size"`
+	MimeType string `json:"type"`
+}
+
+func contentTypeFromPart(part *multipart.Part) string {
+	return part.Header.Get("Content-Type")
+}
+
+func fileMetadataFromRequest(r *http.Request) string {
+	return r.Header.Get("X-Metadata")
+}
+
+func hookData(buf []byte, r *http.Request, part *multipart.Part, fileSize int64) ([]byte, error) {
+	buf = buf[:0]
+	buf = append(buf, []byte(`{"__wg":{}}`)...)
+	if user := authentication.UserFromContext(r.Context()); user != nil {
+		if userJson, err := json.Marshal(user); err == nil {
+			if buf, err = jsonparser.Set(buf, userJson, "__wg", "user"); err != nil {
+				return nil, err
+			}
+		}
+	}
+	if part != nil {
+		fileData, err := json.Marshal(&hookFile{
+			Name:     part.FileName(),
+			Size:     fileSize,
+			MimeType: contentTypeFromPart(part),
+		})
+		if err != nil {
+			return nil, err
+		}
+		if buf, err = jsonparser.Set(buf, fileData, "file"); err != nil {
+			return nil, err
+		}
+	}
+	if metadata := fileMetadataFromRequest(r); metadata != "" {
+		var err error
+		if buf, err = jsonparser.Set(buf, []byte(metadata), "meta"); err != nil {
+			return nil, err
+		}
+	}
+	return buf, nil
 }
