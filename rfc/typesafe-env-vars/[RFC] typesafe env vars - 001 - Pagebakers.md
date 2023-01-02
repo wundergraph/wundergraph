@@ -24,9 +24,9 @@ import { z } from 'zod';
 import { configureEnv } from '@wundergraph/sdk';
 
 const schema = z.object({
-	NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-	OAUTH_CLIENT_ID: z.string().describe('OAuth Client ID'),
-	SQLITE_DB: z.string().optional(),
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  OAUTH_CLIENT_ID: z.string().describe('OAuth Client ID'),
+  SQLITE_DB: z.string().optional(),
 });
 
 export default configureEnv(schema);
@@ -66,26 +66,26 @@ declare global {
 ```
 
 ```ts
-new EnvironmentVariable('OAUTH_CLIENT_ID')
+new EnvironmentVariable('OAUTH_CLIENT_ID');
 ```
 
 ### configureEnv
 
 ```ts
 const configureEnv = (schema: AnySchema) => {
-	const _env = schema.safeParse(process.env);
+  const _env = schema.safeParse(process.env);
 
-	if (!_env.success) {
-		console.error(
-			'❌ Invalid environment variables:\n',
-			...formatErrors(_env.error.format()) // do some nice formatting for the console output
-		);
-		throw new Error('Invalid environment variables');
-	}
+  if (!_env.success) {
+    console.error(
+      '❌ Invalid environment variables:\n',
+      ...formatErrors(_env.error.format()) // do some nice formatting for the console output
+    );
+    throw new Error('Invalid environment variables');
+  }
 
-	return {
-		...env.data,
-		...wgEnv,
-	};
+  return {
+    ...env.data,
+    ...wgEnv,
+  };
 };
 ```
