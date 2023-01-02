@@ -8,7 +8,7 @@
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
     "build": "wunderctl generate --debug",
     "build:next": "next build",
-    "dev": "next dev --port 3003",
+    "dev": "next dev",
     "check": "tsc --noEmit",
     "test": "jest"
   },

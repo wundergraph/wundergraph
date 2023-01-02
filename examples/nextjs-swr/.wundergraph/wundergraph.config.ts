@@ -30,7 +30,7 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: ['http://localhost:3003'],
+		allowedOrigins: ['http://localhost:3000'],
 	},
 	authentication: {
 		cookieBased: {
