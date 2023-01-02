@@ -20,10 +20,11 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/wundergraph/wundergraph/pkg/authentication"
-	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
+
+	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 )
 
 const MaxUploadSize = 20 * 1024 * 1024 // 20MB
