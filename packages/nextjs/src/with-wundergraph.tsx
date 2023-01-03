@@ -3,12 +3,11 @@ import ssrPrepass from 'react-ssr-prepass';
 import { NextComponentType } from 'next';
 import { AppContextType, AppPropsType, NextPageContext } from 'next/dist/shared/lib/utils';
 import { NextRouter } from 'next/router';
-import { GraphQLResponseError, User } from '@wundergraph/sdk/client';
+import { ResponseError, User } from '@wundergraph/sdk/client';
 import { userSWRKey, SWRConfig } from '@wundergraph/swr';
 import { WithWunderGraphOptions, SSRCache } from './types';
 import { WunderGraphProvider } from './context';
 import { SSRMiddleWare } from './ssr-middleware';
-import { ResponseError } from '@wundergraph/sdk/dist/client/ResponseError';
 
 export const withWunderGraph = (options: WithWunderGraphOptions) => {
 	return (
