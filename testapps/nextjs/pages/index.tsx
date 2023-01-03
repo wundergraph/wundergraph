@@ -18,35 +18,25 @@ export default function Home() {
 				</h2>
 				<p className={styles.description}>Take a look at the examples below...</p>
 				<div className={styles.grid}>
-					<NextLink href="/caching">
-						<div className={styles.card}>
-							<h3>Caching &rarr;</h3>
-							<p>Example using WunderGraph Caching</p>
-						</div>
+					<NextLink href="/caching" className={styles.card}>
+						<h3>Caching &rarr;</h3>
+						<p>Example using WunderGraph Caching</p>
 					</NextLink>
-					<NextLink href="/mocks">
-						<div className={styles.card}>
-							<h3>Typesafe Mocking &rarr;</h3>
-							<p>WunderGraph allows your do mock any API with type safety.</p>
-						</div>
+					<NextLink href="/mocks" className={styles.card}>
+						<h3>Typesafe Mocking &rarr;</h3>
+						<p>WunderGraph allows your do mock any API with type safety.</p>
 					</NextLink>
-					<NextLink href="/realtime">
-						<div className={styles.card}>
-							<h3>Realtime Subscriptions &rarr;</h3>
-							<p>Turn any API into a Realtime Subscription</p>
-						</div>
+					<NextLink href="/realtime" className={styles.card}>
+						<h3>Realtime Subscriptions &rarr;</h3>
+						<p>Turn any API into a Realtime Subscription</p>
 					</NextLink>
-					<NextLink href="/authentication">
-						<div className={styles.card}>
-							<h3>Authentication &rarr;</h3>
-							<p>Authentication aware Data Fetching</p>
-						</div>
+					<NextLink href="/authentication" className={styles.card}>
+						<h3>Authentication &rarr;</h3>
+						<p>Authentication aware Data Fetching</p>
 					</NextLink>
-					<NextLink href="/upload">
-						<div className={styles.card}>
-							<h3>File uploading &rarr;</h3>
-							<p>Upload files to a S3 compatible server</p>
-						</div>
+					<NextLink href="/upload" className={styles.card}>
+						<h3>File uploading &rarr;</h3>
+						<p>Upload files to a S3 compatible server</p>
 					</NextLink>
 					<a
 						href="https://wundergraph.com/docs/guides/your_first_wundergraph_application/overview?utm_source=nextjs_starter"
