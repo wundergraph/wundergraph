@@ -162,8 +162,6 @@ const {
   useQuery,
   useMutation,
   useSubscription,
-  useUser,
-  useAuth,
   useFileUpload,
 } = createWunderGraphNext({
   baseURL: 'http://localhost:3000/api/wg',
@@ -176,13 +174,15 @@ export {
   useQuery,
   useMutation,
   useSubscription,
-  useUser,
-  useAuth,
   useFileUpload,
 }
 ```
 
 We create our own WunderGraph client instead of using the auto generated client, because we need to point the baseURL to our Next.js API. In the next step you will see why.
+
+{% callout %}
+Note that we don't export `useUser` and `useAuth` here since we use the NextAuth `useSession` hook, `signIn` and `signOut` methods instead.
+{% /callout %}
 
 ## Configure Next.js
 
@@ -280,8 +280,6 @@ export default function Home() {
 }
 ```
 
-Now you can run the application and log in using the NextAuth.js login page. After you are logged in you should see the list of SpaceX dragons.
-
 Start Next.js in development mode:
 
 ```bash
@@ -293,6 +291,8 @@ Run WunderGraph:
 ```bash
 npm run wundergraph
 ```
+
+Now you can run the application and log in using the NextAuth.js login page. After you are logged in you should see the list of SpaceX dragons.
 
 ## Conclusion
 
