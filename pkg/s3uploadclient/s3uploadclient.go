@@ -3,7 +3,6 @@ package s3uploadclient
 import (
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -172,43 +171,37 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 	contentType := contentTypeFromPart(part)
 
 	// creates a temporary unique file in the temp folder of the OS
-	dst, err := os.CreateTemp("", fmt.Sprintf("wundergraph-upload.*.%s", extension))
+	tmp, err := os.CreateTemp("", fmt.Sprintf("wundergraph-upload.*.%s", extension))
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
-		_ = os.Remove(dst.Name())
+		_ = os.Remove(tmp.Name())
 	}()
 
-	_, err = io.Copy(dst, part)
+	written, err := io.Copy(tmp, part)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = dst.Seek(0, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
-
-	hasher := xxhash.New()
-	written, err := io.Copy(hasher, dst)
-	if err != nil {
-		return nil, err
-	}
-
-	if profileName := r.Header.Get("X-Upload-Profile"); profileName != "" {
-		profile := s.profiles[profileName]
+	var profileName string
+	var profile *preparedProfile
+	if profileName = r.Header.Get("X-Upload-Profile"); profileName != "" {
+		profile = s.profiles[profileName]
 		if profile == nil {
 			return nil, fmt.Errorf("profile %q does not exist in upload provider %s", profileName, s.client.EndpointURL())
 		}
-		if err := s.validateFile(ctx, r, profileName, profile, part, dst); err != nil {
+		if err := s.validateFile(ctx, profile, part, tmp); err != nil {
 			return nil, err
 		}
 	}
 
-	filename := fmt.Sprintf("%s%s", hex.EncodeToString(hasher.Sum(nil)), extension)
+	filename, err := s.preUpload(ctx, r, profileName, profile, part, tmp)
+	if err != nil {
+		return nil, err
+	}
 
-	info, err := s.client.FPutObject(ctx, s.bucketName, filename, dst.Name(), minio.PutObjectOptions{
+	info, err := s.client.FPutObject(ctx, s.bucketName, filename, tmp.Name(), minio.PutObjectOptions{
 		ContentType: contentType,
 		UserMetadata: map[string]string{
 			"metadata":           fileMetadataFromRequest(r),
@@ -232,12 +225,40 @@ func (s *S3UploadClient) fileSize(tempFile *os.File) (int64, error) {
 	return st.Size(), nil
 }
 
-func (s *S3UploadClient) validateFile(ctx context.Context, r *http.Request, profileName string, profile *preparedProfile, part *multipart.Part, tempFile *os.File) error {
-	// Only stat() if we actually have a file size limit or if we have a hook
-	fileSize := int64(-1)
+func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, profileName string, profile *preparedProfile, part *multipart.Part, tempFile *os.File) (string, error) {
+	var fileKey string
+	if profile != nil && profile.UsePreUploadHook {
+		fileSize, err := s.fileSize(tempFile)
+		if err != nil {
+			return "", fmt.Errorf("error preparing hook data: %w", err)
+		}
+		var buf []byte
+		data, err := hookData(buf, r, part, fileSize)
+		if err != nil {
+			return "", fmt.Errorf("error preparing hook data: %w", err)
+		}
+		resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data)
+		if err != nil {
+			return "", fmt.Errorf("error in preUpload hook: %w", err)
+		}
+		// resp.Error is guaranteed to be empty here, since *hooks.Client would
+		// handle it and return err != nil if resp.Error was non-empty.
+		fileKey = resp.FileKey
+	}
+	if fileKey == "" {
+		hexHash, err := hashContents(tempFile)
+		if err != nil {
+			return "", err
+		}
+		fileKey = fmt.Sprintf("%s%s", hexHash, filepath.Ext(part.FileName()))
+	}
+	return fileKey, nil
+}
+
+func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProfile, part *multipart.Part, tempFile *os.File) error {
+	// Only stat() if we actually have a file size limit
 	if profile.MaxFileSizeBytes >= 0 {
-		var err error
-		fileSize, err = s.fileSize(tempFile)
+		fileSize, err := s.fileSize(tempFile)
 		if err != nil {
 			return fmt.Errorf("error validating profile: %w", err)
 		}
@@ -271,27 +292,6 @@ func (s *S3UploadClient) validateFile(ctx context.Context, r *http.Request, prof
 		pos := sort.SearchStrings(profile.AllowedFileExtensions, ext)
 		if pos >= ec || profile.AllowedFileExtensions[pos] != ext {
 			return fmt.Errorf("file with extension %s is not allowed (%s)", ext, strings.Join(profile.AllowedFileExtensions, ", "))
-		}
-	}
-	if profile.UsePreUploadHook {
-		if fileSize < 0 {
-			var err error
-			fileSize, err = s.fileSize(tempFile)
-			if err != nil {
-				return fmt.Errorf("error preparing hook data: %w", err)
-			}
-		}
-		var buf []byte
-		data, err := hookData(buf, r, part, fileSize)
-		if err != nil {
-			return fmt.Errorf("error preparing hook data: %w", err)
-		}
-		resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data)
-		if err != nil {
-			return err
-		}
-		if resp.Error != "" {
-			return errors.New(resp.Error)
 		}
 	}
 	return nil
@@ -392,4 +392,18 @@ func hookData(buf []byte, r *http.Request, part *multipart.Part, fileSize int64)
 		}
 	}
 	return buf, nil
+}
+
+// hashContents returns the xxhash encoded as an hex string.
+// Before calculating the hash, it seeks to rs's start.
+func hashContents(rs io.ReadSeeker) (string, error) {
+	if _, err := rs.Seek(0, io.SeekStart); err != nil {
+		return "", err
+	}
+
+	hasher := xxhash.New()
+	if _, err := io.Copy(hasher, rs); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
