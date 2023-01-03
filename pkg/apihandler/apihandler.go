@@ -265,6 +265,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
 				AllowedFileExtensions: append([]string(nil), profile.AllowedFileExtensions...),
 				UsePreUploadHook:      profile.Hooks.PreUpload,
+				UsePostUploadHook:     profile.Hooks.PostUpload,
 			}
 		}
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),

@@ -431,6 +431,7 @@ message WunderGraphConfiguration {
 
 message S3UploadProfileHooksConfiguration {
 	bool preUpload = 1;
+	bool postUpload = 2;
 }
 
 message S3UploadProfile {

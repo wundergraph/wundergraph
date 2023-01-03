@@ -56,6 +56,8 @@ type UploadProfile struct {
 	AllowedFileExtensions []string
 	// Wether to use the PreUpload middleware hook
 	UsePreUploadHook bool
+	// Wether to use the PostUpload middleware hook
+	UsePostUploadHook bool
 }
 
 type Options struct {
@@ -163,6 +165,16 @@ func (s *S3UploadClient) createBucket() error {
 	return s.client.MakeBucket(ctx, s.bucketName, minio.MakeBucketOptions{Region: s.bucketLocation})
 }
 
+func (s *S3UploadClient) uploadProfile(r *http.Request) (profileName string, profile *preparedProfile, err error) {
+	if profileName = r.Header.Get("X-Upload-Profile"); profileName != "" {
+		profile = s.profiles[profileName]
+		if profile == nil {
+			return "", nil, fmt.Errorf("profile %q does not exist in upload provider %s", profileName, s.name)
+		}
+	}
+	return profileName, profile, nil
+}
+
 func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *multipart.Part) (*minio.UploadInfo, error) {
 	extension := filepath.Ext(part.FileName())
 
@@ -184,19 +196,7 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 		return nil, err
 	}
 
-	var profileName string
-	var profile *preparedProfile
-	if profileName = r.Header.Get("X-Upload-Profile"); profileName != "" {
-		profile = s.profiles[profileName]
-		if profile == nil {
-			return nil, fmt.Errorf("profile %q does not exist in upload provider %s", profileName, s.client.EndpointURL())
-		}
-		if err := s.validateFile(ctx, profile, part, tmp); err != nil {
-			return nil, err
-		}
-	}
-
-	filename, err := s.preUpload(ctx, r, profileName, profile, part, tmp)
+	filename, err := s.preUpload(ctx, r, part, tmp, written)
 	if err != nil {
 		return nil, err
 	}
@@ -225,26 +225,35 @@ func (s *S3UploadClient) fileSize(tempFile *os.File) (int64, error) {
 	return st.Size(), nil
 }
 
-func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, profileName string, profile *preparedProfile, part *multipart.Part, tempFile *os.File) (string, error) {
-	var fileKey string
-	if profile != nil && profile.UsePreUploadHook {
-		fileSize, err := s.fileSize(tempFile)
-		if err != nil {
-			return "", fmt.Errorf("error preparing hook data: %w", err)
-		}
-		var buf []byte
-		data, err := hookData(buf, r, part, fileSize)
-		if err != nil {
-			return "", fmt.Errorf("error preparing hook data: %w", err)
-		}
-		resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data)
-		if err != nil {
-			return "", fmt.Errorf("error in preUpload hook: %w", err)
-		}
-		// resp.Error is guaranteed to be empty here, since *hooks.Client would
-		// handle it and return err != nil if resp.Error was non-empty.
-		fileKey = resp.FileKey
+func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, part *multipart.Part, tempFile *os.File, fileSize int64) (string, error) {
+	profileName, profile, err := s.uploadProfile(r)
+	if err != nil {
+		return "", err
 	}
+
+	var fileKey string
+
+	if profile != nil {
+		if err := s.validateFile(ctx, profile, part, fileSize); err != nil {
+			return "", fmt.Errorf("error validating file: %w", err)
+		}
+
+		if profile.UsePreUploadHook {
+			var buf []byte
+			data, err := hookData(buf, r, part, fileSize, nil)
+			if err != nil {
+				return "", fmt.Errorf("error preparing preUpload hook data: %w", err)
+			}
+			resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data)
+			if err != nil {
+				return "", fmt.Errorf("error in preUpload hook: %w", err)
+			}
+			// resp.Error is guaranteed to be empty here, since *hooks.Client would
+			// handle it and return err != nil if resp.Error was non-empty.
+			fileKey = resp.FileKey
+		}
+	}
+
 	if fileKey == "" {
 		hexHash, err := hashContents(tempFile)
 		if err != nil {
@@ -255,13 +264,8 @@ func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, profile
 	return fileKey, nil
 }
 
-func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProfile, part *multipart.Part, tempFile *os.File) error {
-	// Only stat() if we actually have a file size limit
+func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProfile, part *multipart.Part, fileSize int64) error {
 	if profile.MaxFileSizeBytes >= 0 {
-		fileSize, err := s.fileSize(tempFile)
-		if err != nil {
-			return fmt.Errorf("error validating profile: %w", err)
-		}
 		if fileSize > int64(profile.MaxFileSizeBytes) {
 			return fmt.Errorf("file with %d bytes exceeds the %d maximum", fileSize, profile.MaxFileSizeBytes)
 		}
@@ -337,10 +341,35 @@ func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(files)
 }
 
+func (s *S3UploadClient) postUpload(ctx context.Context, r *http.Request, part *multipart.Part, info *minio.UploadInfo, uploadError error) error {
+	profileName, profile, err := s.uploadProfile(r)
+	if err != nil {
+		return err
+	}
+
+	if profile != nil && profile.UsePostUploadHook {
+		var buf []byte
+		data, err := hookData(buf, r, part, info.Size, uploadError)
+		if err != nil {
+			return fmt.Errorf("error preparing postUpload hook data: %w", err)
+		}
+		_, err = s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PostUpload, data)
+		if err != nil {
+			return fmt.Errorf("error in postUpload hook: %w", err)
+		}
+	}
+	return nil
+}
+
 func (s *S3UploadClient) handlePart(ctx context.Context, r *http.Request, part *multipart.Part) (*minio.UploadInfo, error) {
 	defer part.Close()
 
 	info, err := s.uploadToS3(ctx, r, part)
+	// Run PostUpload first
+	if err := s.postUpload(ctx, r, part, info, err); err != nil {
+		return nil, err
+	}
+	// Check error from s.uploadToS3()
 	if err != nil {
 		return nil, err
 	}
@@ -362,7 +391,7 @@ func fileMetadataFromRequest(r *http.Request) string {
 	return r.Header.Get("X-Metadata")
 }
 
-func hookData(buf []byte, r *http.Request, part *multipart.Part, fileSize int64) ([]byte, error) {
+func hookData(buf []byte, r *http.Request, part *multipart.Part, fileSize int64, uploadError error) ([]byte, error) {
 	buf = buf[:0]
 	buf = append(buf, []byte(`{"__wg":{}}`)...)
 	if user := authentication.UserFromContext(r.Context()); user != nil {
@@ -388,6 +417,22 @@ func hookData(buf []byte, r *http.Request, part *multipart.Part, fileSize int64)
 	if metadata := fileMetadataFromRequest(r); metadata != "" {
 		var err error
 		if buf, err = jsonparser.Set(buf, []byte(metadata), "meta"); err != nil {
+			return nil, err
+		}
+	}
+	if uploadError != nil {
+		jsError := struct {
+			Name    string `json:"name"`
+			Message string `json:"message"`
+		}{
+			Name:    "UploadError",
+			Message: uploadError.Error(),
+		}
+		jsErrorData, err := json.Marshal(jsError)
+		if err != nil {
+			return nil, err
+		}
+		if buf, err = jsonparser.Set(buf, jsErrorData, "error"); err != nil {
 			return nil, err
 		}
 	}

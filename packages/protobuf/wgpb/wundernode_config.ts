@@ -915,6 +915,7 @@ export interface WunderGraphConfiguration {
 
 export interface S3UploadProfileHooksConfiguration {
   preUpload: boolean;
+  postUpload: boolean;
 }
 
 export interface S3UploadProfile {
@@ -3188,17 +3189,21 @@ export const WunderGraphConfiguration = {
 };
 
 function createBaseS3UploadProfileHooksConfiguration(): S3UploadProfileHooksConfiguration {
-  return { preUpload: false };
+  return { preUpload: false, postUpload: false };
 }
 
 export const S3UploadProfileHooksConfiguration = {
   fromJSON(object: any): S3UploadProfileHooksConfiguration {
-    return { preUpload: isSet(object.preUpload) ? Boolean(object.preUpload) : false };
+    return {
+      preUpload: isSet(object.preUpload) ? Boolean(object.preUpload) : false,
+      postUpload: isSet(object.postUpload) ? Boolean(object.postUpload) : false,
+    };
   },
 
   toJSON(message: S3UploadProfileHooksConfiguration): unknown {
     const obj: any = {};
     message.preUpload !== undefined && (obj.preUpload = message.preUpload);
+    message.postUpload !== undefined && (obj.postUpload = message.postUpload);
     return obj;
   },
 
@@ -3207,6 +3212,7 @@ export const S3UploadProfileHooksConfiguration = {
   ): S3UploadProfileHooksConfiguration {
     const message = createBaseS3UploadProfileHooksConfiguration();
     message.preUpload = object.preUpload ?? false;
+    message.postUpload = object.postUpload ?? false;
     return message;
   },
 };

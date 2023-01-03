@@ -64,7 +64,7 @@ export interface WunderGraphFile {
 	readonly type: string;
 }
 
-export interface FilePreuploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
+export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
 	/**
 	 * The user that is currently logged in, if any.
 	 */
@@ -77,6 +77,14 @@ export interface FilePreuploadHookRequest<User extends WunderGraphUser = WunderG
 	 * Metadata received from the client
 	 */
 	meta: any;
+}
+
+export interface PostUploadHookRequest<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalClient = InternalClient
+> extends PreUploadHookRequest<User> {
+	internalClient: IC;
+	error: Error;
 }
 
 export interface ClientRequestHeaders extends Headers {}
@@ -190,7 +198,7 @@ export interface AuthenticationDeny {
 	message: string;
 }
 
-export interface UploadHookFileResponse {
+export interface UploadHookFileKeyResponse {
 	fileKey: string;
 }
 
@@ -198,4 +206,10 @@ export interface UploadHookErrorResponse {
 	error: string;
 }
 
-export type PreUploadHookResponse = UploadHookErrorResponse | undefined | Promise<UploadHookErrorResponse | undefined>;
+export type PreUploadHookResponseData = UploadHookFileKeyResponse | UploadHookErrorResponse;
+export type PreUploadHookResponse =
+	| PreUploadHookResponseData
+	| Promise<PreUploadHookResponseData>
+	| Promise<void>
+	| undefined;
+export type PostUploadHookResponse = Promise<void> | undefined;

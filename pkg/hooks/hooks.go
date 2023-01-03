@@ -142,7 +142,8 @@ const (
 type UploadHook string
 
 const (
-	PreUpload UploadHook = "preUpload"
+	PreUpload  UploadHook = "preUpload"
+	PostUpload UploadHook = "postUpload"
 )
 
 type Client struct {

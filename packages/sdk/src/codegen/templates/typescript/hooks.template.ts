@@ -1,7 +1,7 @@
 //language=handlebars
 export const template = `
 import { {{ modelImports }} } from "./models"
-import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration, WsTransportOnConnectionInitResponse, FilePreuploadHookRequest, PreUploadHookResponse } from "@wundergraph/sdk";
+import type { BaseRequestContext, WunderGraphRequest, WunderGraphResponse, AuthenticationResponse, AuthenticationHookRequest, HooksConfiguration, WsTransportOnConnectionInitResponse, PreUploadHookRequest, PreUploadHookResponse, PostUploadHookRequest, PostUploadHookResponse } from "@wundergraph/sdk";
 import type { InternalClient } from "./wundergraph.internal.client"
 import type { User } from "./wundergraph.server"
 
@@ -171,7 +171,8 @@ export interface Uploads {
         {{name}}?: {
             {{#each uploadProfiles}}
                 {{@key}}?: {
-                    preUpload?: (hook: FilePreuploadHookRequest<User>) => PreUploadHookResponse;
+                    preUpload?: (hook: PreUploadHookRequest<User>) => PreUploadHookResponse;
+                    postUpload?: (hook: PostUploadHookRequest<User, InternalClient>) => PostUploadHookResponse;
                 }
             {{/each}}
         }

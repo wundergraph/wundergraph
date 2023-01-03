@@ -482,7 +482,32 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				const result = await handler({
 					...request.ctx,
 					file: request.body.file,
-					response: request.body.meta,
+					meta: request.body.meta,
+				});
+				return result || {};
+			} catch (err) {
+				request.log.error(err);
+				reply.code(500);
+				return { error: err };
+			}
+		});
+	};
+
+	const postUpload = (providerName: string, profileName: string, handler: any) => {
+		fastify.post<{
+			Body: {
+				file: WunderGraphFile;
+				meta: any;
+				error: Error;
+			};
+		}>(`/upload/${providerName}/${profileName}/postUpload`, async (request, reply) => {
+			reply.type('application/json').code(200);
+			try {
+				const result = await handler({
+					...request.ctx,
+					file: request.body.file,
+					meta: request.body.meta,
+					error: request.body.error,
 				});
 				return result || {};
 			} catch (err) {
@@ -499,9 +524,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			const provider = hooks[providerName];
 			for (const profileName in provider) {
 				const profile = provider[profileName];
-				if (profile.preUpload !== undefined) {
+				if (profile?.preUpload !== undefined) {
 					count++;
 					preUpload(providerName, profileName, profile.preUpload);
+				}
+				if (profile?.postUpload !== undefined) {
+					count++;
+					postUpload(providerName, profileName, profile.postUpload);
 				}
 			}
 		}

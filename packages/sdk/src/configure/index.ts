@@ -295,6 +295,7 @@ interface S3UploadConfiguration {
 
 export interface ResolvedS3UploadProfile extends Required<S3UploadProfile> {
 	preUploadHook: boolean;
+	postUploadHook: boolean;
 }
 
 interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'uploadProfiles'> {
@@ -632,6 +633,7 @@ const resolveUploadConfiguration = (
 				allowedMimeTypes: profile.allowedMimeTypes ?? [],
 				allowedFileExtensions: profile.allowedFileExtensions ?? [],
 				preUploadHook: profileHooks?.preUpload !== undefined,
+				postUploadHook: profileHooks?.postUpload !== undefined,
 			};
 		}
 	}
@@ -1061,6 +1063,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 							allowedFileExtensions: resolved.allowedFileExtensions,
 							hooks: {
 								preUpload: resolved.preUploadHook,
+								postUpload: resolved.postUploadHook,
 							},
 						};
 					}
