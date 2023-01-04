@@ -1,4 +1,17 @@
 import fs from 'fs';
+import path from 'path';
+import process from 'node:process';
+import _ from 'lodash';
+import {
+	buildSchema,
+	FieldDefinitionNode,
+	InputValueDefinitionNode,
+	Kind,
+	parse,
+	parseType,
+	print,
+	visit,
+} from 'graphql';
 import {
 	Api,
 	DatabaseApiCustom,
@@ -34,19 +47,7 @@ import {
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
-import {
-	buildSchema,
-	FieldDefinitionNode,
-	InputValueDefinitionNode,
-	Kind,
-	parse,
-	parseType,
-	print,
-	visit,
-} from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
-import path from 'path';
-import _ from 'lodash';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
@@ -55,7 +56,6 @@ import {
 	WunderGraphUser,
 } from '../middleware/types';
 import { getWebhooks } from '../webhooks';
-import process from 'node:process';
 import {
 	NodeOptions,
 	ResolvedNodeOptions,
@@ -254,6 +254,8 @@ interface ResolvedDeployment {
 }
 
 export interface S3UploadProfile {
+	/** JSON schema for metadata */
+	meta?: any;
 	/**
 	 * Maximum file size, in bytes
 	 *
@@ -632,6 +634,7 @@ const resolveUploadConfiguration = (
 				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
 				allowedMimeTypes: profile.allowedMimeTypes ?? [],
 				allowedFileExtensions: profile.allowedFileExtensions ?? [],
+				meta: profile.meta ?? null,
 				preUploadHook: profileHooks?.preUpload !== undefined,
 				postUploadHook: profileHooks?.postUpload !== undefined,
 			};
@@ -1056,11 +1059,18 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				if (provider.uploadProfiles) {
 					for (const key in provider.uploadProfiles) {
 						const resolved = provider.uploadProfiles[key];
+						let metadataJSONSchema: string;
+						try {
+							metadataJSONSchema = resolved.meta ? JSON.stringify(resolved.meta) : '';
+						} catch (e) {
+							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
+						}
 						uploadProfiles[key] = {
 							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
 							maxAllowedFiles: resolved.maxAllowedFiles,
 							allowedMimeTypes: resolved.allowedMimeTypes,
 							allowedFileExtensions: resolved.allowedFileExtensions,
+							metadataJSONSchema: metadataJSONSchema,
 							hooks: {
 								preUpload: resolved.preUploadHook,
 								postUpload: resolved.postUploadHook,

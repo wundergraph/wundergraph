@@ -1,22 +1,50 @@
-import { handlebarTemplate } from './client.template';
 import Handlebars from 'handlebars';
+import hash from 'object-hash';
+import { compile as compileJSONSchema } from 'json-schema-to-typescript';
+
+import { handlebarTemplate } from './client.template';
 import { Template, TemplateOutputFile } from '../../index';
 import { formatTypeScript } from './';
 import { OperationType } from '@wundergraph/protobuf';
-import hash from 'object-hash';
 import { ResolvedWunderGraphConfig } from '../../../configure';
 import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
 import templates from '../index';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const allOperations = allQueries(config.application, false);
 		const _liveQueries = liveQueries(config.application, false);
 		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _mutations = operations(config.application, OperationType.MUTATION, false);
 		const _subscriptions = operations(config.application, OperationType.SUBSCRIPTION, false);
+		const _uploadProfileTypeDefinitions: string[] = [];
+		const _uploadProfileTypeNames: Record<string, Record<string, string>> = {};
+		for (const provider of config.application.S3UploadProvider) {
+			_uploadProfileTypeNames[provider.name] = {};
+			for (const key in provider.uploadProfiles) {
+				const profile = provider.uploadProfiles[key];
+				if (profile.meta) {
+					const requestedTypeName = `${provider.name}_${key}_metadata`;
+					const typeDefinition = await compileJSONSchema(profile.meta, requestedTypeName, {
+						additionalProperties: false,
+						format: false,
+						bannerComment: '',
+					});
+					// compileJSONSchema might change the typeName capitalization, retrieve it
+					const match = typeDefinition.match(/export interface (\w+)/);
+					if (!match) {
+						throw new Error(`could not retrieve type name from ${typeDefinition}`);
+					}
+					const typeName = match[1];
+					_uploadProfileTypeDefinitions.push(typeDefinition);
+					_uploadProfileTypeNames[provider.name][key] = typeName;
+				} else {
+					_uploadProfileTypeNames[provider.name][key] = 'any | undefined';
+				}
+			}
+		}
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,
@@ -39,6 +67,8 @@ export class TypeScriptClient implements Template {
 			s3Providers: config.application.S3UploadProvider,
 			hasS3Provider: config.application.S3UploadProvider.length > 0,
 			s3Provider: config.application.S3UploadProvider,
+			uploadProfileTypeDefinitions: _uploadProfileTypeDefinitions,
+			uploadProfileTypeNames: _uploadProfileTypeNames,
 		});
 		return Promise.resolve([
 			{

@@ -19,6 +19,7 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/santhosh-tekuri/jsonschema/v5"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 
@@ -40,6 +41,7 @@ type S3UploadClient struct {
 
 type preparedProfile struct {
 	UploadProfile
+	metadataJSONSchema      *jsonschema.Schema
 	allowedMimeTypesRegexps []*regexp.Regexp
 }
 
@@ -54,6 +56,8 @@ type UploadProfile struct {
 	AllowedMimeTypes []string
 	// Allowed file extensions, case insensitive
 	AllowedFileExtensions []string
+	// Optional JSON schema to validate metadata
+	MetadataJSONSchema string
 	// Wether to use the PreUpload middleware hook
 	UsePreUploadHook bool
 	// Wether to use the PostUpload middleware hook
@@ -94,7 +98,7 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		return nil, err
 	}
 
-	// Normalize profiles
+	// Prepare profiles
 	profiles := make(map[string]*preparedProfile, len(s3Options.Profiles))
 	for name, profile := range s3Options.Profiles {
 		allowedMimeTypes := make([]string, len(profile.AllowedMimeTypes))
@@ -126,9 +130,20 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		// Since we're only looking for exact matches here, we can sort the
 		// extensions and make search a bit faster
 		sort.Strings(allowedFileExtensions)
+
+		var metadataJSONSchema *jsonschema.Schema
+		if profile.MetadataJSONSchema != "" {
+			name := fmt.Sprintf("%s.%s.metadata.schema.json", s3Options.Name, name)
+			metadataJSONSchema, err = jsonschema.CompileString(name, profile.MetadataJSONSchema)
+			if err != nil {
+				return nil, fmt.Errorf("error compiling JSON schema: %w", err)
+			}
+		}
+
 		pp := &preparedProfile{
 			UploadProfile:           *profile,
 			allowedMimeTypesRegexps: allowedMimeTypesRegexps,
+			metadataJSONSchema:      metadataJSONSchema,
 		}
 		pp.AllowedMimeTypes = allowedMimeTypes
 		pp.AllowedFileExtensions = allowedFileExtensions
@@ -217,14 +232,6 @@ func (s *S3UploadClient) uploadToS3(ctx context.Context, r *http.Request, part *
 	return &info, nil
 }
 
-func (s *S3UploadClient) fileSize(tempFile *os.File) (int64, error) {
-	st, err := os.Stat(tempFile.Name())
-	if err != nil {
-		return 0, fmt.Errorf("error stat'ing temporary file: %w", err)
-	}
-	return st.Size(), nil
-}
-
 func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, part *multipart.Part, tempFile *os.File, fileSize int64) (string, error) {
 	profileName, profile, err := s.uploadProfile(r)
 	if err != nil {
@@ -236,6 +243,17 @@ func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, part *m
 	if profile != nil {
 		if err := s.validateFile(ctx, profile, part, fileSize); err != nil {
 			return "", fmt.Errorf("error validating file: %w", err)
+		}
+
+		if profile.metadataJSONSchema != nil {
+			metadata := fileMetadataFromRequest(r)
+			var output interface{}
+			if err := json.Unmarshal([]byte(metadata), &output); err != nil {
+				return "", fmt.Errorf("error decoding metadata: %w", err)
+			}
+			if err := profile.metadataJSONSchema.Validate(output); err != nil {
+				return "", fmt.Errorf("error validating metadata: %w", err)
+			}
 		}
 
 		if profile.UsePreUploadHook {

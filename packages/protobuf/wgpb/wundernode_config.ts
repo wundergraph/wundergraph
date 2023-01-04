@@ -923,6 +923,7 @@ export interface S3UploadProfile {
   maxAllowedFiles: number;
   allowedMimeTypes: string[];
   allowedFileExtensions: string[];
+  metadataJSONSchema: string;
   hooks: S3UploadProfileHooksConfiguration | undefined;
 }
 
@@ -3223,6 +3224,7 @@ function createBaseS3UploadProfile(): S3UploadProfile {
     maxAllowedFiles: 0,
     allowedMimeTypes: [],
     allowedFileExtensions: [],
+    metadataJSONSchema: "",
     hooks: undefined,
   };
 }
@@ -3238,6 +3240,7 @@ export const S3UploadProfile = {
       allowedFileExtensions: Array.isArray(object?.allowedFileExtensions)
         ? object.allowedFileExtensions.map((e: any) => String(e))
         : [],
+      metadataJSONSchema: isSet(object.metadataJSONSchema) ? String(object.metadataJSONSchema) : "",
       hooks: isSet(object.hooks) ? S3UploadProfileHooksConfiguration.fromJSON(object.hooks) : undefined,
     };
   },
@@ -3257,6 +3260,7 @@ export const S3UploadProfile = {
     } else {
       obj.allowedFileExtensions = [];
     }
+    message.metadataJSONSchema !== undefined && (obj.metadataJSONSchema = message.metadataJSONSchema);
     message.hooks !== undefined &&
       (obj.hooks = message.hooks ? S3UploadProfileHooksConfiguration.toJSON(message.hooks) : undefined);
     return obj;
@@ -3268,6 +3272,7 @@ export const S3UploadProfile = {
     message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
     message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];
     message.allowedFileExtensions = object.allowedFileExtensions?.map((e) => e) || [];
+    message.metadataJSONSchema = object.metadataJSONSchema ?? "";
     message.hooks = (object.hooks !== undefined && object.hooks !== null)
       ? S3UploadProfileHooksConfiguration.fromPartial(object.hooks)
       : undefined;

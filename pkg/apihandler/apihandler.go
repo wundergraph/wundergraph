@@ -264,6 +264,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
 				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
 				AllowedFileExtensions: append([]string(nil), profile.AllowedFileExtensions...),
+				MetadataJSONSchema:    profile.MetadataJSONSchema,
 				UsePreUploadHook:      profile.Hooks.PreUpload,
 				UsePostUploadHook:     profile.Hooks.PostUpload,
 			}

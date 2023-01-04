@@ -439,7 +439,8 @@ message S3UploadProfile {
 	int32 maxAllowedFiles = 2;
 	repeated string allowedMimeTypes = 3;
 	repeated string allowedFileExtensions = 4;
-	S3UploadProfileHooksConfiguration hooks = 5;
+	string metadataJSONSchema = 5;
+	S3UploadProfileHooksConfiguration hooks = 6;
 }
 
 message S3UploadConfiguration {

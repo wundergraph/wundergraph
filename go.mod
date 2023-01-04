@@ -103,6 +103,7 @@ require (
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
 	github.com/r3labs/sse/v2 v2.8.1 // indirect
 	github.com/rs/xid v1.2.1 // indirect
+	github.com/santhosh-tekuri/jsonschema/v5 v5.1.1 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
