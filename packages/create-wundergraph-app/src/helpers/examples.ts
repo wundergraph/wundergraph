@@ -10,8 +10,8 @@ export const getExamplesList = async (ref: string) => {
 		});
 	const exampleDirectories = JSON.parse(exampleDirectoriesResponse.body);
 	const examples: string[] = [];
-	exampleDirectories.forEach((element: { name: string }) => {
-		examples.push(element.name);
+	exampleDirectories.forEach((element: { name: string; type: string }) => {
+		if (element.type === 'dir') examples.push(element.name);
 	});
 	return examples;
 };
