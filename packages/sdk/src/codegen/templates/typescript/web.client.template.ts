@@ -10,12 +10,12 @@ import {
 	ClientResponse as Result,
   LogoutOptions
 } from "@wundergraph/sdk/client";
-export const WUNDERGRAPH_S3_ENABLED = {{hasS3Provider}};
+export const WUNDERGRAPH_S3_ENABLED = {{hasS3Providers}};
 export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
-{{#if hasS3Provider}}
+{{#if hasS3Providers}}
 export interface UploadResponse { key: string }
 export enum S3Provider {
-    {{#each s3Provider }}
+    {{#each s3Providers }}
     "{{name}}" = "{{name}}",
     {{/each}}
 }
@@ -141,7 +141,7 @@ export class Client {
         {{/each}}
         }
     {{/unless}}{{/if}}
-    {{#if hasS3Provider}}
+    {{#if hasS3Providers}}
     public uploadFiles = async (config: UploadConfig): Promise<Response<UploadResponse[]>> => {
       try {
         const result = await this._client.uploadFiles(config);

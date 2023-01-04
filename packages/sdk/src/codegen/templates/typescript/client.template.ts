@@ -17,10 +17,10 @@ import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
 
-export const WUNDERGRAPH_S3_ENABLED = {{hasS3Provider}};
+export const WUNDERGRAPH_S3_ENABLED = {{hasS3Providers}};
 export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
 
-{{#if hasS3Provider}}
+{{#if hasS3Providers}}
 export interface UploadResponse { key: string }
 {{/if}}
 
@@ -31,7 +31,7 @@ export interface UploadResponse { key: string }
 {{/each}}
 
 type S3UploadProfileMetadata = {
-	{{#each s3Provider }}
+	{{#each s3Providers }}
 	{{name}}: {
 		{{#each uploadProfiles}}
 		{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}};
@@ -41,7 +41,7 @@ type S3UploadProfileMetadata = {
 };
 
 const S3UploadProfileData = {
-	{{#each s3Provider }}
+	{{#each s3Providers }}
 	{{name}}: {
 		{{#each uploadProfiles}}
 			{{@key}}: {
@@ -184,5 +184,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Provider}}, Extract<keyof typeof S3UploadProfileData, string>{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Providers}}, Extract<keyof typeof S3UploadProfileData, string>{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;

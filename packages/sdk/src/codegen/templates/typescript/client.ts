@@ -63,10 +63,8 @@ export class TypeScriptClient implements Template {
 			hasSubscriptionsOrLiveQueries: _subscriptions.length + _liveQueries.length !== 0,
 			hasAuthProviders: config.authentication.cookieBased.length !== 0,
 			authProviders: config.authentication.cookieBased.map((provider) => provider.id),
-			hasS3Providers: config.application.S3UploadProvider.length !== 0,
+			hasS3Providers: config.application.S3UploadProvider.length > 0,
 			s3Providers: config.application.S3UploadProvider,
-			hasS3Provider: config.application.S3UploadProvider.length > 0,
-			s3Provider: config.application.S3UploadProvider,
 			uploadProfileTypeDefinitions: _uploadProfileTypeDefinitions,
 			uploadProfileTypeNames: _uploadProfileTypeNames,
 		});
