@@ -1,4 +1,4 @@
-import type { Webhook } from '@wundergraph/sdk';
+import type { Webhook } from '@wundergraph/sdk/server';
 import type { InternalClient } from '../generated/wundergraph.internal.client';
 
 const webhook: Webhook<InternalClient> = {

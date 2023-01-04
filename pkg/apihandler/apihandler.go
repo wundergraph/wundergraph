@@ -421,7 +421,7 @@ func (r *Builder) operationApiPath(name string) string {
 }
 
 func (r *Builder) registerInvalidOperation(name string) {
-	apiPath := r.operationApiPath((name))
+	apiPath := r.operationApiPath(name)
 	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
 	route.Handler(&EndpointUnavailableHandler{
 		OperationName: name,
@@ -458,14 +458,17 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
 	if shared.Report.HasErrors() {
-		return shared.Report
+		return fmt.Errorf(ErrMsgOperationParseFailed, shared.Report)
 	}
 
 	shared.Normalizer.NormalizeNamedOperation(shared.Doc, r.definition, []byte(operation.Name), shared.Report)
+	if shared.Report.HasErrors() {
+		return fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
+	}
 
 	state := shared.Validation.Validate(shared.Doc, r.definition, shared.Report)
 	if state != astvalidation.Valid {
-		return shared.Report
+		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
@@ -863,6 +866,9 @@ func (h *GraphQLHandler) preparePlan(operationHash uint64, requestOperationName 
 			shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
 		} else {
 			shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
+		}
+		if shared.Report.HasErrors() {
+			return nil, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
 		}
 
 		state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)

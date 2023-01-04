@@ -18,7 +18,7 @@ Examples are expected to include the following node scripts:
     2. `start`: (required, development) starts the example with a single command
     3. `start:services` (optional, Development & CI): start any local services (docker, additonal server) required by the example
     4. `wait-on:services` (optional, Development & CI): wait for the services to be ready
-    5. `generate` (required): generates the WunderGraph build
+    5. `build` (required): generates the WunderGraph build
     6. `setup` (optional, Development & CI): setup the example (e.g. migration) after the environment is ready
     7. `test` (optional, Development & CI): runs the tests for the example
     8. `cleanup` (optional, Development & CI): stops,remove all provisioned resources e.g. shutdown docker containers or kill processes

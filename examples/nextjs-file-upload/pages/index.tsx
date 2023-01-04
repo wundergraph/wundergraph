@@ -82,7 +82,7 @@ const Home: NextPage = () => {
 	return (
 		<div className="flex flex-col my-auto gap-y-24 lg:gap-y-32 py-4">
 			<header className="flex flex-col relative">
-				<Image src="/logo.svg" height={120} width={120} />
+				<Image src="/logo.svg" height={120} width={120} alt="WunderGraph Logo" />
 				<h1 className="font-extrabold text-4xl lg:text-6xl text-center">WunderGraph File Upload</h1>
 				<p className="mt-6 text-lg text-gray-400 text-center">
 					Upload multiple files to any S3 compatible file server. Check out the{' '}

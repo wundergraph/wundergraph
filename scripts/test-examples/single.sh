@@ -68,6 +68,12 @@ if test ${update_package_json} = "yes"; then
     ${npm} install
 fi
 
+# If we have an example .env.example file
+# copy it to .env to use default values in the CI
+if [ -e ".env.example" ]; then
+	cp -n .env.example .env
+fi
+
 if ! test -d node_modules; then
     ${npm} install
 fi
@@ -89,7 +95,7 @@ if grep -q '"setup"' package.json; then
 fi
 
 # Generate WunderGraph files
-npm run generate
+npm run build
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
