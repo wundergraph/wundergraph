@@ -55,13 +55,7 @@ import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
 import _ from 'lodash';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import {
-	AuthenticationHookRequest,
-	AuthenticationResponse,
-	ResolvedServerOptions,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphUser,
-} from '../server/types';
+import { ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
@@ -1043,18 +1037,23 @@ const resolveOperationsConfigurations = async (
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)
 		for (const file of loadedOperations.typescript_operation_files) {
-			const nodeJsOperation: NodeJSOperation<any, any> = (await import(file.module_path)).default;
+			const implementation: NodeJSOperation<any, any, any> = (await import(file.module_path)).default;
 			const operation: GraphQLOperation = {
 				Name: file.operation_name.replace('/', '_'),
 				PathName: file.operation_name,
 				Content: '',
-				OperationType: OperationType.QUERY,
+				OperationType:
+					implementation.type === 'query'
+						? OperationType.QUERY
+						: implementation.type === 'mutation'
+						? OperationType.MUTATION
+						: OperationType.SUBSCRIPTION,
 				ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
 				VariablesSchema: { type: 'object', properties: {} },
 				InterpolationVariablesSchema: { type: 'object', properties: {} },
 				InternalVariablesSchema: { type: 'object', properties: {} },
 				InjectedVariablesSchema: { type: 'object', properties: {} },
-				ResponseSchema: { type: 'object', properties: {} },
+				ResponseSchema: { type: 'object', properties: { data: {} } },
 				AuthenticationConfig: {
 					required: false,
 				},
@@ -1086,8 +1085,8 @@ const resolveOperationsConfigurations = async (
 				Internal: false,
 				PostResolveTransformations: undefined,
 			};
-			if (nodeJsOperation.inputSchema) {
-				operation.VariablesSchema = zodToJsonSchema(nodeJsOperation.inputSchema) as any;
+			if (implementation.inputSchema) {
+				operation.VariablesSchema = zodToJsonSchema(implementation.inputSchema) as any;
 			}
 			nodeJSOperations.push(operation);
 		}

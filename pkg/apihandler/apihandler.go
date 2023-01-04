@@ -2280,6 +2280,14 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION {
+		h.handleSubscriptionRequest(w, r, variables, requestLogger)
+	} else {
+		h.handleRequest(w, r, variables, requestLogger)
+	}
+}
+
+func (h *FunctionsHandler) handleRequest(w http.ResponseWriter, r *http.Request, variables []byte, requestLogger *zap.Logger) {
 	out, err := h.hooksClient.DoFunctionRequest(r.Context(), h.operation.Path, variables)
 	if err != nil {
 		requestLogger.Error("failed to call function", zap.Error(err))
@@ -2290,6 +2298,16 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(out.Response)
+}
+
+func (h *FunctionsHandler) handleSubscriptionRequest(w http.ResponseWriter, r *http.Request, variables []byte, requestLogger *zap.Logger) {
+	setSubscriptionHeaders(w)
+	err := h.hooksClient.DoFunctionSubscriptionRequest(r.Context(), h.operation.Path, variables, w)
+	if err != nil {
+		requestLogger.Error("failed to call function", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *FunctionsHandler) parseFormVariables(r *http.Request) []byte {

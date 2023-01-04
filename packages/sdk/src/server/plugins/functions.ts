@@ -12,7 +12,7 @@ interface FastifyFunctionsOptions {
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
 	for (const operation of config.operations) {
 		try {
-			const nodeJsOperation: NodeJSOperation<any, any> = (await import(operation.module_path)).default;
+			const implementation: NodeJSOperation<any, any, any> = (await import(operation.module_path)).default;
 			const routeUrl = path.join('/functions', operation.operation_name);
 			fastify.route({
 				url: routeUrl,
@@ -20,22 +20,61 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				config: {},
 				handler: async (request, reply) => {
 					try {
-						const out = await nodeJsOperation.handler(request.body);
-						console.log('out', JSON.stringify(out));
-						reply.code(200);
-						reply.send({
-							response: out,
-						});
+						switch (implementation.type) {
+							case 'subscription':
+								if (!implementation.subscriptionHandler) {
+									return reply.status(500);
+								}
+								const gen = await implementation.subscriptionHandler({
+									input: request.body,
+								});
+								reply.hijack();
+								reply.raw.on('close', () => {
+									gen.return(0);
+								});
+								while (true) {
+									const next = await gen.next();
+									if (next.done) {
+										return reply.raw.end();
+									}
+									reply.raw.write(`${JSON.stringify({ data: next.value })}\n\n`);
+								}
+							case 'query':
+								if (!implementation.queryHandler) {
+									return reply.status(500);
+								}
+								const outQuery = await implementation.queryHandler(request.body);
+								reply.code(200);
+								reply.send({
+									response: outQuery,
+								});
+								return;
+							case 'mutation':
+								if (!implementation.mutationHandler) {
+									return reply.status(500);
+								}
+								const outMutation = await implementation.mutationHandler(request.body);
+								reply.code(200);
+								reply.send({
+									response: outMutation,
+								});
+								return;
+						}
+
 						return;
 					} catch (e) {
 						fastify.log.error(e);
-						reply.code(500);
+						if (implementation.type === 'subscription') {
+							reply.raw.end();
+						} else {
+							reply.code(500);
+						}
 					}
 				},
 			});
 			fastify.log.debug(`Function '${operation.operation_name}' registered at ${routeUrl}`);
 		} catch (err) {
-			fastify.log.error(err, 'Could not load function', operation.operation_name);
+			fastify.log.error(err, `Failed to register function at ${operation.module_path}`);
 		}
 	}
 };

@@ -194,6 +194,12 @@ export interface GraphQLError {
 `;
 
 const JSONSchemaToTypescriptInterface = (schema: JSONSchema, interfaceName: string, withErrors: boolean): string => {
+	console.log(`interfaceName: ${interfaceName} schema: ${JSON.stringify(schema)}`);
+
+	if (typeof schema === 'object' && !schema.type && !schema.properties && !schema.$ref) {
+		return `export type ${interfaceName} = JSONObject;`;
+	}
+
 	let out = '';
 	const writeType = (name: string, isRequired: boolean, typeName: string) => {
 		out += `${name + (isRequired ? '' : '?')}: ${typeName}\n`;

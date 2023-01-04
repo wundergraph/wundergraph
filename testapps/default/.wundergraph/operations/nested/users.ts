@@ -1,14 +1,11 @@
 import { z } from 'zod';
 import { createOperation } from '@wundergraph/sdk';
 
-export default createOperation()
-	.query()
-	.input(
-		z.object({
-			name: z.string(),
-		})
-	)
-	.handler(async (input) => {
+export default createOperation.query({
+	input: z.object({
+		name: z.string(),
+	}),
+	handler: async (input) => {
 		console.log(`test.ts input: ${JSON.stringify(input)}`);
 		return {
 			users: [
@@ -18,5 +15,5 @@ export default createOperation()
 				},
 			],
 		};
-	})
-	.build();
+	},
+});
