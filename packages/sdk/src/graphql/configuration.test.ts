@@ -320,7 +320,7 @@ describe('configuration', () => {
 	it.each(tests)('testCase: %#', ({ schema: tSchema, serviceSDL: tServiceSDL, config }) => {
 		const schema = parse(tSchema);
 		const serviceSDL = tServiceSDL === undefined ? undefined : parse(tServiceSDL);
-		const nodes = configuration(schema, serviceSDL);
+		const nodes = configuration(schema, undefined, serviceSDL);
 		assert.equal(pretty(nodes), pretty(config));
 	});
 });

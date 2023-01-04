@@ -106,7 +106,11 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const serviceDocumentNode = serviceSDL !== undefined ? parse(serviceSDL) : undefined;
 		const schemaDocumentNode = parse(schemaSDL);
 		const graphQLSchema = buildSchema(schemaSDL);
-		const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode, serviceDocumentNode);
+		const { RootNodes, ChildNodes, Fields } = configuration(
+			schemaDocumentNode,
+			introspection.customJSONScalars,
+			serviceDocumentNode
+		);
 		const subscriptionsEnabled = hasSubscriptions(schema);
 		if (introspection.internal === true) {
 			headers['X-WG-Internal-GraphQL-API'] = {
@@ -177,7 +181,8 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 				introspection.apiNamespace
 			),
 			generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
-			[]
+			[],
+			introspection.customJSONScalars
 		);
 	});
 };

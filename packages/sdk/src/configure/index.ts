@@ -3,6 +3,7 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
+	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -340,6 +341,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	}
 
 	const apps = config.apis;
+
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
 	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
@@ -660,6 +662,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
 				keepFromClaimVariables: false,
 				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
+				customJsonScalars: app.EngineConfiguration.CustomJsonScalars,
 			});
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalidOperationNames;
