@@ -26,6 +26,10 @@ export type {
 	WunderGraphServerConfig,
 	ClientRequestHeaders,
 	AuthenticationHookRequest,
+	PreUploadHookRequest,
+	PreUploadHookResponse,
+	PostUploadHookRequest,
+	PostUploadHookResponse,
 } from './middleware/types';
 export type {
 	SubscriptionRequestOptions,

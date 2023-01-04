@@ -211,5 +211,5 @@ export type PreUploadHookResponse =
 	| PreUploadHookResponseData
 	| Promise<PreUploadHookResponseData>
 	| Promise<void>
-	| undefined;
-export type PostUploadHookResponse = Promise<void> | undefined;
+	| void;
+export type PostUploadHookResponse = Promise<void> | void;
