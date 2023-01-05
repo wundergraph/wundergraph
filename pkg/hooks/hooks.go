@@ -129,20 +129,20 @@ type Client struct {
 	serverUrl  string
 	httpClient *retryablehttp.Client
 	log        *zap.Logger
+	hostPort   string
 }
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	httpClient := retryablehttp.NewClient()
-	// INFO: retryablehttp also handles retry-after headers
-	httpClient.RetryMax = 10
-	// keep it low to increase the chance that the server is fast to start
-	httpClient.RetryWaitMin = time.Millisecond * 100
-	httpClient.RetryWaitMax = time.Second * 30
+	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
+	httpClient.RetryMax = 40
+	// keep it low and linear to increase the chance
+	// that we can continue as soon as the server is back from a cold start
+	httpClient.Backoff = retryablehttp.LinearJitterBackoff
+	httpClient.RetryWaitMax = 50 * time.Millisecond
+	httpClient.RetryWaitMin = 50 * time.Millisecond
 	httpClient.HTTPClient.Timeout = time.Minute * 1
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
-	httpClient.RequestLogHook = func(_ retryablehttp.Logger, req *http.Request, attempt int) {
-		logger.Debug("hook request call", zap.Int("attempt", attempt), zap.String("url", req.URL.String()))
-	}
 
 	return &Client{
 		serverUrl:  serverUrl,
@@ -218,8 +218,12 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 	return &hookRes, nil
 }
 
-func (c *Client) DoHealthCheckRequest(timeout time.Duration) (status bool) {
-	resp, err := c.httpClient.Get(fmt.Sprintf("%s/health", c.serverUrl))
+func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
+	req, err := retryablehttp.NewRequestWithContext(ctx, "GET", c.serverUrl+"/health", nil)
+	if err != nil {
+		return false
+	}
+	resp, err := c.httpClient.Do(req)
 	if err != nil || resp.StatusCode != 200 {
 		return
 	}

@@ -32,7 +32,7 @@
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "figlet": "^1.5.2",
-    "got": "^11.8.5",
+    "got": "^11.8.6",
     "gradient-string": "^2.0.2",
     "inquirer": "^8.0.0",
     "log-symbols": "^4.1.0",
