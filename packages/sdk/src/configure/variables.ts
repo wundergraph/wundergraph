@@ -29,7 +29,7 @@ export type InputVariable<T = string> = T | EnvironmentVariable<T> | PlaceHolder
  */
 export const resolveVariable = (variable: string | EnvironmentVariable): string => {
 	if (variable === undefined) {
-		throw new Error(`could not resolve empty data variable: ${variable}`);
+		throw new Error('could not resolve undefined data variable');
 	}
 	if (variable instanceof EnvironmentVariable) {
 		const environmentVariable = variable as EnvironmentVariable;

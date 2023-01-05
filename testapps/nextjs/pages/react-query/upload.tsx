@@ -41,7 +41,7 @@ const UploadPage: NextPage = () => {
 				<ul>
 					{data.map((file) => (
 						<li key={file}>
-							<a target="_blank" href={`http://127.0.0.1:9000/uploads/${file}`}>
+							<a target="_blank" href={`http://localhost:9000/uploads/${file}`}>
 								{file}
 							</a>
 						</li>

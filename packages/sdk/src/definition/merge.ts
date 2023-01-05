@@ -80,6 +80,25 @@ directive @fromClaim(
   name: Claim
 ) on VARIABLE_DEFINITION
 
+"""
+The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
+
+A potential use-case could be that you have a graphql upstream which is not accepting null values for variables.
+By enabling this directive all variables with null values will be removed from upstream query.
+
+query ($say: String, $name: String) @removeNullVariables {
+	hello(say: $say, name: $name)
+}
+
+Directive will transform variables json and remove top level null values.
+{ "say": null, "name": "world" }
+
+So upstream will receive the following variables:
+
+{ "name": "world" }
+"""
+directive @removeNullVariables on QUERY | MUTATION
+
 enum Claim {
 	USERID
   EMAIL

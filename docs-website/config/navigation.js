@@ -14,6 +14,10 @@ const navigation = [
 				title: 'Manifesto',
 				href: '/manifesto',
 			},
+			{
+				title: 'Usage Information',
+				href: '/usage-information',
+			},
 		],
 	},
 	{
@@ -214,6 +218,10 @@ const navigation = [
 			{
 				title: 'Caching',
 				href: '/docs/examples/caching',
+			},
+			{
+				title: 'Expo + SWR',
+				href: '/docs/examples/expo-swr',
 			},
 			{
 				title: 'FaunaDB NextJS',

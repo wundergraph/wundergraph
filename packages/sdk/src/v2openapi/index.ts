@@ -31,7 +31,6 @@ import { ListTypeNode, NamedTypeNode } from 'graphql/language/ast';
 import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
-	ConfigurationVariable,
 	ConfigurationVariableKind,
 	DataSourceKind,
 	FieldConfiguration,

@@ -30,11 +30,7 @@ configureWunderGraphApplication({
   operations,
   codeGenerators: [
     {
-      templates: [
-        ...templates.typescript.all,
-        templates.typescript.operations,
-        templates.typescript.linkBuilder,
-      ],
+      templates: [...templates.typescript.all],
     },
     {
       templates: [templates.typescript.client],
@@ -69,7 +65,7 @@ Next up is setting up the React Query hooks.
 Create a new `.ts` file for example `lib/wundergraph.ts` and add the following code:
 
 ```ts
-import { createClient, Operations } from '../generated/client'
+import { createClient, Operations } from '../components/generated/client'
 
 import { createHooks } from '@wundergraph/react-query'
 
@@ -107,7 +103,7 @@ Now we're ready to run the operation. Edit `pages/index.tsx` and add the followi
 
 ```typescript
 import { NextPage } from 'next'
-import { useQuery, withWunderGraph } from '../components/generated/nextjs'
+import { useQuery } from '../lib/wundergraph'
 
 export default function Home() {
   const dragons = useQuery({ operationName: 'Dragons' })

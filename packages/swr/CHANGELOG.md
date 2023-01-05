@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.6...@wundergraph/swr@0.9.7) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.5...@wundergraph/swr@0.9.6) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.4...@wundergraph/swr@0.9.5) (2022-12-29)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.3...@wundergraph/swr@0.9.4) (2022-12-28)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.2...@wundergraph/swr@0.9.3) (2022-12-21)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.1...@wundergraph/swr@0.9.2) (2022-12-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.0...@wundergraph/swr@0.9.1) (2022-12-15)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.8.1...@wundergraph/swr@0.9.0) (2022-12-14)
+
+### Features
+
+* update SWR to v2 🥳 ([#446](https://github.com/wundergraph/wundergraph/issues/446)) ([8af6b99](https://github.com/wundergraph/wundergraph/commit/8af6b99f9e0e9da84586782ad5b9ad8e1072c987)) (@Pagebakers)
+
 ## [0.8.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.8.0...@wundergraph/swr@0.8.1) (2022-12-08)
 
 **Note:** Version bump only for package @wundergraph/swr

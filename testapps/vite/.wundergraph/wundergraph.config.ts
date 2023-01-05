@@ -111,7 +111,7 @@ configureWunderGraphApplication({
 	s3UploadProvider: [
 		{
 			name: 'minio',
-			endpoint: '127.0.0.1:9000',
+			endpoint: 'localhost:9000',
 			accessKeyID: 'test',
 			secretAccessKey: '12345678',
 			bucketLocation: 'eu-central-1',
@@ -130,7 +130,7 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+		allowedOrigins: ['http://localhost:5173', 'http://localhost:5173'],
 	},
 	authentication: {
 		cookieBased: {

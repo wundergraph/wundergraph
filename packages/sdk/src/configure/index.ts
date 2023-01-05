@@ -9,7 +9,7 @@ import {
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
-import { mergeApis, removeBaseSchema } from '../definition/merge';
+import { mergeApis } from '../definition/merge';
 import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
 import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
@@ -41,34 +41,25 @@ import {
 	parse,
 	parseType,
 	print,
-	stripIgnoredCharacters,
 	visit,
 } from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
-import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
-import { wunderctlExec } from '../wunderctlexec';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
 	AuthenticationResponse,
+	ResolvedServerOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphUser,
-} from '../middleware/types';
+} from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
-import {
-	NodeOptions,
-	ResolvedNodeOptions,
-	ResolvedServerOptions,
-	resolveNodeOptions,
-	resolveServerOptions,
-	serverOptionsWithDefaults,
-} from './options';
+import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { InternalClient } from '../middleware/internal-client';
 import { Logger } from '../logger';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -144,68 +135,6 @@ export interface DotGraphQLConfig {
 	hasDotWunderGraphDirectory?: boolean;
 }
 
-export enum HooksConfigurationOperationType {
-	Queries = 'queries',
-	Mutations = 'mutations',
-	Subscriptions = 'subscriptions',
-}
-
-export interface OperationHookFunction {
-	(...args: any[]): Promise<any>;
-}
-
-export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
-	mockResolve?: AsyncFn;
-	preResolve?: AsyncFn;
-	postResolve?: AsyncFn;
-	mutatingPreResolve?: AsyncFn;
-	mutatingPostResolve?: AsyncFn;
-	customResolve?: AsyncFn;
-}
-
-// Any is used here because the exact type of the hooks is not known at compile time
-// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
-export type OperationHooks = Record<string, any>;
-
-export interface HooksConfiguration<
-	Queries extends OperationHooks = OperationHooks,
-	Mutations extends OperationHooks = OperationHooks,
-	Subscriptions extends OperationHooks = OperationHooks,
-	User extends WunderGraphUser = WunderGraphUser,
-	// Any is used here because the exact type of the base client is not known at compile time
-	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
-	IC extends InternalClient = InternalClient<any, any>
-> {
-	global?: {
-		httpTransport?: {
-			onOriginRequest?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-			onOriginResponse?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-		};
-		wsTransport?: {
-			onConnectionInit?: {
-				hook: OperationHookFunction;
-				enableForDataSources: string[];
-			};
-		};
-	};
-	authentication?: {
-		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		revalidate?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		postLogout?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-	};
-	[HooksConfigurationOperationType.Queries]?: Queries;
-	[HooksConfigurationOperationType.Mutations]?: Mutations;
-	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
-}
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;
@@ -323,13 +252,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	};
 
 	const graphqlApis = config.server?.graphqlServers?.map((gs) => {
-		const serverPath = customGqlServerMountPath(gs.serverName);
-
 		return introspectGraphqlServer({
 			skipRenameRootFields: gs.skipRenameRootFields,
 			url: '',
 			baseUrl: serverOptions.serverUrl,
-			path: serverPath,
+			path: gs.routeUrl,
 			apiNamespace: gs.apiNamespace,
 			schema: gs.schema,
 		});
@@ -1092,159 +1019,6 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	}
 
 	return out;
-};
-
-export interface PublishConfiguration {
-	organization: string;
-	name: string;
-	apis: Promise<Api<any>>[];
-	isPublic: boolean;
-	repositoryUrl?: string;
-	shortDescription: string;
-	markdownDescriptionFile?: string;
-	keywords: string[];
-}
-
-export interface PublishResult {
-	organization: string;
-	name: string;
-	shortDescription: string;
-	markdownDescription: string;
-	isPublic: boolean;
-	keywords: string[];
-	definition: Api<any>;
-	repositoryUrl: string;
-	sdkVersion: string;
-	placeholders: PublishConfigurationPlaceholder[];
-}
-
-interface PublishConfigurationPlaceholder {
-	name: string;
-	optional: boolean;
-}
-
-export const configurePublishWunderGraphAPI = (configuration: PublishConfiguration) => {
-	const outFile = path.join('generated', `${configuration.organization}.${configuration.name}.api.json`);
-	_configurePublishWunderGraphAPI(configuration, outFile)
-		.then(() => {
-			Logger.info(`${configuration.organization}/${configuration.name} API configuration written to ${outFile}`);
-			if (process.env.WUNDERGRAPH_PUBLISH_API === 'true') {
-				try {
-					const result = wunderctlExec({
-						cmd: ['publish', configuration.organization + '/' + configuration.name],
-						timeout: 1000 * 5,
-					});
-					if (result?.failed) {
-						Logger.error(`Failed to publish ${configuration.organization}/${configuration.name}`);
-					}
-				} catch (e) {
-					Logger.error(`Failed to publish ${configuration.organization}/${configuration.name}`);
-				}
-			} else {
-				Logger.info(`You can now publish the API using the following command:`);
-				Logger.info(`wunderctl publish ${configuration.organization}/${configuration.name}`);
-			}
-		})
-		.catch((err) => {
-			Logger.error(`Failed to create publish configuration for ${configuration.organization}/${configuration.name}`);
-			Logger.error(err);
-		});
-};
-
-const _configurePublishWunderGraphAPI = async (configuration: PublishConfiguration, outFile: string) => {
-	const resolvedApis = await Promise.all(configuration.apis);
-	const merged = mergeApis([], ...resolvedApis);
-	const markdownDescription = configuration.markdownDescriptionFile
-		? fs.readFileSync(configuration.markdownDescriptionFile, 'utf-8')
-		: '';
-	const out: PublishResult = {
-		organization: configuration.organization,
-		name: configuration.name,
-		keywords: configuration.keywords,
-		shortDescription: configuration.shortDescription || '',
-		markdownDescription,
-		isPublic: configuration.isPublic,
-		repositoryUrl: configuration.repositoryUrl || '',
-		sdkVersion: SDK_VERSION,
-		definition: merged,
-		placeholders: [],
-	};
-	merged.Schema = removeBaseSchema(merged.Schema);
-	merged.Schema = stripIgnoredCharacters(merged.Schema);
-	merged.DataSources = merged.DataSources.filter(
-		(ds) =>
-			!(
-				ds.Kind === DataSourceKind.STATIC &&
-				ds.RootNodes.length === 1 &&
-				ds.RootNodes[0].fieldNames.length === 1 &&
-				ds.RootNodes[0].fieldNames[0] === '_join'
-			)
-	);
-	merged.Fields = merged.Fields.filter((field) => !(field.fieldName === '_join'));
-	const printed = JSON.stringify(out, (key, value) => {
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).placeholderVariableName !== undefined
-		) {
-			out.placeholders.push({
-				name: (value as ConfigurationVariable).placeholderVariableName,
-				optional: false,
-			});
-		}
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).environmentVariableName !== undefined
-		) {
-			out.placeholders.push({
-				name: (value as ConfigurationVariable).environmentVariableName,
-				optional: true,
-			});
-		}
-		return value;
-	});
-	fs.writeFileSync(outFile, printed);
-};
-
-export const parsePublishResultWithVariables = (raw: string, variables: { [key: string]: string }): PublishResult => {
-	return JSON.parse(raw, (key, value) => {
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).environmentVariableName !== undefined
-		) {
-			if (variables[(value as ConfigurationVariable).environmentVariableName] !== undefined) {
-				return mapInputVariable(variables[(value as ConfigurationVariable).environmentVariableName]);
-			}
-		}
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).placeholderVariableName !== undefined
-		) {
-			if (variables[(value as ConfigurationVariable).placeholderVariableName] !== undefined) {
-				return mapInputVariable(variables[(value as ConfigurationVariable).placeholderVariableName]);
-			}
-		}
-		return value;
-	});
-};
-
-export const resolveIntegration = (
-	rawApi: string,
-	variables: { [key: string]: string },
-	apiNamespace?: string
-): Promise<Api<any>> => {
-	let published: PublishResult = parsePublishResultWithVariables(rawApi, variables);
-	if (apiNamespace) {
-		return Promise.resolve(applyNamespaceToApi(published.definition, apiNamespace, []));
-	}
-	return Promise.resolve(published.definition);
-};
-
-export const customGqlServerMountPath = (name: string): string => {
-	return `/gqls/${name}/graphql`;
 };
 
 const trimTrailingSlash = (url: string): string => {

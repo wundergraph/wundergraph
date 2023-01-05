@@ -13,7 +13,7 @@ Here's an overview of all the available examples.
 {% quick-link title="Hello world" icon="core" href="/docs/examples/hello-world" description="The simplest example of WunderGraph." /%}
 {% quick-link title="Cross API Joins" icon="core" href="/docs/examples/cross-api-joins" description="An example demonstrating how to join data across two APIs." /%}
 {% quick-link title="Next.js" icon="core" href="/docs/examples/nextjs" description="This example integrates WunderGraph with Next.js." /%}
-{% quick-link title="Next.js + SWR" icon="core" href="/docs/examples/nextjs-swr" description="This example integrates WunderGraph with Next.js and SWR." /%}
+{% quick-link title="Vite + SWR" icon="core" href="/docs/examples/vite-swr" description="This example integrates WunderGraph with Vite and SWR." /%}
 {% quick-link title="Hooks" icon="core" href="/docs/examples/hooks" description="This example demonstrates how to use hooks in WunderGraph." /%}
 {% quick-link title="Caching" icon="core" href="/docs/examples/caching" description="This example demonstrates how to use caching in WunderGraph." /%}
 {% quick-link title="FaunaDB Next.js" icon="core" href="/docs/examples/fauna-db-nextjs" description="This example demonstrates how to integrate FaunaDB into your WunderGraph applications." /%}

@@ -73,6 +73,14 @@ func (i *InMemoryCache) Delete(ctx context.Context, key string) {
 	i.c.Del(key)
 }
 
+func (i *InMemoryCache) Close() error {
+	if i.c != nil {
+		i.c.Close()
+		i.c = nil
+	}
+	return nil
+}
+
 type RedisCache struct {
 	c   *cache.Cache
 	log *zap.Logger
