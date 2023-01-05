@@ -80,7 +80,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 ### Configure options with custom environment variables
 
 ```typescript
-import { EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk'
+import { configureWunderGraphServer, EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk/server'
 
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   options: {
@@ -103,7 +103,7 @@ This configuration illustrates what options you will get when options are not pr
 By using default environment variables names you could stick with Wundergraph Default behaviour but supply different default values.
 
 ```typescript
-import { EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk'
+import { configureWunderGraphServer, EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk/server'
 
 // use WgEnv enum to set variable names
 export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
