@@ -30,9 +30,10 @@ export interface UploadResponse { key: string }
 
 {{/each}}
 
-type S3UploadProfileMetadata = {
+type S3UploadProfiles = {
 	{{#each s3Providers }}
 	{{name}}: {
+		undefined: any;
 		{{#each uploadProfiles}}
 		{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}};
 		{{/each}}
@@ -40,6 +41,7 @@ type S3UploadProfileMetadata = {
 	{{/each}}
 };
 
+{{#if hasS3Providers}}
 const S3UploadProfileData = {
 	{{#each s3Providers }}
 	{{name}}: {
@@ -62,6 +64,7 @@ const S3UploadProfileData = {
 	},
 	{{/each}}
 }
+{{/if}}
 
 {{#if hasAuthProviders}}
 export enum AuthProviderId {
@@ -118,14 +121,16 @@ export class WunderGraphClient extends Client {
 	) {
 		return super.subscribe(options, cb);
 	}
+	{{#if hasS3Providers}}
 	public async uploadFiles<
-		ProviderName extends Extract<keyof S3UploadProfileMetadata, string>,
-		ProfileName extends Extract<keyof S3UploadProfileMetadata[ProviderName], string>,
-		Meta extends S3UploadProfileMetadata[ProviderName][ProfileName]
+		ProviderName extends Extract<keyof S3UploadProfiles, string>,
+		ProfileName extends Extract<keyof S3UploadProfiles[ProviderName], string>,
+		Meta extends S3UploadProfiles[ProviderName][ProfileName]
 	>(config: ProviderName extends string ? ProfileName extends string ? UploadRequestOptions<ProviderName, ProfileName, Meta> : UploadRequestOptions : UploadRequestOptions) {
 		const profile = config.profile ? S3UploadProfileData[config.provider][config.profile] : undefined;
 		return super.uploadFiles(config, profile);
 	}
+	{{/if}}
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
 	}

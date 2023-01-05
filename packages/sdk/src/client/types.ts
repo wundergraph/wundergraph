@@ -113,7 +113,7 @@ export interface SubscriptionResult {
 
 export interface UploadRequestOptions<
 	ProviderName extends string = string,
-	UploadProfile extends string = string,
+	UploadProfile extends string | undefined = string | undefined,
 	Meta extends any = any
 > {
 	provider: ProviderName;
