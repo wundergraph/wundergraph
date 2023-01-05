@@ -95,7 +95,7 @@ You can use it with Vite, Create React App, or any other React project.
 If you're interested in trying out WunderGraph with React,
 have a look at the following examples:
 
-- [Next.js + SWR](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-SWR)
+- [Vite + SWR](https://github.com/wundergraph/wundergraph/tree/main/examples/vite-swr)
 - [Next.js + React Query](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-react-query)
 - [FaunaDB + Next.js](https://github.com/wundergraph/wundergraph/tree/main/examples/faunadb-nextjs)
 - [Next.js + PostgreSQL + Prisma](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-postgres-prisma)

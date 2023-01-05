@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.130.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.130.1...@wundergraph/sdk@0.130.2) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.130.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.130.0...@wundergraph/sdk@0.130.1) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.130.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.129.0...@wundergraph/sdk@0.130.0) (2022-12-29)
+
+### ⚠ BREAKING CHANGES
+
+* **node:** restructure server imports (#497)
+
+### Features
+
+* **node:** restructure server imports ([#497](https://github.com/wundergraph/wundergraph/issues/497)) ([ac277de](https://github.com/wundergraph/wundergraph/commit/ac277dec5c06bb761d6acb026248dedd3d1f59c0)) (@StarpTech)
+
+### Bug Fixes
+
+* use 0.0.0.0 for test server ([#499](https://github.com/wundergraph/wundergraph/issues/499)) ([126778b](https://github.com/wundergraph/wundergraph/commit/126778b88d3e546be1870e4bfb7c8e9d429f3fe1)) (@spetrunin)
+
 ## [0.129.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.128.0...@wundergraph/sdk@0.129.0) (2022-12-28)
 
 ### Features
