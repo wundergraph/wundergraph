@@ -113,14 +113,14 @@ export interface SubscriptionResult {
 
 export interface UploadRequestOptions<
 	ProviderName extends string = string,
-	UploadProfile extends string | undefined = string | undefined,
-	Meta extends any = any
+	ProfileName extends string = string,
+	Meta extends any | undefined = any | undefined
 > {
 	provider: ProviderName;
-	profile?: UploadProfile;
-	meta?: Meta;
 	files: FileList;
 	abortSignal?: AbortSignal;
+	profile?: ProfileName;
+	meta?: Meta;
 }
 
 export interface UploadResponse {

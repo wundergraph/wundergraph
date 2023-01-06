@@ -22,7 +22,6 @@ export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
 
 {{#if hasS3Providers}}
 export interface UploadResponse { key: string }
-{{/if}}
 
 {{#each uploadProfileTypeDefinitions}}
 
@@ -30,19 +29,21 @@ export interface UploadResponse { key: string }
 
 {{/each}}
 
-type S3UploadProfiles = {
-	{{#each s3Providers }}
-	{{name}}: {
-		undefined: any;
+type S3Providers =
+	{{#each s3Providers}}
+	| {
+		name: "{{name}}";
+		profiles:
 		{{#each uploadProfiles}}
-		{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}};
+		| {
+			name: "{{@key}}";
+			meta: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}};
+		}
 		{{/each}}
-	};
+	}
 	{{/each}}
-};
 
-{{#if hasS3Providers}}
-const S3UploadProfileData = {
+const S3UploadProviderData = {
 	{{#each s3Providers }}
 	{{name}}: {
 		{{#each uploadProfiles}}
@@ -123,11 +124,13 @@ export class WunderGraphClient extends Client {
 	}
 	{{#if hasS3Providers}}
 	public async uploadFiles<
-		ProviderName extends Extract<keyof S3UploadProfiles, string>,
-		ProfileName extends Extract<keyof S3UploadProfiles[ProviderName], string>,
-		Meta extends S3UploadProfiles[ProviderName][ProfileName]
-	>(config: ProviderName extends string ? ProfileName extends string ? UploadRequestOptions<ProviderName, ProfileName, Meta> : UploadRequestOptions : UploadRequestOptions) {
-		const profile = config.profile ? S3UploadProfileData[config.provider][config.profile] : undefined;
+		TProviderName extends S3Providers['name'],
+		TProfileName extends Extract<S3Providers, { name: TProviderName }>['profiles']['name'],
+		TProfile = Extract<Extract<S3Providers, { name: TProviderName }>['profiles'], {name: TProfileName}>
+	>(
+		config: TProfile extends {meta: infer TMeta} ? UploadRequestOptions<TProviderName, TProfileName, TMeta> : never
+	) {
+		const profile = config.profile ? S3UploadProviderData[config.provider as string][config.profile as string] : undefined;
 		return super.uploadFiles(config, profile);
 	}
 	{{/if}}
