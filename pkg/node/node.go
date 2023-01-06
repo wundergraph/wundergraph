@@ -264,35 +264,59 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListener(configuration *apihandler.Listener) (net.Listener, error) {
+func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
 	cfg := net.ListenConfig{
 		KeepAlive: 90 * time.Second,
 	}
 
 	host, port := configuration.Host, configuration.Port
 
-	bindProto := ""
-	address := ""
-	// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
-	// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
-	// to pass the network as tcp4. Dual stack has produced some issues in container environments
-	// for those reasons we are using tcp4 or tcp6 explicitly.
-	if IsIPv4(host) {
-		bindProto = "tcp4"
-		address = fmt.Sprintf("%s:%d", host, port)
-	} else if IsIPv6(host) {
-		bindProto = "tcp6"
-		address = fmt.Sprintf("[%s]:%d", host, port)
+	var addrs []string
+	if net.ParseIP(host) == nil {
+		// Not an IP, resolve
+		var err error
+		addrs, err = net.LookupHost(host)
+		if err != nil {
+			return nil, fmt.Errorf("can't resolve host to listen on %s: %w", host, err)
+		}
+	} else {
+		addrs = append(addrs, host)
 	}
 
-	listener, err := cfg.Listen(context.Background(), bindProto, address)
-	if err != nil {
-		return nil, err
+	var listeners []net.Listener
+	for _, addr := range addrs {
+		bindProto := ""
+		address := ""
+		// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
+		// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
+		// to pass the network as tcp4. Dual stack has produced some issues in container environments
+		// for those reasons we are using tcp4 or tcp6 explicitly.
+		if IsIPv4(addr) {
+			bindProto = "tcp4"
+			address = addr
+		} else if IsIPv6(addr) {
+			// Filter out link-local addresses
+			if strings.HasPrefix(addr, "fe80:") {
+				continue
+			}
+			bindProto = "tcp6"
+			address = fmt.Sprintf("[%s]", addr)
+		} else {
+			panic(fmt.Errorf("%s doesn't look like an IPv4 nor an IPv6", addr))
+		}
+
+		toListen := fmt.Sprintf("%s:%d", address, port)
+		listener, err := cfg.Listen(context.Background(), bindProto, toListen)
+		if err != nil {
+			return nil, fmt.Errorf("error listening on %s: %w", toListen, err)
+		}
+
+		listeners = append(listeners, &proxyproto.Listener{
+			Listener: listener,
+		})
 	}
 
-	return &proxyproto.Listener{
-		Listener: listener,
-	}, nil
+	return listeners, nil
 }
 
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
@@ -498,30 +522,38 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}()
 	}
 
-	listener, err := n.newListener(nodeConfig.Api.Options.Listener)
+	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		return err
 	}
 
-	n.log.Info("listening on",
-		zap.String("addr", listener.Addr().String()),
-	)
+	g, _ := errgroup.WithContext(n.ctx)
 
-	if err := n.server.Serve(listener); err != nil {
-		if err == http.ErrServerClosed {
-			n.log.Debug("listener closed",
-				zap.String("addr", listener.Addr().String()),
+	for _, listener := range listeners {
+		l := listener
+		g.Go(func() error {
+			n.log.Info("listening on",
+				zap.String("addr", l.Addr().String()),
 			)
+
+			if err := n.server.Serve(l); err != nil {
+				if err == http.ErrServerClosed {
+					n.log.Debug("listener closed",
+						zap.String("addr", l.Addr().String()),
+					)
+					return nil
+				}
+				return err
+			}
 			return nil
-		}
-		return err
+		})
 	}
 
 	n.log.Debug("public node url",
 		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
-	return nil
+	return g.Wait()
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
@@ -644,18 +676,6 @@ func (n *Node) reloadFileConfig(filePath string) error {
 	n.configCh <- config
 
 	return nil
-}
-
-func uniqueStrings(slice []string) []string {
-	keys := make(map[string]bool)
-	var list []string
-	for _, entry := range slice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
 }
 
 func IsIPv4(address string) bool {
