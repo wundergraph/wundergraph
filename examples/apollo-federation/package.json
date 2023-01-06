@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "run-p -l start:services generate && run-p wundergraph start:nextjs open:browser",
+    "start": "run-p -l start:services generate:api && run-p wundergraph start:nextjs open:browser",
     "postinstall": "cp -n .env.example .env",
     "start:services": "cd federation && docker-compose up -d",
     "wait-on:services": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004",
