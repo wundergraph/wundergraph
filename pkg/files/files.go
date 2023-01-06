@@ -2,13 +2,14 @@ package files
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
 )
 
 const (
-	WunderGraphDirName = ".wundergraph"
+	WunderGraphConfigFilename = "wundergraph.config.ts"
 )
 
 func DirectoryExists(path string) bool {
@@ -26,39 +27,37 @@ func FileExists(filePath string) bool {
 	return true
 }
 
-func findWunderGraphDirInParent() (string, error) {
-	// Check if we already operate inside .wundergraph directory
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", fmt.Errorf("could not get your current working directory")
-	}
-
-	parentWunderGraphDir := path.Join(wd, "..", WunderGraphDirName)
-	if DirectoryExists(parentWunderGraphDir) {
-		return parentWunderGraphDir, nil
-	}
-
-	return "", fmt.Errorf("could not find .wundergraph directory")
-}
-
-// FindWunderGraphDir returns the absolute path to the .wundergraph directory.
-// If the wundergraphDir can't be found we try to find it in the parent directory.
-// If no directory is found we return an error.
+// FindWunderGraphDir returns the absolute path to the directory of the wundergraph.config.ts file.
 func FindWunderGraphDir(wundergraphDir string) (string, error) {
 	absWgDir, err := filepath.Abs(wundergraphDir)
 	if err != nil {
-		return "", fmt.Errorf("unable to get absolute path from .wundergraph dir: %w", err)
+		return "", fmt.Errorf("unable to get absolute path of %s dir: %w", wundergraphDir, err)
 	}
 
-	if !DirectoryExists(absWgDir) {
-		dir, err := findWunderGraphDirInParent()
-		if err != nil {
-			return "", fmt.Errorf(`unable to find .wundergraph dir: %w`, err)
-		}
-		return dir, nil
+	wgDir := ""
+
+	err = filepath.WalkDir(absWgDir,
+		func(path string, info os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if info.IsDir() && info.Name() == "node_modules" {
+				return filepath.SkipDir
+			}
+
+			if !info.IsDir() && info.Name() == WunderGraphConfigFilename {
+				wgDir = filepath.Dir(path)
+				return io.EOF
+			}
+			return nil
+		})
+
+	if err != nil && err != io.EOF {
+		return "", fmt.Errorf(`unable to find %s in %s or children: %w`, WunderGraphConfigFilename, wundergraphDir, err)
 	}
 
-	return absWgDir, nil
+	return wgDir, nil
 }
 
 // CodeFilePath returns the absolute path to the file and returns an error if the file does not exist.

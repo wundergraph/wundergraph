@@ -5,20 +5,18 @@
   "scripts": {
     "start": "npm run start:services && run-p dev wundergraph open",
     "start:services": "cd minio && ./setup.sh",
-    "postinstall": "cp -n .env.example .env",
-    "generate": "wunderctl generate --debug",
-    "wundergraph": "wunderctl up --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "build": "next build",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
     "dev": "next dev",
     "check": "tsc --noEmit",
     "cleanup": "cd minio && docker-compose down -v"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.7.0",
-    "@wundergraph/sdk": "^0.126.0",
+    "@wundergraph/nextjs": "^0.7.7",
+    "@wundergraph/sdk": "^0.130.2",
     "graphql": "^16.3.0",
-    "next": "^12.1.6",
+    "next": "^13.1.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "swr": "^2.0.0"

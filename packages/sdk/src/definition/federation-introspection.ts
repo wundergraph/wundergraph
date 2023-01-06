@@ -1,27 +1,14 @@
-import { DocumentNode, GraphQLSchema } from 'graphql';
+import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
 import { resolveVariable } from '../configure/variables';
-import { parse } from 'graphql/index';
 import { mergeApis } from './merge';
 import { introspectWithCache } from './introspection-cache';
 import { introspectGraphql, resolveGraphqlIntrospectionHeaders } from './graphql-introspection';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
-
-export const isFederationService = (schema: GraphQLSchema): boolean => {
-	const queryType = schema.getQueryType();
-	if (queryType === undefined || queryType === null) {
-		return false;
-	}
-	const fields = queryType.getFields();
-	if (fields === undefined) {
-		return false;
-	}
-	return Object.keys(fields).indexOf('_service') !== -1;
-};
 
 export const fetchFederationServiceSDL = async (
 	url: string,
@@ -93,6 +80,7 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 				}
 				const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
+				// upstream.url is truthy at this point, no need to check
 				schema = await fetchFederationServiceSDL(resolveVariable(upstream.url), introspectionHeaders, {
 					apiNamespace: introspection.apiNamespace,
 					upstreamName: name,
