@@ -383,7 +383,8 @@ func (s *S3UploadClient) handlePart(ctx context.Context, r *http.Request, part *
 	defer part.Close()
 
 	info, err := s.uploadToS3(ctx, r, part)
-	// Run PostUpload first
+	// Run PostUpload first, since it should always be ran even if the
+	// upload fails.
 	if err := s.postUpload(ctx, r, part, info, err); err != nil {
 		return nil, err
 	}
