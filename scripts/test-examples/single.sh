@@ -87,9 +87,6 @@ else
     sleep 1
 fi
 
-# Generate WunderGraph files
-npm run build &
-
 # Wait for code generation to complete
 while ! test -f .wundergraph/generated/bundle/config.js; do
     sleep 0.1
@@ -114,7 +111,7 @@ kill_with_children ${pid}
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
-	echo "Cleaning up"
+    echo "Cleaning up"
     npm run cleanup
 fi
 
