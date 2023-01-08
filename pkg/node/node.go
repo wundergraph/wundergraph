@@ -306,7 +306,7 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 		}
 
 		toListen := fmt.Sprintf("%s:%d", address, port)
-		listener, err := cfg.Listen(context.Background(), bindProto, toListen)
+		listener, err := cfg.Listen(n.ctx, bindProto, toListen)
 		if err != nil {
 			return nil, fmt.Errorf("error listening on %s: %w", toListen, err)
 		}
