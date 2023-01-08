@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -107,7 +107,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		opts[i](&options)
 	}
 
-	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
