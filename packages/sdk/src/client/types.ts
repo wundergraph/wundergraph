@@ -24,12 +24,18 @@ export interface ClientOperation {
 	requiresAuthentication: boolean;
 }
 
+export interface S3ProviderDefinition {
+	[provider: string]: {
+		[profile: string]: object;
+	};
+}
+
 export interface OperationsDefinition<
 	Queries extends OperationDefinition = OperationDefinition,
 	Mutations extends OperationDefinition = OperationDefinition,
 	Subscriptions extends OperationDefinition = OperationDefinition,
 	UserRole extends string = string,
-	S3Provider extends string = string,
+	S3Provider extends S3ProviderDefinition = S3ProviderDefinition,
 	AuthProvider extends string = string
 > {
 	user: User<UserRole>;
@@ -111,17 +117,17 @@ export interface SubscriptionResult {
 	data: any;
 }
 
-export interface UploadRequestOptions<
-	ProviderName extends string = string,
-	ProfileName extends string = string,
-	Meta extends any | undefined = any | undefined
-> {
+export type UploadRequestOptions<
+	ProviderName extends string = any,
+	ProfileName extends string = any,
+	Meta extends object = object
+> = {
 	provider: ProviderName;
 	files: FileList;
 	abortSignal?: AbortSignal;
 	profile?: ProfileName;
 	meta?: Meta;
-}
+};
 
 export interface UploadResponse {
 	fileKeys: string[];

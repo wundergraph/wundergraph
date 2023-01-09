@@ -136,26 +136,31 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 	(options?: UseUserOptions<Operations['user']>): SWRResponse<Operations['user'], GraphQLResponseError>;
 };
 
+export type UseUploadOptions = Omit<
+	SWRMutationConfiguration<string[], GraphQLResponseError, UploadRequestOptions, 'uploadFiles'>,
+	'fetcher'
+>;
+
 export type UseUploadHook<Operations extends OperationsDefinition> = {
-	(
-		config?: Omit<
-			SWRMutationConfiguration<
-				string[],
-				GraphQLResponseError,
-				UploadRequestOptions<Operations['s3Provider']>,
-				'uploadFiles'
-			>,
-			'fetcher'
-		>
-	): Omit<
-		SWRMutationResponse<string[], GraphQLResponseError, UploadRequestOptions<Operations['s3Provider']>>,
+	(config?: UseUploadOptions): Omit<
+		SWRMutationResponse<string[], GraphQLResponseError, UploadRequestOptions>,
 		'trigger'
 	> & {
-		upload: SWRMutationResponse<
-			string[],
-			GraphQLResponseError,
-			UploadRequestOptions<Operations['s3Provider']>,
-			'uploadFiles'
-		>['trigger'];
+		upload: <
+			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName],
+				string
+			>,
+			Meta extends Operations['s3Provider'][ProviderName][ProfileName] = Operations['s3Provider'][ProviderName][ProfileName]
+		>(
+			options: {
+				files: FileList;
+				provider: ProviderName;
+				profile?: ProfileName;
+				meta?: Meta;
+			},
+			config?: UseUploadOptions
+		) => Promise<string[]>;
 	};
 };

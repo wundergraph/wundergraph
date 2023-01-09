@@ -6,7 +6,7 @@ import { useFileUpload, withWunderGraph } from '../components/generated/nextjs';
 const UploadPage: NextPage = () => {
 	const [files, setFiles] = useState<FileList>();
 	const [data, setData] = useState<string[]>([]);
-	const { upload } = useFileUpload({});
+	const { upload } = useFileUpload();
 	const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (e.target.files) setFiles(e.target.files);
 	};
@@ -18,6 +18,10 @@ const UploadPage: NextPage = () => {
 		try {
 			const result = await upload({
 				provider: 'minio',
+				profile: 'coverPicture',
+				meta: {
+					postId: 'abcdefg',
+				},
 				files,
 			});
 			result && setData(result);

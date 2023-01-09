@@ -41,7 +41,7 @@ export class TypeScriptClient implements Template {
 					_uploadProfileTypeDefinitions.push(typeDefinition);
 					_uploadProfileTypeNames[provider.name][key] = typeName;
 				} else {
-					_uploadProfileTypeNames[provider.name][key] = 'any | undefined';
+					_uploadProfileTypeNames[provider.name][key] = 'object';
 				}
 			}
 		}

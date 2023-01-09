@@ -29,19 +29,15 @@ export interface UploadResponse { key: string }
 
 {{/each}}
 
-type S3Providers =
+type S3Providers ={
 	{{#each s3Providers}}
-	| {
-		name: "{{name}}";
-		profiles:
+	{{name}}: {
 		{{#each uploadProfiles}}
-		| {
-			name: "{{@key}}";
-			meta: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}};
-		}
+			{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}}
 		{{/each}}
 	}
 	{{/each}}
+}
 
 const S3UploadProviderData = {
 	{{#each s3Providers }}
@@ -124,13 +120,19 @@ export class WunderGraphClient extends Client {
 	}
 	{{#if hasS3Providers}}
 	public async uploadFiles<
-		TProviderName extends S3Providers['name'],
-		TProfileName extends Extract<S3Providers, { name: TProviderName }>['profiles']['name'],
-		TProfile = Extract<Extract<S3Providers, { name: TProviderName }>['profiles'], {name: TProfileName}>
+		ProviderName extends Extract<keyof S3Providers, string>,
+		ProfileName extends Extract<keyof S3Providers[ProviderName], string> = Extract<
+			keyof S3Providers[ProviderName],
+			string
+		>,
+		Meta extends Extract<S3Providers[ProviderName][ProfileName], object> = Extract<
+			S3Providers[ProviderName][ProfileName],
+			object
+		>
 	>(
-		config: TProfile extends {meta: infer TMeta} ? UploadRequestOptions<TProviderName, TProfileName, TMeta> : never
+		config: ProviderName extends string ? UploadRequestOptions<ProviderName, ProfileName, Meta> : UploadRequestOptions
 	) {
-		const profile = config.profile ? S3UploadProviderData[config.provider as string][config.profile as string] : undefined;
+		const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
 		return super.uploadFiles(config, profile);
 	}
 	{{/if}}
@@ -192,5 +194,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Providers}}, Extract<keyof typeof S3UploadProfileData, string>{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Providers}}, S3Providers{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;
