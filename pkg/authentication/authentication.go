@@ -48,15 +48,17 @@ type UserLoadConfig struct {
 	issuer           string
 }
 
-func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User) error {
+func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
-	fromCache, exists := u.cache.Get(token)
-	if exists {
-		*user = fromCache.(User)
-		u.log.Debug("user loaded from cache",
-			zap.String("sub", user.UserID),
-		)
-		return nil
+	if (!revalidate) {
+		fromCache, exists := u.cache.Get(token)
+		if exists {
+			*user = fromCache.(User)
+			u.log.Debug("user loaded from cache",
+				zap.String("sub", user.UserID),
+			)
+			return nil
+		}
 	}
 
 	var tempUser User
@@ -216,12 +218,13 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 			return fmt.Errorf("invalid authorization Header")
 		}
 		trimmed := strings.TrimPrefix(authorizationHeader, "Bearer ")
+		revalidate := r.URL.Query().Get("revalidate") == "true"
 		for i := range loader.userLoadConfigs {
 			token, err := jwt.Parse(trimmed, loader.userLoadConfigs[i].jwks.Keyfunc)
 			if err == nil && !token.Valid {
 				continue
 			}
-			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u)
+			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u, revalidate)
 			if err == nil {
 				return nil
 			}
