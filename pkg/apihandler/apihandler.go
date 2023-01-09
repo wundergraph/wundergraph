@@ -439,17 +439,14 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
 	if shared.Report.HasErrors() {
-		return fmt.Errorf(ErrMsgOperationParseFailed, shared.Report)
+		return shared.Report
 	}
 
 	shared.Normalizer.NormalizeNamedOperation(shared.Doc, r.definition, []byte(operation.Name), shared.Report)
-	if shared.Report.HasErrors() {
-		return fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
-	}
-	
+
 	state := shared.Validation.Validate(shared.Doc, r.definition, shared.Report)
 	if state != astvalidation.Valid {
-		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
+		return shared.Report
 	}
 
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
@@ -847,9 +844,6 @@ func (h *GraphQLHandler) preparePlan(operationHash uint64, requestOperationName 
 			shared.Normalizer.NormalizeOperation(shared.Doc, h.definition, shared.Report)
 		} else {
 			shared.Normalizer.NormalizeNamedOperation(shared.Doc, h.definition, requestOperationName, shared.Report)
-		}
-		if shared.Report.HasErrors() {
-			return nil, fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
 		}
 
 		state := shared.Validation.Validate(shared.Doc, h.definition, shared.Report)

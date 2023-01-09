@@ -115,17 +115,14 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
 	if shared.Report.HasErrors() {
-		return fmt.Errorf(ErrMsgOperationParseFailed, shared.Report)
+		return shared.Report
 	}
 
 	shared.Normalizer.NormalizeNamedOperation(shared.Doc, i.definition, []byte(operation.Name), shared.Report)
-	if shared.Report.HasErrors() {
-		return fmt.Errorf(ErrMsgOperationNormalizationFailed, shared.Report)
-	}
-	
+
 	state := shared.Validation.Validate(shared.Doc, i.definition, shared.Report)
 	if state != astvalidation.Valid {
-		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
+		return shared.Report
 	}
 
 	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
