@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.130.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.130.1...@wundergraph/sdk@0.130.2) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.130.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.130.0...@wundergraph/sdk@0.130.1) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.130.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.129.0...@wundergraph/sdk@0.130.0) (2022-12-29)
+
+### ⚠ BREAKING CHANGES
+
+* **node:** restructure server imports (#497)
+
+### Features
+
+* **node:** restructure server imports ([#497](https://github.com/wundergraph/wundergraph/issues/497)) ([ac277de](https://github.com/wundergraph/wundergraph/commit/ac277dec5c06bb761d6acb026248dedd3d1f59c0)) (@StarpTech)
+
+### Bug Fixes
+
+* use 0.0.0.0 for test server ([#499](https://github.com/wundergraph/wundergraph/issues/499)) ([126778b](https://github.com/wundergraph/wundergraph/commit/126778b88d3e546be1870e4bfb7c8e9d429f3fe1)) (@spetrunin)
+
+## [0.129.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.128.0...@wundergraph/sdk@0.129.0) (2022-12-28)
+
+### Features
+
+* add [@remove](https://github.com/remove)NullVariables directives ([#477](https://github.com/wundergraph/wundergraph/issues/477)) ([0f4398b](https://github.com/wundergraph/wundergraph/commit/0f4398b1509b5939e0c4b5824ae2b64c0646e101)) (@spetrunin)
+
+## [0.128.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.127.0...@wundergraph/sdk@0.128.0) (2022-12-21)
+
+### Features
+
+* better error messages when resolving undefined variables ([#419](https://github.com/wundergraph/wundergraph/issues/419)) ([aa0dd65](https://github.com/wundergraph/wundergraph/commit/aa0dd65cb6fc837cf4de962e915bb1c541d18418)), closes [#262](https://github.com/wundergraph/wundergraph/issues/262) (@fiam)
+
 ## [0.127.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.126.0...@wundergraph/sdk@0.127.0) (2022-12-20)
 
 ### Features

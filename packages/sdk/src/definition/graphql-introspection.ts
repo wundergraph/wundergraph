@@ -1,4 +1,4 @@
-import { fetchFederationServiceSDL, isFederationService } from './federation-introspection';
+import { fetchFederationServiceSDL } from './federation-introspection';
 import { configuration } from '../graphql/configuration';
 import {
 	buildClientSchema,
@@ -33,7 +33,7 @@ import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
-import transformSchema from '../transformations/shema';
+import transformSchema from '../transformations/schema';
 
 class MissingKeyError extends Error {
 	constructor(private key: string, private introspection: GraphQLIntrospection) {
@@ -69,7 +69,9 @@ export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HT
 	return baseHeaders;
 };
 
-export const introspectGraphql = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
+export const introspectGraphql = async (
+	introspection: Omit<GraphQLIntrospection, 'isFederation'>
+): Promise<GraphQLApi> => {
 	return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
 		const headersBuilder = new HeadersBuilder();
 		const introspectionHeadersBuilder = new HeadersBuilder();
@@ -87,7 +89,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 
 		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
 		schema = lexicographicSortSchema(schema);
-		const federationEnabled = isFederationService(schema);
+		const federationEnabled = introspection.isFederation || false;
 		const upstreamSchema = cleanupSchema(schema, introspection);
 		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
 		let serviceSDL: string | undefined;

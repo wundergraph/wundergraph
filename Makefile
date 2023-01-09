@@ -59,7 +59,8 @@ wunderctl: build
 run:
 	cd cmd/wunderctl && go run main.go
 
+# CGO_ENABLED is set to 0 to avoid linking to libc. This is required to run the binary on alpine.
 install:
-	cd cmd/wunderctl && go install
+	cd cmd/wunderctl && CGO_ENABLED=0 go install
 
 .PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio

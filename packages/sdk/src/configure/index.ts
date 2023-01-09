@@ -9,7 +9,7 @@ import {
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
-import { mergeApis, removeBaseSchema } from '../definition/merge';
+import { mergeApis } from '../definition/merge';
 import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
 import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
@@ -41,34 +41,25 @@ import {
 	parse,
 	parseType,
 	print,
-	stripIgnoredCharacters,
 	visit,
 } from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
-import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
-import { wunderctlExec } from '../wunderctlexec';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
 	AuthenticationResponse,
+	ResolvedServerOptions,
 	WunderGraphHooksAndServerConfig,
 	WunderGraphUser,
-} from '../middleware/types';
+} from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
-import {
-	NodeOptions,
-	ResolvedNodeOptions,
-	ResolvedServerOptions,
-	resolveNodeOptions,
-	resolveServerOptions,
-	serverOptionsWithDefaults,
-} from './options';
+import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { InternalClient } from '../middleware/internal-client';
 import { Logger } from '../logger';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -144,68 +135,6 @@ export interface DotGraphQLConfig {
 	hasDotWunderGraphDirectory?: boolean;
 }
 
-export enum HooksConfigurationOperationType {
-	Queries = 'queries',
-	Mutations = 'mutations',
-	Subscriptions = 'subscriptions',
-}
-
-export interface OperationHookFunction {
-	(...args: any[]): Promise<any>;
-}
-
-export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
-	mockResolve?: AsyncFn;
-	preResolve?: AsyncFn;
-	postResolve?: AsyncFn;
-	mutatingPreResolve?: AsyncFn;
-	mutatingPostResolve?: AsyncFn;
-	customResolve?: AsyncFn;
-}
-
-// Any is used here because the exact type of the hooks is not known at compile time
-// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
-export type OperationHooks = Record<string, any>;
-
-export interface HooksConfiguration<
-	Queries extends OperationHooks = OperationHooks,
-	Mutations extends OperationHooks = OperationHooks,
-	Subscriptions extends OperationHooks = OperationHooks,
-	User extends WunderGraphUser = WunderGraphUser,
-	// Any is used here because the exact type of the base client is not known at compile time
-	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
-	IC extends InternalClient = InternalClient<any, any>
-> {
-	global?: {
-		httpTransport?: {
-			onOriginRequest?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-			onOriginResponse?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-		};
-		wsTransport?: {
-			onConnectionInit?: {
-				hook: OperationHookFunction;
-				enableForDataSources: string[];
-			};
-		};
-	};
-	authentication?: {
-		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		revalidate?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		postLogout?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-	};
-	[HooksConfigurationOperationType.Queries]?: Queries;
-	[HooksConfigurationOperationType.Mutations]?: Mutations;
-	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
-}
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;
@@ -323,13 +252,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	};
 
 	const graphqlApis = config.server?.graphqlServers?.map((gs) => {
-		const serverPath = customGqlServerMountPath(gs.serverName);
-
 		return introspectGraphqlServer({
 			skipRenameRootFields: gs.skipRenameRootFields,
 			url: '',
 			baseUrl: serverOptions.serverUrl,
-			path: serverPath,
+			path: gs.routeUrl,
 			apiNamespace: gs.apiNamespace,
 			schema: gs.schema,
 		});
@@ -1091,10 +1018,6 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	}
 
 	return out;
-};
-
-export const customGqlServerMountPath = (name: string): string => {
-	return `/gqls/${name}/graphql`;
 };
 
 const trimTrailingSlash = (url: string): string => {

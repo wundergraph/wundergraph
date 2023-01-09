@@ -6,9 +6,10 @@ Check schema extension configuration [doc](https://docs.wundergraph.com/docs/wun
 
 #### Getting started
 
-```shell
-docker-compose up
+1. Copy the `.env.example` file to `.env` and fill in the required values.
+2. Install the dependencies and run the complete example in one command:
 
+```shell
 npm install && npm start
 ```
 

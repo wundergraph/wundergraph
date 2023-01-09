@@ -4,6 +4,8 @@ The best way to start with Wundergraph is by using `create-wundergraph-app`. Thi
 
 ## Local Development
 
+The project has an environment variable called GITHUB_TOKEN that can be used to increase the rate limit of GitHub APIs.
+
 ```shell
 pnpm install
 pnpm build
