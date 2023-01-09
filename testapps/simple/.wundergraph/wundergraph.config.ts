@@ -19,18 +19,12 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins:
-			process.env.NODE_ENV === 'production'
-				? [
-						// change this before deploying to production to the actual domain where you're deploying your app
-						'http://localhost:3000',
-				  ]
-				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
+		allowedOrigins: ['http://localhost:9991', 'http://127.0.0.1:9991'],
 	},
 	dotGraphQLConfig: {
 		hasDotWunderGraphDirectory: false,
 	},
 	security: {
-		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined,
+		enableGraphQLEndpoint: true,
 	},
 });
