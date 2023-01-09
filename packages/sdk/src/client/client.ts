@@ -19,6 +19,9 @@ import { ResponseError } from './ResponseError';
 
 // https://graphql.org/learn/serving-over-http/
 
+interface LogoutResponse {
+	redirect?: string;
+}
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -404,6 +407,20 @@ export class Client {
 			method: 'GET',
 		});
 
-		return response.ok;
+		if (!response.ok) {
+			return false;
+		}
+
+		if (response.headers.get('Content-Type') === 'application/json') {
+			const data = (await response.json()) as LogoutResponse;
+			if (data.redirect) {
+				if (options?.redirect) {
+					return options.redirect(data.redirect);
+				}
+				window.location.href = data.redirect;
+			}
+		}
+
+		return true;
 	}
 }

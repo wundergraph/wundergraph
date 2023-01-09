@@ -764,9 +764,10 @@ func (_ *CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserLogoutHandler struct {
-	InsecureCookies                  bool
-	OpenIDConnectIssuersToLogoutURLs map[string]string
-	Hooks                            Hooks
+	InsecureCookies bool
+	OpenIDProviders *OpenIDConnectProviderSet
+	Hooks           Hooks
+	Log             *zap.Logger
 }
 
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -776,37 +777,45 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.Hooks.handlePostLogout(r.Context(), user)
-	logoutOpenIDConnectProvider := r.URL.Query().Has("logout_openid_connect_provider")
-	if !logoutOpenIDConnectProvider {
-		return
+	if strings.ToLower(r.URL.Query().Get("logout_openid_connect_provider")) == "true" {
+		if err := u.logoutFromProvider(w, r, user); err != nil {
+			if u.Log != nil {
+				u.Log.Warn("could not disconnect user from OIDC provider", zap.Error(err))
+			}
+		}
 	}
+}
+
+func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Request, user *User) error {
 	if user.ProviderName != "oidc" {
-		return
+		return fmt.Errorf("user provider %q is not OpenIDConnect", user.ProviderName)
 	}
 	if user.IdToken == nil {
-		return
+		return errors.New("user has no token")
 	}
 	issuer, err := jsonparser.GetString(user.IdToken, "iss")
-	if err != nil || issuer == "" {
-		return
-	}
-	logoutURL, ok := u.OpenIDConnectIssuersToLogoutURLs[issuer]
-	if !ok {
-		return
-	}
-	req, err := http.NewRequestWithContext(r.Context(), "GET", logoutURL, nil)
 	if err != nil {
-		return
+		return fmt.Errorf("error retrieving issuer from token: %w", err)
 	}
-	q := req.URL.Query()
-	q.Set("id_token_hint", user.RawIDToken)
-	req.URL.RawQuery = q.Encode()
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	client := &http.Client{
-		Timeout: time.Second * 10,
+	if issuer == "" {
+		return errors.New("can't find issuer in token")
 	}
-	_, _ = client.Do(req)
-	// we can safely ignore the outcome
+
+	provider := u.OpenIDProviders.ByIssuer(issuer)
+	if provider == nil {
+		return fmt.Errorf("no provider registered for issuer %s", issuer)
+
+	}
+	result, err := provider.Disconnect(r.Context(), user)
+	if err != nil {
+		return err
+	}
+	if result.RequiresClientCooperation() {
+		w.Header().Set("Content-Type", "application/json")
+		enc := json.NewEncoder(w)
+		return enc.Encode(&result)
+	}
+	return nil
 }
 
 type CSRFErrorHandler struct {

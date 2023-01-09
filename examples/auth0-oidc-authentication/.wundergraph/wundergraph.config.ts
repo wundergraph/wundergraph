@@ -31,7 +31,7 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: ['http://localhost:3003'],
+		allowedOrigins: ['http://localhost:3000'],
 	},
 	authentication: {
 		cookieBased: {
@@ -44,7 +44,7 @@ configureWunderGraphApplication({
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:3003'],
+			authorizedRedirectUris: ['http://localhost:3000'],
 		},
 	},
 	security: {

@@ -2,11 +2,14 @@ package authentication
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -312,4 +315,186 @@ func (h *OpenIDConnectCookieHandler) createProvider(ctx context.Context, config 
 		}
 	}
 	return provider
+}
+
+type openIDConnectConfiguration struct {
+	Issuer                string `json:"issuer"`
+	AuthorizationEndpoint string `json:"authorization_endpoint"`
+	TokenEndpoint         string `json:"token_endpoint"`
+	UserinfoEndpoint      string `json:"userinfo_endpoint"`
+	JwksUri               string `json:"jwks_uri"`
+	EndSessionEndpoint    string `json:"end_session_endpoint"`
+}
+
+type openIDConnectConfigurationMissingFieldError string
+
+func (e openIDConnectConfigurationMissingFieldError) Error() string {
+	return fmt.Sprintf("missing field %q", string(e))
+}
+
+func (c *openIDConnectConfiguration) Validate() error {
+	// See https://openid.net/specs/openid-connect-discovery-1_0.html
+	//
+	// Note that our implementation uses userinfo_endpoint and hence we
+	// make it required, but can work without jwks_uri so we make it optional
+	if c.Issuer == "" {
+		return openIDConnectConfigurationMissingFieldError("issuer")
+	}
+	if c.AuthorizationEndpoint == "" {
+		return openIDConnectConfigurationMissingFieldError("authorization_endpoint")
+	}
+	if c.TokenEndpoint == "" {
+		// TODO: This might be optional with Implicit Flow?
+		return openIDConnectConfigurationMissingFieldError("token_endpoint")
+	}
+	if c.UserinfoEndpoint == "" {
+		return openIDConnectConfigurationMissingFieldError("userinfo_endpoint")
+	}
+	return nil
+}
+
+// openIDDisconnectFallback implements session disconnection for providers that
+// don't support end_session_endpoint (like e.g. Auth0)
+type openIDDisconnectFallback func(ctx context.Context, p *OpenIDConnectProvider, user *User) (*OpenIDDisconnectResult, error)
+
+func auth0DisconnectFallback(ctx context.Context, p *OpenIDConnectProvider, user *User) (*OpenIDDisconnectResult, error) {
+	return &OpenIDDisconnectResult{
+		Redirect: fmt.Sprintf("%sv2/logout?client_id=%s", p.config.Issuer, p.clientID),
+	}, nil
+}
+
+type OpenIDDisconnectResult struct {
+	// Redirect indicates an URL that must be visited by the client to complete the logout
+	Redirect string `json:"redirect,omitempty"`
+}
+
+func (r *OpenIDDisconnectResult) RequiresClientCooperation() bool {
+	return r != nil && r.Redirect != ""
+}
+
+type OpenIDConnectProvider struct {
+	clientID           string
+	clientSecret       string
+	config             *openIDConnectConfiguration
+	httpClient         *http.Client
+	disconnectFallback openIDDisconnectFallback
+}
+
+func NewOpenIDConnectProvider(issuer string, clientID string, clientSecret string, httpClient *http.Client, log *zap.Logger) (*OpenIDConnectProvider, error) {
+	if issuer == "" {
+		return nil, errors.New("OIDC issuer must not be empty")
+	}
+	if clientID == "" {
+		return nil, errors.New("OIDC client ID must not be empty")
+	}
+	if clientSecret == "" {
+		return nil, errors.New("OIDC client secret must not be empty")
+	}
+
+	issuerURL, err := url.ParseRequestURI(issuer)
+	if err != nil {
+		return nil, fmt.Errorf("OIDC issuer must be a valid URL: %w", err)
+	}
+
+	issuer = strings.TrimSuffix(issuer, "/")
+
+	introspectionURL := issuer + "/.well-known/openid-configuration"
+	req, err := http.NewRequest(http.MethodGet, introspectionURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("could not request OIDC configuration: %w", err)
+	}
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("could not fetch OIDC configuration: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("OIDC configuration returned an HTTP error code: %d", resp.StatusCode)
+	}
+	defer resp.Body.Close()
+
+	dec := json.NewDecoder(resp.Body)
+	var config openIDConnectConfiguration
+	if err := dec.Decode(&config); err != nil {
+		return nil, fmt.Errorf("could not decode OIDC configuration: %w", err)
+	}
+	if err := config.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid OIDC configuration: %w", err)
+	}
+
+	var disconnectFallback openIDDisconnectFallback
+	if config.EndSessionEndpoint == "" {
+		switch {
+		case strings.HasSuffix(issuerURL.Host, ".auth0.com"):
+			disconnectFallback = auth0DisconnectFallback
+		default:
+			if log != nil {
+				log.Debug("issuer doesn't support end_session_endpoint", zap.String("issuer", issuer))
+			}
+		}
+	}
+	return &OpenIDConnectProvider{
+		clientID:           clientID,
+		clientSecret:       clientSecret,
+		config:             &config,
+		httpClient:         httpClient,
+		disconnectFallback: disconnectFallback,
+	}, nil
+}
+
+func (p *OpenIDConnectProvider) Disconnect(ctx context.Context, user *User) (*OpenIDDisconnectResult, error) {
+	if p.disconnectFallback != nil {
+		return p.disconnectFallback(ctx, p, user)
+	}
+	logoutURL := p.config.EndSessionEndpoint
+	if logoutURL == "" {
+		return nil, errors.New("no end_session_endpoint")
+	}
+	req, err := http.NewRequestWithContext(ctx, "GET", logoutURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	q := req.URL.Query()
+	q.Set("id_token_hint", user.RawIDToken)
+	req.URL.RawQuery = q.Encode()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return nil, nil
+}
+
+type OpenIDConnectProviderSet struct {
+	mu sync.Mutex
+	m  map[string]*OpenIDConnectProvider
+}
+
+func (s *OpenIDConnectProviderSet) Add(id string, p *OpenIDConnectProvider) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.m == nil {
+		s.m = make(map[string]*OpenIDConnectProvider)
+	}
+
+	if s.m[id] != nil {
+		return fmt.Errorf("duplicate OIDC provider ID %q", id)
+
+	}
+	s.m[id] = p
+	return nil
+}
+
+func (s *OpenIDConnectProviderSet) ByIssuer(issuer string) *OpenIDConnectProvider {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, provider := range s.m {
+		if provider.config.Issuer == issuer {
+			return provider
+		}
+	}
+
+	return nil
 }
