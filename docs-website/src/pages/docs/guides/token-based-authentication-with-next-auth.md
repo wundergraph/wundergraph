@@ -29,7 +29,9 @@ Add the following WunderGraph commands to your package.json
 {
   "scripts": {
     "wundergraph": "wunderctl up",
-    "generate": "wunderctl generate"
+    "generate": "wunderctl generate",
+    "build": "npm run generate && npm run build:next",
+    "build:next": "next build"
   }
 }
 ```
@@ -292,10 +294,18 @@ Run WunderGraph:
 npm run wundergraph
 ```
 
-Now you can run the application and log in using the NextAuth.js login page. After you are logged in you should see the list of SpaceX dragons.
+Now you can run the application and log in using the NextAuth.js login page. After you are logged in you should see the list of SpaceX dragons. 👏
+
+## What's next?
+
+We now have a basic setup that works on localhost. In order to run this on production you should configure environment variables for all endpoints used in this example.
 
 ## Conclusion
 
 In this guide we have shown you how to use WunderGraph with NextAuth.js. We have added WunderGraph to an existing Next.js application and use NextAuth as the authentication provider in front of our WunderGraph API.
 
 The technique we used to forward the NextAuth session token to WunderGraph can be used to forward any kind of authentication token to WunderGraph. This can be useful if you want to use WunderGraph with other authentication providers that don't support OIDC. For example Gotrue (Netlify Auth), Supabase Auth, or any other hosted authentication service that supports JSON Web Tokens.
+
+## Resources
+
+- [NextAuth Documentation](https://next-auth.js.org/getting-started/introduction)
