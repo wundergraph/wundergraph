@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -57,13 +57,13 @@ func startWunderGraphServer(ctx context.Context) error {
 		return err
 	}
 
-	configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	serverScriptFile := path.Join("generated", "bundle", "server.js")
-	serverExecutablePath := path.Join(wunderGraphDir, serverScriptFile)
+	serverScriptFile := filepath.Join("generated", "bundle", "server.js")
+	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
 	if !files.FileExists(serverExecutablePath) {
 		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 	}
