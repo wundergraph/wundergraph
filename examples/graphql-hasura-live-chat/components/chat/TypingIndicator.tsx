@@ -13,9 +13,7 @@ function TypingIndicator(props) {
 	}
 
 	return (
-		<div>
-			{data?.hasura_user_typing?.length === 0 ? ' ' : `${data.hasura_user_typing[0].username} is typing ...`}
-		</div>
+		<div>{data?.hasura_user_typing?.length === 0 ? ' ' : `${data.hasura_user_typing[0].username} is typing ...`}</div>
 	);
 }
 
