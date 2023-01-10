@@ -367,7 +367,11 @@ func (s *S3UploadClient) postUpload(ctx context.Context, r *http.Request, part *
 
 	if profile != nil && profile.UsePostUploadHook {
 		var buf []byte
-		data, err := hookData(buf, r, part, info.Size, uploadError)
+		fileSize := int64(-1)
+		if info != nil {
+			fileSize = info.Size
+		}
+		data, err := hookData(buf, r, part, fileSize, uploadError)
 		if err != nil {
 			return fmt.Errorf("error preparing postUpload hook data: %w", err)
 		}
