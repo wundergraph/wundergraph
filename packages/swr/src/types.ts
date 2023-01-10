@@ -154,12 +154,7 @@ export type UseUploadHook<Operations extends OperationsDefinition> = {
 			>,
 			Meta extends Operations['s3Provider'][ProviderName][ProfileName] = Operations['s3Provider'][ProviderName][ProfileName]
 		>(
-			options: {
-				files: FileList;
-				provider: ProviderName;
-				profile?: ProfileName;
-				meta?: Meta;
-			},
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
 			config?: UseUploadOptions
 		) => Promise<string[]>;
 	};
