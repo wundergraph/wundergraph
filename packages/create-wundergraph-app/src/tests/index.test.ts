@@ -12,7 +12,7 @@ test('The command should clone the repository using example name and github link
 	const secondRepoName = `tempRepository2-${Date.now()}`;
 	const firstTestResponse = await getRepository({
 		exampleName: 'caching',
-		projectName: firstRepoName,
+		projectNameForTests: firstRepoName,
 		directoryPath: tempDirectory,
 	});
 	expect(firstTestResponse).toEqual('success');
@@ -32,7 +32,7 @@ test('The command should clone the repository using example name and github link
 
 	const secondTestResponse = await getRepository({
 		githubLink: 'https://github.com/wundergraph/wundergraph/tree/main/examples/caching',
-		projectName: secondRepoName,
+		projectNameForTests: secondRepoName,
 		directoryPath: tempDirectory,
 	});
 	expect(secondTestResponse).toEqual('success');
