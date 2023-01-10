@@ -22,7 +22,7 @@ out
 .DS_Store
 .eslintcache
 *.logs
-examples/**/*lock*
+#examples/**/*lock*
 /wunderctl
 scripts/mc
 
