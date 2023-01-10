@@ -143,21 +143,38 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 	(options?: UseUserOptions<Operations['user']>): UseQueryResult<Operations['user'], GraphQLResponseError>;
 };
 
+export type UseUploadOptions = Omit<
+	UseTanstackMutationOptions<string[], GraphQLResponseError, UploadRequestOptions, 'uploadFiles'>,
+	'fetcher'
+>;
+
 export type UseUploadHook<Operations extends OperationsDefinition> = {
-	(
-		options?: Omit<
-			UseTanstackMutationOptions<string[], GraphQLResponseError, UploadRequestOptions<Operations['s3Provider']>>,
-			'fetcher'
-		>
-	): Omit<
-		UseTanstackMutationOptions<string[], GraphQLResponseError, UploadRequestOptions<Operations['s3Provider']>>,
+	(options?: UseUploadOptions): Omit<
+		UseTanstackMutationOptions<string[], GraphQLResponseError, UploadRequestOptions>,
 		'mutate'
 	> & {
-		upload: UseMutationResult<string[], GraphQLResponseError, UploadRequestOptions<Operations['s3Provider']>>['mutate'];
-		uploadAsync: UseMutationResult<
-			string[],
-			GraphQLResponseError,
-			UploadRequestOptions<Operations['s3Provider']>
-		>['mutateAsync'];
+		upload: <
+			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName],
+				string
+			>,
+			Meta extends Operations['s3Provider'][ProviderName][ProfileName] = Operations['s3Provider'][ProviderName][ProfileName]
+		>(
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
+			config?: UseUploadOptions
+		) => Promise<string[]>;
+
+		uploadAsync: <
+			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName],
+				string
+			>,
+			Meta extends Operations['s3Provider'][ProviderName][ProfileName] = Operations['s3Provider'][ProviderName][ProfileName]
+		>(
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
+			config?: UseUploadOptions
+		) => Promise<string[]>;
 	};
 };
