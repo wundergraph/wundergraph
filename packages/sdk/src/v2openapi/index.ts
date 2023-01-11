@@ -222,6 +222,8 @@ class RESTApiBuilder {
 			RequestTimeoutSeconds: this.introspection.requestTimeoutSeconds ?? 0,
 		});
 
+		const isJsonResponse = Object.keys(operationObject.responses).length === 0;
+
 		this.fields.push({
 			typeName: parentType,
 			fieldName: fieldName,
@@ -229,9 +231,10 @@ class RESTApiBuilder {
 			argumentsConfiguration: [],
 			requiresFields: [],
 			path: [],
-			unescapeResponseJson: false,
+			unescapeResponseJson: isJsonResponse,
 		});
-		if (Object.keys(operationObject.responses).length === 0) {
+
+		if (isJsonResponse) {
 			this.ensureType('scalar', 'JSON');
 			this.addField(parentType, 'type', fieldName, 'JSON', []);
 		}
@@ -855,6 +858,8 @@ class RESTApiBuilder {
 		fieldTypeName: string,
 		enclosingTypes: EnclosingType[]
 	) => {
+		const isJSONField = fieldTypeName === 'JSON';
+
 		const fieldType = this.resolveTypeNode(fieldTypeName, enclosingTypes);
 		// remove non alphanumeric characters as well as leading numbers
 		const sanitizedFieldName = fieldName.replace(/[^a-zA-Z0-9_]/g, '').replace(/^[0-9]+/, '');
@@ -866,9 +871,26 @@ class RESTApiBuilder {
 				disableDefaultFieldMapping: true,
 				path: [fieldName],
 				requiresFields: [],
-				unescapeResponseJson: false,
+				unescapeResponseJson: isJSONField,
 				argumentsConfiguration: [],
 			});
+		} else if (isJSONField) {
+			let field: FieldConfiguration | undefined = this.fields.find(
+				(f) => f.typeName === parentName && f.fieldName === fieldName
+			);
+			if (!field) {
+				this.fields.push({
+					typeName: parentName,
+					fieldName: fieldName,
+					disableDefaultFieldMapping: true,
+					argumentsConfiguration: [],
+					requiresFields: [],
+					path: [],
+					unescapeResponseJson: true,
+				});
+			} else {
+				field.unescapeResponseJson = true;
+			}
 		}
 		if (objectKind === 'type') {
 			this.graphQLSchema = visit(this.graphQLSchema, {
