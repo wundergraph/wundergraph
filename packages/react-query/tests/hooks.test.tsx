@@ -37,8 +37,7 @@ export type Subscriptions = {
 	};
 };
 
-export interface Operations
-	extends OperationsDefinition<Queries, Mutations, Subscriptions, string, 'minio', 'github'> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, string, {}, 'github'> {}
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
