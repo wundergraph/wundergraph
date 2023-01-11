@@ -1085,7 +1085,7 @@ const subTest = (rawSchema: string, testCase: TestCase[]) => {
 		) as OperationDefinitionNode;
 		const actual = operationResponseToJSONSchema(schema, queryDocument, operation, []);
 		expect(pretty(actual)).toMatchSnapshot(`testCase_${i}_responseJSONSchema`);
-		const actualVariables = operationVariablesToJSONSchema(schema, operation, []);
+		const actualVariables = operationVariablesToJSONSchema(schema, operation, [], false, false, []);
 		expect(pretty(actualVariables)).toMatchSnapshot(`testCase_${i}_variablesJSONSchema`);
 	});
 };

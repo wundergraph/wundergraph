@@ -108,6 +108,7 @@ export interface ParsedOperations {
 export interface ParseOperationsOptions {
 	keepFromClaimVariables?: boolean;
 	interpolateVariableDefinitionAsJSON?: string[];
+	customJsonScalars?: string[];
 }
 
 const defaultParseOptions: ParseOperationsOptions = {
@@ -174,16 +175,34 @@ export const parseGraphQLOperations = (
 								parsedGraphQLSchema,
 								node,
 								[],
-								options.keepFromClaimVariables
+								options.keepFromClaimVariables,
+								false,
+								options.customJsonScalars || []
 							),
 							InterpolationVariablesSchema: operationVariablesToJSONSchema(
 								parsedGraphQLSchema,
 								node,
 								options.interpolateVariableDefinitionAsJSON || [],
-								options.keepFromClaimVariables
+								options.keepFromClaimVariables,
+								false,
+								options.customJsonScalars || []
 							),
-							InternalVariablesSchema: operationVariablesToJSONSchema(parsedGraphQLSchema, node, [], true),
-							InjectedVariablesSchema: operationVariablesToJSONSchema(parsedGraphQLSchema, node, [], true, true),
+							InternalVariablesSchema: operationVariablesToJSONSchema(
+								parsedGraphQLSchema,
+								node,
+								[],
+								true,
+								false,
+								options.customJsonScalars || []
+							),
+							InjectedVariablesSchema: operationVariablesToJSONSchema(
+								parsedGraphQLSchema,
+								node,
+								[],
+								true,
+								true,
+								options.customJsonScalars || []
+							),
 							ResponseSchema: operationResponseToJSONSchema(parsedGraphQLSchema, ast, node, transformations),
 							AuthenticationConfig: {
 								required: false,
@@ -707,7 +726,8 @@ export const operationVariablesToJSONSchema = (
 	operation: OperationDefinitionNode,
 	interpolateVariableDefinitionAsJSON: string[],
 	keepInternalVariables: boolean = false,
-	keepInjectedVariables: boolean = false
+	keepInjectedVariables: boolean = false,
+	customJsonScalars: string[]
 ): JSONSchema => {
 	const schema: JSONSchema = {
 		type: 'object',
@@ -741,7 +761,8 @@ export const operationVariablesToJSONSchema = (
 			interpolateVariableDefinitionAsJSON,
 			type,
 			name,
-			nonNullType
+			nonNullType,
+			customJsonScalars
 		);
 	});
 
@@ -781,7 +802,8 @@ const typeSchema = (
 	interpolateVariableDefinitionAsJSON: string[],
 	type: TypeNode,
 	name: string,
-	nonNull: boolean
+	nonNull: boolean,
+	customJsonScalars: string[]
 ): JSONSchema => {
 	switch (type.kind) {
 		case 'NonNullType':
@@ -793,7 +815,16 @@ const typeSchema = (
 					parent.minItems = 1;
 					break;
 			}
-			return typeSchema(root, parent, graphQLSchema, interpolateVariableDefinitionAsJSON, type.type, name, true);
+			return typeSchema(
+				root,
+				parent,
+				graphQLSchema,
+				interpolateVariableDefinitionAsJSON,
+				type.type,
+				name,
+				true,
+				customJsonScalars
+			);
 		case 'ListType':
 			const schema: JSONSchema = {
 				type: nonNull ? 'array' : ['array', 'null'],
@@ -805,7 +836,8 @@ const typeSchema = (
 				interpolateVariableDefinitionAsJSON,
 				type.type,
 				name,
-				false
+				false,
+				customJsonScalars
 			);
 			return schema;
 		case 'NamedType':
@@ -833,6 +865,10 @@ const typeSchema = (
 				case 'JSON':
 					return {};
 				default:
+					if (customJsonScalars.includes(type.name.value)) {
+						return {};
+					}
+
 					let schema: JSONSchema = {};
 					const namedType = graphQLSchema.getType(type.name.value);
 					if (namedType === null || namedType === undefined || !namedType.astNode) {
@@ -880,7 +916,8 @@ const typeSchema = (
 									interpolateVariableDefinitionAsJSON,
 									fieldType,
 									name,
-									false
+									false,
+									customJsonScalars
 								);
 							});
 							root.definitions![typeName] = schema;

@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -50,7 +50,7 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		configOutFile := path.Join("generated", "bundle", "config.js")
+		configOutFile := filepath.Join("generated", "bundle", "config.js")
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -83,11 +83,11 @@ var generateCmd = &cobra.Command{
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
-			serverOutFile := path.Join(wunderGraphDir, "generated", "bundle", "server.js")
-			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
-			webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
-			operationsDir := path.Join(wunderGraphDir, operations.DirectoryName)
-			operationsOutDir := path.Join("generated", "bundle", "operations")
+			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.js")
+			webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
+			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
+			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
+			operationsOutDir := filepath.Join("generated", "bundle", "operations")
 
 			var webhooksBundler *bundler.Bundler
 			var operationsBundler *bundler.Bundler

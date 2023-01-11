@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 )
 
@@ -62,7 +61,7 @@ func FindWunderGraphDir(wundergraphDir string) (string, error) {
 
 // CodeFilePath returns the absolute path to the file and returns an error if the file does not exist.
 func CodeFilePath(wundergraphDir, filename string) (string, error) {
-	configEntryPoint := path.Join(wundergraphDir, filename)
+	configEntryPoint := filepath.Join(wundergraphDir, filename)
 
 	if FileExists(configEntryPoint) {
 		return configEntryPoint, nil

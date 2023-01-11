@@ -3,6 +3,7 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
+	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -587,7 +588,11 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			}
 
 			const loadedOperations = loadOperations(schemaFileName);
-			const operations = await resolveOperationsConfigurations(resolved, loadedOperations);
+			const operations = await resolveOperationsConfigurations(
+				resolved,
+				loadedOperations,
+				app.EngineConfiguration.CustomJsonScalars || []
+			);
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
@@ -1028,11 +1033,13 @@ const trimTrailingSlash = (url: string): string => {
 
 const resolveOperationsConfigurations = async (
 	config: ResolvedWunderGraphConfig,
-	loadedOperations: LoadOperationsOutput
+	loadedOperations: LoadOperationsOutput,
+	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
 	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
 		keepFromClaimVariables: false,
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
+		customJsonScalars,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)

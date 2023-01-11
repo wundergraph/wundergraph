@@ -79,13 +79,15 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		dataSources: DataSource<T>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
-		interpolateVariableDefinitionAsJSON: string[]
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
 		this.DataSources = dataSources;
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
+		this.CustomJsonScalars = customJsonScalars;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -94,6 +96,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
+	CustomJsonScalars?: string[];
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -223,6 +226,7 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream
 	// so that the request context can be enriched

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"sync"
 	"syscall"
 
@@ -68,15 +68,15 @@ var upCmd = &cobra.Command{
 			zap.String("builtBy", BuildInfo.BuiltBy),
 		)
 
-		introspectionCacheDir := path.Join(wunderGraphDir, "cache", "introspection")
+		introspectionCacheDir := filepath.Join(wunderGraphDir, "cache", "introspection")
 
-		configJsonPath := path.Join(wunderGraphDir, "generated", configJsonFilename)
-		webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
-		configOutFile := path.Join("generated", "bundle", "config.js")
-		serverOutFile := path.Join("generated", "bundle", "server.js")
-		webhooksOutDir := path.Join("generated", "bundle", "webhooks")
-		operationsDir := path.Join(wunderGraphDir, operations.DirectoryName)
-		operationsOutDir := path.Join("generated", "bundle", "operations")
+		configJsonPath := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
+		webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
+		configOutFile := filepath.Join("generated", "bundle", "config.js")
+		serverOutFile := filepath.Join("generated", "bundle", "server.js")
+		webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
+		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
+		operationsOutDir := filepath.Join("generated", "bundle", "operations")
 
 		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
@@ -244,8 +244,8 @@ var upCmd = &cobra.Command{
 			OutFile:       configOutFile,
 			Logger:        log,
 			WatchPaths: []*watcher.WatchPath{
-				{Path: path.Join(wunderGraphDir, "operations"), Optional: true},
-				{Path: path.Join(wunderGraphDir, "fragments"), Optional: true},
+				{Path: filepath.Join(wunderGraphDir, "operations"), Optional: true},
+				{Path: filepath.Join(wunderGraphDir, "fragments"), Optional: true},
 				// all webhook filenames are stored in the config
 				// we are going to create HTTP routes on the node for all of them
 				{Path: webhooksDir, Optional: true},
@@ -294,7 +294,7 @@ var upCmd = &cobra.Command{
 
 		n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 		go func() {
-			configFile := path.Join(wunderGraphDir, "generated", "wundergraph.config.json")
+			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
