@@ -78,19 +78,14 @@ fi
 npm start &
 pid=$!
 
-# Kill all services we started in "start" at exit
-# trap kill_with_children ${pid} EXIT
-
-if grep -q '"wait-on:services"' package.json; then
-    npm run wait-on:services
-else
-    sleep 1
-fi
+trap "kill_with_children ${pid}" EXIT
 
 # Wait for code generation to complete
 while ! test -f .wundergraph/generated/bundle/config.js; do
     sleep 0.1
 done
+
+sleep 1
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
