@@ -421,6 +421,10 @@ export class Client {
 			}
 		}
 
+		if (options?.after) {
+			options.after();
+		}
+
 		return true;
 	}
 }

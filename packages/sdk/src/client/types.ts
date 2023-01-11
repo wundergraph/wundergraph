@@ -158,4 +158,8 @@ export interface LogoutOptions {
 	 * URL. If not provided, window.location.href is updated.
 	 */
 	redirect?: (url: string) => Promise<boolean>;
+	/**
+	 * Callback to be run after a succesful logout
+	 * */
+	after?: () => void;
 }
