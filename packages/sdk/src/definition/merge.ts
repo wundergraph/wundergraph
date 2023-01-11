@@ -22,11 +22,19 @@ export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[])
 	const dataSources: DataSource<T>[] = apis
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
+
+	const jsonScalars: string[] = [];
+	apis.forEach((api) => {
+		if (api.CustomJsonScalars) {
+			jsonScalars.push(...api.CustomJsonScalars);
+		}
+	});
+
 	const fields = mergeApiFields(apis);
 	const types = mergeTypeConfigurations(apis);
 	const schema = mergeApiSchemas(roles, apis, dataSources, fields);
 	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
-	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
 };
 
 const mergeApiFields = <T extends {} = {}>(apis: Api<T>[]): FieldConfiguration[] => {

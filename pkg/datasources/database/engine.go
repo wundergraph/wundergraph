@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -272,8 +271,8 @@ func (e *Engine) ensurePrisma() error {
 		return err
 	}
 
-	e.queryEnginePath = path.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
-	e.introspectionEnginePath = path.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+	e.queryEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
+	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
 
 	// Acquire a file lock before trying to download
 	lockPath := filepath.Join(prismaPath, ".lock")
