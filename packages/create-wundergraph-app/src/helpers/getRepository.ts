@@ -85,16 +85,15 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 export const getRepository = async ({
 	exampleName,
 	githubLink,
+	projectName,
 	isInit,
 	directoryPath,
-	// projectNameForTests is only for tests
-	projectNameForTests,
 }: {
 	exampleName?: string;
 	githubLink?: string;
+	projectName: string;
 	isInit?: boolean;
 	directoryPath?: string;
-	projectNameForTests?: string;
 }) => {
 	try {
 		const wgGradient = gradient(['#a855f7', '#ec4899']);
@@ -123,15 +122,13 @@ export const getRepository = async ({
 			spinner.succeed(chalk.green('Successfully installed wundergraph/sdk'));
 			exampleName = 'simple';
 		} else {
-			let projectName: string;
-			// this gets executed only for tests, as it cant be interactive
-			if (projectNameForTests) {
-				projectName = projectNameForTests;
-			} else {
+			if (projectName === '') {
+				// prompt the user to give the project name
 				const projectNamePrompt = await inquirer.prompt({
 					name: 'projectName',
 					type: 'input',
 					message: 'What would you like to name your app?',
+					default: 'my-app',
 				});
 				projectName = projectNamePrompt['projectName'];
 			}
