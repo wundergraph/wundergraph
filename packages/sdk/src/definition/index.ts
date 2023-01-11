@@ -49,6 +49,8 @@ export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTIO
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 // When true, throw an exception an error is found while loading operations
 export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
+// Absolute path to .wundergraph directory
+export const WG_DIR_ABS = process.env['WG_DIR_ABS'] || process.cwd();
 
 export interface RenameType {
 	from: string;

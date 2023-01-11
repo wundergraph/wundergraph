@@ -3,15 +3,15 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
-	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
+	WG_DIR_ABS,
 } from '../definition';
 import { mergeApis } from '../definition/merge';
-import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
+import { generateIDEConfig } from '../ideconfig';
 import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
@@ -110,8 +110,13 @@ export interface WunderGraphConfigApplicationConfig {
 		};
 	};
 	links?: LinkConfiguration;
-	dotGraphQLConfig?: DotGraphQLConfig;
 	security?: SecurityConfig;
+
+	/** IDE configuration */
+	ideConfig?: IDEConfig;
+
+	/** @deprecated: Superseded by ideConfig */
+	dotGraphQLConfig?: any;
 }
 
 export interface TokenAuthProvider {
@@ -129,11 +134,18 @@ export interface SecurityConfig {
 	allowedHosts?: InputVariable[];
 }
 
-export interface DotGraphQLConfig {
-	// hasDotWunderGraphDirectory should be set to true if the project has a ".wundergraph" directory as the WunderGraph root
-	// the default is true so this config doesn't have to be touched usually
-	// only set it to false if you don't have a ".wundergraph" directory in your project
-	hasDotWunderGraphDirectory?: boolean;
+export interface IDEConfig {
+	/**
+	 * Path to project's root directory, for generating configuration files for autocompletion.
+	 * If empty, it defaults to the the directory that contains .wundergraph.
+	 */
+	projectRootDir?: string;
+	generate?: {
+		/** Generate a GraphQL autocompletion file (.graphqlrc)
+		 * @default true
+		 */
+		graphql?: boolean;
+	};
 }
 
 export interface DeploymentAPI {
@@ -797,30 +809,23 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
-			const dotGraphQLNested =
-				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
-					? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
-					: true;
-
-			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: publicNodeUrl,
-				nested: dotGraphQLNested,
-			});
-
-			const dotGraphQLConfigPath = path.join(dotGraphQLNested ? '..' + path.sep : '', '.graphqlconfig');
-			let shouldUpdateDotGraphQLConfig = true;
-			const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
-			if (fs.existsSync(dotGraphQLConfigPath)) {
-				const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
-				if (dotGraphQLContent === existingDotGraphQLContent) {
-					shouldUpdateDotGraphQLConfig = false;
+			const wgDir = WG_DIR_ABS;
+			let projectRootDir = config?.ideConfig?.projectRootDir;
+			if (projectRootDir) {
+				if (!path.isAbsolute(projectRootDir)) {
+					projectRootDir = path.join(wgDir, projectRootDir.replace('//g', path.sep));
 				}
+			} else {
+				projectRootDir = path.dirname(wgDir);
 			}
 
-			if (shouldUpdateDotGraphQLConfig) {
-				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				Logger.info(`.graphqlconfig updated`);
-			}
+			generateIDEConfig({
+				projectRootDir: projectRootDir,
+				wundergraphDir: wgDir,
+				nodeUrl: publicNodeUrl,
+				generateGraphQLConfig: config?.ideConfig?.generate?.graphql ?? true,
+				logger: (s) => Logger.info(s),
+			});
 
 			done();
 
