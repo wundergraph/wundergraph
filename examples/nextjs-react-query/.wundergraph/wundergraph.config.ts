@@ -36,9 +36,15 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [authProviders.demo()],
 			authorizedRedirectUris: ['http://localhost:3000'],
-			secureCookieHashKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'), // must be of length 32
-			secureCookieBlockKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
-			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
+			secureCookieHashKey: new EnvironmentVariable(
+				'WUNDERGRAPH_SECURE_COOKIE_HASH_KEY',
+				'00000000000000000000000000000000'
+			), // must be of length 32
+			secureCookieBlockKey: new EnvironmentVariable(
+				'WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY',
+				'00000000000000000000000000000000'
+			), // must be of length 32
+			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET', '00000000000'), // must be of length 11
 		},
 	},
 	security: {
