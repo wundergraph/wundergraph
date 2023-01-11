@@ -20,8 +20,6 @@ export type {
 	OperationDefinition,
 	ClientOperation,
 	OperationsDefinition,
-	S3UploadProfile,
-	S3UploadProfiles,
 	S3ProviderDefinition,
 } from './types';
 

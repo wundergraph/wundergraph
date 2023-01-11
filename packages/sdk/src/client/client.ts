@@ -7,7 +7,6 @@ import {
 	LogoutOptions,
 	OperationRequestOptions,
 	QueryRequestOptions,
-	S3UploadProfile,
 	SubscriptionEventHandler,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
@@ -19,6 +18,13 @@ import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 
 // https://graphql.org/learn/serving-over-http/
+
+export interface UploadValidationOptions {
+	maxAllowedUploadSizeBytes?: number;
+	maxAllowedFiles?: number;
+	allowedFileExtensions?: string[];
+	allowedMimeTypes?: string[];
+}
 
 export class Client {
 	constructor(private options: ClientConfig) {
@@ -337,8 +343,11 @@ export class Client {
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
-	public async uploadFiles(config: UploadRequestOptions, profile?: S3UploadProfile): Promise<UploadResponse> {
-		this.validateFiles(config, profile);
+	public async uploadFiles(
+		config: UploadRequestOptions,
+		validation?: UploadValidationOptions
+	): Promise<UploadResponse> {
+		this.validateFiles(config, validation);
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
 			if (file instanceof Blob) {
@@ -382,27 +391,27 @@ export class Client {
 		};
 	}
 
-	public validateFiles(config: UploadRequestOptions, profile?: S3UploadProfile) {
-		if (profile?.maxAllowedFiles && config.files.length > profile.maxAllowedFiles) {
-			throw new Error(`uploading ${config.files.length} exceeds the maximum allowed (${profile.maxAllowedFiles})`);
+	public validateFiles(config: UploadRequestOptions, validation?: UploadValidationOptions) {
+		if (validation?.maxAllowedFiles && config.files.length > validation.maxAllowedFiles) {
+			throw new Error(`uploading ${config.files.length} exceeds the maximum allowed (${validation.maxAllowedFiles})`);
 		}
 		for (const file of config.files) {
-			if (profile?.maxAllowedUploadSizeBytes && file.size > profile.maxAllowedUploadSizeBytes) {
+			if (validation?.maxAllowedUploadSizeBytes && file.size > validation.maxAllowedUploadSizeBytes) {
 				throw new Error(
-					`file ${file.name} with size ${file.size} exceeds the maximum allowed (${profile.maxAllowedUploadSizeBytes})`
+					`file ${file.name} with size ${file.size} exceeds the maximum allowed (${validation.maxAllowedUploadSizeBytes})`
 				);
 			}
-			if (profile?.allowedFileExtensions && file.name.includes('.')) {
+			if (validation?.allowedFileExtensions && file.name.includes('.')) {
 				const ext = file.name.substring(file.name.indexOf('.') + 1).toLowerCase();
 				if (ext) {
-					if (profile.allowedFileExtensions.findIndex((item) => item.toLocaleLowerCase()) < 0) {
+					if (validation.allowedFileExtensions.findIndex((item) => item.toLocaleLowerCase()) < 0) {
 						throw new Error(`file ${file.name} with extension ${ext} is not allowed`);
 					}
 				}
 			}
-			if (profile?.allowedMimeTypes) {
+			if (validation?.allowedMimeTypes) {
 				const mimeType = file.type;
-				const idx = profile.allowedMimeTypes.findIndex((item) => {
+				const idx = validation.allowedMimeTypes.findIndex((item) => {
 					// Full match
 					if (item == mimeType) {
 						return true;

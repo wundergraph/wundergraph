@@ -1,9 +1,6 @@
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 
-import { S3UploadProfile, S3UploadProfiles } from '../configure/index';
-export type { S3UploadProfile, S3UploadProfiles };
-
 export type Headers = { [key: string]: string };
 
 export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
