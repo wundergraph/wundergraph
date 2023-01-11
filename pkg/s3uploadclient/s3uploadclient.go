@@ -15,8 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wundergraph/wundergraph/pkg/pool"
-
 	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
 	"github.com/minio/minio-go/v7"
@@ -27,6 +25,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
 const MaxUploadSize = 20 * 1024 * 1024 // 20MB
