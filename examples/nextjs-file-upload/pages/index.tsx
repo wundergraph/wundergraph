@@ -34,8 +34,9 @@ const Upload = () => {
 			});
 			result && setData(result);
 		} catch (e) {
-			alert('Upload failed!');
-			console.error("Couldn't upload files", e);
+			const msg = e instanceof Error ? e.message : 'Upload failed!';
+			alert(msg);
+			console.error("Couldn't upload files", msg);
 		}
 	};
 
