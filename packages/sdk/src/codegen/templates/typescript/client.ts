@@ -1,3 +1,6 @@
+import { z } from 'zod';
+import zodToJsonSchema from 'zod-to-json-schema';
+
 import Handlebars from 'handlebars';
 import hash from 'object-hash';
 import { compile as compileJSONSchema } from 'json-schema-to-typescript';
@@ -26,8 +29,18 @@ export class TypeScriptClient implements Template {
 			for (const key in provider.uploadProfiles) {
 				const profile = provider.uploadProfiles[key];
 				if (profile.meta) {
+					let schema: object;
+					if (profile.meta instanceof z.ZodType) {
+						try {
+							schema = zodToJsonSchema(profile.meta);
+						} catch (e: any) {
+							throw new Error(`could not convert zod type to JSON schema: ${e}`);
+						}
+					} else {
+						schema = profile.meta;
+					}
 					const requestedTypeName = `${provider.name}_${key}_metadata`;
-					const typeDefinition = await compileJSONSchema(profile.meta, requestedTypeName, {
+					const typeDefinition = await compileJSONSchema(schema, requestedTypeName, {
 						additionalProperties: false,
 						format: false,
 						bannerComment: '',
