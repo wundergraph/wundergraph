@@ -536,16 +536,17 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 				zap.String("addr", l.Addr().String()),
 			)
 
-			if err := n.server.Serve(l); err != nil {
-				if err == http.ErrServerClosed {
-					n.log.Debug("listener closed",
-						zap.String("addr", l.Addr().String()),
-					)
-					return nil
-				}
-				return err
+			err := n.server.Serve(l)
+			if err == nil {
+				return nil
 			}
-			return nil
+			if err == http.ErrServerClosed {
+				n.log.Debug("listener closed",
+					zap.String("addr", l.Addr().String()),
+				)
+				return nil
+			}
+			return err
 		})
 	}
 
