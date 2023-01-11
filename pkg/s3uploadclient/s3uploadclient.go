@@ -15,6 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wundergraph/wundergraph/pkg/pool"
+
 	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
 	"github.com/minio/minio-go/v7"
@@ -37,6 +39,7 @@ type S3UploadClient struct {
 	profiles       map[string]*preparedProfile
 	hooksClient    *hooks.Client
 	name           string
+	pool           *pool.Pool
 }
 
 type preparedProfile struct {
@@ -157,6 +160,7 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		profiles:       profiles,
 		hooksClient:    s3Options.HooksClient,
 		name:           s3Options.Name,
+		pool:           pool.New(),
 	}
 
 	err = s.createBucket()
@@ -257,8 +261,9 @@ func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, part *m
 		}
 
 		if profile.UsePreUploadHook {
-			var buf []byte
-			data, err := hookData(buf, r, part, fileSize, nil)
+			buf := pool.GetBytesBuffer()
+			defer pool.PutBytesBuffer(buf)
+			data, err := hookData(buf.Bytes(), r, part, fileSize, nil)
 			if err != nil {
 				return "", fmt.Errorf("error preparing preUpload hook data: %w", err)
 			}
@@ -366,12 +371,13 @@ func (s *S3UploadClient) postUpload(ctx context.Context, r *http.Request, part *
 	}
 
 	if profile != nil && profile.UsePostUploadHook {
-		var buf []byte
+		buf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(buf)
 		fileSize := int64(-1)
 		if info != nil {
 			fileSize = info.Size
 		}
-		data, err := hookData(buf, r, part, fileSize, uploadError)
+		data, err := hookData(buf.Bytes(), r, part, fileSize, uploadError)
 		if err != nil {
 			return fmt.Errorf("error preparing postUpload hook data: %w", err)
 		}
