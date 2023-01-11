@@ -1975,12 +1975,18 @@ func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securec
 func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConnectProviderSet, error) {
 	var providers authentication.OpenIDConnectProviderSet
 
-	client := &http.Client{
+	httpClient := &http.Client{
 		Timeout: r.api.Options.DefaultTimeout,
 	}
 
 	for _, provider := range r.api.AuthenticationConfig.CookieBased.Providers {
-		if provider.Kind != wgpb.AuthProviderKind_AuthProviderOIDC {
+		var flavor authentication.OpenIDConnectFlavor
+		switch provider.Kind {
+		case wgpb.AuthProviderKind_AuthProviderOIDC:
+			flavor = authentication.OpenIDConnectFlavorDefault
+		case wgpb.AuthProviderKind_AuthProviderAuth0:
+			flavor = authentication.OpenIDConnectFlavorAuth0
+		default:
 			continue
 		}
 		if provider.OidcConfig == nil {
@@ -1990,7 +1996,11 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 		clientID := loadvariable.String(provider.OidcConfig.ClientId)
 		clientSecret := loadvariable.String(provider.OidcConfig.ClientId)
 
-		oidc, err := authentication.NewOpenIDConnectProvider(issuer, clientID, clientSecret, client, r.log)
+		oidc, err := authentication.NewOpenIDConnectProvider(issuer, clientID, clientSecret, &authentication.OpenIDConnectProviderOptions{
+			Flavor:     flavor,
+			HTTPClient: httpClient,
+			Logger:     r.log,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("error in %s OIDC provider: %w", provider.Id, err)
 		}
@@ -2052,6 +2062,8 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			zap.String("clientID", loadvariable.String(provider.GithubConfig.ClientId)),
 		)
 	case wgpb.AuthProviderKind_AuthProviderOIDC:
+		fallthrough
+	case wgpb.AuthProviderKind_AuthProviderAuth0:
 		if provider.OidcConfig == nil {
 			return
 		}
@@ -2086,6 +2098,8 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			zap.String("issuer", loadvariable.String(provider.OidcConfig.Issuer)),
 			zap.String("clientID", loadvariable.String(provider.OidcConfig.ClientId)),
 		)
+	default:
+		panic("unreachable")
 	}
 }
 

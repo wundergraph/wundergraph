@@ -37,7 +37,7 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [
 				authProviders.demo(),
-				authProviders.openIdConnect({
+				authProviders.auth0({
 					id: 'auth0',
 					issuer: new EnvironmentVariable('AUTH0_ISSUER'),
 					clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
