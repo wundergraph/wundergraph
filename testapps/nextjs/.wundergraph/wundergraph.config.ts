@@ -16,6 +16,14 @@ const weather = introspect.graphql({
 	url: 'https://weather-api.wundergraph.com/',
 });
 
+const stripe = introspect.openApi({
+	apiNamespace: 'stripe',
+	source: {
+		kind: 'file',
+		filePath: '../spec3.json',
+	},
+});
+
 /*const jsonPlaceholder = introspect.openApi({
     source: {
         kind: "file",
@@ -118,6 +126,7 @@ configureWunderGraphApplication({
 		weather,
 		spaceX,
 		counter,
+		stripe,
 		//jspFieldsRenamed,
 		/*federatedApi,
             openAPI,
