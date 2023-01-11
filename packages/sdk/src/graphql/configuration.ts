@@ -61,6 +61,9 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration, customJ
 	let entityFields: string[] = [];
 	let jsonFields: JsonTypeField[] = [];
 
+	const jsonScalars = [DefaultJsonType];
+	jsonScalars.push(...customJsonScalars);
+
 	const graphQLSchema = buildASTSchema(schema, { assumeValidSDL: true });
 
 	visit(schema, {
@@ -154,7 +157,7 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration, customJ
 			enter: (node) => {
 				fieldName = node.name.value;
 
-				if (isJsonField(node.type, customJsonScalars)) {
+				if (isJsonField(node.type, jsonScalars)) {
 					jsonFields.push({ typeName: typeName!, fieldName: fieldName! });
 				}
 			},
@@ -361,10 +364,7 @@ const findField = (fields: FieldConfiguration[], typeName: string, fieldName: st
 const isJsonField = (type: TypeNode, jsonScalars: string[]) => {
 	const namedTypeName = resolveNamedTypeName(type);
 
-	const scalars = [DefaultJsonType];
-	scalars.push(...jsonScalars);
-
-	for (const jsonType of scalars) {
+	for (const jsonType of jsonScalars) {
 		if (namedTypeName === jsonType) {
 			return true;
 		}
