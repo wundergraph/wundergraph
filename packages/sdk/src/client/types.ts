@@ -1,5 +1,4 @@
-import { GraphQLResponseError } from './GraphQLResponseError';
-import { ResponseError } from './ResponseError';
+import { ClientResponseError } from './ClientResponseError';
 
 export type Headers = { [key: string]: string };
 
@@ -68,7 +67,7 @@ export interface GraphQLError {
 
 export interface ClientResponse<ResponseData = any> {
 	data?: ResponseData;
-	error?: Error | GraphQLResponseError | ResponseError;
+	error?: ClientResponseError;
 }
 
 export interface GraphQLResponse<

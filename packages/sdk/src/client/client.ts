@@ -16,6 +16,7 @@ import {
 import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
+import { InputValidationError } from './InputValidationError';
 
 // https://graphql.org/learn/serving-over-http/
 
@@ -94,7 +95,7 @@ export class Client {
 
 		if (!resp.data) {
 			return {
-				error: new Error('Invalid response from the server'),
+				error: new ResponseError('Invalid response from the server', 200),
 			};
 		}
 
@@ -111,10 +112,18 @@ export class Client {
 	private async fetchResponseToClientResponse(resp: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
+
 		if (!resp.ok) {
-			return {
-				error: new ResponseError(`Response is not ok`, resp.status),
-			};
+			try {
+				const json = await resp.json();
+				return {
+					error: new InputValidationError(json, resp.status),
+				};
+			} catch {
+				return {
+					error: new ResponseError('Unable to parse response body', resp.status),
+				};
+			}
 		}
 
 		const json = await resp.json();
@@ -309,7 +318,7 @@ export class Client {
 
 		if (!response.ok || response.body === null) {
 			yield {
-				error: new Error(`HTTP Error: ${response.status}`),
+				error: new ResponseError('HTTP Error', response.status),
 			};
 			return;
 		}

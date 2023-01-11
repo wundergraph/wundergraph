@@ -3,6 +3,7 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 import { ResponseError } from './ResponseError';
 import { QueryRequestOptions } from './types';
+import { InputValidationError } from './InputValidationError';
 
 const newClient = (overrides?: Partial<ClientConfig>) => {
 	return new Client({
@@ -162,10 +163,10 @@ describe('Client', () => {
 			expect(resp.error).toEqual(new Error('Error'));
 		});
 
-		test('Should return ResponseError when request failed', async () => {
+		test('Should return ResponseError when request fails with no response body', async () => {
 			const client = newClient();
 
-			const scope = nock('https://api.com')
+			nock('https://api.com')
 				.get('/operations/Weather')
 				.query({ wg_api_hash: '123', wg_variables: '{}' })
 				.once()
@@ -176,7 +177,37 @@ describe('Client', () => {
 			});
 
 			expect(resp.error).toBeInstanceOf(Error);
-			expect(resp.error).toEqual(new ResponseError('Response is not ok', 500));
+			expect(resp.error).toEqual(new ResponseError('Unable to parse response body', 500));
+			expect(resp.data).toBeUndefined();
+		});
+
+		test('Should return InputValidationError when response body contains errors', async () => {
+			const client = newClient();
+
+			const mockJson = {
+				message: 'Bad Request: Invalid input',
+				errors: [
+					{
+						propertyPath: '/',
+						message: 'some error message',
+						invalidValue: {},
+					},
+				],
+				input: {},
+			};
+
+			nock('https://api.com')
+				.get('/operations/Weather')
+				.query({ wg_api_hash: '123', wg_variables: '{}' })
+				.once()
+				.reply(400, mockJson);
+
+			const resp = await client.query<QueryRequestOptions<'Weather'>>({
+				operationName: 'Weather',
+			});
+
+			expect(resp.error).toBeInstanceOf(Error);
+			expect(resp.error).toEqual(new InputValidationError(mockJson, 500));
 			expect(resp.data).toBeUndefined();
 		});
 	});
