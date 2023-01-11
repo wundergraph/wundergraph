@@ -1,3 +1,4 @@
+import fs from 'fs';
 import {
 	buildMTLSConfiguration,
 	buildUpstreamAuthentication,
@@ -48,7 +49,9 @@ import {
 import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
-import _ from 'lodash';
+import camelCase from 'lodash/camelCase';
+import uniqBy from 'lodash/uniqBy';
+import uniq from 'lodash/uniq';
 import transformSchema from '../transformations/schema';
 
 export const openApiSpecificationToRESTApiObject = async (
@@ -138,12 +141,18 @@ class RESTApiBuilder {
 				this.traversePath(pathObject.delete, pathObject, path, HTTPMethod.DELETE);
 			}
 		});
+
+		fs.writeFileSync('schema-test.json', JSON.stringify(this.graphQLSchema));
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
 		const { schemaSDL: replaced, customScalarTypeFields } = transformSchema.replaceCustomScalars(
 			print(filtered),
 			this.introspection
 		);
+
+		// @todo
+		fs.writeFileSync('schema-test.graphql', replaced);
 		const schema = buildASTSchema(parse(replaced));
+
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
 			return {
@@ -455,6 +464,13 @@ class RESTApiBuilder {
 		if (schema.allOf) {
 			schema = (schema.allOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
 		}
+
+		if (schema.anyOf) {
+			// @todo support union types
+			// schema = (schema.anyOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
+			schema = this.resolveSchema(schema.anyOf[0] as JSONSchema);
+		}
+
 		if (schema.type === undefined) {
 			this.ensureType('scalar', 'JSON');
 			if (argumentName) {
@@ -492,7 +508,10 @@ class RESTApiBuilder {
 						this.addEnumValues(enumName, schema.enum);
 						return;
 					}
-					this.addEnumValues(parentTypeName, schema.enum);
+					const enumName = parentTypeName + '_' + fieldName;
+					this.ensureType('enum', enumName);
+					this.addField(parentTypeName, objectKind, fieldName, enumName, enclosingTypes);
+					this.addEnumValues(enumName, schema.enum);
 					return;
 				}
 				if (argumentName) {
@@ -523,7 +542,9 @@ class RESTApiBuilder {
 				});
 				return;
 			case 'object':
-				if (!schema.properties) {
+				// properties can be {}, make sure we skip.
+				if (!schema.properties || Object.keys(schema.properties).length === 0) {
+					/* @ts-ignore this can actually be false according to spec */
 					if (schema?.additionalProperties && schema.additionalProperties !== false) {
 						this.ensureType('scalar', 'JSON');
 						this.addField(parentTypeName, objectKind, fieldName, 'JSON', enclosingTypes);
@@ -531,20 +552,26 @@ class RESTApiBuilder {
 					return;
 				}
 				if (argumentName) {
+					let argumentTypeName = schema.title
+						? schema.title.replace(' ', '')
+						: argumentName[0].toUpperCase() + this.prettyFieldName(argumentName.substring(1));
+					if (objectKind === 'input' && !argumentTypeName.endsWith('Input') && !argumentTypeName.endsWith('params')) {
+						argumentTypeName += 'Input';
+					}
 					if (schema.required?.length) {
 						if (enclosingTypes.length !== 0 && enclosingTypes[enclosingTypes.length - 1] !== 'non_null') {
 							enclosingTypes.push('non_null');
 						}
 					}
-					this.addArgument(parentTypeName, fieldName, argumentName, argumentName, enclosingTypes);
-					this.ensureType('input', argumentName);
+					this.addArgument(parentTypeName, fieldName, argumentName, argumentTypeName, enclosingTypes);
+					this.ensureType('input', argumentTypeName);
 					Object.keys(schema.properties).forEach((prop) => {
 						this.traverseSchema({
 							isRootField: false,
 							enclosingTypes: schema.required?.find((req) => req === prop) !== undefined ? ['non_null'] : [],
 							fieldName: prop,
 							objectKind: 'input',
-							parentTypeName: argumentName!,
+							parentTypeName: argumentTypeName!,
 							path,
 							verb,
 							schema: schema.properties![prop] as JSONSchema,
@@ -560,6 +587,7 @@ class RESTApiBuilder {
 						typeName += 'Input';
 					}
 					typeName = this.cleanupTypeName(typeName, parentTypeName);
+
 					let fieldTypeName = typeName;
 					if (this.statusCodeUnions && isRootField && objectKind === 'type') {
 						fieldTypeName = this.buildFieldTypeName(typeName, responseObjectDescription || '', statusCode || '');
@@ -898,19 +926,24 @@ class RESTApiBuilder {
 					if (node.name.value !== parentName) {
 						return;
 					}
+
 					const updated: ObjectTypeDefinitionNode = {
 						...node,
-						fields: [
-							...(node.fields || []),
-							{
-								kind: Kind.FIELD_DEFINITION,
-								name: {
-									kind: Kind.NAME,
-									value: sanitizedFieldName,
+						fields: uniqBy(
+							// remove duplicates
+							[
+								...(node.fields || []),
+								{
+									kind: Kind.FIELD_DEFINITION,
+									name: {
+										kind: Kind.NAME,
+										value: sanitizedFieldName,
+									},
+									type: fieldType,
 								},
-								type: fieldType,
-							},
-						],
+							],
+							({ name }) => name.value
+						),
 					};
 					return updated;
 				},
@@ -923,30 +956,43 @@ class RESTApiBuilder {
 					}
 					const updated: InputObjectTypeDefinitionNode = {
 						...node,
-						fields: [
-							...(node.fields || []),
-							{
-								kind: Kind.INPUT_VALUE_DEFINITION,
-								name: {
-									kind: Kind.NAME,
-									value: sanitizedFieldName,
+						fields: uniqBy(
+							// remove duplicates
+							[
+								...(node.fields || []),
+								{
+									kind: Kind.INPUT_VALUE_DEFINITION,
+									name: {
+										kind: Kind.NAME,
+										value: sanitizedFieldName,
+									},
+									type: fieldType,
 								},
-								type: fieldType,
-							},
-						],
+							],
+							({ name }) => name.value
+						),
 					};
 					return updated;
 				},
 			});
 		}
 	};
+	private enumMappings: Record<string, string> = {};
 	private addEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
 		const nodes: EnumValueDefinitionNode[] = [];
 		values.forEach((value) => {
 			if (typeof value !== 'string') {
 				return;
 			}
-			const exists = nodes.find((node) => node.name.value === value) !== undefined;
+
+			let gEnum = value.replace(/[^A-Za-z0-9]/g, '_').toUpperCase();
+			if (gEnum.match('^[0-9]')) {
+				gEnum = '_' + gEnum;
+			}
+
+			this.enumMappings[gEnum] = value;
+
+			const exists = nodes.find((node) => node.name.value === gEnum) !== undefined;
 			if (exists) {
 				return;
 			}
@@ -954,7 +1000,7 @@ class RESTApiBuilder {
 				kind: Kind.ENUM_VALUE_DEFINITION,
 				name: {
 					kind: Kind.NAME,
-					value: value,
+					value: gEnum,
 				},
 			});
 		});
@@ -968,7 +1014,7 @@ class RESTApiBuilder {
 				}
 				const update: EnumTypeDefinitionNode = {
 					...node,
-					values: [...(node.values || []), ...nodes],
+					values: uniqBy([...(node.values || []), ...nodes], (v) => v.name.value),
 				};
 				return update;
 			},
@@ -1049,11 +1095,16 @@ class RESTApiBuilder {
 	};
 	private filterEmptyTypes = (document: DocumentNode): DocumentNode => {
 		return visit(document, {
-			ObjectTypeDefinition: (node) => {
-				if (!node.fields || node.fields.length === 0) {
-					return null;
-				}
-			},
+			// ObjectTypeDefinition: (node) => {
+			// 	if (!node.fields || node.fields.length === 0) {
+			// 		return null;
+			// 	}
+			// },
+			// InputObjectTypeDefinition: (node) => {
+			// 	if (!node.fields || node.fields.length === 0) {
+			// 		return null;
+			// 	}
+			// },
 			InterfaceTypeDefinition: (node) => {
 				if (!node.fields || node.fields.length === 0) {
 					return null;
@@ -1090,6 +1141,10 @@ class RESTApiBuilder {
 		if (value.allOf) {
 			return (value.allOf! as JSONSchema[]).map(this.resolveSchema).reduce(this.mergeJSONSchemas);
 		}
+		// @todo transform to union type
+		if (value.anyOf && value.anyOf!.length === 1) {
+			return this.resolveSchema(value.anyOf[0] as JSONSchema);
+		}
 		return value as JSONSchema;
 	};
 	private componentName = (ref: string, componentType: 'schemas' | 'responses'): string | undefined => {
@@ -1098,7 +1153,8 @@ class RESTApiBuilder {
 			if (refPath.length !== 3 || refPath[0] !== 'components' || refPath[1] !== componentType) {
 				return;
 			}
-			return refPath[2];
+			// @todo some operations are skipped due to this
+			return refPath[2].replace('.', '__');
 		}
 	};
 	private resolveSchemaRef = (schema: JSONSchema): string | undefined => {
@@ -1107,7 +1163,8 @@ class RESTApiBuilder {
 			if (refPath.length !== 3 || refPath[0] !== 'components' || refPath[1] !== 'schemas') {
 				return;
 			}
-			return refPath[2];
+			// @todo some operations are skipped due to this
+			return refPath[2].replace('.', '__');
 		}
 	};
 	private jsonSchemaFromRef = (
@@ -1225,8 +1282,8 @@ class RESTApiBuilder {
 
 	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
 		// remove all non-alphanumeric characters and all leading numbers
-		typeName = _.camelCase(typeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
-		parentTypeName = _.camelCase(parentTypeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
+		typeName = camelCase(typeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
+		parentTypeName = camelCase(parentTypeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
 		// and make the first character uppercase
 		typeName = typeName[0].toUpperCase() + typeName.substring(1);
 		parentTypeName = parentTypeName[0].toUpperCase() + parentTypeName.substring(1);

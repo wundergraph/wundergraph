@@ -46,7 +46,7 @@ import {
 } from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
-import _ from 'lodash';
+import camelCase from 'lodash/camelCase';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import {
 	AuthenticationHookRequest,
@@ -280,7 +280,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				.map((provider) => provider.resolve())
 				.map((provider) => ({
 					...provider,
-					id: _.camelCase(provider.id),
+					id: camelCase(provider.id),
 				}))) ||
 		[];
 

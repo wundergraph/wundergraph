@@ -2,7 +2,7 @@ import { BaseTypeScriptDataModel, ResolvedWunderGraphConfig, Template, TemplateO
 import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import execa from 'execa';
-import _ from 'lodash';
+import _capitalize from 'lodash/capitalize';
 import Handlebars from 'handlebars';
 import { clientTemplate } from './client-template';
 import { OperationType } from '@wundergraph/protobuf';
@@ -238,7 +238,7 @@ export class GolangClient implements Template {
 
 const JSONSchemaToGolangStruct = (schema: JSONSchema, structName: string, withErrors: boolean): string => {
 	let out = '';
-	const capitalize = (name: string) => _.capitalize(name.substring(0, 1)) + name.substring(1);
+	const capitalize = (name: string) => _capitalize(name.substring(0, 1)) + name.substring(1);
 	const addJsonTag = (fieldName: string, isArray: boolean) => {
 		if (isArray) {
 			return;
