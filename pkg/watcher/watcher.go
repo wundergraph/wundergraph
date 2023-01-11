@@ -38,7 +38,7 @@ type WatchPath struct {
 	Path     string
 }
 
-// pathset is used to collect paths that have changed and flush them all at once
+// pathSet is used to collect paths that have changed and flush them all at once
 // when the watch function is triggered.
 type pathSet struct {
 	mu    sync.RWMutex
