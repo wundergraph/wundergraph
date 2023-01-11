@@ -21,6 +21,7 @@ export interface IntrospectionCacheFile<A extends ApiType> {
 	fields: FieldConfiguration[];
 	types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
+	customJsonScalars: string[] | undefined;
 }
 
 export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
@@ -31,6 +32,7 @@ export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCache
 		fields: api.Fields,
 		types: api.Types,
 		interpolateVariableDefinitionAsJSON: api.interpolateVariableDefinitionAsJSON,
+		customJsonScalars: api.CustomJsonScalars,
 	};
 }
 
@@ -40,7 +42,8 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 		cache.dataSources,
 		cache.fields,
 		cache.types,
-		cache.interpolateVariableDefinitionAsJSON
+		cache.interpolateVariableDefinitionAsJSON,
+		cache.customJsonScalars
 	);
 }
 
