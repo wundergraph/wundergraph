@@ -17,7 +17,7 @@ esac
 set -e
 
 # These require 3rd party accounts
-SKIP="faunadb-nextjs graphql-hasura-subscriptions"
+SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 
 # These are broken
 SKIP="${SKIP} nextjs-todos vite-swr"
