@@ -190,6 +190,9 @@ func (s *S3UploadClient) uploadProfile(r *http.Request) (profileName string, pro
 		if profile == nil {
 			return "", nil, fmt.Errorf("profile %q does not exist in upload provider %s", profileName, s.name)
 		}
+	} else if len(s.profiles) > 0 {
+		// If profiles are defined but non is specified, return an error
+		return "", nil, fmt.Errorf("uploading to provider %s requires specifying a profile", s.name)
 	}
 	return profileName, profile, nil
 }
