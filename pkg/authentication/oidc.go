@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -496,14 +495,10 @@ func (p *OpenIDConnectProvider) disconnectAuth0(ctx context.Context, user *User)
 }
 
 type OpenIDConnectProviderSet struct {
-	mu sync.Mutex
-	m  map[string]*OpenIDConnectProvider
+	m map[string]*OpenIDConnectProvider
 }
 
 func (s *OpenIDConnectProviderSet) Add(id string, p *OpenIDConnectProvider) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	if s.m == nil {
 		s.m = make(map[string]*OpenIDConnectProvider)
 	}
@@ -517,9 +512,6 @@ func (s *OpenIDConnectProviderSet) Add(id string, p *OpenIDConnectProvider) erro
 }
 
 func (s *OpenIDConnectProviderSet) ByIssuer(issuer string) *OpenIDConnectProvider {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	for _, provider := range s.m {
 		if provider.config.Issuer == issuer {
 			return provider
