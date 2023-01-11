@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/evanw/esbuild/pkg/api"
 	"go.uber.org/zap"
@@ -32,9 +31,10 @@ type Bundler struct {
 	outFile               string
 	outDir                string
 	fileLoaders           []string
-	mu                    sync.Mutex
 	buildResult           *api.BuildResult
 	onAfterBundle         func() error
+
+	newWatchPath chan *watcher.WatchPath
 }
 
 type Config struct {
@@ -65,6 +65,7 @@ func NewBundler(config Config) *Bundler {
 		onAfterBundle:         config.OnAfterBundle,
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
+		newWatchPath:          make(chan *watcher.WatchPath),
 	}
 }
 
@@ -194,9 +195,10 @@ func (b *Bundler) initialBuild() api.BuildResult {
 			if !exists {
 				if len(b.watchPaths) < watchFileLimit {
 					// each plugin runs on a separate go routine
-					b.mu.Lock()
-					defer b.mu.Unlock()
-					b.watchPaths = append(b.watchPaths, &watcher.WatchPath{Path: file})
+					go func(watchPath *watcher.WatchPath) {
+						b.newWatchPath <- watchPath
+					}(&watcher.WatchPath{Path: file})
+
 				} else {
 					b.log.Error("Bundler watching limit exceeded", zap.String("bundlerName", b.name), zap.Int("limit", watchFileLimit), zap.Error(err))
 				}
@@ -232,6 +234,24 @@ func (b *Bundler) initialBuild() api.BuildResult {
 }
 
 func (b *Bundler) watch(ctx context.Context, rebuild func() api.BuildResult) {
+	watcherCtx, cancel := context.WithCancel(ctx)
+	b.runWatcher(watcherCtx, rebuild)
+
+	for {
+		select {
+		case <-ctx.Done():
+			cancel()
+			return
+		case watchPath := <-b.newWatchPath:
+			b.watchPaths = append(b.watchPaths, watchPath)
+			cancel()
+			watcherCtx, cancel = context.WithCancel(ctx)
+			b.runWatcher(watcherCtx, rebuild)
+		}
+	}
+}
+
+func (b *Bundler) runWatcher(ctx context.Context, rebuild func() api.BuildResult) {
 	w := watcher.NewWatcher(b.name, &watcher.Config{
 		IgnorePaths: b.ignorePaths,
 		WatchPaths:  b.watchPaths,

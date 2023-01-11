@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -35,7 +34,7 @@ func ConfigDir() string {
 
 // ConfigFilePath - returns the path to the config file
 func ConfigFilePath() string {
-	return path.Join(configDir, "config.json")
+	return filepath.Join(configDir, "config.json")
 }
 
 func initConfigDir() error {

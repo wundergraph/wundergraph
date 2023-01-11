@@ -271,42 +271,42 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 
 	host, port := configuration.Host, configuration.Port
 
-	var addrs []string
-	if net.ParseIP(host) == nil {
-		// Not an IP, resolve
-		var err error
-		addrs, err = net.LookupHost(host)
-		if err != nil {
-			return nil, fmt.Errorf("can't resolve host to listen on %s: %w", host, err)
+	var addrs []net.IP
+	// Calling LookupHost on an IP address will return the same
+	// address, so we don't need to handle addresses and hostnames
+	// differently
+	hostAddrs, err := net.DefaultResolver.LookupHost(n.ctx, host)
+	if err != nil {
+		return nil, fmt.Errorf("can't resolve host to listen on %s: %w", host, err)
+	}
+	for _, addr := range hostAddrs {
+		if ip := net.ParseIP(addr); ip != nil {
+			addrs = append(addrs, ip)
 		}
-	} else {
-		addrs = append(addrs, host)
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("host %s didn't resolve to any valid IP adddresses", host)
 	}
 
 	var listeners []net.Listener
 	for _, addr := range addrs {
-		bindProto := ""
-		address := ""
+		saddr := addr.String()
+		var bindAddr string
+		var bindProto string
 		// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
 		// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
 		// to pass the network as tcp4. Dual stack has produced some issues in container environments
 		// for those reasons we are using tcp4 or tcp6 explicitly.
-		if IsIPv4(addr) {
+		if addr.To4() != nil {
 			bindProto = "tcp4"
-			address = addr
-		} else if IsIPv6(addr) {
-			// Filter out link-local addresses
-			if strings.HasPrefix(addr, "fe80:") {
-				continue
-			}
-			bindProto = "tcp6"
-			address = fmt.Sprintf("[%s]", addr)
+			bindAddr = saddr
 		} else {
-			panic(fmt.Errorf("%s doesn't look like an IPv4 nor an IPv6", addr))
+			bindProto = "tcp6"
+			bindAddr = fmt.Sprintf("[%s]", saddr)
 		}
 
-		toListen := fmt.Sprintf("%s:%d", address, port)
-		listener, err := cfg.Listen(context.Background(), bindProto, toListen)
+		toListen := fmt.Sprintf("%s:%d", bindAddr, port)
+		listener, err := cfg.Listen(n.ctx, bindProto, toListen)
 		if err != nil {
 			return nil, fmt.Errorf("error listening on %s: %w", toListen, err)
 		}
@@ -536,16 +536,17 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 				zap.String("addr", l.Addr().String()),
 			)
 
-			if err := n.server.Serve(l); err != nil {
-				if err == http.ErrServerClosed {
-					n.log.Debug("listener closed",
-						zap.String("addr", l.Addr().String()),
-					)
-					return nil
-				}
-				return err
+			err := n.server.Serve(l)
+			if err == nil {
+				return nil
 			}
-			return nil
+			if err == http.ErrServerClosed {
+				n.log.Debug("listener closed",
+					zap.String("addr", l.Addr().String()),
+				)
+				return nil
+			}
+			return err
 		})
 	}
 
@@ -676,12 +677,4 @@ func (n *Node) reloadFileConfig(filePath string) error {
 	n.configCh <- config
 
 	return nil
-}
-
-func IsIPv4(address string) bool {
-	return strings.Count(address, ":") < 2
-}
-
-func IsIPv6(address string) bool {
-	return strings.Count(address, ":") >= 2
 }
