@@ -173,7 +173,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 		state, err := r.Cookie("state")
 		if err != nil {
-			h.log.Error("GithubCookieHandler state missing",
+			h.log.Error("OIDCCookieHandler state missing",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -181,7 +181,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 		}
 
 		if r.URL.Query().Get("state") != state.Value {
-			h.log.Error("GithubCookieHandler state mismatch",
+			h.log.Error("OIDCCookieHandler state mismatch",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -190,7 +190,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 		redirectURI, err := r.Cookie("redirect_uri")
 		if err != nil {
-			h.log.Error("GithubCookieHandler redirect uri missing",
+			h.log.Error("OIDCCookieHandler redirect uri missing",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -207,7 +207,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 
 		oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
 		if err != nil {
-			h.log.Error("GithubCookieHandler.exchange.token",
+			h.log.Error("OIDCCookieHandler.exchange.token",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
