@@ -495,24 +495,24 @@ func (p *OpenIDConnectProvider) disconnectAuth0(ctx context.Context, user *User)
 }
 
 type OpenIDConnectProviderSet struct {
-	m map[string]*OpenIDConnectProvider
+	providers map[string]*OpenIDConnectProvider
 }
 
 func (s *OpenIDConnectProviderSet) Add(id string, p *OpenIDConnectProvider) error {
-	if s.m == nil {
-		s.m = make(map[string]*OpenIDConnectProvider)
+	if s.providers == nil {
+		s.providers = make(map[string]*OpenIDConnectProvider)
 	}
 
-	if s.m[id] != nil {
+	if s.providers[id] != nil {
 		return fmt.Errorf("duplicate OIDC provider ID %q", id)
 
 	}
-	s.m[id] = p
+	s.providers[id] = p
 	return nil
 }
 
 func (s *OpenIDConnectProviderSet) ByID(id string) (*OpenIDConnectProvider, error) {
-	provider := s.m[id]
+	provider := s.providers[id]
 	if provider == nil {
 		return nil, fmt.Errorf("no authentication provider with ID %q", id)
 	}
