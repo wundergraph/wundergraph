@@ -8,7 +8,6 @@ import {
 	RESTApiCustom,
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
-	WG_DIR_ABS,
 } from '../definition';
 import { mergeApis } from '../definition/merge';
 import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
