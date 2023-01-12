@@ -37,7 +37,11 @@ func TestNode(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
+		if bytes.Contains(req, []byte(`{"query":"{me {id username}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
+			return
+		}
+		w.WriteHeader(500)
 	}))
 	defer userService.Close()
 
@@ -45,7 +49,14 @@ func TestNode(t *testing.T) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		_, _ = w.Write([]byte(`{"data":{"_entities":[{"reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}}]}]}}`))
+		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"User","id":"1234"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){__typename ... on User {reviews {body author {id username} product {upc}}}}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"_entities":[{"__typename": "User","reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}}]}]}}`))
+			return
+		}
+		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"Product","upc":"top-1"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){__typename ... on Product {reviews {body author {id username}}}}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"_entities":[{"__typename": "Product","reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"}}]}]}}`))
+		}
+		w.WriteHeader(500)
 	}))
 	defer reviewService.Close()
 
