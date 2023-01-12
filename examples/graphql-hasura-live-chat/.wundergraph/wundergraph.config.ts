@@ -12,7 +12,7 @@ import operations from './wundergraph.operations';
 const hasura = introspect.graphql({
 	id: 'hasura',
 	apiNamespace: 'hasura',
-	url: 'http://hasura-engine:8080/v1/graphql',
+	url: 'http://localhost:8080/v1/graphql',
 	headers: (builder) =>
 		builder
 			.addClientRequestHeader('Authorization', 'Authorization')
@@ -43,19 +43,7 @@ configureWunderGraphApplication({
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3000'],
 	},
-	authentication: {
-		cookieBased: {
-			providers: [authProviders.demo()],
-			authorizedRedirectUriRegexes: ['http://localhost:3000*'],
-		},
-	},
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
-	},
-	options: {
-		listen: {
-			host: '0.0.0.0',
-			port: '9991',
-		},
 	},
 });

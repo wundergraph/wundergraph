@@ -1,17 +1,21 @@
 {
-  "name": "wundergraph-swr",
+  "name": "wundergraph-hasura-live-chat",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "run-p dev wundergraph",
+    "start": "run-p -l start:hasura build && run-p wundergraph start:nextjs open:browser",
+    "start:hasura": "docker-compose up -d",
+    "wait-on:hasura": "wait-on http://localhost:8080 http://localhost:9693 http://localhost:9695",
+    "start:nextjs": "next dev",
+    "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "wundergraph": "wunderctl up --debug",
-    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "build": "next build",
-    "dev": "next dev --port 3000",
-    "check": "tsc --noEmit"
+    "build": "wunderctl generate --debug",
+    "cleanup": "docker-compose down -v",
+    "check": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.123.2",
+    "@wundergraph/sdk": "^0.130.2",
     "@wundergraph/swr": "^0.7.2",
     "graphql": "^16.3.0",
     "moment": "^2.29.4",
@@ -21,12 +25,15 @@
     "swr": "^2.0.0-rc.0"
   },
   "devDependencies": {
+    "@jest/globals": "^29.3.1",
     "@types/node": "^17.0.15",
     "@types/react": "^18.0.6",
+    "jest": "^29.3.1",
     "node-fetch": "^2.6.7",
     "npm-run-all": "^4.1.5",
     "open-cli": "^7.0.1",
     "prettier": "^2.8.0",
+    "ts-jest": "^29.0.3",
     "ts-node": "^10.8.0",
     "typescript": "^4.8.2",
     "wait-on": "^6.0.1"

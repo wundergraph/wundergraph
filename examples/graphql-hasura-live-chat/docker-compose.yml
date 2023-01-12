@@ -46,18 +46,3 @@ services:
     depends_on:
       hasura-engine:
         condition: service_healthy
-
-  app:
-    image: node:18.10.0-alpine3.16
-    command: sh -c "yarn install && yarn start"
-    working_dir: /app
-    volumes:
-      - ./app:/app
-    ports:
-      - 9991:9991
-      - 3000:3000
-    environment:
-      HASURA_GRAPHQL_ADMIN_SECRET: admin-secret-change-me
-    depends_on:
-      hasura-engine:
-        condition: service_healthy
