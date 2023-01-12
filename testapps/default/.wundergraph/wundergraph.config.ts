@@ -108,12 +108,12 @@ configureWunderGraphApplication({
 						// change this before deploying to production to the actual domain where you're deploying your app
 						'http://localhost:3000',
 				  ]
-				: ['http://localhost:3000', 'http://localhost:9991'],
+				: ['http://localhost:3000'],
 	},
 	authentication: {
 		cookieBased: {
 			providers: [authProviders.demo()],
-			authorizedRedirectUris: ['http://localhost:3000', 'http://localhost:9991'],
+			authorizedRedirectUris: ['http://localhost:3000'],
 		},
 	},
 	security: {
