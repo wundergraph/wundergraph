@@ -50,7 +50,7 @@ type UserLoadConfig struct {
 
 func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
-	if (!revalidate) {
+	if !revalidate {
 		fromCache, exists := u.cache.Get(token)
 		if exists {
 			*user = fromCache.(User)
