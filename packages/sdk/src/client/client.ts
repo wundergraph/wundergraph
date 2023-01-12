@@ -411,20 +411,22 @@ export class Client {
 			return false;
 		}
 
+		let ok = true;
 		if (response.headers.get('Content-Type') === 'application/json') {
 			const data = (await response.json()) as LogoutResponse;
 			if (data.redirect) {
 				if (options?.redirect) {
-					return options.redirect(data.redirect);
+					ok = await options.redirect(data.redirect);
+				} else {
+					window.location.href = data.redirect;
 				}
-				window.location.href = data.redirect;
 			}
 		}
 
-		if (options?.after) {
+		if (ok && options?.after) {
 			options.after();
 		}
 
-		return true;
+		return ok;
 	}
 }
