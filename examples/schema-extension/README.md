@@ -16,7 +16,7 @@ npm install && npm start
 #### Get Landpad
 
 ```shell
-curl -N http://localhost:9991/operations/Space
+curl -N http://localhost:9991/operations/Image
 ```
 
 #### Get Users
