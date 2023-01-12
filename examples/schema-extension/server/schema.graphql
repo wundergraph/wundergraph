@@ -1,0 +1,11 @@
+type Query {
+	images: [Image]
+}
+
+type Image {
+	id: String!
+	name: String!
+	geography: Map!
+}
+
+scalar Map
