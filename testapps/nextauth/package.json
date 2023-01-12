@@ -5,8 +5,9 @@
   "scripts": {
     "start": "run-p dev wundergraph open",
     "wundergraph": "wunderctl up",
+    "generate": "wunderctl generate",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "build": "next build",
+    "build": "pnpm generate && next build && pnpm check",
     "dev": "next dev",
     "check": "tsc --noEmit"
   },
