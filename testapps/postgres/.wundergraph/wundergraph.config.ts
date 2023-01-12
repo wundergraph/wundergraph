@@ -21,9 +21,6 @@ configureWunderGraphApplication({
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3000'],
 	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
 	security: {
 		enableGraphQLEndpoint: true,
 	},
