@@ -790,21 +790,12 @@ func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Re
 	if user.ProviderName != "oidc" {
 		return fmt.Errorf("user provider %q is not OpenIDConnect", user.ProviderName)
 	}
-	if user.IdToken == nil {
-		return errors.New("user has no token")
+	if user.ProviderID == "" {
+		return errors.New("user has no provider ID")
 	}
-	issuer, err := jsonparser.GetString(user.IdToken, "iss")
+	provider, err := u.OpenIDProviders.ByID(user.ProviderID)
 	if err != nil {
-		return fmt.Errorf("error retrieving issuer from token: %w", err)
-	}
-	if issuer == "" {
-		return errors.New("can't find issuer in token")
-	}
-
-	provider := u.OpenIDProviders.ByIssuer(issuer)
-	if provider == nil {
-		return fmt.Errorf("no provider registered for issuer %s", issuer)
-
+		return err
 	}
 	result, err := provider.Disconnect(r.Context(), user)
 	if err != nil {

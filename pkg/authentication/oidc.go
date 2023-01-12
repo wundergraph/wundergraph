@@ -511,12 +511,10 @@ func (s *OpenIDConnectProviderSet) Add(id string, p *OpenIDConnectProvider) erro
 	return nil
 }
 
-func (s *OpenIDConnectProviderSet) ByIssuer(issuer string) *OpenIDConnectProvider {
-	for _, provider := range s.m {
-		if provider.config.Issuer == issuer {
-			return provider
-		}
+func (s *OpenIDConnectProviderSet) ByID(id string) (*OpenIDConnectProvider, error) {
+	provider := s.m[id]
+	if provider == nil {
+		return nil, fmt.Errorf("no authentication provider with ID %q", id)
 	}
-
-	return nil
+	return provider, nil
 }
