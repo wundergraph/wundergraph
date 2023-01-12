@@ -104,29 +104,41 @@ export class Client {
 		};
 	}
 
+	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
+	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponse> {
+		const text = await response.text();
+		if (!text) {
+			return {
+				error: new ResponseError('Unable to parse response body', response.status),
+			};
+		}
+		try {
+			const json = JSON.parse(text);
+			return {
+				error: new InputValidationError(json, response.status),
+			};
+		} catch {
+			// if the JSON.parse fails, we know the body must be plaintext
+			return {
+				error: new ResponseError(text, response.status),
+			};
+		}
+	}
+
 	/***
 	 * fetchResponseToClientResponse converts a fetch response to a ClientResponse.
 	 * Network errors or non-200 status codes are converted to an error. Application errors
 	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
 	 */
-	private async fetchResponseToClientResponse(resp: globalThis.Response): Promise<ClientResponse> {
+	private async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
 
-		if (!resp.ok) {
-			try {
-				const json = await resp.json();
-				return {
-					error: new InputValidationError(json, resp.status),
-				};
-			} catch {
-				return {
-					error: new ResponseError('Unable to parse response body', resp.status),
-				};
-			}
+		if (!response.ok) {
+			return this.handleClientResponseError(response);
 		}
 
-		const json = await resp.json();
+		const json = await response.json();
 
 		return this.convertGraphQLResponse({
 			data: json.data,
@@ -243,8 +255,9 @@ export class Client {
 			method: 'GET',
 			signal: options?.abortSignal,
 		});
+
 		if (!response.ok) {
-			throw new ResponseError(`Response is not ok`, response.status);
+			throw await this.handleClientResponseError(response);
 		}
 
 		return response.json();
@@ -372,7 +385,7 @@ export class Client {
 		);
 
 		if (!response.ok) {
-			throw new ResponseError(`Response is not ok`, response.status);
+			throw await this.handleClientResponseError(response);
 		}
 
 		const result = await response.json();
