@@ -130,20 +130,6 @@ export interface SecurityConfig {
 	allowedHosts?: InputVariable[];
 }
 
-export interface IDEConfig {
-	/**
-	 * Path to project's root directory, for generating configuration files for autocompletion.
-	 * If empty, it defaults to the the directory that contains .wundergraph.
-	 */
-	projectRootDir?: string;
-	generate?: {
-		/** Generate a GraphQL autocompletion file (.graphqlrc)
-		 * @default true
-		 */
-		graphql?: boolean;
-	};
-}
-
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;
