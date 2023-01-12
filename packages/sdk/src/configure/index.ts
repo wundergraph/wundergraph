@@ -11,7 +11,6 @@ import {
 	WG_DIR_ABS,
 } from '../definition';
 import { mergeApis } from '../definition/merge';
-import { generateIDEConfig } from '../ideconfig';
 import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
@@ -112,10 +111,7 @@ export interface WunderGraphConfigApplicationConfig {
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
 
-	/** IDE configuration */
-	ideConfig?: IDEConfig;
-
-	/** @deprecated: Superseded by ideConfig */
+	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
 }
 
@@ -809,26 +805,6 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
-			const wgDir = WG_DIR_ABS;
-			let projectRootDir = config?.ideConfig?.projectRootDir;
-			if (projectRootDir) {
-				if (!path.isAbsolute(projectRootDir)) {
-					projectRootDir = path.join(wgDir, projectRootDir.replace('//g', path.sep));
-				}
-			} else {
-				projectRootDir = path.dirname(wgDir);
-			}
-
-			generateIDEConfig({
-				projectRootDir: projectRootDir,
-				wundergraphDir: wgDir,
-				nodeUrl: publicNodeUrl,
-				generateGraphQLConfig: config?.ideConfig?.generate?.graphql ?? true,
-				logger: (s) => Logger.info(s),
-			});
-
-			done();
-
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
 			});
@@ -849,7 +825,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		});
 };
 
-const total = 5;
+const total = 4;
 let doneCount = 0;
 
 const done = () => {
