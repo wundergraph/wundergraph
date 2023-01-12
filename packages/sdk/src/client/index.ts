@@ -1,6 +1,7 @@
 export type {
 	ClientResponse,
 	UploadRequestOptions,
+	UploadRequestOptionsWithProfile,
 	UploadResponse,
 	FetchUserRequestOptions,
 	User,

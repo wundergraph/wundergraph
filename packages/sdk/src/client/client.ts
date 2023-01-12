@@ -343,8 +343,8 @@ export class Client {
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
-	public async uploadFiles(
-		config: UploadRequestOptions,
+	public async uploadFiles<UploadOptions extends UploadRequestOptions>(
+		config: UploadOptions,
 		validation?: UploadValidationOptions
 	): Promise<UploadResponse> {
 		this.validateFiles(config, validation);
@@ -360,15 +360,23 @@ export class Client {
 			wg_api_hash: this.options.applicationHash,
 		});
 
+		// Dont set the content-type header, the browser will set it for us + boundary
+		const headers: Headers = {
+			'X-CSRF-Token': csrfToken,
+		};
+
+		if ('profile' in config) {
+			headers['X-Upload-Profile'] = (config.profile ?? '') as string;
+		}
+
+		if ('meta' in config) {
+			headers['X-Metadata'] = config.meta ? JSON.stringify(config.meta) : '';
+		}
+
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
-				headers: {
-					// Dont set the content-type header, the browser will set it for us + boundary
-					'X-CSRF-Token': csrfToken,
-					'X-Upload-Profile': config.profile ?? '',
-					'X-Metadata': config.meta ? JSON.stringify(config.meta) : '',
-				},
+				headers,
 				body: formData,
 				method: 'POST',
 				signal: config.abortSignal,

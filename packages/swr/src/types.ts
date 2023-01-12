@@ -9,6 +9,7 @@ import {
 	UploadRequestOptions,
 	User,
 } from '@wundergraph/sdk/client';
+import { UploadRequestOptionsWithProfile } from '@wundergraph/sdk/dist/client/types';
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration, SWRMutationResponse } from 'swr/mutation';
 
@@ -148,14 +149,18 @@ export type UseUploadHook<Operations extends OperationsDefinition> = {
 	> & {
 		upload: <
 			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
-			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName], string> = Extract<
-				keyof Operations['s3Provider'][ProviderName],
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName]['profiles'],
 				string
 			>,
-			Meta extends Operations['s3Provider'][ProviderName][ProfileName] = Operations['s3Provider'][ProviderName][ProfileName]
+			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
 		>(
-			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
+			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
+				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
+				: UploadRequestOptions,
 			config?: UseUploadOptions
 		) => Promise<string[]>;
 	};
 };
+
+// type Test<ProfileName> =

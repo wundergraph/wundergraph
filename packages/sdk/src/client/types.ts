@@ -23,7 +23,10 @@ export interface ClientOperation {
 
 export interface S3ProviderDefinition {
 	[provider: string]: {
-		[profile: string]: object;
+		hasProfiles: boolean;
+		profiles: {
+			[profile: string]: object;
+		};
 	};
 }
 
@@ -114,17 +117,23 @@ export interface SubscriptionResult {
 	data: any;
 }
 
-export type UploadRequestOptions<
-	ProviderName extends string = any,
-	ProfileName extends string = any,
-	Meta extends object = object
-> = {
+export interface UploadRequestOptions<ProviderName extends string = string> {
 	provider: ProviderName;
 	files: FileList;
 	abortSignal?: AbortSignal;
-	profile?: ProfileName;
+}
+
+export interface UploadRequestOptionsWithProfile<
+	ProviderName extends string = string,
+	ProfileName extends string = string,
+	Meta extends object = object
+> extends UploadRequestOptions<ProviderName> {
+	provider: ProviderName;
+	profile: ProfileName;
+	files: FileList;
+	abortSignal?: AbortSignal;
 	meta?: Meta;
-};
+}
 
 export interface UploadResponse {
 	fileKeys: string[];

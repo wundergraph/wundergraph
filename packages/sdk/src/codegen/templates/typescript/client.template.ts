@@ -6,6 +6,7 @@ import {
 	CreateClientConfig,
 	User,
 	UploadRequestOptions,
+	UploadRequestOptionsWithProfile,
 	OperationMetadata,
 	OperationsDefinition,
 	OperationRequestOptions,
@@ -32,9 +33,12 @@ export interface UploadResponse { key: string }
 type S3Providers ={
 	{{#each s3Providers}}
 	{{name}}: {
-		{{#each uploadProfiles}}
-			{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}}
-		{{/each}}
+		hasProfiles: {{#if hasProfiles}}true{{else}}false{{/if}},
+		profiles: {
+			{{#each uploadProfiles}}
+				{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}}
+			{{/each}}
+		}
 	}
 	{{/each}}
 }
@@ -121,16 +125,16 @@ export class WunderGraphClient extends Client {
 	{{#if hasS3Providers}}
 	public async uploadFiles<
 		ProviderName extends Extract<keyof S3Providers, string>,
-		ProfileName extends Extract<keyof S3Providers[ProviderName], string> = Extract<
-			keyof S3Providers[ProviderName],
+		ProfileName extends Extract<keyof S3Providers[ProviderName]['profiles'], string> = Extract<
+			keyof S3Providers[ProviderName]['profiles'],
 			string
 		>,
-		Meta extends Extract<S3Providers[ProviderName][ProfileName], object> = Extract<
-			S3Providers[ProviderName][ProfileName],
+		Meta extends Extract<S3Providers[ProviderName]['profiles'][ProfileName], object> = Extract<
+			S3Providers[ProviderName]['profiles'][ProfileName],
 			object
 		>
 	>(
-		config: ProviderName extends string ? UploadRequestOptions<ProviderName, ProfileName, Meta> : UploadRequestOptions
+		config: ProfileName extends string ? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta> : UploadRequestOptions
 	) {
 		const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
 		return super.uploadFiles(config, profile);

@@ -1,5 +1,14 @@
 import { expectType } from 'tsd';
-import { Client, ClientResponse, OperationRequestOptions, SubscriptionRequestOptions, User } from '../src/client';
+import {
+	Client,
+	ClientResponse,
+	OperationRequestOptions,
+	SubscriptionRequestOptions,
+	UploadRequestOptions,
+	UploadResponse,
+	User,
+} from '../src/client';
+import { UploadRequestOptionsWithProfile } from '../src/client/types';
 
 const client = new Client({
 	baseURL: 'https://api.com',
@@ -108,5 +117,22 @@ expectType<string>(
 	Client.buildCacheKey({
 		operationName: 'Weather',
 		input: { lat: 1 },
+	})
+);
+
+// Uploads
+
+expectType<Promise<UploadResponse>>(
+	client.uploadFiles({
+		provider: 'minio',
+		files: new FileList(),
+	})
+);
+
+expectType<Promise<UploadResponse>>(
+	client.uploadFiles<UploadRequestOptionsWithProfile<'minio', 'avatar', object>>({
+		provider: 'minio',
+		profile: 'avatar',
+		files: new FileList(),
 	})
 );

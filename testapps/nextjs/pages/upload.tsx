@@ -20,7 +20,7 @@ const UploadPage: NextPage = () => {
 				provider: 'minio',
 				profile: 'coverPicture',
 				meta: {
-					postId: 'abcdefg',
+					postId: '1',
 				},
 				files,
 			});
