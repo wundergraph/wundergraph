@@ -1,7 +1,6 @@
 import { NextPage } from 'next';
 import Image from 'next/image';
 import { useState } from 'react';
-import { createClient } from '../components/generated/client';
 import { useAuth, useFileUpload, useUser, withWunderGraph } from '../components/generated/nextjs';
 
 const Upload = () => {
