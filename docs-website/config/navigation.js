@@ -144,8 +144,8 @@ const navigation = [
 				href: '/docs/guides/signing-origin-requests',
 			},
 			{
-				title: 'Configure Authorization',
-				href: '/docs/guides/configure-authorization',
+				title: 'Token Based Authentication with Next Auth',
+				href: '/docs/guides/token-based-authentication-with-next-auth',
 			},
 		],
 	},
