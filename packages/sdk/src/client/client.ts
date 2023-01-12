@@ -366,11 +366,11 @@ export class Client {
 		};
 
 		if ('profile' in config) {
-			headers['X-Upload-Profile'] = (config.profile ?? '') as string;
+			headers['X-Upload-Profile'] = (config as any).profile ?? ('' as string);
 		}
 
 		if ('meta' in config) {
-			headers['X-Metadata'] = config.meta ? JSON.stringify(config.meta) : '';
+			headers['X-Metadata'] = (config as any).meta ? JSON.stringify((config as any).meta) : '';
 		}
 
 		const response = await this.fetch(

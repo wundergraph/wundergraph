@@ -22,14 +22,10 @@ const Upload = () => {
 		if (!files) {
 			return;
 		}
-		const c = createClient();
-		c.uploadFiles({
-			provider: 'minio',
-			files: files,
-		});
 		try {
 			const result = await upload({
-				provider: 'minio',
+				provider: 'minio1',
+				profile: 'coverPicture',
 				files,
 			});
 			result && setData(result);
