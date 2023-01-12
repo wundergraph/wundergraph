@@ -8,7 +8,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 		queries: {},
 		mutations: {},
 		uploads: {
-			minio: {
+			minio1: {
 				coverPicture: {
 					preUpload: ({ user, file, meta }) => {
 						console.log(`preUpload user: ${user}, file: ${file}, meta: ${meta}`);
