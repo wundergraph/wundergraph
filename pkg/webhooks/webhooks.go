@@ -2,14 +2,14 @@ package webhooks
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
 const WebhookDirectoryName = "webhooks"
 
 func GetWebhooks(wunderGraphDir string) ([]string, error) {
-	webhooksDirectoryAbs := path.Join(wunderGraphDir, WebhookDirectoryName)
+	webhooksDirectoryAbs := filepath.Join(wunderGraphDir, WebhookDirectoryName)
 	des, err := os.ReadDir(webhooksDirectoryAbs)
 	if err != nil {
 		return nil, err
@@ -19,7 +19,7 @@ func GetWebhooks(wunderGraphDir string) ([]string, error) {
 		if entry.IsDir() || strings.HasSuffix(entry.Name(), ".d.ts") || !strings.HasSuffix(entry.Name(), ".ts") {
 			continue
 		}
-		webhookFilePaths = append(webhookFilePaths, path.Join(WebhookDirectoryName, entry.Name()))
+		webhookFilePaths = append(webhookFilePaths, filepath.Join(WebhookDirectoryName, entry.Name()))
 	}
 	return webhookFilePaths, nil
 }

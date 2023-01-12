@@ -248,14 +248,80 @@ const tests: {
 			Types: [],
 		},
 	},
+	{
+		schema:
+			'schema { query: Query } type Query { jsonReturn: JSON jsonInput(field: JSON): String jsonListReturn: [JSON] jsonListInput(input: [JSON]): String } scalar JSON',
+		config: {
+			RootNodes: [
+				{
+					typeName: 'Query',
+					fieldNames: ['jsonReturn', 'jsonInput', 'jsonListReturn', 'jsonListInput'],
+				},
+			],
+			ChildNodes: [],
+			Fields: [
+				{
+					typeName: 'Query',
+					fieldName: 'jsonInput',
+					argumentsConfiguration: [
+						{
+							name: 'field',
+							sourceType: 1,
+							sourcePath: [],
+							renderConfiguration: 0,
+						},
+					],
+					disableDefaultFieldMapping: false,
+					path: [],
+					requiresFields: [],
+					unescapeResponseJson: false,
+				},
+				{
+					typeName: 'Query',
+					fieldName: 'jsonListInput',
+					argumentsConfiguration: [
+						{
+							name: 'input',
+							sourceType: 1,
+							sourcePath: [],
+							renderConfiguration: 0,
+						},
+					],
+					disableDefaultFieldMapping: false,
+					path: [],
+					requiresFields: [],
+					unescapeResponseJson: false,
+				},
+				{
+					typeName: 'Query',
+					fieldName: 'jsonReturn',
+					argumentsConfiguration: [],
+					disableDefaultFieldMapping: false,
+					path: [],
+					requiresFields: [],
+					unescapeResponseJson: true,
+				},
+				{
+					typeName: 'Query',
+					fieldName: 'jsonListReturn',
+					argumentsConfiguration: [],
+					disableDefaultFieldMapping: false,
+					path: [],
+					requiresFields: [],
+					unescapeResponseJson: true,
+				},
+			],
+			Types: [],
+		},
+	},
 ];
 
-test('configuration', () => {
-	tests.forEach((t, i) => {
-		const schema = parse(t.schema);
-		const serviceSDL = t.serviceSDL === undefined ? undefined : parse(t.serviceSDL);
-		const nodes = configuration(schema, serviceSDL);
-		assert.equal(pretty(nodes), pretty(t.config), 'testCase: ' + i);
+describe('configuration', () => {
+	it.each(tests)('testCase: %#', ({ schema: tSchema, serviceSDL: tServiceSDL, config }) => {
+		const schema = parse(tSchema);
+		const serviceSDL = tServiceSDL === undefined ? undefined : parse(tServiceSDL);
+		const nodes = configuration(schema, undefined, serviceSDL);
+		assert.equal(pretty(nodes), pretty(config));
 	});
 });
 
