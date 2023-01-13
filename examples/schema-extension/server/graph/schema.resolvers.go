@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 
-	"github.com/wundergraph/wundergraph/examples/schema-extension/server/graph/generated"
+	"github.com/wundergraph/wundergraph/examples/schema-extension/server/graph/gen"
 	"github.com/wundergraph/wundergraph/examples/schema-extension/server/graph/model"
 )
 
@@ -33,6 +33,6 @@ func (r *queryResolver) Images(ctx context.Context) ([]*model.Image, error) {
 }
 
 // Query returns generated.QueryResolver implementation.
-func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
+func (r *Resolver) Query() gen.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
