@@ -66,7 +66,7 @@ fi
 
 # If we have an example .env.example file
 # copy it to .env to use default values in the CI
-if [ -e ".env.example" ]; then
+if test -f .env.example && ! test -f .env; then
 	cp -n .env.example .env
 fi
 
