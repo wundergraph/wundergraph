@@ -19,7 +19,7 @@ kill_with_children() {
         done
     fi
     # Ignore errors here
-    kill ${pid} 2> /dev/null || true
+    kill ${pid} > /dev/null 2> /dev/null || true
 }
 
 args=`getopt uh $*`
