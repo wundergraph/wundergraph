@@ -31,7 +31,7 @@ npm i && npm start
 You can also easily integrate WunderGraph into your existing projects.
 
 ```shell
-npx create-wundergraph-app <project-name> -E simple
+npx create-wundergraph-app --init
 ```
 
 ## More Examples

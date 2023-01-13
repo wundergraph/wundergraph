@@ -5,7 +5,7 @@ import inquirer from 'inquirer';
 export const getExamplesList = async (ref: string) => {
 	const exampleDirectoriesResponse = await got
 		.get(`https://api.github.com/repos/wundergraph/wundergraph/contents/examples?ref=${ref}`)
-		.catch((e) => {
+		.catch((e: any) => {
 			throw e;
 		});
 	const exampleDirectories = JSON.parse(exampleDirectoriesResponse.body);

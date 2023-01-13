@@ -48,15 +48,17 @@ type UserLoadConfig struct {
 	issuer           string
 }
 
-func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User) error {
+func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
-	fromCache, exists := u.cache.Get(token)
-	if exists {
-		*user = fromCache.(User)
-		u.log.Debug("user loaded from cache",
-			zap.String("sub", user.UserID),
-		)
-		return nil
+	if !revalidate {
+		fromCache, exists := u.cache.Get(token)
+		if exists {
+			*user = fromCache.(User)
+			u.log.Debug("user loaded from cache",
+				zap.String("sub", user.UserID),
+			)
+			return nil
+		}
 	}
 
 	var tempUser User
@@ -89,6 +91,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		if err != nil {
 			return err
 		}
+
 		tempUser = User{
 			ProviderName:  "token",
 			ProviderID:    cfg.issuer,
@@ -215,12 +218,13 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 			return fmt.Errorf("invalid authorization Header")
 		}
 		trimmed := strings.TrimPrefix(authorizationHeader, "Bearer ")
+		revalidate := r.URL.Query().Get("revalidate") == "true"
 		for i := range loader.userLoadConfigs {
 			token, err := jwt.Parse(trimmed, loader.userLoadConfigs[i].jwks.Keyfunc)
 			if err == nil && !token.Valid {
 				continue
 			}
-			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u)
+			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u, revalidate)
 			if err == nil {
 				return nil
 			}
@@ -665,20 +669,7 @@ func UserFromContext(ctx context.Context) *User {
 	return nil
 }
 
-type TokenUserHandler struct{}
-
-func (_ TokenUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	user := UserFromContext(r.Context())
-	if user == nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	user.RemoveInternalFields()
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(user)
-}
-
-type CookieUserHandler struct {
+type UserHandler struct {
 	HasRevalidateHook bool
 	MWClient          *hooks.Client
 	Log               *zap.Logger
@@ -687,13 +678,14 @@ type CookieUserHandler struct {
 	Cookie            *securecookie.SecureCookie
 }
 
-func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user := UserFromContext(r.Context())
 	if user == nil {
 		http.NotFound(w, r)
 		return
 	}
-	if u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
+
+	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
 		hookData := []byte(`{}`)
 		if userJson, err := json.Marshal(user); err != nil {
 			u.Log.Error("Could not marshal user", zap.Error(err))
@@ -737,14 +729,17 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if r.Header.Get("If-None-Match") == user.ETag {
+	if tag := r.Header.Get("If-None-Match"); tag != "" && tag == user.ETag {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header()["ETag"] = []string{user.ETag}
-	w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
+
+	if user.ETag != "" {
+		w.Header()["ETag"] = []string{user.ETag}
+		w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
+	}
 
 	user.RemoveInternalFields()
 	if r.Header.Get("Accept") != "application/json" {
@@ -764,9 +759,10 @@ func (_ *CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserLogoutHandler struct {
-	InsecureCookies                  bool
-	OpenIDConnectIssuersToLogoutURLs map[string]string
-	Hooks                            Hooks
+	InsecureCookies bool
+	OpenIDProviders *OpenIDConnectProviderSet
+	Hooks           Hooks
+	Log             *zap.Logger
 }
 
 func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -776,37 +772,36 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u.Hooks.handlePostLogout(r.Context(), user)
-	logoutOpenIDConnectProvider := r.URL.Query().Has("logout_openid_connect_provider")
-	if !logoutOpenIDConnectProvider {
-		return
+	if strings.ToLower(r.URL.Query().Get("logout_openid_connect_provider")) == "true" {
+		if err := u.logoutFromProvider(w, r, user); err != nil {
+			if u.Log != nil {
+				u.Log.Warn("could not disconnect user from OIDC provider", zap.Error(err))
+			}
+		}
 	}
+}
+
+func (u *UserLogoutHandler) logoutFromProvider(w http.ResponseWriter, r *http.Request, user *User) error {
 	if user.ProviderName != "oidc" {
-		return
+		return fmt.Errorf("user provider %q is not OpenIDConnect", user.ProviderName)
 	}
-	if user.IdToken == nil {
-		return
+	if user.ProviderID == "" {
+		return errors.New("user has no provider ID")
 	}
-	issuer, err := jsonparser.GetString(user.IdToken, "iss")
-	if err != nil || issuer == "" {
-		return
-	}
-	logoutURL, ok := u.OpenIDConnectIssuersToLogoutURLs[issuer]
-	if !ok {
-		return
-	}
-	req, err := http.NewRequestWithContext(r.Context(), "GET", logoutURL, nil)
+	provider, err := u.OpenIDProviders.ByID(user.ProviderID)
 	if err != nil {
-		return
+		return err
 	}
-	q := req.URL.Query()
-	q.Set("id_token_hint", user.RawIDToken)
-	req.URL.RawQuery = q.Encode()
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	client := &http.Client{
-		Timeout: time.Second * 10,
+	result, err := provider.Disconnect(r.Context(), user)
+	if err != nil {
+		return err
 	}
-	_, _ = client.Do(req)
-	// we can safely ignore the outcome
+	if result.RequiresClientCooperation() {
+		w.Header().Set("Content-Type", "application/json")
+		enc := json.NewEncoder(w)
+		return enc.Encode(&result)
+	}
+	return nil
 }
 
 type CSRFErrorHandler struct {
