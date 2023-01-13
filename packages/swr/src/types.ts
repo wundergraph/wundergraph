@@ -42,8 +42,8 @@ export type MutationFetcher<Operations extends OperationsDefinition> = {
 	): Promise<Data>;
 };
 
-export type UseQueryOptions<Data, ClientResponseError, Input, OperationName extends string, LiveQuery> = Omit<
-	SWRConfiguration<Data, ClientResponseError>,
+export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
+	SWRConfiguration<Data, Error>,
 	'fetcher'
 > & {
 	operationName: OperationName;
@@ -63,7 +63,7 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 	): SWRResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionOptions<Data, ClientResponseError, Input, OperationName extends string> = {
+export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
 	operationName: OperationName;
 	subscribeOnce?: boolean;
 	resetOnMount?: boolean;
@@ -77,7 +77,7 @@ export type UseSubscriptionOptions<Data, ClientResponseError, Input, OperationNa
 	onError?(
 		error: ClientResponseError,
 		key: Key,
-		config: UseSubscriptionOptions<Data, ClientResponseError, Input, OperationName>
+		config: UseSubscriptionOptions<Data, Error, Input, OperationName>
 	): void;
 };
 
@@ -91,15 +91,15 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 	): UseSubscriptionResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, ClientResponseError> = Omit<
-	SWRResponse<Data, ClientResponseError>,
+export type UseSubscriptionResponse<Data, Error = ClientResponseError> = Omit<
+	SWRResponse<Data, Error>,
 	'isValidating' | 'mutate'
 > & {
 	isSubscribed: boolean;
 };
 
-export type UseMutationOptions<Data, ClientResponseError, Input, OperationName extends string> = Omit<
-	SWRMutationConfiguration<Data, ClientResponseError, Input, OperationName>,
+export type UseMutationOptions<Data, Error, Input, OperationName extends string> = Omit<
+	SWRMutationConfiguration<Data, Error, Input, OperationName>,
 	'fetcher'
 > & {
 	operationName: OperationName;

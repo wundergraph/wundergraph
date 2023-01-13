@@ -57,8 +57,8 @@ export type QueryKey<Operations extends OperationsDefinition> = {
 	}): (OperationName | Input | undefined)[];
 };
 
-export type UseQueryOptions<Data, ClientResponseError, Input, OperationName extends string, LiveQuery> = Omit<
-	UseTanstackQueryOptions<Data, ClientResponseError, Data, (OperationName | Input | undefined)[]>,
+export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
+	UseTanstackQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>,
 	'queryKey' | 'queryFn'
 > & {
 	operationName: OperationName;
@@ -77,14 +77,14 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 	): UseQueryResult<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionOptions<Data, ClientResponseError, Input, OperationName extends string> = {
+export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
 	operationName: OperationName;
 	subscribeOnce?: boolean;
 	resetOnMount?: boolean;
 	enabled?: boolean;
 	input?: Input;
 	onSuccess?(response: ClientResponse<Data>): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: Error): void;
 };
 
 export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
@@ -97,12 +97,12 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 	): UseSubscriptionResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, ClientResponseError> = UseQueryResult<Data, ClientResponseError> & {
+export type UseSubscriptionResponse<Data, Error = ClientResponseError> = UseQueryResult<Data, ClientResponseError> & {
 	isSubscribed: boolean;
 };
 
-export type UseMutationOptions<Data, ClientResponseError, Input, OperationName extends string> = Omit<
-	UseTanstackMutationOptions<Data, ClientResponseError, Input, (OperationName | Input | undefined)[]>,
+export type UseMutationOptions<Data, Error, Input, OperationName extends string> = Omit<
+	UseTanstackMutationOptions<Data, Error, Input, (OperationName | Input | undefined)[]>,
 	'mutationKey' | 'mutationFn'
 > & {
 	operationName: OperationName;
