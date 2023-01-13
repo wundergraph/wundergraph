@@ -97,7 +97,7 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 	): UseSubscriptionResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, Error = ClientResponseError> = UseQueryResult<Data, ClientResponseError> & {
+export type UseSubscriptionResponse<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
 	isSubscribed: boolean;
 };
 
