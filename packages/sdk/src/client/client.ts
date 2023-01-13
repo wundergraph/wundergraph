@@ -419,7 +419,7 @@ export class Client {
 		}
 
 		let ok = true;
-		if (response.headers.get('Content-Type') === 'application/json') {
+		if (response.headers.get('Content-Type')?.includes('application/json')) {
 			const data = (await response.json()) as LogoutResponse;
 			if (data.redirect) {
 				if (options?.redirect) {
