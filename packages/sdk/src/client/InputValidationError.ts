@@ -11,7 +11,7 @@ interface ResponseJson {
 }
 
 export class InputValidationError extends Error {
-	private errors: error[];
+	public errors: error[];
 	constructor(public json: ResponseJson, public statusCode: number) {
 		super(json.message);
 		this.name = 'InputValidationError';

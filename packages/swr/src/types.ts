@@ -8,7 +8,7 @@ import {
 } from '@wundergraph/sdk/client';
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration, SWRMutationResponse } from 'swr/mutation';
-import { ClientResponseError } from '@wundergraph/sdk/dist/client/ClientResponseError';
+import { ClientResponseError } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<

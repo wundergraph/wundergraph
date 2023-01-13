@@ -13,7 +13,7 @@ import {
 	UseQueryResult,
 	UseMutationResult,
 } from '@tanstack/react-query';
-import { ClientResponseError } from '@wundergraph/sdk/dist/client/ClientResponseError';
+import { ClientResponseError } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
