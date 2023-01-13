@@ -250,7 +250,9 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		)
 	}
 
-	r.registerAuth(r.insecureCookies)
+	if err := r.registerAuth(r.insecureCookies); err != nil {
+		return nil, err
+	}
 
 	for _, s3Provider := range api.S3UploadConfiguration {
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
@@ -2012,7 +2014,7 @@ func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConne
 			return nil, fmt.Errorf("error in %s OIDC provider: %w", provider.Id, err)
 		}
 		if err := providers.Add(provider.Id, oidc); err != nil {
-			return nil, fmt.Errorf("could not %s register OIDC provider: %w", provider.Id, err)
+			return nil, fmt.Errorf("could not register OIDC provider %s: %w", provider.Id, err)
 		}
 	}
 
