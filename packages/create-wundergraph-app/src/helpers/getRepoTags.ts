@@ -14,7 +14,7 @@ export const getRepoTags = async (githubLink: string, prefix?: string) => {
 
 	const response = await got
 		.get(`https://api.github.com/repos/${repoOwnerName}/${repoName}/git/refs/tags`, options)
-		.catch((e) => {
+		.catch((e: any) => {
 			throw e;
 		});
 	const data = JSON.parse(response.body);

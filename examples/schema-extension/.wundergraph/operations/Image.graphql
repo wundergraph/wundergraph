@@ -1,0 +1,10 @@
+query {
+	gallery_images {
+		id
+		name
+		geography {
+			latitude
+			longitude
+		}
+	}
+}

@@ -19,7 +19,7 @@ following their [official instructions](https://nodejs.org).
 # Init a new project with the Next.js starter kit
 npx create-wundergraph-app my-project -E nextjs
 
-# Move the the project directory
+# Move to the project directory
 cd my-project
 
 # Install dependencies and start
@@ -31,7 +31,7 @@ npm i && npm start
 You can also easily integrate WunderGraph into your existing projects.
 
 ```shell
-npx create-wundergraph-app <project-name> -E simple
+npx create-wundergraph-app --init
 ```
 
 ## More Examples
