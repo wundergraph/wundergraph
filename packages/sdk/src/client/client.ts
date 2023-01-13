@@ -19,6 +19,9 @@ import { ResponseError } from './ResponseError';
 
 // https://graphql.org/learn/serving-over-http/
 
+interface LogoutResponse {
+	redirect?: string;
+}
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -401,6 +404,11 @@ export class Client {
 	}
 
 	public async logout(options?: LogoutOptions): Promise<boolean> {
+		// browser check
+		if (typeof window === 'undefined') {
+			throw new Error('logout() can only be called in a browser environment');
+		}
+
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
@@ -411,6 +419,26 @@ export class Client {
 			method: 'GET',
 		});
 
-		return response.ok;
+		if (!response.ok) {
+			return false;
+		}
+
+		let ok = true;
+		if (response.headers.get('Content-Type')?.includes('application/json')) {
+			const data = (await response.json()) as LogoutResponse;
+			if (data.redirect) {
+				if (options?.redirect) {
+					ok = await options.redirect(data.redirect);
+				} else {
+					window.location.href = data.redirect;
+				}
+			}
+		}
+
+		if (ok && options?.after) {
+			options.after();
+		}
+
+		return ok;
 	}
 }
