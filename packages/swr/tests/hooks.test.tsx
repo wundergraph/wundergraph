@@ -6,11 +6,35 @@ import { Client, ClientConfig } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
 
-import { createHooks } from '../src/hooks';
+import { createHooks } from '../src';
+import { InputValidationError } from '@wundergraph/sdk/dist/client/InputValidationError';
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
 }
+
+type MockError = {
+	propertyPath: string;
+	message: string;
+	invalidValue: object;
+};
+
+const mockErrorJson = {
+	message: 'Bad Request: Invalid input',
+	errors: [
+		{
+			propertyPath: '/',
+			message: 'error one',
+			invalidValue: {},
+		},
+		{
+			propertyPath: '/',
+			message: 'error two',
+			invalidValue: {},
+		},
+	],
+	input: {},
+};
 
 const _renderWithConfig = (
 	element: React.ReactElement,
@@ -131,6 +155,75 @@ describe('SWR - useQuery', () => {
 		scope.done();
 	});
 
+	it('returns a ResponseError if the response is not 2xx and has a plaintext body', async () => {
+		const errorMessage = 'Computer says no.';
+		const scope = nockQuery().once().reply(400, errorMessage);
+
+		function Page() {
+			const { error } = useQuery({
+				operationName: 'Weather',
+			});
+
+			return <div>{error?.message}</div>;
+		}
+
+		renderWithConfig(<Page />);
+
+		await waitFor(() => {
+			screen.getByText(errorMessage);
+		});
+
+		scope.done();
+	});
+
+	it('returns a ResponseError if the response is not 2xx and has no body', async () => {
+		const scope = nockQuery().once().reply(400);
+
+		function Page() {
+			const { error } = useQuery({
+				operationName: 'Weather',
+			});
+
+			return <div>{error?.message}</div>;
+		}
+
+		renderWithConfig(<Page />);
+
+		await waitFor(() => {
+			screen.getByText('Unable to parse response body');
+		});
+
+		scope.done();
+	});
+
+	it('returns an InputValidationError if the response is not 2xx and has a json body', async () => {
+		const scope = nockQuery().once().reply(400, mockErrorJson);
+
+		function Page() {
+			const { error } = useQuery({
+				operationName: 'Weather',
+				input: {}, // unnecessary but for illustration
+			});
+
+			return (
+				<div>
+					{error?.message}
+					{error instanceof InputValidationError && error.errors.map((error: MockError) => error.message)}
+				</div>
+			);
+		}
+
+		renderWithConfig(<Page />);
+
+		await waitFor(() => {
+			screen.getByText(/Bad Request: Invalid input/);
+			screen.getByText(/error one/);
+			screen.getByText(/error two/);
+		});
+
+		scope.done();
+	});
+
 	it('should be disabled', async () => {
 		const scope = nockQuery().reply(200, {
 			data: {
@@ -139,7 +232,7 @@ describe('SWR - useQuery', () => {
 		});
 
 		function Page() {
-			const { data, isValidating } = useQuery({
+			const { isValidating } = useQuery({
 				operationName: 'Weather',
 				enabled: false,
 			});
@@ -160,7 +253,7 @@ describe('SWR - useQuery', () => {
 
 	it('should subscribe live query', async () => {
 		// web streams not supported in node-fetch, but we check if the hook returns isLoading
-		const scope = nockQuery('Weather', {
+		nockQuery('Weather', {
 			wg_live: 'true',
 		}).reply(200, {
 			data: {
@@ -169,7 +262,7 @@ describe('SWR - useQuery', () => {
 		});
 
 		function Page() {
-			const { data, isLoading } = useQuery({
+			const { isLoading } = useQuery({
 				operationName: 'Weather',
 				liveQuery: true,
 			});
@@ -231,7 +324,7 @@ describe('SWR - useMutation', () => {
 		});
 
 		function Page() {
-			const { data, error, isMutating, trigger } = useMutation({
+			const { data, isMutating, trigger } = useMutation({
 				operationName: 'SetNameWithoutAuth',
 			});
 
@@ -254,6 +347,111 @@ describe('SWR - useMutation', () => {
 
 		scope.done();
 	});
+
+	it('returns a ResponseError if the response is not 2xx and has a plaintext body', async () => {
+		const { mutation, csrfScope } = nockMutation('SetNameWithoutAuth', { name: 'Rick Astley' });
+		const scope = mutation.once().reply(400, 'An error');
+
+		function Page() {
+			const { data, error, isMutating, trigger } = useMutation({
+				operationName: 'SetNameWithoutAuth',
+			});
+
+			React.useEffect(() => {
+				trigger({ name: 'Rick Astley' }, { throwOnError: false });
+			}, []);
+
+			return (
+				<div>
+					{isMutating ? 'true' : data?.id}
+					{error?.message}
+				</div>
+			);
+		}
+
+		renderWithGlobalCache(<Page />);
+
+		screen.getByText(/true/);
+
+		await waitFor(() => {
+			screen.getByText(/An error/);
+		});
+
+		expect(() => csrfScope.done()).toThrow(); // should not be called
+
+		scope.done();
+	});
+
+	it('returns a ResponseError if the response is not 2xx and has no body', async () => {
+		const { mutation, csrfScope } = nockMutation('SetNameWithoutAuth', { name: 'Rick Astley' });
+		const scope = mutation.once().reply(400);
+
+		function Page() {
+			const { data, error, isMutating, trigger } = useMutation({
+				operationName: 'SetNameWithoutAuth',
+			});
+
+			React.useEffect(() => {
+				trigger({ name: 'Rick Astley' }, { throwOnError: false });
+			}, []);
+
+			return (
+				<div>
+					{isMutating ? 'true' : data?.id}
+					{error?.message}
+				</div>
+			);
+		}
+
+		renderWithGlobalCache(<Page />);
+
+		screen.getByText(/true/);
+
+		await waitFor(() => {
+			screen.getByText('Unable to parse response body');
+		});
+
+		expect(() => csrfScope.done()).toThrow(); // should not be called
+
+		scope.done();
+	});
+
+	it('returns an InputValidationError if the response is not 2xx and has a json body', async () => {
+		const { mutation, csrfScope } = nockMutation('SetNameWithoutAuth', { name: 'Rick Astley' });
+		const scope = mutation.once().reply(400, mockErrorJson);
+
+		function Page() {
+			const { data, error, isMutating, trigger } = useMutation({
+				operationName: 'SetNameWithoutAuth',
+			});
+
+			React.useEffect(() => {
+				trigger({ name: 'Rick Astley' }, { throwOnError: false });
+			}, []);
+
+			return (
+				<div>
+					{isMutating ? 'true' : data?.id}
+					{error?.message}
+					{error instanceof InputValidationError && error.errors.map((error: MockError) => error.message)}
+				</div>
+			);
+		}
+
+		renderWithGlobalCache(<Page />);
+
+		screen.getByText(/true/);
+
+		await waitFor(() => {
+			screen.getByText(/Bad Request: Invalid input/);
+			screen.getByText(/error one/);
+			screen.getByText(/error two/);
+		});
+
+		expect(() => csrfScope.done()).toThrow(); // should not be called
+
+		scope.done();
+	});
 });
 
 describe('SWR - useSubscription', () => {
@@ -263,7 +461,7 @@ describe('SWR - useSubscription', () => {
 
 	it('should subscribe', async () => {
 		// web streams not supported in node-fetch, but we check if the hook returns isLoading
-		const scope = nockQuery('Weather', {
+		nockQuery('Weather', {
 			wg_live: 'true',
 		}).reply(200, {
 			data: {
@@ -272,7 +470,7 @@ describe('SWR - useSubscription', () => {
 		});
 
 		function Page() {
-			const { data, error, isLoading, isSubscribed } = useSubscription({
+			const { data, isLoading } = useSubscription({
 				operationName: 'Weather',
 			});
 
@@ -304,7 +502,7 @@ describe('SWR - useUser', () => {
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {
-			const { data, error } = useUser();
+			const { data } = useUser();
 
 			return <div>{data?.email}</div>;
 		}
