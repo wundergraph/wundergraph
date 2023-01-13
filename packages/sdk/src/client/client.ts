@@ -404,6 +404,11 @@ export class Client {
 	}
 
 	public async logout(options?: LogoutOptions): Promise<boolean> {
+		// browser check
+		if (typeof window === 'undefined') {
+			throw new Error('logout() can only be called in a browser environment');
+		}
+
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
