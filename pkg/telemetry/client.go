@@ -72,6 +72,16 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 		opt(c)
 	}
 
+	if clientInfo.GitRepoURLHash == "" {
+		gitRepoURLHash, err := gitRepoURLHash()
+		if err != nil {
+			if c.log != nil && c.debug {
+				c.log.Debug("error retrieving gitRepoURLHash: %w", zap.Error(err))
+			}
+		}
+		c.clientInfo.GitRepoURLHash = gitRepoURLHash
+	}
+
 	if c.timeout == 0 {
 		c.timeout = DefaultTimeout * time.Second
 	}
@@ -112,6 +122,7 @@ type MetricClientInfo struct {
 	IsCI             bool   `json:"isCI"`
 	WunderctlVersion string `json:"wunderctlVersion,omitempty"`
 	AnonymousID      string `json:"anonymousID,omitempty"`
+	GitRepoURLHash   string `json:"gitRepoURLHash,omitempty"`
 }
 
 func (c *client) Send(metrics []Metric) error {
