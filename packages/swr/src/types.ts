@@ -1,16 +1,14 @@
 import {
-	Client,
 	ClientResponse,
 	FetchUserRequestOptions,
-	GraphQLResponseError,
 	OperationRequestOptions,
 	OperationsDefinition,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
-	User,
 } from '@wundergraph/sdk/client';
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration, SWRMutationResponse } from 'swr/mutation';
+import { ClientResponseError } from '@wundergraph/sdk/dist/client/ClientResponseError';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
@@ -44,8 +42,8 @@ export type MutationFetcher<Operations extends OperationsDefinition> = {
 	): Promise<Data>;
 };
 
-export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
-	SWRConfiguration<Data, Error>,
+export type UseQueryOptions<Data, ClientResponseError, Input, OperationName extends string, LiveQuery> = Omit<
+	SWRConfiguration<Data, ClientResponseError>,
 	'fetcher'
 > & {
 	operationName: OperationName;
@@ -61,11 +59,11 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
-		options: UseQueryOptions<Data, GraphQLResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): SWRResponse<Data, GraphQLResponseError>;
+		options: UseQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
+	): SWRResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
+export type UseSubscriptionOptions<Data, ClientResponseError, Input, OperationName extends string> = {
 	operationName: OperationName;
 	subscribeOnce?: boolean;
 	resetOnMount?: boolean;
@@ -76,7 +74,11 @@ export type UseSubscriptionOptions<Data, Error, Input, OperationName extends str
 		key: Key,
 		config: UseSubscriptionOptions<Data, Error, Input, OperationName>
 	): void;
-	onError?(error: Error, key: Key, config: UseSubscriptionOptions<Data, Error, Input, OperationName>): void;
+	onError?(
+		error: ClientResponseError,
+		key: Key,
+		config: UseSubscriptionOptions<Data, ClientResponseError, Input, OperationName>
+	): void;
 };
 
 export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
@@ -85,19 +87,19 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
 		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
 	>(
-		options: UseSubscriptionOptions<Data | undefined, GraphQLResponseError, Input, OperationName> & ExtraOptions
-	): UseSubscriptionResponse<Data, GraphQLResponseError>;
+		options: UseSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
+	): UseSubscriptionResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, Error = GraphQLResponseError> = Omit<
-	SWRResponse<Data, Error>,
+export type UseSubscriptionResponse<Data, ClientResponseError> = Omit<
+	SWRResponse<Data, ClientResponseError>,
 	'isValidating' | 'mutate'
 > & {
 	isSubscribed: boolean;
 };
 
-export type UseMutationOptions<Data, Error, Input, OperationName extends string> = Omit<
-	SWRMutationConfiguration<Data, Error, Input, OperationName>,
+export type UseMutationOptions<Data, ClientResponseError, Input, OperationName extends string> = Omit<
+	SWRMutationConfiguration<Data, ClientResponseError, Input, OperationName>,
 	'fetcher'
 > & {
 	operationName: OperationName;
@@ -109,8 +111,8 @@ export type UseMutationHook<Operations extends OperationsDefinition, ExtraOption
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
 		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
 	>(
-		options: UseMutationOptions<Data, GraphQLResponseError, Input, OperationName> & ExtraOptions
-	): SWRMutationResponse<Data, GraphQLResponseError, Input>;
+		options: UseMutationOptions<Data, ClientResponseError, Input, OperationName> & ExtraOptions
+	): SWRMutationResponse<Data, ClientResponseError, Input>;
 };
 
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
@@ -118,13 +120,13 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	enabled?: boolean;
 	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: GraphQLResponseError): void;
+	onError?(error: ClientResponseError): void;
 }
 
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: GraphQLResponseError): void;
+	onError?(error: ClientResponseError): void;
 	onAbort?(): void;
 }
 
@@ -133,7 +135,7 @@ export interface UseUserOptions<User> extends FetchUserRequestOptions, SWRConfig
 }
 
 export type UseUserHook<Operations extends OperationsDefinition> = {
-	(options?: UseUserOptions<Operations['user']>): SWRResponse<Operations['user'], GraphQLResponseError>;
+	(options?: UseUserOptions<Operations['user']>): SWRResponse<Operations['user'], ClientResponseError>;
 };
 
 export type UseUploadHook<Operations extends OperationsDefinition> = {
@@ -141,19 +143,19 @@ export type UseUploadHook<Operations extends OperationsDefinition> = {
 		config?: Omit<
 			SWRMutationConfiguration<
 				string[],
-				GraphQLResponseError,
+				ClientResponseError,
 				UploadRequestOptions<Operations['s3Provider']>,
 				'uploadFiles'
 			>,
 			'fetcher'
 		>
 	): Omit<
-		SWRMutationResponse<string[], GraphQLResponseError, UploadRequestOptions<Operations['s3Provider']>>,
+		SWRMutationResponse<string[], ClientResponseError, UploadRequestOptions<Operations['s3Provider']>>,
 		'trigger'
 	> & {
 		upload: SWRMutationResponse<
 			string[],
-			GraphQLResponseError,
+			ClientResponseError,
 			UploadRequestOptions<Operations['s3Provider']>,
 			'uploadFiles'
 		>['trigger'];
