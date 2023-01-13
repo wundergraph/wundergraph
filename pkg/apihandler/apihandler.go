@@ -1930,19 +1930,26 @@ func (r *Builder) registerAuth(insecureCookies bool) {
 		Secret:          csrfSecret,
 	}))
 
-	tokenBasedAuth := r.router.PathPrefix("/auth/token").Subrouter()
-
-	tokenBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.TokenUserHandler{})
-
-	cookieBasedAuth := r.router.PathPrefix("/auth/cookie").Subrouter()
-
-	cookieBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CookieUserHandler{
+	userHandler := &authentication.UserHandler{
 		HasRevalidateHook: r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
 		MWClient:          r.middlewareClient,
 		Log:               r.log,
 		InsecureCookies:   insecureCookies,
 		Cookie:            cookie,
-	})
+	}
+
+	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
+
+	// fallback for old token user path
+	// @deprecated use /auth/user instead
+	r.router.Path("/auth/token/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
+
+	cookieBasedAuth := r.router.PathPrefix("/auth/cookie").Subrouter()
+
+	// fallback for old cookie user path
+	// @deprecated use /auth/user instead
+	cookieBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
+
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
 	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)

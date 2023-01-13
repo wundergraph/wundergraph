@@ -48,6 +48,7 @@ export interface ClientConfig {
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
+	csrfEnabled?: boolean;
 }
 
 type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata';
