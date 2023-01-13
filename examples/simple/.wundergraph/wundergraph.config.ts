@@ -9,12 +9,7 @@ const countries = introspect.graphql({
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [
-		countries,
-		/*federatedApi,
-        openAPI,
-        graphQLAPI*/
-	],
+	apis: [countries],
 	server,
 	operations,
 	codeGenerators: [
@@ -23,8 +18,6 @@ configureWunderGraphApplication({
 				// use all the typescript react templates to generate a client
 				...templates.typescript.all,
 			],
-			// create-react-app expects all code to be inside /src
-			// path: "../frontend/src/generated",
 		},
 	],
 	cors: {

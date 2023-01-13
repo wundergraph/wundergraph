@@ -20,12 +20,6 @@ curl --get --data-urlencode 'wg_variables={ "filter": {"code": { "eq": "AD" } } 
     http://localhost:9991/operations/Countries
 ```
 
-#### Call your custom GraphQL server
-
-```shell
-curl http://localhost:9991/operations/Hello
-```
-
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
