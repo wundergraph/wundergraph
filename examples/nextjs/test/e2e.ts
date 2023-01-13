@@ -7,6 +7,12 @@ test('example loads and displays data', async ({ page }) => {
 		return !data.isLoading;
 	};
 
+	const hasStartedValidating = () => {
+		const text = document.querySelector('[data-testid="result"]').textContent;
+		const data = JSON.parse(text);
+		return data.isValidating;
+	};
+
 	const hasFinishedValidating = () => {
 		const text = document.querySelector('[data-testid="result"]').textContent;
 		const data = JSON.parse(text);
@@ -22,8 +28,9 @@ test('example loads and displays data', async ({ page }) => {
 
 	const refresh = page.getByRole('button', { name: 'refresh' });
 	await refresh.click();
-	expect(JSON.parse((await result.textContent()) ?? '').isValidating).toBeTruthy();
 
+	await page.waitForFunction(hasStartedValidating);
 	await page.waitForFunction(hasFinishedValidating);
+
 	expect(await result.textContent()).toContain('spacex_dragons');
 });
