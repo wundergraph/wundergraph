@@ -87,8 +87,6 @@ export class TypeScriptClient implements Template {
 			uploadProfileTypeDefinitions: _uploadProfileTypeDefinitions,
 			uploadProfileTypeNames: _uploadProfileTypeNames,
 			csrfEnabled: hasAuthProviders,
-			hasS3Provider: config.application.S3UploadProvider.length > 0,
-			s3Provider: config.application.S3UploadProvider,
 		});
 		return Promise.resolve([
 			{
