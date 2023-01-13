@@ -81,11 +81,10 @@ pid=$!
 trap "kill_with_children ${pid}" EXIT
 
 # Wait for code generation to complete
-while ! test -f .wundergraph/generated/bundle/config.js; do
+while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
     sleep 0.1
 done
 
-sleep 1
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
@@ -101,8 +100,6 @@ if grep -q '"test:playwright"' package.json; then
     npx -- playwright install --with-deps chromium
     WG_NODE_URL=${default_node_url} npm run test:playwright
 fi
-
-kill_with_children ${pid}
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
