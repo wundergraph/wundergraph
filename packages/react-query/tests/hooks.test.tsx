@@ -397,7 +397,7 @@ describe('React Query - useUser', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.get('/auth/cookie/user')
+			.get('/auth/user')
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {

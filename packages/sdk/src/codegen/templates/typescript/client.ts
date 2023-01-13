@@ -58,6 +58,7 @@ export class TypeScriptClient implements Template {
 				}
 			}
 		}
+		const hasAuthProviders = config.authentication.cookieBased.length !== 0;
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,
@@ -85,6 +86,9 @@ export class TypeScriptClient implements Template {
 			}),
 			uploadProfileTypeDefinitions: _uploadProfileTypeDefinitions,
 			uploadProfileTypeNames: _uploadProfileTypeNames,
+			csrfEnabled: hasAuthProviders,
+			hasS3Provider: config.application.S3UploadProvider.length > 0,
+			s3Provider: config.application.S3UploadProvider,
 		});
 		return Promise.resolve([
 			{
