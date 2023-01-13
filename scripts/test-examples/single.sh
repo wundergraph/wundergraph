@@ -83,6 +83,8 @@ trap "kill_with_children ${pid}" EXIT
 # Wait for code generation to complete
 while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
     sleep 0.1
+    # Make sure npm start is still running
+    kill -0 ${pid}
 done
 
 
