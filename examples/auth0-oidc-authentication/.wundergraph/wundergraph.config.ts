@@ -31,20 +31,20 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: ['http://localhost:3003'],
+		allowedOrigins: ['http://localhost:3000'],
 	},
 	authentication: {
 		cookieBased: {
 			providers: [
 				authProviders.demo(),
-				authProviders.openIdConnect({
+				authProviders.auth0({
 					id: 'auth0',
 					issuer: new EnvironmentVariable('AUTH0_ISSUER'),
 					clientId: new EnvironmentVariable('AUTH0_CLIENT_ID'),
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:3003'],
+			authorizedRedirectUris: ['http://localhost:3000'],
 		},
 	},
 	security: {
