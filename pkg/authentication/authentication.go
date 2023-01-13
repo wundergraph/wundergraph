@@ -48,15 +48,17 @@ type UserLoadConfig struct {
 	issuer           string
 }
 
-func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User) error {
+func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
-	fromCache, exists := u.cache.Get(token)
-	if exists {
-		*user = fromCache.(User)
-		u.log.Debug("user loaded from cache",
-			zap.String("sub", user.UserID),
-		)
-		return nil
+	if !revalidate {
+		fromCache, exists := u.cache.Get(token)
+		if exists {
+			*user = fromCache.(User)
+			u.log.Debug("user loaded from cache",
+				zap.String("sub", user.UserID),
+			)
+			return nil
+		}
 	}
 
 	var tempUser User
@@ -89,6 +91,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		if err != nil {
 			return err
 		}
+
 		tempUser = User{
 			ProviderName:  "token",
 			ProviderID:    cfg.issuer,
@@ -215,12 +218,13 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 			return fmt.Errorf("invalid authorization Header")
 		}
 		trimmed := strings.TrimPrefix(authorizationHeader, "Bearer ")
+		revalidate := r.URL.Query().Get("revalidate") == "true"
 		for i := range loader.userLoadConfigs {
 			token, err := jwt.Parse(trimmed, loader.userLoadConfigs[i].jwks.Keyfunc)
 			if err == nil && !token.Valid {
 				continue
 			}
-			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u)
+			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u, revalidate)
 			if err == nil {
 				return nil
 			}
@@ -665,20 +669,7 @@ func UserFromContext(ctx context.Context) *User {
 	return nil
 }
 
-type TokenUserHandler struct{}
-
-func (_ TokenUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	user := UserFromContext(r.Context())
-	if user == nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	user.RemoveInternalFields()
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(user)
-}
-
-type CookieUserHandler struct {
+type UserHandler struct {
 	HasRevalidateHook bool
 	MWClient          *hooks.Client
 	Log               *zap.Logger
@@ -687,13 +678,14 @@ type CookieUserHandler struct {
 	Cookie            *securecookie.SecureCookie
 }
 
-func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	user := UserFromContext(r.Context())
 	if user == nil {
 		http.NotFound(w, r)
 		return
 	}
-	if u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
+
+	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
 		hookData := []byte(`{}`)
 		if userJson, err := json.Marshal(user); err != nil {
 			u.Log.Error("Could not marshal user", zap.Error(err))
@@ -737,14 +729,17 @@ func (u *CookieUserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if r.Header.Get("If-None-Match") == user.ETag {
+	if tag := r.Header.Get("If-None-Match"); tag != "" && tag == user.ETag {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header()["ETag"] = []string{user.ETag}
-	w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
+
+	if user.ETag != "" {
+		w.Header()["ETag"] = []string{user.ETag}
+		w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
+	}
 
 	user.RemoveInternalFields()
 	if r.Header.Get("Accept") != "application/json" {

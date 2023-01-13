@@ -105,6 +105,7 @@ export const createClient = (config?: CreateClientConfig) => {
 		...defaultClientConfig,
 		...config,
 		operationMetadata,
+		csrfEnabled: {{csrfEnabled}},
 	});
 };
 
