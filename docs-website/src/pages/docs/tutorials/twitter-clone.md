@@ -464,7 +464,7 @@ Once you create an account or sign in, perform the following steps.
 - For application type, select Regular Web Applications
 - Click the Create button.
 
-![Auth0 Image 1](/images/twitter_guide/Auth0-Step-1.jpg)
+![Auth0 Image 1](/images/twitter_guide/Auth0-step-1.jpg)
 
 Click the Settings tab. ​At this point, this is all the configuration we need for Auth0 client. To configure our client with our WunderGraph application, we will need three pieces of information.​
 
@@ -472,7 +472,7 @@ Click the Settings tab. ​At this point, this is all the configuration we need 
 - Client ID
 - Client Secret
 
-![Auth0 Image 2](/images/twitter_guide/Auth0-Step-2.jpg)
+![Auth0 Image 2](/images/twitter_guide/Auth0-step-2.jpg)
 
 Open up your **.env** file and paste in the following with your information:
 
@@ -486,7 +486,7 @@ AUTH0_CLIENT_SECRET=<Client Secrect>
 
 Final step, scroll down in the auth0 settings and set your callback URL to: **http://localhost:9991/auth/cookie/callback/auth0**
 
-![Auth0 Image 3](/images/twitter_guide/Auth0-Step-3.jpg)
+![Auth0 Image 3](/images/twitter_guide/Auth0-step-3.jpg)
 
 ## Configuring Auth0 with WunderGraph
 
