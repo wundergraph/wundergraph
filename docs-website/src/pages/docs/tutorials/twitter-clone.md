@@ -2,6 +2,8 @@
 
 ## Introduction
 
+One of the best ways to learn a new programming language or framework is to get your hands dirty with it.
+
 This tutorial will guide you through the process of building a functional replica of Twitter, utilizing WunderGraph, React, MongoDB, and Auth0.
 
 Upon completion, not only will you have a functioning replica of Twitter, but you will also have gained a comprehensive understanding of the capabilities and potential of WunderGraph..
@@ -775,3 +777,7 @@ with that in place. We've finished our Twitter-Clone!
 ## Conclusion
 
 So let's go over what we just built
+
+## Full Source Code
+
+You can get the full source code of this Twitter at the following Github [Repo](https://github.com/Sawmonabo/Twitter-Clone). Thanks again to our awesome community for creating this demo and guide!
