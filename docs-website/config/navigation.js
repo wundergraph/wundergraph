@@ -164,6 +164,10 @@ const navigation = [
 				title: 'NextJS Full-Stack Tutorial',
 				href: '/docs/tutorials/nextjs-full-stack-tutorial',
 			},*/
+			{
+				title: 'Community Built Twitter Clone',
+				href: '/docs/tutorials/twitter-clone',
+			},
 		],
 	},
 	{

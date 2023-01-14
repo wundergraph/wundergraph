@@ -21,3 +21,12 @@ including:
 - Authorization
 - Database integration
 - File uploads
+
+## [Community built Twitter Clone](https://github.com/Sawmonabo/wundergraph-twitter-clone)
+
+This is a tutorial for React developers to build a Twitter clone using WunderGraph, MongoDB, and Auth0. This tutorial will cover the following aspects:
+
+- React integration of WunderGraph
+- Configuring operations for WunderGraph with MongoDB
+- Implementing WunderGraph Operations
+- Configuring WunderGraph with Auth0
