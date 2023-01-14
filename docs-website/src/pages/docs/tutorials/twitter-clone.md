@@ -32,7 +32,7 @@ We'll also assume you have heard of or worked with MongoDB, [Auth0](https://auth
 
 ## Basic Twitter Setup
 
-To focus more on the power of WunderGraph, we've taken care of the styling for you. Please mind this is a very basic twitter clone!
+To focus more on the power of WunderGraph, we've taken care of the styling for you. Please keep in mind this is a very basic twitter clone for educational purposes!
 
 Open up your terminal and clone the community repo using:
 
@@ -40,15 +40,19 @@ Open up your terminal and clone the community repo using:
 git clone https://github.com/Sawmonabo/wundergraph-twitter-clone.git
 ```
 
-Once you clone the repo you're going to want to download the current dependencies from our package.json and start the application. You can do this by entering this command in your terminal:
+Once you clone the repo you're going to want to download the current dependencies and start the application. Enter the following into your terminal:
 
 ```bash
 npm i && npm start
 ```
 
-As you can see this will load up the skeleton structure of the Twitter-Clone. This guide is more focused on the backend technologies vs frontend and styling.
+As you can see this will load up the skeleton structure of our Twitter-Clone.
 
-Before moving forward, lets take a look at `Feed.js` located within our **src** folder. In the code snippet below, we are creating a const named tweets where we are currently assigning hard-coded values to it and inserting it onto our twitter feed. Feel free to add another hardcoded tweet if you want. This will be dynamic once we get our DB set up.
+Before moving forward, lets take a look at **Feed.js** file located within our **src** folder.
+
+In the code snippet below, we are creating a const named **tweets** where we are currently assigning hard-coded values to it and inserting it onto our twitter feed.
+
+Feel free to add another hard coded tweet if you want. This will be dynamic once we get our DB set up.
 
 ```javascript
 // Feed.js
@@ -65,7 +69,7 @@ const tweets = [
 ]
 ```
 
-Next, Let's navigate to `TweetBox.js`, also within the src folder, is where users will be creating/sending their tweets. Once again, we are currently assigning hard-coded values to our user attributes.
+Next, Let's navigate to **TweetBox.js** file, also within the **src** folder, is where users will be creating/sending their tweets. Once again, we are currently assigning hard-coded values to our user attributes.
 
 ```javascript
 // TweetBox.js
@@ -79,7 +83,7 @@ const user = {
 }
 ```
 
-and then capturing the input message or image url from the front-end to our sendTweet const that acts as our onClick method.
+and then capturing the input message or image url from the front-end to our `sendTweet` const that acts as our onClick method.
 
 ```javascript
 // TweetBox.js
@@ -97,7 +101,9 @@ const sendTweet = (e) => {
 }
 ```
 
-While the application is still running on localhost:3000, go ahead and open up the Chrome dev tools console. If you type in a message and click Tweet you'll be able to see the console log our input to the TweetBox upon clicking the tweet button.
+While the application is still running on `localhost:3000`, go ahead and open up the Chrome dev tools console.
+
+If you type in a message and click Tweet you'll be able to see the console log our input to the TweetBox upon clicking the tweet button.
 
 ## Setting up WunderGraph
 
@@ -163,7 +169,7 @@ allowedOrigins:
 
 ## MongoDB SetUp
 
-WunderGraph supports multiple databases. For this Demo, we will be using MongoDb.
+WunderGraph supports multiple databases. For this demo, we will be using MongoDb.
 
 Geting started with the MongoDB is super easy.
 
@@ -179,16 +185,19 @@ After creating or signing into your acount, perform the following steps:
 
    - Choose Shared Free tier
    - Allow default settings for the Cluster
-   - Click "Connect" to the cluster (Make sure it says that your IP Address has been added, this is very important!)
+   - Click "Connect Cluser" at the bottom
+
+Next, you will be taken to the Securty QuickStart screen:
 
 4. Choose a username and password for the database, **SAVE THESE**
-5. Click **next/continue**
-6. Choose **Connect using VSCode** and copy/save the connection string in the ( Connect to your MongoDB deployment ) text box.
+5. Choose **My Local Enviroment** from where you want to comment from and click the "Add My Current IP Address" (Make sure it says that your IP Address has been added, this is very important!)
+6. Click the **Finish and Close** button
+7. Choose **Connect using VSCode** and copy/save the connection string in the ( Connect to your MongoDB deployment ) text box.
    - **ex: mongodb+srv://user:<password>@cluster0.jzgqp26.mongodb.net/test**
 
 ### Adding Sample Data
 
-Once you create your Database, Create a document for your twitter feed to represent an existing tweet
+Once you create your Database, Let's create a sample document for your twitter feed to represent an existing tweet
 
 1. Click the **Browse Collections** button
 2. Next, Click the **Add My Own Data** button.
@@ -209,11 +218,13 @@ Once you create your Database, Create a document for your twitter feed to repres
 }
 ```
 
+That's it for setting up MongoDB!
+
 ### Introspecting MongoDB with WunderGraph
 
 Hop back over to your code and let's configure your MongoDB cluster with WunderGraph
 
-Inside the `.wundergraph folder`, open the **wundergraph.config.ts**
+Inside the **.wundergraph folder**, open the **wundergraph.config.ts** file
 
 Comment out or delete the countries datasource and add the following datasource:
 
@@ -228,7 +239,7 @@ const tweets = introspect.mongodb({
 })
 ```
 
-Now update our apis array in our config to include our MongoDB Datasource:
+Now update your apis array in your config to include your new MongoDB Datasource:
 
 ```typescript
 configureWunderGraphApplication({
@@ -237,7 +248,7 @@ configureWunderGraphApplication({
 	],
 ```
 
-After updating our WunderGraph Config, run the following command to initialize the setup.
+After updating your WunderGraph Config, run the following command to initialize the setup.
 
 ```bash
 wunderctl generate
@@ -277,7 +288,7 @@ model Tweets {
 
 ## Configuring WunderGraph Operations
 
-Within our **src** directory, Create a folder named **lib**. Once added, create a file inside of **lib** called **wundergraph.ts**.Within the **wundergraph.ts** file add the following contents:
+Within our **src** directory, Create a folder named **lib**. Once added, create a file inside of **lib** called **wundergraph.ts**. Within the **wundergraph.ts** file add the following contents:
 
 ```typescript
 import { createClient, Operations } from '../components/generated/client'
@@ -296,7 +307,7 @@ export const {
 } = createHooks<Operations>(client)
 ```
 
-If we take a look at the `jsonchema.ts` file in `src/components/generated` and look for the `findManytweets` query and `createOnetweets` mutation, that will be the two we use in our manually defined operation.
+If we take a look at the **jsonchema.ts** file in **src/components/generated** and look for the **findManytweets** query and **createOnetweets** mutation, that will be the two we use in our manually defined operation.
 
 Let's define our operations using WunderGraph
 
@@ -435,7 +446,7 @@ You should now see our twitter feed now includes our tweet document we created w
 
 With WunderGraph, you can use any Authentication provider Such as Ory, Keycloak, Auth0, OpenID Connect, and more. For this demo, we will be using our Partner Auth0.
 
-Start by creating an [Auth0](https://auth0.auth0.com/u/login/identifier?state=hKFo2SBQZ3RaREhZTFNkbU1VQ250Z054UGItVmVVeTNOZWpmZKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDZfaVlSRFMwNXo5b0w3aXhLVUlGOTE2QkNtaVZUeFV4o2NpZNkgYkxSOVQ1YXI2bkZ0RE80ekVyR1hkb3FNQ000aU5aU1Y) or signing in if you already have an account.
+Start by creating an [Auth0](https://auth0.auth0.com/u/login/identifier?state=hKFo2SBQZ3RaREhZTFNkbU1VQ250Z054UGItVmVVeTNOZWpmZKFur3VuaXZlcnNhbC1sb2dpbqN0aWTZIDZfaVlSRFMwNXo5b0w3aXhLVUlGOTE2QkNtaVZUeFV4o2NpZNkgYkxSOVQ1YXI2bkZ0RE80ekVyR1hkb3FNQ000aU5aU1Y) account or signing in if you already have an account.
 
 Once you create an account or sign in, perform the following steps.
 
@@ -451,13 +462,17 @@ Once you create an account or sign in, perform the following steps.
 - For application type, select Regular Web Applications
 - Click the Create button.
 
-5. Click the Settings tab. ​At this point this is all the configuration we need for Auth0 client. To configure our client with our WunderGraph application, we will need three pieces of information.​
+![Auth0 Image 1](/images/twitter_guide/Auth0-Step-1.jpg)
+
+Click the Settings tab. ​At this point, this is all the configuration we need for Auth0 client. To configure our client with our WunderGraph application, we will need three pieces of information.​
 
 - The Domain (AKA The issuer)
 - Client ID
 - Client Secret
 
-Open up your `.env` file and paste in the following with your information:
+![Auth0 Image 2](/images/twitter_guide/Auth0-Step-2.jpg)
+
+Open up your **.env** file and paste in the following with your information:
 
 ```
 AUTH0_ISSUER=<Issuer>
@@ -469,11 +484,13 @@ AUTH0_CLIENT_SECRET=<Client Secrect>
 
 Final step, scroll down in the auth0 settings and set your callback URL to: **http://localhost:9991/auth/cookie/callback/auth0**
 
-##Configuring Auth0 with WunderGraph
+![Auth0 Image 3](/images/twitter_guide/Auth0-Step-3.jpg)
 
-Now that we set up our Auth0 Account, let's configure it into our WunderGraph application.
+## Configuring Auth0 with WunderGraph
 
-Navigate over to the **wundergraph.config.ts** file located in the **.wundergraph** folder
+Now that we finished with our Auth0 config, let's configure it into our WunderGraph application.
+
+Navigate over to the **wundergraph.config.ts** file located in the **.wundergraph** folder and add the following:
 
 ```typescript
  authentication: {
@@ -491,15 +508,11 @@ Navigate over to the **wundergraph.config.ts** file located in the **.wundergrap
  },
 ```
 
-Now we are able to use Auth0 to authenticate with WunderGraph. Let's finsh up the tutorial and add it to our Twitter-clone.
-
-## I think we can improve this section
+"We can now utilize Auth0 for authentication in WunderGraph. Let's complete the tutorial and integrate it into our Twitter-Clone.
 
 ## Implementing Authentication into our Twitter Clone
 
-Let's great a React component for authentication.
-
-Within your `.src` directory, create a new file called **auth0_components**.
+Within your .**src** directory, create a new folder called **auth0_components**.
 
 Create six new files inside the **auth0_components** folder:
 
@@ -515,6 +528,8 @@ Create six new files inside the **auth0_components** folder:
 Add the following code to your files:
 
 ### LoginButton.js
+
+Here we are creating our **Login** and **Logout** buttons and using Auth0 as our authentication provider.
 
 ```javascript
 // LoginButton.js
@@ -689,7 +704,11 @@ export default Auth
 }
 ```
 
-Almost there! After creating our Auth0 components, we need to update our `App.js` within our `src` directory to configure Auth0 login/logout. We can now also capture the user attributes from Auth0 using our WunderGraph hooks with useUser().
+Almost there! After creating our Auth0 components, we need to update our **App.js** within our **src** directory to configure Auth0 login/logout.
+
+We can now also capture the user attributes from Auth0 using our WunderGraph hooks with **useUser()**.
+
+Update you **App.js** file to look like this:
 
 ```javascript
 // App.js
@@ -725,7 +744,7 @@ export default App
 
 Next, we should include the Logout Button in the Sidebar view so that we can log out cleanly.
 
-Open up the `Sidebar.js` file and add the following:
+Open up the **Sidebar.js** file and add the following:
 
 ```javascript
 import React from 'react';
@@ -737,7 +756,7 @@ import './Sidebar.css';
 		<LogoutButton />
 ```
 
-Our final step is to switch over the **TweetBox.js** file inside our **.src** directory and updated our hard-coded user information to use user information from our generated cookie upon login.
+Our final step is to switch over the **TweetBox.js** file inside our **src** directory and updated our hard-coded user information to use user information from our generated cookie upon login.
 
 Add the following code:
 
@@ -749,7 +768,9 @@ import { useUser, useMutation } from './lib/wundergraph'
 const user = useUser().data
 ```
 
-and thats it! You just built a twitter clone using WunderGraph, Auth0, React and MongoDB
+with that in place. We've finished our Twitter-Clone!
+
+## Deploying our app to WunderGraph Cloud ..?
 
 ## Conclusion
 
