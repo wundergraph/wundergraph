@@ -55,6 +55,7 @@ message AuthProvider {
 enum AuthProviderKind {
 	AuthProviderGithub = 0;
 	AuthProviderOIDC = 1;
+	AuthProviderAuth0 = 2;
 }
 
 message GithubAuthProviderConfig {

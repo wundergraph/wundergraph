@@ -8,49 +8,33 @@ schema {
 }
 
 type Query {
-	landpads(limit: Int, offset: Int): [Landpad]
-	landpad(id: ID!): Landpad
+	images: [Image]
 }
 
-scalar geography
-
-type Landpad {
-  attempted_landings: String
-  details: String
-  full_name: String
-  id: ID
-  landing_type: String
-  location: geography
-  status: String
-  successful_landings: String
-  wikipedia: String
+type Image {
+	id: String!
+	name: String!
+	geography: Map!
 }
+
+scalar Map
 `;
 
-const spacex = introspect.graphql({
-	apiNamespace: 'spacex',
+const gallery = introspect.graphql({
+	apiNamespace: 'gallery',
 	loadSchemaFromString: schema,
-	url: 'https://spacex-api.fly.dev/graphql/',
+	url: 'http://localhost:8084/',
 	schemaExtension: `
-		type Location {
+		type Geography {
 		  latitude: Float
 		  longitude: Float
-		  name: String
-		  region: String
-		}
-		input LocationInput {
-		  latitude: Float
-		  longitude: Float
-		  name: String
-		  region: String
 		}
 	`,
 	replaceCustomScalarTypeFields: [
 		{
-			entityName: 'Landpad',
-			fieldName: 'location',
-			responseTypeReplacement: 'Location',
-			inputTypeReplacement: 'LocationInput',
+			entityName: 'Image',
+			fieldName: 'geography',
+			responseTypeReplacement: 'Geography',
 		},
 	],
 });
@@ -80,7 +64,7 @@ const db = introspect.postgresql({
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [spacex, db],
+	apis: [gallery, db],
 	server,
 	operations,
 	codeGenerators: [
