@@ -1,8 +1,8 @@
 package operations
 
 import (
+	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 )
@@ -10,21 +10,80 @@ import (
 const DirectoryName = "operations"
 
 func GetPaths(wunderGraphDir string) ([]string, error) {
-	webhooksDirectoryAbs := path.Join(wunderGraphDir, DirectoryName)
-	// walk recursively through webhooksDirectoryAbs and find all .ts files
-	// return the paths to the files
-	var webhookFilePaths []string
-	err := filepath.Walk(webhooksDirectoryAbs, func(path string, info os.FileInfo, err error) error {
+	operationsDirectoryAbs := filepath.Join(wunderGraphDir, DirectoryName)
+	var operationFilePaths []string
+	err := filepath.Walk(operationsDirectoryAbs, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || strings.HasSuffix(info.Name(), ".d.ts") || !strings.HasSuffix(info.Name(), ".ts") {
+			return nil
+		}
+		path, err = filepath.Rel(wunderGraphDir, path)
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".ts") {
-			webhookFilePaths = append(webhookFilePaths, path)
-		}
+		operationFilePaths = append(operationFilePaths, path)
 		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return webhookFilePaths, nil
+	return operationFilePaths, nil
+}
+
+func Cleanup(wunderGraphDir string, paths []string) error {
+	expected := make([]string, len(paths)*2)
+	for _, path := range paths {
+		expected = append(expected,
+			filepath.Join(wunderGraphDir, "generated", "bundle", strings.Replace(path, ".ts", ".js", 1)),
+			filepath.Join(wunderGraphDir, "generated", "bundle", strings.Replace(path, ".ts", ".js.map", 1)),
+		)
+	}
+	err := filepath.Walk(filepath.Join(wunderGraphDir, "generated", "bundle", "operations"), func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if !contains(expected, path) {
+			return os.Remove(path)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return filepath.Walk(filepath.Join(wunderGraphDir, "generated", "bundle", "operations"), func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			return nil
+		}
+		// check if directory is empty
+		empty, err := isDirEmpty(path)
+		if err != nil {
+			return err
+		}
+		if empty {
+			return os.Remove(path)
+		}
+		return nil
+	})
+}
+
+func isDirEmpty(name string) (bool, error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	_, err = f.Readdirnames(1)
+	if err == io.EOF {
+		return true, nil
+	}
+	return false, err
+}
+
+func contains(paths []string, path string) bool {
+	for _, p := range paths {
+		if p == path {
+			return true
+		}
+	}
+	return false
 }

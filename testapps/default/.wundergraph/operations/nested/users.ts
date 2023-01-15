@@ -11,7 +11,7 @@ export default createOperation.query({
 			users: [
 				{
 					id: '1',
-					name: 'John Doe',
+					name: input.name,
 				},
 			],
 		};

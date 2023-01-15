@@ -32,7 +32,7 @@ var loadoperationsCmd = &cobra.Command{
 		}
 
 		loader := loadoperations.Loader{}
-		out, err := loader.Load(args[0], args[1], args[2], wunderGraphDir, rootFlags.Pretty)
+		out, err := loader.Load(args[0], args[1], args[2], rootFlags.Pretty)
 		return ioutil.WriteFile(outFile, []byte(out), os.ModePerm)
 	},
 	Args: cobra.ExactArgs(3),

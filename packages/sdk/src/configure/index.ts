@@ -3,7 +3,6 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
-	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -61,9 +60,9 @@ import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { Logger } from '../logger';
+import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
-import { NodeJSOperation } from '../operations/operations';
+import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 
 export interface WunderGraphCorsConfiguration {
@@ -220,6 +219,11 @@ export interface ResolvedWunderGraphConfig {
 	webhooks: WebhookConfiguration[];
 	nodeOptions: ResolvedNodeOptions;
 	serverOptions?: ResolvedServerOptions;
+}
+
+export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+	outPath: string;
+	wunderGraphDir: string;
 }
 
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
@@ -596,7 +600,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
-				app.Operations = app.Operations.map((op) => {
+				const ops = app.Operations.map(async (op) => {
 					const cfg = config.operations!;
 					const base = Object.assign({}, cfg.defaultConfig);
 					const customize =
@@ -619,6 +623,20 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
+							const isNodeJsFunction = op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS;
+							if (isNodeJsFunction) {
+								const filePath = path.join(
+									process.env.WG_DIR_ABS!,
+									'generated',
+									'bundle',
+									'operations',
+									op.PathName + '.js'
+								);
+								const operation: NodeJSOperation<any, any, any> = (await import(filePath)).default;
+								if (operation.liveQuery) {
+									queryConfig.liveQuery = operation.liveQuery;
+								}
+							}
 							return {
 								...op,
 								CacheConfig: {
@@ -631,10 +649,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
 								},
-								LiveQuery: {
-									enable: queryConfig.liveQuery.enable,
-									pollingIntervalSeconds: queryConfig.liveQuery.pollingIntervalSeconds,
-								},
+								LiveQuery: queryConfig.liveQuery,
 							};
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
@@ -652,6 +667,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							return op;
 					}
 				});
+
+				app.Operations = await Promise.all(ops);
 			}
 
 			if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
@@ -841,7 +858,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			done();
 		})
 		.catch((e: any) => {
-			Logger.fatal(`Couldn't configure your WunderNode: ${e}`);
+			//throw e;
+			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
 			process.exit(1);
 		});
 };
@@ -1044,58 +1062,74 @@ const resolveOperationsConfigurations = async (
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)
 		for (const file of loadedOperations.typescript_operation_files) {
-			const implementation: NodeJSOperation<any, any, any> = (await import(file.module_path)).default;
-			const operation: GraphQLOperation = {
-				Name: file.operation_name.replace('/', '_'),
-				PathName: file.operation_name,
-				Content: '',
-				OperationType:
-					implementation.type === 'query'
-						? OperationType.QUERY
-						: implementation.type === 'mutation'
-						? OperationType.MUTATION
-						: OperationType.SUBSCRIPTION,
-				ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
-				VariablesSchema: { type: 'object', properties: {} },
-				InterpolationVariablesSchema: { type: 'object', properties: {} },
-				InternalVariablesSchema: { type: 'object', properties: {} },
-				InjectedVariablesSchema: { type: 'object', properties: {} },
-				ResponseSchema: { type: 'object', properties: { data: {} } },
-				AuthenticationConfig: {
-					required: false,
-				},
-				AuthorizationConfig: {
-					claims: [],
-					roleConfig: {
-						requireMatchAll: [],
-						requireMatchAny: [],
-						denyMatchAll: [],
-						denyMatchAny: [],
+			try {
+				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
+				const implementation = await loadNodeJsOperationDefaultModule(filePath);
+				const operation: GraphQLOperation = {
+					Name: file.operation_name.replace('/', '_'),
+					PathName: file.operation_name,
+					Content: '',
+					OperationType:
+						implementation.type === 'query'
+							? OperationType.QUERY
+							: implementation.type === 'mutation'
+							? OperationType.MUTATION
+							: OperationType.SUBSCRIPTION,
+					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+					VariablesSchema: { type: 'object', properties: {} },
+					InterpolationVariablesSchema: { type: 'object', properties: {} },
+					InternalVariablesSchema: { type: 'object', properties: {} },
+					InjectedVariablesSchema: { type: 'object', properties: {} },
+					ResponseSchema: { type: 'object', properties: { data: {} } },
+					TypeScriptOperationImport: `function_${file.operation_name.replace('/', '_')}`,
+					AuthenticationConfig: {
+						required: implementation.requireAuthentication || false,
 					},
-				},
-				HooksConfiguration: {
-					preResolve: false,
-					postResolve: false,
-					mutatingPreResolve: false,
-					mutatingPostResolve: false,
-					mockResolve: {
-						enable: false,
-						subscriptionPollingIntervalMillis: 0,
+					LiveQuery: {
+						enable: true,
+						pollingIntervalSeconds: 5,
 					},
-					httpTransportOnResponse: false,
-					httpTransportOnRequest: false,
-					customResolve: false,
-				},
-				VariablesConfiguration: {
-					injectVariables: [],
-				},
-				Internal: false,
-				PostResolveTransformations: undefined,
-			};
-			if (implementation.inputSchema) {
-				operation.VariablesSchema = zodToJsonSchema(implementation.inputSchema) as any;
+					AuthorizationConfig: {
+						claims: [],
+						roleConfig: {
+							requireMatchAll: [],
+							requireMatchAny: [],
+							denyMatchAll: [],
+							denyMatchAny: [],
+						},
+					},
+					HooksConfiguration: {
+						preResolve: false,
+						postResolve: false,
+						mutatingPreResolve: false,
+						mutatingPostResolve: false,
+						mockResolve: {
+							enable: false,
+							subscriptionPollingIntervalMillis: 0,
+						},
+						httpTransportOnResponse: false,
+						httpTransportOnRequest: false,
+						customResolve: false,
+					},
+					VariablesConfiguration: {
+						injectVariables: [],
+					},
+					Internal: implementation.internal ? implementation.internal : false,
+					PostResolveTransformations: undefined,
+				};
+				if (implementation.inputSchema) {
+					operation.VariablesSchema = zodToJsonSchema(implementation.inputSchema) as any;
+				}
+				if (implementation.liveQuery) {
+					operation.LiveQuery = {
+						enable: implementation.liveQuery.enable,
+						pollingIntervalSeconds: implementation.liveQuery.pollingIntervalSeconds,
+					};
+				}
+				nodeJSOperations.push(operation);
+			} catch (e: any) {
+				logger.info(`Skipping operation ${file.operation_name} due to error: ${e.message}`);
 			}
-			nodeJSOperations.push(operation);
 		}
 	return {
 		operations: [...graphQLOperations.operations, ...nodeJSOperations],

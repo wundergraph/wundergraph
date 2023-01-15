@@ -823,7 +823,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case *plan.SubscriptionResponsePlan:
-		flushWriter, ok := getFlushWriter(shared.Ctx, r, w)
+		flushWriter, ok := getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
@@ -1694,7 +1694,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
 
-	flushWriter, ok := getFlushWriter(ctx, r, w)
+	flushWriter, ok := getFlushWriter(ctx, ctx.Variables, r, w)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
@@ -1727,9 +1727,9 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if h.hooksConfig.postResolve {
-		var callback flushWriterPostResolveCallback = func(ctx *resolve.Context, resp []byte) {
-			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
-			_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
+		var callback flushWriterPostResolveCallback = func(ctx context.Context, variables, resp []byte) {
+			hookData := hookBaseData(r, hookBuf.Bytes(), variables, resp)
+			_, err := h.hooksClient.DoOperationRequest(ctx, h.operation.Name, hooks.PostResolve, hookData)
 			_ = handleOperationErr(requestLogger, err, w, "postResolve hook failed", h.operation)
 		}
 
@@ -1737,9 +1737,9 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if h.hooksConfig.mutatingPostResolve {
-		var callback flushWriterMutatingPostResolveCallback = func(ctx *resolve.Context, resp []byte) ([]byte, error) {
-			hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, resp)
-			out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
+		var callback flushWriterMutatingPostResolveCallback = func(ctx context.Context, variables, resp []byte) ([]byte, error) {
+			hookData := hookBaseData(r, hookBuf.Bytes(), variables, resp)
+			out, err := h.hooksClient.DoOperationRequest(ctx, h.operation.Name, hooks.MutatingPostResolve, hookData)
 			if err != nil {
 				if errors.Is(err, context.Canceled) {
 					// e.g. client closed connection
@@ -1809,8 +1809,8 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 	o.walker.Stop()
 }
 
-type flushWriterMutatingPostResolveCallback func(ctx *resolve.Context, resp []byte) ([]byte, error)
-type flushWriterPostResolveCallback func(ctx *resolve.Context, resp []byte)
+type flushWriterMutatingPostResolveCallback func(ctx context.Context, variables, resp []byte) ([]byte, error)
+type flushWriterPostResolveCallback func(ctx context.Context, variables, resp []byte)
 
 type httpFlushWriter struct {
 	writer                      io.Writer
@@ -1822,7 +1822,8 @@ type httpFlushWriter struct {
 	buf                         *bytes.Buffer
 	mutatingPostResolveCallback *flushWriterMutatingPostResolveCallback
 	postResolveCallback         *flushWriterPostResolveCallback
-	ctx                         *resolve.Context
+	ctx                         context.Context
+	variables                   []byte
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -1841,11 +1842,11 @@ func (f *httpFlushWriter) Flush() {
 	f.buf.Reset()
 
 	if f.postResolveCallback != nil {
-		(*f.postResolveCallback)(f.ctx, resp)
+		(*f.postResolveCallback)(f.ctx, f.variables, resp)
 	}
 
 	if f.mutatingPostResolveCallback != nil {
-		if r, err := (*f.mutatingPostResolveCallback)(f.ctx, resp); err == nil {
+		if r, err := (*f.mutatingPostResolveCallback)(f.ctx, f.variables, resp); err == nil {
 			resp = r
 		}
 	}
@@ -2203,6 +2204,10 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		hooksClient:          r.middlewareClient,
 		queryParamsAllowList: r.generateQueryArgumentsAllowList(operation.VariablesSchema),
 		stringInterpolator:   stringInterpolator,
+		liveQuery: liveQueryConfig{
+			enabled:                operation.LiveQueryConfig.Enable,
+			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
+		},
 	}
 
 	if operation.AuthenticationConfig != nil && operation.AuthenticationConfig.AuthRequired {
@@ -2228,6 +2233,7 @@ type FunctionsHandler struct {
 	hooksClient          *hooks.Client
 	queryParamsAllowList []string
 	stringInterpolator   *interpolate.StringInterpolator
+	liveQuery            liveQueryConfig
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -2280,10 +2286,45 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION {
+	isLive := h.liveQuery.enabled && r.URL.Query().Get(WG_LIVE) == "true"
+
+	switch {
+	case isLive:
+		h.handleLiveQuery(w, r, variables, requestLogger)
+	case h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION:
 		h.handleSubscriptionRequest(w, r, variables, requestLogger)
-	} else {
+	default:
 		h.handleRequest(w, r, variables, requestLogger)
+	}
+}
+
+func (h *FunctionsHandler) handleLiveQuery(w http.ResponseWriter, r *http.Request, variables []byte, requestLogger *zap.Logger) {
+
+	fw, ok := getFlushWriter(r.Context(), variables, r, w)
+	if !ok {
+		requestLogger.Error("request doesn't support flushing")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for {
+		select {
+		case <-r.Context().Done():
+			return
+		default:
+			out, err := h.hooksClient.DoFunctionRequest(r.Context(), h.operation.Path, variables)
+			if err != nil {
+				requestLogger.Error("failed to execute function", zap.Error(err))
+				return
+			}
+			_, err = fw.Write(out.Response)
+			if err != nil {
+				requestLogger.Error("failed to write response", zap.Error(err))
+				return
+			}
+			fw.Flush()
+			time.Sleep(time.Duration(h.liveQuery.pollingIntervalSeconds) * time.Second)
+		}
 	}
 }
 
@@ -2416,7 +2457,7 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
-func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter) (*httpFlushWriter, bool) {
+func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*httpFlushWriter, bool) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		return nil, false
@@ -2432,11 +2473,12 @@ func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter
 	flusher.Flush()
 
 	flushWriter := &httpFlushWriter{
-		writer:  w,
-		flusher: flusher,
-		sse:     sse,
-		buf:     &bytes.Buffer{},
-		ctx:     ctx,
+		writer:    w,
+		flusher:   flusher,
+		sse:       sse,
+		buf:       &bytes.Buffer{},
+		ctx:       ctx,
+		variables: variables,
 	}
 
 	if subscribeOnce {
@@ -2444,7 +2486,7 @@ func getFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter
 		var (
 			closeFunc func()
 		)
-		ctx.Context, closeFunc = context.WithCancel(ctx.Context)
+		ctx, closeFunc = context.WithCancel(ctx)
 		flushWriter.close = closeFunc
 	}
 

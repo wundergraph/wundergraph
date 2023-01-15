@@ -21,6 +21,7 @@ import (
 )
 
 type Loader struct {
+	operationsRootPath string
 }
 
 type GraphQLOperationFile struct {
@@ -45,7 +46,9 @@ type Output struct {
 	Info                     []string                  `json:"info"`
 }
 
-func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath, wunderGraphRootDir string, pretty bool) (string, error) {
+func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath string, pretty bool) (string, error) {
+
+	l.operationsRootPath = operationsRootPath
 
 	var (
 		out Output
@@ -88,13 +91,17 @@ func (l *Loader) Load(operationsRootPath, fragmentsRootPath, schemaFilePath, wun
 		if info.IsDir() {
 			return nil
 		}
+		filePath, err = filepath.Rel(operationsRootPath, filePath)
+		if err != nil {
+			return err
+		}
 		if strings.HasSuffix(filePath, ".ts") {
 			fileName := strings.TrimSuffix(strings.TrimPrefix(filePath, operationsRootPath+"/"), ".ts")
 			typeScriptFile := TypeScriptOperationFile{
 				OperationName: fileName,
 				FilePath:      filePath,
 				Path:          l.operationPath(fileName),
-				ModulePath:    path.Join(wunderGraphRootDir, "generated", "bundle", "operations", fileName),
+				ModulePath:    path.Join("generated", "bundle", "operations", fileName),
 			}
 			out.TypeScriptOperationFiles = append(out.TypeScriptOperationFiles, typeScriptFile)
 			return nil
@@ -196,7 +203,7 @@ func (e infoError) IsInfo() bool  { return true }
 func (e infoError) Error() string { return string(e) }
 
 func (l *Loader) loadOperation(file GraphQLOperationFile, normalizer *astnormalization.OperationNormalizer, fragments string, schemaDocument *ast.Document) (string, error) {
-	content, err := ioutil.ReadFile(file.FilePath)
+	content, err := ioutil.ReadFile(filepath.Join(l.operationsRootPath, file.FilePath))
 	if err != nil {
 		return "", fmt.Errorf("error reading file: %w", err)
 	}

@@ -76,7 +76,7 @@ var upCmd = &cobra.Command{
 		serverOutFile := filepath.Join("generated", "bundle", "server.js")
 		webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
-		operationsOutDir := filepath.Join("generated", "bundle", "operations")
+		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
 		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
@@ -114,7 +114,6 @@ var upCmd = &cobra.Command{
 
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var webhooksBundler *bundler.Bundler
-		var operationsBundler *bundler.Bundler
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
@@ -148,24 +147,6 @@ var upCmd = &cobra.Command{
 				})
 			}
 
-			if files.DirectoryExists(operationsDir) {
-				operationsPaths, err := operations.GetPaths(wunderGraphDir)
-				if err != nil {
-					return err
-				}
-				operationsBundler = bundler.NewBundler(bundler.Config{
-					Name:          "operations-bundler",
-					EntryPoints:   operationsPaths,
-					AbsWorkingDir: wunderGraphDir,
-					OutDir:        operationsOutDir,
-					Logger:        log,
-					OnAfterBundle: func() error {
-						log.Debug("Operations bundled!", zap.String("bundlerName", "operations-bundler"))
-						return nil
-					},
-				})
-			}
-
 			srvCfg := &helpers.ServerRunConfig{
 				WunderGraphDirAbs: wunderGraphDir,
 				ServerScriptFile:  serverOutFile,
@@ -177,10 +158,23 @@ var upCmd = &cobra.Command{
 			onAfterBuild = func() error {
 				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
-				if operationsBundler != nil {
-					// operationsBundler need to run before configRunner because it influences the config
-					// e.g. the JSON Schema for operations inputs needs to be available in the config
-					err := operationsBundler.Bundle()
+				if files.DirectoryExists(operationsDir) {
+					operationsPaths, err := operations.GetPaths(wunderGraphDir)
+					if err != nil {
+						return err
+					}
+					err = operations.Cleanup(wunderGraphDir, operationsPaths)
+					if err != nil {
+						return err
+					}
+					operationsBundler := bundler.NewBundler(bundler.Config{
+						Name:          "operations-bundler",
+						EntryPoints:   operationsPaths,
+						AbsWorkingDir: wunderGraphDir,
+						OutDir:        generatedBundleOutDir,
+						Logger:        log,
+					})
+					err = operationsBundler.Bundle()
 					if err != nil {
 						return err
 					}

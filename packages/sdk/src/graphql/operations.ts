@@ -34,6 +34,7 @@ import { WG_PRETTY_GRAPHQL_VALIDATION_ERRORS, WG_THROW_ON_OPERATION_LOADING_ERRO
 import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
 import * as fs from 'fs';
+import process from 'node:process';
 
 export interface GraphQLOperation {
 	Name: string;
@@ -46,6 +47,7 @@ export interface GraphQLOperation {
 	InjectedVariablesSchema: JSONSchema;
 	InternalVariablesSchema: JSONSchema;
 	ResponseSchema: JSONSchema;
+	TypeScriptOperationImport?: string;
 	Mock?: {
 		Endpoint: string;
 		SubscriptionPollingInterval?: number;
@@ -1325,10 +1327,10 @@ export interface TypeScriptOperationFile {
 }
 
 export const loadOperations = (schemaFileName: string): LoadOperationsOutput => {
-	const operationsPath = path.join(process.cwd(), 'operations');
-	const fragmentsPath = path.join(process.cwd(), 'fragments');
-	const schemaFilePath = path.join(process.cwd(), 'generated', schemaFileName);
-	const outFilePath = path.join(process.cwd(), 'generated', 'wundergraph.operations.json');
+	const operationsPath = path.join(process.env.WG_DIR_ABS!, 'operations');
+	const fragmentsPath = path.join(process.env.WG_DIR_ABS!, 'fragments');
+	const schemaFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', schemaFileName);
+	const outFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.operations.json');
 	const result = wunderctlExec({
 		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath, '--pretty'],
 	});

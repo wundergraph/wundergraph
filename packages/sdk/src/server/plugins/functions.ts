@@ -3,6 +3,7 @@ import path from 'path';
 import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations/operations';
+import process from 'node:process';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -12,13 +13,23 @@ interface FastifyFunctionsOptions {
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
 	for (const operation of config.operations) {
 		try {
-			const implementation: NodeJSOperation<any, any, any> = (await import(operation.module_path)).default;
+			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
 			const routeUrl = path.join('/functions', operation.operation_name);
+			let maybeImplementation: NodeJSOperation<any, any, any> | undefined;
+			try {
+				maybeImplementation = (await import(filePath)).default;
+			} catch (e) {
+				continue;
+			}
+			if (!maybeImplementation) {
+				continue;
+			}
 			fastify.route({
 				url: routeUrl,
 				method: ['POST'],
 				config: {},
 				handler: async (request, reply) => {
+					const implementation = maybeImplementation!;
 					try {
 						switch (implementation.type) {
 							case 'subscription':
@@ -46,7 +57,9 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								const outQuery = await implementation.queryHandler(request.body);
 								reply.code(200);
 								reply.send({
-									response: outQuery,
+									response: {
+										data: outQuery,
+									},
 								});
 								return;
 							case 'mutation':
@@ -56,7 +69,9 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								const outMutation = await implementation.mutationHandler(request.body);
 								reply.code(200);
 								reply.send({
-									response: outMutation,
+									response: {
+										data: outMutation,
+									},
 								});
 								return;
 						}

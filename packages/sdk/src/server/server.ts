@@ -47,12 +47,12 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		logger.error(err, `uncaught exception, origin: ${origin}`);
 	});
 
-	if (!process.env.WG_ABS_DIR) {
-		logger.fatal('The environment variable `WG_ABS_DIR` is required!');
+	if (!process.env.WG_DIR_ABS) {
+		logger.fatal('The environment variable `WG_DIR_ABS` is required!');
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR!, 'generated', 'wundergraph.config.json'), {
+		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
 			encoding: 'utf8',
 		});
 		WG_CONFIG = JSON.parse(configContent);
@@ -115,7 +115,7 @@ const _configureWunderGraphServer = <
 		}
 
 		startServer({
-			wundergraphDir: process.env.WG_ABS_DIR!,
+			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
 			serverConfig,
 			// only in production because it has no value in development

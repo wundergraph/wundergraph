@@ -1,11 +1,12 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import prettier from 'prettier';
 import { JSONSchema7, JSONSchema7 as JSONSchema } from 'json-schema';
-import { hasInput, hasInternalInput, hasInjectedInput } from './helpers';
+import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
 import fs from 'fs';
 import path from 'path';
 import { visitJSONSchema } from '../../jsonschema';
+import { OperationExecutionEngine } from '@wundergraph/protobuf';
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -17,9 +18,21 @@ export const formatTypeScript = (input: string): string => {
 };
 
 export class TypeScriptInputModels implements Template {
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = config.application.Operations.filter(hasInput)
-			.map((op) => JSONSchemaToTypescriptInterface(op.VariablesSchema, op.Name + 'Input', false))
+			.map((op) =>
+				JSONSchemaToTypescriptInterface(
+					op.VariablesSchema,
+					op.Name + 'Input',
+					false,
+					op.TypeScriptOperationImport
+						? {
+								importName: op.TypeScriptOperationImport,
+								extract: 'Input',
+						  }
+						: undefined
+				)
+			)
 			.join('\n\n');
 		return Promise.resolve([
 			{
@@ -36,7 +49,7 @@ export class TypeScriptInputModels implements Template {
 }
 
 export class TypeScriptInternalInputModels implements Template {
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = config.application.Operations.filter(hasInternalInput)
 			.map((op) => JSONSchemaToTypescriptInterface(op.InternalVariablesSchema, 'Internal' + op.Name + 'Input', false))
 			.join('\n\n');
@@ -55,7 +68,7 @@ export class TypeScriptInternalInputModels implements Template {
 }
 
 export class TypeScriptInjectedInputModels implements Template {
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = config.application.Operations.filter(hasInjectedInput)
 			.map((op) => JSONSchemaToTypescriptInterface(op.InjectedVariablesSchema, 'Injected' + op.Name + 'Input', false))
 			.join('\n\n');
@@ -75,7 +88,7 @@ export class TypeScriptInjectedInputModels implements Template {
 }
 
 export class TypeScriptResponseModels implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + op.Name + 'ResponseData';
 			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
@@ -101,7 +114,7 @@ export class TypeScriptResponseModels implements Template {
 }
 
 export class TypeScriptResponseDataModels implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = config.application.Operations.filter(
 			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
 		)
@@ -109,7 +122,13 @@ export class TypeScriptResponseDataModels implements Template {
 				JSONSchemaToTypescriptInterface(
 					op.ResponseSchema.properties!['data'] as JSONSchema7,
 					op.Name + 'ResponseData',
-					false
+					false,
+					op.TypeScriptOperationImport
+						? {
+								importName: op.TypeScriptOperationImport,
+								extract: 'Response',
+						  }
+						: undefined
 				)
 			)
 			.join('\n\n');
@@ -128,7 +147,9 @@ export class TypeScriptResponseDataModels implements Template {
 }
 
 export class BaseTypeScriptDataModel implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	precedence = 10;
+
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const definitions: Map<string, JSONSchema7> = new Map();
 
 		config.application.Operations.forEach((op) => {
@@ -167,9 +188,13 @@ export class BaseTypeScriptDataModel implements Template {
 				});
 		});
 
-		const content = Array.from(definitions.entries())
+		const models = Array.from(definitions.entries())
 			.map(([definitionName, definition]) => JSONSchemaToTypescriptInterface(definition, definitionName, false))
 			.join('\n\n');
+
+		const functionImports = typescriptFunctionsImports(config);
+
+		const content = functionImports + models;
 
 		return Promise.resolve([
 			{
@@ -193,8 +218,42 @@ export interface GraphQLError {
 }
 `;
 
-const JSONSchemaToTypescriptInterface = (schema: JSONSchema, interfaceName: string, withErrors: boolean): string => {
-	console.log(`interfaceName: ${interfaceName} schema: ${JSON.stringify(schema)}`);
+const typescriptFunctionsImports = (config: CodeGenerationConfig): string => {
+	const ops = config.application.Operations.filter(
+		(op) => op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS
+	);
+	if (ops.length === 0) {
+		return '';
+	}
+	const relBasePath = path.relative(config.outPath, config.wunderGraphDir);
+	return (
+		ops
+			.map((op) => `import type function_${op.Name} from '${path.join(relBasePath, 'operations', op.PathName)}';\n`)
+			.join('') +
+		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk";\n' +
+		'\n'
+	);
+};
+
+interface typeScriptOperation {
+	importName: string;
+	extract: 'Input' | 'Response';
+}
+
+const JSONSchemaToTypescriptInterface = (
+	schema: JSONSchema,
+	interfaceName: string,
+	withErrors: boolean,
+	typeScriptOperation?: typeScriptOperation
+): string => {
+	if (typeScriptOperation) {
+		switch (typeScriptOperation.extract) {
+			case 'Input':
+				return `export type ${interfaceName} = ExtractInput<typeof ${typeScriptOperation.importName}>;`;
+			case 'Response':
+				return `export type ${interfaceName} = ExtractResponse<typeof ${typeScriptOperation.importName}>;`;
+		}
+	}
 
 	if (typeof schema === 'object' && !schema.type && !schema.properties && !schema.$ref) {
 		return `export type ${interfaceName} = JSONObject;`;

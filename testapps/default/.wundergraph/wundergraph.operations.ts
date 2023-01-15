@@ -27,8 +27,6 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
 		subscriptions: (config) => ({
 			...config,
 		}),
-		custom: {
-			Join: enableCaching,
-		},
+		custom: {},
 	},
 });
