@@ -4,6 +4,7 @@ import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations/operations';
 import process from 'node:process';
+import { HandlerContext } from '../../operations/operations';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -31,14 +32,20 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				handler: async (request, reply) => {
 					const implementation = maybeImplementation!;
 					try {
+						const ctx: HandlerContext<any> = {
+							log: fastify.log,
+							user: (request.body as any)?.__wg.user!,
+							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),
+							clientRequest: (request.body as any)?.__wg.clientRequest,
+							input: (request.body as any)?.input,
+						};
+
 						switch (implementation.type) {
 							case 'subscription':
 								if (!implementation.subscriptionHandler) {
 									return reply.status(500);
 								}
-								const gen = await implementation.subscriptionHandler({
-									input: request.body,
-								});
+								const gen = await implementation.subscriptionHandler(ctx);
 								reply.hijack();
 								reply.raw.on('close', () => {
 									gen.return(0);
@@ -54,7 +61,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								if (!implementation.queryHandler) {
 									return reply.status(500);
 								}
-								const outQuery = await implementation.queryHandler(request.body);
+								const outQuery = await implementation.queryHandler(ctx);
 								reply.code(200);
 								reply.send({
 									response: {
@@ -66,7 +73,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								if (!implementation.mutationHandler) {
 									return reply.status(500);
 								}
-								const outMutation = await implementation.mutationHandler(request.body);
+								const outMutation = await implementation.mutationHandler(ctx);
 								reply.code(200);
 								reply.send({
 									response: {

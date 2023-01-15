@@ -611,33 +611,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							if (customize as CustomizeMutation) {
 								mutationConfig = customize(mutationConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || mutationConfig.authentication.required,
 								},
-							};
+							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
-							const isNodeJsFunction = op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS;
-							if (isNodeJsFunction) {
-								const filePath = path.join(
-									process.env.WG_DIR_ABS!,
-									'generated',
-									'bundle',
-									'operations',
-									op.PathName + '.js'
-								);
-								const operation: NodeJSOperation<any, any, any> = (await import(filePath)).default;
-								if (operation.liveQuery) {
-									queryConfig.liveQuery = operation.liveQuery;
-								}
-							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								CacheConfig: {
 									enable: queryConfig.caching.enable,
@@ -650,19 +636,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
 								},
 								LiveQuery: queryConfig.liveQuery,
-							};
+							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
 							if (customize as CustomizeSubscription) {
 								subscriptionConfig = customize(subscriptionConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || subscriptionConfig.authentication.required,
 								},
-							};
+							});
 						default:
 							return op;
 					}
@@ -1117,16 +1103,7 @@ const resolveOperationsConfigurations = async (
 					Internal: implementation.internal ? implementation.internal : false,
 					PostResolveTransformations: undefined,
 				};
-				if (implementation.inputSchema) {
-					operation.VariablesSchema = zodToJsonSchema(implementation.inputSchema) as any;
-				}
-				if (implementation.liveQuery) {
-					operation.LiveQuery = {
-						enable: implementation.liveQuery.enable,
-						pollingIntervalSeconds: implementation.liveQuery.pollingIntervalSeconds,
-					};
-				}
-				nodeJSOperations.push(operation);
+				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
 				logger.info(`Skipping operation ${file.operation_name} due to error: ${e.message}`);
 			}
@@ -1134,4 +1111,45 @@ const resolveOperationsConfigurations = async (
 	return {
 		operations: [...graphQLOperations.operations, ...nodeJSOperations],
 	};
+};
+
+const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
+		return operation;
+	}
+	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+	return applyNodeJsOperationOverrides(operation, implementation);
+};
+
+const applyNodeJsOperationOverrides = (
+	operation: GraphQLOperation,
+	overrides: NodeJSOperation<any, any, any>
+): GraphQLOperation => {
+	if (overrides.inputSchema) {
+		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+	}
+	if (overrides.liveQuery) {
+		operation.LiveQuery = {
+			enable: overrides.liveQuery.enable,
+			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
+		};
+	}
+	if (overrides.requireAuthentication) {
+		operation.AuthenticationConfig = {
+			required: overrides.requireAuthentication,
+		};
+	}
+	if (overrides.rbac) {
+		operation.AuthorizationConfig = {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: overrides.rbac.requireMatchAll,
+				requireMatchAny: overrides.rbac.requireMatchAny,
+				denyMatchAll: overrides.rbac.denyMatchAll,
+				denyMatchAny: overrides.rbac.denyMatchAny,
+			},
+		};
+	}
+	return operation;
 };

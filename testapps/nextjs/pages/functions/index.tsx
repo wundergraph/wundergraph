@@ -16,6 +16,8 @@ const Functions = () => {
 			<div>
 				<div>id: {one?.id}</div>
 				<div>name: {one?.name}</div>
+				<div>bio: {one?.bio}</div>
+				<div>roles: {one?.roles.map((r) => r).join(', ')}</div>
 			</div>
 			<h2>All</h2>
 			{all?.map((user) => (

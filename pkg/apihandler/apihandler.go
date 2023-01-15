@@ -2181,6 +2181,9 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 
+	ctx := pool.GetCtx(r, r, pool.Config{})
+	defer pool.PutCtx(ctx)
+
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -2189,15 +2192,11 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	variablesBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(variablesBuf)
 
-	var (
-		variables []byte
-	)
-
 	ct := r.Header.Get("Content-Type")
 	if r.Method == http.MethodGet {
-		variables = parseQueryVariables(r, h.queryParamsAllowList)
+		ctx.Variables = parseQueryVariables(r, h.queryParamsAllowList)
 	} else if ct == "application/x-www-form-urlencoded" {
-		variables = h.parseFormVariables(r)
+		ctx.Variables = h.parseFormVariables(r)
 	} else {
 		_, err := io.Copy(variablesBuf, r.Body)
 		if err != nil {
@@ -2205,43 +2204,48 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		variables = variablesBuf.Bytes()
+		ctx.Variables = variablesBuf.Bytes()
 	}
 
-	if len(variables) == 0 {
-		variables = []byte("{}")
+	if len(ctx.Variables) == 0 {
+		ctx.Variables = []byte("{}")
 	} else {
-		variables = h.stringInterpolator.Interpolate(variables)
+		ctx.Variables = h.stringInterpolator.Interpolate(ctx.Variables)
 	}
 
 	variablesBuf.Reset()
-	err := json.Compact(variablesBuf, variables)
+	err := json.Compact(variablesBuf, ctx.Variables)
 	if err != nil {
 		requestLogger.Error("failed to compact variables", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	variables = variablesBuf.Bytes()
+	ctx.Variables = variablesBuf.Bytes()
 
-	if !validateInputVariables(r.Context(), requestLogger, variables, h.variablesValidator, w) {
+	if !validateInputVariables(ctx, requestLogger, ctx.Variables, h.variablesValidator, w) {
 		return
 	}
 
 	isLive := h.liveQuery.enabled && r.URL.Query().Get(WG_LIVE) == "true"
 
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	input := hookBaseData(r, buf.Bytes(), ctx.Variables, nil)
+
 	switch {
 	case isLive:
-		h.handleLiveQuery(w, r, variables, requestLogger)
+		h.handleLiveQuery(ctx, w, r, input, requestLogger)
 	case h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION:
-		h.handleSubscriptionRequest(w, r, variables, requestLogger)
+		h.handleSubscriptionRequest(ctx, w, input, requestLogger)
 	default:
-		h.handleRequest(w, r, variables, requestLogger)
+		h.handleRequest(ctx, w, input, requestLogger)
 	}
 }
 
-func (h *FunctionsHandler) handleLiveQuery(w http.ResponseWriter, r *http.Request, variables []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 
-	fw, ok := getFlushWriter(r.Context(), variables, r, w)
+	fw, ok := getFlushWriter(ctx, input, r, w)
 	if !ok {
 		requestLogger.Error("request doesn't support flushing")
 		w.WriteHeader(http.StatusBadRequest)
@@ -2250,10 +2254,10 @@ func (h *FunctionsHandler) handleLiveQuery(w http.ResponseWriter, r *http.Reques
 
 	for {
 		select {
-		case <-r.Context().Done():
+		case <-ctx.Done():
 			return
 		default:
-			out, err := h.hooksClient.DoFunctionRequest(r.Context(), h.operation.Path, variables)
+			out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
 			if err != nil {
 				requestLogger.Error("failed to execute function", zap.Error(err))
 				return
@@ -2269,8 +2273,8 @@ func (h *FunctionsHandler) handleLiveQuery(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (h *FunctionsHandler) handleRequest(w http.ResponseWriter, r *http.Request, variables []byte, requestLogger *zap.Logger) {
-	out, err := h.hooksClient.DoFunctionRequest(r.Context(), h.operation.Path, variables)
+func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
+	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
 	if err != nil {
 		requestLogger.Error("failed to call function", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -2282,9 +2286,9 @@ func (h *FunctionsHandler) handleRequest(w http.ResponseWriter, r *http.Request,
 	_, _ = w.Write(out.Response)
 }
 
-func (h *FunctionsHandler) handleSubscriptionRequest(w http.ResponseWriter, r *http.Request, variables []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
 	setSubscriptionHeaders(w)
-	err := h.hooksClient.DoFunctionSubscriptionRequest(r.Context(), h.operation.Path, variables, w)
+	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, w)
 	if err != nil {
 		requestLogger.Error("failed to call function", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)

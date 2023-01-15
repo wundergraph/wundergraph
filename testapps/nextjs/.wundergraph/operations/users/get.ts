@@ -5,10 +5,14 @@ export default createOperation.query({
 	input: z.object({
 		id: z.string(),
 	}),
-	handler: async (input) => {
+	handler: async (ctx) => {
+		console.log(`ctx data: ${JSON.stringify(ctx)}`);
 		return {
-			id: input.id,
-			name: 'Jens',
+			id: ctx.input.id,
+			name: ctx.user?.name || 'no name',
+			bio: ctx.user?.description || 'no bio',
+			roles: ctx.user?.roles || [],
+			time: new Date().toISOString(),
 		};
 	},
 });
