@@ -70,11 +70,13 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		const { operationName, liveQuery, input, ...queryOptions } = options;
 		const queryHash = serialize([operationName, input]);
 
-		const result = useTanstackQuery(
-			queryKey({ operationName, input }),
-			({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
-			queryOptions
-		);
+		const result = useTanstackQuery({
+			queryKey: queryKey({ operationName, input }),
+			queryFn: liveQuery
+				? undefined
+				: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
+			...queryOptions,
+		});
 
 		const onSuccess = useCallback(
 			(response: any) => {
@@ -95,7 +97,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			operationName,
 			input,
 			liveQuery,
-			enabled: options.enabled && liveQuery,
+			enabled: options.enabled !== false && liveQuery,
 			onSuccess,
 			onError,
 		});
