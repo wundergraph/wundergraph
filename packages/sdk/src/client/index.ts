@@ -28,3 +28,4 @@ export { Client } from './client';
 
 export { GraphQLResponseError } from './GraphQLResponseError';
 export { ResponseError } from './ResponseError';
+export type { ClientResponseError } from './ClientResponseError';

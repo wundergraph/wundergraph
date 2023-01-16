@@ -1,7 +1,6 @@
 import {
 	ClientResponse,
 	FetchUserRequestOptions,
-	GraphQLResponseError,
 	OperationRequestOptions,
 	OperationsDefinition,
 	SubscriptionRequestOptions,
@@ -15,6 +14,7 @@ import {
 	UseQueryResult,
 	UseMutationResult,
 } from '@tanstack/react-query';
+import { ClientResponseError } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
@@ -74,8 +74,8 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
-		options: UseQueryOptions<Data, GraphQLResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): UseQueryResult<Data, GraphQLResponseError>;
+		options: UseQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
+	): UseQueryResult<Data, ClientResponseError>;
 };
 
 export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
@@ -94,11 +94,11 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
 		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
 	>(
-		options: UseSubscriptionOptions<Data | undefined, GraphQLResponseError, Input, OperationName> & ExtraOptions
-	): UseSubscriptionResponse<Data, GraphQLResponseError>;
+		options: UseSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
+	): UseSubscriptionResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, Error = GraphQLResponseError> = UseQueryResult<Data, Error> & {
+export type UseSubscriptionResponse<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
 	isSubscribed: boolean;
 };
 
@@ -115,8 +115,8 @@ export type UseMutationHook<Operations extends OperationsDefinition, ExtraOption
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
 		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
 	>(
-		options: UseMutationOptions<Data, GraphQLResponseError, Input, OperationName> & ExtraOptions
-	): UseMutationResult<Data, GraphQLResponseError, Input>;
+		options: UseMutationOptions<Data, ClientResponseError, Input, OperationName> & ExtraOptions
+	): UseMutationResult<Data, ClientResponseError, Input>;
 };
 
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
@@ -124,34 +124,34 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	enabled?: boolean;
 	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: GraphQLResponseError): void;
+	onError?(error: ClientResponseError): void;
 }
 
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: GraphQLResponseError): void;
+	onError?(error: ClientResponseError): void;
 	onAbort?(): void;
 }
 
 export interface UseUserOptions<User>
 	extends FetchUserRequestOptions,
-		UseTanstackQueryOptions<User, GraphQLResponseError, User, [string]> {
+		UseTanstackQueryOptions<User, ClientResponseError, User, [string]> {
 	enabled?: boolean;
 }
 
 export type UseUserHook<Operations extends OperationsDefinition> = {
-	(options?: UseUserOptions<Operations['user']>): UseQueryResult<Operations['user'], GraphQLResponseError>;
+	(options?: UseUserOptions<Operations['user']>): UseQueryResult<Operations['user'], ClientResponseError>;
 };
 
 export type UseUploadOptions = Omit<
-	UseTanstackMutationOptions<string[], GraphQLResponseError, UploadRequestOptions, 'uploadFiles'>,
+	UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions, 'uploadFiles'>,
 	'fetcher'
 >;
 
 export type UseUploadHook<Operations extends OperationsDefinition> = {
 	(options?: UseUploadOptions): Omit<
-		UseTanstackMutationOptions<string[], GraphQLResponseError, UploadRequestOptions>,
+		UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions>,
 		'mutate'
 	> & {
 		upload: <
