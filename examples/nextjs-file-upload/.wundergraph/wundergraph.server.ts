@@ -16,7 +16,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 							return { error: 'authenticate' };
 						}
 						return { fileKey: 'myfile.png' };
-						//						return {fileKey: file.name}
+						// return {fileKey: file.name}
 					},
 					postUpload: async ({ user, file, meta, internalClient, error }) => {
 						console.log(
@@ -27,23 +27,4 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			},
 		},
 	},
-	graphqlServers: [
-		{
-			serverName: 'gql',
-			apiNamespace: 'gql',
-			schema: new GraphQLSchema({
-				query: new GraphQLObjectType({
-					name: 'RootQueryType',
-					fields: {
-						hello: {
-							type: GraphQLString,
-							resolve() {
-								return 'world';
-							},
-						},
-					},
-				}),
-			}),
-		},
-	],
 }));
