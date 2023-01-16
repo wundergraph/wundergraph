@@ -20,6 +20,9 @@ import { InputValidationError } from './InputValidationError';
 
 // https://graphql.org/learn/serving-over-http/
 
+interface LogoutResponse {
+	redirect?: string;
+}
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -27,11 +30,14 @@ export class Client {
 		};
 
 		this.extraHeaders = { ...options.extraHeaders };
+
+		this.csrfEnabled = options.csrfEnabled ?? true;
 	}
 
 	private readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
+	private csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
 		return serialize(query);
@@ -226,7 +232,8 @@ export class Client {
 		if (
 			this.options.operationMetadata &&
 			this.options.operationMetadata[options.operationName] &&
-			this.options.operationMetadata[options.operationName].requiresAuthentication
+			this.options.operationMetadata[options.operationName].requiresAuthentication &&
+			this.csrfEnabled
 		) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
@@ -251,7 +258,7 @@ export class Client {
 			revalidate: options?.revalidate ? 'true' : 'false',
 		});
 
-		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/cookie/user`, params), {
+		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/user`, params), {
 			method: 'GET',
 			signal: options?.abortSignal,
 		});
@@ -365,7 +372,12 @@ export class Client {
 				formData.append('files', file);
 			}
 		}
-		const csrfToken = await this.getCSRFToken();
+
+		const headers: Headers = {};
+
+		if (this.csrfEnabled) {
+			headers['X-CSRF-Token'] = await this.getCSRFToken();
+		}
 
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
@@ -374,10 +386,8 @@ export class Client {
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
-				headers: {
-					// Dont set the content-type header, the browser will set it for us + boundary
-					'X-CSRF-Token': csrfToken,
-				},
+				// Dont set the content-type header, the browser will set it for us + boundary
+				headers,
 				body: formData,
 				method: 'POST',
 				signal: config.abortSignal,
@@ -416,6 +426,11 @@ export class Client {
 	}
 
 	public async logout(options?: LogoutOptions): Promise<boolean> {
+		// browser check
+		if (typeof window === 'undefined') {
+			throw new Error('logout() can only be called in a browser environment');
+		}
+
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
@@ -426,6 +441,26 @@ export class Client {
 			method: 'GET',
 		});
 
-		return response.ok;
+		if (!response.ok) {
+			return false;
+		}
+
+		let ok = true;
+		if (response.headers.get('Content-Type')?.includes('application/json')) {
+			const data = (await response.json()) as LogoutResponse;
+			if (data.redirect) {
+				if (options?.redirect) {
+					ok = await options.redirect(data.redirect);
+				} else {
+					window.location.href = data.redirect;
+				}
+			}
+		}
+
+		if (ok && options?.after) {
+			options.after();
+		}
+
+		return ok;
 	}
 }

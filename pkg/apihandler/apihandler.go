@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -251,7 +250,9 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		)
 	}
 
-	r.registerAuth(r.insecureCookies)
+	if err := r.registerAuth(r.insecureCookies); err != nil {
+		return nil, err
+	}
 
 	for _, s3Provider := range api.S3UploadConfiguration {
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
@@ -1204,6 +1205,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if done := handleHookOut(ctx, w, requestLogger, out, "mutatingPreResolve hook out is nil", h.operation); done {
 			return
 		}
+		ctx.Variables = out.Input
 	}
 
 	if h.hooksConfig.customResolve {
@@ -1880,7 +1882,7 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 	return left
 }
 
-func (r *Builder) registerAuth(insecureCookies bool) {
+func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	var (
 		hashKey, blockKey, csrfSecret []byte
@@ -1930,158 +1932,94 @@ func (r *Builder) registerAuth(insecureCookies bool) {
 		Secret:          csrfSecret,
 	}))
 
-	tokenBasedAuth := r.router.PathPrefix("/auth/token").Subrouter()
-
-	tokenBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.TokenUserHandler{})
-
-	cookieBasedAuth := r.router.PathPrefix("/auth/cookie").Subrouter()
-
-	cookieBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CookieUserHandler{
+	userHandler := &authentication.UserHandler{
 		HasRevalidateHook: r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
 		MWClient:          r.middlewareClient,
 		Log:               r.log,
 		InsecureCookies:   insecureCookies,
 		Cookie:            cookie,
-	})
+	}
+
+	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
+
+	// fallback for old token user path
+	// @deprecated use /auth/user instead
+	r.router.Path("/auth/token/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
+
+	cookieBasedAuth := r.router.PathPrefix("/auth/cookie").Subrouter()
+
+	// fallback for old cookie user path
+	// @deprecated use /auth/user instead
+	cookieBasedAuth.Path("/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
+
 	cookieBasedAuth.Path("/csrf").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.CSRFTokenHandler{})
 
-	r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)
+	return r.registerCookieAuthHandlers(cookieBasedAuth, cookie, authHooks)
 }
 
-func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks) {
+func (r *Builder) registerCookieAuthHandlers(router *mux.Router, cookie *securecookie.SecureCookie, authHooks authentication.Hooks) error {
+
+	oidcProviders, err := r.configureOpenIDConnectProviders()
+	if err != nil {
+		return fmt.Errorf("error configuring OIDC providers: %w", err)
+	}
 
 	router.Path("/user/logout").Methods(http.MethodGet, http.MethodOptions).Handler(&authentication.UserLogoutHandler{
-		InsecureCookies:                  r.insecureCookies,
-		OpenIDConnectIssuersToLogoutURLs: r.configureOpenIDConnectIssuerLogoutURLs(),
-		Hooks:                            authHooks,
+		InsecureCookies: r.insecureCookies,
+		OpenIDProviders: oidcProviders,
+		Hooks:           authHooks,
+		Log:             r.log,
 	})
 
 	if r.api.AuthenticationConfig == nil || r.api.AuthenticationConfig.CookieBased == nil {
-		return
+		return nil
 	}
 
 	for _, provider := range r.api.AuthenticationConfig.CookieBased.Providers {
 		r.configureCookieProvider(router, provider, cookie)
 	}
+
+	return nil
 }
 
-func (r *Builder) configureOpenIDConnectIssuerLogoutURLs() map[string]string {
-	issuerLogoutURLs := map[string]string{}
+func (r *Builder) configureOpenIDConnectProviders() (*authentication.OpenIDConnectProviderSet, error) {
+	var providers authentication.OpenIDConnectProviderSet
 
-	client := &http.Client{
+	httpClient := &http.Client{
 		Timeout: r.api.Options.DefaultTimeout,
 	}
 
 	for _, provider := range r.api.AuthenticationConfig.CookieBased.Providers {
-		if provider.Kind != wgpb.AuthProviderKind_AuthProviderOIDC {
+		var flavor authentication.OpenIDConnectFlavor
+		switch provider.Kind {
+		case wgpb.AuthProviderKind_AuthProviderOIDC:
+			flavor = authentication.OpenIDConnectFlavorDefault
+		case wgpb.AuthProviderKind_AuthProviderAuth0:
+			flavor = authentication.OpenIDConnectFlavorAuth0
+		default:
 			continue
 		}
 		if provider.OidcConfig == nil {
 			continue
 		}
 		issuer := loadvariable.String(provider.OidcConfig.Issuer)
-		if issuer == "" {
-			r.log.Error("oidc issuer must not be empty",
-				zap.String("providerID", provider.Id),
-			)
-			continue
-		}
-		_, urlErr := url.ParseRequestURI(issuer)
-		if urlErr != nil {
-			r.log.Error("invalid oidc issuer, must be a valid URL",
-				zap.String("providerID", provider.Id),
-				zap.String("issuer", issuer),
-				zap.Error(urlErr),
-			)
-			continue
-		}
+		clientID := loadvariable.String(provider.OidcConfig.ClientId)
+		clientSecret := loadvariable.String(provider.OidcConfig.ClientId)
 
-		issuer = strings.TrimSuffix(issuer, "/")
-
-		introspectionURL := issuer + "/.well-known/openid-configuration"
-		req, err := http.NewRequest(http.MethodGet, introspectionURL, nil)
+		oidc, err := authentication.NewOpenIDConnectProvider(issuer, clientID, clientSecret, &authentication.OpenIDConnectProviderOptions{
+			Flavor:     flavor,
+			HTTPClient: httpClient,
+			Logger:     r.log,
+		})
 		if err != nil {
-			r.log.Error("failed to create openid-configuration request",
-				zap.Error(err),
-			)
-			continue
+			return nil, fmt.Errorf("error in %s OIDC provider: %w", provider.Id, err)
 		}
-		resp, err := client.Do(req)
-		if err != nil {
-			r.log.Warn("failed to get openid-configuration",
-				zap.Error(err),
-			)
-			continue
+		if err := providers.Add(provider.Id, oidc); err != nil {
+			return nil, fmt.Errorf("could not register OIDC provider %s: %w", provider.Id, err)
 		}
-		if resp.StatusCode != http.StatusOK {
-			r.log.Error("failed to get openid-configuration, provider returned an HTTP error",
-				zap.Int("status", resp.StatusCode),
-			)
-			continue
-		}
-		defer resp.Body.Close()
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			r.log.Error("failed to read openid-configuration",
-				zap.Error(err),
-			)
-			continue
-		}
-		var config OpenIDConnectConfiguration
-		err = json.Unmarshal(data, &config)
-		if err != nil {
-			r.log.Error("failed to decode openid-configuration",
-				zap.Error(err),
-			)
-			continue
-		}
-		if err := config.Validate(); err != nil {
-			r.log.Warn("failed to get openid-configuration", zap.Error(err))
-			continue
-		}
-		if config.EndSessionEndpoint == "" {
-			r.log.Debug("issuer doesn't support end_session_endpoint", zap.String("issuer", issuer))
-		}
-		issuerLogoutURLs[issuer] = config.EndSessionEndpoint
 	}
 
-	return issuerLogoutURLs
-}
-
-type OpenIDConnectConfiguration struct {
-	Issuer                string `json:"issuer"`
-	AuthorizationEndpoint string `json:"authorization_endpoint"`
-	TokenEndpoint         string `json:"token_endpoint"`
-	UserinfoEndpoint      string `json:"userinfo_endpoint"`
-	JwksUri               string `json:"jwks_uri"`
-	EndSessionEndpoint    string `json:"end_session_endpoint"`
-}
-
-type openIDConnectConfigurationMissingFieldError string
-
-func (e openIDConnectConfigurationMissingFieldError) Error() string {
-	return fmt.Sprintf("missing field %q", string(e))
-}
-
-func (c *OpenIDConnectConfiguration) Validate() error {
-	// See https://openid.net/specs/openid-connect-discovery-1_0.html
-	//
-	// Note that our implementation uses userinfo_endpoint and hence we
-	// make it required, but can work without jwks_uri so we make it optional
-	if c.Issuer == "" {
-		return openIDConnectConfigurationMissingFieldError("issuer")
-	}
-	if c.AuthorizationEndpoint == "" {
-		return openIDConnectConfigurationMissingFieldError("authorization_endpoint")
-	}
-	if c.TokenEndpoint == "" {
-		// TODO: This might be optional with Implicit Flow?
-		return openIDConnectConfigurationMissingFieldError("token_endpoint")
-	}
-	if c.UserinfoEndpoint == "" {
-		return openIDConnectConfigurationMissingFieldError("userinfo_endpoint")
-	}
-	return nil
+	return &providers, nil
 }
 
 func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.AuthProvider, cookie *securecookie.SecureCookie) {
@@ -2134,6 +2072,8 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			zap.String("clientID", loadvariable.String(provider.GithubConfig.ClientId)),
 		)
 	case wgpb.AuthProviderKind_AuthProviderOIDC:
+		fallthrough
+	case wgpb.AuthProviderKind_AuthProviderAuth0:
 		if provider.OidcConfig == nil {
 			return
 		}
@@ -2168,6 +2108,8 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			zap.String("issuer", loadvariable.String(provider.OidcConfig.Issuer)),
 			zap.String("clientID", loadvariable.String(provider.OidcConfig.ClientId)),
 		)
+	default:
+		panic("unreachable")
 	}
 }
 
