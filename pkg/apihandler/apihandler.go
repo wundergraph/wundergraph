@@ -1205,6 +1205,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if done := handleHookOut(ctx, w, requestLogger, out, "mutatingPreResolve hook out is nil", h.operation); done {
 			return
 		}
+		ctx.Variables = out.Input
 	}
 
 	if h.hooksConfig.customResolve {
