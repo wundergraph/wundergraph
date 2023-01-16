@@ -395,7 +395,7 @@ export class Client {
 		});
 
 		if ('profile' in config) {
-			headers['X-Upload-Profile'] = (config as any).profile ?? ('' as string);
+			headers['X-Upload-Profile'] = (config as any).profile;
 		}
 
 		if ('meta' in config) {
