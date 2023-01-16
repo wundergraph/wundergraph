@@ -1,4 +1,8 @@
-import { openApiSpecificationToRESTApiObject } from './index';
+import {
+	getNormalisedGraphQLEnumValue,
+	isNormalisedGraphQLEnumValueUnique,
+	openApiSpecificationToRESTApiObject,
+} from './index';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -120,4 +124,29 @@ test('arbitrary type', async () => {
 	});
 
 	expect(actual.Schema).toMatchSnapshot('users_meta_schema');
+});
+
+test('that invalid GraphQL enum values are normalised correctly', () => {
+	expect(getNormalisedGraphQLEnumValue('1Som3/Ex$*pl_e')).toBe('_Som3_Ex__pl_e');
+});
+
+test('that a valid GraphQL enum value remains unchanged', () => {
+	expect(getNormalisedGraphQLEnumValue('_An_exAMP___LE')).toBe('_An_exAMP___LE');
+});
+
+test('that a unique value remains unchanged', () => {
+	const valueSet = new Set(['a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
+	expect(isNormalisedGraphQLEnumValueUnique(valueSet, 'a')).toBe(true);
+	expect(valueSet.has('a')).toBe(true);
+});
+
+test('that creating a unique value before 9 tries returns true', () => {
+	const valueSet = new Set(['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
+	expect(isNormalisedGraphQLEnumValueUnique(valueSet, 'a')).toBe(true);
+	expect(valueSet.has('a_9')).toBe(true);
+});
+
+test('that failure to create a unique value after 9 tries returns false', () => {
+	const valueSet = new Set(['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8', 'a_9']);
+	expect(isNormalisedGraphQLEnumValueUnique(valueSet, 'a')).toBe(false);
 });

@@ -139,10 +139,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const { schemaSDL: replaced, customScalarTypeFields } = transformSchema.replaceCustomScalars(
-			print(filtered),
-			this.introspection
-		);
+		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -942,19 +939,20 @@ class RESTApiBuilder {
 	};
 	private addEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
 		const nodes: EnumValueDefinitionNode[] = [];
+		const valueSet: Set<string> = new Set();
 		values.forEach((value) => {
 			if (typeof value !== 'string') {
 				return;
 			}
-			const exists = nodes.find((node) => node.name.value === value) !== undefined;
-			if (exists) {
+			let normalisedValue = getNormalisedGraphQLEnumValue(value);
+			if (!isNormalisedGraphQLEnumValueUnique(valueSet, normalisedValue)) {
 				return;
 			}
 			nodes.push({
 				kind: Kind.ENUM_VALUE_DEFINITION,
 				name: {
 					kind: Kind.NAME,
-					value: value,
+					value: normalisedValue,
 				},
 			});
 		});
@@ -1265,4 +1263,28 @@ const fixOasReplacer = (key: string, value: any): any => {
 		default:
 			return value;
 	}
+};
+
+export const getNormalisedGraphQLEnumValue = (valueToNormalise: string): string => {
+	let normalisedValue = valueToNormalise.replace(/[^a-zA-Z0-9_]/g, '_');
+	if (normalisedValue.match(/^[a-zA-Z_].*$/)) {
+		return normalisedValue;
+	}
+	return `_${normalisedValue.slice(1)}`;
+};
+
+export const isNormalisedGraphQLEnumValueUnique = (valueSet: Set<string>, normalisedValue: string): boolean => {
+	if (!valueSet.has(normalisedValue)) {
+		valueSet.add(normalisedValue);
+		return true;
+	}
+	for (let i = 1; i < 10; i++) {
+		const newNormalisedValue = `${normalisedValue}_${i}`;
+		if (!valueSet.has(newNormalisedValue)) {
+			normalisedValue = newNormalisedValue;
+			valueSet.add(normalisedValue);
+			return true;
+		}
+	}
+	return false; // more than 9 retries seems unreasonable
 };
