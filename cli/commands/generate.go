@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/wundergraph/wundergraph/pkg/operations"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )

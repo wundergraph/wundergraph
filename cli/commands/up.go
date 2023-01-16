@@ -10,13 +10,13 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	"github.com/wundergraph/wundergraph/pkg/operations"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
@@ -89,7 +89,7 @@ var upCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(helpers.CliEnv(rootFlags),
-				fmt.Sprintf("WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true"),
+				"WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true",
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),

@@ -253,7 +253,9 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 
 	for {
 		line, err = buf.ReadBytes('\n')
-		_, err = buf.ReadByte()
+		if err == nil {
+			_, err = buf.ReadByte()
+		}
 		if err != nil {
 			if err == io.EOF {
 				return nil
