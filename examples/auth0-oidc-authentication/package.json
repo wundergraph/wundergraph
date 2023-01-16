@@ -6,9 +6,9 @@
     "start": "run-p dev wundergraph open",
     "wundergraph": "wunderctl up --debug",
     "build": "wunderctl generate --debug",
-    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
+    "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost",
     "build:next": "next build",
-    "dev": "next dev --port 3003",
+    "dev": "next dev",
     "wunderctl": "wunderctl",
     "check": "tsc --noEmit"
   },

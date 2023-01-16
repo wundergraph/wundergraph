@@ -9,6 +9,9 @@ import { checkIfValidExample, getExamplesList } from './examples';
 import { getRepoInfo } from './getRepoInfo';
 import { getRepoTags } from './getRepoTags';
 import { validateBranch } from './validateBranch';
+import * as process from 'process';
+import { execSync } from 'node:child_process';
+import ora from 'ora';
 
 const resolveLatestWundergraphRef = async () => {
 	const tags = await getRepoTags('https://github.com/wundergraph/wundergraph', '@wundergraph/sdk');
@@ -83,11 +86,13 @@ export const getRepository = async ({
 	exampleName,
 	githubLink,
 	projectName,
+	isInit,
 	directoryPath,
 }: {
 	exampleName?: string;
 	githubLink?: string;
 	projectName: string;
+	isInit?: boolean;
 	directoryPath?: string;
 }) => {
 	try {
@@ -100,7 +105,36 @@ export const getRepository = async ({
 				})
 			)
 		);
-		const resolvedProjectPath = await createDirectory(projectName, directoryPath);
+		let resolvedProjectPath: string;
+
+		if (isInit) {
+			resolvedProjectPath = process.cwd();
+			// ask the user for the package manager being used in the repo
+			const packageManagerPrompt = await inquirer.prompt({
+				name: 'packageManager',
+				type: 'list',
+				message: 'Which package manager is used in the project?',
+				choices: ['npm', 'yarn', 'pnpm'],
+			});
+			const spinner = ora('Installing wundergraph/sdk...').start();
+			// Install the wundergraph sdk
+			execSync(packageManagerPrompt['packageManager'] + ' install @wundergraph/sdk', { cwd: resolvedProjectPath });
+			spinner.succeed(chalk.green('Successfully installed wundergraph/sdk'));
+			exampleName = 'simple';
+		} else {
+			if (projectName === '') {
+				// prompt the user to give the project name
+				const projectNamePrompt = await inquirer.prompt({
+					name: 'projectName',
+					type: 'input',
+					message: 'What would you like to name your app?',
+					default: 'my-app',
+				});
+				projectName = projectNamePrompt['projectName'];
+			}
+			resolvedProjectPath = await createDirectory(projectName, directoryPath);
+		}
+
 		const { repoOwnerName, repoName, ref, filePath } = await resolveRepository({ exampleName, githubLink });
 		if (repoOwnerName === '' || repoName === '' || ref === '') {
 			console.log(chalk.red('Could not resolve the repository details. Please try again.'));
@@ -114,6 +148,7 @@ export const getRepository = async ({
 					repoName: repoName,
 					ref: ref,
 					filePath: filePath,
+					isInit: isInit,
 				}),
 			{
 				retries: 3,

@@ -16,9 +16,13 @@ import {
 import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
+import { InputValidationError } from './InputValidationError';
 
 // https://graphql.org/learn/serving-over-http/
 
+interface LogoutResponse {
+	redirect?: string;
+}
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -97,7 +101,7 @@ export class Client {
 
 		if (!resp.data) {
 			return {
-				error: new Error('Invalid response from the server'),
+				error: new ResponseError('Invalid response from the server', 200),
 			};
 		}
 
@@ -106,21 +110,41 @@ export class Client {
 		};
 	}
 
+	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
+	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponse> {
+		const text = await response.text();
+		if (!text) {
+			return {
+				error: new ResponseError('Unable to parse response body', response.status),
+			};
+		}
+		try {
+			const json = JSON.parse(text);
+			return {
+				error: new InputValidationError(json, response.status),
+			};
+		} catch {
+			// if the JSON.parse fails, we know the body must be plaintext
+			return {
+				error: new ResponseError(text, response.status),
+			};
+		}
+	}
+
 	/***
 	 * fetchResponseToClientResponse converts a fetch response to a ClientResponse.
 	 * Network errors or non-200 status codes are converted to an error. Application errors
 	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
 	 */
-	private async fetchResponseToClientResponse(resp: globalThis.Response): Promise<ClientResponse> {
+	private async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
-		if (!resp.ok) {
-			return {
-				error: new ResponseError(`Response is not ok`, resp.status),
-			};
+
+		if (!response.ok) {
+			return this.handleClientResponseError(response);
 		}
 
-		const json = await resp.json();
+		const json = await response.json();
 
 		return this.convertGraphQLResponse({
 			data: json.data,
@@ -238,8 +262,9 @@ export class Client {
 			method: 'GET',
 			signal: options?.abortSignal,
 		});
+
 		if (!response.ok) {
-			throw new ResponseError(`Response is not ok`, response.status);
+			throw await this.handleClientResponseError(response);
 		}
 
 		return response.json();
@@ -313,7 +338,7 @@ export class Client {
 
 		if (!response.ok || response.body === null) {
 			yield {
-				error: new Error(`HTTP Error: ${response.status}`),
+				error: new ResponseError('HTTP Error', response.status),
 			};
 			return;
 		}
@@ -370,7 +395,7 @@ export class Client {
 		);
 
 		if (!response.ok) {
-			throw new ResponseError(`Response is not ok`, response.status);
+			throw await this.handleClientResponseError(response);
 		}
 
 		const result = await response.json();
@@ -401,6 +426,11 @@ export class Client {
 	}
 
 	public async logout(options?: LogoutOptions): Promise<boolean> {
+		// browser check
+		if (typeof window === 'undefined') {
+			throw new Error('logout() can only be called in a browser environment');
+		}
+
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
@@ -411,6 +441,26 @@ export class Client {
 			method: 'GET',
 		});
 
-		return response.ok;
+		if (!response.ok) {
+			return false;
+		}
+
+		let ok = true;
+		if (response.headers.get('Content-Type')?.includes('application/json')) {
+			const data = (await response.json()) as LogoutResponse;
+			if (data.redirect) {
+				if (options?.redirect) {
+					ok = await options.redirect(data.redirect);
+				} else {
+					window.location.href = data.redirect;
+				}
+			}
+		}
+
+		if (ok && options?.after) {
+			options.after();
+		}
+
+		return ok;
 	}
 }
