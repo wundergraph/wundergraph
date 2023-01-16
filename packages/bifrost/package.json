@@ -1,0 +1,35 @@
+{
+  "name": "bifrost",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest && tsd",
+    "buf:generate": "buf generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@bufbuild/protoc-gen-connect-web": "^0.6.0",
+    "@bufbuild/protoc-gen-es": "^1.0.0",
+    "@jest/globals": "^27.4.5",
+    "@types/node-fetch": "^2.6.2",
+    "jest": "^29.3.1",
+    "ts-jest": "^29.0.1",
+    "tsd": "^0.24.1",
+    "typescript": "^4.8.2"
+  },
+  "dependencies": {
+    "@bufbuild/connect-web": "^0.6.0",
+    "@bufbuild/protobuf": "^1.0.0",
+    "node-fetch": "^2.6.7"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testPathIgnorePatterns": [
+      "dist"
+    ],
+    "testEnvironment": "node"
+  }
+}

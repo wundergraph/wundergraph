@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package bifrost;
+
+option go_package = "bifrost/gen/bifrost;bifrost";
+
+service KVService {
+	rpc Get(KVServiceGetRequest) returns (KVServiceGetResponse) {}
+	rpc Put(KVServicePutRequest) returns (KVServicePutResponse) {}
+	rpc Delete(KVServiceDeleteRequest) returns (KVServiceDeleteResponse) {}
+}
+
+message KVServiceGetRequest {
+	string key = 1;
+}
+
+message KVServiceGetResponse {
+	KeyValueEntry key_value_entry = 1;
+}
+
+message KVServicePutRequest {
+	string key = 1;
+	string value = 2;
+}
+
+message KVServicePutResponse {
+	uint64 revision = 1;
+}
+
+message KVServiceDeleteRequest {
+	string key = 1;
+}
+
+message KVServiceDeleteResponse {
+}
+
+message KeyValueEntry {
+	string key = 1;
+	string value = 2;
+	uint64 revision = 3;
+}
