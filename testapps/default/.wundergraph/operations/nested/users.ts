@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { createOperation } from '@wundergraph/sdk';
+import { createOperation } from '../../wundergraph.operations';
 
 export default createOperation.query({
 	input: z.object({
 		name: z.string(),
 	}),
-	handler: async (input) => {
+	handler: async ({ input }) => {
 		console.log(`test.ts input: ${JSON.stringify(input)}`);
 		return {
 			users: [
