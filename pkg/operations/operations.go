@@ -1,6 +1,7 @@
 package operations
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -30,15 +31,19 @@ func GetPaths(wunderGraphDir string) ([]string, error) {
 }
 
 func Cleanup(wunderGraphDir string, paths []string) error {
-	expected := make([]string, len(paths)*2)
+	expected := make([]string, 0, len(paths)*2)
 	for _, path := range paths {
 		expected = append(expected,
 			filepath.Join(wunderGraphDir, "generated", "bundle", strings.Replace(path, ".ts", ".js", 1)),
 			filepath.Join(wunderGraphDir, "generated", "bundle", strings.Replace(path, ".ts", ".js.map", 1)),
 		)
 	}
-	err := filepath.Walk(filepath.Join(wunderGraphDir, "generated", "bundle", "operations"), func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
+	operationsBundlePath := filepath.Join(wunderGraphDir, "generated", "bundle", "operations")
+	if _, err := os.Stat(operationsBundlePath); errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	err := filepath.Walk(operationsBundlePath, func(path string, info os.FileInfo, err error) error {
+		if info == nil || info.IsDir() {
 			return nil
 		}
 		if !contains(expected, path) {

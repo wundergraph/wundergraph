@@ -1,15 +1,17 @@
 import { createOperation } from '../../wundergraph.operations';
 import { z } from 'zod';
 
-export default createOperation.query({
+export default createOperation.mutation({
 	input: z.object({
 		id: z.string(),
+		name: z.string(),
+		bio: z.string().optional(),
 	}),
 	handler: async (ctx) => {
 		return {
 			id: ctx.input.id,
-			userName: 'Jens Neuse',
-			bio: 'Founder of WunderGraph',
+			userName: ctx.input.name,
+			bio: ctx.input.bio || 'Founder of WunderGraph',
 		};
 	},
 });

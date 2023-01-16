@@ -32,5 +32,5 @@ export {
 export { TypeScriptClient } from './codegen/templates/typescript/client';
 export { PlaceHolder } from './configure/variables';
 export { EnvironmentVariable } from './configure/variables';
-export { createOperation } from './operations/operations';
+export { createOperationFactory } from './operations/operations';
 export type { ExtractInput, ExtractResponse } from './operations/operations';

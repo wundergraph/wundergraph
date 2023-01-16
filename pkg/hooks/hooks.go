@@ -208,7 +208,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 	return &hookRes, nil
 }
 
-func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, out io.Writer) error {
+func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce, sse bool, out io.Writer) error {
 	jsonData = c.setInternalHookData(ctx, jsonData)
 	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
 	if err != nil {
@@ -217,6 +217,9 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(ctx))
+	if subscribeOnce {
+		r.Header.Set("X-WG-Subscribe-Once", "true")
+	}
 
 	req, err := retryablehttp.FromRequest(r)
 	if err != nil {
@@ -256,6 +259,15 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			}
 			return err
 		}
+		if sse {
+			_, err = out.Write([]byte("data: "))
+			if err != nil {
+				if ctx.Err() != nil {
+					return nil
+				}
+				return fmt.Errorf("error writing to client: %w", err)
+			}
+		}
 		_, err = out.Write(line)
 		if err != nil {
 			if ctx.Err() != nil {
@@ -263,6 +275,7 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			}
 			return fmt.Errorf("error writing to client: %w", err)
 		}
+		// we only need to write one newline, the second one is already in the line above
 		_, err = out.Write([]byte("\n"))
 		if err != nil {
 			if ctx.Err() != nil {

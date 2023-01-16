@@ -1,5 +1,9 @@
-import { configureWunderGraphOperations } from '@wundergraph/sdk';
+import { configureWunderGraphOperations, createOperationFactory } from '@wundergraph/sdk';
 import type { OperationsConfiguration } from './generated/wundergraph.operations';
+import type { InternalClient } from './generated/wundergraph.internal.client';
+import type { UserRole } from './generated/client';
+
+export const createOperation = createOperationFactory<InternalClient, UserRole>();
 
 export default configureWunderGraphOperations<OperationsConfiguration>({
 	operations: {

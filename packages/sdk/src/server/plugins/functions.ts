@@ -3,8 +3,8 @@ import path from 'path';
 import { InternalClientFactory } from '../internal-client';
 import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations/operations';
-import process from 'node:process';
 import { HandlerContext } from '../../operations/operations';
+import process from 'node:process';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -16,7 +16,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 		try {
 			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
 			const routeUrl = path.join('/functions', operation.operation_name);
-			let maybeImplementation: NodeJSOperation<any, any, any> | undefined;
+			let maybeImplementation: NodeJSOperation<any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;
 			} catch (e) {
@@ -32,7 +32,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				handler: async (request, reply) => {
 					const implementation = maybeImplementation!;
 					try {
-						const ctx: HandlerContext<any> = {
+						const ctx: HandlerContext<any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),
@@ -45,6 +45,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								if (!implementation.subscriptionHandler) {
 									return reply.status(500);
 								}
+								const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
 								const gen = await implementation.subscriptionHandler(ctx);
 								reply.hijack();
 								reply.raw.on('close', () => {
@@ -56,6 +57,10 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 										return reply.raw.end();
 									}
 									reply.raw.write(`${JSON.stringify({ data: next.value })}\n\n`);
+									if (subscribeOnce) {
+										await gen.return(0);
+										return reply.raw.end();
+									}
 								}
 							case 'query':
 								if (!implementation.queryHandler) {

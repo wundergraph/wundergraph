@@ -2238,7 +2238,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case isLive:
 		h.handleLiveQuery(ctx, w, r, input, requestLogger)
 	case h.operation.OperationType == wgpb.OperationType_SUBSCRIPTION:
-		h.handleSubscriptionRequest(ctx, w, input, requestLogger)
+		h.handleSubscriptionRequest(ctx, w, r, input, requestLogger)
 	default:
 		h.handleRequest(ctx, w, input, requestLogger)
 	}
@@ -2294,9 +2294,11 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 	_, _ = w.Write(out.Response)
 }
 
-func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
+func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 	setSubscriptionHeaders(w)
-	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, w)
+	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
+	sse := r.URL.Query().Get("wg_sse") == "true"
+	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, subscribeOnce, sse, w)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")

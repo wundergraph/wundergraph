@@ -1,27 +1,27 @@
 import { z } from 'zod';
 import * as fs from 'fs';
-import type { BaseRequestContext } from '../server';
+import type { BaseRequestContext, InternalClient } from '../server';
 import type { User } from '../client';
 
-export type SubscriptionHandler<I, R> = (ctx: HandlerContext<I>) => AsyncGenerator<R>;
+export type SubscriptionHandler<I, R, IC extends InternalClient> = (ctx: HandlerContext<I, IC>) => AsyncGenerator<R>;
 export type OperationTypes = 'query' | 'mutation' | 'subscription';
 
-interface _HandlerContext<Input> extends BaseRequestContext<User> {
+interface _HandlerContext<Input, IC extends InternalClient> extends BaseRequestContext<User, IC> {
 	input: Input extends {} ? Input : never;
 }
 
-export type HandlerContext<I> = I extends z.AnyZodObject
-	? _HandlerContext<z.infer<I>>
-	: Omit<_HandlerContext<never>, 'input'>;
+export type HandlerContext<I, IC extends InternalClient> = I extends z.AnyZodObject
+	? _HandlerContext<z.infer<I>, IC>
+	: Omit<_HandlerContext<never, IC>, 'input'>;
 
-export interface BaseOperationConfiguration {
+export interface BaseOperationConfiguration<UserRole extends string> {
 	requireAuthentication?: boolean;
 	internal?: boolean;
 	rbac?: {
-		requireMatchAll?: string[];
-		requireMatchAny?: string[];
-		denyMatchAll?: string[];
-		denyMatchAny?: string[];
+		requireMatchAll?: UserRole[];
+		requireMatchAny?: UserRole[];
+		denyMatchAll?: UserRole[];
+		denyMatchAny?: UserRole[];
 	};
 }
 
@@ -30,107 +30,113 @@ interface LiveQueryConfig {
 	pollingIntervalSeconds: number;
 }
 
-const createQuery = <I extends z.AnyZodObject, R>({
-	input,
-	handler,
-	live,
-	requireAuthentication = false,
-	internal = false,
-	rbac,
-}: {
-	input?: I;
-	handler: (ctx: HandlerContext<I>) => Promise<R>;
-	live?: LiveQueryConfig;
-} & BaseOperationConfiguration): NodeJSOperation<z.infer<I>, R, 'query'> => {
-	return {
-		type: 'query',
-		inputSchema: input,
-		queryHandler: handler,
-		internal: internal || false,
-		requireAuthentication: requireAuthentication,
-		rbac: {
-			denyMatchAll: rbac?.denyMatchAll || [],
-			denyMatchAny: rbac?.denyMatchAny || [],
-			requireMatchAll: rbac?.requireMatchAll || [],
-			requireMatchAny: rbac?.requireMatchAny || [],
-		},
-		liveQuery: {
-			enable: live?.enable || true,
-			pollingIntervalSeconds: live?.pollingIntervalSeconds || 5,
-		},
+const createQuery =
+	<IC extends InternalClient, UserRole extends string>() =>
+	<I extends z.AnyZodObject, R>({
+		input,
+		handler,
+		live,
+		requireAuthentication = false,
+		internal = false,
+		rbac,
+	}: {
+		input?: I;
+		handler: (ctx: HandlerContext<I, IC>) => Promise<R>;
+		live?: LiveQueryConfig;
+	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'query', IC> => {
+		return {
+			type: 'query',
+			inputSchema: input,
+			queryHandler: handler,
+			internal: internal || false,
+			requireAuthentication: requireAuthentication,
+			rbac: {
+				denyMatchAll: rbac?.denyMatchAll || [],
+				denyMatchAny: rbac?.denyMatchAny || [],
+				requireMatchAll: rbac?.requireMatchAll || [],
+				requireMatchAny: rbac?.requireMatchAny || [],
+			},
+			liveQuery: {
+				enable: live?.enable || true,
+				pollingIntervalSeconds: live?.pollingIntervalSeconds || 5,
+			},
+		};
 	};
-};
 
-const createMutation = <I extends z.AnyZodObject, R>({
-	input,
-	handler,
-	requireAuthentication = false,
-	internal = false,
-	rbac,
-}: {
-	input: I;
-	handler: (ctx: HandlerContext<z.infer<I>>) => Promise<R>;
-} & BaseOperationConfiguration): NodeJSOperation<z.infer<I>, R, 'mutation'> => {
-	return {
-		type: 'mutation',
-		inputSchema: input,
-		mutationHandler: handler,
-		internal: internal || false,
-		requireAuthentication: requireAuthentication,
-		rbac: {
-			denyMatchAll: rbac?.denyMatchAll || [],
-			denyMatchAny: rbac?.denyMatchAny || [],
-			requireMatchAll: rbac?.requireMatchAll || [],
-			requireMatchAny: rbac?.requireMatchAny || [],
-		},
-		liveQuery: {
-			enable: false,
-			pollingIntervalSeconds: 0,
-		},
+const createMutation =
+	<IC extends InternalClient, UserRole extends string>() =>
+	<I extends z.AnyZodObject, R>({
+		input,
+		handler,
+		requireAuthentication = false,
+		internal = false,
+		rbac,
+	}: {
+		input?: I;
+		handler: (ctx: HandlerContext<I, IC>) => Promise<R>;
+	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'mutation', IC> => {
+		return {
+			type: 'mutation',
+			inputSchema: input,
+			mutationHandler: handler,
+			internal: internal || false,
+			requireAuthentication: requireAuthentication,
+			rbac: {
+				denyMatchAll: rbac?.denyMatchAll || [],
+				denyMatchAny: rbac?.denyMatchAny || [],
+				requireMatchAll: rbac?.requireMatchAll || [],
+				requireMatchAny: rbac?.requireMatchAny || [],
+			},
+			liveQuery: {
+				enable: false,
+				pollingIntervalSeconds: 0,
+			},
+		};
 	};
-};
 
-const createSubscription = <I extends z.AnyZodObject, R>({
-	input,
-	handler,
-	requireAuthentication = false,
-	internal = false,
-	rbac,
-}: {
-	input: I;
-	handler: SubscriptionHandler<z.infer<I>, R>;
-} & BaseOperationConfiguration): NodeJSOperation<z.infer<I>, R, 'subscription'> => {
-	return {
-		type: 'subscription',
-		subscriptionHandler: handler,
-		inputSchema: input,
-		internal: internal || false,
-		requireAuthentication: requireAuthentication,
-		rbac: {
-			denyMatchAll: rbac?.denyMatchAll || [],
-			denyMatchAny: rbac?.denyMatchAny || [],
-			requireMatchAll: rbac?.requireMatchAll || [],
-			requireMatchAny: rbac?.requireMatchAny || [],
-		},
-		liveQuery: {
-			enable: false,
-			pollingIntervalSeconds: 0,
-		},
+const createSubscription =
+	<IC extends InternalClient, UserRole extends string>() =>
+	<I extends z.AnyZodObject, R>({
+		input,
+		handler,
+		requireAuthentication = false,
+		internal = false,
+		rbac,
+	}: {
+		input?: I;
+		handler: SubscriptionHandler<I, R, IC>;
+	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'subscription', IC> => {
+		return {
+			type: 'subscription',
+			subscriptionHandler: handler,
+			inputSchema: input,
+			internal: internal || false,
+			requireAuthentication: requireAuthentication,
+			rbac: {
+				denyMatchAll: rbac?.denyMatchAll || [],
+				denyMatchAny: rbac?.denyMatchAny || [],
+				requireMatchAll: rbac?.requireMatchAll || [],
+				requireMatchAny: rbac?.requireMatchAny || [],
+			},
+			liveQuery: {
+				enable: false,
+				pollingIntervalSeconds: 0,
+			},
+		};
 	};
-};
 
-export const createOperation = {
-	query: createQuery,
-	mutation: createMutation,
-	subscription: createSubscription,
-};
+export const createOperationFactory = <IC extends InternalClient, UserRole extends string>() => ({
+	query: createQuery<IC, UserRole>(),
+	mutation: createMutation<IC, UserRole>(),
+	subscription: createSubscription<IC, UserRole>(),
+});
 
-export type NodeJSOperation<Input, Response, OperationType extends OperationTypes> = {
+export type NodeJSOperation<Input, Response, OperationType extends OperationTypes, IC extends InternalClient> = {
 	type: OperationType;
 	inputSchema?: z.ZodObject<any>;
-	queryHandler?: (ctx: HandlerContext<Input>) => Promise<Response>;
-	mutationHandler?: (ctx: HandlerContext<Input>) => Promise<Response>;
-	subscriptionHandler?: SubscriptionHandler<Input, Response>;
+	queryHandler?: (ctx: HandlerContext<Input, IC>) => Promise<Response>;
+	mutationHandler?: (ctx: HandlerContext<Input, IC>) => Promise<Response>;
+	subscriptionHandler?: SubscriptionHandler<Input, Response, IC>;
 	requireAuthentication?: boolean;
 	internal: boolean;
 	liveQuery: {
@@ -145,12 +151,12 @@ export type NodeJSOperation<Input, Response, OperationType extends OperationType
 	};
 };
 
-export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any> ? T : never;
-export type ExtractResponse<B> = B extends NodeJSOperation<any, infer T, any> ? T : never;
+export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any> ? T : never;
+export type ExtractResponse<B> = B extends NodeJSOperation<any, infer T, any, any> ? T : never;
 
 export const loadNodeJsOperationDefaultModule = async (
 	operationPath: string
-): Promise<NodeJSOperation<any, any, any>> => {
+): Promise<NodeJSOperation<any, any, any, any>> => {
 	// remove .js or / from the end of operationPath if present
 	if (operationPath.endsWith('.js')) {
 		operationPath = operationPath.slice(0, -3);
