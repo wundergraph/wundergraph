@@ -12,7 +12,7 @@ import {
 	print,
 	visit,
 } from 'graphql';
-import { z } from 'zod';
+import { ZodType } from 'zod';
 import {
 	Api,
 	DatabaseApiCustom,
@@ -174,7 +174,7 @@ interface ResolvedDeployment {
 
 export interface S3UploadProfile {
 	/** JSON schema for metadata */
-	meta?: z.ZodType | object;
+	meta?: ZodType | object;
 	/**
 	 * Maximum file size, in bytes
 	 *
@@ -215,7 +215,7 @@ interface S3UploadConfiguration {
 }
 
 export interface ResolvedS3UploadProfile extends Omit<Required<S3UploadProfile>, 'meta'> {
-	meta: z.ZodType | object | null;
+	meta: ZodType | object | null;
 	preUploadHook: boolean;
 	postUploadHook: boolean;
 }
