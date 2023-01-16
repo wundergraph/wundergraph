@@ -1,15 +1,18 @@
 import { z } from 'zod';
 import * as fs from 'fs';
-import { BaseRequestContext } from '../server';
+import type { BaseRequestContext } from '../server';
 import type { User } from '../client';
-import type { InternalClient } from '../server';
 
 export type SubscriptionHandler<I, R> = (ctx: HandlerContext<I>) => AsyncGenerator<R>;
 export type OperationTypes = 'query' | 'mutation' | 'subscription';
 
-export interface HandlerContext<Input> extends BaseRequestContext<User, InternalClient> {
+interface _HandlerContext<Input> extends BaseRequestContext<User> {
 	input: Input extends {} ? Input : never;
 }
+
+export type HandlerContext<I> = I extends z.AnyZodObject
+	? _HandlerContext<z.infer<I>>
+	: Omit<_HandlerContext<never>, 'input'>;
 
 export interface BaseOperationConfiguration {
 	requireAuthentication?: boolean;
@@ -36,7 +39,7 @@ const createQuery = <I extends z.AnyZodObject, R>({
 	rbac,
 }: {
 	input?: I;
-	handler: (ctx: HandlerContext<z.infer<I>>) => Promise<R>;
+	handler: (ctx: HandlerContext<I>) => Promise<R>;
 	live?: LiveQueryConfig;
 } & BaseOperationConfiguration): NodeJSOperation<z.infer<I>, R, 'query'> => {
 	return {

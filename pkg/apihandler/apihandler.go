@@ -2259,6 +2259,9 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 		default:
 			out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
 			if err != nil {
+				if ctx.Err() != nil {
+					return
+				}
 				requestLogger.Error("failed to execute function", zap.Error(err))
 				return
 			}
@@ -2276,6 +2279,10 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
 	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
 	if err != nil {
+		if ctx.Err() != nil {
+			requestLogger.Debug("request cancelled")
+			return
+		}
 		requestLogger.Error("failed to call function", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -2290,6 +2297,10 @@ func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http
 	setSubscriptionHeaders(w)
 	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, w)
 	if err != nil {
+		if ctx.Err() != nil {
+			requestLogger.Debug("request cancelled")
+			return
+		}
 		requestLogger.Error("failed to call function", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return

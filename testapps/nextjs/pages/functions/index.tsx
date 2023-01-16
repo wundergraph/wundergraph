@@ -19,6 +19,8 @@ const Functions = () => {
 				<div>bio: {one?.bio}</div>
 				<div>roles: {one?.roles.map((r) => r).join(', ')}</div>
 			</div>
+			<h2>Weather</h2>
+			<div>{JSON.stringify(one?.weather.data?.getCityByName?.weather)}</div>
 			<h2>All</h2>
 			{all?.map((user) => (
 				<div key={user.id}>
