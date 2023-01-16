@@ -3764,11 +3764,11 @@ packages:
       '@babel/types': 7.20.2
     dev: true
 
-  /@types/cacheable-request/6.0.2:
-    resolution: {integrity: sha512-B3xVo+dlKM6nnKTcmm5ZtY/OL8bOAOd2Olee9M1zft65ox50OzjEHW91sDiU9j6cvW8Ejg1/Qkf4xd2kugApUA==}
+  /@types/cacheable-request/6.0.3:
+    resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
     dependencies:
       '@types/http-cache-semantics': 4.0.1
-      '@types/keyv': 4.2.0
+      '@types/keyv': 3.1.4
       '@types/node': 18.11.9
       '@types/responselike': 1.0.0
     dev: false
@@ -3907,11 +3907,10 @@ packages:
       '@types/node': 18.11.9
     dev: false
 
-  /@types/keyv/4.2.0:
-    resolution: {integrity: sha512-xoBtGl5R9jeKUhc8ZqeYaRDx04qqJ10yhhXYGmJ4Jr8qKpvMsDQQrNUvF/wUJ4klOtmJeJM+p2Xo3zp9uaC3tw==}
-    deprecated: This is a stub types definition. keyv provides its own type definitions, so you do not need this installed.
+  /@types/keyv/3.1.4:
+    resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      keyv: 4.5.0
+      '@types/node': 18.11.9
     dev: false
 
   /@types/lodash/4.14.187:
@@ -7605,7 +7604,7 @@ packages:
     dependencies:
       '@sindresorhus/is': 4.6.0
       '@szmarczak/http-timer': 4.0.6
-      '@types/cacheable-request': 6.0.2
+      '@types/cacheable-request': 6.0.3
       '@types/responselike': 1.0.0
       cacheable-lookup: 5.0.4
       cacheable-request: 7.0.2

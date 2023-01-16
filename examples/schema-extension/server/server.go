@@ -7,10 +7,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 
 	"github.com/wundergraph/wundergraph/examples/schema-extension/server/graph"
-	"github.com/wundergraph/wundergraph/examples/schema-extension/server/graph/generated"
+	"github.com/wundergraph/wundergraph/examples/schema-extension/server/graph/gen"
 )
 
 func main() {
-	http.Handle("/", handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}})))
+	http.Handle("/", handler.NewDefaultServer(gen.NewExecutableSchema(gen.Config{Resolvers: &graph.Resolver{}})))
 	log.Fatal(http.ListenAndServe(":8084", nil))
 }

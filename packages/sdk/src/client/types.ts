@@ -169,5 +169,19 @@ export interface User<Role extends string = string> {
 }
 
 export interface LogoutOptions {
+	/**
+	 * Wether to log out the user from the OpenID Connect provider.
+	 * Some providers might require the user to visit a URL. See
+	 * the redirect field.
+	 */
 	logoutOpenidConnectProvider?: boolean;
+	/**
+	 * Custom function for redirecting the client to the log out
+	 * URL. If not provided, window.location.href is updated.
+	 */
+	redirect?: (url: string) => Promise<boolean>;
+	/**
+	 * Callback to be run after a succesful logout
+	 * */
+	after?: () => void;
 }

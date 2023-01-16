@@ -58,6 +58,7 @@ export function logLevelToJSON(object: LogLevel): string {
 export enum AuthProviderKind {
   AuthProviderGithub = 0,
   AuthProviderOIDC = 1,
+  AuthProviderAuth0 = 2,
 }
 
 export function authProviderKindFromJSON(object: any): AuthProviderKind {
@@ -68,6 +69,9 @@ export function authProviderKindFromJSON(object: any): AuthProviderKind {
     case 1:
     case "AuthProviderOIDC":
       return AuthProviderKind.AuthProviderOIDC;
+    case 2:
+    case "AuthProviderAuth0":
+      return AuthProviderKind.AuthProviderAuth0;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum AuthProviderKind");
   }
@@ -79,6 +83,8 @@ export function authProviderKindToJSON(object: AuthProviderKind): string {
       return "AuthProviderGithub";
     case AuthProviderKind.AuthProviderOIDC:
       return "AuthProviderOIDC";
+    case AuthProviderKind.AuthProviderAuth0:
+      return "AuthProviderAuth0";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum AuthProviderKind");
   }
