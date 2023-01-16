@@ -7,7 +7,7 @@ import { InternalClientFactory, internalClientFactory } from './internal-client'
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
-import { ServerLogger, resolveServerLogLevel } from '../logger';
+import { resolveServerLogLevel, ServerLogger } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
@@ -241,22 +241,23 @@ export const createServer = async ({
 		fastify.log.info('Webhooks plugin registered');
 	}
 
-	const operationsConfigFile = fs.readFileSync(
-		path.join(wundergraphDir, 'generated', 'wundergraph.operations.json'),
-		'utf-8'
-	);
-	const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
+	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
+	const operationsFileExists = fs.existsSync(operationsFilePath);
+	if (operationsFileExists) {
+		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
+		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
 
-	if (
-		operationsConfig &&
-		operationsConfig.typescript_operation_files &&
-		operationsConfig.typescript_operation_files.length
-	) {
-		await fastify.register(FastifyFunctionsPlugin, {
-			operations: operationsConfig.typescript_operation_files,
-			internalClientFactory: clientFactory,
-		});
-		fastify.log.info('Functions plugin registered');
+		if (
+			operationsConfig &&
+			operationsConfig.typescript_operation_files &&
+			operationsConfig.typescript_operation_files.length
+		) {
+			await fastify.register(FastifyFunctionsPlugin, {
+				operations: operationsConfig.typescript_operation_files,
+				internalClientFactory: clientFactory,
+			});
+			fastify.log.info('Functions plugin registered');
+		}
 	}
 
 	if (gracefulShutdown) {
