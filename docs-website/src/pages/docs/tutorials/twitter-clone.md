@@ -14,17 +14,15 @@ Here is what the finished product will look like:
 
 ![Twitter Image](/images/twitter_guide/twitter-clone.gif)
 
-## Contents
-
-- [Twitter Skelton](#twitter-init)
-- [WunderGraph Setup](#wundergraph-init)
-- [MongoDB Setup](#mongodb-init)
-- [Configuring WunderGraph Operations](#configuring-wundergraph-operations)
+- [Twitter Skeleton](#basic-twitter-setup)
+- [WunderGraph Setup](#setting-up-wunder-graph)
+- [MongoDB Setup](#mongo-db-set-up)
+- [Configuring WunderGraph Operations](#configuring-wunder-graph-operations)
 - [Implementing WunderGraph Operations into Twitter-Clone](#implementing-wundergraph-operations-into-twitter-clone)
-- [Auth0 Setup](#auth0-init)
+- [Adding Authentication with Auth0](#adding-authentication-with-auth0)
 - [Configuring WunderGraph with Auth0](#configuring-wundergraph-with-auth0)
-- [Implementing WunderGraph Auth0 into Twitter-Clone](#implementing-wundergraph-auth0-into-twitter-clone)
-- [Final Working Version](#final-working-version)
+- [Implementing WunderGraph Auth0 into Twitter-Clone](#configuring-auth0-with-wunder-graph)
+- [Final Working Version](#full-source-code)
 
 ## Prerequisites
 
@@ -59,7 +57,7 @@ Feel free to add another hard coded tweet if you want. This will be dynamic once
 ```javascript
 // Feed.js
 
-const tweets = [
+const posts = [
   {
     displayName: 'Test User',
     username: 'testuser',
@@ -769,10 +767,6 @@ import { useUser, useMutation } from './lib/wundergraph'
 // replace the const user with:
 const user = useUser().data
 ```
-
-with that in place. We've finished our Twitter-Clone!
-
-## Deploying our app to WunderGraph Cloud ..?
 
 ## Conclusion
 
