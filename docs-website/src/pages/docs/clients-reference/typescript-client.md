@@ -216,12 +216,18 @@ const { fileKeys } = await client.uploadFiles({
 controller.abort()
 ```
 
-## Error handling
+## Error handling (ClientResponseError)
 
 ### Operations
 
-Query and mutation errors are returned as a `GraphQLResponseError` object. By default, the first error specifiy the error message but you can access all GraphQL errors through the `errors` property.
-Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code as `statusCode` property.
+The errors that can be returned from an operation are one of `ResponseError`, `InputValidationError`, or `GraphQLResponseError`. These three errors compose the type union named `ClientResponseError`.
+
+Network errors and non 2xx responses are returned as a `ResponseError` or `InputValidationError` object and contain the status code through the `statusCode` property.
+You can be sure that the request was successful if the method doesn't throw an error.
+
+### GraphQLResponseError
+
+Query and mutation errors are returned as a `GraphQLResponseError` object. By default, the first error specifies the error message, but you can access all GraphQL errors through the `errors` property:
 
 ```ts
 const { data, error } = await client.query({
@@ -238,10 +244,37 @@ if (error instanceof GraphQLResponseError) {
 }
 ```
 
-### Other
+### ResponseError
 
-Methods that initiate a network request throw a `ResponseError` or `Error` if the request fails to initiate or the response is not 2xx.
-You can be sure that the request was successful if the method doesn't throw an error.
+Methods that initiate a network request throw a `ResponseError` if the request fails to initiate or the response is not 2xx. Note that `ResponseError` returns a single error and does not have an `errors` property.
+
+### InputValidationError
+
+If the source of failure was due to an invalid input, the error received will be an `InputValdationError`. By default, the first error specifies the error message, but you can access all input validation errors through the `errors` property.
+
+The `errors` property is an array of errors with the following structure:
+
+```ts
+type error = {
+  propertyPath: string // provides the path to the error (useful if the error nested)
+  message: string // the error
+  invalidValue: any // the invalid input
+}
+```
+
+```ts
+import { InputValidationError } from './InputValidationError'
+
+const { data, error } = await client.query({
+  operationName: 'Hello',
+  input: {}, // a required input is missing
+})
+
+if (error instanceof InputValidationError) {
+  error.message // the top level error
+  error.errors // an array of errors
+}
+```
 
 ## Limitations
 
