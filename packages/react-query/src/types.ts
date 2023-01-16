@@ -52,15 +52,10 @@ export type QueryKey<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input']
-	>(
-		query: WithInput<
-			Input,
-			{
-				operationName: OperationName;
-				input?: Input;
-			}
-		>
-	): (OperationName | Input | undefined)[];
+	>(query: {
+		operationName: OperationName;
+		input?: Input;
+	}): (OperationName | Input | undefined)[];
 };
 
 export type UseQueryOptions<
