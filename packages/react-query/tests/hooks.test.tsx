@@ -364,6 +364,9 @@ describe('React Query - useSubscription', () => {
 			const { data } = useSubscription({
 				operationName: 'Countdown',
 				subscribeOnce: true,
+				input: {
+					from: 100,
+				},
 			});
 
 			return <div>{data?.count ? data.count : 'loading'}</div>;
