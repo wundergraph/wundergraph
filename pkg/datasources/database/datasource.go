@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 
@@ -173,7 +173,9 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 			Renderer: renderer,
 		}
 		replacement, _ := p.variables.AddVariable(variable)
-		input.Query = strings.Replace(input.Query, currentName, replacement, -1)
+		reg := regexp.MustCompile(`\` + currentName + `([^\w\d])`)
+		input.Query = reg.ReplaceAllString(input.Query, "$$" + replacement + "$$$1")
+		// input.Query = strings.Replace(input.Query, currentName, replacement, -1)
 	}
 
 	rawInput, err := json.Marshal(input)
