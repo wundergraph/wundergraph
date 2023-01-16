@@ -824,7 +824,11 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case *plan.SubscriptionResponsePlan:
-		flushWriter, ok := getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
+		var (
+			flushWriter *httpFlushWriter
+			ok          bool
+		)
+		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
@@ -1696,7 +1700,12 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
 
-	flushWriter, ok := getFlushWriter(ctx, ctx.Variables, r, w)
+	var (
+		flushWriter *httpFlushWriter
+		ok          bool
+	)
+
+	ctx.Context, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
@@ -2246,7 +2255,14 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 
-	fw, ok := getFlushWriter(ctx, input, r, w)
+	var (
+		err error
+		fw  *httpFlushWriter
+		ok  bool
+		out *hooks.MiddlewareHookResponse
+	)
+
+	ctx, fw, ok = getFlushWriter(ctx, input, r, w)
 	if !ok {
 		requestLogger.Error("request doesn't support flushing")
 		w.WriteHeader(http.StatusBadRequest)
@@ -2258,7 +2274,7 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 		case <-ctx.Done():
 			return
 		default:
-			out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
+			out, err = h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
 			if err != nil {
 				if ctx.Err() != nil {
 					return
@@ -2416,10 +2432,10 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
-func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (*httpFlushWriter, bool) {
+func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
-		return nil, false
+		return ctx, nil, false
 	}
 
 	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
@@ -2442,14 +2458,10 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 
 	if subscribeOnce {
 		flushWriter.subscribeOnce = true
-		var (
-			closeFunc func()
-		)
-		ctx, closeFunc = context.WithCancel(ctx)
-		flushWriter.close = closeFunc
+		ctx, flushWriter.close = context.WithCancel(ctx)
 	}
 
-	return flushWriter, true
+	return ctx, flushWriter, true
 }
 
 func handleHookOut(ctx *resolve.Context, w http.ResponseWriter, log *zap.Logger, out *hooks.MiddlewareHookResponse, errorMessage string, operation *wgpb.Operation) (done bool) {

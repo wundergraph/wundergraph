@@ -247,8 +247,12 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 	}
 
 	buf := bufio.NewReader(resp.Body)
+	var (
+		line []byte
+	)
+
 	for {
-		line, err := buf.ReadBytes('\n')
+		line, err = buf.ReadBytes('\n')
 		_, err = buf.ReadByte()
 		if err != nil {
 			if err == io.EOF {
