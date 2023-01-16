@@ -2622,7 +2622,8 @@ exports[`parseGraphQLOperations 1`] = `
           "requireMatchAny": [],
         },
       },
-      "Content": "query MyReviews{me{name reviews{id body}}}",
+      "Content": "{me{name reviews{id body}}}",
+      "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
@@ -2657,6 +2658,7 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "Name": "MyReviews",
       "OperationType": 0,
+      "PathName": "MyReviews",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {
         "additionalProperties": false,
@@ -2720,7 +2722,8 @@ exports[`parseGraphQLOperations 1`] = `
           "requireMatchAny": [],
         },
       },
-      "Content": "mutation CreatePet($petInput:PetInput!){postPets(petInput:$petInput){name}}",
+      "Content": "mutation($petInput:PetInput!){postPets(petInput:$petInput){name}}",
+      "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
@@ -2833,6 +2836,7 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "Name": "CreatePet",
       "OperationType": 1,
+      "PathName": "CreatePet",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {
         "additionalProperties": false,
@@ -2904,7 +2908,8 @@ exports[`parseGraphQLOperations 1`] = `
           "requireMatchAny": [],
         },
       },
-      "Content": "subscription NewPets@internalOperation{newPets{name}}",
+      "Content": "subscription@internalOperation{newPets{name}}",
+      "ExecutionEngine": 0,
       "HooksConfiguration": {
         "customResolve": false,
         "httpTransportOnRequest": false,
@@ -2939,6 +2944,7 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "Name": "NewPets",
       "OperationType": 2,
+      "PathName": "NewPets",
       "PostResolveTransformations": undefined,
       "ResponseSchema": {
         "additionalProperties": false,
