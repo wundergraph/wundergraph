@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.2.4...@wundergraph/react-query@0.3.0) (2023-01-17)
+
+### Features
+
+* make input required if there are required variables ([#551](https://github.com/wundergraph/wundergraph/issues/551)) ([00256bf](https://github.com/wundergraph/wundergraph/commit/00256bf456f0c733beb45a5cdbc258f84631975e)) (@Pagebakers)
+
+### Bug Fixes
+
+* prevent swallowing of input validation errors ([#529](https://github.com/wundergraph/wundergraph/issues/529)) ([39ea3fc](https://github.com/wundergraph/wundergraph/commit/39ea3fc3fbf96916f1165228194b8c915882b133)) (@Aenimus)
+
 ## [0.2.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.2.3...@wundergraph/react-query@0.2.4) (2022-12-31)
 
 **Note:** Version bump only for package @wundergraph/react-query
