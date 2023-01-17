@@ -46,22 +46,19 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 									return reply.status(500);
 								}
 								const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
-								const gen = await implementation.subscriptionHandler(ctx);
 								reply.hijack();
+								const gen = await implementation.subscriptionHandler(ctx);
 								reply.raw.on('close', () => {
 									gen.return(0);
 								});
-								while (true) {
-									const next = await gen.next();
-									if (next.done) {
-										return reply.raw.end();
-									}
-									reply.raw.write(`${JSON.stringify({ data: next.value })}\n\n`);
+								for await (const next of gen) {
+									reply.raw.write(`${JSON.stringify({ data: next })}\n\n`);
 									if (subscribeOnce) {
 										await gen.return(0);
 										return reply.raw.end();
 									}
 								}
+								return reply.raw.end();
 							case 'query':
 								if (!implementation.queryHandler) {
 									return reply.status(500);

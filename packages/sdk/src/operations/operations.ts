@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient } from '../server';
-import { WunderGraphUser } from '../server';
+import type { WunderGraphUser } from '../server';
 
 export type SubscriptionHandler<I, R, IC extends InternalClient, UserRole extends string> = (
 	ctx: HandlerContext<I, IC, UserRole>

@@ -130,6 +130,10 @@ var generateCmd = &cobra.Command{
 					if err != nil {
 						return err
 					}
+					err = operations.EnsureWunderGraphFactoryTS(wunderGraphDir)
+					if err != nil {
+						return err
+					}
 					operationsBundler := bundler.NewBundler(bundler.Config{
 						Name:          "operations-bundler",
 						EntryPoints:   operationsPaths,

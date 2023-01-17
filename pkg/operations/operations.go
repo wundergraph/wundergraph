@@ -92,3 +92,23 @@ func contains(paths []string, path string) bool {
 	}
 	return false
 }
+
+func EnsureWunderGraphFactoryTS(wunderGraphDir string) error {
+	path := filepath.Join(wunderGraphDir, "generated")
+	err := os.MkdirAll(path, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	path = filepath.Join(path, "wundergraph.factory.ts")
+	return os.WriteFile(path, []byte(wunderGraphFactoryTSContent), os.ModePerm)
+}
+
+const (
+	wunderGraphFactoryTSContent = `import type {InternalClient} from "./wundergraph.internal.client";
+import type {Role} from "./wundergraph.server";
+import {createOperationFactory} from "@wundergraph/sdk/operations";
+
+export {z} from "zod";
+
+export const createOperation = createOperationFactory<InternalClient, Role>();`
+)

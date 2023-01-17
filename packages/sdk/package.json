@@ -23,6 +23,10 @@
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
     },
+    "./operations": {
+      "types": "./dist/operations/index.d.ts",
+      "default": "./dist/operations/index.js"
+    },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
@@ -45,6 +49,9 @@
       ],
       "server": [
         "./dist/server"
+      ],
+      "operations": [
+        "./dist/operations"
       ],
       "internal/logger": [
         "./dist/logger"

@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { createOperation } from '../../wundergraph.operations';
+import { createOperation, z } from '../../generated/wundergraph.factory';
 
 export default createOperation.subscription({
 	input: z.object({
