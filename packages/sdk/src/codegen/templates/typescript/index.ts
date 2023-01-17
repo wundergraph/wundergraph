@@ -230,7 +230,7 @@ const typescriptFunctionsImports = (config: CodeGenerationConfig): string => {
 		ops
 			.map((op) => `import type function_${op.Name} from '${path.join(relBasePath, 'operations', op.PathName)}';\n`)
 			.join('') +
-		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk";\n' +
+		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
 		'\n'
 	);
 };
