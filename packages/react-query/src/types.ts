@@ -5,6 +5,7 @@ import {
 	OperationsDefinition,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
+	WithInput,
 } from '@wundergraph/sdk/client';
 
 import {
@@ -57,14 +58,21 @@ export type QueryKey<Operations extends OperationsDefinition> = {
 	}): (OperationName | Input | undefined)[];
 };
 
-export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
-	UseTanstackQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>,
-	'queryKey' | 'queryFn'
-> & {
-	operationName: OperationName;
-	liveQuery?: LiveQuery;
-	input?: Input;
-};
+export type UseQueryOptions<
+	Data,
+	Error,
+	Input extends object | undefined,
+	OperationName extends string,
+	LiveQuery
+> = Omit<UseTanstackQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>, 'queryKey' | 'queryFn'> &
+	WithInput<
+		Input,
+		{
+			operationName: OperationName;
+			liveQuery?: LiveQuery;
+			input?: Input;
+		}
+	>;
 
 export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
 	<
@@ -77,15 +85,23 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 	): UseQueryResult<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
-	operationName: OperationName;
-	subscribeOnce?: boolean;
-	resetOnMount?: boolean;
-	enabled?: boolean;
-	input?: Input;
-	onSuccess?(response: ClientResponse<Data>): void;
-	onError?(error: Error): void;
-};
+export type UseSubscriptionOptions<
+	Data,
+	Error,
+	Input extends object | undefined,
+	OperationName extends string
+> = WithInput<
+	Input,
+	{
+		operationName: OperationName;
+		subscribeOnce?: boolean;
+		resetOnMount?: boolean;
+		enabled?: boolean;
+		input?: Input;
+		onSuccess?(response: ClientResponse<Data>): void;
+		onError?(error: Error): void;
+	}
+>;
 
 export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
 	<
