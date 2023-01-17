@@ -23,6 +23,10 @@
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
     },
+    "./operations": {
+      "types": "./dist/operations/index.d.ts",
+      "default": "./dist/operations/index.js"
+    },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
       "default": "./dist/logger/index.js"
@@ -45,6 +49,9 @@
       ],
       "server": [
         "./dist/server"
+      ],
+      "operations": [
+        "./dist/operations"
       ],
       "internal/logger": [
         "./dist/logger"
@@ -139,7 +146,9 @@
     "protobufjs": "^6.11.2",
     "swagger2openapi": "^7.0.8",
     "terminate": "^2.5.0",
-    "ts-retry-promise": "^0.7.0"
+    "ts-retry-promise": "^0.7.0",
+    "zod": "^3.20.2",
+    "zod-to-json-schema": "^3.20.1"
   },
   "jest": {
     "preset": "ts-jest",

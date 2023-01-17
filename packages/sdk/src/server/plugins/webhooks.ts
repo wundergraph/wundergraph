@@ -5,6 +5,7 @@ import { Headers } from '@web-std/fetch';
 import type { RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
+import process from 'node:process';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
@@ -14,7 +15,6 @@ export interface WebHookRouteConfig {
 interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
-	wundergraphDir: string;
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
@@ -22,7 +22,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 
 	for (const hook of config.webhooks) {
 		try {
-			const webhookFilePath = path.join(config.wundergraphDir, 'generated', 'bundle', hook.filePath);
+			const webhookFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', hook.filePath);
 			const webhook: Webhook = (await import(webhookFilePath)).default;
 
 			fastify.route({

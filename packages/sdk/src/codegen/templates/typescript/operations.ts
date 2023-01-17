@@ -1,12 +1,12 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import Handlebars from 'handlebars';
 import { template } from './operations.template';
 
 export class Operations implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const model: OperationsModel = {
 			operations: config.application.Operations.map((op) => ({
 				name: op.Name,
