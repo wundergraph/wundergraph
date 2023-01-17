@@ -1,7 +1,7 @@
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import styles from '../../styles/Home.module.css';
 
-import { useSubscription, withWunderGraph } from '../components/generated/nextjs';
+import { useSubscription } from '../../lib/react-query';
 
 const Countdown: React.FC = () => {
 	const countdown = useSubscription({
@@ -17,7 +17,11 @@ const Countdown: React.FC = () => {
 		},
 	});
 
-	return <pre>{JSON.stringify(countdown, null, 2)}</pre>;
+	return (
+		<div>
+			<pre>{JSON.stringify(countdown, null, 2)}</pre>
+		</div>
+	);
 };
 
 const SWR = () => {
@@ -36,7 +40,7 @@ const SWR = () => {
 				</h2>
 				<p className={styles.description}>Take a look at the examples below...</p>
 
-				<div style={{ paddingTop: '80px' }}>
+				<div style={{ padding: '80px' }}>
 					<h3>Subscription</h3>
 					<Countdown />
 				</div>
@@ -58,6 +62,4 @@ const SWR = () => {
 	);
 };
 
-export default withWunderGraph(SWR, {
-	ssr: true,
-});
+export default SWR;
