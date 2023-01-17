@@ -1,4 +1,5 @@
 import { ClientResponseError } from './ClientResponseError';
+import type { RequiredKeysOf, SetRequired } from 'type-fest';
 
 export type Headers = { [key: string]: string };
 
@@ -88,20 +89,25 @@ export interface OperationRequestOptions<
 	input?: Input;
 }
 
-export interface QueryRequestOptions<
+export type QueryRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
-> extends OperationRequestOptions<OperationName, Input> {
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
 	subscribeOnce?: Boolean;
-}
+};
 
-export interface SubscriptionRequestOptions<
+export type MutationRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
-> extends OperationRequestOptions<OperationName, Input> {
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>>;
+
+export type SubscriptionRequestOptions<
+	OperationName extends string = any,
+	Input extends object | undefined = object | undefined
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
 	liveQuery?: Boolean;
 	subscribeOnce?: Boolean;
-}
+};
 
 export interface SubscriptionResult {
 	streamState: 'streaming' | 'stopped' | 'restarting';
@@ -163,3 +169,14 @@ export interface LogoutOptions {
 	 * */
 	after?: () => void;
 }
+
+export type HasRequiredInput<Input extends object | undefined> = Input extends object
+	? RequiredKeysOf<Input> extends never
+		? false
+		: true
+	: false;
+
+export type WithInput<
+	Input extends object | undefined,
+	Options extends { input?: Input }
+> = HasRequiredInput<Input> extends true ? SetRequired<Options, 'input'> : Options;

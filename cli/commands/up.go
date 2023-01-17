@@ -16,6 +16,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
@@ -74,6 +75,8 @@ var upCmd = &cobra.Command{
 		configOutFile := filepath.Join("generated", "bundle", "config.js")
 		serverOutFile := filepath.Join("generated", "bundle", "server.js")
 		webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
+		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
+		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
 		if port, err := helpers.ServerPortFromConfig(configJsonPath); err == nil {
 			helpers.KillExistingHooksProcess(port, log)
@@ -86,6 +89,7 @@ var upCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
 			ScriptEnv: append(helpers.CliEnv(rootFlags),
+				"WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true",
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
@@ -154,6 +158,32 @@ var upCmd = &cobra.Command{
 			onAfterBuild = func() error {
 				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
+				if files.DirectoryExists(operationsDir) {
+					operationsPaths, err := operations.GetPaths(wunderGraphDir)
+					if err != nil {
+						return err
+					}
+					err = operations.Cleanup(wunderGraphDir, operationsPaths)
+					if err != nil {
+						return err
+					}
+					err = operations.EnsureWunderGraphFactoryTS(wunderGraphDir)
+					if err != nil {
+						return err
+					}
+					operationsBundler := bundler.NewBundler(bundler.Config{
+						Name:          "operations-bundler",
+						EntryPoints:   operationsPaths,
+						AbsWorkingDir: wunderGraphDir,
+						OutDir:        generatedBundleOutDir,
+						Logger:        log,
+					})
+					err = operationsBundler.Bundle()
+					if err != nil {
+						return err
+					}
+				}
+
 				// generate new config
 				<-configRunner.Run(ctx)
 
@@ -217,6 +247,7 @@ var upCmd = &cobra.Command{
 				// all webhook filenames are stored in the config
 				// we are going to create HTTP routes on the node for all of them
 				{Path: webhooksDir, Optional: true},
+				{Path: operationsDir, Optional: true},
 				// a new cache entry is generated as soon as the introspection "poller" detects a change in the API dependencies
 				// in that case we want to rerun the script to build a new config
 				{Path: introspectionCacheDir},

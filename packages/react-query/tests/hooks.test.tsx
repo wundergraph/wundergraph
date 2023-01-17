@@ -74,6 +74,9 @@ const createClient = (overrides?: Partial<ClientConfig>) => {
 			SetNameWithoutAuth: {
 				requiresAuthentication: false,
 			},
+			Countdown: {
+				requiresAuthentication: false,
+			},
 		},
 		...overrides,
 	});
@@ -357,15 +360,17 @@ describe('React Query - useSubscription', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.get('/operations/Countdown')
-			.query({ wg_api_hash: '123', wg_variables: '{}', wg_subscribe_once: 'true' })
+			.query({ wg_api_hash: '123', wg_variables: JSON.stringify({ from: 100 }), wg_subscribe_once: 'true' })
 			.reply(200, { data: { count: 100 } });
 
 		function Page() {
-			const { data } = useSubscription({
+			const { data, isLoading, isSubscribed, error } = useSubscription({
 				operationName: 'Countdown',
 				subscribeOnce: true,
+				input: {
+					from: 100,
+				},
 			});
-
 			return <div>{data?.count ? data.count : 'loading'}</div>;
 		}
 
@@ -373,9 +378,14 @@ describe('React Query - useSubscription', () => {
 
 		screen.getByText('loading');
 
-		await waitFor(() => {
-			screen.getByText('100');
-		});
+		await waitFor(
+			() => {
+				screen.getByText('100');
+			},
+			{
+				timeout: 10000,
+			}
+		);
 
 		scope.done();
 	});

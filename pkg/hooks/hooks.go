@@ -1,10 +1,12 @@
 package hooks
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -126,13 +128,22 @@ const (
 )
 
 type Client struct {
-	serverUrl  string
-	httpClient *retryablehttp.Client
-	log        *zap.Logger
-	hostPort   string
+	serverUrl           string
+	httpClient          *retryablehttp.Client
+	subscriptionsClient *retryablehttp.Client
+	log                 *zap.Logger
+	hostPort            string
 }
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
+	return &Client{
+		serverUrl:           serverUrl,
+		httpClient:          buildClient(60 * time.Second),
+		subscriptionsClient: buildClient(0),
+	}
+}
+
+func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient := retryablehttp.NewClient()
 	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
 	httpClient.RetryMax = 40
@@ -141,13 +152,9 @@ func NewClient(serverUrl string, logger *zap.Logger) *Client {
 	httpClient.Backoff = retryablehttp.LinearJitterBackoff
 	httpClient.RetryWaitMax = 50 * time.Millisecond
 	httpClient.RetryWaitMin = 50 * time.Millisecond
-	httpClient.HTTPClient.Timeout = time.Minute * 1
+	httpClient.HTTPClient.Timeout = requestTimeout
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
-
-	return &Client{
-		serverUrl:  serverUrl,
-		httpClient: httpClient,
-	}
+	return httpClient
 }
 
 func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
@@ -160,6 +167,130 @@ func (c *Client) DoWsTransportRequest(ctx context.Context, hook MiddlewareHook, 
 
 func (c *Client) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
 	return c.doRequest(ctx, "operation/"+operationName, hook, jsonData)
+}
+
+func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte) (*MiddlewareHookResponse, error) {
+	jsonData = c.setInternalHookData(ctx, jsonData)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+
+	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(ctx))
+
+	req, err := retryablehttp.FromRequest(r)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error calling function %s: %w", operationName, err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
+	}
+
+	dec := json.NewDecoder(resp.Body)
+
+	var hookRes MiddlewareHookResponse
+	err = dec.Decode(&hookRes)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding function response: %w", err)
+	}
+
+	if hookRes.Error != "" {
+		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
+	}
+
+	return &hookRes, nil
+}
+
+func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce, sse bool, out io.Writer) error {
+	jsonData = c.setInternalHookData(ctx, jsonData)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	r.Header.Set("Content-Type", "application/json")
+	r.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(ctx))
+	if subscribeOnce {
+		r.Header.Set("X-WG-Subscribe-Once", "true")
+	}
+
+	req, err := retryablehttp.FromRequest(r)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.subscriptionsClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("error calling function %s: %w", operationName, err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("server function call did not return 200: %s", resp.Status)
+	}
+
+	if resp.Body == nil {
+		return fmt.Errorf("server function call did not return a body")
+	}
+
+	defer resp.Body.Close()
+
+	flusher, ok := out.(http.Flusher)
+	if !ok {
+		return fmt.Errorf("client connection is not flushable")
+	}
+
+	buf := bufio.NewReader(resp.Body)
+	var (
+		line []byte
+	)
+
+	for {
+		line, err = buf.ReadBytes('\n')
+		if err == nil {
+			_, err = buf.ReadByte()
+		}
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			if ctx.Err() != nil {
+				return nil
+			}
+			return err
+		}
+		if sse {
+			_, err = out.Write([]byte("data: "))
+			if err != nil {
+				if ctx.Err() != nil {
+					return nil
+				}
+				return fmt.Errorf("error writing to client: %w", err)
+			}
+		}
+		_, err = out.Write(line)
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			return fmt.Errorf("error writing to client: %w", err)
+		}
+		// we only need to write one newline, the second one is already in the line above
+		_, err = out.Write([]byte("\n"))
+		if err != nil {
+			if ctx.Err() != nil {
+				return nil
+			}
+			return fmt.Errorf("error writing to client: %w", err)
+		}
+		flusher.Flush()
+	}
 }
 
 func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {

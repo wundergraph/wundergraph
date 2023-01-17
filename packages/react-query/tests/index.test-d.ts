@@ -96,4 +96,6 @@ expectType<UseQueryResult<User<string>, ClientResponseError>>(
 	})
 );
 
-expectType<('Weather' | { city: string } | undefined)[]>(queryKey({ operationName: 'Weather' }));
+expectType<('Weather' | { city: string } | undefined)[]>(
+	queryKey({ operationName: 'Weather', input: { city: 'Berlin' } })
+);

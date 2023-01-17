@@ -24,6 +24,7 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 		.map((op) => {
 			return {
 				operationName: op.Name,
+				operationPath: op.PathName,
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
@@ -36,6 +37,7 @@ export const queries = (application: ResolvedApplication, includeInternal: boole
 	filteredOperations(application, includeInternal).map((op) => {
 		return {
 			operationName: op.Name,
+			operationPath: op.PathName,
 			path: op.Name,
 			hasInput: hasInput(op),
 			hasInternalInput: hasInternalInput(op),
@@ -50,6 +52,7 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 		.map((op) => {
 			return {
 				operationName: op.Name,
+				operationPath: op.PathName,
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
