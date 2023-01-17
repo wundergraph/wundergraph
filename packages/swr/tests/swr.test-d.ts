@@ -1,7 +1,7 @@
-import { Client, OperationsDefinition, GraphQLResponseError, User } from '@wundergraph/sdk/client';
+import { Client, ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { SWRResponse } from 'swr';
-import { createHooks } from '../src/hooks';
+import { createHooks } from '../src';
 
 interface Operations extends OperationsDefinition {
 	queries: {
@@ -50,7 +50,7 @@ const { data: queryData, error: queryError } = useQuery({
 });
 
 expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<GraphQLResponseError | undefined>(queryError);
+expectType<ClientResponseError | undefined>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
@@ -62,7 +62,7 @@ const { data: subData, error: subError } = useSubscription({
 });
 
 expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<GraphQLResponseError | undefined>(subError);
+expectType<ClientResponseError | undefined>(subError);
 
 const {
 	data: mutData,
@@ -73,7 +73,7 @@ const {
 });
 
 expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<GraphQLResponseError | undefined>(mutError);
+expectType<ClientResponseError | undefined>(mutError);
 
 expectType<Promise<any>>(
 	trigger({
@@ -81,8 +81,8 @@ expectType<Promise<any>>(
 	})
 );
 
-expectType<SWRResponse<User<string>, GraphQLResponseError>>(useUser());
-expectType<SWRResponse<User<string>, GraphQLResponseError>>(
+expectType<SWRResponse<User<string>, ClientResponseError>>(useUser());
+expectType<SWRResponse<User<string>, ClientResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,
