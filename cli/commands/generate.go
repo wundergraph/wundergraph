@@ -87,10 +87,9 @@ var generateCmd = &cobra.Command{
 			webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
 			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
-			operationsOutDir := filepath.Join("generated", "bundle", "operations")
+			generatedBundleOutDir := filepath.Join("generated", "bundle")
 
 			var webhooksBundler *bundler.Bundler
-			var operationsBundler *bundler.Bundler
 
 			if files.DirectoryExists(webhooksDir) {
 				webhookPaths, err := webhooks.GetWebhooks(wunderGraphDir)
@@ -111,24 +110,6 @@ var generateCmd = &cobra.Command{
 				})
 			}
 
-			if files.DirectoryExists(operationsDir) {
-				operationsPaths, err := operations.GetPaths(wunderGraphDir)
-				if err != nil {
-					return err
-				}
-				operationsBundler = bundler.NewBundler(bundler.Config{
-					Name:          "operations-bundler",
-					EntryPoints:   operationsPaths,
-					AbsWorkingDir: wunderGraphDir,
-					OutDir:        operationsOutDir,
-					Logger:        log,
-					OnAfterBundle: func() error {
-						log.Debug("Operations bundled!", zap.String("bundlerName", "operations-bundler"))
-						return nil
-					},
-				})
-			}
-
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
 				Production:    true,
@@ -139,6 +120,29 @@ var generateCmd = &cobra.Command{
 			})
 
 			onAfterBuild = func() error {
+
+				if files.DirectoryExists(operationsDir) {
+					operationsPaths, err := operations.GetPaths(wunderGraphDir)
+					if err != nil {
+						return err
+					}
+					err = operations.Cleanup(wunderGraphDir, operationsPaths)
+					if err != nil {
+						return err
+					}
+					operationsBundler := bundler.NewBundler(bundler.Config{
+						Name:          "operations-bundler",
+						EntryPoints:   operationsPaths,
+						AbsWorkingDir: wunderGraphDir,
+						OutDir:        generatedBundleOutDir,
+						Logger:        log,
+					})
+					err = operationsBundler.Bundle()
+					if err != nil {
+						return err
+					}
+				}
+
 				<-configRunner.Run(ctx)
 
 				if !configRunner.Successful() {
@@ -161,21 +165,9 @@ var generateCmd = &cobra.Command{
 					})
 				}
 
-				if operationsBundler != nil {
-					wg.Go(func() error {
-						// bundle operations
-						return operationsBundler.Bundle()
-					})
-				}
-
 				err := wg.Wait()
 				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
 
-				return err
-			}
-
-			err = operationsBundler.Bundle()
-			if err != nil {
 				return err
 			}
 

@@ -130,7 +130,7 @@ configureWunderGraphApplication({
 
 	// Enable file upload functionality in your generated client
 	// Minio credentials: minio / minio123
-	/*s3UploadProvider: [
+	s3UploadProvider: [
 		{
 			name: 'minio',
 			endpoint: 'localhost:9000',
@@ -140,7 +140,7 @@ configureWunderGraphApplication({
 			bucketName: 'uploads',
 			useSSL: false,
 		},
-	],*/
+	],
 	codeGenerators: [
 		{
 			templates: [...templates.typescript.all],
