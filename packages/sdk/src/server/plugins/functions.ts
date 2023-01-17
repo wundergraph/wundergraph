@@ -16,7 +16,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 		try {
 			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
 			const routeUrl = path.join('/functions', operation.operation_name);
-			let maybeImplementation: NodeJSOperation<any, any, any, any> | undefined;
+			let maybeImplementation: NodeJSOperation<any, any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;
 			} catch (e) {
@@ -32,7 +32,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				handler: async (request, reply) => {
 					const implementation = maybeImplementation!;
 					try {
-						const ctx: HandlerContext<any, any> = {
+						const ctx: HandlerContext<any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),

@@ -1,18 +1,21 @@
 import { z } from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient } from '../server';
-import type { User } from '../client';
+import { WunderGraphUser } from '../server';
 
-export type SubscriptionHandler<I, R, IC extends InternalClient> = (ctx: HandlerContext<I, IC>) => AsyncGenerator<R>;
+export type SubscriptionHandler<I, R, IC extends InternalClient, UserRole extends string> = (
+	ctx: HandlerContext<I, IC, UserRole>
+) => AsyncGenerator<R>;
 export type OperationTypes = 'query' | 'mutation' | 'subscription';
 
-interface _HandlerContext<Input, IC extends InternalClient> extends BaseRequestContext<User, IC> {
+interface _HandlerContext<Input, IC extends InternalClient, Role extends string>
+	extends BaseRequestContext<WunderGraphUser<Role>, IC> {
 	input: Input extends {} ? Input : never;
 }
 
-export type HandlerContext<I, IC extends InternalClient> = I extends z.AnyZodObject
-	? _HandlerContext<z.infer<I>, IC>
-	: Omit<_HandlerContext<never, IC>, 'input'>;
+export type HandlerContext<I, IC extends InternalClient, Role extends string> = I extends z.AnyZodObject
+	? _HandlerContext<z.infer<I>, IC, Role>
+	: Omit<_HandlerContext<never, IC, Role>, 'input'>;
 
 export interface BaseOperationConfiguration<UserRole extends string> {
 	requireAuthentication?: boolean;
@@ -41,9 +44,9 @@ const createQuery =
 		rbac,
 	}: {
 		input?: I;
-		handler: (ctx: HandlerContext<I, IC>) => Promise<R>;
+		handler: (ctx: HandlerContext<I, IC, UserRole>) => Promise<R>;
 		live?: LiveQueryConfig;
-	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'query', IC> => {
+	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'query', IC, UserRole> => {
 		return {
 			type: 'query',
 			inputSchema: input,
@@ -73,8 +76,8 @@ const createMutation =
 		rbac,
 	}: {
 		input?: I;
-		handler: (ctx: HandlerContext<I, IC>) => Promise<R>;
-	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'mutation', IC> => {
+		handler: (ctx: HandlerContext<I, IC, UserRole>) => Promise<R>;
+	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'mutation', IC, UserRole> => {
 		return {
 			type: 'mutation',
 			inputSchema: input,
@@ -104,8 +107,8 @@ const createSubscription =
 		rbac,
 	}: {
 		input?: I;
-		handler: SubscriptionHandler<I, R, IC>;
-	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'subscription', IC> => {
+		handler: SubscriptionHandler<I, R, IC, UserRole>;
+	} & BaseOperationConfiguration<UserRole>): NodeJSOperation<z.infer<I>, R, 'subscription', IC, UserRole> => {
 		return {
 			type: 'subscription',
 			subscriptionHandler: handler,
@@ -131,12 +134,18 @@ export const createOperationFactory = <IC extends InternalClient, UserRole exten
 	subscription: createSubscription<IC, UserRole>(),
 });
 
-export type NodeJSOperation<Input, Response, OperationType extends OperationTypes, IC extends InternalClient> = {
+export type NodeJSOperation<
+	Input,
+	Response,
+	OperationType extends OperationTypes,
+	IC extends InternalClient,
+	UserRole extends string
+> = {
 	type: OperationType;
 	inputSchema?: z.ZodObject<any>;
-	queryHandler?: (ctx: HandlerContext<Input, IC>) => Promise<Response>;
-	mutationHandler?: (ctx: HandlerContext<Input, IC>) => Promise<Response>;
-	subscriptionHandler?: SubscriptionHandler<Input, Response, IC>;
+	queryHandler?: (ctx: HandlerContext<Input, IC, UserRole>) => Promise<Response>;
+	mutationHandler?: (ctx: HandlerContext<Input, IC, UserRole>) => Promise<Response>;
+	subscriptionHandler?: SubscriptionHandler<Input, Response, IC, UserRole>;
 	requireAuthentication?: boolean;
 	internal: boolean;
 	liveQuery: {
@@ -151,12 +160,12 @@ export type NodeJSOperation<Input, Response, OperationType extends OperationType
 	};
 };
 
-export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any> ? T : never;
-export type ExtractResponse<B> = B extends NodeJSOperation<any, infer T, any, any> ? T : never;
+export type ExtractInput<B> = B extends NodeJSOperation<infer T, any, any, any, any> ? T : never;
+export type ExtractResponse<B> = B extends NodeJSOperation<any, infer T, any, any, any> ? T : never;
 
 export const loadNodeJsOperationDefaultModule = async (
 	operationPath: string
-): Promise<NodeJSOperation<any, any, any, any>> => {
+): Promise<NodeJSOperation<any, any, any, any, any>> => {
 	// remove .js or / from the end of operationPath if present
 	if (operationPath.endsWith('.js')) {
 		operationPath = operationPath.slice(0, -3);
