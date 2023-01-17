@@ -107,8 +107,6 @@ const (
 	wunderGraphFactoryTSContent = `import type {InternalClient} from "./wundergraph.internal.client";
 import type {Role} from "./wundergraph.server";
 import {createOperationFactory} from "@wundergraph/sdk/operations";
-
-export {z} from "zod";
-
+export {z} from "@wundergraph/sdk/operations";
 export const createOperation = createOperationFactory<InternalClient, Role>();`
 )
