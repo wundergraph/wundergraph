@@ -787,6 +787,7 @@ export interface DataSourceConfiguration {
   directives: DirectiveConfiguration[];
   requestTimeoutSeconds: number;
   id: string;
+  hash: string;
 }
 
 export interface DirectiveConfiguration {
@@ -2209,6 +2210,7 @@ function createBaseDataSourceConfiguration(): DataSourceConfiguration {
     directives: [],
     requestTimeoutSeconds: 0,
     id: "",
+    hash: "",
   };
 }
 
@@ -2232,6 +2234,7 @@ export const DataSourceConfiguration = {
         : [],
       requestTimeoutSeconds: isSet(object.requestTimeoutSeconds) ? Number(object.requestTimeoutSeconds) : 0,
       id: isSet(object.id) ? String(object.id) : "",
+      hash: isSet(object.hash) ? String(object.hash) : "",
     };
   },
 
@@ -2268,6 +2271,7 @@ export const DataSourceConfiguration = {
     message.requestTimeoutSeconds !== undefined &&
       (obj.requestTimeoutSeconds = Math.round(message.requestTimeoutSeconds));
     message.id !== undefined && (obj.id = message.id);
+    message.hash !== undefined && (obj.hash = message.hash);
     return obj;
   },
 
@@ -2292,6 +2296,7 @@ export const DataSourceConfiguration = {
     message.directives = object.directives?.map((e) => DirectiveConfiguration.fromPartial(e)) || [];
     message.requestTimeoutSeconds = object.requestTimeoutSeconds ?? 0;
     message.id = object.id ?? "";
+    message.hash = object.hash ?? "";
     return message;
   },
 };

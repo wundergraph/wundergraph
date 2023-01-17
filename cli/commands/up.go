@@ -28,12 +28,10 @@ var upCmdPrettyLogging bool
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:   UpCmdName,
-	Short: "Starts WunderGraph in development mode",
-	Long:  "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: map[string]string{
-		"telemetry": "true",
-	},
+	Use:         UpCmdName,
+	Short:       "Starts WunderGraph in development mode",
+	Long:        "Start the WunderGraph application in development mode and watch for changes",
+	Annotations: helpers.TelemetryAnnotations(helpers.TelemetryAnnotationCommand | helpers.TelemetryAnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()

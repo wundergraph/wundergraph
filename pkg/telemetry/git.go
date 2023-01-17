@@ -2,9 +2,6 @@ package telemetry
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
-	"io"
 	"os/exec"
 	"strings"
 )
@@ -17,9 +14,5 @@ func gitRepoURLHash() (string, error) {
 		return "", err
 	}
 	projectID := strings.TrimSpace(stdout.String())
-	hash := sha256.New()
-	if _, err := io.Copy(hash, strings.NewReader(projectID)); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(hash.Sum(nil)), nil
+	return Hash(projectID)
 }

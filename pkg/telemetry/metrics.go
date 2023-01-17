@@ -18,3 +18,7 @@ func DurationMetricSuffix(cmdName string) string {
 func CobraFullCommandPathMetricName(cmd *cobra.Command) string {
 	return strings.ToUpper(strings.Join(strings.Split(cmd.CommandPath(), " "), "_"))
 }
+
+func DataSourceMetricName(name string) string {
+	return fmt.Sprintf("DATA_SOURCE_%s", name)
+}

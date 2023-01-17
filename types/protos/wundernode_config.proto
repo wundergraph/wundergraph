@@ -246,6 +246,7 @@ message DataSourceConfiguration {
 	repeated DirectiveConfiguration directives = 9;
 	int64 requestTimeoutSeconds = 10;
 	string id = 11;
+	string hash = 12;
 }
 
 message DirectiveConfiguration {

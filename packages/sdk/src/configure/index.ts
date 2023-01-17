@@ -1,4 +1,5 @@
 import fs from 'fs';
+<<<<<<< HEAD
 import path from 'path';
 import process from 'node:process';
 import _ from 'lodash';
@@ -13,6 +14,9 @@ import {
 	visit,
 } from 'graphql';
 import { ZodType } from 'zod';
+=======
+import objectHash from 'object-hash';
+>>>>>>> d3a844ed (feat: add support for data source types in the telemetry)
 import {
 	Api,
 	DatabaseApiCustom,
@@ -313,10 +317,9 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		config.apis.push(...graphqlApis);
 	}
 
-	const apps = config.apis;
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = await resolveApplication(roles, apps, cors, config.s3UploadProvider, config.server?.hooks);
+	const resolved = await resolveApplication(roles, config.apis, cors, config.s3UploadProvider || []);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -1034,6 +1037,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		customDatabase: undefined,
 		directives: source.Directives,
 		requestTimeoutSeconds: source.RequestTimeoutSeconds,
+		hash: objectHash(source),
 	};
 	switch (source.Kind) {
 		case DataSourceKind.REST:

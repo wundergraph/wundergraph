@@ -3,6 +3,7 @@ package telemetry
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,10 +21,10 @@ const (
 	DefaultTimeout = 5
 )
 
-type DurationMetric func() Metric
+type DurationMetric func() *Metric
 
 type Client interface {
-	Send(metrics []Metric) error
+	Send(metrics []*Metric) error
 }
 
 type ClientOption func(*client)
@@ -55,10 +56,12 @@ type client struct {
 	log        *zap.Logger
 }
 
-func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption) Client {
+var _ Client = (*client)(nil)
+
+func NewClient(address string, clientInfo *MetricClientInfo, opts ...ClientOption) Client {
 	c := &client{
 		address:    address,
-		clientInfo: clientInfo,
+		clientInfo: *clientInfo,
 	}
 
 	if clientInfo.CpuCount == 0 {
@@ -98,13 +101,67 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 }
 
 type MetricRequest struct {
-	Metrics    []Metric         `json:"metrics"`
+	Metrics    []*Metric        `json:"metrics"`
 	ClientInfo MetricClientInfo `json:"clientInfo"`
 }
 
+type MetricTag struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
 type Metric struct {
-	Name  string  `json:"name"`
-	Value float64 `json:"value"`
+	Name  string      `json:"name"`
+	Value float64     `json:"value"`
+	Tags  []MetricTag `json:"tags,omitempty"`
+}
+
+// Equal returns true iff both Metric instances contain the same data
+func (m *Metric) Equal(other *Metric) bool {
+	if m.Name == other.Name && m.Value == other.Value && len(m.Tags) == len(other.Tags) {
+		for _, tag := range m.Tags {
+			found := false
+			for _, otherTag := range other.Tags {
+				if tag.Name == otherTag.Name && tag.Value == otherTag.Value {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+// AddTag adds a tag to the Metric, validating its name and
+// ensuring there are no duplicates.
+func (m *Metric) AddTag(name string, value string) error {
+	const (
+		invalidChars       = ";!^="
+		invalidInitialChar = "~"
+	)
+	if name == "" {
+		return errors.New("tag name is empty")
+	}
+	if name[0] == invalidInitialChar[0] {
+		return fmt.Errorf("tag name %q starts with invalid initial character %s", name, invalidInitialChar)
+	}
+	if strings.ContainsAny(name, invalidChars) {
+		return fmt.Errorf("tag name %q contains invalid characters (%s)", name, invalidChars)
+	}
+	for _, tag := range m.Tags {
+		if tag.Name == name {
+			return fmt.Errorf("metric already contains a %q tag", name)
+		}
+	}
+	m.Tags = append(m.Tags, MetricTag{
+		Name:  name,
+		Value: value,
+	})
+	return nil
 }
 
 type GraphQLResponse struct {
@@ -125,7 +182,7 @@ type MetricClientInfo struct {
 	GitRepoURLHash   string `json:"gitRepoURLHash,omitempty"`
 }
 
-func (c *client) Send(metrics []Metric) error {
+func (c *client) Send(metrics []*Metric) error {
 	if c.log != nil && c.debug {
 		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
 		for _, m := range metrics {
@@ -178,8 +235,8 @@ func (c *client) Send(metrics []Metric) error {
 }
 
 // NewUsageMetric creates a simple metric. The value will be 1.
-func NewUsageMetric(name string) Metric {
-	return Metric{
+func NewUsageMetric(name string) *Metric {
+	return &Metric{
 		Name:  name,
 		Value: 1,
 	}
@@ -188,10 +245,18 @@ func NewUsageMetric(name string) Metric {
 // NewDurationMetric starts a duration metric. The duration will be stop when PrepareBatch is called.
 func NewDurationMetric(name string) DurationMetric {
 	start := time.Now()
-	return func() Metric {
-		return Metric{
+	return func() *Metric {
+		return &Metric{
 			Name:  name,
 			Value: time.Since(start).Seconds(),
 		}
+	}
+}
+
+// NewDataSourceMetric creates a data metric from the data source name
+func NewDataSourceMetric(dataSourceName string) *Metric {
+	return &Metric{
+		Name:  DataSourceMetricName(dataSourceName),
+		Value: 1,
 	}
 }
