@@ -1,11 +1,11 @@
 import { Template, TemplateOutputFile } from '../../index';
-import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig, ResolvedApplication } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import hash from 'object-hash';
 import { template } from './web.client.template';
-import { hasInjectedInput, hasInternalInput, hasInput } from './helpers';
+import { hasInjectedInput, hasInput, hasInternalInput } from './helpers';
 
 export class TypeScriptLegacyWebClient implements Template {
 	constructor(reactNative?: boolean) {
@@ -14,7 +14,7 @@ export class TypeScriptLegacyWebClient implements Template {
 
 	private readonly reactNative: boolean;
 
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
 		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _liveQueries = liveQueries(config.application, false);
