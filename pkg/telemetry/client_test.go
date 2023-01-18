@@ -190,3 +190,31 @@ func TestMetricEqual(t *testing.T) {
 
 	}
 }
+
+func TestMetricAddTag(t *testing.T) {
+	const (
+		tagName  = "tag~"
+		tagValue = "tagValue"
+	)
+
+	m := &Metric{"metric", 1, nil}
+
+	assert.NotNil(t, m.AddTag("", tagValue), "should fail to add empty tag")
+	assert.NotNil(t, m.AddTag("~tag", tagValue), "should fail to add invalid tag")
+	for _, ch := range ";!^=" {
+		assert.NotNil(t, m.AddTag("tag"+string(ch), "value"), "should fail to tag with invalid character")
+	}
+	assert.Nil(t, m.AddTag(tagName, tagValue), "should add tag")
+
+	assert.Equal(t, 1, len(m.Tags), "should have one tag")
+	assert.Equal(t, tagName, m.Tags[0].Name)
+	assert.Equal(t, tagValue, m.Tags[0].Value)
+
+	assert.NotNil(t, m.AddTag(tagName, ""), "should not add duplicate tag")
+
+	// make sure trying to add a duplicate tag didn't mess the internal state
+	assert.Equal(t, 1, len(m.Tags), "should have one tag")
+	assert.Equal(t, tagName, m.Tags[0].Name)
+	assert.Equal(t, tagValue, m.Tags[0].Value)
+
+}
