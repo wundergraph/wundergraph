@@ -158,11 +158,13 @@ func TestSendDurationMetric(t *testing.T) {
 }
 
 func TestMetricEqual(t *testing.T) {
-	tags := []MetricTag{{"b", "c"}}
+	tags := []MetricTag{{"b", "c"}, {"d", "e"}}
 	m1 := &Metric{"a", 1, tags}
 	m2 := &Metric{"a", 1, nil}
 	m3 := &Metric{"a", 3, nil}
 	m4 := &Metric{"b", 1, tags}
+	// Tags in reverse order vs m1, should compare as equal
+	m5 := &Metric{m1.Name, m1.Value, []MetricTag{tags[1], tags[0]}}
 	testCases := []struct {
 		a     *Metric
 		b     *Metric
@@ -172,6 +174,7 @@ func TestMetricEqual(t *testing.T) {
 		{m1, m2, false},
 		{m1, m3, false},
 		{m1, m4, false},
+		{m1, m5, true},
 	}
 	for _, tc := range testCases {
 		op := "=="
