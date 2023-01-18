@@ -305,6 +305,10 @@ const navigation = [
 				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
 			},
 			{
+				title: 'TypeScript Operations',
+				href: '/docs/features/typescript-operations',
+			},
+			{
 				title: 'API Namespacing',
 				href: '/docs/features/api-namespacing',
 			},
