@@ -1,12 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io/fs"
-	"net"
-	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -20,11 +16,9 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
 	"github.com/wundergraph/wundergraph/pkg/files"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 const (
@@ -137,7 +131,11 @@ var rootCmd = &cobra.Command{
 			}
 
 			if helpers.HasTelemetryAnnotations(helpers.TelemetryAnnotationDataSources, cmd.Annotations) {
-				dataSourcesMetrics, err := dataSourcesTelemetryMetrics(clientInfo)
+				wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+				if err != nil {
+					return err
+				}
+				dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
 				if err != nil {
 					if rootFlags.TelemetryDebugMode {
 						log.Error("could not generate data sources telemetry data", zap.Error(err))
@@ -225,94 +223,6 @@ func wunderctlBinaryPath() string {
 		}
 	}
 	return path
-}
-
-func dataSourcesTelemetryMetrics(info *telemetry.MetricClientInfo) ([]*telemetry.Metric, error) {
-	wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-	if err != nil {
-		return nil, err
-	}
-	configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
-	f, err := os.Open(configFile)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	dec := json.NewDecoder(f)
-	var wgConfig wgpb.WunderGraphConfiguration
-	if err := dec.Decode(&wgConfig); err != nil {
-		return nil, err
-	}
-	var metrics []*telemetry.Metric
-	if api := wgConfig.Api; api != nil {
-		if engineConfig := api.EngineConfiguration; engineConfig != nil {
-			for _, ds := range engineConfig.DatasourceConfigurations {
-				var dataSourceName string
-				var urlVariable *wgpb.ConfigurationVariable
-				switch ds.Kind {
-				case wgpb.DataSourceKind_STATIC:
-					// Not reported
-				case wgpb.DataSourceKind_REST:
-					dataSourceName = ds.Kind.String()
-					urlVariable = ds.GetCustomRest().GetFetch().GetUrl()
-				case wgpb.DataSourceKind_GRAPHQL:
-					dataSourceName = ds.Kind.String()
-					urlVariable = ds.GetCustomGraphql().GetFetch().GetUrl()
-				case wgpb.DataSourceKind_POSTGRESQL,
-					wgpb.DataSourceKind_MYSQL,
-					wgpb.DataSourceKind_SQLSERVER,
-					wgpb.DataSourceKind_MONGODB,
-					wgpb.DataSourceKind_SQLITE:
-
-					dataSourceName = ds.Kind.String()
-					urlVariable = ds.CustomDatabase.GetDatabaseURL()
-				default:
-					if err != nil {
-						return nil, fmt.Errorf("unhandled data source kind %v", ds.Kind)
-					}
-				}
-				if dataSourceName != "" {
-					metric := telemetry.NewDataSourceMetric(dataSourceName)
-					if urlVariable != nil {
-						urlValue := loadvariable.String(urlVariable)
-						if urlValue != "" {
-							urlHash, err := telemetry.Hash(urlValue)
-							if err != nil {
-								return nil, err
-							}
-							if err := metric.AddTag("urlHash", urlHash); err != nil {
-								return nil, err
-							}
-							if u, err := url.Parse(urlValue); err == nil {
-								// Try to parse as host:port, fallback to host
-								host, _, _ := net.SplitHostPort(u.Host)
-								if host == "" {
-									host = u.Host
-								}
-								if host == "localhost" {
-									if err := metric.AddTag("localhost", "true"); err != nil {
-										return nil, err
-									}
-								}
-							}
-						}
-					}
-					// Same underlying data source can be included multiple times, deduplicate
-					found := false
-					for _, m := range metrics {
-						if m.Equal(metric) {
-							found = true
-							break
-						}
-					}
-					if !found {
-						metrics = append(metrics, metric)
-					}
-				}
-			}
-		}
-	}
-	return metrics, nil
 }
 
 func init() {
