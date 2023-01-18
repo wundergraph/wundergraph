@@ -3,7 +3,6 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
-	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -48,13 +47,7 @@ import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
 import _ from 'lodash';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import {
-	AuthenticationHookRequest,
-	AuthenticationResponse,
-	ResolvedServerOptions,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphUser,
-} from '../server/types';
+import { ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
@@ -590,6 +583,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				keepFromClaimVariables: false,
 				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
 				customJsonScalars: app.EngineConfiguration.CustomJsonScalars,
+				customEnumMappings: app.EngineConfiguration.CustomEnumMappings,
 			});
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalidOperationNames;

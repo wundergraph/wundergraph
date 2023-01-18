@@ -69,6 +69,11 @@ export interface RenameTypeFields {
 	renameTypeFields: (rename: RenameTypeField[]) => void;
 }
 
+export interface EnumMapping {
+	normalisedName: string;
+	values: string[];
+}
+
 export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
 
 export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
@@ -78,7 +83,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: string[],
+		customEnumMappings?: EnumMapping[]
 	) {
 		this.Schema = schema;
 		this.DataSources = dataSources;
@@ -86,6 +92,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
+		this.CustomEnumMappings = customEnumMappings;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -95,6 +102,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
+	CustomEnumMappings?: EnumMapping[];
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);

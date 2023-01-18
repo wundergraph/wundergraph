@@ -29,7 +29,7 @@ import {
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
-import { WG_THROW_ON_OPERATION_LOADING_ERROR } from '../definition';
+import { EnumMapping, WG_THROW_ON_OPERATION_LOADING_ERROR } from '../definition';
 import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
 
@@ -105,6 +105,7 @@ export interface ParseOperationsOptions {
 	keepFromClaimVariables?: boolean;
 	interpolateVariableDefinitionAsJSON?: string[];
 	customJsonScalars?: string[];
+	customEnumMappings?: EnumMapping[];
 }
 
 const defaultParseOptions: ParseOperationsOptions = {
@@ -168,7 +169,8 @@ export const parseOperations = (
 							[],
 							options.keepFromClaimVariables,
 							false,
-							options.customJsonScalars || []
+							options.customJsonScalars || [],
+							options.customEnumMappings || []
 						),
 						InterpolationVariablesSchema: operationVariablesToJSONSchema(
 							parsedGraphQLSchema,
@@ -176,7 +178,8 @@ export const parseOperations = (
 							options.interpolateVariableDefinitionAsJSON || [],
 							options.keepFromClaimVariables,
 							false,
-							options.customJsonScalars || []
+							options.customJsonScalars || [],
+							options.customEnumMappings || []
 						),
 						InternalVariablesSchema: operationVariablesToJSONSchema(
 							parsedGraphQLSchema,
@@ -184,7 +187,8 @@ export const parseOperations = (
 							[],
 							true,
 							false,
-							options.customJsonScalars || []
+							options.customJsonScalars || [],
+							options.customEnumMappings || []
 						),
 						InjectedVariablesSchema: operationVariablesToJSONSchema(
 							parsedGraphQLSchema,
@@ -192,7 +196,8 @@ export const parseOperations = (
 							[],
 							true,
 							true,
-							options.customJsonScalars || []
+							options.customJsonScalars || [],
+							options.customEnumMappings || []
 						),
 						ResponseSchema: operationResponseToJSONSchema(parsedGraphQLSchema, ast, node, transformations),
 						AuthenticationConfig: {
@@ -716,7 +721,8 @@ export const operationVariablesToJSONSchema = (
 	interpolateVariableDefinitionAsJSON: string[],
 	keepInternalVariables: boolean = false,
 	keepInjectedVariables: boolean = false,
-	customJsonScalars: string[]
+	customJsonScalars: string[],
+	customEnumMappings: EnumMapping[]
 ): JSONSchema => {
 	debugger;
 
@@ -753,7 +759,8 @@ export const operationVariablesToJSONSchema = (
 			type,
 			name,
 			nonNullType,
-			customJsonScalars
+			customJsonScalars,
+			customEnumMappings
 		);
 	});
 
@@ -794,7 +801,8 @@ const typeSchema = (
 	type: TypeNode,
 	name: string,
 	nonNull: boolean,
-	customJsonScalars: string[]
+	customJsonScalars: string[],
+	customEnumMappings: EnumMapping[]
 ): JSONSchema => {
 	switch (type.kind) {
 		case 'NonNullType':
@@ -814,7 +822,8 @@ const typeSchema = (
 				type.type,
 				name,
 				true,
-				customJsonScalars
+				customJsonScalars,
+				customEnumMappings
 			);
 		case 'ListType':
 			const schema: JSONSchema = {
@@ -828,7 +837,8 @@ const typeSchema = (
 				type.type,
 				name,
 				false,
-				customJsonScalars
+				customJsonScalars,
+				customEnumMappings
 			);
 			return schema;
 		case 'NamedType':
@@ -872,8 +882,15 @@ const typeSchema = (
 					}
 					switch (namedType.astNode.kind) {
 						case 'ScalarTypeDefinition':
+							const match = customEnumMappings.find((item) => item.normalisedName === namedType.name);
+							if (!match) {
+								return {
+									type: nonNull ? 'string' : ['string', 'null'],
+								};
+							}
 							return {
 								type: nonNull ? 'string' : ['string', 'null'],
+								enum: match.values,
 							};
 						case 'EnumTypeDefinition':
 							schema.type = nonNull ? 'string' : ['string', 'null'];
@@ -908,7 +925,8 @@ const typeSchema = (
 									fieldType,
 									name,
 									false,
-									customJsonScalars
+									customJsonScalars,
+									customEnumMappings
 								);
 							});
 							root.definitions![typeName] = schema;

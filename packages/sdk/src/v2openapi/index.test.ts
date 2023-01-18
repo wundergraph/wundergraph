@@ -1,10 +1,8 @@
-import {
-	getNormalisedGraphQLEnumValue,
-	isNormalisedGraphQLEnumValueUnique,
-	openApiSpecificationToRESTApiObject,
-} from './index';
+import { openApiSpecificationToRESTApiObject, RESTApiBuilder } from './index';
 import * as fs from 'fs';
 import path from 'path';
+import { JSONSchema7Type } from 'json-schema';
+import { EnumTypeDefinitionNode } from 'graphql';
 
 const runTest = async (testFile: string, snapShot: string, statusCodeUnions?: boolean) => {
 	const exists = fs.existsSync(testFile);
@@ -126,27 +124,129 @@ test('arbitrary type', async () => {
 	expect(actual.Schema).toMatchSnapshot('users_meta_schema');
 });
 
-test('that invalid GraphQL enum values are normalised correctly', () => {
-	expect(getNormalisedGraphQLEnumValue('1Som3/Ex$*pl_e')).toBe('_Som3_Ex__pl_e');
-});
+describe('RestApiBuilderTests', () => {
+	const newRestApiBuilder = () =>
+		new RESTApiBuilder(
+			{ info: { title: '', version: '' }, openapi: '', paths: {} },
+			{ source: { kind: 'object', openAPIObject: {} } }
+		);
 
-test('that a valid GraphQL enum value remains unchanged', () => {
-	expect(getNormalisedGraphQLEnumValue('_An_exAMP___LE')).toBe('_An_exAMP___LE');
-});
+	describe('GraphQL name normalisation tests', () => {
+		test('that invalid GraphQL names are normalised correctly', () => {
+			const restApiBuilder = newRestApiBuilder();
+			expect(restApiBuilder.getUniqueNormalisedGraphQLName('1Som3/Ex$*pl_e')).toBe('_1Som3_Ex__pl_e');
+		});
 
-test('that a unique value remains unchanged', () => {
-	const valueSet = new Set(['a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
-	expect(isNormalisedGraphQLEnumValueUnique(valueSet, 'a')).toBe(true);
-	expect(valueSet.has('a')).toBe(true);
-});
+		test('that a valid GraphQL enum name remains unchanged', () => {
+			const restApiBuilder = newRestApiBuilder();
+			expect(restApiBuilder.getUniqueNormalisedGraphQLName('_An_exAMP___LE')).toBe('_An_exAMP___LE');
+		});
 
-test('that creating a unique value before 9 tries returns true', () => {
-	const valueSet = new Set(['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
-	expect(isNormalisedGraphQLEnumValueUnique(valueSet, 'a')).toBe(true);
-	expect(valueSet.has('a_9')).toBe(true);
-});
+		test('that a unique name remains unchanged', () => {
+			const restApiBuilder = newRestApiBuilder();
+			restApiBuilder['uniqueGraphQLNames'] = new Set(['a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
+			expect(restApiBuilder.getUniqueGraphQLName('a')).toBe('a');
+			expect(restApiBuilder['uniqueGraphQLNames'].has('a')).toBe(true);
+		});
 
-test('that failure to create a unique value after 9 tries returns false', () => {
-	const valueSet = new Set(['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8', 'a_9']);
-	expect(isNormalisedGraphQLEnumValueUnique(valueSet, 'a')).toBe(false);
+		test('that for up to 9 retries a unique suffix is added to a name that already exists', () => {
+			const restApiBuilder = newRestApiBuilder();
+			restApiBuilder['uniqueGraphQLNames'] = new Set(['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
+			expect(restApiBuilder.getUniqueGraphQLName('a')).toBe('a_9');
+			expect(restApiBuilder['uniqueGraphQLNames'].has('a_9')).toBe(true);
+		});
+
+		test('that failure to create a unique value after 9 tries returns an empty string', () => {
+			const restApiBuilder = newRestApiBuilder();
+			restApiBuilder['uniqueGraphQLNames'] = new Set([
+				'a',
+				'a_1',
+				'a_2',
+				'a_3',
+				'a_4',
+				'a_5',
+				'a_6',
+				'a_7',
+				'a_8',
+				'a_9',
+			]);
+			expect(restApiBuilder.getUniqueGraphQLName('a')).toBe('');
+		});
+	});
+
+	describe('GraphQL enum handling', () => {
+		test('that an empty string as a normalised name short circuits', () => {
+			const restApiBuilder = newRestApiBuilder();
+			const addScalar = jest.spyOn(restApiBuilder, 'addCustomScalarForInvalidEnum');
+			const addEnum = jest.spyOn(restApiBuilder, 'addEnumValuesForValidEnum');
+			jest.spyOn(restApiBuilder, 'getUniqueNormalisedGraphQLName').mockReturnValue('');
+			expect(addEnum).not.toHaveBeenCalled();
+			expect(addScalar).not.toHaveBeenCalled();
+		});
+
+		test('that an enum with no values short circuits', () => {
+			const restApiBuilder = newRestApiBuilder();
+			const addScalar = jest.spyOn(restApiBuilder, 'addCustomScalarForInvalidEnum');
+			const addEnum = jest.spyOn(restApiBuilder, 'addEnumValuesForValidEnum');
+			const values: JSONSchema7Type[] = [];
+			restApiBuilder.handleEnumValues('ValidEnumName', values);
+			expect(addEnum).not.toHaveBeenCalled();
+			expect(addScalar).not.toHaveBeenCalled();
+		});
+
+		test('that an enum with a valid name and valid values are added as a GraphQL enum', () => {
+			const restApiBuilder = newRestApiBuilder();
+			const addScalar = jest.spyOn(restApiBuilder, 'addCustomScalarForInvalidEnum');
+			const addEnum = jest.spyOn(restApiBuilder, 'addEnumValuesForValidEnum');
+			const values = ['ValidValueOne', 'ValidValueTwo', 'ValidValueThree'];
+			restApiBuilder.handleEnumValues('ValidEnumName', values);
+			expect(addEnum).toHaveBeenCalledWith('ValidEnumName', new Set(values));
+			expect(addScalar).not.toHaveBeenCalled();
+		});
+
+		test('that an enum with an invalid name and valid values is normalised and added as a GraphQL enum', () => {
+			const restApiBuilder = newRestApiBuilder();
+			const normalisedName = '_1nValidEnumName';
+			const node: EnumTypeDefinitionNode = restApiBuilder.buildEnumTypeDefinitionNode(normalisedName, []);
+			let schema = restApiBuilder['graphQLSchema'];
+			restApiBuilder['graphQLSchema'] = { ...schema, definitions: [...schema.definitions, node] };
+			const addScalar = jest.spyOn(restApiBuilder, 'addCustomScalarForInvalidEnum');
+			const addEnum = jest.spyOn(restApiBuilder, 'addEnumValuesForValidEnum');
+			const values = ['ValidValueOne', 'ValidValueTwo', 'ValidValueThree', 'ValidValueFour'];
+			restApiBuilder.handleEnumValues('1nValidEnumName', values);
+			expect(addEnum).toHaveBeenCalledWith('_1nValidEnumName', new Set(values));
+			expect(addScalar).not.toHaveBeenCalled();
+			expect((restApiBuilder['graphQLSchema'].definitions[3] as EnumTypeDefinitionNode).values).toHaveLength(
+				values.length
+			);
+		});
+
+		test('that an enum with a valid name and invalid values added as a custom scalar', () => {
+			const restApiBuilder = newRestApiBuilder();
+			const addScalar = jest.spyOn(restApiBuilder, 'addCustomScalarForInvalidEnum');
+			const addEnum = jest.spyOn(restApiBuilder, 'addEnumValuesForValidEnum');
+			const values = ['ValidValueOne', 'ValidValueTwo', 'ValidValue/Three'];
+			restApiBuilder.handleEnumValues('ValidEnumName', values);
+			expect(addEnum).not.toHaveBeenCalled();
+			expect(addScalar).toHaveBeenCalledWith('ValidEnumName', 'ValidEnumName', new Set(values));
+			expect(restApiBuilder['graphQLSchema'].definitions).toHaveLength(4);
+			expect(restApiBuilder['enumMappings']).toHaveLength(1);
+			expect(restApiBuilder['enumMappings'][0].normalisedName).toBe('ValidEnumName');
+			expect(restApiBuilder['enumMappings'][0].values).toEqual(values);
+		});
+
+		test('that an enum with a invalid name and invalid values is normalised and added as a custom scalar', () => {
+			const restApiBuilder = newRestApiBuilder();
+			const addScalar = jest.spyOn(restApiBuilder, 'addCustomScalarForInvalidEnum');
+			const addEnum = jest.spyOn(restApiBuilder, 'addEnumValuesForValidEnum');
+			const values = ['//ValidValueOne', '&ValidValueTwo', '%$ValidValueThree£'];
+			restApiBuilder.handleEnumValues('2*&Valid3numN4me', values);
+			expect(addEnum).not.toHaveBeenCalled();
+			expect(addScalar).toHaveBeenCalledWith('2*&Valid3numN4me', '_2__Valid3numN4me', new Set(values));
+			expect(restApiBuilder['graphQLSchema'].definitions).toHaveLength(4);
+			expect(restApiBuilder['enumMappings']).toHaveLength(1);
+			expect(restApiBuilder['enumMappings'][0].normalisedName).toBe('_2__Valid3numN4me');
+			expect(restApiBuilder['enumMappings'][0].values).toEqual(values);
+		});
+	});
 });

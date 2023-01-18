@@ -2,6 +2,7 @@ import {
 	buildMTLSConfiguration,
 	buildUpstreamAuthentication,
 	DataSource,
+	EnumMapping,
 	OpenAPIIntrospection,
 	RESTApi,
 	RESTApiCustom,
@@ -48,8 +49,8 @@ import {
 import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
-import _ from 'lodash';
 import transformSchema from '../transformations/schema';
+import _ from 'lodash';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -89,7 +90,7 @@ type EnclosingType = 'non_null' | 'list';
 
 type ObjectKind = 'input' | 'type' | 'enum' | 'scalar';
 
-class RESTApiBuilder {
+export class RESTApiBuilder {
 	constructor(spec: OpenAPIV3.Document, introspection: OpenAPIIntrospection) {
 		this.spec = spec;
 		this.graphQLSchema = {
@@ -118,6 +119,8 @@ class RESTApiBuilder {
 	private dataSources: DataSource<RESTApiCustom>[] = [];
 	private fields: FieldConfiguration[] = [];
 	private baseUrlArgs: string[] = [];
+	private enumMappings: EnumMapping[] = [];
+	private uniqueGraphQLNames: Set<string> = new Set();
 
 	public build = (): RESTApi => {
 		Object.keys(this.spec.paths).forEach((path) => {
@@ -170,7 +173,9 @@ class RESTApiBuilder {
 			dataSources,
 			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
 			[],
-			[]
+			[],
+			[],
+			this.enumMappings
 		);
 	};
 	private traversePath = (
@@ -485,11 +490,12 @@ class RESTApiBuilder {
 					if (argumentName) {
 						const enumName = fieldName + '_' + argumentName;
 						this.ensureType('enum', enumName);
+						// TODO this needs to be changed as well
 						this.addArgument(parentTypeName, fieldName, argumentName, enumName, enclosingTypes);
 						this.addEnumValues(enumName, schema.enum);
 						return;
 					}
-					this.addEnumValues(parentTypeName, schema.enum);
+					this.handleEnumValues(parentTypeName, schema.enum);
 					return;
 				}
 				if (argumentName) {
@@ -937,22 +943,97 @@ class RESTApiBuilder {
 			});
 		}
 	};
-	private addEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
-		const nodes: EnumValueDefinitionNode[] = [];
-		const valueSet: Set<string> = new Set();
+
+	public handleEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
+		const uniqueValues: Set<string> = new Set();
+		const normalisedName = this.getUniqueNormalisedGraphQLName(enumTypeName);
+		if (normalisedName === '') {
+			return; // TODO what should happen here?
+		}
+
+		let isValidEnum = true;
 		values.forEach((value) => {
 			if (typeof value !== 'string') {
 				return;
 			}
-			let normalisedValue = getNormalisedGraphQLEnumValue(value);
-			if (!isNormalisedGraphQLEnumValueUnique(valueSet, normalisedValue)) {
+			if (!value.match(/^[_a-zA-z][_a-zA-Z0-9]*$/)) {
+				isValidEnum = false;
+			}
+			uniqueValues.add(value);
+		});
+		if (uniqueValues.size === 0) {
+			return;
+		}
+		isValidEnum
+			? this.addEnumValuesForValidEnum(normalisedName, uniqueValues)
+			: this.addCustomScalarForInvalidEnum(enumTypeName, normalisedName, uniqueValues);
+	};
+
+	public addCustomScalarForInvalidEnum = (originalName: string, normalisedName: string, uniqueValues: Set<string>) => {
+		const enumMapping: EnumMapping = {
+			normalisedName,
+			values: [...uniqueValues],
+		};
+		this.enumMappings.push(enumMapping);
+		const node: ScalarTypeDefinitionNode = {
+			kind: Kind.SCALAR_TYPE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: normalisedName,
+			},
+			description: {
+				kind: Kind.STRING,
+				value: `The original enum named ${originalName} contained invalid GraphQL enum value names.\nConsequently, the enum was substituted by a custom scalar named ${normalisedName}.\nIt has the following valid values: ${JSON.stringify(
+					uniqueValues
+				)}`,
+				block: true,
+			},
+		};
+		this.graphQLSchema = {
+			...this.graphQLSchema,
+			definitions: [...this.graphQLSchema.definitions, node],
+		};
+	};
+
+	public addEnumValuesForValidEnum = (normalisedName: string, uniqueValues: Set<string>) => {
+		const nodes: EnumValueDefinitionNode[] = [];
+		uniqueValues.forEach((value) => {
+			nodes.push({
+				kind: Kind.ENUM_VALUE_DEFINITION,
+				name: {
+					kind: Kind.NAME,
+					value: value,
+				},
+			});
+		});
+		this.graphQLSchema = visit(this.graphQLSchema, {
+			EnumTypeDefinition: (node) => {
+				if (node.name.value !== normalisedName) {
+					return;
+				}
+				return {
+					...node,
+					values: [...(node.values || []), ...nodes],
+				} as EnumTypeDefinitionNode;
+			},
+		});
+	};
+
+	private addEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
+		const nodes: EnumValueDefinitionNode[] = [];
+		values.forEach((value) => {
+			if (typeof value !== 'string') {
+				return;
+			}
+			const exists = nodes.find((node) => node.name.value === value) !== undefined;
+			if (exists) {
 				return;
 			}
 			nodes.push({
 				kind: Kind.ENUM_VALUE_DEFINITION,
 				name: {
 					kind: Kind.NAME,
-					value: normalisedValue,
+					value: value,
 				},
 			});
 		});
@@ -1164,7 +1245,7 @@ class RESTApiBuilder {
 			},
 		};
 	};
-	private buildEnumTypeDefinitionNode = (name: string, values: EnumValueDefinitionNode[]): EnumTypeDefinitionNode => {
+	public buildEnumTypeDefinitionNode = (name: string, values: EnumValueDefinitionNode[]): EnumTypeDefinitionNode => {
 		return {
 			kind: Kind.ENUM_TYPE_DEFINITION,
 			values,
@@ -1237,6 +1318,29 @@ class RESTApiBuilder {
 				return typeName;
 		}
 	};
+
+	public getUniqueGraphQLName = (normalisedName: string): string => {
+		if (!this.uniqueGraphQLNames.has(normalisedName)) {
+			this.uniqueGraphQLNames.add(normalisedName);
+			return normalisedName;
+		}
+		for (let i = 1; i < 10; i++) {
+			const newNormalisedName = `${normalisedName}_${i}`;
+			if (!this.uniqueGraphQLNames.has(newNormalisedName)) {
+				this.uniqueGraphQLNames.add(newNormalisedName);
+				return newNormalisedName;
+			}
+		}
+		return ''; // more than 9 retries seems unreasonable
+	};
+
+	public getUniqueNormalisedGraphQLName = (nameToNormalise: string): string => {
+		let normalisedName = nameToNormalise.replace(/[^a-zA-Z0-9_]/g, '_');
+		if (!normalisedName.match(/^[a-zA-Z_].*$/)) {
+			normalisedName = `_${normalisedName}`;
+		}
+		return this.getUniqueGraphQLName(normalisedName);
+	};
 }
 
 const convertOpenApiV3 = async (openApiSpec: Object): Promise<OpenAPIV3.Document> => {
@@ -1263,28 +1367,4 @@ const fixOasReplacer = (key: string, value: any): any => {
 		default:
 			return value;
 	}
-};
-
-export const getNormalisedGraphQLEnumValue = (valueToNormalise: string): string => {
-	let normalisedValue = valueToNormalise.replace(/[^a-zA-Z0-9_]/g, '_');
-	if (normalisedValue.match(/^[a-zA-Z_].*$/)) {
-		return normalisedValue;
-	}
-	return `_${normalisedValue.slice(1)}`;
-};
-
-export const isNormalisedGraphQLEnumValueUnique = (valueSet: Set<string>, normalisedValue: string): boolean => {
-	if (!valueSet.has(normalisedValue)) {
-		valueSet.add(normalisedValue);
-		return true;
-	}
-	for (let i = 1; i < 10; i++) {
-		const newNormalisedValue = `${normalisedValue}_${i}`;
-		if (!valueSet.has(newNormalisedValue)) {
-			normalisedValue = newNormalisedValue;
-			valueSet.add(normalisedValue);
-			return true;
-		}
-	}
-	return false; // more than 9 retries seems unreasonable
 };

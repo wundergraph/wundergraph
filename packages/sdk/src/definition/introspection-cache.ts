@@ -2,6 +2,7 @@ import {
 	Api,
 	ApiType,
 	DataSource,
+	EnumMapping,
 	IntrospectionConfiguration,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
@@ -22,6 +23,7 @@ export interface IntrospectionCacheFile<A extends ApiType> {
 	types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	customJsonScalars: string[] | undefined;
+	customEnumMappings: EnumMapping[] | undefined;
 }
 
 export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
@@ -33,6 +35,7 @@ export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCache
 		types: api.Types,
 		interpolateVariableDefinitionAsJSON: api.interpolateVariableDefinitionAsJSON,
 		customJsonScalars: api.CustomJsonScalars,
+		customEnumMappings: api.CustomEnumMappings,
 	};
 }
 
@@ -43,7 +46,8 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 		cache.fields,
 		cache.types,
 		cache.interpolateVariableDefinitionAsJSON,
-		cache.customJsonScalars
+		cache.customJsonScalars,
+		cache.customEnumMappings
 	);
 }
 
@@ -73,7 +77,7 @@ export const writeIntrospectionCacheFile = async (cacheKey: string, content: str
 				Logger.error(`Error creating cache directory: ${de}`);
 			}
 			// Now try again. Avoid calling writeIntrospectionCacheFile(), otherwise
-			// a bug could end up causing infinite recursion instead of a a non-working
+			// a bug could end up causing infinite recursion instead of a non-working
 			// cache
 			return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
 		}
