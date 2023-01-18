@@ -1,7 +1,7 @@
-import useSWR, { SWRConfiguration, useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { GraphQLResponseError, OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
+import { OperationsDefinition, LogoutOptions, Client, ClientResponseError } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -74,7 +74,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		);
 
 		const onError = useCallback(
-			(err: GraphQLResponseError) => {
+			(err: ClientResponseError) => {
 				onErrorProp?.(err, _key, swrConfig as any);
 			},
 			[onErrorProp, _key]
@@ -154,7 +154,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 */
 	const useUser: UseUserHook<Operations> = (options) => {
 		const { enabled = true, revalidate, ...swrOptions } = options || {};
-		return useSWR<Operations['user'], GraphQLResponseError>(
+		return useSWR<Operations['user'], ClientResponseError>(
 			enabled ? userSWRKey : null,
 			() => client.fetchUser(options),
 			swrOptions
@@ -212,6 +212,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			props;
 
 		const startedAtRef = useRef<number | null>(null);
+		const onSuccessRef = useRef(onSuccess);
+		const onErrorRef = useRef(onError);
 
 		const [state, setState] = useState({
 			isLoading: false,
@@ -241,13 +243,13 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 					subscribeOnce,
 					onError(error) {
 						setState({ isLoading: false, isSubscribed: false });
-						onError?.(error);
+						onErrorRef.current?.(error);
 						startedAtRef.current = null;
 					},
 					onResult(result) {
 						if (!startedAtRef.current) {
 							setState({ isLoading: false, isSubscribed: true });
-							onSuccess?.(result);
+							onSuccessRef.current?.(result);
 							startedAtRef.current = new Date().getTime();
 						}
 
@@ -271,7 +273,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			return () => {
 				unsubscribe?.();
 			};
-		}, [mutationKey, enabled, liveQuery, subscribeOnce, onSuccess, onError]);
+		}, [mutationKey, enabled, liveQuery, subscribeOnce]);
 
 		return state;
 	};
@@ -310,7 +312,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		);
 
 		const onError = useCallback(
-			(error: GraphQLResponseError) => {
+			(error: ClientResponseError) => {
 				onErrorProp?.(error, _key, options);
 			},
 			[onErrorProp, _key]

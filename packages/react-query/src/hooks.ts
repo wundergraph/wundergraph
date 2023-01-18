@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import {
 	useQuery as useTanstackQuery,
 	useMutation as useTanstackMutation,
@@ -5,9 +6,8 @@ import {
 	QueryFunctionContext,
 } from '@tanstack/react-query';
 
-import { GraphQLResponseError, OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
+import { OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	QueryFetcher,
 	MutationFetcher,
@@ -67,28 +67,16 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * ```
 	 */
 	const useQuery: UseQueryHook<Operations> = (options) => {
-		const { operationName, liveQuery, input, ...queryOptions } = options;
+		const { operationName, liveQuery, input, enabled, refetchOnWindowFocus, ...queryOptions } = options;
 		const queryHash = serialize([operationName, input]);
 
-		const result = useTanstackQuery(
-			queryKey({ operationName, input }),
-			({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
-			queryOptions
-		);
-
-		const onSuccess = useCallback(
-			(response: any) => {
-				options.onSuccess?.(response);
-			},
-			[options.onSuccess]
-		);
-
-		const onError = useCallback(
-			(err: GraphQLResponseError) => {
-				options.onError?.(err);
-			},
-			[options.onError]
-		);
+		const result = useTanstackQuery({
+			queryKey: queryKey({ operationName, input }),
+			queryFn: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
+			...queryOptions,
+			enabled: liveQuery ? false : enabled,
+			refetchOnWindowFocus: liveQuery ? false : refetchOnWindowFocus,
+		});
 
 		const { isSubscribed } = useSubscribeTo({
 			queryHash,
@@ -96,8 +84,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			input,
 			liveQuery,
 			enabled: options.enabled !== false && liveQuery,
-			onSuccess,
-			onError,
+			onSuccess: options.onSuccess,
+			onError: options.onError,
 		});
 
 		if (liveQuery) {
@@ -222,6 +210,8 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			props;
 
 		const startedAtRef = useRef<number | null>(null);
+		const onSuccessRef = useRef(onSuccess);
+		const onErrorRef = useRef(onError);
 
 		const [state, setState] = useState({
 			isLoading: false,
@@ -251,13 +241,13 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 					subscribeOnce,
 					onError(error) {
 						setState({ isLoading: false, isSubscribed: false });
-						onError?.(error);
+						onErrorRef.current?.(error);
 						startedAtRef.current = null;
 					},
 					onResult(result) {
 						if (!startedAtRef.current) {
 							setState({ isLoading: false, isSubscribed: true });
-							onSuccess?.(result);
+							onSuccessRef.current?.(result);
 							startedAtRef.current = new Date().getTime();
 						}
 
@@ -281,7 +271,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			return () => {
 				unsubscribe?.();
 			};
-		}, [queryHash, enabled, liveQuery, subscribeOnce, onSuccess, onError]);
+		}, [queryHash, enabled, liveQuery, subscribeOnce]);
 
 		return state;
 	};
@@ -298,31 +288,13 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * })
 	 */
 	const useSubscription: UseSubscriptionHook<Operations> = (options) => {
-		const {
-			enabled = true,
-			operationName,
-			input,
-			subscribeOnce,
-			onSuccess: onSuccessProp,
-			onError: onErrorProp,
-		} = options;
+		const { enabled = true, operationName, input, subscribeOnce, onSuccess, onError } = options;
 		const queryHash = serialize([operationName, input]);
 
-		const subscription = useTanstackQuery<any, any, any, any>([operationName, input]);
-
-		const onSuccess = useCallback(
-			(response: object) => {
-				onSuccessProp?.(response);
-			},
-			[onSuccessProp, queryHash]
-		);
-
-		const onError = useCallback(
-			(error: GraphQLResponseError) => {
-				onErrorProp?.(error);
-			},
-			[onErrorProp, queryHash]
-		);
+		const subscription = useTanstackQuery<any, any, any, any>({
+			queryKey: [operationName, input],
+			enabled: false, // we update the cache async
+		});
 
 		const { isSubscribed } = useSubscribeTo({
 			queryHash,
