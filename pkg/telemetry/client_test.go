@@ -166,9 +166,9 @@ func TestMetricEqual(t *testing.T) {
 	// Tags in reverse order vs m1, should compare as equal
 	m5 := &Metric{m1.Name, m1.Value, []MetricTag{tags[1], tags[0]}}
 	testCases := []struct {
-		a     *Metric
-		b     *Metric
-		equal bool
+		a          *Metric
+		b          *Metric
+		wantsEqual bool
 	}{
 		{m1, m1, true},
 		{m1, m2, false},
@@ -178,11 +178,11 @@ func TestMetricEqual(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		op := "=="
-		if !tc.equal {
+		if !tc.wantsEqual {
 			op = "!="
 		}
 		t.Run(fmt.Sprintf("%v %s %v", tc.a, op, tc.b), func(t *testing.T) {
-			if tc.equal {
+			if tc.wantsEqual {
 				assert.True(t, tc.a.Equal(tc.b), "should be equal")
 				assert.True(t, tc.b.Equal(tc.a), "should be equal")
 			} else {
