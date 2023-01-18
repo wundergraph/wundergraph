@@ -213,7 +213,7 @@ func TestMetricAddTag(t *testing.T) {
 	assert.Equal(t, tagName, m.Tags[0].Name)
 	assert.Equal(t, tagValue, m.Tags[0].Value)
 
-	assert.NotNil(t, m.AddTag(tagName, ""), "should not add duplicate tag")
+	assert.Error(t, m.AddTag(tagName, ""), "should not add duplicate tag")
 
 	// make sure trying to add a duplicate tag didn't mess the internal state
 	assert.Equal(t, 1, len(m.Tags), "should have one tag")
