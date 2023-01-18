@@ -6,7 +6,7 @@ const Users = () => {
 	const [state, setState] = useState<users_updateInput>({
 		id: '1',
 		name: 'Jens',
-		userInfo: 'Founder of WunderGraph',
+		bio: 'Founder of WunderGraph',
 	});
 	const { data, trigger } = useMutation({
 		operationName: 'users/update',
@@ -15,7 +15,7 @@ const Users = () => {
 		<div>
 			<input value={state.id} onChange={(e) => setState((s) => ({ ...s, id: e.target.value }))}></input>
 			<input value={state.name} onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}></input>
-			<input value={state.userInfo} onChange={(e) => setState((s) => ({ ...s, userInfo: e.target.value }))}></input>
+			<input value={state.bio} onChange={(e) => setState((s) => ({ ...s, bio: e.target.value }))}></input>
 			<button onClick={() => trigger(state)}>Update</button>
 			<pre>{JSON.stringify(data)}</pre>
 		</div>
