@@ -95,7 +95,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			operationName,
 			input,
 			liveQuery,
-			enabled: options.enabled && liveQuery,
+			enabled: options.enabled !== false && liveQuery,
 			onSuccess,
 			onError,
 		});

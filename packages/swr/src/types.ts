@@ -10,6 +10,7 @@ import { UploadRequestOptionsWithProfile } from '@wundergraph/sdk/dist/client/ty
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration, SWRMutationResponse } from 'swr/mutation';
 import { ClientResponseError } from '@wundergraph/sdk/client';
+import type { WithInput } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
@@ -43,15 +44,22 @@ export type MutationFetcher<Operations extends OperationsDefinition> = {
 	): Promise<Data>;
 };
 
-export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
-	SWRConfiguration<Data, Error>,
-	'fetcher'
-> & {
-	operationName: OperationName;
-	liveQuery?: LiveQuery;
-	enabled?: boolean;
-	input?: Input;
-};
+export type UseQueryOptions<
+	Data,
+	Error,
+	Input extends object | undefined,
+	OperationName extends string,
+	LiveQuery
+> = Omit<SWRConfiguration<Data, Error>, 'fetcher'> &
+	WithInput<
+		Input,
+		{
+			operationName: OperationName;
+			liveQuery?: LiveQuery;
+			enabled?: boolean;
+			input?: Input;
+		}
+	>;
 
 export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
 	<
@@ -64,23 +72,31 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 	): SWRResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
-	operationName: OperationName;
-	subscribeOnce?: boolean;
-	resetOnMount?: boolean;
-	enabled?: boolean;
-	input?: Input;
-	onSuccess?(
-		response: ClientResponse<Data>,
-		key: Key,
-		config: UseSubscriptionOptions<Data, Error, Input, OperationName>
-	): void;
-	onError?(
-		error: ClientResponseError,
-		key: Key,
-		config: UseSubscriptionOptions<Data, Error, Input, OperationName>
-	): void;
-};
+export type UseSubscriptionOptions<
+	Data,
+	Error,
+	Input extends object | undefined,
+	OperationName extends string
+> = WithInput<
+	Input,
+	{
+		operationName: OperationName;
+		subscribeOnce?: boolean;
+		resetOnMount?: boolean;
+		enabled?: boolean;
+		input?: Input;
+		onSuccess?(
+			response: ClientResponse<Data>,
+			key: Key,
+			config: UseSubscriptionOptions<Data, Error, Input, OperationName>
+		): void;
+		onError?(
+			error: ClientResponseError,
+			key: Key,
+			config: UseSubscriptionOptions<Data, Error, Input, OperationName>
+		): void;
+	}
+>;
 
 export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
 	<

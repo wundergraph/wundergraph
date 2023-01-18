@@ -8,8 +8,10 @@ export type {
 	LogoutOptions,
 	GraphQLResponse,
 	Headers,
-	SubscriptionRequestOptions,
 	OperationRequestOptions,
+	QueryRequestOptions,
+	MutationRequestOptions,
+	SubscriptionRequestOptions,
 	GraphQLError,
 	ClientConfig,
 	CreateClientConfig,
@@ -22,6 +24,8 @@ export type {
 	ClientOperation,
 	OperationsDefinition,
 	S3ProviderDefinition,
+	HasRequiredInput,
+	WithInput,
 } from './types';
 
 export { Client } from './client';

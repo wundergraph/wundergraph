@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.7.7...@wundergraph/nextjs@0.8.0) (2023-01-17)
+
+### Features
+
+* upgrade to nextjs 13 ([#504](https://github.com/wundergraph/wundergraph/issues/504)) ([45bc431](https://github.com/wundergraph/wundergraph/commit/45bc431243cc61765c2712b03e89818a1bb3d14a)) (@Pagebakers)
+
 ## [0.7.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.7.6...@wundergraph/nextjs@0.7.7) (2022-12-31)
 
 **Note:** Version bump only for package @wundergraph/nextjs

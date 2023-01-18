@@ -2,9 +2,9 @@ import { expectType } from 'tsd';
 import {
 	Client,
 	ClientResponse,
-	OperationRequestOptions,
+	MutationRequestOptions,
+	QueryRequestOptions,
 	SubscriptionRequestOptions,
-	UploadRequestOptions,
 	UploadResponse,
 	User,
 } from '../src/client';
@@ -20,7 +20,7 @@ const client = new Client({
 // Queries
 
 expectType<Promise<ClientResponse<{ id: string }>>>(
-	client.query<OperationRequestOptions<'Weather', { lat: number }>, { id: string }>({
+	client.query<QueryRequestOptions<'Weather', { lat: number }>, { id: string }>({
 		operationName: 'Weather',
 		input: { lat: 1 },
 	})
@@ -36,7 +36,7 @@ expectType<Promise<ClientResponse<any>>>(
 // Mutation
 
 expectType<Promise<ClientResponse<{ id: string }>>>(
-	client.mutate<OperationRequestOptions<'Weather', { lat: number }>, { id: string }>({
+	client.mutate<MutationRequestOptions<'Weather', { lat: number }>, { id: string }>({
 		operationName: 'Weather',
 		input: { lat: 1 },
 	})

@@ -106,6 +106,7 @@ func TestNode(t *testing.T) {
 			Operations: []*wgpb.Operation{
 				{
 					Name:          "MyReviews",
+					Path:          "MyReviews",
 					Content:       federationTestQuery,
 					OperationType: wgpb.OperationType_QUERY,
 					HooksConfiguration: &wgpb.OperationHooksConfiguration{
@@ -120,6 +121,7 @@ func TestNode(t *testing.T) {
 				},
 				{
 					Name:          "TopProducts",
+					Path:          "TopProducts",
 					Content:       topProductsQuery,
 					OperationType: wgpb.OperationType_QUERY,
 					HooksConfiguration: &wgpb.OperationHooksConfiguration{
@@ -259,6 +261,7 @@ func TestInMemoryCache(t *testing.T) {
 			Operations: []*wgpb.Operation{
 				{
 					Name:    "TopProducts",
+					Path:    "TopProducts",
 					Content: topProductsQuery,
 					CacheConfig: &wgpb.OperationCacheConfig{
 						Enable:               true,

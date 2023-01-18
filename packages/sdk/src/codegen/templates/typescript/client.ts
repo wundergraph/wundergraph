@@ -9,13 +9,13 @@ import { handlebarTemplate } from './client.template';
 import { Template, TemplateOutputFile } from '../../index';
 import { formatTypeScript } from './';
 import { OperationType } from '@wundergraph/protobuf';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
 import templates from '../index';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const allOperations = allQueries(config.application, false);
 		const _liveQueries = liveQueries(config.application, false);

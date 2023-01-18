@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.130.2",
+  "version": "0.131.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -22,6 +22,10 @@
     "./server": {
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"
+    },
+    "./operations": {
+      "types": "./dist/operations/index.d.ts",
+      "default": "./dist/operations/index.js"
     },
     "./internal/logger": {
       "types": "./dist/logger/index.d.ts",
@@ -45,6 +49,9 @@
       ],
       "server": [
         "./dist/server"
+      ],
+      "operations": [
+        "./dist/operations"
       ],
       "internal/logger": [
         "./dist/logger"
@@ -108,6 +115,7 @@
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.1",
     "tsd": "^0.24.1",
+    "type-fest": "^3.5.2",
     "typescript": "^4.8.2"
   },
   "dependencies": {
@@ -115,8 +123,8 @@
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
-    "@wundergraph/protobuf": "workspace:^0.100.0",
-    "@wundergraph/wunderctl": "workspace:>=0.125.0",
+    "@wundergraph/protobuf": "workspace:^0.101.0",
+    "@wundergraph/wunderctl": "workspace:>=0.126.1",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",

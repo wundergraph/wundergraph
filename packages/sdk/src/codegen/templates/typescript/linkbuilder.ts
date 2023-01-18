@@ -1,5 +1,5 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { queryTypeFields, typesInfo } from '../../../linkbuilder';
 import { buildSchema } from 'graphql';
 import Handlebars from 'handlebars';
@@ -7,7 +7,7 @@ import { formatTypeScript } from './index';
 import { template } from './linkbuilder.template';
 
 export class TypeScriptLinkBuilder implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
 		const schema = buildSchema(config.application.EngineConfiguration.Schema);
 		const fields = queryTypeFields(schema);

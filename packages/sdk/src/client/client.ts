@@ -5,6 +5,7 @@ import {
 	GraphQLResponse,
 	Headers,
 	LogoutOptions,
+	MutationRequestOptions,
 	OperationRequestOptions,
 	QueryRequestOptions,
 	SubscriptionEventHandler,
@@ -224,7 +225,7 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async mutate<RequestOptions extends OperationRequestOptions, ResponseData = any>(
+	public async mutate<RequestOptions extends MutationRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
 		const url = this.addUrlParams(
