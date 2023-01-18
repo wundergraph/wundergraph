@@ -1,6 +1,8 @@
 package helpers
 
-import "strings"
+import (
+	"strconv"
+)
 
 type TelemetryAnnotation int
 
@@ -10,41 +12,16 @@ const (
 )
 
 const (
-	telemetryKey       = "telemetry"
-	telemetryFieldsSep = "|"
+	telemetryAnnotationsKey = "telemetry"
 )
-
-func (t TelemetryAnnotation) String() string {
-	var values []string
-	if t&TelemetryAnnotationCommand != 0 {
-		values = append(values, "command")
-	}
-	if t&TelemetryAnnotationDataSources != 0 {
-		values = append(values, "dataSources")
-	}
-	return strings.Join(values, telemetryFieldsSep)
-}
 
 func TelemetryAnnotations(annotations TelemetryAnnotation) map[string]string {
 	return map[string]string{
-		telemetryKey: annotations.String(),
+		telemetryAnnotationsKey: strconv.Itoa(int(annotations)),
 	}
 }
 
 func HasTelemetryAnnotations(annotations TelemetryAnnotation, values map[string]string) bool {
-	telemetryValues := strings.Split(values[telemetryKey], telemetryFieldsSep)
-	requested := strings.Split(annotations.String(), telemetryFieldsSep)
-	for _, req := range requested {
-		found := false
-		for _, val := range telemetryValues {
-			if val == req {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-	return true
+	val, _ := strconv.Atoi(values[telemetryAnnotationsKey])
+	return val&int(annotations) != 0
 }
