@@ -912,6 +912,15 @@ const navigation = [
 		],
 	},
 	{
+		title: 'TypeScript Operations Reference',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/typescript-operations-reference',
+			},
+		],
+	},
+	{
 		title: 'wundergraph.operations.ts Reference',
 		links: [
 			{
