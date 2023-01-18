@@ -38,6 +38,7 @@ Learn how to use and configure WunderGraph. {% .lead %}
 {% quick-link title="Directives reference" icon="directives" href="/docs/directives-reference" description="Learn how to use Directives to configure Operations" /%}
 {% quick-link title="wundergraph.config.ts reference" icon="config" href="/docs/wundergraph-config-ts-reference" description="Learn to easily configure your WunderGraph applications" /%}
 {% quick-link title="wundergraph.server.ts reference" icon="server" href="/docs/wundergraph-server-ts-reference" description="Learn to easily customize your WunderGraph server" /%}
+{% quick-link title="TypeScript Operations reference" icon="operations" href="/docs/typescript-operations-reference" description="Write custom TypeScript Operations" /%}
 {% quick-link title="wundergraph.operations.ts reference" icon="operations" href="/docs/wundergraph-operations-ts-reference" description="Customize your Operations" /%}
 
 {% /quick-links %}

@@ -305,6 +305,10 @@ const navigation = [
 				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
 			},
 			{
+				title: 'TypeScript Operations',
+				href: '/docs/features/typescript-operations',
+			},
+			{
 				title: 'API Namespacing',
 				href: '/docs/features/api-namespacing',
 			},
@@ -908,6 +912,15 @@ const navigation = [
 			{
 				title: 'Custom GraphQL Servers',
 				href: '/docs/wundergraph-server-ts-reference/custom-graphql-servers',
+			},
+		],
+	},
+	{
+		title: 'TypeScript Operations Reference',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/typescript-operations-reference',
 			},
 		],
 	},
