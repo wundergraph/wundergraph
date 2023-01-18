@@ -24,7 +24,7 @@ const Countdown: React.FC = () => {
 	);
 };
 
-const SWR = () => {
+const Subscription = () => {
 	return (
 		<div className={styles.container}>
 			<Head>
@@ -62,4 +62,4 @@ const SWR = () => {
 	);
 };
 
-export default SWR;
+export default Subscription;
