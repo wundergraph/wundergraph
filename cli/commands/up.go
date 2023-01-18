@@ -17,8 +17,10 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/stack"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 const UpCmdName = "up"
@@ -236,10 +238,24 @@ var upCmd = &cobra.Command{
 			)
 		}
 
+		// hardcode the config file for now
+		stackRunner, err := stack.NewRunner(ctx, &stack.Config{
+			Log:                  log,
+			WunderGraphDir:       wunderGraphDir,
+			IsFileStorageEnabled: true,
+		})
+		if err != nil {
+			log.Error("failed to initialize stack runner", zap.Error(err))
+		} else {
+			if err := stackRunner.Run(ctx); err != nil {
+				log.Error("failed to run stack", zap.Error(err))
+			}
+		}
+
 		// only start watching in the builder once the initial config was built and written to the filesystem
 		go configBundler.Watch(ctx)
 
-		configFileChangeChan := make(chan struct{})
+		configFileChangeChan := make(chan *node.WunderNodeConfig)
 		configWatcher := watcher.NewWatcher("config", &watcher.Config{
 			WatchPaths: []*watcher.WatchPath{
 				{Path: configJsonPath},
@@ -248,7 +264,23 @@ var upCmd = &cobra.Command{
 
 		go func() {
 			err := configWatcher.Watch(ctx, func(paths []string) error {
-				configFileChangeChan <- struct{}{}
+				wunderNodeConfig, err := node.ReadAndCreateConfig(configJsonPath, log, func(cfg *node.WunderNodeConfig) {
+
+					// just an example until we have new config spec
+					for s, resource := range stackRunner.Resources {
+						if s == stack.S3 {
+							for _, s3Cfg := range cfg.Api.S3UploadConfiguration {
+								s3Cfg.Endpoint.StaticVariableContent = resource.GetHostPort(stack.GetDefaultS3PortID())
+								s3Cfg.Endpoint.Kind = wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE
+							}
+						}
+					}
+				})
+				if err != nil {
+					return err
+				}
+
+				configFileChangeChan <- wunderNodeConfig
 				return nil
 			})
 			if err != nil {
@@ -261,10 +293,8 @@ var upCmd = &cobra.Command{
 
 		n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 		go func() {
-			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
 			err := n.StartBlocking(
 				node.WithConfigFileChange(configFileChangeChan),
-				node.WithFileSystemConfig(configFile),
 				node.WithDebugMode(rootFlags.DebugMode),
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
@@ -279,9 +309,29 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
+		// lookup into config do we have a stack for s3
+		// if we do - reconfigure stack runner
+
+		wunderNodeConfig, err := node.ReadAndCreateConfig(configJsonPath, log, func(cfg *node.WunderNodeConfig) {
+			// now we have port - write it to the config
+
+			// just an example until we have new config spec
+			for s, resource := range stackRunner.Resources {
+				if s == stack.S3 {
+					for _, s3Cfg := range cfg.Api.S3UploadConfiguration {
+						s3Cfg.Endpoint.StaticVariableContent = resource.GetHostPort(stack.GetDefaultS3PortID())
+						s3Cfg.Endpoint.Kind = wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE
+					}
+				}
+			}
+		})
+		if err != nil {
+			return err
+		}
+
 		// trigger server reload after initial config build
 		// because no fs event is fired as build is already done
-		configFileChangeChan <- struct{}{}
+		configFileChangeChan <- wunderNodeConfig
 
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()

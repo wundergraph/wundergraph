@@ -1,10 +1,15 @@
 package node
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/wundergraph/wundergraph/pkg/files"
+	"go.uber.org/zap"
 
 	"github.com/docker/go-units"
 
@@ -32,7 +37,9 @@ type WunderNodeConfig struct {
 	Api    *apihandler.Api
 }
 
-func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig, error) {
+type AppendConfig func(cfg *WunderNodeConfig)
+
+func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration, modifiers ...AppendConfig) (*WunderNodeConfig, error) {
 	const (
 		defaultTimeout = 10 * time.Second
 	)
@@ -41,7 +48,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 
 	logLevel, err := logging.FindLogLevel(logLevelStr)
 	if err != nil {
-		return WunderNodeConfig{}, err
+		return nil, err
 	}
 
 	listener := &apihandler.Listener{
@@ -61,7 +68,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		if inMemoryCacheConfig != "" {
 			cacheSize, err = units.RAMInBytes(inMemoryCacheConfig)
 			if err != nil {
-				return WunderNodeConfig{}, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
+				return nil, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
 			}
 		}
 		if cacheSize > 0 {
@@ -74,7 +81,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		}
 	}
 
-	config := WunderNodeConfig{
+	config := &WunderNodeConfig{
 		Api: &apihandler.Api{
 			PrimaryHost:           fmt.Sprintf("%s:%d", listener.Host, listener.Port),
 			Hosts:                 loadvariable.Strings(graphConfig.Api.AllowedHostNames),
@@ -107,5 +114,41 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		},
 	}
 
+	for _, modifier := range modifiers {
+		modifier(config)
+	}
+
 	return config, nil
+}
+
+func ReadAndCreateConfig(configFilePath string, log *zap.Logger, modifiers ...AppendConfig) (*WunderNodeConfig, error) {
+	if !files.FileExists(configFilePath) {
+		return nil, fmt.Errorf("could not find configuration file: %s", configFilePath)
+	}
+
+	data, err := os.ReadFile(configFilePath)
+	if err != nil {
+		log.Error("Failed to read file", zap.String("filePath", configFilePath), zap.Error(err))
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		log.Error("Config file is empty", zap.String("filePath", configFilePath))
+		return nil, errors.New("config file is empty")
+	}
+
+	var graphConfig wgpb.WunderGraphConfiguration
+	err = json.Unmarshal(data, &graphConfig)
+	if err != nil {
+		log.Error("Failed to unmarshal", zap.String("filePath", configFilePath), zap.Error(err))
+		return nil, errors.New("failed to unmarshal config file")
+	}
+
+	wunderNodeConfig, err := CreateConfig(&graphConfig, modifiers...)
+	if err != nil {
+		log.Error("Failed to create config", zap.String("filePath", configFilePath), zap.Error(err))
+		return nil, err
+	}
+
+	return wunderNodeConfig, nil
 }

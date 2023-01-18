@@ -2,9 +2,6 @@ package commands
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -17,7 +14,6 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
-	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 var nodeCmd = &cobra.Command{
@@ -108,31 +104,8 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 	}
 
 	configFile := filepath.Join(n.WundergraphDir, "generated", configJsonFilename)
-	if !files.FileExists(configFile) {
-		return fmt.Errorf("could not find configuration file: %s", configFile)
-	}
-
-	data, err := os.ReadFile(configFile)
+	wunderNodeConfig, err := node.ReadAndCreateConfig(configFile, log)
 	if err != nil {
-		log.Error("Failed to read file", zap.String("filePath", configFile), zap.Error(err))
-		return err
-	}
-
-	if len(data) == 0 {
-		log.Error("Config file is empty", zap.String("filePath", configFile))
-		return errors.New("config file is empty")
-	}
-
-	var graphConfig wgpb.WunderGraphConfiguration
-	err = json.Unmarshal(data, &graphConfig)
-	if err != nil {
-		log.Error("Failed to unmarshal", zap.String("filePath", configFile), zap.Error(err))
-		return errors.New("failed to unmarshal config file")
-	}
-
-	wunderNodeConfig, err := node.CreateConfig(&graphConfig)
-	if err != nil {
-		log.Error("Failed to create config", zap.String("filePath", configFile), zap.Error(err))
 		return err
 	}
 

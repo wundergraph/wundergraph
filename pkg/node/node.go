@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
@@ -40,7 +39,6 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Lo
 	return &Node{
 		info:           info,
 		ctx:            ctx,
-		configCh:       make(chan WunderNodeConfig),
 		pool:           pool.New(),
 		log:            log.With(zap.String("component", "@wundergraph/node")),
 		WundergraphDir: wundergraphDir,
@@ -59,7 +57,7 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Lo
 type Node struct {
 	ctx            context.Context
 	info           BuildInfo
-	configCh       chan WunderNodeConfig
+	configCh       chan *WunderNodeConfig
 	builder        *apihandler.Builder
 	server         *http.Server
 	pool           *pool.Pool
@@ -71,11 +69,10 @@ type Node struct {
 
 type options struct {
 	staticConfig        *WunderNodeConfig
-	fileSystemConfig    *string
 	enableDebugMode     bool
 	forceHttpsRedirects bool
 	enableIntrospection bool
-	configFileChange    chan struct{}
+	configFileChange    chan *WunderNodeConfig
 	globalRateLimit     struct {
 		enable      bool
 		requests    int
@@ -101,9 +98,9 @@ func WithHooksServerHealthCheck(timeout time.Duration) Option {
 	}
 }
 
-func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
+func WithStaticWunderNodeConfig(config *WunderNodeConfig) Option {
 	return func(options *options) {
-		options.staticConfig = &config
+		options.staticConfig = config
 	}
 }
 
@@ -142,15 +139,9 @@ func WithGlobalRateLimit(requests int, perDuration time.Duration) Option {
 	}
 }
 
-func WithFileSystemConfig(configFilePath string) Option {
+func WithConfigFileChange(cfgChan chan *WunderNodeConfig) Option {
 	return func(options *options) {
-		options.fileSystemConfig = &configFilePath
-	}
-}
-
-func WithConfigFileChange(event chan struct{}) Option {
-	return func(options *options) {
-		options.configFileChange = event
+		options.configFileChange = cfgChan
 	}
 }
 
@@ -198,7 +189,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		n.log.Info("Api config: static")
 
 		g.Go(func() error {
-			err := n.startServer(*options.staticConfig)
+			err := n.startServer(options.staticConfig)
 			if err != nil {
 				n.log.Error("could not start a node",
 					zap.Error(err),
@@ -207,33 +198,20 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			}
 			return nil
 		})
-	case options.fileSystemConfig != nil:
-		n.log.Info("Api config: file polling",
-			zap.String("config_file_name", *options.fileSystemConfig),
-		)
-		if options.configFileChange != nil {
-			g.Go(func() error {
-				err := n.reconfigureOnConfigUpdate()
-				if err != nil {
-					n.log.Error("could not reconfigure config update",
-						zap.Error(err),
-					)
-					return err
-				}
-				return nil
-			})
+	case options.configFileChange != nil:
+		n.configCh = options.configFileChange
+		n.log.Info("Api config: file polling")
 
-			g.Go(func() error {
-				err := n.filePollConfig(*options.fileSystemConfig)
-				if err != nil {
-					n.log.Error("could not load config",
-						zap.Error(err),
-					)
-					return err
-				}
-				return nil
-			})
-		}
+		g.Go(func() error {
+			err := n.reconfigureOnConfigUpdate()
+			if err != nil {
+				n.log.Error("could not reconfigure config update",
+					zap.Error(err),
+				)
+				return err
+			}
+			return nil
+		})
 	default:
 		return errors.New("could not start a node. no config present")
 	}
@@ -361,7 +339,7 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 	return healthCheck, true
 }
 
-func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
+func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	logLevel := nodeConfig.Api.Options.Logging.Level
 	if n.options.enableDebugMode {
 		logLevel = zapcore.DebugLevel
@@ -633,48 +611,4 @@ func (n *Node) reconfigureOnConfigUpdate() error {
 			return g.Wait()
 		}
 	}
-}
-
-func (n *Node) filePollConfig(filePath string) error {
-	for {
-		select {
-		case <-n.ctx.Done():
-			return nil
-		case _, ok := <-n.options.configFileChange:
-			if !ok {
-				return nil
-			}
-			err := n.reloadFileConfig(filePath)
-			if err != nil {
-				return err
-			}
-		}
-	}
-}
-
-func (n *Node) reloadFileConfig(filePath string) error {
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		n.log.Error("reloadFileConfig ioutil.ReadFile", zap.String("filePath", filePath), zap.Error(err))
-		return err
-	}
-	if len(data) == 0 {
-		return errors.New("empty config file")
-	}
-	var graphConfig wgpb.WunderGraphConfiguration
-	err = json.Unmarshal(data, &graphConfig)
-	if err != nil {
-		n.log.Error("reloadFileConfig json.Unmarshal", zap.String("filePath", filePath), zap.Error(err))
-		return err
-	}
-
-	config, err := CreateConfig(&graphConfig)
-	if err != nil {
-		n.log.Error("reloadFileConfig CreateConfig", zap.String("filePath", filePath), zap.Error(err))
-		return err
-	}
-
-	n.configCh <- config
-
-	return nil
 }
