@@ -16,6 +16,36 @@ const (
 	urlHashTag = "urlHash"
 )
 
+func isPrivateHost(host string) bool {
+	privateIPBlocks := []string{
+		"127.0.0.0/8",    // IPv4 loopback
+		"10.0.0.0/8",     // RFC1918
+		"172.16.0.0/12",  // RFC1918
+		"192.168.0.0/16", // RFC1918
+		"169.254.0.0/16", // RFC3927 link-local
+		"::1/128",        // IPv6 loopback
+		"fe80::/10",      // IPv6 link-local
+		"fc00::/7",       // IPv6 unique local addr
+	}
+	addrs, _ := net.LookupHost(host)
+	for _, addr := range addrs {
+		ip := net.ParseIP(addr)
+		if ip == nil {
+			continue
+		}
+		if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+			return true
+		}
+		for _, blockAddr := range privateIPBlocks {
+			_, block, err := net.ParseCIDR(blockAddr)
+			if err == nil && block.Contains(ip) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func dataSourceMetric(dataSourceName string, urlVariable *wgpb.ConfigurationVariable) (*Metric, error) {
 	metric := NewDataSourceMetric(dataSourceName)
 	if urlVariable != nil {
@@ -34,8 +64,8 @@ func dataSourceMetric(dataSourceName string, urlVariable *wgpb.ConfigurationVari
 				if host == "" {
 					host = u.Host
 				}
-				if host == "localhost" {
-					if err := metric.AddTag("localhost", "true"); err != nil {
+				if isPrivateHost(host) {
+					if err := metric.AddTag("isPrivate", "true"); err != nil {
 						return nil, err
 					}
 				}
