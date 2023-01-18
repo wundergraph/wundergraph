@@ -79,7 +79,7 @@ func NewClient(address string, clientInfo *MetricClientInfo, opts ...ClientOptio
 		gitRepoURLHash, err := gitRepoURLHash()
 		if err != nil {
 			if c.log != nil && c.debug {
-				c.log.Debug("error retrieving gitRepoURLHash: %w", zap.Error(err))
+				c.log.Debug("error retrieving gitRepoURLHash", zap.Error(err))
 			}
 		}
 		c.clientInfo.GitRepoURLHash = gitRepoURLHash
