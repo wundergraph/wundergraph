@@ -51,7 +51,7 @@ func TestSendUsageMetric(t *testing.T) {
 	defer testServer.Close()
 
 	client := NewClient(testServer.URL,
-		MetricClientInfo{
+		&MetricClientInfo{
 			OsName:           "LINUX",
 			CpuCount:         1,
 			IsCI:             false,
@@ -61,7 +61,7 @@ func TestSendUsageMetric(t *testing.T) {
 		WithTimeout(2*time.Second),
 	)
 
-	err := client.Send([]Metric{NewUsageMetric("foo")})
+	err := client.Send([]*Metric{NewUsageMetric("foo")})
 
 	assert.NoError(t, err)
 }
@@ -88,7 +88,7 @@ func TestSendFailOnGraphQLError(t *testing.T) {
 	defer testServer.Close()
 
 	client := NewClient(testServer.URL,
-		MetricClientInfo{
+		&MetricClientInfo{
 			OsName:           "LINUX",
 			CpuCount:         1,
 			IsCI:             false,
@@ -98,7 +98,7 @@ func TestSendFailOnGraphQLError(t *testing.T) {
 		WithTimeout(2*time.Second),
 	)
 
-	err := client.Send([]Metric{NewUsageMetric("foo")})
+	err := client.Send([]*Metric{NewUsageMetric("foo")})
 
 	assert.Error(t, err, "Expected error on graphql error")
 }
@@ -137,7 +137,7 @@ func TestSendDurationMetric(t *testing.T) {
 	defer testServer.Close()
 
 	client := NewClient(testServer.URL,
-		MetricClientInfo{
+		&MetricClientInfo{
 			OsName:           "LINUX",
 			CpuCount:         1,
 			IsCI:             false,
@@ -151,7 +151,7 @@ func TestSendDurationMetric(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	err := client.Send([]Metric{m()})
+	err := client.Send([]*Metric{m()})
 
 	assert.NoError(t, err)
 }
