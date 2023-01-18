@@ -32,16 +32,17 @@ const (
 )
 
 var (
-	BuildInfo             node.BuildInfo
-	GitHubAuthDemo        node.GitHubAuthDemo
-	TelemetryClient       telemetry.Client
-	DotEnvFile            string
-	log                   *zap.Logger
-	serviceToken          string
-	cmdDurationMetric     telemetry.DurationMetric
-	_wunderGraphDirConfig string
-	disableCache          bool
-	clearCache            bool
+	BuildInfo                     node.BuildInfo
+	GitHubAuthDemo                node.GitHubAuthDemo
+	TelemetryClient               telemetry.Client
+	DotEnvFile                    string
+	log                           *zap.Logger
+	serviceToken                  string
+	cmdDurationMetric             telemetry.DurationMetric
+	_wunderGraphDirConfig         string
+	disableCache                  bool
+	prettyGraphQLValidationErrors bool
+	clearCache                    bool
 
 	rootFlags helpers.RootFlags
 
@@ -226,4 +227,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
 }

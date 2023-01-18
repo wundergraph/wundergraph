@@ -1,7 +1,7 @@
 import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
 import { ResolvedWunderGraphConfig } from '../configure';
-import { ConfigurationVariableKind, OperationType } from '@wundergraph/protobuf';
+import { ConfigurationVariableKind, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { mapInputVariable } from '../configure/variables';
 
 class FakeTemplate implements Template {
@@ -123,8 +123,10 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 					Operations: [
 						{
 							Name: 'MyReviews',
+							PathName: 'MyReviews',
 							Content: 'query MyReviews {\n  me {\n    name\n    reviews {\n      id\n      body\n    }\n  }\n}',
 							OperationType: OperationType.QUERY,
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 							VariablesSchema: {
 								type: 'object',
 								properties: {},
@@ -215,9 +217,11 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 						{
 							Name: 'CreatePet',
+							PathName: 'CreatePet',
 							Content:
 								'mutation CreatePet($petInput: PetInput!) {\n  postPets(petInput: $petInput) {\n    name\n  }\n}',
 							OperationType: OperationType.MUTATION,
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 							VariablesSchema: {
 								type: 'object',
 								properties: {
@@ -357,8 +361,10 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 						{
 							Name: 'NewPets',
+							PathName: 'NewPets',
 							Content: 'subscription NewPets {\n  newPets {\n    name\n  }\n}',
 							OperationType: OperationType.SUBSCRIPTION,
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 							VariablesSchema: {
 								type: 'object',
 								properties: {},

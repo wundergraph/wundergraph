@@ -1,5 +1,5 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedApplication, ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig, ResolvedApplication } from '../../../configure';
 import { formatTypeScript } from './index';
 import Handlebars from 'handlebars';
 import { GraphQLOperation } from '../../../graphql/operations';
@@ -10,7 +10,7 @@ import { template as hooksTemplate } from './react.hooks.template';
 import { hasInput, isNotInternal, queries as allQueries } from './helpers';
 
 export class TypescriptReactProvider implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(providerTemplate);
 		const allOperations = allQueries(config.application, false);
 		const content = tmpl({
@@ -28,7 +28,7 @@ export class TypescriptReactProvider implements Template {
 }
 
 export class TypescriptReactNativeProvider implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(reactNativeProviderTemplate);
 		const allOperations = allQueries(config.application, false);
 		const content = tmpl({
@@ -52,7 +52,7 @@ export class TypescriptReactHooks implements Template {
 
 	private readonly reactNative: boolean;
 
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(hooksTemplate);
 		const _imports = imports(config.application);
 		_imports.push(...queryResponseImports(config.application));

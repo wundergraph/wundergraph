@@ -1,5 +1,5 @@
-import { GraphQLResponseError } from './GraphQLResponseError';
-import { ResponseError } from './ResponseError';
+import { ClientResponseError } from './ClientResponseError';
+import type { RequiredKeysOf, SetRequired } from 'type-fest';
 
 export type Headers = { [key: string]: string };
 
@@ -48,6 +48,7 @@ export interface ClientConfig {
 	customFetch?: (input: RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 	extraHeaders?: Headers;
 	operationMetadata?: OperationMetadata;
+	csrfEnabled?: boolean;
 }
 
 type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata';
@@ -68,7 +69,7 @@ export interface GraphQLError {
 
 export interface ClientResponse<ResponseData = any> {
 	data?: ResponseData;
-	error?: Error | GraphQLResponseError | ResponseError;
+	error?: ClientResponseError;
 }
 
 export interface GraphQLResponse<
@@ -88,20 +89,25 @@ export interface OperationRequestOptions<
 	input?: Input;
 }
 
-export interface QueryRequestOptions<
+export type QueryRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
-> extends OperationRequestOptions<OperationName, Input> {
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
 	subscribeOnce?: Boolean;
-}
+};
 
-export interface SubscriptionRequestOptions<
+export type MutationRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
-> extends OperationRequestOptions<OperationName, Input> {
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>>;
+
+export type SubscriptionRequestOptions<
+	OperationName extends string = any,
+	Input extends object | undefined = object | undefined
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
 	liveQuery?: Boolean;
 	subscribeOnce?: Boolean;
-}
+};
 
 export interface SubscriptionResult {
 	streamState: 'streaming' | 'stopped' | 'restarting';
@@ -147,5 +153,30 @@ export interface User<Role extends string = string> {
 }
 
 export interface LogoutOptions {
+	/**
+	 * Wether to log out the user from the OpenID Connect provider.
+	 * Some providers might require the user to visit a URL. See
+	 * the redirect field.
+	 */
 	logoutOpenidConnectProvider?: boolean;
+	/**
+	 * Custom function for redirecting the client to the log out
+	 * URL. If not provided, window.location.href is updated.
+	 */
+	redirect?: (url: string) => Promise<boolean>;
+	/**
+	 * Callback to be run after a succesful logout
+	 * */
+	after?: () => void;
 }
+
+export type HasRequiredInput<Input extends object | undefined> = Input extends object
+	? RequiredKeysOf<Input> extends never
+		? false
+		: true
+	: false;
+
+export type WithInput<
+	Input extends object | undefined,
+	Options extends { input?: Input }
+> = HasRequiredInput<Input> extends true ? SetRequired<Options, 'input'> : Options;

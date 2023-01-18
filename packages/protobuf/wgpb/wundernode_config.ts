@@ -58,6 +58,7 @@ export function logLevelToJSON(object: LogLevel): string {
 export enum AuthProviderKind {
   AuthProviderGithub = 0,
   AuthProviderOIDC = 1,
+  AuthProviderAuth0 = 2,
 }
 
 export function authProviderKindFromJSON(object: any): AuthProviderKind {
@@ -68,6 +69,9 @@ export function authProviderKindFromJSON(object: any): AuthProviderKind {
     case 1:
     case "AuthProviderOIDC":
       return AuthProviderKind.AuthProviderOIDC;
+    case 2:
+    case "AuthProviderAuth0":
+      return AuthProviderKind.AuthProviderAuth0;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum AuthProviderKind");
   }
@@ -79,6 +83,8 @@ export function authProviderKindToJSON(object: AuthProviderKind): string {
       return "AuthProviderGithub";
     case AuthProviderKind.AuthProviderOIDC:
       return "AuthProviderOIDC";
+    case AuthProviderKind.AuthProviderAuth0:
+      return "AuthProviderAuth0";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum AuthProviderKind");
   }
@@ -116,6 +122,35 @@ export function apiCacheKindToJSON(object: ApiCacheKind): string {
       return "REDIS_CACHE";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ApiCacheKind");
+  }
+}
+
+export enum OperationExecutionEngine {
+  ENGINE_GRAPHQL = 0,
+  ENGINE_NODEJS = 1,
+}
+
+export function operationExecutionEngineFromJSON(object: any): OperationExecutionEngine {
+  switch (object) {
+    case 0:
+    case "ENGINE_GRAPHQL":
+      return OperationExecutionEngine.ENGINE_GRAPHQL;
+    case 1:
+    case "ENGINE_NODEJS":
+      return OperationExecutionEngine.ENGINE_NODEJS;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum OperationExecutionEngine");
+  }
+}
+
+export function operationExecutionEngineToJSON(object: OperationExecutionEngine): string {
+  switch (object) {
+    case OperationExecutionEngine.ENGINE_GRAPHQL:
+      return "ENGINE_GRAPHQL";
+    case OperationExecutionEngine.ENGINE_NODEJS:
+      return "ENGINE_NODEJS";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum OperationExecutionEngine");
   }
 }
 
@@ -649,6 +684,8 @@ export interface Operation {
   internal: boolean;
   interpolationVariablesSchema: string;
   postResolveTransformations: PostResolveTransformation[];
+  engine: OperationExecutionEngine;
+  path: string;
 }
 
 export interface PostResolveTransformation {
@@ -1512,6 +1549,8 @@ function createBaseOperation(): Operation {
     internal: false,
     interpolationVariablesSchema: "",
     postResolveTransformations: [],
+    engine: 0,
+    path: "",
   };
 }
 
@@ -1546,6 +1585,8 @@ export const Operation = {
       postResolveTransformations: Array.isArray(object?.postResolveTransformations)
         ? object.postResolveTransformations.map((e: any) => PostResolveTransformation.fromJSON(e))
         : [],
+      engine: isSet(object.engine) ? operationExecutionEngineFromJSON(object.engine) : 0,
+      path: isSet(object.path) ? String(object.path) : "",
     };
   },
 
@@ -1583,6 +1624,8 @@ export const Operation = {
     } else {
       obj.postResolveTransformations = [];
     }
+    message.engine !== undefined && (obj.engine = operationExecutionEngineToJSON(message.engine));
+    message.path !== undefined && (obj.path = message.path);
     return obj;
   },
 
@@ -1617,6 +1660,8 @@ export const Operation = {
     message.postResolveTransformations = object.postResolveTransformations?.map((e) =>
       PostResolveTransformation.fromPartial(e)
     ) || [];
+    message.engine = object.engine ?? 0;
+    message.path = object.path ?? "";
     return message;
   },
 };

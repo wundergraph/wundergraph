@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.101.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.100.0...@wundergraph/protobuf@0.101.0) (2023-01-17)
+
+### Features
+
+* add support for disconnecting from Auth0 ([#525](https://github.com/wundergraph/wundergraph/issues/525)) ([7465fb2](https://github.com/wundergraph/wundergraph/commit/7465fb21a3618924c7dfb59a6a2f94c7d740f0f8)) (@fiam)
+
 ## [0.100.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.99.0...@wundergraph/protobuf@0.100.0) (2022-12-06)
 
 ### Features
