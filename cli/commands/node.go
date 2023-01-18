@@ -15,9 +15,9 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -33,7 +33,7 @@ var nodeStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl node start
 `,
-	Annotations: helpers.TelemetryAnnotations(helpers.TelemetryAnnotationCommand),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
 var (
@@ -27,7 +27,7 @@ var startCmd = &cobra.Command{
 	Use:         "start",
 	Short:       "Starts WunderGraph in production mode",
 	Long:        `Start runs WunderGraph Node and Server as a single process in production mode`,
-	Annotations: helpers.TelemetryAnnotations(helpers.TelemetryAnnotationCommand),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()

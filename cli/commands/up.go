@@ -18,6 +18,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
@@ -31,7 +32,7 @@ var upCmd = &cobra.Command{
 	Use:         UpCmdName,
 	Short:       "Starts WunderGraph in development mode",
 	Long:        "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: helpers.TelemetryAnnotations(helpers.TelemetryAnnotationCommand | helpers.TelemetryAnnotationDataSources),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()

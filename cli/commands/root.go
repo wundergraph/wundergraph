@@ -113,7 +113,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check if we want to track telemetry for this command
-		if rootFlags.Telemetry && helpers.HasTelemetryAnnotations(helpers.TelemetryAnnotationCommand, cmd.Annotations) {
+		if rootFlags.Telemetry && telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
 			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
 
 			metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
@@ -130,7 +130,8 @@ var rootCmd = &cobra.Command{
 				AnonymousID:      viper.GetString("anonymousid"),
 			}
 
-			if helpers.HasTelemetryAnnotations(helpers.TelemetryAnnotationDataSources, cmd.Annotations) {
+			// Check if this command should also send data source related telemetry
+			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
 				wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 				if err != nil {
 					return err

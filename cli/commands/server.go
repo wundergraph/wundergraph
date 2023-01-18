@@ -13,6 +13,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
 var serverCmd = &cobra.Command{
@@ -27,7 +28,7 @@ var serverStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl server start
 `,
-	Annotations: helpers.TelemetryAnnotations(helpers.TelemetryAnnotationCommand),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
