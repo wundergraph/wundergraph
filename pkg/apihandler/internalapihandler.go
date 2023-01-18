@@ -107,6 +107,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 
+	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
+		return nil
+	}
+
 	shared := i.pool.GetShared(context.Background(), i.planConfig, pool.Config{
 		RenameTypeNames: i.renameTypeNames,
 	})
@@ -128,15 +132,14 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
+	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, "", shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
 	apiPath := fmt.Sprintf("/operations/%s", operation.Name)
-	operationType := getOperationType(shared.Doc, i.definition, operation.Name)
 
-	switch operationType {
-	case ast.OperationTypeQuery,
-		ast.OperationTypeMutation:
+	switch operation.OperationType {
+	case wgpb.OperationType_QUERY,
+		wgpb.OperationType_MUTATION:
 		p, ok := preparedPlan.(*plan.SynchronousResponsePlan)
 		if !ok {
 			return nil

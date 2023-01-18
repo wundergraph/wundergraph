@@ -7,8 +7,10 @@ export type {
 	LogoutOptions,
 	GraphQLResponse,
 	Headers,
-	SubscriptionRequestOptions,
 	OperationRequestOptions,
+	QueryRequestOptions,
+	MutationRequestOptions,
+	SubscriptionRequestOptions,
 	GraphQLError,
 	ClientConfig,
 	CreateClientConfig,
@@ -20,9 +22,12 @@ export type {
 	OperationDefinition,
 	ClientOperation,
 	OperationsDefinition,
+	HasRequiredInput,
+	WithInput,
 } from './types';
 
 export { Client } from './client';
 
 export { GraphQLResponseError } from './GraphQLResponseError';
 export { ResponseError } from './ResponseError';
+export type { ClientResponseError } from './ClientResponseError';
