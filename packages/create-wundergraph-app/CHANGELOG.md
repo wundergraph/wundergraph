@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.0](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.3...create-wundergraph-app@0.3.0) (2023-01-17)
+
+### Features
+
+* allow to init wundergraph into existing projects ([#534](https://github.com/wundergraph/wundergraph/issues/534)) ([e561095](https://github.com/wundergraph/wundergraph/commit/e561095992d37891e088b2f774107fbef84d3adf)) (@JivusAyrus)
+
+### Bug Fixes
+
+* filter only folders while listing examples ([#513](https://github.com/wundergraph/wundergraph/issues/513)) ([8619818](https://github.com/wundergraph/wundergraph/commit/8619818c5e1ec1c388261d369b055ff2962b7aab)) (@JivusAyrus)
+
 ## [0.2.3](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.2...create-wundergraph-app@0.2.3) (2022-12-21)
 
 ### Bug Fixes
