@@ -142,21 +142,22 @@ func (m *Metric) Equal(other *Metric) bool {
 	return false
 }
 
+const (
+	invalidTagChars       = ";!^="
+	invalidTagInitialChar = '~'
+)
+
 // AddTag adds a tag to the Metric, validating its name and
 // ensuring there are no duplicates.
 func (m *Metric) AddTag(name string, value string) error {
-	const (
-		invalidChars       = ";!^="
-		invalidInitialChar = "~"
-	)
 	if name == "" {
 		return errors.New("tag name is empty")
 	}
-	if name[0] == invalidInitialChar[0] {
-		return fmt.Errorf("tag name %q starts with invalid initial character %s", name, invalidInitialChar)
+	if name[0] == invalidTagInitialChar {
+		return fmt.Errorf("tag name %q starts with invalid initial character %c", name, invalidTagInitialChar)
 	}
-	if strings.ContainsAny(name, invalidChars) {
-		return fmt.Errorf("tag name %q contains invalid characters (%s)", name, invalidChars)
+	if strings.ContainsAny(name, invalidTagChars) {
+		return fmt.Errorf("tag name %q contains invalid characters (%s)", name, invalidTagChars)
 	}
 	for _, tag := range m.Tags {
 		if tag.Name == name {

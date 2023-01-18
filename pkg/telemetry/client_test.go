@@ -203,8 +203,8 @@ func TestMetricAddTag(t *testing.T) {
 	m := &Metric{"metric", 1, nil}
 
 	assert.NotNil(t, m.AddTag("", tagValue), "should fail to add empty tag")
-	assert.NotNil(t, m.AddTag("~tag", tagValue), "should fail to add invalid tag")
-	for _, ch := range ";!^=" {
+	assert.NotNil(t, m.AddTag(string(invalidTagInitialChar)+"tag", tagValue), "should fail to add invalid tag")
+	for _, ch := range invalidTagChars {
 		assert.NotNil(t, m.AddTag("tag"+string(ch), "value"), "should fail to tag with invalid character")
 	}
 	assert.Nil(t, m.AddTag(tagName, tagValue), "should add tag")
