@@ -8,7 +8,6 @@ import {
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
-// import linkBuilder from "./generated/linkbuilder";
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 const weather = introspect.graphql({

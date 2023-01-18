@@ -1,5 +1,5 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import { OperationType } from '@wundergraph/protobuf';
 import Handlebars from 'handlebars';
@@ -7,7 +7,7 @@ import { template } from './forms.tsx.template';
 import { hasInput, isNotInternal } from './helpers';
 
 export class Forms implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const liveQueries: Operation[] = config.application.Operations.filter(hasInput)
 			.filter(isNotInternal)
 			.filter((op) => op.OperationType === OperationType.QUERY && op.LiveQuery?.enable === true)
