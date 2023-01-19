@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/buger/jsonparser"
 	"github.com/hetiansu5/urlquery"
@@ -26,6 +27,17 @@ var (
 		{"value"},
 	}
 )
+
+// unescapeJSON tries to unescape the given JSON data, returning
+// the original one if the unescaping fails
+func unescapeJSON(in []byte) []byte {
+	// This will only allocate if there are actual escape sequences in the data
+	unescaped, err := jsonparser.Unescape(in, nil)
+	if err != nil {
+		return in
+	}
+	return unescaped
+}
 
 func Do(client *http.Client, ctx context.Context, requestInput []byte, out io.Writer) (err error) {
 	_, err = DoWithStatus(client, ctx, requestInput, out)
@@ -80,33 +92,11 @@ func DoWithStatus(client *http.Client, ctx context.Context, requestInput []byte,
 	}
 
 	if queryParams != nil {
-		query := request.URL.Query()
-		_, err = jsonparser.ArrayEach(queryParams, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			var (
-				parameterName, parameterValue []byte
-			)
-			jsonparser.EachKey(value, func(i int, bytes []byte, valueType jsonparser.ValueType, err error) {
-				switch i {
-				case 0:
-					parameterName = bytes
-				case 1:
-					parameterValue = bytes
-				}
-			}, queryParamsKeys...)
-			if len(parameterName) != 0 && len(parameterValue) != 0 {
-				if bytes.Equal(parameterValue[:1], literal.LBRACK) {
-					_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-						query.Add(string(parameterName), string(value))
-					})
-				} else {
-					query.Add(string(parameterName), string(parameterValue))
-				}
-			}
-		})
+		rawQuery, err := encodeQueryParams(queryParams)
 		if err != nil {
 			return 0, err
 		}
-		request.URL.RawQuery = query.Encode()
+		request.URL.RawQuery = rawQuery
 	}
 
 	response, err := client.Do(request)
@@ -137,6 +127,36 @@ func respBodyReader(req *http.Request, resp *http.Response) (io.ReadCloser, erro
 	}
 
 	return resp.Body, nil
+}
+
+func encodeQueryParams(queryParams []byte) (string, error) {
+	query := make(url.Values)
+	_, err := jsonparser.ArrayEach(queryParams, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		var (
+			parameterName, parameterValue []byte
+		)
+		jsonparser.EachKey(value, func(i int, bytes []byte, valueType jsonparser.ValueType, err error) {
+			switch i {
+			case 0:
+				parameterName = unescapeJSON(bytes)
+			case 1:
+				parameterValue = unescapeJSON(bytes)
+			}
+		}, queryParamsKeys...)
+		if len(parameterName) != 0 && len(parameterValue) != 0 {
+			if bytes.Equal(parameterValue[:1], literal.LBRACK) {
+				_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+					query.Add(string(parameterName), string(value))
+				})
+			} else {
+				query.Add(string(parameterName), string(parameterValue))
+			}
+		}
+	})
+	if err != nil {
+		return "", err
+	}
+	return query.Encode(), nil
 }
 
 const (
