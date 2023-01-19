@@ -5,7 +5,7 @@ import Highlight, { defaultProps, Language } from 'prism-react-renderer'
 import copy from 'copy-to-clipboard'
 import { Card, CardProps } from './Card'
 import clsx from 'clsx'
-import { CheckIcon, ClipboardCopyIcon } from '@heroicons/react/solid'
+import { CheckIcon, ClipboardIcon } from '@heroicons/react/24/solid'
 
 export type CodeSnippet = {
 	filename: string
@@ -69,7 +69,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({
 								className="h-5 w-5 flex-shrink-0 text-slate-300 dark:text-slate-300"
 								aria-hidden="true"
 							>
-								{!copied ? <ClipboardCopyIcon /> : <CheckIcon />}
+								{!copied ? <ClipboardIcon /> : <CheckIcon />}
 							</button>
 						</div>
 					)}

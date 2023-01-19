@@ -34,7 +34,7 @@ importers:
       '@docsearch/react': ^3.1.1
       '@giscus/react': 2.2.0
       '@headlessui/react': ^1.6.5
-      '@heroicons/react': ^1.0.6
+      '@heroicons/react': ^2.0.13
       '@markdoc/markdoc': ^0.1.3
       '@markdoc/next.js': ^0.1.7-0
       '@radix-ui/react-scroll-area': ^0.1.5-rc.44
@@ -68,7 +68,7 @@ importers:
       '@docsearch/react': 3.3.0_knhnagtyfncgg2hpin7s37uixq
       '@giscus/react': 2.2.0_biqbaboplfbrettd7655fr4n2y
       '@headlessui/react': 1.7.4_biqbaboplfbrettd7655fr4n2y
-      '@heroicons/react': 1.0.6_react@18.2.0
+      '@heroicons/react': 2.0.13_react@18.2.0
       '@markdoc/markdoc': 0.1.13_@types+react@18.0.24
       '@markdoc/next.js': 0.1.10_sjsxg553udvvvfz4ddwyelvphq
       '@radix-ui/react-scroll-area': 0.1.5-rc.50_biqbaboplfbrettd7655fr4n2y
@@ -457,17 +457,6 @@ importers:
       '@types/node': 14.18.33
       '@types/rimraf': 3.0.2
       '@types/tar': 4.0.5
-      typescript: 4.8.4
-
-  testapps/cloud-starter:
-    specifiers:
-      '@types/node': ^14.14.37
-      '@wundergraph/sdk': ^0.130.2
-      typescript: ^4.8.2
-    dependencies:
-      '@wundergraph/sdk': 0.130.2
-    devDependencies:
-      '@types/node': 14.18.33
       typescript: 4.8.4
 
   testapps/default:
@@ -1669,8 +1658,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@heroicons/react/1.0.6_react@18.2.0:
-    resolution: {integrity: sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==}
+  /@heroicons/react/2.0.13_react@18.2.0:
+    resolution: {integrity: sha512-iSN5XwmagrnirWlYEWNPdCDj9aRYVD/lnK3JlsC9/+fqGF80k8C7rl+1HCvBX0dBoagKqOFBs6fMhJJ1hOg1EQ==}
     peerDependencies:
       react: '>= 16'
     dependencies:
@@ -4193,67 +4182,6 @@ packages:
       - encoding
     dev: false
 
-  /@wundergraph/protobuf/0.100.0:
-    resolution: {integrity: sha512-nWGdAU8MqLo7A3uzk/yFZ2OxzccLiPzLuVCXGaotYs5jITJFjsXj0uF5fvBttIlIZNWYgZbFlOcbnrNq2XasuQ==}
-    dependencies:
-      long: 5.2.1
-      protobufjs: 6.11.3
-      ts-proto: 1.131.0
-    dev: false
-
-  /@wundergraph/sdk/0.130.2:
-    resolution: {integrity: sha512-J3sTcEoHumycWmIqgAXarFHkbvx2PAKHu8v5Z+SEo4QQzOGnBsbCF2tKHHQoeh0ZF7C4AONZgj45uHVWwZm0hA==}
-    hasBin: true
-    dependencies:
-      '@fastify/formbody': 7.3.0
-      '@graphql-tools/schema': 8.5.1_graphql@16.6.0
-      '@prisma/generator-helper': 3.15.2
-      '@web-std/fetch': 4.1.0
-      '@wundergraph/protobuf': 0.100.0
-      '@wundergraph/wunderctl': 0.126.1
-      axios: 0.26.1
-      axios-retry: 3.3.1
-      close-with-grace: 1.1.0
-      execa: 5.1.1
-      fastify: 4.10.2
-      fastify-plugin: 4.4.0
-      graphql: 16.6.0
-      graphql-helix: 1.13.0_graphql@16.6.0
-      handlebars: 4.7.7
-      js-yaml: 4.1.0
-      json-schema: 0.4.0
-      lodash: 4.17.21
-      long: 5.2.1
-      object-hash: 2.2.0
-      openapi-types: 10.0.0
-      pino: 8.8.0
-      pino-pretty: 9.1.1
-      postman-collection: 4.1.5
-      prettier: 2.7.1
-      protobufjs: 6.11.3
-      swagger2openapi: 7.0.8
-      terminate: 2.5.0
-      ts-retry-promise: 0.7.0
-    transitivePeerDependencies:
-      - debug
-      - encoding
-      - supports-color
-    dev: false
-
-  /@wundergraph/wunderctl/0.126.1:
-    resolution: {integrity: sha512-fJeGSUmF+hkD21IZ3nE01hokFlfGhSMcfiOfe5xy0egLH3xNg+ysRWVyEllZBt8ay/t43cSQo+E/EH21mnWLdg==}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      axios: 0.26.1_debug@4.3.4
-      debug: 4.3.4
-      execa: 5.1.1
-      rimraf: 3.0.2
-      tar: 6.1.12
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /@yarnpkg/lockfile/1.1.0:
     resolution: {integrity: sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==}
     dev: true
@@ -4708,7 +4636,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -7163,6 +7091,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}

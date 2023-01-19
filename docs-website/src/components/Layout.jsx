@@ -120,13 +120,12 @@ function useTableOfContents(tableOfContents) {
 
 export function Layout({ children, title, tableOfContents, frontmatter }) {
 	let router = useRouter()
-	let isHomePage = router.pathname === '/'
 	let allLinks = navigation.flatMap((section) => section.links)
-	let linkIndex = allLinks.findIndex((link) => link.href === router.pathname)
+	let linkIndex = allLinks.findIndex((link) => link?.href === router.pathname)
 	let previousPage = allLinks[linkIndex - 1]
 	let nextPage = allLinks[linkIndex + 1]
 	let section = navigation.find((section) =>
-		section.links.find((link) => link.href === router.pathname)
+		section.links?.find((link) => link?.href === router.pathname)
 	)
 	let currentSection = useTableOfContents(tableOfContents)
 
@@ -148,9 +147,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 		<>
 			<Header navigation={navigation} />
 
-			{isHomePage && <Hero />}
-
-			<div className="relative mx-auto flex max-w-8xl justify-center sm:px-2 lg:px-8 xl:px-12">
+			<div className="relative mx-auto flex max-w-screen-2xl justify-center sm:px-2 lg:px-8 xl:px-12">
 				<div className="hidden lg:relative lg:block lg:flex-none">
 					<div className="absolute inset-y-0 right-0 w-[50vw] bg-white dark:hidden dark:bg-slate-50" />
 					<div className="sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto py-16 pl-0.5">
@@ -188,12 +185,12 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 									Previous
 								</dt>
 								<dd className="mt-1">
-									<Link
+									{/* <Link
 										href={previousPage.href}
 										className="text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
 									>
 										<span aria-hidden="true">&larr;</span> {previousPage.title}
-									</Link>
+									</Link> */}
 								</dd>
 							</div>
 						)}
@@ -203,12 +200,12 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 									Next
 								</dt>
 								<dd className="mt-1">
-									<Link
+									{/* <Link
 										href={nextPage.href}
 										className="text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
 									>
 										{nextPage.title} <span aria-hidden="true">&rarr;</span>
-									</Link>
+									</Link> */}
 								</dd>
 							</div>
 						)}
