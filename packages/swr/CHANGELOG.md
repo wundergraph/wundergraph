@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.10.0...@wundergraph/swr@0.11.0) (2023-01-19)
+
+### Features
+
+* fix infinite loop when callbacks are not memoized ([#555](https://github.com/wundergraph/wundergraph/issues/555)) ([f9ed75f](https://github.com/wundergraph/wundergraph/commit/f9ed75fef9323c8cf49557e8c8017ddba2f41886)) (@Pagebakers)
+
 ## [0.10.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.7...@wundergraph/swr@0.10.0) (2023-01-17)
 
 ### Features
