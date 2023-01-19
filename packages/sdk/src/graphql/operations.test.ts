@@ -42,18 +42,21 @@ test('parseGraphQLOperations', () => {
 		graphql_operation_files: [
 			{
 				operation_name: 'MyReviews',
+				path_name: 'MyReviews',
 				content: MyReviews,
 				file_path: 'MyReviews.graphql',
 				path: [],
 			},
 			{
 				operation_name: 'CreatePet',
+				path_name: 'CreatePet',
 				content: CreatePet,
 				file_path: 'CreatePet.graphql',
 				path: [],
 			},
 			{
 				operation_name: 'NewPets',
+				path_name: 'NewPets',
 				content: NewPets,
 				file_path: 'NewPets.graphql',
 				path: [],
@@ -430,18 +433,21 @@ test('parseTransformOperations', () => {
 		graphql_operation_files: [
 			{
 				operation_name: 'GetName',
+				path_name: 'GetName',
 				file_path: 'GetName.graphql',
 				content: GetName,
 				path: [],
 			},
 			{
 				operation_name: 'GetReviews',
+				path_name: 'GetReviews',
 				file_path: 'GetReviews.graphql',
 				content: GetReviews,
 				path: [],
 			},
 			{
 				operation_name: 'TopProducts',
+				path_name: 'TopProducts',
 				file_path: 'TopProducts.graphql',
 				content: TopProducts,
 				path: [],
@@ -594,6 +600,7 @@ test('parse operations with fromClaim directive', () => {
 		graphql_operation_files: [
 			{
 				operation_name: 'CreateUser',
+				path_name: 'CreateUser',
 				file_path: 'CreateUser.graphql',
 				content: fromClaimOperations,
 				path: [],
@@ -608,7 +615,8 @@ test('parse operations with jsonSchema directive', () => {
 	const operations: LoadOperationsOutput = {
 		graphql_operation_files: [
 			{
-				operation_name: 'nested/JsonSchemaQuery',
+				operation_name: 'nested_JsonSchemaQuery',
+				path_name: 'nested/JsonSchemaQuery',
 				file_path: 'nested/JsonSchemaQuery.graphql',
 				content: jsonSchemaDirectiveOperation,
 				path: [],
