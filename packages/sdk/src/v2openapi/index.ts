@@ -422,7 +422,7 @@ export class RESTApiBuilder {
 				if (objectKind === 'input') {
 					fieldTypeName = `${fieldTypeName}Input`;
 				}
-
+				fieldTypeName = this.getUniqueNormalisedGraphQLName(fieldTypeName);
 				const isIntEnum = componentSchema.enum && componentSchema.type === 'integer';
 				if (argumentName) {
 					this.addArgument(parentTypeName, fieldName, argumentName, isIntEnum ? 'Int' : fieldTypeName, enclosingTypes);
@@ -492,10 +492,10 @@ export class RESTApiBuilder {
 						this.ensureType('enum', enumName);
 						// TODO this needs to be changed as well
 						this.addArgument(parentTypeName, fieldName, argumentName, enumName, enclosingTypes);
-						this.addEnumValues(enumName, schema.enum);
+						this.addEnumValues(enumName, schema.enum); // TODO
 						return;
 					}
-					this.handleEnumValues(parentTypeName, schema.enum);
+					this.handleEnum(parentTypeName, schema.enum);
 					return;
 				}
 				if (argumentName) {
@@ -944,13 +944,8 @@ export class RESTApiBuilder {
 		}
 	};
 
-	public handleEnumValues = (enumTypeName: string, values: JSONSchema7Type[]) => {
+	public handleEnum = (typeName: string, values: JSONSchema7Type[]) => {
 		const uniqueValues: Set<string> = new Set();
-		const normalisedName = this.getUniqueNormalisedGraphQLName(enumTypeName);
-		if (normalisedName === '') {
-			return; // TODO what should happen here?
-		}
-
 		let isValidEnum = true;
 		values.forEach((value) => {
 			if (typeof value !== 'string') {
@@ -965,13 +960,13 @@ export class RESTApiBuilder {
 			return;
 		}
 		isValidEnum
-			? this.addEnumValuesForValidEnum(normalisedName, uniqueValues)
-			: this.addCustomScalarForInvalidEnum(enumTypeName, normalisedName, uniqueValues);
+			? this.addEnumValuesForValidEnum(typeName, uniqueValues)
+			: this.addCustomScalarForInvalidEnum(typeName, uniqueValues);
 	};
 
-	public addCustomScalarForInvalidEnum = (originalName: string, normalisedName: string, uniqueValues: Set<string>) => {
+	public addCustomScalarForInvalidEnum = (typeName: string, uniqueValues: Set<string>) => {
 		const enumMapping: EnumMapping = {
-			normalisedName,
+			typeName,
 			values: [...uniqueValues],
 		};
 		this.enumMappings.push(enumMapping);
@@ -979,11 +974,11 @@ export class RESTApiBuilder {
 			kind: Kind.SCALAR_TYPE_DEFINITION,
 			name: {
 				kind: Kind.NAME,
-				value: normalisedName,
+				value: typeName,
 			},
 			description: {
 				kind: Kind.STRING,
-				value: `The original enum named ${originalName} contained invalid GraphQL enum value names.\nConsequently, the enum was substituted by a custom scalar named ${normalisedName}.\nIt has the following valid values: ${JSON.stringify(
+				value: `The enum named ${typeName} contained invalid GraphQL enum value names.\nConsequently, the enum was substituted by a custom scalar.\nIt has the following valid values: ${JSON.stringify(
 					uniqueValues
 				)}`,
 				block: true,
@@ -1299,7 +1294,7 @@ export class RESTApiBuilder {
 	}
 
 	private sanitizeName = (name: string): string => {
-		return name.replace(/\[\]/g, '');
+		return name.replace(/\[]/g, '');
 	};
 
 	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
@@ -1324,14 +1319,15 @@ export class RESTApiBuilder {
 			this.uniqueGraphQLNames.add(normalisedName);
 			return normalisedName;
 		}
-		for (let i = 1; i < 10; i++) {
+		for (let i = 1; i < 1001; i++) {
 			const newNormalisedName = `${normalisedName}_${i}`;
 			if (!this.uniqueGraphQLNames.has(newNormalisedName)) {
 				this.uniqueGraphQLNames.add(newNormalisedName);
 				return newNormalisedName;
 			}
 		}
-		return ''; // more than 9 retries seems unreasonable
+		// more than 1000 retries seems unreasonable
+		throw new Error(`unable to produce a unique GraphQL schema name for ${normalisedName} after 1000 retries`);
 	};
 
 	public getUniqueNormalisedGraphQLName = (nameToNormalise: string): string => {

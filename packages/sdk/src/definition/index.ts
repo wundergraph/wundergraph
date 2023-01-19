@@ -70,7 +70,7 @@ export interface RenameTypeFields {
 }
 
 export interface EnumMapping {
-	normalisedName: string;
+	typeName: string;
 	values: string[];
 }
 
