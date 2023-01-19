@@ -23,4 +23,6 @@ Here's an overview of all the available guides.
 
 {% quick-link title="Configure Authorization" icon="core" href="/docs/guides/configure-authorization" description="This Guide helps you to configure Authorization with RBAC." /%}
 
+{% quick-link title="TypeSafe API Integrations" icon="core" href="/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql" description="Easily integrate APIs with TypeScript Operations & GraphQL" /%}
+
 {% /quick-links %}
