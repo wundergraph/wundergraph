@@ -14,6 +14,7 @@ import (
 	"github.com/klauspost/compress/gzip"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
+
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 )
 
