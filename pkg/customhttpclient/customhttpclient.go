@@ -14,6 +14,7 @@ import (
 	"github.com/klauspost/compress/gzip"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
+	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 )
 
 const (
@@ -146,10 +147,10 @@ func encodeQueryParams(queryParams []byte) (string, error) {
 		if len(parameterName) != 0 && len(parameterValue) != 0 {
 			if bytes.Equal(parameterValue[:1], literal.LBRACK) {
 				_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-					query.Add(string(parameterName), string(value))
+					query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(value))
 				})
 			} else {
-				query.Add(string(parameterName), string(parameterValue))
+				query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(parameterValue))
 			}
 		}
 	})
