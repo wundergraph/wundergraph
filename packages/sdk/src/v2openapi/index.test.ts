@@ -1,4 +1,4 @@
-import { getFormattedPath, openApiSpecificationToRESTApiObject } from './index';
+import { getFormattedFieldName, getFormattedPath, openApiSpecificationToRESTApiObject } from './index';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -137,5 +137,25 @@ describe('Path formatting tests', () => {
 
 	test('that a path with curly braces is formatted correctly', () => {
 		expect(getFormattedPath('/a/{someValue}/b/{someOtherValue}')).toBe('aBySomeValueBBySomeOtherValue');
+	});
+});
+
+describe('Field name formatting tests', () => {
+	test('that a simple field name is formatted correctly', () => {
+		expect(getFormattedFieldName('some_field/name')).toBe('someField_name');
+	});
+
+	test('that a field name with consecutive underscores is formatted correctly', () => {
+		expect(getFormattedFieldName('some__kind_of_field____name/ok')).toBe('someKindOfFieldName_ok');
+	});
+
+	test('that a field name with consecutive hyphens is formatted correctly', () => {
+		expect(getFormattedFieldName('gimme/some--kind-of-field----name')).toBe('gimme_someKindOfFieldName');
+	});
+
+	test('that a field name with consecutive hyphens and underscores is formatted correctly', () => {
+		expect(getFormattedFieldName('gimme/some-_other/kind_-_of__----field--___name__pretty/--please')).toBe(
+			'gimme_someOther_kindOfFieldNamePretty_Please'
+		);
 	});
 });

@@ -179,7 +179,7 @@ class RESTApiBuilder {
 		path: string,
 		verb: HTTPMethod
 	) => {
-		const fieldName = this.prettyFieldName(this.resolveFieldName(operationObject, path, verb));
+		const fieldName = getFormattedFieldName(this.resolveFieldName(operationObject, path, verb));
 		if (!operationObject.responses) {
 			return;
 		}
@@ -1173,11 +1173,6 @@ class RESTApiBuilder {
 			},
 		};
 	};
-	private prettyFieldName = (input: string): string => {
-		let underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
-		underscore = underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
-		return underscore.replace(/\/+/g, '_');
-	};
 	private resolveFieldName = (operationObject: OpenAPIV3.OperationObject, path: string, verb: HTTPMethod): string => {
 		if (operationObject.operationId) {
 			if (operationObject.operationId.startsWith('/')) {
@@ -1197,11 +1192,11 @@ class RESTApiBuilder {
 			if (current.startsWith('{') && current.endsWith('}')) {
 				const trimmed = current.substring(1, current.length - 1);
 				return (
-					prev + trimmed[0].toUpperCase() + this.prettyFieldName(trimmed.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+					prev + trimmed[0].toUpperCase() + getFormattedFieldName(trimmed.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
 				);
 			}
 			return (
-				prev + current[0]?.toUpperCase() + this.prettyFieldName(current.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+				prev + current[0]?.toUpperCase() + getFormattedFieldName(current.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
 			);
 		});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0] + formattedPath.substring(1) + 'Input';
@@ -1267,4 +1262,9 @@ export const getFormattedPath = (path: string): string => {
 		}
 		return acc + curr[0]?.toUpperCase() + curr.substring(1);
 	});
+};
+
+export const getFormattedFieldName = (name: string): string => {
+	const formattedName = name.split(/[_-]+/g).reduce((acc, curr) => acc + curr[0].toUpperCase() + curr.substring(1));
+	return formattedName.replace(/\/+/g, '_');
 };
