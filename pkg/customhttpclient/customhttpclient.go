@@ -30,8 +30,9 @@ var (
 	}
 )
 
-// unescapeJSON tries to unescape the given JSON data, returning
-// the original one if the unescaping fails
+// unescapeJSON tries to unescape the given JSON data over itself (to avoid)
+// any allocations. This means that in case of an error the data will be
+// malformed.
 func unescapeJSON(in []byte) ([]byte, error) {
 	// All variables that can be fed into Do()/DoWithStatus() output must be
 	// first formatted as valid JSON. This means the only escaping that will
