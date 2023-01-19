@@ -15,9 +15,19 @@ const spaceX = introspect.graphql({
 	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
+const countries = introspect.graphql({
+	apiNamespace: 'countries',
+	url: 'https://countries.trevorblades.com/',
+});
+
+const weather = introspect.graphql({
+	apiNamespace: 'weather',
+	url: 'https://weather-api.wundergraph.com/',
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [spaceX],
+	apis: [spaceX, countries, weather],
 	server,
 	operations,
 	codeGenerators: [

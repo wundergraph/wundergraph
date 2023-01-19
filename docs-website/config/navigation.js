@@ -147,6 +147,10 @@ const navigation = [
 				title: 'Token Based Authentication with Next Auth',
 				href: '/docs/guides/token-based-authentication-with-next-auth',
 			},
+			{
+				title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
+				href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
+			},
 		],
 	},
 	{
@@ -202,6 +206,10 @@ const navigation = [
 			{
 				title: 'NextJS',
 				href: '/docs/examples/nextjs',
+			},
+			{
+				title: 'NextJS TypeScript Operations',
+				href: '/docs/examples/nextjs-typescript-operations',
 			},
 			{
 				title: 'NextJS + React Query',
