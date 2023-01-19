@@ -1,4 +1,4 @@
-import { openApiSpecificationToRESTApiObject } from './index';
+import { getFormattedPath, openApiSpecificationToRESTApiObject } from './index';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -120,4 +120,22 @@ test('arbitrary type', async () => {
 	});
 
 	expect(actual.Schema).toMatchSnapshot('users_meta_schema');
+});
+
+describe('Path formatting tests', () => {
+	test('that splitting a path into an empty array remains unformatted', () => {
+		expect(getFormattedPath('/')).toBe('/');
+	});
+
+	test('that an empty path returns an empty string', () => {
+		expect(getFormattedPath('')).toBe('');
+	});
+
+	test('that a simple path iis formatted correctly', () => {
+		expect(getFormattedPath('a/b/')).toBe('aB');
+	});
+
+	test('that a path with curly braces is formatted correctly', () => {
+		expect(getFormattedPath('/a/{someValue}/b/{someOtherValue}')).toBe('aBySomeValueBBySomeOtherValue');
+	});
 });

@@ -139,10 +139,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const { schemaSDL: replaced, customScalarTypeFields } = transformSchema.replaceCustomScalars(
-			print(filtered),
-			this.introspection
-		);
+		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -1188,16 +1185,7 @@ class RESTApiBuilder {
 			}
 			return operationObject.operationId;
 		}
-		const formattedPath = path
-			.split('/')
-			.filter((element) => element !== '')
-			.reduce((prev, current) => {
-				if (current.startsWith('{') && current.endsWith('}')) {
-					const trimmed = current.substring(1, current.length - 1);
-					return prev + 'By' + trimmed[0].toUpperCase() + trimmed.substring(1);
-				}
-				return prev + current[0]?.toUpperCase() + current.substring(1);
-			});
+		const formattedPath = getFormattedPath(path);
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0].toUpperCase() + formattedPath.substring(1);
 	};
 
@@ -1220,7 +1208,7 @@ class RESTApiBuilder {
 	}
 
 	private sanitizeName = (name: string): string => {
-		return name.replace(/\[\]/g, '');
+		return name.replace(/\[]/g, '');
 	};
 
 	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
@@ -1265,4 +1253,18 @@ const fixOasReplacer = (key: string, value: any): any => {
 		default:
 			return value;
 	}
+};
+
+export const getFormattedPath = (path: string): string => {
+	let formattedPath = path.split('/').filter((element) => element !== '');
+	if (formattedPath.length < 1) {
+		return path;
+	}
+	return formattedPath.reduce((acc, curr) => {
+		if (curr.startsWith('{') && curr.endsWith('}')) {
+			const trimmed = curr.substring(1, curr.length - 1);
+			return acc + 'By' + trimmed[0].toUpperCase() + trimmed.substring(1);
+		}
+		return acc + curr[0]?.toUpperCase() + curr.substring(1);
+	});
 };
