@@ -147,6 +147,10 @@ const navigation = [
 				title: 'Token Based Authentication with Next Auth',
 				href: '/docs/guides/token-based-authentication-with-next-auth',
 			},
+			{
+				title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
+				href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
+			},
 		],
 	},
 	{
@@ -202,6 +206,10 @@ const navigation = [
 			{
 				title: 'NextJS',
 				href: '/docs/examples/nextjs',
+			},
+			{
+				title: 'NextJS TypeScript Operations',
+				href: '/docs/examples/nextjs-typescript-operations',
 			},
 			{
 				title: 'NextJS + React Query',
@@ -303,6 +311,10 @@ const navigation = [
 			{
 				title: 'TypeScript webhooks to integrate third party applications',
 				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/docs/features/typescript-operations',
 			},
 			{
 				title: 'API Namespacing',
@@ -908,6 +920,15 @@ const navigation = [
 			{
 				title: 'Custom GraphQL Servers',
 				href: '/docs/wundergraph-server-ts-reference/custom-graphql-servers',
+			},
+		],
+	},
+	{
+		title: 'TypeScript Operations Reference',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/typescript-operations-reference',
 			},
 		],
 	},

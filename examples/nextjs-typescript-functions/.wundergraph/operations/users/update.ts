@@ -4,7 +4,7 @@ export default createOperation.mutation({
 	input: z.object({
 		id: z.string(),
 		name: z.string(),
-		userInfo: z.string(),
+		bio: z.string(),
 	}),
 	handler: async ({ input }) => {
 		return {
