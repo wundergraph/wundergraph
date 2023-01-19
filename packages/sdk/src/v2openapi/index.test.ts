@@ -131,7 +131,7 @@ describe('Path formatting tests', () => {
 		expect(getFormattedPath('')).toBe('');
 	});
 
-	test('that a simple path iis formatted correctly', () => {
+	test('that a simple path is formatted correctly', () => {
 		expect(getFormattedPath('a/b/')).toBe('aB');
 	});
 
