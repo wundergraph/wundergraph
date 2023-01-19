@@ -3,7 +3,6 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
-	GraphQLApi,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -12,7 +11,14 @@ import {
 } from '../definition';
 import { mergeApis } from '../definition/merge';
 import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
-import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
+import {
+	GraphQLOperation,
+	loadOperations,
+	LoadOperationsOutput,
+	ParsedOperations,
+	parseGraphQLOperations,
+	removeHookVariables,
+} from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
@@ -25,6 +31,7 @@ import {
 	DataSourceKind,
 	FieldConfiguration,
 	Operation,
+	OperationExecutionEngine,
 	OperationType,
 	PostResolveTransformationKind,
 	TypeConfiguration,
@@ -48,19 +55,15 @@ import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
 import _ from 'lodash';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import {
-	AuthenticationHookRequest,
-	AuthenticationResponse,
-	ResolvedServerOptions,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphUser,
-} from '../server/types';
+import { ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { Logger } from '../logger';
+import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
+import zodToJsonSchema from 'zod-to-json-schema';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -218,6 +221,11 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
+export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+	outPath: string;
+	wunderGraphDir: string;
+}
+
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
 	const api = {
 		id: '',
@@ -268,7 +276,6 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	}
 
 	const apps = config.apis;
-
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
 	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
@@ -585,16 +592,15 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			}
 
 			const loadedOperations = loadOperations(schemaFileName);
-			const operationsContent = loadedOperations.content;
-			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
-				keepFromClaimVariables: false,
-				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
-				customJsonScalars: app.EngineConfiguration.CustomJsonScalars,
-			});
+			const operations = await resolveOperationsConfigurations(
+				resolved,
+				loadedOperations,
+				app.EngineConfiguration.CustomJsonScalars || []
+			);
 			app.Operations = operations.operations;
-			app.InvalidOperationNames = loadedOperations.invalidOperationNames;
+			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
-				app.Operations = app.Operations.map((op) => {
+				const ops = app.Operations.map(async (op) => {
 					const cfg = config.operations!;
 					const base = Object.assign({}, cfg.defaultConfig);
 					const customize =
@@ -605,19 +611,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							if (customize as CustomizeMutation) {
 								mutationConfig = customize(mutationConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || mutationConfig.authentication.required,
 								},
-							};
+							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								CacheConfig: {
 									enable: queryConfig.caching.enable,
@@ -629,27 +635,26 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
 								},
-								LiveQuery: {
-									enable: queryConfig.liveQuery.enable,
-									pollingIntervalSeconds: queryConfig.liveQuery.pollingIntervalSeconds,
-								},
-							};
+								LiveQuery: queryConfig.liveQuery,
+							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
 							if (customize as CustomizeSubscription) {
 								subscriptionConfig = customize(subscriptionConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || subscriptionConfig.authentication.required,
 								},
-							};
+							});
 						default:
 							return op;
 					}
 				});
+
+				app.Operations = await Promise.all(ops);
 			}
 
 			if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
@@ -839,7 +844,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			done();
 		})
 		.catch((e: any) => {
-			Logger.fatal(`Couldn't configure your WunderNode: ${e}`);
+			//throw e;
+			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
 			process.exit(1);
 		});
 };
@@ -862,10 +868,12 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
+		path: op.PathName,
 		responseSchema: JSON.stringify(op.ResponseSchema),
 		variablesSchema: JSON.stringify(op.VariablesSchema),
 		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
 		operationType: op.OperationType,
+		engine: op.ExecutionEngine,
 		cacheConfig: op.CacheConfig || {
 			enable: false,
 			maxAge: 0,
@@ -1025,4 +1033,123 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 
 const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+
+const resolveOperationsConfigurations = async (
+	config: ResolvedWunderGraphConfig,
+	loadedOperations: LoadOperationsOutput,
+	customJsonScalars: string[]
+): Promise<ParsedOperations> => {
+	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
+		keepFromClaimVariables: false,
+		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
+		customJsonScalars,
+	});
+	const nodeJSOperations: GraphQLOperation[] = [];
+	if (loadedOperations.typescript_operation_files)
+		for (const file of loadedOperations.typescript_operation_files) {
+			try {
+				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
+				const implementation = await loadNodeJsOperationDefaultModule(filePath);
+				const operation: GraphQLOperation = {
+					Name: file.operation_name.replace('/', '_'),
+					PathName: file.operation_name,
+					Content: '',
+					OperationType:
+						implementation.type === 'query'
+							? OperationType.QUERY
+							: implementation.type === 'mutation'
+							? OperationType.MUTATION
+							: OperationType.SUBSCRIPTION,
+					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+					VariablesSchema: { type: 'object', properties: {} },
+					InterpolationVariablesSchema: { type: 'object', properties: {} },
+					InternalVariablesSchema: { type: 'object', properties: {} },
+					InjectedVariablesSchema: { type: 'object', properties: {} },
+					ResponseSchema: { type: 'object', properties: { data: {} } },
+					TypeScriptOperationImport: `function_${file.operation_name.replace('/', '_')}`,
+					AuthenticationConfig: {
+						required: implementation.requireAuthentication || false,
+					},
+					LiveQuery: {
+						enable: true,
+						pollingIntervalSeconds: 5,
+					},
+					AuthorizationConfig: {
+						claims: [],
+						roleConfig: {
+							requireMatchAll: [],
+							requireMatchAny: [],
+							denyMatchAll: [],
+							denyMatchAny: [],
+						},
+					},
+					HooksConfiguration: {
+						preResolve: false,
+						postResolve: false,
+						mutatingPreResolve: false,
+						mutatingPostResolve: false,
+						mockResolve: {
+							enable: false,
+							subscriptionPollingIntervalMillis: 0,
+						},
+						httpTransportOnResponse: false,
+						httpTransportOnRequest: false,
+						customResolve: false,
+					},
+					VariablesConfiguration: {
+						injectVariables: [],
+					},
+					Internal: implementation.internal ? implementation.internal : false,
+					PostResolveTransformations: undefined,
+				};
+				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
+			} catch (e: any) {
+				logger.info(`Skipping operation ${file.operation_name} due to error: ${e.message}`);
+			}
+		}
+	return {
+		operations: [...graphQLOperations.operations, ...nodeJSOperations],
+	};
+};
+
+const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
+		return operation;
+	}
+	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+	return applyNodeJsOperationOverrides(operation, implementation);
+};
+
+const applyNodeJsOperationOverrides = (
+	operation: GraphQLOperation,
+	overrides: NodeJSOperation<any, any, any, any, any>
+): GraphQLOperation => {
+	if (overrides.inputSchema) {
+		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+	}
+	if (overrides.liveQuery) {
+		operation.LiveQuery = {
+			enable: overrides.liveQuery.enable,
+			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
+		};
+	}
+	if (overrides.requireAuthentication) {
+		operation.AuthenticationConfig = {
+			required: overrides.requireAuthentication,
+		};
+	}
+	if (overrides.rbac) {
+		operation.AuthorizationConfig = {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: overrides.rbac.requireMatchAll,
+				requireMatchAny: overrides.rbac.requireMatchAny,
+				denyMatchAll: overrides.rbac.denyMatchAll,
+				denyMatchAny: overrides.rbac.denyMatchAny,
+			},
+		};
+	}
+	return operation;
 };
