@@ -31,13 +31,14 @@ var (
 
 // unescapeJSON tries to unescape the given JSON data, returning
 // the original one if the unescaping fails
-func unescapeJSON(in []byte) []byte {
-	// This will only allocate if there are actual escape sequences in the data
-	unescaped, err := jsonparser.Unescape(in, nil)
-	if err != nil {
-		return in
-	}
-	return unescaped
+func unescapeJSON(in []byte) ([]byte, error) {
+	// All variables that can be fed into Do()/DoWithStatus() output must be
+	// first formatted as valid JSON. This means the only escaping that will
+	// be added by the second encoding run is prepending a second "layer" of
+	// escaping and this should all be "deescapable" onto the same source
+	// slice because we're always at least writing one byte behind where we
+	// read from.
+	return jsonparser.Unescape(in, in)
 }
 
 func Do(client *http.Client, ctx context.Context, requestInput []byte, out io.Writer) (err error) {
@@ -131,30 +132,46 @@ func respBodyReader(req *http.Request, resp *http.Response) (io.ReadCloser, erro
 }
 
 func encodeQueryParams(queryParams []byte) (string, error) {
+	var jsonErr error
 	query := make(url.Values)
 	_, err := jsonparser.ArrayEach(queryParams, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		if jsonErr != nil {
+			return
+		}
+		jsonErr = err
 		var (
 			parameterName, parameterValue []byte
 		)
 		jsonparser.EachKey(value, func(i int, bytes []byte, valueType jsonparser.ValueType, err error) {
+			if jsonErr != nil {
+				return
+			}
+			if err != nil {
+				jsonErr = err
+				return
+			}
 			switch i {
 			case 0:
-				parameterName = unescapeJSON(bytes)
+				parameterName, jsonErr = unescapeJSON(bytes)
 			case 1:
-				parameterValue = unescapeJSON(bytes)
+				parameterValue, jsonErr = unescapeJSON(bytes)
 			}
 		}, queryParamsKeys...)
-		if len(parameterName) != 0 && len(parameterValue) != 0 {
-			if bytes.Equal(parameterValue[:1], literal.LBRACK) {
-				_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-					query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(value))
-				})
-			} else {
-				query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(parameterValue))
-			}
+		if len(parameterName) == 0 || len(parameterValue) == 0 {
+			return
+		}
+		if bytes.Equal(parameterValue[:1], literal.LBRACK) {
+			_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(value))
+			})
+		} else {
+			query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(parameterValue))
 		}
 	})
 	if err != nil {
+		return "", err
+	}
+	if jsonErr != nil {
 		return "", err
 	}
 	return query.Encode(), nil
