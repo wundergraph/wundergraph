@@ -20,6 +20,12 @@ curl --get --data-urlencode 'wg_variables={ "filter": {"code": { "eq": "AD" } } 
     http://localhost:9991/operations/Countries
 ```
 
+#### Get user
+
+```shell
+curl http://localhost:9991/operations/users/get?id=1
+```
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
