@@ -3,18 +3,22 @@ export type { OperationArgsWithInput, InternalClient } from './internal-client';
 export type { GraphQLServerConfig } from './plugins/graphql';
 
 export type {
-	WunderGraphRequest,
-	WunderGraphResponse,
-	WsTransportOnConnectionInitResponse,
-	WunderGraphUser,
-	BaseRequestContext,
+	AuthenticationHookRequest,
 	AuthenticationRequestContext,
 	AuthenticationResponse,
+	BaseRequestContext,
 	ClientRequest,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphServerConfig,
 	ClientRequestHeaders,
-	AuthenticationHookRequest,
+	PostUploadHookRequest,
+	PostUploadHookResponse,
+	PreUploadHookRequest,
+	PreUploadHookResponse,
+	WsTransportOnConnectionInitResponse,
+	WunderGraphHooksAndServerConfig,
+	WunderGraphRequest,
+	WunderGraphResponse,
+	WunderGraphServerConfig,
+	WunderGraphUser,
 } from './types';
 export type {
 	SubscriptionRequestOptions,
