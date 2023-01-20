@@ -1,9 +1,16 @@
 import { NextPage } from 'next';
-import { useAuth, useQuery, withWunderGraph } from '../components/generated/nextjs';
+import { useAuth, useQuery, useUser, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-	const result = useQuery({
+	const resultDragons = useQuery({
 		operationName: 'Dragons',
+	});
+
+	const resultCountries = useQuery({
+		operationName: 'countries/get',
+		input: {
+			code: 'IND',
+		},
 	});
 
 	const { login, logout } = useAuth();
@@ -14,8 +21,10 @@ const Home: NextPage = () => {
 	const logoutGithub = () => {
 		logout();
 	};
-	const getDragons = () => {
-		result.mutate();
+
+	const getData = () => {
+		resultDragons.mutate();
+		resultCountries.mutate();
 	};
 
 	return (
@@ -100,7 +109,7 @@ const Home: NextPage = () => {
 							</button>
 							<button
 								type="button"
-								onClick={getDragons}
+								onClick={getData}
 								className="inline-flex items-center py-2 px-4 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-cyan-500 focus:z-10 focus:ring-2 focus:ring-cyan-700 focus:text-cyan-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-cyan-500 dark:focus:text-white"
 							>
 								<svg
@@ -115,7 +124,7 @@ const Home: NextPage = () => {
 								>
 									<path d="M868 732h-70.3c-4.8 0-9.3 2.1-12.3 5.8-7 8.5-14.5 16.7-22.4 24.5a353.84 353.84 0 0 1-112.7 75.9A352.8 352.8 0 0 1 512.4 866c-47.9 0-94.3-9.4-137.9-27.8a353.84 353.84 0 0 1-112.7-75.9 353.28 353.28 0 0 1-76-112.5C167.3 606.2 158 559.9 158 512s9.4-94.2 27.8-137.8c17.8-42.1 43.4-80 76-112.5s70.5-58.1 112.7-75.9c43.6-18.4 90-27.8 137.9-27.8 47.9 0 94.3 9.3 137.9 27.8 42.2 17.8 80.1 43.4 112.7 75.9 7.9 7.9 15.3 16.1 22.4 24.5 3 3.7 7.6 5.8 12.3 5.8H868c6.3 0 10.2-7 6.7-12.3C798 160.5 663.8 81.6 511.3 82 271.7 82.6 79.6 277.1 82 516.4 84.4 751.9 276.2 942 512.4 942c152.1 0 285.7-78.8 362.3-197.7 3.4-5.3-.4-12.3-6.7-12.3zm88.9-226.3L815 393.7c-5.3-4.2-13-.4-13 6.3v76H488c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h314v76c0 6.7 7.8 10.5 13 6.3l141.9-112a8 8 0 0 0 0-12.6z"></path>
 								</svg>
-								Call Operation
+								Call Operations
 							</button>
 							<button
 								type="button"
@@ -141,7 +150,8 @@ const Home: NextPage = () => {
 					</div>
 					<div className="flex justify-center mt-2"></div>
 					<div className="mx-auto flex max-w-sm flex-col items-center mt-8">
-						<code className="p-3">{JSON.stringify(result, null, 2)}</code>
+						<code className="p-3">{JSON.stringify(resultDragons, null, 2)}</code>
+						<code className="p-3">{JSON.stringify(resultCountries, null, 2)}</code>
 					</div>
 				</div>
 				<footer className="flex justify-between text-gray-400">
