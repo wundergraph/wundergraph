@@ -36,8 +36,8 @@ export class TypeScriptLegacyWebClient implements Template {
 			hasSubscriptionsOrLiveQueries: _subscriptions.length + _liveQueries.length !== 0,
 			authProviders: config.authentication.cookieBased.map((provider) => provider.id),
 			hasAuthProviders: config.authentication.cookieBased.length !== 0,
-			hasS3Provider: config.application.S3UploadProvider.length > 0,
-			s3Provider: config.application.S3UploadProvider,
+			hasS3Providers: config.application.S3UploadProvider.length > 0,
+			s3Providers: config.application.S3UploadProvider,
 			reactNative: this.reactNative,
 		});
 		return Promise.resolve([

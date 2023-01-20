@@ -255,13 +255,29 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	for _, s3Provider := range api.S3UploadConfiguration {
+		profiles := make(map[string]*s3uploadclient.UploadProfile, len(s3Provider.UploadProfiles))
+		for name, profile := range s3Provider.UploadProfiles {
+			profiles[name] = &s3uploadclient.UploadProfile{
+				MaxFileSizeBytes:      int(profile.MaxAllowedUploadSizeBytes),
+				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
+				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
+				AllowedFileExtensions: append([]string(nil), profile.AllowedFileExtensions...),
+				MetadataJSONSchema:    profile.MetadataJSONSchema,
+				UsePreUploadHook:      profile.Hooks.PreUpload,
+				UsePostUploadHook:     profile.Hooks.PostUpload,
+			}
+		}
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
 			s3uploadclient.Options{
+				Logger:          r.log,
 				BucketName:      loadvariable.String(s3Provider.BucketName),
 				BucketLocation:  loadvariable.String(s3Provider.BucketLocation),
 				AccessKeyID:     loadvariable.String(s3Provider.AccessKeyID),
 				SecretAccessKey: loadvariable.String(s3Provider.SecretAccessKey),
 				UseSSL:          s3Provider.UseSSL,
+				Profiles:        profiles,
+				HooksClient:     r.middlewareClient,
+				Name:            s3Provider.Name,
 			},
 		)
 		if err != nil {

@@ -1,6 +1,7 @@
 export type {
 	ClientResponse,
 	UploadRequestOptions,
+	UploadRequestOptionsWithProfile,
 	UploadResponse,
 	FetchUserRequestOptions,
 	User,
@@ -22,6 +23,7 @@ export type {
 	OperationDefinition,
 	ClientOperation,
 	OperationsDefinition,
+	S3ProviderDefinition,
 	HasRequiredInput,
 	WithInput,
 } from './types';

@@ -41,6 +41,12 @@ curl -N http://localhost:9991/operations/Todo
  curl -N http://localhost:9991/operations/Users\?wg_sse\=true
 ```
 
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
+```
+
 #### Playground
 
 Use https://hasura.io/learn/graphql/graphiql to add new users and todos, and explore schema.
