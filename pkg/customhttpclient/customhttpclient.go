@@ -16,6 +16,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
 const (
@@ -96,7 +97,13 @@ func DoWithStatus(client *http.Client, ctx context.Context, requestInput []byte,
 	}
 
 	if queryParams != nil {
-		rawQuery, err := encodeQueryParams(queryParams)
+		// Copy queryParams to a buffer, so we can modify it in place
+		queryParamsBuf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(queryParamsBuf)
+		if _, err := io.Copy(queryParamsBuf, bytes.NewReader(queryParams)); err != nil {
+			return 0, err
+		}
+		rawQuery, err := encodeQueryParams(queryParamsBuf.Bytes())
 		if err != nil {
 			return 0, err
 		}
