@@ -1,10 +1,10 @@
 {
   "graphql_operation_files": [
     {
-      "operation_name": "level_Chat",
+      "operation_name": "LevelChat",
       "api_mount_path": "level/Chat",
       "file_path": "level/Chat.graphql",
-      "content": "subscription level_Chat {chat_messageAdded(roomName: \"test\"){text id}}"
+      "content": "subscription LevelChat {chat_messageAdded(roomName: \"test\"){text id}}"
     }
   ],
   "typescript_operation_files": [
