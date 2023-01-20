@@ -105,6 +105,18 @@
 			>
 	<table class="w-full text-sm text-left table-fixed">
 		<tr class="border-b hover:bg-sky-50/50 transition-all">
+			<th class="pb-4 pt-5 px-6 text-sky-800">Deployment ID</th>
+			<td class="text-gray-800 font-semibold">{{.DeploymentId}}</td>
+		</tr>
+	</table>
+</div>
+<div class="border w-full mt-12 rounded-md bg-white relative">
+      <span
+				class="absolute text-sm bg-white px-2 text-xs -top-2 ml-3 text-gray-500 rounded-sm"
+			>Engine Info</span
+			>
+	<table class="w-full text-sm text-left table-fixed">
+		<tr class="border-b hover:bg-sky-50/50 transition-all">
 			<th class="pb-4 pt-5 px-6 text-sky-800">Version</th>
 			<td class="text-gray-800 font-semibold">{{.BuildInfo.Version}}</td>
 		</tr>

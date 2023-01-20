@@ -13,4 +13,5 @@ type HealthCheckReport struct {
 	ServerStatus string    `json:"serverStatus"`
 	NodeStatus   string    `json:"nodeStatus"`
 	BuildInfo    BuildInfo `json:"buildInfo"`
+	DeploymentId string    `json:"deploymentId"`
 }
