@@ -12,6 +12,6 @@ describe('Test Dragons API', () => {
 			operationName: 'Dragons',
 		});
 		expect(result.error).toBeFalsy();
-		expect(result.data?.spacex_dragons.length).toBe(2);
+		expect(result.data?.spacex_dragons?.length).toBe(2);
 	});
 });

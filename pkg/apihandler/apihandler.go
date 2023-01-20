@@ -256,13 +256,29 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	for _, s3Provider := range api.S3UploadConfiguration {
+		profiles := make(map[string]*s3uploadclient.UploadProfile, len(s3Provider.UploadProfiles))
+		for name, profile := range s3Provider.UploadProfiles {
+			profiles[name] = &s3uploadclient.UploadProfile{
+				MaxFileSizeBytes:      int(profile.MaxAllowedUploadSizeBytes),
+				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
+				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
+				AllowedFileExtensions: append([]string(nil), profile.AllowedFileExtensions...),
+				MetadataJSONSchema:    profile.MetadataJSONSchema,
+				UsePreUploadHook:      profile.Hooks.PreUpload,
+				UsePostUploadHook:     profile.Hooks.PostUpload,
+			}
+		}
 		s3, err := s3uploadclient.NewS3UploadClient(loadvariable.String(s3Provider.Endpoint),
 			s3uploadclient.Options{
+				Logger:          r.log,
 				BucketName:      loadvariable.String(s3Provider.BucketName),
 				BucketLocation:  loadvariable.String(s3Provider.BucketLocation),
 				AccessKeyID:     loadvariable.String(s3Provider.AccessKeyID),
 				SecretAccessKey: loadvariable.String(s3Provider.SecretAccessKey),
 				UseSSL:          s3Provider.UseSSL,
+				Profiles:        profiles,
+				HooksClient:     r.middlewareClient,
+				Name:            s3Provider.Name,
 			},
 		)
 		if err != nil {
@@ -458,7 +474,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, "", shared.Report)
+	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
 	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
@@ -860,7 +876,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			flushWriter *httpFlushWriter
 			ok          bool
 		)
-		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
+		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx.Context, shared.Ctx.Variables, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
@@ -1737,7 +1753,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		ok          bool
 	)
 
-	ctx.Context, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
+	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return

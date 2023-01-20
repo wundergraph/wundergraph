@@ -32,17 +32,15 @@ const (
 )
 
 var (
-	BuildInfo                     node.BuildInfo
-	GitHubAuthDemo                node.GitHubAuthDemo
-	TelemetryClient               telemetry.Client
-	DotEnvFile                    string
-	log                           *zap.Logger
-	serviceToken                  string
-	cmdDurationMetric             telemetry.DurationMetric
-	_wunderGraphDirConfig         string
-	disableCache                  bool
-	prettyGraphQLValidationErrors bool
-	clearCache                    bool
+	BuildInfo             node.BuildInfo
+	GitHubAuthDemo        node.GitHubAuthDemo
+	TelemetryClient       telemetry.Client
+	DotEnvFile            string
+	log                   *zap.Logger
+	cmdDurationMetric     telemetry.DurationMetric
+	_wunderGraphDirConfig string
+	disableCache          bool
+	clearCache            bool
 
 	rootFlags helpers.RootFlags
 

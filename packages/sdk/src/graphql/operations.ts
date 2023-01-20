@@ -157,7 +157,7 @@ export const parseGraphQLOperations = (
 						});
 						const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
 						if (errors.length > 0) {
-							Logger.error(`Error parsing operation ${operationFile.operation_name}: ${errors.join(',')}`);
+							Logger.error(`Error parsing operation ${operationFile.file_path}: ${errors.join(',')}`);
 							Logger.error('Skipping operation');
 							if (WG_PRETTY_GRAPHQL_VALIDATION_ERRORS) {
 								console.log('\n' + errors.join(',') + '\n');
@@ -168,8 +168,8 @@ export const parseGraphQLOperations = (
 						const transformations: PostResolveTransformation[] = [];
 
 						const operation: GraphQLOperation = {
-							Name: operationFile.operation_name.replace('/', '_'),
-							PathName: operationFile.operation_name,
+							Name: operationFile.operation_name,
+							PathName: operationFile.api_mount_path,
 							Content: stripIgnoredCharacters(removeTransformDirectives(content)),
 							OperationType: parseOperationTypeNode(node.operation),
 							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
@@ -1314,16 +1314,16 @@ export interface LoadOperationsOutput {
 
 export interface GraphQLOperationFile {
 	operation_name: string;
+	api_mount_path: string;
 	file_path: string;
 	content: string;
-	path: string[];
 }
 
 export interface TypeScriptOperationFile {
 	operation_name: string;
+	api_mount_path: string;
 	file_path: string;
 	module_path: string;
-	path: string[];
 }
 
 export const loadOperations = (schemaFileName: string): LoadOperationsOutput => {

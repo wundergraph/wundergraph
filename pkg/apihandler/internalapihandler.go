@@ -132,7 +132,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, "", shared.Report)
+	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
 	apiPath := fmt.Sprintf("/operations/%s", operation.Name)
