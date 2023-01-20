@@ -21,7 +21,8 @@ func TestEncodeQueryParams(t *testing.T) {
 		input string
 		want  url.Values
 	}{
-		{"[{\"name\":\"foo\",\"value\":\"\\\"bar\"}]", url.Values{"foo": []string{"\"bar"}}},
+		{"[{\"name\":\"foo1\",\"value\":\"\\\"bar1\"},{\"name\":\"foo1\",\"value\":\"\\\"bar2\"},{\"name\":\"foo2\",\"value\":\"\\\"bar\"},{\"name\":\"foo3\",\"value\":\"\\\"baz\"}]",
+			url.Values{"foo1": []string{"\"bar1", "\"bar2"}, "foo2": []string{"\"bar"}, "foo3": []string{"\"baz"}}},
 	}
 	for _, tc := range testCases {
 		encoded, err := encodeQueryParams([]byte(tc.input))
