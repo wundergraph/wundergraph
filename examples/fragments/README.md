@@ -26,6 +26,11 @@ This example uses global fragments. (operations/GlobalFragment.graphql)
 curl http://localhost:9991/operations/GlobalFragment
 ```
 
+#### TS Operations
+
+```shell
+curl http://localhost:9991/operations/users/get?id=1
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
@@ -33,3 +38,4 @@ Read the [Docs](https://wundergraph.com/docs).
 ## Got Questions?
 
 Join us on [Discord](https://wundergraph.com/discord)!
+```
