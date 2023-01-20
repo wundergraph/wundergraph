@@ -9,9 +9,15 @@ const Countdown: React.FC = () => {
 		input: {
 			from: 100,
 		},
+		onSuccess: (data) => {
+			console.log(data);
+		},
+		onError: (err) => {
+			console.log(err);
+		},
 	});
 
-	return <div>{JSON.stringify(countdown)}</div>;
+	return <pre>{JSON.stringify(countdown, null, 2)}</pre>;
 };
 
 const SWR = () => {

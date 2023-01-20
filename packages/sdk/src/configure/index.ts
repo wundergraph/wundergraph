@@ -9,9 +9,15 @@ import {
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
-import { mergeApis, removeBaseSchema } from '../definition/merge';
-import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
-import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
+import { mergeApis } from '../definition/merge';
+import {
+	GraphQLOperation,
+	loadOperations,
+	LoadOperationsOutput,
+	ParsedOperations,
+	parseGraphQLOperations,
+	removeHookVariables,
+} from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
@@ -24,6 +30,7 @@ import {
 	DataSourceKind,
 	FieldConfiguration,
 	Operation,
+	OperationExecutionEngine,
 	OperationType,
 	PostResolveTransformationKind,
 	TypeConfiguration,
@@ -41,34 +48,21 @@ import {
 	parse,
 	parseType,
 	print,
-	stripIgnoredCharacters,
 	visit,
 } from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
 import path from 'path';
-import { applyNamespaceToApi } from '../definition/namespacing';
 import _ from 'lodash';
-import { wunderctlExec } from '../wunderctlexec';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import {
-	AuthenticationHookRequest,
-	AuthenticationResponse,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphUser,
-} from '../middleware/types';
+import { ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
 import process from 'node:process';
-import {
-	NodeOptions,
-	ResolvedNodeOptions,
-	ResolvedServerOptions,
-	resolveNodeOptions,
-	resolveServerOptions,
-	serverOptionsWithDefaults,
-} from './options';
+import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { InternalClient } from '../middleware/internal-client';
-import { Logger } from '../logger';
+import logger, { Logger } from '../logger';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
+import zodToJsonSchema from 'zod-to-json-schema';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -118,8 +112,10 @@ export interface WunderGraphConfigApplicationConfig {
 		};
 	};
 	links?: LinkConfiguration;
-	dotGraphQLConfig?: DotGraphQLConfig;
 	security?: SecurityConfig;
+
+	/** @deprecated: Not used anymore */
+	dotGraphQLConfig?: any;
 }
 
 export interface TokenAuthProvider {
@@ -137,75 +133,6 @@ export interface SecurityConfig {
 	allowedHosts?: InputVariable[];
 }
 
-export interface DotGraphQLConfig {
-	// hasDotWunderGraphDirectory should be set to true if the project has a ".wundergraph" directory as the WunderGraph root
-	// the default is true so this config doesn't have to be touched usually
-	// only set it to false if you don't have a ".wundergraph" directory in your project
-	hasDotWunderGraphDirectory?: boolean;
-}
-
-export enum HooksConfigurationOperationType {
-	Queries = 'queries',
-	Mutations = 'mutations',
-	Subscriptions = 'subscriptions',
-}
-
-export interface OperationHookFunction {
-	(...args: any[]): Promise<any>;
-}
-
-export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
-	mockResolve?: AsyncFn;
-	preResolve?: AsyncFn;
-	postResolve?: AsyncFn;
-	mutatingPreResolve?: AsyncFn;
-	mutatingPostResolve?: AsyncFn;
-	customResolve?: AsyncFn;
-}
-
-// Any is used here because the exact type of the hooks is not known at compile time
-// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
-export type OperationHooks = Record<string, any>;
-
-export interface HooksConfiguration<
-	Queries extends OperationHooks = OperationHooks,
-	Mutations extends OperationHooks = OperationHooks,
-	Subscriptions extends OperationHooks = OperationHooks,
-	User extends WunderGraphUser = WunderGraphUser,
-	// Any is used here because the exact type of the base client is not known at compile time
-	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
-	IC extends InternalClient = InternalClient<any, any>
-> {
-	global?: {
-		httpTransport?: {
-			onOriginRequest?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-			onOriginResponse?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-		};
-		wsTransport?: {
-			onConnectionInit?: {
-				hook: OperationHookFunction;
-				enableForDataSources: string[];
-			};
-		};
-	};
-	authentication?: {
-		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		revalidate?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		postLogout?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-	};
-	[HooksConfigurationOperationType.Queries]?: Queries;
-	[HooksConfigurationOperationType.Mutations]?: Mutations;
-	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
-}
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;
@@ -288,6 +215,11 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
+export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+	outPath: string;
+	wunderGraphDir: string;
+}
+
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
 	const api = {
 		id: '',
@@ -323,13 +255,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	};
 
 	const graphqlApis = config.server?.graphqlServers?.map((gs) => {
-		const serverPath = customGqlServerMountPath(gs.serverName);
-
 		return introspectGraphqlServer({
 			skipRenameRootFields: gs.skipRenameRootFields,
 			url: '',
 			baseUrl: serverOptions.serverUrl,
-			path: serverPath,
+			path: gs.routeUrl,
 			apiNamespace: gs.apiNamespace,
 			schema: gs.schema,
 		});
@@ -656,15 +586,15 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			}
 
 			const loadedOperations = loadOperations(schemaFileName);
-			const operationsContent = loadedOperations.content;
-			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
-				keepFromClaimVariables: false,
-				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
-			});
+			const operations = await resolveOperationsConfigurations(
+				resolved,
+				loadedOperations,
+				app.EngineConfiguration.CustomJsonScalars || []
+			);
 			app.Operations = operations.operations;
-			app.InvalidOperationNames = loadedOperations.invalidOperationNames;
+			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
-				app.Operations = app.Operations.map((op) => {
+				const ops = app.Operations.map(async (op) => {
 					const cfg = config.operations!;
 					const base = Object.assign({}, cfg.defaultConfig);
 					const customize =
@@ -675,19 +605,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							if (customize as CustomizeMutation) {
 								mutationConfig = customize(mutationConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || mutationConfig.authentication.required,
 								},
-							};
+							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								CacheConfig: {
 									enable: queryConfig.caching.enable,
@@ -699,27 +629,26 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
 								},
-								LiveQuery: {
-									enable: queryConfig.liveQuery.enable,
-									pollingIntervalSeconds: queryConfig.liveQuery.pollingIntervalSeconds,
-								},
-							};
+								LiveQuery: queryConfig.liveQuery,
+							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
 							if (customize as CustomizeSubscription) {
 								subscriptionConfig = customize(subscriptionConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || subscriptionConfig.authentication.required,
 								},
-							};
+							});
 						default:
 							return op;
 					}
 				});
+
+				app.Operations = await Promise.all(ops);
 			}
 
 			if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
@@ -867,33 +796,6 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
-			const dotGraphQLNested =
-				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
-					? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
-					: true;
-
-			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: publicNodeUrl,
-				nested: dotGraphQLNested,
-			});
-
-			const dotGraphQLConfigPath = path.join(dotGraphQLNested ? '..' + path.sep : '', '.graphqlconfig');
-			let shouldUpdateDotGraphQLConfig = true;
-			const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
-			if (fs.existsSync(dotGraphQLConfigPath)) {
-				const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
-				if (dotGraphQLContent === existingDotGraphQLContent) {
-					shouldUpdateDotGraphQLConfig = false;
-				}
-			}
-
-			if (shouldUpdateDotGraphQLConfig) {
-				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				Logger.info(`.graphqlconfig updated`);
-			}
-
-			done();
-
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
 			});
@@ -909,12 +811,13 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			done();
 		})
 		.catch((e: any) => {
-			Logger.fatal(`Couldn't configure your WunderNode: ${e}`);
+			//throw e;
+			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
 			process.exit(1);
 		});
 };
 
-const total = 5;
+const total = 4;
 let doneCount = 0;
 
 const done = () => {
@@ -932,10 +835,12 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
+		path: op.PathName,
 		responseSchema: JSON.stringify(op.ResponseSchema),
 		variablesSchema: JSON.stringify(op.VariablesSchema),
 		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
 		operationType: op.OperationType,
+		engine: op.ExecutionEngine,
 		cacheConfig: op.CacheConfig || {
 			enable: false,
 			maxAge: 0,
@@ -1093,10 +998,125 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	return out;
 };
 
-export const customGqlServerMountPath = (name: string): string => {
-	return `/gqls/${name}/graphql`;
-};
-
 const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+
+const resolveOperationsConfigurations = async (
+	config: ResolvedWunderGraphConfig,
+	loadedOperations: LoadOperationsOutput,
+	customJsonScalars: string[]
+): Promise<ParsedOperations> => {
+	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
+		keepFromClaimVariables: false,
+		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
+		customJsonScalars,
+	});
+	const nodeJSOperations: GraphQLOperation[] = [];
+	if (loadedOperations.typescript_operation_files)
+		for (const file of loadedOperations.typescript_operation_files) {
+			try {
+				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
+				const implementation = await loadNodeJsOperationDefaultModule(filePath);
+				const operation: GraphQLOperation = {
+					Name: file.operation_name,
+					PathName: file.api_mount_path,
+					Content: '',
+					OperationType:
+						implementation.type === 'query'
+							? OperationType.QUERY
+							: implementation.type === 'mutation'
+							? OperationType.MUTATION
+							: OperationType.SUBSCRIPTION,
+					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+					VariablesSchema: { type: 'object', properties: {} },
+					InterpolationVariablesSchema: { type: 'object', properties: {} },
+					InternalVariablesSchema: { type: 'object', properties: {} },
+					InjectedVariablesSchema: { type: 'object', properties: {} },
+					ResponseSchema: { type: 'object', properties: { data: {} } },
+					TypeScriptOperationImport: `function_${file.operation_name}`,
+					AuthenticationConfig: {
+						required: implementation.requireAuthentication || false,
+					},
+					LiveQuery: {
+						enable: true,
+						pollingIntervalSeconds: 5,
+					},
+					AuthorizationConfig: {
+						claims: [],
+						roleConfig: {
+							requireMatchAll: [],
+							requireMatchAny: [],
+							denyMatchAll: [],
+							denyMatchAny: [],
+						},
+					},
+					HooksConfiguration: {
+						preResolve: false,
+						postResolve: false,
+						mutatingPreResolve: false,
+						mutatingPostResolve: false,
+						mockResolve: {
+							enable: false,
+							subscriptionPollingIntervalMillis: 0,
+						},
+						httpTransportOnResponse: false,
+						httpTransportOnRequest: false,
+						customResolve: false,
+					},
+					VariablesConfiguration: {
+						injectVariables: [],
+					},
+					Internal: implementation.internal ? implementation.internal : false,
+					PostResolveTransformations: undefined,
+				};
+				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
+			} catch (e: any) {
+				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
+			}
+		}
+	return {
+		operations: [...graphQLOperations.operations, ...nodeJSOperations],
+	};
+};
+
+const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
+		return operation;
+	}
+	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+	return applyNodeJsOperationOverrides(operation, implementation);
+};
+
+const applyNodeJsOperationOverrides = (
+	operation: GraphQLOperation,
+	overrides: NodeJSOperation<any, any, any, any, any>
+): GraphQLOperation => {
+	if (overrides.inputSchema) {
+		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+	}
+	if (overrides.liveQuery) {
+		operation.LiveQuery = {
+			enable: overrides.liveQuery.enable,
+			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
+		};
+	}
+	if (overrides.requireAuthentication) {
+		operation.AuthenticationConfig = {
+			required: overrides.requireAuthentication,
+		};
+	}
+	if (overrides.rbac) {
+		operation.AuthorizationConfig = {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: overrides.rbac.requireMatchAll,
+				requireMatchAny: overrides.rbac.requireMatchAny,
+				denyMatchAll: overrides.rbac.denyMatchAll,
+				denyMatchAny: overrides.rbac.denyMatchAny,
+			},
+		};
+	}
+	return operation;
 };

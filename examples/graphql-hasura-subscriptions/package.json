@@ -4,12 +4,13 @@
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
+    "build": "wunderctl generate --debug",
     "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.125.0",
+    "@wundergraph/sdk": "^0.131.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

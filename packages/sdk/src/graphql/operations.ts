@@ -2,12 +2,14 @@ import {
 	Claim,
 	ClaimConfig,
 	InjectVariableKind,
+	OperationExecutionEngine,
 	OperationRoleConfig,
 	OperationType,
 	VariableInjectionConfiguration,
 } from '@wundergraph/protobuf';
 import {
 	buildSchema,
+	DirectiveNode,
 	DocumentNode,
 	FieldNode,
 	FragmentDefinitionNode,
@@ -19,29 +21,33 @@ import {
 	parse,
 	print,
 	SelectionNode,
+	stripIgnoredCharacters,
 	TypeNode,
+	UnionTypeDefinitionNode,
+	validate,
 	VariableDefinitionNode,
 	visit,
-	validate,
-	DirectiveNode,
-	stripIgnoredCharacters,
-	UnionTypeDefinitionNode,
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
-import { WG_THROW_ON_OPERATION_LOADING_ERROR } from '../definition';
+import { WG_PRETTY_GRAPHQL_VALIDATION_ERRORS, WG_THROW_ON_OPERATION_LOADING_ERROR } from '../definition';
 import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
+import * as fs from 'fs';
+import process from 'node:process';
 
 export interface GraphQLOperation {
 	Name: string;
+	PathName: string;
 	Content: string;
 	OperationType: OperationType;
+	ExecutionEngine: OperationExecutionEngine;
 	VariablesSchema: JSONSchema;
 	InterpolationVariablesSchema: JSONSchema;
 	InjectedVariablesSchema: JSONSchema;
 	InternalVariablesSchema: JSONSchema;
 	ResponseSchema: JSONSchema;
+	TypeScriptOperationImport?: string;
 	Mock?: {
 		Endpoint: string;
 		SubscriptionPollingInterval?: number;
@@ -104,6 +110,7 @@ export interface ParsedOperations {
 export interface ParseOperationsOptions {
 	keepFromClaimVariables?: boolean;
 	interpolateVariableDefinitionAsJSON?: string[];
+	customJsonScalars?: string[];
 }
 
 const defaultParseOptions: ParseOperationsOptions = {
@@ -118,9 +125,9 @@ const defaultVariableInjectionConfiguration: Omit<
 	dateFormat: '',
 };
 
-export const parseOperations = (
+export const parseGraphQLOperations = (
 	graphQLSchema: string,
-	operationsDocument: string,
+	loadOperationsOutput: LoadOperationsOutput,
 	options: ParseOperationsOptions = defaultParseOptions
 ): ParsedOperations => {
 	let parsedGraphQLSchema = buildSchema(graphQLSchema);
@@ -131,150 +138,175 @@ export const parseOperations = (
 		operations: [],
 	};
 	const wgRoleEnum = parsedGraphQLSchema.getType('WG_ROLE')?.astNode;
-	try {
-		const ast = parse(operationsDocument);
-		visit(ast, {
-			OperationDefinition: {
-				enter: (node) => {
-					const operationName = (node.name || { value: '' }).value;
-					const content = print(node);
-					const parsedOperation = parse(content);
-					const operationWithoutHooksVariables = visit(parsedOperation, {
-						VariableDefinition: {
-							enter: (node) => {
-								if (node.directives?.some((directive) => directive.name.value === 'hooksVariable')) {
-									return null;
-								}
-							},
-						},
-					});
-					const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
-					if (errors.length > 0) {
-						Logger.error(`Error parsing operation ${operationName}: ${errors.join(',')}`);
-						Logger.error('Skipping operation');
-						return;
-					}
-
-					const transformations: PostResolveTransformation[] = [];
-
-					const operation: GraphQLOperation = {
-						Name: operationName,
-						Content: stripIgnoredCharacters(removeTransformDirectives(content)),
-						OperationType: parseOperationTypeNode(node.operation),
-						VariablesSchema: operationVariablesToJSONSchema(
-							parsedGraphQLSchema,
-							node,
-							[],
-							options.keepFromClaimVariables
-						),
-						InterpolationVariablesSchema: operationVariablesToJSONSchema(
-							parsedGraphQLSchema,
-							node,
-							options.interpolateVariableDefinitionAsJSON || [],
-							options.keepFromClaimVariables
-						),
-						InternalVariablesSchema: operationVariablesToJSONSchema(parsedGraphQLSchema, node, [], true),
-						InjectedVariablesSchema: operationVariablesToJSONSchema(parsedGraphQLSchema, node, [], true, true),
-						ResponseSchema: operationResponseToJSONSchema(parsedGraphQLSchema, ast, node, transformations),
-						AuthenticationConfig: {
-							required: false,
-						},
-						AuthorizationConfig: {
-							claims: [],
-							roleConfig: {
-								requireMatchAll: [],
-								requireMatchAny: [],
-								denyMatchAll: [],
-								denyMatchAny: [],
-							},
-						},
-						HooksConfiguration: {
-							preResolve: false,
-							postResolve: false,
-							mutatingPreResolve: false,
-							mutatingPostResolve: false,
-							mockResolve: {
-								enable: false,
-								subscriptionPollingIntervalMillis: 0,
-							},
-							httpTransportOnResponse: false,
-							httpTransportOnRequest: false,
-							customResolve: false,
-						},
-						VariablesConfiguration: {
-							injectVariables: [],
-						},
-						Internal: false,
-						PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
-					};
-					node.variableDefinitions?.forEach((variable) => {
-						handleFromClaimDirective(variable, operation);
-						handleJsonSchemaDirective(variable, operation);
-						handleUuidDirective(variable, operation);
-						handleDateTimeDirective(variable, operation);
-						handleInjectEnvironmentVariableDirective(variable, operation);
-					});
-					operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
-					if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
-						const rbac = node.directives?.find((d) => d.name.value === 'rbac');
-						rbac?.arguments?.forEach((arg) => {
-							if (arg.value.kind !== 'ListValue') {
-								return;
-							}
-							const values = arg.value.values
-								.map((v) => {
-									if (v.kind !== 'EnumValue') {
-										return '';
+	loadOperationsOutput.graphql_operation_files?.forEach((operationFile) => {
+		try {
+			const ast = parse(operationFile.content);
+			visit(ast, {
+				OperationDefinition: {
+					enter: (node) => {
+						const content = print(node);
+						const parsedOperation = parse(content);
+						const operationWithoutHooksVariables = visit(parsedOperation, {
+							VariableDefinition: {
+								enter: (node) => {
+									if (node.directives?.some((directive) => directive.name.value === 'hooksVariable')) {
+										return null;
 									}
-									return v.value;
-								})
-								.filter((v) => wgRoleEnum.values?.find((n) => n.name.value === v) !== undefined);
-							switch (arg.name.value) {
-								case 'requireMatchAll':
-									operation.AuthorizationConfig.roleConfig.requireMatchAll = [
-										...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAll, ...values]),
-									];
-									return;
-								case 'requireMatchAny':
-									operation.AuthorizationConfig.roleConfig.requireMatchAny = [
-										...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAny, ...values]),
-									];
-									return;
-								case 'denyMatchAll':
-									operation.AuthorizationConfig.roleConfig.denyMatchAll = [
-										...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAll, ...values]),
-									];
-									return;
-								case 'denyMatchAny':
-									operation.AuthorizationConfig.roleConfig.denyMatchAny = [
-										...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAny, ...values]),
-									];
-									return;
-							}
+								},
+							},
 						});
-					}
-					if (
-						operation.AuthorizationConfig.roleConfig.denyMatchAny.length +
-							operation.AuthorizationConfig.roleConfig.denyMatchAll.length +
-							operation.AuthorizationConfig.roleConfig.requireMatchAll.length +
-							operation.AuthorizationConfig.roleConfig.requireMatchAny.length !==
-						0
-					) {
-						operation.AuthenticationConfig.required = true;
-					}
-					if (operation.AuthorizationConfig.claims.length !== 0) {
-						operation.AuthenticationConfig.required = true;
-					}
-					parsed.operations.push(operation);
+						const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
+						if (errors.length > 0) {
+							Logger.error(`Error parsing operation ${operationFile.file_path}: ${errors.join(',')}`);
+							Logger.error('Skipping operation');
+							if (WG_PRETTY_GRAPHQL_VALIDATION_ERRORS) {
+								console.log('\n' + errors.join(',') + '\n');
+							}
+							return;
+						}
+
+						const transformations: PostResolveTransformation[] = [];
+
+						const operation: GraphQLOperation = {
+							Name: operationFile.operation_name,
+							PathName: operationFile.api_mount_path,
+							Content: stripIgnoredCharacters(removeTransformDirectives(content)),
+							OperationType: parseOperationTypeNode(node.operation),
+							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+							VariablesSchema: operationVariablesToJSONSchema(
+								parsedGraphQLSchema,
+								node,
+								[],
+								options.keepFromClaimVariables,
+								false,
+								options.customJsonScalars || []
+							),
+							InterpolationVariablesSchema: operationVariablesToJSONSchema(
+								parsedGraphQLSchema,
+								node,
+								options.interpolateVariableDefinitionAsJSON || [],
+								options.keepFromClaimVariables,
+								false,
+								options.customJsonScalars || []
+							),
+							InternalVariablesSchema: operationVariablesToJSONSchema(
+								parsedGraphQLSchema,
+								node,
+								[],
+								true,
+								false,
+								options.customJsonScalars || []
+							),
+							InjectedVariablesSchema: operationVariablesToJSONSchema(
+								parsedGraphQLSchema,
+								node,
+								[],
+								true,
+								true,
+								options.customJsonScalars || []
+							),
+							ResponseSchema: operationResponseToJSONSchema(parsedGraphQLSchema, ast, node, transformations),
+							AuthenticationConfig: {
+								required: false,
+							},
+							AuthorizationConfig: {
+								claims: [],
+								roleConfig: {
+									requireMatchAll: [],
+									requireMatchAny: [],
+									denyMatchAll: [],
+									denyMatchAny: [],
+								},
+							},
+							HooksConfiguration: {
+								preResolve: false,
+								postResolve: false,
+								mutatingPreResolve: false,
+								mutatingPostResolve: false,
+								mockResolve: {
+									enable: false,
+									subscriptionPollingIntervalMillis: 0,
+								},
+								httpTransportOnResponse: false,
+								httpTransportOnRequest: false,
+								customResolve: false,
+							},
+							VariablesConfiguration: {
+								injectVariables: [],
+							},
+							Internal: false,
+							PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
+						};
+						node.variableDefinitions?.forEach((variable) => {
+							handleFromClaimDirective(variable, operation);
+							handleJsonSchemaDirective(variable, operation);
+							handleUuidDirective(variable, operation);
+							handleDateTimeDirective(variable, operation);
+							handleInjectEnvironmentVariableDirective(variable, operation);
+						});
+						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
+						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
+							const rbac = node.directives?.find((d) => d.name.value === 'rbac');
+							rbac?.arguments?.forEach((arg) => {
+								if (arg.value.kind !== 'ListValue') {
+									return;
+								}
+								const values = arg.value.values
+									.map((v) => {
+										if (v.kind !== 'EnumValue') {
+											return '';
+										}
+										return v.value;
+									})
+									.filter((v) => wgRoleEnum.values?.find((n) => n.name.value === v) !== undefined);
+								switch (arg.name.value) {
+									case 'requireMatchAll':
+										operation.AuthorizationConfig.roleConfig.requireMatchAll = [
+											...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAll, ...values]),
+										];
+										return;
+									case 'requireMatchAny':
+										operation.AuthorizationConfig.roleConfig.requireMatchAny = [
+											...new Set([...operation.AuthorizationConfig.roleConfig.requireMatchAny, ...values]),
+										];
+										return;
+									case 'denyMatchAll':
+										operation.AuthorizationConfig.roleConfig.denyMatchAll = [
+											...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAll, ...values]),
+										];
+										return;
+									case 'denyMatchAny':
+										operation.AuthorizationConfig.roleConfig.denyMatchAny = [
+											...new Set([...operation.AuthorizationConfig.roleConfig.denyMatchAny, ...values]),
+										];
+										return;
+								}
+							});
+						}
+						if (
+							operation.AuthorizationConfig.roleConfig.denyMatchAny.length +
+								operation.AuthorizationConfig.roleConfig.denyMatchAll.length +
+								operation.AuthorizationConfig.roleConfig.requireMatchAll.length +
+								operation.AuthorizationConfig.roleConfig.requireMatchAny.length !==
+							0
+						) {
+							operation.AuthenticationConfig.required = true;
+						}
+						if (operation.AuthorizationConfig.claims.length !== 0) {
+							operation.AuthenticationConfig.required = true;
+						}
+						parsed.operations.push(operation);
+					},
 				},
-			},
-		});
-	} catch (e) {
-		Logger.error(e);
-		Logger.error('No Operations found! Please create at least one Operation in the directory ./operations');
-		Logger.error("Operation files must have the file extension '.graphql', otherwise they are ignored.");
-		Logger.error("Operations don't need to be named, the file name is responsible for the operation name.");
-	}
+			});
+		} catch (e) {
+			Logger.error(e);
+			Logger.error(`Operations document: ${operationFile.content}`);
+			Logger.error('No Operations found! Please create at least one Operation in the directory ./operations');
+			Logger.error("Operation files must have the file extension '.graphql', otherwise they are ignored.");
+			Logger.error("Operations don't need to be named, the file name is responsible for the operation name.");
+		}
+	});
 	return parsed;
 };
 
@@ -696,7 +728,8 @@ export const operationVariablesToJSONSchema = (
 	operation: OperationDefinitionNode,
 	interpolateVariableDefinitionAsJSON: string[],
 	keepInternalVariables: boolean = false,
-	keepInjectedVariables: boolean = false
+	keepInjectedVariables: boolean = false,
+	customJsonScalars: string[]
 ): JSONSchema => {
 	const schema: JSONSchema = {
 		type: 'object',
@@ -730,7 +763,8 @@ export const operationVariablesToJSONSchema = (
 			interpolateVariableDefinitionAsJSON,
 			type,
 			name,
-			nonNullType
+			nonNullType,
+			customJsonScalars
 		);
 	});
 
@@ -770,7 +804,8 @@ const typeSchema = (
 	interpolateVariableDefinitionAsJSON: string[],
 	type: TypeNode,
 	name: string,
-	nonNull: boolean
+	nonNull: boolean,
+	customJsonScalars: string[]
 ): JSONSchema => {
 	switch (type.kind) {
 		case 'NonNullType':
@@ -782,7 +817,16 @@ const typeSchema = (
 					parent.minItems = 1;
 					break;
 			}
-			return typeSchema(root, parent, graphQLSchema, interpolateVariableDefinitionAsJSON, type.type, name, true);
+			return typeSchema(
+				root,
+				parent,
+				graphQLSchema,
+				interpolateVariableDefinitionAsJSON,
+				type.type,
+				name,
+				true,
+				customJsonScalars
+			);
 		case 'ListType':
 			const schema: JSONSchema = {
 				type: nonNull ? 'array' : ['array', 'null'],
@@ -794,7 +838,8 @@ const typeSchema = (
 				interpolateVariableDefinitionAsJSON,
 				type.type,
 				name,
-				false
+				false,
+				customJsonScalars
 			);
 			return schema;
 		case 'NamedType':
@@ -822,6 +867,10 @@ const typeSchema = (
 				case 'JSON':
 					return {};
 				default:
+					if (customJsonScalars.includes(type.name.value)) {
+						return {};
+					}
+
 					let schema: JSONSchema = {};
 					const namedType = graphQLSchema.getType(type.name.value);
 					if (namedType === null || namedType === undefined || !namedType.astNode) {
@@ -869,7 +918,8 @@ const typeSchema = (
 									interpolateVariableDefinitionAsJSON,
 									fieldType,
 									name,
-									false
+									false,
+									customJsonScalars
 								);
 							});
 							root.definitions![typeName] = schema;
@@ -1254,54 +1304,57 @@ const handleTransformDirective = (
 	return schema;
 };
 
-interface LoadOperationsOutput {
-	files?: GqlFile[];
+export interface LoadOperationsOutput {
+	graphql_operation_files?: GraphQLOperationFile[];
+	typescript_operation_files?: TypeScriptOperationFile[];
 	invalid?: string[];
 	errors?: string[];
 	info?: string[];
 }
 
-interface GqlFile {
+export interface GraphQLOperationFile {
 	operation_name: string;
+	api_mount_path: string;
 	file_path: string;
 	content: string;
 }
 
-interface LoadedOperations {
-	content: string;
-	invalidOperationNames: string[];
+export interface TypeScriptOperationFile {
+	operation_name: string;
+	api_mount_path: string;
+	file_path: string;
+	module_path: string;
 }
 
-export const loadOperations = (schemaFileName: string): LoadedOperations => {
-	const operationsPath = path.join(process.cwd(), 'operations');
-	const fragmentsPath = path.join(process.cwd(), 'fragments');
-	const schemaFilePath = path.join(process.cwd(), 'generated', schemaFileName);
+export const loadOperations = (schemaFileName: string): LoadOperationsOutput => {
+	const operationsPath = path.join(process.env.WG_DIR_ABS!, 'operations');
+	const fragmentsPath = path.join(process.env.WG_DIR_ABS!, 'fragments');
+	const schemaFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', schemaFileName);
+	const outFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.operations.json');
 	const result = wunderctlExec({
-		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath],
+		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath, '--pretty'],
 	});
 	if (result?.failed) {
 		throw new Error(result?.stderr);
 	}
-	const output = result?.stdout;
-	let content = '';
-	let invalidOperationNames: string[] = [];
-	if (output) {
-		const out = JSON.parse(output) as LoadOperationsOutput;
-		out.info?.forEach((msg) => Logger.info(msg));
-		out.errors?.forEach((msg) => Logger.error(msg));
-		if (WG_THROW_ON_OPERATION_LOADING_ERROR && (out.errors?.length ?? 0) > 0 && out?.errors?.[0]) {
-			throw new Error(out.errors[0]);
-		}
-		content = out.files?.map((file) => file.content).join(' ') || '';
-		invalidOperationNames = out.invalid ?? [];
+
+	const output = fs.readFileSync(outFilePath, 'utf8');
+	const out = JSON.parse(output) as LoadOperationsOutput;
+
+	out.info?.forEach((msg) => Logger.info(msg));
+	out.errors?.forEach((msg) => Logger.error(msg));
+
+	if (WG_THROW_ON_OPERATION_LOADING_ERROR && (out.errors?.length ?? 0) > 0 && out?.errors?.[0]) {
+		throw new Error(out.errors[0]);
 	}
-	return {
-		content,
-		invalidOperationNames,
-	};
+
+	return out;
 };
 
 export const removeHookVariables = (operation: string): string => {
+	if (operation === '') {
+		return operation;
+	}
 	const document = parse(operation);
 	const updated = visit(document, {
 		VariableDefinition: (node) => {

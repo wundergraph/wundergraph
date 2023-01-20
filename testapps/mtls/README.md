@@ -2,7 +2,7 @@
 
 1. Start the mTLS server that mocks the SpaceX API.
    ```
-   cd server && go run main.go
+   pnpm start:server
    ```
 2. Start WunderGraph with mTLS.
    ```

@@ -17,7 +17,7 @@ import type {
   Webhook,
   WebhookHttpEvent,
   WebhookHttpResponse,
-} from '@wundergraph/sdk'
+} from '@wundergraph/sdk/server'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
 const webhook: Webhook<
@@ -57,7 +57,7 @@ You have access to the original client request.
 ```typescript
 // .wundergraph/webhooks/github.ts
 
-import type { Webhook } from '@wundergraph/sdk'
+import type { Webhook } from '@wundergraph/sdk/server'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
 const webhook: Webhook<InternalClient> = {
@@ -90,7 +90,7 @@ You can call internal operations from webhooks. Ensure to import the generated c
 ```typescript
 // .wundergraph/webhooks/github.ts
 
-import type { Webhook } from '@wundergraph/sdk'
+import type { Webhook } from '@wundergraph/sdk/server'
 import type { InternalClient } from '../generated/wundergraph.internal.client'
 
 const webhook: Webhook<InternalClient> = {
@@ -125,7 +125,7 @@ import {
   configureWunderGraphServer,
   EnvironmentVariable,
   GithubWebhookVerifier,
-} from '@wundergraph/sdk'
+} from '@wundergraph/sdk/server'
 import type { HooksConfig } from './generated/wundergraph.hooks'
 import type { WebhooksConfig } from './generated/wundergraph.webhooks'
 import type { InternalClient } from './generated/wundergraph.internal.client'
@@ -157,7 +157,7 @@ import {
   configureWunderGraphServer,
   EnvironmentVariable,
   GithubWebhookVerifier,
-} from '@wundergraph/sdk'
+} from '@wundergraph/sdk/server'
 import type { HooksConfig } from './generated/wundergraph.hooks'
 import type { WebhooksConfig } from './generated/wundergraph.webhooks'
 import type { InternalClient } from './generated/wundergraph.internal.client'

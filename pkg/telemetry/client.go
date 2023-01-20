@@ -79,7 +79,7 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 	if c.httpClient == nil {
 		retryClient := retryablehttp.NewClient()
 		retryClient.HTTPClient.Timeout = c.timeout
-		retryClient.RetryMax = 1
+		retryClient.RetryMax = 3
 		retryClient.Logger = nil
 		c.httpClient = retryClient.StandardClient()
 	}

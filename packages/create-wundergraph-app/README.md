@@ -4,6 +4,8 @@ The best way to start with Wundergraph is by using `create-wundergraph-app`. Thi
 
 ## Local Development
 
+The project has an environment variable called GITHUB_TOKEN that can be used to increase the rate limit of GitHub APIs.
+
 ```shell
 pnpm install
 pnpm build
@@ -29,11 +31,18 @@ npx create-wundergraph-app <project-name> -E <example-name>
 npx create-wundergraph-app <project-name> -L <github-link>
 ```
 
+## Integrating WunderGraph with an existing project
+
+```shell
+npx create-wundergraph-app --init
+```
+
 ## Local Usage
 
 ```shell
 node ./dist/src/index.js --help
 node ./dist/src/index.js --version
+node ./dist/src/index.js --init
 node ./dist/src/index.js <project-name>
 node ./dist/src/index.js <project-name> -E <example-name>
 node ./dist/src/index.js <project-name> -L <github-link>

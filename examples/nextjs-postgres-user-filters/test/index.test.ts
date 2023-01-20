@@ -3,17 +3,8 @@ import fetch from 'node-fetch';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
 const wg = createTestServer({ fetch: fetch as any });
-
-beforeAll(async () => {
-	process.env['WUNDERGRAPH_CSRF_TOKEN_SECRET'] = 'abcdefghijk';
-	process.env['WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'] = 'a'.repeat(32);
-	process.env['WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'] = 'a'.repeat(32);
-	await wg.start();
-});
-
-afterAll(async () => {
-	await wg.stop();
-});
+beforeAll(() => wg.start());
+afterAll(() => wg.stop());
 
 describe('Test User and Nodes', () => {
 	test('create user and query user by email', async () => {
@@ -48,19 +39,19 @@ describe('Test User and Nodes', () => {
 				data: [
 					{
 						name: 'A',
-						created_at: new Date(2020, 0, 1).toISOString(),
+						created_at: new Date(2020, 1, 1).toISOString(),
 					},
 					{
 						name: 'B',
-						created_at: new Date(2020, 0, 2).toISOString(),
+						created_at: new Date(2020, 1, 2).toISOString(),
 					},
 					{
 						name: 'C',
-						created_at: new Date(2020, 0, 3).toISOString(),
+						created_at: new Date(2020, 1, 3).toISOString(),
 					},
 					{
 						name: 'D',
-						created_at: new Date(2020, 0, 4).toISOString(),
+						created_at: new Date(2020, 1, 4).toISOString(),
 					},
 				],
 			},
@@ -77,6 +68,6 @@ describe('Test User and Nodes', () => {
 			},
 		});
 		expect(result.error).toBeFalsy();
-		expect(result.data?.db_findManyNode?.[0]?.created_at).toBe(new Date(2020, 0, 1).toISOString());
+		expect(result.data?.db_findManyNode?.[0]?.created_at).toBe(new Date(2020, 1, 1).toISOString());
 	});
 });

@@ -5,7 +5,9 @@
   "scripts": {
     "start": "run-p start:services wundergraph",
     "start:services": "ts-node yoga/server.ts",
-    "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
+    "wait-on:services": "wait-on tcp:4000",
+    "wundergraph": "npm run wait-on:services && wunderctl up --debug",
+    "build": "wunderctl generate --debug",
     "check": "tsc --noEmit",
     "test": "jest"
   },
@@ -13,19 +15,19 @@
   "license": "ISC",
   "dependencies": {
     "@graphql-yoga/node": "^2.13.13",
-    "@wundergraph/sdk": "^0.125.0",
+    "@wundergraph/sdk": "^0.131.0",
     "graphql": "^16.3.0",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.1",
     "wait-on": "^6.0.1"
   },
   "devDependencies": {
-    "@types/node": "^14.14.37",
-    "typescript": "^4.8.2",
     "@jest/globals": "^29.3.1",
+    "@types/node": "^14.14.37",
+    "@types/node-fetch": "^2.6.2",
     "jest": "^29.3.1",
-    "ts-jest": "^29.0.3",
     "node-fetch": "^2.6.7",
-    "@types/node-fetch": "^2.6.2"
+    "ts-jest": "^29.0.3",
+    "typescript": "^4.8.2"
   }
 }

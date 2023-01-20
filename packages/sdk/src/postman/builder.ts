@@ -28,7 +28,7 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	mutationGroup.describe('All your mutation operations');
 
 	operations.forEach((op) => {
-		const operationURL = `{{apiBaseUrl}}/operations/${op.Name}`;
+		const operationURL = `{{apiBaseUrl}}/operations/${op.PathName}`;
 
 		let paths: JSONSchemaParameterPath[] = [];
 		buildPath([], false, op.VariablesSchema, paths);

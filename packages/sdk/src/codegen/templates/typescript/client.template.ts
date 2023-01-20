@@ -105,12 +105,13 @@ export const createClient = (config?: CreateClientConfig) => {
 		...defaultClientConfig,
 		...config,
 		operationMetadata,
+		csrfEnabled: {{csrfEnabled}},
 	});
 };
 
 export type Queries = {
 {{#each queries}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
@@ -121,7 +122,7 @@ export type Queries = {
 
 export type Mutations = {
 {{#each mutations}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
@@ -131,7 +132,7 @@ export type Mutations = {
 
 export type Subscriptions = {
 {{#each subscriptions}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
@@ -141,7 +142,7 @@ export type Subscriptions = {
 
 export type LiveQueries = {
 {{#each liveQueries}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         liveQuery: true

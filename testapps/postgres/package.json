@@ -4,10 +4,10 @@
   "version": "1.0.1",
   "description": "",
   "scripts": {
-    "start-database": "docker-compose up",
+    "start:database": "docker-compose up -d",
     "dev": "wunderctl up --debug",
     "generate": "wunderctl generate --debug",
-    "cleanup": "docker-compose down"
+    "cleanup": "docker-compose down -v"
   },
   "author": "",
   "license": "ISC",

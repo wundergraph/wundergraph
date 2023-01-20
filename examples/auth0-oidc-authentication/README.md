@@ -7,13 +7,15 @@
 1. Go to [Auth0](https://auth0.com/) and create a new application of type "Regular Web Application"
 2. Skip the Quickstart
 3. Copy the `Issuer`, `Client ID` and `Client Secret` to the clipboard
-4. Rename the `.example.env` file to `.env`
+4. Rename the `.env.example` file to `.env`
 5. Paste the credentials into the `.env` file
-6. Set the Callback URL on Auth0 to http://localhost:9991/auth/cookie/callback/auth0
+6. Set _Allowed Callback URLs_ on Auth0's app settings dashboard to `http://localhost:9991/auth/cookie/callback/auth0`
+7. Set _Allowed Logout URLs_ on Auth0's app settings dashboard to `http://localhost:3000`
 
 ### 2. Install & Start
 
-Install the dependencies and run the complete example in one command:
+1. Copy the `.env.example` file to `.env` and fill in the required values.
+2. Install the dependencies and run the complete example in one command:
 
 ```shell
 npm install && npm start

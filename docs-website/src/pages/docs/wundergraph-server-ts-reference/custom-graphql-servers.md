@@ -41,7 +41,7 @@ you're able to call these from the GraphQL resolvers.
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer } from '@wundergraph/sdk'
+import { configureWunderGraphServer } from '@wundergraph/sdk/server'
 import type { HooksConfig } from './generated/wundergraph.hooks'
 import type { InternalClient } from './generated/wundergraph.internal.client'
 import type { GraphQLExecutionContext } from './generated/wundergraph.server'
@@ -84,7 +84,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 
 ```typescript
 // wundergraph.server.ts
-import { configureWunderGraphServer } from '@wundergraph/sdk'
+import { configureWunderGraphServer } from '@wundergraph/sdk/server'
 import type { HooksConfig } from './generated/wundergraph.hooks'
 import type { InternalClient } from './generated/wundergraph.internal.client'
 import type { GraphQLExecutionContext } from './generated/wundergraph.server'

@@ -18,7 +18,7 @@ type ServerRunConfig struct {
 func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
 	hooksEnv := []string{
 		"START_HOOKS_SERVER=true",
-		fmt.Sprintf("WG_ABS_DIR=%s", cfg.WunderGraphDirAbs),
+		fmt.Sprintf("WG_DIR_ABS=%s", cfg.WunderGraphDirAbs),
 	}
 
 	if cfg.Production {

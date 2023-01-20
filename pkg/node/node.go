@@ -271,52 +271,46 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 
 	host, port := configuration.Host, configuration.Port
 
+	var addrs []net.IP
+	// Calling LookupHost on an IP address will return the same
+	// address, so we don't need to handle addresses and hostnames
+	// differently
+	hostAddrs, err := net.DefaultResolver.LookupHost(n.ctx, host)
+	if err != nil {
+		return nil, fmt.Errorf("can't resolve host to listen on %s: %w", host, err)
+	}
+	for _, addr := range hostAddrs {
+		if ip := net.ParseIP(addr); ip != nil {
+			addrs = append(addrs, ip)
+		}
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("host %s didn't resolve to any valid IP adddresses", host)
+	}
+
 	var listeners []net.Listener
-	var localhostIPs []net.IP
-
-	// If listening to 'localhost', listen to both localhost or ::1 if they are available.
-	if host == "localhost" {
-		localhostIPs, _ = net.LookupIP(host)
-	}
-
-	for _, ip := range localhostIPs {
-		nip := ip.String()
-		// isIPv6
-		if strings.Contains(nip, ":") {
-			// Filter out link-local addresses
-			if strings.HasPrefix(nip, "fe80:") {
-				continue
-			}
-			listener, err := cfg.Listen(context.Background(), "tcp6", fmt.Sprintf("[%s]:%d", nip, port))
-			// in some cases e.g when ipv6 is not enabled in docker, listen will error
-			// in that case we ignore this error and try to listen to next ip
-			if err == nil {
-				listeners = append(listeners, &proxyproto.Listener{
-					Listener: listener,
-				})
-			} else {
-				n.log.Error("failed to listen to ipv6. Did you forget to enable ipv6?",
-					zap.String("ip", nip),
-					zap.Error(err),
-				)
-			}
+	for _, addr := range addrs {
+		saddr := addr.String()
+		var bindAddr string
+		var bindProto string
+		// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
+		// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
+		// to pass the network as tcp4. Dual stack has produced some issues in container environments
+		// for those reasons we are using tcp4 or tcp6 explicitly.
+		if addr.To4() != nil {
+			bindProto = "tcp4"
+			bindAddr = saddr
 		} else {
-			listener, err := cfg.Listen(context.Background(), "tcp4", fmt.Sprintf("%s:%d", nip, port))
-			if err != nil {
-				return nil, err
-			}
-			listeners = append(listeners, &proxyproto.Listener{
-				Listener: listener,
-			})
+			bindProto = "tcp6"
+			bindAddr = fmt.Sprintf("[%s]", saddr)
 		}
-	}
 
-	// when we didn't listen to additional localhostIPs we will listen only to the host
-	if len(localhostIPs) == 0 {
-		listener, err := cfg.Listen(context.Background(), "tcp", fmt.Sprintf("%s:%d", host, port))
+		toListen := fmt.Sprintf("%s:%d", bindAddr, port)
+		listener, err := cfg.Listen(n.ctx, bindProto, toListen)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error listening on %s: %w", toListen, err)
 		}
+
 		listeners = append(listeners, &proxyproto.Listener{
 			Listener: listener,
 		})
@@ -342,7 +336,7 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	n.log.Info("WunderNode shutdown complete")
 }
 
-func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, bool) {
+func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (*HealthCheckReport, bool) {
 	healthCheck := &HealthCheckReport{
 		ServerStatus: "NOT_READY",
 		// For now we assume that the server is ready
@@ -352,7 +346,9 @@ func (n *Node) GetHealthReport(hooksClient *hooks.Client) (*HealthCheckReport, b
 	}
 
 	if n.options.hooksServerHealthCheck {
-		ok := hooksClient.DoHealthCheckRequest(n.options.healthCheckTimeout)
+		ctx, cancel := context.WithTimeout(ctx, n.options.healthCheckTimeout)
+		defer cancel()
+		ok := hooksClient.DoHealthCheckRequest(ctx)
 		if ok {
 			healthCheck.ServerStatus = "READY"
 		} else {
@@ -479,7 +475,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 			return
 		}
 
-		report, healthy := n.GetHealthReport(hooksClient)
+		report, healthy := n.GetHealthReport(r.Context(), hooksClient)
 		if !healthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
@@ -493,7 +489,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}))
 
 	router.Handle(healthCheckEndpoint, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		report, healthy := n.GetHealthReport(hooksClient)
+		report, healthy := n.GetHealthReport(r.Context(), hooksClient)
 		if !healthy {
 			w.WriteHeader(http.StatusServiceUnavailable)
 		}
@@ -521,7 +517,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		n.server.RegisterOnShutdown(timeoutMiddleware.Cancel)
 		timeoutMiddleware.Start()
 		go func() {
-			timeoutMiddleware.Wait(n.ctx)
+			_ = timeoutMiddleware.Wait(n.ctx)
 			n.options.idleHandler()
 		}()
 	}
@@ -540,16 +536,17 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 				zap.String("addr", l.Addr().String()),
 			)
 
-			if err := n.server.Serve(l); err != nil {
-				if err == http.ErrServerClosed {
-					n.log.Debug("listener closed",
-						zap.String("addr", l.Addr().String()),
-					)
-					return nil
-				}
-				return err
+			err := n.server.Serve(l)
+			if err == nil {
+				return nil
 			}
-			return nil
+			if err == http.ErrServerClosed {
+				n.log.Debug("listener closed",
+					zap.String("addr", l.Addr().String()),
+				)
+				return nil
+			}
+			return err
 		})
 	}
 
@@ -680,16 +677,4 @@ func (n *Node) reloadFileConfig(filePath string) error {
 	n.configCh <- config
 
 	return nil
-}
-
-func uniqueStrings(slice []string) []string {
-	keys := make(map[string]bool)
-	var list []string
-	for _, entry := range slice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
 }

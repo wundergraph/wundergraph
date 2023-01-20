@@ -9,7 +9,19 @@ usage()
 }
 
 update_package_json="no"
-npm=pnpm
+# On Linux using pnpm always results in a "ELIFECYCLE Command failed. Exit code: 1" error
+# For this reason we use npm as the default
+npm=npm
+
+kill_with_children() {
+    local pid=$1
+    if children="`pgrep -P $pid`"; then
+        for child in $children; do
+            kill_with_children $child
+        done
+    fi
+    kill $pid
+}
 
 args=`getopt uh $*`
 if test $? -ne 0; then
@@ -36,16 +48,6 @@ while :; do
     esac
 done
 
-kill_with_children() {
-    local pid=$1
-    if children="`pgrep -P $pid`"; then
-        for child in $children; do
-            kill_with_children $child
-        done
-    fi
-    kill $pid
-}
-
 if ! test -f package.json || ! test -d ../../examples; then
     echo "Run this from the example directory" 1>&2
     exit 1
@@ -66,17 +68,14 @@ if test ${update_package_json} = "yes"; then
     ${npm} install
 fi
 
-if ! test -d node_modules; then
-    ${npm} install
+# If we have an example .env.example file
+# copy it to .env to use default values in the CI
+if [ -e ".env.example" ]; then
+	cp -n .env.example .env
 fi
 
-docker_compose_yml=`find . -name docker-compose.yml`
-
-# If we have a Docker cluster, bring it up
-if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
-    cd `dirname ${docker_compose_yml}` && docker-compose up -d && cd -
-    # Wait for container services to start
-    sleep 1
+if ! test -d node_modules; then
+    ${npm} install
 fi
 
 # Check for a script to bring up the required services
@@ -96,7 +95,7 @@ if grep -q '"setup"' package.json; then
 fi
 
 # Generate WunderGraph files
-wunderctl generate
+npm run build
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
@@ -107,15 +106,19 @@ elif grep -q '"build"' package.json; then
     ${npm} run build
 fi
 
+# If we have something to cleanup e.g. a Docker cluster, do it
+if grep -q '"cleanup"' package.json; then
+		echo "Cleaning up"
+    ${npm} run cleanup
+fi
+
+# Kill all services we started in "start:services"
 if test ! -z ${services_pid}; then
-    kill_with_children ${services_pid}
+	if ps -p $services_pid > /dev/null; then
+			echo "Killing services"
+			kill_with_children ${services_pid}
+	fi
 fi
-
-# If we have a Docker cluster, clean it up
-if test ! -z "${docker_compose_yml}" && test -f ${docker_compose_yml}; then
-    cd `dirname ${docker_compose_yml}` && docker-compose down && cd -
-fi
-
 # Restore package.json
 if test ${update_package_json} = "yes"; then
     git checkout -f package.json

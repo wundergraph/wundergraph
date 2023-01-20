@@ -3,7 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
-	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -12,6 +12,7 @@ import (
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
@@ -49,7 +50,7 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		configOutFile := path.Join("generated", "bundle", "config.js")
+		configOutFile := filepath.Join("generated", "bundle", "config.js")
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -82,9 +83,10 @@ var generateCmd = &cobra.Command{
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
-			serverOutFile := path.Join(wunderGraphDir, "generated", "bundle", "server.js")
-			webhooksOutDir := path.Join("generated", "bundle", "webhooks")
-			webhooksDir := path.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
+			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.js")
+			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
+			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
+			generatedBundleOutDir := filepath.Join("generated", "bundle")
 
 			var webhooksBundler *bundler.Bundler
 
@@ -95,9 +97,10 @@ var generateCmd = &cobra.Command{
 				}
 				webhooksBundler = bundler.NewBundler(bundler.Config{
 					Name:          "webhooks-bundler",
+					Production:    true,
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
-					OutDir:        webhooksOutDir,
+					OutDir:        generatedBundleOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
@@ -108,6 +111,7 @@ var generateCmd = &cobra.Command{
 
 			hooksBundler := bundler.NewBundler(bundler.Config{
 				Name:          "server-bundler",
+				Production:    true,
 				AbsWorkingDir: wunderGraphDir,
 				EntryPoints:   []string{serverEntryPointFilename},
 				OutFile:       serverOutFile,
@@ -115,6 +119,33 @@ var generateCmd = &cobra.Command{
 			})
 
 			onAfterBuild = func() error {
+
+				if files.DirectoryExists(operationsDir) {
+					operationsPaths, err := operations.GetPaths(wunderGraphDir)
+					if err != nil {
+						return err
+					}
+					err = operations.Cleanup(wunderGraphDir, operationsPaths)
+					if err != nil {
+						return err
+					}
+					err = operations.EnsureWunderGraphFactoryTS(wunderGraphDir)
+					if err != nil {
+						return err
+					}
+					operationsBundler := bundler.NewBundler(bundler.Config{
+						Name:          "operations-bundler",
+						EntryPoints:   operationsPaths,
+						AbsWorkingDir: wunderGraphDir,
+						OutDir:        generatedBundleOutDir,
+						Logger:        log,
+					})
+					err = operationsBundler.Bundle()
+					if err != nil {
+						return err
+					}
+				}
+
 				<-configRunner.Run(ctx)
 
 				if !configRunner.Successful() {
@@ -142,6 +173,7 @@ var generateCmd = &cobra.Command{
 
 				return err
 			}
+
 		} else {
 			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
 			onAfterBuild = func() error {
@@ -161,6 +193,7 @@ var generateCmd = &cobra.Command{
 
 		configBundler := bundler.NewBundler(bundler.Config{
 			Name:          "config-bundler",
+			Production:    true,
 			AbsWorkingDir: wunderGraphDir,
 			EntryPoints:   []string{configEntryPointFilename},
 			OutFile:       configOutFile,
