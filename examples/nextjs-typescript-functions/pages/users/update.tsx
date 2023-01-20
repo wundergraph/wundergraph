@@ -1,9 +1,9 @@
 import { useMutation, useQuery, withWunderGraph } from '../../components/generated/nextjs';
-import { users_updateInput } from '../../components/generated/models';
+import { UsersUpdateInput } from '../../components/generated/models';
 import { useState } from 'react';
 
 const Users = () => {
-	const [state, setState] = useState<users_updateInput>({
+	const [state, setState] = useState<UsersUpdateInput>({
 		id: 1,
 		name: 'Jens',
 		bio: 'Founder of WunderGraph',

@@ -841,10 +841,6 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
 			},
 			{
-				title: '.graphqlconfig',
-				href: '/docs/wundergraph-config-ts-reference/configure-graphqlconfig',
-			},
-			{
 				title: 'Schema extension',
 				href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
 			},

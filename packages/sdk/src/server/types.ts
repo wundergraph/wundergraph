@@ -49,6 +49,44 @@ export interface AuthenticationRequestContext<User extends WunderGraphUser = Wun
 	user: User;
 }
 
+export interface WunderGraphFile {
+	/**
+	 * Filename of the file, as returned by the browser.
+	 */
+	readonly name: string;
+	/**
+	 * Size of the file, in bytes
+	 */
+	readonly size: number;
+	/**
+	 * File mimetype
+	 */
+	readonly type: string;
+}
+
+export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
+	/**
+	 * The user that is currently logged in, if any.
+	 */
+	user?: User;
+	/**
+	 * File to be uploaded
+	 */
+	file: WunderGraphFile;
+	/**
+	 * Metadata received from the client
+	 */
+	meta: any;
+}
+
+export interface PostUploadHookRequest<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalClient = InternalClient
+> extends PreUploadHookRequest<User> {
+	internalClient: IC;
+	error: Error;
+}
+
 export interface ClientRequestHeaders extends Headers {}
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -160,10 +198,27 @@ export interface AuthenticationDeny {
 	message: string;
 }
 
+export interface UploadHookFileKeyResponse {
+	fileKey: string;
+}
+
+export interface UploadHookErrorResponse {
+	error: string;
+}
+
+export type PreUploadHookResponseData = UploadHookFileKeyResponse | UploadHookErrorResponse;
+export type PreUploadHookResponse =
+	| PreUploadHookResponseData
+	| Promise<PreUploadHookResponseData>
+	| Promise<void>
+	| void;
+export type PostUploadHookResponse = Promise<void> | void;
+
 export enum HooksConfigurationOperationType {
 	Queries = 'queries',
 	Mutations = 'mutations',
 	Subscriptions = 'subscriptions',
+	Uploads = 'uploads',
 }
 
 export interface OperationHookFunction {
@@ -182,11 +237,13 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 // Any is used here because the exact type of the hooks is not known at compile time
 // We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
 export type OperationHooks = Record<string, any>;
+export type UploadHooks = Record<string, any>;
 
 export interface HooksConfiguration<
 	Queries extends OperationHooks = OperationHooks,
 	Mutations extends OperationHooks = OperationHooks,
 	Subscriptions extends OperationHooks = OperationHooks,
+	Uploads extends UploadHooks = UploadHooks,
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
 	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
@@ -221,6 +278,7 @@ export interface HooksConfiguration<
 	[HooksConfigurationOperationType.Queries]?: Queries;
 	[HooksConfigurationOperationType.Mutations]?: Mutations;
 	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
+	[HooksConfigurationOperationType.Uploads]?: Uploads;
 }
 
 export interface ServerOptions {
