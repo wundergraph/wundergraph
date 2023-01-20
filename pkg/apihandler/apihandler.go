@@ -473,7 +473,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, "", shared.Report)
+	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
 	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
@@ -844,7 +844,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			flushWriter *httpFlushWriter
 			ok          bool
 		)
-		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx, shared.Ctx.Variables, r, w)
+		shared.Ctx.Context, flushWriter, ok = getFlushWriter(shared.Ctx.Context, shared.Ctx.Variables, r, w)
 		if !ok {
 			requestLogger.Error("connection not flushable")
 			http.Error(w, "Connection not flushable", http.StatusBadRequest)
@@ -1721,7 +1721,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		ok          bool
 	)
 
-	ctx.Context, flushWriter, ok = getFlushWriter(ctx, ctx.Variables, r, w)
+	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return

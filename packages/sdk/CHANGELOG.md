@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.131.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.131.1...@wundergraph/sdk@0.131.2) (2023-01-20)
+
+### Bug Fixes
+
+* operations loading and normalization ([#568](https://github.com/wundergraph/wundergraph/issues/568)) ([f34fc98](https://github.com/wundergraph/wundergraph/commit/f34fc98227e9a988499fd388e3883a07128dcdd7)) (@spetrunin)
+
+## [0.131.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.131.0...@wundergraph/sdk@0.131.1) (2023-01-19)
+
+### Bug Fixes
+
+* handle consecutive hyphens or underscores when formatting field … ([#566](https://github.com/wundergraph/wundergraph/issues/566)) ([810b31c](https://github.com/wundergraph/wundergraph/commit/810b31cfbc135a93b65ffaeed20f64d003646548)) (@Aenimus)
+* operation metadata type imports ([#501](https://github.com/wundergraph/wundergraph/issues/501)) ([1dcb746](https://github.com/wundergraph/wundergraph/commit/1dcb746110a9dc518d02fe82184bedf67e2a5d51)) (@rwest202)
+* path formatting for resolveFieldName ([#565](https://github.com/wundergraph/wundergraph/issues/565)) ([7416b61](https://github.com/wundergraph/wundergraph/commit/7416b61e99037aef15ce6e2bb3812a36c2ca3bed)) (@Aenimus)
+
 ## [0.131.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.130.2...@wundergraph/sdk@0.131.0) (2023-01-17)
 
 ### Features
