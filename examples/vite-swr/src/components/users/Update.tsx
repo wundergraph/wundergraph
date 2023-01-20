@@ -1,9 +1,9 @@
 import { useMutation } from '../../lib/wundergraph';
-import { users_updateInput } from '../../../components/generated/models';
+import { UsersUpdateInput } from '../../../components/generated/models';
 import { useState } from 'react';
 
 const UpdateUser = () => {
-	const [state, setState] = useState<users_updateInput>({
+	const [state, setState] = useState<UsersUpdateInput>({
 		id: '1',
 		name: 'Jens',
 		bio: 'Founder of WunderGraph',
