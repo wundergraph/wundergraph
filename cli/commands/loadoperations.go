@@ -32,8 +32,8 @@ var loadoperationsCmd = &cobra.Command{
 			return err
 		}
 
-		loader := loadoperations.Loader{}
-		out, err := loader.Load(args[0], args[1], args[2], rootFlags.Pretty)
+		loader := loadoperations.NewLoader(args[0], args[1], args[2])
+		out, err := loader.Load(rootFlags.Pretty)
 		if err != nil {
 			return err
 		}
