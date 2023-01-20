@@ -131,6 +131,17 @@ func (l *Loader) readOperations() error {
 
 func (l *Loader) readTypescriptOperation(filePath string) {
 	fileName := strings.TrimSuffix(strings.TrimPrefix(filePath, l.operationsRootPath+"/"), ".ts")
+
+	operationName := normalizeOperationName(fileName)
+
+	for _, file := range l.out.TypeScriptOperationFiles {
+		if file.OperationName == operationName {
+			l.out.Info = append(l.out.Info, fmt.Sprintf(
+				"skipping file %s. Operation name collides with operation defined in: %s", filePath, file.FilePath))
+			return
+		}
+	}
+
 	typeScriptFile := TypeScriptOperationFile{
 		OperationName: normalizeOperationName(fileName),
 		ApiMountPath:  fileName,
@@ -148,8 +159,18 @@ func (l *Loader) readGraphQLOperation(filePath string) {
 		return
 	}
 
+	operationName := normalizeOperationName(fileName)
+
+	for _, file := range l.out.GraphQLOperationFiles {
+		if file.OperationName == operationName {
+			l.out.Info = append(l.out.Info, fmt.Sprintf(
+				"skipping file %s. Operation name collides with operation defined in: %s", filePath, file.FilePath))
+			return
+		}
+	}
+
 	l.out.GraphQLOperationFiles = append(l.out.GraphQLOperationFiles, GraphQLOperationFile{
-		OperationName: normalizeOperationName(fileName),
+		OperationName: operationName,
 		ApiMountPath:  fileName,
 		FilePath:      filePath,
 	})
