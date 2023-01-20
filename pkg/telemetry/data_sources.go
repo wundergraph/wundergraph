@@ -46,8 +46,8 @@ func isPrivateHost(host string) bool {
 	return false
 }
 
-func dataSourceMetric(dataSourceName string, urlVariable *wgpb.ConfigurationVariable) (*Metric, error) {
-	metric := NewDataSourceMetric(dataSourceName)
+func dataSourceMetric(dataSourceTag string, urlVariable *wgpb.ConfigurationVariable) (*Metric, error) {
+	metric := NewDataSourceMetric(dataSourceTag)
 	if urlVariable != nil {
 		urlValue := loadvariable.String(urlVariable)
 		if urlValue != "" {
@@ -89,16 +89,16 @@ func DataSourceMetrics(wunderGraphDir string) ([]*Metric, error) {
 	}
 	var metrics []*Metric
 	for _, ds := range wgConfig.GetApi().GetEngineConfiguration().GetDatasourceConfigurations() {
-		var dataSourceName string
+		var dataSourceTag string
 		var urlVariable *wgpb.ConfigurationVariable
 		switch ds.Kind {
 		case wgpb.DataSourceKind_STATIC:
 			// Not reported
 		case wgpb.DataSourceKind_REST:
-			dataSourceName = ds.Kind.String()
+			dataSourceTag = ds.Kind.String()
 			urlVariable = ds.GetCustomRest().GetFetch().GetUrl()
 		case wgpb.DataSourceKind_GRAPHQL:
-			dataSourceName = ds.Kind.String()
+			dataSourceTag = ds.Kind.String()
 			urlVariable = ds.GetCustomGraphql().GetFetch().GetUrl()
 		case wgpb.DataSourceKind_POSTGRESQL,
 			wgpb.DataSourceKind_MYSQL,
@@ -106,17 +106,17 @@ func DataSourceMetrics(wunderGraphDir string) ([]*Metric, error) {
 			wgpb.DataSourceKind_MONGODB,
 			wgpb.DataSourceKind_SQLITE:
 
-			dataSourceName = ds.Kind.String()
+			dataSourceTag = ds.Kind.String()
 			urlVariable = ds.CustomDatabase.GetDatabaseURL()
 		default:
 			if err != nil {
 				return nil, fmt.Errorf("unhandled data source kind %v", ds.Kind)
 			}
 		}
-		if dataSourceName == "" {
+		if dataSourceTag == "" {
 			continue
 		}
-		metric, err := dataSourceMetric(dataSourceName, urlVariable)
+		metric, err := dataSourceMetric(dataSourceTag, urlVariable)
 		if err != nil {
 			return nil, err
 		}
