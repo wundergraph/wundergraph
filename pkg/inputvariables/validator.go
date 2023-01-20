@@ -22,6 +22,9 @@ func NewValidator(schema string, disableVerboseErrors bool) (*Validator, error) 
 	if err != nil {
 		return nil, err
 	}
+	// Run validator once to make it set up its internal state, otherwise we
+	// run into a data race in https://github.com/qri-io/jsonschema/blob/master/schema.go#L60
+	validator.schema.Validate(context.Background(), []byte{})
 	validator.schemaString = schema
 	validator.disableVerboseErrors = disableVerboseErrors
 	return &validator, nil
