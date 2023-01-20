@@ -19,6 +19,7 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
@@ -764,8 +765,31 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	shared.Doc.Input.ResetInputString(requestQuery)
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
+	logInternalErrors := func(report *operationreport.Report) {
+		var internalErr error
+		for _, err := range report.InternalErrors {
+			internalErr = multierror.Append(internalErr, err)
+		}
+
+		if internalErr != nil {
+			requestLogger.Error("internal error", zap.Error(internalErr))
+		}
+	}
+
+	writeRequestErrors := func(report *operationreport.Report) {
+		requestErrors := graphql.RequestErrorsFromOperationReport(*report)
+		if requestErrors != nil {
+			if _, err := requestErrors.WriteResponse(w); err != nil {
+				requestLogger.Error("error writing response", zap.Error(err))
+			}
+		}
+	}
+
 	if shared.Report.HasErrors() {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		logInternalErrors(shared.Report)
+		writeRequestErrors(shared.Report)
+
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -778,8 +802,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if shared.Report.HasErrors() {
-		requestLogger.Error("shared printer", zap.String("errors", shared.Report.Error()))
-		http.Error(w, "bad request", http.StatusBadRequest)
+		logInternalErrors(shared.Report)
+		writeRequestErrors(shared.Report)
+
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -791,7 +817,13 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
 		if err != nil {
-			requestLogger.Error("prepare plan failed", zap.Error(shared.Report))
+			if shared.Report.HasErrors() {
+				logInternalErrors(shared.Report)
+				writeRequestErrors(shared.Report)
+			} else {
+				requestLogger.Error("prepare plan failed", zap.Error(err))
+			}
+
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
