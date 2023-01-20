@@ -299,7 +299,7 @@ func isValidOperationName(s string) bool {
 
 func normalizeOperationName(s string) string {
 	parts := strings.Split(s, "/")
-	caser := cases.Title(language.English)
+	caser := cases.Title(language.English, cases.NoLower)
 
 	var out []string
 	for _, part := range parts {

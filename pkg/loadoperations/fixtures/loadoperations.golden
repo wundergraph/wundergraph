@@ -1,10 +1,22 @@
 {
   "graphql_operation_files": [
     {
+      "operation_name": "PREFIXChat",
+      "api_mount_path": "PREFIXChat",
+      "file_path": "PREFIXChat.graphql",
+      "content": "subscription PREFIXChat {chat_messageAdded(roomName: \"test\"){text id}}"
+    },
+    {
       "operation_name": "LevelChat",
       "api_mount_path": "level/Chat",
       "file_path": "level/Chat.graphql",
       "content": "subscription LevelChat {chat_messageAdded(roomName: \"test\"){text id}}"
+    },
+    {
+      "operation_name": "LevelMessage",
+      "api_mount_path": "level/message",
+      "file_path": "level/message.graphql",
+      "content": "subscription LevelMessage {chat_messageAdded(roomName: \"test\"){text id}}"
     }
   ],
   "typescript_operation_files": [
