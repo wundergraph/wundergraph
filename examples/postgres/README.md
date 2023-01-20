@@ -84,6 +84,14 @@ curl http://localhost:9991/operations/Users
 curl GET http://localhost:9991/operations/Messages
 ```
 
+## Typescript Operation
+
+### Get users
+
+```shell
+curl http://localhost:9991/operations/users/get
+```
+
 ## Wrap up
 
 That's it! You've learned the most important aspects of using WunderGraph as an ORM to speak to your Database.

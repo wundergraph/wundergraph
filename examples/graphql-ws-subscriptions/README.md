@@ -22,6 +22,12 @@ curl -N http://localhost:9991/operations/Ws
  curl -N http://localhost:9991/operations/Ws\?wg_sse\=true
 ```
 
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
+```
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
