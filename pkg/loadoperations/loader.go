@@ -12,6 +12,9 @@ import (
 	"strings"
 	"unicode"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astnormalization"
 	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
@@ -129,7 +132,7 @@ func (l *Loader) readOperations() error {
 func (l *Loader) readTypescriptOperation(filePath string) {
 	fileName := strings.TrimSuffix(strings.TrimPrefix(filePath, l.operationsRootPath+"/"), ".ts")
 	typeScriptFile := TypeScriptOperationFile{
-		OperationName: normalizeOperationName(fileName),
+		OperationName: normalizeTsOperationName(fileName),
 		ApiMountPath:  fileName,
 		FilePath:      filePath,
 		ModulePath:    path.Join("generated", "bundle", "operations", fileName),
@@ -296,4 +299,15 @@ func isValidOperationName(s string) bool {
 
 func normalizeOperationName(s string) string {
 	return strings.ReplaceAll(s, "/", "_")
+}
+
+func normalizeTsOperationName(s string) string {
+	parts := strings.Split(s, "/")
+	caser := cases.Title(language.English)
+
+	var out []string
+	for _, part := range parts {
+		out = append(out, caser.String(part))
+	}
+	return strings.Join(out, "")
 }

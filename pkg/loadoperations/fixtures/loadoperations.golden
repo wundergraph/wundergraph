@@ -9,7 +9,7 @@
   ],
   "typescript_operation_files": [
     {
-      "operation_name": "level_nested_one",
+      "operation_name": "LevelNestedOne",
       "api_mount_path": "level/nested/one",
       "file_path": "level/nested/one.ts",
       "module_path": "generated/bundle/operations/level/nested/one"
