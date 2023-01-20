@@ -1,4 +1,18 @@
 import fs from 'fs';
+import path from 'path';
+import process from 'node:process';
+import _ from 'lodash';
+import {
+	buildSchema,
+	FieldDefinitionNode,
+	InputValueDefinitionNode,
+	Kind,
+	parse,
+	parseType,
+	print,
+	visit,
+} from 'graphql';
+import { ZodType } from 'zod';
 import {
 	Api,
 	DatabaseApiCustom,
@@ -35,28 +49,16 @@ import {
 	PostResolveTransformationKind,
 	TypeConfiguration,
 	WebhookConfiguration,
+	S3UploadProfile as _S3UploadProfile,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
-import {
-	buildSchema,
-	FieldDefinitionNode,
-	InputValueDefinitionNode,
-	Kind,
-	parse,
-	parseType,
-	print,
-	visit,
-} from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
-import path from 'path';
-import _ from 'lodash';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
+import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
-import process from 'node:process';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { Logger } from '../logger';
@@ -160,7 +162,7 @@ export interface ResolvedApplication {
 	Operations: GraphQLOperation[];
 	InvalidOperationNames: string[];
 	CorsConfiguration: CorsConfiguration;
-	S3UploadProvider: S3Provider;
+	S3UploadProvider: ResolvedS3UploadConfiguration[];
 }
 
 interface ResolvedDeployment {
@@ -173,6 +175,37 @@ interface ResolvedDeployment {
 	};
 }
 
+export interface S3UploadProfile {
+	/** JSON schema for metadata */
+	meta?: ZodType | object;
+	/**
+	 * Maximum file size, in bytes
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
+	maxAllowedUploadSizeBytes?: number;
+	/**
+	 * Maximum number of files
+	 *
+	 * @default unlimited
+	 */
+	maxAllowedFiles?: number;
+	/**
+	 * List of mime-types allowed to be uploaded, case insensitive
+	 *
+	 * @default Any type
+	 */
+	allowedMimeTypes?: string[];
+	/**
+	 * Allowed file extensions, case insensitive
+	 *
+	 * @default Any extension
+	 */
+	allowedFileExtensions?: string[];
+}
+
+export type S3UploadProfiles = Record<string, S3UploadProfile>;
+
 interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
@@ -181,6 +214,17 @@ interface S3UploadConfiguration {
 	bucketName: InputVariable;
 	bucketLocation: InputVariable;
 	useSSL: boolean;
+	uploadProfiles?: S3UploadProfiles;
+}
+
+export interface ResolvedS3UploadProfile extends Omit<Required<S3UploadProfile>, 'meta'> {
+	meta: ZodType | object | null;
+	preUploadHook: boolean;
+	postUploadHook: boolean;
+}
+
+interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'uploadProfiles'> {
+	uploadProfiles: Record<string, ResolvedS3UploadProfile>;
 }
 
 export interface ResolvedWunderGraphConfig {
@@ -272,7 +316,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const apps = config.apis;
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
+	const resolved = await resolveApplication(roles, apps, cors, config.s3UploadProvider, config.server?.hooks);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -500,26 +544,52 @@ const updateArguments = (dataSource: DataSource, fieldInfo: FieldInfo, link: Lin
 	return JSON.parse(json);
 };
 
-const resolveApplications = async (
+const resolveUploadConfiguration = (
+	configuration: S3UploadConfiguration,
+	hooks?: HooksConfiguration
+): ResolvedS3UploadConfiguration => {
+	let uploadProfiles: Record<string, ResolvedS3UploadProfile> = {};
+	if (configuration?.uploadProfiles) {
+		const configurationHooks = hooks?.uploads ? hooks.uploads[configuration.name] : undefined;
+		for (const key in configuration.uploadProfiles) {
+			const profile = configuration.uploadProfiles[key];
+			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
+
+			uploadProfiles[key] = {
+				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
+				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
+				allowedMimeTypes: profile.allowedMimeTypes ?? [],
+				allowedFileExtensions: profile.allowedFileExtensions ?? [],
+				meta: profile.meta ?? null,
+				preUploadHook: profileHooks?.preUpload !== undefined,
+				postUploadHook: profileHooks?.postUpload !== undefined,
+			};
+		}
+	}
+	return {
+		...configuration,
+		uploadProfiles,
+	};
+};
+
+const resolveApplication = async (
 	roles: string[],
 	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
-	s3: S3Provider
-): Promise<ResolvedApplication[]> => {
-	const out: ResolvedApplication[] = [];
-
+	s3?: S3Provider,
+	hooks?: HooksConfiguration
+): Promise<ResolvedApplication> => {
 	const resolvedApis = await Promise.all(apis);
 	const merged = mergeApis(roles, ...resolvedApis);
-	out.push({
+	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
+	return {
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
 		InvalidOperationNames: [],
 		CorsConfiguration: cors,
-		S3UploadProvider: s3,
-	});
-
-	return out;
+		S3UploadProvider: s3Configurations,
+	};
 };
 
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
@@ -886,6 +956,29 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				typeConfigurations: types,
 			},
 			s3UploadConfiguration: config.application.S3UploadProvider.map((provider) => {
+				let uploadProfiles: { [key: string]: _S3UploadProfile } = {};
+				if (provider.uploadProfiles) {
+					for (const key in provider.uploadProfiles) {
+						const resolved = provider.uploadProfiles[key];
+						let metadataJSONSchema: string;
+						try {
+							metadataJSONSchema = resolved.meta ? JSON.stringify(resolved.meta) : '';
+						} catch (e) {
+							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
+						}
+						uploadProfiles[key] = {
+							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
+							maxAllowedFiles: resolved.maxAllowedFiles,
+							allowedMimeTypes: resolved.allowedMimeTypes,
+							allowedFileExtensions: resolved.allowedFileExtensions,
+							metadataJSONSchema: metadataJSONSchema,
+							hooks: {
+								preUpload: resolved.preUploadHook,
+								postUpload: resolved.postUploadHook,
+							},
+						};
+					}
+				}
 				return {
 					name: provider.name,
 					accessKeyID: mapInputVariable(provider.accessKeyID),
@@ -894,6 +987,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
 					useSSL: provider.useSSL,
+					uploadProfiles: uploadProfiles,
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,

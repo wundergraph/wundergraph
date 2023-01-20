@@ -36,6 +36,7 @@ require (
 	github.com/prisma/prisma-client-go v0.16.2
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
+	github.com/santhosh-tekuri/jsonschema/v5 v5.1.1
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/segmentio/ksuid v1.0.4
 	github.com/spf13/cobra v1.1.3
