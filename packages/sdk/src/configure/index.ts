@@ -1052,8 +1052,8 @@ const resolveOperationsConfigurations = async (
 				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
 				const implementation = await loadNodeJsOperationDefaultModule(filePath);
 				const operation: GraphQLOperation = {
-					Name: file.operation_name.replace('/', '_'),
-					PathName: file.operation_name,
+					Name: file.operation_name,
+					PathName: file.api_mount_path,
 					Content: '',
 					OperationType:
 						implementation.type === 'query'
@@ -1067,7 +1067,7 @@ const resolveOperationsConfigurations = async (
 					InternalVariablesSchema: { type: 'object', properties: {} },
 					InjectedVariablesSchema: { type: 'object', properties: {} },
 					ResponseSchema: { type: 'object', properties: { data: {} } },
-					TypeScriptOperationImport: `function_${file.operation_name.replace('/', '_')}`,
+					TypeScriptOperationImport: `function_${file.operation_name}`,
 					AuthenticationConfig: {
 						required: implementation.requireAuthentication || false,
 					},
@@ -1105,7 +1105,7 @@ const resolveOperationsConfigurations = async (
 				};
 				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
-				logger.info(`Skipping operation ${file.operation_name} due to error: ${e.message}`);
+				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
 			}
 		}
 	return {
