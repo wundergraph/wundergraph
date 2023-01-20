@@ -15,7 +15,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 	for (const operation of config.operations) {
 		try {
 			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
-			const routeUrl = path.join('/functions', operation.operation_name);
+			const routeUrl = path.join('/functions', operation.api_mount_path);
 			let maybeImplementation: NodeJSOperation<any, any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;

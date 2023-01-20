@@ -1,0 +1,6 @@
+subscription {
+	chat_messageAdded(roomName: "test") {
+		text
+		id
+	}
+}

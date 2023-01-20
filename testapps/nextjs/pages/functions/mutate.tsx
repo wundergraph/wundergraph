@@ -1,9 +1,9 @@
 import { useMutation, withWunderGraph } from '../../components/generated/nextjs';
 import { useState } from 'react';
-import { users_mutateInput } from '../../components/generated/models';
+import { UsersMutateInput } from '../../components/generated/models';
 
 const Functions = () => {
-	const [input, setInput] = useState<users_mutateInput>({ id: '1', name: 'Jens', bio: 'Founder of WunderGraph' });
+	const [input, setInput] = useState<UsersMutateInput>({ id: '1', name: 'Jens', bio: 'Founder of WunderGraph' });
 	const { trigger, data, error } = useMutation({
 		operationName: 'users/mutate',
 	});

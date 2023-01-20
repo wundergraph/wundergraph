@@ -1,5 +1,6 @@
 import { Callout } from '@/components/Callout'
 import { QuickLink, QuickLinks } from '@/components/QuickLinks'
+import Video from '../src/components/Video'
 
 const tags = {
 	callout: {
@@ -13,6 +14,19 @@ const tags = {
 			},
 		},
 		render: Callout,
+	},
+	video: {
+		render: Video,
+		children: ['inline'],
+		attributes: {
+			src: { type: String, required: true },
+			className: { type: String },
+			autoPlay: { type: Boolean },
+			muted: { type: Boolean },
+			playsInline: { type: Boolean },
+			loop: { type: Boolean },
+			controls: { type: Boolean },
+		},
 	},
 	figure: {
 		selfClosing: true,
