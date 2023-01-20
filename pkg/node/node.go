@@ -339,6 +339,8 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 
 func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (*HealthCheckReport, bool) {
 	deploymentId := os.Getenv("WG_CLOUD_DEPLOYMENT_ID")
+	commitSHA := os.Getenv("WG_CLOUD_DEPLOYMENT_COMMIT_SHA")
+	commitURL := os.Getenv("WG_CLOUD_DEPLOYMENT_COMMIT_URL")
 	healthCheck := &HealthCheckReport{
 		ServerStatus: "NOT_READY",
 		// For now we assume that the server is ready
@@ -346,6 +348,8 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 		NodeStatus:   "READY",
 		BuildInfo:    n.info,
 		DeploymentId: deploymentId,
+		CommitSHA:    commitSHA,
+		CommitURL:    commitURL,
 	}
 
 	if n.options.hooksServerHealthCheck {
