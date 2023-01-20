@@ -10,7 +10,6 @@ import {
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
 import { mergeApis } from '../definition/merge';
-import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
 import {
 	GraphQLOperation,
 	loadOperations,
@@ -113,8 +112,10 @@ export interface WunderGraphConfigApplicationConfig {
 		};
 	};
 	links?: LinkConfiguration;
-	dotGraphQLConfig?: DotGraphQLConfig;
 	security?: SecurityConfig;
+
+	/** @deprecated: Not used anymore */
+	dotGraphQLConfig?: any;
 }
 
 export interface TokenAuthProvider {
@@ -130,13 +131,6 @@ export interface SecurityConfig {
 	// e.g. when running WunderGraph on localhost:9991, but your external host pointing to the internal IP is example.com,
 	// you have to add "example.com" to the allowedHosts so that the WunderGraph router allows the hostname.
 	allowedHosts?: InputVariable[];
-}
-
-export interface DotGraphQLConfig {
-	// hasDotWunderGraphDirectory should be set to true if the project has a ".wundergraph" directory as the WunderGraph root
-	// the default is true so this config doesn't have to be touched usually
-	// only set it to false if you don't have a ".wundergraph" directory in your project
-	hasDotWunderGraphDirectory?: boolean;
 }
 
 export interface DeploymentAPI {
@@ -802,33 +796,6 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
-			const dotGraphQLNested =
-				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
-					? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
-					: true;
-
-			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: publicNodeUrl,
-				nested: dotGraphQLNested,
-			});
-
-			const dotGraphQLConfigPath = path.join(dotGraphQLNested ? '..' + path.sep : '', '.graphqlconfig');
-			let shouldUpdateDotGraphQLConfig = true;
-			const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
-			if (fs.existsSync(dotGraphQLConfigPath)) {
-				const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
-				if (dotGraphQLContent === existingDotGraphQLContent) {
-					shouldUpdateDotGraphQLConfig = false;
-				}
-			}
-
-			if (shouldUpdateDotGraphQLConfig) {
-				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				Logger.info(`.graphqlconfig updated`);
-			}
-
-			done();
-
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
 			});
@@ -850,7 +817,7 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		});
 };
 
-const total = 5;
+const total = 4;
 let doneCount = 0;
 
 const done = () => {
