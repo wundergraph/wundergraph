@@ -12,12 +12,12 @@ let authorizationToken = '';
 const startServer = async () => {
 	const keyID = '123456';
 	const keyAlgorithm = 'RS256';
-	const { publicKey, privateKey } = await jose.generateKeyPair('RS256');
+	const { publicKey, privateKey } = await jose.generateKeyPair(keyAlgorithm);
 	const publicKeyJWK = await jose.exportJWK(publicKey);
 	const token = await new jose.SignJWT({})
 		.setProtectedHeader({
 			typ: 'JWT',
-			alg: 'RS256',
+			alg: keyAlgorithm,
 			kid: keyID,
 		})
 		.setIssuer('https://example.com')
