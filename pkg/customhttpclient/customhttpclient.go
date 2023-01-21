@@ -140,6 +140,9 @@ func respBodyReader(req *http.Request, resp *http.Response) (io.ReadCloser, erro
 	return resp.Body, nil
 }
 
+// encodeQueryParams encodes the query parameters received as a JSON
+// array into a valid URL query string. NOTICE: If queryParams contains escape
+// sequences, they will be unescaped in place, overwriting the data.
 func encodeQueryParams(queryParams []byte) (string, error) {
 	var jsonErr error
 	query := make(url.Values)
