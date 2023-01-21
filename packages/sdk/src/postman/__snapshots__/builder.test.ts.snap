@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getNestedCollection 1`] = `
+{
+  "event": [],
+  "info": {
+    "_postman_id": "Wundergraph",
+    "description": {
+      "content": "Your Wundergraph collection",
+      "type": "text/plain",
+    },
+    "name": "Wundergraph",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": undefined,
+  },
+  "item": [
+    {
+      "_": {
+        "postman_id": "operatations",
+      },
+      "event": [],
+      "id": "operatations",
+      "item": [
+        {
+          "event": [],
+          "id": "location",
+          "item": [
+            {
+              "event": [],
+              "id": "GetName",
+              "name": "GetName",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "GetName",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+            {
+              "event": [],
+              "id": "GetName",
+              "name": "GetName",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "GetName",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+          ],
+          "name": "location",
+        },
+        {
+          "event": [],
+          "id": "location/query",
+          "item": [
+            {
+              "event": [],
+              "id": "GetUser",
+              "name": "GetUser",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "query",
+                    "GetUser",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+            {
+              "event": [],
+              "id": "GetCart",
+              "name": "GetUser",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "query",
+                    "GetUser",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+            {
+              "event": [],
+              "id": "GetSetUser",
+              "name": "SetUser",
+              "request": {
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [],
+                },
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "query",
+                    "SetUser",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+          ],
+          "name": "location/query",
+        },
+        {
+          "event": [],
+          "id": "location/query/new",
+          "item": [
+            {
+              "event": [],
+              "id": "NewGetSetUser",
+              "name": "SetUser",
+              "request": {
+                "body": {
+                  "mode": "urlencoded",
+                  "urlencoded": [],
+                },
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "query",
+                    "new",
+                    "SetUser",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+          ],
+          "name": "location/query/new",
+        },
+      ],
+      "name": "operations",
+    },
+  ],
+  "variable": [
+    {
+      "key": "apiBaseUrl",
+      "type": "string",
+      "value": "http://localhost:9991",
+    },
+  ],
+}
+`;

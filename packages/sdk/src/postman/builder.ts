@@ -1,6 +1,6 @@
 import { OperationType } from '@wundergraph/protobuf';
 import { JSONSchema7Definition } from 'json-schema';
-import { Collection, Request } from 'postman-collection';
+import { Collection, Item, PropertyList, Request } from 'postman-collection';
 import { GraphQLOperation } from '../graphql/operations';
 
 export interface PostmanBuilderOptions {
@@ -13,44 +13,54 @@ export interface JSONSchemaParameterPath {
 	type: string;
 }
 
-// TS types of these modules are so bad, I opt out!
-// docs: https://www.postmanlabs.com/postman-collection/
+const buildItem = (op: GraphQLOperation, operationURL: string, opName: string) => {
+	let paths: JSONSchemaParameterPath[] = [];
+	buildPath([], false, op.VariablesSchema, paths);
+
+	if (op.OperationType !== OperationType.MUTATION) {
+		const request = queryRequestJson(operationURL, paths);
+
+		return {
+			id: op.Name,
+			name: opName,
+			request: request,
+		};
+	} else if (op.OperationType === OperationType.MUTATION) {
+		const request = mutationRequestJson(operationURL, paths);
+
+		return {
+			id: op.Name,
+			name: opName,
+			request: request,
+		};
+	}
+};
 
 export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanBuilderOptions) => {
-	const queryGroup = new Collection();
-	queryGroup.id = 'Queries';
-	queryGroup.name = 'Queries';
-	queryGroup.describe('All your query operations');
-
-	const mutationGroup = new Collection();
-	mutationGroup.id = 'Mutations';
-	mutationGroup.name = 'Mutations';
-	mutationGroup.describe('All your mutation operations');
-
+	const mapOfItems = new Map<string, any[]>();
 	operations.forEach((op) => {
 		const operationURL = `{{apiBaseUrl}}/operations/${op.PathName}`;
-
-		let paths: JSONSchemaParameterPath[] = [];
-		buildPath([], false, op.VariablesSchema, paths);
-
-		if (op.OperationType !== OperationType.MUTATION) {
-			const request = queryRequestJson(operationURL, paths);
-
-			queryGroup.items.add({
-				id: op.Name,
-				name: op.Name,
-				request: request,
-			});
-		} else if (op.OperationType === OperationType.MUTATION) {
-			const request = mutationRequestJson(operationURL, paths);
-
-			mutationGroup.items.add({
-				id: op.Name,
-				name: op.Name,
-				request: request,
-			});
+		const folders = op.PathName.split('/');
+		const opName = folders.pop();
+		if (opName) {
+			const key = folders.join('/');
+			const item = buildItem(op, operationURL, opName);
+			const keySet = mapOfItems.get(key);
+			if (keySet) {
+				keySet.push(item);
+			} else {
+				mapOfItems.set(key, [item]);
+			}
 		}
 	});
+
+	const operationsGroup = new Collection();
+	operationsGroup.id = 'operatations';
+	operationsGroup.name = 'operations';
+
+	for (const [key, value] of mapOfItems.entries()) {
+		operationsGroup.items.add({ id: key, name: key, item: value });
+	}
 
 	const myCollection = new Collection();
 	myCollection.id = 'Wundergraph';
@@ -65,8 +75,7 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	});
 
 	// add sub collections
-	myCollection.items.add(queryGroup.toJSON());
-	myCollection.items.add(mutationGroup.toJSON());
+	myCollection.items.add(operationsGroup.toJSON());
 
 	return myCollection;
 };
@@ -83,7 +92,7 @@ const mutationRequestJson = (url: string, paths: JSONSchemaParameterPath[]): str
 	});
 
 	for (const path of paths) {
-		request.body.urlencoded.add({
+		request.body?.urlencoded.add({
 			key: path.path.join('.'),
 			disabled: !path.required,
 			description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
