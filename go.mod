@@ -3,7 +3,7 @@ module github.com/wundergraph/wundergraph
 go 1.18
 
 require (
-	github.com/MicahParks/keyfunc v1.5.1
+	github.com/MicahParks/keyfunc v1.9.0
 	github.com/bep/debounce v1.2.1
 	github.com/buger/jsonparser v1.1.1
 	github.com/cespare/xxhash v1.1.0
