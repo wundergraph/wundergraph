@@ -10,7 +10,6 @@ test/*.js
 .wundergraph/cache
 .wundergraph/generated
 .wundergraph/operations/*.graphql
-.wundergraph/*.ts
 
 # dependencies
 node_modules
