@@ -11,6 +11,6 @@ describe('Test Dragons API', () => {
 		const result = await wg.client().query({
 			operationName: 'Dragons',
 		});
-		expect(result.data?.spacex_dragons.length).toBe(2);
+		expect(result.data?.spacex_dragons?.length).toBe(2);
 	});
 });

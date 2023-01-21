@@ -84,7 +84,7 @@ Both client and server share the exact same TypeScript code to implement and con
 What this allows you to do is create not just a fully type-safe API between client and server,
 but much more importantly, you get an immediate feedback loop when changing client or server code.
 
-{% video src="/videos/wundergraph_typescript_functions.mp4" /%}
+{% video src="/videos/isomorphic_typescript_apis_1080_web.mp4" /%}
 
 As you can see in the animation above, when you change the TypeScript Operation on the server,
 the client will immediately pick up the changes and show any errors if the contract changed,

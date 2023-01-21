@@ -1,0 +1,34 @@
+{
+  "graphql_operation_files": [
+    {
+      "operation_name": "LevelChat",
+      "api_mount_path": "LevelChat",
+      "file_path": "LevelChat.graphql",
+      "content": "subscription LevelChat {chat_messageAdded(roomName: \"test\"){text id}}"
+    },
+    {
+      "operation_name": "PREFIXChat",
+      "api_mount_path": "PREFIXChat",
+      "file_path": "PREFIXChat.graphql",
+      "content": "subscription PREFIXChat {chat_messageAdded(roomName: \"test\"){text id}}"
+    },
+    {
+      "operation_name": "LevelMessage",
+      "api_mount_path": "level/message",
+      "file_path": "level/message.graphql",
+      "content": "subscription LevelMessage {chat_messageAdded(roomName: \"test\"){text id}}"
+    }
+  ],
+  "typescript_operation_files": [
+    {
+      "operation_name": "LevelNestedOne",
+      "api_mount_path": "LevelNestedOne",
+      "file_path": "LevelNestedOne.ts",
+      "module_path": "generated/bundle/operations/LevelNestedOne"
+    }
+  ],
+  "info": [
+    "skipping file level/Chat.graphql. Operation name collides with operation defined in: LevelChat.graphql",
+    "skipping file level/nested/one.ts. Operation name collides with operation defined in: LevelNestedOne.ts"
+  ]
+}
