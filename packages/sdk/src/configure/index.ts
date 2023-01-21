@@ -1,5 +1,4 @@
 import fs from 'fs';
-<<<<<<< HEAD
 import path from 'path';
 import process from 'node:process';
 import _ from 'lodash';
@@ -14,9 +13,7 @@ import {
 	visit,
 } from 'graphql';
 import { ZodType } from 'zod';
-=======
 import objectHash from 'object-hash';
->>>>>>> d3a844ed (feat: add support for data source types in the telemetry)
 import {
 	Api,
 	DatabaseApiCustom,
