@@ -22,6 +22,9 @@ SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 # These are broken
 SKIP="${SKIP} nextjs-todos vite-swr"
 
+# These are broken on Windows
+SKIP="${SKIP} apollo-federation"
+
 # XXX: This breaks only in CI (fastify issue?)
 SKIP="${SKIP} graphql-ws-subscriptions"
 
