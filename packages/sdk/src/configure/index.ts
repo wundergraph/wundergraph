@@ -13,7 +13,6 @@ import {
 	visit,
 } from 'graphql';
 import { ZodType } from 'zod';
-import objectHash from 'object-hash';
 import {
 	Api,
 	DatabaseApiCustom,
@@ -1034,7 +1033,6 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		customDatabase: undefined,
 		directives: source.Directives,
 		requestTimeoutSeconds: source.RequestTimeoutSeconds,
-		hash: objectHash(source),
 	};
 	switch (source.Kind) {
 		case DataSourceKind.REST:
