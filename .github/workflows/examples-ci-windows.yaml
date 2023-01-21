@@ -1,0 +1,68 @@
+name: Examples CI
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      version:
+        type: choice
+        description: Run against
+        required: true
+        options:
+          - workspace
+          - release
+  pull_request:
+    branches:
+      - main
+      - next
+    paths:
+      - '.github/actions/go/action.yaml'
+      - '.github/actions/node/action.yaml'
+      - '.github/workflows/examples-ci-windows.yaml'
+      - 'examples/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+env:
+  WORKING_DIRECTORY: '.'
+  CI: true
+
+jobs:
+  build_test:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/go
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+      - uses: ./.github/actions/node
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          node-version: '18'
+
+      - name: Setup Docker image cache
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+
+      - name: Bootstrap PNPM workspace
+        run: bash ./scripts/pnpm.sh
+
+      - name: Build libs
+        run: pnpm build:libs
+
+      - name: Build wunderctl
+        run: |
+          make install
+          echo "WUNDERCTL_BINARY_PATH=$(which wunderctl)" >> $GITHUB_ENV
+
+      - name: Run tests
+        run: bash ./scripts/test-examples/all.sh
+
+      - name: Check if git is not dirty after generating files
+        run: git diff --no-ext-diff --exit-code
