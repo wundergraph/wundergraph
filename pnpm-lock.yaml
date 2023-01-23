@@ -304,7 +304,7 @@ importers:
       '@types/object-hash': ^1.3.4
       '@web-std/fetch': ^4.1.0
       '@wundergraph/protobuf': workspace:^0.102.0
-      '@wundergraph/wunderctl': workspace:>=0.127.0
+      '@wundergraph/wunderctl': workspace:>=0.127.1
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
@@ -14932,6 +14932,7 @@ packages:
       handlebars: 4.7.7
       js-yaml: 4.1.0
       json-schema: 0.4.0
+      json-schema-to-typescript: 11.0.3
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
