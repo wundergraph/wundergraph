@@ -12,12 +12,27 @@ const Users = () => {
 		operationName: 'users/update',
 	});
 	return (
-		<div>
-			<input value={state.id} onChange={(e) => setState((s) => ({ ...s, id: e.target.value }))}></input>
-			<input value={state.name} onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}></input>
-			<input value={state.bio} onChange={(e) => setState((s) => ({ ...s, bio: e.target.value }))}></input>
-			<button onClick={() => mutate(state)}>Update</button>
-			<pre>{JSON.stringify(data)}</pre>
+		<div className="min-h-screen flex flex-col gap-4 items-center justify-center">
+			<h1 className="text-2xl md:text-3xl font-bold text-white mb-4">Typescript Operations</h1>
+			<input
+				className="px-2 py-1 rounded-sm w-64"
+				value={state.id}
+				onChange={(e) => setState((s) => ({ ...s, id: e.target.value }))}
+			/>
+			<input
+				className="px-2 py-1 rounded-sm w-64"
+				value={state.name}
+				onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))}
+			/>
+			<input
+				className="px-2 py-1 rounded-sm w-64"
+				value={state.bio}
+				onChange={(e) => setState((s) => ({ ...s, bio: e.target.value }))}
+			/>
+			<button className="bg-blue-500 text-white py-2 px-4 rounded-md" onClick={() => mutate(state)}>
+				Update
+			</button>
+			<pre className="bg-white mt-4">{JSON.stringify(data)}</pre>
 		</div>
 	);
 };

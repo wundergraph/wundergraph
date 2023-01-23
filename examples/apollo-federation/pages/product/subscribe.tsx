@@ -8,11 +8,14 @@ const Users = () => {
 		},
 	});
 	return (
-		<div style={{ color: 'white' }}>
-			<div>{data?.name}</div>
-			<div>{data?.price}</div>
-			<div>{data?.weight}</div>
-			<div>{data?.time}</div>
+		<div className="min-h-screen flex flex-col items-center justify-center text-white">
+			<h1 className="text-2xl md:text-3xl font-bold">Typescript Operations</h1>
+			<div className="bg-white text-sm md:text-lg text-black p-6 md:p-12 rounded-lg mt-12">
+				<div>Name: {data?.name}</div>
+				<div>Weight: {data?.weight}</div>
+				<div>Price: {data?.price}</div>
+				<div>Time: {data?.time}</div>
+			</div>
 		</div>
 	);
 };
