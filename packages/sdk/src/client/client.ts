@@ -184,7 +184,7 @@ export class Client {
 	}
 
 	/**
-	 * unsetAuthorization removes any previously authorization credentials
+	 * unsetAuthorization removes any previously set authorization credentials
 	 * (e.g. via setAuthorizationToken or via setExtraHeaders).
 	 * If there was no authorization set, it does nothing.
 	 */
