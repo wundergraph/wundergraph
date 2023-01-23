@@ -88,7 +88,7 @@ export const defaultClientConfig: ClientConfig = {
 
 export const operationMetadata: OperationMetadata = {
 {{#each allOperations}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         requiresAuthentication: {{requiresAuthentication}}
 		}
     {{#unless @last}},{{/unless}}
