@@ -71,7 +71,7 @@ export function Navigation({ navigation, className }) {
 			<ul
 				role="list"
 				className={clsx(
-					'absolute transition-transform',
+					'absolute pb-16 transition-transform ',
 					!isRoot ? '-translate-x-full opacity-0' : 'translate-x-0'
 				)}
 			>
@@ -87,7 +87,7 @@ export function Navigation({ navigation, className }) {
 			</ul>
 			<div
 				className={clsx(
-					'absolute transition-transform',
+					'absolute pb-16 transition-transform ',
 					isRoot ? 'translate-x-full opacity-0' : 'translate-x-0'
 				)}
 			>

@@ -17,6 +17,8 @@ import {
 	BugAntIcon,
 	WrenchIcon,
 	ArrowUpCircleIcon,
+	LightBulbIcon,
+	ListBulletIcon,
 } from '@heroicons/react/24/solid'
 
 const navigation = [
@@ -163,7 +165,158 @@ const navigation = [
 			},
 		],
 	},
+	{
+		title: 'Guides',
+		href: '/docs/guides',
+		icon: <BookOpenIcon />,
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/guides',
+			},
+			{
+				title: 'Writing operations',
+				links: [
+					{
+						title:
+							'TypeSafe API Integrations with TypeScript Operations & GraphQL',
+						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
+					},
+					{
+						title: 'API Namespacing',
+						href: '/docs/core-concepts/api-namespacing',
+					},
+					{
+						title: 'Virtual Graph',
+						href: '/docs/core-concepts/virtual-graph',
+					},
+					{
+						title: 'The `_join` field',
+						href: '/docs/core-concepts/_join-field',
+					},
+				],
+			},
+			{
+				title: 'Configuring WunderGraph',
+				links: [],
+			},
+			{
+				title: 'IDE',
+				links: [
+					{
+						title: 'Enable autocompletion in your IDE',
+						href: '/docs/guides/enable-autocompletion-in-your-ide',
+					},
+				],
+			},
+			{
+				title: 'Testing',
+				links: [],
+			},
+			{
+				title: 'Security',
+				links: [
+					{
+						title: 'Token Based Authentication with Next Auth',
+						href: '/docs/guides/token-based-authentication-with-next-auth',
+					},
+				],
+			},
+			{
+				title: 'Advanced',
+				links: [
+					{
+						title: 'Inject Short-Lived Token into Upstream Requests',
+						href: '/docs/guides/inject-short-lived-token-into-upstream-requests',
+					},
+					{
+						title: 'Expose a GraphQL API from WunderGraph',
+						href: '/docs/guides/expose-a-graphql-api-from-wundergraph',
+					},
+					{
+						title: 'Extend JSON fields with more specific types',
+						href: '/docs/guides/extend-json-fields-with-more-specific-types',
+					},
+					{
+						title: 'Signing Origin Requests',
+						href: '/docs/guides/signing-origin-requests',
+					},
+				],
+			},
+			{
+				title: 'Testing',
+				links: [],
+			},
+			{
+				title: 'Debugging',
+				links: [],
+			},
+		],
+	},
 	{ type: 'divider' },
+	{
+		title: 'APIs',
+		href: '/docs/apis',
+		icon: <ShareIcon />,
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/apis/overview',
+			},
+			{
+				title: 'Supported APIs',
+				links: [
+					{
+						title: 'Overview',
+						href: '/docs/supported-data-sources',
+					},
+					{
+						title: 'GraphQL',
+						href: '/docs/supported-data-sources/graphql',
+					},
+					{
+						title: 'Apollo Federation',
+						href: '/docs/supported-data-sources/apollo-federation',
+					},
+					{
+						title: 'REST / OpenAPI',
+						href: '/docs/supported-data-sources/rest-openapi',
+					},
+					{
+						title: 'gRPC',
+						href: '/docs/supported-data-sources/grpc',
+					},
+					{
+						title: 'SOAP',
+						href: '/docs/supported-data-sources/soap',
+					},
+					{
+						title: 'OData',
+						href: '/docs/supported-data-sources/odata',
+					},
+					{
+						title: 'Apache Thrift',
+						href: '/docs/supported-data-sources/apache-thrift',
+					},
+				],
+			},
+		],
+	},
+	{
+		title: 'Authentication',
+		href: '/docs/auth',
+		icon: <LockClosedIcon />,
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/auth/overview',
+			},
+			{
+				title: 'Supported Providers',
+				links: [],
+			},
+		],
+	},
 	{
 		title: 'Database',
 		href: '/docs/database',
@@ -221,69 +374,6 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Authentication',
-		href: '/docs/auth',
-		icon: <LockClosedIcon />,
-		links: [
-			{
-				title: 'Overview',
-				href: '/docs/auth/overview',
-			},
-			{
-				title: 'Supported Providers',
-				links: [],
-			},
-		],
-	},
-	{
-		title: 'APIs',
-		href: '/docs/apis',
-		icon: <ShareIcon />,
-		links: [
-			{
-				title: 'Overview',
-				href: '/docs/apis/overview',
-			},
-			{
-				title: 'Supported APIs',
-				links: [
-					{
-						title: 'Overview',
-						href: '/docs/supported-data-sources',
-					},
-					{
-						title: 'GraphQL',
-						href: '/docs/supported-data-sources/graphql',
-					},
-					{
-						title: 'Apollo Federation',
-						href: '/docs/supported-data-sources/apollo-federation',
-					},
-					{
-						title: 'REST / OpenAPI',
-						href: '/docs/supported-data-sources/rest-openapi',
-					},
-					{
-						title: 'gRPC',
-						href: '/docs/supported-data-sources/grpc',
-					},
-					{
-						title: 'SOAP',
-						href: '/docs/supported-data-sources/soap',
-					},
-					{
-						title: 'OData',
-						href: '/docs/supported-data-sources/odata',
-					},
-					{
-						title: 'Apache Thrift',
-						href: '/docs/supported-data-sources/apache-thrift',
-					},
-				],
-			},
-		],
-	},
-	{
 		title: 'Realtime',
 		href: '/docs/realtime',
 		icon: <CursorArrowRaysIcon />,
@@ -322,160 +412,6 @@ const navigation = [
 		],
 	},
 	{ type: 'divider' },
-	{
-		title: 'Guides',
-		href: '/docs/guides',
-		icon: <BookOpenIcon />,
-		links: [
-			{
-				title: 'Overview',
-				href: '/docs/guides',
-			},
-			{
-				title: 'Writing operations',
-				link: [
-					{
-						title:
-							'TypeSafe API Integrations with TypeScript Operations & GraphQL',
-						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
-					},
-					{
-						title: 'API Namespacing',
-						href: '/docs/core-concepts/api-namespacing',
-					},
-					{
-						title: 'Virtual Graph',
-						href: '/docs/core-concepts/virtual-graph',
-					},
-					{
-						title: 'The `_join` field',
-						href: '/docs/core-concepts/_join-field',
-					},
-				],
-			},
-			{
-				title: 'Configuring WunderGraph',
-				link: [],
-			},
-			{
-				title: 'Frontend Frameworks',
-				links: [
-					{
-						title: 'React',
-						href: '/docs/supported-frontend-frameworks/react-js',
-					},
-					{
-						title: 'React Native',
-						href: '/docs/supported-frontend-frameworks/react-native',
-					},
-					{
-						title: 'Next.js',
-						href: '/docs/supported-frontend-frameworks/nextjs',
-					},
-					{
-						title: 'ViteJS',
-						href: '/docs/supported-frontend-frameworks/vite-js',
-					},
-					{
-						title: 'iOS / Swift / Objective-C',
-						href: '/docs/supported-frontend-frameworks/ios-swift-objective-c',
-					},
-					{
-						title: 'Android / Kotlin / Java',
-						href: '/docs/supported-frontend-frameworks/android-kotlin-java',
-					},
-					{
-						title: 'Remix',
-						href: '/docs/supported-frontend-frameworks/remix',
-					},
-					{
-						title: 'Svelte',
-						href: '/docs/supported-frontend-frameworks/svelte',
-					},
-					{
-						title: 'Vue',
-						href: '/docs/supported-frontend-frameworks/vue',
-					},
-					{
-						title: 'SolidJS',
-						href: '/docs/supported-frontend-frameworks/solidjs',
-					},
-				],
-			},
-			{
-				title: 'Supported Backend Languages',
-				links: [
-					{
-						title: 'NodeJS / TypeScript',
-						href: '/docs/supported-backend-languages-frameworks/nodejs-typescript',
-					},
-					{
-						title: 'Golang / Go',
-						href: '/docs/supported-backend-languages-frameworks/golang-go',
-					},
-					{
-						title: 'Python',
-						href: '/docs/supported-backend-languages-frameworks/python',
-					},
-					{
-						title: 'Java / Kotlin',
-						href: '/docs/supported-backend-languages-frameworks/java-kotlin',
-					},
-				],
-			},
-			{
-				title: 'IDE',
-				link: [
-					{
-						title: 'Enable autocompletion in your IDE',
-						href: '/docs/guides/enable-autocompletion-in-your-ide',
-					},
-				],
-			},
-			{
-				title: 'Testing',
-				link: [],
-			},
-			{
-				title: 'Security',
-				link: [
-					{
-						title: 'Token Based Authentication with Next Auth',
-						href: '/docs/guides/token-based-authentication-with-next-auth',
-					},
-				],
-			},
-			{
-				title: 'Advanced',
-				link: [
-					{
-						title: 'Inject Short-Lived Token into Upstream Requests',
-						href: '/docs/guides/inject-short-lived-token-into-upstream-requests',
-					},
-					{
-						title: 'Expose a GraphQL API from WunderGraph',
-						href: '/docs/guides/expose-a-graphql-api-from-wundergraph',
-					},
-					{
-						title: 'Extend JSON fields with more specific types',
-						href: '/docs/guides/extend-json-fields-with-more-specific-types',
-					},
-					{
-						title: 'Signing Origin Requests',
-						href: '/docs/guides/signing-origin-requests',
-					},
-				],
-			},
-			{
-				title: 'Testing',
-				href: '/docs/guides/testing',
-			},
-			{
-				title: 'Debugging',
-				href: '/docs/guides/debugging',
-			},
-		],
-	},
 	{
 		title: 'Platform',
 		href: '/docs/platform',
@@ -548,155 +484,302 @@ const navigation = [
 				],
 			},
 			{
-				title: 'Use Cases',
+				title: 'Supported Data Sources',
 				links: [
 					{
 						title: 'Overview',
-						href: '/docs/use-cases',
+						href: '/docs/supported-data-sources',
 					},
 					{
-						title: 'Programmable API Gateway',
-						href: '/docs/use-cases/programmable-api-gateway',
+						title: 'GraphQL',
+						href: '/docs/supported-data-sources/graphql',
 					},
 					{
-						title: 'API Management',
-						href: '/docs/use-cases/api-management',
+						title: 'Apollo Federation',
+						href: '/docs/supported-data-sources/apollo-federation',
 					},
 					{
-						title: 'Backend for Frontend',
-						href: '/docs/use-cases/backend-for-frontend',
+						title: 'REST / OpenAPI',
+						href: '/docs/supported-data-sources/rest-openapi',
 					},
 					{
-						title: 'API Composition & Integration',
-						href: '/docs/use-cases/api-composition-and-integration',
+						title: 'gRPC',
+						href: '/docs/supported-data-sources/grpc',
 					},
 					{
-						title: 'Versionless APIs: Easily build backwards compatible APIs',
-						href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
+						title: 'SOAP',
+						href: '/docs/supported-data-sources/soap',
 					},
 					{
-						title: 'Multi Database, multi schema ORM',
-						href: '/docs/use-cases/multi-database-multi-schema-orm',
+						title: 'OData',
+						href: '/docs/supported-data-sources/odata',
 					},
 					{
-						title: 'Generate SDKs for all your APIs',
-						href: '/docs/use-cases/generate-sdks-for-all-your-apis',
+						title: 'Apache Thrift',
+						href: '/docs/supported-data-sources/apache-thrift',
 					},
 					{
-						title:
-							'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
-						href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
+						title: 'PostgreSQL',
+						href: '/docs/supported-data-sources/postgresql',
 					},
 					{
-						title: 'Enabling your Organization to become API first',
-						href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
+						title: 'MySQL',
+						href: '/docs/supported-data-sources/mysql',
+					},
+					{
+						title: 'SQLite',
+						href: '/docs/supported-data-sources/sqlite',
+					},
+					{
+						title: 'SQLServer',
+						href: '/docs/supported-data-sources/sqlserver',
+					},
+					{
+						title: 'MongoDB + Atlas',
+						href: '/docs/supported-data-sources/mongodb-atlas',
+					},
+					{
+						title: 'Planetscale',
+						href: '/docs/supported-data-sources/planetscale',
+					},
+					{
+						title: 'FaunaDB',
+						href: '/docs/supported-data-sources/faunadb',
+					},
+					{
+						title: 'Neo4j',
+						href: '/docs/supported-data-sources/neo4j',
+					},
+					{
+						title: 'Yugabyte',
+						href: '/docs/supported-data-sources/yugabyte',
+					},
+					{
+						title: 'Oracle DB',
+						href: '/docs/supported-data-sources/oracle-db',
 					},
 				],
 			},
 			{
-				title: 'Features',
+				title: 'Supported Frontend Frameworks',
 				links: [
 					{
-						title: 'Overview',
-						href: '/docs/features',
+						title: 'React',
+						href: '/docs/supported-frontend-frameworks/react-js',
 					},
 					{
-						title: 'TypeScript hooks to customize the API Gateway Middleware',
-						href: '/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
+						title: 'React Native',
+						href: '/docs/supported-frontend-frameworks/react-native',
 					},
 					{
-						title: 'TypeScript webhooks to integrate third party applications',
-						href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+						title: 'Next.js',
+						href: '/docs/supported-frontend-frameworks/nextjs',
 					},
 					{
-						title: 'TypeScript Operations',
-						href: '/docs/features/typescript-operations',
+						title: 'ViteJS',
+						href: '/docs/supported-frontend-frameworks/vite-js',
 					},
 					{
-						title: 'API Namespacing',
-						href: '/docs/features/api-namespacing',
+						title: 'iOS / Swift / Objective-C',
+						href: '/docs/supported-frontend-frameworks/ios-swift-objective-c',
 					},
 					{
-						title: 'Cross-API Joins to compose APIs',
-						href: '/docs/features/cross-api-joins-to-compose-apis',
+						title: 'Android / Kotlin / Java',
+						href: '/docs/supported-frontend-frameworks/android-kotlin-java',
 					},
 					{
-						title: 'TypeSafe Mocking',
-						href: '/docs/features/type-safe-mocking',
+						title: 'Remix',
+						href: '/docs/supported-frontend-frameworks/remix',
 					},
 					{
-						title: 'Local Development',
-						href: '/docs/features/local-development',
+						title: 'Svelte',
+						href: '/docs/supported-frontend-frameworks/svelte',
 					},
 					{
-						title: 'OpenID Connect based Authentication',
-						href: '/docs/features/openid-connect-based-authentication',
+						title: 'Vue',
+						href: '/docs/supported-frontend-frameworks/vue',
 					},
 					{
-						title: 'Authentication aware Data-Fetching',
-						href: '/docs/features/authentication-aware-data-fetching',
-					},
-					{
-						title: 'Authorization - Injecting Claims',
-						href: '/docs/features/authorization-injecting-claims',
-					},
-					{
-						title: 'Authorization - Role-Based Access Control',
-						href: '/docs/features/authorization-role-based-access-control-rbac',
-					},
-					{
-						title: 'Automatic CSRF Protection for Mutations',
-						href: '/docs/features/automatic-csrf-protection-for-mutations',
-					},
-					{
-						title: 'HTTP-Layer Caching',
-						href: '/docs/features/http-layer-caching',
-					},
-					{
-						title: 'GraphQL to JSON-RPC Compiler',
-						href: '/docs/features/graphql-to-json-rpc-compiler',
-					},
-					{
-						title: 'Automatic Content Revalidation with ETags',
-						href: '/docs/features/automatic-content-revalidation-with-etags',
-					},
-					{
-						title: 'Realtime Subscriptions',
-						href: '/docs/features/realtime-subscriptions',
-					},
-					{
-						title: 'Live Queries',
-						href: '/docs/features/live-queries',
-					},
-					{
-						title: 'Generated Clients / SDKs',
-						href: '/docs/features/generated-clients-and-sdks',
-					},
-					{
-						title: 'JSON-Schema Validation',
-						href: '/docs/features/json-schema-validation',
-					},
-					{
-						title: 'Generated APIs for any Database',
-						href: '/docs/features/generated-apis-for-any-database',
-					},
-					{
-						title: 'File-based Operations',
-						href: '/docs/features/file-based-operations',
-					},
-					{
-						title: 'Configuration as Code',
-						href: '/docs/features/configuration-as-code',
-					},
-					{
-						title: 'File uploads to S3 compatible File Storages',
-						href: '/docs/features/file-uploads-to-s3-compatible-file-storages',
-					},
-					{
-						title: 'Custom GraphQL Resolvers',
-						href: '/docs/features/custom-graphql-resolvers',
+						title: 'SolidJS',
+						href: '/docs/supported-frontend-frameworks/solidjs',
 					},
 				],
+			},
+			{
+				title: 'Supported Backend Languages',
+				links: [
+					{
+						title: 'NodeJS / TypeScript',
+						href: '/docs/supported-backend-languages-frameworks/nodejs-typescript',
+					},
+					{
+						title: 'Golang / Go',
+						href: '/docs/supported-backend-languages-frameworks/golang-go',
+					},
+					{
+						title: 'Python',
+						href: '/docs/supported-backend-languages-frameworks/python',
+					},
+					{
+						title: 'Java / Kotlin',
+						href: '/docs/supported-backend-languages-frameworks/java-kotlin',
+					},
+				],
+			},
+		],
+	},
+	{
+		title: 'Use Cases',
+		href: '/docs/use-cases',
+		icon: <LightBulbIcon />,
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/use-cases',
+			},
+			{
+				title: 'Programmable API Gateway',
+				href: '/docs/use-cases/programmable-api-gateway',
+			},
+			{
+				title: 'API Management',
+				href: '/docs/use-cases/api-management',
+			},
+			{
+				title: 'Backend for Frontend',
+				href: '/docs/use-cases/backend-for-frontend',
+			},
+			{
+				title: 'API Composition & Integration',
+				href: '/docs/use-cases/api-composition-and-integration',
+			},
+			{
+				title: 'Versionless APIs: Easily build backwards compatible APIs',
+				href: '/docs/use-cases/versionless-apis-easily-build-backwards-compatible-apis',
+			},
+			{
+				title: 'Multi Database, multi schema ORM',
+				href: '/docs/use-cases/multi-database-multi-schema-orm',
+			},
+			{
+				title: 'Generate SDKs for all your APIs',
+				href: '/docs/use-cases/generate-sdks-for-all-your-apis',
+			},
+			{
+				title:
+					'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
+				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
+			},
+			{
+				title: 'Enabling your Organization to become API first',
+				href: '/docs/use-cases/enabling-your-organization-to-become-api-first',
+			},
+		],
+	},
+	{
+		title: 'Features',
+		href: '/docs/features',
+		icon: <ListBulletIcon />,
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/features',
+			},
+			{
+				title: 'TypeScript hooks to customize the API Gateway Middleware',
+				href: '/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
+			},
+			{
+				title: 'TypeScript webhooks to integrate third party applications',
+				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/docs/features/typescript-operations',
+			},
+			{
+				title: 'API Namespacing',
+				href: '/docs/features/api-namespacing',
+			},
+			{
+				title: 'Cross-API Joins to compose APIs',
+				href: '/docs/features/cross-api-joins-to-compose-apis',
+			},
+			{
+				title: 'TypeSafe Mocking',
+				href: '/docs/features/type-safe-mocking',
+			},
+			{
+				title: 'Local Development',
+				href: '/docs/features/local-development',
+			},
+			{
+				title: 'OpenID Connect based Authentication',
+				href: '/docs/features/openid-connect-based-authentication',
+			},
+			{
+				title: 'Authentication aware Data-Fetching',
+				href: '/docs/features/authentication-aware-data-fetching',
+			},
+			{
+				title: 'Authorization - Injecting Claims',
+				href: '/docs/features/authorization-injecting-claims',
+			},
+			{
+				title: 'Authorization - Role-Based Access Control',
+				href: '/docs/features/authorization-role-based-access-control-rbac',
+			},
+			{
+				title: 'Automatic CSRF Protection for Mutations',
+				href: '/docs/features/automatic-csrf-protection-for-mutations',
+			},
+			{
+				title: 'HTTP-Layer Caching',
+				href: '/docs/features/http-layer-caching',
+			},
+			{
+				title: 'GraphQL to JSON-RPC Compiler',
+				href: '/docs/features/graphql-to-json-rpc-compiler',
+			},
+			{
+				title: 'Automatic Content Revalidation with ETags',
+				href: '/docs/features/automatic-content-revalidation-with-etags',
+			},
+			{
+				title: 'Realtime Subscriptions',
+				href: '/docs/features/realtime-subscriptions',
+			},
+			{
+				title: 'Live Queries',
+				href: '/docs/features/live-queries',
+			},
+			{
+				title: 'Generated Clients / SDKs',
+				href: '/docs/features/generated-clients-and-sdks',
+			},
+			{
+				title: 'JSON-Schema Validation',
+				href: '/docs/features/json-schema-validation',
+			},
+			{
+				title: 'Generated APIs for any Database',
+				href: '/docs/features/generated-apis-for-any-database',
+			},
+			{
+				title: 'File-based Operations',
+				href: '/docs/features/file-based-operations',
+			},
+			{
+				title: 'Configuration as Code',
+				href: '/docs/features/configuration-as-code',
+			},
+			{
+				title: 'File uploads to S3 compatible File Storages',
+				href: '/docs/features/file-uploads-to-s3-compatible-file-storages',
+			},
+			{
+				title: 'Custom GraphQL Resolvers',
+				href: '/docs/features/custom-graphql-resolvers',
 			},
 		],
 	},
