@@ -213,6 +213,22 @@ func TestNode(t *testing.T) {
 
 	withHeaders.GET("/graphql").Expect().Status(http.StatusOK).Text(
 		httpexpect.ContentOpts{MediaType: "text/html"})
+
+	failingRequest := GraphQLRequest{
+		OperationName: "MyReviews",
+		Query: `query MyReviews {
+						me {
+							id
+							name
+							reviews {
+								body
+							},
+					}
+				}`,
+	}
+
+	actual = withHeaders.POST("/graphql").WithJSON(failingRequest).Expect().Status(http.StatusOK).Body().Raw()
+	g.Assert(t, "post my reviews graphql returns valid graphql error", prettyJSON(actual))
 }
 
 func TestInMemoryCache(t *testing.T) {
