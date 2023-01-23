@@ -4,45 +4,116 @@ import { useRouter } from 'next/router'
 import clsx from 'clsx'
 import { scrollIntoViewIfNeeded } from '../utils/scroll-into-view'
 
+import { ArrowLeftIcon } from '@heroicons/react/24/solid'
+
 function SubNavigation({ navigation, className }) {
 	return (
-		<ul role="list" className="space-y-9">
-			{navigation.map((section) => (
-				<li key={section.title}>
-					<h2 className="font-display font-medium text-slate-900 dark:text-white">
-						{section.title}
-					</h2>
-					<ul
-						role="list"
-						className="mt-2 space-y-2 border-l-2 border-slate-100 dark:border-slate-800 lg:mt-4 lg:space-y-4 lg:border-slate-200"
-					>
-						{section.links?.map((link) => (
-							<li key={link.href} className="relative">
-								{link.href ? <NavLink {...link} /> : link.title}
-							</li>
-						))}
-					</ul>
-				</li>
-			))}
-		</ul>
+		<>
+			<div className="relative">
+				<Link
+					className="font-xs group flex items-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+					href="/"
+				>
+					<span className="absolute -left-5 mr-2 inline-block h-4 w-4 transition-all  group-hover:-left-6">
+						<ArrowLeftIcon />
+					</span>
+					All docs
+				</Link>
+			</div>
+
+			<h2 className="relative mt-8 mb-6 flex flex-row items-center font-display text-lg font-medium text-gray-900 dark:text-white">
+				<span className="absolute -left-6 mr-2 inline-block h-5 w-5">
+					{navigation?.icon}
+				</span>{' '}
+				{navigation?.title}
+			</h2>
+			<ul role="list">
+				{navigation?.links.map((section) => (
+					<li key={section.title} className="relative">
+						{section.href ? (
+							<PrimaryNavLink {...section} />
+						) : (
+							<>
+								<h3 className="mt-8 font-display font-medium text-gray-900 dark:text-white">
+									{section.title}
+								</h3>
+								<ul
+									role="list"
+									className="mt-2 border-l-2 border-gray-100 dark:border-gray-800 lg:mt-4 lg:border-gray-200"
+								>
+									{section.links?.map((link) => (
+										<li key={link.href} className="relative">
+											{link.href ? <NavLink {...link} /> : link.title}
+										</li>
+									))}
+								</ul>
+							</>
+						)}
+					</li>
+				))}
+			</ul>
+		</>
 	)
 }
 
 export function Navigation({ navigation, className }) {
+	const router = useRouter()
+	const path = router.asPath
+	const isRoot = path === '/'
+
+	const subNavigation = React.useMemo(
+		() => !isRoot && navigation.find(({ href }) => href === path),
+		[navigation, path, isRoot]
+	)
+
 	return (
-		<nav className={clsx('text-base lg:text-sm', className)}>
-			<ul role="list" className="space-y-4">
-				{navigation.map((section) =>
+		<nav className={clsx('flex text-base lg:text-sm', className)}>
+			<ul
+				role="list"
+				className={clsx(
+					'absolute transition-transform',
+					!isRoot ? '-translate-x-full opacity-0' : 'translate-x-0'
+				)}
+			>
+				{navigation.map((section, i) =>
 					section.type === 'divider' ? (
-						<li className="mb-2 border-b border-transparent" />
+						<li key={i} className="mb-4 border-b border-transparent" />
 					) : (
-						<li key={section.title}>
-							<NavLink {...section} />
+						<li key={section.title} className="relative">
+							<PrimaryNavLink {...section} />
 						</li>
 					)
 				)}
 			</ul>
+			<div
+				className={clsx(
+					'absolute transition-transform',
+					isRoot ? 'translate-x-full opacity-0' : 'translate-x-0'
+				)}
+			>
+				{subNavigation && <SubNavigation navigation={subNavigation} />}
+			</div>
 		</nav>
+	)
+}
+
+const PrimaryNavLink = ({ href, title, icon, className }) => {
+	let router = useRouter()
+
+	return (
+		<Link
+			href={href || ''}
+			className={clsx(
+				'flex w-full items-center py-2',
+				href === router.pathname
+					? 'font-semibold text-pink-500 before:bg-pink-500'
+					: 'text-gray-500  hover:text-gray-800 dark:text-gray-400 dark:before:bg-gray-700 dark:hover:text-gray-300',
+				className
+			)}
+		>
+			{icon && <span className="mr-2 inline-block h-4 w-4">{icon}</span>}
+			{title}
+		</Link>
 	)
 }
 
@@ -70,17 +141,17 @@ const NavLink = ({ href, title, icon, className }) => {
 			)
 		}
 		routeRef.current = router.pathname
-	}, [router.pathname])
+	}, [router.pathname, href])
 
 	return (
 		<Link
 			ref={ref}
 			href={href || ''}
 			className={clsx(
-				'flex w-full items-center pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full',
+				'before:-trangray-y-1/2 flex w-full items-center py-2 pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:-mt-0.5 before:h-1.5 before:w-1.5 before:rounded-full',
 				href === router.pathname
-					? 'font-semibold text-sky-600 before:bg-sky-500'
-					: 'text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300',
+					? 'font-semibold text-pink-500 before:bg-pink-500'
+					: 'text-gray-500 before:hidden before:bg-gray-300 hover:text-gray-800 hover:before:block dark:text-gray-400 dark:before:bg-gray-700 dark:hover:text-gray-300',
 				className
 			)}
 		>

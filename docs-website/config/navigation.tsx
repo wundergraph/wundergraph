@@ -22,7 +22,7 @@ import {
 const navigation = [
 	{
 		title: 'Home',
-		href: '/docs',
+		href: '/',
 		icon: <HomeIcon />,
 	},
 	{
@@ -32,11 +32,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/getting-started/overview',
-			},
-			{
-				title: 'Your first WunderGraph Application',
-				href: '/docs/tutorials/your-first-wundergraph-application',
+				href: '/getting-started',
 			},
 			{
 				title: 'Framework Quickstarts',
@@ -48,6 +44,15 @@ const navigation = [
 					{
 						title: 'Vite',
 						href: '/docs/getting-started/vite',
+					},
+				],
+			},
+			{
+				title: 'Tutorials',
+				links: [
+					{
+						title: 'Your first WunderGraph Application',
+						href: '/docs/tutorials/your-first-wundergraph-application',
 					},
 				],
 			},
@@ -1167,9 +1172,24 @@ const navigation = [
 		icon: <BugAntIcon />,
 	},
 	{
-		title: 'Upgrade guids',
-		href: '/docs/upgrading',
+		title: 'Upgrade guides',
+		href: '/docs/upgrade-guides',
 		icon: <ArrowUpCircleIcon />,
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/upgrade-guides',
+			},
+			{
+				title: 'Pre 1.0 changes',
+				links: [
+					{
+						title: 'Simplified URL structure',
+						href: '/docs/upgrade-guides/simplifying-the-wundergraph-url-structure.md',
+					},
+				],
+			},
+		],
 	},
 ]
 

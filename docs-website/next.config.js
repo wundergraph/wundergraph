@@ -18,8 +18,18 @@ const nextConfig = {
 				permanent: true,
 			},
 			{
-				source: '/docs/examples/nextjs-swr',
-				destination: '/docs/examples/nextjs',
+				source: '/docs/pre-1-0-changes',
+				destination: '/docs/upgrade-guides',
+				permanent: true,
+			},
+			{
+				source: '/docs/pre-1-0-changes/:path*',
+				destination: '/docs/upgrade-guides/:path*',
+				permanent: true,
+			},
+			{
+				source: '/docs/getting-started/:path*',
+				destination: '/getting-started/:path*',
 				permanent: true,
 			},
 		]
