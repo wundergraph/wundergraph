@@ -13,8 +13,21 @@ import (
 )
 
 const (
-	urlHashTag = "urlHash"
+	urlHashTag    = "WG_TAG_DATA_SOURCE_URL_HASH"
+	dataSourceTag = "WG_TAG_DATA_SOURCE_TYPE"
+	isPrivateTag  = "WG_TAG_DATA_SOURCE_IS_PRIVATE"
 )
+
+// NewDataSourceMetric creates a data metric from the data source name
+func NewDataSourceMetric(dataSourceName string) *Metric {
+	return &Metric{
+		Name:  DATASOURCE_USAGE_METRIC_NAME,
+		Value: 1,
+		Tags: []MetricTag{
+			{Name: dataSourceTag, Value: dataSourceName},
+		},
+	}
+}
 
 func isPrivateHost(host string) bool {
 	privateIPBlocks := []string{
@@ -65,7 +78,7 @@ func dataSourceMetric(dataSourceTag string, urlVariable *wgpb.ConfigurationVaria
 					host = u.Host
 				}
 				if isPrivateHost(host) {
-					if err := metric.AddTag("isPrivate", "true"); err != nil {
+					if err := metric.AddTag(isPrivateTag, "true"); err != nil {
 						return nil, err
 					}
 				}

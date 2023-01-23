@@ -259,14 +259,3 @@ func NewDurationMetric(name string) DurationMetric {
 		}
 	}
 }
-
-// NewDataSourceMetric creates a data metric from the data source name
-func NewDataSourceMetric(dataSourceName string) *Metric {
-	return &Metric{
-		Name:  DATASOURCE_USAGE_METRIC_NAME,
-		Value: 1,
-		Tags: []MetricTag{
-			{Name: "ds", Value: dataSourceName},
-		},
-	}
-}
