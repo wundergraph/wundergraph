@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { clsx } from 'clsx'
+import clsx from 'clsx'
 import { Icon } from '@/components/Icon'
 import { ArrowRightIcon } from '@heroicons/react/24/solid'
 
