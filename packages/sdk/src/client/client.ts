@@ -183,6 +183,15 @@ export class Client {
 		});
 	}
 
+	/**
+	 * unsetAuthorization removes any previously authorization credentials
+	 * (e.g. via setAuthorizationToken or via setExtraHeaders).
+	 * If there was no authorization set, it does nothing.
+	 */
+	public unsetAuthorization() {
+		delete this.extraHeaders['Authorization'];
+	}
+
 	/***
 	 * Query makes a GET request to the server.
 	 * The method only throws an error if the request fails to reach the server or
