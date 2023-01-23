@@ -57,9 +57,7 @@ const expectUnauthorized = (result: ClientResponse<HelloResponseData>) => {
 describe('test token Authorization', () => {
 	test('valid token', async () => {
 		const client = wg.client();
-		client.setExtraHeaders({
-			Authorization: `Bearer ${authorizationToken}`,
-		});
+		client.setAuthorizationToken(authorizationToken);
 		const result = await client.query({
 			operationName: 'Hello',
 		});
@@ -77,9 +75,7 @@ describe('test token Authorization', () => {
 
 	test('invalid token', async () => {
 		const client = wg.client();
-		client.setExtraHeaders({
-			Authorization: `Bearer random`,
-		});
+		client.setAuthorizationToken('random');
 		const result = await client.query({
 			operationName: 'Hello',
 		});
@@ -88,9 +84,7 @@ describe('test token Authorization', () => {
 
 	test('empty token', async () => {
 		const client = wg.client();
-		client.setExtraHeaders({
-			Authorization: `Bearer `,
-		});
+		client.setAuthorizationToken('');
 		const result = await client.query({
 			operationName: 'Hello',
 		});
