@@ -19,6 +19,7 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
@@ -781,7 +782,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
 	if shared.Report.HasErrors() {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		h.logInternalErrors(shared.Report, requestLogger)
+		h.writeRequestErrors(shared.Report, w, requestLogger)
+
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -794,8 +798,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if shared.Report.HasErrors() {
-		requestLogger.Error("shared printer", zap.String("errors", shared.Report.Error()))
-		http.Error(w, "bad request", http.StatusBadRequest)
+		h.logInternalErrors(shared.Report, requestLogger)
+		h.writeRequestErrors(shared.Report, w, requestLogger)
+
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -807,7 +813,13 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
 		if err != nil {
-			requestLogger.Error("prepare plan failed", zap.Error(shared.Report))
+			if shared.Report.HasErrors() {
+				h.logInternalErrors(shared.Report, requestLogger)
+				h.writeRequestErrors(shared.Report, w, requestLogger)
+			} else {
+				requestLogger.Error("prepare plan failed", zap.Error(err))
+			}
+
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -830,8 +842,19 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
+
+			requestErrors := graphql.RequestErrors{
+				{
+					Message: "could not resolve response",
+				},
+			}
+
+			if _, err := requestErrors.WriteResponse(w); err != nil {
+				requestLogger.Error("could not write response", zap.Error(err))
+			}
+
 			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
-			http.Error(w, "bad request", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		_, err = executionBuf.WriteTo(w)
@@ -856,11 +879,43 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
+
+			requestErrors := graphql.RequestErrors{
+				{
+					Message: "could not resolve response",
+				},
+			}
+
+			if _, err := requestErrors.WriteResponse(w); err != nil {
+				requestLogger.Error("could not write response", zap.Error(err))
+			}
+
 			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	case *plan.StreamingResponsePlan:
 		http.Error(w, "not implemented", http.StatusNotFound)
+	}
+}
+
+func (h *GraphQLHandler) logInternalErrors(report *operationreport.Report, requestLogger *zap.Logger) {
+	var internalErr error
+	for _, err := range report.InternalErrors {
+		internalErr = multierror.Append(internalErr, err)
+	}
+
+	if internalErr != nil {
+		requestLogger.Error("internal error", zap.Error(internalErr))
+	}
+}
+
+func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w http.ResponseWriter, requestLogger *zap.Logger) {
+	requestErrors := graphql.RequestErrorsFromOperationReport(*report)
+	if requestErrors != nil {
+		if _, err := requestErrors.WriteResponse(w); err != nil {
+			requestLogger.Error("error writing response", zap.Error(err))
+		}
 	}
 }
 
