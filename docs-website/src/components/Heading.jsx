@@ -14,7 +14,7 @@ export function Heading({ id = '', level = 1, children, className }) {
 			id={id}
 		>
 			{children}
-			<style jsx>
+			<style>
 				{`
 					a {
 						text-decoration: none;
@@ -30,7 +30,7 @@ export function Heading({ id = '', level = 1, children, className }) {
 	return id && level !== 1 ? (
 		<a href={`#${id}`}>
 			{link}
-			<style jsx>
+			<style>
 				{`
 					a {
 						text-decoration: none;
