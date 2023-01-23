@@ -24,9 +24,6 @@ configureWunderGraphApplication({
 		...cors.allowAll,
 		allowedOrigins: [],
 	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined,
 	},

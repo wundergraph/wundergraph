@@ -79,9 +79,6 @@ configureWunderGraphApplication({
 		...cors.allowAll,
 		allowedOrigins: [],
 	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
 	security: {
 		enableGraphQLEndpoint: true,
 	},

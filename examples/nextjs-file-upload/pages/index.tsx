@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth, useFileUpload, useUser, withWunderGraph } from '../components/generated/nextjs';
 
 const Upload = () => {
-	const { login } = useAuth();
+	const { login, logout } = useAuth();
 	const { data: user } = useUser();
 
 	const [files, setFiles] = useState<FileList>();
@@ -23,13 +23,15 @@ const Upload = () => {
 		}
 		try {
 			const result = await upload({
-				provider: 'minio',
+				provider: 'minio1',
+				profile: 'coverPicture',
 				files,
 			});
 			result && setData(result);
 		} catch (e) {
-			alert('Upload failed!');
-			console.error("Couldn't upload files", e);
+			const msg = e instanceof Error ? e.message : 'Upload failed!';
+			alert(msg);
+			console.error("Couldn't upload files", msg);
 		}
 	};
 
@@ -65,6 +67,9 @@ const Upload = () => {
 					</li>
 				))}
 			</ul>
+			<button className="bg-white text-black p-2 rounded w-full mt-4" type="button" onClick={() => logout()}>
+				Logout
+			</button>
 		</div>
 	);
 };
