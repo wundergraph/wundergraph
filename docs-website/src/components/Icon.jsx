@@ -86,7 +86,11 @@ export function Icon({ color = 'blue', icon, className, ...props }) {
 				width="1.6em"
 			/>
 		</svg>
-	) : null
+	) : (
+		<span className={clsx('inline-block', className, iconStyles[color])}>
+			{icon}
+		</span>
+	)
 }
 
 const gradients = {

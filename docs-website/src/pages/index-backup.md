@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: WunderGraph Documentation
 pageTitle: WunderGraph Documentation
 description: Explore our guides and examples to integrate WunderGraph.
 isIndexFile: true
