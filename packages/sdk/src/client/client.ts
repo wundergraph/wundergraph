@@ -249,12 +249,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (
-			this.options.operationMetadata &&
-			this.options.operationMetadata[options.operationName] &&
-			this.options.operationMetadata[options.operationName].requiresAuthentication &&
-			this.csrfEnabled
-		) {
+		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
