@@ -2,25 +2,24 @@
 
 usage()
 {
-  echo "Usage: $0 [-u] [-p]" 1>&2
+  echo "Usage: $0 [-u]" 1>&2
   echo "This script tests a single example, optionally updating dependencies to point to workspace" 1>&2
   echo "It must be run from the example directory e.g. ../../scripts/test-example.sh" 1>&2
   exit 2
 }
 
+default_node_url=http://localhost:9991
 update_package_json="no"
-# On Linux using pnpm always results in a "ELIFECYCLE Command failed. Exit code: 1" error
-# For this reason we use npm as the default
-npm=npm
 
 kill_with_children() {
     local pid=$1
-    if children="`pgrep -P $pid`"; then
+    if children="`pgrep -P ${pid}`"; then
         for child in $children; do
-            kill_with_children $child
+            kill_with_children ${child}
         done
     fi
-    kill $pid
+    # Ignore errors here
+    kill ${pid} > /dev/null 2> /dev/null || true
 }
 
 args=`getopt uh $*`
@@ -33,10 +32,6 @@ while :; do
     case "$1" in
         -u)
             update_package_json="yes"
-            shift
-        ;;
-        -p)
-            npm=npm
             shift
         ;;
         -h)
@@ -53,7 +48,6 @@ if ! test -f package.json || ! test -d ../../examples; then
     exit 1
 fi
 
-set -x
 set -e
 
 # Wipe cache and generated files. This should have no impact in
@@ -65,60 +59,56 @@ if test ${update_package_json} = "yes"; then
     sed -i.bak -E 's/(@wundergraph\/.*": ")\^[0-9\.]+/\1workspace:*/g' package.json
     rm -fr package.json.bak
 
-    ${npm} install
+    # We're replacing modules with workspace copies, need to use
+    # pnpm to install since npm doesn't understand workspaces
+    pnpm install
 fi
 
 # If we have an example .env.example file
 # copy it to .env to use default values in the CI
-if [ -e ".env.example" ]; then
+if test -f .env.example && ! test -f .env; then
 	cp -n .env.example .env
 fi
 
 if ! test -d node_modules; then
-    ${npm} install
+    npm install
 fi
 
 # Check for a script to bring up the required services
-services_pid=
-if grep -q '"start:services"' package.json; then
-    ${npm} run start:services &
-    services_pid=$!
-    if grep -q '"wait-on:services"' package.json; then
-        ${npm} run wait-on:services
-    else
-        sleep 1
-    fi
-fi
+npm start &
+pid=$!
 
-if grep -q '"setup"' package.json; then
-    ${npm} run setup
-fi
+trap "kill_with_children ${pid}" EXIT
 
-# Generate WunderGraph files
-npm run build
+# Wait for code generation to complete
+while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
+    sleep 0.1
+    # Make sure npm start is still running
+    kill -0 ${pid}
+done
+
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
-    ${npm} test
+    WG_NODE_URL=${default_node_url} npm test
 elif grep -q '"check"' package.json; then
-    ${npm} run check
+    npm run check
 elif grep -q '"build"' package.json; then
-    ${npm} run build
+    npm run build
+fi
+
+if grep -q '"test:playwright"' package.json; then
+    # This is a no-op if playwright is already installed
+    npx -- playwright install --with-deps chromium
+    WG_NODE_URL=${default_node_url} npm run test:playwright
 fi
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
-		echo "Cleaning up"
-    ${npm} run cleanup
+    echo "Cleaning up"
+    npm run cleanup
 fi
 
-# Kill all services we started in "start:services"
-if test ! -z ${services_pid}; then
-	if ps -p $services_pid > /dev/null; then
-			echo "Killing services"
-			kill_with_children ${services_pid}
-	fi
-fi
 # Restore package.json
 if test ${update_package_json} = "yes"; then
     git checkout -f package.json
