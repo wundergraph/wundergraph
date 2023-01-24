@@ -83,7 +83,7 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
 		options: UseQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): UseQueryResult<Data, ClientResponseError>;
+	): UseQueryResult<Data, ClientResponseError> & { isSubscribed?: boolean };
 };
 
 export type UseSubscriptionOptions<
@@ -111,10 +111,10 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
 	>(
 		options: UseSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
-	): UseSubscriptionResponse<Data, ClientResponseError>;
+	): UseSubscriptionResult<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
+export type UseSubscriptionResult<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
 	isSubscribed: boolean;
 };
 
