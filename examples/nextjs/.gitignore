@@ -44,3 +44,6 @@ yarn-error.log*
 .vercel
 
 migrations
+/test-results/
+/playwright-report/
+/playwright/.cache/
