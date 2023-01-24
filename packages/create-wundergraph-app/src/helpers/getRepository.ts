@@ -7,12 +7,23 @@ import { createDirectory } from './createDirectory';
 import { downloadAndExtractRepo } from './download';
 import { checkIfValidExample, getExamplesList } from './examples';
 import { getRepoInfo } from './getRepoInfo';
+import { getRepoTags } from './getRepoTags';
 import { validateBranch } from './validateBranch';
+import * as process from 'process';
+import { execSync } from 'node:child_process';
+import ora from 'ora';
+
+const resolveLatestWundergraphRef = async () => {
+	const tags = await getRepoTags('https://github.com/wundergraph/wundergraph', '@wundergraph/sdk');
+	return tags[tags.length - 1];
+};
 
 const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: string; githubLink?: string }) => {
 	try {
+		let ref = '';
 		if (!exampleName && !githubLink) {
-			const examples = await getExamplesList();
+			ref = await resolveLatestWundergraphRef();
+			const examples = await getExamplesList(ref);
 			const selectedExampleName = await inquirer.prompt({
 				name: 'selectExample',
 				type: 'list',
@@ -22,16 +33,19 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 			return {
 				repoOwnerName: 'wundergraph',
 				repoName: 'wundergraph',
-				branch: 'main',
+				ref: ref,
 				filePath: `examples/${selectedExampleName['selectExample']}`,
 			};
 		}
 		if (exampleName) {
-			const selectedExampleName = await checkIfValidExample(exampleName);
+			if (!ref) {
+				ref = await resolveLatestWundergraphRef();
+			}
+			const selectedExampleName = await checkIfValidExample(exampleName, ref);
 			return {
 				repoOwnerName: 'wundergraph',
 				repoName: 'wundergraph',
-				branch: 'main',
+				ref: ref,
 				filePath: `examples/${selectedExampleName}`,
 			};
 		} else if (githubLink) {
@@ -58,11 +72,11 @@ const resolveRepository = async ({ exampleName, githubLink }: { exampleName?: st
 			return {
 				repoOwnerName: repoOwnerName,
 				repoName: repoName,
-				branch: selectedBranchName,
+				ref: selectedBranchName,
 				filePath: filePath,
 			};
 		}
-		return { repoOwnerName: '', repoName: '', branch: '', filePath: '' };
+		return { repoOwnerName: '', repoName: '', ref: '', filePath: '' };
 	} catch (e) {
 		throw e;
 	}
@@ -72,11 +86,13 @@ export const getRepository = async ({
 	exampleName,
 	githubLink,
 	projectName,
+	isInit,
 	directoryPath,
 }: {
 	exampleName?: string;
 	githubLink?: string;
 	projectName: string;
+	isInit?: boolean;
 	directoryPath?: string;
 }) => {
 	try {
@@ -89,9 +105,38 @@ export const getRepository = async ({
 				})
 			)
 		);
-		const resolvedProjectPath = await createDirectory(projectName, directoryPath);
-		const { repoOwnerName, repoName, branch, filePath } = await resolveRepository({ exampleName, githubLink });
-		if (repoOwnerName === '' || repoName === '' || branch === '') {
+		let resolvedProjectPath: string;
+
+		if (isInit) {
+			resolvedProjectPath = process.cwd();
+			// ask the user for the package manager being used in the repo
+			const packageManagerPrompt = await inquirer.prompt({
+				name: 'packageManager',
+				type: 'list',
+				message: 'Which package manager is used in the project?',
+				choices: ['npm', 'yarn', 'pnpm'],
+			});
+			const spinner = ora('Installing wundergraph/sdk...').start();
+			// Install the wundergraph sdk
+			execSync(packageManagerPrompt['packageManager'] + ' install @wundergraph/sdk', { cwd: resolvedProjectPath });
+			spinner.succeed(chalk.green('Successfully installed wundergraph/sdk'));
+			exampleName = 'simple';
+		} else {
+			if (projectName === '') {
+				// prompt the user to give the project name
+				const projectNamePrompt = await inquirer.prompt({
+					name: 'projectName',
+					type: 'input',
+					message: 'What would you like to name your app?',
+					default: 'my-app',
+				});
+				projectName = projectNamePrompt['projectName'];
+			}
+			resolvedProjectPath = await createDirectory(projectName, directoryPath);
+		}
+
+		const { repoOwnerName, repoName, ref, filePath } = await resolveRepository({ exampleName, githubLink });
+		if (repoOwnerName === '' || repoName === '' || ref === '') {
 			console.log(chalk.red('Could not resolve the repository details. Please try again.'));
 			throw new Error('Could not resolve the repository details. Please try again.');
 		}
@@ -101,8 +146,9 @@ export const getRepository = async ({
 					root: resolvedProjectPath,
 					repoOwnerName: repoOwnerName,
 					repoName: repoName,
-					branch: branch,
+					ref: ref,
 					filePath: filePath,
+					isInit: isInit,
 				}),
 			{
 				retries: 3,

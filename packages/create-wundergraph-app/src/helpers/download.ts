@@ -8,12 +8,14 @@ import { Stream } from 'stream';
 import tar from 'tar';
 import { promisify } from 'util';
 
+import { getGitHubRequestOptions } from './github';
+
 const pipeline = promisify(Stream.pipeline);
 
 export const downloadTar = async (url: string) => {
 	try {
 		const tempFile = join(tmpdir(), `wundergraph-example.temp-${Date.now()}`);
-		await pipeline(got.stream(url), createWriteStream(tempFile));
+		await pipeline(got.stream(url, getGitHubRequestOptions()), createWriteStream(tempFile));
 		return tempFile;
 	} catch (e) {
 		console.error('Error', e);
@@ -24,24 +26,33 @@ export const downloadTar = async (url: string) => {
 export const downloadAndExtractRepo = async ({
 	root,
 	repoName,
-	branch,
+	ref,
 	repoOwnerName,
 	filePath,
+	isInit,
 }: {
 	root: string;
 	repoName: string;
-	branch: string;
+	ref: string;
 	repoOwnerName: string;
 	filePath?: string;
+	isInit?: boolean;
 }) => {
 	try {
 		const spinner = ora('Loading..').start();
-		const tempFile = await downloadTar(`https://codeload.github.com/${repoOwnerName}/${repoName}/tar.gz/${branch}`);
+		const tempFile = await downloadTar(`https://codeload.github.com/${repoOwnerName}/${repoName}/tar.gz/${ref}`);
 		await tar.x({
 			file: tempFile,
 			cwd: root,
 			strip: filePath ? filePath.split('/').length + 1 : 1,
-			filter: (p) => p.startsWith(`${repoName}-${branch}${filePath ? `/${filePath}` : ''}`),
+			filter: (p) => {
+				const rel = p.split('/').slice(1).join('/');
+				if (isInit) {
+					return rel.startsWith(`${filePath ? `${filePath}/.wundergraph` : ''}`);
+				} else {
+					return rel.startsWith(`${filePath ? `${filePath}/` : ''}`);
+				}
+			},
 		});
 		await fsp.unlink(tempFile);
 		spinner.succeed(chalk.green('Successfully cloned the repository'));

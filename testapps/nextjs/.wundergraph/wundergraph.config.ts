@@ -8,12 +8,11 @@ import {
 } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
-// import linkBuilder from "./generated/linkbuilder";
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 /*const jsonPlaceholder = introspect.openApi({
@@ -140,15 +139,42 @@ configureWunderGraphApplication({
 			bucketLocation: 'eu-central-1',
 			bucketName: 'uploads',
 			useSSL: false,
+			uploadProfiles: {
+				avatar: {
+					maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
+					maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
+					allowedMimeTypes: ['image/png', 'image/jpeg'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
+					allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
+				},
+				coverPicture: {
+					meta: {
+						type: 'object',
+						properties: {
+							postId: {
+								type: 'string',
+							},
+						},
+					},
+					maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
+					maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
+					allowedMimeTypes: ['image/*'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
+					allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
+				},
+			},
+		},
+		{
+			name: 'minio2',
+			endpoint: '127.0.0.1:9000',
+			accessKeyID: 'test',
+			secretAccessKey: '12345678',
+			bucketLocation: 'eu-central-1',
+			bucketName: 'uploads',
+			useSSL: false,
 		},
 	],
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
-		},
-		{
-			templates: [templates.typescript.client],
-			path: '../components/generated',
+			templates: [...templates.typescript.all],
 		},
 		{
 			templates: [new NextJsTemplate()],

@@ -79,10 +79,20 @@ export interface GoogleAuthProviderConfig {
 	clientSecret: InputVariable;
 }
 
+export class Auth0AuthProvider extends OpenIDConnectAuthProvider {
+	resolve(): AuthProvider {
+		return {
+			...super.resolve(),
+			kind: AuthProviderKind.AuthProviderAuth0,
+		};
+	}
+}
+
 export const authProviders = {
 	github: (config: GithubAuthProviderConfig) => new GithubAuthProvider(config),
 	demo: () => new GithubAuthProvider({ id: 'github', clientId: 'demo', clientSecret: 'demo' }),
 	openIdConnect: (config: OpenIDConnectAuthProviderConfig) => new OpenIDConnectAuthProvider(config),
+	auth0: (config: OpenIDConnectAuthProviderConfig) => new Auth0AuthProvider(config),
 	google: (config: GoogleAuthProviderConfig) =>
 		new OpenIDConnectAuthProvider({
 			...config,

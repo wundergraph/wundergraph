@@ -3,8 +3,10 @@ export const handlebarTemplate = `
 import {
 	Client,
 	ClientConfig,
+	CreateClientConfig,
 	User,
 	UploadRequestOptions,
+	UploadRequestOptionsWithProfile,
 	OperationMetadata,
 	OperationsDefinition,
 	OperationRequestOptions,
@@ -16,21 +18,53 @@ import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
 
-export const WUNDERGRAPH_S3_ENABLED = {{hasS3Provider}};
+export const WUNDERGRAPH_S3_ENABLED = {{hasS3Providers}};
 export const WUNDERGRAPH_AUTH_ENABLED = {{hasAuthProviders}};
 
-{{#if hasS3Provider}}
+{{#if hasS3Providers}}
 export interface UploadResponse { key: string }
 
-export enum S3Provider {
-    {{#each s3Provider }}
-    "{{name}}" = "{{name}}",
-    {{/each}}
+{{#each uploadProfileTypeDefinitions}}
+
+{{.}}
+
+{{/each}}
+
+type S3Providers ={
+	{{#each s3Providers}}
+	{{name}}: {
+		hasProfiles: {{#if hasProfiles}}true{{else}}false{{/if}},
+		profiles: {
+			{{#each uploadProfiles}}
+				{{@key}}: {{lookup (lookup @root.uploadProfileTypeNames ../name) @key}}
+			{{/each}}
+		}
+	}
+	{{/each}}
 }
 
-export type UploadConfig = UploadRequestOptions<S3Provider>
-{{else}}
-export type UploadConfig = UploadRequestOptions<never>
+const S3UploadProviderData = {
+	{{#each s3Providers }}
+	{{name}}: {
+		{{#each uploadProfiles}}
+			{{@key}}: {
+				{{#if this.maxAllowedUploadSizeBytes includeZero=true}}
+				maxAllowedUploadSizeBytes: {{this.maxAllowedUploadSizeBytes}},
+				{{/if}}
+				{{#if this.maxAllowedFiles includeZero=true}}
+				maxAllowedFiles: {{this.maxAllowedFiles}},
+				{{/if}}
+				{{#if this.allowedMimeTypes}}
+				allowedMimeTypes: [{{#each this.allowedMimeTypes}}'{{this}}',{{/each}}],
+				{{/if}}
+				{{#if this.allowedFileExtensions}}
+				allowedFileExtensions: [{{#each this.allowedFileExtensions}}'{{this}}',{{/each}}],
+				{{/if}}
+			},
+		{{/each}}
+	},
+	{{/each}}
+}
 {{/if}}
 
 {{#if hasAuthProviders}}
@@ -54,14 +88,12 @@ export const defaultClientConfig: ClientConfig = {
 
 export const operationMetadata: OperationMetadata = {
 {{#each allOperations}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         requiresAuthentication: {{requiresAuthentication}}
 		}
     {{#unless @last}},{{/unless}}
 {{/each}}
 }
-
-type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata'
 
 export class WunderGraphClient extends Client {
 	query<
@@ -90,28 +122,44 @@ export class WunderGraphClient extends Client {
 	) {
 		return super.subscribe(options, cb);
 	}
-	public async uploadFiles(config: UploadConfig) {
-		return super.uploadFiles(config);
+	{{#if hasS3Providers}}
+	public async uploadFiles<
+		ProviderName extends Extract<keyof S3Providers, string>,
+		ProfileName extends Extract<keyof S3Providers[ProviderName]['profiles'], string> = Extract<
+			keyof S3Providers[ProviderName]['profiles'],
+			string
+		>,
+		Meta extends Extract<S3Providers[ProviderName]['profiles'][ProfileName], object> = Extract<
+			S3Providers[ProviderName]['profiles'][ProfileName],
+			object
+		>
+	>(
+		config: ProfileName extends string ? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta> : UploadRequestOptions
+	) {
+		const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
+		return super.uploadFiles(config, profile);
 	}
+	{{/if}}
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
 	}
-	public async fetchUser<TUser extends User = User<UserRole>>(options: FetchUserRequestOptions) {
+	public async fetchUser<TUser extends User = User<UserRole>>(options?: FetchUserRequestOptions) {
 		return super.fetchUser<TUser>(options);
 	}
 }
 
-export const createClient = (config?: Partial<Omit<ClientConfig, PrivateConfigProperties>>) => {
+export const createClient = (config?: CreateClientConfig) => {
 	return new WunderGraphClient({
 		...defaultClientConfig,
 		...config,
 		operationMetadata,
+		csrfEnabled: {{csrfEnabled}},
 	});
 };
 
 export type Queries = {
 {{#each queries}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
@@ -122,7 +170,7 @@ export type Queries = {
 
 export type Mutations = {
 {{#each mutations}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
@@ -132,7 +180,7 @@ export type Mutations = {
 
 export type Subscriptions = {
 {{#each subscriptions}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         requiresAuthentication: {{requiresAuthentication}}
@@ -142,7 +190,7 @@ export type Subscriptions = {
 
 export type LiveQueries = {
 {{#each liveQueries}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
         data: {{operationName}}ResponseData
         liveQuery: true
@@ -151,5 +199,5 @@ export type LiveQueries = {
 {{/each}}
 }
 
-export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole{{#if hasS3Provider}}, keyof typeof S3Provider{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
+export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, UserRole,{{#if hasS3Providers}}S3Providers{{else}}{}{{/if}}{{#if hasAuthProviders}},keyof typeof AuthProviderId{{/if}}> {}
 `;

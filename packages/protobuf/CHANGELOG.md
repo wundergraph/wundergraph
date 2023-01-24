@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.102.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.101.0...@wundergraph/protobuf@0.102.0) (2023-01-20)
+
+### Features
+
+* add upload profiles for S3 providers ([#476](https://github.com/wundergraph/wundergraph/issues/476)) ([6144545](https://github.com/wundergraph/wundergraph/commit/614454539133c7f235aea6aa72ade36059f41c97)) (@fiam)
+
+## [0.101.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.100.0...@wundergraph/protobuf@0.101.0) (2023-01-17)
+
+### Features
+
+* add support for disconnecting from Auth0 ([#525](https://github.com/wundergraph/wundergraph/issues/525)) ([7465fb2](https://github.com/wundergraph/wundergraph/commit/7465fb21a3618924c7dfb59a6a2f94c7d740f0f8)) (@fiam)
+
+## [0.100.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.99.0...@wundergraph/protobuf@0.100.0) (2022-12-06)
+
+### Features
+
+* make detecting invalid operations easier ([#374](https://github.com/wundergraph/wundergraph/issues/374)) ([45639db](https://github.com/wundergraph/wundergraph/commit/45639db0ae3adb8cac4f62b623b04061118f7bf7)) (@fiam)
+
+## [0.99.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.98.0...@wundergraph/protobuf@0.99.0) (2022-11-18)
+
+### Features
+
+* remove app/main from URL structure ([#335](https://github.com/wundergraph/wundergraph/issues/335)) ([e49e585](https://github.com/wundergraph/wundergraph/commit/e49e585528297126b93958105e80b68f1943d781)), closes [#333](https://github.com/wundergraph/wundergraph/issues/333) (@fiam)
+* sdk, schema extension fields config ([#336](https://github.com/wundergraph/wundergraph/issues/336)) ([ca09b3c](https://github.com/wundergraph/wundergraph/commit/ca09b3cf2002763b7ea53a7d50f6dce50d08c120)) (@YuriBuerov)
+
 ## [0.98.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.97.0...@wundergraph/protobuf@0.98.0) (2022-11-04)
 
 ### Features

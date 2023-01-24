@@ -39,6 +39,17 @@ This command will install the necessary dependencies for the WunderGraph reposit
 make
 ```
 
+### Use your local wunderctl binary if you test SDK changes
+
+Before you run any testapp, you need to ensure that you use your local wunderctl binary. This is necessary because the examples are using the downloaded wunderctl binary from GithHub.
+
+```bash
+# Install the wunderctl binary in your GOBIN.
+make install
+# Set this environment variable to use your local wunderctl binary.
+WUNDERCTL_BINARY_PATH="$(which wunderctl)"
+```
+
 ### Run the tests
 
 This command will run all Go and NPM tests.
@@ -56,7 +67,7 @@ If you run into any onboarding issue, please open an issue as well or visit the 
 
 We use [conventionalcommits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) for changelog generation and more structured commit messages.
 
-In order to enforce this standard we use a linter on pre-commit hook. This functionality is provided by [husky](https://typicode.github.io/husky/#/). If you use a Node version manager like `nvm` you need tell husky where to find `pnpm`.
+In order to enforce this standard, we use a linter on pre-commit hook. This functionality is provided by [husky](https://typicode.github.io/husky/#/). If you use a Node version manager like `nvm` you need tell husky where to find `pnpm`.
 Here is a snippet for `nvm`:
 
 ```bash
@@ -65,11 +76,11 @@ echo "export NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.
 
 ### For JetBrains users
 
-[This](https://plugins.jetbrains.com/plugin/13389-conventional-commit) plugins simplifies the commit message creation process.
+[This](https://plugins.jetbrains.com/plugin/13389-conventional-commit) plugin simplifies the commit message creation process.
 
 ### Pull Requests
 
-We merge all pull requests in `squash merge` mode. You're not enforced to use [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) across all your commits but it's a good practice and avoid mistakes. At the end it's important that the squashed commit message follow the standard.
+We merge all pull requests in `squash merge` mode. You're not enforced to use [conventional commit standard](https://www.conventionalcommits.org/en/v1.0.0-beta.2/#why-use-conventional-commits) across all your commits, but it's good practice and avoids mistakes. However, it's important that the ultimate squashed commit message follow the conventionalcommit standard.
 
 ## Releases
 

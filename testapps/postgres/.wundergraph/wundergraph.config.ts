@@ -14,15 +14,12 @@ configureWunderGraphApplication({
 	operations,
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations],
+			templates: [...templates.typescript.all],
 		},
 	],
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:3000'],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
 	},
 	security: {
 		enableGraphQLEndpoint: true,

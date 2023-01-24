@@ -14,7 +14,7 @@ configureWunderGraphApplication({
   s3UploadProvider: [
     {
       name: 'minio', // a unique name for the storage provider
-      endpoint: '127.0.0.1:9000', // the S3 endpoint
+      endpoint: 'localhost:9000', // the S3 endpoint
       accessKeyID: 'test', // access key to upload files to the S3 bucket
       secretAccessKey: '12345678', // access secret to upload files to the S3 bucket
       bucketLocation: 'eu-central-1', // the bucket location, some providers don't require it

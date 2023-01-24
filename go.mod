@@ -3,27 +3,29 @@ module github.com/wundergraph/wundergraph
 go 1.18
 
 require (
-	github.com/MicahParks/keyfunc v1.0.1
-	github.com/andybalholm/brotli v1.0.2
+	github.com/MicahParks/keyfunc v1.9.0
 	github.com/bep/debounce v1.2.1
 	github.com/buger/jsonparser v1.1.1
 	github.com/cespare/xxhash v1.1.0
 	github.com/coreos/go-oidc/v3 v3.0.0
 	github.com/dgraph-io/ristretto v0.0.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/evanw/esbuild v0.15.10
+	github.com/docker/go-units v0.5.0
+	github.com/evanw/esbuild v0.16.10
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.0
 	github.com/go-cmd/cmd v1.4.1
 	github.com/go-redis/cache/v8 v8.4.1
 	github.com/go-redis/redis/v8 v8.10.0
-	github.com/golang-jwt/jwt/v4 v4.2.0
+	github.com/gofrs/flock v0.8.1
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/websocket v1.5.0
-	github.com/hashicorp/go-retryablehttp v0.7.0
+	github.com/hashicorp/go-multierror v1.1.1
+	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hetiansu5/urlquery v1.2.7
 	github.com/jensneuse/goprisma v0.2.0
@@ -35,19 +37,21 @@ require (
 	github.com/prisma/prisma-client-go v0.16.2
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
-	github.com/sebdah/goldie v0.0.0-20180424091453-8784dd1ab561
-	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
+	github.com/santhosh-tekuri/jsonschema/v5 v5.1.1
+	github.com/sebdah/goldie/v2 v2.5.3
+	github.com/segmentio/ksuid v1.0.4
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.8.0
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.26.0
-	github.com/wundergraph/graphql-go-tools v1.58.0
+	github.com/wundergraph/graphql-go-tools v1.60.8
 	go.uber.org/zap v1.18.1
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/text v0.3.7
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	google.golang.org/protobuf v1.28.0
 )
@@ -57,6 +61,7 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/ajg/form v1.5.1 // indirect
+	github.com/andybalholm/brotli v1.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
@@ -67,6 +72,7 @@ require (
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -92,7 +98,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nats-io/jwt/v2 v2.3.0 // indirect
-	github.com/nats-io/nats.go v1.14.0 // indirect
+	github.com/nats-io/nats.go v1.19.1 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
@@ -128,9 +134,8 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/exp v0.0.0-20201221025956-e89b829e73ea // indirect
-	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
-	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/tools v0.0.0-20210106214847-113979e3529a // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
@@ -142,4 +147,4 @@ require (
 	nhooyr.io/websocket v1.8.7 // indirect
 )
 
-replace github.com/wundergraph/wundergraph/types => ./types
+//replace github.com/wundergraph/graphql-go-tools => ../graphql-go-tools

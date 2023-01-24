@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -27,17 +27,22 @@ var serverStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl server start
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Annotations: map[string]string{
+		"telemetry": "true",
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
 		err := startWunderGraphServer(ctx)
 		if err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph server process shutdown: %w", zap.Error(err))
+			log.Error("WunderGraph server process shutdown: %w", zap.Error(err))
+			return err
 		}
 
 		// exit code 0 to indicate success
+		return nil
 	},
 }
 
@@ -52,13 +57,13 @@ func startWunderGraphServer(ctx context.Context) error {
 		return err
 	}
 
-	configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	serverScriptFile := path.Join("generated", "bundle", "server.js")
-	serverExecutablePath := path.Join(wunderGraphDir, serverScriptFile)
+	serverScriptFile := filepath.Join("generated", "bundle", "server.js")
+	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
 	if !files.FileExists(serverExecutablePath) {
 		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 	}

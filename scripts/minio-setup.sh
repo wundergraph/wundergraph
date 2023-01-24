@@ -15,7 +15,7 @@ if ! [[ -x scripts/mc ]]; then
 fi
 
 chmod +x ./scripts/mc
-./scripts/mc alias set minio http://127.0.0.1:9000 minio minio123
+./scripts/mc alias set minio http://localhost:9000 minio minio123
 ./scripts/mc admin user add minio test 12345678
 ./scripts/mc admin policy set minio readwrite user=test
 ./scripts/mc admin user info minio test

@@ -1,4 +1,18 @@
 import fs from 'fs';
+import path from 'path';
+import process from 'node:process';
+import _ from 'lodash';
+import {
+	buildSchema,
+	FieldDefinitionNode,
+	InputValueDefinitionNode,
+	Kind,
+	parse,
+	parseType,
+	print,
+	visit,
+} from 'graphql';
+import { ZodType } from 'zod';
 import {
 	Api,
 	DatabaseApiCustom,
@@ -9,9 +23,15 @@ import {
 	StaticApiCustom,
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
-import { mergeApis, removeBaseSchema } from '../definition/merge';
-import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
-import { GraphQLOperation, loadOperations, parseOperations, removeHookVariables } from '../graphql/operations';
+import { mergeApis } from '../definition/merge';
+import {
+	GraphQLOperation,
+	loadOperations,
+	LoadOperationsOutput,
+	ParsedOperations,
+	parseGraphQLOperations,
+	removeHookVariables,
+} from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
 	ArgumentRenderConfiguration,
@@ -24,52 +44,27 @@ import {
 	DataSourceKind,
 	FieldConfiguration,
 	Operation,
+	OperationExecutionEngine,
 	OperationType,
 	PostResolveTransformationKind,
 	TypeConfiguration,
 	WebhookConfiguration,
+	S3UploadProfile as _S3UploadProfile,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
-import {
-	buildSchema,
-	FieldDefinitionNode,
-	InputValueDefinitionNode,
-	Kind,
-	parse,
-	parseType,
-	print,
-	stripIgnoredCharacters,
-	visit,
-} from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
-import path from 'path';
-import { applyNamespaceToApi } from '../definition/namespacing';
-import _ from 'lodash';
-import { wunderctlExec } from '../wunderctlexec';
-import colors from 'colors';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import {
-	AuthenticationHookRequest,
-	AuthenticationResponse,
-	WunderGraphHooksAndServerConfig,
-	WunderGraphUser,
-} from '../middleware/types';
+import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
-import process from 'node:process';
-import {
-	NodeOptions,
-	ResolvedNodeOptions,
-	ResolvedServerOptions,
-	resolveNodeOptions,
-	resolveServerOptions,
-	serverOptionsWithDefaults,
-} from './options';
+import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import { InternalClient } from '../middleware/internal-client';
-import { Logger } from '../logger';
+import logger, { Logger } from '../logger';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
+import zodToJsonSchema from 'zod-to-json-schema';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -119,8 +114,10 @@ export interface WunderGraphConfigApplicationConfig {
 		};
 	};
 	links?: LinkConfiguration;
-	dotGraphQLConfig?: DotGraphQLConfig;
 	security?: SecurityConfig;
+
+	/** @deprecated: Not used anymore */
+	dotGraphQLConfig?: any;
 }
 
 export interface TokenAuthProvider {
@@ -138,75 +135,6 @@ export interface SecurityConfig {
 	allowedHosts?: InputVariable[];
 }
 
-export interface DotGraphQLConfig {
-	// hasDotWunderGraphDirectory should be set to true if the project has a ".wundergraph" directory as the WunderGraph root
-	// the default is true so this config doesn't have to be touched usually
-	// only set it to false if you don't have a ".wundergraph" directory in your project
-	hasDotWunderGraphDirectory?: boolean;
-}
-
-export enum HooksConfigurationOperationType {
-	Queries = 'queries',
-	Mutations = 'mutations',
-	Subscriptions = 'subscriptions',
-}
-
-export interface OperationHookFunction {
-	(...args: any[]): Promise<any>;
-}
-
-export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
-	mockResolve?: AsyncFn;
-	preResolve?: AsyncFn;
-	postResolve?: AsyncFn;
-	mutatingPreResolve?: AsyncFn;
-	mutatingPostResolve?: AsyncFn;
-	customResolve?: AsyncFn;
-}
-
-// Any is used here because the exact type of the hooks is not known at compile time
-// We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
-export type OperationHooks = Record<string, any>;
-
-export interface HooksConfiguration<
-	Queries extends OperationHooks = OperationHooks,
-	Mutations extends OperationHooks = OperationHooks,
-	Subscriptions extends OperationHooks = OperationHooks,
-	User extends WunderGraphUser = WunderGraphUser,
-	// Any is used here because the exact type of the base client is not known at compile time
-	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
-	IC extends InternalClient = InternalClient<any, any>
-> {
-	global?: {
-		httpTransport?: {
-			onOriginRequest?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-			onOriginResponse?: {
-				hook: OperationHookFunction;
-				enableForOperations?: string[];
-				enableForAllOperations?: boolean;
-			};
-		};
-		wsTransport?: {
-			onConnectionInit?: {
-				hook: OperationHookFunction;
-				enableForDataSources: string[];
-			};
-		};
-	};
-	authentication?: {
-		postAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-		mutatingPostAuthentication?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		revalidate?: (hook: AuthenticationHookRequest<User, IC>) => Promise<AuthenticationResponse<User>>;
-		postLogout?: (hook: AuthenticationHookRequest<User, IC>) => Promise<void>;
-	};
-	[HooksConfigurationOperationType.Queries]?: Queries;
-	[HooksConfigurationOperationType.Mutations]?: Mutations;
-	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
-}
 export interface DeploymentAPI {
 	apiConfig: () => {
 		id: string;
@@ -232,8 +160,9 @@ export interface ResolvedApplication {
 	EnableSingleFlight: boolean;
 	EngineConfiguration: Api<any>;
 	Operations: GraphQLOperation[];
+	InvalidOperationNames: string[];
 	CorsConfiguration: CorsConfiguration;
-	S3UploadProvider: S3Provider;
+	S3UploadProvider: ResolvedS3UploadConfiguration[];
 }
 
 interface ResolvedDeployment {
@@ -246,6 +175,37 @@ interface ResolvedDeployment {
 	};
 }
 
+export interface S3UploadProfile {
+	/** JSON schema for metadata */
+	meta?: ZodType | object;
+	/**
+	 * Maximum file size, in bytes
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
+	maxAllowedUploadSizeBytes?: number;
+	/**
+	 * Maximum number of files
+	 *
+	 * @default unlimited
+	 */
+	maxAllowedFiles?: number;
+	/**
+	 * List of mime-types allowed to be uploaded, case insensitive
+	 *
+	 * @default Any type
+	 */
+	allowedMimeTypes?: string[];
+	/**
+	 * Allowed file extensions, case insensitive
+	 *
+	 * @default Any extension
+	 */
+	allowedFileExtensions?: string[];
+}
+
+export type S3UploadProfiles = Record<string, S3UploadProfile>;
+
 interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
@@ -254,6 +214,17 @@ interface S3UploadConfiguration {
 	bucketName: InputVariable;
 	bucketLocation: InputVariable;
 	useSSL: boolean;
+	uploadProfiles?: S3UploadProfiles;
+}
+
+export interface ResolvedS3UploadProfile extends Omit<Required<S3UploadProfile>, 'meta'> {
+	meta: ZodType | object | null;
+	preUploadHook: boolean;
+	postUploadHook: boolean;
+}
+
+interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'uploadProfiles'> {
+	uploadProfiles: Record<string, ResolvedS3UploadProfile>;
 }
 
 export interface ResolvedWunderGraphConfig {
@@ -286,6 +257,11 @@ export interface ResolvedWunderGraphConfig {
 	webhooks: WebhookConfiguration[];
 	nodeOptions: ResolvedNodeOptions;
 	serverOptions?: ResolvedServerOptions;
+}
+
+export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+	outPath: string;
+	wunderGraphDir: string;
 }
 
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
@@ -323,13 +299,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	};
 
 	const graphqlApis = config.server?.graphqlServers?.map((gs) => {
-		const serverPath = customGqlServerMountPath(gs.serverName);
-
 		return introspectGraphqlServer({
 			skipRenameRootFields: gs.skipRenameRootFields,
 			url: '',
 			baseUrl: serverOptions.serverUrl,
-			path: serverPath,
+			path: gs.routeUrl,
 			apiNamespace: gs.apiNamespace,
 			schema: gs.schema,
 		});
@@ -342,7 +316,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const apps = config.apis;
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
+	const resolved = await resolveApplication(roles, apps, cors, config.s3UploadProvider, config.server?.hooks);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -570,25 +544,52 @@ const updateArguments = (dataSource: DataSource, fieldInfo: FieldInfo, link: Lin
 	return JSON.parse(json);
 };
 
-const resolveApplications = async (
+const resolveUploadConfiguration = (
+	configuration: S3UploadConfiguration,
+	hooks?: HooksConfiguration
+): ResolvedS3UploadConfiguration => {
+	let uploadProfiles: Record<string, ResolvedS3UploadProfile> = {};
+	if (configuration?.uploadProfiles) {
+		const configurationHooks = hooks?.uploads ? hooks.uploads[configuration.name] : undefined;
+		for (const key in configuration.uploadProfiles) {
+			const profile = configuration.uploadProfiles[key];
+			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
+
+			uploadProfiles[key] = {
+				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
+				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
+				allowedMimeTypes: profile.allowedMimeTypes ?? [],
+				allowedFileExtensions: profile.allowedFileExtensions ?? [],
+				meta: profile.meta ?? null,
+				preUploadHook: profileHooks?.preUpload !== undefined,
+				postUploadHook: profileHooks?.postUpload !== undefined,
+			};
+		}
+	}
+	return {
+		...configuration,
+		uploadProfiles,
+	};
+};
+
+const resolveApplication = async (
 	roles: string[],
 	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
-	s3: S3Provider
-): Promise<ResolvedApplication[]> => {
-	const out: ResolvedApplication[] = [];
-
+	s3?: S3Provider,
+	hooks?: HooksConfiguration
+): Promise<ResolvedApplication> => {
 	const resolvedApis = await Promise.all(apis);
 	const merged = mergeApis(roles, ...resolvedApis);
-	out.push({
+	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
+	return {
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
+		InvalidOperationNames: [],
 		CorsConfiguration: cors,
-		S3UploadProvider: s3,
-	});
-
-	return out;
+		S3UploadProvider: s3Configurations,
+	};
 };
 
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
@@ -654,14 +655,16 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				});
 			}
 
-			const operationsContent = loadOperations(schemaFileName);
-			const operations = parseOperations(app.EngineConfiguration.Schema, operationsContent.toString(), {
-				keepFromClaimVariables: false,
-				interpolateVariableDefinitionAsJSON: resolved.interpolateVariableDefinitionAsJSON,
-			});
+			const loadedOperations = loadOperations(schemaFileName);
+			const operations = await resolveOperationsConfigurations(
+				resolved,
+				loadedOperations,
+				app.EngineConfiguration.CustomJsonScalars || []
+			);
 			app.Operations = operations.operations;
+			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
-				app.Operations = app.Operations.map((op) => {
+				const ops = app.Operations.map(async (op) => {
 					const cfg = config.operations!;
 					const base = Object.assign({}, cfg.defaultConfig);
 					const customize =
@@ -672,19 +675,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 							if (customize as CustomizeMutation) {
 								mutationConfig = customize(mutationConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || mutationConfig.authentication.required,
 								},
-							};
+							});
 						case OperationType.QUERY:
 							let queryConfig = cfg.queries(base);
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								CacheConfig: {
 									enable: queryConfig.caching.enable,
@@ -696,27 +699,26 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || queryConfig.authentication.required,
 								},
-								LiveQuery: {
-									enable: queryConfig.liveQuery.enable,
-									pollingIntervalSeconds: queryConfig.liveQuery.pollingIntervalSeconds,
-								},
-							};
+								LiveQuery: queryConfig.liveQuery,
+							});
 						case OperationType.SUBSCRIPTION:
 							let subscriptionConfig = cfg.subscriptions(base);
 							if (customize as CustomizeSubscription) {
 								subscriptionConfig = customize(subscriptionConfig);
 							}
-							return {
+							return loadAndApplyNodeJsOperationOverrides({
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
 									required: op.AuthenticationConfig.required || subscriptionConfig.authentication.required,
 								},
-							};
+							});
 						default:
 							return op;
 					}
 				});
+
+				app.Operations = await Promise.all(ops);
 			}
 
 			if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
@@ -864,33 +866,6 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
-			const dotGraphQLNested =
-				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
-					? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
-					: true;
-
-			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: publicNodeUrl,
-				nested: dotGraphQLNested,
-			});
-
-			const dotGraphQLConfigPath = path.join(dotGraphQLNested ? '..' + path.sep : '', '.graphqlconfig');
-			let shouldUpdateDotGraphQLConfig = true;
-			const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
-			if (fs.existsSync(dotGraphQLConfigPath)) {
-				const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
-				if (dotGraphQLContent === existingDotGraphQLContent) {
-					shouldUpdateDotGraphQLConfig = false;
-				}
-			}
-
-			if (shouldUpdateDotGraphQLConfig) {
-				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				Logger.info(`.graphqlconfig updated`);
-			}
-
-			done();
-
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
 			});
@@ -906,12 +881,13 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 			done();
 		})
 		.catch((e: any) => {
-			Logger.fatal(`Couldn't configure your WunderNode: ${e}`);
+			//throw e;
+			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
 			process.exit(1);
 		});
 };
 
-const total = 5;
+const total = 4;
 let doneCount = 0;
 
 const done = () => {
@@ -929,10 +905,12 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
+		path: op.PathName,
 		responseSchema: JSON.stringify(op.ResponseSchema),
 		variablesSchema: JSON.stringify(op.VariablesSchema),
 		interpolationVariablesSchema: JSON.stringify(op.InterpolationVariablesSchema),
 		operationType: op.OperationType,
+		engine: op.ExecutionEngine,
 		cacheConfig: op.CacheConfig || {
 			enable: false,
 			maxAge: 0,
@@ -969,6 +947,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 		api: {
 			enableGraphqlEndpoint: false,
 			operations: operations,
+			invalidOperationNames: config.application.InvalidOperationNames,
 			engineConfiguration: {
 				defaultFlushInterval: config.application.EngineConfiguration.DefaultFlushInterval,
 				graphqlSchema: config.application.EngineConfiguration.Schema,
@@ -977,6 +956,29 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				typeConfigurations: types,
 			},
 			s3UploadConfiguration: config.application.S3UploadProvider.map((provider) => {
+				let uploadProfiles: { [key: string]: _S3UploadProfile } = {};
+				if (provider.uploadProfiles) {
+					for (const key in provider.uploadProfiles) {
+						const resolved = provider.uploadProfiles[key];
+						let metadataJSONSchema: string;
+						try {
+							metadataJSONSchema = resolved.meta ? JSON.stringify(resolved.meta) : '';
+						} catch (e) {
+							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
+						}
+						uploadProfiles[key] = {
+							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
+							maxAllowedFiles: resolved.maxAllowedFiles,
+							allowedMimeTypes: resolved.allowedMimeTypes,
+							allowedFileExtensions: resolved.allowedFileExtensions,
+							metadataJSONSchema: metadataJSONSchema,
+							hooks: {
+								preUpload: resolved.preUploadHook,
+								postUpload: resolved.postUploadHook,
+							},
+						};
+					}
+				}
 				return {
 					name: provider.name,
 					accessKeyID: mapInputVariable(provider.accessKeyID),
@@ -985,6 +987,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
 					useSSL: provider.useSSL,
+					uploadProfiles: uploadProfiles,
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,
@@ -1067,6 +1070,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 				},
 				upstreamSchema: graphql.UpstreamSchema,
 				hooksConfiguration: graphql.HooksConfiguration,
+				customScalarTypeFields: graphql.CustomScalarTypeFields,
 			};
 			break;
 		case DataSourceKind.POSTGRESQL:
@@ -1088,161 +1092,125 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 	return out;
 };
 
-export interface PublishConfiguration {
-	organization: string;
-	name: string;
-	apis: Promise<Api<any>>[];
-	isPublic: boolean;
-	repositoryUrl?: string;
-	shortDescription: string;
-	markdownDescriptionFile?: string;
-	keywords: string[];
-}
-
-export interface PublishResult {
-	organization: string;
-	name: string;
-	shortDescription: string;
-	markdownDescription: string;
-	isPublic: boolean;
-	keywords: string[];
-	definition: Api<any>;
-	repositoryUrl: string;
-	sdkVersion: string;
-	placeholders: PublishConfigurationPlaceholder[];
-}
-
-interface PublishConfigurationPlaceholder {
-	name: string;
-	optional: boolean;
-}
-
-export const configurePublishWunderGraphAPI = (configuration: PublishConfiguration) => {
-	const outFile = path.join('generated', `${configuration.organization}.${configuration.name}.api.json`);
-	_configurePublishWunderGraphAPI(configuration, outFile)
-		.then(() => {
-			Logger.info(
-				colors.blue(`${configuration.organization}/${configuration.name} API configuration written to ${outFile}`)
-			);
-			if (process.env.WUNDERGRAPH_PUBLISH_API === 'true') {
-				try {
-					const result = wunderctlExec({
-						cmd: ['publish', configuration.organization + '/' + configuration.name],
-						timeout: 1000 * 5,
-					});
-					if (result?.failed) {
-						Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
-					}
-				} catch (e) {
-					Logger.error(colors.red(`Failed to publish ${configuration.organization}/${configuration.name}`));
-				}
-			} else {
-				Logger.info(colors.blue(`You can now publish the API using the following command:`));
-				Logger.info(colors.green(`wunderctl publish ${configuration.organization}/${configuration.name}`));
-			}
-		})
-		.catch((err) => {
-			Logger.error(`Failed to create publish configuration for ${configuration.organization}/${configuration.name}`);
-			Logger.error(err);
-		});
-};
-
-const _configurePublishWunderGraphAPI = async (configuration: PublishConfiguration, outFile: string) => {
-	const resolvedApis = await Promise.all(configuration.apis);
-	const merged = mergeApis([], ...resolvedApis);
-	const markdownDescription = configuration.markdownDescriptionFile
-		? fs.readFileSync(configuration.markdownDescriptionFile, 'utf-8')
-		: '';
-	const out: PublishResult = {
-		organization: configuration.organization,
-		name: configuration.name,
-		keywords: configuration.keywords,
-		shortDescription: configuration.shortDescription || '',
-		markdownDescription,
-		isPublic: configuration.isPublic,
-		repositoryUrl: configuration.repositoryUrl || '',
-		sdkVersion: SDK_VERSION,
-		definition: merged,
-		placeholders: [],
-	};
-	merged.Schema = removeBaseSchema(merged.Schema);
-	merged.Schema = stripIgnoredCharacters(merged.Schema);
-	merged.DataSources = merged.DataSources.filter(
-		(ds) =>
-			!(
-				ds.Kind === DataSourceKind.STATIC &&
-				ds.RootNodes.length === 1 &&
-				ds.RootNodes[0].fieldNames.length === 1 &&
-				ds.RootNodes[0].fieldNames[0] === '_join'
-			)
-	);
-	merged.Fields = merged.Fields.filter((field) => !(field.fieldName === '_join'));
-	const printed = JSON.stringify(out, (key, value) => {
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).placeholderVariableName !== undefined
-		) {
-			out.placeholders.push({
-				name: (value as ConfigurationVariable).placeholderVariableName,
-				optional: false,
-			});
-		}
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).environmentVariableName !== undefined
-		) {
-			out.placeholders.push({
-				name: (value as ConfigurationVariable).environmentVariableName,
-				optional: true,
-			});
-		}
-		return value;
-	});
-	fs.writeFileSync(outFile, printed);
-};
-
-export const parsePublishResultWithVariables = (raw: string, variables: { [key: string]: string }): PublishResult => {
-	return JSON.parse(raw, (key, value) => {
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).environmentVariableName !== undefined
-		) {
-			if (variables[(value as ConfigurationVariable).environmentVariableName] !== undefined) {
-				return mapInputVariable(variables[(value as ConfigurationVariable).environmentVariableName]);
-			}
-		}
-		if (
-			value !== undefined &&
-			(value as ConfigurationVariable).kind === ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE &&
-			(value as ConfigurationVariable).placeholderVariableName !== undefined
-		) {
-			if (variables[(value as ConfigurationVariable).placeholderVariableName] !== undefined) {
-				return mapInputVariable(variables[(value as ConfigurationVariable).placeholderVariableName]);
-			}
-		}
-		return value;
-	});
-};
-
-export const resolveIntegration = (
-	rawApi: string,
-	variables: { [key: string]: string },
-	apiNamespace?: string
-): Promise<Api<any>> => {
-	let published: PublishResult = parsePublishResultWithVariables(rawApi, variables);
-	if (apiNamespace) {
-		return Promise.resolve(applyNamespaceToApi(published.definition, apiNamespace, []));
-	}
-	return Promise.resolve(published.definition);
-};
-
-export const customGqlServerMountPath = (name: string): string => {
-	return `/gqls/${name}/graphql`;
-};
-
 const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
+};
+
+const resolveOperationsConfigurations = async (
+	config: ResolvedWunderGraphConfig,
+	loadedOperations: LoadOperationsOutput,
+	customJsonScalars: string[]
+): Promise<ParsedOperations> => {
+	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
+		keepFromClaimVariables: false,
+		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
+		customJsonScalars,
+	});
+	const nodeJSOperations: GraphQLOperation[] = [];
+	if (loadedOperations.typescript_operation_files)
+		for (const file of loadedOperations.typescript_operation_files) {
+			try {
+				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
+				const implementation = await loadNodeJsOperationDefaultModule(filePath);
+				const operation: GraphQLOperation = {
+					Name: file.operation_name,
+					PathName: file.api_mount_path,
+					Content: '',
+					OperationType:
+						implementation.type === 'query'
+							? OperationType.QUERY
+							: implementation.type === 'mutation'
+							? OperationType.MUTATION
+							: OperationType.SUBSCRIPTION,
+					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+					VariablesSchema: { type: 'object', properties: {} },
+					InterpolationVariablesSchema: { type: 'object', properties: {} },
+					InternalVariablesSchema: { type: 'object', properties: {} },
+					InjectedVariablesSchema: { type: 'object', properties: {} },
+					ResponseSchema: { type: 'object', properties: { data: {} } },
+					TypeScriptOperationImport: `function_${file.operation_name}`,
+					AuthenticationConfig: {
+						required: implementation.requireAuthentication || false,
+					},
+					LiveQuery: {
+						enable: true,
+						pollingIntervalSeconds: 5,
+					},
+					AuthorizationConfig: {
+						claims: [],
+						roleConfig: {
+							requireMatchAll: [],
+							requireMatchAny: [],
+							denyMatchAll: [],
+							denyMatchAny: [],
+						},
+					},
+					HooksConfiguration: {
+						preResolve: false,
+						postResolve: false,
+						mutatingPreResolve: false,
+						mutatingPostResolve: false,
+						mockResolve: {
+							enable: false,
+							subscriptionPollingIntervalMillis: 0,
+						},
+						httpTransportOnResponse: false,
+						httpTransportOnRequest: false,
+						customResolve: false,
+					},
+					VariablesConfiguration: {
+						injectVariables: [],
+					},
+					Internal: implementation.internal ? implementation.internal : false,
+					PostResolveTransformations: undefined,
+				};
+				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
+			} catch (e: any) {
+				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
+			}
+		}
+	return {
+		operations: [...graphQLOperations.operations, ...nodeJSOperations],
+	};
+};
+
+const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
+		return operation;
+	}
+	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+	return applyNodeJsOperationOverrides(operation, implementation);
+};
+
+const applyNodeJsOperationOverrides = (
+	operation: GraphQLOperation,
+	overrides: NodeJSOperation<any, any, any, any, any>
+): GraphQLOperation => {
+	if (overrides.inputSchema) {
+		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+	}
+	if (overrides.liveQuery) {
+		operation.LiveQuery = {
+			enable: overrides.liveQuery.enable,
+			pollingIntervalSeconds: overrides.liveQuery.pollingIntervalSeconds,
+		};
+	}
+	if (overrides.requireAuthentication) {
+		operation.AuthenticationConfig = {
+			required: overrides.requireAuthentication,
+		};
+	}
+	if (overrides.rbac) {
+		operation.AuthorizationConfig = {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: overrides.rbac.requireMatchAll,
+				requireMatchAny: overrides.rbac.requireMatchAny,
+				denyMatchAll: overrides.rbac.denyMatchAll,
+				denyMatchAny: overrides.rbac.denyMatchAny,
+			},
+		};
+	}
+	return operation;
 };

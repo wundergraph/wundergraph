@@ -15,6 +15,29 @@ import {
 	TypeConfiguration,
 	TypeField,
 } from '@wundergraph/protobuf';
+import { TypeNode } from 'graphql/language/ast';
+import { Kind } from 'graphql/language/kinds';
+
+const DefaultJsonType = 'JSON';
+
+export const configuration = (
+	schema: DocumentNode,
+	customJsonScalars: string[] = [],
+	serviceSDL?: DocumentNode
+): GraphQLConfiguration => {
+	const config: GraphQLConfiguration = {
+		RootNodes: [],
+		ChildNodes: [],
+		Fields: [],
+		Types: [],
+	};
+	if (serviceSDL !== undefined) {
+		visitSchema(serviceSDL, config, customJsonScalars, true);
+	} else {
+		visitSchema(schema, config, customJsonScalars, false);
+	}
+	return config;
+};
 
 export interface GraphQLConfiguration {
 	RootNodes: TypeField[];
@@ -23,22 +46,17 @@ export interface GraphQLConfiguration {
 	Types: TypeConfiguration[];
 }
 
-export const configuration = (schema: DocumentNode, serviceSDL?: DocumentNode): GraphQLConfiguration => {
-	const config: GraphQLConfiguration = {
-		RootNodes: [],
-		ChildNodes: [],
-		Fields: [],
-		Types: [],
-	};
-	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config);
-	} else {
-		visitSchema(schema, config);
-	}
-	return config;
-};
+interface JsonTypeField {
+	typeName: string;
+	fieldName: string;
+}
 
-const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
+const visitSchema = (
+	schema: DocumentNode,
+	config: GraphQLConfiguration,
+	customJsonScalars: string[],
+	isFederation: boolean
+) => {
 	let typeName: undefined | string;
 	let fieldName: undefined | string;
 	let isExtensionType = false;
@@ -46,8 +64,15 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 	let isEntity = false;
 	let isExternalField = false;
 	let entityFields: string[] = [];
+	let jsonFields: JsonTypeField[] = [];
 
-	const graphQLSchema = buildASTSchema(schema, { assumeValidSDL: true });
+	const jsonScalars = [DefaultJsonType];
+	jsonScalars.push(...customJsonScalars);
+
+	const RootNodeNames = rootNodeNames(schema, isFederation);
+	const isNodeRoot = (typeName: string) => {
+		return RootNodeNames.includes(typeName);
+	};
 
 	visit(schema, {
 		ObjectTypeDefinition: {
@@ -139,12 +164,16 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 		FieldDefinition: {
 			enter: (node) => {
 				fieldName = node.name.value;
+
+				if (isJsonField(node.type, jsonScalars)) {
+					jsonFields.push({ typeName: typeName!, fieldName: fieldName! });
+				}
 			},
 			leave: () => {
 				if (typeName === undefined || fieldName === undefined) {
 					return;
 				}
-				const isRoot = isRootType(typeName, graphQLSchema);
+				const isRoot = isNodeRoot(typeName);
 				if (isRoot) {
 					addTypeField(config.RootNodes, typeName, fieldName);
 				}
@@ -187,6 +216,8 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration) => {
 			},
 		},
 	});
+
+	addJsonFieldConfigurations(config, jsonFields);
 };
 
 const parseSelectionSet = (selectionSet: string): SelectionSetNode => {
@@ -194,7 +225,45 @@ const parseSelectionSet = (selectionSet: string): SelectionSetNode => {
 	return query.selectionSet;
 };
 
-export const isRootType = (typeName: string, schema: GraphQLSchema) => {
+const rootNodeNames = (schema: DocumentNode, isFederation: boolean): string[] => {
+	const rootTypes = new Set<string>();
+	visit(schema, {
+		SchemaDefinition: {
+			enter: (node) => {
+				node.operationTypes.forEach((operationType) => {
+					rootTypes.add(operationType.type.name.value);
+				});
+			},
+		},
+		ObjectTypeDefinition: {
+			enter: (node) => {
+				switch (node.name.value) {
+					case 'Query':
+					case 'Mutation':
+					case 'Subscription':
+						rootTypes.add(node.name.value);
+				}
+			},
+		},
+		ObjectTypeExtension: {
+			enter: (node) => {
+				if (!isFederation) {
+					return;
+				}
+				switch (node.name.value) {
+					case 'Query':
+					case 'Mutation':
+					case 'Subscription':
+						rootTypes.add(node.name.value);
+				}
+			},
+		},
+	});
+
+	return Array.from(rootTypes.values());
+};
+
+export const isRootType = (typeName: string, schema: GraphQLSchema): boolean => {
 	const queryType = schema.getQueryType();
 	if (queryType && queryType.astNode && queryType.astNode.name.value === typeName) {
 		return true;
@@ -214,7 +283,7 @@ export const isRootType = (typeName: string, schema: GraphQLSchema) => {
 		typeDefinition.astNode === undefined ||
 		typeDefinition.astNode === null
 	) {
-		return;
+		return false;
 	}
 	return false;
 };
@@ -248,9 +317,7 @@ const addFieldArgument = (typeName: string, fieldName: string, argName: string, 
 		sourcePath: [],
 		renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_DEFAULT,
 	};
-	let field: FieldConfiguration | undefined = config.Fields.find(
-		(f) => f.typeName === typeName && f.typeName === fieldName
-	);
+	let field: FieldConfiguration | undefined = findField(config.Fields, typeName, fieldName);
 	if (!field) {
 		config.Fields.push({
 			typeName: typeName,
@@ -292,7 +359,7 @@ const addRequiredField = (
 	config: GraphQLConfiguration,
 	requiredFieldName: string
 ) => {
-	const field = config.Fields.find((f) => f.typeName === typeName && f.typeName === fieldName);
+	let field: FieldConfiguration | undefined = findField(config.Fields, typeName, fieldName);
 	if (!field) {
 		config.Fields.push({
 			typeName: typeName,
@@ -314,4 +381,51 @@ const addRequiredField = (
 		return;
 	}
 	field.requiresFields.push(requiredFieldName);
+};
+
+const addJsonFieldConfigurations = (config: GraphQLConfiguration, jsonFields: JsonTypeField[]) => {
+	for (const jsonField of jsonFields) {
+		let field: FieldConfiguration | undefined = findField(config.Fields, jsonField.typeName, jsonField.fieldName);
+
+		if (field) {
+			field.unescapeResponseJson = true;
+		} else {
+			config.Fields.push({
+				typeName: jsonField.typeName,
+				fieldName: jsonField.fieldName,
+				argumentsConfiguration: [],
+				disableDefaultFieldMapping: false,
+				path: [],
+				requiresFields: [],
+				unescapeResponseJson: true,
+			});
+		}
+	}
+};
+
+const findField = (fields: FieldConfiguration[], typeName: string, fieldName: string) => {
+	return fields.find((f) => f.typeName === typeName && f.fieldName === fieldName);
+};
+
+const isJsonField = (type: TypeNode, jsonScalars: string[]) => {
+	const namedTypeName = resolveNamedTypeName(type);
+
+	for (const jsonType of jsonScalars) {
+		if (namedTypeName === jsonType) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+const resolveNamedTypeName = (type: TypeNode): string => {
+	switch (type.kind) {
+		case Kind.NON_NULL_TYPE:
+			return resolveNamedTypeName(type.type);
+		case Kind.LIST_TYPE:
+			return resolveNamedTypeName(type.type);
+		default:
+			return type.name.value;
+	}
 };

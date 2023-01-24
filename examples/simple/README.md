@@ -20,10 +20,10 @@ curl --get --data-urlencode 'wg_variables={ "filter": {"code": { "eq": "AD" } } 
     http://localhost:9991/operations/Countries
 ```
 
-#### Call your custom GraphQL server
+#### Get user
 
 ```shell
-curl http://localhost:9991/operations/Hello
+curl http://localhost:9991/operations/users/get?id=1
 ```
 
 ## Learn More

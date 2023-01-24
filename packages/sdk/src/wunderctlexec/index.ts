@@ -4,6 +4,7 @@ import { wunderctlBinaryPath } from '@wundergraph/wunderctl';
 
 export interface WunderCtlExecArgs {
 	cmd: string[];
+	env?: Record<string, string>;
 	timeout?: number;
 }
 
@@ -15,20 +16,28 @@ export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnVal
 		encoding: 'utf-8',
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
+		env: args.env ?? {},
 		extendEnv: true,
 		stdio: 'pipe',
 	});
 };
 
-export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
+export type Subprocess = execa.ExecaChildProcess;
+
+export const wunderctlSubprocess = (args: WunderCtlExecArgs): Subprocess => {
 	const file = wunderCtlFile();
 	const cmdArgs = wunderCtlArgs(args.cmd);
 
-	const subprocess = execa(file, cmdArgs, {
+	return execa(file, cmdArgs, {
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
+		env: args.env ?? {},
 		extendEnv: true,
 	});
+};
+
+export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
+	const subprocess = wunderctlSubprocess(args);
 	subprocess.stdout?.pipe(process.stdout);
 	subprocess.stderr?.pipe(process.stderr);
 
@@ -38,7 +47,7 @@ export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<strin
 
 const wunderCtlArgs = (args: string[]): string[] => {
 	if (process.env.WG_DIR_ABS) {
-		args.push('--wundergraph-dir', '.');
+		args.push('--wundergraph-dir', process.env.WG_DIR_ABS);
 	}
 
 	if (process.env.WG_CLI_LOG_LEVEL) {

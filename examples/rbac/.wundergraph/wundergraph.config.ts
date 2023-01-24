@@ -1,7 +1,7 @@
-import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
-import server from './wundergraph.server';
 import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import operations from './wundergraph.operations';
+import server from './wundergraph.server';
 
 const github = introspect.openApi({
 	apiNamespace: 'github',
@@ -26,10 +26,10 @@ configureWunderGraphApplication({
 	operations,
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
+			templates: [...templates.typescript.all],
 		},
 		{
-			templates: [templates.typescript.client, new NextJsTemplate()],
+			templates: [new NextJsTemplate()],
 			path: '../components/generated',
 		},
 	],

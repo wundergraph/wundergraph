@@ -20,7 +20,7 @@ type Subscription {
 const greeter = introspect.graphql({
 	apiNamespace: 'ws',
 	loadSchemaFromString: schema,
-	url: 'http://127.0.0.1:4000/graphql',
+	url: 'http://localhost:4000/graphql',
 });
 
 // configureWunderGraph emits the configuration
@@ -33,17 +33,12 @@ configureWunderGraphApplication({
 			templates: [
 				// use all the typescript react templates to generate a client
 				...templates.typescript.all,
-				templates.typescript.operations,
-				templates.typescript.linkBuilder,
 			],
 		},
 	],
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: [],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
 	},
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production' || process.env.GITPOD_WORKSPACE_ID !== undefined,

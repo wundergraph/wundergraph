@@ -22,11 +22,19 @@ export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[])
 	const dataSources: DataSource<T>[] = apis
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
+
+	const jsonScalars: string[] = [];
+	apis.forEach((api) => {
+		if (api.CustomJsonScalars) {
+			jsonScalars.push(...api.CustomJsonScalars);
+		}
+	});
+
 	const fields = mergeApiFields(apis);
 	const types = mergeTypeConfigurations(apis);
 	const schema = mergeApiSchemas(roles, apis, dataSources, fields);
 	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
-	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
 };
 
 const mergeApiFields = <T extends {} = {}>(apis: Api<T>[]): FieldConfiguration[] => {
@@ -79,6 +87,25 @@ export const baseSchema = `
 directive @fromClaim(
   name: Claim
 ) on VARIABLE_DEFINITION
+
+"""
+The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
+
+A potential use-case could be that you have a graphql upstream which is not accepting null values for variables.
+By enabling this directive all variables with null values will be removed from upstream query.
+
+query ($say: String, $name: String) @removeNullVariables {
+	hello(say: $say, name: $name)
+}
+
+Directive will transform variables json and remove top level null values.
+{ "say": null, "name": "world" }
+
+So upstream will receive the following variables:
+
+{ "name": "world" }
+"""
+directive @removeNullVariables on QUERY | MUTATION
 
 enum Claim {
 	USERID

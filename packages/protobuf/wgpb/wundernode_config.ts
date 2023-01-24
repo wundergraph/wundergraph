@@ -58,6 +58,7 @@ export function logLevelToJSON(object: LogLevel): string {
 export enum AuthProviderKind {
   AuthProviderGithub = 0,
   AuthProviderOIDC = 1,
+  AuthProviderAuth0 = 2,
 }
 
 export function authProviderKindFromJSON(object: any): AuthProviderKind {
@@ -68,6 +69,9 @@ export function authProviderKindFromJSON(object: any): AuthProviderKind {
     case 1:
     case "AuthProviderOIDC":
       return AuthProviderKind.AuthProviderOIDC;
+    case 2:
+    case "AuthProviderAuth0":
+      return AuthProviderKind.AuthProviderAuth0;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum AuthProviderKind");
   }
@@ -79,6 +83,8 @@ export function authProviderKindToJSON(object: AuthProviderKind): string {
       return "AuthProviderGithub";
     case AuthProviderKind.AuthProviderOIDC:
       return "AuthProviderOIDC";
+    case AuthProviderKind.AuthProviderAuth0:
+      return "AuthProviderAuth0";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum AuthProviderKind");
   }
@@ -116,6 +122,35 @@ export function apiCacheKindToJSON(object: ApiCacheKind): string {
       return "REDIS_CACHE";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum ApiCacheKind");
+  }
+}
+
+export enum OperationExecutionEngine {
+  ENGINE_GRAPHQL = 0,
+  ENGINE_NODEJS = 1,
+}
+
+export function operationExecutionEngineFromJSON(object: any): OperationExecutionEngine {
+  switch (object) {
+    case 0:
+    case "ENGINE_GRAPHQL":
+      return OperationExecutionEngine.ENGINE_GRAPHQL;
+    case 1:
+    case "ENGINE_NODEJS":
+      return OperationExecutionEngine.ENGINE_NODEJS;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum OperationExecutionEngine");
+  }
+}
+
+export function operationExecutionEngineToJSON(object: OperationExecutionEngine): string {
+  switch (object) {
+    case OperationExecutionEngine.ENGINE_GRAPHQL:
+      return "ENGINE_GRAPHQL";
+    case OperationExecutionEngine.ENGINE_NODEJS:
+      return "ENGINE_NODEJS";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum OperationExecutionEngine");
   }
 }
 
@@ -649,6 +684,8 @@ export interface Operation {
   internal: boolean;
   interpolationVariablesSchema: string;
   postResolveTransformations: PostResolveTransformation[];
+  engine: OperationExecutionEngine;
+  path: string;
 }
 
 export interface PostResolveTransformation {
@@ -776,6 +813,7 @@ export interface DataSourceCustomGraphQL {
   federation: GraphQLFederationConfiguration | undefined;
   upstreamSchema: string;
   hooksConfiguration: GraphQLDataSourceHooksConfiguration | undefined;
+  customScalarTypeFields: SingleTypeField[];
 }
 
 export interface DataSourceCustomDatabase {
@@ -912,6 +950,20 @@ export interface WunderGraphConfiguration {
   dangerouslyEnableGraphQLEndpoint: boolean;
 }
 
+export interface S3UploadProfileHooksConfiguration {
+  preUpload: boolean;
+  postUpload: boolean;
+}
+
+export interface S3UploadProfile {
+  maxAllowedUploadSizeBytes: number;
+  maxAllowedFiles: number;
+  allowedMimeTypes: string[];
+  allowedFileExtensions: string[];
+  metadataJSONSchema: string;
+  hooks: S3UploadProfileHooksConfiguration | undefined;
+}
+
 export interface S3UploadConfiguration {
   name: string;
   endpoint: ConfigurationVariable | undefined;
@@ -920,12 +972,19 @@ export interface S3UploadConfiguration {
   bucketName: ConfigurationVariable | undefined;
   bucketLocation: ConfigurationVariable | undefined;
   useSSL: boolean;
+  uploadProfiles: { [key: string]: S3UploadProfile };
+}
+
+export interface S3UploadConfiguration_UploadProfilesEntry {
+  key: string;
+  value: S3UploadProfile | undefined;
 }
 
 export interface UserDefinedApi {
   engineConfiguration: EngineConfiguration | undefined;
   enableGraphqlEndpoint: boolean;
   operations: Operation[];
+  invalidOperationNames: string[];
   corsConfiguration: CorsConfiguration | undefined;
   authenticationConfig: ApiAuthenticationConfig | undefined;
   s3UploadConfiguration: S3UploadConfiguration[];
@@ -1510,6 +1569,8 @@ function createBaseOperation(): Operation {
     internal: false,
     interpolationVariablesSchema: "",
     postResolveTransformations: [],
+    engine: 0,
+    path: "",
   };
 }
 
@@ -1544,6 +1605,8 @@ export const Operation = {
       postResolveTransformations: Array.isArray(object?.postResolveTransformations)
         ? object.postResolveTransformations.map((e: any) => PostResolveTransformation.fromJSON(e))
         : [],
+      engine: isSet(object.engine) ? operationExecutionEngineFromJSON(object.engine) : 0,
+      path: isSet(object.path) ? String(object.path) : "",
     };
   },
 
@@ -1581,6 +1644,8 @@ export const Operation = {
     } else {
       obj.postResolveTransformations = [];
     }
+    message.engine !== undefined && (obj.engine = operationExecutionEngineToJSON(message.engine));
+    message.path !== undefined && (obj.path = message.path);
     return obj;
   },
 
@@ -1615,6 +1680,8 @@ export const Operation = {
     message.postResolveTransformations = object.postResolveTransformations?.map((e) =>
       PostResolveTransformation.fromPartial(e)
     ) || [];
+    message.engine = object.engine ?? 0;
+    message.path = object.path ?? "";
     return message;
   },
 };
@@ -2346,6 +2413,7 @@ function createBaseDataSourceCustomGraphQL(): DataSourceCustomGraphQL {
     federation: undefined,
     upstreamSchema: "",
     hooksConfiguration: undefined,
+    customScalarTypeFields: [],
   };
 }
 
@@ -2361,6 +2429,9 @@ export const DataSourceCustomGraphQL = {
       hooksConfiguration: isSet(object.hooksConfiguration)
         ? GraphQLDataSourceHooksConfiguration.fromJSON(object.hooksConfiguration)
         : undefined,
+      customScalarTypeFields: Array.isArray(object?.customScalarTypeFields)
+        ? object.customScalarTypeFields.map((e: any) => SingleTypeField.fromJSON(e))
+        : [],
     };
   },
 
@@ -2376,6 +2447,11 @@ export const DataSourceCustomGraphQL = {
     message.hooksConfiguration !== undefined && (obj.hooksConfiguration = message.hooksConfiguration
       ? GraphQLDataSourceHooksConfiguration.toJSON(message.hooksConfiguration)
       : undefined);
+    if (message.customScalarTypeFields) {
+      obj.customScalarTypeFields = message.customScalarTypeFields.map((e) => e ? SingleTypeField.toJSON(e) : undefined);
+    } else {
+      obj.customScalarTypeFields = [];
+    }
     return obj;
   },
 
@@ -2394,6 +2470,7 @@ export const DataSourceCustomGraphQL = {
     message.hooksConfiguration = (object.hooksConfiguration !== undefined && object.hooksConfiguration !== null)
       ? GraphQLDataSourceHooksConfiguration.fromPartial(object.hooksConfiguration)
       : undefined;
+    message.customScalarTypeFields = object.customScalarTypeFields?.map((e) => SingleTypeField.fromPartial(e)) || [];
     return message;
   },
 };
@@ -3157,6 +3234,97 @@ export const WunderGraphConfiguration = {
   },
 };
 
+function createBaseS3UploadProfileHooksConfiguration(): S3UploadProfileHooksConfiguration {
+  return { preUpload: false, postUpload: false };
+}
+
+export const S3UploadProfileHooksConfiguration = {
+  fromJSON(object: any): S3UploadProfileHooksConfiguration {
+    return {
+      preUpload: isSet(object.preUpload) ? Boolean(object.preUpload) : false,
+      postUpload: isSet(object.postUpload) ? Boolean(object.postUpload) : false,
+    };
+  },
+
+  toJSON(message: S3UploadProfileHooksConfiguration): unknown {
+    const obj: any = {};
+    message.preUpload !== undefined && (obj.preUpload = message.preUpload);
+    message.postUpload !== undefined && (obj.postUpload = message.postUpload);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<S3UploadProfileHooksConfiguration>, I>>(
+    object: I,
+  ): S3UploadProfileHooksConfiguration {
+    const message = createBaseS3UploadProfileHooksConfiguration();
+    message.preUpload = object.preUpload ?? false;
+    message.postUpload = object.postUpload ?? false;
+    return message;
+  },
+};
+
+function createBaseS3UploadProfile(): S3UploadProfile {
+  return {
+    maxAllowedUploadSizeBytes: 0,
+    maxAllowedFiles: 0,
+    allowedMimeTypes: [],
+    allowedFileExtensions: [],
+    metadataJSONSchema: "",
+    hooks: undefined,
+  };
+}
+
+export const S3UploadProfile = {
+  fromJSON(object: any): S3UploadProfile {
+    return {
+      maxAllowedUploadSizeBytes: isSet(object.maxAllowedUploadSizeBytes) ? Number(object.maxAllowedUploadSizeBytes) : 0,
+      maxAllowedFiles: isSet(object.maxAllowedFiles) ? Number(object.maxAllowedFiles) : 0,
+      allowedMimeTypes: Array.isArray(object?.allowedMimeTypes)
+        ? object.allowedMimeTypes.map((e: any) => String(e))
+        : [],
+      allowedFileExtensions: Array.isArray(object?.allowedFileExtensions)
+        ? object.allowedFileExtensions.map((e: any) => String(e))
+        : [],
+      metadataJSONSchema: isSet(object.metadataJSONSchema) ? String(object.metadataJSONSchema) : "",
+      hooks: isSet(object.hooks) ? S3UploadProfileHooksConfiguration.fromJSON(object.hooks) : undefined,
+    };
+  },
+
+  toJSON(message: S3UploadProfile): unknown {
+    const obj: any = {};
+    message.maxAllowedUploadSizeBytes !== undefined &&
+      (obj.maxAllowedUploadSizeBytes = Math.round(message.maxAllowedUploadSizeBytes));
+    message.maxAllowedFiles !== undefined && (obj.maxAllowedFiles = Math.round(message.maxAllowedFiles));
+    if (message.allowedMimeTypes) {
+      obj.allowedMimeTypes = message.allowedMimeTypes.map((e) => e);
+    } else {
+      obj.allowedMimeTypes = [];
+    }
+    if (message.allowedFileExtensions) {
+      obj.allowedFileExtensions = message.allowedFileExtensions.map((e) => e);
+    } else {
+      obj.allowedFileExtensions = [];
+    }
+    message.metadataJSONSchema !== undefined && (obj.metadataJSONSchema = message.metadataJSONSchema);
+    message.hooks !== undefined &&
+      (obj.hooks = message.hooks ? S3UploadProfileHooksConfiguration.toJSON(message.hooks) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<S3UploadProfile>, I>>(object: I): S3UploadProfile {
+    const message = createBaseS3UploadProfile();
+    message.maxAllowedUploadSizeBytes = object.maxAllowedUploadSizeBytes ?? 0;
+    message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
+    message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];
+    message.allowedFileExtensions = object.allowedFileExtensions?.map((e) => e) || [];
+    message.metadataJSONSchema = object.metadataJSONSchema ?? "";
+    message.hooks = (object.hooks !== undefined && object.hooks !== null)
+      ? S3UploadProfileHooksConfiguration.fromPartial(object.hooks)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseS3UploadConfiguration(): S3UploadConfiguration {
   return {
     name: "",
@@ -3166,6 +3334,7 @@ function createBaseS3UploadConfiguration(): S3UploadConfiguration {
     bucketName: undefined,
     bucketLocation: undefined,
     useSSL: false,
+    uploadProfiles: {},
   };
 }
 
@@ -3181,6 +3350,12 @@ export const S3UploadConfiguration = {
       bucketName: isSet(object.bucketName) ? ConfigurationVariable.fromJSON(object.bucketName) : undefined,
       bucketLocation: isSet(object.bucketLocation) ? ConfigurationVariable.fromJSON(object.bucketLocation) : undefined,
       useSSL: isSet(object.useSSL) ? Boolean(object.useSSL) : false,
+      uploadProfiles: isObject(object.uploadProfiles)
+        ? Object.entries(object.uploadProfiles).reduce<{ [key: string]: S3UploadProfile }>((acc, [key, value]) => {
+          acc[key] = S3UploadProfile.fromJSON(value);
+          return acc;
+        }, {})
+        : {},
     };
   },
 
@@ -3200,6 +3375,12 @@ export const S3UploadConfiguration = {
     message.bucketLocation !== undefined &&
       (obj.bucketLocation = message.bucketLocation ? ConfigurationVariable.toJSON(message.bucketLocation) : undefined);
     message.useSSL !== undefined && (obj.useSSL = message.useSSL);
+    obj.uploadProfiles = {};
+    if (message.uploadProfiles) {
+      Object.entries(message.uploadProfiles).forEach(([k, v]) => {
+        obj.uploadProfiles[k] = S3UploadProfile.toJSON(v);
+      });
+    }
     return obj;
   },
 
@@ -3222,6 +3403,46 @@ export const S3UploadConfiguration = {
       ? ConfigurationVariable.fromPartial(object.bucketLocation)
       : undefined;
     message.useSSL = object.useSSL ?? false;
+    message.uploadProfiles = Object.entries(object.uploadProfiles ?? {}).reduce<{ [key: string]: S3UploadProfile }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = S3UploadProfile.fromPartial(value);
+        }
+        return acc;
+      },
+      {},
+    );
+    return message;
+  },
+};
+
+function createBaseS3UploadConfiguration_UploadProfilesEntry(): S3UploadConfiguration_UploadProfilesEntry {
+  return { key: "", value: undefined };
+}
+
+export const S3UploadConfiguration_UploadProfilesEntry = {
+  fromJSON(object: any): S3UploadConfiguration_UploadProfilesEntry {
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value) ? S3UploadProfile.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: S3UploadConfiguration_UploadProfilesEntry): unknown {
+    const obj: any = {};
+    message.key !== undefined && (obj.key = message.key);
+    message.value !== undefined && (obj.value = message.value ? S3UploadProfile.toJSON(message.value) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<S3UploadConfiguration_UploadProfilesEntry>, I>>(
+    object: I,
+  ): S3UploadConfiguration_UploadProfilesEntry {
+    const message = createBaseS3UploadConfiguration_UploadProfilesEntry();
+    message.key = object.key ?? "";
+    message.value = (object.value !== undefined && object.value !== null)
+      ? S3UploadProfile.fromPartial(object.value)
+      : undefined;
     return message;
   },
 };
@@ -3231,6 +3452,7 @@ function createBaseUserDefinedApi(): UserDefinedApi {
     engineConfiguration: undefined,
     enableGraphqlEndpoint: false,
     operations: [],
+    invalidOperationNames: [],
     corsConfiguration: undefined,
     authenticationConfig: undefined,
     s3UploadConfiguration: [],
@@ -3249,6 +3471,9 @@ export const UserDefinedApi = {
         : undefined,
       enableGraphqlEndpoint: isSet(object.enableGraphqlEndpoint) ? Boolean(object.enableGraphqlEndpoint) : false,
       operations: Array.isArray(object?.operations) ? object.operations.map((e: any) => Operation.fromJSON(e)) : [],
+      invalidOperationNames: Array.isArray(object?.invalidOperationNames)
+        ? object.invalidOperationNames.map((e: any) => String(e))
+        : [],
       corsConfiguration: isSet(object.corsConfiguration)
         ? CorsConfiguration.fromJSON(object.corsConfiguration)
         : undefined,
@@ -3279,6 +3504,11 @@ export const UserDefinedApi = {
       obj.operations = message.operations.map((e) => e ? Operation.toJSON(e) : undefined);
     } else {
       obj.operations = [];
+    }
+    if (message.invalidOperationNames) {
+      obj.invalidOperationNames = message.invalidOperationNames.map((e) => e);
+    } else {
+      obj.invalidOperationNames = [];
     }
     message.corsConfiguration !== undefined && (obj.corsConfiguration = message.corsConfiguration
       ? CorsConfiguration.toJSON(message.corsConfiguration)
@@ -3317,6 +3547,7 @@ export const UserDefinedApi = {
       : undefined;
     message.enableGraphqlEndpoint = object.enableGraphqlEndpoint ?? false;
     message.operations = object.operations?.map((e) => Operation.fromPartial(e)) || [];
+    message.invalidOperationNames = object.invalidOperationNames?.map((e) => e) || [];
     message.corsConfiguration = (object.corsConfiguration !== undefined && object.corsConfiguration !== null)
       ? CorsConfiguration.fromPartial(object.corsConfiguration)
       : undefined;

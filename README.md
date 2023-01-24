@@ -52,7 +52,7 @@ The fastest way to get started with WunderGraph is to open a Gitpod. After boots
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
 
-You can also following the [**Quickstart (5
+You can also follow the [**Quickstart (5
 min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
 
 ## Examples:
@@ -73,6 +73,8 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Publish & Install APIs](./examples/publish-install-api)
 - [Dockerize WunderGraph](https://github.com/wundergraph/docker)
 - [Typesafe Golang Client](/examples/golang-client)
+- [Typesafe Node.js Client](/examples/nodejs-ts-client)
+- [OpenAPI and mocking](/examples/openapi-mocking)
 
 ## The WunderGraph Stack
 

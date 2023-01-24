@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -32,7 +32,10 @@ var nodeStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl node start
 `,
-	Run: func(cmd *cobra.Command, args []string) {
+	Annotations: map[string]string{
+		"telemetry": "true",
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 
@@ -40,7 +43,8 @@ var nodeStartCmd = &cobra.Command{
 
 		n, err := NewWunderGraphNode(ctx)
 		if err != nil {
-			log.Fatal("Could not create node: %w", zap.Error(err))
+			log.Error("Could not create node: %w", zap.Error(err))
+			return err
 		}
 
 		g.Go(func() error {
@@ -52,10 +56,12 @@ var nodeStartCmd = &cobra.Command{
 		// Only exit with error code 1 when the server was not stopped by the signal
 		if err := g.Wait(); sigCtx.Err() == nil && err != nil {
 			// Exit with error code 1 to indicate failure and restart
-			log.Fatal("WunderGraph process shutdown: %w", zap.Error(err))
+			log.Error("WunderGraph node process shutdown: %w", zap.Error(err))
+			return err
 		}
 
 		// exit code 0 to indicate success
+		return nil
 	},
 }
 
@@ -101,7 +107,7 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		opts[i](&options)
 	}
 
-	configFile := path.Join(n.WundergraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(n.WundergraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}

@@ -1,11 +1,11 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import Handlebars from 'handlebars';
 import { template } from './jsonschema.template';
 
 export class JsonSchema implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const model: Model = {
 			operations: config.application.Operations.map((op) => ({
 				name: op.Name,

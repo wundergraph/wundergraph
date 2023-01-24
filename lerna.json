@@ -14,7 +14,15 @@
   },
   "loglevel": "verbose",
   "changelogPreset": "conventional-changelog-conventionalcommits",
-  "packages": ["packages/nextjs", "packages/sdk", "packages/protobuf", "packages/golang-client", "packages/swr"],
+  "packages": [
+    "packages/nextjs",
+    "packages/sdk",
+    "packages/protobuf",
+    "packages/golang-client",
+    "packages/swr",
+    "packages/create-wundergraph-app",
+    "packages/react-query"
+  ],
   "npmClient": "pnpm",
   "version": "independent"
 }

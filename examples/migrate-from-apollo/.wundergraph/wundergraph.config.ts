@@ -15,10 +15,10 @@ configureWunderGraphApplication({
 	operations,
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
+			templates: [...templates.typescript.all],
 		},
 		{
-			templates: [templates.typescript.client, new NextJsTemplate()],
+			templates: [new NextJsTemplate()],
 			path: '../components/generated',
 		},
 	],
@@ -31,9 +31,6 @@ configureWunderGraphApplication({
 						'http://localhost:3000',
 				  ]
 				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: true,
 	},
 	security: {
 		enableGraphQLEndpoint: true,

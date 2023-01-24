@@ -1,8 +1,8 @@
 import {
-	Application,
 	authProviders,
 	configureWunderGraphApplication,
 	cors,
+	EnvironmentVariable,
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
@@ -14,17 +14,16 @@ const spaceX = introspect.graphql({
 	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
-const myApplication = new Application({
-	name: 'api',
-	apis: [spaceX],
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	application: myApplication,
+	apis: [spaceX],
 	server,
 	operations,
 	codeGenerators: [
+		{
+			templates: [...templates.typescript.all],
+			path: './generated',
+		},
 		{
 			templates: [templates.typescript.client],
 			path: '../components/generated',
@@ -38,6 +37,15 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [authProviders.demo()],
 			authorizedRedirectUriRegexes: ['http://localhost:5173*'],
+			secureCookieHashKey: new EnvironmentVariable(
+				'WUNDERGRAPH_SECURE_COOKIE_HASH_KEY',
+				'00000000000000000000000000000000'
+			), // must be of length 32
+			secureCookieBlockKey: new EnvironmentVariable(
+				'WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY',
+				'00000000000000000000000000000000'
+			), // must be of length 32
+			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET', '00000000000'), // must be of length 11
 		},
 	},
 	security: {

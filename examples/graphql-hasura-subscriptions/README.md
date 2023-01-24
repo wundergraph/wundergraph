@@ -8,7 +8,7 @@ You will need to complete a simple signup form (just mail and password) to get a
 GraphiQL interface, and obtain token.
 
 - Set the authorization header, using the token you obtained from the previous step,
-  replace `Secret` with your token:
+  replace `Secret` with your token in `wundergraph.config.ts`:
 
 ````bash
 ```typescript
@@ -39,6 +39,12 @@ curl -N http://localhost:9991/operations/Todo
 
 ```shell
  curl -N http://localhost:9991/operations/Users\?wg_sse\=true
+```
+
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
 ```
 
 #### Playground

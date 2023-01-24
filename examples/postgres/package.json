@@ -3,20 +3,28 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "npm run start:services && wait-on -d 5000 tcp:54322 && npm run start:api",
+    "start": "npm run start:services && npm run wait-on:services && npm run start:api",
     "start:services": "docker-compose up -d",
+    "wait-on:services": "wait-on -d 5000 tcp:54322",
     "start:api": "wunderctl up --debug",
     "cleanup": "docker-compose down -v",
-    "check": "tsc --noEmit"
+    "build": "wunderctl generate --debug",
+    "check": "tsc --noEmit",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.119.0",
+    "@wundergraph/sdk": "^0.132.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {
+    "@jest/globals": "^29.3.1",
     "@types/node": "^14.14.37",
+    "@types/node-fetch": "^2.6.2",
+    "jest": "^29.3.1",
+    "node-fetch": "^2.6.7",
+    "ts-jest": "^29.0.3",
     "typescript": "^4.8.2",
     "wait-on": "^6.0.1"
   }

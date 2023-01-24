@@ -45,6 +45,8 @@ E.g. you can use Minio on localhost and DigitalOcean spaces when running in prod
 Additionally,
 you're able to swap storage providers or buckets without changing the client itself.
 
+> Note: Currently, you need to be authenticated to perform file uploads.
+
 ## How does it work?
 
 1. Configure your S3 Bucket (see reference below for more info)
@@ -105,7 +107,7 @@ const UploadPage: NextPage = () => {
               <li>
                 <a
                   target="_blank"
-                  href={`http://127.0.0.1:9000/uploads/${file}`}
+                  href={`http://localhost:9000/uploads/${file}`}
                 >
                   {file}
                 </a>
@@ -118,6 +120,102 @@ const UploadPage: NextPage = () => {
   )
 }
 ```
+
+## Configuring upload profiles
+
+Additionally, S3 uploads support defining different profiles with limits and an optional metadata schema. Start by adding your
+profiles to your `wundergraph.config.ts`:
+
+```typescript
+configureWunderGraphApplication({
+  ...
+	s3UploadProvider: [
+		{
+      ...
+			uploadProfiles: {
+        // 'avatar' profile
+				avatar: {
+					maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
+					maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
+					allowedMimeTypes: ['image/png', 'image/jpeg'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
+					allowedFileExtensions: ['png', 'jpg'], // leave empty/undefined to allow all
+          // Optional metadata schema as JSON schema
+					meta: {
+						type: 'object',
+						properties: {
+							postId: {
+								type: 'string',
+							},
+						},
+					},
+				},
+				gallery: {
+          // Metadata defined with zod
+					meta: z.object({
+						postId: z.string(),
+						position: z.number().positive(),
+					}),
+				},
+```
+
+After you define profiles for a given storage provider, you must indicate the profile name when performing an upload. For example,
+to use the `avatar` profile use:
+
+```typescript
+const result = await upload({
+  provider: 'minio',
+  profile: 'avatar',
+  files,
+})
+```
+
+When using a profile with required metadata, `upload()` argument will also need to include a properly defined `metadata` field,
+accoding to its schema.
+
+## Upload hooks
+
+Upload profiles also allow you to define hooks that will be run before and after the upload. The `preUpload` hook will run
+before the upload, allowing you to perform any required validation as well as defining the path to store the file. There's
+also a `postUpload` hook which runs after the upload completes or fails (the `error` argument indicates that). To use upload
+hooks, define them in your `wundergraph.server.ts` file:
+
+```typescript
+export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
+	hooks: {
+    ...
+		uploads: {
+			minio: {
+				avatar: {
+					preUpload: ({ user, file, meta }) => {
+						console.log(`preUpload user: ${user}, file: ${file}, meta: ${meta}`);
+						if (!user) {
+              // Optional: return an error if the user is not authenticated
+							return { error: 'authenticate' };
+						}
+            // Optional: Return a fileKey to override the default path for storing the
+            // file. Use / as a directory separator.
+            //
+            // e.g. return { fileKey: 'directory/' + file.name };
+            //
+						// e.g. return {fileKey: 'customname.png'};
+            //
+            // Or don't return anything to use the default filename derived from the file contents.
+					},
+					postUpload: async ({ user, file, meta, internalClient, error }) => {
+						console.log(
+							`postUpload user: ${user}, file: ${file}, meta: ${meta}, internalClient: ${internalClient}, error: ${error}`
+						);
+					},
+				},
+			},
+		},
+	},
+}));
+```
+
+## Examples
+
+[nextjs-file-upload example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-file-upload)
 
 ## Reference
 

@@ -47,6 +47,10 @@ export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_M
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
 // Only use the instrospection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
+// When true, throw an exception an error is found while loading operations
+export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
+
+export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
 
 export interface RenameType {
 	from: string;
@@ -75,13 +79,15 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		dataSources: DataSource<T>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
-		interpolateVariableDefinitionAsJSON: string[]
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
 		this.DataSources = dataSources;
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
+		this.CustomJsonScalars = customJsonScalars;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -90,6 +96,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
+	CustomJsonScalars?: string[];
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -219,6 +226,7 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream
 	// so that the request context can be enriched
@@ -406,6 +414,7 @@ export interface GraphQLApiCustom {
 	};
 	UpstreamSchema: string;
 	HooksConfiguration: GraphQLDataSourceHooksConfiguration;
+	CustomScalarTypeFields: SingleTypeField[];
 }
 
 export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, 'loadSchemaFromString'> {

@@ -5,7 +5,7 @@
 ```typescript
 const counter = introspect.graphql({
   apiNamespace: 'counter',
-  url: 'http://127.0.0.1:4000/graphql',
+  url: 'http://localhost:4000/graphql',
   subscriptionsUseSSE: true,
 });
 ```
@@ -26,6 +26,12 @@ curl -N http://localhost:9991/operations/Counter
 
 ```shell
  curl -N 'http://localhost:9991/operations/Counter?wg_sse=true'
+```
+
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
 ```
 
 ## Learn More

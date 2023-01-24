@@ -3,6 +3,94 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.0...@wundergraph/swr@0.12.1) (2023-01-23)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.12.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.11.1...@wundergraph/swr@0.12.0) (2023-01-20)
+
+### Features
+
+* add upload profiles for S3 providers ([#476](https://github.com/wundergraph/wundergraph/issues/476)) ([6144545](https://github.com/wundergraph/wundergraph/commit/614454539133c7f235aea6aa72ade36059f41c97)) (@fiam)
+
+## [0.11.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.11.0...@wundergraph/swr@0.11.1) (2023-01-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.11.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.10.0...@wundergraph/swr@0.11.0) (2023-01-19)
+
+### Features
+
+* fix infinite loop when callbacks are not memoized ([#555](https://github.com/wundergraph/wundergraph/issues/555)) ([f9ed75f](https://github.com/wundergraph/wundergraph/commit/f9ed75fef9323c8cf49557e8c8017ddba2f41886)) (@Pagebakers)
+
+## [0.10.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.7...@wundergraph/swr@0.10.0) (2023-01-17)
+
+### Features
+
+* make input required if there are required variables ([#551](https://github.com/wundergraph/wundergraph/issues/551)) ([00256bf](https://github.com/wundergraph/wundergraph/commit/00256bf456f0c733beb45a5cdbc258f84631975e)) (@Pagebakers)
+
+### Bug Fixes
+
+* prevent swallowing of input validation errors ([#529](https://github.com/wundergraph/wundergraph/issues/529)) ([39ea3fc](https://github.com/wundergraph/wundergraph/commit/39ea3fc3fbf96916f1165228194b8c915882b133)) (@Aenimus)
+
+## [0.9.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.6...@wundergraph/swr@0.9.7) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.5...@wundergraph/swr@0.9.6) (2022-12-31)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.4...@wundergraph/swr@0.9.5) (2022-12-29)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.3...@wundergraph/swr@0.9.4) (2022-12-28)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.2...@wundergraph/swr@0.9.3) (2022-12-21)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.1...@wundergraph/swr@0.9.2) (2022-12-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.9.0...@wundergraph/swr@0.9.1) (2022-12-15)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.9.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.8.1...@wundergraph/swr@0.9.0) (2022-12-14)
+
+### Features
+
+* update SWR to v2 🥳 ([#446](https://github.com/wundergraph/wundergraph/issues/446)) ([8af6b99](https://github.com/wundergraph/wundergraph/commit/8af6b99f9e0e9da84586782ad5b9ad8e1072c987)) (@Pagebakers)
+
+## [0.8.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.8.0...@wundergraph/swr@0.8.1) (2022-12-08)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.8.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.7.2...@wundergraph/swr@0.8.0) (2022-12-06)
+
+### Features
+
+* react query client ([#340](https://github.com/wundergraph/wundergraph/issues/340)) ([c5769a4](https://github.com/wundergraph/wundergraph/commit/c5769a422970e8eaf626dd767cf09252789bcd1f)) (@Pagebakers)
+
+## [0.7.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.7.0...@wundergraph/swr@0.7.2) (2022-11-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.7.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.7.0...@wundergraph/swr@0.7.1) (2022-11-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.7.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.6.0...@wundergraph/swr@0.7.0) (2022-11-18)
+
+### Features
+
+* remove app/main from URL structure ([#335](https://github.com/wundergraph/wundergraph/issues/335)) ([e49e585](https://github.com/wundergraph/wundergraph/commit/e49e585528297126b93958105e80b68f1943d781)), closes [#333](https://github.com/wundergraph/wundergraph/issues/333) (@fiam)
+
 ## [0.6.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.5.0...@wundergraph/swr@0.6.0) (2022-11-17)
 
 ### Features

@@ -48,7 +48,7 @@ configureWunderGraphApplication({
       providers: [
         authProviders.openIdConnect({
           id: 'keycloak',
-          clientId: EnvironmentVariable.from('KEYCLOAK_CLIENT_ID'),
+          clientId: new EnvironmentVariable('KEYCLOAK_CLIENT_ID'),
           clientSecret: new EnvironmentVariable('KEYCLOAK_CLIENT_SECRET'),
           issuer: new EnvironmentVariable('KEYCLOAK_ISSUER'),
         }),
@@ -94,11 +94,12 @@ By default, when no options are passed to `wundergraph.config.ts` or `wundergrap
 | `WG_LOG_LEVEL`       | The log level of the `WunderNode`/`WunderGraph Server`. | `info`                  |
 | `WG_NODE_URL`        | The internal URL of the `WunderNode`.                   | `http://localhost:9991` |
 | `WG_PUBLIC_NODE_URL` | The publicly available URL of the `WunderNode`.         | `http://localhost:9991` |
-| `WG_NODE_HOST`       | The host of the `WunderNode`.                           | `127.0.0.1`             |
+| `WG_NODE_HOST`       | The host of the `WunderNode`.                           | `localhost`             |
 | `WG_NODE_PORT`       | The port of the `WunderNode`.                           | `9991`                  |
 | `WG_SERVER_URL`      | The URL of the `WunderGraph Server`.                    | `http://localhost:9992` |
-| `WG_SERVER_HOST`     | The host of the `WunderGraph Server`.                   | `127.0.0.1`             |
+| `WG_SERVER_HOST`     | The host of the `WunderGraph Server`.                   | `localhost`             |
 | `WG_SERVER_PORT`     | The port of the `WunderGraph Server`.                   | `9992`                  |
+| `WG_IN_MEMORY_CACHE` | Size of the in-memory cache (number + suffix) or `off`. | `128MB`                 |
 
 ### Available log levels
 

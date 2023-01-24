@@ -5,7 +5,7 @@ info:
 servers:
   - url: 'https://localhost:44331/'
 paths:
-  "/WeatherForecast":
+  '/WeatherForecast':
     get:
       tags:
         - WeatherForecast
@@ -17,17 +17,17 @@ paths:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/WeatherForecast"
+                  '$ref': '#/components/schemas/WeatherForecast'
             application/json:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/WeatherForecast"
+                  '$ref': '#/components/schemas/WeatherForecast'
             text/json:
               schema:
                 type: array
                 items:
-                  "$ref": "#/components/schemas/WeatherForecast"
+                  '$ref': '#/components/schemas/WeatherForecast'
 components:
   schemas:
     WeatherForecast:

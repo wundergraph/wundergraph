@@ -10,7 +10,7 @@ const counter = introspect.graphql({
   id: 'counter',
   apiNamespace: 'ws',
   loadSchemaFromString: schema,
-  url: 'http://127.0.0.1:4000/graphql',
+  url: 'http://localhost:4000/graphql',
 });
 
 configureWunderGraphApplication({
@@ -96,6 +96,12 @@ curl -N 'http://localhost:9991/operations/Ws?from=5'
 
 - Check the output.
 - Check the logs to see the hooks being executed.
+
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
+```
 
 ## Learn More
 

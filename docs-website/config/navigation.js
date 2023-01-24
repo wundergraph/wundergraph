@@ -14,6 +14,10 @@ const navigation = [
 				title: 'Manifesto',
 				href: '/manifesto',
 			},
+			{
+				title: 'Usage Information',
+				href: '/usage-information',
+			},
 		],
 	},
 	{
@@ -116,6 +120,10 @@ const navigation = [
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
 			{
+				title: 'Testing',
+				href: '/docs/guides/testing',
+			},
+			{
 				title: 'Debugging',
 				href: '/docs/guides/debugging',
 			},
@@ -136,8 +144,12 @@ const navigation = [
 				href: '/docs/guides/signing-origin-requests',
 			},
 			{
-				title: 'Configure Authorization',
-				href: '/docs/guides/configure-authorization',
+				title: 'Token Based Authentication with Next Auth',
+				href: '/docs/guides/token-based-authentication-with-next-auth',
+			},
+			{
+				title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
+				href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
 			},
 		],
 	},
@@ -152,10 +164,10 @@ const navigation = [
 				title: 'Your first WunderGraph Application',
 				href: '/docs/tutorials/your-first-wundergraph-application',
 			},
-			{
+			/*{
 				title: 'NextJS Full-Stack Tutorial',
 				href: '/docs/tutorials/nextjs-full-stack-tutorial',
-			},
+			},*/
 		],
 	},
 	{
@@ -196,6 +208,14 @@ const navigation = [
 				href: '/docs/examples/nextjs',
 			},
 			{
+				title: 'NextJS TypeScript Operations',
+				href: '/docs/examples/nextjs-typescript-operations',
+			},
+			{
+				title: 'NextJS + React Query',
+				href: '/docs/examples/nextjs-react-query',
+			},
+			{
 				title: 'Vite + SWR',
 				href: '/docs/examples/vite-swr',
 			},
@@ -206,6 +226,10 @@ const navigation = [
 			{
 				title: 'Caching',
 				href: '/docs/examples/caching',
+			},
+			{
+				title: 'Expo + SWR',
+				href: '/docs/examples/expo-swr',
 			},
 			{
 				title: 'FaunaDB NextJS',
@@ -220,12 +244,8 @@ const navigation = [
 				href: '/docs/examples/postgresql',
 			},
 			{
-				title: 'PostgreSQL & Prisma',
-				href: '/docs/examples/postgresql-prisma',
-			},
-			{
-				title: 'Publish Install API using WunderHub',
-				href: '/docs/examples/publish-install-api',
+				title: 'NextJS & PostgreSQL & Prisma',
+				href: '/docs/examples/nextjs-postgresql-prisma',
 			},
 			{
 				title: 'Apollo Federation',
@@ -271,6 +291,10 @@ const navigation = [
 				title: 'WunderGraph schema extension',
 				href: '/docs/examples/schema-extension',
 			},
+			{
+				title: 'Next.js Todos',
+				href: '/docs/examples/nextjs-todos',
+			},
 		],
 	},
 	{
@@ -287,6 +311,10 @@ const navigation = [
 			{
 				title: 'TypeScript webhooks to integrate third party applications',
 				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/docs/features/typescript-operations',
 			},
 			{
 				title: 'API Namespacing',
@@ -459,7 +487,7 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks',
 			},
 			{
-				title: 'React-JS',
+				title: 'React',
 				href: '/docs/supported-frontend-frameworks/react-js',
 			},
 			{
@@ -467,8 +495,12 @@ const navigation = [
 				href: '/docs/supported-frontend-frameworks/react-native',
 			},
 			{
-				title: 'NextJS',
+				title: 'Next.js',
 				href: '/docs/supported-frontend-frameworks/nextjs',
+			},
+			{
+				title: 'ViteJS',
+				href: '/docs/supported-frontend-frameworks/vite-js',
 			},
 			{
 				title: 'iOS / Swift / Objective-C',
@@ -809,10 +841,6 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
 			},
 			{
-				title: '.graphqlconfig',
-				href: '/docs/wundergraph-config-ts-reference/configure-graphqlconfig',
-			},
-			{
 				title: 'Schema extension',
 				href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
 			},
@@ -892,6 +920,15 @@ const navigation = [
 		],
 	},
 	{
+		title: 'TypeScript Operations Reference',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/typescript-operations-reference',
+			},
+		],
+	},
+	{
 		title: 'wundergraph.operations.ts Reference',
 		links: [
 			{
@@ -926,6 +963,27 @@ const navigation = [
 			{
 				title: 'Overview',
 				href: '/docs/wundergraph-manifest-json-reference',
+			},
+		],
+	},
+	{
+		title: 'Clients reference',
+		links: [
+			{
+				title: 'TypeScript Client',
+				href: '/docs/clients-reference/typescript-client',
+			},
+			{
+				title: 'SWR',
+				href: '/docs/clients-reference/swr',
+			},
+			{
+				title: 'React Query',
+				href: '/docs/clients-reference/react-query',
+			},
+			{
+				title: 'Next.js',
+				href: '/docs/clients-reference/nextjs',
 			},
 		],
 	},

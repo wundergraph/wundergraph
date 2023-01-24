@@ -1,0 +1,8 @@
+query Todos {
+	todos: db_findManyTodo(orderBy: { order: asc }) {
+		id
+		title
+		completed
+		order
+	}
+}

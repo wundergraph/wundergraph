@@ -6,17 +6,17 @@ import {
 	introspect,
 	templates,
 } from '@wundergraph/sdk';
-import server from './wundergraph.server';
 import operations from './wundergraph.operations';
+import server from './wundergraph.server';
 
 const spaceX = introspect.graphql({
 	apiNamespace: 'spacex',
-	url: 'https://api.spacex.land/graphql/',
+	url: 'https://spacex-api.fly.dev/graphql/',
 });
 
 const weather = introspect.graphql({
 	apiNamespace: 'weather',
-	url: 'https://graphql-weather-api.herokuapp.com/',
+	url: 'https://weather-api.wundergraph.com/',
 });
 
 /*const jsonPlaceholder = introspect.openApi({
@@ -111,7 +111,7 @@ configureWunderGraphApplication({
 	s3UploadProvider: [
 		{
 			name: 'minio',
-			endpoint: '127.0.0.1:9000',
+			endpoint: 'localhost:9000',
 			accessKeyID: 'test',
 			secretAccessKey: '12345678',
 			bucketLocation: 'eu-central-1',
@@ -121,7 +121,7 @@ configureWunderGraphApplication({
 	],
 	codeGenerators: [
 		{
-			templates: [...templates.typescript.all, templates.typescript.operations, templates.typescript.linkBuilder],
+			templates: [...templates.typescript.all],
 		},
 		{
 			templates: [templates.typescript.client],
@@ -130,7 +130,7 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+		allowedOrigins: ['http://localhost:5173', 'http://localhost:5173'],
 	},
 	authentication: {
 		cookieBased: {
@@ -143,7 +143,7 @@ configureWunderGraphApplication({
 					clientSecret: new EnvironmentVariable('AUTH0_CLIENT_SECRET'),
 				}),
 			],
-			authorizedRedirectUris: ['http://localhost:5173/authentication', 'http://localhost:5173/auth-test'],
+			authorizedRedirectUriRegexes: ['http://localhost:5173*'],
 		},
 	},
 	/*links: [

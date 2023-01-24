@@ -5,20 +5,21 @@
   "scripts": {
     "start": "run-p dev wundergraph open",
     "wundergraph": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "build": "wunderctl generate --debug",
+    "build:next": "next build",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3003",
-    "build": "next build",
     "dev": "next dev --port 3003",
     "wunderctl": "wunderctl",
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.3.22",
-    "@wundergraph/sdk": "^0.119.0",
+    "@wundergraph/nextjs": "^0.8.4",
+    "@wundergraph/sdk": "^0.132.1",
     "graphql": "^16.3.0",
-    "next": "^12.1.6",
+    "next": "^13.1.1",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "swr": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",

@@ -3,18 +3,27 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "wunderctl up --debug",
-    "check": "tsc --noEmit"
+    "start": "run-p start:services start:server",
+    "start:server": "wait-on tcp:8085 && wunderctl up --debug",
+    "start:services": "cd chat && go run server/server.go",
+    "build": "wunderctl generate --debug",
+    "check": "tsc --noEmit",
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.119.0",
-    "graphql": "^16.3.0",
-    "ts-node": "^10.9.1"
+    "@wundergraph/sdk": "^0.132.1",
+    "graphql": "^16.3.0"
   },
   "devDependencies": {
+    "@jest/globals": "^29.3.1",
     "@types/node": "^14.14.37",
-    "typescript": "^4.8.2"
+    "jest": "^29.3.1",
+    "npm-run-all": "^4.1.5",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.2",
+    "wait-on": "^6.0.0"
   }
 }

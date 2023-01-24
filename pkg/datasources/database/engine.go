@@ -11,18 +11,21 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-cmd/cmd"
+	"github.com/gofrs/flock"
 	"github.com/phayes/freeport"
 	"github.com/prisma/prisma-client-go/binaries"
 	"github.com/prisma/prisma-client-go/binaries/platform"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/repair"
+
+	"github.com/wundergraph/wundergraph/cli/helpers"
 )
 
 func InstallPrismaDependencies(log *zap.Logger, wundergraphDir string) error {
@@ -63,6 +66,7 @@ type Engine struct {
 	queryEnginePath         string
 	introspectionEnginePath string
 	url                     string
+	cmd                     *exec.Cmd
 	cancel                  func()
 	client                  *http.Client
 	log                     *zap.Logger
@@ -238,32 +242,46 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	port := strconv.Itoa(freePort)
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel
-	cmd := exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
+	e.cmd = exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
 	// ensure that prisma starts with the dir set to the .wundergraph directory
 	// this is important for sqlite support as it's expected that the path of the sqlite file is the same
 	// (relative to the .wundergraph directory) during introspection and at runtime
-	cmd.Dir = e.wundergraphDir
-	cmd.Env = append(cmd.Env, "PRISMA_DML="+schema)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	e.cmd.Dir = e.wundergraphDir
+	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+	e.cmd.Stdout = os.Stdout
+	e.cmd.Stderr = os.Stderr
 	e.url = "http://localhost:" + port
-	go func() {
-		_ = cmd.Start()
-	}()
+	if err := e.cmd.Start(); err != nil {
+		e.StopQueryEngine()
+		return err
+	}
 	return nil
 }
 
 func (e *Engine) ensurePrisma() error {
 
-	prismaPath := path.Join(e.wundergraphDir, "generated", "prisma")
-
-	err := os.MkdirAll(prismaPath, os.ModePerm)
+	cacheDir, err := helpers.GlobalWunderGraphCacheDir()
 	if err != nil {
+		return fmt.Errorf("retrieving cache dir: %w", err)
+	}
+
+	prismaPath := filepath.Join(cacheDir, "prisma")
+
+	if err := os.MkdirAll(prismaPath, os.ModePerm); err != nil {
 		return err
 	}
 
-	e.queryEnginePath = path.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
-	e.introspectionEnginePath = path.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+	e.queryEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
+	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+
+	// Acquire a file lock before trying to download
+	lockPath := filepath.Join(prismaPath, ".lock")
+	lock := flock.New(lockPath)
+
+	if err := lock.Lock(); err != nil {
+		return fmt.Errorf("creating prisma lockfile: %w", err)
+	}
+	defer lock.Unlock()
 
 	_, err = os.Lstat(e.queryEnginePath)
 	if os.IsNotExist(err) {
@@ -299,6 +317,25 @@ func (e *Engine) StopQueryEngine() {
 		return
 	}
 	e.cancel()
+	exitCh := make(chan error)
+	go func() {
+		exitCh <- e.cmd.Wait()
+	}()
+	const prismaExitTimeout = 5 * time.Second
+	select {
+	case <-exitCh:
+		// Ignore errors here, since killing the process with a signal
+		// will cause Wait() to return an error and there's no cross-platform
+		// way to tell it apart from an interesting failure
+	case <-time.After(prismaExitTimeout):
+		e.log.Warn(fmt.Sprintf("prisma didn't exit after %s, killing", prismaExitTimeout))
+		if err := e.cmd.Process.Kill(); err != nil {
+			e.log.Error("killing prisma", zap.Error(err))
+		}
+	}
+	close(exitCh)
+	e.cmd = nil
+	e.cancel = nil
 }
 
 func (e *Engine) WaitUntilReady(ctx context.Context) error {

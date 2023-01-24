@@ -3,7 +3,7 @@
 #### Getting started
 
 ```shell
-npm install && npm start
+pnpm install && pnpm start:database && pnpm dev
 ```
 
 #### Get Dragons

@@ -4,13 +4,20 @@ This example demonstrates how to use the `mutatingPostResolve` hook to change th
 
 ## Getting Started
 
-Install the dependencies and run the complete example in one command:
+1. Copy the `.env.example` file to `.env` and fill in the required values.
+2. Install the dependencies and run the complete example in one command:
 
 ```shell
 npm install && npm start
 ```
 
 After `npm start` has been executed, your browser should open a new tab and navigate to [`http://localhost:9991/operations/Dragons`](http://localhost:9991/operations/Dragons). In the console, you can see logs emitted by the `mutatingPostResolve` hook.
+
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
+```
 
 ## Learn More
 

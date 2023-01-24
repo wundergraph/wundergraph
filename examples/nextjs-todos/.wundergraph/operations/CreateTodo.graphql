@@ -1,0 +1,5 @@
+mutation ($title: String!, $order: Int! @internal) {
+	todo: db_createOneTodo(data: { title: $title, completed: false, order: $order }) {
+		id
+	}
+}

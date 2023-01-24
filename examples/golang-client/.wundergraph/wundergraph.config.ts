@@ -1,4 +1,4 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import { golangClient } from '@wundergraph/golang-client';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
@@ -14,6 +14,9 @@ configureWunderGraphApplication({
 	server,
 	operations,
 	codeGenerators: [
+		{
+			templates: templates.typescript.all,
+		},
 		{
 			templates: [
 				...golangClient.all({
@@ -32,9 +35,6 @@ configureWunderGraphApplication({
 						'http://localhost:3000',
 				  ]
 				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
 	},
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',

@@ -3,6 +3,9 @@
 .vscode
 .idea
 
+# jest compilation
+test/*.js
+
 # WunderGraph build output
 .wundergraph/cache
 .wundergraph/generated
@@ -41,3 +44,6 @@ yarn-error.log*
 .vercel
 
 migrations
+/test-results/
+/playwright-report/
+/playwright/.cache/
