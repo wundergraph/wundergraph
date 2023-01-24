@@ -5,6 +5,7 @@ import {
 	GraphQLResponse,
 	Headers,
 	LogoutOptions,
+	MutationRequestOptions,
 	OperationRequestOptions,
 	QueryRequestOptions,
 	SubscriptionEventHandler,
@@ -19,6 +20,13 @@ import { ResponseError } from './ResponseError';
 import { InputValidationError } from './InputValidationError';
 
 // https://graphql.org/learn/serving-over-http/
+
+export interface UploadValidationOptions {
+	maxAllowedUploadSizeBytes?: number;
+	maxAllowedFiles?: number;
+	allowedFileExtensions?: string[];
+	allowedMimeTypes?: string[];
+}
 
 interface LogoutResponse {
 	redirect?: string;
@@ -163,6 +171,27 @@ export class Client {
 		};
 	}
 
+	/**
+	 * setAuthorizationToken is a shorthand method for setting up the
+	 * required headers for token authentication.
+	 *
+	 * @param token Bearer token
+	 */
+	public setAuthorizationToken(token: string) {
+		this.setExtraHeaders({
+			Authorization: `Bearer ${token}`,
+		});
+	}
+
+	/**
+	 * unsetAuthorization removes any previously set authorization credentials
+	 * (e.g. via setAuthorizationToken or via setExtraHeaders).
+	 * If there was no authorization set, it does nothing.
+	 */
+	public unsetAuthorization() {
+		delete this.extraHeaders['Authorization'];
+	}
+
 	/***
 	 * Query makes a GET request to the server.
 	 * The method only throws an error if the request fails to reach the server or
@@ -217,7 +246,7 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async mutate<RequestOptions extends OperationRequestOptions, ResponseData = any>(
+	public async mutate<RequestOptions extends MutationRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
 		const url = this.addUrlParams(
@@ -229,12 +258,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (
-			this.options.operationMetadata &&
-			this.options.operationMetadata[options.operationName] &&
-			this.options.operationMetadata[options.operationName].requiresAuthentication &&
-			this.csrfEnabled
-		) {
+		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -365,7 +389,11 @@ export class Client {
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
-	public async uploadFiles(config: UploadRequestOptions): Promise<UploadResponse> {
+	public async uploadFiles<UploadOptions extends UploadRequestOptions>(
+		config: UploadOptions,
+		validation?: UploadValidationOptions
+	): Promise<UploadResponse> {
+		this.validateFiles(config, validation);
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
 			if (file instanceof Blob) {
@@ -382,6 +410,14 @@ export class Client {
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});
+
+		if ('profile' in config) {
+			headers['X-Upload-Profile'] = (config as any).profile;
+		}
+
+		if ('meta' in config) {
+			headers['X-Metadata'] = (config as any).meta ? JSON.stringify((config as any).meta) : '';
+		}
 
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
@@ -408,6 +444,42 @@ export class Client {
 		return {
 			fileKeys: json.map((x) => x.key),
 		};
+	}
+
+	public validateFiles(config: UploadRequestOptions, validation?: UploadValidationOptions) {
+		if (validation?.maxAllowedFiles && config.files.length > validation.maxAllowedFiles) {
+			throw new Error(`uploading ${config.files.length} exceeds the maximum allowed (${validation.maxAllowedFiles})`);
+		}
+		for (const file of config.files) {
+			if (validation?.maxAllowedUploadSizeBytes && file.size > validation.maxAllowedUploadSizeBytes) {
+				throw new Error(
+					`file ${file.name} with size ${file.size} exceeds the maximum allowed (${validation.maxAllowedUploadSizeBytes})`
+				);
+			}
+			if (validation?.allowedFileExtensions && file.name.includes('.')) {
+				const ext = file.name.substring(file.name.indexOf('.') + 1).toLowerCase();
+				if (ext) {
+					if (validation.allowedFileExtensions.findIndex((item) => item.toLocaleLowerCase()) < 0) {
+						throw new Error(`file ${file.name} with extension ${ext} is not allowed`);
+					}
+				}
+			}
+			if (validation?.allowedMimeTypes) {
+				const mimeType = file.type;
+				const idx = validation.allowedMimeTypes.findIndex((item) => {
+					// Full match
+					if (item == mimeType) {
+						return true;
+					}
+					// Try wildcard match. This is a bit brittle but it should be fine
+					// as long as profile?.allowedMimeTypes contains only valid entries
+					return mimeType.match(new RegExp(item.replace('*', '.*')));
+				});
+				if (idx < 0) {
+					throw new Error(`file ${file.name} with MIME type ${mimeType} is not allowed`);
+				}
+			}
+		}
 	}
 
 	public login(authProviderID: string, redirectURI?: string) {

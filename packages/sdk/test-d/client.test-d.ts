@@ -1,5 +1,14 @@
 import { expectType } from 'tsd';
-import { Client, ClientResponse, OperationRequestOptions, SubscriptionRequestOptions, User } from '../src/client';
+import {
+	Client,
+	ClientResponse,
+	MutationRequestOptions,
+	QueryRequestOptions,
+	SubscriptionRequestOptions,
+	UploadResponse,
+	User,
+} from '../src/client';
+import { UploadRequestOptionsWithProfile } from '../src/client/types';
 
 const client = new Client({
 	baseURL: 'https://api.com',
@@ -11,7 +20,7 @@ const client = new Client({
 // Queries
 
 expectType<Promise<ClientResponse<{ id: string }>>>(
-	client.query<OperationRequestOptions<'Weather', { lat: number }>, { id: string }>({
+	client.query<QueryRequestOptions<'Weather', { lat: number }>, { id: string }>({
 		operationName: 'Weather',
 		input: { lat: 1 },
 	})
@@ -27,7 +36,7 @@ expectType<Promise<ClientResponse<any>>>(
 // Mutation
 
 expectType<Promise<ClientResponse<{ id: string }>>>(
-	client.mutate<OperationRequestOptions<'Weather', { lat: number }>, { id: string }>({
+	client.mutate<MutationRequestOptions<'Weather', { lat: number }>, { id: string }>({
 		operationName: 'Weather',
 		input: { lat: 1 },
 	})
@@ -108,5 +117,22 @@ expectType<string>(
 	Client.buildCacheKey({
 		operationName: 'Weather',
 		input: { lat: 1 },
+	})
+);
+
+// Uploads
+
+expectType<Promise<UploadResponse>>(
+	client.uploadFiles({
+		provider: 'minio',
+		files: new FileList(),
+	})
+);
+
+expectType<Promise<UploadResponse>>(
+	client.uploadFiles<UploadRequestOptionsWithProfile<'minio', 'avatar', object>>({
+		provider: 'minio',
+		profile: 'avatar',
+		files: new FileList(),
 	})
 );

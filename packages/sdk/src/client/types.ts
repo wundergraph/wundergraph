@@ -1,4 +1,5 @@
 import { ClientResponseError } from './ClientResponseError';
+import type { RequiredKeysOf, SetRequired } from 'type-fest';
 
 export type Headers = { [key: string]: string };
 
@@ -20,12 +21,21 @@ export interface ClientOperation {
 	requiresAuthentication: boolean;
 }
 
+export interface S3ProviderDefinition {
+	[provider: string]: {
+		hasProfiles: boolean;
+		profiles: {
+			[profile: string]: object;
+		};
+	};
+}
+
 export interface OperationsDefinition<
 	Queries extends OperationDefinition = OperationDefinition,
 	Mutations extends OperationDefinition = OperationDefinition,
 	Subscriptions extends OperationDefinition = OperationDefinition,
 	UserRole extends string = string,
-	S3Provider extends string = string,
+	S3Provider extends S3ProviderDefinition = S3ProviderDefinition,
 	AuthProvider extends string = string
 > {
 	user: User<UserRole>;
@@ -88,20 +98,25 @@ export interface OperationRequestOptions<
 	input?: Input;
 }
 
-export interface QueryRequestOptions<
+export type QueryRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
-> extends OperationRequestOptions<OperationName, Input> {
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
 	subscribeOnce?: Boolean;
-}
+};
 
-export interface SubscriptionRequestOptions<
+export type MutationRequestOptions<
 	OperationName extends string = any,
 	Input extends object | undefined = object | undefined
-> extends OperationRequestOptions<OperationName, Input> {
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>>;
+
+export type SubscriptionRequestOptions<
+	OperationName extends string = any,
+	Input extends object | undefined = object | undefined
+> = WithInput<Input, OperationRequestOptions<OperationName, Input>> & {
 	liveQuery?: Boolean;
 	subscribeOnce?: Boolean;
-}
+};
 
 export interface SubscriptionResult {
 	streamState: 'streaming' | 'stopped' | 'restarting';
@@ -112,6 +127,18 @@ export interface UploadRequestOptions<ProviderName extends string = string> {
 	provider: ProviderName;
 	files: FileList;
 	abortSignal?: AbortSignal;
+}
+
+export interface UploadRequestOptionsWithProfile<
+	ProviderName extends string = string,
+	ProfileName extends string = string,
+	Meta extends object = object
+> extends UploadRequestOptions<ProviderName> {
+	provider: ProviderName;
+	profile: ProfileName;
+	files: FileList;
+	abortSignal?: AbortSignal;
+	meta?: Meta;
 }
 
 export interface UploadResponse {
@@ -163,3 +190,14 @@ export interface LogoutOptions {
 	 * */
 	after?: () => void;
 }
+
+export type HasRequiredInput<Input extends object | undefined> = Input extends object
+	? RequiredKeysOf<Input> extends never
+		? false
+		: true
+	: false;
+
+export type WithInput<
+	Input extends object | undefined,
+	Options extends { input?: Input }
+> = HasRequiredInput<Input> extends true ? SetRequired<Options, 'input'> : Options;

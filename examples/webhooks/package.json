@@ -8,10 +8,15 @@
     "build": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/webhooks/github",
     "wunderctl": "wunderctl",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/sdk": "^0.130.2"
+    "@jest/globals": "^29.3.1",
+    "@types/node-fetch": "^2.6.2",
+    "@wundergraph/sdk": "^0.132.1",
+    "jest": "^29.3.1",
+    "ts-jest": "^29.0.3"
   },
   "devDependencies": {
     "@types/node": "^17.0.15",

@@ -1,14 +1,14 @@
 import Handlebars from 'handlebars';
 import { OperationType } from '@wundergraph/protobuf';
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { formatTypeScript } from './index';
 import { modelImports, operations } from './helpers';
 import { template } from './internal.client.template';
 import templates from '../index';
 
 export class WunderGraphInternalApiClient implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
 		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _internalQueries = operations(config.application, OperationType.QUERY, true);

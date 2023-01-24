@@ -1,5 +1,7 @@
 import got from 'got';
 
+import { getGitHubRequestOptions } from './github';
+
 export const validateBranch = async ({
 	repoOwnerName,
 	repoName,
@@ -11,7 +13,8 @@ export const validateBranch = async ({
 }) => {
 	try {
 		const getBranchResponse = await got.get(
-			`https://api.github.com/repos/${repoOwnerName}/${repoName}/branches/${branchName}`
+			`https://api.github.com/repos/${repoOwnerName}/${repoName}/branches/${branchName}`,
+			getGitHubRequestOptions()
 		);
 		if (getBranchResponse.statusCode === 200) return true;
 		else return false;

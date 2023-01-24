@@ -6,9 +6,11 @@ import {
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
 } from '@wundergraph/sdk/client';
+import { UploadRequestOptionsWithProfile } from '@wundergraph/sdk/dist/client/types';
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration, SWRMutationResponse } from 'swr/mutation';
 import { ClientResponseError } from '@wundergraph/sdk/client';
+import type { WithInput } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
@@ -42,15 +44,22 @@ export type MutationFetcher<Operations extends OperationsDefinition> = {
 	): Promise<Data>;
 };
 
-export type UseQueryOptions<Data, Error, Input, OperationName extends string, LiveQuery> = Omit<
-	SWRConfiguration<Data, Error>,
-	'fetcher'
-> & {
-	operationName: OperationName;
-	liveQuery?: LiveQuery;
-	enabled?: boolean;
-	input?: Input;
-};
+export type UseQueryOptions<
+	Data,
+	Error,
+	Input extends object | undefined,
+	OperationName extends string,
+	LiveQuery
+> = Omit<SWRConfiguration<Data, Error>, 'fetcher'> &
+	WithInput<
+		Input,
+		{
+			operationName: OperationName;
+			liveQuery?: LiveQuery;
+			enabled?: boolean;
+			input?: Input;
+		}
+	>;
 
 export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
 	<
@@ -63,23 +72,31 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 	): SWRResponse<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionOptions<Data, Error, Input, OperationName extends string> = {
-	operationName: OperationName;
-	subscribeOnce?: boolean;
-	resetOnMount?: boolean;
-	enabled?: boolean;
-	input?: Input;
-	onSuccess?(
-		response: ClientResponse<Data>,
-		key: Key,
-		config: UseSubscriptionOptions<Data, Error, Input, OperationName>
-	): void;
-	onError?(
-		error: ClientResponseError,
-		key: Key,
-		config: UseSubscriptionOptions<Data, Error, Input, OperationName>
-	): void;
-};
+export type UseSubscriptionOptions<
+	Data,
+	Error,
+	Input extends object | undefined,
+	OperationName extends string
+> = WithInput<
+	Input,
+	{
+		operationName: OperationName;
+		subscribeOnce?: boolean;
+		resetOnMount?: boolean;
+		enabled?: boolean;
+		input?: Input;
+		onSuccess?(
+			response: ClientResponse<Data>,
+			key: Key,
+			config: UseSubscriptionOptions<Data, Error, Input, OperationName>
+		): void;
+		onError?(
+			error: ClientResponseError,
+			key: Key,
+			config: UseSubscriptionOptions<Data, Error, Input, OperationName>
+		): void;
+	}
+>;
 
 export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
 	<
@@ -138,26 +155,30 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 	(options?: UseUserOptions<Operations['user']>): SWRResponse<Operations['user'], ClientResponseError>;
 };
 
+export type UseUploadOptions = Omit<
+	SWRMutationConfiguration<string[], ClientResponseError, UploadRequestOptions, 'uploadFiles'>,
+	'fetcher'
+>;
+
 export type UseUploadHook<Operations extends OperationsDefinition> = {
-	(
-		config?: Omit<
-			SWRMutationConfiguration<
-				string[],
-				ClientResponseError,
-				UploadRequestOptions<Operations['s3Provider']>,
-				'uploadFiles'
-			>,
-			'fetcher'
-		>
-	): Omit<
-		SWRMutationResponse<string[], ClientResponseError, UploadRequestOptions<Operations['s3Provider']>>,
+	(config?: UseUploadOptions): Omit<
+		SWRMutationResponse<string[], ClientResponseError, UploadRequestOptions>,
 		'trigger'
 	> & {
-		upload: SWRMutationResponse<
-			string[],
-			ClientResponseError,
-			UploadRequestOptions<Operations['s3Provider']>,
-			'uploadFiles'
-		>['trigger'];
+		upload: <
+			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName]['profiles'],
+				string
+			>,
+			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+		>(
+			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
+				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
+				: UploadRequestOptions,
+			config?: UseUploadOptions
+		) => Promise<string[]>;
 	};
 };
+
+// type Test<ProfileName> =

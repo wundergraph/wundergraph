@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 import styles from '../../styles/Home.module.css';
-import { FC, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { useQuery } from '../../lib/react-query';
 
 const RealtimePage: NextPage = () => {
@@ -43,6 +43,12 @@ const LiveWeather: FC<{ city: string }> = ({ city }) => {
 		operationName: 'Weather',
 		input: { forCity: city },
 		liveQuery: true,
+		onSuccess: (data) => {
+			console.log(data);
+		},
+		onError: (err) => {
+			console.log(err);
+		},
 	});
 	return (
 		<div>

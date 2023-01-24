@@ -22,7 +22,7 @@ var NonNodeModuleReg = regexp.MustCompile(`^[^./]|^\.[^./]|^\.\.[^/]`) // Must n
 type Bundler struct {
 	name                  string
 	production            bool
-	entryPoints           []string
+	entryPoints           []api.EntryPoint
 	absWorkingDir         string
 	watchPaths            []*watcher.WatchPath
 	ignorePaths           []string
@@ -52,13 +52,14 @@ type Config struct {
 }
 
 func NewBundler(config Config) *Bundler {
+
 	return &Bundler{
 		name:                  config.Name,
 		production:            config.Production,
 		absWorkingDir:         config.AbsWorkingDir,
 		outFile:               config.OutFile,
 		outDir:                config.OutDir,
-		entryPoints:           config.EntryPoints,
+		entryPoints:           entryPoints(config),
 		watchPaths:            config.WatchPaths,
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
@@ -67,6 +68,31 @@ func NewBundler(config Config) *Bundler {
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
 		newWatchPath:          make(chan *watcher.WatchPath),
 	}
+}
+
+func entryPoints(config Config) []api.EntryPoint {
+
+	if config.OutFile != "" && len(config.EntryPoints) == 1 {
+		entryPoint := config.EntryPoints[0]
+		return []api.EntryPoint{
+			{
+				InputPath:  entryPoint,
+				OutputPath: strings.TrimSuffix(entryPoint, filepath.Ext(entryPoint)),
+			},
+		}
+	}
+
+	entries := make([]api.EntryPoint, len(config.EntryPoints))
+	for i, entryPoint := range config.EntryPoints {
+		// remove file extension from entryPoint
+		outPath := strings.TrimSuffix(entryPoint, filepath.Ext(entryPoint))
+		entries[i] = api.EntryPoint{
+			InputPath:  entryPoint,
+			OutputPath: outPath,
+		}
+	}
+
+	return entries
 }
 
 func (b *Bundler) Bundle() error {
@@ -78,6 +104,9 @@ func (b *Bundler) Bundle() error {
 				zap.String("bundlerName", b.name),
 				zap.Any("errors", b.buildResult.Errors),
 			)
+			if b.buildResult.Errors[0].Location == nil {
+				return fmt.Errorf("build failed: %s", b.buildResult.Errors[0].Text)
+			}
 			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
 		}
 		b.log.Debug("Build successful", zap.String("bundlerName", b.name))
@@ -132,13 +161,13 @@ func (b *Bundler) BundleAndWatch(ctx context.Context) {
 
 func (b *Bundler) initialBuild() api.BuildResult {
 	options := api.BuildOptions{
-		Outfile:     b.outFile,
-		Outdir:      b.outDir,
-		EntryPoints: b.entryPoints,
-		Bundle:      true,
-		Incremental: true,
-		Platform:    api.PlatformNode,
-		Sourcemap:   api.SourceMapLinked,
+		Outfile:             b.outFile,
+		Outdir:              b.outDir,
+		Bundle:              true,
+		Incremental:         true,
+		EntryPointsAdvanced: b.entryPoints,
+		Platform:            api.PlatformNode,
+		Sourcemap:           api.SourceMapLinked,
 		// Don't bundle external modules
 		Packages:      api.PackagesExternal,
 		AbsWorkingDir: b.absWorkingDir,

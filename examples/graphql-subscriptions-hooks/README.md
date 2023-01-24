@@ -97,6 +97,12 @@ curl -N 'http://localhost:9991/operations/Ws?from=5'
 - Check the output.
 - Check the logs to see the hooks being executed.
 
+#### TS operation
+
+```shell
+curl -N http://localhost:9991/operations/users/get?id=1
+```
+
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
