@@ -244,27 +244,27 @@ const navigation = [
 				href: '/docs/examples/keycloak-openid-connect-authentication',
 			},
 			{
-				title: 'GraphQl Apollo subscriptions',
+				title: 'GraphQL Apollo subscriptions',
 				href: '/docs/examples/graphql-apollo-subscriptions',
 			},
 			{
-				title: 'GraphQl yoga subscriptions',
+				title: 'GraphQL yoga subscriptions',
 				href: '/docs/examples/graphql-yoga-subscriptions',
 			},
 			{
-				title: 'GraphQl SSE subscriptions',
+				title: 'GraphQL SSE subscriptions',
 				href: '/docs/examples/graphql-sse-subscriptions',
 			},
 			{
-				title: 'GraphQl WS subscriptions',
+				title: 'GraphQL WS subscriptions',
 				href: '/docs/examples/graphql-ws-subscriptions',
 			},
 			{
-				title: 'GraphQl hasura WS subscriptions',
+				title: 'GraphQL hasura WS subscriptions',
 				href: '/docs/examples/graphql-hasura-subscriptions',
 			},
 			{
-				title: 'GraphQl subscriptions hooks',
+				title: 'GraphQL subscriptions hooks',
 				href: '/docs/examples/graphql-subscriptions-hooks',
 			},
 			{

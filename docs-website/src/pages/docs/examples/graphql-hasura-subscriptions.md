@@ -1,6 +1,6 @@
 ---
-title: GraphQl Hasura subscriptions Example
-pageTitle: WunderGraph - Examples - GraphQl Hasura subscriptions
+title: GraphQL Hasura subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQL Hasura subscriptions
 description:
 ---
 

@@ -1,6 +1,6 @@
 ---
-title: GraphQl Yoga SSE subscriptions Example
-pageTitle: WunderGraph - Examples - GraphQl Yoga SSE subscriptions
+title: GraphQL Yoga SSE subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQL Yoga SSE subscriptions
 description:
 ---
 

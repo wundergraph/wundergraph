@@ -1,6 +1,6 @@
 ---
-title: GraphQl SSE subscriptions Example
-pageTitle: WunderGraph - Examples - GraphQl SSE subscriptions
+title: GraphQL SSE subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQL SSE subscriptions
 description:
 ---
 
