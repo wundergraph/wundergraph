@@ -818,9 +818,9 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				h.writeRequestErrors(shared.Report, w, requestLogger)
 			} else {
 				requestLogger.Error("prepare plan failed", zap.Error(err))
+				w.WriteHeader(http.StatusBadRequest)
 			}
 
-			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	}
