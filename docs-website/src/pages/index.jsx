@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Heading } from '../components/Heading'
 import { Paragraph } from '../components/Paragraph'
 import { CodeBlock } from '../components/CodeBlock'
@@ -15,6 +16,25 @@ import { RemixLogo } from '../components/logos/remix'
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
 cd my-project && npm i && npm start`
+
+const Links = ({ links }) => {
+	return (
+		<div>
+			<ul className="absolute mt-4 flex space-x-4 ">
+				{links.map(({ href, label }) => (
+					<li key={href}>
+						<Link
+							href={href}
+							className="text-sm text-white transition-all hover:text-pink-500"
+						>
+							{label}
+						</Link>
+					</li>
+				))}
+			</ul>
+		</div>
+	)
+}
 
 export default function HomePage() {
 	return (
@@ -93,7 +113,15 @@ export default function HomePage() {
 						description="Connect existing services and 3rd APIs to WunderGraph."
 						icon={<ShareIcon />}
 						href="/apis/overview"
-					/>
+					>
+						<Links
+							links={[
+								{ href: '/apis/rest', label: 'REST' },
+								{ href: '/apis/graphql', label: 'GraphQL' },
+								{ href: '/apis/overview', label: 'View all' },
+							]}
+						/>
+					</QuickLink>
 					<QuickLink
 						title="Databases"
 						description="Create instant typesafe APIs on top of your databases."

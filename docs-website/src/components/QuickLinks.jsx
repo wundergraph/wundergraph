@@ -16,7 +16,15 @@ export function QuickLinks({ children, className }) {
 	)
 }
 
-export function QuickLink({ title, description, href, icon, logo, more }) {
+export function QuickLink({
+	title,
+	description,
+	href,
+	icon,
+	logo,
+	children,
+	more,
+}) {
 	return (
 		<div className="group relative flex flex-row gap-8 overflow-hidden rounded-xl border border-gray-200 bg-white bg-gradient-to-b from-gray-50 dark:border-gray-800 dark:bg-gray-950 dark:from-gray-900 dark:to-gray-850">
 			<div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-500 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.pink.50)),var(--quick-links-hover-bg,theme(colors.pink.50)))_padding-box,linear-gradient(to_top,theme(colors.purple.400),theme(colors.pink.400))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.gray.800)]" />
@@ -36,6 +44,8 @@ export function QuickLink({ title, description, href, icon, logo, more }) {
 				<p className="mt-1 text-sm text-slate-700 dark:text-slate-400">
 					{description}
 				</p>
+
+				{children}
 
 				{more && (
 					<span className="group mt-8 flex items-center text-sm text-pink-500">
