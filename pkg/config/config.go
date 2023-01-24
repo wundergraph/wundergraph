@@ -62,11 +62,17 @@ func initViper(isTelemetryEnabled bool) {
 	}
 
 	// Init anonymous user id that is used to distinguish between different users
-	if isTelemetryEnabled && !viper.InConfig("anonymousID") {
-		viper.Set("anonymousID", ksuid.New().String())
-		allSettings := viper.AllSettings()
-		if err := SaveConfig(allSettings); err != nil {
-			log.Printf("Could not save config: %v\n", err)
+	if isTelemetryEnabled {
+		telemetryID, exists := os.LookupEnv("WG_TELEMETRY_ANONYMOUS_ID")
+		if exists {
+			viper.Set("anonymousID", telemetryID)
+		}
+		if !viper.InConfig("anonymousID") {
+			viper.Set("anonymousID", ksuid.New().String())
+			allSettings := viper.AllSettings()
+			if err := SaveConfig(allSettings); err != nil {
+				log.Printf("Could not save config: %v\n", err)
+			}
 		}
 	}
 
