@@ -5,6 +5,7 @@ export default createOperation.subscription({
 		id: z.string(),
 	}),
 	handler: async function* (ctx) {
+		throw new Error('Something went wrong');
 		try {
 			for (let i = 0; i < 10; i++) {
 				yield {

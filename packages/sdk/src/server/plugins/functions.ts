@@ -5,6 +5,7 @@ import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations/operations';
 import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
+import { AuthorizationError } from '../../errors';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -86,12 +87,26 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 						}
 
 						return;
-					} catch (e) {
+					} catch (e: any) {
+						const isUnauthorized = e instanceof AuthorizationError;
 						fastify.log.error(e);
 						if (implementation.type === 'subscription') {
+							if (isUnauthorized) {
+								reply.raw.writeHead(401);
+							}
+							reply.raw.write(`${JSON.stringify({ errors: [{ message: e.message || 'Internal Error' }] })}\n\n`);
 							reply.raw.end();
 						} else {
-							reply.code(500);
+							reply.code(isUnauthorized ? 401 : 500);
+							reply.send({
+								response: {
+									errors: [
+										{
+											message: e.message || 'Internal Error',
+										},
+									],
+								},
+							});
 						}
 					}
 				},

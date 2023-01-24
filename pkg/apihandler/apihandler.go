@@ -2377,8 +2377,10 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(out.Response)
+	w.WriteHeader(out.ClientResponseStatusCode)
+	if len(out.Response) > 0 {
+		_, _ = w.Write(out.Response)
+	}
 }
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
