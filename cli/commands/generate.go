@@ -32,7 +32,7 @@ var generateCmd = &cobra.Command{
  server start'. All files are stored to .wundergraph/generated. The local
  introspection cache has precedence. You can overwrite this behavior by passing
  --no-cache to the command`,
-	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
