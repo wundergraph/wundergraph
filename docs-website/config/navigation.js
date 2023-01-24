@@ -248,7 +248,7 @@ const navigation = [
 				href: '/docs/examples/graphql-apollo-subscriptions',
 			},
 			{
-				title: 'GraphQL yoga subscriptions',
+				title: 'GraphQL Yoga subscriptions',
 				href: '/docs/examples/graphql-yoga-subscriptions',
 			},
 			{
@@ -260,7 +260,7 @@ const navigation = [
 				href: '/docs/examples/graphql-ws-subscriptions',
 			},
 			{
-				title: 'GraphQL hasura WS subscriptions',
+				title: 'GraphQL Hasura WS subscriptions',
 				href: '/docs/examples/graphql-hasura-subscriptions',
 			},
 			{
