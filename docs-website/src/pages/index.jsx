@@ -13,7 +13,7 @@ cd my-project && npm i && npm start`;
 
 const Links = ({ links }) => {
 	return (
-		<div className="">
+		<div className="hidden h-10 lg:block">
 			<ul className="absolute mt-4 flex space-x-4">
 				{links.map(({ href, label }) => (
 					<li key={href}>
@@ -108,6 +108,7 @@ export default function HomePage() {
 							links={[
 								{ href: '/apis/rest', label: 'REST' },
 								{ href: '/apis/graphql', label: 'GraphQL' },
+								{ href: '/apis/federation', label: 'Apollo Federation' },
 								{ href: '/apis/overview', label: 'View all' },
 							]}
 						/>
@@ -117,7 +118,17 @@ export default function HomePage() {
 						description="Create instant typesafe APIs on top of your databases."
 						icon={<CircleStackIcon />}
 						href="/database/overview"
-					/>
+					>
+						<Links
+							links={[
+								{ href: '/database/postgres', label: 'Postgres' },
+								{ href: '/database/mysql', label: 'MySQL' },
+								{ href: '/database/fauna', label: 'Fauna' },
+								{ href: '/database/planetscale', label: 'Planetscale' },
+								{ href: '/database/overview', label: 'View all' },
+							]}
+						/>
+					</QuickLink>
 				</QuickLinks>
 
 				<QuickLinks className="lg:grid-cols-3">
