@@ -33,6 +33,10 @@ test('complex2 oas3', async () => {
 	await runTest('src/v2openapi/testdata/complex_2.json', 'complex2_oas3');
 });
 
+test('key_client', async () => {
+	await runTest('src/v2openapi/testdata/keycloak.json', 'keycloak');
+});
+
 test('httpbin', async () => {
 	await runTest('src/v2openapi/testdata/httpbin.json', 'httpbin');
 });
@@ -144,33 +148,30 @@ describe('RestApiBuilderTests', () => {
 
 		test('that a unique name remains unchanged', () => {
 			const restApiBuilder = newRestApiBuilder();
+			const uniqueName = 'a';
 			restApiBuilder['uniqueGraphQLNames'] = new Set(['a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
-			expect(restApiBuilder.getUniqueGraphQLName('a')).toBe('a');
-			expect(restApiBuilder['uniqueGraphQLNames'].has('a')).toBe(true);
+			expect(restApiBuilder.getUniqueGraphQLName(uniqueName, uniqueName)).toBe(uniqueName);
+			expect(restApiBuilder['uniqueGraphQLNames'].has(uniqueName)).toBe(true);
 		});
 
-		test('that for up to 9 retries a unique suffix is added to a name that already exists', () => {
+		test('that a unique suffix is added to a name that already exists if the original name has not previously been mapped', () => {
 			const restApiBuilder = newRestApiBuilder();
+			const nameToNormalise = 'a';
+			const normalisedName = 'a_9';
 			restApiBuilder['uniqueGraphQLNames'] = new Set(['a', 'a_1', 'a_2', 'a_3', 'a_4', 'a_5', 'a_6', 'a_7', 'a_8']);
-			expect(restApiBuilder.getUniqueGraphQLName('a')).toBe('a_9');
+			expect(restApiBuilder.getUniqueGraphQLName(nameToNormalise, nameToNormalise)).toBe(normalisedName);
 			expect(restApiBuilder['uniqueGraphQLNames'].has('a_9')).toBe(true);
+			expect(restApiBuilder['normalisedNames'].get(nameToNormalise)).toBe(normalisedName);
 		});
 
-		test('that failure to create a unique value after 9 tries returns an empty string', () => {
+		test('that if the original schema name has already been normalised, that name is returned', () => {
 			const restApiBuilder = newRestApiBuilder();
-			restApiBuilder['uniqueGraphQLNames'] = new Set([
-				'a',
-				'a_1',
-				'a_2',
-				'a_3',
-				'a_4',
-				'a_5',
-				'a_6',
-				'a_7',
-				'a_8',
-				'a_9',
-			]);
-			expect(restApiBuilder.getUniqueGraphQLName('a')).toBe('');
+			const nameToNormalise = 'a$&*b';
+			const normalisedName = 'a___b';
+			const getUniqueGraphQLName = jest.spyOn(restApiBuilder, 'getUniqueGraphQLName');
+			restApiBuilder['normalisedNames'].set(nameToNormalise, normalisedName);
+			expect(restApiBuilder.getUniqueNormalisedGraphQLName(nameToNormalise)).toBe(normalisedName);
+			expect(getUniqueGraphQLName).not.toHaveBeenCalled();
 		});
 	});
 

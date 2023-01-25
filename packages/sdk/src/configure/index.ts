@@ -17,6 +17,7 @@ import {
 	Api,
 	DatabaseApiCustom,
 	DataSource,
+	EnumMapping,
 	GraphQLApiCustom,
 	introspectGraphqlServer,
 	RESTApiCustom,
@@ -660,8 +661,8 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				resolved,
 				loadedOperations,
 				app.EngineConfiguration.CustomJsonScalars || [],
-				customEnumMappings: app.EngineConfiguration.CustomEnumMappings,
-		);
+				app.EngineConfiguration.CustomEnumMappings || []
+			);
 			app.Operations = operations.operations;
 			app.InvalidOperationNames = loadedOperations.invalid || [];
 			if (app.Operations && config.operations !== undefined) {
@@ -1100,12 +1101,14 @@ const trimTrailingSlash = (url: string): string => {
 const resolveOperationsConfigurations = async (
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
-	customJsonScalars: string[]
+	customJsonScalars: string[],
+	customEnumMappings: EnumMapping[] | undefined
 ): Promise<ParsedOperations> => {
 	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
 		keepFromClaimVariables: false,
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
+		customEnumMappings,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)

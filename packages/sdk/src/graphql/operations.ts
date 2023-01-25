@@ -893,7 +893,7 @@ const typeSchema = (
 					}
 					switch (namedType.astNode.kind) {
 						case 'ScalarTypeDefinition':
-							const match = customEnumMappings.find((item) => item.normalisedName === namedType.name);
+							const match = customEnumMappings.find((item) => item.typeName === namedType.name);
 							if (!match) {
 								return {
 									type: nonNull ? 'string' : ['string', 'null'],

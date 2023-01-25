@@ -1,5 +1,4 @@
 import { introspect } from './index';
-import fetch from 'node-fetch';
 import nock from 'nock';
 import axios from 'axios';
 import { promises as fs } from 'fs';

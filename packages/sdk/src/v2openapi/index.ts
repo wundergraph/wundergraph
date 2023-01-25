@@ -120,6 +120,7 @@ export class RESTApiBuilder {
 	private fields: FieldConfiguration[] = [];
 	private baseUrlArgs: string[] = [];
 	private enumMappings: EnumMapping[] = [];
+	private normalisedNames: Map<string, string> = new Map();
 	private uniqueGraphQLNames: Set<string> = new Set();
 
 	public build = (): RESTApi => {
@@ -1300,28 +1301,34 @@ export class RESTApiBuilder {
 		}
 	};
 
-	public getUniqueGraphQLName = (normalisedName: string): string => {
+	public getUniqueGraphQLName = (nameToNormalise: string, normalisedName: string): string => {
 		if (!this.uniqueGraphQLNames.has(normalisedName)) {
+			this.normalisedNames.set(nameToNormalise, normalisedName);
 			this.uniqueGraphQLNames.add(normalisedName);
 			return normalisedName;
 		}
 		for (let i = 1; i < 1001; i++) {
 			const newNormalisedName = `${normalisedName}_${i}`;
 			if (!this.uniqueGraphQLNames.has(newNormalisedName)) {
+				this.normalisedNames.set(nameToNormalise, newNormalisedName);
 				this.uniqueGraphQLNames.add(newNormalisedName);
 				return newNormalisedName;
 			}
 		}
 		// more than 1000 retries seems unreasonable
-		throw new Error(`unable to produce a unique GraphQL schema name for ${normalisedName} after 1000 retries`);
+		throw new Error(`unable to produce a unique GraphQL schema name for ${nameToNormalise} after 1000 retries`);
 	};
 
 	public getUniqueNormalisedGraphQLName = (nameToNormalise: string): string => {
-		let normalisedName = nameToNormalise.replace(/[^a-zA-Z0-9_]/g, '_');
+		let normalisedName = this.normalisedNames.get(nameToNormalise);
+		if (normalisedName) {
+			return normalisedName;
+		}
+		normalisedName = nameToNormalise.replace(/[^a-zA-Z0-9_]/g, '_');
 		if (!normalisedName.match(/^[a-zA-Z_].*$/)) {
 			normalisedName = `_${normalisedName}`;
 		}
-		return this.getUniqueGraphQLName(normalisedName);
+		return this.getUniqueGraphQLName(nameToNormalise, normalisedName);
 	};
 }
 
