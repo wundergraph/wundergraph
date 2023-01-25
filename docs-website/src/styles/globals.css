@@ -9,7 +9,7 @@
 	}
 
 	.scrollbar-custom {
-		@apply transition-colors scrollbar-thin scrollbar-thumb-gray-400 scrollbar-thumb-rounded-md hover:scrollbar-thumb-gray-500 dark:scrollbar-thumb-gray-800 dark:hover:scrollbar-thumb-gray-700;
+		@apply transition-colors scrollbar-thin scrollbar-thumb-gray-400 scrollbar-thumb-rounded-md hover:scrollbar-thumb-gray-500 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500;
 	}
 
 	body {
@@ -62,19 +62,11 @@
 	}
 
 	.value-gradient {
-		background: radial-gradient(
-			47.29% 50% at 50% 50%,
-			rgba(2, 132, 199, 0.05) 0%,
-			rgba(255, 255, 255, 0.3) 100%
-		);
+		background: radial-gradient(47.29% 50% at 50% 50%, rgba(2, 132, 199, 0.05) 0%, rgba(255, 255, 255, 0.3) 100%);
 	}
 
 	.dark .value-gradient {
-		background: radial-gradient(
-			50% 57.71% at 50% 50%,
-			rgba(2, 132, 199, 0.2) 0%,
-			rgba(11, 15, 26, 0.3) 100%
-		);
+		background: radial-gradient(50% 57.71% at 50% 50%, rgba(2, 132, 199, 0.2) 0%, rgba(11, 15, 26, 0.3) 100%);
 	}
 
 	.fade-x {
@@ -122,21 +114,12 @@
 		inset: 0px;
 		border-radius: inherit;
 		padding: 1px;
-		background-image: linear-gradient(
-			to bottom,
-			rgba(0, 0, 0, 0.15),
-			transparent
-		);
-		-webkit-mask: linear-gradient(black, black) content-box content-box,
-			linear-gradient(black, black);
+		background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.15), transparent);
+		-webkit-mask: linear-gradient(black, black) content-box content-box, linear-gradient(black, black);
 		-webkit-mask-composite: xor;
 	}
 
 	.dark .feature-mask:before {
-		background-image: linear-gradient(
-			to bottom,
-			rgba(255, 255, 255, 0.15),
-			transparent
-		);
+		background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), transparent);
 	}
 }
