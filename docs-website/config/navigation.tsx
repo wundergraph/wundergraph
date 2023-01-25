@@ -309,7 +309,20 @@ const navigation = [
 			},
 			{
 				title: 'Supported Providers',
-				links: [],
+				links: [
+					{
+						title: 'OpenID Connect',
+						href: '/docs/auth/open-id-connect',
+					},
+					{
+						title: 'Auth0',
+						href: '/docs/auth/auth0',
+					},
+					{
+						title: 'Keycloak',
+						href: '/docs/auth/keycloak',
+					},
+				],
 			},
 		],
 	},
@@ -403,7 +416,16 @@ const navigation = [
 			},
 			{
 				title: 'Supported Providers',
-				links: [],
+				links: [
+					{
+						title: 'AWS S3',
+						href: '/docs/storage/aws-s3',
+					},
+					{
+						title: 'Minio',
+						href: '/docs/storage/minio',
+					},
+				],
 			},
 		],
 	},

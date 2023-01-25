@@ -176,7 +176,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						<Comments />
 					</article>
 					<dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
-						{previousPage && (
+						{previousPage?.href && (
 							<div className="max-w-[50%]">
 								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Previous</dt>
 								<dd className="mt-1">
@@ -189,7 +189,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 								</dd>
 							</div>
 						)}
-						{nextPage && (
+						{nextPage?.href && (
 							<div className="ml-auto max-w-[50%] text-right">
 								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Next</dt>
 								<dd className="mt-1">
