@@ -32,9 +32,9 @@ export const configuration = (
 		Types: [],
 	};
 	if (serviceSDL !== undefined) {
-		visitSchema(serviceSDL, config, customJsonScalars);
+		visitSchema(serviceSDL, config, customJsonScalars, true);
 	} else {
-		visitSchema(schema, config, customJsonScalars);
+		visitSchema(schema, config, customJsonScalars, false);
 	}
 	return config;
 };
@@ -51,7 +51,12 @@ interface JsonTypeField {
 	fieldName: string;
 }
 
-const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration, customJsonScalars: string[]) => {
+const visitSchema = (
+	schema: DocumentNode,
+	config: GraphQLConfiguration,
+	customJsonScalars: string[],
+	isFederation: boolean
+) => {
 	let typeName: undefined | string;
 	let fieldName: undefined | string;
 	let isExtensionType = false;
@@ -64,7 +69,10 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration, customJ
 	const jsonScalars = [DefaultJsonType];
 	jsonScalars.push(...customJsonScalars);
 
-	const graphQLSchema = buildASTSchema(schema, { assumeValidSDL: true });
+	const RootNodeNames = rootNodeNames(schema, isFederation);
+	const isNodeRoot = (typeName: string) => {
+		return RootNodeNames.includes(typeName);
+	};
 
 	visit(schema, {
 		ObjectTypeDefinition: {
@@ -165,7 +173,7 @@ const visitSchema = (schema: DocumentNode, config: GraphQLConfiguration, customJ
 				if (typeName === undefined || fieldName === undefined) {
 					return;
 				}
-				const isRoot = isRootType(typeName, graphQLSchema);
+				const isRoot = isNodeRoot(typeName);
 				if (isRoot) {
 					addTypeField(config.RootNodes, typeName, fieldName);
 				}
@@ -217,7 +225,45 @@ const parseSelectionSet = (selectionSet: string): SelectionSetNode => {
 	return query.selectionSet;
 };
 
-export const isRootType = (typeName: string, schema: GraphQLSchema) => {
+const rootNodeNames = (schema: DocumentNode, isFederation: boolean): string[] => {
+	const rootTypes = new Set<string>();
+	visit(schema, {
+		SchemaDefinition: {
+			enter: (node) => {
+				node.operationTypes.forEach((operationType) => {
+					rootTypes.add(operationType.type.name.value);
+				});
+			},
+		},
+		ObjectTypeDefinition: {
+			enter: (node) => {
+				switch (node.name.value) {
+					case 'Query':
+					case 'Mutation':
+					case 'Subscription':
+						rootTypes.add(node.name.value);
+				}
+			},
+		},
+		ObjectTypeExtension: {
+			enter: (node) => {
+				if (!isFederation) {
+					return;
+				}
+				switch (node.name.value) {
+					case 'Query':
+					case 'Mutation':
+					case 'Subscription':
+						rootTypes.add(node.name.value);
+				}
+			},
+		},
+	});
+
+	return Array.from(rootTypes.values());
+};
+
+export const isRootType = (typeName: string, schema: GraphQLSchema): boolean => {
 	const queryType = schema.getQueryType();
 	if (queryType && queryType.astNode && queryType.astNode.name.value === typeName) {
 		return true;
@@ -237,7 +283,7 @@ export const isRootType = (typeName: string, schema: GraphQLSchema) => {
 		typeDefinition.astNode === undefined ||
 		typeDefinition.astNode === null
 	) {
-		return;
+		return false;
 	}
 	return false;
 };

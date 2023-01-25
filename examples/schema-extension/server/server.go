@@ -12,5 +12,5 @@ import (
 
 func main() {
 	http.Handle("/", handler.NewDefaultServer(gen.NewExecutableSchema(gen.Config{Resolvers: &graph.Resolver{}})))
-	log.Fatal(http.ListenAndServe(":8084", nil))
+	log.Fatal(http.ListenAndServe(":8081", nil))
 }
