@@ -1225,25 +1225,25 @@ const navigation = [
 			},
 		],
 	},
-	{
-		title: 'WunderHub Reference',
-		href: '/docs/wunderhub-reference',
-		icon: <CloudArrowUpIcon />,
-		links: [
-			{
-				title: 'Overview',
-				href: '/docs/wunderhub-reference',
-			},
-			{
-				title: 'Publish an API to WunderHub',
-				href: '/docs/wunderhub-reference/publish-api-to-wunderhub',
-			},
-			{
-				title: 'Integrate an API from WunderHub',
-				href: '/docs/wunderhub-reference/integrate-api-from-wunderhub',
-			},
-		],
-	},
+	// {
+	// 	title: 'WunderHub Reference',
+	// 	href: '/docs/wunderhub-reference',
+	// 	icon: <CloudArrowUpIcon />,
+	// 	links: [
+	// 		{
+	// 			title: 'Overview',
+	// 			href: '/docs/wunderhub-reference',
+	// 		},
+	// 		{
+	// 			title: 'Publish an API to WunderHub',
+	// 			href: '/docs/wunderhub-reference/publish-api-to-wunderhub',
+	// 		},
+	// 		{
+	// 			title: 'Integrate an API from WunderHub',
+	// 			href: '/docs/wunderhub-reference/integrate-api-from-wunderhub',
+	// 		},
+	// 	],
+	// },
 	{ type: 'divider' },
 	{
 		title: 'About WunderGraph',
