@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -48,6 +47,14 @@ func WithTimeout(timeout time.Duration) ClientOption {
 	}
 }
 
+func WithAuthToken(token string) ClientOption {
+	return func(c *client) {
+		if token != "" {
+			c.authToken = token
+		}
+	}
+}
+
 type client struct {
 	address    string
 	httpClient *http.Client
@@ -65,8 +72,6 @@ func NewClient(address string, clientInfo *MetricClientInfo, opts ...ClientOptio
 		address:    address,
 		clientInfo: *clientInfo,
 	}
-
-	c.authToken = os.Getenv("WG_TELEMETRY_AUTH_TOKEN")
 
 	if clientInfo.CpuCount == 0 {
 		c.clientInfo.CpuCount = runtime.NumCPU()

@@ -151,6 +151,7 @@ var rootCmd = &cobra.Command{
 				telemetry.WithTimeout(3*time.Second),
 				telemetry.WithLogger(log),
 				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+				telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
 			)
 
 			// Send telemetry in a goroutine to not block the command
