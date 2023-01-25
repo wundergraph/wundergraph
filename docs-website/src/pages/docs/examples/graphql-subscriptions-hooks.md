@@ -1,6 +1,6 @@
 ---
 title: GraphQL subscriptions hooks Example
-pageTitle: WunderGraph - Examples - GraphQl subscriptions hooks
+pageTitle: WunderGraph - Examples - GraphQL subscriptions hooks
 description:
 ---
 
