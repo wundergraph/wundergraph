@@ -1,4 +1,4 @@
-const withMarkdoc = require('@markdoc/next.js')
+const withMarkdoc = require('@markdoc/next.js');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -32,12 +32,15 @@ const nextConfig = {
 				destination: '/getting-started/:path*',
 				permanent: true,
 			},
-		]
+			{
+				source: '/docs/deployment/flyio',
+				destination: '/docs/self-hosted/flyio',
+				permanent: true,
+			},
+		];
 	},
-}
+};
 
-const production = process.env.NODE_ENV === 'production'
+const production = process.env.NODE_ENV === 'production';
 
-module.exports = withMarkdoc({ mode: production ? 'static' : 'server' })(
-	nextConfig
-)
+module.exports = withMarkdoc({ mode: production ? 'static' : 'server' })(nextConfig);

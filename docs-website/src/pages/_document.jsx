@@ -73,7 +73,6 @@ export default function Document() {
 				<meta name="msapplication-TileColor" content="#ffffff" />
 				<meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png" />
 				<meta name="theme-color" content="#ffffff" />
-				<link rel="preload" href="/fonts/virgil.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
 			</Head>
 			<body className="bg-white dark:bg-gray-950">
 				<Main />

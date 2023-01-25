@@ -19,7 +19,7 @@ import {
 	ArrowUpCircleIcon,
 	LightBulbIcon,
 	ListBulletIcon,
-} from '@heroicons/react/24/solid'
+} from '@heroicons/react/24/solid';
 
 const navigation = [
 	{
@@ -30,6 +30,7 @@ const navigation = [
 	{
 		title: 'Getting started',
 		href: '/getting-started',
+		paths: ['/docs/tutorials', '/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
@@ -41,11 +42,15 @@ const navigation = [
 				links: [
 					{
 						title: 'Next.js',
-						href: '/docs/getting-started/nextjs',
+						href: '/getting-started/nextjs',
 					},
 					{
 						title: 'Vite',
-						href: '/docs/getting-started/vite',
+						href: '/getting-started/vite',
+					},
+					{
+						title: 'Remix',
+						href: '/getting-started/remix',
 					},
 				],
 			},
@@ -178,8 +183,7 @@ const navigation = [
 				title: 'Writing operations',
 				links: [
 					{
-						title:
-							'TypeSafe API Integrations with TypeScript Operations & GraphQL',
+						title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
 						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
 					},
 					{
@@ -208,6 +212,10 @@ const navigation = [
 						href: '/docs/guides/enable-autocompletion-in-your-ide',
 					},
 				],
+			},
+			{
+				title: 'Debugging',
+				links: [],
 			},
 			{
 				title: 'Testing',
@@ -243,14 +251,6 @@ const navigation = [
 					},
 				],
 			},
-			{
-				title: 'Testing',
-				links: [],
-			},
-			{
-				title: 'Debugging',
-				links: [],
-			},
 		],
 	},
 	{ type: 'divider' },
@@ -266,10 +266,6 @@ const navigation = [
 			{
 				title: 'Supported APIs',
 				links: [
-					{
-						title: 'Overview',
-						href: '/docs/supported-data-sources',
-					},
 					{
 						title: 'GraphQL',
 						href: '/docs/supported-data-sources/graphql',
@@ -324,7 +320,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/database/overview',
+				href: '/docs/database/overview',
 			},
 			{
 				title: 'Supported Databases',
@@ -380,7 +376,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/realtime/overview',
+				href: '/docs/realtime',
 			},
 			{
 				title: 'Live queries',
@@ -403,7 +399,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/storage/overview',
+				href: '/docs/storage',
 			},
 			{
 				title: 'Supported Providers',
@@ -415,6 +411,13 @@ const navigation = [
 	{
 		title: 'Platform',
 		href: '/docs/platform',
+		paths: [
+			'/docs/architecture',
+			'/docs/components-of-wundergraph',
+			'/docs/supported-data-sources',
+			'/docs/supported-frontend-frameworks',
+			'/docs/supported-backend-languages-frameworks',
+		],
 		icon: <CubeIcon />,
 		links: [
 			{
@@ -666,8 +669,7 @@ const navigation = [
 				href: '/docs/use-cases/generate-sdks-for-all-your-apis',
 			},
 			{
-				title:
-					'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
+				title: 'Centralized Governance, Monitoring, Access Controls and Logging across your APIs',
 				href: '/docs/use-cases/centralized-governance-monitoring-access-controls-and-logging-across-your-apis',
 			},
 			{
@@ -805,8 +807,16 @@ const navigation = [
 		links: [
 			{ title: 'Overview', href: '/docs/self-hosted' },
 			{
+				title: 'AWS',
+				href: '/docs/self-hosted/aws',
+			},
+			{
 				title: 'Fly.io',
-				href: '/docs/deployment/flyio',
+				href: '/docs/self-hosted/flyio',
+			},
+			{
+				title: 'Docker',
+				href: '/docs/self-hosted/docker',
 			},
 		],
 	},
@@ -841,6 +851,12 @@ const navigation = [
 	{
 		title: 'WunderGraph reference',
 		href: '/docs/wundergraph-reference',
+		paths: [
+			'/docs/wundergraph-config-ts-reference',
+			'/docs/wundergraph-operations-ts-reference',
+			'/docs/wundergraph-server-ts-reference',
+			'/docs/wundergraph-manifest-json-reference',
+		],
 		icon: <WrenchIcon />,
 		links: [
 			{
@@ -1059,8 +1075,20 @@ const navigation = [
 					},
 				],
 			},
+		],
+	},
+	{
+		title: 'Operations Reference',
+		href: '/docs/operations-reference',
+		icon: <CogIcon />,
+		paths: ['/docs/typescript-operations/reference', '/docs/directives-reference'],
+		links: [
 			{
-				title: 'TypeScript Operations Reference',
+				title: 'Overview',
+				href: '/docs/operations-reference',
+			},
+			{
+				title: 'TypeScript Operations',
 				links: [
 					{
 						title: 'Overview',
@@ -1069,7 +1097,7 @@ const navigation = [
 				],
 			},
 			{
-				title: 'Directives Reference',
+				title: 'Directives',
 				links: [
 					{
 						title: 'Overview',
@@ -1127,7 +1155,21 @@ const navigation = [
 		title: 'CLI Reference',
 		href: '/docs/cli-reference',
 		icon: <CommandLineIcon />,
-		items: [
+		paths: ['/docs/wunderctl-reference'],
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/cli-reference',
+			},
+			{
+				title: 'create-wundergraph-app',
+				links: [
+					{
+						title: 'create-wundergraph-app',
+						href: '/docs/cli-reference/create-wundergraph-app',
+					},
+				],
+			},
 			{
 				title: 'wunderctl Reference',
 				links: [
@@ -1181,9 +1223,6 @@ const navigation = [
 					},
 				],
 			},
-			{
-				title: 'create-wundergraph-app',
-			},
 		],
 	},
 	{
@@ -1227,18 +1266,15 @@ const navigation = [
 						href: '/docs/frequently-asked-questions/does-wundergraph-support-postman-collections',
 					},
 					{
-						title:
-							'How is WunderGraph faster and more secure than other GraphQL solutions?',
+						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
 						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',
 					},
 					{
-						title:
-							'How is the developer experience different from legacy GraphQL?',
+						title: 'How is the developer experience different from legacy GraphQL?',
 						href: '/docs/frequently-asked-questions/how-is-the-developer-experience-different-from-legacy-graphql',
 					},
 					{
-						title:
-							'How is server-side only GraphQL different from client-side GraphQL?',
+						title: 'How is server-side only GraphQL different from client-side GraphQL?',
 						href: '/docs/frequently-asked-questions/how-is-server-side-only-graphql-different-from-client-side-graphql',
 					},
 				],
@@ -1270,6 +1306,6 @@ const navigation = [
 			},
 		],
 	},
-]
+];
 
-export default navigation
+export default navigation;

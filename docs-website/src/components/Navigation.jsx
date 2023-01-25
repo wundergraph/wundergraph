@@ -1,10 +1,10 @@
-import * as React from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import clsx from 'clsx'
-import { scrollIntoViewIfNeeded } from '../utils/scroll-into-view'
+import * as React from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import clsx from 'clsx';
+import { scrollIntoViewIfNeeded } from '../utils/scroll-into-view';
 
-import { ArrowLeftIcon } from '@heroicons/react/24/solid'
+import { ArrowLeftIcon } from '@heroicons/react/24/solid';
 
 function SubNavigation({ navigation, className }) {
 	return (
@@ -21,22 +21,17 @@ function SubNavigation({ navigation, className }) {
 				</Link>
 			</div>
 
-			<h2 className="relative mt-8 mb-6 flex flex-row items-center font-display text-lg font-medium text-gray-900 dark:text-white">
-				<span className="absolute -left-6 mr-2 inline-block h-5 w-5">
-					{navigation?.icon}
-				</span>{' '}
-				{navigation?.title}
+			<h2 className="relative mt-8 mb-2 flex flex-row items-center font-display text-lg font-medium text-gray-900 dark:text-white">
+				<span className="absolute -left-6 mr-2 inline-block h-5 w-5">{navigation?.icon}</span> {navigation?.title}
 			</h2>
 			<ul role="list">
-				{navigation?.links.map((section) => (
+				{navigation?.links?.map((section) => (
 					<li key={section.title} className="relative">
 						{section.href ? (
 							<PrimaryNavLink {...section} />
 						) : (
 							<>
-								<h3 className="mt-8 font-display font-medium text-gray-900 dark:text-white">
-									{section.title}
-								</h3>
+								<h3 className="mt-8 font-display font-medium text-gray-900 dark:text-white">{section.title}</h3>
 								<ul
 									role="list"
 									className="mt-2 border-l-2 border-gray-100 dark:border-gray-800 lg:mt-4 lg:border-gray-200"
@@ -53,18 +48,24 @@ function SubNavigation({ navigation, className }) {
 				))}
 			</ul>
 		</>
-	)
+	);
 }
 
 export function Navigation({ navigation, className }) {
-	const router = useRouter()
-	const path = router.asPath
-	const isRoot = path === '/'
+	const router = useRouter();
+	const path = router.asPath;
+	const isRoot = path === '/';
 
 	const subNavigation = React.useMemo(
-		() => !isRoot && navigation.find(({ href }) => href === path),
+		() =>
+			!isRoot &&
+			navigation.find(({ href, paths, links }) => {
+				if (!links) return false;
+
+				return [href].concat(paths || []).some((href) => path.match(href));
+			}),
 		[navigation, path, isRoot]
-	)
+	);
 
 	return (
 		<nav className={clsx('flex text-base lg:text-sm', className)}>
@@ -94,15 +95,19 @@ export function Navigation({ navigation, className }) {
 				{subNavigation && <SubNavigation navigation={subNavigation} />}
 			</div>
 		</nav>
-	)
+	);
 }
 
 const PrimaryNavLink = ({ href, title, icon, className }) => {
-	let router = useRouter()
-
+	let router = useRouter();
+	const ref = React.useRef(null);
 	return (
 		<Link
+			ref={ref}
 			href={href || ''}
+			onClick={() => {
+				ref.current.parentNode?.parentNode?.parentNode?.parentNode?.scrollTo({ top: 0 });
+			}}
 			className={clsx(
 				'flex w-full items-center py-2',
 				href === router.pathname
@@ -114,21 +119,17 @@ const PrimaryNavLink = ({ href, title, icon, className }) => {
 			{icon && <span className="mr-2 inline-block h-4 w-4">{icon}</span>}
 			{title}
 		</Link>
-	)
-}
+	);
+};
 
 const NavLink = ({ href, title, icon, className }) => {
-	let router = useRouter()
+	let router = useRouter();
 
-	const ref = React.useRef(null)
-	const routeRef = React.useRef(null)
+	const ref = React.useRef(null);
+	const routeRef = React.useRef(null);
 
 	React.useEffect(() => {
-		if (
-			href === router.pathname &&
-			ref.current &&
-			routeRef.current !== router.pathname
-		) {
+		if (href === router.pathname && ref.current && routeRef.current !== router.pathname) {
 			scrollIntoViewIfNeeded(
 				ref.current.parentNode.parentNode,
 				routeRef.current
@@ -138,10 +139,10 @@ const NavLink = ({ href, title, icon, className }) => {
 					: {
 							block: 'center',
 					  }
-			)
+			);
 		}
-		routeRef.current = router.pathname
-	}, [router.pathname, href])
+		routeRef.current = router.pathname;
+	}, [router.pathname, href]);
 
 	return (
 		<Link
@@ -158,5 +159,5 @@ const NavLink = ({ href, title, icon, className }) => {
 			{icon && <span className="mr-2 inline-block h-4 w-4">{icon}</span>}
 			{title}
 		</Link>
-	)
-}
+	);
+};
