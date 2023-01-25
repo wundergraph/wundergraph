@@ -14,6 +14,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
@@ -31,9 +32,7 @@ var generateCmd = &cobra.Command{
  server start'. All files are stored to .wundergraph/generated. The local
  introspection cache has precedence. You can overwrite this behavior by passing
  --no-cache to the command`,
-	Annotations: map[string]string{
-		"telemetry": "true",
-	},
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
