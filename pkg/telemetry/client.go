@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -53,6 +54,7 @@ type client struct {
 	debug      bool
 	clientInfo MetricClientInfo
 	log        *zap.Logger
+	authToken  string
 }
 
 func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption) Client {
@@ -60,6 +62,8 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 		address:    address,
 		clientInfo: clientInfo,
 	}
+
+	c.authToken = os.Getenv("WG_TELEMETRY_AUTH_TOKEN")
 
 	if clientInfo.CpuCount == 0 {
 		c.clientInfo.CpuCount = runtime.NumCPU()
@@ -137,6 +141,9 @@ func (c *client) Send(metrics []Metric) error {
 
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Add("Content-Type", "application/json")
+	if c.authToken != "" {
+		req.Header.Add("X-WG-TELEMETRY-AUTHORIZATION", fmt.Sprintf("Bearer %s", c.authToken))
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
