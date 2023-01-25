@@ -1,18 +1,13 @@
-import * as React from 'react'
-import { useRouter } from 'next/router'
+import * as React from 'react';
+import { useRouter } from 'next/router';
 
 export function Heading({ id = '', level = 1, children, className }) {
-	const router = useRouter()
-	const Component = `h${level}`
+	const router = useRouter();
+	const Component = `h${level}`;
 
 	const link = (
 		// @ts-ignore
-		<Component
-			className={['heading', 'scroll-mt-2.5', className]
-				.filter(Boolean)
-				.join(' ')}
-			id={id}
-		>
+		<Component className={['heading', 'scroll-mt-2.5', className].filter(Boolean).join(' ')} id={id}>
 			{children}
 			<style>
 				{`
@@ -25,12 +20,12 @@ export function Heading({ id = '', level = 1, children, className }) {
 				`}
 			</style>
 		</Component>
-	)
+	);
 
 	return id && level !== 1 ? (
 		<a href={`#${id}`}>
 			{link}
-			<style>
+			{/* <style>
 				{`
 					a {
 						text-decoration: none;
@@ -48,9 +43,9 @@ export function Heading({ id = '', level = 1, children, className }) {
 						opacity: 1;
 					}
 				`}
-			</style>
+			</style> */}
 		</a>
 	) : (
 		link
-	)
+	);
 }

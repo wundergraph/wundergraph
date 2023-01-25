@@ -410,7 +410,7 @@ const navigation = [
 	{ type: 'divider' },
 	{
 		title: 'Platform',
-		href: '/docs/platform',
+		href: '/docs/architecture',
 		paths: [
 			'/docs/architecture',
 			'/docs/components-of-wundergraph',
@@ -420,10 +420,6 @@ const navigation = [
 		],
 		icon: <CubeIcon />,
 		links: [
-			{
-				title: 'Overview',
-				href: '/docs/platform',
-			},
 			{
 				title: 'Architecture',
 				links: [
