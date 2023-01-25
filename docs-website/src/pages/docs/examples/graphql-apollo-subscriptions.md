@@ -1,6 +1,6 @@
 ---
-title: GraphQl Apollo WS subscriptions Example
-pageTitle: WunderGraph - Examples - GraphQl Apollo WS subscriptions
+title: GraphQL Apollo WS subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQL Apollo WS subscriptions
 description:
 ---
 
