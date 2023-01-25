@@ -1,34 +1,32 @@
-import { useCallback, useEffect, useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import clsx from 'clsx'
-import { Hero } from '@/components/Hero'
-import { Logo, Logomark } from '@/components/Logo'
-import { MobileNavigation } from '@/components/MobileNavigation'
-import { Navigation } from '@/components/Navigation'
-import { Prose } from '@/components/Prose'
-import { Search } from '@/components/Search'
-import { ThemeSelector } from '@/components/ThemeSelector'
-import navigation from '../../config/navigation'
-import { GitHubIcon } from './icons/Github'
-import { DocsFooter } from './DocsFooter'
-import Comments from './Comments'
-import { AnnouncementBanner } from '@/components/AnnouncementBanner'
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import clsx from 'clsx';
+import { Logo, Logomark } from '@/components/Logo';
+import { MobileNavigation } from '@/components/MobileNavigation';
+import { Navigation } from '@/components/Navigation';
+import { Prose } from '@/components/Prose';
+import { Search } from '@/components/Search';
+import { ThemeSelector } from '@/components/ThemeSelector';
+import navigation from '../../config/navigation';
+import { GitHubIcon } from './icons/Github';
+import { DocsFooter } from './DocsFooter';
+import Comments from './Comments';
 
 function Header({ navigation }) {
-	let [isScrolled, setIsScrolled] = useState(false)
+	let [isScrolled, setIsScrolled] = useState(false);
 
 	useEffect(() => {
 		function onScroll() {
-			setIsScrolled(window.scrollY > 0)
+			setIsScrolled(window.scrollY > 0);
 		}
 
-		onScroll()
-		window.addEventListener('scroll', onScroll, { passive: true })
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
 		return () => {
-			window.removeEventListener('scroll', onScroll, { passive: true })
-		}
-	}, [])
+			window.removeEventListener('scroll', onScroll, { passive: true });
+		};
+	}, []);
 
 	return (
 		<header
@@ -39,16 +37,12 @@ function Header({ navigation }) {
 					: 'dark:bg-transparent'
 			)}
 		>
-			{/* <AnnouncementBanner /> */}
 			<div className="flex flex-wrap items-center justify-between py-5 px-4 sm:px-6 lg:px-8">
 				<div className="mr-6 flex lg:hidden">
 					<MobileNavigation navigation={navigation} />
 				</div>
 				<div className="relative flex flex-grow basis-0 items-center">
-					<Link
-						href="https://wundergraph.com/"
-						aria-label="WunderGraph landing page"
-					>
+					<Link href="https://wundergraph.com/" aria-label="WunderGraph landing page">
 						<div className="flex">
 							<Logomark className="h-10 w-10 text-black dark:text-white lg:hidden" />
 							<Logo className="hidden h-8 text-black dark:text-white lg:flex" />
@@ -60,87 +54,81 @@ function Header({ navigation }) {
 				</div>
 				<div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
 					<ThemeSelector className="relative z-10" />
-					<Link
-						href="https://github.com/wundergraph/wundergraph"
-						className="group"
-						aria-label="GitHub"
-					>
+					<Link href="https://github.com/wundergraph/wundergraph" className="group" aria-label="GitHub">
 						<GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
 					</Link>
 				</div>
 			</div>
 		</header>
-	)
+	);
 }
 
 function useTableOfContents(tableOfContents) {
-	let [currentSection, setCurrentSection] = useState(tableOfContents[0]?.id)
+	let [currentSection, setCurrentSection] = useState(tableOfContents[0]?.id);
 
 	let getHeadings = useCallback((tableOfContents) => {
 		return tableOfContents
 			.flatMap((node) => [node.id, ...node.children.map((child) => child.id)])
 			.map((id) => {
-				let el = document.getElementById(id)
-				if (!el) return
+				let el = document.getElementById(id);
+				if (!el) return;
 
-				let style = window.getComputedStyle(el)
-				let scrollMt = parseFloat(style.scrollMarginTop)
+				let style = window.getComputedStyle(el);
+				let scrollMt = parseFloat(style.scrollMarginTop);
 
-				let top = window.scrollY + el.getBoundingClientRect().top - scrollMt
-				return { id, top }
-			})
-	}, [])
+				let top = window.scrollY + el.getBoundingClientRect().top - scrollMt;
+				return { id, top };
+			});
+	}, []);
 
 	useEffect(() => {
-		if (tableOfContents.length === 0) return
-		let headings = getHeadings(tableOfContents)
+		if (tableOfContents.length === 0) return;
+		let headings = getHeadings(tableOfContents);
 
 		function onScroll() {
-			let top = window.scrollY
-			let current = headings[0].id
+			let top = window.scrollY;
+			let current = headings[0].id;
 			for (let heading of headings) {
 				if (top >= heading.top) {
-					current = heading.id
+					current = heading.id;
 				} else {
-					break
+					break;
 				}
 			}
-			setCurrentSection(current)
+			setCurrentSection(current);
 		}
 
-		window.addEventListener('scroll', onScroll, { passive: true })
-		onScroll()
+		window.addEventListener('scroll', onScroll, { passive: true });
+		onScroll();
 		return () => {
-			window.removeEventListener('scroll', onScroll, { passive: true })
-		}
-	}, [getHeadings, tableOfContents])
+			window.removeEventListener('scroll', onScroll, { passive: true });
+		};
+	}, [getHeadings, tableOfContents]);
 
-	return currentSection
+	return currentSection;
 }
 
 export function Layout({ children, title, tableOfContents, frontmatter }) {
-	let router = useRouter()
-	let allLinks = navigation.flatMap((section) => section.links)
-	let linkIndex = allLinks.findIndex((link) => link?.href === router.pathname)
-	let previousPage = allLinks[linkIndex - 1]
-	let nextPage = allLinks[linkIndex + 1]
-	let section = navigation.find((section) =>
-		section.links?.find((link) => link?.href === router.pathname)
-	)
-	let currentSection = useTableOfContents(tableOfContents)
+	let router = useRouter();
+	let allLinks = navigation.flatMap((section) => section.links);
+	let linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
+	let previousPage = allLinks[linkIndex - 1];
+	let nextPage = allLinks[linkIndex + 1];
+	let section = navigation.find((section) => section.links?.find((link) => link?.href === router.pathname));
+	let currentSection = useTableOfContents(tableOfContents);
 
-	const hideTableOfContents = frontmatter?.hideTableOfContents
-	const fullWidthContent = frontmatter?.fullWidthContent
-	const isIndexFile = frontmatter?.isIndexFile === true
+	const hideTableOfContents = frontmatter?.hideTableOfContents;
+	const fullWidthContent = frontmatter?.fullWidthContent;
+	const isIndexFile = frontmatter?.isIndexFile === true;
 
 	function isActive(section) {
 		if (section.id === currentSection) {
-			return true
+			return true;
 		}
 		if (!section.children) {
-			return false
+			return false;
 		}
-		return section.children.findIndex(isActive) > -1
+		return section.children.findIndex(isActive) > -1;
 	}
 
 	return (
@@ -156,19 +144,13 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						<Navigation navigation={navigation} className="w-64 xl:w-72" />
 					</div>
 				</div>
-				<div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pr-0 lg:pl-8 xl:px-16">
+				<div className="min-w-0 max-w-4xl flex-auto px-4 py-16 lg:max-w-none lg:pr-0 lg:pl-8 xl:px-16">
 					<article>
-						{(title || section) && (
+						{frontmatter && (title || section) && (
 							<header className="mb-9 space-y-1">
-								{section && (
-									<p className="font-display text-sm font-medium text-sky-600">
-										{section.title}
-									</p>
-								)}
+								{section && <p className="font-display text-sm font-medium text-sky-600">{section.title}</p>}
 								{title && (
-									<h1 className="font-display text-3xl tracking-tight text-slate-900 dark:text-white">
-										{title}
-									</h1>
+									<h1 className="font-display text-3xl tracking-tight text-slate-900 dark:text-white">{title}</h1>
 								)}
 							</header>
 						)}
@@ -178,9 +160,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 					<dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
 						{previousPage && (
 							<div className="max-w-[50%]">
-								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">
-									Previous
-								</dt>
+								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Previous</dt>
 								<dd className="mt-1">
 									{/* <Link
 										href={previousPage.href}
@@ -193,9 +173,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						)}
 						{nextPage && (
 							<div className="ml-auto max-w-[50%] text-right">
-								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">
-									Next
-								</dt>
+								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Next</dt>
 								<dd className="mt-1">
 									{/* <Link
 										href={nextPage.href}
@@ -224,10 +202,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 					<nav aria-labelledby="on-this-page-title" className="w-56">
 						{tableOfContents.length > 0 && (
 							<>
-								<h2
-									id="on-this-page-title"
-									className="font-display text-sm font-medium text-slate-900 dark:text-white"
-								>
+								<h2 id="on-this-page-title" className="font-display text-sm font-medium text-slate-900 dark:text-white">
 									On this page
 								</h2>
 								<ol role="list" className="mt-4 space-y-3 text-sm">
@@ -246,10 +221,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 												</Link>
 											</h3>
 											{section.children.length > 0 && (
-												<ol
-													role="list"
-													className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
-												>
+												<ol role="list" className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400">
 													{section.children.map((subSection) => (
 														<li key={subSection.id}>
 															<Link
@@ -275,5 +247,5 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 				</div>
 			</div>
 		</>
-	)
+	);
 }

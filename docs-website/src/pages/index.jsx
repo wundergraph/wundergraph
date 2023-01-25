@@ -1,21 +1,15 @@
-import Link from 'next/link'
-import { Heading } from '../components/Heading'
-import { Paragraph } from '../components/Paragraph'
-import { CodeBlock } from '../components/CodeBlock'
-import { QuickLinks, QuickLink } from '../components/QuickLinks'
-import {
-	ShareIcon,
-	LockClosedIcon,
-	CircleStackIcon,
-	CursorArrowRaysIcon,
-	ServerIcon,
-} from '@heroicons/react/24/solid'
-import { NextLogo } from '../components/logos/next'
-import { ViteLogo } from '../components/logos/vite'
-import { RemixLogo } from '../components/logos/remix'
+import Link from 'next/link';
+import { Heading } from '../components/Heading';
+import { Paragraph } from '../components/Paragraph';
+import { CodeBlock } from '../components/CodeBlock';
+import { QuickLinks, QuickLink } from '../components/QuickLinks';
+import { ShareIcon, LockClosedIcon, CircleStackIcon, CursorArrowRaysIcon, ServerIcon } from '@heroicons/react/24/solid';
+import { NextLogo } from '../components/logos/next';
+import { ViteLogo } from '../components/logos/vite';
+import { RemixLogo } from '../components/logos/remix';
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
-cd my-project && npm i && npm start`
+cd my-project && npm i && npm start`;
 
 const Links = ({ links }) => {
 	return (
@@ -23,28 +17,24 @@ const Links = ({ links }) => {
 			<ul className="absolute mt-4 flex space-x-4 ">
 				{links.map(({ href, label }) => (
 					<li key={href}>
-						<Link
-							href={href}
-							className="text-sm text-white transition-all hover:text-pink-500"
-						>
+						<Link href={href} className="text-sm text-white transition-all hover:text-pink-500">
 							{label}
 						</Link>
 					</li>
 				))}
 			</ul>
 		</div>
-	)
-}
+	);
+};
 
 export default function HomePage() {
 	return (
 		<div className="space-y-8">
-			<div className="flex flex-row items-end justify-end">
+			<div className="lg:flew-row stretch flex flex-col lg:items-end lg:justify-end">
 				<div className="flex-1">
 					<Heading>WunderGraph Docs</Heading>
 					<Paragraph className="max-w-lg text-xl">
-						Learn more about how to integrate APIs and build complete backends
-						with WunderGraph.
+						Learn more about how to integrate APIs and build complete backends with WunderGraph.
 					</Paragraph>
 				</div>
 				<div className="flex-1">
@@ -178,5 +168,12 @@ export default function HomePage() {
 				</QuickLinks>
 			</div>
 		</div>
-	)
+	);
 }
+
+HomePage.getInitialProps = () => {
+	return {
+		title: 'WunderGraph Docs',
+		description: 'Learn more about how to integrate APIs and build complete backends with WunderGraph.',
+	};
+};
