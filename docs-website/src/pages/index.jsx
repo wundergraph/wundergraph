@@ -13,8 +13,8 @@ cd my-project && npm i && npm start`;
 
 const Links = ({ links }) => {
 	return (
-		<div>
-			<ul className="absolute mt-4 flex space-x-4 ">
+		<div className="">
+			<ul className="absolute mt-4 flex space-x-4">
 				{links.map(({ href, label }) => (
 					<li key={href}>
 						<Link href={href} className="text-sm text-white transition-all hover:text-pink-500">
