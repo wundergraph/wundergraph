@@ -1187,7 +1187,9 @@ const applyNodeJsOperationOverrides = (
 	overrides: NodeJSOperation<any, any, any, any, any>
 ): GraphQLOperation => {
 	if (overrides.inputSchema) {
-		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+		const schema = zodToJsonSchema(overrides.inputSchema) as any;
+		operation.VariablesSchema = schema;
+		operation.InternalVariablesSchema = schema;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {
