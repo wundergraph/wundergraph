@@ -1081,7 +1081,7 @@ const navigation = [
 		title: 'Operations Reference',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
-		paths: ['/docs/typescript-operations/reference', '/docs/directives-reference'],
+		paths: ['/docs/typescript-operations-reference', '/docs/directives-reference'],
 		links: [
 			{
 				title: 'Overview',
