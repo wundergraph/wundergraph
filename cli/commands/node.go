@@ -17,6 +17,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/node"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -32,9 +33,7 @@ var nodeStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl node start
 `,
-	Annotations: map[string]string{
-		"telemetry": "true",
-	},
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		sigCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
