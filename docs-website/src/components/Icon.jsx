@@ -18,6 +18,7 @@ import {
 	LightBulbIcon,
 	ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
+import { CloudArrowUpIcon } from '@heroicons/react/24/solid';
 
 const icons = {
 	installation: FlagIcon,
@@ -36,6 +37,7 @@ const icons = {
 	operations: CogIcon,
 	warning: ExclamationTriangleIcon,
 	note: LightBulbIcon,
+	cloud: CloudArrowUpIcon,
 };
 
 export function Icon({ icon: iconProp, className, ...props }) {
