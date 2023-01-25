@@ -30,7 +30,7 @@ const Links = ({ links }) => {
 export default function HomePage() {
 	return (
 		<div className="space-y-8">
-			<div className="lg:flew-row stretch flex flex-col lg:items-end lg:justify-end">
+			<div className="stretch flex flex-col lg:flex-row lg:items-end lg:justify-end">
 				<div className="flex-1">
 					<Heading>WunderGraph Docs</Heading>
 					<Paragraph className="max-w-lg text-xl">
