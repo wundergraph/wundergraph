@@ -46,15 +46,15 @@ const navigation = [
 				links: [
 					{
 						title: 'Next.js',
-						href: '/docs/getting-started/nextjs',
+						href: '/docs/getting-started/nextjs-quickstart',
 					},
 					{
 						title: 'Vite',
-						href: '/docs/getting-started/vite',
+						href: '/docs/getting-started/vite-quickstart',
 					},
 					{
 						title: 'Remix',
-						href: '/docs/getting-started/remix',
+						href: '/docs/getting-started/remix-quickstart',
 					},
 				],
 			},

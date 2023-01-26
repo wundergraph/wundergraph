@@ -1,16 +1,18 @@
 ---
-title: Quickstart
-pageTitle: WunderGraph - Getting started quickly with WunderGraph
-description: Initialize your WunderGraph development environment and get started using WunderGraph
+title: Next.js Quickstart
+pageTitle: WunderGraph and Next.js Quickstart
+description: Getting started with WunderGraph and Next.js
 ---
 
-This quick start guide will help you to start a new WunderGraph project from scratch, or add WunderGraph to an existing project.
+This quickstart guide will show you how to use WunderGraph with Next.js and goes into a couple of details like server side rendering and TypeScript operations.
 
-## Creating a new WunderGraph project
+## Creating a new WunderGraph project with Next.js
+
+We'll use the next.js example to get started. This example is a basic Next.js application that uses WunderGraph to fetch data from the [SpaceX GraphQL API](https://spacex-api.fly.dev/graphql).
 
 ```shell
 # Init a new project
-npx create-wundergraph-app my-project --example simple
+npx create-wundergraph-app my-project --example nextjs
 
 # Move to the project directory
 cd my-project
@@ -19,40 +21,27 @@ cd my-project
 npm i
 ```
 
-## Integrating WunderGraph with an existing project
-
-You can also easily integrate WunderGraph into your existing projects.
+## Start Next.js and WunderGraph
 
 ```shell
-# In your application directory
-npx create-wundergraph-app --init
+npm start
 ```
 
-Now edit your `package.json` and add the following scripts, so we can run the WunderGraph server.
+WunderGraph will now do some code generation and start the WunderNode and the Next.js dev server.
+A new browser window will open at [http://localhost:3000](http://localhost:3000). You should see the WunderGraph & Next.js example homepage with the JSON result of the Dragons operation.
 
 ```json
 {
-  "scripts": {
-    "wundergraph": "wunderctl up",
-    "build": "wunderctl generate"
-  }
+  "data": {
+    "spacex_dragons": [
+      { "name": "Dragon 1", "active": true },
+      { "name": "Dragon 2", "active": true }
+    ]
+  },
+  "isValidating": false,
+  "isLoading": false
 }
 ```
-
-## Start the WunderGraph server
-
-```shell
-npm run wundergraph
-```
-
-WunderGraph will now do some code generation and start the server.
-Head over to [http://localhost:9991](http://localhost:9991) and you should see the WunderGraph status page.
-
-Now lets run one of the example queries, open the following URL in your browser:
-[http://localhost:9991/operations/Countries](http://localhost:9991/operations/Countries)
-
-You'll see a JSON response with a list of countries.
-Pretty cool, right? Let's take a look at how this works.
 
 ## Configure WunderGraph
 
@@ -60,12 +49,12 @@ WunderGraph lives in the `.wundergraph` directory by default. This is where you 
 
 Let's take a look at the default configuration open `.wundergraph/wundergraph.config.ts`.
 
-You can see that we have a single API configured, which is the [Countries GraphQL API](https://countries.trevorblades.com/).
+You can see that we have a single API configured, which is the [SpaceX GraphQL API](https://spacex-api.fly.dev/graphql).
 
 ```ts
-const countries = introspect.graphql({
-  apiNamespace: 'countries',
-  url: 'https://countries.trevorblades.com/',
+const spaceX = introspect.graphql({
+  apiNamespace: 'spacex',
+  url: 'https://spacex-api.fly.dev/graphql/',
 });
 ```
 
@@ -74,72 +63,125 @@ The API is introspected and added to the WunderGraph virtual graph, as you can s
 ```ts
 configureWunderGraphApplication({
   apis: [countries],
-  // configuration
+  // ...
+  codeGenerators: [
+    {
+      templates: [...templates.typescript.all],
+    },
+    {
+      templates: [new NextJsTemplate()],
+      path: '../components/generated',
+    },
+  ],
+  // ...
 });
 ```
 
-Once it's added to the virtual graph, you can write operations against it.
+What's different from the [1-minute quickstart](/docs/quickstart) here is we added a `NextJsTemplate` to the code generators. This will generate the typesafe client and React hooks that can be used in Next.js.
 
-## Write your first operation
+Now let's take a look at the operations.
+
+## Operations
 
 Operations are written in the `.wundergraph/operations` directory. They can be written in Graphql or TypeScript.
-Let's check out the Countries operation, open `.wundergraph/operations/Countries.graphql`.
+Let's check out the Dragons operation, open `.wundergraph/operations/Dragons.graphql`.
 
 ```graphql
-query Countries($filter: countries_CountryFilterInput) {
-  countries_countries(filter: $filter) {
-    code
+query Dragons {
+  spacex_dragons {
     name
-    capital
+    active
   }
 }
 ```
 
-The input type and query are prefixed with `countries_` because we're using the `countries` API namespace in the introspection config. This is to avoid naming conflicts when you add multiple APIs to your WunderGraph application.
+This simply fetches the name and active status of all the SpaceX dragons, we can run this operation in Next.js by using the generated React hooks.
 
-We'll make a few improvements to the API. First, let's remove the `countries_` prefix from the result, so we can use the operation without the `countries_` prefix.
+## Calling the operation in Next.js
+
+Open `pages/index.tsx`, there you will find the following code:
+
+```tsx
+const dragons = useQuery({
+  operationName: 'Dragons',
+});
+```
+
+The operation name is the name of the file in the operations directory, without the extension. The `useQuery` hook will return the result of the operation.
+
+```tsx
+const { data, error, isLoading, isValidating } = dragons;
+```
+
+Let's modify the Dragons operation and add a limit parameter and return extra fields.
+Open `.wundergraph/operations/Dragons.graphql` and change it to:
 
 ```graphql
-query Countries($filter: countries_CountryFilterInput) {
-  countries: countries_countries(filter: $filter) {
-    code
+query Dragons($limit: Int!) {
+  spacex_dragons(limit: $limit) {
+    id
     name
-    capital
+    active
   }
 }
 ```
 
-If you run the operation again, you'll see that the result is the same, but the countries can now be accessed without the `countries_` prefix.
+The WunderGraph server will automatically pick up on the changes and re-generate the types.
+Go back to `pages/index.tsx` and you will see that the `Dragons` operation now has a required `limit` input parameter.
 
-Now we can add some extra data to the result. Let's add the `continent` and `currency` fields to the result.
+```tsx
+const dragons = useQuery({
+  operationName: 'Dragons',
+  input: {
+    limit: 1,
+  },
+});
+```
 
-```graphql
-query Countries($filter: countries_CountryFilterInput) {
-  countries: countries_countries(filter: $filter) {
-    code
-    name
-    capital
-    continent {
-      name
-    }
-    currency
-  }
+Refresh the page in your browser, the result will look like this:
+
+```json
+{
+  "data": { "spacex_dragons": [{ "id": "dragon1", "name": "Dragon 1", "active": true }] },
+  "isValidating": false,
+  "isLoading": false
 }
 ```
 
-If you run the operation again, you'll see that the result now contains the `continent` and `currency` fields.
+## Server side rendering
 
-Awesome! You now have a basic understanding how WunderGraph works. The next step is to consume the API from your frontend, continue with one of our frontend quickstarts:
+Next.js supports server side rendering, which means that the page is rendered on the server and then sent to the browser. This is great for SEO and performance. WunderGraph supports server side rendering as well.
 
-- [Next.js Quickstart](/docs/getting-started/nextjs-quickstart)
-- [Vite Quickstart](/docs/getting-started/vite-quickstart)
-- [Remix Quickstart](/docs/getting-started/remix-quickstart)
+Let's take a look at the `pages/index.tsx` file again. You will see that we are using the `useQuery` hook to fetch the data. This hook will fetch the data on the client side, which means that the page will be rendered on the client side.
 
-## More Examples
+To render the page on the server side, all we need to wrap our Page or App with `withWunderGraph`. This will make sure that the page is rendered on the server side, WunderGraph does all the hard work for you.
+
+```tsx
+export default withWunderGraph(Home);
+```
+
+## TypeScript Operations
+
+TBD
+
+## What's next?
+
+Wunderbar! You added a your first Graphql API to Next.js. Next up you might want to add a database, authentication and support uploads to turn Next.js into a full stack powerhouse 😎.
+
+- [Databases](/docs/databases)
+- [Authentication](/docs/authentication)
+- [Realtime](/docs/realtime)
+- [File Storage](/docs/file-storage)
+
+### Guides
+
+Learn more advanced topics in our [guides](/docs/guides) and get comfortable with WunderGraph.
+
+### More Examples
 
 Have a look at [other examples](/docs/examples) we provide, to get a better understanding of WunderGraph.
 
-## Want to know more about WunderGraph?
+### Want to know more about WunderGraph?
 
 If you're not yet sure what kind of problems WunderGraph can solve for you,
 check out [the different use cases](/docs/use-cases) we support,
