@@ -20,20 +20,18 @@
   <p>
     <a href="https://twitter.com/wundergraphcom">
       <img height="24" width="24"
-        src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6ca814282eca7172c6_icon_clyde_white_RGB.svg"
+        src="https://user-images.githubusercontent.com/47415099/214888086-2b6077a5-b615-4acc-ae63-cb3c06e280c2.png"
         alt="Tweet us on Twitter!"
-      >
-    </a>
+    ></a>
     <span>&nbsp;&nbsp;</span>
     <a href="https://discord.com/invite/Jjmc8TC">
       <img height="24" width="24"
         src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6ca814282eca7172c6_icon_clyde_white_RGB.svg"
         alt="Join our Discord community server!"
-      >
-    </a>
+    ></a>
   </p>
 
-<img height="300" width="300" src="https://raw.githubusercontent.com/wundergraph/website/main/public/images/logos/wundergraph-dark.png?token=GHSAT0AAAAAAB4MWL34WI4OQ5W6VOFGIWCGY6ST6OQ">
+<img height="300" width="300" src="https://user-images.githubusercontent.com/47415099/214886487-2b7adfa6-ee7f-4883-b570-77233e2a7530.png">
 </div>
 
 ## What is WunderGraph?
