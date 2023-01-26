@@ -22,6 +22,9 @@ logs
 
 CHANGELOG.md
 
+# Ignore html files
+*.html
+
 # Ignore go files
 *.go
 
