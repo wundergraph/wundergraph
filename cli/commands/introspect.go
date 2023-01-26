@@ -10,9 +10,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+
 	"github.com/wundergraph/wundergraph/pkg/datasources/database"
 	"github.com/wundergraph/wundergraph/pkg/files"
-	"go.uber.org/zap"
 )
 
 var (
@@ -56,7 +57,7 @@ func introspectDatabase(introspectionSchema string) error {
 	}
 	emitIntrospectionResult(result)
 	if introspectionOutputFile != "" {
-		log.Debug("Introspection Successful", zap.String("duration", fmt.Sprintf("%s", time.Since(start))))
+		log.Debug("Introspection Successful", zap.String("duration", time.Since(start).String()))
 	}
 	return nil
 }
