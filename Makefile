@@ -49,6 +49,10 @@ codegen: install-proto codegen-go
 build: codegen
 	cd cmd/wunderctl && go build -o ../../wunderctl -ldflags "-X 'main.commit=$(shell git rev-parse --short HEAD)' -X 'main.builtBy=dev' -X 'main.version=dev' -X 'main.date=$(shell date)'" -trimpath
 
+build-wrapper: build
+	cp -rf wunderctl packages/wunderctl/download/wunderctl
+	rm wunderctl
+
 # This command builds the wunderctl binary and copies it into the nodejs wunderctl wrapper
 wunderctl: build
 	pnpm -r run --filter="./packages/wunderctl" build

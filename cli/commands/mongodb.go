@@ -19,7 +19,7 @@ var mongoDbCmd = &cobra.Command{
   url      = "%s"
 }
 `, databaseURL)
-		return introspectDatabase(introspectionSchema)
+		return introspectDatabase(introspectionSchema, true)
 	},
 }
 

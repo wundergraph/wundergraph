@@ -210,6 +210,8 @@ export class SQLServerApi extends Api<DatabaseApiCustom> {}
 
 export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
+export class PrismaApi extends Api<DatabaseApiCustom> {}
+
 export interface DataSource<Custom = unknown> {
 	Id?: string;
 	Kind: DataSourceKind;
@@ -262,6 +264,15 @@ export interface ReplaceCustomScalarTypeFieldConfiguration {
 
 export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	databaseURL: InputVariable;
+	apiNamespace?: string;
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+}
+
+export interface PrismaIntrospection extends IntrospectionConfiguration {
+	prismaFilePath: string;
 	apiNamespace?: string;
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
@@ -435,6 +446,8 @@ const databaseSchemaToKind = (schema: DatabaseSchema): DataSourceKind => {
 			return DataSourceKind.SQLSERVER;
 		case 'mongodb':
 			return DataSourceKind.MONGODB;
+		case 'prisma':
+			return DataSourceKind.PRISMA;
 		default:
 			throw new Error(`databaseSchemaToKind not implemented for: ${schema}`);
 	}
@@ -603,6 +616,15 @@ export const introspect = {
 				5
 			);
 			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	prisma: async (introspection: PrismaIntrospection): Promise<PrismaApi> =>
+		introspectWithCache(introspection, async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				{ ...introspection, databaseURL: introspection.prismaFilePath },
+				'prisma',
+				5
+			);
+			return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
 	federation: introspectFederation,
 	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {

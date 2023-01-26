@@ -22,7 +22,7 @@ export interface PrismaDatabaseIntrospectionResult {
 	jsonResponseFields: SingleTypeField[];
 }
 
-export type DatabaseSchema = 'postgresql' | 'mysql' | 'sqlite' | 'sqlserver' | 'planetscale' | 'mongodb';
+export type DatabaseSchema = 'postgresql' | 'mysql' | 'sqlite' | 'sqlserver' | 'planetscale' | 'mongodb' | 'prisma';
 
 const _ensurePrisma = async () => {
 	Logger.info('Installing prisma...');
@@ -48,9 +48,8 @@ const introspectPrismaDatabase = async (
 		fs.mkdirSync(introspectionDir, { recursive: true });
 	}
 	const introspectionFilePath = path.join('generated', 'introspection', 'database', `${id}.json`);
-	const result = await wunderctlExecAsync({
-		cmd: ['introspect', databaseSchema, databaseURL, `--outfile=${introspectionFilePath}`, '--debug'],
-	});
+	const cmd = ['introspect', databaseSchema, databaseURL, `--outfile=${introspectionFilePath}`, '--debug'];
+	const result = await wunderctlExecAsync({ cmd });
 	if (result === undefined) {
 		return {
 			success: false,
@@ -64,16 +63,19 @@ const introspectPrismaDatabase = async (
 	}
 	const output = fs.readFileSync(introspectionFilePath, 'utf8');
 	const out = JSON.parse(output) as PrismaDatabaseIntrospectionResult;
+	out.success = true;
+	out.interpolateVariableDefinitionAsJSON = [];
+	out.jsonTypeFields = [];
+	out.jsonResponseFields = [];
+	if (databaseSchema === 'prisma') {
+		return out;
+	}
 	const dataSourceStart = out.prisma_schema.indexOf('datasource');
 	const dataSourceEnd = out.prisma_schema.indexOf('}', dataSourceStart) + 1;
 	out.prisma_schema = out.prisma_schema.replace(out.prisma_schema.substring(dataSourceStart, dataSourceEnd), '');
 	while (out.prisma_schema.startsWith('\n')) {
 		out.prisma_schema = out.prisma_schema.substring(1);
 	}
-	out.success = true;
-	out.interpolateVariableDefinitionAsJSON = [];
-	out.jsonTypeFields = [];
-	out.jsonResponseFields = [];
 	return out;
 };
 

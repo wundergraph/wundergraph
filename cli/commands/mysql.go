@@ -18,7 +18,7 @@ var mysqlCmd = &cobra.Command{
 			provider = "mysql"
 			url      = "%s"
 		}`, databaseURL)
-		return introspectDatabase(introspectionSchema)
+		return introspectDatabase(introspectionSchema, true)
 	},
 }
 

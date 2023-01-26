@@ -25,7 +25,7 @@ var postgresCmd = &cobra.Command{
 			provider = "postgresql"
 			url      = "%s"
 		}`, databaseURL)
-		return introspectDatabase(introspectionSchema)
+		return introspectDatabase(introspectionSchema, true)
 	},
 }
 

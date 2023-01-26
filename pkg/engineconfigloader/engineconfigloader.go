@@ -240,8 +240,8 @@ func (d *DefaultFactoryResolver) Resolve(ds *wgpb.DataSourceConfiguration) (plan
 		wgpb.DataSourceKind_MYSQL,
 		wgpb.DataSourceKind_SQLSERVER,
 		wgpb.DataSourceKind_MONGODB,
-		wgpb.DataSourceKind_SQLITE:
-
+		wgpb.DataSourceKind_SQLITE,
+		wgpb.DataSourceKind_PRISMA:
 		if d.requiresCustomHTTPClient(ds, nil) {
 			client, err := d.newHTTPClient(ds, nil)
 			if err != nil {
@@ -436,7 +436,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			wgpb.DataSourceKind_MYSQL,
 			wgpb.DataSourceKind_SQLSERVER,
 			wgpb.DataSourceKind_MONGODB,
-			wgpb.DataSourceKind_SQLITE:
+			wgpb.DataSourceKind_SQLITE,
+			wgpb.DataSourceKind_PRISMA:
 			if in.CustomDatabase == nil {
 				continue
 			}
@@ -514,6 +515,10 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 		provider = "sqlserver"
 	case wgpb.DataSourceKind_SQLITE:
 		provider = "sqlite"
+	case wgpb.DataSourceKind_PRISMA:
+		provider = "prisma"
+		// on the prisma datasource, the datasource header is already present in the schema
+		return schema
 	}
 	if provider == "" {
 		return schema

@@ -1,0 +1,12 @@
+{
+	users_post_findManyUser {
+		id
+		name
+		posts {
+			id
+			title
+			content
+			published
+		}
+	}
+}
