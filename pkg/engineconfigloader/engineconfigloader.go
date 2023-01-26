@@ -516,7 +516,6 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 	case wgpb.DataSourceKind_SQLITE:
 		provider = "sqlite"
 	case wgpb.DataSourceKind_PRISMA:
-		provider = "prisma"
 		// on the prisma datasource, the datasource header is already present in the schema
 		return schema
 	}
