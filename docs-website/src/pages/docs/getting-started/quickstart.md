@@ -97,7 +97,7 @@ query Countries($filter: countries_CountryFilterInput) {
 
 The input type and query are prefixed with `countries_` because we're using the `countries` API namespace in the introspection config. This is to avoid naming conflicts when you add multiple APIs to your WunderGraph application.
 
-We'll make a few improvements to the API. First, let's remove the `countries_` prefix from the result, so we can use the operation without the `countries_` prefix.
+We'll make a few improvements to the API. First, let's remove the `countries_` prefix from the result, so we can access the result without the `countries_` prefix.
 
 ```graphql
 query Countries($filter: countries_CountryFilterInput) {
