@@ -20,12 +20,12 @@
   <p>
     <a href="https://twitter.com/wundergraphcom">
       <img height="24" width="24"
-        src="https://user-images.githubusercontent.com/47415099/214888086-2b6077a5-b615-4acc-ae63-cb3c06e280c2.png"
+        src="https://user-images.githubusercontent.com/47415099/214893369-6b58729f-640e-4774-b9b3-27a348fbb73f.png"
         alt="Tweet us on Twitter!"
     ></a>
     <span>&nbsp;&nbsp;</span>
     <a href="https://discord.com/invite/Jjmc8TC">
-      <img height="24" width="24"
+      <img height="27" width="27"
         src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6ca814282eca7172c6_icon_clyde_white_RGB.svg"
         alt="Join our Discord community server!"
     ></a>
@@ -34,12 +34,12 @@
 <img height="300" width="300" src="https://user-images.githubusercontent.com/47415099/214886487-2b7adfa6-ee7f-4883-b570-77233e2a7530.png">
 </div>
 
-## What is WunderGraph?
+# What is WunderGraph?
 
 The simplicity of RPC with the power of GraphQL; WunderGraph is an open-source framework that allows you to
 quickly build end-to-end (client-to-server) type-safe APIs on any backend.
 
-## What is WunderGraph SDK?
+# What is WunderGraph SDK?
 
 The WunderGraph SDK is the easiest way to configure your WunderGraph applications.
 It's written in TypeScript and allows you to configure every aspect of your WunderGraph applications via Code.
@@ -54,7 +54,7 @@ Go from development to production without touching a single button; simply git p
 
 The WunderGraph SDK works best in combination with the WunderGraph CLI, wunderctl, the Command Line Interface to initialize and run your local WunderGraph dev environment.
 
-## Getting Started
+# Getting Started
 
 First, initialise your WunderGraph application with the following command:
 
