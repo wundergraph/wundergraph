@@ -21,7 +21,7 @@ const buildItem = (op: GraphQLOperation, operationURL: string, opName: string) =
 		const request = queryRequestJson(operationURL, paths);
 
 		return {
-			id: op.Name,
+			id: op.PathName,
 			name: opName,
 			request: request,
 		};
@@ -57,6 +57,30 @@ export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanB
 	const operationsGroup = new Collection();
 	operationsGroup.id = 'operatations';
 	operationsGroup.name = 'operations';
+
+	// Bit of a mind bender here, but we need to iterate over the keys to flatten the folders and only keep the last folder
+	const keys = mapOfItems.keys();
+	for (const key of keys) {
+		const keySet = new Set();
+		key.split('/').forEach((i) => keySet.add(i));
+		const uniqueArray = Array.from(keySet);
+		while (uniqueArray.length > 0) {
+			const fullKey = uniqueArray.join('/');
+			const lastFolder = uniqueArray.pop();
+			const remainderKey = uniqueArray.join('/');
+
+			const itemFolder = {
+				name: lastFolder,
+				id: fullKey,
+				item: mapOfItems.get(fullKey),
+			};
+
+			mapOfItems.get(remainderKey)?.push(itemFolder);
+			if (uniqueArray.length > 0) {
+				mapOfItems.delete(fullKey);
+			}
+		}
+	}
 
 	for (const [key, value] of mapOfItems.entries()) {
 		operationsGroup.items.add({ id: key, name: key, item: value });

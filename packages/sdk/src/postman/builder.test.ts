@@ -4,9 +4,8 @@ import { PostmanBuilder } from './builder';
 
 const operations = [
 	{
-		Name: 'GetName',
-		PathName: 'location/GetName',
-		Content: 'query GetName{name:me{name}}',
+		Name: 'GetUser',
+		PathName: 'item/GetID',
 		OperationType: OperationType.QUERY,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 		VariablesSchema: {
@@ -17,8 +16,20 @@ const operations = [
 		},
 	},
 	{
-		Name: 'GetName',
-		PathName: 'location/GetName',
+		Name: 'GetUser',
+		PathName: 'location/GetID',
+		OperationType: OperationType.QUERY,
+		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+		VariablesSchema: {
+			type: 'object',
+			properties: {},
+			additionalProperties: false,
+			definitions: {},
+		},
+	},
+	{
+		Name: 'GetUser',
+		PathName: 'location/GetUser',
 		OperationType: OperationType.QUERY,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 		VariablesSchema: {
@@ -78,7 +89,7 @@ const operations = [
 	},
 ] as any;
 
-test('getNestedCollection', async () => {
+test('PostmanBuilder', async () => {
 	const result = PostmanBuilder(operations, { baseURL: 'http://localhost:9991' });
 
 	expect(result).toMatchSnapshot();

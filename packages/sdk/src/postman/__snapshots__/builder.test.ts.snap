@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getNestedCollection 1`] = `
+exports[`PostmanBuilder 1`] = `
 {
   "event": [],
   "info": {
@@ -23,12 +23,46 @@ exports[`getNestedCollection 1`] = `
       "item": [
         {
           "event": [],
+          "id": "item",
+          "item": [
+            {
+              "event": [],
+              "id": "item/GetID",
+              "name": "GetID",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "item",
+                    "GetID",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+          ],
+          "name": "item",
+        },
+        {
+          "event": [],
           "id": "location",
           "item": [
             {
               "event": [],
-              "id": "GetName",
-              "name": "GetName",
+              "id": "location/GetID",
+              "name": "GetID",
               "request": {
                 "header": [
                   {
@@ -44,7 +78,7 @@ exports[`getNestedCollection 1`] = `
                   "path": [
                     "operations",
                     "location",
-                    "GetName",
+                    "GetID",
                   ],
                   "query": [],
                   "variable": [],
@@ -54,8 +88,8 @@ exports[`getNestedCollection 1`] = `
             },
             {
               "event": [],
-              "id": "GetName",
-              "name": "GetName",
+              "id": "location/GetUser",
+              "name": "GetUser",
               "request": {
                 "header": [
                   {
@@ -71,8 +105,110 @@ exports[`getNestedCollection 1`] = `
                   "path": [
                     "operations",
                     "location",
-                    "GetName",
+                    "GetUser",
                   ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+            {
+              "event": [],
+              "id": "location/query",
+              "item": [
+                {
+                  "event": [],
+                  "id": "location/query/GetUser",
+                  "name": "GetUser",
+                  "request": {
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                      },
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{apiBaseUrl}}",
+                      ],
+                      "path": [
+                        "operations",
+                        "location",
+                        "query",
+                        "GetUser",
+                      ],
+                      "query": [],
+                      "variable": [],
+                    },
+                  },
+                  "response": [],
+                },
+                {
+                  "event": [],
+                  "id": "location/query/GetUser",
+                  "name": "GetUser",
+                  "request": {
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                      },
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{apiBaseUrl}}",
+                      ],
+                      "path": [
+                        "operations",
+                        "location",
+                        "query",
+                        "GetUser",
+                      ],
+                      "query": [],
+                      "variable": [],
+                    },
+                  },
+                  "response": [],
+                },
+                {
+                  "event": [],
+                  "id": "GetSetUser",
+                  "name": "SetUser",
+                  "request": {
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [],
+                    },
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{apiBaseUrl}}",
+                      ],
+                      "path": [
+                        "operations",
+                        "location",
+                        "query",
+                        "SetUser",
+                      ],
+                      "query": [],
+                      "variable": [],
+                    },
+                  },
+                  "response": [],
+                },
+              ],
+              "name": "query",
+            },
+            {
+              "event": [],
+              "id": "location/query",
+              "name": "query",
+              "request": {
+                "method": "GET",
+                "url": {
                   "query": [],
                   "variable": [],
                 },
@@ -81,129 +217,6 @@ exports[`getNestedCollection 1`] = `
             },
           ],
           "name": "location",
-        },
-        {
-          "event": [],
-          "id": "location/query",
-          "item": [
-            {
-              "event": [],
-              "id": "GetUser",
-              "name": "GetUser",
-              "request": {
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                  },
-                ],
-                "method": "GET",
-                "url": {
-                  "host": [
-                    "{{apiBaseUrl}}",
-                  ],
-                  "path": [
-                    "operations",
-                    "location",
-                    "query",
-                    "GetUser",
-                  ],
-                  "query": [],
-                  "variable": [],
-                },
-              },
-              "response": [],
-            },
-            {
-              "event": [],
-              "id": "GetCart",
-              "name": "GetUser",
-              "request": {
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                  },
-                ],
-                "method": "GET",
-                "url": {
-                  "host": [
-                    "{{apiBaseUrl}}",
-                  ],
-                  "path": [
-                    "operations",
-                    "location",
-                    "query",
-                    "GetUser",
-                  ],
-                  "query": [],
-                  "variable": [],
-                },
-              },
-              "response": [],
-            },
-            {
-              "event": [],
-              "id": "GetSetUser",
-              "name": "SetUser",
-              "request": {
-                "body": {
-                  "mode": "urlencoded",
-                  "urlencoded": [],
-                },
-                "method": "POST",
-                "url": {
-                  "host": [
-                    "{{apiBaseUrl}}",
-                  ],
-                  "path": [
-                    "operations",
-                    "location",
-                    "query",
-                    "SetUser",
-                  ],
-                  "query": [],
-                  "variable": [],
-                },
-              },
-              "response": [],
-            },
-          ],
-          "name": "location/query",
-        },
-        {
-          "event": [],
-          "id": "location/query/new",
-          "item": [
-            {
-              "event": [],
-              "id": "NewGetSetUser",
-              "name": "SetUser",
-              "request": {
-                "body": {
-                  "mode": "urlencoded",
-                  "urlencoded": [],
-                },
-                "method": "POST",
-                "url": {
-                  "host": [
-                    "{{apiBaseUrl}}",
-                  ],
-                  "path": [
-                    "operations",
-                    "location",
-                    "query",
-                    "new",
-                    "SetUser",
-                  ],
-                  "query": [],
-                  "variable": [],
-                },
-              },
-              "response": [],
-            },
-          ],
-          "name": "location/query/new",
         },
       ],
       "name": "operations",
