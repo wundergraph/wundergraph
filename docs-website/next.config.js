@@ -28,11 +28,6 @@ const nextConfig = {
 				permanent: true,
 			},
 			{
-				source: '/docs/getting-started/:path*',
-				destination: '/getting-started/:path*',
-				permanent: true,
-			},
-			{
 				source: '/docs/deployment/flyio',
 				destination: '/docs/self-hosted/flyio',
 				permanent: true,

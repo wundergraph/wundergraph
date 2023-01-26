@@ -29,28 +29,32 @@ const navigation = [
 	},
 	{
 		title: 'Getting started',
-		href: '/getting-started',
+		href: '/docs/getting-started',
 		paths: ['/docs/tutorials', '/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
 				title: 'Overview',
-				href: '/getting-started',
+				href: '/docs/getting-started',
+			},
+			{
+				title: 'Quickstart',
+				href: '/docs/getting-started/quickstart',
 			},
 			{
 				title: 'Framework Quickstarts',
 				links: [
 					{
 						title: 'Next.js',
-						href: '/getting-started/nextjs',
+						href: '/docs/getting-started/nextjs',
 					},
 					{
 						title: 'Vite',
-						href: '/getting-started/vite',
+						href: '/docs/getting-started/vite',
 					},
 					{
 						title: 'Remix',
-						href: '/getting-started/remix',
+						href: '/docs/getting-started/remix',
 					},
 				],
 			},

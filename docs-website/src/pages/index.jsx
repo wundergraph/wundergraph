@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Heading } from '../components/Heading';
-import { Paragraph } from '../components/Paragraph';
-import { CodeBlock } from '../components/CodeBlock';
-import { QuickLinks, QuickLink, QuickLinkMore } from '../components/QuickLinks';
+import { Heading } from '@/components/Heading';
+import { Paragraph } from '@/components/Paragraph';
+import { CodeBlock } from '@/components/CodeBlock';
+import { QuickLinks, QuickLink, QuickLinkMore } from '@/components/QuickLinks';
 import {
 	ShareIcon,
 	LockClosedIcon,
@@ -14,9 +14,9 @@ import {
 	CogIcon,
 	CommandLineIcon,
 } from '@heroicons/react/24/solid';
-import { NextLogo } from '../components/logos/next';
-import { ViteLogo } from '../components/logos/vite';
-import { RemixLogo } from '../components/logos/remix';
+import { NextLogo } from '@/components/logos/next';
+import { ViteLogo } from '@/components/logos/vite';
+import { RemixLogo } from '@/components/logos/remix';
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
 cd my-project && npm i && npm start`;
@@ -68,7 +68,7 @@ export default function HomePage() {
 					<QuickLink
 						title="Tutorials &amp; Examples"
 						description="Get familiar with WunderGraph by following our tutorials and examples."
-						href="/getting-started"
+						href="/docs/getting-started"
 						more
 					/>
 					<QuickLink
@@ -83,21 +83,21 @@ export default function HomePage() {
 						title="Next.js"
 						description="Learn how to use WunderGraph with Next.js."
 						logo={<NextLogo />}
-						href="/getting-started/nextjs"
+						href="/docs/getting-started/nextjs-quickstart"
 						variant="plain"
 					/>
 					<QuickLink
 						title="Vite"
 						description="Learn how to use WunderGraph with Vite."
 						logo={<ViteLogo />}
-						href="/getting-started/vite"
+						href="/docs/getting-started/vite-quickstart"
 						variant="plain"
 					/>
 					<QuickLink
 						title="Remix"
 						description="Learn how to use WunderGraph with Remix."
 						logo={<RemixLogo />}
-						href="/getting-started/remix"
+						href="/docs/getting-started/remix-quickstart"
 						variant="plain"
 					/>
 				</QuickLinks>
