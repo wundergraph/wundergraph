@@ -97,8 +97,8 @@ Now, the only thing our community is missing is you!
 
 # Exports
 
-- [@wundergraph/sdk/client](https://github.com/wundergraph/wundergraph/blob/main/packages/sdk/client)
-- [@wundergraph/sdk/internal](https://github.com/wundergraph/wundergraph/blob/main/packages/sdk/internal)
-- [@wundergraph/sdk/internal/logger](https://github.com/wundergraph/wundergraph/blob/main/packages/sdk/logger)
-- [@wundergraph/sdk/server](https://github.com/wundergraph/wundergraph/blob/main/packages/sdk/server)
-- [@wundergraph/sdk/testing](https://github.com/wundergraph/wundergraph/blob/main/packages/sdk/testing)
+- [@wundergraph/sdk/client](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk/src/client)
+- [@wundergraph/sdk/internal](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk/src/internal)
+- [@wundergraph/sdk/internal/logger](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk/src/logger)
+- [@wundergraph/sdk/server](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk/src/server)
+- [@wundergraph/sdk/testing](https://github.com/wundergraph/wundergraph/tree/main/packages/sdk/src/testing)
