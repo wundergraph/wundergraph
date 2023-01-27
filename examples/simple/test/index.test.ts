@@ -9,15 +9,10 @@ afterAll(() => wg.stop());
 describe('test Countries API', () => {
 	test('country by code', async () => {
 		const result = await wg.client().query({
-			operationName: 'Countries',
-			input: {
-				filter: {
-					code: { eq: 'AD' },
-				},
-			},
+			operationName: 'Country',
 		});
-		const andorra = result.data?.countries_countries[0];
-		expect(andorra?.name).toBe('Andorra');
+		const country = result.data?.countries_country;
+		expect(country?.capital).toBe('Berlin');
 	});
 
 	test('continents', async () => {
