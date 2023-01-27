@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 
@@ -49,8 +49,9 @@ type Planner struct {
 
 	engineFactory *LazyEngineFactory
 
-	debug bool
-	log   *zap.Logger
+	debug           bool
+	testsSkipEngine bool
+	log             *zap.Logger
 
 	insideJsonField bool
 	jsonFieldRef    int
@@ -173,7 +174,13 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 			Renderer: renderer,
 		}
 		replacement, _ := p.variables.AddVariable(variable)
-		input.Query = strings.Replace(input.Query, currentName, replacement, -1)
+
+		re, err := regexp.Compile(fmt.Sprintf(`%s\b`, regexp.QuoteMeta(currentName)))
+		if err != nil {
+			continue
+		}
+
+		input.Query = re.ReplaceAllLiteralString(input.Query, replacement)
 	}
 
 	rawInput, err := json.Marshal(input)
@@ -181,10 +188,15 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 		rawInput = []byte(`{"error":` + err.Error() + `}`)
 	}
 
+	var engine *LazyEngine
+	if !p.testsSkipEngine {
+		engine = p.engineFactory.Engine(p.config.PrismaSchema, p.config.WunderGraphDir, p.config.CloseTimeoutSeconds)
+	}
+
 	return plan.FetchConfiguration{
 		Input: string(rawInput),
 		DataSource: &Source{
-			engine: p.engineFactory.Engine(p.config.PrismaSchema, p.config.WunderGraphDir, p.config.CloseTimeoutSeconds),
+			engine: engine,
 			debug:  p.debug,
 			log:    p.log,
 		},
@@ -408,76 +420,6 @@ func (p *Planner) EnterDocument(operation, definition *ast.Document) {
 
 func (p *Planner) LeaveDocument(operation, definition *ast.Document) {
 
-}
-
-func (p *Planner) addOneTypeInlineFragment() {
-	selectionSet := p.upstreamOperation.AddSelectionSet()
-	typeRef := p.upstreamOperation.AddNamedType([]byte(p.lastFieldEnclosingTypeName))
-	inlineFragment := p.upstreamOperation.AddInlineFragment(ast.InlineFragment{
-		HasSelections: true,
-		SelectionSet:  selectionSet.Ref,
-		TypeCondition: ast.TypeCondition{
-			Type: typeRef,
-		},
-	})
-	p.upstreamOperation.AddSelection(p.nodes[len(p.nodes)-1].Ref, ast.Selection{
-		Kind: ast.SelectionKindInlineFragment,
-		Ref:  inlineFragment,
-	})
-	p.nodes = append(p.nodes, selectionSet)
-}
-
-func (p *Planner) addEntitiesSelectionSet() {
-
-	// $representations
-	representationsLiteral := p.upstreamOperation.Input.AppendInputString("representations")
-	representationsVariable := p.upstreamOperation.AddVariableValue(ast.VariableValue{
-		Name: representationsLiteral,
-	})
-	representationsArgument := p.upstreamOperation.AddArgument(ast.Argument{
-		Name: representationsLiteral,
-		Value: ast.Value{
-			Kind: ast.ValueKindVariable,
-			Ref:  representationsVariable,
-		},
-	})
-
-	// _entities
-	entitiesSelectionSet := p.upstreamOperation.AddSelectionSet()
-	entitiesField := p.upstreamOperation.AddField(ast.Field{
-		Name:          p.upstreamOperation.Input.AppendInputString("_entities"),
-		HasSelections: true,
-		HasArguments:  true,
-		Arguments: ast.ArgumentList{
-			Refs: []int{representationsArgument},
-		},
-		SelectionSet: entitiesSelectionSet.Ref,
-	})
-	p.upstreamOperation.AddSelection(p.nodes[len(p.nodes)-1].Ref, ast.Selection{
-		Kind: ast.SelectionKindField,
-		Ref:  entitiesField.Ref,
-	})
-	p.nodes = append(p.nodes, entitiesField, entitiesSelectionSet)
-}
-
-func (p *Planner) addRepresentationsVariableDefinition() {
-	anyType := p.upstreamOperation.AddNamedType([]byte("_Any"))
-	nonNullAnyType := p.upstreamOperation.AddType(ast.Type{
-		TypeKind: ast.TypeKindNonNull,
-		OfType:   anyType,
-	})
-	listOfNonNullAnyType := p.upstreamOperation.AddType(ast.Type{
-		TypeKind: ast.TypeKindList,
-		OfType:   nonNullAnyType,
-	})
-	nonNullListOfNonNullAnyType := p.upstreamOperation.AddType(ast.Type{
-		TypeKind: ast.TypeKindNonNull,
-		OfType:   listOfNonNullAnyType,
-	})
-	representationsVariable := p.upstreamOperation.AddVariableValue(ast.VariableValue{
-		Name: p.upstreamOperation.Input.AppendInputBytes([]byte("representations")),
-	})
-	p.upstreamOperation.AddVariableDefinitionToOperationDefinition(p.nodes[0].Ref, representationsVariable, nonNullListOfNonNullAnyType)
 }
 
 func (p *Planner) isNestedRequest() bool {
@@ -858,7 +800,6 @@ func (p *Planner) addField(ref int) {
 
 	field := p.upstreamOperation.AddField(ast.Field{
 		Name: p.upstreamOperation.Input.AppendInputString(fieldName),
-		//Alias: alias,
 	})
 
 	selection := ast.Selection{
@@ -871,10 +812,11 @@ func (p *Planner) addField(ref int) {
 }
 
 type Factory struct {
-	Client        *http.Client
-	engineFactory LazyEngineFactory
-	Debug         bool
-	Log           *zap.Logger
+	Client          *http.Client
+	engineFactory   LazyEngineFactory
+	Debug           bool
+	Log             *zap.Logger
+	testsSkipEngine bool
 }
 
 func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
@@ -889,10 +831,11 @@ func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
 func (f *Factory) Planner(ctx context.Context) plan.DataSourcePlanner {
 	f.engineFactory.closer = ctx.Done()
 	return &Planner{
-		client:        f.Client,
-		engineFactory: &f.engineFactory,
-		debug:         f.Debug,
-		log:           f.Log,
+		client:          f.Client,
+		engineFactory:   &f.engineFactory,
+		debug:           f.Debug,
+		log:             f.Log,
+		testsSkipEngine: f.testsSkipEngine,
 	}
 }
 
