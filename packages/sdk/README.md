@@ -1,28 +1,26 @@
 <div align="center">
 
-  # WunderGraph SDK
+# WunderGraph SDK
 
-  ![wunderctl](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
-  [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md)
-  [![License Apache 2](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/wundergraph/wundergraph/blob/main/LICENSE)
-  [![Enterprise support](https://img.shields.io/badge/enterprise-support-indigo.svg)](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/sdk.svg)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/wundergraph/wundergraph/blob/main/CONTRIBUTING.md)
+[![License Apache 2](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/wundergraph/wundergraph/blob/main/LICENSE)
+[![Enterprise support](https://img.shields.io/badge/enterprise-support-indigo.svg)](https://form.typeform.com/to/fuRWxErj?typeform-embed-id=8749569972809419&typeform-embed=popup-blank&typeform-source=wundergraph.com&typeform-medium=embed-sdk&typeform-medium-version=next)
 
-  [Quickstart](https://docs.wundergraph.com/getting-started)
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  [Website](https://wundergraph.com/)
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  [Docs](https://docs.wundergraph.com/docs)
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  [Examples](https://docs.wundergraph.com/docs/examples)
-  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-  [Blog](https://wundergraph.com/blog)
-  
-  [<img height="300" width="300" src="https://user-images.githubusercontent.com/47415099/214915738-fd34d2ab-7549-4a60-bbdb-ab9f30145341.png">](https://wundergraph.com/)
- 
- 
-  [![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
-  [![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
+[Quickstart](https://docs.wundergraph.com/getting-started)
+<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+[Website](https://wundergraph.com/)
+<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+[Docs](https://docs.wundergraph.com/docs)
+<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+[Examples](https://docs.wundergraph.com/docs/examples)
+<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+[Blog](https://wundergraph.com/blog)
 
+[<img height="300" width="300" src="https://user-images.githubusercontent.com/47415099/214915738-fd34d2ab-7549-4a60-bbdb-ab9f30145341.png">](https://wundergraph.com/)
+
+[![Join our Discord Server](https://img.shields.io/badge/Discord-chat%20with%20us-%235865F2?style=flat&logo=discord&logoColor=%23fff)](https://discord.com/invite/Jjmc8TC)
+[![Tweet at us on Twitter](https://img.shields.io/badge/Twitter-tweet%20at%20us-1da1f2?style=flat&logo=twitter&logoColor=%23fff)](https://twitter.com/wundergraphcom)
 
 </div>
 
@@ -66,7 +64,8 @@ You can write queries, mutations, and subscriptions that span multiple data sour
 Each operation will be exposed securely via JSON-RPC-API through the WunderGraph gateway.
 After writing your operations, you can start deploying your WunderGraph application.
 
-For a more thorough introduction To WunderGraph, please visit the [architecture](./docs/architecture) documentation.
+For a more thorough introduction To WunderGraph, please visit the
+[architecture](https://github.com/wundergraph/wundergraph/blob/main/docs/architecture.md) documentation.
 Our general documentation can also be found [here](https://docs.wundergraph.com/docs).
 
 # Community
