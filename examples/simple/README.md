@@ -12,7 +12,7 @@ npm install && npm start
 curl http://localhost:9991/operations/Continents
 ```
 
-#### Get Andorra
+#### Get Country
 
 ```shell
 curl http://localhost:9991/operations/Country
