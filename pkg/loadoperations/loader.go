@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"unicode"
@@ -129,24 +128,25 @@ func (l *Loader) readOperations() error {
 	})
 }
 
-func (l *Loader) readTypescriptOperation(filePath string) {
-	fileName := strings.TrimSuffix(strings.TrimPrefix(filePath, l.operationsRootPath+"/"), ".ts")
-
-	operationName := normalizeOperationName(fileName)
+func (l *Loader) readTypescriptOperation(relativeFilePath string) {
+	ext := filepath.Ext(relativeFilePath)
+	relativeFilePathNonExt := relativeFilePath[:len(relativeFilePath)-len(ext)]
+	unixLikeRelativeFilePathNonExt := filepath.ToSlash(relativeFilePathNonExt)
+	operationName := normalizeOperationName(unixLikeRelativeFilePathNonExt)
 
 	for _, file := range l.out.TypeScriptOperationFiles {
 		if file.OperationName == operationName {
 			l.out.Info = append(l.out.Info, fmt.Sprintf(
-				"skipping file %s. Operation name collides with operation defined in: %s", filePath, file.FilePath))
+				"skipping file %s. Operation name collides with operation defined in: %s", relativeFilePath, file.FilePath))
 			return
 		}
 	}
 
 	typeScriptFile := TypeScriptOperationFile{
-		OperationName: normalizeOperationName(fileName),
-		ApiMountPath:  fileName,
-		FilePath:      filePath,
-		ModulePath:    path.Join("generated", "bundle", "operations", fileName),
+		OperationName: operationName,
+		ApiMountPath:  unixLikeRelativeFilePathNonExt,
+		FilePath:      relativeFilePath,
+		ModulePath:    filepath.ToSlash(filepath.Join("generated", "bundle", "operations", relativeFilePathNonExt)),
 	}
 	l.out.TypeScriptOperationFiles = append(l.out.TypeScriptOperationFiles, typeScriptFile)
 }
