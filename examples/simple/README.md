@@ -15,9 +15,7 @@ curl http://localhost:9991/operations/Continents
 #### Get Andorra
 
 ```shell
-curl --get --data-urlencode 'wg_variables={ "filter": {"code": { "eq": "AD" } } }' \
-    --header 'Content-Type: application/json' \
-    http://localhost:9991/operations/Countries
+curl http://localhost:9991/operations/Country
 ```
 
 #### Get user
