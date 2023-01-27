@@ -47,6 +47,14 @@ func WithTimeout(timeout time.Duration) ClientOption {
 	}
 }
 
+func WithAuthToken(token string) ClientOption {
+	return func(c *client) {
+		if token != "" {
+			c.authToken = token
+		}
+	}
+}
+
 type client struct {
 	address    string
 	httpClient *http.Client
@@ -54,6 +62,7 @@ type client struct {
 	debug      bool
 	clientInfo MetricClientInfo
 	log        *zap.Logger
+	authToken  string
 }
 
 var _ Client = (*client)(nil)
@@ -212,6 +221,9 @@ func (c *client) Send(metrics []*Metric) error {
 
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Add("Content-Type", "application/json")
+	if c.authToken != "" {
+		req.Header.Add("X-WG-TELEMETRY-AUTHORIZATION", fmt.Sprintf("Bearer %s", c.authToken))
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

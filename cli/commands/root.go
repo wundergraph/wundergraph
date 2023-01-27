@@ -151,6 +151,7 @@ var rootCmd = &cobra.Command{
 				telemetry.WithTimeout(3*time.Second),
 				telemetry.WithLogger(log),
 				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+				telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
 			)
 
 			// Send telemetry in a goroutine to not block the command
@@ -229,8 +230,12 @@ func wunderctlBinaryPath() string {
 func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
+	telemetryAnonymousID := os.Getenv("WG_TELEMETRY_ANONYMOUS_ID")
 
-	config.InitConfig(!isTelemetryDisabled)
+	config.InitConfig(config.Options{
+		TelemetryEnabled:     !isTelemetryDisabled,
+		TelemetryAnonymousID: telemetryAnonymousID,
+	})
 
 	// Can be overwritten by WG_API_URL=<url> env variable
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")

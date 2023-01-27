@@ -13,4 +13,7 @@ type HealthCheckReport struct {
 	ServerStatus string    `json:"serverStatus"`
 	NodeStatus   string    `json:"nodeStatus"`
 	BuildInfo    BuildInfo `json:"buildInfo"`
+	DeploymentId string    `json:"deploymentId"`
+	CommitSHA    string    `json:"CommitSHA"`
+	CommitURL    string    `json:"CommitURL"`
 }
