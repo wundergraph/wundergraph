@@ -419,18 +419,18 @@ func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
 	return nil
 }
 
-func (r *Builder) operationApiPath(name string) string {
+func operationApiPath(name string) string {
 	return fmt.Sprintf("/operations/%s", name)
 }
 
 func (r *Builder) registerInvalidOperation(name string) {
-	apiPath := r.operationApiPath(name)
+	apiPath := operationApiPath(name)
 	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
 	route.Handler(&EndpointUnavailableHandler{
 		OperationName: name,
 		Logger:        r.log,
 	})
-	r.log.Error("EndpointUnavailableHandler",
+	r.log.Warn("EndpointUnavailableHandler",
 		zap.String("Operation", name),
 		zap.String("Endpoint", apiPath),
 		zap.String("Help", "This operation is invalid. Please, check the logs"),
@@ -443,7 +443,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return nil
 	}
 
-	apiPath := r.operationApiPath(operation.Path)
+	apiPath := operationApiPath(operation.Path)
 
 	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
 		return r.registerNodejsOperation(operation, apiPath)
@@ -481,19 +481,19 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
 
-	queryParamsAllowList := r.generateQueryArgumentsAllowList(operation.VariablesSchema)
+	queryParamsAllowList := generateQueryArgumentsAllowList(operation.VariablesSchema)
 
-	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
 	}
 
-	jsonStringInterpolator, err := interpolate.NewStringInterpolatorJSONOnly(r.cleanupJsonSchema(operation.InterpolationVariablesSchema))
+	jsonStringInterpolator, err := interpolate.NewStringInterpolatorJSONOnly(cleanupJsonSchema(operation.InterpolationVariablesSchema))
 	if err != nil {
 		return err
 	}
@@ -650,9 +650,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	return nil
 }
 
-func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
+func generateQueryArgumentsAllowList(schema string) []string {
 	var allowList []string
-	schema = r.cleanupJsonSchema(schema)
+	schema = cleanupJsonSchema(schema)
 	_ = jsonparser.ObjectEach([]byte(schema), func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 		allowList = append(allowList, string(key))
 		return nil
@@ -660,7 +660,7 @@ func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
 	return allowList
 }
 
-func (r *Builder) cleanupJsonSchema(schema string) string {
+func cleanupJsonSchema(schema string) string {
 	schema = strings.Replace(schema, "/definitions/", "/$defs/", -1)
 	schema = strings.Replace(schema, "\"definitions\"", "\"$defs\"", -1)
 	return schema
@@ -2212,12 +2212,12 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
 	}
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
 
-	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
 	}
@@ -2228,7 +2228,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,
-		queryParamsAllowList: r.generateQueryArgumentsAllowList(operation.VariablesSchema),
+		queryParamsAllowList: generateQueryArgumentsAllowList(operation.VariablesSchema),
 		stringInterpolator:   stringInterpolator,
 		liveQuery: liveQueryConfig{
 			enabled:                operation.LiveQueryConfig.Enable,
@@ -2263,8 +2263,14 @@ type FunctionsHandler struct {
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
+
+	reqID := r.Header.Get(logging.RequestIDHeader)
+	requestLogger := h.log.With(logging.WithRequestID(reqID))
+	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+
 	r = setOperationMetaData(r, h.operation)
+
+	isInternal := strings.HasPrefix(r.URL.Path, "/internal/")
 
 	ctx := pool.GetCtx(r, r, pool.Config{})
 	defer pool.PutCtx(ctx)
@@ -2289,7 +2295,11 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		ctx.Variables = variablesBuf.Bytes()
+		if isInternal {
+			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
+		} else {
+			ctx.Variables = variablesBuf.Bytes()
+		}
 	}
 
 	if len(ctx.Variables) == 0 {

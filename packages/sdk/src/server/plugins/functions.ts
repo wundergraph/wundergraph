@@ -6,10 +6,12 @@ import type { NodeJSOperation } from '../../operations/operations';
 import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { AuthorizationError } from '../../errors';
+import { OperationsClient } from '../operations-client';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
 	internalClientFactory: InternalClientFactory;
+	nodeURL: string;
 }
 
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
@@ -17,7 +19,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 		try {
 			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
 			const routeUrl = `/functions/${operation.api_mount_path}`;
-			let maybeImplementation: NodeJSOperation<any, any, any, any, any> | undefined;
+			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any> | undefined;
 			try {
 				maybeImplementation = (await import(filePath)).default;
 			} catch (e) {
@@ -33,12 +35,17 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				handler: async (request, reply) => {
 					const implementation = maybeImplementation!;
 					try {
-						const ctx: HandlerContext<any, any, any> = {
+						const operationClient = new OperationsClient({
+							baseURL: config.nodeURL,
+							clientRequest: (request.body as any)?.__wg.clientRequest,
+						});
+						const ctx: HandlerContext<any, any, any, any, any, any> = {
 							log: fastify.log,
 							user: (request.body as any)?.__wg.user!,
 							internalClient: config.internalClientFactory(undefined, (request.body as any)?.__wg.clientRequest),
 							clientRequest: (request.body as any)?.__wg.clientRequest,
 							input: (request.body as any)?.input,
+							operations: operationClient,
 						};
 
 						switch (implementation.type) {
@@ -49,8 +56,9 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 								const subscribeOnce = request.headers['x-wg-subscribe-once'] === 'true';
 								reply.hijack();
 								const gen = await implementation.subscriptionHandler(ctx);
-								reply.raw.on('close', () => {
+								reply.raw.once('close', () => {
 									gen.return(0);
+									operationClient.cancelSubscriptions();
 								});
 								for await (const next of gen) {
 									reply.raw.write(`${JSON.stringify({ data: next })}\n\n`);
