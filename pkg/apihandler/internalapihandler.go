@@ -11,10 +11,6 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/gorilla/mux"
-	"github.com/wundergraph/wundergraph/pkg/authentication"
-	"github.com/wundergraph/wundergraph/pkg/hooks"
-	"github.com/wundergraph/wundergraph/pkg/inputvariables"
-	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
@@ -24,7 +20,11 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/inputvariables"
+	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
