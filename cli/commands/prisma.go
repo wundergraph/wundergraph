@@ -9,7 +9,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 )
 
-// postgresCmd represents the postgres command
+// prismaCmd represents the prisma command
 var prismaCmd = &cobra.Command{
 	Use:     "prisma",
 	Short:   "Introspects a prisma database",
