@@ -117,7 +117,8 @@ func DataSourceMetrics(wunderGraphDir string) ([]*Metric, error) {
 			wgpb.DataSourceKind_MYSQL,
 			wgpb.DataSourceKind_SQLSERVER,
 			wgpb.DataSourceKind_MONGODB,
-			wgpb.DataSourceKind_SQLITE:
+			wgpb.DataSourceKind_SQLITE,
+			wgpb.DataSourceKind_PRISMA:
 
 			dataSourceTag = ds.Kind.String()
 			urlVariable = ds.CustomDatabase.GetDatabaseURL()

@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func IntrospectPrismaDatabase(ctx context.Context, introspectionSchema, wundergraphDir string, log *zap.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
+func IntrospectPrismaDatabase(ctx context.Context, introspectionSchema, wundergraphDir string, loadPrismaSchemaFromDatabase bool, log *zap.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
 	engine := NewEngine(
 		&http.Client{
 			Timeout: time.Second * 30,
@@ -20,9 +20,13 @@ func IntrospectPrismaDatabase(ctx context.Context, introspectionSchema, wundergr
 		wundergraphDir,
 	)
 	defer engine.StopQueryEngine()
-	prismaSchema, err = engine.IntrospectPrismaDatabaseSchema(ctx, introspectionSchema)
-	if err != nil {
-		return "", "", "", err
+	if loadPrismaSchemaFromDatabase {
+		prismaSchema, err = engine.IntrospectPrismaDatabaseSchema(ctx, introspectionSchema)
+		if err != nil {
+			return "", "", "", err
+		}
+	} else {
+		prismaSchema = introspectionSchema
 	}
 	err = engine.StartQueryEngine(prismaSchema)
 	if err != nil {

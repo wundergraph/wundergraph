@@ -262,6 +262,7 @@ enum DataSourceKind {
 	SQLSERVER = 5;
 	MONGODB = 6;
 	SQLITE = 7;
+	PRISMA = 8;
 }
 
 message DataSourceCustom_REST {

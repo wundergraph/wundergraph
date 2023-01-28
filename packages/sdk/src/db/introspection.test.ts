@@ -11,9 +11,10 @@ import { DatabaseIntrospection } from '../definition';
 test.skip('introspection', async () => {
 	const result = await introspectPrismaDatabaseWithRetries(
 		{
-			databaseURL: 'postgresql://admin:admin@localhost:54322/example?schema=public',
+			databaseURL: 'prisma.schema',
+			apiNamespace: 'test',
 		},
-		'postgresql',
+		'prisma',
 		1
 	);
 	assert.equal(result.success, true);
