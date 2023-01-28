@@ -21,7 +21,6 @@ const Functions = () => {
 				<div>id: {data?.id}</div>
 				<div>name: {data?.userName}</div>
 				<div>bio: {data?.bio}</div>
-				<pre>{JSON.stringify(data?.weather)}</pre>
 			</div>
 		</div>
 	);
