@@ -10,6 +10,7 @@ import hash from 'object-hash';
 import path from 'path';
 import { resolveVariable } from '../configure/variables';
 import { Logger } from '../logger';
+import { DatabaseSchema, prisma } from './types';
 
 export interface PrismaDatabaseIntrospectionResult {
 	success: boolean;
@@ -21,8 +22,6 @@ export interface PrismaDatabaseIntrospectionResult {
 	jsonTypeFields: SingleTypeField[];
 	jsonResponseFields: SingleTypeField[];
 }
-
-export type DatabaseSchema = 'postgresql' | 'mysql' | 'sqlite' | 'sqlserver' | 'planetscale' | 'mongodb' | 'prisma';
 
 const _ensurePrisma = async () => {
 	Logger.info('Installing prisma...');
@@ -67,7 +66,7 @@ const introspectPrismaDatabase = async (
 	out.interpolateVariableDefinitionAsJSON = [];
 	out.jsonTypeFields = [];
 	out.jsonResponseFields = [];
-	if (databaseSchema === 'prisma') {
+	if (databaseSchema === prisma) {
 		return out;
 	}
 	const dataSourceStart = out.prisma_schema.indexOf('datasource');
