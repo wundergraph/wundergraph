@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -24,7 +24,7 @@ var prismaCmd = &cobra.Command{
 		if !filepath.IsAbs(schemaFilePath) {
 			schemaFilePath = filepath.Join(wunderGraphDir, schemaFilePath)
 		}
-		content, err := ioutil.ReadFile(schemaFilePath)
+		content, err := os.ReadFile(schemaFilePath)
 		if err != nil {
 			return err
 		}
