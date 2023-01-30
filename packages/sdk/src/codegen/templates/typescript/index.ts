@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
+import { GraphQLOperation } from '../../../graphql/operations';
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -226,10 +227,10 @@ const typescriptFunctionsImports = (config: CodeGenerationConfig): string => {
 		return '';
 	}
 	const relBasePath = path.relative(config.outPath, config.wunderGraphDir);
+	// Be careful with translating filesystem paths to import paths on Windows
+	const relImport = (op: GraphQLOperation) => path.join(relBasePath, 'operations', op.PathName).replace(/\\/g, '/');
 	return (
-		ops
-			.map((op) => `import type function_${op.Name} from '${path.join(relBasePath, 'operations', op.PathName)}';\n`)
-			.join('') +
+		ops.map((op) => `import type function_${op.Name} from '${relImport(op)}';\n`).join('') +
 		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
 		'\n'
 	);

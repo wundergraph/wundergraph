@@ -252,7 +252,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	if err := r.registerAuth(r.insecureCookies); err != nil {
-		return nil, err
+		if !r.devMode {
+			// If authentication fails in production, consider this a fatal error
+			return nil, err
+		}
+		r.log.Error("configuring auth", zap.Error(err))
 	}
 
 	for _, s3Provider := range api.S3UploadConfiguration {
