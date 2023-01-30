@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -264,35 +265,59 @@ func (n *Node) Close() error {
 	return nil
 }
 
-func (n *Node) newListener(configuration *apihandler.Listener) (net.Listener, error) {
+func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener, error) {
 	cfg := net.ListenConfig{
 		KeepAlive: 90 * time.Second,
 	}
 
 	host, port := configuration.Host, configuration.Port
 
-	bindProto := ""
-	address := ""
-	// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
-	// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
-	// to pass the network as tcp4. Dual stack has produced some issues in container environments
-	// for those reasons we are using tcp4 or tcp6 explicitly.
-	if IsIPv4(host) {
-		bindProto = "tcp4"
-		address = fmt.Sprintf("%s:%d", host, port)
-	} else if IsIPv6(host) {
-		bindProto = "tcp6"
-		address = fmt.Sprintf("[%s]:%d", host, port)
-	}
-
-	listener, err := cfg.Listen(context.Background(), bindProto, address)
+	var addrs []net.IP
+	// Calling LookupHost on an IP address will return the same
+	// address, so we don't need to handle addresses and hostnames
+	// differently
+	hostAddrs, err := net.DefaultResolver.LookupHost(n.ctx, host)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can't resolve host to listen on %s: %w", host, err)
+	}
+	for _, addr := range hostAddrs {
+		if ip := net.ParseIP(addr); ip != nil {
+			addrs = append(addrs, ip)
+		}
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("host %s didn't resolve to any valid IP adddresses", host)
 	}
 
-	return &proxyproto.Listener{
-		Listener: listener,
-	}, nil
+	var listeners []net.Listener
+	for _, addr := range addrs {
+		saddr := addr.String()
+		var bindAddr string
+		var bindProto string
+		// By default, Go uses dual stack. That means, if we pass 0.0.0.0 (ipv4), it will
+		// bind on both IPv4 and IPv6. If we want to listen on IPv4 only, we need
+		// to pass the network as tcp4. Dual stack has produced some issues in container environments
+		// for those reasons we are using tcp4 or tcp6 explicitly.
+		if addr.To4() != nil {
+			bindProto = "tcp4"
+			bindAddr = saddr
+		} else {
+			bindProto = "tcp6"
+			bindAddr = fmt.Sprintf("[%s]", saddr)
+		}
+
+		toListen := fmt.Sprintf("%s:%d", bindAddr, port)
+		listener, err := cfg.Listen(n.ctx, bindProto, toListen)
+		if err != nil {
+			return nil, fmt.Errorf("error listening on %s: %w", toListen, err)
+		}
+
+		listeners = append(listeners, &proxyproto.Listener{
+			Listener: listener,
+		})
+	}
+
+	return listeners, nil
 }
 
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
@@ -313,12 +338,18 @@ func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 }
 
 func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (*HealthCheckReport, bool) {
+	deploymentId := os.Getenv("WG_CLOUD_DEPLOYMENT_ID")
+	commitSHA := os.Getenv("WG_CLOUD_DEPLOYMENT_COMMIT_SHA")
+	commitURL := os.Getenv("WG_CLOUD_DEPLOYMENT_COMMIT_URL")
 	healthCheck := &HealthCheckReport{
 		ServerStatus: "NOT_READY",
 		// For now we assume that the server is ready
 		// because we don't have any health checks
-		NodeStatus: "READY",
-		BuildInfo:  n.info,
+		NodeStatus:   "READY",
+		BuildInfo:    n.info,
+		DeploymentId: deploymentId,
+		CommitSHA:    commitSHA,
+		CommitURL:    commitURL,
 	}
 
 	if n.options.hooksServerHealthCheck {
@@ -498,30 +529,39 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		}()
 	}
 
-	listener, err := n.newListener(nodeConfig.Api.Options.Listener)
+	listeners, err := n.newListeners(nodeConfig.Api.Options.Listener)
 	if err != nil {
 		return err
 	}
 
-	n.log.Info("listening on",
-		zap.String("addr", listener.Addr().String()),
-	)
+	g, _ := errgroup.WithContext(n.ctx)
 
-	if err := n.server.Serve(listener); err != nil {
-		if err == http.ErrServerClosed {
-			n.log.Debug("listener closed",
-				zap.String("addr", listener.Addr().String()),
+	for _, listener := range listeners {
+		l := listener
+		g.Go(func() error {
+			n.log.Info("listening on",
+				zap.String("addr", l.Addr().String()),
 			)
-			return nil
-		}
-		return err
+
+			err := n.server.Serve(l)
+			if err == nil {
+				return nil
+			}
+			if err == http.ErrServerClosed {
+				n.log.Debug("listener closed",
+					zap.String("addr", l.Addr().String()),
+				)
+				return nil
+			}
+			return err
+		})
 	}
 
 	n.log.Debug("public node url",
 		zap.String("publicNodeUrl", nodeConfig.Api.Options.PublicNodeUrl),
 	)
 
-	return nil
+	return g.Wait()
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
@@ -644,24 +684,4 @@ func (n *Node) reloadFileConfig(filePath string) error {
 	n.configCh <- config
 
 	return nil
-}
-
-func uniqueStrings(slice []string) []string {
-	keys := make(map[string]bool)
-	var list []string
-	for _, entry := range slice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
-}
-
-func IsIPv4(address string) bool {
-	return strings.Count(address, ":") < 2
-}
-
-func IsIPv6(address string) bool {
-	return strings.Count(address, ":") >= 2
 }

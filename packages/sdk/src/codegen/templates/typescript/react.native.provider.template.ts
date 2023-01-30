@@ -1,6 +1,7 @@
 //language=handlebars
 export const template = `
 import type { UserListener } from "@wundergraph/sdk";
+import type { OperationMetadata } from "@wundergraph/sdk/client";
 import { Client } from "./wundergraph.client";
 import type { User } from "./wundergraph.server";
 import React, { createContext, FunctionComponent, useMemo, useEffect, useState, Dispatch, SetStateAction } from "react";

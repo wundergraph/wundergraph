@@ -29,7 +29,7 @@ import {
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
 import path from 'path';
-import { DatabaseSchema, introspectPrismaDatabaseWithRetries } from '../db/introspection';
+import { introspectPrismaDatabaseWithRetries } from '../db/introspection';
 import {
 	applyNameSpaceToFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
@@ -41,6 +41,7 @@ import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphql } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
+import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -49,6 +50,8 @@ export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTIO
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 // When true, throw an exception an error is found while loading operations
 export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
+
+export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
 
 export interface RenameType {
 	from: string;
@@ -77,13 +80,15 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		dataSources: DataSource<T>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
-		interpolateVariableDefinitionAsJSON: string[]
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
 		this.DataSources = dataSources;
 		this.Fields = fields;
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
+		this.CustomJsonScalars = customJsonScalars;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -92,6 +97,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Fields: FieldConfiguration[];
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
+	CustomJsonScalars?: string[];
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -205,6 +211,8 @@ export class SQLServerApi extends Api<DatabaseApiCustom> {}
 
 export class MongoDBApi extends Api<DatabaseApiCustom> {}
 
+export class PrismaApi extends Api<DatabaseApiCustom> {}
+
 export interface DataSource<Custom = unknown> {
 	Id?: string;
 	Kind: DataSourceKind;
@@ -221,6 +229,7 @@ interface GraphQLIntrospectionOptions {
 	loadSchemaFromString?: string | (() => string);
 	customFloatScalars?: string[];
 	customIntScalars?: string[];
+	customJSONScalars?: string[];
 	// switching internal to true will mark the origin as an internal GraphQL API
 	// this will forward the original request and user info to the internal upstream
 	// so that the request context can be enriched
@@ -256,6 +265,15 @@ export interface ReplaceCustomScalarTypeFieldConfiguration {
 
 export interface DatabaseIntrospection extends IntrospectionConfiguration {
 	databaseURL: InputVariable;
+	apiNamespace?: string;
+	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
+	// this is useful for specifying type definitions for JSON objects
+	schemaExtension?: string;
+	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
+}
+
+export interface PrismaIntrospection extends IntrospectionConfiguration {
+	prismaFilePath: string;
 	apiNamespace?: string;
 	// the schemaExtension field is used to extend the generated GraphQL schema with additional types and fields
 	// this is useful for specifying type definitions for JSON objects
@@ -417,18 +435,20 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 
 const databaseSchemaToKind = (schema: DatabaseSchema): DataSourceKind => {
 	switch (schema) {
-		case 'planetscale':
+		case planetscale:
 			return DataSourceKind.MYSQL;
-		case 'mysql':
+		case mysql:
 			return DataSourceKind.MYSQL;
-		case 'postgresql':
+		case postgresql:
 			return DataSourceKind.POSTGRESQL;
-		case 'sqlite':
+		case sqlite:
 			return DataSourceKind.SQLITE;
-		case 'sqlserver':
+		case sqlserver:
 			return DataSourceKind.SQLSERVER;
-		case 'mongodb':
+		case mongodb:
 			return DataSourceKind.MONGODB;
+		case prisma:
+			return DataSourceKind.PRISMA;
 		default:
 			throw new Error(`databaseSchemaToKind not implemented for: ${schema}`);
 	}
@@ -548,7 +568,7 @@ export const introspect = {
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				introspection,
-				'postgresql',
+				postgresql,
 				5
 			);
 			return new PostgresqlApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
@@ -557,7 +577,7 @@ export const introspect = {
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				introspection,
-				'mysql',
+				mysql,
 				5
 			);
 			return new MySQLApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
@@ -566,7 +586,7 @@ export const introspect = {
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				introspection,
-				'planetscale',
+				planetscale,
 				5
 			);
 			return new PlanetscaleApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
@@ -575,7 +595,7 @@ export const introspect = {
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				introspection,
-				'sqlite',
+				sqlite,
 				5
 			);
 			return new SQLiteApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
@@ -584,7 +604,7 @@ export const introspect = {
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				introspection,
-				'sqlserver',
+				sqlserver,
 				5
 			);
 			return new SQLServerApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
@@ -593,10 +613,19 @@ export const introspect = {
 		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<MongoDBApi> => {
 			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
 				introspection,
-				'mongodb',
+				mongodb,
 				5
 			);
 			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}),
+	prisma: async (introspection: PrismaIntrospection): Promise<PrismaApi> =>
+		introspectWithCache(introspection, async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				{ ...introspection, databaseURL: introspection.prismaFilePath },
+				prisma,
+				5
+			);
+			return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
 	federation: introspectFederation,
 	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {

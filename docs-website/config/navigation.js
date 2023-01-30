@@ -144,8 +144,12 @@ const navigation = [
 				href: '/docs/guides/signing-origin-requests',
 			},
 			{
-				title: 'Configure Authorization',
-				href: '/docs/guides/configure-authorization',
+				title: 'Token Based Authentication with Next Auth',
+				href: '/docs/guides/token-based-authentication-with-next-auth',
+			},
+			{
+				title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
+				href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
 			},
 		],
 	},
@@ -204,6 +208,10 @@ const navigation = [
 				href: '/docs/examples/nextjs',
 			},
 			{
+				title: 'NextJS TypeScript Operations',
+				href: '/docs/examples/nextjs-typescript-operations',
+			},
+			{
 				title: 'NextJS + React Query',
 				href: '/docs/examples/nextjs-react-query',
 			},
@@ -256,27 +264,27 @@ const navigation = [
 				href: '/docs/examples/keycloak-openid-connect-authentication',
 			},
 			{
-				title: 'GraphQl Apollo subscriptions',
+				title: 'GraphQL Apollo subscriptions',
 				href: '/docs/examples/graphql-apollo-subscriptions',
 			},
 			{
-				title: 'GraphQl Yoga subscriptions',
+				title: 'GraphQL Yoga subscriptions',
 				href: '/docs/examples/graphql-yoga-subscriptions',
 			},
 			{
-				title: 'GraphQl SSE subscriptions',
+				title: 'GraphQL SSE subscriptions',
 				href: '/docs/examples/graphql-sse-subscriptions',
 			},
 			{
-				title: 'GraphQl WS subscriptions',
+				title: 'GraphQL WS subscriptions',
 				href: '/docs/examples/graphql-ws-subscriptions',
 			},
 			{
-				title: 'GraphQl Hasura WS subscriptions',
+				title: 'GraphQL Hasura WS subscriptions',
 				href: '/docs/examples/graphql-hasura-subscriptions',
 			},
 			{
-				title: 'GraphQl subscriptions hooks',
+				title: 'GraphQL subscriptions hooks',
 				href: '/docs/examples/graphql-subscriptions-hooks',
 			},
 			{
@@ -303,6 +311,10 @@ const navigation = [
 			{
 				title: 'TypeScript webhooks to integrate third party applications',
 				href: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/docs/features/typescript-operations',
 			},
 			{
 				title: 'API Namespacing',
@@ -829,10 +841,6 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
 			},
 			{
-				title: '.graphqlconfig',
-				href: '/docs/wundergraph-config-ts-reference/configure-graphqlconfig',
-			},
-			{
 				title: 'Schema extension',
 				href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
 			},
@@ -908,6 +916,15 @@ const navigation = [
 			{
 				title: 'Custom GraphQL Servers',
 				href: '/docs/wundergraph-server-ts-reference/custom-graphql-servers',
+			},
+		],
+	},
+	{
+		title: 'TypeScript Operations Reference',
+		links: [
+			{
+				title: 'Overview',
+				href: '/docs/typescript-operations-reference',
 			},
 		],
 	},

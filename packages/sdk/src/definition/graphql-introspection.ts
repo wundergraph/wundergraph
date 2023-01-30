@@ -1,4 +1,4 @@
-import { fetchFederationServiceSDL, isFederationService } from './federation-introspection';
+import { fetchFederationServiceSDL } from './federation-introspection';
 import { configuration } from '../graphql/configuration';
 import {
 	buildClientSchema,
@@ -69,7 +69,9 @@ export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HT
 	return baseHeaders;
 };
 
-export const introspectGraphql = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
+export const introspectGraphql = async (
+	introspection: Omit<GraphQLIntrospection, 'isFederation'>
+): Promise<GraphQLApi> => {
 	return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
 		const headersBuilder = new HeadersBuilder();
 		const introspectionHeadersBuilder = new HeadersBuilder();
@@ -87,7 +89,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 
 		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
 		schema = lexicographicSortSchema(schema);
-		const federationEnabled = isFederationService(schema);
+		const federationEnabled = introspection.isFederation || false;
 		const { upstreamSchema, argumentReplacements } = cleanupSchema(schema, introspection);
 		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
 		let serviceSDL: string | undefined;
@@ -108,6 +110,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const graphQLSchema = buildSchema(schemaSDL);
 		const { RootNodes, ChildNodes, Fields } = configuration(
 			schemaDocumentNode,
+			introspection.customJSONScalars,
 			serviceDocumentNode,
 			argumentReplacements
 		);
@@ -181,7 +184,8 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 				introspection.apiNamespace
 			),
 			generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
-			[]
+			[],
+			introspection.customJSONScalars
 		);
 	});
 };

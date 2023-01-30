@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -130,10 +131,10 @@ func TestSkip(t *testing.T) {
 		skipPath          = "/test"
 		expectedSkipCount = 1
 	)
-	skipCount := 0
+	skipCount := int32(0)
 	m := New(timeoutDuration, WithSkip(func(r *http.Request) bool {
 		if r.URL.Path == skipPath {
-			skipCount += 1
+			atomic.AddInt32(&skipCount, 1)
 			return true
 		}
 		return false
@@ -147,22 +148,23 @@ func TestSkip(t *testing.T) {
 		_, _ = io.WriteString(w, "Hello World")
 	})))
 
+	var wg sync.WaitGroup
+	wg.Add(4)
 	time.AfterFunc(maxWait/2, func() {
+		defer wg.Done()
 		sendDummyRequest(server, skipPath)
 	})
 
-	time.AfterFunc(maxWait*3/2, func() {
+	time.AfterFunc(maxWait*2, func() {
+		defer wg.Done()
 		sendDummyRequest(server, "/")
 	})
 
 	ctx1, cancel1 := context.WithTimeout(context.Background(), timeoutDuration)
 	defer cancel1()
 
-	ctx2, cancel2 := context.WithTimeout(context.Background(), timeoutDuration*2)
+	ctx2, cancel2 := context.WithTimeout(context.Background(), timeoutDuration*3)
 	defer cancel2()
-
-	var wg sync.WaitGroup
-	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
@@ -180,7 +182,7 @@ func TestSkip(t *testing.T) {
 
 	wg.Wait()
 
-	if skipCount != expectedSkipCount {
+	if atomic.LoadInt32(&skipCount) != expectedSkipCount {
 		t.Errorf("expecting skipCount = %d, got %d instead", expectedSkipCount, skipCount)
 	}
 }

@@ -26,6 +26,8 @@ const tags = {
 		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'Architecture Introduction': '/docs/architecture/architecture-diagram',
 	join: '/docs/features/cross-api-joins-to-compose-apis',
+	'JOIN feature': '/docs/features/cross-api-joins-to-compose-apis',
+	JOIN: '/docs/features/cross-api-joins-to-compose-apis',
 	'Cross API JOIN': '/docs/features/cross-api-joins-to-compose-apis',
 	JOINs: '/docs/features/cross-api-joins-to-compose-apis',
 	'GraphQL to JSON RPC compiler': '/docs/features/graphql-to-json-rpc-compiler',
@@ -83,10 +85,6 @@ const tags = {
 		'/docs/features/type-script-webhooks-to-integrate-third-party-applications',
 	Webhooks:
 		'/docs/features/type-script-webhooks-to-integrate-third-party-applications',
-	hooks:
-		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
-	Hooks:
-		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
 	'configure authorization': '/docs/guides/configure-authorization',
 	'configure Authorization': '/docs/guides/configure-authorization',
 	authorization: '/docs/features/authorization-role-based-access-control-rbac',
@@ -196,8 +194,6 @@ const tags = {
 		'/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
 	mutatingPostAuthentication:
 		'/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
-	authentication: '/docs/features/openid-connect-based-authentication',
-	Authentication: '/docs/features/openid-connect-based-authentication',
 	'supported DataSources': '/docs/supported-data-sources',
 	DataSources: '/docs/supported-data-sources',
 	'supported data sources': '/docs/supported-data-sources',

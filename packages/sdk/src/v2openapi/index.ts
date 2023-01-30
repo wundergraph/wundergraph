@@ -139,10 +139,7 @@ class RESTApiBuilder {
 			}
 		});
 		const filtered = this.filterEmptyTypes(this.graphQLSchema);
-		const { schemaSDL: replaced, customScalarTypeFields } = transformSchema.replaceCustomScalars(
-			print(filtered),
-			this.introspection
-		);
+		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
 		const dataSources = this.dataSources.map((ds) => {
@@ -182,7 +179,7 @@ class RESTApiBuilder {
 		path: string,
 		verb: HTTPMethod
 	) => {
-		const fieldName = this.prettyFieldName(this.resolveFieldName(operationObject, path, verb));
+		const fieldName = getFormattedFieldName(this.resolveFieldName(operationObject, path, verb));
 		if (!operationObject.responses) {
 			return;
 		}
@@ -222,6 +219,8 @@ class RESTApiBuilder {
 			RequestTimeoutSeconds: this.introspection.requestTimeoutSeconds ?? 0,
 		});
 
+		const isJsonResponse = Object.keys(operationObject.responses).length === 0;
+
 		this.fields.push({
 			typeName: parentType,
 			fieldName: fieldName,
@@ -229,9 +228,10 @@ class RESTApiBuilder {
 			argumentsConfiguration: [],
 			requiresFields: [],
 			path: [],
-			unescapeResponseJson: false,
+			unescapeResponseJson: isJsonResponse,
 		});
-		if (Object.keys(operationObject.responses).length === 0) {
+
+		if (isJsonResponse) {
 			this.ensureType('scalar', 'JSON');
 			this.addField(parentType, 'type', fieldName, 'JSON', []);
 		}
@@ -856,6 +856,8 @@ class RESTApiBuilder {
 		fieldTypeName: string,
 		enclosingTypes: EnclosingType[]
 	) => {
+		const isJSONField = fieldTypeName === 'JSON';
+
 		const fieldType = this.resolveTypeNode(fieldTypeName, enclosingTypes);
 		// remove non alphanumeric characters as well as leading numbers
 		const sanitizedFieldName = fieldName.replace(/[^a-zA-Z0-9_]/g, '').replace(/^[0-9]+/, '');
@@ -867,9 +869,26 @@ class RESTApiBuilder {
 				disableDefaultFieldMapping: true,
 				path: [fieldName],
 				requiresFields: [],
-				unescapeResponseJson: false,
+				unescapeResponseJson: isJSONField,
 				argumentsConfiguration: [],
 			});
+		} else if (isJSONField) {
+			let field: FieldConfiguration | undefined = this.fields.find(
+				(f) => f.typeName === parentName && f.fieldName === fieldName
+			);
+			if (!field) {
+				this.fields.push({
+					typeName: parentName,
+					fieldName: fieldName,
+					disableDefaultFieldMapping: true,
+					argumentsConfiguration: [],
+					requiresFields: [],
+					path: [],
+					unescapeResponseJson: true,
+				});
+			} else {
+				field.unescapeResponseJson = true;
+			}
 		}
 		if (objectKind === 'type') {
 			this.graphQLSchema = visit(this.graphQLSchema, {
@@ -1155,11 +1174,6 @@ class RESTApiBuilder {
 			},
 		};
 	};
-	private prettyFieldName = (input: string): string => {
-		let underscore = input.split('_').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
-		underscore = underscore.split('-').reduce((prev, next) => prev + next[0].toUpperCase() + next.substring(1));
-		return underscore.replace(/\/+/g, '_');
-	};
 	private resolveFieldName = (operationObject: OpenAPIV3.OperationObject, path: string, verb: HTTPMethod): string => {
 		if (operationObject.operationId) {
 			if (operationObject.operationId.startsWith('/')) {
@@ -1167,16 +1181,7 @@ class RESTApiBuilder {
 			}
 			return operationObject.operationId;
 		}
-		const formattedPath = path
-			.split('/')
-			.filter((element) => element !== '')
-			.reduce((prev, current) => {
-				if (current.startsWith('{') && current.endsWith('}')) {
-					const trimmed = current.substring(1, current.length - 1);
-					return prev + 'By' + trimmed[0].toUpperCase() + trimmed.substring(1);
-				}
-				return prev + current[0]?.toUpperCase() + current.substring(1);
-			});
+		const formattedPath = getFormattedPath(path);
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0].toUpperCase() + formattedPath.substring(1);
 	};
 
@@ -1188,18 +1193,18 @@ class RESTApiBuilder {
 			if (current.startsWith('{') && current.endsWith('}')) {
 				const trimmed = current.substring(1, current.length - 1);
 				return (
-					prev + trimmed[0].toUpperCase() + this.prettyFieldName(trimmed.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+					prev + trimmed[0].toUpperCase() + getFormattedFieldName(trimmed.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
 				);
 			}
 			return (
-				prev + current[0]?.toUpperCase() + this.prettyFieldName(current.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
+				prev + current[0]?.toUpperCase() + getFormattedFieldName(current.substring(1).replace(/[^_a-zA-Z0-9]/g, '_'))
 			);
 		});
 		return hTTPMethodToJSON(verb).toLowerCase() + formattedPath[0] + formattedPath.substring(1) + 'Input';
 	}
 
 	private sanitizeName = (name: string): string => {
-		return name.replace(/\[\]/g, '');
+		return name.replace(/\[]/g, '');
 	};
 
 	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
@@ -1244,4 +1249,23 @@ const fixOasReplacer = (key: string, value: any): any => {
 		default:
 			return value;
 	}
+};
+
+export const getFormattedPath = (path: string): string => {
+	let formattedPath = path.split('/').filter((element) => element !== '');
+	if (formattedPath.length < 1) {
+		return path;
+	}
+	return formattedPath.reduce((acc, curr) => {
+		if (curr.startsWith('{') && curr.endsWith('}')) {
+			const trimmed = curr.substring(1, curr.length - 1);
+			return acc + 'By' + trimmed[0].toUpperCase() + trimmed.substring(1);
+		}
+		return acc + curr[0]?.toUpperCase() + curr.substring(1);
+	});
+};
+
+export const getFormattedFieldName = (name: string): string => {
+	const formattedName = name.split(/[_-]+/g).reduce((acc, curr) => acc + curr[0].toUpperCase() + curr.substring(1));
+	return formattedName.replace(/\/+/g, '_');
 };

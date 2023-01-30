@@ -12,6 +12,7 @@ async function main() {
 		// Additional headers to send with every request. Defaults to an empty object.
 		extraHeaders: {},
 	});
+	// graphql operation
 	const result = await client.query({
 		operationName: 'Countries',
 		input: {
@@ -20,8 +21,16 @@ async function main() {
 			},
 		},
 	});
+	// ts operation
+	const result2 = await client.query({
+		operationName: 'users/get',
+		input: {
+			id: '1',
+		},
+	});
 	const andorra = result.data?.countries_countries[0];
-	console.log(andorra);
+	const user = result2.data;
+	console.log({ andorra, user });
 }
 
 main()

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -18,14 +17,19 @@ import (
 
 var configDir string
 
+type Options struct {
+	TelemetryEnabled     bool
+	TelemetryAnonymousID string
+}
+
 // InitConfig - Initialises config file for Viper
-func InitConfig(isTelemetryEnabled bool) {
+func InitConfig(options Options) {
 	if err := initConfigDir(); err != nil {
 		fmt.Println("Error accessing config directory at $HOME/.wundergraph", err)
 		return
 	}
 
-	initViper(isTelemetryEnabled)
+	initViper(options)
 }
 
 // ConfigDir - Returns Directory holding the Config file
@@ -35,7 +39,7 @@ func ConfigDir() string {
 
 // ConfigFilePath - returns the path to the config file
 func ConfigFilePath() string {
-	return path.Join(configDir, "config.json")
+	return filepath.Join(configDir, "config.json")
 }
 
 func initConfigDir() error {
@@ -57,17 +61,22 @@ func initConfigDir() error {
 	return nil
 }
 
-func initViper(isTelemetryEnabled bool) {
+func initViper(options Options) {
 	if err := loadConfig(); err != nil {
 		fmt.Println("Error loading config", err)
 	}
 
 	// Init anonymous user id that is used to distinguish between different users
-	if isTelemetryEnabled && !viper.InConfig("anonymousID") {
-		viper.Set("anonymousID", ksuid.New().String())
-		allSettings := viper.AllSettings()
-		if err := SaveConfig(allSettings); err != nil {
-			log.Printf("Could not save config: %v\n", err)
+	if options.TelemetryEnabled {
+		if options.TelemetryAnonymousID != "" {
+			viper.Set("anonymousID", options.TelemetryAnonymousID)
+		}
+		if !viper.InConfig("anonymousID") {
+			viper.Set("anonymousID", ksuid.New().String())
+			allSettings := viper.AllSettings()
+			if err := SaveConfig(allSettings); err != nil {
+				log.Printf("Could not save config: %v\n", err)
+			}
 		}
 	}
 

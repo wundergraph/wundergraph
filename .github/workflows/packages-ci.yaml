@@ -6,6 +6,7 @@ on:
       - next
     paths:
       - 'packages/**/*'
+      - 'testapps/**/*'
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
@@ -18,6 +19,7 @@ on:
       - main
       - next
     paths:
+      - 'testapps/**/*'
       - 'packages/**/*'
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
@@ -91,7 +93,7 @@ jobs:
           main-branch-name: ${{ steps.branch-name.outputs.current_branch }} # Get the last successful commit for the current branch.
 
       - name: Check for formatting errors
-        run: eval "pnpx prettier --check $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.last_successful_commit_push.outputs.base }} | xargs)"
+        run: eval "pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.last_successful_commit_push.outputs.base }} | xargs)"
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code

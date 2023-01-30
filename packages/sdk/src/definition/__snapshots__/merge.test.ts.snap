@@ -507,7 +507,8 @@ exports[`Should be merged: merged_apis 1`] = `
     }
   ],
   "Types": [],
-  "interpolateVariableDefinitionAsJSON": []
+  "interpolateVariableDefinitionAsJSON": [],
+  "CustomJsonScalars": []
 }"
 `;
 
