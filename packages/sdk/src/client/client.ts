@@ -122,8 +122,9 @@ export class Client {
 
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
 	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponseError> {
+		const text = await response.text();
 		try {
-			const json = await response.json();
+			const json = JSON.parse(text);
 
 			switch (response.status) {
 				case 401:
@@ -134,7 +135,7 @@ export class Client {
 					return new ResponseError(json.errors[0]?.message || json.message, response.status);
 			}
 		} catch {
-			return new ResponseError('Response not OK', response.status);
+			return new ResponseError(text.length ? text : 'Response not OK', response.status);
 		}
 	}
 
