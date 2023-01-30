@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.133.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.132.1...@wundergraph/sdk@0.133.0) (2023-01-30)
+
+### Features
+
+* add prisma datasource ([#605](https://github.com/wundergraph/wundergraph/issues/605)) ([2f0cfa5](https://github.com/wundergraph/wundergraph/commit/2f0cfa5e420080772a6552f4a256c7d71906f84a)) (@jensneuse)
+* federation, support extend keyword ([#578](https://github.com/wundergraph/wundergraph/issues/578)) ([903e880](https://github.com/wundergraph/wundergraph/commit/903e88024f65c03d2354cf199c865e44edd22a6b)) (@YuriBuerov)
+
+### Bug Fixes
+
+* enforce token validation if any token keys are defined ([#580](https://github.com/wundergraph/wundergraph/issues/580)) ([4bb88fc](https://github.com/wundergraph/wundergraph/commit/4bb88fc155a058dfd0003b7d86caa0afcfa6b86c)) (@fiam)
+* paths and uri composition on Windows when using nested directories for operations ([#607](https://github.com/wundergraph/wundergraph/issues/607)) ([ee2467f](https://github.com/wundergraph/wundergraph/commit/ee2467f340927798fa25369dbe141509e8b7d739)) (@fiam)
+
 ## [0.132.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.132.0...@wundergraph/sdk@0.132.1) (2023-01-23)
 
 ### Bug Fixes
