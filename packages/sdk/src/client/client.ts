@@ -135,7 +135,7 @@ export class Client {
 					return new ResponseError(json.errors[0]?.message || json.message, response.status);
 			}
 		} catch {
-			return new ResponseError(text.length ? text : 'Response not OK', response.status);
+			return new ResponseError(text.length ? text : 'Response is not OK', response.status);
 		}
 	}
 
