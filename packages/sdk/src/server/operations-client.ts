@@ -31,6 +31,7 @@ export interface Options {
 	baseURL: string;
 	extraHeaders?: { [key: string]: string };
 	clientRequest: any;
+	customFetch?: (input: URL | RequestInfo, init?: RequestInit) => Promise<globalThis.Response>;
 }
 
 export class OperationsClient<Queries, Mutations, Subscriptions> {
@@ -41,6 +42,10 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 	private readonly options: Options;
 
 	private subscriptions: AsyncGenerator<any>[] = [];
+
+	private fetch(input: URL | RequestInfo, init?: RequestInit): Promise<globalThis.Response> {
+		return this.options.customFetch ? this.options.customFetch(input, init) : fetch(input, init);
+	}
 
 	public cancelSubscriptions() {
 		this.subscriptions.forEach((sub) => sub.return(0));
@@ -65,7 +70,7 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 			}
 		);
 		const input = (args as OperationArgs<T, ExtractInput<Queries[T]>>).input || undefined;
-		const res = await fetch(url, {
+		const res = await this.fetch(url, {
 			headers,
 			method: 'POST',
 			body: JSON.stringify({ input, __wg: { clientRequest: this.options.clientRequest } }),
@@ -96,6 +101,7 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 		const input = (args as OperationArgs<T, ExtractInput<Subscriptions[T]>>).input || undefined;
 		const body = JSON.stringify({ input, __wg: { clientRequest: this.options.clientRequest } });
 		const abort = new AbortController();
+		const fetch = this.fetch;
 		const generator = async function* () {
 			try {
 				const res = await fetch(url, {
