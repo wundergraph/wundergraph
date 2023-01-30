@@ -177,6 +177,7 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 
 		re, err := regexp.Compile(fmt.Sprintf(`%s\b`, regexp.QuoteMeta(currentName)))
 		if err != nil {
+			p.log.Error("failed to compile regexp", zap.Error(err))
 			continue
 		}
 
