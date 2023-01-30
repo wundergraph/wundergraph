@@ -1077,6 +1077,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		case DataSourceKind.MONGODB:
 		case DataSourceKind.SQLSERVER:
 		case DataSourceKind.SQLITE:
+		case DataSourceKind.PRISMA:
 			const database = source.Custom as DatabaseApiCustom;
 			out.customDatabase = {
 				databaseURL: database.databaseURL,

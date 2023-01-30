@@ -18,7 +18,7 @@ var sqlserverCmd = &cobra.Command{
 			provider = "sqlserver"
 			url      = "%s"
 		}`, databaseURL)
-		return introspectDatabase(introspectionSchema)
+		return introspectDatabase(introspectionSchema, true)
 	},
 }
 

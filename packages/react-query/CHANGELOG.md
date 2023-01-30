@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.1...@wundergraph/react-query@0.5.2) (2023-01-30)
+
+### Bug Fixes
+
+* add isSubscribed to return types ([#591](https://github.com/wundergraph/wundergraph/issues/591)) ([1d13051](https://github.com/wundergraph/wundergraph/commit/1d13051be9277d25ddaaa66035f9504790f64165)) (@Pagebakers)
+
 ## [0.5.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.0...@wundergraph/react-query@0.5.1) (2023-01-23)
 
 **Note:** Version bump only for package @wundergraph/react-query
