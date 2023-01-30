@@ -29,28 +29,32 @@ const navigation = [
 	},
 	{
 		title: 'Getting started',
-		href: '/getting-started',
+		href: '/docs/getting-started',
 		paths: ['/docs/tutorials', '/docs/examples'],
 		icon: <BoltIcon />,
 		links: [
 			{
 				title: 'Overview',
-				href: '/getting-started',
+				href: '/docs/getting-started',
+			},
+			{
+				title: 'Quickstart',
+				href: '/docs/getting-started/quickstart',
 			},
 			{
 				title: 'Framework Quickstarts',
 				links: [
 					{
 						title: 'Next.js',
-						href: '/getting-started/nextjs',
+						href: '/docs/getting-started/nextjs-quickstart',
 					},
 					{
 						title: 'Vite',
-						href: '/getting-started/vite',
+						href: '/docs/getting-started/vite-quickstart',
 					},
 					{
 						title: 'Remix',
-						href: '/getting-started/remix',
+						href: '/docs/getting-started/remix-quickstart',
 					},
 				],
 			},
@@ -309,7 +313,20 @@ const navigation = [
 			},
 			{
 				title: 'Supported Providers',
-				links: [],
+				links: [
+					{
+						title: 'OpenID Connect',
+						href: '/docs/auth/open-id-connect',
+					},
+					{
+						title: 'Auth0',
+						href: '/docs/auth/auth0',
+					},
+					{
+						title: 'Keycloak',
+						href: '/docs/auth/keycloak',
+					},
+				],
 			},
 		],
 	},
@@ -403,14 +420,23 @@ const navigation = [
 			},
 			{
 				title: 'Supported Providers',
-				links: [],
+				links: [
+					{
+						title: 'AWS S3',
+						href: '/docs/storage/aws-s3',
+					},
+					{
+						title: 'Minio',
+						href: '/docs/storage/minio',
+					},
+				],
 			},
 		],
 	},
 	{ type: 'divider' },
 	{
 		title: 'Platform',
-		href: '/docs/platform',
+		href: '/docs/architecture',
 		paths: [
 			'/docs/architecture',
 			'/docs/components-of-wundergraph',
@@ -420,10 +446,6 @@ const navigation = [
 		],
 		icon: <CubeIcon />,
 		links: [
-			{
-				title: 'Overview',
-				href: '/docs/platform',
-			},
 			{
 				title: 'Architecture',
 				links: [
@@ -1225,25 +1247,25 @@ const navigation = [
 			},
 		],
 	},
-	{
-		title: 'WunderHub Reference',
-		href: '/docs/wunderhub-reference',
-		icon: <CloudArrowUpIcon />,
-		links: [
-			{
-				title: 'Overview',
-				href: '/docs/wunderhub-reference',
-			},
-			{
-				title: 'Publish an API to WunderHub',
-				href: '/docs/wunderhub-reference/publish-api-to-wunderhub',
-			},
-			{
-				title: 'Integrate an API from WunderHub',
-				href: '/docs/wunderhub-reference/integrate-api-from-wunderhub',
-			},
-		],
-	},
+	// {
+	// 	title: 'WunderHub Reference',
+	// 	href: '/docs/wunderhub-reference',
+	// 	icon: <CloudArrowUpIcon />,
+	// 	links: [
+	// 		{
+	// 			title: 'Overview',
+	// 			href: '/docs/wunderhub-reference',
+	// 		},
+	// 		{
+	// 			title: 'Publish an API to WunderHub',
+	// 			href: '/docs/wunderhub-reference/publish-api-to-wunderhub',
+	// 		},
+	// 		{
+	// 			title: 'Integrate an API from WunderHub',
+	// 			href: '/docs/wunderhub-reference/integrate-api-from-wunderhub',
+	// 		},
+	// 	],
+	// },
 	{ type: 'divider' },
 	{
 		title: 'About WunderGraph',

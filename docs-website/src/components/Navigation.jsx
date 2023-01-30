@@ -101,6 +101,7 @@ export function Navigation({ navigation, className }) {
 const PrimaryNavLink = ({ href, title, icon, className }) => {
 	let router = useRouter();
 	const ref = React.useRef(null);
+	const isActive = href === router.pathname;
 	return (
 		<Link
 			ref={ref}
@@ -109,14 +110,22 @@ const PrimaryNavLink = ({ href, title, icon, className }) => {
 				ref.current.parentNode?.parentNode?.parentNode?.parentNode?.scrollTo({ top: 0 });
 			}}
 			className={clsx(
-				'flex w-full items-center py-2',
-				href === router.pathname
+				'active group flex w-full items-center py-2',
+				isActive
 					? 'font-semibold text-pink-500 before:bg-pink-500'
-					: 'text-gray-500  hover:text-gray-800 dark:text-gray-400 dark:before:bg-gray-700 dark:hover:text-gray-300',
+					: 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:before:bg-gray-700 dark:hover:text-gray-100',
 				className
 			)}
 		>
-			{icon && <span className="mr-2 inline-block h-4 w-4">{icon}</span>}
+			{icon && (
+				<span
+					className={clsx('mr-2 inline-block h-4 w-4 opacity-40 group-hover:opacity-90', {
+						'opacity-100': isActive,
+					})}
+				>
+					{icon}
+				</span>
+			)}
 			{title}
 		</Link>
 	);

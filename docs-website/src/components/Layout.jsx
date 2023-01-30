@@ -12,6 +12,8 @@ import navigation from '../../config/navigation';
 import { GitHubIcon } from './icons/Github';
 import { DocsFooter } from './DocsFooter';
 import Comments from './Comments';
+import { PopupButton } from '@typeform/embed-react';
+import { Events, plausible } from '@/utils/analytics';
 
 function Header({ navigation }) {
 	let [isScrolled, setIsScrolled] = useState(false);
@@ -52,7 +54,23 @@ function Header({ navigation }) {
 				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
 					<Search />
 				</div>
-				<div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
+				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-8 md:flex-grow">
+					<PopupButton
+						id={'cn3Zwo5B'}
+						size={50}
+						className="relative z-10 flex h-8 w-full items-center justify-center space-x-3 rounded-md border-slate-300 bg-gradient-to-r from-pink-400 to-purple-400 px-10 text-sm font-medium text-black transition before:absolute before:inset-px before:-z-10 before:rounded-md before:bg-white before:transition-all focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-50 hover:border-slate-400 hover:text-white hover:text-slate-700 before:hover:inset-0 before:hover:opacity-0 disabled:hover:border-slate-400 disabled:hover:text-slate-500 dark:border-slate-600 dark:text-white before:dark:bg-gray-950 dark:focus:ring-sky-900 dark:hover:border-slate-500 hover:dark:text-black dark:hover:text-slate-200 disabled:hover:dark:border-slate-500 disabled:hover:dark:text-slate-400 lg:w-max"
+						onReady={() => {
+							plausible.trackEvent(Events.AnnouncementBannerClicked);
+						}}
+						onClose={() => {
+							plausible.trackEvent(Events.AnnouncementBannerTypeformClosed);
+						}}
+						onSubmit={() => {
+							plausible.trackEvent(Events.AnnouncementBannerTypeformSubmitted);
+						}}
+					>
+						<span className="text-slate-50 dark:text-slate-100">Early access</span>
+					</PopupButton>
 					<ThemeSelector className="relative z-10" />
 					<Link href="https://github.com/wundergraph/wundergraph" className="group" aria-label="GitHub">
 						<GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
@@ -138,7 +156,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 			<div className="relative mx-auto flex max-w-screen-2xl justify-center sm:px-2 lg:px-8">
 				<div className="hidden lg:relative lg:block lg:flex-none">
 					<div className="absolute inset-y-0 right-0 w-[50vw] bg-white dark:hidden dark:bg-slate-50" />
-					<div className="sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto py-16 pr-8 pl-8">
+					<div className="scrollbar-custom sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto py-16 pr-8 pl-8">
 						<div className="absolute top-16 bottom-0 right-0 hidden h-12 w-px bg-gradient-to-t from-slate-800 dark:block" />
 						<div className="absolute top-28 bottom-0 right-0 hidden w-px bg-slate-800 dark:block" />
 						<Navigation navigation={navigation} className="w-64 xl:w-72" />
@@ -158,29 +176,29 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						<Comments />
 					</article>
 					<dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
-						{previousPage && (
+						{previousPage?.href && (
 							<div className="max-w-[50%]">
 								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Previous</dt>
 								<dd className="mt-1">
-									{/* <Link
+									<Link
 										href={previousPage.href}
 										className="text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
 									>
 										<span aria-hidden="true">&larr;</span> {previousPage.title}
-									</Link> */}
+									</Link>
 								</dd>
 							</div>
 						)}
-						{nextPage && (
+						{nextPage?.href && (
 							<div className="ml-auto max-w-[50%] text-right">
 								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Next</dt>
 								<dd className="mt-1">
-									{/* <Link
+									<Link
 										href={nextPage.href}
 										className="text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
 									>
 										{nextPage.title} <span aria-hidden="true">&rarr;</span>
-									</Link> */}
+									</Link>
 								</dd>
 							</div>
 						)}
