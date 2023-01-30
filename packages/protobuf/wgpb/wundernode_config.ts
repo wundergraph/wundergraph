@@ -315,6 +315,7 @@ export enum DataSourceKind {
   SQLSERVER = 5,
   MONGODB = 6,
   SQLITE = 7,
+  PRISMA = 8,
 }
 
 export function dataSourceKindFromJSON(object: any): DataSourceKind {
@@ -343,6 +344,9 @@ export function dataSourceKindFromJSON(object: any): DataSourceKind {
     case 7:
     case "SQLITE":
       return DataSourceKind.SQLITE;
+    case 8:
+    case "PRISMA":
+      return DataSourceKind.PRISMA;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum DataSourceKind");
   }
@@ -366,6 +370,8 @@ export function dataSourceKindToJSON(object: DataSourceKind): string {
       return "MONGODB";
     case DataSourceKind.SQLITE:
       return "SQLITE";
+    case DataSourceKind.PRISMA:
+      return "PRISMA";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum DataSourceKind");
   }

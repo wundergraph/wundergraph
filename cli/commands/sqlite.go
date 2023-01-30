@@ -18,7 +18,7 @@ var sqliteCmd = &cobra.Command{
 			provider = "sqlite"
 			url      = "%s"
 		}`, databaseURL)
-		return introspectDatabase(introspectionSchema)
+		return introspectDatabase(introspectionSchema, true)
 	},
 }
 

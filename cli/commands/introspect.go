@@ -38,7 +38,7 @@ func init() {
 	introspectCmd.PersistentFlags().IntVarP(&introspectionTimeoutSeconds, "timeout", "t", 30, "Timeout in seconds for the introspection process")
 }
 
-func introspectDatabase(introspectionSchema string) error {
+func introspectDatabase(introspectionSchema string, loadPrismaSchemaFromDatabase bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(introspectionTimeoutSeconds)*time.Second)
 	defer cancel()
 	start := time.Now()
@@ -46,7 +46,7 @@ func introspectDatabase(introspectionSchema string) error {
 	if err != nil {
 		return err
 	}
-	prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(ctx, introspectionSchema, wunderGraphDir, log)
+	prismaSchema, graphqlSDL, dmmf, err := database.IntrospectPrismaDatabase(ctx, introspectionSchema, wunderGraphDir, loadPrismaSchemaFromDatabase, log)
 	if err != nil {
 		return err
 	}

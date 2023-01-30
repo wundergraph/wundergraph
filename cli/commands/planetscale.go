@@ -27,7 +27,7 @@ var planetscaleCmd = &cobra.Command{
 			provider = "mysql"
 			url      = "%s"
 		}`, parsed.String())
-		return introspectDatabase(introspectionSchema)
+		return introspectDatabase(introspectionSchema, true)
 	},
 }
 
