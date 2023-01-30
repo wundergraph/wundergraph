@@ -1,9 +1,7 @@
 package database
 
 import (
-	"reflect"
 	"testing"
-	"unsafe"
 
 	"github.com/buger/jsonparser"
 
@@ -23,6 +21,7 @@ const (
 				id: Int!
 				provider: String
 				providerId: Int
+	      someprovider: String
 		}
 
 		input usersCreateInput {
@@ -30,32 +29,23 @@ const (
 				provider: String
 				providerId: Int
 				provider2: String
+        someprovider: String
 		}
 	`
 
 	operationWithSimilarAgrNames = `
-		mutation CreateUser($provider: String!, $providerId: Int!) {
-			createOneusers(data: {provider: $provider, providerId: $providerId, provider2: $provider}) {
+		mutation CreateUser($provider: String!, $providerId: Int!, $someprovider: String!) {
+			createOneusers(data: {provider: $provider, providerId: $providerId, provider2: $provider, someprovider: $someprovider}) {
 				id
 			}
 		}
 	`
 )
 
-func changeJsonRootType(f *resolve.GraphQLVariableRenderer, v resolve.JsonRootType) {
-	pointerVal := reflect.ValueOf(f)
-	val := reflect.Indirect(pointerVal)
-	member := val.FieldByName("rootValueType")
-	ptrToY := unsafe.Pointer(member.UnsafeAddr())
-	realPtrToY := (*resolve.JsonRootType)(ptrToY)
-	*realPtrToY = v
-}
-
 func TestDatabaseDataSource(t *testing.T) {
-	providerVariableRenderer := &resolve.GraphQLVariableRenderer{Kind: resolve.VariableRendererKindGraphqlWithValidation}
-	changeJsonRootType(providerVariableRenderer, resolve.JsonRootType{Value: jsonparser.String})
-	providerIdVariableRenderer := &resolve.GraphQLVariableRenderer{Kind: resolve.VariableRendererKindGraphqlWithValidation}
-	changeJsonRootType(providerIdVariableRenderer, resolve.JsonRootType{Value: jsonparser.Number})
+	providerVariableRenderer, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.String})
+	providerIdVariableRenderer, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.Number})
+	spVariableRenderer, _ := resolve.NewGraphQLVariableRendererFromJSONRootTypeWithoutValidation(resolve.JsonRootType{Value: jsonparser.String})
 
 	t.Run("createOneUser", datasourcetesting.RunTest(schema, operationWithSimilarAgrNames, "",
 		&plan.SynchronousResponsePlan{
@@ -64,7 +54,7 @@ func TestDatabaseDataSource(t *testing.T) {
 					Nullable: false,
 					Fetch: &resolve.SingleFetch{
 						BufferId:   0,
-						Input:      `{"query":"mutation{createOneusers(data: {provider: $$0$$,providerId: $$1$$,provider2: $$0$$}){id}}","variables":null}`,
+						Input:      `{"query":"mutation{createOneusers(data: {provider: $$0$$,providerId: $$1$$,provider2: $$0$$,someprovider: $$2$$}){id}}","variables":null}`,
 						DataSource: &Source{},
 						Variables: resolve.NewVariables(
 							&resolve.ContextVariable{
@@ -74,6 +64,10 @@ func TestDatabaseDataSource(t *testing.T) {
 							&resolve.ContextVariable{
 								Path:     []string{"providerId"},
 								Renderer: providerIdVariableRenderer,
+							},
+							&resolve.ContextVariable{
+								Path:     []string{"someprovider"},
+								Renderer: spVariableRenderer,
 							},
 						),
 						DataSourceIdentifier: []byte("database.Source"),
@@ -118,7 +112,7 @@ func TestDatabaseDataSource(t *testing.T) {
 					ChildNodes: []plan.TypeField{
 						{
 							TypeName:   "users",
-							FieldNames: []string{"id", "avatar", "provider", "providerId"},
+							FieldNames: []string{"id", "avatar", "provider", "providerId", "someprovider"},
 						},
 					},
 					Custom: ConfigJson(Configuration{
