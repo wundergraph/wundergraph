@@ -41,19 +41,14 @@ export const openApiSpecificationToGraphQLApi = async (
 		viewer: false,
 	});
 
-	return introspect.graphql(
-		{
-			url: '',
-			baseUrl: '<SERVER_URL>',
-			path: `/openapis/${apiGeneratedKey}/graphql`,
-			apiNamespace: introspection.apiNamespace,
-			internal: true,
-			loadSchemaFromString: () => printSchema(schema),
-		},
-		{
-			OasSpecPath: filePath,
-		}
-	);
+	return introspect.graphql({
+		url: '',
+		baseUrl: '<SERVER_URL>',
+		path: `/openapis/${apiGeneratedKey}/graphql`,
+		apiNamespace: introspection.apiNamespace,
+		internal: true,
+		loadSchemaFromString: () => printSchema(schema),
+	});
 };
 
 export const createExecutableSchema = async (specName: string): Promise<GraphQLSchema> => {

@@ -73,10 +73,6 @@ export interface RenameTypeFields {
 
 export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
 
-export interface ApiOptions {
-	OasSpecPath?: string;
-}
-
 export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
@@ -84,8 +80,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[],
-		options?: ApiOptions
+		customJsonScalars?: string[]
 	) {
 		this.Schema = schema;
 		this.DataSources = dataSources;
@@ -93,8 +88,6 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
-
-		this.OasSpecPath = options?.OasSpecPath;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -104,7 +97,6 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
-	OasSpecPath?: string;
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);

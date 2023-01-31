@@ -22,7 +22,6 @@ export interface IntrospectionCacheFile<A extends ApiType> {
 	types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	customJsonScalars: string[] | undefined;
-	oasSpecPath: string | undefined;
 }
 
 export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
@@ -34,24 +33,18 @@ export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCache
 		types: api.Types,
 		interpolateVariableDefinitionAsJSON: api.interpolateVariableDefinitionAsJSON,
 		customJsonScalars: api.CustomJsonScalars,
-		oasSpecPath: api.OasSpecPath,
 	};
 }
 
 export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Api<A> {
-	const api = new Api<A>(
+	return new Api<A>(
 		cache.schema,
 		cache.dataSources,
 		cache.fields,
 		cache.types,
 		cache.interpolateVariableDefinitionAsJSON,
-		cache.customJsonScalars,
-		{
-			OasSpecPath: cache.oasSpecPath,
-		}
+		cache.customJsonScalars
 	);
-
-	return api;
 }
 
 export const readIntrospectionCacheFile = async (cacheKey: string): Promise<string> => {

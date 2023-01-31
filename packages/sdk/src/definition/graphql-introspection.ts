@@ -28,13 +28,7 @@ import { loadFile } from '../codegen/templates/typescript';
 import * as https from 'https';
 import { introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
-import {
-	ApiOptions,
-	buildMTLSConfiguration,
-	buildUpstreamAuthentication,
-	GraphQLApi,
-	GraphQLIntrospection,
-} from './index';
+import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
@@ -76,8 +70,7 @@ export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HT
 };
 
 export const introspectGraphql = async (
-	introspection: Omit<GraphQLIntrospection, 'isFederation'>,
-	options?: ApiOptions
+	introspection: Omit<GraphQLIntrospection, 'isFederation'>
 ): Promise<GraphQLApi> => {
 	return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
 		const headersBuilder = new HeadersBuilder();
@@ -191,8 +184,7 @@ export const introspectGraphql = async (
 			),
 			generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 			[],
-			introspection.customJSONScalars,
-			options
+			introspection.customJSONScalars
 		);
 	});
 };
