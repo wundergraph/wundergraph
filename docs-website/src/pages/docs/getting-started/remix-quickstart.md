@@ -74,7 +74,7 @@ Now let's take a look at the operations.
 
 ## WunderGraph client
 
-If you head over to `lib/wudnergraph.ts` you will see that we create and export a client and all the necessary hooks to use in our app. We also create a client from cookies that we will use to make authenticated requests.
+If you head over to `lib/wundergraph.ts` you will see that we create and export a client and all the necessary hooks to use in our app. We also create a client from cookies that we will use to make authenticated requests.
 
 ## Operations
 
