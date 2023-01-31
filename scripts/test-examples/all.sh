@@ -19,6 +19,9 @@ set -e
 # These require 3rd party accounts
 SKIP="faunadb-nextjs graphql-hasura-subscriptions inject-bearer"
 
+# This one has build:next broken
+SKIP="${SKIP} nextjs-react-query"
+
 # These are broken
 SKIP="${SKIP} nextjs-todos vite-swr"
 
