@@ -24,6 +24,7 @@
   },
   "scripts": {
     "start": "run-p wunder expo",
+    "check": "tsc --noEmit",
     "wunder": "wunderctl up --debug",
     "build": "wunderctl generate --debug",
     "wunderctl": "wunderctl",

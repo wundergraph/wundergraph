@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "start": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
+    "check": "tsc --noEmit",
     "clean": "rimraf ./.next",
     "wundergraph": "wunderctl up --debug",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
