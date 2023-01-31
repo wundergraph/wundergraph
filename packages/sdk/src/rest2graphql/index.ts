@@ -1,13 +1,15 @@
-import { GraphQLApi, introspect, OpenAPIIntrospection, OpenAPIIntrospectionSource } from '../definition';
-import yaml from 'js-yaml';
-import path from 'path';
-import { GraphQLSchema, printSchema } from 'graphql';
-import { createGraphQLSchema, Oas3, Oas2 } from 'openapi-to-graphql';
 import process from 'node:process';
 import fs from 'fs';
+import yaml from 'js-yaml';
+import path from 'path';
 import objectHash from 'object-hash';
-import { InputVariable, mapInputVariable, resolveConfigurationVariable } from '../configure/variables';
 import { pino } from 'pino';
+
+import { GraphQLSchema, printSchema } from 'graphql';
+import { createGraphQLSchema, Oas2, Oas3 } from 'openapi-to-graphql';
+
+import { GraphQLApi, introspect, OpenAPIIntrospection, OpenAPIIntrospectionSource } from '../definition';
+import { InputVariable, mapInputVariable, resolveConfigurationVariable } from '../configure/variables';
 
 const token = 'sk_test_123';
 export const openApiSpecsLocation = path.join('generated', 'openapi');
