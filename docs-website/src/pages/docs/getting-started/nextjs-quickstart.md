@@ -162,7 +162,41 @@ export default withWunderGraph(Home);
 
 ## TypeScript Operations
 
-TBD
+WunderGraph allows you to write your operation using TypeScript. TypeScript Operations are a great way to use WunderGraph as a fully featured backend framework. Let's find out how to write a TypeScript operation.
+
+Open `.wundergraph/operations/users/get.ts`
+
+```ts
+import { createOperation, z } from '../../generated/wundergraph.factory';
+
+export default createOperation.query({
+  input: z.object({
+    id: z.string(),
+  }),
+  handler: async ({ input }) => {
+    return {
+      id: input.id,
+      name: 'Jens',
+      bio: 'Founder of WunderGraph',
+    };
+  },
+});
+```
+
+This operation will return a user with the given id. We simply return a plain object here, but you can also return a database model or any other data type. We're using Zod to create the input schema, this will make sure that the input is validated before it reaches the handler.
+
+Open `pages/users/index.tsx`
+
+```tsx
+const { data } = useQuery({
+  operationName: 'users/get',
+  input: {
+    id: '1',
+  },
+});
+```
+
+You can call TypeScript operations just like Graphql operations, fully type safe. Note that the operation name is `users/get`, this is the path to the operation file, without the extension. We use filebased router for operations, similar to Next.js pages. This allows you to keep your operations organized.
 
 ## What's next?
 
