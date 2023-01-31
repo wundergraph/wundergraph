@@ -10,10 +10,10 @@ const Dragons: React.FC = () => {
 	return (
 		<div>
 			{isLoading && <p>Loading...</p>}
-			{error && <p>Error</p>}
+			{error && <p>Error: {JSON.stringify(error, null, 2)}</p>}
 			{data && (
 				<div>
-					<p>{JSON.stringify(data)}</p>
+					<p>{JSON.stringify(data, null, 2)}</p>
 				</div>
 			)}
 		</div>
@@ -37,7 +37,6 @@ function App() {
 			<h1>WunderGraph + Vite + React</h1>
 			<div className="card">
 				<Dragons />
-				<User />
 			</div>
 			<p className="read-the-docs">Click on the WunderGraph, Vite and React logos to learn more</p>
 		</div>
