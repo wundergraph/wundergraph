@@ -1,0 +1,18 @@
+query {
+	stripe_v1Charges2 {
+		data {
+			amount
+			amountCaptured
+			paymentMethodDetails {
+				card {
+					expMonth
+					expYear
+					last4
+					brand
+				}
+			}
+		}
+		url
+		hasMore
+	}
+}
