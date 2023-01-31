@@ -13,10 +13,12 @@ import {
 	WrenchIcon,
 	CogIcon,
 	CommandLineIcon,
+	ArrowRightIcon,
 } from '@heroicons/react/24/solid';
 import { NextLogo } from '@/components/logos/next';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
+import clsx from 'clsx';
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
 cd my-project && npm i && npm start`;
@@ -25,11 +27,14 @@ const Links = ({ href, links }) => {
 	return (
 		<div className="hidden h-10 lg:block">
 			<ul className="absolute mt-4 flex space-x-4">
-				{links.map(({ href, label }) => (
+				{links.map(({ href, label, className }) => (
 					<li key={href}>
 						<Link
 							href={href}
-							className="text-sm text-white underline decoration-white/20 decoration-2 transition-all hover:text-pink-500"
+							className={clsx(
+								'inline-flex items-center text-sm decoration-white/20 decoration-2 transition-all hover:text-pink-500',
+								className
+							)}
 						>
 							{label}
 						</Link>
@@ -120,10 +125,13 @@ export default function HomePage() {
 						<Links
 							href="/docs/apis"
 							links={[
-								{ href: '/docs/apis/rest', label: 'REST' },
-								{ href: '/docs/apis/graphql', label: 'GraphQL' },
-								{ href: '/docs/apis/federation', label: 'Apollo Federation' },
-								{ href: '/docs/apis', label: 'View all' },
+								{ href: '/docs/apis/rest', label: 'REST', className: 'underline' },
+								{ href: '/docs/apis/graphql', label: 'GraphQL', className: 'underline' },
+								{ href: '/docs/apis/federation', label: 'Apollo Federation', className: 'underline' },
+								{
+									href: '/docs/apis',
+									label: <QuickLinkMore label="View all" />,
+								},
 							]}
 						/>
 					</QuickLink>
@@ -134,13 +142,16 @@ export default function HomePage() {
 						href="/docs/database"
 					>
 						<Links
-							href="/docs/database"
+							href="/docs/databases"
 							links={[
-								{ href: '/docs/database/postgres', label: 'Postgres' },
-								{ href: '/docs/database/mysql', label: 'MySQL' },
-								{ href: '/docs/database/fauna', label: 'Fauna' },
-								{ href: '/docs/database/planetscale', label: 'Planetscale' },
-								{ href: '/docs/apis', label: 'View all' },
+								{ href: '/docs/databases/postgres', label: 'Postgres', className: 'underline' },
+								{ href: '/docs/databases/mysql', label: 'MySQL', className: 'underline' },
+								{ href: '/docs/databases/fauna', label: 'Fauna', className: 'underline' },
+								{ href: '/docs/databases/planetscale', label: 'Planetscale', className: 'underline' },
+								{
+									href: '/docs/databases',
+									label: <QuickLinkMore label="View all" className="underline-0" />,
+								},
 							]}
 						/>
 					</QuickLink>
