@@ -49,6 +49,8 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 
 			const pluginLogger = req.ctx.log.child({ server: config.serverName, plugin: 'graphql' });
 
+			pluginLogger.info(`GraphQL request  ${JSON.stringify(request)}`);
+
 			if (config.enableGraphQLEndpoint && shouldRenderGraphiQL(request)) {
 				reply.type('text/html');
 				reply.send(
@@ -62,12 +64,6 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 				// No fastify hooks are called for the response.
 				reply.hijack();
 
-				const request = {
-					body: req.body,
-					headers: req.headers,
-					method: req.method,
-					query: req.query,
-				};
 				const { operationName, query, variables } = getGraphQLParameters(request);
 
 				if (config.contextFactory) {

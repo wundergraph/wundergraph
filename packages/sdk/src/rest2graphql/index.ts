@@ -7,6 +7,7 @@ import process from 'node:process';
 import fs from 'fs';
 import objectHash from 'object-hash';
 import { InputVariable, mapInputVariable, resolveConfigurationVariable } from '../configure/variables';
+import { pino } from 'pino';
 
 const token = 'sk_test_123';
 export const openApiSpecsLocation = path.join('generated', 'openapi');
@@ -32,9 +33,9 @@ export const openApiSpecificationToGraphQLApi = async (
 	}
 
 	const readSpecResult = readSpec(oas, introspection.source);
-	const apiGeneratedKey = objectHash(introspection);
+	const apiGeneratedKey = objectHash(oas);
 
-	const filePath = writeSpec(apiGeneratedKey, readSpecResult.spec, introspection);
+	writeSpec(apiGeneratedKey, readSpecResult.spec, introspection);
 
 	const { schema } = await createGraphQLSchema(readSpecResult.spec, {
 		fillEmptyResponses: true,
@@ -48,10 +49,11 @@ export const openApiSpecificationToGraphQLApi = async (
 		apiNamespace: introspection.apiNamespace,
 		internal: true,
 		loadSchemaFromString: () => printSchema(schema),
+		headers: introspection.headers,
 	});
 };
 
-export const createExecutableSchema = async (specName: string): Promise<GraphQLSchema> => {
+export const createExecutableSchema = async (specName: string, logger: pino.Logger): Promise<GraphQLSchema> => {
 	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation, specName);
 	const specContent = fs.readFileSync(fullSpecPath).toString();
 	const spec: OpenApiSpec = JSON.parse(specContent);
@@ -62,8 +64,15 @@ export const createExecutableSchema = async (specName: string): Promise<GraphQLS
 		fillEmptyResponses: true,
 		baseUrl: baseUrl,
 		viewer: false,
-		headers: {
-			authorization: `Bearer ${token}`, // send authorization header in every request
+		headers: function (method, path, title, resolverParams) {
+			logger.info(`method ${method}`);
+			logger.info(`path  ${path}`);
+			logger.info(`title ${title}`);
+			logger.info(`resolverParams ${JSON.stringify(resolverParams?.context)}`);
+
+			return {
+				authorization: `Bearer ${token}`, // send authorization header in every request
+			};
 		},
 	});
 
@@ -84,7 +93,7 @@ export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
 	}
 };
 
-const writeSpec = (name: string, spec: OasSpec, introspection: OpenAPIIntrospection): string => {
+const writeSpec = (name: string, spec: OasSpec, introspection: OpenAPIIntrospection) => {
 	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
 	fs.mkdir(specsFolderPath, { recursive: true }, (err) => {
 		if (err) throw err;
@@ -99,8 +108,6 @@ const writeSpec = (name: string, spec: OasSpec, introspection: OpenAPIIntrospect
 	};
 
 	fs.writeFileSync(filePath, JSON.stringify(item, null, 2));
-
-	return path.join(openApiSpecsLocation, fileName);
 };
 
 const readSpec = (spec: string, source: OpenAPIIntrospectionSource): ReadSpecResult => {

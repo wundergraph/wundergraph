@@ -9,6 +9,8 @@ const stripe = introspect.openApiV2({
 		kind: 'file',
 		filePath: './stripe.yaml',
 	},
+	headers: (builder) =>
+		builder.addClientRequestHeader('X-Authorization', 'Authorization').addStaticHeader('X-Client-Id', 'client-id'),
 });
 
 // configureWunderGraph emits the configuration

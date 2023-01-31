@@ -243,10 +243,14 @@ export const createServer = async ({
 			for await (const specPath of specPaths) {
 				const ext = path.extname(specPath);
 				const apiName = path.basename(specPath, ext);
-				const schema = createExecutableSchema(specPath);
+				const schema = createExecutableSchema(specPath, logger);
 				const routeUrl = openApiServerMountPath(apiName);
 
-				await fastify.register(require('./plugins/graphql'), { schema: schema, routeUrl: routeUrl });
+				await fastify.register(require('./plugins/graphql'), {
+					serverName: apiName,
+					schema: schema,
+					routeUrl: routeUrl,
+				});
 				fastify.log.info('GraphQL plugin registered');
 				fastify.log.info(`OpenAPi Graphql server '${apiName}' listening at ${routeUrl}`);
 			}
