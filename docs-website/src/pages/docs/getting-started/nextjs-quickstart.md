@@ -200,7 +200,7 @@ You can call TypeScript operations just like Graphql operations, fully type safe
 
 ## What's next?
 
-Wunderbar! You added a your first Graphql API to Next.js. Next up you might want to add a database, authentication and support uploads to turn Next.js into a full stack powerhouse 😎.
+Wunderbar! You've added your first Graphql API to Next.js. Next up you might want to add a database, authentication and support uploads to turn Next.js into a full stack powerhouse 😎.
 
 - [Databases](/docs/databases)
 - [Authentication](/docs/authentication)
