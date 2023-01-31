@@ -10,7 +10,7 @@ import fs from 'fs';
 import { resolveServerLogLevel, ServerLogger } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
-import { customGqlServerMountPath } from './util';
+import { customGqlServerMountPath, openApiServerMountPath } from './mount-path';
 
 import type { WunderGraphConfiguration } from '@wundergraph/protobuf';
 import type { WebhooksConfig } from '../webhooks/types';
@@ -25,6 +25,7 @@ import type {
 } from './types';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
+import { createExecutableSchema, openApiSpecsLocation } from '../rest2graphql';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -228,6 +229,26 @@ export const createServer = async ({
 				await fastify.register(require('./plugins/graphql'), { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
 				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
+			}
+		}
+
+		const openApisSpecsPath = path.join(wundergraphDir, openApiSpecsLocation);
+		const openApisExists = fs.existsSync(openApisSpecsPath);
+		if (openApisExists) {
+			const specPaths: string[] = [];
+			fs.readdirSync(openApisSpecsPath).forEach((file) => {
+				specPaths.push(file);
+			});
+
+			for await (const specPath of specPaths) {
+				const ext = path.extname(specPath);
+				const apiName = path.basename(specPath, ext);
+				const schema = createExecutableSchema(specPath);
+				const routeUrl = openApiServerMountPath(apiName);
+
+				await fastify.register(require('./plugins/graphql'), { schema: schema, routeUrl: routeUrl });
+				fastify.log.info('GraphQL plugin registered');
+				fastify.log.info(`OpenAPi Graphql server '${apiName}' listening at ${routeUrl}`);
 			}
 		}
 	});

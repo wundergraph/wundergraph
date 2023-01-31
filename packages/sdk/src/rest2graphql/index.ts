@@ -8,6 +8,7 @@ import fs from 'fs';
 import objectHash from 'object-hash';
 
 const token = 'sk_test_123';
+export const openApiSpecsLocation = path.join('generated', 'openapi');
 
 type OasSpec = Oas3 | Oas2 | (Oas3 | Oas2);
 
@@ -37,8 +38,8 @@ export const openApiSpecificationToGraphQLApi = async (
 	return introspect.graphql(
 		{
 			url: '',
-			baseUrl: '',
-			path: `<SERVER_URL>/${apiGeneratedKey}`,
+			baseUrl: '<SERVER_URL>',
+			path: `/openapis/${apiGeneratedKey}/graphql`,
 			apiNamespace: introspection.apiNamespace,
 			internal: true,
 			loadSchemaFromString: () => printSchema(schema),
@@ -49,8 +50,8 @@ export const openApiSpecificationToGraphQLApi = async (
 	);
 };
 
-export const createExecutableSchema = async (specPath: string): Promise<GraphQLSchema> => {
-	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, specPath);
+export const createExecutableSchema = async (specName: string): Promise<GraphQLSchema> => {
+	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation, specName);
 	const introspection: OpenAPIIntrospectionSource = {
 		kind: 'file',
 		filePath: fullSpecPath,
@@ -85,8 +86,7 @@ export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
 };
 
 const writeSpec = (spec: OasSpec, extension: string, name: string): string => {
-	const relativePath = path.join('generated', 'openapi');
-	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, relativePath);
+	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
 	fs.mkdir(specsFolderPath, { recursive: true }, (err) => {
 		if (err) throw err;
 	});
@@ -96,7 +96,7 @@ const writeSpec = (spec: OasSpec, extension: string, name: string): string => {
 
 	fs.writeFileSync(filePath, extension === 'yaml' ? yaml.dump(spec) : JSON.stringify(spec, null, 2));
 
-	return path.join(relativePath, fileName);
+	return path.join(openApiSpecsLocation, fileName);
 };
 
 const readSpec = (spec: string, source: OpenAPIIntrospectionSource): ReadSpecResult => {

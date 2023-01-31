@@ -62,7 +62,7 @@ import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/server-options';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 
@@ -316,6 +316,18 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
 	const resolved = await resolveApplication(roles, config.apis, cors, config.s3UploadProvider || []);
+
+	for (const ds of resolved.EngineConfiguration.DataSources) {
+		if (ds.Kind === DataSourceKind.GRAPHQL) {
+			const custom = ds.Custom as unknown as GraphQLApiCustom;
+			if (
+				custom.Fetch.baseUrl?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
+				custom.Fetch.baseUrl.staticVariableContent.includes('<SERVER_URL>')
+			) {
+				custom.Fetch.baseUrl = resolvedServerOptions.serverUrl;
+			}
+		}
+	}
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
