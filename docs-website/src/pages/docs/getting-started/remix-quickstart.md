@@ -1,5 +1,5 @@
 ---
-title: Quickstart
+title: Remix Quickstart
 pageTitle: WunderGraph - Getting started quickly with WunderGraph
 description: Initialize your WunderGraph development environment and get started using WunderGraph
 ---
@@ -10,7 +10,7 @@ This quick start guide will help you to start a new WunderGraph project from scr
 
 ```shell
 # Init a new project
-npx create-wundergraph-app my-project --example simple
+npx create-wundergraph-app my-project --example remix
 
 # Move to the project directory
 cd my-project
@@ -19,53 +19,32 @@ cd my-project
 npm i
 ```
 
-## Integrating WunderGraph with an existing project
-
-You can also easily integrate WunderGraph into your existing projects.
+## Start Remix and WunderGraph
 
 ```shell
-# In your application directory
-npx create-wundergraph-app --init
+npm start
 ```
 
-Now edit your `package.json` and add the following scripts, so we can run the WunderGraph server.
+WunderGraph will now do some code generation and start WunderNode and Remix.
+A new browser window will open at [http://localhost:3000](http://localhost:3000). You should see the homepage with the JSON result of the Dragons operation.
 
 ```json
-{
-  "scripts": {
-    "wundergraph": "wunderctl up",
-    "build": "wunderctl generate"
-  }
-}
+[
+  { "name": "Dragon 1", "active": true },
+  { "name": "Dragon 2", "active": true }
+]
 ```
-
-## Start the WunderGraph server
-
-```shell
-npm run wundergraph
-```
-
-WunderGraph will now do some code generation and start the server.
-Head over to [http://localhost:9991](http://localhost:9991) and you should see the WunderGraph status page.
-
-Now lets run one of the example queries, open the following URL in your browser:
-[http://localhost:9991/operations/Countries](http://localhost:9991/operations/Countries)
-
-You'll see a JSON response with a list of countries.
-Pretty cool, right? Let's take a look at how this works.
-
-## Configure WunderGraph
 
 WunderGraph lives in the `.wundergraph` directory by default. This is where you can configure your WunderGraph application and write your operations.
 
 Let's take a look at the default configuration open `.wundergraph/wundergraph.config.ts`.
 
-You can see that we have a single API configured, which is the [Countries GraphQL API](https://countries.trevorblades.com/).
+You can see that we have a single API configured, which is the [SpaceX GraphQL API](https://spacex-api.fly.dev/graphql).
 
 ```ts
-const countries = introspect.graphql({
-  apiNamespace: 'countries',
-  url: 'https://countries.trevorblades.com/',
+const spaceX = introspect.graphql({
+  apiNamespace: 'spacex',
+  url: 'https://spacex-api.fly.dev/graphql/',
 });
 ```
 
@@ -74,72 +53,196 @@ The API is introspected and added to the WunderGraph virtual graph, as you can s
 ```ts
 configureWunderGraphApplication({
   apis: [countries],
-  // configuration
+  // ...
+  codeGenerators: [
+    {
+      templates: [...templates.typescript.all],
+      path: './generated',
+    },
+    {
+      templates: [templates.typescript.client],
+      path: '../components/generated',
+    },
+  ],
+  // ...
 });
 ```
 
-Once it's added to the virtual graph, you can write operations against it.
+We generate a type-safe client specified in the list of generators which we shall use later to make calls to our WunderNode.
 
-## Write your first operation
+Now let's take a look at the operations.
+
+## WunderGraph client
+
+If you head over to `lib/wundergraph.ts` you will see that we create and export a client and all the necessary hooks to use in our app. We also create a client from cookies that we will use to make authenticated requests.
+
+## Operations
 
 Operations are written in the `.wundergraph/operations` directory. They can be written in Graphql or TypeScript.
-Let's check out the Countries operation, open `.wundergraph/operations/Countries.graphql`.
+
+### GraphQL operations
+
+Let's check out the Dragons operation, open `.wundergraph/operations/Dragons.graphql`.
 
 ```graphql
-query Countries($filter: countries_CountryFilterInput) {
-  countries_countries(filter: $filter) {
-    code
+query Dragons {
+  spacex_dragons {
     name
-    capital
+    active
   }
 }
 ```
 
-The input type and query are prefixed with `countries_` because we're using the `countries` API namespace in the introspection config. This is to avoid naming conflicts when you add multiple APIs to your WunderGraph application.
+This simply fetches the name and active status of all the SpaceX dragons, we can run this operation in Remix by using the generated client.
 
-We'll make a few improvements to the API. First, let's remove the `countries_` prefix from the result, so we can use the operation without the `countries_` prefix.
+### Typescript operations
+
+Let's also checkout the users/get operation, open `.wundergraph/operations/users/get.ts`
+
+```ts
+export default createOperation.query({
+  input: z.object({
+    id: z.string(),
+  }),
+  handler: async ({ input }) => {
+    return {
+      id: input.id,
+      name: 'Jens',
+      bio: 'Founder of WunderGraph',
+    };
+  },
+});
+```
+
+Here we create a query (you can also create mutations and subscriptions) and return sample data. You are free to perform any task, calling external api, db requests and so on.
+
+## Calling the operation in Remix
+
+Open `app/routes/index.tsx`, in the loader function you will find the following code:
+
+```tsx
+const res = await client.query({
+  operationName: 'Dragons',
+});
+```
+
+The operation name is the name of the file in the operations directory, without the extension. This will return the result of the operation.
+
+Let's modify the Dragons operation and add a limit parameter and return extra fields.
+Open `.wundergraph/operations/Dragons.graphql` and change it to:
 
 ```graphql
-query Countries($filter: countries_CountryFilterInput) {
-  countries: countries_countries(filter: $filter) {
-    code
+query Dragons($limit: Int!) {
+  spacex_dragons(limit: $limit) {
+    id
     name
-    capital
+    active
   }
 }
 ```
 
-If you run the operation again, you'll see that the result is the same, but the countries can now be accessed without the `countries_` prefix.
+The WunderGraph server will automatically pick up on the changes and re-generate the types.
+Go back to `app/routes/index.tsx` and you will see that the `Dragons` operation now has a required `limit` input parameter.
 
-Now we can add some extra data to the result. Let's add the `continent` and `currency` fields to the result.
-
-```graphql
-query Countries($filter: countries_CountryFilterInput) {
-  countries: countries_countries(filter: $filter) {
-    code
-    name
-    capital
-    continent {
-      name
-    }
-    currency
-  }
-}
+```tsx
+const res = await client.query({
+  operationName: 'Dragons',
+  input: {
+    limit: 1,
+  },
+});
 ```
 
-If you run the operation again, you'll see that the result now contains the `continent` and `currency` fields.
+Refresh the page in your browser, the result will look like this:
 
-Awesome! You now have a basic understanding how WunderGraph works. The next step is to consume the API from your frontend, continue with one of our frontend quickstarts:
+```json
+[{ "name": "Dragon 1", "active": true }]
+```
 
-- [Next.js Quickstart](/docs/getting-started/nextjs-quickstart)
-- [Vite Quickstart](/docs/getting-started/vite-quickstart)
-- [Remix Quickstart](/docs/getting-started/remix-quickstart)
+For client side requests, you can use the `useQuery`, `useMutation` and `useSubscription` hooks that we exported. An example of this is in `app/routes/users/subscribe.tsx`
 
-## More Examples
+```ts
+const { data } = useSubscription({
+  operationName: 'users/subscribe',
+  input: {
+    id: '1',
+  },
+});
+```
+
+## Authentication
+
+At one point or another you will need authentication. If you go back to `wundergraph.config.ts`, you can see we have configured cookie based authentication. The demo auth provider uses github. There is no need to setup any env.
+
+```ts
+authentication: {
+  cookieBased: {
+    providers: [authProviders.demo()],
+    authorizedRedirectUriRegexes: ['http://localhost:3000*'],
+    ...
+  },
+},
+```
+
+We define an operation using typescript in `.wundergraph/operations/users/update.ts` and specify that it requires auth.
+
+```ts
+export default createOperation.mutation({
+  input: z.object({
+    id: z.string(),
+    name: z.string(),
+    bio: z.string(),
+  }),
+  requireAuthentication: true,
+  handler: async ({ input }) => {
+    return {
+      ...input,
+    };
+  },
+});
+```
+
+Now go to `app/routes/users/update.tsx`. We import the `useAuth` that we created earlier, which gives us methods to login and logout. We can get the current user as well with the `useUser` hook.
+
+```tsx
+const { login, logout } = useAuth();
+const { data: user } = useUser();
+...
+
+<button
+  type="button"
+  onClick={() => {
+    !user ? login('github') : logout();
+  }}
+>
+  {!user ? 'Login to update user' : 'Logout'}
+</button>
+```
+
+Within the action function we create an authenticated client by passing the request object. We extract the cookie and pass it as an extra header. This is required only on the server side for operations that require auth.
+
+```ts
+const client = createClientFromCookies(request);
+```
+
+## What's next?
+
+Wunderbar! You added a your first couple APIs to Remix. Next up you might want to add a database, authentication and support uploads to turn Remix into a full stack powerhouse 😎.
+
+- [Databases](/docs/databases)
+- [Authentication](/docs/authentication)
+- [Realtime](/docs/realtime)
+- [File Storage](/docs/file-storage)
+
+### Guides
+
+Learn more advanced topics in our [guides](/docs/guides) and get comfortable with WunderGraph.
+
+### More Examples
 
 Have a look at [other examples](/docs/examples) we provide, to get a better understanding of WunderGraph.
 
-## Want to know more about WunderGraph?
+### Want to know more about WunderGraph?
 
 If you're not yet sure what kind of problems WunderGraph can solve for you,
 check out [the different use cases](/docs/use-cases) we support,
