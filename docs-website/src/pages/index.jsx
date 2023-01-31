@@ -51,8 +51,8 @@ export default function HomePage() {
 			<div className="stretch flex flex-col lg:flex-row lg:items-end lg:justify-end">
 				<div className="flex-1">
 					<Heading>WunderGraph Docs</Heading>
-					<Paragraph className="max-w-lg text-xl">
-						Learn more about how to integrate APIs and build complete backends with WunderGraph.
+					<Paragraph className="max-w-lg pr-8 text-xl">
+						Learn more about how to integrate APIs and build backends with WunderGraph.
 					</Paragraph>
 				</div>
 				<div className="flex-1">
