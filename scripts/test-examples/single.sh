@@ -93,7 +93,10 @@ if grep -q '"test"' package.json; then
     WG_NODE_URL=${default_node_url} npm test
 fi
 
-if grep -q '"check"' package.json; then
+# If the example uses Next.js, compile it
+if grep -q '"build:next"' package.json; then
+    npm run build:next
+elif grep -q '"check"' package.json; then
     npm run check
 fi
 
