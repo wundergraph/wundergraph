@@ -127,7 +127,7 @@ export default function HomePage() {
 							links={[
 								{ href: '/docs/apis/rest', label: 'REST', className: 'underline' },
 								{ href: '/docs/apis/graphql', label: 'GraphQL', className: 'underline' },
-								{ href: '/docs/apis/federation', label: 'Apollo Federation', className: 'underline' },
+								{ href: '/docs/apis/apollo-federation', label: 'Apollo Federation', className: 'underline' },
 								{
 									href: '/docs/apis',
 									label: <QuickLinkMore label="View all" />,
