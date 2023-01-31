@@ -18,9 +18,12 @@ Configure your PlayWright to start your WunderGraph application by editing `play
 Look for `webServer` and add the following lines:
 
 ```javascript
-/* Run your local dev server before starting the tests */
 webServer: {
-    command: 'npm run start',
+    /*
+        Run both your backend (via wunderctl up) and your frontend.
+        See the example at the bottom for more details.
+    */
+    command: 'npm start',
     port: 3000,
 },
 ```
