@@ -235,6 +235,8 @@ const tags = {
 	SQLite: '/docs/supported-data-sources/sqlite',
 	'SQLServer DataSource': '/docs/supported-data-sources/sqlserver',
 	'SQL Server': '/docs/supported-data-sources/sqlserver',
+	'Prisma DataSource': '/docs/supported-data-sources/prisma',
+	Prisma: '/docs/supported-data-sources/prisma',
 	SQLServer: '/docs/supported-data-sources/sqlserver',
 	'Yugabyte DataSource': '/docs/supported-data-sources/yugabyte',
 	Yugabyte: '/docs/supported-data-sources/yugabyte',

@@ -21,6 +21,7 @@ Find below an overview of all the data sources supported by WunderGraph.
 {% quick-link title="MySQL" icon="core" href="/docs/supported-data-sources/mysql" description="" /%}
 {% quick-link title="SQLite" icon="core" href="/docs/supported-data-sources/sqlite" description="" /%}
 {% quick-link title="SQLServer" icon="core" href="/docs/supported-data-sources/sqlserver" description="" /%}
+{% quick-link title="Prisma" icon="core" href="/docs/supported-data-sources/prisma" description="" /%}
 {% quick-link title="MongoDB / Atlas" icon="core" href="/docs/supported-data-sources/mongodb-atlas" description="" /%}
 {% quick-link title="Planetscale" icon="core" href="/docs/supported-data-sources/planetscale" description="" /%}
 {% quick-link title="FaunaDB" icon="core" href="/docs/supported-data-sources/faunadb" description="" /%}

@@ -17,6 +17,7 @@ Here's an overview of all the different options to configure your WunderNode usi
 {% quick-link title="Planetscale Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-planetscale-data-source" description="" /%}
 {% quick-link title="SQLite Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-sqlite-data-source" description="" /%}
 {% quick-link title="SQLServer Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source" description="" /%}
+{% quick-link title="Prisma Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-prisma-data-source" description="" /%}
 {% quick-link title="MongoDB / Atlas Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source" description="" /%}
 {% quick-link title="Apollo Federation Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-apollo-federation-data-source" description="" /%}
 {% quick-link title="OpenAPI / REST Data Source" icon="core" href="/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source" description="" /%}

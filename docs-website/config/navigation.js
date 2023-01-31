@@ -785,6 +785,10 @@ const navigation = [
 				href: '/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source',
 			},
 			{
+				title: 'Prisma Data Source',
+				href: '/docs/wundergraph-config-ts-reference/configure-prisma-data-source',
+			},
+			{
 				title: 'MongoDB / Atlas Data Source',
 				href: '/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source',
 			},
