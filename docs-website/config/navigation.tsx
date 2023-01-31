@@ -79,15 +79,15 @@ const navigation = [
 						href: '/docs/examples/cross-api-joins',
 					},
 					{
-						title: 'NextJS',
+						title: 'Next.js',
 						href: '/docs/examples/nextjs',
 					},
 					{
-						title: 'NextJS TypeScript Operations',
+						title: 'Next.js TypeScript Operations',
 						href: '/docs/examples/nextjs-typescript-operations',
 					},
 					{
-						title: 'NextJS + React Query',
+						title: 'Next.js + React Query',
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
@@ -107,7 +107,7 @@ const navigation = [
 						href: '/docs/examples/expo-swr',
 					},
 					{
-						title: 'FaunaDB NextJS',
+						title: 'FaunaDB Next.js',
 						href: '/docs/examples/fauna-db-nextjs',
 					},
 					{
@@ -119,7 +119,7 @@ const navigation = [
 						href: '/docs/examples/postgresql',
 					},
 					{
-						title: 'NextJS & PostgreSQL & Prisma',
+						title: 'Next.js & PostgreSQL & Prisma',
 						href: '/docs/examples/nextjs-postgresql-prisma',
 					},
 					{
@@ -139,27 +139,27 @@ const navigation = [
 						href: '/docs/examples/keycloak-openid-connect-authentication',
 					},
 					{
-						title: 'GraphQl Apollo subscriptions',
+						title: 'GraphQL Apollo subscriptions',
 						href: '/docs/examples/graphql-apollo-subscriptions',
 					},
 					{
-						title: 'GraphQl Yoga subscriptions',
+						title: 'GraphQL Yoga subscriptions',
 						href: '/docs/examples/graphql-yoga-subscriptions',
 					},
 					{
-						title: 'GraphQl SSE subscriptions',
+						title: 'GraphQL SSE subscriptions',
 						href: '/docs/examples/graphql-sse-subscriptions',
 					},
 					{
-						title: 'GraphQl WS subscriptions',
+						title: 'GraphQL WS subscriptions',
 						href: '/docs/examples/graphql-ws-subscriptions',
 					},
 					{
-						title: 'GraphQl Hasura WS subscriptions',
+						title: 'GraphQL Hasura WS subscriptions',
 						href: '/docs/examples/graphql-hasura-subscriptions',
 					},
 					{
-						title: 'GraphQl subscriptions hooks',
+						title: 'GraphQL subscriptions hooks',
 						href: '/docs/examples/graphql-subscriptions-hooks',
 					},
 					{
