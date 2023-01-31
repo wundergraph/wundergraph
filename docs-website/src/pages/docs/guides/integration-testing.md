@@ -6,7 +6,7 @@ description: This guide shows how to test your WunderGraph applications
 
 ## Integration testing
 
-WunderGraph comes with builtin support for running tests against your APIs, using a our
+WunderGraph comes with builtin support for running tests against your APIs, using our
 TypeScript client. Leverage our testing server implementation to set up your WunderGraph
 server, run your test, and finally tear everything down.
 
