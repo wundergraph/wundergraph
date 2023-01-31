@@ -1,4 +1,4 @@
-import { Api, DataSource, GraphQLApiCustom, StaticApiCustom } from './index';
+import { Api, DataSource, StaticApiCustom } from './index';
 import {
 	ASTNode,
 	buildSchema,
