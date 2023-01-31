@@ -120,8 +120,12 @@ const navigation = [
 				href: '/docs/guides/enable-autocompletion-in-your-ide',
 			},
 			{
-				title: 'Testing',
-				href: '/docs/guides/testing',
+				title: 'Integration testing',
+				href: '/docs/guides/integration-testing',
+			},
+			{
+				title: 'End to end testing',
+				href: '/docs/guides/end-to-end-testing',
 			},
 			{
 				title: 'Debugging',
