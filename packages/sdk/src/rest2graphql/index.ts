@@ -6,6 +6,7 @@ import { createGraphQLSchema, Oas3, Oas2 } from 'openapi-to-graphql';
 import process from 'node:process';
 import fs from 'fs';
 import objectHash from 'object-hash';
+import { InputVariable, mapInputVariable, resolveConfigurationVariable } from '../configure/variables';
 
 const token = 'sk_test_123';
 export const openApiSpecsLocation = path.join('generated', 'openapi');
@@ -17,22 +18,27 @@ interface ReadSpecResult {
 	extension: string;
 }
 
+interface OpenApiSpec {
+	content: OasSpec;
+	baseURL: InputVariable;
+}
+
 export const openApiSpecificationToGraphQLApi = async (
 	oas: string,
 	introspection: OpenAPIIntrospection
 ): Promise<GraphQLApi> => {
+	if (!introspection.baseURL) {
+		throw new Error('Base URL is not defined');
+	}
+
 	const readSpecResult = readSpec(oas, introspection.source);
 	const apiGeneratedKey = objectHash(introspection);
 
-	const filePath = writeSpec(readSpecResult.spec, readSpecResult.extension, apiGeneratedKey);
+	const filePath = writeSpec(apiGeneratedKey, readSpecResult.spec, introspection);
 
 	const { schema } = await createGraphQLSchema(readSpecResult.spec, {
 		fillEmptyResponses: true,
-		baseUrl: 'http://localhost:12111',
 		viewer: false,
-		headers: {
-			authorization: `Bearer ${token}`, // send authorization header in every request
-		},
 	});
 
 	return introspect.graphql(
@@ -52,16 +58,14 @@ export const openApiSpecificationToGraphQLApi = async (
 
 export const createExecutableSchema = async (specName: string): Promise<GraphQLSchema> => {
 	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation, specName);
-	const introspection: OpenAPIIntrospectionSource = {
-		kind: 'file',
-		filePath: fullSpecPath,
-	};
-	const spec = loadOpenApi(introspection);
-	const readSpecResult = readSpec(spec, introspection);
+	const specContent = fs.readFileSync(fullSpecPath).toString();
+	const spec: OpenApiSpec = JSON.parse(specContent);
 
-	const { schema } = await createGraphQLSchema(readSpecResult.spec, {
+	const baseUrl = resolveConfigurationVariable(mapInputVariable(spec.baseURL));
+
+	const { schema } = await createGraphQLSchema(spec.content, {
 		fillEmptyResponses: true,
-		baseUrl: 'http://localhost:12111',
+		baseUrl: baseUrl,
 		viewer: false,
 		headers: {
 			authorization: `Bearer ${token}`, // send authorization header in every request
@@ -85,16 +89,21 @@ export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
 	}
 };
 
-const writeSpec = (spec: OasSpec, extension: string, name: string): string => {
+const writeSpec = (name: string, spec: OasSpec, introspection: OpenAPIIntrospection): string => {
 	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
 	fs.mkdir(specsFolderPath, { recursive: true }, (err) => {
 		if (err) throw err;
 	});
 
-	const fileName = `${name}.${extension}`;
+	const fileName = `${name}.json`;
 	const filePath = path.join(specsFolderPath, fileName);
 
-	fs.writeFileSync(filePath, extension === 'yaml' ? yaml.dump(spec) : JSON.stringify(spec, null, 2));
+	const item: OpenApiSpec = {
+		content: spec,
+		baseURL: introspection.baseURL!,
+	};
+
+	fs.writeFileSync(filePath, JSON.stringify(item, null, 2));
 
 	return path.join(openApiSpecsLocation, fileName);
 };
