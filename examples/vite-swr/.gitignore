@@ -25,3 +25,8 @@ test/*.js
 *.njsproj
 *.sln
 *.sw?
+
+# lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
