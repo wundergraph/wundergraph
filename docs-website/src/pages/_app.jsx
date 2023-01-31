@@ -52,10 +52,12 @@ export default function App({ Component, pageProps }) {
 		plausible.enableAutoPageviews();
 	}, []);
 
-	let title = pageProps.title || pageProps.markdoc?.frontmatter.title;
+	let title = pageProps.title || pageProps.markdoc?.frontmatter.title || 'WunderGraph';
 
 	let pageTitle =
-		pageProps.title || pageProps.markdoc?.frontmatter.pageTitle || `${pageProps.markdoc?.frontmatter.title} - Docs`;
+		pageProps.title ||
+		pageProps.markdoc?.frontmatter.pageTitle ||
+		`${pageProps.markdoc?.frontmatter.title || 'WunderGraph'} - Docs`;
 
 	let description = pageProps.description || pageProps.markdoc?.frontmatter.description;
 

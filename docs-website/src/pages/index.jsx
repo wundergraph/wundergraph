@@ -153,12 +153,12 @@ export default function HomePage() {
 						icon={<LockClosedIcon />}
 						href="/auth/overview"
 					/>
-					<QuickLink
+					{/* <QuickLink
 						title="Realtime"
 						description="How to build realtime apps with WunderGraph."
 						icon={<CursorArrowRaysIcon />}
 						href="/realtime"
-					/>
+					/> */}
 					<QuickLink
 						title="Storage"
 						description="Add S3 compatible storage and file uploads with the WunderGraph client."

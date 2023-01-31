@@ -204,10 +204,10 @@ const navigation = [
 					},
 				],
 			},
-			{
-				title: 'Configuring WunderGraph',
-				links: [],
-			},
+			// {
+			// 	title: 'Configuring WunderGraph',
+			// 	links: [],
+			// },
 			{
 				title: 'IDE',
 				links: [
@@ -217,13 +217,20 @@ const navigation = [
 					},
 				],
 			},
-			{
-				title: 'Debugging',
-				links: [],
-			},
+			// {
+			// 	title: 'Debugging',
+			// 	links: [
+
+			// 	],
+			// },
 			{
 				title: 'Testing',
-				links: [],
+				links: [
+					{
+						title: 'Integration tests',
+						href: '/docs/guides/testing',
+					},
+				],
 			},
 			{
 				title: 'Security',
@@ -265,40 +272,19 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/apis/overview',
+				href: '/docs/apis',
 			},
 			{
-				title: 'Supported APIs',
-				links: [
-					{
-						title: 'GraphQL',
-						href: '/docs/supported-data-sources/graphql',
-					},
-					{
-						title: 'Apollo Federation',
-						href: '/docs/supported-data-sources/apollo-federation',
-					},
-					{
-						title: 'REST / OpenAPI',
-						href: '/docs/supported-data-sources/rest-openapi',
-					},
-					{
-						title: 'gRPC',
-						href: '/docs/supported-data-sources/grpc',
-					},
-					{
-						title: 'SOAP',
-						href: '/docs/supported-data-sources/soap',
-					},
-					{
-						title: 'OData',
-						href: '/docs/supported-data-sources/odata',
-					},
-					{
-						title: 'Apache Thrift',
-						href: '/docs/supported-data-sources/apache-thrift',
-					},
-				],
+				title: 'GraphQL',
+				href: '/docs/apis/graphql',
+			},
+			{
+				title: 'Apollo Federation',
+				href: '/docs/apis/apollo-federation',
+			},
+			{
+				title: 'REST / OpenAPI',
+				href: '/docs/apis/rest-openapi',
 			},
 		],
 	},
@@ -309,10 +295,10 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/auth/overview',
+				href: '/docs/auth',
 			},
 			{
-				title: 'Supported Providers',
+				title: 'OIDC Providers',
 				links: [
 					{
 						title: 'OpenID Connect',
@@ -326,89 +312,97 @@ const navigation = [
 						title: 'Keycloak',
 						href: '/docs/auth/keycloak',
 					},
+					{
+						title: 'Github',
+						href: '/docs/auth/github',
+					},
+				],
+			},
+			{
+				title: 'Token based auth',
+				links: [
+					{
+						title: 'Auth.js (NextAuth)',
+						href: '/docs/auth/auth-js',
+					},
 				],
 			},
 		],
 	},
 	{
-		title: 'Database',
-		href: '/docs/database',
+		title: 'Databases',
+		href: '/docs/databases',
 		icon: <CircleStackIcon />,
 		links: [
 			{
 				title: 'Overview',
-				href: '/docs/database/overview',
+				href: '/docs/databases',
 			},
 			{
-				title: 'Supported Databases',
-				links: [
-					{
-						title: 'PostgreSQL',
-						href: '/docs/supported-data-sources/postgresql',
-					},
-					{
-						title: 'MySQL',
-						href: '/docs/supported-data-sources/mysql',
-					},
-					{
-						title: 'SQLite',
-						href: '/docs/supported-data-sources/sqlite',
-					},
-					{
-						title: 'SQLServer',
-						href: '/docs/supported-data-sources/sqlserver',
-					},
-					{
-						title: 'MongoDB + Atlas',
-						href: '/docs/supported-data-sources/mongodb-atlas',
-					},
-					{
-						title: 'Planetscale',
-						href: '/docs/supported-data-sources/planetscale',
-					},
-					{
-						title: 'FaunaDB',
-						href: '/docs/supported-data-sources/faunadb',
-					},
-					{
-						title: 'Neo4j',
-						href: '/docs/supported-data-sources/neo4j',
-					},
-					{
-						title: 'Yugabyte',
-						href: '/docs/supported-data-sources/yugabyte',
-					},
-					{
-						title: 'Oracle DB',
-						href: '/docs/supported-data-sources/oracle-db',
-					},
-				],
+				title: 'PostgreSQL',
+				href: '/docs/databases/postgresql',
+			},
+			{
+				title: 'MySQL',
+				href: '/docs/databases/mysql',
+			},
+			{
+				title: 'SQLite',
+				href: '/docs/databases/sqlite',
+			},
+			{
+				title: 'SQLServer',
+				href: '/docs/databases/sqlserver',
+			},
+			{
+				title: 'MongoDB + Atlas',
+				href: '/docs/databases/mongodb-atlas',
+			},
+			{
+				title: 'Planetscale',
+				href: '/docs/databases/planetscale',
+			},
+			{
+				title: 'FaunaDB',
+				href: '/docs/databases/faunadb',
+			},
+			{
+				title: 'Neo4j',
+				href: '/docs/databases/neo4j',
+			},
+			{
+				title: 'Yugabyte',
+				href: '/docs/databases/yugabyte',
+			},
+			{
+				title: 'Oracle DB',
+				href: '/docs/databases/oracle-db',
 			},
 		],
 	},
-	{
-		title: 'Realtime',
-		href: '/docs/realtime',
-		icon: <CursorArrowRaysIcon />,
-		links: [
-			{
-				title: 'Overview',
-				href: '/docs/realtime',
-			},
-			{
-				title: 'Live queries',
-				href: '/docs/realtime/live-queries',
-			},
-			{
-				title: 'Graphql subscriptions',
-				href: '/docs/realtime/subscriptions',
-			},
-			{
-				title: 'Typescript subscriptions',
-				href: '/docs/realtime/typescript',
-			},
-		],
-	},
+	// {
+	// 	title: 'Realtime',
+	// 	href: '/docs/realtime',
+	// 	icon: <CursorArrowRaysIcon />,
+	// 	links: [
+	// 		{
+	// 			title: 'Overview',
+	// 			href: '/docs/realtime',
+	// 		},
+	// 		{
+	// 			title: 'Live queries',
+	// 			href: '/docs/realtime/live-queries',
+	// 		},
+	// 		{
+	// 			title: 'Graphql subscriptions',
+	// 			href: '/docs/realtime/subscriptions',
+	// 		},
+	// 		{
+	// 			title: 'Typescript subscriptions',
+	// 			href: '/docs/realtime/typescript',
+	// 		},
+	// 	],
+	// },
 	{
 		title: 'Storage',
 		href: '/docs/storage',
@@ -1009,10 +1003,6 @@ const navigation = [
 						title: 'Live Queries',
 						href: '/docs/wundergraph-operations-ts-reference/configure-live-queries',
 					},
-					{
-						title: 'custom Operations Configuration',
-						href: '/docs/wundergraph-operations-ts-reference/custom-operations-configuration',
-					},
 				],
 			},
 			{
@@ -1085,15 +1075,6 @@ const navigation = [
 					{
 						title: 'Custom GraphQL Servers',
 						href: '/docs/wundergraph-server-ts-reference/custom-graphql-servers',
-					},
-				],
-			},
-			{
-				title: 'wundergraph.manifest.json',
-				links: [
-					{
-						title: 'Overview',
-						href: '/docs/wundergraph-manifest-json-reference',
 					},
 				],
 			},
@@ -1200,10 +1181,6 @@ const navigation = [
 						href: '/docs/wunderctl-reference',
 					},
 					{
-						title: 'wunderctl init',
-						href: '/docs/wunderctl-reference/wunderctl-init',
-					},
-					{
 						title: 'wunderctl up',
 						href: '/docs/wunderctl-reference/wunderctl-up',
 					},
@@ -1303,11 +1280,11 @@ const navigation = [
 			},
 		],
 	},
-	{
-		title: 'Troubleshooting',
-		href: '/docs/troubleshooting',
-		icon: <BugAntIcon />,
-	},
+	// {
+	// 	title: 'Troubleshooting',
+	// 	href: '/docs/troubleshooting',
+	// 	icon: <BugAntIcon />,
+	// },
 	{
 		title: 'Upgrade guides',
 		href: '/docs/upgrade-guides',
@@ -1322,7 +1299,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Simplified URL structure',
-						href: '/docs/upgrade-guides/simplifying-the-wundergraph-url-structure.md',
+						href: '/docs/upgrade-guides/simplifying-the-wundergraph-url-structure',
 					},
 				],
 			},

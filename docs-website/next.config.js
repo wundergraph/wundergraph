@@ -28,6 +28,11 @@ const nextConfig = {
 				permanent: true,
 			},
 			{
+				source: '/docs/pre-1-0-changes',
+				destination: '/docs/upgrade-guides',
+				permanent: true,
+			},
+			{
 				source: '/docs/deployment/flyio',
 				destination: '/docs/self-hosted/flyio',
 				permanent: true,

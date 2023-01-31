@@ -79,16 +79,15 @@ export const Button: FC<{
 
 	if (href && !isDisabled) {
 		return (
-			<Link href={href}>
-				<a
-					className={cls}
-					onClick={onClick}
-					aria-label={props['aria-label']}
-					target={isExternalUrl(href) ? '_blank' : undefined}
-					rel={isExternalUrl(href) ? 'noreferrer' : undefined}
-				>
-					{content}
-				</a>
+			<Link
+				href={href}
+				className={cls}
+				onClick={onClick}
+				aria-label={props['aria-label']}
+				target={isExternalUrl(href) ? '_blank' : undefined}
+				rel={isExternalUrl(href) ? 'noreferrer' : undefined}
+			>
+				{content}
 			</Link>
 		);
 	}

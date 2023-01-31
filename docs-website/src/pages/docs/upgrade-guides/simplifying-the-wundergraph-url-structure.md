@@ -13,12 +13,12 @@ Previously, the configuration of a WunderGraph application looked like this:
 const myApplication = new Application({
   name: 'app',
   apis: [jsp, weather, countries, spacex, chinook, db],
-})
+});
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
   application: myApplication,
-})
+});
 ```
 
 You've had to create an `Application` and pass it to `configureWunderGraphApplication`.
@@ -51,7 +51,7 @@ The new way to configure a WunderGraph application looks like this:
 
 configureWunderGraphApplication({
   apis: [jsp, weather, countries, spacex, chinook, db],
-})
+});
 ```
 
 You don't have to create an `Application` anymore.

@@ -66,14 +66,14 @@ export function Navigation({ navigation, className }) {
 			}),
 		[navigation, path, isRoot]
 	);
-
+	console.log(subNavigation);
 	return (
 		<nav className={clsx('flex text-base lg:text-sm', className)}>
 			<ul
 				role="list"
 				className={clsx(
 					'absolute pb-16 transition-transform ',
-					!isRoot ? '-translate-x-full opacity-0' : 'translate-x-0'
+					!isRoot && subNavigation ? '-translate-x-full opacity-0' : 'translate-x-0'
 				)}
 			>
 				{navigation.map((section, i) =>
@@ -89,7 +89,7 @@ export function Navigation({ navigation, className }) {
 			<div
 				className={clsx(
 					'absolute pb-16 transition-transform ',
-					isRoot ? 'translate-x-full opacity-0' : 'translate-x-0'
+					isRoot || !subNavigation ? 'translate-x-full opacity-0' : 'translate-x-0'
 				)}
 			>
 				{subNavigation && <SubNavigation navigation={subNavigation} />}
