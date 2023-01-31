@@ -139,6 +139,7 @@
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
+    "openapi-to-graphql": "^2.2.5",
     "openapi-types": "^10.0.0",
     "pino": "^8.8.0",
     "pino-pretty": "^9.1.1",

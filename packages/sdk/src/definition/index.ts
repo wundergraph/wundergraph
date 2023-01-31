@@ -8,7 +8,6 @@ import {
 	print,
 	printSchema,
 } from 'graphql';
-import * as fs from 'fs';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import {
@@ -28,7 +27,6 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import path from 'path';
 import { introspectPrismaDatabaseWithRetries } from '../db/introspection';
 import {
 	applyNameSpaceToFieldConfigurations,
@@ -42,6 +40,7 @@ import { introspectGraphql } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
+import { openApiSpecificationToGraphQLApi, loadOpenApi } from '../rest2graphql';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
@@ -74,6 +73,10 @@ export interface RenameTypeFields {
 
 export type ApiType = GraphQLApiCustom | RESTApiCustom | DatabaseApiCustom;
 
+export interface ApiOptions {
+	OasSpecPath?: string;
+}
+
 export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	constructor(
 		schema: string,
@@ -81,7 +84,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
-		customJsonScalars?: string[]
+		customJsonScalars?: string[],
+		options?: ApiOptions
 	) {
 		this.Schema = schema;
 		this.DataSources = dataSources;
@@ -89,6 +93,8 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 		this.Types = types;
 		this.interpolateVariableDefinitionAsJSON = interpolateVariableDefinitionAsJSON;
 		this.CustomJsonScalars = customJsonScalars;
+
+		this.OasSpecPath = options?.OasSpecPath;
 	}
 
 	DefaultFlushInterval: number = 500;
@@ -98,6 +104,7 @@ export class Api<T = ApiType> implements RenameTypes, RenameTypeFields {
 	Types: TypeConfiguration[];
 	interpolateVariableDefinitionAsJSON: string[];
 	CustomJsonScalars?: string[];
+	OasSpecPath?: string;
 
 	renameTypes(rename: RenameType[]): void {
 		this.Schema = renameTypes(this.Schema, rename);
@@ -388,6 +395,11 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
+export interface OpenAPIV2Introspection extends HTTPUpstream {
+	source: OpenAPIIntrospectionSource;
+	baseURL?: InputVariable;
+}
+
 export interface StaticApiCustom {
 	data: ConfigurationVariable;
 }
@@ -628,9 +640,22 @@ export const introspect = {
 			return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
 	federation: introspectFederation,
-	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-		const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-			const spec = loadOpenApi(introspection);
+	openApiV2: async (introspection: OpenAPIIntrospection): Promise<GraphQLApi> => {
+		const generator = async (introspection: OpenAPIIntrospection): Promise<GraphQLApi> => {
+			const spec = loadOpenApi(introspection.source);
+			return await openApiSpecificationToGraphQLApi(spec, introspection);
+		};
+		// If the source is a file we have all data required to perform the instrospection
+		// locally, which is also fast. Skip the cache in this case, so changes to the file
+		// are picked up immediately without requiring a cache flush.
+		if (introspection.source.kind === 'file') {
+			return generator(introspection);
+		}
+		return introspectWithCache(introspection, generator);
+	},
+	openApi: async (introspection: OpenAPIV2Introspection): Promise<RESTApi> => {
+		const generator = async (introspection: OpenAPIV2Introspection): Promise<RESTApi> => {
+			const spec = loadOpenApi(introspection.source);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
 		};
 		// If the source is a file we have all data required to perform the instrospection
@@ -695,19 +720,5 @@ const upstreamAuthenticationKind = (kind: HTTPUpstreamAuthentication['kind']): U
 			return UpstreamAuthenticationKind.UpstreamAuthenticationJWTWithAccessTokenExchange;
 		default:
 			throw new Error(`upstreamAuthenticationKind, unsupported kind: ${kind}`);
-	}
-};
-
-const loadOpenApi = (introspection: OpenAPIIntrospection): string => {
-	switch (introspection.source.kind) {
-		case 'file':
-			const filePath = path.resolve(process.cwd(), introspection.source.filePath);
-			return fs.readFileSync(filePath).toString();
-		case 'object':
-			return JSON.stringify(introspection.source.openAPIObject);
-		case 'string':
-			return introspection.source.openAPISpec;
-		default:
-			return '';
 	}
 };
