@@ -1,4 +1,4 @@
-query Countries($filter: countries_CountryFilterInput) {
+query Countries($filter: countries_CountryFilterInput) @removeNullVariables {
 	countries_countries(filter: $filter) {
 		code
 		name
