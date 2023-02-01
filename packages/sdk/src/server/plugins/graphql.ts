@@ -28,8 +28,12 @@ export interface GraphQLServerConfig {
 	customResolverFactory?: (executionContext: HelixExecutionContext & ExecutionContext) => Promise<{}>;
 }
 
-interface ExecutionContext {
-	wundergraph: BaseRequestContext;
+interface ServerContext extends BaseRequestContext {
+	headers: Record<string, string>;
+}
+
+export interface ExecutionContext {
+	wundergraph: ServerContext;
 }
 
 const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {
@@ -46,6 +50,15 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 				method: req.method,
 				query: req.query,
 			};
+
+			const headers = Object.entries(request.headers).reduce((acc, [key, value]) => {
+				if (value instanceof Array) {
+					acc[key] = value.join(',');
+				} else if (value !== undefined) {
+					acc[key] = value;
+				}
+				return acc;
+			}, {} as Record<string, string>);
 
 			const pluginLogger = req.ctx.log.child({ server: config.serverName, plugin: 'graphql' });
 
@@ -82,6 +95,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 								wundergraph: {
 									...req.ctx,
 									log: pluginLogger,
+									headers: headers,
 								},
 							}),
 						});
@@ -104,6 +118,7 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fas
 						wundergraph: {
 							...req.ctx,
 							log: pluginLogger,
+							headers: headers,
 						},
 					}),
 				});

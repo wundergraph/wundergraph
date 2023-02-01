@@ -3,6 +3,7 @@ import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
 const stripe = introspect.openApiV2({
+	id: 'stripe',
 	baseURL: 'http://localhost:12111',
 	apiNamespace: 'stripe',
 	source: {
@@ -10,7 +11,9 @@ const stripe = introspect.openApiV2({
 		filePath: './stripe.yaml',
 	},
 	headers: (builder) =>
-		builder.addClientRequestHeader('X-Authorization', 'Authorization').addStaticHeader('X-Client-Id', 'client-id'),
+		builder
+			.addClientRequestHeader('X-Authorization', 'FooBarBazz')
+			.addStaticHeader('Authorization', `Bearer sk_test_123`),
 });
 
 // configureWunderGraph emits the configuration

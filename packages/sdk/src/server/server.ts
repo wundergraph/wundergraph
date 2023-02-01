@@ -243,7 +243,7 @@ export const createServer = async ({
 			for await (const specPath of specPaths) {
 				const ext = path.extname(specPath);
 				const apiName = path.basename(specPath, ext);
-				const schema = createExecutableSchema(specPath, logger);
+				const schema = createExecutableSchema(specPath);
 				const routeUrl = openApiServerMountPath(apiName);
 
 				await fastify.register(require('./plugins/graphql'), {

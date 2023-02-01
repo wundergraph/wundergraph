@@ -1,5 +1,4 @@
 import { InputVariable, mapInputVariable, resolveConfigurationVariable } from '../configure/variables';
-import { pino } from 'pino';
 import { GraphQLSchema } from 'graphql';
 import path from 'path';
 import process from 'node:process';
@@ -7,17 +6,18 @@ import fs from 'fs';
 import { createGraphQLSchema } from 'openapi-to-graphql';
 import { OpenAPIIntrospection } from '../definition';
 import { OasSpec } from './introspection';
+import { ExecutionContext } from '../server/plugins/graphql';
+import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 
 export const openApiSpecsLocation = path.join('generated', 'openapi');
-
-const token = 'sk_test_123';
 
 interface OpenApiSpec {
 	content: OasSpec;
 	baseURL: InputVariable | undefined;
+	headers: string[];
 }
 
-export const createExecutableSchema = async (specName: string, logger: pino.Logger): Promise<GraphQLSchema> => {
+export const createExecutableSchema = async (specName: string): Promise<GraphQLSchema> => {
 	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation, specName);
 	const specContent = fs.readFileSync(fullSpecPath).toString();
 	const spec: OpenApiSpec = JSON.parse(specContent);
@@ -32,14 +32,21 @@ export const createExecutableSchema = async (specName: string, logger: pino.Logg
 		baseUrl: baseUrl,
 		viewer: false,
 		headers: function (method, path, title, resolverParams) {
-			logger.info(`method ${method}`);
-			logger.info(`path  ${path}`);
-			logger.info(`title ${title}`);
-			logger.info(`resolverParams ${JSON.stringify(resolverParams?.context)}`);
+			const ctx = resolverParams?.context as ExecutionContext;
 
-			return {
-				authorization: `Bearer ${token}`, // send authorization header in every request
-			};
+			const headers: Record<string, string> = {};
+
+			spec.headers.reduce((acc, header: string) => {
+				const value = ctx.wundergraph?.headers[header];
+				if (value) {
+					acc[header] = value;
+				}
+				return acc;
+			}, headers);
+
+			ctx.wundergraph?.log?.info(`created headers ${JSON.stringify(headers)}`);
+
+			return headers;
 		},
 	});
 
@@ -58,7 +65,18 @@ export const writeApiInfo = (name: string, spec: OasSpec, introspection: OpenAPI
 	const item: OpenApiSpec = {
 		content: spec,
 		baseURL: introspection.baseURL,
+		headers: forwardHeaders(introspection),
 	};
 
 	fs.writeFileSync(filePath, JSON.stringify(item, null, 2));
+};
+
+const forwardHeaders = (introspection: OpenAPIIntrospection): string[] => {
+	const headersBuilder = new HeadersBuilder();
+
+	if (introspection.headers !== undefined) {
+		introspection.headers(headersBuilder);
+	}
+
+	return headersBuilder.build().map((value) => value.key.toLowerCase());
 };
