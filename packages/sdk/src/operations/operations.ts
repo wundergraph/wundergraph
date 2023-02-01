@@ -41,7 +41,7 @@ export interface BaseOperationConfiguration<UserRole extends string> {
 	};
 }
 
-interface LiveQueryConfig {
+export interface LiveQueryConfig {
 	enable: boolean;
 	pollingIntervalSeconds: number;
 }
