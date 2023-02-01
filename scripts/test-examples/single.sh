@@ -101,7 +101,10 @@ fi
 
 # If the example uses Next.js, compile it
 if grep -q '"build:next"' package.json; then
-    npm run build:next
+    # This example doesn't build under a pnpm workspace
+    if !grep -q '"nextjs-react-query"' package.json; then
+        npm run build:next
+    fi
 elif grep -q '"check"' package.json; then
     npm run check
 fi
