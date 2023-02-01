@@ -23,17 +23,13 @@ interface ReadSpecResult {
 
 interface OpenApiSpec {
 	content: OasSpec;
-	baseURL: InputVariable;
+	baseURL: InputVariable | undefined;
 }
 
 export const openApiSpecificationToGraphQLApi = async (
 	oas: string,
 	introspection: OpenAPIIntrospection
 ): Promise<GraphQLApi> => {
-	if (!introspection.baseURL) {
-		throw new Error('Base URL is not defined');
-	}
-
 	const readSpecResult = readSpec(oas, introspection.source);
 	const apiGeneratedKey = objectHash(oas);
 
@@ -60,7 +56,10 @@ export const createExecutableSchema = async (specName: string, logger: pino.Logg
 	const specContent = fs.readFileSync(fullSpecPath).toString();
 	const spec: OpenApiSpec = JSON.parse(specContent);
 
-	const baseUrl = resolveConfigurationVariable(mapInputVariable(spec.baseURL));
+	let baseUrl: string | undefined;
+	if (spec.baseURL) {
+		baseUrl = resolveConfigurationVariable(mapInputVariable(spec.baseURL));
+	}
 
 	const { schema } = await createGraphQLSchema(spec.content, {
 		fillEmptyResponses: true,
@@ -106,7 +105,7 @@ const writeSpec = (name: string, spec: OasSpec, introspection: OpenAPIIntrospect
 
 	const item: OpenApiSpec = {
 		content: spec,
-		baseURL: introspection.baseURL!,
+		baseURL: introspection.baseURL,
 	};
 
 	fs.writeFileSync(filePath, JSON.stringify(item, null, 2));
