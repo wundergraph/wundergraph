@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.133.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.133.0...@wundergraph/sdk@0.133.1) (2023-02-01)
+
+### Bug Fixes
+
+* factory type errors ([#625](https://github.com/wundergraph/wundergraph/issues/625)) ([8e6e81b](https://github.com/wundergraph/wundergraph/commit/8e6e81b8e8dfb6c0640789dd04a8b598232733cc)) (@Pagebakers)
+
 ## [0.133.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.132.1...@wundergraph/sdk@0.133.0) (2023-01-30)
 
 ### Features
