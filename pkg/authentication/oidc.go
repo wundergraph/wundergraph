@@ -128,6 +128,10 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 
 	state, err := generateState()
 	if err != nil {
+		h.log.Error("OIDCCookieHandler could not generate state",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
