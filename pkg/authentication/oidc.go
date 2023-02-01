@@ -25,6 +25,11 @@ const (
 	OpenIDConnectFlavorAuth0
 )
 
+const (
+	oidcRedirectURICookieName             = "redirect_uri"
+	oidcRedirectOnCompletionURICookieName = "completion_redirect_uri"
+)
+
 type OpenIDConnectCookieHandler struct {
 	log    *zap.Logger
 	claims ClaimsInfo
@@ -93,209 +98,236 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	}
 
 	authorizeRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if provider == nil {
-			http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
-			return
-		}
-
-		redirectOnSuccessURL := r.URL.Query().Get("redirect_uri")
-
-		uriWithoutQuery := strings.Replace(r.RequestURI, "?"+r.URL.RawQuery, "", 1)
-		redirectPath := strings.Replace(uriWithoutQuery, "authorize", "callback", 1)
-		scheme := "https"
-		if !config.ForceRedirectHttps && r.TLS == nil {
-			scheme = "http"
-		}
-		redirectURI := fmt.Sprintf("%s://%s%s", scheme, r.Host, redirectPath)
-
-		oauth2Config := oauth2.Config{
-			ClientID:     config.ClientID,
-			ClientSecret: config.ClientSecret,
-			Endpoint:     provider.Endpoint(),
-			RedirectURL:  redirectURI,
-			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-		}
-
-		state, err := generateState()
-		if err != nil {
-			return
-		}
-
-		cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
-		cookieDomain := sanitizeDomain(r.Host)
-
-		c := &http.Cookie{
-			Name:     "state",
-			Value:    state,
-			MaxAge:   int(time.Minute.Seconds()),
-			Secure:   r.TLS != nil,
-			HttpOnly: true,
-			Path:     cookiePath,
-			Domain:   cookieDomain,
-			SameSite: http.SameSiteLaxMode,
-		}
-		http.SetCookie(w, c)
-
-		c2 := &http.Cookie{
-			Name:     "redirect_uri",
-			Value:    redirectURI,
-			MaxAge:   int(time.Minute.Seconds()),
-			Secure:   r.TLS != nil,
-			HttpOnly: true,
-			Path:     cookiePath,
-			Domain:   cookieDomain,
-			SameSite: http.SameSiteLaxMode,
-		}
-		http.SetCookie(w, c2)
-
-		if redirectOnSuccessURL != "" {
-			c3 := &http.Cookie{
-				Name:     "success_redirect_uri",
-				Value:    redirectOnSuccessURL,
-				MaxAge:   int(time.Minute.Seconds()),
-				Secure:   r.TLS != nil,
-				HttpOnly: true,
-				Path:     cookiePath,
-				Domain:   cookieDomain,
-				SameSite: http.SameSiteLaxMode,
-			}
-			http.SetCookie(w, c3)
-		}
-
-		opts := make([]oauth2.AuthCodeOption, len(config.QueryParameters))
-		for i, p := range config.QueryParameters {
-			opts[i] = oauth2.SetAuthURLParam(p.Name, p.Value)
-		}
-
-		redirect := oauth2Config.AuthCodeURL(state, opts...)
-
-		http.Redirect(w, r, redirect, http.StatusFound)
+		h.authorize(ctx, w, r, provider, &config)
 	})
 
 	callbackRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		if provider == nil {
-			http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
-			return
-		}
-
-		state, err := r.Cookie("state")
-		if err != nil {
-			h.log.Error("OIDCCookieHandler state missing",
-				zap.Error(err),
-			)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		if r.URL.Query().Get("state") != state.Value {
-			h.log.Error("OIDCCookieHandler state mismatch",
-				zap.Error(err),
-			)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		redirectURI, err := r.Cookie("redirect_uri")
-		if err != nil {
-			h.log.Error("OIDCCookieHandler redirect uri missing",
-				zap.Error(err),
-			)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		oauth2Config := oauth2.Config{
-			ClientID:     config.ClientID,
-			ClientSecret: config.ClientSecret,
-			Endpoint:     provider.Endpoint(),
-			RedirectURL:  redirectURI.Value,
-			Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
-		}
-
-		oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
-		if err != nil {
-			h.log.Error("OIDCCookieHandler.exchange.token",
-				zap.Error(err),
-			)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		var (
-			idToken string
-		)
-
-		accessToken := oauth2Token.AccessToken
-		maybeIdToken := oauth2Token.Extra("id_token")
-		if maybeIdToken != nil {
-			idToken = maybeIdToken.(string)
-		}
-
-		userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
-		if err != nil {
-			h.log.Error("oidc.provider.UserInfo", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		var claims Claims
-		err = userInfo.Claims(&claims)
-		if err != nil {
-			h.log.Error("oidc.userInfo.Claims", zap.Error(err))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		accessTokenJSON := tryParseJWT(accessToken)
-		idTokenJSON := tryParseJWT(idToken)
-
-		user := User{
-			ProviderName:   "oidc",
-			ProviderID:     config.ProviderID,
-			Email:          claims.Email,
-			EmailVerified:  claims.EmailVerified,
-			Name:           claims.Name,
-			FirstName:      claims.GivenName,
-			LastName:       claims.FamilyName,
-			UserID:         claims.Sub,
-			AvatarURL:      claims.Picture,
-			Location:       claims.Locale,
-			ExpiresAt:      oauth2Token.Expiry,
-			AccessToken:    accessTokenJSON,
-			RawAccessToken: accessToken,
-			RawIDToken:     idToken,
-			IdToken:        idTokenJSON,
-		}
-
-		hooks.handlePostAuthentication(r.Context(), user)
-		proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)
-		if proceed {
-			err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
-			if err != nil {
-				h.log.Error("OpenIDConnectCookieHandler.user.Save",
-					zap.Error(err),
-				)
-				return
-			}
-
-		}
-
-		scheme := "https"
-		if !config.ForceRedirectHttps && r.TLS == nil {
-			scheme = "http"
-		}
-
-		if redirectOnSuccess, err := r.Cookie("success_redirect_uri"); err == nil {
-			http.Redirect(w, r, redirectOnSuccess.Value, http.StatusFound)
-			return
-		}
-
-		redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, "/auth/cookie/user"))
-
-		http.Redirect(w, r, redirect, http.StatusFound)
+		h.authorizationCallback(ctx, w, r, provider, &config, &hooks)
 	})
+}
+
+func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
+	if provider == nil {
+		http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
+		return
+	}
+
+	redirectOnCompletionURI := r.URL.Query().Get("redirect_uri")
+
+	uriWithoutQuery := strings.Replace(r.RequestURI, "?"+r.URL.RawQuery, "", 1)
+	redirectPath := strings.Replace(uriWithoutQuery, "authorize", "callback", 1)
+	scheme := "https"
+	if !config.ForceRedirectHttps && r.TLS == nil {
+		scheme = "http"
+	}
+	redirectURI := fmt.Sprintf("%s://%s%s", scheme, r.Host, redirectPath)
+
+	oauth2Config := oauth2.Config{
+		ClientID:     config.ClientID,
+		ClientSecret: config.ClientSecret,
+		Endpoint:     provider.Endpoint(),
+		RedirectURL:  redirectURI,
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+
+	state, err := generateState()
+	if err != nil {
+		return
+	}
+
+	cookiePath := fmt.Sprintf("/auth/cookie/callback/%s", config.ProviderID)
+	cookieDomain := sanitizeDomain(r.Host)
+
+	stateCookie := &http.Cookie{
+		Name:     "state",
+		Value:    state,
+		MaxAge:   int(time.Minute.Seconds()),
+		Secure:   r.TLS != nil,
+		HttpOnly: true,
+		Path:     cookiePath,
+		Domain:   cookieDomain,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, stateCookie)
+
+	redirectURICookie := &http.Cookie{
+		Name:     oidcRedirectURICookieName,
+		Value:    redirectURI,
+		MaxAge:   int(time.Minute.Seconds()),
+		Secure:   r.TLS != nil,
+		HttpOnly: true,
+		Path:     cookiePath,
+		Domain:   cookieDomain,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, redirectURICookie)
+
+	if redirectOnCompletionURI != "" {
+		redirectOnSucessURICookie := &http.Cookie{
+			Name:     oidcRedirectOnCompletionURICookieName,
+			Value:    redirectOnCompletionURI,
+			MaxAge:   int(time.Minute.Seconds()),
+			Secure:   r.TLS != nil,
+			HttpOnly: true,
+			Path:     cookiePath,
+			Domain:   cookieDomain,
+			SameSite: http.SameSiteLaxMode,
+		}
+		http.SetCookie(w, redirectOnSucessURICookie)
+	}
+
+	opts := make([]oauth2.AuthCodeOption, len(config.QueryParameters))
+	for i, p := range config.QueryParameters {
+		opts[i] = oauth2.SetAuthURLParam(p.Name, p.Value)
+	}
+
+	redirect := oauth2Config.AuthCodeURL(state, opts...)
+
+	http.Redirect(w, r, redirect, http.StatusFound)
+}
+
+func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) {
+	if provider == nil {
+		http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
+		return
+	}
+
+	state, err := r.Cookie("state")
+	if err != nil {
+		h.log.Error("OIDCCookieHandler state missing",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if r.URL.Query().Get("state") != state.Value {
+		h.log.Error("OIDCCookieHandler state mismatch",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	redirectURI, err := r.Cookie(oidcRedirectURICookieName)
+	if err != nil {
+		h.log.Error("OIDCCookieHandler redirect uri missing",
+			zap.Error(err),
+		)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// This is optional
+	var redirectOnCompletionURI string
+	if redirectOnCompletionCookie, err := r.Cookie(oidcRedirectOnCompletionURICookieName); err == nil {
+		redirectOnCompletionURI = redirectOnCompletionCookie.Value
+	}
+
+	oauth2Config := &oauth2.Config{
+		ClientID:     config.ClientID,
+		ClientSecret: config.ClientSecret,
+		Endpoint:     provider.Endpoint(),
+		RedirectURL:  redirectURI.Value,
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+	if err := h.exchangeToken(ctx, w, r, oauth2Config, provider, config, hooks); err != nil {
+		// Error is already logged by exchangeToken
+		if redirectOnCompletionURI != "" {
+			if redirURL, _ := url.Parse(redirectOnCompletionURI); redirURL != nil {
+				qs := redirURL.Query()
+				qs.Add("error", url.QueryEscape(err.Error()))
+				redirURL.RawQuery = qs.Encode()
+				redirectOnCompletionURI = redirURL.String()
+			}
+			http.Redirect(w, r, redirectOnCompletionURI, http.StatusFound)
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
+		}
+		return
+	}
+
+	if redirectOnCompletionURI != "" {
+		http.Redirect(w, r, redirectOnCompletionURI, http.StatusFound)
+		return
+	}
+
+	scheme := "https"
+	if !config.ForceRedirectHttps && r.TLS == nil {
+		scheme = "http"
+	}
+
+	redirect := fmt.Sprintf("%s://%s", scheme, path.Join(r.Host, "/auth/cookie/user"))
+
+	http.Redirect(w, r, redirect, http.StatusFound)
+}
+
+func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.ResponseWriter, r *http.Request, oauth2Config *oauth2.Config, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) error {
+	oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
+	if err != nil {
+		h.log.Error("OIDCCookieHandler.exchange.token",
+			zap.Error(err),
+		)
+		return err
+	}
+
+	var (
+		idToken string
+	)
+
+	accessToken := oauth2Token.AccessToken
+	maybeIdToken := oauth2Token.Extra("id_token")
+	if maybeIdToken != nil {
+		idToken = maybeIdToken.(string)
+	}
+
+	userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
+	if err != nil {
+		h.log.Error("oidc.provider.UserInfo", zap.Error(err))
+		return err
+	}
+
+	var claims Claims
+	err = userInfo.Claims(&claims)
+	if err != nil {
+		h.log.Error("oidc.userInfo.Claims", zap.Error(err))
+		return err
+	}
+
+	accessTokenJSON := tryParseJWT(accessToken)
+	idTokenJSON := tryParseJWT(idToken)
+
+	user := User{
+		ProviderName:   "oidc",
+		ProviderID:     config.ProviderID,
+		Email:          claims.Email,
+		EmailVerified:  claims.EmailVerified,
+		Name:           claims.Name,
+		FirstName:      claims.GivenName,
+		LastName:       claims.FamilyName,
+		UserID:         claims.Sub,
+		AvatarURL:      claims.Picture,
+		Location:       claims.Locale,
+		ExpiresAt:      oauth2Token.Expiry,
+		AccessToken:    accessTokenJSON,
+		RawAccessToken: accessToken,
+		RawIDToken:     idToken,
+		IdToken:        idTokenJSON,
+	}
+
+	hooks.handlePostAuthentication(r.Context(), user)
+	proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)
+	if proceed {
+		err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
+		if err != nil {
+			h.log.Error("OpenIDConnectCookieHandler.user.Save",
+				zap.Error(err),
+			)
+			return err
+		}
+
+	}
+	return nil
 }
 
 func (h *OpenIDConnectCookieHandler) isValidIssuer(issuer string) bool {
