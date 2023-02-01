@@ -93,6 +93,12 @@ if grep -q '"test"' package.json; then
     WG_NODE_URL=${default_node_url} npm test
 fi
 
+if grep -q '"test:playwright"' package.json; then
+    # This is a no-op if playwright is already installed
+    npx -- playwright install --with-deps chromium
+    WG_NODE_URL=${default_node_url} npm run test:playwright
+fi
+
 # If the example uses Next.js, compile it
 if grep -q '"build:next"' package.json; then
     npm run build:next
@@ -100,11 +106,6 @@ elif grep -q '"check"' package.json; then
     npm run check
 fi
 
-if grep -q '"test:playwright"' package.json; then
-    # This is a no-op if playwright is already installed
-    npx -- playwright install --with-deps chromium
-    WG_NODE_URL=${default_node_url} npm run test:playwright
-fi
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
