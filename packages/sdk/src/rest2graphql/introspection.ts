@@ -18,7 +18,7 @@ export const openApiSpecificationToGraphQLApi = async (
 	let apiID: string;
 
 	if (introspection.id) {
-		if (!introspection.id.match(/^[_\-0-9a-zA-z]+$/)) {
+		if (!introspection.id.match(/^[_\-0-9a-z]+$/)) {
 			throw new Error('Invalid characters in api id - please use only alphanumeric characters, dashes and underscores');
 		}
 		apiID = introspection.id;
