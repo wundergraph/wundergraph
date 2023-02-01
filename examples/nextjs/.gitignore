@@ -47,8 +47,3 @@ migrations
 /test-results/
 /playwright-report/
 /playwright/.cache/
-
-# lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
