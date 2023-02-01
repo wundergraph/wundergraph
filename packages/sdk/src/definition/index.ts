@@ -40,7 +40,7 @@ import { introspectGraphql } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
-import { openApiSpecificationToGraphQLApi, loadOpenApi } from '../rest2graphql';
+import { loadOpenApi, openApiSpecificationToGraphQLApi } from '../rest2graphql';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
