@@ -387,7 +387,7 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
-export interface OpenAPIV2Introspection extends HTTPUpstream {
+export interface OpenAPIV2Introspection extends Omit<HTTPUpstream, 'authentication' | 'mTLS'> {
 	source: OpenAPIIntrospectionSource;
 	baseURL?: InputVariable;
 }
@@ -632,12 +632,12 @@ export const introspect = {
 			return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
 		}),
 	federation: introspectFederation,
-	openApiV2: async (introspection: OpenAPIIntrospection): Promise<GraphQLApi> => {
+	openApiV2: async (introspection: OpenAPIV2Introspection): Promise<GraphQLApi> => {
 		const spec = loadOpenApi(introspection.source);
 		return openApiSpecificationToGraphQLApi(spec, introspection);
 	},
-	openApi: async (introspection: OpenAPIV2Introspection): Promise<RESTApi> => {
-		const generator = async (introspection: OpenAPIV2Introspection): Promise<RESTApi> => {
+	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 			const spec = loadOpenApi(introspection.source);
 			return await openApiSpecificationToRESTApiObject(spec, introspection);
 		};

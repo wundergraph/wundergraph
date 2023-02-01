@@ -15,9 +15,19 @@ export const openApiSpecificationToGraphQLApi = async (
 	introspection: OpenAPIIntrospection
 ): Promise<GraphQLApi> => {
 	const spec = readSpec(oas, introspection.source);
-	const apiGeneratedKey = objectHash(oas);
+	let apiID: string;
 
-	writeApiInfo(apiGeneratedKey, spec, introspection);
+	if (introspection.id) {
+		if (!introspection.id.match(/^[_\-0-9a-zA-z]+$/)) {
+			throw new Error('Invalid characters in api id - please use only alphanumeric characters, dashes and underscores');
+		}
+		apiID = introspection.id;
+	} else {
+		apiID = objectHash(oas);
+	}
+
+	// TODO: in case apiID is changed the old one file still will exists. what could be a better place to cache the file?
+	writeApiInfo(apiID, spec, introspection);
 
 	const { schema } = await createGraphQLSchema(spec, {
 		fillEmptyResponses: true,
@@ -27,7 +37,7 @@ export const openApiSpecificationToGraphQLApi = async (
 	return introspect.graphql({
 		url: '',
 		baseUrl: '<SERVER_URL>',
-		path: `/openapis/${apiGeneratedKey}/graphql`,
+		path: `/openapis/${apiID}/graphql`,
 		apiNamespace: introspection.apiNamespace,
 		internal: true,
 		loadSchemaFromString: () => printSchema(schema),
