@@ -107,10 +107,6 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 }
 
 func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
-	if provider == nil {
-		http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
-		return
-	}
 
 	redirectOnCompletionURI := r.URL.Query().Get("redirect_uri")
 
@@ -187,11 +183,6 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 }
 
 func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) {
-	if provider == nil {
-		http.Error(w, "oidc provider configuration error", http.StatusMethodNotAllowed)
-		return
-	}
-
 	state, err := r.Cookie("state")
 	if err != nil {
 		h.log.Error("OIDCCookieHandler state missing",
