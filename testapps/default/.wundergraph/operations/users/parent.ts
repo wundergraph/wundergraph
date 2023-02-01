@@ -14,7 +14,7 @@ export default createOperation.subscription({
 			}
 		} finally {
 			// this gets always called, either when you're done yielding or when the client disconnects
-			console.log('finally done');
+			console.log('parent subscription done');
 		}
 	},
 });

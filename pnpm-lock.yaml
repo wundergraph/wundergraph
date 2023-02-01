@@ -309,6 +309,7 @@ importers:
       axios-retry: ^3.3.1
       chai: ^4.3.4
       close-with-grace: ^1.1.0
+      cross-fetch: ^3.1.5
       execa: 5.1.1
       fastify: ^4.10.2
       fastify-plugin: ^4.4.0
@@ -349,6 +350,7 @@ importers:
       axios: 0.26.1
       axios-retry: 3.3.1
       close-with-grace: 1.1.0
+      cross-fetch: 3.1.5
       execa: 5.1.1
       fastify: 4.10.2
       fastify-plugin: 4.4.0
@@ -469,7 +471,7 @@ importers:
       graphql: ^16.3.0
       pg: ^8.7.3
       postgraphile: ^4.12.9
-      typescript: ^4.8.2
+      typescript: ^4.9.4
       zod: ^3.20.2
     dependencies:
       '@types/node': 14.18.33
@@ -478,7 +480,7 @@ importers:
       graphql: 16.6.0
       pg: 8.8.0
       postgraphile: 4.12.11
-      typescript: 4.8.4
+      typescript: 4.9.4
       zod: 3.20.2
 
   testapps/jwks:
@@ -1316,11 +1318,11 @@ packages:
       '@types/node': 14.18.33
       chalk: 4.1.2
       cosmiconfig: 7.0.1
-      cosmiconfig-typescript-loader: 4.2.0_gbbg4brkmakf6m5nuj7scelzny
+      cosmiconfig-typescript-loader: 4.2.0_s3xc53pkyjbzjshgwsr5hhhztm
       lodash: 4.17.21
       resolve-from: 5.0.0
-      ts-node: 10.9.1_yodorn5kzjgomblrsstrk2spaa
-      typescript: 4.8.4
+      ts-node: 10.9.1_rju6pyblifsagdmqm3y74zsi6q
+      typescript: 4.9.4
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -5627,7 +5629,7 @@ packages:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
     dev: true
 
-  /cosmiconfig-typescript-loader/4.2.0_gbbg4brkmakf6m5nuj7scelzny:
+  /cosmiconfig-typescript-loader/4.2.0_s3xc53pkyjbzjshgwsr5hhhztm:
     resolution: {integrity: sha512-NkANeMnaHrlaSSlpKGyvn2R4rqUDeE/9E5YHx+b4nwo0R8dZyAqcih8/gxpCZvqWP9Vf6xuLpMSzSgdVEIM78g==}
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
@@ -5638,8 +5640,8 @@ packages:
     dependencies:
       '@types/node': 14.18.33
       cosmiconfig: 7.0.1
-      ts-node: 10.9.1_yodorn5kzjgomblrsstrk2spaa
-      typescript: 4.8.4
+      ts-node: 10.9.1_rju6pyblifsagdmqm3y74zsi6q
+      typescript: 4.9.4
     dev: true
 
   /cosmiconfig/7.0.1:
@@ -14238,6 +14240,37 @@ packages:
       yn: 3.1.1
     dev: true
 
+  /ts-node/10.9.1_rju6pyblifsagdmqm3y74zsi6q:
+    resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.9
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.3
+      '@types/node': 14.18.33
+      acorn: 8.8.1
+      acorn-walk: 8.2.0
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.9.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    dev: true
+
   /ts-node/10.9.1_vqcafhj4xvr2nzknlrdklk55zm:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
@@ -14258,37 +14291,6 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.11.18
-      acorn: 8.8.1
-      acorn-walk: 8.2.0
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 4.8.4
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    dev: true
-
-  /ts-node/10.9.1_yodorn5kzjgomblrsstrk2spaa:
-    resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
-    hasBin: true
-    peerDependencies:
-      '@swc/core': '>=1.2.50'
-      '@swc/wasm': '>=1.2.50'
-      '@types/node': '*'
-      typescript: '>=2.7'
-    peerDependenciesMeta:
-      '@swc/core':
-        optional: true
-      '@swc/wasm':
-        optional: true
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.9
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.3
-      '@types/node': 14.18.33
       acorn: 8.8.1
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -14501,6 +14503,11 @@ packages:
 
   /typescript/4.8.4:
     resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+
+  /typescript/4.9.4:
+    resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
 

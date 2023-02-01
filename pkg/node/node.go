@@ -453,7 +453,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
+	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader)
 
 	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
