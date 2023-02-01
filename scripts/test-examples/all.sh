@@ -61,7 +61,7 @@ cd ..
 
 if test ${target} = "workspace"; then
     # Restore package.json files in examples
-    find examples -name package.json | grep -v '\.next' | xargs git checkout
+    find examples -maxdepth 2  -name package.json | xargs git checkout
 
     # Restore workspace and lockfile
     git checkout pnpm-workspace.yaml pnpm-lock.yaml
