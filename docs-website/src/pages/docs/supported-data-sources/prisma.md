@@ -1,7 +1,7 @@
 ---
 title: Prisma
 pageTitle: WunderGraph - Prisma
-description:
+description: WunderGraph is the easiest way to expose Prisma through GraphQL.
 ---
 
 The Prisma DataSource allows you to turn any [Prisma](https://www.prisma.io) compatible database into a secure production-grade GraphQL API.
