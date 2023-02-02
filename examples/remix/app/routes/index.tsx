@@ -60,7 +60,7 @@ export default function Index() {
 					</div>
 				</div>
 				<h1 className="text-slate-900 font-extrabold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-center dark:text-white">
-					WunderGraph & Next.js
+					WunderGraph & Remix
 				</h1>
 				<p className="mt-6 text-lg text-slate-600 text-center max-w-3xl mx-auto dark:text-slate-400">
 					Use{' '}
@@ -69,7 +69,7 @@ export default function Index() {
 							WunderGraph
 						</a>
 					</code>{' '}
-					to make your data-source accessible through JSON-RPC to your Next.js app.
+					to make your data-source accessible through JSON-RPC in your Remix app.
 				</p>
 			</div>
 			<div className="relative flex flex-col items-center overflow-hidden p-8 sm:p-12">
