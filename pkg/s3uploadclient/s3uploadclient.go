@@ -425,7 +425,7 @@ func (s *S3UploadClient) hasRequiredAuthentication(w http.ResponseWriter, r *htt
 	if profile == nil || profile.RequiresAuthentication {
 		if authentication.UserFromContext(r.Context()) == nil {
 			if s.logger != nil {
-				s.logger.Info("refusing upload from anonymous user", zap.String("provider", s.name), zap.String("profile", profileName))
+				s.logger.Debug("refusing upload from anonymous user", zap.String("provider", s.name), zap.String("profile", profileName))
 			}
 			w.WriteHeader(http.StatusUnauthorized)
 			return false
