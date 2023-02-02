@@ -1,20 +1,21 @@
 import { handlebarTemplate } from './handlebar.template';
 import Handlebars from 'handlebars';
 import {
+	BaseTypeScriptDataModel,
+	CodeGenerationConfig,
+	formatTypeScript,
+	GraphQLOperation,
 	Template,
 	TemplateOutputFile,
-	BaseTypeScriptDataModel,
-	formatTypeScript,
+	TypeScriptClient,
 	TypeScriptInputModels,
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
-	GraphQLOperation,
-	TypeScriptClient,
 } from '@wundergraph/sdk';
 import { modelImports } from '@wundergraph/sdk/internal';
 import hash from 'object-hash';
 import { OperationType } from '@wundergraph/protobuf';
-import { CodeGenerationConfig } from '@wundergraph/sdk/dist/configure';
+import {} from '@wundergraph/sdk/dist/configure';
 
 export class NextJsTemplate implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {

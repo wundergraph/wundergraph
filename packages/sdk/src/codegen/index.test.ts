@@ -1,6 +1,6 @@
 import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
-import { CodeGenerationConfig, ResolvedWunderGraphConfig } from '../configure';
+import { CodeGenerationConfig } from '../configure';
 import { ConfigurationVariableKind, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { mapInputVariable } from '../configure/variables';
 
