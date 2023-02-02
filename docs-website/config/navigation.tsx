@@ -230,6 +230,10 @@ const navigation = [
 						title: 'Integration tests',
 						href: '/docs/guides/testing',
 					},
+					{
+						title: 'End to end testing',
+						href: '/docs/guides/end-to-end-testing',
+					},
 				],
 			},
 			{

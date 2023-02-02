@@ -47,9 +47,9 @@ import {
 	OperationExecutionEngine,
 	OperationType,
 	PostResolveTransformationKind,
+	S3UploadProfile as _S3UploadProfile,
 	TypeConfiguration,
 	WebhookConfiguration,
-	S3UploadProfile as _S3UploadProfile,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
@@ -313,10 +313,9 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		config.apis.push(...graphqlApis);
 	}
 
-	const apps = config.apis;
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = await resolveApplication(roles, apps, cors, config.s3UploadProvider, config.server?.hooks);
+	const resolved = await resolveApplication(roles, config.apis, cors, config.s3UploadProvider || []);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -1078,6 +1077,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		case DataSourceKind.MONGODB:
 		case DataSourceKind.SQLSERVER:
 		case DataSourceKind.SQLITE:
+		case DataSourceKind.PRISMA:
 			const database = source.Custom as DatabaseApiCustom;
 			out.customDatabase = {
 				databaseURL: database.databaseURL,
@@ -1185,10 +1185,12 @@ const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation)
 
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
-	overrides: NodeJSOperation<any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
 ): GraphQLOperation => {
 	if (overrides.inputSchema) {
-		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+		const schema = zodToJsonSchema(overrides.inputSchema) as any;
+		operation.VariablesSchema = schema;
+		operation.InternalVariablesSchema = schema;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {

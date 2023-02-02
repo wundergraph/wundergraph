@@ -10,13 +10,12 @@
     "build": "wunderctl generate --debug",
     "build:next": "next build",
     "dev": "next dev",
-    "wundergraph": "wunderctl up --debug",
     "check": "tsc --noEmit",
     "cleanup": "cd minio && docker-compose down -v"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.8.4",
-    "@wundergraph/sdk": "^0.132.1",
+    "@wundergraph/nextjs": "^0.8.6",
+    "@wundergraph/sdk": "^0.133.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",

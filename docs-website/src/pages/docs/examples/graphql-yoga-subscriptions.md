@@ -1,6 +1,6 @@
 ---
-title: GraphQl Yoga SSE subscriptions Example
-pageTitle: WunderGraph - Examples - GraphQl Yoga SSE subscriptions
+title: GraphQL Yoga SSE subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQL Yoga SSE subscriptions
 description:
 ---
 
@@ -13,7 +13,7 @@ const counter = introspect.graphql({
   apiNamespace: 'counter',
   url: 'http://localhost:4000/graphql',
   subscriptionsUseSSE: true,
-})
+});
 ```
 
 ## Getting started

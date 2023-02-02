@@ -1,0 +1,20 @@
+datasource db {
+		provider = "sqlite"
+		url      = "file:./users_post.sqlite"
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean @default(false)
+  author    User    @relation(fields: [authorID], references: [id])
+  authorID  Int
+}

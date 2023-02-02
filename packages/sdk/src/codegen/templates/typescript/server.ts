@@ -5,6 +5,7 @@ import { formatTypeScript } from './index';
 import { template } from './server.template';
 import { WunderGraphHooksPlugin } from './hooks';
 import { WunderGraphInternalApiClient } from './internal.client';
+import { WunderGraphInternalOperationsApiClient } from './internal.operations.client';
 
 export class WunderGraphServer implements Template {
 	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
@@ -22,6 +23,10 @@ export class WunderGraphServer implements Template {
 	}
 
 	dependencies(): Template[] {
-		return [new WunderGraphHooksPlugin(), new WunderGraphInternalApiClient()];
+		return [
+			new WunderGraphHooksPlugin(),
+			new WunderGraphInternalApiClient(),
+			new WunderGraphInternalOperationsApiClient(),
+		];
 	}
 }
