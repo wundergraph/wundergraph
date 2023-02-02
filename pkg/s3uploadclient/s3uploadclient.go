@@ -39,6 +39,7 @@ type S3UploadClient struct {
 	hooksClient    *hooks.Client
 	name           string
 	pool           *pool.Pool
+	logger         *zap.Logger
 }
 
 type preparedProfile struct {
@@ -162,6 +163,7 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		hooksClient:    s3Options.HooksClient,
 		name:           s3Options.Name,
 		pool:           pool.New(),
+		logger:         s3Options.Logger,
 	}
 
 	err = s.createBucket()
@@ -417,12 +419,17 @@ func (s *S3UploadClient) handlePart(ctx context.Context, r *http.Request, part *
 
 func (s *S3UploadClient) hasRequiredAuthentication(w http.ResponseWriter, r *http.Request) bool {
 	// Don't check for a valid profile name here. Since the default is requiring users
-	// to be authenticated, we can just check wether there's a profile. If the name
+	// to be authenticated, we can just check if there's a profile. If the name
 	// doesn't exist we'll get an error later.
-	_, profile, _ := s.uploadProfile(r)
-	if (profile == nil || profile.RequiresAuthentication) && authentication.UserFromContext(r.Context()) == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return false
+	profileName, profile, _ := s.uploadProfile(r)
+	if profile == nil || profile.RequiresAuthentication {
+		if authentication.UserFromContext(r.Context()) == nil {
+			if s.logger != nil {
+				s.logger.Info("refusing upload from anonymous user", zap.String("provider", s.name), zap.String("profile", profileName))
+			}
+			w.WriteHeader(http.StatusUnauthorized)
+			return false
+		}
 	}
 	return true
 }
