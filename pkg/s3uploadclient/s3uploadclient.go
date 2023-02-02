@@ -50,7 +50,7 @@ type preparedProfile struct {
 // UploadProfile specifies options like maximum file size and allowed
 // extensions for a given upload profile
 type UploadProfile struct {
-	// Wether the profile requires authentication to upload a file
+	// Whether the profile requires authentication to upload a file
 	RequiresAuthentication bool
 	// Maximum size of each file in bytes
 	MaxFileSizeBytes int
@@ -62,9 +62,9 @@ type UploadProfile struct {
 	AllowedFileExtensions []string
 	// Optional JSON schema to validate metadata
 	MetadataJSONSchema string
-	// Wether to use the PreUpload middleware hook
+	// Whether to use the PreUpload middleware hook
 	UsePreUploadHook bool
-	// Wether to use the PostUpload middleware hook
+	// Whether to use the PostUpload middleware hook
 	UsePostUploadHook bool
 }
 

@@ -176,7 +176,7 @@ interface ResolvedDeployment {
 }
 
 export interface S3UploadProfile {
-	/** Wether authentication is required to upload to this profile
+	/** Whether authentication is required to upload to this profile
 	 *
 	 * @default true
 	 */

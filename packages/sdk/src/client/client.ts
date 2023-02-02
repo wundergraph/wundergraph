@@ -24,7 +24,7 @@ import { ClientResponseError } from './ClientResponseError';
 // https://graphql.org/learn/serving-over-http/
 
 export interface UploadValidationOptions {
-	/** Wether authentication is required to upload to this profile
+	/** Whether authentication is required to upload to this profile
 	 *
 	 * @default true
 	 */
