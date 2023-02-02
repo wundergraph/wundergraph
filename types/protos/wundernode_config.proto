@@ -444,12 +444,13 @@ message S3UploadProfileHooksConfiguration {
 }
 
 message S3UploadProfile {
-	int32 maxAllowedUploadSizeBytes = 1;
-	int32 maxAllowedFiles = 2;
-	repeated string allowedMimeTypes = 3;
-	repeated string allowedFileExtensions = 4;
-	string metadataJSONSchema = 5;
-	S3UploadProfileHooksConfiguration hooks = 6;
+	bool authenticationRequired = 1;
+	int32 maxAllowedUploadSizeBytes = 2;
+	int32 maxAllowedFiles = 3;
+	repeated string allowedMimeTypes = 4;
+	repeated string allowedFileExtensions = 5;
+	string metadataJSONSchema = 6;
+	S3UploadProfileHooksConfiguration hooks = 7;
 }
 
 message S3UploadConfiguration {

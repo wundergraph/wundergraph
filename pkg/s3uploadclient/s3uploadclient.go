@@ -50,6 +50,8 @@ type preparedProfile struct {
 // UploadProfile specifies options like maximum file size and allowed
 // extensions for a given upload profile
 type UploadProfile struct {
+	// Wether the profile requires authentication to upload a file
+	AuthenticationRequired bool
 	// Maximum size of each file in bytes
 	MaxFileSizeBytes int
 	// Maximum number of files per upload
@@ -327,6 +329,11 @@ func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProf
 }
 
 func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
+
+	if !s.hasRequiredAuthentication(w, r) {
+		return
+	}
+
 	r.Body = http.MaxBytesReader(w, r.Body, MaxUploadSize)
 
 	var result []UploadedFile
@@ -406,6 +413,18 @@ func (s *S3UploadClient) handlePart(ctx context.Context, r *http.Request, part *
 	}
 
 	return info, nil
+}
+
+func (s *S3UploadClient) hasRequiredAuthentication(w http.ResponseWriter, r *http.Request) bool {
+	// Don't check for a valid profile name here. Since the default is requiring users
+	// to be authenticated, we can just check wether there's a profile. If the name
+	// doesn't exist we'll get an error later.
+	_, profile, _ := s.uploadProfile(r)
+	if (profile == nil || profile.AuthenticationRequired) && authentication.UserFromContext(r.Context()) == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+	return true
 }
 
 type hookFile struct {

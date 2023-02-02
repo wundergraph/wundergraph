@@ -962,6 +962,7 @@ export interface S3UploadProfileHooksConfiguration {
 }
 
 export interface S3UploadProfile {
+  authenticationRequired: boolean;
   maxAllowedUploadSizeBytes: number;
   maxAllowedFiles: number;
   allowedMimeTypes: string[];
@@ -3271,6 +3272,7 @@ export const S3UploadProfileHooksConfiguration = {
 
 function createBaseS3UploadProfile(): S3UploadProfile {
   return {
+    authenticationRequired: false,
     maxAllowedUploadSizeBytes: 0,
     maxAllowedFiles: 0,
     allowedMimeTypes: [],
@@ -3283,6 +3285,7 @@ function createBaseS3UploadProfile(): S3UploadProfile {
 export const S3UploadProfile = {
   fromJSON(object: any): S3UploadProfile {
     return {
+      authenticationRequired: isSet(object.authenticationRequired) ? Boolean(object.authenticationRequired) : false,
       maxAllowedUploadSizeBytes: isSet(object.maxAllowedUploadSizeBytes) ? Number(object.maxAllowedUploadSizeBytes) : 0,
       maxAllowedFiles: isSet(object.maxAllowedFiles) ? Number(object.maxAllowedFiles) : 0,
       allowedMimeTypes: Array.isArray(object?.allowedMimeTypes)
@@ -3298,6 +3301,7 @@ export const S3UploadProfile = {
 
   toJSON(message: S3UploadProfile): unknown {
     const obj: any = {};
+    message.authenticationRequired !== undefined && (obj.authenticationRequired = message.authenticationRequired);
     message.maxAllowedUploadSizeBytes !== undefined &&
       (obj.maxAllowedUploadSizeBytes = Math.round(message.maxAllowedUploadSizeBytes));
     message.maxAllowedFiles !== undefined && (obj.maxAllowedFiles = Math.round(message.maxAllowedFiles));
@@ -3319,6 +3323,7 @@ export const S3UploadProfile = {
 
   fromPartial<I extends Exact<DeepPartial<S3UploadProfile>, I>>(object: I): S3UploadProfile {
     const message = createBaseS3UploadProfile();
+    message.authenticationRequired = object.authenticationRequired ?? false;
     message.maxAllowedUploadSizeBytes = object.maxAllowedUploadSizeBytes ?? 0;
     message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
     message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];
