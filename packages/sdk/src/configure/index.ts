@@ -321,7 +321,13 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = await resolveApplication(roles, config.apis, cors, config.s3UploadProvider || []);
+	const resolved = await resolveApplication(
+		roles,
+		config.apis,
+		cors,
+		config.s3UploadProvider || [],
+		config.server?.hooks
+	);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
