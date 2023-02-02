@@ -28,7 +28,7 @@ export interface UploadValidationOptions {
 	 *
 	 * @default true
 	 */
-	authenticationRequired?: boolean;
+	requiresAuthentication?: boolean;
 	/** Maximum file size allowed per upload
 	 *
 	 * @default 10 * 1024 * 1024 (10MB)
@@ -424,7 +424,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled && (validation?.authenticationRequired ?? true)) {
+		if (this.csrfEnabled && (validation?.requiresAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 

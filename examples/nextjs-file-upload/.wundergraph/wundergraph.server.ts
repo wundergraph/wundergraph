@@ -11,7 +11,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				coverPicture: {
 					preUpload: ({ user, file, meta }) => {
 						console.log(`preUpload user: ${user}, file: ${file}, meta: ${meta}`);
-						// Use this coupled with authenticationRequired: false in the profile
+						// Use this coupled with requiresAuthentication: false in the profile
 						// definition to conditionally allow uploads from anonoymous users
 						// if (!user) {
 						// 	return { error: 'authenticate' };

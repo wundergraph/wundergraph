@@ -180,7 +180,7 @@ export interface S3UploadProfile {
 	 *
 	 * @default true
 	 */
-	authenticationRequired?: boolean;
+	requiresAuthentication?: boolean;
 	/** JSON schema for metadata */
 	meta?: ZodType | object;
 	/**
@@ -560,7 +560,7 @@ const resolveUploadConfiguration = (
 			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
 
 			uploadProfiles[key] = {
-				authenticationRequired: profile.authenticationRequired ?? true,
+				requiresAuthentication: profile.requiresAuthentication ?? true,
 				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
 				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
 				allowedMimeTypes: profile.allowedMimeTypes ?? [],
@@ -972,7 +972,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
 						}
 						uploadProfiles[key] = {
-							authenticationRequired: resolved.authenticationRequired,
+							requiresAuthentication: resolved.requiresAuthentication,
 							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
 							maxAllowedFiles: resolved.maxAllowedFiles,
 							allowedMimeTypes: resolved.allowedMimeTypes,

@@ -48,7 +48,7 @@ const S3UploadProviderData = {
 	{{name}}: {
 		{{#each uploadProfiles}}
 			{{@key}}: {
-				authenticationRequired: {{this.authenticationRequired}},
+				requiresAuthentication: {{this.requiresAuthentication}},
 				{{#if this.maxAllowedUploadSizeBytes includeZero=true}}
 				maxAllowedUploadSizeBytes: {{this.maxAllowedUploadSizeBytes}},
 				{{/if}}

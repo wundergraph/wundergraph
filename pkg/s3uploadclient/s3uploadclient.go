@@ -51,7 +51,7 @@ type preparedProfile struct {
 // extensions for a given upload profile
 type UploadProfile struct {
 	// Wether the profile requires authentication to upload a file
-	AuthenticationRequired bool
+	RequiresAuthentication bool
 	// Maximum size of each file in bytes
 	MaxFileSizeBytes int
 	// Maximum number of files per upload
@@ -420,7 +420,7 @@ func (s *S3UploadClient) hasRequiredAuthentication(w http.ResponseWriter, r *htt
 	// to be authenticated, we can just check wether there's a profile. If the name
 	// doesn't exist we'll get an error later.
 	_, profile, _ := s.uploadProfile(r)
-	if (profile == nil || profile.AuthenticationRequired) && authentication.UserFromContext(r.Context()) == nil {
+	if (profile == nil || profile.RequiresAuthentication) && authentication.UserFromContext(r.Context()) == nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return false
 	}

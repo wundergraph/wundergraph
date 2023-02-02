@@ -263,7 +263,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		profiles := make(map[string]*s3uploadclient.UploadProfile, len(s3Provider.UploadProfiles))
 		for name, profile := range s3Provider.UploadProfiles {
 			profiles[name] = &s3uploadclient.UploadProfile{
-				AuthenticationRequired: profile.AuthenticationRequired,
+				RequiresAuthentication: profile.RequiresAuthentication,
 				MaxFileSizeBytes:       int(profile.MaxAllowedUploadSizeBytes),
 				MaxAllowedFiles:        int(profile.MaxAllowedFiles),
 				AllowedMimeTypes:       append([]string(nil), profile.AllowedMimeTypes...),
