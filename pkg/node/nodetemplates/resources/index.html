@@ -32,7 +32,7 @@
 </head>
 
 <body
-	class="min-h-screen overflow-auto flex flex-col items-center justify-center container max-w-screen-md mx-auto px-4 py-12"
+	class="min-h-screen overflow-auto flex flex-col items-center justify-center container max-w-screen-md mx-auto py-12"
 >
 <h2 class="font-medium text-gray-600 text-xl">Powered by</h2>
 <a
@@ -100,10 +100,7 @@
 </div>
 {{ if ne .DeploymentId "" }}
 	<div class="border w-full mt-12 rounded-md bg-white relative">
-				<span
-					class="absolute text-sm bg-white px-2 text-xs -top-2 ml-3 text-gray-500 rounded-sm"
-				>Build Info</span
-				>
+		<span class="absolute text-sm bg-white px-2 text-xs -top-2 ml-3 text-gray-500 rounded-sm">Build Info</span>
 		<table class="w-full text-sm text-left table-fixed">
 			<tr class="border-b hover:bg-sky-50/50 transition-all">
 				<th class="pb-4 pt-5 px-6 text-sky-800">Deployment ID</th>
@@ -113,7 +110,7 @@
 				<th class="pb-4 pt-5 px-6 text-sky-800">CommitSHA</th>
 				<td class="text-gray-800 font-semibold">
 					{{ if eq .CommitURL "" }}
-					<div class="flex gap-x-3 items-center">
+					<div class="flex gap-x-2 items-center">
 						<span id="commitSHA">{{.CommitSHA}}</span>
 						<div onclick="copyText()" class="cursor-pointer">
 							<svg
