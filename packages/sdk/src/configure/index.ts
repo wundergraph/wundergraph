@@ -259,7 +259,8 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
-export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+export interface CodeGenerationConfig {
+	config: ResolvedWunderGraphConfig;
 	outPath: string;
 	wunderGraphDir: string;
 }

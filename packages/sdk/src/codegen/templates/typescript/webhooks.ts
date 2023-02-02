@@ -5,10 +5,10 @@ import { formatTypeScript } from './index';
 import { template } from './webhooks.template';
 
 export class WunderGraphWebhooksPlugin implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
 		const content = tmpl({
-			webhooks: config.webhooks,
+			webhooks: generationConfig.config.webhooks,
 		});
 		return Promise.resolve([
 			{

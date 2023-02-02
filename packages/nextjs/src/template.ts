@@ -8,16 +8,17 @@ import {
 	TypeScriptInputModels,
 	TypeScriptResponseDataModels,
 	TypeScriptResponseModels,
-	ResolvedWunderGraphConfig,
 	GraphQLOperation,
 	TypeScriptClient,
 } from '@wundergraph/sdk';
 import { modelImports } from '@wundergraph/sdk/internal';
 import hash from 'object-hash';
 import { OperationType } from '@wundergraph/protobuf';
+import { CodeGenerationConfig } from '@wundergraph/sdk/dist/configure';
 
 export class NextJsTemplate implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const content = tmpl({
 			baseURL: config.deployment.environment.baseUrl,
