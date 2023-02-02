@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
+	"path/filepath"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -13,6 +13,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 )
 
 var serverCmd = &cobra.Command{
@@ -27,9 +28,7 @@ var serverStartCmd = &cobra.Command{
 		Example usage:
 			wunderctl server start
 `,
-	Annotations: map[string]string{
-		"telemetry": "true",
-	},
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
@@ -57,13 +56,13 @@ func startWunderGraphServer(ctx context.Context) error {
 		return err
 	}
 
-	configFile := path.Join(wunderGraphDir, "generated", configJsonFilename)
+	configFile := filepath.Join(wunderGraphDir, "generated", configJsonFilename)
 	if !files.FileExists(configFile) {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	serverScriptFile := path.Join("generated", "bundle", "server.js")
-	serverExecutablePath := path.Join(wunderGraphDir, serverScriptFile)
+	serverScriptFile := filepath.Join("generated", "bundle", "server.js")
+	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
 	if !files.FileExists(serverExecutablePath) {
 		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
 	}

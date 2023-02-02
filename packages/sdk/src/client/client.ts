@@ -5,6 +5,7 @@ import {
 	GraphQLResponse,
 	Headers,
 	LogoutOptions,
+	MutationRequestOptions,
 	OperationRequestOptions,
 	QueryRequestOptions,
 	SubscriptionEventHandler,
@@ -16,9 +17,22 @@ import {
 import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
+import { InputValidationError } from './InputValidationError';
+import { AuthorizationError } from './AuthorizationError';
+import { ClientResponseError } from './ClientResponseError';
 
 // https://graphql.org/learn/serving-over-http/
 
+export interface UploadValidationOptions {
+	maxAllowedUploadSizeBytes?: number;
+	maxAllowedFiles?: number;
+	allowedFileExtensions?: string[];
+	allowedMimeTypes?: string[];
+}
+
+interface LogoutResponse {
+	redirect?: string;
+}
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -26,11 +40,14 @@ export class Client {
 		};
 
 		this.extraHeaders = { ...options.extraHeaders };
+
+		this.csrfEnabled = options.csrfEnabled ?? true;
 	}
 
 	private readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
+	private csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
 		return serialize(query);
@@ -94,7 +111,7 @@ export class Client {
 
 		if (!resp.data) {
 			return {
-				error: new Error('Invalid response from the server'),
+				error: new ResponseError('Invalid response from the server', 200),
 			};
 		}
 
@@ -103,21 +120,39 @@ export class Client {
 		};
 	}
 
+	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
+	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponseError> {
+		const text = await response.text();
+		try {
+			const json = JSON.parse(text);
+
+			switch (response.status) {
+				case 401:
+					return new AuthorizationError(json.errors[0]?.message, response.status);
+				case 400:
+					return new InputValidationError(json, response.status);
+				default:
+					return new ResponseError(json.errors[0]?.message || json.message, response.status);
+			}
+		} catch {
+			return new ResponseError(text.length ? text : 'Response is not OK', response.status);
+		}
+	}
+
 	/***
 	 * fetchResponseToClientResponse converts a fetch response to a ClientResponse.
 	 * Network errors or non-200 status codes are converted to an error. Application errors
 	 * as from GraphQL are returned as an Error from type GraphQLResponseError.
 	 */
-	private async fetchResponseToClientResponse(resp: globalThis.Response): Promise<ClientResponse> {
+	private async fetchResponseToClientResponse(response: globalThis.Response): Promise<ClientResponse> {
 		// The Promise returned from fetch() won't reject on HTTP error status
 		// even if the response is an HTTP 404 or 500.
-		if (!resp.ok) {
-			return {
-				error: new ResponseError(`Response is not ok`, resp.status),
-			};
+
+		if (!response.ok) {
+			return { error: await this.handleClientResponseError(response) };
 		}
 
-		const json = await resp.json();
+		const json = await response.json();
 
 		return this.convertGraphQLResponse({
 			data: json.data,
@@ -134,6 +169,27 @@ export class Client {
 			...this.extraHeaders,
 			...headers,
 		};
+	}
+
+	/**
+	 * setAuthorizationToken is a shorthand method for setting up the
+	 * required headers for token authentication.
+	 *
+	 * @param token Bearer token
+	 */
+	public setAuthorizationToken(token: string) {
+		this.setExtraHeaders({
+			Authorization: `Bearer ${token}`,
+		});
+	}
+
+	/**
+	 * unsetAuthorization removes any previously set authorization credentials
+	 * (e.g. via setAuthorizationToken or via setExtraHeaders).
+	 * If there was no authorization set, it does nothing.
+	 */
+	public unsetAuthorization() {
+		delete this.extraHeaders['Authorization'];
 	}
 
 	/***
@@ -190,7 +246,7 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async mutate<RequestOptions extends OperationRequestOptions, ResponseData = any>(
+	public async mutate<RequestOptions extends MutationRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
 		const url = this.addUrlParams(
@@ -202,11 +258,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (
-			this.options.operationMetadata &&
-			this.options.operationMetadata[options.operationName] &&
-			this.options.operationMetadata[options.operationName].requiresAuthentication
-		) {
+		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -230,12 +282,13 @@ export class Client {
 			revalidate: options?.revalidate ? 'true' : 'false',
 		});
 
-		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/cookie/user`, params), {
+		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/user`, params), {
 			method: 'GET',
 			signal: options?.abortSignal,
 		});
+
 		if (!response.ok) {
-			throw new ResponseError(`Response is not ok`, response.status);
+			throw await this.handleClientResponseError(response);
 		}
 
 		return response.json();
@@ -309,7 +362,7 @@ export class Client {
 
 		if (!response.ok || response.body === null) {
 			yield {
-				error: new Error(`HTTP Error: ${response.status}`),
+				error: new ResponseError('HTTP Error', response.status),
 			};
 			return;
 		}
@@ -336,26 +389,41 @@ export class Client {
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
-	public async uploadFiles(config: UploadRequestOptions): Promise<UploadResponse> {
+	public async uploadFiles<UploadOptions extends UploadRequestOptions>(
+		config: UploadOptions,
+		validation?: UploadValidationOptions
+	): Promise<UploadResponse> {
+		this.validateFiles(config, validation);
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
 			if (file instanceof Blob) {
 				formData.append('files', file);
 			}
 		}
-		const csrfToken = await this.getCSRFToken();
+
+		const headers: Headers = {};
+
+		if (this.csrfEnabled) {
+			headers['X-CSRF-Token'] = await this.getCSRFToken();
+		}
 
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});
 
+		if ('profile' in config) {
+			headers['X-Upload-Profile'] = (config as any).profile;
+		}
+
+		if ('meta' in config) {
+			headers['X-Metadata'] = (config as any).meta ? JSON.stringify((config as any).meta) : '';
+		}
+
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
 			{
-				headers: {
-					// Dont set the content-type header, the browser will set it for us + boundary
-					'X-CSRF-Token': csrfToken,
-				},
+				// Dont set the content-type header, the browser will set it for us + boundary
+				headers,
 				body: formData,
 				method: 'POST',
 				signal: config.abortSignal,
@@ -363,7 +431,7 @@ export class Client {
 		);
 
 		if (!response.ok) {
-			throw new ResponseError(`Response is not ok`, response.status);
+			throw await this.handleClientResponseError(response);
 		}
 
 		const result = await response.json();
@@ -376,6 +444,42 @@ export class Client {
 		return {
 			fileKeys: json.map((x) => x.key),
 		};
+	}
+
+	public validateFiles(config: UploadRequestOptions, validation?: UploadValidationOptions) {
+		if (validation?.maxAllowedFiles && config.files.length > validation.maxAllowedFiles) {
+			throw new Error(`uploading ${config.files.length} exceeds the maximum allowed (${validation.maxAllowedFiles})`);
+		}
+		for (const file of config.files) {
+			if (validation?.maxAllowedUploadSizeBytes && file.size > validation.maxAllowedUploadSizeBytes) {
+				throw new Error(
+					`file ${file.name} with size ${file.size} exceeds the maximum allowed (${validation.maxAllowedUploadSizeBytes})`
+				);
+			}
+			if (validation?.allowedFileExtensions && file.name.includes('.')) {
+				const ext = file.name.substring(file.name.indexOf('.') + 1).toLowerCase();
+				if (ext) {
+					if (validation.allowedFileExtensions.findIndex((item) => item.toLocaleLowerCase()) < 0) {
+						throw new Error(`file ${file.name} with extension ${ext} is not allowed`);
+					}
+				}
+			}
+			if (validation?.allowedMimeTypes) {
+				const mimeType = file.type;
+				const idx = validation.allowedMimeTypes.findIndex((item) => {
+					// Full match
+					if (item == mimeType) {
+						return true;
+					}
+					// Try wildcard match. This is a bit brittle but it should be fine
+					// as long as profile?.allowedMimeTypes contains only valid entries
+					return mimeType.match(new RegExp(item.replace('*', '.*')));
+				});
+				if (idx < 0) {
+					throw new Error(`file ${file.name} with MIME type ${mimeType} is not allowed`);
+				}
+			}
+		}
 	}
 
 	public login(authProviderID: string, redirectURI?: string) {
@@ -394,6 +498,11 @@ export class Client {
 	}
 
 	public async logout(options?: LogoutOptions): Promise<boolean> {
+		// browser check
+		if (typeof window === 'undefined') {
+			throw new Error('logout() can only be called in a browser environment');
+		}
+
 		const params = new URLSearchParams({
 			logout_openid_connect_provider: options?.logoutOpenidConnectProvider ? 'true' : 'false',
 		});
@@ -404,6 +513,26 @@ export class Client {
 			method: 'GET',
 		});
 
-		return response.ok;
+		if (!response.ok) {
+			return false;
+		}
+
+		let ok = true;
+		if (response.headers.get('Content-Type')?.includes('application/json')) {
+			const data = (await response.json()) as LogoutResponse;
+			if (data.redirect) {
+				if (options?.redirect) {
+					ok = await options.redirect(data.redirect);
+				} else {
+					window.location.href = data.redirect;
+				}
+			}
+		}
+
+		if (ok && options?.after) {
+			options.after();
+		}
+
+		return ok;
 	}
 }

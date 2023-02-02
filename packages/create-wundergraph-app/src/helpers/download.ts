@@ -8,12 +8,14 @@ import { Stream } from 'stream';
 import tar from 'tar';
 import { promisify } from 'util';
 
+import { getGitHubRequestOptions } from './github';
+
 const pipeline = promisify(Stream.pipeline);
 
 export const downloadTar = async (url: string) => {
 	try {
 		const tempFile = join(tmpdir(), `wundergraph-example.temp-${Date.now()}`);
-		await pipeline(got.stream(url), createWriteStream(tempFile));
+		await pipeline(got.stream(url, getGitHubRequestOptions()), createWriteStream(tempFile));
 		return tempFile;
 	} catch (e) {
 		console.error('Error', e);
@@ -27,12 +29,14 @@ export const downloadAndExtractRepo = async ({
 	ref,
 	repoOwnerName,
 	filePath,
+	isInit,
 }: {
 	root: string;
 	repoName: string;
 	ref: string;
 	repoOwnerName: string;
 	filePath?: string;
+	isInit?: boolean;
 }) => {
 	try {
 		const spinner = ora('Loading..').start();
@@ -43,7 +47,11 @@ export const downloadAndExtractRepo = async ({
 			strip: filePath ? filePath.split('/').length + 1 : 1,
 			filter: (p) => {
 				const rel = p.split('/').slice(1).join('/');
-				return rel.startsWith(`${filePath ? `${filePath}/` : ''}`);
+				if (isInit) {
+					return rel.startsWith(`${filePath ? `${filePath}/.wundergraph` : ''}`);
+				} else {
+					return rel.startsWith(`${filePath ? `${filePath}/` : ''}`);
+				}
 			},
 		});
 		await fsp.unlink(tempFile);

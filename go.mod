@@ -3,7 +3,7 @@ module github.com/wundergraph/wundergraph
 go 1.18
 
 require (
-	github.com/MicahParks/keyfunc v1.0.1
+	github.com/MicahParks/keyfunc v1.9.0
 	github.com/bep/debounce v1.2.1
 	github.com/buger/jsonparser v1.1.1
 	github.com/cespare/xxhash v1.1.0
@@ -19,11 +19,12 @@ require (
 	github.com/go-redis/cache/v8 v8.4.1
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/gofrs/flock v0.8.1
-	github.com/golang-jwt/jwt/v4 v4.2.0
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/websocket v1.5.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hetiansu5/urlquery v1.2.7
@@ -36,6 +37,7 @@ require (
 	github.com/prisma/prisma-client-go v0.16.2
 	github.com/qri-io/jsonschema v0.2.1
 	github.com/rs/cors v1.7.0
+	github.com/santhosh-tekuri/jsonschema/v5 v5.1.1
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/segmentio/ksuid v1.0.4
 	github.com/spf13/cobra v1.1.3
@@ -44,11 +46,12 @@ require (
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.26.0
-	github.com/wundergraph/graphql-go-tools v1.60.4
+	github.com/wundergraph/graphql-go-tools v1.61.0
 	go.uber.org/zap v1.18.1
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/text v0.3.7
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	google.golang.org/protobuf v1.28.0
 )
@@ -69,6 +72,7 @@ require (
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -131,7 +135,6 @@ require (
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/exp v0.0.0-20201221025956-e89b829e73ea // indirect
 	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

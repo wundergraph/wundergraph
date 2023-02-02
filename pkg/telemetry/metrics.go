@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	DATASOURCE_USAGE_METRIC_NAME = "WG_DATASOURCE_USAGE"
+)
+
 func UsageMetricSuffix(cmdName string) string {
 	return fmt.Sprintf("%s_CMD_USAGE", strings.ToUpper(cmdName))
 }

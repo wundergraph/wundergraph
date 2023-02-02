@@ -18,6 +18,7 @@ const UploadPage: NextPage = () => {
 		try {
 			const result = await uploadAsync({
 				provider: 'minio',
+				profile: 'avatar',
 				files,
 			});
 			result && setData(result);

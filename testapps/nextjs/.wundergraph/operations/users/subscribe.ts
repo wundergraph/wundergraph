@@ -1,0 +1,23 @@
+import { createOperation, z } from '../../generated/wundergraph.factory';
+
+export default createOperation.subscription({
+	input: z.object({
+		id: z.string(),
+	}),
+	handler: async function* (ctx) {
+		throw new Error('Something went wrong');
+		try {
+			for (let i = 0; i < 10; i++) {
+				yield {
+					id: ctx.input.id,
+					userName: 'Jens Neuse',
+					bio: 'Founder of WunderGraph',
+					time: new Date().toISOString(),
+				};
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
+		} finally {
+			console.log('Client disconnected');
+		}
+	},
+});

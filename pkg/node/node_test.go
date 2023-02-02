@@ -37,7 +37,11 @@ func TestNode(t *testing.T) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
+		if bytes.Contains(req, []byte(`{"query":"{me {id username}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"me":{"id":"1234","username":"Me"}}}`))
+			return
+		}
+		w.WriteHeader(500)
 	}))
 	defer userService.Close()
 
@@ -45,7 +49,15 @@ func TestNode(t *testing.T) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		_, _ = w.Write([]byte(`{"data":{"_entities":[{"reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}}]}]}}`))
+		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"User","id":"1234"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){__typename ... on User {reviews {body author {id username} product {upc}}}}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"_entities":[{"__typename": "User","reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"},"product": {"upc": "top-1"}}]}]}}`))
+			return
+		}
+		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"Product","upc":"top-1"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){__typename ... on Product {reviews {body author {id username}}}}}"}`)) {
+			_, _ = w.Write([]byte(`{"data":{"_entities":[{"__typename": "Product","reviews": [{"body": "A highly effective form of birth control.","author":{"id":"1234","username":"Me"}},{"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.","author":{"id":"1234","username":"Me"}}]}]}}`))
+			return
+		}
+		w.WriteHeader(500)
 	}))
 	defer reviewService.Close()
 
@@ -61,7 +73,7 @@ func TestNode(t *testing.T) {
 			_, _ = w.Write([]byte(`{"data":{"topProducts":[{"upc":"1","name":"A","price":1}]}}`))
 			return
 		}
-		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"Product","upc":"top-1"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){... on Product {name price}}}"}`)) {
+		if bytes.Contains(req, []byte(`{"variables":{"representations":[{"__typename":"Product","upc":"top-1"}]},"query":"query($representations: [_Any!]!){_entities(representations: $representations){__typename ... on Product {name price}}}"}`)) {
 			_, _ = w.Write([]byte(`{"data":{"_entities":[{"name":"Trilby","price":456}]}}`))
 			return
 		}
@@ -95,6 +107,7 @@ func TestNode(t *testing.T) {
 			Operations: []*wgpb.Operation{
 				{
 					Name:          "MyReviews",
+					Path:          "MyReviews",
 					Content:       federationTestQuery,
 					OperationType: wgpb.OperationType_QUERY,
 					HooksConfiguration: &wgpb.OperationHooksConfiguration{
@@ -109,6 +122,7 @@ func TestNode(t *testing.T) {
 				},
 				{
 					Name:          "TopProducts",
+					Path:          "TopProducts",
 					Content:       topProductsQuery,
 					OperationType: wgpb.OperationType_QUERY,
 					HooksConfiguration: &wgpb.OperationHooksConfiguration{
@@ -163,32 +177,32 @@ func TestNode(t *testing.T) {
 	myReviews := withHeaders.GET("/operations/MyReviews").
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
-	g.Assert(t, "get my reviews json rpc", prettyJSON(myReviews))
+	g.Assert(t, "get_my_reviews_json_rpc", prettyJSON(myReviews))
 
 	topProductsWithoutQuery := withHeaders.GET("/operations/TopProducts").
 		Expect().Status(http.StatusOK).Body().Raw()
-	g.Assert(t, "top products without query", prettyJSON(topProductsWithoutQuery))
+	g.Assert(t, "top_products_without_query", prettyJSON(topProductsWithoutQuery))
 
 	topProductsWithQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", 1).
 		WithQuery("unknown", 123).
 		Expect().Status(http.StatusOK).Body().Raw()
-	g.Assert(t, "top products with query", prettyJSON(topProductsWithQuery))
+	g.Assert(t, "top_products_with_query", prettyJSON(topProductsWithQuery))
 
 	topProductsWithInvalidQuery := withHeaders.GET("/operations/TopProducts").
 		WithQuery("first", true).
 		Expect().Status(http.StatusBadRequest).Body().Raw()
-	g.Assert(t, "top products with invalid query", prettyJSON(topProductsWithInvalidQuery))
+	g.Assert(t, "top_products_with_invalid_query", prettyJSON(topProductsWithInvalidQuery))
 
 	topProductsWithQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
 		WithQuery("wg_variables", `{"first":1}`).
 		Expect().Status(http.StatusOK).Body().Raw()
-	g.Assert(t, "top products with query as wg variables", prettyJSON(topProductsWithQueryAsWgVariables))
+	g.Assert(t, "top_products_with_query_as_wg_variables", prettyJSON(topProductsWithQueryAsWgVariables))
 
 	topProductsWithInvalidQueryAsWgVariables := withHeaders.GET("/operations/TopProducts").
 		WithQuery("wg_variables", `{"first":true}`).
 		Expect().Status(http.StatusBadRequest).Body().Raw()
-	g.Assert(t, "top products with invalid query as wg variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
+	g.Assert(t, "top_products_with_invalid_query_as_wg_variables", prettyJSON(topProductsWithInvalidQueryAsWgVariables))
 
 	request := GraphQLRequest{
 		OperationName: "MyReviews",
@@ -196,10 +210,26 @@ func TestNode(t *testing.T) {
 	}
 
 	actual := withHeaders.POST("/graphql").WithJSON(request).Expect().Status(http.StatusOK).Body().Raw()
-	g.Assert(t, "post my reviews graphql", prettyJSON(actual))
+	g.Assert(t, "post_my_reviews_graphql", prettyJSON(actual))
 
 	withHeaders.GET("/graphql").Expect().Status(http.StatusOK).Text(
 		httpexpect.ContentOpts{MediaType: "text/html"})
+
+	failingRequest := GraphQLRequest{
+		OperationName: "MyReviews",
+		Query: `query MyReviews {
+						me {
+							id
+							name
+							reviews {
+								body
+							},
+					}
+				}`,
+	}
+
+	actual = withHeaders.POST("/graphql").WithJSON(failingRequest).Expect().Status(http.StatusOK).Body().Raw()
+	g.Assert(t, "post_my_reviews_graphql_returns_valid_graphql_error", prettyJSON(actual))
 }
 
 func TestInMemoryCache(t *testing.T) {
@@ -248,6 +278,7 @@ func TestInMemoryCache(t *testing.T) {
 			Operations: []*wgpb.Operation{
 				{
 					Name:    "TopProducts",
+					Path:    "TopProducts",
 					Content: topProductsQuery,
 					CacheConfig: &wgpb.OperationCacheConfig{
 						Enable:               true,
@@ -310,7 +341,7 @@ func TestInMemoryCache(t *testing.T) {
 
 	const (
 		cacheHeaderName  = "X-Wg-Cache"
-		expectedDataName = "top products without query"
+		expectedDataName = "top_products_without_query"
 	)
 
 	// Send a request to populate the cache

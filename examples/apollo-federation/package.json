@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "run-p -l start:services build && run-p wundergraph start:nextjs open:browser",
+    "start": "npm run start:services && npm run wait-on:services && npm run build && run-p wundergraph start:nextjs open:browser",
     "start:services": "cd federation && docker-compose up -d",
     "wait-on:services": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004",
     "start:nextjs": "next dev",
@@ -15,8 +15,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.7.7",
-    "@wundergraph/sdk": "^0.130.2",
+    "@wundergraph/nextjs": "^0.8.6",
+    "@wundergraph/sdk": "^0.133.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",

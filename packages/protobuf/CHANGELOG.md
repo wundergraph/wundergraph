@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.103.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.102.0...@wundergraph/protobuf@0.103.0) (2023-01-30)
+
+### Features
+
+* add prisma datasource ([#605](https://github.com/wundergraph/wundergraph/issues/605)) ([2f0cfa5](https://github.com/wundergraph/wundergraph/commit/2f0cfa5e420080772a6552f4a256c7d71906f84a)) (@jensneuse)
+
+## [0.102.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.101.0...@wundergraph/protobuf@0.102.0) (2023-01-20)
+
+### Features
+
+* add upload profiles for S3 providers ([#476](https://github.com/wundergraph/wundergraph/issues/476)) ([6144545](https://github.com/wundergraph/wundergraph/commit/614454539133c7f235aea6aa72ade36059f41c97)) (@fiam)
+
+## [0.101.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.100.0...@wundergraph/protobuf@0.101.0) (2023-01-17)
+
+### Features
+
+* add support for disconnecting from Auth0 ([#525](https://github.com/wundergraph/wundergraph/issues/525)) ([7465fb2](https://github.com/wundergraph/wundergraph/commit/7465fb21a3618924c7dfb59a6a2f94c7d740f0f8)) (@fiam)
+
 ## [0.100.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.99.0...@wundergraph/protobuf@0.100.0) (2022-12-06)
 
 ### Features

@@ -55,6 +55,7 @@ message AuthProvider {
 enum AuthProviderKind {
 	AuthProviderGithub = 0;
 	AuthProviderOIDC = 1;
+	AuthProviderAuth0 = 2;
 }
 
 message GithubAuthProviderConfig {
@@ -111,6 +112,13 @@ message Operation {
 	bool internal = 13;
 	string interpolationVariablesSchema = 14;
 	repeated PostResolveTransformation postResolveTransformations = 15;
+	OperationExecutionEngine engine = 16;
+	string path = 17;
+}
+
+enum OperationExecutionEngine {
+	ENGINE_GRAPHQL = 0;
+	ENGINE_NODEJS = 1;
 }
 
 message PostResolveTransformation {
@@ -254,6 +262,7 @@ enum DataSourceKind {
 	SQLSERVER = 5;
 	MONGODB = 6;
 	SQLITE = 7;
+	PRISMA = 8;
 }
 
 message DataSourceCustom_REST {
@@ -429,6 +438,20 @@ message WunderGraphConfiguration {
 	bool dangerouslyEnableGraphQLEndpoint = 4;
 }
 
+message S3UploadProfileHooksConfiguration {
+	bool preUpload = 1;
+	bool postUpload = 2;
+}
+
+message S3UploadProfile {
+	int32 maxAllowedUploadSizeBytes = 1;
+	int32 maxAllowedFiles = 2;
+	repeated string allowedMimeTypes = 3;
+	repeated string allowedFileExtensions = 4;
+	string metadataJSONSchema = 5;
+	S3UploadProfileHooksConfiguration hooks = 6;
+}
+
 message S3UploadConfiguration {
 	string name = 1;
 	ConfigurationVariable endpoint = 2;
@@ -437,6 +460,7 @@ message S3UploadConfiguration {
 	ConfigurationVariable bucketName = 5;
 	ConfigurationVariable bucketLocation = 6;
 	bool useSSL = 7;
+	map<string, S3UploadProfile> uploadProfiles = 8;
 }
 
 message UserDefinedApi {

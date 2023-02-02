@@ -61,22 +61,31 @@ const Home: NextPage = () => {
 					</div>
 					<div className="mx-auto flex max-w-sm flex-col items-center">
 						<p className="mt-3 mb-8 text-center text-black/80">User: </p>
-						{user && <code className="max-w-3xl flex-wrap">{JSON.stringify(user, null, 2)}</code>}
-						{!user && <code className="max-w-3xl flex-wrap">User not authenticated, click Login</code>}
+						{user.data && <code className="max-w-3xl flex-wrap">{JSON.stringify(user, null, 2)}</code>}
+						{!user.data && <code className="max-w-3xl flex-wrap">User not authenticated, click Login</code>}
 					</div>
 					<div className="flex justify-center mt-8 gap-2">
-						<button
-							onClick={() => login('auth0')}
-							className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
-						>
-							Login
-						</button>
-						<button
-							onClick={() => logout()}
-							className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
-						>
-							Logout
-						</button>
+						{!user.data && (
+							<button
+								onClick={() => login('auth0')}
+								className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
+							>
+								Login
+							</button>
+						)}
+						{user.data && (
+							<button
+								onClick={() =>
+									logout({
+										// Optional. Log outs the user from the OpenID Connect provider too
+										logoutOpenidConnectProvider: true,
+									})
+								}
+								className="bg-slate-900 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold h-12 px-6 rounded-lg w-full flex items-center justify-center sm:w-auto dark:bg-sky-500 dark:highlight-white/20 dark:hover:bg-sky-400"
+							>
+								Logout
+							</button>
+						)}
 					</div>
 				</div>
 				<footer className="flex justify-between text-gray-400">

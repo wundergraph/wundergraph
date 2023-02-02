@@ -1,6 +1,6 @@
 import type { GraphQLOperation } from '../../../graphql/operations';
 import type { ResolvedApplication } from '../../../configure';
-import { OperationType } from '@wundergraph/protobuf';
+import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 
 export const isNotInternal = (op: GraphQLOperation): boolean => !op.Internal;
 
@@ -18,12 +18,19 @@ export const hasInjectedInput = (op: GraphQLOperation): boolean =>
 const filteredOperations = (application: ResolvedApplication, includeInternal: boolean) =>
 	includeInternal ? application.Operations : application.Operations.filter((op) => !op.Internal);
 
+export const filterNodeJSOperations = (application: ResolvedApplication): ResolvedApplication => {
+	const copy = JSON.parse(JSON.stringify(application)) as ResolvedApplication;
+	copy.Operations = copy.Operations.filter((op) => op.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS);
+	return copy;
+};
+
 export const operations = (application: ResolvedApplication, operationType: OperationType, includeInternal: boolean) =>
 	filteredOperations(application, includeInternal)
 		.filter((op) => op.OperationType === operationType)
 		.map((op) => {
 			return {
 				operationName: op.Name,
+				operationPath: op.PathName,
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),
@@ -36,6 +43,7 @@ export const queries = (application: ResolvedApplication, includeInternal: boole
 	filteredOperations(application, includeInternal).map((op) => {
 		return {
 			operationName: op.Name,
+			operationPath: op.PathName,
 			path: op.Name,
 			hasInput: hasInput(op),
 			hasInternalInput: hasInternalInput(op),
@@ -50,6 +58,7 @@ export const liveQueries = (application: ResolvedApplication, includeInternal: b
 		.map((op) => {
 			return {
 				operationName: op.Name,
+				operationPath: op.PathName,
 				path: op.Name,
 				hasInput: hasInput(op),
 				hasInternalInput: hasInternalInput(op),

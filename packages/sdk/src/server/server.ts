@@ -7,7 +7,7 @@ import { InternalClientFactory, internalClientFactory } from './internal-client'
 import { pino } from 'pino';
 import path from 'path';
 import fs from 'fs';
-import { ServerLogger, resolveServerLogLevel } from '../logger';
+import { resolveServerLogLevel, ServerLogger } from '../logger';
 import { resolveConfigurationVariable } from '../configure/variables';
 import { onParentProcessExit } from '../utils/process';
 import { customGqlServerMountPath } from './util';
@@ -23,6 +23,8 @@ import type {
 	WunderGraphHooksAndServerConfig,
 	WunderGraphServerConfig,
 } from './types';
+import type { LoadOperationsOutput } from '../graphql/operations';
+import FastifyFunctionsPlugin from './plugins/functions';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -45,12 +47,12 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		logger.error(err, `uncaught exception, origin: ${origin}`);
 	});
 
-	if (!process.env.WG_ABS_DIR) {
-		logger.fatal('The environment variable `WG_ABS_DIR` is required!');
+	if (!process.env.WG_DIR_ABS) {
+		logger.fatal('The environment variable `WG_DIR_ABS` is required!');
 		process.exit(1);
 	}
 	try {
-		const configContent = fs.readFileSync(path.join(process.env.WG_ABS_DIR!, 'generated', 'wundergraph.config.json'), {
+		const configContent = fs.readFileSync(path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.config.json'), {
 			encoding: 'utf8',
 		});
 		WG_CONFIG = JSON.parse(configContent);
@@ -113,7 +115,7 @@ const _configureWunderGraphServer = <
 		}
 
 		startServer({
-			wundergraphDir: process.env.WG_ABS_DIR!,
+			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,
 			serverConfig,
 			// only in production because it has no value in development
@@ -237,6 +239,28 @@ export const createServer = async ({
 			internalClientFactory: clientFactory,
 		});
 		fastify.log.info('Webhooks plugin registered');
+	}
+
+	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
+	const operationsFileExists = fs.existsSync(operationsFilePath);
+	if (operationsFileExists) {
+		const operationsConfigFile = fs.readFileSync(operationsFilePath, 'utf-8');
+		const operationsConfig = JSON.parse(operationsConfigFile) as LoadOperationsOutput;
+
+		if (
+			operationsConfig &&
+			operationsConfig.typescript_operation_files &&
+			operationsConfig.typescript_operation_files.length
+		) {
+			await fastify.register(FastifyFunctionsPlugin, {
+				operations: operationsConfig.typescript_operation_files,
+				internalClientFactory: clientFactory,
+				nodeURL: WG_CONFIG?.api?.nodeOptions?.nodeUrl
+					? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
+					: '',
+			});
+			fastify.log.info('Functions plugin registered');
+		}
 	}
 
 	if (gracefulShutdown) {

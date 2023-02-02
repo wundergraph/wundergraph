@@ -37,7 +37,6 @@ var (
 	TelemetryClient       telemetry.Client
 	DotEnvFile            string
 	log                   *zap.Logger
-	serviceToken          string
 	cmdDurationMetric     telemetry.DurationMetric
 	_wunderGraphDirConfig string
 	disableCache          bool
@@ -114,19 +113,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check if we want to track telemetry for this command
-		if rootFlags.Telemetry && cmd.Annotations["telemetry"] == "true" {
-			TelemetryClient = telemetry.NewClient(
-				viper.GetString("API_URL"),
-				telemetry.MetricClientInfo{
-					WunderctlVersion: BuildInfo.Version,
-					IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
-					AnonymousID:      viper.GetString("anonymousid"),
-				},
-				telemetry.WithTimeout(3*time.Second),
-				telemetry.WithLogger(log),
-				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
-			)
-
+		if rootFlags.Telemetry && telemetry.HasAnnotations(telemetry.AnnotationCommand, cmd.Annotations) {
 			cmdMetricName := telemetry.CobraFullCommandPathMetricName(cmd)
 
 			metricDurationName := telemetry.DurationMetricSuffix(cmdMetricName)
@@ -135,9 +122,41 @@ var rootCmd = &cobra.Command{
 			metricUsageName := telemetry.UsageMetricSuffix(cmdMetricName)
 			cmdUsageMetric := telemetry.NewUsageMetric(metricUsageName)
 
+			metrics := []*telemetry.Metric{cmdUsageMetric}
+
+			clientInfo := &telemetry.MetricClientInfo{
+				WunderctlVersion: BuildInfo.Version,
+				IsCI:             os.Getenv("CI") != "" || os.Getenv("ci") != "",
+				AnonymousID:      viper.GetString("anonymousid"),
+			}
+
+			// Check if this command should also send data source related telemetry
+			if telemetry.HasAnnotations(telemetry.AnnotationDataSources, cmd.Annotations) {
+				wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
+				if err != nil {
+					return err
+				}
+				dataSourcesMetrics, err := telemetry.DataSourceMetrics(wunderGraphDir)
+				if err != nil {
+					if rootFlags.TelemetryDebugMode {
+						log.Error("could not generate data sources telemetry data", zap.Error(err))
+
+					}
+				}
+				metrics = append(metrics, dataSourcesMetrics...)
+			}
+
+			TelemetryClient = telemetry.NewClient(
+				viper.GetString("API_URL"), clientInfo,
+				telemetry.WithTimeout(3*time.Second),
+				telemetry.WithLogger(log),
+				telemetry.WithDebug(rootFlags.TelemetryDebugMode),
+				telemetry.WithAuthToken(os.Getenv("WG_TELEMETRY_AUTH_TOKEN")),
+			)
+
 			// Send telemetry in a goroutine to not block the command
 			go func() {
-				err := TelemetryClient.Send([]telemetry.Metric{cmdUsageMetric})
+				err := TelemetryClient.Send(metrics)
 
 				// AddMetric the usage of the command immediately
 				if rootFlags.TelemetryDebugMode {
@@ -181,7 +200,7 @@ func Execute(buildInfo node.BuildInfo, githubAuthDemo node.GitHubAuthDemo) {
 
 func FlushTelemetry() {
 	if TelemetryClient != nil && rootFlags.Telemetry && cmdDurationMetric != nil {
-		err := TelemetryClient.Send([]telemetry.Metric{cmdDurationMetric()})
+		err := TelemetryClient.Send([]*telemetry.Metric{cmdDurationMetric()})
 		if rootFlags.TelemetryDebugMode {
 			if err != nil {
 				log.Error("Could not send telemetry data", zap.Error(err))
@@ -211,8 +230,12 @@ func wunderctlBinaryPath() string {
 func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
+	telemetryAnonymousID := os.Getenv("WG_TELEMETRY_ANONYMOUS_ID")
 
-	config.InitConfig(!isTelemetryDisabled)
+	config.InitConfig(config.Options{
+		TelemetryEnabled:     !isTelemetryDisabled,
+		TelemetryAnonymousID: telemetryAnonymousID,
+	})
 
 	// Can be overwritten by WG_API_URL=<url> env variable
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
@@ -226,4 +249,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
 	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
 }

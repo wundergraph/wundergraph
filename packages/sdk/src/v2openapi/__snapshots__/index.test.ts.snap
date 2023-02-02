@@ -16030,6 +16030,15 @@ exports[`dynamic baseurl: dynamic_baseurl_fields 1`] = `
     "requiresFields": [],
     "path": [],
     "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_PropertiesResponse",
+    "fieldName": "properties",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
   }
 ]"
 `;
@@ -16335,6 +16344,15 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_fields 1`] = `
     "unescapeResponseJson": false
   },
   {
+    "typeName": "api_postPasswordlessStartInput",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
+  },
+  {
     "typeName": "Mutation",
     "fieldName": "api_postPasswordlessLogin",
     "disableDefaultFieldMapping": true,
@@ -16342,6 +16360,24 @@ exports[`fusion v2 with statusCodeUnions: fusion_v2_fields 1`] = `
     "requiresFields": [],
     "path": [],
     "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_MutationPostPasswordlessLoginOK",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
+  },
+  {
+    "typeName": "api_MutationPostPasswordlessLoginTwoFactorEnabled",
+    "fieldName": "methods",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",
@@ -16636,6 +16672,15 @@ exports[`fusion with statusCodeUnions: fusion_fields 1`] = `
     "unescapeResponseJson": false
   },
   {
+    "typeName": "api_postPasswordlessStartInput",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
+  },
+  {
     "typeName": "Mutation",
     "fieldName": "api_postPasswordlessLogin",
     "disableDefaultFieldMapping": true,
@@ -16643,6 +16688,15 @@ exports[`fusion with statusCodeUnions: fusion_fields 1`] = `
     "requiresFields": [],
     "path": [],
     "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_MutationPostPasswordlessLoginOK",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
   }
 ]"
 `;
@@ -16836,6 +16890,15 @@ exports[`fusion: fusion_fields 1`] = `
     "unescapeResponseJson": false
   },
   {
+    "typeName": "api_postPasswordlessStartInput",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
+  },
+  {
     "typeName": "Mutation",
     "fieldName": "api_postPasswordlessLogin",
     "disableDefaultFieldMapping": true,
@@ -16843,6 +16906,15 @@ exports[`fusion: fusion_fields 1`] = `
     "requiresFields": [],
     "path": [],
     "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_MutationPostPasswordlessLogin",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
   }
 ]"
 `;
@@ -18212,7 +18284,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18221,7 +18293,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",
@@ -18230,7 +18302,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",
@@ -18239,7 +18311,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",
@@ -18248,7 +18320,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18257,7 +18329,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18266,7 +18338,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18275,7 +18347,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18284,7 +18356,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18293,7 +18365,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18302,7 +18374,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18311,7 +18383,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18320,7 +18392,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18329,7 +18401,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18338,7 +18410,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18347,7 +18419,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18356,7 +18428,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18365,7 +18437,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18374,7 +18446,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18383,7 +18455,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Query",
@@ -18392,7 +18464,7 @@ exports[`httpbin: httpbin_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   }
 ]"
 `;
@@ -20287,7 +20359,7 @@ exports[`petstore: petstore_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",
@@ -21070,6 +21142,15 @@ exports[`users: users_fields 1`] = `
     "requiresFields": [],
     "path": [],
     "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_PropertiesResponse",
+    "fieldName": "properties",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
   }
 ]"
 `;
@@ -21584,6 +21665,15 @@ exports[`with_path_parameters: fusion_fields 1`] = `
     "unescapeResponseJson": false
   },
   {
+    "typeName": "api_postPasswordlessStartInput",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
+  },
+  {
     "typeName": "Mutation",
     "fieldName": "api_postPasswordlessLogin",
     "disableDefaultFieldMapping": true,
@@ -21591,6 +21681,15 @@ exports[`with_path_parameters: fusion_fields 1`] = `
     "requiresFields": [],
     "path": [],
     "unescapeResponseJson": false
+  },
+  {
+    "typeName": "api_MutationPostPasswordlessLogin",
+    "fieldName": "state",
+    "disableDefaultFieldMapping": true,
+    "argumentsConfiguration": [],
+    "requiresFields": [],
+    "path": [],
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",
@@ -21608,7 +21707,7 @@ exports[`with_path_parameters: fusion_fields 1`] = `
     "argumentsConfiguration": [],
     "requiresFields": [],
     "path": [],
-    "unescapeResponseJson": false
+    "unescapeResponseJson": true
   },
   {
     "typeName": "Mutation",

@@ -1,8 +1,7 @@
-import { createHooks } from '../src/hooks';
-import { Client, OperationsDefinition, GraphQLResponseError, User } from '@wundergraph/sdk/client';
+import { createHooks } from '../src';
+import { Client, ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { UseQueryResult } from '@tanstack/react-query';
-import { QueryKey } from '../src/types';
 
 interface Operations extends OperationsDefinition {
 	queries: {
@@ -51,7 +50,7 @@ const { data: queryData, error: queryError } = useQuery({
 });
 
 expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<GraphQLResponseError | null>(queryError);
+expectType<ClientResponseError | null>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
@@ -63,7 +62,7 @@ const { data: subData, error: subError } = useSubscription({
 });
 
 expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<GraphQLResponseError | null>(subError);
+expectType<ClientResponseError | null>(subError);
 
 const {
 	data: mutData,
@@ -75,7 +74,7 @@ const {
 });
 
 expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<GraphQLResponseError | null>(mutError);
+expectType<ClientResponseError | null>(mutError);
 
 expectType<void>(
 	mutate({
@@ -89,12 +88,14 @@ expectType<Promise<any>>(
 	})
 );
 
-expectType<UseQueryResult<User<string>, GraphQLResponseError>>(useUser());
-expectType<UseQueryResult<User<string>, GraphQLResponseError>>(
+expectType<UseQueryResult<User<string>, ClientResponseError>>(useUser());
+expectType<UseQueryResult<User<string>, ClientResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,
 	})
 );
 
-expectType<('Weather' | { city: string } | undefined)[]>(queryKey({ operationName: 'Weather' }));
+expectType<('Weather' | { city: string } | undefined)[]>(
+	queryKey({ operationName: 'Weather', input: { city: 'Berlin' } })
+);

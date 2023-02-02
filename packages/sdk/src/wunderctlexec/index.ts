@@ -47,7 +47,7 @@ export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<strin
 
 const wunderCtlArgs = (args: string[]): string[] => {
 	if (process.env.WG_DIR_ABS) {
-		args.push('--wundergraph-dir', '.');
+		args.push('--wundergraph-dir', process.env.WG_DIR_ABS);
 	}
 
 	if (process.env.WG_CLI_LOG_LEVEL) {

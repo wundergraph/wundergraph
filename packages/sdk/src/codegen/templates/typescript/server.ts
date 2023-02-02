@@ -1,13 +1,14 @@
 import { doNotEditHeader, Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { template } from './server.template';
 import { WunderGraphHooksPlugin } from './hooks';
 import { WunderGraphInternalApiClient } from './internal.client';
+import { WunderGraphInternalOperationsApiClient } from './internal.operations.client';
 
 export class WunderGraphServer implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
 		const content = tmpl({
 			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
@@ -22,6 +23,10 @@ export class WunderGraphServer implements Template {
 	}
 
 	dependencies(): Template[] {
-		return [new WunderGraphHooksPlugin(), new WunderGraphInternalApiClient()];
+		return [
+			new WunderGraphHooksPlugin(),
+			new WunderGraphInternalApiClient(),
+			new WunderGraphInternalOperationsApiClient(),
+		];
 	}
 }

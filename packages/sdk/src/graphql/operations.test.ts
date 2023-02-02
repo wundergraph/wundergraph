@@ -1,18 +1,19 @@
 import {
+	LoadOperationsOutput,
 	operationResponseToJSONSchema,
 	operationVariablesToJSONSchema,
 	ParsedOperations,
-	parseOperations,
+	parseGraphQLOperations,
 } from './operations';
 import { assert } from 'chai';
-import { buildSchema, OperationDefinitionNode, parse, print } from 'graphql';
+import { buildSchema, OperationDefinitionNode, parse } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
-import { Claim, OperationType } from '@wundergraph/protobuf';
+import { Claim, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
 
-const operations = `
-query MyReviews {
+const MyReviews = `
+query {
     me {
         name
         reviews {
@@ -20,32 +21,57 @@ query MyReviews {
             body
         }
     }
-}
+}`;
 
-mutation CreatePet ($petInput: PetInput!) {
+const CreatePet = `
+mutation ($petInput: PetInput!) {
     postPets(petInput: $petInput){
         name
     }
-}
+}`;
 
-subscription NewPets @internalOperation {
+const NewPets = `
+subscription @internalOperation {
     newPets {
         name
     }
 }`;
 
 test('parseGraphQLOperations', () => {
-	const actual = parseOperations(testSchema, operations);
+	const operations: LoadOperationsOutput = {
+		graphql_operation_files: [
+			{
+				operation_name: 'MyReviews',
+				api_mount_path: 'MyReviews',
+				content: MyReviews,
+				file_path: 'MyReviews.graphql',
+			},
+			{
+				operation_name: 'CreatePet',
+				api_mount_path: 'CreatePet',
+				content: CreatePet,
+				file_path: 'CreatePet.graphql',
+			},
+			{
+				operation_name: 'NewPets',
+				api_mount_path: 'NewPets',
+				content: NewPets,
+				file_path: 'NewPets.graphql',
+			},
+		],
+	};
+	const actual = parseGraphQLOperations(testSchema, operations);
 	expect(actual).toMatchSnapshot();
 });
 
-const transformOperations = `
+const GetName = `
 query GetName {
     name: me @transform(get: "name") {
         name
     }
-}
+}`;
 
+const GetReviews = `
 query GetReviews {
     myReviews: me @transform(get: "reviews") {
         name
@@ -54,8 +80,9 @@ query GetReviews {
             body
         }
     }
-}
+}`;
 
+const TopProducts = `
 query TopProducts{
     topProducts {
         upc
@@ -76,15 +103,16 @@ query TopProducts{
             }
         }
     }
-}
-`;
+}`;
 
 const expectedTransformOperations: ParsedOperations = {
 	operations: [
 		{
 			Name: 'GetName',
+			PathName: 'GetName',
 			Content: 'query GetName{name:me{name}}',
 			OperationType: OperationType.QUERY,
+			ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 			VariablesSchema: {
 				type: 'object',
 				properties: {},
@@ -166,8 +194,10 @@ const expectedTransformOperations: ParsedOperations = {
 		},
 		{
 			Name: 'GetReviews',
+			PathName: 'GetReviews',
 			Content: 'query GetReviews{myReviews:me{name reviews{id body}}}',
 			OperationType: OperationType.QUERY,
+			ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 			VariablesSchema: {
 				type: 'object',
 				properties: {},
@@ -262,9 +292,11 @@ const expectedTransformOperations: ParsedOperations = {
 		},
 		{
 			Name: 'TopProducts',
+			PathName: 'TopProducts',
 			Content:
 				'query TopProducts{topProducts{upc name price reviews{id body userName:author{name}productNames:author{reviews{product{name}}}}}}',
 			OperationType: OperationType.QUERY,
+			ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 			VariablesSchema: {
 				type: 'object',
 				properties: {},
@@ -394,7 +426,29 @@ const expectedTransformOperations: ParsedOperations = {
 };
 
 test('parseTransformOperations', () => {
-	const actual = parseOperations(testSchema, transformOperations);
+	const transformOperations: LoadOperationsOutput = {
+		graphql_operation_files: [
+			{
+				operation_name: 'GetName',
+				api_mount_path: 'GetName',
+				file_path: 'GetName.graphql',
+				content: GetName,
+			},
+			{
+				operation_name: 'GetReviews',
+				api_mount_path: 'GetReviews',
+				file_path: 'GetReviews.graphql',
+				content: GetReviews,
+			},
+			{
+				operation_name: 'TopProducts',
+				api_mount_path: 'TopProducts',
+				file_path: 'TopProducts.graphql',
+				content: TopProducts,
+			},
+		],
+	};
+	const actual = parseGraphQLOperations(testSchema, transformOperations);
 	assert.equal(pretty(actual), pretty(expectedTransformOperations));
 });
 
@@ -424,7 +478,7 @@ enum Claim {
 `;
 
 const fromClaimOperations = `
-mutation CreateUser(
+mutation (
     $email: String! @fromClaim(name: EMAIL)
 ) {
     createUser(email: $email) {
@@ -437,8 +491,10 @@ const fromClaimParsed: ParsedOperations = {
 	operations: [
 		{
 			Name: 'CreateUser',
-			Content: 'mutation CreateUser($email:String!@fromClaim(name:EMAIL)){createUser(email:$email){email}}',
+			PathName: 'CreateUser',
+			Content: 'mutation($email:String!@fromClaim(name:EMAIL)){createUser(email:$email){email}}',
 			OperationType: OperationType.MUTATION,
+			ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 			VariablesSchema: {
 				type: 'object',
 				properties: {},
@@ -534,19 +590,39 @@ const fromClaimParsed: ParsedOperations = {
 };
 
 test('parse operations with fromClaim directive', () => {
-	const actual = parseOperations(fromClaimSchema, fromClaimOperations);
+	const operations: LoadOperationsOutput = {
+		graphql_operation_files: [
+			{
+				operation_name: 'CreateUser',
+				api_mount_path: 'CreateUser',
+				file_path: 'CreateUser.graphql',
+				content: fromClaimOperations,
+			},
+		],
+	};
+	const actual = parseGraphQLOperations(fromClaimSchema, operations);
 	assert.equal(pretty(actual), pretty(fromClaimParsed));
 });
 
 test('parse operations with jsonSchema directive', () => {
-	const actual = parseOperations(jsonSchemaDirectiveSchema, jsonSchemaDirectiveOperation, {
+	const operations: LoadOperationsOutput = {
+		graphql_operation_files: [
+			{
+				operation_name: 'nested_JsonSchemaQuery',
+				api_mount_path: 'nested/JsonSchemaQuery',
+				file_path: 'nested/JsonSchemaQuery.graphql',
+				content: jsonSchemaDirectiveOperation,
+			},
+		],
+	};
+	const actual = parseGraphQLOperations(jsonSchemaDirectiveSchema, operations, {
 		keepFromClaimVariables: true,
 	});
 	assert.equal(pretty(actual), pretty(jsonSchemaDirectiveParsed));
 });
 
 const jsonSchemaDirectiveOperation = `
-query JsonSchemaQuery (
+query (
     $nullableStringWithTitle: String @jsonSchema(title: "someTitle")
     $stringWithTitle: String! @jsonSchema(title: "someTitle")
     $stringWithDescription: String! @jsonSchema(description: "someDescription")
@@ -686,9 +762,11 @@ const jsonSchemVariablesSchema: JSONSchema = {
 const jsonSchemaDirectiveParsed: ParsedOperations = {
 	operations: [
 		{
-			Name: 'JsonSchemaQuery',
-			Content: `query JsonSchemaQuery($nullableStringWithTitle:String@jsonSchema(title:"someTitle")$stringWithTitle:String!@jsonSchema(title:"someTitle")$stringWithDescription:String!@jsonSchema(description:"someDescription")$intWithMultipleOf:Int!@jsonSchema(multipleOf:10)$intWithMaximum:Int!@jsonSchema(maximum:10)$intWithExclusiveMaximum:Int!@jsonSchema(exclusiveMaximum:10)$intWithMinimum:Int!@jsonSchema(minimum:1)$intWithExclusiveMinimum:Int!@jsonSchema(exclusiveMinimum:1)$stringWithMaxLength:String!@jsonSchema(maxLength:3)$stringWithMinLength:String!@jsonSchema(minLength:5)$stringWithPattern:String!@jsonSchema(pattern:"foo")$arrayWithMaxItems:[String]!@jsonSchema(maxItems:5)$arrayWithMinItems:[String]!@jsonSchema(minItems:2)$arrayWithUniqueItems:[String]!@jsonSchema(uniqueItems:true)$email:String!@jsonSchema(commonPattern:EMAIL)$domain:String!@jsonSchema(commonPattern:DOMAIN)){root(input:{nullableStringWithTitle:$nullableStringWithTitle stringWithTitle:$stringWithTitle stringWithDescription:$stringWithDescription intWithMultipleOf:$intWithMultipleOf intWithMaximum:$intWithMaximum intWithExclusiveMaximum:$intWithExclusiveMaximum intWithMinimum:$intWithMinimum intWithExclusiveMinimum:$intWithExclusiveMinimum stringWithMaxLength:$stringWithMaxLength stringWithMinLength:$stringWithMinLength stringWithPattern:$stringWithPattern arrayWithMaxItems:$arrayWithMaxItems arrayWithMinItems:$arrayWithMinItems arrayWithUniqueItems:$arrayWithUniqueItems email:$email domain:$domain})}`,
+			Name: 'nested_JsonSchemaQuery',
+			PathName: 'nested/JsonSchemaQuery',
+			Content: `query($nullableStringWithTitle:String@jsonSchema(title:"someTitle")$stringWithTitle:String!@jsonSchema(title:"someTitle")$stringWithDescription:String!@jsonSchema(description:"someDescription")$intWithMultipleOf:Int!@jsonSchema(multipleOf:10)$intWithMaximum:Int!@jsonSchema(maximum:10)$intWithExclusiveMaximum:Int!@jsonSchema(exclusiveMaximum:10)$intWithMinimum:Int!@jsonSchema(minimum:1)$intWithExclusiveMinimum:Int!@jsonSchema(exclusiveMinimum:1)$stringWithMaxLength:String!@jsonSchema(maxLength:3)$stringWithMinLength:String!@jsonSchema(minLength:5)$stringWithPattern:String!@jsonSchema(pattern:"foo")$arrayWithMaxItems:[String]!@jsonSchema(maxItems:5)$arrayWithMinItems:[String]!@jsonSchema(minItems:2)$arrayWithUniqueItems:[String]!@jsonSchema(uniqueItems:true)$email:String!@jsonSchema(commonPattern:EMAIL)$domain:String!@jsonSchema(commonPattern:DOMAIN)){root(input:{nullableStringWithTitle:$nullableStringWithTitle stringWithTitle:$stringWithTitle stringWithDescription:$stringWithDescription intWithMultipleOf:$intWithMultipleOf intWithMaximum:$intWithMaximum intWithExclusiveMaximum:$intWithExclusiveMaximum intWithMinimum:$intWithMinimum intWithExclusiveMinimum:$intWithExclusiveMinimum stringWithMaxLength:$stringWithMaxLength stringWithMinLength:$stringWithMinLength stringWithPattern:$stringWithPattern arrayWithMaxItems:$arrayWithMaxItems arrayWithMinItems:$arrayWithMinItems arrayWithUniqueItems:$arrayWithUniqueItems email:$email domain:$domain})}`,
 			OperationType: OperationType.QUERY,
+			ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 			VariablesSchema: jsonSchemVariablesSchema,
 			InterpolationVariablesSchema: jsonSchemVariablesSchema,
 			InternalVariablesSchema: jsonSchemVariablesSchema,
@@ -1007,7 +1085,7 @@ const subTest = (rawSchema: string, testCase: TestCase[]) => {
 		) as OperationDefinitionNode;
 		const actual = operationResponseToJSONSchema(schema, queryDocument, operation, []);
 		expect(pretty(actual)).toMatchSnapshot(`testCase_${i}_responseJSONSchema`);
-		const actualVariables = operationVariablesToJSONSchema(schema, operation, []);
+		const actualVariables = operationVariablesToJSONSchema(schema, operation, [], false, false, []);
 		expect(pretty(actualVariables)).toMatchSnapshot(`testCase_${i}_variablesJSONSchema`);
 	});
 };
