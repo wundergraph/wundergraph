@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
+    "check": "tsc --noEmit",
     "build": "wunderctl generate --debug",
     "request": "ts-node client.ts",
     "test": "jest"
