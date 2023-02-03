@@ -144,6 +144,8 @@ If you don't have the `.wundergraph` directory, the build script would look like
 }
 ```
 
+Note that `--wundergraph-dir .` is used to specify the current directory.
+
 However, as mentioned above, if you don't have a build script,
 WunderGraph Cloud will automatically detect the path to the wundergraph dir, and execute `wunderctl generate` command by default.
 
