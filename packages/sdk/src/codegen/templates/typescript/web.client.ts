@@ -14,7 +14,8 @@ export class TypeScriptLegacyWebClient implements Template {
 
 	private readonly reactNative: boolean;
 
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(template);
 		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _liveQueries = liveQueries(config.application, false);

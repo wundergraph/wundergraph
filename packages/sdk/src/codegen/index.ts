@@ -66,7 +66,7 @@ export const GenerateCode = async (config: CodeGenConfig, customOutWriter?: Code
 	config.templates = Array.from(collectAllTemplates(config.templates));
 
 	const generateConfig: CodeGenerationConfig = {
-		...config.wunderGraphConfig,
+		config: config.wunderGraphConfig,
 		outPath: config.basePath,
 		wunderGraphDir: process.env.WG_DIR_ABS!,
 	};
