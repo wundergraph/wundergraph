@@ -424,7 +424,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled && (validation?.requiresAuthentication ?? true)) {
+		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
