@@ -8,8 +8,8 @@ import { template } from './hooks.template';
 import templates from '../index';
 
 export class WunderGraphHooksPlugin implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const application = filterNodeJSOperations(config.application);
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const application = filterNodeJSOperations(generationConfig.config.application);
 		const tmpl = Handlebars.compile(template);
 		const _queries = operations(application, OperationType.QUERY, false);
 		const _internalQueries = operations(application, OperationType.QUERY, true);
@@ -37,7 +37,7 @@ export class WunderGraphHooksPlugin implements Template {
 			hasInternalMutations: _internalMutations.length !== 0,
 			hasUploadProviders: _uploadProviders.length !== 0,
 			uploadProviders: _uploadProviders,
-			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
+			roleDefinitions: generationConfig.config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 		});
 		return Promise.resolve([
 			{

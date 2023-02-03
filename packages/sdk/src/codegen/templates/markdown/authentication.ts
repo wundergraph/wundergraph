@@ -1,13 +1,13 @@
 import { Template, TemplateOutputFile } from '../../index';
-import { ResolvedWunderGraphConfig } from '../../../configure';
+import { CodeGenerationConfig } from '../../../configure';
 import { template } from './configure_auth_providers.template';
 import Handlebars from 'handlebars';
 import { AuthProviderKind } from '@wundergraph/protobuf';
 
 export class AuthenticationProviderConfiguration implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const model: AuthenticationProviderModel = {
-			providers: config.authentication.cookieBased
+			providers: generationConfig.config.authentication.cookieBased
 				.filter((p) => p.id !== 'demo')
 				.map((p) => {
 					let providerKind: string = 'not defined';

@@ -18,6 +18,12 @@ func initClient() *s3uploadclient.S3UploadClient {
 		AccessKeyID:     "test",
 		SecretAccessKey: "12345678",
 		UseSSL:          false,
+		Profiles: map[string]*s3uploadclient.UploadProfile{
+			"test": {
+				RequireAuthentication: false,
+				MaxFileSizeBytes:      -1,
+			},
+		},
 	})
 	if err != nil {
 		panic(err)
@@ -50,6 +56,7 @@ func prepareRequest() (*httptest.ResponseRecorder, *http.Request) {
 		panic(err)
 	}
 
+	req.Header.Add("X-Upload-Profile", "test")
 	req.Header.Add("Content-Type", w.FormDataContentType())
 
 	return wr, req
