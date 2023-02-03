@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { product_updateInput } from '../../components/generated/models';
+import { ProductUpdateInput } from '../../components/generated/models';
 import { useMutation, withWunderGraph } from '../../components/generated/nextjs';
 
 const Users = () => {
-	const [state, setState] = useState<product_updateInput>({
+	const [state, setState] = useState<ProductUpdateInput>({
 		id: '1',
 		name: 'TableTop',
 		price: '299',
