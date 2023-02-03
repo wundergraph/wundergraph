@@ -228,6 +228,8 @@ interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'upl
 }
 
 export interface ResolvedWunderGraphConfig {
+	// XXX: ResolvedWunderGraphConfig is hashed by several templates.
+	// DO NOT INCLUDE UNSTABLE DATA (paths, times, etc...) in it.
 	application: ResolvedApplication;
 	deployment: ResolvedDeployment;
 	sdkVersion: string;
@@ -259,7 +261,11 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
-export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+export interface CodeGenerationConfig {
+	// Keep ResolvedWunderGraphConfig in a separate field, so it can be
+	// hashed without using any unstable data as the hash input (e.g.
+	// paths like outPath or wunderGraphDir).
+	config: ResolvedWunderGraphConfig;
 	outPath: string;
 	wunderGraphDir: string;
 }

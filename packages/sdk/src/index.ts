@@ -1,4 +1,4 @@
-export type { ResolvedWunderGraphConfig } from './configure';
+export type { CodeGenerationConfig, ResolvedWunderGraphConfig } from './configure';
 export type {
 	BaseOperationConfiguration,
 	QueryConfiguration,
