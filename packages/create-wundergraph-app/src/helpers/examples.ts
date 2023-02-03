@@ -2,9 +2,11 @@ import chalk from 'chalk';
 import got from 'got';
 import inquirer from 'inquirer';
 
+import { getGitHubRequestOptions } from './github';
+
 export const getExamplesList = async (ref: string) => {
 	const exampleDirectoriesResponse = await got
-		.get(`https://api.github.com/repos/wundergraph/wundergraph/contents/examples?ref=${ref}`)
+		.get(`https://api.github.com/repos/wundergraph/wundergraph/contents/examples?ref=${ref}`, getGitHubRequestOptions())
 		.catch((e: any) => {
 			throw e;
 		});
