@@ -10,6 +10,7 @@
     "build": "wunderctl generate --debug",
     "build:next": "next build",
     "dev": "next dev",
+    "test:playwright": "npx -- playwright test",
     "check": "tsc --noEmit",
     "cleanup": "cd minio && docker-compose down -v"
   },
@@ -24,6 +25,7 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.30.0",
     "@types/node": "^17.0.15",
     "@types/react": "^18.0.6",
     "node-fetch": "^2.6.7",

@@ -175,7 +175,7 @@ export interface User<Role extends string = string> {
 
 export interface LogoutOptions {
 	/**
-	 * Wether to log out the user from the OpenID Connect provider.
+	 * Whether to log out the user from the OpenID Connect provider.
 	 * Some providers might require the user to visit a URL. See
 	 * the redirect field.
 	 */
