@@ -34,6 +34,7 @@ configureWunderGraphApplication({
 					},
 				},
 				coverPicture: {
+					requireAuthentication: false,
 					maxAllowedUploadSizeBytes: 1024 * 1024 * 10, // 10 MB, optional, defaults to 25 MB
 					maxAllowedFiles: 1, // limit the number of files to 1, leave undefined for unlimited files
 					allowedMimeTypes: ['image/*'], // wildcard is supported, e.g. 'image/*', leave empty/undefined to allow all
