@@ -28,7 +28,7 @@ export interface UploadValidationOptions {
 	 *
 	 * @default true
 	 */
-	requiresAuthentication?: boolean;
+	requireAuthentication?: boolean;
 	/** Maximum file size allowed per upload
 	 *
 	 * @default 10 * 1024 * 1024 (10MB)

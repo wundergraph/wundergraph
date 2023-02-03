@@ -962,7 +962,7 @@ export interface S3UploadProfileHooksConfiguration {
 }
 
 export interface S3UploadProfile {
-  requiresAuthentication: boolean;
+  requireAuthentication: boolean;
   maxAllowedUploadSizeBytes: number;
   maxAllowedFiles: number;
   allowedMimeTypes: string[];
@@ -3272,7 +3272,7 @@ export const S3UploadProfileHooksConfiguration = {
 
 function createBaseS3UploadProfile(): S3UploadProfile {
   return {
-    requiresAuthentication: false,
+    requireAuthentication: false,
     maxAllowedUploadSizeBytes: 0,
     maxAllowedFiles: 0,
     allowedMimeTypes: [],
@@ -3285,7 +3285,7 @@ function createBaseS3UploadProfile(): S3UploadProfile {
 export const S3UploadProfile = {
   fromJSON(object: any): S3UploadProfile {
     return {
-      requiresAuthentication: isSet(object.requiresAuthentication) ? Boolean(object.requiresAuthentication) : false,
+      requireAuthentication: isSet(object.requireAuthentication) ? Boolean(object.requireAuthentication) : false,
       maxAllowedUploadSizeBytes: isSet(object.maxAllowedUploadSizeBytes) ? Number(object.maxAllowedUploadSizeBytes) : 0,
       maxAllowedFiles: isSet(object.maxAllowedFiles) ? Number(object.maxAllowedFiles) : 0,
       allowedMimeTypes: Array.isArray(object?.allowedMimeTypes)
@@ -3301,7 +3301,7 @@ export const S3UploadProfile = {
 
   toJSON(message: S3UploadProfile): unknown {
     const obj: any = {};
-    message.requiresAuthentication !== undefined && (obj.requiresAuthentication = message.requiresAuthentication);
+    message.requireAuthentication !== undefined && (obj.requireAuthentication = message.requireAuthentication);
     message.maxAllowedUploadSizeBytes !== undefined &&
       (obj.maxAllowedUploadSizeBytes = Math.round(message.maxAllowedUploadSizeBytes));
     message.maxAllowedFiles !== undefined && (obj.maxAllowedFiles = Math.round(message.maxAllowedFiles));
@@ -3323,7 +3323,7 @@ export const S3UploadProfile = {
 
   fromPartial<I extends Exact<DeepPartial<S3UploadProfile>, I>>(object: I): S3UploadProfile {
     const message = createBaseS3UploadProfile();
-    message.requiresAuthentication = object.requiresAuthentication ?? false;
+    message.requireAuthentication = object.requireAuthentication ?? false;
     message.maxAllowedUploadSizeBytes = object.maxAllowedUploadSizeBytes ?? 0;
     message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
     message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];

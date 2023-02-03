@@ -444,7 +444,7 @@ message S3UploadProfileHooksConfiguration {
 }
 
 message S3UploadProfile {
-	bool requiresAuthentication = 1;
+	bool requireAuthentication = 1;
 	int32 maxAllowedUploadSizeBytes = 2;
 	int32 maxAllowedFiles = 3;
 	repeated string allowedMimeTypes = 4;

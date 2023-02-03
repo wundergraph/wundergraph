@@ -20,8 +20,8 @@ func initClient() *s3uploadclient.S3UploadClient {
 		UseSSL:          false,
 		Profiles: map[string]*s3uploadclient.UploadProfile{
 			"test": {
-				RequiresAuthentication: false,
-				MaxFileSizeBytes:       -1,
+				RequireAuthentication: false,
+				MaxFileSizeBytes:      -1,
 			},
 		},
 	})
