@@ -15,7 +15,8 @@ import templates from '../index';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
-	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const allOperations = allQueries(config.application, false);
 		const _liveQueries = liveQueries(config.application, false);

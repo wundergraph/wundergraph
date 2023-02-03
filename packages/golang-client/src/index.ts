@@ -1,4 +1,4 @@
-import { BaseTypeScriptDataModel, ResolvedWunderGraphConfig, Template, TemplateOutputFile } from '@wundergraph/sdk';
+import { BaseTypeScriptDataModel, CodeGenerationConfig, Template, TemplateOutputFile } from '@wundergraph/sdk';
 import { hasInput, visitJSONSchema } from '@wundergraph/sdk/internal';
 import { JSONSchema7 as JSONSchema, JSONSchema7 } from 'json-schema';
 import execa from 'execa';
@@ -68,8 +68,8 @@ export class GolangInputModels implements Template {
 
 	private readonly config: GolangClientTemplateConfig;
 
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(hasInput)
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.filter(hasInput)
 			.map((op) => JSONSchemaToGolangStruct(op.VariablesSchema, op.Name + 'Input', false))
 			.join('\n\n');
 		return Promise.resolve([
@@ -93,7 +93,8 @@ export class GolangResponseModels implements Template {
 
 	private readonly config: GolangClientTemplateConfig;
 
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const content = config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + op.Name + 'ResponseData';
 			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
@@ -125,8 +126,8 @@ export class GolangResponseDataModels implements Template {
 
 	private readonly config: GolangClientTemplateConfig;
 
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.filter(
 			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
 		)
 			.map((op) =>
@@ -154,10 +155,10 @@ export class GolangBaseDataModel implements Template {
 
 	private readonly config: GolangClientTemplateConfig;
 
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const definitions: Map<string, JSONSchema7> = new Map();
 
-		config.application.Operations.forEach((op) => {
+		generationConfig.config.application.Operations.forEach((op) => {
 			if (!op.VariablesSchema.definitions) {
 				return;
 			}
@@ -194,7 +195,7 @@ type GraphQLError struct {
 }`;
 
 export class GolangModelsBase implements Template {
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		return Promise.resolve([
 			{
 				path: 'models.go',
@@ -211,7 +212,8 @@ export class GolangClient implements Template {
 
 	private readonly config: GolangClientTemplateConfig;
 
-	async generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(clientTemplate);
 		const content = tmpl({
 			queries: config.application.Operations.filter((op) => op.OperationType === OperationType.QUERY).map((op) => ({
