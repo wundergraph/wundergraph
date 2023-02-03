@@ -85,7 +85,7 @@ Follow the steps from the `Import your repository` and `Deploy your project`.
 
 # Redeploy
 
-- Make changes to the `main` branch, e.g. change the query in `.wundergraph/operations/`.
+- Make changes to the `main` branch, e.g. change a query in `.wundergraph/operations/`.
 
 - Commit and push the changes.
 
@@ -121,7 +121,7 @@ As an example, let's check our [cloud-starter repository](https://github.com/wun
 }
 ```
 
-As you can see, we have a `build` script, which is executed during the deployment process.
+As you can see, we have a `build` script, which is executed during the build process.
 This repository contains a `.wundergraph` directory, so we don't need to specify the path.
 
 If you renamed the `.wundergraph` directory to `app` for example, the build script would look like this:
@@ -145,7 +145,7 @@ If you don't have the `.wundergraph` directory, the build script would look like
 ```
 
 However, as mentioned above, if you don't have a build script,
-WunderGraph Cloud will automatically detect the path to the wundergraph dir, execute `wunderctl generate` command by default.
+WunderGraph Cloud will automatically detect the path to the wundergraph dir, and execute `wunderctl generate` command by default.
 
 In case you have a monorepo project, you will need to make WunderGraph part of the build pipeline.
 
