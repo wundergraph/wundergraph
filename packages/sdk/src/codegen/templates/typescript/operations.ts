@@ -6,9 +6,9 @@ import Handlebars from 'handlebars';
 import { template } from './operations.template';
 
 export class Operations implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const model: OperationsModel = {
-			operations: config.application.Operations.map((op) => ({
+			operations: generationConfig.config.application.Operations.map((op) => ({
 				name: op.Name,
 				isMutation: op.OperationType === OperationType.MUTATION,
 				isQuery: op.OperationType === OperationType.QUERY,
