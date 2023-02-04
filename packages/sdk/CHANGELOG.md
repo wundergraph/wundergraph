@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.134.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.133.1...@wundergraph/sdk@0.134.0) (2023-02-03)
+
+### Features
+
+* add support for uploads from anonymous users ([#632](https://github.com/wundergraph/wundergraph/issues/632)) ([485975b](https://github.com/wundergraph/wundergraph/commit/485975be55a8c1c82a4610431c7514d3c3c2dfe0)) (@fiam)
+
+### Bug Fixes
+
+* avoid feeding paths into applicationHash calculation ([#636](https://github.com/wundergraph/wundergraph/issues/636)) ([8542cf6](https://github.com/wundergraph/wundergraph/commit/8542cf6789de51711b05b0fbc4bb78d895e0e099)) (@fiam)
+* pass file upload hooks to upload configuration resolution ([#631](https://github.com/wundergraph/wundergraph/issues/631)) ([95a7bd7](https://github.com/wundergraph/wundergraph/commit/95a7bd784818141d769a105fd86a635daf9cb3f8)) (@fiam)
+
 ## [0.133.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.133.0...@wundergraph/sdk@0.133.1) (2023-02-01)
 
 ### Bug Fixes

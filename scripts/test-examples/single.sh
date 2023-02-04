@@ -91,10 +91,6 @@ done
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
     WG_NODE_URL=${default_node_url} npm test
-elif grep -q '"check"' package.json; then
-    npm run check
-elif grep -q '"build"' package.json; then
-    npm run build
 fi
 
 if grep -q '"test:playwright"' package.json; then
@@ -102,6 +98,17 @@ if grep -q '"test:playwright"' package.json; then
     npx -- playwright install --with-deps chromium
     WG_NODE_URL=${default_node_url} npm run test:playwright
 fi
+
+# If the example uses Next.js, compile it
+if grep -q '"build:next"' package.json; then
+    # This example doesn't build under a pnpm workspace
+    if !grep -q '"nextjs-react-query"' package.json; then
+        npm run build:next
+    fi
+elif grep -q '"check"' package.json; then
+    npm run check
+fi
+
 
 # If we have something to cleanup e.g. a Docker cluster, do it
 if grep -q '"cleanup"' package.json; then
