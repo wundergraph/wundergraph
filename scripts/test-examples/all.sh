@@ -47,8 +47,16 @@ cd `dirname ${0}`/../..
 cd examples
 for example in `ls -d */`; do
     if test ! -z "${TEST_FILTER}" && ! echo "${TEST_FILTER}" | grep -q -E "(^| )`basename ${example}`($| )"; then
-    echo "filter ${example}"
+    echo ${example} is filtered out
         continue
+    fi
+
+    if ! test -z "${WINDOWS}"; then
+        # On Windows, skip examples with Dockerfile or docker-compose.yml
+        if find ${example} -iname Dockerfile -o -iname docker-compose.yml | grep -q . ; then
+            echo skip ${example} on Windows due to docker usage
+            continue
+        fi
     fi
 
     if echo ${SKIP} | grep -q -E "(^| )`basename ${example}`($| )"; then
