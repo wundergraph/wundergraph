@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
+import { GraphQLOperation } from '../../../graphql/operations';
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -18,8 +19,8 @@ export const formatTypeScript = (input: string): string => {
 };
 
 export class TypeScriptInputModels implements Template {
-	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(hasInput)
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.filter(hasInput)
 			.map((op) =>
 				JSONSchemaToTypescriptInterface(
 					op.VariablesSchema,
@@ -49,8 +50,8 @@ export class TypeScriptInputModels implements Template {
 }
 
 export class TypeScriptInternalInputModels implements Template {
-	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(hasInternalInput)
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.filter(hasInternalInput)
 			.map((op) => JSONSchemaToTypescriptInterface(op.InternalVariablesSchema, 'Internal' + op.Name + 'Input', false))
 			.join('\n\n');
 		return Promise.resolve([
@@ -68,8 +69,8 @@ export class TypeScriptInternalInputModels implements Template {
 }
 
 export class TypeScriptInjectedInputModels implements Template {
-	async generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(hasInjectedInput)
+	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.filter(hasInjectedInput)
 			.map((op) => JSONSchemaToTypescriptInterface(op.InjectedVariablesSchema, 'Injected' + op.Name + 'Input', false))
 			.join('\n\n');
 
@@ -88,8 +89,8 @@ export class TypeScriptInjectedInputModels implements Template {
 }
 
 export class TypeScriptResponseModels implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.map((op) => {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.map((op) => {
 			const dataName = '#/definitions/' + op.Name + 'ResponseData';
 			const responseSchema = JSON.parse(JSON.stringify(op.ResponseSchema)) as JSONSchema7;
 			if (responseSchema.properties) {
@@ -114,8 +115,8 @@ export class TypeScriptResponseModels implements Template {
 }
 
 export class TypeScriptResponseDataModels implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.filter(
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.filter(
 			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
 		)
 			.map((op) =>
@@ -149,10 +150,10 @@ export class TypeScriptResponseDataModels implements Template {
 export class BaseTypeScriptDataModel implements Template {
 	precedence = 10;
 
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const definitions: Map<string, JSONSchema7> = new Map();
 
-		config.application.Operations.forEach((op) => {
+		generationConfig.config.application.Operations.forEach((op) => {
 			if (op.VariablesSchema.definitions)
 				Object.keys(op.VariablesSchema.definitions).forEach((definitionName) => {
 					if (definitions.has(definitionName)) {
@@ -192,7 +193,7 @@ export class BaseTypeScriptDataModel implements Template {
 			.map(([definitionName, definition]) => JSONSchemaToTypescriptInterface(definition, definitionName, false))
 			.join('\n\n');
 
-		const functionImports = typescriptFunctionsImports(config);
+		const functionImports = typescriptFunctionsImports(generationConfig);
 
 		const content = functionImports + models;
 
@@ -218,18 +219,18 @@ export interface GraphQLError {
 }
 `;
 
-const typescriptFunctionsImports = (config: CodeGenerationConfig): string => {
-	const ops = config.application.Operations.filter(
+const typescriptFunctionsImports = (generationConfig: CodeGenerationConfig): string => {
+	const ops = generationConfig.config.application.Operations.filter(
 		(op) => op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS
 	);
 	if (ops.length === 0) {
 		return '';
 	}
-	const relBasePath = path.relative(config.outPath, config.wunderGraphDir);
+	const relBasePath = path.relative(generationConfig.outPath, generationConfig.wunderGraphDir);
+	// Be careful with translating filesystem paths to import paths on Windows
+	const relImport = (op: GraphQLOperation) => path.join(relBasePath, 'operations', op.PathName).replace(/\\/g, '/');
 	return (
-		ops
-			.map((op) => `import type function_${op.Name} from '${path.join(relBasePath, 'operations', op.PathName)}';\n`)
-			.join('') +
+		ops.map((op) => `import type function_${op.Name} from '${relImport(op)}';\n`).join('') +
 		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
 		'\n'
 	);

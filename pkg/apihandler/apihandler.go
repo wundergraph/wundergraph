@@ -19,6 +19,7 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
@@ -251,13 +252,18 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	}
 
 	if err := r.registerAuth(r.insecureCookies); err != nil {
-		return nil, err
+		if !r.devMode {
+			// If authentication fails in production, consider this a fatal error
+			return nil, err
+		}
+		r.log.Error("configuring auth", zap.Error(err))
 	}
 
 	for _, s3Provider := range api.S3UploadConfiguration {
 		profiles := make(map[string]*s3uploadclient.UploadProfile, len(s3Provider.UploadProfiles))
 		for name, profile := range s3Provider.UploadProfiles {
 			profiles[name] = &s3uploadclient.UploadProfile{
+				RequireAuthentication: profile.RequireAuthentication,
 				MaxFileSizeBytes:      int(profile.MaxAllowedUploadSizeBytes),
 				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
 				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
@@ -284,7 +290,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			r.log.Error("registerS3UploadClient", zap.Error(err))
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
-			r.router.Handle(s3Path, authentication.RequiresAuthentication(http.HandlerFunc(s3.UploadFile)))
+			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
 			r.log.Debug("register S3 provider", zap.String("provider", s3Provider.Name))
 			r.log.Debug("register S3 endpoint", zap.String("path", s3Path))
 		}
@@ -414,18 +420,18 @@ func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
 	return nil
 }
 
-func (r *Builder) operationApiPath(name string) string {
+func operationApiPath(name string) string {
 	return fmt.Sprintf("/operations/%s", name)
 }
 
 func (r *Builder) registerInvalidOperation(name string) {
-	apiPath := r.operationApiPath(name)
+	apiPath := operationApiPath(name)
 	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
 	route.Handler(&EndpointUnavailableHandler{
 		OperationName: name,
 		Logger:        r.log,
 	})
-	r.log.Error("EndpointUnavailableHandler",
+	r.log.Warn("EndpointUnavailableHandler",
 		zap.String("Operation", name),
 		zap.String("Endpoint", apiPath),
 		zap.String("Help", "This operation is invalid. Please, check the logs"),
@@ -438,7 +444,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return nil
 	}
 
-	apiPath := r.operationApiPath(operation.Path)
+	apiPath := operationApiPath(operation.Path)
 
 	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
 		return r.registerNodejsOperation(operation, apiPath)
@@ -476,19 +482,19 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
 
-	queryParamsAllowList := r.generateQueryArgumentsAllowList(operation.VariablesSchema)
+	queryParamsAllowList := generateQueryArgumentsAllowList(operation.VariablesSchema)
 
-	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
 	}
 
-	jsonStringInterpolator, err := interpolate.NewStringInterpolatorJSONOnly(r.cleanupJsonSchema(operation.InterpolationVariablesSchema))
+	jsonStringInterpolator, err := interpolate.NewStringInterpolatorJSONOnly(cleanupJsonSchema(operation.InterpolationVariablesSchema))
 	if err != nil {
 		return err
 	}
@@ -645,9 +651,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	return nil
 }
 
-func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
+func generateQueryArgumentsAllowList(schema string) []string {
 	var allowList []string
-	schema = r.cleanupJsonSchema(schema)
+	schema = cleanupJsonSchema(schema)
 	_ = jsonparser.ObjectEach([]byte(schema), func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 		allowList = append(allowList, string(key))
 		return nil
@@ -655,7 +661,7 @@ func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
 	return allowList
 }
 
-func (r *Builder) cleanupJsonSchema(schema string) string {
+func cleanupJsonSchema(schema string) string {
 	schema = strings.Replace(schema, "/definitions/", "/$defs/", -1)
 	schema = strings.Replace(schema, "\"definitions\"", "\"$defs\"", -1)
 	return schema
@@ -781,7 +787,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	shared.Parser.Parse(shared.Doc, shared.Report)
 
 	if shared.Report.HasErrors() {
-		http.Error(w, "bad request", http.StatusBadRequest)
+		h.logInternalErrors(shared.Report, requestLogger)
+		h.writeRequestErrors(shared.Report, w, requestLogger)
+
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -794,8 +803,10 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if shared.Report.HasErrors() {
-		requestLogger.Error("shared printer", zap.String("errors", shared.Report.Error()))
-		http.Error(w, "bad request", http.StatusBadRequest)
+		h.logInternalErrors(shared.Report, requestLogger)
+		h.writeRequestErrors(shared.Report, w, requestLogger)
+
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -807,8 +818,14 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !exists {
 		prepared, err = h.preparePlan(operationHash, requestOperationName, shared)
 		if err != nil {
-			requestLogger.Error("prepare plan failed", zap.Error(shared.Report))
-			w.WriteHeader(http.StatusBadRequest)
+			if shared.Report.HasErrors() {
+				h.logInternalErrors(shared.Report, requestLogger)
+				h.writeRequestErrors(shared.Report, w, requestLogger)
+			} else {
+				requestLogger.Error("prepare plan failed", zap.Error(err))
+				w.WriteHeader(http.StatusBadRequest)
+			}
+
 			return
 		}
 	}
@@ -830,8 +847,19 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
+
+			requestErrors := graphql.RequestErrors{
+				{
+					Message: "could not resolve response",
+				},
+			}
+
+			if _, err := requestErrors.WriteResponse(w); err != nil {
+				requestLogger.Error("could not write response", zap.Error(err))
+			}
+
 			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
-			http.Error(w, "bad request", http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		_, err = executionBuf.WriteTo(w)
@@ -856,11 +884,43 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, context.Canceled) {
 				return
 			}
+
+			requestErrors := graphql.RequestErrors{
+				{
+					Message: "could not resolve response",
+				},
+			}
+
+			if _, err := requestErrors.WriteResponse(w); err != nil {
+				requestLogger.Error("could not write response", zap.Error(err))
+			}
+
 			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	case *plan.StreamingResponsePlan:
 		http.Error(w, "not implemented", http.StatusNotFound)
+	}
+}
+
+func (h *GraphQLHandler) logInternalErrors(report *operationreport.Report, requestLogger *zap.Logger) {
+	var internalErr error
+	for _, err := range report.InternalErrors {
+		internalErr = multierror.Append(internalErr, err)
+	}
+
+	if internalErr != nil {
+		requestLogger.Error("internal error", zap.Error(internalErr))
+	}
+}
+
+func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w http.ResponseWriter, requestLogger *zap.Logger) {
+	requestErrors := graphql.RequestErrorsFromOperationReport(*report)
+	if requestErrors != nil {
+		if _, err := requestErrors.WriteResponse(w); err != nil {
+			requestLogger.Error("error writing response", zap.Error(err))
+		}
 	}
 }
 
@@ -2153,12 +2213,12 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
 	}
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
 
-	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
 	}
@@ -2169,7 +2229,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,
-		queryParamsAllowList: r.generateQueryArgumentsAllowList(operation.VariablesSchema),
+		queryParamsAllowList: generateQueryArgumentsAllowList(operation.VariablesSchema),
 		stringInterpolator:   stringInterpolator,
 		liveQuery: liveQueryConfig{
 			enabled:                operation.LiveQueryConfig.Enable,
@@ -2204,8 +2264,14 @@ type FunctionsHandler struct {
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
+
+	reqID := r.Header.Get(logging.RequestIDHeader)
+	requestLogger := h.log.With(logging.WithRequestID(reqID))
+	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+
 	r = setOperationMetaData(r, h.operation)
+
+	isInternal := strings.HasPrefix(r.URL.Path, "/internal/")
 
 	ctx := pool.GetCtx(r, r, pool.Config{})
 	defer pool.PutCtx(ctx)
@@ -2230,7 +2296,11 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		ctx.Variables = variablesBuf.Bytes()
+		if isInternal {
+			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
+		} else {
+			ctx.Variables = variablesBuf.Bytes()
+		}
 	}
 
 	if len(ctx.Variables) == 0 {
@@ -2322,8 +2392,10 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(out.Response)
+	w.WriteHeader(out.ClientResponseStatusCode)
+	if len(out.Response) > 0 {
+		_, _ = w.Write(out.Response)
+	}
 }
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {

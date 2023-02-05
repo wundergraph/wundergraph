@@ -315,6 +315,7 @@ export enum DataSourceKind {
   SQLSERVER = 5,
   MONGODB = 6,
   SQLITE = 7,
+  PRISMA = 8,
 }
 
 export function dataSourceKindFromJSON(object: any): DataSourceKind {
@@ -343,6 +344,9 @@ export function dataSourceKindFromJSON(object: any): DataSourceKind {
     case 7:
     case "SQLITE":
       return DataSourceKind.SQLITE;
+    case 8:
+    case "PRISMA":
+      return DataSourceKind.PRISMA;
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum DataSourceKind");
   }
@@ -366,6 +370,8 @@ export function dataSourceKindToJSON(object: DataSourceKind): string {
       return "MONGODB";
     case DataSourceKind.SQLITE:
       return "SQLITE";
+    case DataSourceKind.PRISMA:
+      return "PRISMA";
     default:
       throw new globalThis.Error("Unrecognized enum value " + object + " for enum DataSourceKind");
   }
@@ -956,6 +962,7 @@ export interface S3UploadProfileHooksConfiguration {
 }
 
 export interface S3UploadProfile {
+  requireAuthentication: boolean;
   maxAllowedUploadSizeBytes: number;
   maxAllowedFiles: number;
   allowedMimeTypes: string[];
@@ -3265,6 +3272,7 @@ export const S3UploadProfileHooksConfiguration = {
 
 function createBaseS3UploadProfile(): S3UploadProfile {
   return {
+    requireAuthentication: false,
     maxAllowedUploadSizeBytes: 0,
     maxAllowedFiles: 0,
     allowedMimeTypes: [],
@@ -3277,6 +3285,7 @@ function createBaseS3UploadProfile(): S3UploadProfile {
 export const S3UploadProfile = {
   fromJSON(object: any): S3UploadProfile {
     return {
+      requireAuthentication: isSet(object.requireAuthentication) ? Boolean(object.requireAuthentication) : false,
       maxAllowedUploadSizeBytes: isSet(object.maxAllowedUploadSizeBytes) ? Number(object.maxAllowedUploadSizeBytes) : 0,
       maxAllowedFiles: isSet(object.maxAllowedFiles) ? Number(object.maxAllowedFiles) : 0,
       allowedMimeTypes: Array.isArray(object?.allowedMimeTypes)
@@ -3292,6 +3301,7 @@ export const S3UploadProfile = {
 
   toJSON(message: S3UploadProfile): unknown {
     const obj: any = {};
+    message.requireAuthentication !== undefined && (obj.requireAuthentication = message.requireAuthentication);
     message.maxAllowedUploadSizeBytes !== undefined &&
       (obj.maxAllowedUploadSizeBytes = Math.round(message.maxAllowedUploadSizeBytes));
     message.maxAllowedFiles !== undefined && (obj.maxAllowedFiles = Math.round(message.maxAllowedFiles));
@@ -3313,6 +3323,7 @@ export const S3UploadProfile = {
 
   fromPartial<I extends Exact<DeepPartial<S3UploadProfile>, I>>(object: I): S3UploadProfile {
     const message = createBaseS3UploadProfile();
+    message.requireAuthentication = object.requireAuthentication ?? false;
     message.maxAllowedUploadSizeBytes = object.maxAllowedUploadSizeBytes ?? 0;
     message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
     message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];

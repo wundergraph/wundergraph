@@ -48,6 +48,16 @@ type UserLoadConfig struct {
 	issuer           string
 }
 
+// Keyfunc returns a function for retrieving a token key from the
+// UserLoadConfig's key set if there are any keys. Otherwise, it
+// returns nil.
+func (cfg *UserLoadConfig) Keyfunc() jwt.Keyfunc {
+	if cfg != nil && cfg.jwks != nil && cfg.jwks.Len() > 0 {
+		return cfg.jwks.Keyfunc
+	}
+	return nil
+}
+
 func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
 	if !revalidate {
@@ -76,7 +86,7 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		if err != nil {
 			return err
 		}
-		req.Header.Set("Authorization", token)
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 		res, err := u.client.Do(req)
 		if err != nil {
 			return err
@@ -219,13 +229,21 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		}
 		trimmed := strings.TrimPrefix(authorizationHeader, "Bearer ")
 		revalidate := r.URL.Query().Get("revalidate") == "true"
-		for i := range loader.userLoadConfigs {
-			token, err := jwt.Parse(trimmed, loader.userLoadConfigs[i].jwks.Keyfunc)
-			if err == nil && !token.Valid {
-				continue
+		for _, config := range loader.userLoadConfigs {
+			// If we have a Keyfunc, enforce a valid token. Otherwise fallback
+			// to loader.userFromToken
+			if keyFunc := config.Keyfunc(); keyFunc != nil {
+				token, err := jwt.Parse(trimmed, keyFunc)
+				if err != nil {
+					loader.log.Warn("could not parse token", zap.String("token", trimmed), zap.Error(err))
+					continue
+				}
+				if !token.Valid {
+					loader.log.Warn("token is invalid", zap.Any("token", token))
+					continue
+				}
 			}
-			err = loader.userFromToken(authorizationHeader, loader.userLoadConfigs[i], u, revalidate)
-			if err == nil {
+			if err := loader.userFromToken(trimmed, config, u, revalidate); err == nil {
 				return nil
 			}
 		}

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.6...@wundergraph/nextjs@0.8.7) (2023-02-03)
+
+### Bug Fixes
+
+* avoid feeding paths into applicationHash calculation ([#636](https://github.com/wundergraph/wundergraph/issues/636)) ([8542cf6](https://github.com/wundergraph/wundergraph/commit/8542cf6789de51711b05b0fbc4bb78d895e0e099)) (@fiam)
+
+## [0.8.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.5...@wundergraph/nextjs@0.8.6) (2023-02-01)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.8.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.4...@wundergraph/nextjs@0.8.5) (2023-01-30)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.8.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.3...@wundergraph/nextjs@0.8.4) (2023-01-23)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.8.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.2...@wundergraph/nextjs@0.8.3) (2023-01-20)
 
 **Note:** Version bump only for package @wundergraph/nextjs

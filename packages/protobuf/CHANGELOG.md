@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.104.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.103.0...@wundergraph/protobuf@0.104.0) (2023-02-03)
+
+### Features
+
+* add support for uploads from anonymous users ([#632](https://github.com/wundergraph/wundergraph/issues/632)) ([485975b](https://github.com/wundergraph/wundergraph/commit/485975be55a8c1c82a4610431c7514d3c3c2dfe0)) (@fiam)
+
+## [0.103.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.102.0...@wundergraph/protobuf@0.103.0) (2023-01-30)
+
+### Features
+
+* add prisma datasource ([#605](https://github.com/wundergraph/wundergraph/issues/605)) ([2f0cfa5](https://github.com/wundergraph/wundergraph/commit/2f0cfa5e420080772a6552f4a256c7d71906f84a)) (@jensneuse)
+
 ## [0.102.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.101.0...@wundergraph/protobuf@0.102.0) (2023-01-20)
 
 ### Features

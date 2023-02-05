@@ -38,6 +38,7 @@ It takes away a lot of complexity,
 which is also quite handy to illustrate different capabilities of WunderGraph.
 
 ```graphql
+# operations/Weather.graphql
 query (
   $continent: String!
   # the @internal directive removes the $capital variable from the public API
@@ -78,8 +79,8 @@ query (
 ### Step-by-step explanation
 
 As WunderGraph uses a GraphQL to JSON RPC compiler,
-the client starts by requesting the Resource `/operations/Weather?continent=Europe`,
-so we're essentially asking to execute the `Weather` operation with the `continent` parameter set to `Europe`.
+the client starts by requesting the Resource `/operations/Weather?continent=EU`,
+so we're essentially asking to execute the `Weather` operation with the `continent` parameter set to `EU`.
 
 The server will then validate if the user is authenticated (if enabled) and will return 401 if not.
 If we've configured Role Based Access Control, the server will also validate if the user has the correct roles.

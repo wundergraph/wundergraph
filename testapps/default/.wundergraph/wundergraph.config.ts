@@ -76,9 +76,17 @@ const db = introspect.sqlite({
 	databaseURL: 'file:./db.sqlite',
 });
 
+const usersPost = introspect.prisma({
+	apiNamespace: 'users_post',
+	prismaFilePath: './schema.prisma',
+	introspection: {
+		disableCache: true,
+	},
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost],
 	server,
 	operations,
 	authorization: {

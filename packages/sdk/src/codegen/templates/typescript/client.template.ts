@@ -48,6 +48,7 @@ const S3UploadProviderData = {
 	{{name}}: {
 		{{#each uploadProfiles}}
 			{{@key}}: {
+				requireAuthentication: {{this.requireAuthentication}},
 				{{#if this.maxAllowedUploadSizeBytes includeZero=true}}
 				maxAllowedUploadSizeBytes: {{this.maxAllowedUploadSizeBytes}},
 				{{/if}}
@@ -88,7 +89,7 @@ export const defaultClientConfig: ClientConfig = {
 
 export const operationMetadata: OperationMetadata = {
 {{#each allOperations}}
-    {{operationName}}: {
+    "{{operationPath}}": {
         requiresAuthentication: {{requiresAuthentication}}
 		}
     {{#unless @last}},{{/unless}}

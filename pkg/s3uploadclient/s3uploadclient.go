@@ -39,6 +39,7 @@ type S3UploadClient struct {
 	hooksClient    *hooks.Client
 	name           string
 	pool           *pool.Pool
+	logger         *zap.Logger
 }
 
 type preparedProfile struct {
@@ -50,6 +51,8 @@ type preparedProfile struct {
 // UploadProfile specifies options like maximum file size and allowed
 // extensions for a given upload profile
 type UploadProfile struct {
+	// Whether the profile requires authentication to upload a file
+	RequireAuthentication bool
 	// Maximum size of each file in bytes
 	MaxFileSizeBytes int
 	// Maximum number of files per upload
@@ -60,9 +63,9 @@ type UploadProfile struct {
 	AllowedFileExtensions []string
 	// Optional JSON schema to validate metadata
 	MetadataJSONSchema string
-	// Wether to use the PreUpload middleware hook
+	// Whether to use the PreUpload middleware hook
 	UsePreUploadHook bool
-	// Wether to use the PostUpload middleware hook
+	// Whether to use the PostUpload middleware hook
 	UsePostUploadHook bool
 }
 
@@ -160,6 +163,7 @@ func NewS3UploadClient(endpoint string, s3Options Options) (*S3UploadClient, err
 		hooksClient:    s3Options.HooksClient,
 		name:           s3Options.Name,
 		pool:           pool.New(),
+		logger:         s3Options.Logger,
 	}
 
 	err = s.createBucket()
@@ -327,6 +331,11 @@ func (s *S3UploadClient) validateFile(ctx context.Context, profile *preparedProf
 }
 
 func (s *S3UploadClient) UploadFile(w http.ResponseWriter, r *http.Request) {
+
+	if !s.hasRequiredAuthentication(w, r) {
+		return
+	}
+
 	r.Body = http.MaxBytesReader(w, r.Body, MaxUploadSize)
 
 	var result []UploadedFile
@@ -406,6 +415,23 @@ func (s *S3UploadClient) handlePart(ctx context.Context, r *http.Request, part *
 	}
 
 	return info, nil
+}
+
+func (s *S3UploadClient) hasRequiredAuthentication(w http.ResponseWriter, r *http.Request) bool {
+	// Don't check for a valid profile name here. Since the default is requiring users
+	// to be authenticated, we can just check if there's a profile. If the name
+	// doesn't exist we'll get an error later.
+	profileName, profile, _ := s.uploadProfile(r)
+	if profile == nil || profile.RequireAuthentication {
+		if authentication.UserFromContext(r.Context()) == nil {
+			if s.logger != nil {
+				s.logger.Debug("refusing upload from anonymous user", zap.String("provider", s.name), zap.String("profile", profileName))
+			}
+			w.WriteHeader(http.StatusUnauthorized)
+			return false
+		}
+	}
+	return true
 }
 
 type hookFile struct {

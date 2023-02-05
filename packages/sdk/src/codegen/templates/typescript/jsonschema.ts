@@ -5,9 +5,9 @@ import Handlebars from 'handlebars';
 import { template } from './jsonschema.template';
 
 export class JsonSchema implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const model: Model = {
-			operations: config.application.Operations.map((op) => ({
+			operations: generationConfig.config.application.Operations.map((op) => ({
 				name: op.Name,
 				inputSchema: JSON.stringify(op.VariablesSchema),
 				outputSchema: JSON.stringify(op.ResponseSchema),
