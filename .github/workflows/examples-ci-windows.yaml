@@ -1,4 +1,4 @@
-name: Examples CI
+name: Examples CI Windows
 on:
   schedule:
     - cron: '0 0 * * *'
@@ -20,6 +20,7 @@ on:
       - '.github/actions/node/action.yaml'
       - '.github/workflows/examples-ci-windows.yaml'
       - 'examples/**'
+      - 'scripts/test-examples/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}
