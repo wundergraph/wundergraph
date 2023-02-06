@@ -891,64 +891,54 @@ const navigation = [
 						href: '/docs/wundergraph-config-ts-reference',
 					},
 					{
-						title: 'WunderNode Options',
-						href: '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
-					},
-					{
-						title: 'GraphQL Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-graphql-data-source',
-					},
-					{
-						title: 'PostgreSQL Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-postgresql-data-source',
-					},
-					{
-						title: 'MySQL Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-mysql-data-source',
-					},
-					{
-						title: 'Planetscale Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-planetscale-data-source',
-					},
-					{
-						title: 'SQLite Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-sqlite-data-source',
-					},
-					{
-						title: 'SQLServer Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source',
-					},
-					{
-						title: 'MongoDB / Atlas Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source',
-					},
-					{
-						title: 'Apollo Federation Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-apollo-federation-data-source',
-					},
-					{
-						title: 'OpenAPI / REST Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source',
-					},
-					{
-						title: 'gRPC Data Source',
-						href: '/docs/wundergraph-config-ts-reference/configure-grpc-data-source',
-					},
-					{
-						title: 'Headers for HTTP-based Data Sources',
-						href: '/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources',
-					},
-					{
-						title: 'mTLS for HTTP-based Data Sources',
-						href: '/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
+						title: 'Data Sources',
+						href: '/docs/wundergraph-config-ts-reference/configure-data-sources',
+						links: [
+							{
+								title: 'GraphQL Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-graphql-data-source',
+							},
+							{
+								title: 'PostgreSQL Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-postgresql-data-source',
+							},
+							{
+								title: 'MySQL Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-mysql-data-source',
+							},
+							{
+								title: 'Planetscale Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-planetscale-data-source',
+							},
+							{
+								title: 'SQLite Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-sqlite-data-source',
+							},
+							{
+								title: 'SQLServer Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-sqlserver-data-source',
+							},
+							{
+								title: 'MongoDB / Atlas Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-mongodb-atlas-data-source',
+							},
+							{
+								title: 'Apollo Federation Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-apollo-federation-data-source',
+							},
+							{
+								title: 'OpenAPI / REST Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-openapi-rest-data-source',
+							},
+							{
+								title: 'gRPC Data Source',
+								href: '/docs/wundergraph-config-ts-reference/configure-grpc-data-source',
+							},
+						],
 					},
 					{
 						title: 'Introspection',
 						href: '/docs/wundergraph-config-ts-reference/configure-introspection',
-					},
-					{
-						title: 'WunderGraph Application',
-						href: '/docs/wundergraph-config-ts-reference/configure-wundergraph-application',
 					},
 					{
 						title: 'Code Generation',
@@ -979,8 +969,20 @@ const navigation = [
 						href: '/docs/wundergraph-config-ts-reference/configure-advanced-security',
 					},
 					{
+						title: 'Headers for HTTP-based Data Sources',
+						href: '/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources',
+					},
+					{
+						title: 'mTLS for HTTP-based Data Sources',
+						href: '/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
+					},
+					{
 						title: 'Schema extension',
 						href: '/docs/wundergraph-config-ts-reference/configure-schema-extension',
+					},
+					{
+						title: 'WunderNode Options',
+						href: '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
 					},
 				],
 			},
@@ -1249,11 +1251,11 @@ const navigation = [
 			},
 		],
 	},
-	// {
-	// 	title: 'Troubleshooting',
-	// 	href: '/docs/troubleshooting',
-	// 	icon: <BugAntIcon />,
-	// },
+	{
+		title: 'Troubleshooting',
+		href: '/docs/troubleshooting',
+		icon: <BugAntIcon />,
+	},
 	{
 		title: 'Upgrade guides',
 		href: '/docs/upgrade-guides',

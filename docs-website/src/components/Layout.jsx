@@ -138,7 +138,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 	const hideTableOfContents = frontmatter?.hideTableOfContents;
 	const fullWidthContent = frontmatter?.fullWidthContent;
 	const isIndexFile = frontmatter?.isIndexFile === true;
-
+	console.log(tableOfContents);
 	function isActive(section) {
 		if (section.id === currentSection) {
 			return true;

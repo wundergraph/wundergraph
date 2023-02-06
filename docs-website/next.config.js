@@ -37,6 +37,11 @@ const nextConfig = {
 				destination: '/docs/self-hosted/flyio',
 				permanent: true,
 			},
+			{
+				source: '/docs/wundergraph-config-ts-reference/configure-wundergraph-application',
+				destination: '/docs/wundergraph-config-ts-reference',
+				permament: true,
+			},
 		];
 	},
 };
