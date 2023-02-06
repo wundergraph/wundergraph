@@ -19,8 +19,8 @@ authentication: {
     providers: [
       authProviders.openIDConnect({
         id: 'auth0', // you have to choose this ID
-        clientId: 'XXX', // client ID from Auth0
-        clientSecret: 'XXX', // client secret from Auth0
+        clientId: 'XXX', // client ID from OAuth
+        clientSecret: 'XXX', // client secret from OAuth
       }),
     ];
   }
@@ -36,5 +36,5 @@ You must supply an object inside the auth provider that contains 3 properties, t
 - `clientSecret`: the client secret from OAuth
 
 {% callout type="warning" %}
-Consider storing your IDs and secrets inside a .env file.
+Consider storing your IDs and secrets inside a `.env` file.
 {% /callout %}

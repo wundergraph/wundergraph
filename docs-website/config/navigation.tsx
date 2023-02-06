@@ -318,6 +318,10 @@ const navigation = [
 						title: 'GitHub',
 						href: '/docs/auth/github',
 					},
+					{
+						title: 'Google',
+						href: '/docs/auth/google',
+					},
 				],
 			},
 			{

@@ -36,5 +36,5 @@ You must supply an object inside the auth provider that contains 3 properties, t
 - `clientSecret`: the client secret from GitHub
 
 {% callout type="warning" %}
-Consider storing your IDs and secrets inside a .env file.
+Consider storing your IDs and secrets inside a `.env` file.
 {% /callout %}
