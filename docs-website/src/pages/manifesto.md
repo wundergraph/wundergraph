@@ -427,7 +427,7 @@ In a composed GraphQL schema,
 you can build relationships between multiple microservices.
 GraphQL allows clients to easily query these relationships without having to know anything about the underlying API styles.
 
-The WunderGraph API Gateway trangrays between GraphQL and the underlying technologies behind the scenes.
+The WunderGraph API Gateway translates between GraphQL and the underlying technologies behind the scenes.
 Just like the Docker runtime made applications portable,
 the WunderGraph API Gateway acts as an abstraction between GraphQL schema (frontend) and API implementation (backend).
 

@@ -53,7 +53,7 @@ export function Hero() {
 					</div>
 					<div className="relative lg:static xl:pl-10">
 						<div className="absolute inset-x-[-50vw] -top-32 -bottom-48 [mask-image:linear-gradient(transparent,white,white)] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:left-[calc(50%+14rem)] lg:right-0 lg:-top-32 lg:-bottom-32 lg:[mask-image:none] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
-							<HeroBackground className="-trangray-y-1/2 -trangray-x-1/2 lg:trangray-x-0 lg:trangray-y-[-60%] absolute top-1/2 left-1/2 lg:left-0" />
+							<HeroBackground className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 lg:translate-y-[-60%]" />
 						</div>
 						<div className="relative">
 							<Image

@@ -37,7 +37,7 @@ function Header({ navigation }) {
 					: 'dark:bg-transparent'
 			)}
 		>
-			<div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between py-2 px-4 md:px-8 lg:px-16">
+			<div className=" flex  flex-wrap items-center justify-between py-2 px-4 md:px-8 lg:px-16">
 				<div className="mr-6 flex lg:hidden">
 					<MobileNavigation navigation={navigation} />
 				</div>
@@ -145,8 +145,8 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 		<>
 			<Header navigation={navigation} />
 
-			<div className="relative mx-auto flex max-w-screen-2xl justify-center sm:px-2 lg:px-8">
-				<div className="hidden lg:relative lg:block lg:flex-none">
+			<div className="relative mx-auto flex justify-center sm:px-2 lg:px-8">
+				<div className="flex-start hidden lg:relative lg:block lg:flex-none">
 					<div className="absolute inset-y-0 right-0 w-[50vw] bg-white dark:hidden dark:bg-gray-50" />
 					<div className="scrollbar-custom sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto py-16 pr-8 pl-8">
 						<div className="absolute top-16 bottom-0 right-0 hidden h-12 w-px bg-gradient-to-t from-gray-800 dark:block" />
@@ -154,49 +154,51 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						<Navigation navigation={navigation} className="w-64 xl:w-72" />
 					</div>
 				</div>
-				<div className="min-w-0 max-w-4xl flex-auto px-4 py-16 lg:max-w-none lg:pr-0 lg:pl-8 xl:px-16">
-					<article>
-						{frontmatter && (title || section) && (
-							<header className="mb-9 space-y-1">
-								{section && <p className="font-display text-sm font-medium text-sky-600">{section.title}</p>}
-								{title && (
-									<h1 className="font-display text-3xl tracking-tight text-gray-900 dark:text-white">{title}</h1>
-								)}
-							</header>
-						)}
-						<Prose>{children}</Prose>
-						<Comments />
-					</article>
-					<dl className="mt-12 flex border-t border-gray-200 pt-6 dark:border-gray-800">
-						{previousPage?.href && (
-							<div className="max-w-[50%]">
-								<dt className="font-display text-sm font-medium text-gray-900 dark:text-white">Previous</dt>
-								<dd className="mt-1">
-									<Link
-										href={previousPage.href}
-										className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
-									>
-										<span aria-hidden="true">&larr;</span> {previousPage.title}
-									</Link>
-								</dd>
-							</div>
-						)}
-						{nextPage?.href && (
-							<div className="ml-auto max-w-[50%] text-right">
-								<dt className="font-display text-sm font-medium text-gray-900 dark:text-white">Next</dt>
-								<dd className="mt-1">
-									<Link
-										href={nextPage.href}
-										className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
-									>
-										{nextPage.title} <span aria-hidden="true">&rarr;</span>
-									</Link>
-								</dd>
-							</div>
-						)}
-					</dl>
-					<div className="pt-6">
-						<DocsFooter isIndexFile={isIndexFile} />
+				<div className="min-w-0 flex-auto px-4 py-16 lg:pr-0 lg:pl-8 xl:px-16">
+					<div className="mx-auto max-w-6xl">
+						<article>
+							{frontmatter && (title || section) && (
+								<header className="mb-9 space-y-1">
+									{section && <p className="font-display text-sm font-medium text-sky-600">{section.title}</p>}
+									{title && (
+										<h1 className="font-display text-3xl tracking-tight text-gray-900 dark:text-white">{title}</h1>
+									)}
+								</header>
+							)}
+							<Prose>{children}</Prose>
+							<Comments />
+						</article>
+						<dl className="mt-12 flex border-t border-gray-200 pt-6 dark:border-gray-800">
+							{previousPage?.href && (
+								<div className="max-w-[50%]">
+									<dt className="font-display text-sm font-medium text-gray-900 dark:text-white">Previous</dt>
+									<dd className="mt-1">
+										<Link
+											href={previousPage.href}
+											className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+										>
+											<span aria-hidden="true">&larr;</span> {previousPage.title}
+										</Link>
+									</dd>
+								</div>
+							)}
+							{nextPage?.href && (
+								<div className="ml-auto max-w-[50%] text-right">
+									<dt className="font-display text-sm font-medium text-gray-900 dark:text-white">Next</dt>
+									<dd className="mt-1">
+										<Link
+											href={nextPage.href}
+											className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+										>
+											{nextPage.title} <span aria-hidden="true">&rarr;</span>
+										</Link>
+									</dd>
+								</div>
+							)}
+						</dl>
+						<div className="pt-6">
+							<DocsFooter isIndexFile={isIndexFile} />
+						</div>
 					</div>
 				</div>
 

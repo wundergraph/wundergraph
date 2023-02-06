@@ -38,7 +38,7 @@ export const QuickLinkMore = ({ label = 'Learn more', className }) => {
 	return (
 		<span className={clsx('group flex items-center text-sm group-hover:text-pink-500', className)}>
 			{label}{' '}
-			<span className="-trangray-x-1 group-hover:trangray-x-1 ml-2 inline-block h-4 w-4 transition-all">
+			<span className="ml-2 inline-block h-4 w-4 -translate-x-1 transition-all group-hover:translate-x-1">
 				<ArrowRightIcon />
 			</span>
 		</span>

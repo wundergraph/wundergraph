@@ -33,7 +33,7 @@ subscription PriceUpdates {
 }
 ```
 
-This GraphQL Subscription trangrays to the following client code:
+This GraphQL Subscription translates to the following client code:
 
 ```typescript jsx
 const IndexPage = ({ products }) => {

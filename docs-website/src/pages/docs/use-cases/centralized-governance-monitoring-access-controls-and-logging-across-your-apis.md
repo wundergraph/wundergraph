@@ -22,7 +22,7 @@ but you've got so many APIs to monitor,
 and all of them use different protocols,
 so it's really hard to get a single point of view.
 
-Wouldn't it be nice if you could trangray them all to a single language,
+Wouldn't it be nice if you could translate them all to a single language,
 so that you only need to build a monitoring and logging system once?
 
 Even better,

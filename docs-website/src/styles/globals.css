@@ -26,10 +26,10 @@
 
 	@keyframes scroll {
 		0% {
-			transform: trangrayX(0);
+			transform: translateX(0);
 		}
 		100% {
-			transform: trangrayX(calc(-560px * 4));
+			transform: translateX(calc(-560px * 4));
 		}
 	}
 

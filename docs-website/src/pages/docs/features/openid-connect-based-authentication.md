@@ -60,6 +60,6 @@ const IndexPage: NextPage = () => {
 };
 ```
 
-As you can see, the auth provider id (github), we've specified above trangrays into a login function with the same name.
+As you can see, the auth provider id (github), we've specified above translates into a login function with the same name.
 
 If you though this is amazing, head over to the next section and read about authentication aware data fetching, that's a real beauty!
