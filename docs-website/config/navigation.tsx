@@ -1193,24 +1193,8 @@ const navigation = [
 						href: '/docs/wunderctl-reference/wunderctl-generate',
 					},
 					{
-						title: 'wunderctl login',
-						href: '/docs/wunderctl-reference/wunderctl-login',
-					},
-					{
-						title: 'wunderctl logout',
-						href: '/docs/wunderctl-reference/wunderctl-logout',
-					},
-					{
 						title: 'wunderctl version',
 						href: '/docs/wunderctl-reference/wunderctl-version',
-					},
-					{
-						title: 'wunderctl add',
-						href: '/docs/wunderctl-reference/wunderctl-add',
-					},
-					{
-						title: 'wunderctl remove',
-						href: '/docs/wunderctl-reference/wunderctl-remove',
 					},
 					{
 						title: 'wunderctl start',
@@ -1228,25 +1212,6 @@ const navigation = [
 			},
 		],
 	},
-	// {
-	// 	title: 'WunderHub Reference',
-	// 	href: '/docs/wunderhub-reference',
-	// 	icon: <CloudArrowUpIcon />,
-	// 	links: [
-	// 		{
-	// 			title: 'Overview',
-	// 			href: '/docs/wunderhub-reference',
-	// 		},
-	// 		{
-	// 			title: 'Publish an API to WunderHub',
-	// 			href: '/docs/wunderhub-reference/publish-api-to-wunderhub',
-	// 		},
-	// 		{
-	// 			title: 'Integrate an API from WunderHub',
-	// 			href: '/docs/wunderhub-reference/integrate-api-from-wunderhub',
-	// 		},
-	// 	],
-	// },
 	{ type: 'divider' },
 	{
 		title: 'About WunderGraph',
