@@ -10,11 +10,7 @@ isIndexFile: true
 An overview of all APIs supported by WunderGraph.
 
 {% quick-links %}
-{% quick-link title="GraphQL" icon="core" href="/docs/supported-data-sources/graphql" description="" /%}
-{% quick-link title="Apollo Federation" icon="core" href="/docs/supported-data-sources/apollo-federation" description="" /%}
-{% quick-link title="REST / OpenAPI" icon="core" href="/docs/supported-data-sources/rest-openapi" description="" /%}
-{% quick-link title="gRPC" icon="core" href="/docs/supported-data-sources/grpc" description="" /%}
-{% quick-link title="SOAP" icon="core" href="/docs/supported-data-sources/soap" description="" /%}
-{% quick-link title="OData" icon="core" href="/docs/supported-data-sources/odata" description="" /%}
-{% quick-link title="Apache Thrift" icon="core" href="/docs/supported-data-sources/apache-thrift" description="" /%}
+{% quick-link title="GraphQL" icon="apis" href="/docs/apis/graphql" description="Connect any compatible GraphQL server to WunderGraph." /%}
+{% quick-link title="Apollo Federation" icon="apis" href="/docs/apis/apollo-federation" description="Use WunderGraph as your federations gateway." /%}
+{% quick-link title="REST / OpenAPI" icon="apis" href="/docs/apis/rest-openapi" description="Connect REST data source to WunderGraph." /%}
 {% /quick-links %}

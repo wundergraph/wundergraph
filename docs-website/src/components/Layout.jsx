@@ -35,7 +35,7 @@ function Header({ navigation }) {
 			className={clsx(
 				'sticky top-0 z-50 bg-white shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none',
 				isScrolled
-					? 'dark:bg-slate-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-slate-900/75'
+					? 'dark:bg-gray-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-gray-900/75'
 					: 'dark:bg-transparent'
 			)}
 		>
