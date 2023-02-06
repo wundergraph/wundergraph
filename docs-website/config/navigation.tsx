@@ -378,10 +378,6 @@ const navigation = [
 				title: 'Yugabyte',
 				href: '/docs/databases/yugabyte',
 			},
-			{
-				title: 'Oracle DB',
-				href: '/docs/databases/oracle-db',
-			},
 		],
 	},
 	// {
