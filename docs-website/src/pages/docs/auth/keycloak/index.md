@@ -19,8 +19,8 @@ authentication: {
     providers: [
       authProviders.openIDConnect({
         id: 'keycloak', // you have to choose this ID
-        clientId: 'XXX', // client ID from Auth0
-        clientSecret: 'XXX', // client secret from Auth0
+        clientId: 'XXX', // client ID from OAuth
+        clientSecret: 'XXX', // client secret from OAuth
       }),
     ];
   }
