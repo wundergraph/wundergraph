@@ -13,7 +13,7 @@
 	}
 
 	body {
-		@apply scrollbar-custom h-full bg-white text-gray-700 antialiased dark:bg-gray-950 dark:text-slate-400;
+		@apply scrollbar-custom h-full bg-white text-gray-700 antialiased dark:bg-gray-950 dark:text-gray-400;
 	}
 
 	svg {
@@ -26,10 +26,10 @@
 
 	@keyframes scroll {
 		0% {
-			transform: translateX(0);
+			transform: trangrayX(0);
 		}
 		100% {
-			transform: translateX(calc(-560px * 4));
+			transform: trangrayX(calc(-560px * 4));
 		}
 	}
 
@@ -49,11 +49,11 @@
 	.options-table .option-title h2,
 	.options-table .option-title h3,
 	.options-table .option-title h4 {
-		@apply text-slate-900 dark:text-white;
+		@apply text-gray-900 dark:text-white;
 	}
 
 	.options-table .option-title p {
-		@apply text-sm text-slate-500 dark:text-slate-400;
+		@apply text-sm text-gray-500 dark:text-gray-400;
 	}
 
 	.hyphens {

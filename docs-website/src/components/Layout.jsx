@@ -33,47 +33,41 @@ function Header({ navigation }) {
 	return (
 		<header
 			className={clsx(
-				'sticky top-0 z-50 bg-white shadow-md shadow-slate-900/5 transition duration-500 dark:shadow-none',
+				'sticky top-0 z-50 border-gray-200 bg-white shadow-md shadow-gray-900/5 transition transition-all duration-500 dark:border-gray-800 dark:shadow-none',
 				isScrolled
-					? 'dark:bg-gray-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-gray-900/75'
+					? 'border-b dark:bg-gray-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-gray-950/70'
 					: 'dark:bg-transparent'
 			)}
 		>
-			<div className="flex flex-wrap items-center justify-between py-5 px-4 sm:px-6 lg:px-8">
+			<div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between py-2 px-4 md:px-8 lg:px-16">
 				<div className="mr-6 flex lg:hidden">
 					<MobileNavigation navigation={navigation} />
 				</div>
 				<div className="relative flex flex-grow basis-0 items-center">
-					<Link href="https://wundergraph.com/" aria-label="WunderGraph landing page">
-						<div className="flex">
-							<Logomark className="h-10 w-10 text-black dark:text-white lg:hidden" />
-							<Logo className="hidden h-8 text-black dark:text-white lg:flex" />
-						</div>
+					<Link href="/" className="flex items-center space-x-2 font-bold text-slate-800 no-underline dark:text-white">
+						<Logo />
+						<span className="block">WunderGraph Docs</span>
 					</Link>
 				</div>
 				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
 					<Search />
 				</div>
-				<div className="relative flex basis-0 items-center justify-end gap-6 sm:gap-8 md:flex-grow">
-					<PopupButton
-						id={'cn3Zwo5B'}
-						size={50}
-						className="relative z-10 flex h-8 w-full items-center justify-center space-x-3 rounded-md border-slate-300 bg-gradient-to-r from-pink-400 to-purple-400 px-10 text-sm font-medium text-black transition before:absolute before:inset-px before:-z-10 before:rounded-md before:bg-white before:transition-all focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-50 hover:border-slate-400 hover:text-white hover:text-slate-700 before:hover:inset-0 before:hover:opacity-0 disabled:hover:border-slate-400 disabled:hover:text-slate-500 dark:border-slate-600 dark:text-white before:dark:bg-gray-950 dark:focus:ring-sky-900 dark:hover:border-slate-500 hover:dark:text-black dark:hover:text-slate-200 disabled:hover:dark:border-slate-500 disabled:hover:dark:text-slate-400 lg:w-max"
-						onReady={() => {
-							plausible.trackEvent(Events.AnnouncementBannerClicked);
-						}}
-						onClose={() => {
-							plausible.trackEvent(Events.AnnouncementBannerTypeformClosed);
-						}}
-						onSubmit={() => {
-							plausible.trackEvent(Events.AnnouncementBannerTypeformSubmitted);
-						}}
+				<div className="relative flex basis-0 items-center justify-end gap-4 md:flex-grow">
+					<Link
+						href="https://wundergraph.com"
+						className="text-sm text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
 					>
-						<span className="text-slate-50 dark:text-slate-100">Early access</span>
-					</PopupButton>
+						wundergraph.com
+					</Link>
+					<Link
+						href="https://cloud.wundergraph.com"
+						className="relative z-10 flex h-8 w-full items-center justify-center space-x-3 rounded-md border-gray-300 bg-gradient-to-r from-pink-400 to-purple-400 px-10 text-sm text-sm font-medium text-black transition before:absolute before:inset-px before:-z-10 before:rounded-md before:bg-white before:transition-all focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-50 hover:border-gray-400 hover:text-white hover:text-gray-700 before:hover:inset-0 before:hover:opacity-0 disabled:hover:border-gray-400 disabled:hover:text-gray-500 dark:border-gray-600 dark:text-white before:dark:bg-gray-950 dark:focus:ring-sky-900 dark:hover:border-gray-500 hover:dark:text-black dark:hover:text-gray-200 disabled:hover:dark:border-gray-500 disabled:hover:dark:text-gray-400 lg:w-max"
+					>
+						<span className="text-gray-50 dark:text-gray-100">Sign up</span>
+					</Link>
 					<ThemeSelector className="relative z-10" />
 					<Link href="https://github.com/wundergraph/wundergraph" className="group" aria-label="GitHub">
-						<GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
+						<GitHubIcon className="h-5 w-5 fill-gray-500 group-hover:fill-gray-500 dark:group-hover:fill-gray-300" />
 					</Link>
 				</div>
 			</div>
@@ -155,10 +149,10 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 
 			<div className="relative mx-auto flex max-w-screen-2xl justify-center sm:px-2 lg:px-8">
 				<div className="hidden lg:relative lg:block lg:flex-none">
-					<div className="absolute inset-y-0 right-0 w-[50vw] bg-white dark:hidden dark:bg-slate-50" />
+					<div className="absolute inset-y-0 right-0 w-[50vw] bg-white dark:hidden dark:bg-gray-50" />
 					<div className="scrollbar-custom sticky top-[4.5rem] -ml-0.5 h-[calc(100vh-4.5rem)] overflow-y-auto py-16 pr-8 pl-8">
-						<div className="absolute top-16 bottom-0 right-0 hidden h-12 w-px bg-gradient-to-t from-slate-800 dark:block" />
-						<div className="absolute top-28 bottom-0 right-0 hidden w-px bg-slate-800 dark:block" />
+						<div className="absolute top-16 bottom-0 right-0 hidden h-12 w-px bg-gradient-to-t from-gray-800 dark:block" />
+						<div className="absolute top-28 bottom-0 right-0 hidden w-px bg-gray-800 dark:block" />
 						<Navigation navigation={navigation} className="w-64 xl:w-72" />
 					</div>
 				</div>
@@ -168,21 +162,21 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 							<header className="mb-9 space-y-1">
 								{section && <p className="font-display text-sm font-medium text-sky-600">{section.title}</p>}
 								{title && (
-									<h1 className="font-display text-3xl tracking-tight text-slate-900 dark:text-white">{title}</h1>
+									<h1 className="font-display text-3xl tracking-tight text-gray-900 dark:text-white">{title}</h1>
 								)}
 							</header>
 						)}
 						<Prose>{children}</Prose>
 						<Comments />
 					</article>
-					<dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
+					<dl className="mt-12 flex border-t border-gray-200 pt-6 dark:border-gray-800">
 						{previousPage?.href && (
 							<div className="max-w-[50%]">
-								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Previous</dt>
+								<dt className="font-display text-sm font-medium text-gray-900 dark:text-white">Previous</dt>
 								<dd className="mt-1">
 									<Link
 										href={previousPage.href}
-										className="text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
+										className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
 									>
 										<span aria-hidden="true">&larr;</span> {previousPage.title}
 									</Link>
@@ -191,11 +185,11 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						)}
 						{nextPage?.href && (
 							<div className="ml-auto max-w-[50%] text-right">
-								<dt className="font-display text-sm font-medium text-slate-900 dark:text-white">Next</dt>
+								<dt className="font-display text-sm font-medium text-gray-900 dark:text-white">Next</dt>
 								<dd className="mt-1">
 									<Link
 										href={nextPage.href}
-										className="text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
+										className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
 									>
 										{nextPage.title} <span aria-hidden="true">&rarr;</span>
 									</Link>
@@ -220,7 +214,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 					<nav aria-labelledby="on-this-page-title" className="w-56">
 						{tableOfContents.length > 0 && (
 							<>
-								<h2 id="on-this-page-title" className="font-display text-sm font-medium text-slate-900 dark:text-white">
+								<h2 id="on-this-page-title" className="font-display text-sm font-medium text-gray-900 dark:text-white">
 									On this page
 								</h2>
 								<ol role="list" className="mt-4 space-y-3 text-sm">
@@ -232,22 +226,20 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 													className={clsx(
 														isActive(section)
 															? 'text-sky-600'
-															: 'font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+															: 'font-normal text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
 													)}
 												>
 													{section.title}
 												</Link>
 											</h3>
 											{section.children.length > 0 && (
-												<ol role="list" className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400">
+												<ol role="list" className="mt-2 space-y-3 pl-5 text-gray-500 dark:text-gray-400">
 													{section.children.map((subSection) => (
 														<li key={subSection.id}>
 															<Link
 																href={`#${subSection.id}`}
 																className={
-																	isActive(subSection)
-																		? 'text-sky-600'
-																		: 'hover:text-slate-600 dark:hover:text-slate-300'
+																	isActive(subSection) ? 'text-sky-600' : 'hover:text-gray-600 dark:hover:text-gray-300'
 																}
 															>
 																{subSection.title}

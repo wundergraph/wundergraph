@@ -13,7 +13,7 @@ export const themeClasses = {
 		'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-500/30 dark:hover:bg-gray-600/30 dark:hover:text-white dark:bg-gray-500/20',
 	ghost: 'bg-transparent text-sky-800 border-none hover:bg-sky-50 dark:text-sky-300 dark:hover:bg-sky-500/30',
 	plain:
-		'border-slate-300 dark:border-slate-600 hover:border-slate-400 hover:text-slate-700 dark:hover:border-slate-500 dark:hover:text-slate-200',
+		'border-gray-300 dark:border-gray-600 hover:border-gray-400 hover:text-gray-700 dark:hover:border-gray-500 dark:hover:text-gray-200',
 	danger:
 		'bg-red-500 text-white border-red-600 hover:bg-red-400 dark:bg-red-600 dark:border-red-500 dark:hover:bg-red-500 dark:hover:border-red-400',
 };
@@ -27,7 +27,7 @@ const disabledThemeClasses = {
 	ghost:
 		'disabled:hover:text-sky-800 disabled:dark:hover:text-sky-300 disabled:hover:bg-transparent disabled:dark:hover:bg-transparent disabled:opacity-50',
 	plain:
-		'disabled:hover:text-slate-500 disabled:hover:dark:text-slate-400 disabled:hover:border-slate-400 disabled:hover:dark:border-slate-500 disabled:opacity-50',
+		'disabled:hover:text-gray-500 disabled:hover:dark:text-gray-400 disabled:hover:border-gray-400 disabled:hover:dark:border-gray-500 disabled:opacity-50',
 	danger: 'disabled:hover:text-white disabled:hover:bg-red-500 disabled:hover:dark:bg-red-600 disabled:opacity-50',
 };
 

@@ -16,7 +16,7 @@ When a project manager comes up with a new idea,
 you have to quickly cobble together all the APIs that are required for this particular use case.
 
 The problem is that this whole mess of APIs doesn't really fit together.
-You have to translate protocols, map types, etc...
+You have to trangray protocols, map types, etc...
 
 Even worse, you've now introduced a new API facade that also needs to be maintained.
 If one of your APIs changes, you have to update the facade as well.
@@ -31,7 +31,7 @@ What we've come up as a solution to the problem is what we call the "Virtual Gra
 We've built an open source SDK that introspects various data sources,
 like GraphQL, Apollo Federation, OpenAPI, gRPC, PostgreSQL, MySQL, etc...
 
-Once introspected, we translate all these introspections into a GraphQL Schema.
+Once introspected, we trangray all these introspections into a GraphQL Schema.
 Next, we put each of the APIs into their own namespace,
 which is done using our Namespacing feature.
 
@@ -86,12 +86,12 @@ First, let's define two API dependencies:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 The virtual graph will be automatically generated,

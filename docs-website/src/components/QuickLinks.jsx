@@ -19,13 +19,13 @@ export function QuickLink({ title, description, href, icon, logo, children, more
 			<div className="relative overflow-hidden rounded-xl p-6">
 				{icon && <Icon icon={icon} className="mb-4 h-8 w-8 text-pink-500" />}
 				{logo && <span className="mb-4 flex h-8 text-black dark:text-white">{logo}</span>}
-				<h2 className="font-display text-base text-slate-900 dark:text-white">
+				<h2 className="font-display text-base text-gray-900 dark:text-white">
 					<Link href={href}>
 						<span className="absolute -inset-px rounded-xl" />
 						{title}
 					</Link>
 				</h2>
-				<p className="mt-1 text-sm text-slate-700 dark:text-slate-400">{description}</p>
+				<p className="mt-1 text-sm text-gray-700 dark:text-gray-400">{description}</p>
 
 				{children}
 
@@ -38,7 +38,7 @@ export const QuickLinkMore = ({ label = 'Learn more', className }) => {
 	return (
 		<span className={clsx('group flex items-center text-sm group-hover:text-pink-500', className)}>
 			{label}{' '}
-			<span className="ml-2 inline-block h-4 w-4 -translate-x-1 transition-all group-hover:translate-x-1">
+			<span className="-trangray-x-1 group-hover:trangray-x-1 ml-2 inline-block h-4 w-4 transition-all">
 				<ArrowRightIcon />
 			</span>
 		</span>

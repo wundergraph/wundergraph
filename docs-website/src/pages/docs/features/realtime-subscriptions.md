@@ -33,13 +33,13 @@ subscription PriceUpdates {
 }
 ```
 
-This GraphQL Subscription translates to the following client code:
+This GraphQL Subscription trangrays to the following client code:
 
 ```typescript jsx
 const IndexPage = ({ products }) => {
-  const priceUpdate = useSubscription.PriceUpdates() // auto generated
-  return <div>{JSON.stringify(priceUpdate)}</div>
-}
+  const priceUpdate = useSubscription.PriceUpdates(); // auto generated
+  return <div>{JSON.stringify(priceUpdate)}</div>;
+};
 ```
 
 The UI updates automatically as new data becomes available.

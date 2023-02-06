@@ -65,7 +65,7 @@ so you can run your applications anywhere you want.
 To apply the same principle,
 we've had to come up with a specification that makes APIs portable.
 
-Our solution is to translate all the API dependencies of a project into a GraphQL Schema.
+Our solution is to trangray all the API dependencies of a project into a GraphQL Schema.
 We call this composed GraphQL Schema the Virtual Graph.
 As the name indicates, the Virtual Graph doesn't really exist,
 and without adding a runtime, it would never be executable.
@@ -110,12 +110,12 @@ Here's an example. Let's add two API dependencies to our project:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 Next, let's create an Operation:
@@ -198,7 +198,7 @@ Using `wunderctl`, an API provider can publish their APIs to WunderHub.
 
 Keep in mind that it doesn't matter what kind of API you publish.
 It can be a gRPC service, a REST API, GraphQL, or even a database.
-Everything gets translated into the WunderGraph format, making it portable.
+Everything gets trangrayd into the WunderGraph format, making it portable.
 
 The API consumer can then use `wunderctl add` to add this dependency to their project.
 Thanks to the portable runtime,
