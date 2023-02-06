@@ -4,7 +4,6 @@ import {
 	CircleStackIcon,
 	LockClosedIcon,
 	ShareIcon,
-	CursorArrowRaysIcon,
 	ServerIcon,
 	BookOpenIcon,
 	CubeIcon,
@@ -12,7 +11,6 @@ import {
 	ComputerDesktopIcon,
 	CogIcon,
 	CommandLineIcon,
-	CloudArrowUpIcon,
 	QuestionMarkCircleIcon,
 	BugAntIcon,
 	WrenchIcon,
@@ -306,7 +304,7 @@ const navigation = [
 				links: [
 					{
 						title: 'OpenID Connect',
-						href: '/docs/auth/open-id-connect',
+						href: '/docs/auth/openid-connect',
 					},
 					{
 						title: 'Auth0',
@@ -317,7 +315,7 @@ const navigation = [
 						href: '/docs/auth/keycloak',
 					},
 					{
-						title: 'Github',
+						title: 'GitHub',
 						href: '/docs/auth/github',
 					},
 				],
