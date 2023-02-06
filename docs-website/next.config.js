@@ -40,7 +40,7 @@ const nextConfig = {
 			{
 				source: '/docs/wundergraph-config-ts-reference/configure-wundergraph-application',
 				destination: '/docs/wundergraph-config-ts-reference',
-				permament: true,
+				permanent: true,
 			},
 		];
 	},
