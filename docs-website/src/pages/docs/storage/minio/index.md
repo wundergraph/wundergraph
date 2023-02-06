@@ -9,12 +9,12 @@ WunderGraph comes with built-in support for MinIO.
 
 ## Add a MinIO storage provider
 
-To add a GraphQL data source, edit `.wundergraph/wundergraph.config.ts` and introspect the GraphQL server like the config below.
+Edit `.wundergraph/wundergraph.config.ts` and add the following configuration to `s3UploadProvider`.
 
 ```typescript
 const aws = {
   name: 'minio', // a unique name for the storage provider
-  endpoint: 'localhost:9000', // the S3 endpoint
+  endpoint: 'localhost:9000', // the MinIO endpoint
   accessKeyID: 'test', // access key to upload files to the S3 bucket
   secretAccessKey: '12345678', // access secret to upload files to the S3 bucket
   bucketName: 'uploads', // the bucket name to which you're uploading files
@@ -39,7 +39,7 @@ configureWunderGraphApplication({
 
 ## Upload a file
 
-Once you've added a S3 storage provider, you can upload files to it using the `uploadFile` method of the WunderGraph client.
+Once you've added a MinIO storage provider, you can upload files to it using the `uploadFile` method of the WunderGraph client.
 
 **TypeScript client**
 

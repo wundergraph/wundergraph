@@ -9,7 +9,7 @@ WunderGraph comes with built-in support for Amazon S3.
 
 ## Add a S3 storage provider
 
-To add a GraphQL data source, edit `.wundergraph/wundergraph.config.ts` and introspect the GraphQL server like the config below.
+Edit `.wundergraph/wundergraph.config.ts` and add the following configuration to `s3UploadProvider`.
 
 ```typescript
 const aws = {
@@ -40,7 +40,7 @@ configureWunderGraphApplication({
 
 ## Upload a file
 
-Once you've added a S3 storage provider, you can upload files to it using the `uploadFile` method of the WunderGraph client.
+Once you've added the S3 storage provider, you can upload files to it using the `uploadFile` method of the WunderGraph client.
 
 **TypeScript client**
 
