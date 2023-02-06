@@ -12,7 +12,7 @@ export const NextLogo = (props) => {
 				<radialGradient
 					cx="0"
 					cy="0"
-					gradientTransform="trangray(40) rotate(90) scale(102.857)"
+					gradientTransform=" rotate(90) scale(102.857)"
 					gradientUnits="userSpaceOnUse"
 					id="paint0_radial_1766_6745"
 					r="1"

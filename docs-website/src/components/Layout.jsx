@@ -12,8 +12,6 @@ import navigation from '../../config/navigation';
 import { GitHubIcon } from './icons/Github';
 import { DocsFooter } from './DocsFooter';
 import Comments from './Comments';
-import { PopupButton } from '@typeform/embed-react';
-import { Events, plausible } from '@/utils/analytics';
 
 function Header({ navigation }) {
 	let [isScrolled, setIsScrolled] = useState(false);
@@ -132,7 +130,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 	const hideTableOfContents = frontmatter?.hideTableOfContents;
 	const fullWidthContent = frontmatter?.fullWidthContent;
 	const isIndexFile = frontmatter?.isIndexFile === true;
-	console.log(tableOfContents);
+
 	function isActive(section) {
 		if (section.id === currentSection) {
 			return true;
