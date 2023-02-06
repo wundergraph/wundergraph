@@ -823,10 +823,6 @@ const navigation = [
 		links: [
 			{ title: 'Overview', href: '/docs/self-hosted' },
 			{
-				title: 'AWS',
-				href: '/docs/self-hosted/aws',
-			},
-			{
 				title: 'Fly.io',
 				href: '/docs/self-hosted/flyio',
 			},
