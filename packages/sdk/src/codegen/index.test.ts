@@ -190,6 +190,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							AuthorizationConfig: {
 								claims: [],
+								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -334,6 +335,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							AuthorizationConfig: {
 								claims: [],
+								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -412,6 +414,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							AuthorizationConfig: {
 								claims: [],
+								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -474,6 +477,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						secureCookieBlockKey: mapInputVariable(''),
 						csrfTokenSecret: mapInputVariable(''),
 					},
+					customClaims: {},
 				},
 				enableGraphQLEndpoint: true,
 				security: {

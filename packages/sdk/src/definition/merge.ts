@@ -84,9 +84,34 @@ const mergeTypeConfigurations = <T extends {} = {}>(apis: Api<T>[]): TypeConfigu
 };
 
 export const baseSchema = `
+"""
+The @fromClaim directive sets the variable to the value retrieved from the given well-known Claim.
+Adding this directive makes the operation require authentication. For custom claims, see @fromCustomClaim.
+"""
+
 directive @fromClaim(
   name: Claim
 ) on VARIABLE_DEFINITION
+
+enum Claim {
+	USERID
+	EMAIL
+	EMAIL_VERIFIED
+	NAME
+	NICKNAME
+	LOCATION
+	PROVIDER
+}
+
+"""
+The @fromCustomClaim directive sets the variable to the value retrieved one of the custom claims defined by
+your application. Adding this directive makes the operation require authentication.
+"""
+
+directive @fromCustomClaim(
+	name: String
+) on VARIABLE_DEFINITION
+
 
 """
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
@@ -106,16 +131,6 @@ So upstream will receive the following variables:
 { "name": "world" }
 """
 directive @removeNullVariables on QUERY | MUTATION
-
-enum Claim {
-	USERID
-  EMAIL
-  EMAIL_VERIFIED
-  NAME
-  NICKNAME
-  LOCATION
-  PROVIDER
-}
 
 directive @hooksVariable on VARIABLE_DEFINITION
 

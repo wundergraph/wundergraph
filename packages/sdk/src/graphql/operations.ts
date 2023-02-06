@@ -1,6 +1,8 @@
 import {
 	Claim,
 	ClaimConfig,
+	CustomClaim,
+	CustomClaimConfig,
 	InjectVariableKind,
 	OperationExecutionEngine,
 	OperationRoleConfig,
@@ -67,6 +69,7 @@ export interface GraphQLOperation {
 	};
 	AuthorizationConfig: {
 		claims: ClaimConfig[];
+		customClaims: CustomClaimConfig[];
 		roleConfig: OperationRoleConfig;
 	};
 	HooksConfiguration: {
@@ -111,6 +114,7 @@ export interface ParseOperationsOptions {
 	keepFromClaimVariables?: boolean;
 	interpolateVariableDefinitionAsJSON?: string[];
 	customJsonScalars?: string[];
+	customClaims?: Record<string, CustomClaim>;
 }
 
 const defaultParseOptions: ParseOperationsOptions = {
@@ -211,6 +215,7 @@ export const parseGraphQLOperations = (
 							},
 							AuthorizationConfig: {
 								claims: [],
+								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -243,6 +248,7 @@ export const parseGraphQLOperations = (
 							handleUuidDirective(variable, operation);
 							handleDateTimeDirective(variable, operation);
 							handleInjectEnvironmentVariableDirective(variable, operation);
+							handleFromCustomClaimDirective(variable, operation, options.customClaims ?? {});
 						});
 						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
@@ -710,6 +716,36 @@ const handleDateTimeDirective = (variable: VariableDefinitionNode, operation: Gr
 	});
 };
 
+const handleFromCustomClaimDirective = (
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation,
+	customClaims: Record<string, CustomClaim>
+) => {
+	const variableName = variable.variable.name.value;
+	const fromCustomClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromCustomClaim');
+	if (fromCustomClaimDirective === undefined || fromCustomClaimDirective.arguments === undefined) {
+		return;
+	}
+	const nameArg = fromCustomClaimDirective.arguments.find((arg) => arg.name.value === 'name');
+	if (nameArg === undefined) {
+		throw new Error('@fromCustomClaim does not have a name: argument');
+	}
+	if (nameArg.value.kind !== 'StringValue') {
+		throw new Error(`@fromCustomClaim name: argument must be a string, not ${nameArg.value.kind}`);
+	}
+	const claim = customClaims[nameArg.value.value];
+	if (claim == null) {
+		throw new Error(
+			`@fromCustomClaim claim ${nameArg.value.value} is not declared - available ones are ${customClaims}`
+		);
+	}
+	operation.AuthenticationConfig.required = true;
+	operation.AuthorizationConfig.customClaims.push({
+		variableName: variable.variable.name.value,
+		claim,
+	});
+};
+
 const parseOperationTypeNode = (node: OperationTypeNode): OperationType => {
 	switch (node) {
 		case 'subscription':
@@ -773,6 +809,7 @@ export const operationVariablesToJSONSchema = (
 
 const internalVariables = [
 	'fromClaim',
+	'fromCustomClaim',
 	'internal',
 	'injectGeneratedUUID',
 	'injectCurrentDateTime',

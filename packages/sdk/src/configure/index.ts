@@ -49,6 +49,7 @@ import {
 	PostResolveTransformationKind,
 	S3UploadProfile as _S3UploadProfile,
 	TypeConfiguration,
+	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
@@ -112,6 +113,7 @@ export interface WunderGraphConfigApplicationConfig {
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
+		customClaims?: Record<string, CustomClaim>;
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
@@ -125,6 +127,26 @@ export interface TokenAuthProvider {
 	jwksURL?: InputVariable;
 	userInfoEndpoint?: InputVariable;
 	userInfoCacheTtlSeconds?: number;
+}
+
+export interface CustomClaim {
+	/**
+	 * Path to the object inside the user payload to retrieve this claim
+	 */
+	jsonPath: string;
+
+	/** Value type
+	 *
+	 * @default ValueType.STRING
+	 */
+	type?: ValueType;
+
+	/** If required is true, users without this claim will
+	 * fail to authenticate
+	 *
+	 * @default false
+	 */
+	required?: boolean;
 }
 
 export interface SecurityConfig {
@@ -242,6 +264,7 @@ export interface ResolvedWunderGraphConfig {
 		roles: string[];
 		cookieBased: AuthProvider[];
 		tokenBased: TokenAuthProvider[];
+		customClaims: Record<string, CustomClaim>;
 		authorizedRedirectUris: ConfigurationVariable[];
 		authorizedRedirectUriRegexes: ConfigurationVariable[];
 		hooks: {
@@ -353,6 +376,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			roles,
 			cookieBased: cookieBasedAuthProviders,
 			tokenBased: config.authentication?.tokenBased?.providers || [],
+			customClaims: config.authentication?.customClaims || {},
 			authorizedRedirectUris:
 				config.authentication?.cookieBased?.authorizedRedirectUris?.map((stringOrEnvironmentVariable) => {
 					if (typeof stringOrEnvironmentVariable === 'string') {
@@ -907,6 +931,17 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 const total = 4;
 let doneCount = 0;
 
+const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
+	record: Record<TKey, TValue>,
+	fn: (arg: TValue) => TOutputValue
+): Record<TKey, TOutputValue> => {
+	let output: Record<TKey, TOutputValue> = {} as any;
+	for (const key in record) {
+		output[key] = fn(record[key]);
+	}
+	return output;
+};
+
 const done = () => {
 	doneCount++;
 	Logger.info(`${doneCount}/${total} done`);
@@ -1120,10 +1155,18 @@ const resolveOperationsConfigurations = async (
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
+	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (claim) => {
+		return {
+			jsonPath: claim.jsonPath,
+			type: claim.type ?? ValueType.STRING,
+			required: claim.required ?? true,
+		};
+	});
 	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
 		keepFromClaimVariables: false,
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
+		customClaims,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)
@@ -1157,6 +1200,7 @@ const resolveOperationsConfigurations = async (
 					},
 					AuthorizationConfig: {
 						claims: [],
+						customClaims: [],
 						roleConfig: {
 							requireMatchAll: [],
 							requireMatchAny: [],
@@ -1225,6 +1269,7 @@ const applyNodeJsOperationOverrides = (
 	if (overrides.rbac) {
 		operation.AuthorizationConfig = {
 			claims: [],
+			customClaims: [],
 			roleConfig: {
 				requireMatchAll: overrides.rbac.requireMatchAll,
 				requireMatchAny: overrides.rbac.requireMatchAny,

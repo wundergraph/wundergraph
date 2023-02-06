@@ -271,6 +271,47 @@ export function claimToJSON(object: Claim): string {
   }
 }
 
+export enum ValueType {
+  STRING = 0,
+  INT = 1,
+  FLOAT = 2,
+  BOOLEAN = 3,
+}
+
+export function valueTypeFromJSON(object: any): ValueType {
+  switch (object) {
+    case 0:
+    case "STRING":
+      return ValueType.STRING;
+    case 1:
+    case "INT":
+      return ValueType.INT;
+    case 2:
+    case "FLOAT":
+      return ValueType.FLOAT;
+    case 3:
+    case "BOOLEAN":
+      return ValueType.BOOLEAN;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
+  }
+}
+
+export function valueTypeToJSON(object: ValueType): string {
+  switch (object) {
+    case ValueType.STRING:
+      return "STRING";
+    case ValueType.INT:
+      return "INT";
+    case ValueType.FLOAT:
+      return "FLOAT";
+    case ValueType.BOOLEAN:
+      return "BOOLEAN";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
+  }
+}
+
 export enum OperationType {
   QUERY = 0,
   MUTATION = 1,
@@ -598,6 +639,12 @@ export function configurationVariableKindToJSON(object: ConfigurationVariableKin
   }
 }
 
+export interface CustomClaim {
+  jsonPath: string;
+  type: ValueType;
+  required: boolean;
+}
+
 export interface ApiAuthenticationConfig {
   cookieBased: CookieBasedAuthentication | undefined;
   hooks: ApiAuthenticationHooks | undefined;
@@ -738,6 +785,7 @@ export interface MockResolveHookConfiguration {
 
 export interface OperationAuthorizationConfig {
   claims: ClaimConfig[];
+  customClaims: CustomClaimConfig[];
   roleConfig: OperationRoleConfig | undefined;
 }
 
@@ -755,6 +803,11 @@ export interface OperationRoleConfig {
 export interface ClaimConfig {
   variableName: string;
   claim: Claim;
+}
+
+export interface CustomClaimConfig {
+  variableName: string;
+  claim: CustomClaim | undefined;
 }
 
 export interface OperationLiveQueryConfig {
@@ -1092,6 +1145,36 @@ export interface ConfigurationVariable {
   environmentVariableDefaultValue: string;
   placeholderVariableName: string;
 }
+
+function createBaseCustomClaim(): CustomClaim {
+  return { jsonPath: "", type: 0, required: false };
+}
+
+export const CustomClaim = {
+  fromJSON(object: any): CustomClaim {
+    return {
+      jsonPath: isSet(object.jsonPath) ? String(object.jsonPath) : "",
+      type: isSet(object.type) ? valueTypeFromJSON(object.type) : 0,
+      required: isSet(object.required) ? Boolean(object.required) : false,
+    };
+  },
+
+  toJSON(message: CustomClaim): unknown {
+    const obj: any = {};
+    message.jsonPath !== undefined && (obj.jsonPath = message.jsonPath);
+    message.type !== undefined && (obj.type = valueTypeToJSON(message.type));
+    message.required !== undefined && (obj.required = message.required);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CustomClaim>, I>>(object: I): CustomClaim {
+    const message = createBaseCustomClaim();
+    message.jsonPath = object.jsonPath ?? "";
+    message.type = object.type ?? 0;
+    message.required = object.required ?? false;
+    return message;
+  },
+};
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
   return { cookieBased: undefined, hooks: undefined, jwksBased: undefined };
@@ -1946,13 +2029,16 @@ export const MockResolveHookConfiguration = {
 };
 
 function createBaseOperationAuthorizationConfig(): OperationAuthorizationConfig {
-  return { claims: [], roleConfig: undefined };
+  return { claims: [], customClaims: [], roleConfig: undefined };
 }
 
 export const OperationAuthorizationConfig = {
   fromJSON(object: any): OperationAuthorizationConfig {
     return {
       claims: Array.isArray(object?.claims) ? object.claims.map((e: any) => ClaimConfig.fromJSON(e)) : [],
+      customClaims: Array.isArray(object?.customClaims)
+        ? object.customClaims.map((e: any) => CustomClaimConfig.fromJSON(e))
+        : [],
       roleConfig: isSet(object.roleConfig) ? OperationRoleConfig.fromJSON(object.roleConfig) : undefined,
     };
   },
@@ -1964,6 +2050,11 @@ export const OperationAuthorizationConfig = {
     } else {
       obj.claims = [];
     }
+    if (message.customClaims) {
+      obj.customClaims = message.customClaims.map((e) => e ? CustomClaimConfig.toJSON(e) : undefined);
+    } else {
+      obj.customClaims = [];
+    }
     message.roleConfig !== undefined &&
       (obj.roleConfig = message.roleConfig ? OperationRoleConfig.toJSON(message.roleConfig) : undefined);
     return obj;
@@ -1972,6 +2063,7 @@ export const OperationAuthorizationConfig = {
   fromPartial<I extends Exact<DeepPartial<OperationAuthorizationConfig>, I>>(object: I): OperationAuthorizationConfig {
     const message = createBaseOperationAuthorizationConfig();
     message.claims = object.claims?.map((e) => ClaimConfig.fromPartial(e)) || [];
+    message.customClaims = object.customClaims?.map((e) => CustomClaimConfig.fromPartial(e)) || [];
     message.roleConfig = (object.roleConfig !== undefined && object.roleConfig !== null)
       ? OperationRoleConfig.fromPartial(object.roleConfig)
       : undefined;
@@ -2051,6 +2143,35 @@ export const ClaimConfig = {
     const message = createBaseClaimConfig();
     message.variableName = object.variableName ?? "";
     message.claim = object.claim ?? 0;
+    return message;
+  },
+};
+
+function createBaseCustomClaimConfig(): CustomClaimConfig {
+  return { variableName: "", claim: undefined };
+}
+
+export const CustomClaimConfig = {
+  fromJSON(object: any): CustomClaimConfig {
+    return {
+      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      claim: isSet(object.claim) ? CustomClaim.fromJSON(object.claim) : undefined,
+    };
+  },
+
+  toJSON(message: CustomClaimConfig): unknown {
+    const obj: any = {};
+    message.variableName !== undefined && (obj.variableName = message.variableName);
+    message.claim !== undefined && (obj.claim = message.claim ? CustomClaim.toJSON(message.claim) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CustomClaimConfig>, I>>(object: I): CustomClaimConfig {
+    const message = createBaseCustomClaimConfig();
+    message.variableName = object.variableName ?? "";
+    message.claim = (object.claim !== undefined && object.claim !== null)
+      ? CustomClaim.fromPartial(object.claim)
+      : undefined;
     return message;
   },
 };

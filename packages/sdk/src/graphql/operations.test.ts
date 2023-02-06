@@ -157,6 +157,7 @@ const expectedTransformOperations: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
+				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -255,6 +256,7 @@ const expectedTransformOperations: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
+				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -379,6 +381,7 @@ const expectedTransformOperations: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
+				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -561,6 +564,7 @@ const fromClaimParsed: ParsedOperations = {
 						claim: Claim.EMAIL,
 					},
 				],
+				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -792,6 +796,7 @@ const jsonSchemaDirectiveParsed: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
+				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],

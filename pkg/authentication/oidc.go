@@ -63,15 +63,40 @@ type ClaimsInfo struct {
 }
 
 type Claims struct {
-	Sub                string `json:"sub"`
-	Name               string `json:"name"`
-	GivenName          string `json:"given_name"`
-	FamilyName         string `json:"family_name"`
-	Picture            string `json:"picture"`
-	Email              string `json:"email"`
-	EmailVerified      bool   `json:"email_verified"`
-	Locale             string `json:"locale"`
-	HostedGSuiteDomain string `json:"hd"`
+	Issuer             string                 `json:"iss"`
+	Sub                string                 `json:"sub"`
+	Name               string                 `json:"name"`
+	GivenName          string                 `json:"given_name"`
+	FamilyName         string                 `json:"family_name"`
+	Picture            string                 `json:"picture"`
+	Email              string                 `json:"email"`
+	EmailVerified      bool                   `json:"email_verified"`
+	Locale             string                 `json:"locale"`
+	HostedGSuiteDomain string                 `json:"hd"`
+	Raw                map[string]interface{} `json:"-"`
+}
+
+// isCustomClaim true if claim represents a token claim that we're not explicitely
+// handling in type Claim
+func isCustomClaim(claim string) bool {
+	// XXX: Keep this list in sync with Claim's fields
+	switch claim {
+	case "iss", "sub", "name", "given_name", "family_name", "picture", "email", "email_verified", "locale", "hd":
+		return false
+	}
+	return true
+}
+
+// Custom returns a non-nil map with claims from c.Raw that we do not
+// parse explicitly
+func (c *Claims) Custom() map[string]interface{} {
+	custom := make(map[string]interface{})
+	for k, v := range c.Raw {
+		if isCustomClaim(k) {
+			custom[k] = v
+		}
+	}
+	return custom
 }
 
 func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router, config OpenIDConnectConfig, hooks Hooks) {

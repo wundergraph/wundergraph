@@ -12,6 +12,12 @@ enum LogLevel {
 	FATAL = 5;
 }
 
+message CustomClaim {
+	string jsonPath = 1;
+	ValueType type = 2;
+	bool required = 3;
+}
+
 message ApiAuthenticationConfig {
 	CookieBasedAuthentication cookieBased = 1;
 	ApiAuthenticationHooks hooks = 2;
@@ -175,7 +181,8 @@ message MockResolveHookConfiguration {
 
 message OperationAuthorizationConfig {
 	repeated ClaimConfig claims = 1;
-	OperationRoleConfig roleConfig = 2;
+	repeated CustomClaimConfig customClaims = 2;
+	OperationRoleConfig roleConfig = 3;
 }
 
 message OperationRoleConfig {
@@ -194,6 +201,11 @@ message ClaimConfig {
 	Claim claim = 2;
 }
 
+message CustomClaimConfig {
+	string variableName = 1;
+	CustomClaim claim = 2;
+}
+
 enum Claim {
 	EMAIL = 0;
 	EMAIL_VERIFIED = 1;
@@ -202,6 +214,13 @@ enum Claim {
 	LOCATION = 4;
 	PROVIDER = 5;
 	USERID = 6;
+}
+
+enum ValueType {
+	STRING = 0;
+	INT = 1;
+	FLOAT = 2;
+	BOOLEAN = 3;
 }
 
 message OperationLiveQueryConfig {
