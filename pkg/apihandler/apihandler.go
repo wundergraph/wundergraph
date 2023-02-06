@@ -995,7 +995,7 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 		case wgpb.Claim_NICKNAME:
 			variables, _ = jsonparser.Set(variables, []byte("\""+user.NickName+"\""), claim.VariableName)
 		case wgpb.Claim_PROVIDER:
-			variables, _ = jsonparser.Set(variables, []byte("\n"+user.ProviderID+"\""), claim.VariableName)
+			variables, _ = jsonparser.Set(variables, []byte("\""+user.ProviderID+"\""), claim.VariableName)
 		}
 	}
 	return variables
