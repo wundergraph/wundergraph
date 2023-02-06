@@ -17,6 +17,7 @@ import {
 	DocumentTextIcon,
 	LightBulbIcon,
 	ExclamationTriangleIcon,
+	LockClosedIcon,
 } from '@heroicons/react/24/outline';
 import { CloudArrowUpIcon, ShareIcon } from '@heroicons/react/24/solid';
 
@@ -39,6 +40,7 @@ const icons = {
 	note: LightBulbIcon,
 	cloud: CloudArrowUpIcon,
 	apis: ShareIcon,
+	auth: LockClosedIcon,
 };
 
 export function Icon({ icon: iconProp, className, ...props }) {
