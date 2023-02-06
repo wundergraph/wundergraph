@@ -66,7 +66,7 @@ export function Navigation({ navigation, className }) {
 			}),
 		[navigation, path, isRoot]
 	);
-	console.log(subNavigation);
+
 	return (
 		<nav className={clsx('flex text-base lg:text-sm', className)}>
 			<ul

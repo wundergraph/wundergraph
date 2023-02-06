@@ -1085,7 +1085,7 @@ const navigation = [
 		],
 	},
 	{
-		title: 'Operations Reference',
+		title: 'Operations reference',
 		href: '/docs/operations-reference',
 		icon: <CogIcon />,
 		paths: ['/docs/typescript-operations-reference', '/docs/directives-reference'],
@@ -1095,16 +1095,7 @@ const navigation = [
 				href: '/docs/operations-reference',
 			},
 			{
-				title: 'TypeScript Operations',
-				links: [
-					{
-						title: 'Overview',
-						href: '/docs/typescript-operations-reference',
-					},
-				],
-			},
-			{
-				title: 'Directives',
+				title: 'Graphql operations',
 				links: [
 					{
 						title: 'Overview',
@@ -1153,6 +1144,15 @@ const navigation = [
 					{
 						title: '@transform directive',
 						href: '/docs/directives-reference/transform-directive',
+					},
+				],
+			},
+			{
+				title: 'TypeScript operations',
+				links: [
+					{
+						title: 'Overview',
+						href: '/docs/typescript-operations-reference',
 					},
 				],
 			},
