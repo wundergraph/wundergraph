@@ -176,7 +176,7 @@ accoding to its schema.
 
 By default, WunderGraph requires authentication in order to upload files. However, this requirement can be configured on a
 per-profile basis. Each profile takes an optional `requireAuthentication` field, which defaults to `true`. If you want to
-accept uploads from users without authenticating, declare your profile like:
+accept uploads from users without authenticating them first, declare your profile using:
 
 ```typescript
 configureWunderGraphApplication({
@@ -191,6 +191,9 @@ configureWunderGraphApplication({
           ...
 				},
 ```
+
+This will allow anonymous users to upload files. If you want to enable this behavior based on some additional logic, set
+`requireAuthentication` to `false` and then implement your additional logic using the `preUpload` hook documented below.
 
 ## Upload hooks
 
