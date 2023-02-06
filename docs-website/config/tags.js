@@ -5,8 +5,7 @@ const tags = {
 	'WunderGraph SDK': '/docs/components-of-wundergraph/wundergraph-sdk',
 	'TypeScript SDK': '/docs/components-of-wundergraph/wundergraph-sdk',
 	'WunderGraph CLI': '/docs/components-of-wundergraph/wunderctl',
-	'create-wundergraph-app':
-		'/docs/components-of-wundergraph/create-wundergraph-app',
+	'create-wundergraph-app': '/docs/components-of-wundergraph/create-wundergraph-app',
 	CLI: '/docs/components-of-wundergraph/wunderctl',
 	wunderctl: '/docs/components-of-wundergraph/wunderctl',
 	'_join field': '/docs/core-concepts/_join-field',
@@ -18,12 +17,10 @@ const tags = {
 	'API namespacing': '/docs/features/api-namespacing',
 	Namespacing: '/docs/core-concepts/api-namespacing',
 	namespacing: '/docs/features/api-namespacing',
-	'WunderNode / WunderGraph Server':
-		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
+	'WunderNode / WunderGraph Server': '/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	WunderNods: '/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	WunderNode: '/docs/components-of-wundergraph/wundernode-wundergraph-server',
-	'WunderGraph Server':
-		'/docs/components-of-wundergraph/wundernode-wundergraph-server',
+	'WunderGraph Server': '/docs/components-of-wundergraph/wundernode-wundergraph-server',
 	'Architecture Introduction': '/docs/architecture/architecture-diagram',
 	join: '/docs/features/cross-api-joins-to-compose-apis',
 	'JOIN feature': '/docs/features/cross-api-joins-to-compose-apis',
@@ -39,8 +36,7 @@ const tags = {
 	'Custom GraphQL Resolvers': '/docs/features/custom-graphql-resolvers',
 	'custom GraphQL resolvers': '/docs/features/custom-graphql-resolvers',
 	'custom GraphQL resolver': '/docs/features/custom-graphql-resolvers',
-	'Authentication-aware data fetching':
-		'/docs/features/authentication-aware-data-fetching',
+	'Authentication-aware data fetching': '/docs/features/authentication-aware-data-fetching',
 	'inject claims': '/docs/features/authorization-injecting-claims',
 	'injecting claims': '/docs/features/authorization-injecting-claims',
 	'claims injection': '/docs/features/authorization-injecting-claims',
@@ -71,37 +67,28 @@ const tags = {
 	'Live-Queries': '/docs/features/live-queries',
 	'live-queries': '/docs/features/live-queries',
 	'local development': '/docs/features/local-development',
-	'OpenID Connect based authentication':
-		'/docs/features/openid-connect-based-authentication',
+	'OpenID Connect based authentication': '/docs/features/openid-connect-based-authentication',
 	'OpenID Connect': '/docs/features/openid-connect-based-authentication',
 	'realtime subscriptions': '/docs/features/realtime-subscriptions',
-	Subscriptions: '/docs/features/realtime-subscriptions',
 	realtime: '/docs/features/realtime-subscriptions',
 	'typesafe mocking': '/docs/features/type-safe-mocking',
 	'type-safe mocking': '/docs/features/type-safe-mocking',
-	'TypeScript hooks':
-		'/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
-	webhooks:
-		'/docs/features/type-script-webhooks-to-integrate-third-party-applications',
-	Webhooks:
-		'/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+	'TypeScript hooks': '/docs/features/type-script-hooks-to-customize-the-api-gateway-middleware',
+	webhooks: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
+	Webhooks: '/docs/features/type-script-webhooks-to-integrate-third-party-applications',
 	'configure authorization': '/docs/guides/configure-authorization',
 	'configure Authorization': '/docs/guides/configure-authorization',
 	authorization: '/docs/features/authorization-role-based-access-control-rbac',
 	Authorization: '/docs/features/authorization-role-based-access-control-rbac',
 	rbac: '/docs/features/authorization-role-based-access-control-rbac',
 	RBAC: '/docs/features/authorization-role-based-access-control-rbac',
-	'Role Based Access Control':
-		'/docs/features/authorization-role-based-access-control-rbac',
-	'role based access control':
-		'/docs/features/authorization-role-based-access-control-rbac',
+	'Role Based Access Control': '/docs/features/authorization-role-based-access-control-rbac',
+	'role based access control': '/docs/features/authorization-role-based-access-control-rbac',
 	'wundergraph.config.ts reference': '/docs/wundergraph-config-ts-reference',
 	'wundergraph.config.ts': '/docs/wundergraph-config-ts-reference',
-	'wundergraph.manifest.json reference':
-		'/docs/wundergraph-manifest-json-reference',
+	'wundergraph.manifest.json reference': '/docs/wundergraph-manifest-json-reference',
 	'wundergraph.manifest.json': '/docs/wundergraph-manifest-json-reference',
-	'wundergraph.operations.ts reference':
-		'/docs/wundergraph-operations-ts-reference',
+	'wundergraph.operations.ts reference': '/docs/wundergraph-operations-ts-reference',
 	'wundergraph.operations.ts': '/docs/wundergraph-operations-ts-reference',
 	'wundergraph.server.ts reference': '/docs/wundergraph-server-ts-reference',
 	'wundergraph.server.ts': '/docs/wundergraph-server-ts-reference',
@@ -124,124 +111,55 @@ const tags = {
 	'@export': '/docs/directives-reference/export-directive',
 	'@fromClaim': '/docs/directives-reference/from-claim-directive',
 	'@hooksVariable': '/docs/directives-reference/hooks-variable-directive',
-	'@injectCurrentDateTime':
-		'/docs/directives-reference/inject-current-date-time-directive',
-	'@injectEnvironmentVariable':
-		'/docs/directives-reference/inject-environment-variable-directive',
-	'@injectGeneratedUUID':
-		'/docs/directives-reference/inject-generated-uuid-directive',
+	'@injectCurrentDateTime': '/docs/directives-reference/inject-current-date-time-directive',
+	'@injectEnvironmentVariable': '/docs/directives-reference/inject-environment-variable-directive',
+	'@injectGeneratedUUID': '/docs/directives-reference/inject-generated-uuid-directive',
 	'@injectdUUID': '/docs/directives-reference/inject-generated-uuid-directive',
 	'@internal': '/docs/directives-reference/internal-directive',
-	'@internalOperation':
-		'/docs/directives-reference/internal-operation-directive',
+	'@internalOperation': '/docs/directives-reference/internal-operation-directive',
 	'@jsonSchema': '/docs/directives-reference/json-schema-directive',
 	'@rbac': '/docs/directives-reference/rbac-directive',
 	'@transform': '/docs/directives-reference/transform-directive',
-	'preResolve hook reference':
-		'/docs/wundergraph-server-ts-reference/pre-resolve-hook',
+	'preResolve hook reference': '/docs/wundergraph-server-ts-reference/pre-resolve-hook',
 	'preResolve hook': '/docs/wundergraph-server-ts-reference/pre-resolve-hook',
-	'mutatingPostResolve hook reference':
-		'/docs/wundergraph-server-ts-reference/mutating-post-resolve-hook',
-	'mutatingPostResolve hook':
-		'/docs/wundergraph-server-ts-reference/mutating-post-resolve-hook',
-	mutatingPostResolve:
-		'/docs/wundergraph-server-ts-reference/mutating-post-resolve-hook',
-	'mutatingPreResolve hook reference':
-		'/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook',
-	'mutatingPreResolve hook':
-		'/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook',
-	mutatingPreResolve:
-		'/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook',
+	'mutatingPostResolve hook reference': '/docs/wundergraph-server-ts-reference/mutating-post-resolve-hook',
+	'mutatingPostResolve hook': '/docs/wundergraph-server-ts-reference/mutating-post-resolve-hook',
+	mutatingPostResolve: '/docs/wundergraph-server-ts-reference/mutating-post-resolve-hook',
+	'mutatingPreResolve hook reference': '/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook',
+	'mutatingPreResolve hook': '/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook',
+	mutatingPreResolve: '/docs/wundergraph-server-ts-reference/mutating-pre-resolve-hook',
 	preResolve: '/docs/wundergraph-server-ts-reference/pre-resolve-hook',
-	'postResolve hook reference':
-		'/docs/wundergraph-server-ts-reference/post-resolve-hook',
+	'postResolve hook reference': '/docs/wundergraph-server-ts-reference/post-resolve-hook',
 	'postResolve hook': '/docs/wundergraph-server-ts-reference/post-resolve-hook',
 	postResolve: '/docs/wundergraph-server-ts-reference/post-resolve-hook',
-	'mockResolve hook reference':
-		'/docs/wundergraph-server-ts-reference/mock-resolve-hook',
+	'mockResolve hook reference': '/docs/wundergraph-server-ts-reference/mock-resolve-hook',
 	'mockResolve hook': '/docs/wundergraph-server-ts-reference/mock-resolve-hook',
 	mockResolve: '/docs/wundergraph-server-ts-reference/mock-resolve-hook',
-	'customResolve hook reference':
-		'/docs/wundergraph-server-ts-reference/custom-resolve-hook',
-	'customResolve hook':
-		'/docs/wundergraph-server-ts-reference/custom-resolve-hook',
+	'customResolve hook reference': '/docs/wundergraph-server-ts-reference/custom-resolve-hook',
+	'customResolve hook': '/docs/wundergraph-server-ts-reference/custom-resolve-hook',
 	customResolve: '/docs/wundergraph-server-ts-reference/custom-resolve-hook',
-	'onOriginRequest hook reference':
-		'/docs/wundergraph-server-ts-reference/on-origin-request-hook',
-	'onOriginRequest hook':
-		'/docs/wundergraph-server-ts-reference/on-origin-request-hook',
-	onOriginRequest:
-		'/docs/wundergraph-server-ts-reference/on-origin-request-hook',
-	'onOriginResponse hook reference':
-		'/docs/wundergraph-server-ts-reference/on-origin-response-hook',
-	'onOriginResponse hook':
-		'/docs/wundergraph-server-ts-reference/on-origin-response-hook',
-	onOriginResponse:
-		'/docs/wundergraph-server-ts-reference/on-origin-response-hook',
-	'postAuthentication hook reference':
-		'/docs/wundergraph-server-ts-reference/post-authentication-hook',
-	'postAuthentication hook':
-		'/docs/wundergraph-server-ts-reference/post-authentication-hook',
-	postAuthentication:
-		'/docs/wundergraph-server-ts-reference/post-authentication-hook',
-	'revalidate hook reference':
-		'/docs/wundergraph-server-ts-reference/revalidate-hook',
+	'onOriginRequest hook reference': '/docs/wundergraph-server-ts-reference/on-origin-request-hook',
+	'onOriginRequest hook': '/docs/wundergraph-server-ts-reference/on-origin-request-hook',
+	onOriginRequest: '/docs/wundergraph-server-ts-reference/on-origin-request-hook',
+	'onOriginResponse hook reference': '/docs/wundergraph-server-ts-reference/on-origin-response-hook',
+	'onOriginResponse hook': '/docs/wundergraph-server-ts-reference/on-origin-response-hook',
+	onOriginResponse: '/docs/wundergraph-server-ts-reference/on-origin-response-hook',
+	'postAuthentication hook reference': '/docs/wundergraph-server-ts-reference/post-authentication-hook',
+	'postAuthentication hook': '/docs/wundergraph-server-ts-reference/post-authentication-hook',
+	postAuthentication: '/docs/wundergraph-server-ts-reference/post-authentication-hook',
+	'revalidate hook reference': '/docs/wundergraph-server-ts-reference/revalidate-hook',
 	'revalidate hook': '/docs/wundergraph-server-ts-reference/revalidate-hook',
 	revalidate: '/docs/wundergraph-server-ts-reference/revalidate-hook',
 	'mutatingPostAuthentication hook reference':
 		'/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
-	'mutatingPostAuthentication hook':
-		'/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
-	mutatingPostAuthentication:
-		'/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
+	'mutatingPostAuthentication hook': '/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
+	mutatingPostAuthentication: '/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook',
 	'supported DataSources': '/docs/supported-data-sources',
 	DataSources: '/docs/supported-data-sources',
 	'supported data sources': '/docs/supported-data-sources',
 	'data sources': '/docs/supported-data-sources',
-	'Apache Thrift': '/docs/supported-data-sources/apache-thrift',
-	'Apollo Federation': '/docs/supported-data-sources/apollo-federation',
-	Federation: '/docs/supported-data-sources/apollo-federation',
-	federation: '/docs/supported-data-sources/apollo-federation',
-	FaunaDB: '/docs/supported-data-sources/faunadb',
-	'GraphQL DataSource': '/docs/supported-data-sources/graphql',
-	GraphQL: '/docs/supported-data-sources/graphql',
-	'gRPC DataSource': '/docs/supported-data-sources/grpc',
-	gRPC: '/docs/supported-data-sources/grpc',
-	'MongoDB / Atlas': '/docs/supported-data-sources/mongodb-atlas',
-	'MongoDB Atlas': '/docs/supported-data-sources/mongodb-atlas',
-	MongoDB: '/docs/supported-data-sources/mongodb-atlas',
-	'MySQL DataSource': '/docs/supported-data-sources/mysql',
-	MySQL: '/docs/supported-data-sources/mysql',
-	'Neo4J DataSource': '/docs/supported-data-sources/neo4j',
-	Neo4J: '/docs/supported-data-sources/neo4j',
-	'OData DataSource': '/docs/supported-data-sources/odata',
-	OData: '/docs/supported-data-sources/odata',
-	'OracleDB DataSource': '/docs/supported-data-sources/oracle-db',
-	OracleDB: '/docs/supported-data-sources/oracle-db',
-	'Planetscale DataSource': '/docs/supported-data-sources/planetscale',
-	Planetscale: '/docs/supported-data-sources/planetscale',
-	'PostgreSQL DataSource': '/docs/supported-data-sources/postgresql',
-	PostgreSQL: '/docs/supported-data-sources/postgresql',
-	Postgres: '/docs/supported-data-sources/postgresql',
-	'REST DataSource': '/docs/supported-data-sources/rest-openapi',
-	REST: '/docs/supported-data-sources/rest-openapi',
-	'REST / OpenAPI DataSource': '/docs/supported-data-sources/rest-openapi',
-	'REST / OpenAPI': '/docs/supported-data-sources/rest-openapi',
-	'OpenAPI DataSource': '/docs/supported-data-sources/rest-openapi',
-	OpenAPI: '/docs/supported-data-sources/rest-openapi',
-	'SOAP DataSource': '/docs/supported-data-sources/soap',
-	SOAP: '/docs/supported-data-sources/soap',
-	'SQLite DataSource': '/docs/supported-data-sources/sqlite',
-	SQLite: '/docs/supported-data-sources/sqlite',
-	'SQLServer DataSource': '/docs/supported-data-sources/sqlserver',
-	'SQL Server': '/docs/supported-data-sources/sqlserver',
-	SQLServer: '/docs/supported-data-sources/sqlserver',
-	'Yugabyte DataSource': '/docs/supported-data-sources/yugabyte',
-	Yugabyte: '/docs/supported-data-sources/yugabyte',
-	'WunderGraph RPC Protocol':
-		'/docs/architecture/wundergraph-rpc-protocol-explained',
-	'WunderGraph Protocol':
-		'/docs/architecture/wundergraph-rpc-protocol-explained',
+	'WunderGraph RPC Protocol': '/docs/architecture/wundergraph-rpc-protocol-explained',
+	'WunderGraph Protocol': '/docs/architecture/wundergraph-rpc-protocol-explained',
 	'Discord Server': 'https://wundergraph.com/discord',
 	Discord: 'https://wundergraph.com/discord',
 	EnvironmentVariables:
@@ -252,37 +170,24 @@ const tags = {
 		'/docs/architecture/wundergraph-conventions#everything-you-need-to-know-about-using-environment-variables',
 	'Default Environment Variables':
 		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_LOG_LEVEL:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_NODE_URL:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_PUBLIC_NODE_URL:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_NODE_HOST:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_NODE_PORT:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_SERVER_URL:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_SERVER_HOST:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_SERVER_PORT:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
-	WG_IN_MEMORY_CACHE:
-		'/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_LOG_LEVEL: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_URL: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_PUBLIC_NODE_URL: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_HOST: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_NODE_PORT: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_SERVER_URL: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_SERVER_HOST: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_SERVER_PORT: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
+	WG_IN_MEMORY_CACHE: '/docs/architecture/wundergraph-conventions#wundergraph-default-environment-variables',
 	'reach out to our Sales Team': 'https://wundergraph.com/contact/sales',
 	'Sales Team': 'https://wundergraph.com/contact/sales',
 	Sales: 'https://wundergraph.com/contact/sales',
-	'WunderNode options':
-		'/docs/wundergraph-config-ts-reference/configure-wundernode-options',
-	'WunderGraph Server options':
-		'/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
-	'headers configuration':
-		'/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources',
-	'configure mTLS':
-		'/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
+	'WunderNode options': '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
+	'WunderGraph Server options': '/docs/wundergraph-server-ts-reference/configure-wundergraph-server-options',
+	'headers configuration': '/docs/wundergraph-config-ts-reference/configure-headers-for-http-based-data-sources',
+	'configure mTLS': '/docs/wundergraph-config-ts-reference/configure-mtls-for-http-based-data-sources',
 	'configure introspection for protected API':
 		'/docs/wundergraph-config-ts-reference/configure-introspection#introspection-of-protected-graph-ql-ap-is',
-}
+};
 
-export default tags
+export default tags;
