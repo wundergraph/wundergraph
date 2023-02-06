@@ -19,6 +19,8 @@ import { NextLogo } from '@/components/logos/next';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
 import clsx from 'clsx';
+import { DiscordIcon } from '../components/logos/discord';
+import { GitHubIcon } from '../components/logos/github';
 
 const code = `npx create-wundergraph-app my-project -E nextjs \\ &&
 cd my-project && npm i && npm start`;
@@ -72,7 +74,7 @@ export default function HomePage() {
 				<QuickLinks>
 					<QuickLink
 						title="Tutorials &amp; Examples"
-						description="Get familiar with WunderGraph by following our tutorials and examples."
+						description="Get familiar with WunderGraph by following our quickstarts, tutorials and examples."
 						href="/docs/getting-started"
 						more
 					/>
@@ -210,6 +212,29 @@ export default function HomePage() {
 						description="Use the WunderGraph CLI to generate, build or create new projects."
 						href="/docs/cli-reference"
 						icon={<CommandLineIcon />}
+					/>
+				</QuickLinks>
+			</div>
+
+			<hr />
+
+			<div>
+				<Heading level={2} className="mb-12">
+					Support &amp; Community
+				</Heading>
+
+				<QuickLinks className="lg:grid-cols-2">
+					<QuickLink
+						title="Submit an issue"
+						description="Report bugs or issues for WunderGraph Open Source."
+						href="https://github.com/wundergraph/wundergraph/issues/new/choose"
+						icon={<GitHubIcon className="text-black dark:text-white" />}
+					/>
+					<QuickLink
+						title="Discord"
+						description="Join our community of API enthausiasts."
+						href="https://wundergraph.com/discord"
+						icon={<DiscordIcon className="text-[#7289DA]" />}
 					/>
 				</QuickLinks>
 			</div>
