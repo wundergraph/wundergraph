@@ -41,4 +41,4 @@ Consider storing your IDs and secrets inside a .env file.
 
 ## Running Keycloak
 
-You can follow [this example project] if oyu need help running Keycloak.
+You can follow [this example project] if you need help running Keycloak.
