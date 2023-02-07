@@ -7,7 +7,8 @@ import { template } from './forms.tsx.template';
 import { hasInput, isNotInternal } from './helpers';
 
 export class Forms implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const liveQueries: Operation[] = config.application.Operations.filter(hasInput)
 			.filter(isNotInternal)
 			.filter((op) => op.OperationType === OperationType.QUERY && op.LiveQuery?.enable === true)

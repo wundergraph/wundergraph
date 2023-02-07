@@ -24,9 +24,30 @@ import { ClientResponseError } from './ClientResponseError';
 // https://graphql.org/learn/serving-over-http/
 
 export interface UploadValidationOptions {
+	/** Whether authentication is required to upload to this profile
+	 *
+	 * @default true
+	 */
+	requireAuthentication?: boolean;
+	/** Maximum file size allowed per upload
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
 	maxAllowedUploadSizeBytes?: number;
+	/** Maximum number of files allowed per upload
+	 *
+	 * @default unlimited
+	 */
 	maxAllowedFiles?: number;
+	/** List of allowed file extensions
+	 *
+	 * @default Any
+	 */
 	allowedFileExtensions?: string[];
+	/** List of allowed mime types
+	 *
+	 * @default Any
+	 */
 	allowedMimeTypes?: string[];
 }
 
@@ -403,7 +424,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled) {
+		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 

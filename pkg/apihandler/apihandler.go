@@ -263,6 +263,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		profiles := make(map[string]*s3uploadclient.UploadProfile, len(s3Provider.UploadProfiles))
 		for name, profile := range s3Provider.UploadProfiles {
 			profiles[name] = &s3uploadclient.UploadProfile{
+				RequireAuthentication: profile.RequireAuthentication,
 				MaxFileSizeBytes:      int(profile.MaxAllowedUploadSizeBytes),
 				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
 				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
@@ -289,7 +290,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			r.log.Error("registerS3UploadClient", zap.Error(err))
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
-			r.router.Handle(s3Path, authentication.RequiresAuthentication(http.HandlerFunc(s3.UploadFile)))
+			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
 			r.log.Debug("register S3 provider", zap.String("provider", s3Provider.Name))
 			r.log.Debug("register S3 endpoint", zap.String("path", s3Path))
 		}
@@ -994,7 +995,7 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 		case wgpb.Claim_NICKNAME:
 			variables, _ = jsonparser.Set(variables, []byte("\""+user.NickName+"\""), claim.VariableName)
 		case wgpb.Claim_PROVIDER:
-			variables, _ = jsonparser.Set(variables, []byte("\n"+user.ProviderID+"\""), claim.VariableName)
+			variables, _ = jsonparser.Set(variables, []byte("\""+user.ProviderID+"\""), claim.VariableName)
 		}
 	}
 	return variables
