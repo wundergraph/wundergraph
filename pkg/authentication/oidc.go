@@ -314,6 +314,12 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 		return err
 	}
 
+	err = userInfo.Claims(&claims.Raw)
+	if err != nil {
+		h.log.Error("oidc.userInfo.Claims.Raw", zap.Error(err))
+		return err
+	}
+
 	accessTokenJSON := tryParseJWT(accessToken)
 	idTokenJSON := tryParseJWT(idToken)
 
@@ -333,6 +339,7 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 		RawAccessToken: accessToken,
 		RawIDToken:     idToken,
 		IdToken:        idTokenJSON,
+		CustomClaims:   claims.Custom(),
 	}
 
 	hooks.handlePostAuthentication(r.Context(), user)
