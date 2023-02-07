@@ -1012,18 +1012,24 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	for _, claim := range customClaims {
 		value, valueType, _, _ := jsonparser.Get(customUserClaimsData, claim.Claim.JsonPathComponents...)
 		if claim.Claim.Required && (valueType == jsonparser.NotExist || valueType == jsonparser.Null) {
-			return nil, fmt.Errorf("required customClaim %s not found", claim.Claim.Name)
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("required customClaim %s not found", claim.Claim.Name),
+			}
 		}
 		var replacement []byte
 		switch valueType {
 		case jsonparser.String:
 			if claim.Claim.Type != wgpb.ValueType_STRING {
-				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
+				return nil, &inputvariables.ValidationError{
+					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType),
+				}
 			}
 			replacement = []byte("\"" + string(value) + "\"")
 		case jsonparser.Boolean:
 			if claim.Claim.Type != wgpb.ValueType_BOOLEAN {
-				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
+				return nil, &inputvariables.ValidationError{
+					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType),
+				}
 			}
 			replacement = value
 		case jsonparser.Number:
@@ -1031,18 +1037,24 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 			case wgpb.ValueType_INT:
 				f, err := strconv.ParseFloat(string(value), 64)
 				if err != nil {
-					return nil, fmt.Errorf("error parsing customClaim %s: %w", claim.Claim.Name, err)
+					return nil, &inputvariables.ValidationError{
+						Message: fmt.Sprintf("error parsing customClaim %s: %s", claim.Claim.Name, err),
+					}
 				}
 				if f != float64(int(f)) {
 					// Value is not integral
-					return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, "float")
+					return nil, &inputvariables.ValidationError{
+						Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, "float"),
+					}
 				}
 				replacement = value
 			case wgpb.ValueType_FLOAT:
 				// JSON number is always a valid float
 				replacement = value
 			default:
-				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
+				return nil, &inputvariables.ValidationError{
+					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType),
+				}
 			}
 		}
 		variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
