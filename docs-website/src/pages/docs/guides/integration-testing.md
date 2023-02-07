@@ -46,10 +46,10 @@ that depending on your project's settings, the path might be slightly different 
 you generate your templates.
 
 ```typescript
-import { createTestServer } from '../.wundergraph/generated/testing'
+import { createTestServer } from '../.wundergraph/generated/testing';
 
 // Imports from Jest
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from '@jest/globals';
 ```
 
 We recommended creating as few testing server instances as possible and sharing them between
@@ -57,14 +57,14 @@ multiple tests. These minimizes the number of times the server starts and stops,
 faster.
 
 ```typescript
-const wg = createTestServer()
+const wg = createTestServer();
 ```
 
 Use Jest's `beforeAll()` and `afterAll()`, to set up the test server:
 
 ```typescript
-beforeAll(() => wg.start())
-afterAll(() => wg.stop())
+beforeAll(() => wg.start());
+afterAll(() => wg.stop());
 ```
 
 Finally, define your tests as Jest test functions:
@@ -105,10 +105,10 @@ that depending on your project's settings, the path might be slightly different 
 you generate your templates.
 
 ```typescript
-import { createTestServer } from '../.wundergraph/generated/testing'
+import { createTestServer } from '../.wundergraph/generated/testing';
 
 // Imports from Ava
-import { test } from 'ava'
+import { test } from 'ava';
 ```
 
 We recommended creating as few testing server instances as possible and sharing them between
@@ -116,14 +116,14 @@ multiple tests. These minimizes the number of times the server starts and stops,
 faster.
 
 ```typescript
-const wg = createTestServer()
+const wg = createTestServer();
 ```
 
 Use Ava's `test.before()` and `test.after()` functions to setup our testing server:
 
 ```typescript
-test.before(() => wg.start())
-test.after(() => wg.stop())
+test.before(() => wg.start());
+test.after(() => wg.stop());
 ```
 
 Finally, define your functions:
@@ -136,15 +136,11 @@ test('create a note', async (t) => {
     input: {
       text: 'my first note',
     },
-  })
+  });
   // Use Ava for assertions
-  t.falsy(result.error)
-  t.not(
-    result.data?.notes_newNote?.id ?? 0,
-    0,
-    'new note id should not be zero'
-  )
-})
+  t.falsy(result.error);
+  t.not(result.data?.notes_newNote?.id ?? 0, 0, 'new note id should not be zero');
+});
 ```
 
 ## Loading Environment Variables

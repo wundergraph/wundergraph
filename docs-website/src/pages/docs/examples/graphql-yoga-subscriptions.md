@@ -13,7 +13,7 @@ const counter = introspect.graphql({
   apiNamespace: 'counter',
   url: 'http://localhost:4000/graphql',
   subscriptionsUseSSE: true,
-})
+});
 ```
 
 ## Getting started

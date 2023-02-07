@@ -1,6 +1,7 @@
-import { Callout } from '@/components/Callout'
-import { QuickLink, QuickLinks } from '@/components/QuickLinks'
-import Video from '../src/components/Video'
+import { Callout } from '@/components/Callout';
+import { QuickLink, QuickLinks } from '@/components/QuickLinks';
+import Video from '../src/components/Video';
+import { cta } from './cta.markdoc';
 
 const tags = {
 	callout: {
@@ -56,6 +57,7 @@ const tags = {
 			href: { type: String },
 		},
 	},
-}
+	cta,
+};
 
-export default tags
+export default tags;

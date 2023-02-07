@@ -26,7 +26,7 @@ authentication: {
         clientId: new EnvironmentVariable('GITHUB_CLIENT_ID'),
         clientSecret: new EnvironmentVariable('GITHUB_CLIENT_SECRET'),
       }),
-    ]
+    ];
   }
 }
 ```
@@ -44,7 +44,7 @@ const IndexPage: NextPage = () => {
   const {
     client: { login, logout },
     user,
-  } = useWunderGraph()
+  } = useWunderGraph();
   return (
     <div>
       <p>
@@ -52,16 +52,14 @@ const IndexPage: NextPage = () => {
         {user !== undefined && `name: ${user.name}, email: ${user.email}`}
       </p>
       <p>
-        {user === undefined && (
-          <button onClick={() => login.github()}>login</button>
-        )}
+        {user === undefined && <button onClick={() => login.github()}>login</button>}
         {user !== undefined && <button onClick={() => logout()}>logout</button>}
       </p>
     </div>
-  )
-}
+  );
+};
 ```
 
 As you can see, the auth provider id (github), we've specified above translates into a login function with the same name.
 
-If you though this is amazing, head over to the next section and read about authentication aware data fetching, that's a real beauty!
+If you thought this was amazing, head over to the next section and read about authentication aware data fetching; that's a real beauty!
