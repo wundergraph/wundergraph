@@ -1,20 +1,20 @@
-import { Fence } from '@/components/Fence'
-import Link from 'next/link'
-import { ExternalLinkIcon } from '../src/components/icons/ExternalLinkIcon'
-import { Heading } from '../src/components/Heading'
-import { Tag } from '@markdoc/markdoc'
-import tags from '../config/tags'
+import { Fence } from '@/components/Fence';
+import Link from 'next/link';
+import { ExternalLinkIcon } from '../src/components/icons/ExternalLinkIcon';
+import { Heading } from '../src/components/Heading';
+import { Tag } from '@markdoc/markdoc';
+import tags from '../config/tags';
 
 function generateID(children, attributes) {
 	if (attributes.id && typeof attributes.id === 'string') {
-		return attributes.id
+		return attributes.id;
 	}
 	return children
 		.filter((child) => typeof child === 'string')
 		.join(' ')
 		.replace(/[?]/g, '')
 		.replace(/\s+/g, '-')
-		.toLowerCase()
+		.toLowerCase();
 }
 
 const nodes = {
@@ -30,11 +30,11 @@ const nodes = {
 			className: { type: String },
 		},
 		transform(node, config) {
-			const attributes = node.transformAttributes(config)
-			const children = node.transformChildren(config)
-			const id = generateID(children, attributes)
+			const attributes = node.transformAttributes(config);
+			const children = node.transformChildren(config);
+			const id = generateID(children, attributes);
 
-			return new Tag(this.render, { ...attributes, id }, children)
+			return new Tag(this.render, { ...attributes, id }, children);
 		},
 	},
 	th: {
@@ -55,24 +55,24 @@ const nodes = {
 	},
 	paragraph: {
 		transform: (node, config) => {
-			const attributes = node.transformAttributes(config)
-			const children = node.transformChildren(config)
+			const attributes = node.transformAttributes(config);
+			const children = node.transformChildren(config);
 			while (true) {
-				let tagMatch = ''
+				let tagMatch = '';
 				const i = children.findIndex((child) => {
 					if (typeof child !== 'string') {
-						return false
+						return false;
 					}
 					return Object.keys(tags).find((tag) => {
-						tagMatch = tag
-						return child.match(tag)
-					})
-				})
+						tagMatch = tag;
+						return child.match(tag);
+					});
+				});
 				if (i === -1) {
-					break
+					break;
 				}
-				const original = children[i]
-				const parts = original.split(tagMatch)
+				const original = children[i];
+				const parts = original.split(tagMatch);
 				const transformed = [
 					parts[0],
 					new Tag(
@@ -83,17 +83,17 @@ const nodes = {
 						[tagMatch]
 					),
 					parts[1],
-				]
-				children.splice(i, 1, ...transformed)
+				];
+				children.splice(i, 1, ...transformed);
 			}
-			return new Tag('p', attributes, children)
+			return new Tag('p', attributes, children);
 		},
 	},
 	code: {
 		transform: (node, config) => {
-			const content = node.attributes.content
-			const codeTag = new Tag('code', node.attributes, [content])
-			const match = Object.keys(tags).find((tag) => tag === content)
+			const content = node.attributes.content;
+			const codeTag = new Tag('code', node.attributes, [content]);
+			const match = Object.keys(tags).find((tag) => tag === content);
 			if (match) {
 				return new Tag(
 					'Link',
@@ -101,9 +101,9 @@ const nodes = {
 						href: tags[content],
 					},
 					[codeTag]
-				)
+				);
 			}
-			return codeTag
+			return codeTag;
 		},
 	},
 	fence: {
@@ -116,11 +116,11 @@ const nodes = {
 	},
 	link: {
 		render: ({ children, href, ...rest }) => {
-			const isExternal = href.match(/^http/)
+			const isExternal = href.match(/^http/);
 
-			let target
+			let target;
 			if (isExternal) {
-				target = '_blank'
+				target = '_blank';
 			}
 
 			return (
@@ -133,7 +133,7 @@ const nodes = {
 						</>
 					)}
 				</Link>
-			)
+			);
 		},
 		attributes: {
 			href: {
@@ -141,6 +141,6 @@ const nodes = {
 			},
 		},
 	},
-}
+};
 
-export default nodes
+export default nodes;
