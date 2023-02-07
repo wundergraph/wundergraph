@@ -44,6 +44,10 @@ type ValidationError struct {
 	Errors  []error         `json:"errors,omitempty"`
 }
 
+func (e *ValidationError) Error() string {
+	return e.Message
+}
+
 func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Writer) (valid bool, err error) {
 	errs, err := v.schema.ValidateBytes(ctx, variables)
 	if err == nil && len(errs) == 0 {

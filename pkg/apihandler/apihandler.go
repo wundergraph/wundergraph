@@ -2650,6 +2650,15 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		w.WriteHeader(http.StatusGatewayTimeout)
 		return true
 	}
+	var validationError *inputvariables.ValidationError
+	if errors.As(err, &validationError) {
+		w.WriteHeader(http.StatusBadRequest)
+		enc := json.NewEncoder(w)
+		if err := enc.Encode(&validationError); err != nil {
+			log.Error("error encoding validation error", zap.Error(err))
+		}
+		return true
+	}
 	log.Error(errorMessage,
 		zap.String("operationName", operation.Name),
 		zap.String("operationType", operation.OperationType.String()),
