@@ -93,7 +93,6 @@ const tags = {
 	'WunderHub reference': '/docs/wunderhub-reference',
 	WunderHub: '/docs/components-of-wundergraph/wunderhub',
 	'WunderGraph Hub': '/docs/components-of-wundergraph/wunderhub',
-	Hub: '/docs/components-of-wundergraph/wunderhub',
 	'wunderctl up': '/docs/wunderctl-reference/wunderctl-up',
 	'wunderctl add': '/docs/wunderctl-reference/wunderctl-add',
 	'wunderctl generate': '/docs/wunderctl-reference/wunderctl-generate',
