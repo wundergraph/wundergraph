@@ -1,6 +1,6 @@
 ---
 title: Google
-pageTitle: WunderGraph - Authentication - Google
+pageTitle: WunderGraph - Authentication - OIDC Providers - Google
 description: Add Google authentication to your WunderGraph application.
 ---
 
@@ -37,9 +37,10 @@ Now create a OAuth app through Google:
 
 For more help, see [Google's developer docs](https://developers.google.com/identity/sign-in/web/sign-in).
 
-You must supply an object inside the auth provider that contains 3 properties, two of which come from your new Google OAuth App:
+You must supply an object inside the auth provider that contains three properties,
+two of which come from your new Google OAuth App:
 
-- `id`: your choice of id
+- `id`: your choice of unique id that identifies the provider (used to refer elsewhere to this specific provider)
 - `clientId`: the client ID from Google
 - `clientSecret`: the client secret from Google
 
