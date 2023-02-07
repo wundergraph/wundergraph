@@ -34,7 +34,7 @@ importers:
       '@docsearch/react': ^3.1.1
       '@giscus/react': 2.2.0
       '@headlessui/react': ^1.6.5
-      '@heroicons/react': ^1.0.6
+      '@heroicons/react': ^2.0.13
       '@markdoc/markdoc': ^0.1.3
       '@markdoc/next.js': ^0.1.7-0
       '@radix-ui/react-scroll-area': ^0.1.5-rc.44
@@ -61,6 +61,7 @@ importers:
       prism-react-renderer: ^1.3.5
       react: 18.2.0
       react-dom: 18.2.0
+      tailwind-scrollbar: ^2.1.0
       tailwindcss: ^3.1.4
       tailwindcss-radix: ^1.6.0
       typescript: ^4.8.4
@@ -68,7 +69,7 @@ importers:
       '@docsearch/react': 3.3.0_knhnagtyfncgg2hpin7s37uixq
       '@giscus/react': 2.2.0_biqbaboplfbrettd7655fr4n2y
       '@headlessui/react': 1.7.4_biqbaboplfbrettd7655fr4n2y
-      '@heroicons/react': 1.0.6_react@18.2.0
+      '@heroicons/react': 2.0.13_react@18.2.0
       '@markdoc/markdoc': 0.1.13_@types+react@18.0.24
       '@markdoc/next.js': 0.1.10_sjsxg553udvvvfz4ddwyelvphq
       '@radix-ui/react-scroll-area': 0.1.5-rc.50_biqbaboplfbrettd7655fr4n2y
@@ -89,6 +90,7 @@ importers:
       prism-react-renderer: 1.3.5_react@18.2.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      tailwind-scrollbar: 2.1.0_tailwindcss@3.2.1
       tailwindcss: 3.2.1
       tailwindcss-radix: 1.6.0
     devDependencies:
@@ -1715,8 +1717,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@heroicons/react/1.0.6_react@18.2.0:
-    resolution: {integrity: sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==}
+  /@heroicons/react/2.0.13_react@18.2.0:
+    resolution: {integrity: sha512-iSN5XwmagrnirWlYEWNPdCDj9aRYVD/lnK3JlsC9/+fqGF80k8C7rl+1HCvBX0dBoagKqOFBs6fMhJJ1hOg1EQ==}
     peerDependencies:
       react: '>= 16'
     dependencies:
@@ -4743,7 +4745,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -7263,6 +7265,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -13867,6 +13881,15 @@ packages:
   /symbol-tree/3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
     dev: true
+
+  /tailwind-scrollbar/2.1.0_tailwindcss@3.2.1:
+    resolution: {integrity: sha512-zpvY5mDs0130YzYjZKBiDaw32rygxk5RyJ4KmeHjGnwkvbjm/PszON1m4Bbt2DkMRIXlXsfNevykAESgURN4KA==}
+    engines: {node: '>=12.13.0'}
+    peerDependencies:
+      tailwindcss: 3.x
+    dependencies:
+      tailwindcss: 3.2.1
+    dev: false
 
   /tailwindcss-radix/1.6.0:
     resolution: {integrity: sha512-5oBgGCVGsITMiUVlc6Euj4kt03l8htLJxVT9AXbkFxcJiXLtQxJriFq/8R+3s63OKit/ynCVdkqvlnW6H7iG1g==}

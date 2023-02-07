@@ -19,16 +19,16 @@ First, let's add two APIs to our application.
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [weather, countries],
-})
+});
 ```
 
 ## Operation Definition
