@@ -172,6 +172,29 @@ const result = await upload({
 When using a profile with required metadata, `upload()` argument will also need to include a properly defined `metadata` field,
 accoding to its schema.
 
+## Uploads by anonoymous users
+
+By default, WunderGraph requires authentication in order to upload files. However, this requirement can be configured on a
+per-profile basis. Each profile takes an optional `requireAuthentication` field, which defaults to `true`. If you want to
+accept uploads from users without authenticating them first, declare your profile using:
+
+```typescript
+configureWunderGraphApplication({
+  ...
+	s3UploadProvider: [
+		{
+      ...
+			uploadProfiles: {
+				reports: {
+          ...
+          requireAuthentication: false,
+          ...
+				},
+```
+
+This will allow anonymous users to upload files. If you want to enable this behavior based on some additional logic, set
+`requireAuthentication` to `false` and then implement your additional logic using the `preUpload` hook documented below.
+
 ## Upload hooks
 
 Upload profiles also allow you to define hooks that will be run before and after the upload. The `preUpload` hook will run
