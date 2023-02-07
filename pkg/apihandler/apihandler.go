@@ -1045,7 +1045,10 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
 			}
 		}
-		variables, _ = jsonparser.Set(variables, replacement, claim.VariableName)
+		variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+		if err != nil {
+			return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", claim.Claim.Name, err)
+		}
 	}
 	return variables, nil
 }
