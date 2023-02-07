@@ -72,8 +72,8 @@ export function Navigation({ navigation, className }) {
 			<ul
 				role="list"
 				className={clsx(
-					'absolute pb-16 transition-transform ',
-					!isRoot && subNavigation ? '-translate-x-full opacity-0' : 'translate-x-0'
+					'pb-16 transition-transform lg:absolute ',
+					!isRoot && subNavigation ? 'hidden -translate-x-full opacity-0 lg:block' : 'translate-x-0'
 				)}
 			>
 				{navigation.map((section, i) =>
@@ -88,8 +88,8 @@ export function Navigation({ navigation, className }) {
 			</ul>
 			<div
 				className={clsx(
-					'absolute pb-16 transition-transform ',
-					isRoot || !subNavigation ? 'translate-x-full opacity-0' : 'translate-x-0'
+					'pb-16 pl-4 transition-transform lg:absolute ',
+					isRoot || !subNavigation ? 'hidden translate-x-full opacity-0 lg:block' : 'translate-x-0'
 				)}
 			>
 				{subNavigation && <SubNavigation navigation={subNavigation} />}

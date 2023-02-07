@@ -37,7 +37,7 @@ function Header({ navigation }) {
 					: 'dark:bg-transparent'
 			)}
 		>
-			<div className=" flex  flex-wrap items-center justify-between py-2 px-4 md:px-8 lg:px-16">
+			<div className="flex flex-wrap items-center justify-between py-2 px-4 md:px-8 lg:px-16">
 				<div className="mr-6 flex lg:hidden">
 					<MobileNavigation navigation={navigation} />
 				</div>
