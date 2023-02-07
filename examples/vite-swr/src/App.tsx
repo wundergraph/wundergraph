@@ -1,7 +1,6 @@
 import reactLogo from './assets/react.svg';
 import './App.css';
 import { useQuery } from './lib/wundergraph';
-import User from './components/users/User';
 
 const Dragons: React.FC = () => {
 	const { data, error, isLoading } = useQuery({
