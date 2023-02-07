@@ -348,9 +348,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	}
 
 	const roles = config.authorization?.roles || ['admin', 'user'];
+	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
 	const resolved = await resolveApplication(
 		roles,
+		customClaims,
 		config.apis,
 		cors,
 		config.s3UploadProvider || [],
@@ -615,13 +617,14 @@ const resolveUploadConfiguration = (
 
 const resolveApplication = async (
 	roles: string[],
+	customClaims: string[],
 	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
 	const resolvedApis = await Promise.all(apis);
-	const merged = mergeApis(roles, ...resolvedApis);
+	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
 		EngineConfiguration: merged,
@@ -933,11 +936,11 @@ let doneCount = 0;
 
 const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
 	record: Record<TKey, TValue>,
-	fn: (arg: TValue) => TOutputValue
+	fn: (key: TKey, value: TValue) => TOutputValue
 ): Record<TKey, TOutputValue> => {
 	let output: Record<TKey, TOutputValue> = {} as any;
 	for (const key in record) {
-		output[key] = fn(record[key]);
+		output[key] = fn(key, record[key]);
 	}
 	return output;
 };
@@ -1155,9 +1158,10 @@ const resolveOperationsConfigurations = async (
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
-	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (claim) => {
+	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
 		return {
-			jsonPath: claim.jsonPath,
+			name: key,
+			jsonPathComponents: claim.jsonPath.split('.'),
 			type: claim.type ?? ValueType.STRING,
 			required: claim.required ?? true,
 		};

@@ -13,9 +13,10 @@ enum LogLevel {
 }
 
 message CustomClaim {
-	string jsonPath = 1;
-	ValueType type = 2;
-	bool required = 3;
+	string name = 1;
+	repeated string jsonPathComponents = 2;
+	ValueType type = 3;
+	bool required = 4;
 }
 
 message ApiAuthenticationConfig {

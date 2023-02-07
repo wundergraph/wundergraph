@@ -1010,39 +1010,42 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 		return nil, fmt.Errorf("error encoding User: %w", err)
 	}
 	for _, claim := range customClaims {
-		// TODO: Pre-split this to avoid allocating
-		jsonPath := strings.Split(claim.Claim.JsonPath, ".")
-		value, valueType, _, _ := jsonparser.Get(customUserClaimsData, jsonPath...)
+		value, valueType, _, _ := jsonparser.Get(customUserClaimsData, claim.Claim.JsonPathComponents...)
 		if claim.Claim.Required && (valueType == jsonparser.NotExist || valueType == jsonparser.Null) {
-			return nil, fmt.Errorf("required customClaim %s not found", claim.Claim.JsonPath)
+			return nil, fmt.Errorf("required customClaim %s not found", claim.Claim.Name)
 		}
+		var replacement []byte
 		switch valueType {
 		case jsonparser.String:
 			if claim.Claim.Type != wgpb.ValueType_STRING {
-				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.JsonPath, claim.Claim.Type, valueType)
+				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
 			}
+			replacement = []byte("\"" + string(value) + "\"")
 		case jsonparser.Boolean:
 			if claim.Claim.Type != wgpb.ValueType_BOOLEAN {
-				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.JsonPath, claim.Claim.Type, valueType)
+				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
 			}
+			replacement = value
 		case jsonparser.Number:
 			switch claim.Claim.Type {
 			case wgpb.ValueType_INT:
 				f, err := strconv.ParseFloat(string(value), 64)
 				if err != nil {
-					return nil, fmt.Errorf("error parsing customClaim %s: %w", claim.Claim.JsonPath, err)
+					return nil, fmt.Errorf("error parsing customClaim %s: %w", claim.Claim.Name, err)
 				}
 				if f != float64(int(f)) {
 					// Value is not integral
-					return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.JsonPath, claim.Claim.Type, "float")
+					return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, "float")
 				}
+				replacement = value
 			case wgpb.ValueType_FLOAT:
 				// JSON number is always a valid float
+				replacement = value
 			default:
-				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.JsonPath, claim.Claim.Type, valueType)
+				return nil, fmt.Errorf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, valueType)
 			}
 		}
-		variables, _ = jsonparser.Set(variables, value, claim.VariableName)
+		variables, _ = jsonparser.Set(variables, replacement, claim.VariableName)
 	}
 	return variables, nil
 }

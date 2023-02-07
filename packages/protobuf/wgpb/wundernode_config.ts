@@ -640,7 +640,8 @@ export function configurationVariableKindToJSON(object: ConfigurationVariableKin
 }
 
 export interface CustomClaim {
-  jsonPath: string;
+  name: string;
+  jsonPathComponents: string[];
   type: ValueType;
   required: boolean;
 }
@@ -1147,13 +1148,16 @@ export interface ConfigurationVariable {
 }
 
 function createBaseCustomClaim(): CustomClaim {
-  return { jsonPath: "", type: 0, required: false };
+  return { name: "", jsonPathComponents: [], type: 0, required: false };
 }
 
 export const CustomClaim = {
   fromJSON(object: any): CustomClaim {
     return {
-      jsonPath: isSet(object.jsonPath) ? String(object.jsonPath) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      jsonPathComponents: Array.isArray(object?.jsonPathComponents)
+        ? object.jsonPathComponents.map((e: any) => String(e))
+        : [],
       type: isSet(object.type) ? valueTypeFromJSON(object.type) : 0,
       required: isSet(object.required) ? Boolean(object.required) : false,
     };
@@ -1161,7 +1165,12 @@ export const CustomClaim = {
 
   toJSON(message: CustomClaim): unknown {
     const obj: any = {};
-    message.jsonPath !== undefined && (obj.jsonPath = message.jsonPath);
+    message.name !== undefined && (obj.name = message.name);
+    if (message.jsonPathComponents) {
+      obj.jsonPathComponents = message.jsonPathComponents.map((e) => e);
+    } else {
+      obj.jsonPathComponents = [];
+    }
     message.type !== undefined && (obj.type = valueTypeToJSON(message.type));
     message.required !== undefined && (obj.required = message.required);
     return obj;
@@ -1169,7 +1178,8 @@ export const CustomClaim = {
 
   fromPartial<I extends Exact<DeepPartial<CustomClaim>, I>>(object: I): CustomClaim {
     const message = createBaseCustomClaim();
-    message.jsonPath = object.jsonPath ?? "";
+    message.name = object.name ?? "";
+    message.jsonPathComponents = object.jsonPathComponents?.map((e) => e) || [];
     message.type = object.type ?? 0;
     message.required = object.required ?? false;
     return message;

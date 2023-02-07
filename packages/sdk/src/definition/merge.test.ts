@@ -355,7 +355,7 @@ test('Should be merged', () => {
 		[]
 	);
 
-	const actual = mergeApis([], userApi, productApi, reviewsApi, inventoryApi);
+	const actual = mergeApis([], [], userApi, productApi, reviewsApi, inventoryApi);
 	expect(actual.Schema).toMatchSnapshot('merged_schema');
 	expect(pretty(actual)).toMatchSnapshot('merged_apis');
 });

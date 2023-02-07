@@ -18,7 +18,7 @@ import {
 	TypeConfiguration,
 } from '@wundergraph/protobuf';
 
-export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[]): Api<T> => {
+export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
@@ -32,7 +32,7 @@ export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[])
 
 	const fields = mergeApiFields(apis);
 	const types = mergeTypeConfigurations(apis);
-	const schema = mergeApiSchemas(roles, apis, dataSources, fields);
+	const schema = mergeApiSchemas(roles, customClaims, apis, dataSources, fields);
 	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
 	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
 };
@@ -102,16 +102,6 @@ enum Claim {
 	LOCATION
 	PROVIDER
 }
-
-"""
-The @fromCustomClaim directive sets the variable to the value retrieved one of the custom claims defined by
-your application. Adding this directive makes the operation require authentication.
-"""
-
-directive @fromCustomClaim(
-	name: String
-) on VARIABLE_DEFINITION
-
 
 """
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
@@ -278,6 +268,21 @@ enum WG_ROLE {
 }
 `;
 
+const customClaimSchema = (customClaims: string[]) => `
+"""
+The @fromCustomClaim directive sets the variable to the value retrieved one of the custom claims defined by
+your application. Adding this directive makes the operation require authentication.
+"""
+
+directive @fromCustomClaim(
+	name: WG_CUSTOM_CLAIM
+) on VARIABLE_DEFINITION
+
+enum WG_CUSTOM_CLAIM {
+    ${customClaims.join(' ')}
+}
+`;
+
 const uuidSchema = `
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -430,6 +435,7 @@ directive @transform(
 
 const mergeApiSchemas = <T extends {} = {}>(
 	roles: string[],
+	customClaims: string[],
 	apis: Api<T>[],
 	dataSources: DataSource[],
 	fields: FieldConfiguration[]
@@ -452,6 +458,10 @@ const mergeApiSchemas = <T extends {} = {}>(
 
 	if (roles.length) {
 		graphQLSchemas.push(buildSchema(roleSchema(roles), { assumeValidSDL: true }));
+	}
+
+	if (customClaims.length) {
+		graphQLSchemas.push(buildSchema(customClaimSchema(customClaims), { assumeValidSDL: true }));
 	}
 
 	graphQLSchemas.push(buildSchema(dateTimeSchema, { assumeValidSDL: true }));

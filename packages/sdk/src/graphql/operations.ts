@@ -730,8 +730,8 @@ const handleFromCustomClaimDirective = (
 	if (nameArg === undefined) {
 		throw new Error('@fromCustomClaim does not have a name: argument');
 	}
-	if (nameArg.value.kind !== 'StringValue') {
-		throw new Error(`@fromCustomClaim name: argument must be a string, not ${nameArg.value.kind}`);
+	if (nameArg.value.kind !== 'EnumValue') {
+		throw new Error(`@fromCustomClaim name: argument must be a WG_CUSTOM_CLAIM, not ${nameArg.value.kind}`);
 	}
 	const claim = customClaims[nameArg.value.value];
 	if (claim == null) {
