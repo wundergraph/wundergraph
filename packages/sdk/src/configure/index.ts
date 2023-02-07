@@ -144,7 +144,7 @@ export interface CustomClaim {
 	/** If required is true, users without this claim will
 	 * fail to authenticate
 	 *
-	 * @default false
+	 * @default true
 	 */
 	required?: boolean;
 }
