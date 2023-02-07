@@ -18,8 +18,12 @@ import {
 	LightBulbIcon,
 	ExclamationTriangleIcon,
 	LockClosedIcon,
+	CloudArrowUpIcon,
+	ShareIcon,
+	CircleStackIcon,
+	ComputerDesktopIcon,
+	WrenchIcon,
 } from '@heroicons/react/24/outline';
-import { CloudArrowUpIcon, ShareIcon } from '@heroicons/react/24/solid';
 
 const icons = {
 	installation: FlagIcon,
@@ -41,6 +45,10 @@ const icons = {
 	cloud: CloudArrowUpIcon,
 	apis: ShareIcon,
 	auth: LockClosedIcon,
+	databases: CircleStackIcon,
+	monitor: ComputerDesktopIcon,
+	wrench: WrenchIcon,
+	cog: CogIcon,
 };
 
 export function Icon({ icon: iconProp, className, ...props }) {

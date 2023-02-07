@@ -14,7 +14,7 @@ import {
 	CogIcon,
 	CommandLineIcon,
 	ArrowRightIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/outline';
 import { NextLogo } from '@/components/logos/next';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';

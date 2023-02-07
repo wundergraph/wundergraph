@@ -1245,11 +1245,11 @@ const navigation = [
 			},
 		],
 	},
-	{
-		title: 'Troubleshooting',
-		href: '/docs/troubleshooting',
-		icon: <BugAntIcon />,
-	},
+	// {
+	// 	title: 'Troubleshooting',
+	// 	href: '/docs/troubleshooting',
+	// 	icon: <BugAntIcon />,
+	// },
 	{
 		title: 'Upgrade guides',
 		href: '/docs/upgrade-guides',
