@@ -18,6 +18,12 @@ Your project must meet the following requirements to be eligible for deployment 
 - The WunderGraph project can be in a nested folder, or in the root of the repository.
 - The WunderGraph project can be deployed as a standalone project or as part of a monorepo (see the corresponding section below).
 
+# Video
+
+Watch the video how to deploy in 1.30 minute or continue reading below at your own pace.
+
+{% youtube id="yaZuQ32sSSE" /%}
+
 # Set up your repository
 
 The fastest way to get started is to [fork our example repository](https://github.com/wundergraph/cloud-starter/fork).
