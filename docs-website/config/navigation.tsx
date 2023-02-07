@@ -361,6 +361,10 @@ const navigation = [
 				href: '/docs/databases/sqlserver',
 			},
 			{
+				title: 'Prisma',
+				href: '/docs/databases/prisma',
+			},
+			{
 				title: 'MongoDB + Atlas',
 				href: '/docs/databases/mongodb-atlas',
 			},
