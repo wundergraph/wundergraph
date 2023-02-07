@@ -10,12 +10,12 @@ import { template as hooksTemplate } from './react.hooks.template';
 import { hasInput, isNotInternal, queries as allQueries } from './helpers';
 
 export class TypescriptReactProvider implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(providerTemplate);
-		const allOperations = allQueries(config.application, false);
+		const allOperations = allQueries(generationConfig.config.application, false);
 		const content = tmpl({
 			allOperations: allOperations,
-			hasAuthProviders: config.authentication.cookieBased.length !== 0,
+			hasAuthProviders: generationConfig.config.authentication.cookieBased.length !== 0,
 		});
 		return Promise.resolve([
 			{
@@ -28,12 +28,12 @@ export class TypescriptReactProvider implements Template {
 }
 
 export class TypescriptReactNativeProvider implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(reactNativeProviderTemplate);
-		const allOperations = allQueries(config.application, false);
+		const allOperations = allQueries(generationConfig.config.application, false);
 		const content = tmpl({
 			allOperations: allOperations,
-			hasAuthProviders: config.authentication.cookieBased.length !== 0,
+			hasAuthProviders: generationConfig.config.authentication.cookieBased.length !== 0,
 		});
 		return Promise.resolve([
 			{
@@ -52,7 +52,8 @@ export class TypescriptReactHooks implements Template {
 
 	private readonly reactNative: boolean;
 
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(hooksTemplate);
 		const _imports = imports(config.application);
 		_imports.push(...queryResponseImports(config.application));

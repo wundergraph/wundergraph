@@ -176,6 +176,11 @@ interface ResolvedDeployment {
 }
 
 export interface S3UploadProfile {
+	/** Whether authentication is required to upload to this profile
+	 *
+	 * @default true
+	 */
+	requireAuthentication?: boolean;
 	/** JSON schema for metadata */
 	meta?: ZodType | object;
 	/**
@@ -228,6 +233,8 @@ interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'upl
 }
 
 export interface ResolvedWunderGraphConfig {
+	// XXX: ResolvedWunderGraphConfig is hashed by several templates.
+	// DO NOT INCLUDE UNSTABLE DATA (paths, times, etc...) in it.
 	application: ResolvedApplication;
 	deployment: ResolvedDeployment;
 	sdkVersion: string;
@@ -259,7 +266,11 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
-export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+export interface CodeGenerationConfig {
+	// Keep ResolvedWunderGraphConfig in a separate field, so it can be
+	// hashed without using any unstable data as the hash input (e.g.
+	// paths like outPath or wunderGraphDir).
+	config: ResolvedWunderGraphConfig;
 	outPath: string;
 	wunderGraphDir: string;
 }
@@ -315,7 +326,13 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 
 	const roles = config.authorization?.roles || ['admin', 'user'];
 
-	const resolved = await resolveApplication(roles, config.apis, cors, config.s3UploadProvider || []);
+	const resolved = await resolveApplication(
+		roles,
+		config.apis,
+		cors,
+		config.s3UploadProvider || [],
+		config.server?.hooks
+	);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -555,6 +572,7 @@ const resolveUploadConfiguration = (
 			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
 
 			uploadProfiles[key] = {
+				requireAuthentication: profile.requireAuthentication ?? true,
 				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
 				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
 				allowedMimeTypes: profile.allowedMimeTypes ?? [],
@@ -966,6 +984,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
 						}
 						uploadProfiles[key] = {
+							requireAuthentication: resolved.requireAuthentication,
 							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
 							maxAllowedFiles: resolved.maxAllowedFiles,
 							allowedMimeTypes: resolved.allowedMimeTypes,
