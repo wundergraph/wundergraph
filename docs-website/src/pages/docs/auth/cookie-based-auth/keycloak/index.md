@@ -1,6 +1,6 @@
 ---
 title: Keycloak
-pageTitle: WunderGraph - Authentication - Keycloak
+pageTitle: WunderGraph - Authentication - OIDC Providers - Keycloak
 description: Add Keycloak authentication to your WunderGraph application.
 ---
 
@@ -19,8 +19,9 @@ authentication: {
     providers: [
       authProviders.openIDConnect({
         id: 'keycloak', // you have to choose this ID
-        clientId: 'XXX', // client ID from OAuth
-        clientSecret: 'XXX', // client secret from Auth0
+        issuer: 'XXX',
+        clientId: 'XXX',
+        clientSecret: 'XXX',
       }),
     ];
   }
@@ -28,12 +29,13 @@ authentication: {
 }
 ```
 
-Now create a [new OAuth app on GitHub](https://github.com/settings/applications/new).
-You must supply an object inside the auth provider that contains 3 properties, two of which come from your new OAuth App:
+You must supply an object inside the auth provider that contains three properties,
+three of which come from your Keycloak provider.
 
-- `id`: your choice of id
-- `clientId`: the client ID from OAuth
-- `clientSecret`: the client secret from OAuth
+- `id`: your choice of unique id that identifies the provider (used to refer elsewhere to this specific provider)
+- `issuer`: the issuer provided by your Keycloak provider
+- `clientId`: the client ID provided by your Keycloak provider
+- `clientSecret`: the client secret provided by your Keycloak provider
 
 {% callout type="warning" %}
 Consider storing your IDs and secrets inside a `.env` file.
@@ -41,4 +43,5 @@ Consider storing your IDs and secrets inside a `.env` file.
 
 ## Running Keycloak
 
-You can follow [this example project] if you need help running Keycloak.
+You can follow [this example project](/docs/examples/keycloak-openid-connect-authentication)
+if you need help running Keycloak.
