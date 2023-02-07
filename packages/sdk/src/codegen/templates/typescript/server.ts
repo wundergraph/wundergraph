@@ -5,12 +5,13 @@ import { formatTypeScript } from './index';
 import { template } from './server.template';
 import { WunderGraphHooksPlugin } from './hooks';
 import { WunderGraphInternalApiClient } from './internal.client';
+import { WunderGraphInternalOperationsApiClient } from './internal.operations.client';
 
 export class WunderGraphServer implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
 		const content = tmpl({
-			roleDefinitions: config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
+			roleDefinitions: generationConfig.config.authentication.roles.map((role) => '"' + role + '"').join(' | '),
 		});
 		return Promise.resolve([
 			{
@@ -22,6 +23,10 @@ export class WunderGraphServer implements Template {
 	}
 
 	dependencies(): Template[] {
-		return [new WunderGraphHooksPlugin(), new WunderGraphInternalApiClient()];
+		return [
+			new WunderGraphHooksPlugin(),
+			new WunderGraphInternalApiClient(),
+			new WunderGraphInternalOperationsApiClient(),
+		];
 	}
 }

@@ -8,7 +8,8 @@ import { template } from './internal.client.template';
 import templates from '../index';
 
 export class WunderGraphInternalApiClient implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const config = generationConfig.config;
 		const tmpl = Handlebars.compile(template);
 		const _queries = operations(config.application, OperationType.QUERY, false);
 		const _internalQueries = operations(config.application, OperationType.QUERY, true);

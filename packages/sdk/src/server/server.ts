@@ -255,6 +255,9 @@ export const createServer = async ({
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
+				nodeURL: WG_CONFIG?.api?.nodeOptions?.nodeUrl
+					? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
+					: '',
 			});
 			fastify.log.info('Functions plugin registered');
 		}

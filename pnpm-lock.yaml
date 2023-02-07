@@ -34,7 +34,7 @@ importers:
       '@docsearch/react': ^3.1.1
       '@giscus/react': 2.2.0
       '@headlessui/react': ^1.6.5
-      '@heroicons/react': ^1.0.6
+      '@heroicons/react': ^2.0.13
       '@markdoc/markdoc': ^0.1.3
       '@markdoc/next.js': ^0.1.7-0
       '@radix-ui/react-scroll-area': ^0.1.5-rc.44
@@ -61,6 +61,7 @@ importers:
       prism-react-renderer: ^1.3.5
       react: 18.2.0
       react-dom: 18.2.0
+      tailwind-scrollbar: ^2.1.0
       tailwindcss: ^3.1.4
       tailwindcss-radix: ^1.6.0
       typescript: ^4.8.4
@@ -68,7 +69,7 @@ importers:
       '@docsearch/react': 3.3.0_knhnagtyfncgg2hpin7s37uixq
       '@giscus/react': 2.2.0_biqbaboplfbrettd7655fr4n2y
       '@headlessui/react': 1.7.4_biqbaboplfbrettd7655fr4n2y
-      '@heroicons/react': 1.0.6_react@18.2.0
+      '@heroicons/react': 2.0.13_react@18.2.0
       '@markdoc/markdoc': 0.1.13_@types+react@18.0.24
       '@markdoc/next.js': 0.1.10_sjsxg553udvvvfz4ddwyelvphq
       '@radix-ui/react-scroll-area': 0.1.5-rc.50_biqbaboplfbrettd7655fr4n2y
@@ -89,6 +90,7 @@ importers:
       prism-react-renderer: 1.3.5_react@18.2.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      tailwind-scrollbar: 2.1.0_tailwindcss@3.2.1
       tailwindcss: 3.2.1
       tailwindcss-radix: 1.6.0
     devDependencies:
@@ -153,8 +155,8 @@ importers:
       '@types/lodash': ^4.14.178
       '@types/node': ^17.0.32
       '@types/object-hash': ^1.3.4
-      '@wundergraph/protobuf': workspace:^0.103.0
-      '@wundergraph/sdk': workspace:^0.133.0
+      '@wundergraph/protobuf': workspace:^0.104.0
+      '@wundergraph/sdk': workspace:^0.134.0
       execa: 5.1.1
       handlebars: ^4.7.7
       json-schema: ^0.4.0
@@ -187,8 +189,8 @@ importers:
       '@types/node-fetch': 2.6.2
       '@types/object-hash': ^1.3.4
       '@types/react': ^18.0.15
-      '@wundergraph/protobuf': workspace:^0.103.0
-      '@wundergraph/sdk': workspace:^0.133.0
+      '@wundergraph/protobuf': workspace:^0.104.0
+      '@wundergraph/sdk': workspace:^0.134.0
       '@wundergraph/swr': workspace:*
       handlebars: ^4.7.7
       jest: ^29.0.3
@@ -303,12 +305,13 @@ importers:
       '@types/node-fetch': ^2.6.2
       '@types/object-hash': ^1.3.4
       '@web-std/fetch': ^4.1.0
-      '@wundergraph/protobuf': workspace:^0.103.0
-      '@wundergraph/wunderctl': workspace:>=0.128.0
+      '@wundergraph/protobuf': workspace:^0.104.0
+      '@wundergraph/wunderctl': workspace:>=0.130.0
       axios: ^0.26.1
       axios-retry: ^3.3.1
       chai: ^4.3.4
       close-with-grace: ^1.1.0
+      cross-fetch: ^3.1.5
       execa: 5.1.1
       fastify: ^4.10.2
       fastify-plugin: ^4.4.0
@@ -349,6 +352,7 @@ importers:
       axios: 0.26.1
       axios-retry: 3.3.1
       close-with-grace: 1.1.0
+      cross-fetch: 3.1.5
       execa: 5.1.1
       fastify: 4.10.2
       fastify-plugin: 4.4.0
@@ -469,7 +473,7 @@ importers:
       graphql: ^16.3.0
       pg: ^8.7.3
       postgraphile: ^4.12.9
-      typescript: ^4.8.2
+      typescript: ^4.9.4
       zod: ^3.20.2
     dependencies:
       '@types/node': 14.18.33
@@ -478,7 +482,7 @@ importers:
       graphql: 16.6.0
       pg: 8.8.0
       postgraphile: 4.12.11
-      typescript: 4.8.4
+      typescript: 4.9.4
       zod: 3.20.2
 
   testapps/jwks:
@@ -1316,11 +1320,11 @@ packages:
       '@types/node': 14.18.33
       chalk: 4.1.2
       cosmiconfig: 7.0.1
-      cosmiconfig-typescript-loader: 4.2.0_gbbg4brkmakf6m5nuj7scelzny
+      cosmiconfig-typescript-loader: 4.2.0_s3xc53pkyjbzjshgwsr5hhhztm
       lodash: 4.17.21
       resolve-from: 5.0.0
-      ts-node: 10.9.1_yodorn5kzjgomblrsstrk2spaa
-      typescript: 4.8.4
+      ts-node: 10.9.1_rju6pyblifsagdmqm3y74zsi6q
+      typescript: 4.9.4
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -1713,8 +1717,8 @@ packages:
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@heroicons/react/1.0.6_react@18.2.0:
-    resolution: {integrity: sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==}
+  /@heroicons/react/2.0.13_react@18.2.0:
+    resolution: {integrity: sha512-iSN5XwmagrnirWlYEWNPdCDj9aRYVD/lnK3JlsC9/+fqGF80k8C7rl+1HCvBX0dBoagKqOFBs6fMhJJ1hOg1EQ==}
     peerDependencies:
       react: '>= 16'
     dependencies:
@@ -4741,7 +4745,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -5627,7 +5631,7 @@ packages:
     resolution: {integrity: sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==}
     dev: true
 
-  /cosmiconfig-typescript-loader/4.2.0_gbbg4brkmakf6m5nuj7scelzny:
+  /cosmiconfig-typescript-loader/4.2.0_s3xc53pkyjbzjshgwsr5hhhztm:
     resolution: {integrity: sha512-NkANeMnaHrlaSSlpKGyvn2R4rqUDeE/9E5YHx+b4nwo0R8dZyAqcih8/gxpCZvqWP9Vf6xuLpMSzSgdVEIM78g==}
     engines: {node: '>=12', npm: '>=6'}
     peerDependencies:
@@ -5638,8 +5642,8 @@ packages:
     dependencies:
       '@types/node': 14.18.33
       cosmiconfig: 7.0.1
-      ts-node: 10.9.1_yodorn5kzjgomblrsstrk2spaa
-      typescript: 4.8.4
+      ts-node: 10.9.1_rju6pyblifsagdmqm3y74zsi6q
+      typescript: 4.9.4
     dev: true
 
   /cosmiconfig/7.0.1:
@@ -7261,6 +7265,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -13866,6 +13882,15 @@ packages:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
     dev: true
 
+  /tailwind-scrollbar/2.1.0_tailwindcss@3.2.1:
+    resolution: {integrity: sha512-zpvY5mDs0130YzYjZKBiDaw32rygxk5RyJ4KmeHjGnwkvbjm/PszON1m4Bbt2DkMRIXlXsfNevykAESgURN4KA==}
+    engines: {node: '>=12.13.0'}
+    peerDependencies:
+      tailwindcss: 3.x
+    dependencies:
+      tailwindcss: 3.2.1
+    dev: false
+
   /tailwindcss-radix/1.6.0:
     resolution: {integrity: sha512-5oBgGCVGsITMiUVlc6Euj4kt03l8htLJxVT9AXbkFxcJiXLtQxJriFq/8R+3s63OKit/ynCVdkqvlnW6H7iG1g==}
     dev: false
@@ -14238,6 +14263,37 @@ packages:
       yn: 3.1.1
     dev: true
 
+  /ts-node/10.9.1_rju6pyblifsagdmqm3y74zsi6q:
+    resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.9
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.3
+      '@types/node': 14.18.33
+      acorn: 8.8.1
+      acorn-walk: 8.2.0
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.9.4
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    dev: true
+
   /ts-node/10.9.1_vqcafhj4xvr2nzknlrdklk55zm:
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
@@ -14258,37 +14314,6 @@ packages:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.3
       '@types/node': 18.11.18
-      acorn: 8.8.1
-      acorn-walk: 8.2.0
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 4.8.4
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    dev: true
-
-  /ts-node/10.9.1_yodorn5kzjgomblrsstrk2spaa:
-    resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
-    hasBin: true
-    peerDependencies:
-      '@swc/core': '>=1.2.50'
-      '@swc/wasm': '>=1.2.50'
-      '@types/node': '*'
-      typescript: '>=2.7'
-    peerDependenciesMeta:
-      '@swc/core':
-        optional: true
-      '@swc/wasm':
-        optional: true
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.9
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.3
-      '@types/node': 14.18.33
       acorn: 8.8.1
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -14501,6 +14526,11 @@ packages:
 
   /typescript/4.8.4:
     resolution: {integrity: sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+
+  /typescript/4.9.4:
+    resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
 
@@ -15176,7 +15206,7 @@ packages:
   file:packages/sdk:
     resolution: {directory: packages/sdk, type: directory}
     name: '@wundergraph/sdk'
-    version: 0.133.0
+    version: 0.134.0
     hasBin: true
     dependencies:
       '@fastify/formbody': 7.3.0
@@ -15189,6 +15219,7 @@ packages:
       axios-retry: 3.3.1
       close-with-grace: 1.1.0
       colors: 1.4.0
+      cross-fetch: 3.1.5
       execa: 5.1.1
       fastify: 4.10.2
       fastify-graceful-shutdown: 3.4.0

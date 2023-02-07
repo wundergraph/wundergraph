@@ -18,11 +18,11 @@ const counter = introspect.graphql({
   apiNamespace: 'ws',
   loadSchemaFromString: schema,
   url: 'http://localhost:4000/graphql',
-})
+});
 
 configureWunderGraphApplication({
   apis: [counter],
-})
+});
 ```
 
 Now let's configure the hooks in the `wundergraph.server.ts` file:
@@ -37,10 +37,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
           // counter is the id of the introspected api (data source id), defined in the wundergraph.config.ts
           enableForDataSources: ['counter'],
           hook: async (hook) => {
-            let token = hook.clientRequest.headers.get('Authorization') || ''
+            let token = hook.clientRequest.headers.get('Authorization') || '';
             // we can have a different logic for each data source
             if (hook.dataSourceId === 'counter') {
-              token = 'secret'
+              token = 'secret';
             }
             return {
               // this payload will be passed to the ws `connection_init` message payload
@@ -48,7 +48,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
               payload: {
                 Authorization: token,
               },
-            }
+            };
           },
         },
       },
@@ -60,19 +60,19 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
       Ws: {
         mutatingPreResolve: async (hook) => {
           // here we modify the input before request is sent to the data source
-          hook.input.from = 7
-          return hook.input
+          hook.input.from = 7;
+          return hook.input;
         },
         postResolve: async (hook) => {
           // here we log the response we got from the ws server (not the modified one)
-          hook.log.info(`postResolve hook: ${hook.response.data!.ws_countdown}`)
+          hook.log.info(`postResolve hook: ${hook.response.data!.ws_countdown}`);
         },
         mutatingPostResolve: async (hook) => {
           // here we modify the response before it gets sent to the client
-          let count = hook.response.data!.ws_countdown!
-          count++
-          hook.response.data!.ws_countdown = count
-          return hook.response
+          let count = hook.response.data!.ws_countdown!;
+          count++;
+          hook.response.data!.ws_countdown = count;
+          return hook.response;
         },
         preResolve: async (hook) => {
           // here we log the request input
@@ -82,15 +82,13 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
            * 	ws_countdown(from: $from)
            * }
            */
-          hook.log.info(
-            `preResolve hook input, counter starts from: ${hook.input.from}`
-          )
+          hook.log.info(`preResolve hook input, counter starts from: ${hook.input.from}`);
         },
       },
     },
   },
   graphqlServers: [],
-}))
+}));
 ```
 
 ## Getting started

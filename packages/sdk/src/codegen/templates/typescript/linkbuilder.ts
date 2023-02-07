@@ -7,9 +7,9 @@ import { formatTypeScript } from './index';
 import { template } from './linkbuilder.template';
 
 export class TypeScriptLinkBuilder implements Template {
-	generate(config: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(template);
-		const schema = buildSchema(config.application.EngineConfiguration.Schema);
+		const schema = buildSchema(generationConfig.config.application.EngineConfiguration.Schema);
 		const fields = queryTypeFields(schema);
 		const types = typesInfo(schema);
 		const model: Model = {
