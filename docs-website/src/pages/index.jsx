@@ -57,7 +57,7 @@ export default function HomePage() {
 						Learn more about how to integrate APIs and build backends with WunderGraph.
 					</Paragraph>
 				</div>
-				<div className="flex-1">
+				<div className="hidden flex-1 xl:block">
 					<CodeBlock filename="Quick start" language="bash">
 						{code}
 					</CodeBlock>

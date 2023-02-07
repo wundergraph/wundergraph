@@ -31,7 +31,7 @@ function Header({ navigation }) {
 	return (
 		<header
 			className={clsx(
-				'sticky top-0 z-50 border-gray-200 bg-white shadow-md shadow-gray-900/5 transition transition-all duration-500 dark:border-gray-800 dark:shadow-none',
+				'sticky top-0 z-50 border-gray-200 bg-white shadow-md shadow-gray-900/5 transition-all duration-500 dark:border-gray-800 dark:shadow-none',
 				isScrolled
 					? 'border-b dark:bg-gray-900/95 dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-gray-950/70'
 					: 'dark:bg-transparent'
@@ -44,7 +44,7 @@ function Header({ navigation }) {
 				<div className="relative flex flex-grow basis-0 items-center">
 					<Link href="/" className="flex items-center space-x-2 font-bold text-slate-800 no-underline dark:text-white">
 						<Logo />
-						<span className="block">WunderGraph Docs</span>
+						<span className="hidden lg:block">WunderGraph Docs</span>
 					</Link>
 				</div>
 				<div className="-my-5 mr-6 sm:mr-8 md:mr-0">
@@ -53,16 +53,16 @@ function Header({ navigation }) {
 				<div className="relative flex basis-0 items-center justify-end gap-4 md:flex-grow">
 					<Link
 						href="https://wundergraph.com"
-						className="text-sm text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
+						className="hidden text-sm text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white lg:inline"
 					>
 						wundergraph.com
 					</Link>
-					<Link
+					{/* <Link
 						href="https://cloud.wundergraph.com"
-						className="relative z-10 flex h-8 w-full items-center justify-center space-x-3 rounded-md border-gray-300 bg-gradient-to-r from-pink-400 to-purple-400 px-10 text-sm text-sm font-medium text-black transition before:absolute before:inset-px before:-z-10 before:rounded-md before:bg-white before:transition-all focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-50 hover:border-gray-400 hover:text-white hover:text-gray-700 before:hover:inset-0 before:hover:opacity-0 disabled:hover:border-gray-400 disabled:hover:text-gray-500 dark:border-gray-600 dark:text-white before:dark:bg-gray-950 dark:focus:ring-sky-900 dark:hover:border-gray-500 hover:dark:text-black dark:hover:text-gray-200 disabled:hover:dark:border-gray-500 disabled:hover:dark:text-gray-400 lg:w-max"
+						className="hidden md:block relative z-10 flex h-8 w-full items-center justify-center space-x-3 rounded-md border-gray-300 bg-gradient-to-r from-pink-400 to-purple-400 px-10 text-sm text-sm font-medium text-black transition before:absolute before:inset-px before:-z-10 before:rounded-md before:bg-white before:transition-all focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-50 hover:border-gray-400 hover:text-white hover:text-gray-700 before:hover:inset-0 before:hover:opacity-0 disabled:hover:border-gray-400 disabled:hover:text-gray-500 dark:border-gray-600 dark:text-white before:dark:bg-gray-950 dark:focus:ring-sky-900 dark:hover:border-gray-500 hover:dark:text-black dark:hover:text-gray-200 disabled:hover:dark:border-gray-500 disabled:hover:dark:text-gray-400 lg:w-max"
 					>
 						<span className="text-gray-50 dark:text-gray-100">Sign up</span>
-					</Link>
+					</Link> */}
 					<ThemeSelector className="relative z-10" />
 					<Link href="https://github.com/wundergraph/wundergraph" className="group" aria-label="GitHub">
 						<GitHubIcon className="h-5 w-5 fill-gray-500 group-hover:fill-gray-500 dark:group-hover:fill-gray-300" />
