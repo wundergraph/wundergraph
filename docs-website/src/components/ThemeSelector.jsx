@@ -74,7 +74,7 @@ export function ThemeSelector(props) {
 				<LightIcon className="hidden h-4 w-4 fill-gray-400 [:not(.dark)[data-theme=system]_&]:block" />
 				<DarkIcon className="hidden h-4 w-4 fill-gray-400 [.dark[data-theme=system]_&]:block" />
 			</Listbox.Button>
-			<Listbox.Options className="absolute top-full right-1/2 mt-3 w-36 -translate-x-1/2 space-y-1 rounded-xl bg-white p-3 text-sm font-medium shadow-md shadow-black/5 ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/5">
+			<Listbox.Options className="absolute top-full left-1/2 mt-3 w-36 -translate-x-1/2 space-y-1 rounded-xl bg-white p-3 text-sm font-medium shadow-md shadow-black/5 ring-1 ring-black/5 dark:bg-gray-800 dark:ring-white/5">
 				{themes.map((theme) => (
 					<Listbox.Option
 						key={theme.value}
