@@ -1,0 +1,3 @@
+query ($provider: String! @fromClaim(name: PROVIDER)) {
+	echo_string(input: $provider)
+}

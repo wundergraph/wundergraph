@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean } from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
@@ -10,16 +10,46 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	},
 	graphqlServers: [
 		{
-			serverName: 'gql',
-			apiNamespace: 'gql',
+			serverName: 'echo',
+			apiNamespace: 'echo',
 			schema: new GraphQLSchema({
 				query: new GraphQLObjectType({
 					name: 'RootQueryType',
 					fields: {
-						hello: {
+						boolean: {
+							args: {
+								input: { type: GraphQLBoolean },
+							},
 							type: GraphQLString,
-							resolve() {
-								return 'world';
+							resolve(obj, args, context, info) {
+								return `boolean: ${args.input}`;
+							},
+						},
+						int: {
+							args: {
+								input: { type: GraphQLInt },
+							},
+							type: GraphQLString,
+							resolve(obj, args, context, info) {
+								return `int: ${args.input}`;
+							},
+						},
+						float: {
+							args: {
+								input: { type: GraphQLFloat },
+							},
+							type: GraphQLString,
+							resolve(obj, args, context, info) {
+								return `float: ${args.input}`;
+							},
+						},
+						string: {
+							args: {
+								input: { type: GraphQLString },
+							},
+							type: GraphQLString,
+							resolve(obj, args, context, info) {
+								return `string: ${args.input}`;
 							},
 						},
 					},

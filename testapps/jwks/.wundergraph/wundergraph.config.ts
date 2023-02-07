@@ -1,4 +1,4 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, templates, ValueType } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -14,6 +14,18 @@ configureWunderGraphApplication({
 					jwksJSON: new EnvironmentVariable('JWKS_JSON'),
 				},
 			],
+		},
+		customClaims: {
+			/** Implicit: string and required */
+			tenantID: {
+				jsonPath: 'teid',
+			},
+			/** Implicit: string */
+			shopID: {
+				jsonPath: 'shop.id',
+				type: ValueType.INT,
+				required: false,
+			},
 		},
 	},
 	codeGenerators: [
