@@ -1174,7 +1174,7 @@ const navigation = [
 				],
 			},
 			{
-				title: 'wunderctl Reference',
+				title: 'wunderctl reference',
 				links: [
 					{
 						title: 'Overview',
