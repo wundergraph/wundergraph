@@ -23,12 +23,7 @@ mutation (
   createOnepost(
     data: {
       message: $message
-      user: {
-        connectOrCreate: {
-          where: { email: $email }
-          create: { email: $email, name: $name, userID: $userID }
-        }
-      }
+      user: { connectOrCreate: { where: { email: $email }, create: { email: $email, name: $name, userID: $userID } } }
     }
   ) {
     id
@@ -48,3 +43,7 @@ JSON Schema validation would prevent this automatically.
 
 Additionally, applying the `@jsonSchema` directive to an operation will automatically enable an authentication check.
 So, the user must be authenticated to execute the operation.
+
+## Injecting custom claims
+
+If you want to use custom claims instead of well known ones, use `@fromCustomClaim` instead.
