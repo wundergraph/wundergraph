@@ -1,6 +1,6 @@
 ---
 title: GitHub
-pageTitle: WunderGraph - Authentication - GitHub
+pageTitle: WunderGraph - Authentication - OIDC Providers - GitHub
 description: Add GitHub authentication to your WunderGraph application.
 ---
 
@@ -28,10 +28,11 @@ authentication: {
 }
 ```
 
-Now create a [new GitHub App](https://github.com/settings/apps/new).
-You must supply an object inside the auth provider that contains 3 properties, two of which come from your new GitHub App:
+Now create a [new OAuth app on GitHub](https://github.com/settings/applications/new).
+You must supply an object inside the auth provider that contains three properties,
+two of which come from your new GitHub OAuth App:
 
-- `id`: your choice of id
+- `id`: your choice of unique id that identifies the provider (used to refer elsewhere to this specific provider)
 - `clientId`: the client ID from GitHub
 - `clientSecret`: the client secret from GitHub
 
