@@ -1,5 +1,4 @@
 import {
-	Claim,
 	ClaimConfig,
 	CustomClaim,
 	CustomClaimConfig,
@@ -8,6 +7,7 @@ import {
 	OperationRoleConfig,
 	OperationType,
 	VariableInjectionConfiguration,
+	WellKnownClaim,
 } from '@wundergraph/protobuf';
 import {
 	buildSchema,
@@ -460,6 +460,34 @@ const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: 
 	});
 };
 
+const parseWellKnownClaim = (name: string) => {
+	const claims: Record<string, WellKnownClaim> = {
+		ISSUER: WellKnownClaim.ISSUER,
+		SUBJECT: WellKnownClaim.SUBJECT,
+		USERID: WellKnownClaim.USERID,
+		NAME: WellKnownClaim.NAME,
+		GIVEN_NAME: WellKnownClaim.GIVEN_NAME,
+		FAMILY_NAME: WellKnownClaim.FAMILY_NAME,
+		MIDDLE_NAME: WellKnownClaim.MIDDLE_NAME,
+		NICKNAME: WellKnownClaim.NICKNAME,
+		PREFERRED_USERNAME: WellKnownClaim.PREFERRED_USERNAME,
+		PROFILE: WellKnownClaim.PROFILE,
+		PICTURE: WellKnownClaim.PICTURE,
+		WEBSITE: WellKnownClaim.WEBSITE,
+		EMAIL: WellKnownClaim.EMAIL,
+		EMAIL_VERIFIED: WellKnownClaim.EMAIL_VERIFIED,
+		GENDER: WellKnownClaim.GENDER,
+		BIRTH_DATE: WellKnownClaim.BIRTH_DATE,
+		ZONE_INFO: WellKnownClaim.ZONE_INFO,
+		LOCALE: WellKnownClaim.LOCALE,
+		LOCATION: WellKnownClaim.LOCATION,
+	};
+	if (name in claims) {
+		return claims[name];
+	}
+	throw new Error(`unhandled well known claim ${name}`);
+};
+
 const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
 	const variableName = variable.variable.name.value;
 	const fromClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromClaim');
@@ -473,58 +501,12 @@ const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: G
 	if (nameArg.value.kind !== 'EnumValue') {
 		return;
 	}
-	const name = nameArg.value.value;
-	switch (name) {
-		case 'USERID':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.USERID,
-			});
-			break;
-		case 'EMAIL':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.EMAIL,
-			});
-			break;
-		case 'EMAIL_VERIFIED':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.EMAIL_VERIFIED,
-			});
-			break;
-		case 'NAME':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.NAME,
-			});
-			break;
-		case 'NICKNAME':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.NICKNAME,
-			});
-			break;
-		case 'LOCATION':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.LOCATION,
-			});
-			break;
-		case 'PROVIDER':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.PROVIDER,
-			});
-			break;
-	}
+	const claimName = nameArg.value.value;
+	operation.AuthenticationConfig.required = true;
+	operation.AuthorizationConfig.claims.push({
+		variableName,
+		claim: parseWellKnownClaim(claimName),
+	});
 };
 
 const handleInjectEnvironmentVariableDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {

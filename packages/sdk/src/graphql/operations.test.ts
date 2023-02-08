@@ -8,7 +8,7 @@ import {
 import { assert } from 'chai';
 import { buildSchema, OperationDefinitionNode, parse } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
-import { Claim, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
+import { OperationExecutionEngine, OperationType, WellKnownClaim } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -561,7 +561,7 @@ const fromClaimParsed: ParsedOperations = {
 				claims: [
 					{
 						variableName: 'email',
-						claim: Claim.EMAIL,
+						claim: WellKnownClaim.EMAIL,
 					},
 				],
 				customClaims: [],

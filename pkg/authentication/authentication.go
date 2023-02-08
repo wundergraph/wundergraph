@@ -126,20 +126,10 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	if issuer == "" {
 		issuer = claims.Issuer
 	}
-	tempUser := User{
-		ProviderName:  "token",
-		ProviderID:    issuer,
-		Email:         claims.Email,
-		EmailVerified: claims.EmailVerified,
-		Name:          claims.Name,
-		FirstName:     claims.GivenName,
-		LastName:      claims.FamilyName,
-		UserID:        claims.Sub,
-		AvatarURL:     claims.Picture,
-		Location:      claims.Locale,
-		CustomClaims:  claims.Custom(),
-		AccessToken:   tryParseJWT(token.Raw),
-	}
+	tempUser := claims.ToUser()
+	tempUser.ProviderName = "token"
+	tempUser.ProviderID = issuer
+	tempUser.AccessToken = tryParseJWT(token.Raw)
 	u.hooks.handlePostAuthentication(context.Background(), tempUser)
 	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
 	if !proceed {
@@ -153,18 +143,26 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 }
 
 type User struct {
-	ProviderName     string                 `json:"provider,omitempty"`
-	ProviderID       string                 `json:"providerId,omitempty"`
-	Email            string                 `json:"email,omitempty"`
-	EmailVerified    bool                   `json:"emailVerified,omitempty"`
-	Name             string                 `json:"name,omitempty"`
-	FirstName        string                 `json:"firstName,omitempty"`
-	LastName         string                 `json:"lastName,omitempty"`
-	NickName         string                 `json:"nickName,omitempty"`
-	Description      string                 `json:"description,omitempty"`
-	UserID           string                 `json:"userId,omitempty"`
-	AvatarURL        string                 `json:"avatarUrl,omitempty"`
-	Location         string                 `json:"location,omitempty"`
+	ProviderName      string `json:"provider,omitempty"`
+	ProviderID        string `json:"providerId,omitempty"`
+	UserID            string `json:"userId,omitempty"`
+	Name              string `json:"name,omitempty"`
+	FirstName         string `json:"firstName,omitempty"`
+	LastName          string `json:"lastName,omitempty"`
+	MiddleName        string `json:"middleName,omitempty"`
+	NickName          string `json:"nickName,omitempty"`
+	PreferredUsername string `json:"preferredUsername,omitempty"`
+	Profile           string `json:"profile,omitempty"`
+	Picture           string `json:"picture,omitempty"`
+	Website           string `json:"website"`
+	Email             string `json:"email,omitempty"`
+	EmailVerified     bool   `json:"emailVerified,omitempty"`
+	Gender            string `json:"gender,omitempty"`
+	BirthDate         string `json:"birthDate,omitempty"`
+	ZoneInfo          string `json:"zoneInfo,omitempty"`
+	Locale            string `json:"localeomitempty"`
+	Location          string `json:"location,omitempty"`
+
 	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`
 	CustomAttributes []string               `json:"customAttributes,omitempty"`
 	Roles            []string               `json:"roles"`

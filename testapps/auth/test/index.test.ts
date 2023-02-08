@@ -9,6 +9,9 @@ const keyAlgorithm = 'RS256';
 
 const wg = createTestServer({ fetch: fetch as any });
 
+const tokenIssuer = 'https://example.com';
+const defaultTokenSubject = 'admin';
+
 const makeToken = (payload: jose.JWTPayload, privateKey: jose.KeyLike) => {
 	return new jose.SignJWT(payload)
 		.setProtectedHeader({
@@ -16,8 +19,8 @@ const makeToken = (payload: jose.JWTPayload, privateKey: jose.KeyLike) => {
 			alg: keyAlgorithm,
 			kid: keyID,
 		})
-		.setIssuer('https://example.com')
-		.setSubject('admin')
+		.setIssuer(tokenIssuer)
+		.setSubject(payload.sub || defaultTokenSubject)
 		.setAudience('myapp.wundergraph.dev')
 		.setExpirationTime('6h')
 		.setIssuedAt()
@@ -26,6 +29,7 @@ const makeToken = (payload: jose.JWTPayload, privateKey: jose.KeyLike) => {
 
 type Tokens = {
 	default: string;
+	wellKnownClaims: string;
 	withTenantID: string;
 	withShopIDInteger: string;
 	WithShopIDString: string;
@@ -35,6 +39,26 @@ let tokens: Tokens | undefined;
 
 const tenantID = 'my-tenant';
 const shopID = 1234556;
+
+const wellKnownClaims = {
+	sub: 'lskywalker',
+	name: 'Luke Skywalker',
+	given_name: 'Luke',
+	family_name: 'Skywalker',
+	middle_name: '.',
+	nickname: 'Little Padawan',
+	preferred_username: 'luke',
+	profile: 'http://cloud.wundergraph.com/luke',
+	picture: 'http://cloud.wundergraph.com/luke.jpg',
+	website: 'http://lukeskywalker.com',
+	email: 'luke@skywalker.com',
+	email_verified: true,
+	gender: 'male',
+	birthdate: '19 BBY',
+	zoneinfo: 'TST',
+	locale: 'en_TA',
+	location: 'Tatooine',
+};
 
 const startServer = async () => {
 	const { publicKey, privateKey } = await jose.generateKeyPair(keyAlgorithm);
@@ -53,8 +77,10 @@ const startServer = async () => {
 		],
 	};
 	process.env['JWKS_JSON'] = JSON.stringify(jwksKeys);
+
 	tokens = {
 		default: await makeToken({}, privateKey),
+		wellKnownClaims: await makeToken(wellKnownClaims, privateKey),
 		withTenantID: await makeToken({ teid: tenantID }, privateKey),
 		withShopIDInteger: await makeToken({ shop: { id: shopID } }, privateKey),
 		WithShopIDString: await makeToken({ shop: { id: `${shopID}` } }, privateKey),
@@ -118,6 +144,40 @@ describe('test token Authorization', () => {
 			},
 		});
 		expectUnauthorized(result);
+	});
+});
+
+describe('test well known claims (@fromClaim())', () => {
+	test.only('all well known claims have the expected value', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.wellKnownClaims);
+		const result = await client.query({
+			operationName: 'claims/WellKnown',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+
+		const data = result.data!;
+
+		expect(data.issuer).toBe(`string: ${tokenIssuer}`);
+		expect(data.subject).toBe(`string: ${wellKnownClaims.sub}`);
+		expect(data.userID).toBe(`string: ${wellKnownClaims.sub}`);
+		expect(data.name).toBe(`string: ${wellKnownClaims.name}`);
+		expect(data.givenName).toBe(`string: ${wellKnownClaims.given_name}`);
+		expect(data.familyName).toBe(`string: ${wellKnownClaims.family_name}`);
+		expect(data.middleName).toBe(`string: ${wellKnownClaims.middle_name}`);
+		expect(data.nickname).toBe(`string: ${wellKnownClaims.nickname}`);
+		expect(data.preferredUsername).toBe(`string: ${wellKnownClaims.preferred_username}`);
+		expect(data.profile).toBe(`string: ${wellKnownClaims.profile}`);
+		expect(data.picture).toBe(`string: ${wellKnownClaims.picture}`);
+		expect(data.website).toBe(`string: ${wellKnownClaims.website}`);
+		expect(data.email).toBe(`string: ${wellKnownClaims.email}`);
+		expect(data.email_verified).toBe(`boolean: ${wellKnownClaims.email_verified}`);
+		expect(data.gender).toBe(`string: ${wellKnownClaims.gender}`);
+		expect(data.birthDate).toBe(`string: ${wellKnownClaims.birthdate}`);
+		expect(data.zoneInfo).toBe(`string: ${wellKnownClaims.zoneinfo}`);
+		expect(data.locale).toBe(`string: ${wellKnownClaims.locale}`);
+		expect(data.location).toBe(`string: ${wellKnownClaims.location}`);
 	});
 });
 

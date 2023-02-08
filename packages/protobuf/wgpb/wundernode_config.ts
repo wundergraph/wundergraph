@@ -212,62 +212,153 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
   }
 }
 
-export enum Claim {
-  EMAIL = 0,
-  EMAIL_VERIFIED = 1,
+export enum WellKnownClaim {
+  /** ISSUER - iss */
+  ISSUER = 0,
+  /** SUBJECT - sub */
+  SUBJECT = 1,
+  /** USERID - alias for sub */
+  USERID = 1,
+  /** NAME - name */
   NAME = 2,
-  NICKNAME = 3,
-  LOCATION = 4,
-  PROVIDER = 5,
-  USERID = 6,
+  /** GIVEN_NAME - given_name */
+  GIVEN_NAME = 3,
+  /** FAMILY_NAME - family_name */
+  FAMILY_NAME = 4,
+  /** MIDDLE_NAME - middle_name */
+  MIDDLE_NAME = 5,
+  /** NICKNAME - nickname */
+  NICKNAME = 6,
+  /** PREFERRED_USERNAME - preferred_username */
+  PREFERRED_USERNAME = 7,
+  /** PROFILE - profile */
+  PROFILE = 8,
+  /** PICTURE - picture */
+  PICTURE = 9,
+  /** WEBSITE - website */
+  WEBSITE = 10,
+  /** EMAIL - email */
+  EMAIL = 11,
+  /** EMAIL_VERIFIED - email_verified */
+  EMAIL_VERIFIED = 12,
+  /** GENDER - gender */
+  GENDER = 13,
+  /** BIRTH_DATE - birthdate */
+  BIRTH_DATE = 14,
+  /** ZONE_INFO - zoneinfo */
+  ZONE_INFO = 15,
+  /** LOCALE - locale */
+  LOCALE = 16,
+  /** LOCATION - location */
+  LOCATION = 17,
 }
 
-export function claimFromJSON(object: any): Claim {
+export function wellKnownClaimFromJSON(object: any): WellKnownClaim {
   switch (object) {
     case 0:
-    case "EMAIL":
-      return Claim.EMAIL;
+    case "ISSUER":
+      return WellKnownClaim.ISSUER;
     case 1:
-    case "EMAIL_VERIFIED":
-      return Claim.EMAIL_VERIFIED;
+    case "SUBJECT":
+      return WellKnownClaim.SUBJECT;
+    case 1:
+    case "USERID":
+      return WellKnownClaim.USERID;
     case 2:
     case "NAME":
-      return Claim.NAME;
+      return WellKnownClaim.NAME;
     case 3:
-    case "NICKNAME":
-      return Claim.NICKNAME;
+    case "GIVEN_NAME":
+      return WellKnownClaim.GIVEN_NAME;
     case 4:
-    case "LOCATION":
-      return Claim.LOCATION;
+    case "FAMILY_NAME":
+      return WellKnownClaim.FAMILY_NAME;
     case 5:
-    case "PROVIDER":
-      return Claim.PROVIDER;
+    case "MIDDLE_NAME":
+      return WellKnownClaim.MIDDLE_NAME;
     case 6:
-    case "USERID":
-      return Claim.USERID;
+    case "NICKNAME":
+      return WellKnownClaim.NICKNAME;
+    case 7:
+    case "PREFERRED_USERNAME":
+      return WellKnownClaim.PREFERRED_USERNAME;
+    case 8:
+    case "PROFILE":
+      return WellKnownClaim.PROFILE;
+    case 9:
+    case "PICTURE":
+      return WellKnownClaim.PICTURE;
+    case 10:
+    case "WEBSITE":
+      return WellKnownClaim.WEBSITE;
+    case 11:
+    case "EMAIL":
+      return WellKnownClaim.EMAIL;
+    case 12:
+    case "EMAIL_VERIFIED":
+      return WellKnownClaim.EMAIL_VERIFIED;
+    case 13:
+    case "GENDER":
+      return WellKnownClaim.GENDER;
+    case 14:
+    case "BIRTH_DATE":
+      return WellKnownClaim.BIRTH_DATE;
+    case 15:
+    case "ZONE_INFO":
+      return WellKnownClaim.ZONE_INFO;
+    case 16:
+    case "LOCALE":
+      return WellKnownClaim.LOCALE;
+    case 17:
+    case "LOCATION":
+      return WellKnownClaim.LOCATION;
     default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum Claim");
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum WellKnownClaim");
   }
 }
 
-export function claimToJSON(object: Claim): string {
+export function wellKnownClaimToJSON(object: WellKnownClaim): string {
   switch (object) {
-    case Claim.EMAIL:
-      return "EMAIL";
-    case Claim.EMAIL_VERIFIED:
-      return "EMAIL_VERIFIED";
-    case Claim.NAME:
-      return "NAME";
-    case Claim.NICKNAME:
-      return "NICKNAME";
-    case Claim.LOCATION:
-      return "LOCATION";
-    case Claim.PROVIDER:
-      return "PROVIDER";
-    case Claim.USERID:
+    case WellKnownClaim.ISSUER:
+      return "ISSUER";
+    case WellKnownClaim.SUBJECT:
+      return "SUBJECT";
+    case WellKnownClaim.USERID:
       return "USERID";
+    case WellKnownClaim.NAME:
+      return "NAME";
+    case WellKnownClaim.GIVEN_NAME:
+      return "GIVEN_NAME";
+    case WellKnownClaim.FAMILY_NAME:
+      return "FAMILY_NAME";
+    case WellKnownClaim.MIDDLE_NAME:
+      return "MIDDLE_NAME";
+    case WellKnownClaim.NICKNAME:
+      return "NICKNAME";
+    case WellKnownClaim.PREFERRED_USERNAME:
+      return "PREFERRED_USERNAME";
+    case WellKnownClaim.PROFILE:
+      return "PROFILE";
+    case WellKnownClaim.PICTURE:
+      return "PICTURE";
+    case WellKnownClaim.WEBSITE:
+      return "WEBSITE";
+    case WellKnownClaim.EMAIL:
+      return "EMAIL";
+    case WellKnownClaim.EMAIL_VERIFIED:
+      return "EMAIL_VERIFIED";
+    case WellKnownClaim.GENDER:
+      return "GENDER";
+    case WellKnownClaim.BIRTH_DATE:
+      return "BIRTH_DATE";
+    case WellKnownClaim.ZONE_INFO:
+      return "ZONE_INFO";
+    case WellKnownClaim.LOCALE:
+      return "LOCALE";
+    case WellKnownClaim.LOCATION:
+      return "LOCATION";
     default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum Claim");
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum WellKnownClaim");
   }
 }
 
@@ -803,7 +894,7 @@ export interface OperationRoleConfig {
 
 export interface ClaimConfig {
   variableName: string;
-  claim: Claim;
+  claim: WellKnownClaim;
 }
 
 export interface CustomClaimConfig {
@@ -2138,14 +2229,14 @@ export const ClaimConfig = {
   fromJSON(object: any): ClaimConfig {
     return {
       variableName: isSet(object.variableName) ? String(object.variableName) : "",
-      claim: isSet(object.claim) ? claimFromJSON(object.claim) : 0,
+      claim: isSet(object.claim) ? wellKnownClaimFromJSON(object.claim) : 0,
     };
   },
 
   toJSON(message: ClaimConfig): unknown {
     const obj: any = {};
     message.variableName !== undefined && (obj.variableName = message.variableName);
-    message.claim !== undefined && (obj.claim = claimToJSON(message.claim));
+    message.claim !== undefined && (obj.claim = wellKnownClaimToJSON(message.claim));
     return obj;
   },
 

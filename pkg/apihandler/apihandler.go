@@ -972,6 +972,71 @@ func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables 
 	return variables, nil
 }
 
+func injectWellKnownClaims(claims []*wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+	var err error
+	for _, claim := range claims {
+		var replacement string
+
+		switch claim.Claim {
+		case wgpb.WellKnownClaim_ISSUER:
+			replacement = user.ProviderID
+		case wgpb.WellKnownClaim_SUBJECT: // handles  wgpb.WellKnownClaim_USERID too
+			replacement = user.UserID
+		case wgpb.WellKnownClaim_NAME:
+			replacement = user.Name
+		case wgpb.WellKnownClaim_GIVEN_NAME:
+			replacement = user.FirstName
+		case wgpb.WellKnownClaim_FAMILY_NAME:
+			replacement = user.LastName
+		case wgpb.WellKnownClaim_MIDDLE_NAME:
+			replacement = user.MiddleName
+		case wgpb.WellKnownClaim_NICKNAME:
+			replacement = user.NickName
+		case wgpb.WellKnownClaim_PREFERRED_USERNAME:
+			replacement = user.PreferredUsername
+		case wgpb.WellKnownClaim_PROFILE:
+			replacement = user.Profile
+		case wgpb.WellKnownClaim_PICTURE:
+			replacement = user.Picture
+		case wgpb.WellKnownClaim_WEBSITE:
+			replacement = user.Website
+		case wgpb.WellKnownClaim_EMAIL:
+			replacement = user.Email
+		case wgpb.WellKnownClaim_EMAIL_VERIFIED:
+			var boolValue string
+			if user.EmailVerified {
+				boolValue = "true"
+			} else {
+				boolValue = "false"
+			}
+			variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+			if err != nil {
+				return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.Claim, err)
+			}
+			// Don't go into the block after the switch that sets the variable as a string
+			continue
+		case wgpb.WellKnownClaim_GENDER:
+			replacement = user.Gender
+		case wgpb.WellKnownClaim_BIRTH_DATE:
+			replacement = user.BirthDate
+		case wgpb.WellKnownClaim_ZONE_INFO:
+			replacement = user.ZoneInfo
+		case wgpb.WellKnownClaim_LOCALE:
+			replacement = user.Locale
+		case wgpb.WellKnownClaim_LOCATION:
+			replacement = user.Location
+		default:
+			return nil, fmt.Errorf("unhandled well known claim %s", claim.Claim)
+		}
+		variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+		if err != nil {
+			return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.Claim, err)
+		}
+	}
+
+	return variables, nil
+}
+
 func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
 	authorizationConfig := operation.GetAuthorizationConfig()
 	claims := authorizationConfig.GetClaims()
@@ -983,27 +1048,10 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	if user == nil {
 		return variables, nil
 	}
-	for _, claim := range claims {
-		switch claim.Claim {
-		case wgpb.Claim_USERID:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.UserID+"\""), claim.VariableName)
-		case wgpb.Claim_EMAIL:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Email+"\""), claim.VariableName)
-		case wgpb.Claim_EMAIL_VERIFIED:
-			if user.EmailVerified {
-				variables, _ = jsonparser.Set(variables, []byte("true"), claim.VariableName)
-			} else {
-				variables, _ = jsonparser.Set(variables, []byte("false"), claim.VariableName)
-			}
-		case wgpb.Claim_LOCATION:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Location+"\""), claim.VariableName)
-		case wgpb.Claim_NAME:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Name+"\""), claim.VariableName)
-		case wgpb.Claim_NICKNAME:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.NickName+"\""), claim.VariableName)
-		case wgpb.Claim_PROVIDER:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.ProviderID+"\""), claim.VariableName)
-		}
+	var err error
+	variables, err = injectWellKnownClaims(claims, user, variables)
+	if err != nil {
+		return nil, err
 	}
 	customUserClaimsData, err := json.Marshal(user.CustomClaims)
 	if err != nil {

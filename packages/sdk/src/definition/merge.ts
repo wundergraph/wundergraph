@@ -90,17 +90,89 @@ Adding this directive makes the operation require authentication. For custom cla
 """
 
 directive @fromClaim(
-  name: Claim
+  name: WG_WELL_KNOWN_CLAIM
 ) on VARIABLE_DEFINITION
 
-enum Claim {
+"""
+Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
+"""
+enum WG_WELL_KNOWN_CLAIM {
+	"""
+	iss
+	"""
+	ISSUER
+	"""
+	sub
+	"""
+	SUBJECT
+	"""
+	alias for sub
+	"""
 	USERID
-	EMAIL
-	EMAIL_VERIFIED
+	"""
+	name
+	"""
 	NAME
+	"""
+	given_name
+	"""
+	GIVEN_NAME
+	"""
+	family_name
+	"""
+	FAMILY_NAME
+	"""
+	middle_name
+	"""
+	MIDDLE_NAME
+	"""
+	nickname
+	"""
 	NICKNAME
+	"""
+	preferred_username
+	"""
+	PREFERRED_USERNAME
+	"""
+	profile
+	"""
+	PROFILE
+	"""
+	picture
+	"""
+	PICTURE
+	"""
+	website
+	"""
+	WEBSITE
+	"""
+	email
+	"""
+	EMAIL
+	"""
+	email_verified
+	"""
+	EMAIL_VERIFIED
+	"""
+	gender
+	"""
+	GENDER
+	"""
+	birthdate
+	"""
+	BIRTH_DATE
+	"""
+	zoneinfo
+	"""
+	ZONE_INFO
+	"""
+	locale
+	"""
+	LOCALE
+	"""
+	location
+	"""
 	LOCATION
-	PROVIDER
 }
 
 """
