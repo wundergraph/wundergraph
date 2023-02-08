@@ -16,7 +16,7 @@ export function QuickLink({ title, description, href, icon, logo, children, more
 			)}
 		>
 			<div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-500 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.pink.50)),var(--quick-links-hover-bg,theme(colors.pink.50)))_padding-box,linear-gradient(to_top,theme(colors.purple.400),theme(colors.pink.400))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.gray.800)]" />
-			<div className="relative overflow-hidden rounded-xl p-6">
+			<div className="relative w-full overflow-hidden rounded-xl p-6">
 				{icon && <Icon icon={icon} className="mb-4 h-8 w-8 text-pink-500" />}
 				{logo && <span className="mb-4 flex h-8 text-black dark:text-white">{logo}</span>}
 				<h2 className="font-display text-base text-gray-900 dark:text-white">

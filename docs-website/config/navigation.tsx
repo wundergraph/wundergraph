@@ -12,7 +12,6 @@ import {
 	CogIcon,
 	CommandLineIcon,
 	QuestionMarkCircleIcon,
-	BugAntIcon,
 	WrenchIcon,
 	ArrowUpCircleIcon,
 	LightBulbIcon,
@@ -300,36 +299,48 @@ const navigation = [
 				href: '/docs/auth',
 			},
 			{
-				title: 'OIDC Providers',
+				title: 'Cookie-based Auth',
 				links: [
 					{
+						title: 'Overview',
+						href: '/docs/auth/cookie-based-auth',
+					},
+					{
 						title: 'OpenID Connect',
-						href: '/docs/auth/openid-connect',
+						href: '/docs/auth/cookie-based-auth/openid-connect',
 					},
 					{
 						title: 'Auth0',
-						href: '/docs/auth/auth0',
+						href: '/docs/auth/cookie-based-auth/auth0',
 					},
 					{
 						title: 'Keycloak',
-						href: '/docs/auth/keycloak',
+						href: '/docs/auth/cookie-based-auth/keycloak',
 					},
 					{
 						title: 'GitHub',
-						href: '/docs/auth/github',
+						href: '/docs/auth/cookie-based-auth/github',
 					},
 					{
 						title: 'Google',
-						href: '/docs/auth/google',
+						href: '/docs/auth/cookie-based-auth/google',
 					},
 				],
 			},
 			{
-				title: 'Token based auth',
+				title: 'Token-based Auth',
 				links: [
 					{
+						title: 'Overview',
+						href: '/docs/auth/token-based-auth',
+					},
+					{
 						title: 'Auth.js (NextAuth)',
-						href: '/docs/auth/auth-js',
+						href: '/docs/auth/token-based-auth/auth-js',
+					},
+					{
+						title: 'OpenID Connect',
+						href: '/docs/auth/token-based-auth/openid-connect',
 					},
 				],
 			},
@@ -1178,7 +1189,7 @@ const navigation = [
 				],
 			},
 			{
-				title: 'wunderctl Reference',
+				title: 'wunderctl reference',
 				links: [
 					{
 						title: 'Overview',
