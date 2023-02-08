@@ -102,6 +102,10 @@ enum WG_WELL_KNOWN_CLAIM {
 	"""
 	ISSUER
 	"""
+	deprecated alias for ISSUER
+	"""
+	PROVIDER
+	"""
 	sub
 	"""
 	SUBJECT

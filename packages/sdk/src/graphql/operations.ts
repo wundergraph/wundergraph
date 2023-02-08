@@ -463,6 +463,7 @@ const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: 
 const parseWellKnownClaim = (name: string) => {
 	const claims: Record<string, WellKnownClaim> = {
 		ISSUER: WellKnownClaim.ISSUER,
+		PROVIDER: WellKnownClaim.PROVIDER,
 		SUBJECT: WellKnownClaim.SUBJECT,
 		USERID: WellKnownClaim.USERID,
 		NAME: WellKnownClaim.NAME,

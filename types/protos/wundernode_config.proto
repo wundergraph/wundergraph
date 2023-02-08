@@ -211,6 +211,7 @@ enum WellKnownClaim {
 	// https://www.iana.org/assignments/jwt/jwt.xhtml
 	option allow_alias = true;
 	ISSUER = 0; // iss
+	PROVIDER = 0; // alias for iss, deprecated
 	SUBJECT = 1; // sub
 	USERID = 1; // alias for sub
 	NAME = 2; // name

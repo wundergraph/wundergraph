@@ -1209,6 +1209,8 @@ type Subscription {
 enum WG_WELL_KNOWN_CLAIM {
   """iss"""
   ISSUER
+  """deprecated alias for ISSUER"""
+  PROVIDER
   """sub"""
   SUBJECT
   """alias for sub"""
@@ -2501,6 +2503,8 @@ type Subscription {
 enum WG_WELL_KNOWN_CLAIM {
   """iss"""
   ISSUER
+  """deprecated alias for ISSUER"""
+  PROVIDER
   """sub"""
   SUBJECT
   """alias for sub"""

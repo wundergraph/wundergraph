@@ -171,6 +171,7 @@ describe('test well known claims (@fromClaim())', () => {
 		const data = result.data!;
 
 		expect(data.issuer).toBe(`string: ${tokenIssuer}`);
+		expect(data.provider).toBe(`string: ${tokenIssuer}`);
 		expect(data.subject).toBe(`string: ${wellKnownClaims.sub}`);
 		expect(data.userID).toBe(`string: ${wellKnownClaims.sub}`);
 		expect(data.name).toBe(`string: ${wellKnownClaims.name}`);

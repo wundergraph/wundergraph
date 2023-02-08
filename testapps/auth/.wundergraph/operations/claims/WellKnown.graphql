@@ -1,5 +1,6 @@
 query (
 	$issuer: String! @fromClaim(name: ISSUER)
+	$provider: String! @fromClaim(name: PROVIDER)
 	$userID: String! @fromClaim(name: USERID)
 	$subject: String! @fromClaim(name: SUBJECT)
 	$name: String! @fromClaim(name: NAME)
@@ -20,6 +21,7 @@ query (
 	$location: String! @fromClaim(name: LOCATION)
 ) {
 	issuer: echo_string(input: $issuer)
+	provider: echo_string(input: $provider)
 	userID: echo_string(input: $userID)
 	subject: echo_string(input: $subject)
 	name: echo_string(input: $name)

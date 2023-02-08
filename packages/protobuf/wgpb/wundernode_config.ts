@@ -215,6 +215,8 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
 export enum WellKnownClaim {
   /** ISSUER - iss */
   ISSUER = 0,
+  /** PROVIDER - alias for iss, deprecated */
+  PROVIDER = 0,
   /** SUBJECT - sub */
   SUBJECT = 1,
   /** USERID - alias for sub */
@@ -258,6 +260,9 @@ export function wellKnownClaimFromJSON(object: any): WellKnownClaim {
     case 0:
     case "ISSUER":
       return WellKnownClaim.ISSUER;
+    case 0:
+    case "PROVIDER":
+      return WellKnownClaim.PROVIDER;
     case 1:
     case "SUBJECT":
       return WellKnownClaim.SUBJECT;
@@ -321,6 +326,8 @@ export function wellKnownClaimToJSON(object: WellKnownClaim): string {
   switch (object) {
     case WellKnownClaim.ISSUER:
       return "ISSUER";
+    case WellKnownClaim.PROVIDER:
+      return "PROVIDER";
     case WellKnownClaim.SUBJECT:
       return "SUBJECT";
     case WellKnownClaim.USERID:
