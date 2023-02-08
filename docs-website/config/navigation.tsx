@@ -824,8 +824,22 @@ const navigation = [
 				href: '/docs/cloud',
 			},
 			{
-				title: 'Deploy to WunderGraph Cloud',
-				href: '/docs/cloud/deployments',
+				title: 'Deployments',
+				links: [
+					{
+						title: 'Deploy to WunderGraph Cloud',
+						href: '/docs/cloud/deployments',
+					},
+				],
+			},
+			{
+				title: 'Integrations',
+				links: [
+					{
+						title: 'Vercel',
+						href: '/docs/cloud/integrations/vercel',
+					},
+				],
 			},
 		],
 	},
