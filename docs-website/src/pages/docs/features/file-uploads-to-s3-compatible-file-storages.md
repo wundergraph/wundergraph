@@ -166,7 +166,7 @@ const result = await upload({
   provider: 'minio',
   profile: 'avatar',
   files,
-})
+});
 ```
 
 When using a profile with required metadata, `upload()` argument will also need to include a properly defined `metadata` field,
