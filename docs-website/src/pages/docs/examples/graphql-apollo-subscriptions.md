@@ -4,7 +4,7 @@ pageTitle: WunderGraph - Examples - GraphQL Apollo WS subscriptions
 description:
 ---
 
-[Check the example](https://github.com/wundergraph/wundergraph/tree/main/examples/graphql-apollo-subscripptions)
+[Check the example](https://github.com/wundergraph/wundergraph/tree/main/examples/graphql-apollo-subscriptions)
 
 ## Getting started
 
