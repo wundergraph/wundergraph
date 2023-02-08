@@ -284,7 +284,7 @@ func (e *Engine) ensurePrisma() error {
 	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
 
 	if runtime.GOOS == "windows" {
-		// Append .exe prefix
+		// Append .exe suffix
 		e.queryEnginePath += ".exe"
 		e.introspectionEnginePath += ".exe"
 	}
