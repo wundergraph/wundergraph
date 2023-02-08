@@ -20,11 +20,17 @@ configureWunderGraphApplication({
 			tenantID: {
 				jsonPath: 'teid',
 			},
-			/** Implicit: string */
 			shopID: {
 				jsonPath: 'shop.id',
 				type: ValueType.INT,
 				required: false,
+			},
+			floatingPointValue: {
+				jsonPath: 'f.f.f.f',
+				type: ValueType.FLOAT,
+			},
+			nonExistingDeepValue: {
+				jsonPath: 'a.b.c.d.e.f.g.h.i',
 			},
 		},
 	},

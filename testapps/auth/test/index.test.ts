@@ -11,6 +11,15 @@ const wg = createTestServer({ fetch: fetch as any });
 
 const tokenIssuer = 'https://example.com';
 const defaultTokenSubject = 'admin';
+const floatingPointClaim = {
+	f: {
+		f: {
+			f: {
+				f: 1.2345,
+			},
+		},
+	},
+};
 
 const makeToken = (payload: jose.JWTPayload, privateKey: jose.KeyLike) => {
 	return new jose.SignJWT(payload)
@@ -33,6 +42,7 @@ type Tokens = {
 	withTenantID: string;
 	withShopIDInteger: string;
 	WithShopIDString: string;
+	withFloatingPoint: string;
 };
 
 let tokens: Tokens | undefined;
@@ -84,6 +94,7 @@ const startServer = async () => {
 		withTenantID: await makeToken({ teid: tenantID }, privateKey),
 		withShopIDInteger: await makeToken({ shop: { id: shopID } }, privateKey),
 		WithShopIDString: await makeToken({ shop: { id: `${shopID}` } }, privateKey),
+		withFloatingPoint: await makeToken(floatingPointClaim, privateKey),
 	};
 	return wg.start();
 };
@@ -148,7 +159,7 @@ describe('test token Authorization', () => {
 });
 
 describe('test well known claims (@fromClaim())', () => {
-	test.only('all well known claims have the expected value', async () => {
+	test('all well known claims have the expected value', async () => {
 		const client = wg.client();
 		client.setAuthorizationToken(tokens!.wellKnownClaims);
 		const result = await client.query({
@@ -193,6 +204,17 @@ describe('test @fromCustomClaim', () => {
 		expect(result.data?.echo_string).toBe(`string: ${tenantID}`);
 	});
 
+	test('token missing required custom claim', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.default);
+		const result = await client.query({
+			operationName: 'claims/TenantID',
+		});
+		expect(result.data).toBeUndefined();
+		expect(result.error).toBeDefined();
+		expect(result.error?.message).toBe('required customClaim tenantID not found');
+	});
+
 	test('token with nested integer custom claim', async () => {
 		const client = wg.client();
 		client.setAuthorizationToken(tokens!.withShopIDInteger);
@@ -215,7 +237,6 @@ describe('test @fromCustomClaim', () => {
 	});
 
 	test('token with custom claim not required', async () => {
-		const defaultShopID = 99; // From ShopID.graphql
 		const client = wg.client();
 		client.setAuthorizationToken(tokens!.default);
 		const result = await client.query({
@@ -225,5 +246,16 @@ describe('test @fromCustomClaim', () => {
 		// missing
 		expect(result.data).toBeUndefined();
 		expect(result.error?.message).toBe('Variable "$input" of non-null type "Int!" must not be null.');
+	});
+
+	test('token with floating point custom claim', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withFloatingPoint);
+		const result = await client.query({
+			operationName: 'claims/FloatingPointValue',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+		expect(result.data?.echo_float).toBe(`float: ${floatingPointClaim.f.f.f.f}`);
 	});
 });
