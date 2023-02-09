@@ -2,7 +2,7 @@
 export const template = `
 import type { HooksConfig } from "./wundergraph.hooks";
 import type { InternalClient } from "./wundergraph.internal.client"
-import type { Claims } from "./claims";
+import type { CustomClaims } from "./claims";
 import type { GraphQLServerConfig, BaseRequestContext, WunderGraphUser } from "@wundergraph/sdk/server";
 
 export type Role = {{{ roleDefinitions }}};
