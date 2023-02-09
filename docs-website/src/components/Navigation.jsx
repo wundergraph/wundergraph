@@ -158,7 +158,7 @@ const NavLink = ({ href, title, icon, className }) => {
 			ref={ref}
 			href={href || ''}
 			className={clsx(
-				'flex w-full items-center py-2 pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:-mt-0.5 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full',
+				'5 flex w-full items-center py-2 pl-3.5 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full',
 				href === router.pathname
 					? 'font-semibold text-pink-500 before:bg-pink-500'
 					: 'text-gray-500 before:hidden before:bg-gray-300 hover:text-gray-800 hover:before:block dark:text-gray-400 dark:before:bg-gray-700 dark:hover:text-gray-300',
