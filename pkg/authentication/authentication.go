@@ -154,13 +154,13 @@ type User struct {
 	PreferredUsername string `json:"preferredUsername,omitempty"`
 	Profile           string `json:"profile,omitempty"`
 	Picture           string `json:"picture,omitempty"`
-	Website           string `json:"website"`
+	Website           string `json:"website,omitempty"`
 	Email             string `json:"email,omitempty"`
 	EmailVerified     bool   `json:"emailVerified,omitempty"`
 	Gender            string `json:"gender,omitempty"`
 	BirthDate         string `json:"birthDate,omitempty"`
 	ZoneInfo          string `json:"zoneInfo,omitempty"`
-	Locale            string `json:"localeomitempty"`
+	Locale            string `json:"locale,omitempty"`
 	Location          string `json:"location,omitempty"`
 
 	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`

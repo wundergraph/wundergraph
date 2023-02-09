@@ -1,5 +1,6 @@
 import { ClientResponseError } from './ClientResponseError';
 import type { RequiredKeysOf, SetRequired } from 'type-fest';
+import { WunderGraphUser } from '../server';
 
 export type Headers = { [key: string]: string };
 
@@ -150,28 +151,7 @@ export interface FetchUserRequestOptions {
 	revalidate?: boolean;
 }
 
-export interface User<Role extends string = string> {
-	provider?: string;
-	providerId?: string;
-	email?: string;
-	emailVerified?: boolean;
-	name?: string;
-	firstName?: string;
-	lastName?: string;
-	nickName?: string;
-	description?: string;
-	userId?: string;
-	avatarUrl?: string;
-	location?: string;
-	roles?: Role[];
-	customAttributes?: string[];
-	customClaims?: {
-		[key: string]: any;
-	};
-	accessToken?: JSONObject;
-	idToken?: JSONObject;
-	rawIdToken?: string;
-}
+export type User<Role extends string = string> = WunderGraphUser<Role>;
 
 export interface LogoutOptions {
 	/**

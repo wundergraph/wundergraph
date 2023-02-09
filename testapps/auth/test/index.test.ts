@@ -191,6 +191,37 @@ describe('test well known claims (@fromClaim())', () => {
 		expect(data.locale).toBe(`string: ${wellKnownClaims.locale}`);
 		expect(data.location).toBe(`string: ${wellKnownClaims.location}`);
 	});
+
+	test('all well known claims have the expected value in User', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.wellKnownClaims);
+		const result = await client.query({
+			operationName: 'claims/User',
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+
+		const data = result.data!;
+
+		expect(data.providerId).toBe(tokenIssuer);
+		expect(data.userId).toBe(wellKnownClaims.sub);
+		expect(data.name).toBe(wellKnownClaims.name);
+		expect(data.firstName).toBe(wellKnownClaims.given_name);
+		expect(data.lastName).toBe(wellKnownClaims.family_name);
+		expect(data.middleName).toBe(wellKnownClaims.middle_name);
+		expect(data.nickName).toBe(wellKnownClaims.nickname);
+		expect(data.preferredUsername).toBe(wellKnownClaims.preferred_username);
+		expect(data.profile).toBe(wellKnownClaims.profile);
+		expect(data.picture).toBe(wellKnownClaims.picture);
+		expect(data.website).toBe(wellKnownClaims.website);
+		expect(data.email).toBe(wellKnownClaims.email);
+		expect(data.emailVerified).toBe(wellKnownClaims.email_verified);
+		expect(data.gender).toBe(wellKnownClaims.gender);
+		expect(data.birthDate).toBe(wellKnownClaims.birthdate);
+		expect(data.zoneInfo).toBe(wellKnownClaims.zoneinfo);
+		expect(data.locale).toBe(wellKnownClaims.locale);
+		expect(data.location).toBe(wellKnownClaims.location);
+	});
 });
 
 describe('test @fromCustomClaim', () => {
