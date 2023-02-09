@@ -14,6 +14,8 @@ import {
 	SubscriptionEventHandler,
 	FetchUserRequestOptions,
 } from "@wundergraph/sdk/client";
+
+import type { CustomClaims } from "./claims";
 import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
@@ -144,7 +146,7 @@ export class WunderGraphClient extends Client {
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
 	}
-	public async fetchUser<TUser extends User = User<UserRole>>(options?: FetchUserRequestOptions) {
+	public async fetchUser<TUser extends User = User<UserRole, CustomClaims>>(options?: FetchUserRequestOptions) {
 		return super.fetchUser<TUser>(options);
 	}
 }

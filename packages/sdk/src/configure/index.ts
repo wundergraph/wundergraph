@@ -1272,7 +1272,7 @@ const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation)
 
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any>
 ): GraphQLOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

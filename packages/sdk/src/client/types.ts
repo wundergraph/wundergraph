@@ -151,7 +151,7 @@ export interface FetchUserRequestOptions {
 	revalidate?: boolean;
 }
 
-export type User<Role extends string = string> = WunderGraphUser<Role>;
+export type User<Role extends string = string, CustomClaims extends {} = {}> = WunderGraphUser<Role, CustomClaims>;
 
 export interface LogoutOptions {
 	/**

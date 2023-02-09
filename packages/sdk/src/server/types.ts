@@ -123,7 +123,7 @@ export type JSONObject = { [key: string]: JSONValue };
 
 // Changed the default type of Role to any.
 // It should be worked on
-export interface WunderGraphUser<Role extends string = any> {
+export interface WunderGraphUser<Role extends string = any, CustomClaims extends {} = {}> {
 	provider?: string;
 	providerId?: string;
 	userId?: string;
@@ -148,7 +148,7 @@ export interface WunderGraphUser<Role extends string = any> {
 	customAttributes?: string[];
 	customClaims?: {
 		[key: string]: any;
-	};
+	} & CustomClaims;
 	accessToken?: JSONObject;
 	rawAccessToken?: string;
 	idToken?: JSONObject;
