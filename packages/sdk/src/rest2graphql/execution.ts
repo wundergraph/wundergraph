@@ -17,7 +17,7 @@ interface OpenApiSpec {
 	headers: string[];
 }
 
-export const createExecutableSchema = async (specName: string): Promise<GraphQLSchema> => {
+export const createExecutableSchema = async (specName: string) => {
 	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation, specName);
 	const specContent = fs.readFileSync(fullSpecPath).toString();
 	const spec: OpenApiSpec = JSON.parse(specContent);
@@ -50,7 +50,7 @@ export const createExecutableSchema = async (specName: string): Promise<GraphQLS
 		},
 	});
 
-	return new Promise((resolve) => resolve(schema));
+	return schema;
 };
 
 export const writeApiInfo = (name: string, spec: OasSpec, introspection: OpenAPIIntrospection) => {

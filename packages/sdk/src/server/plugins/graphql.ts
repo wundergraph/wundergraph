@@ -36,14 +36,25 @@ export interface ExecutionContext {
 	wundergraph: ServerContext;
 }
 
-const FastifyGraphQLPlugin: FastifyPluginAsync<GraphQLServerConfig> = async (fastify, config) => {
-	const schema = await config.schema;
+export interface LazyGraphQLServerConfig extends Omit<GraphQLServerConfig, 'schema'> {
+	schema: GraphQLSchema | Promise<GraphQLSchema> | (() => Promise<GraphQLSchema>);
+}
+
+const lazyLoadSchema = (schema: LazyGraphQLServerConfig['schema']) =>
+	typeof schema === 'function' ? schema() : schema;
+
+const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async (fastify, config) => {
 	const baseContext = await config.baseContext;
+	let schema: GraphQLSchema;
 
 	fastify.route({
 		method: ['GET', 'POST'],
 		url: config.routeUrl,
 		async handler(req, reply) {
+			if (!schema) {
+				schema = await lazyLoadSchema(config.schema);
+			}
+
 			const request = {
 				body: req.body,
 				headers: req.headers,

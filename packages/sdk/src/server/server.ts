@@ -1,7 +1,7 @@
 import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify, { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import type { InternalClient } from './internal-client';
 import { InternalClientFactory, internalClientFactory } from './internal-client';
 import { pino } from 'pino';
@@ -26,6 +26,7 @@ import type {
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { createExecutableSchema, openApiSpecsLocation } from '../rest2graphql';
+import { LazyGraphQLServerConfig } from './plugins/graphql';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -243,12 +244,11 @@ export const createServer = async ({
 			for await (const specPath of specPaths) {
 				const ext = path.extname(specPath);
 				const apiName = path.basename(specPath, ext);
-				const schema = createExecutableSchema(specPath);
 				const routeUrl = openApiServerMountPath(apiName);
 
-				await fastify.register(require('./plugins/graphql'), {
+				fastify.register(require('./plugins/graphql') as FastifyPluginAsync<LazyGraphQLServerConfig>, {
 					serverName: apiName,
-					schema: schema,
+					schema: () => createExecutableSchema(specPath),
 					routeUrl: routeUrl,
 				});
 				fastify.log.info('GraphQL plugin registered');
