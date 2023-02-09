@@ -9,5 +9,5 @@ export const RemixLogo = (props) => {
 				></path>
 			</g>
 		</svg>
-	)
-}
+	);
+};
