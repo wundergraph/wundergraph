@@ -22,12 +22,12 @@ configureWunderGraphApplication({
 			},
 			shopID: {
 				jsonPath: 'shop.id',
-				type: ValueType.INT,
+				type: 'int',
 				required: false,
 			},
 			floatingPointValue: {
 				jsonPath: 'f.f.f.f',
-				type: ValueType.FLOAT,
+				type: 'float',
 			},
 			nonExistingDeepValue: {
 				jsonPath: 'a.b.c.d.e.f.g.h.i',

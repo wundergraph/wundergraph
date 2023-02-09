@@ -137,9 +137,9 @@ export interface CustomClaim {
 
 	/** Value type
 	 *
-	 * @default ValueType.STRING
+	 * @default 'string'
 	 */
-	type?: ValueType;
+	type?: 'string' | 'int' | 'float' | 'boolean';
 
 	/** If required is true, users without this claim will
 	 * fail to authenticate
@@ -1159,10 +1159,30 @@ const resolveOperationsConfigurations = async (
 	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
 	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
+		let claimType: ValueType;
+		switch (claim.type) {
+			case 'string':
+				claimType = ValueType.STRING;
+				break;
+			case 'int':
+				claimType = ValueType.INT;
+				break;
+			case 'float':
+				claimType = ValueType.FLOAT;
+				break;
+			case 'boolean':
+				claimType = ValueType.FLOAT;
+				break;
+			case undefined:
+				claimType = ValueType.STRING;
+				break;
+			default:
+				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
+		}
 		return {
 			name: key,
 			jsonPathComponents: claim.jsonPath.split('.'),
-			type: claim.type ?? ValueType.STRING,
+			type: claimType,
 			required: claim.required ?? true,
 		};
 	});

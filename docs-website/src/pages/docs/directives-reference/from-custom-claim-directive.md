@@ -19,18 +19,17 @@ configureWunderGraphApplication({
   ...
 	authentication: {
 		customClaims: {
-      // Implicit: required
+			// Implicit: required
 			SHOPID: {
 				jsonPath: 'shop.id', // Nested 'id' field inside a 'shop' object
-				type: ValueType.INT, // Must be an integer
+				type: 'int', // Must be an integer
 			},
 			// Implicit: string
 			TENANTID: {
 				jsonPath: 'teid',
-        required: false, // Optional
+				required: false, // Optional
 			},
-    },
-  },
+	},
 });
 ```
 
