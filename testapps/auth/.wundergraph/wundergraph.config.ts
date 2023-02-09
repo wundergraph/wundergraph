@@ -1,4 +1,4 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, templates, ValueType } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
