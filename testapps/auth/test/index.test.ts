@@ -224,7 +224,7 @@ describe('test well known claims (@fromClaim())', () => {
 	});
 });
 
-describe('test @fromCustomClaim', () => {
+describe('test @fromClaim with custom claims', () => {
 	test('token with string custom claim', async () => {
 		const client = wg.client();
 		client.setAuthorizationToken(tokens!.withTenantID);

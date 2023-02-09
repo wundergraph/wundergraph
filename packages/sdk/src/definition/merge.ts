@@ -85,101 +85,6 @@ const mergeTypeConfigurations = <T extends {} = {}>(apis: Api<T>[]): TypeConfigu
 
 export const baseSchema = `
 """
-The @fromClaim directive sets the variable to the value retrieved from the given well-known Claim.
-Adding this directive makes the operation require authentication. For custom claims, see @fromCustomClaim.
-"""
-
-directive @fromClaim(
-  name: WG_WELL_KNOWN_CLAIM
-) on VARIABLE_DEFINITION
-
-"""
-Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
-"""
-enum WG_WELL_KNOWN_CLAIM {
-	"""
-	iss
-	"""
-	ISSUER
-	"""
-	deprecated alias for ISSUER
-	"""
-	PROVIDER
-	"""
-	sub
-	"""
-	SUBJECT
-	"""
-	alias for sub
-	"""
-	USERID
-	"""
-	name
-	"""
-	NAME
-	"""
-	given_name
-	"""
-	GIVEN_NAME
-	"""
-	family_name
-	"""
-	FAMILY_NAME
-	"""
-	middle_name
-	"""
-	MIDDLE_NAME
-	"""
-	nickname
-	"""
-	NICKNAME
-	"""
-	preferred_username
-	"""
-	PREFERRED_USERNAME
-	"""
-	profile
-	"""
-	PROFILE
-	"""
-	picture
-	"""
-	PICTURE
-	"""
-	website
-	"""
-	WEBSITE
-	"""
-	email
-	"""
-	EMAIL
-	"""
-	email_verified
-	"""
-	EMAIL_VERIFIED
-	"""
-	gender
-	"""
-	GENDER
-	"""
-	birthdate
-	"""
-	BIRTH_DATE
-	"""
-	zoneinfo
-	"""
-	ZONE_INFO
-	"""
-	locale
-	"""
-	LOCALE
-	"""
-	location
-	"""
-	LOCATION
-}
-
-"""
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
 A potential use-case could be that you have a graphql upstream which is not accepting null values for variables.
@@ -344,17 +249,101 @@ enum WG_ROLE {
 }
 `;
 
-const customClaimSchema = (customClaims: string[]) => `
+const claimsSchema = (customClaims: string[]) => `
 """
-The @fromCustomClaim directive sets the variable to the value retrieved one of the custom claims defined by
-your application. Adding this directive makes the operation require authentication.
+The @fromClaim directive sets the variable to the value retrieved from the given a claim.
+Adding this directive makes the operation require authentication.
 """
 
-directive @fromCustomClaim(
-	name: WG_CUSTOM_CLAIM
+directive @fromClaim(
+  name: WG_CLAIM
 ) on VARIABLE_DEFINITION
 
-enum WG_CUSTOM_CLAIM {
+"""
+Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
+"""
+enum WG_CLAIM {
+	"""
+	iss
+	"""
+	ISSUER
+	"""
+	deprecated alias for ISSUER
+	"""
+	PROVIDER
+	"""
+	sub
+	"""
+	SUBJECT
+	"""
+	alias for sub
+	"""
+	USERID
+	"""
+	name
+	"""
+	NAME
+	"""
+	given_name
+	"""
+	GIVEN_NAME
+	"""
+	family_name
+	"""
+	FAMILY_NAME
+	"""
+	middle_name
+	"""
+	MIDDLE_NAME
+	"""
+	nickname
+	"""
+	NICKNAME
+	"""
+	preferred_username
+	"""
+	PREFERRED_USERNAME
+	"""
+	profile
+	"""
+	PROFILE
+	"""
+	picture
+	"""
+	PICTURE
+	"""
+	website
+	"""
+	WEBSITE
+	"""
+	email
+	"""
+	EMAIL
+	"""
+	email_verified
+	"""
+	EMAIL_VERIFIED
+	"""
+	gender
+	"""
+	GENDER
+	"""
+	birthdate
+	"""
+	BIRTH_DATE
+	"""
+	zoneinfo
+	"""
+	ZONE_INFO
+	"""
+	locale
+	"""
+	LOCALE
+	"""
+	location
+	"""
+	LOCATION
+
     ${customClaims.join(' ')}
 }
 `;
@@ -536,9 +525,7 @@ const mergeApiSchemas = <T extends {} = {}>(
 		graphQLSchemas.push(buildSchema(roleSchema(roles), { assumeValidSDL: true }));
 	}
 
-	if (customClaims.length) {
-		graphQLSchemas.push(buildSchema(customClaimSchema(customClaims), { assumeValidSDL: true }));
-	}
+	graphQLSchemas.push(buildSchema(claimsSchema(customClaims), { assumeValidSDL: true }));
 
 	graphQLSchemas.push(buildSchema(dateTimeSchema, { assumeValidSDL: true }));
 	graphQLSchemas.push(buildSchema(uuidSchema, { assumeValidSDL: true }));

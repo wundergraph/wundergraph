@@ -190,7 +190,6 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							AuthorizationConfig: {
 								claims: [],
-								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -335,7 +334,6 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							AuthorizationConfig: {
 								claims: [],
-								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -414,7 +412,6 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							},
 							AuthorizationConfig: {
 								claims: [],
-								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],

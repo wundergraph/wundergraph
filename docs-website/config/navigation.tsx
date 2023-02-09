@@ -1131,10 +1131,6 @@ const navigation = [
 						href: '/docs/directives-reference/from-claim-directive',
 					},
 					{
-						title: '@fromCustomClaim directive',
-						href: '/docs/directives-reference/from-claim-custom-directive',
-					},
-					{
 						title: '@jsonSchema directive',
 						href: '/docs/directives-reference/json-schema-directive',
 					},

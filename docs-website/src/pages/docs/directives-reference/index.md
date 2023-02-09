@@ -9,7 +9,6 @@ isIndexFile: true
 
 {% quick-links %}
 {% quick-link title="@fromClaim directive" icon="core" href="/docs/directives-reference/from-claim-directive" description="Inject Claims into Variables" /%}
-{% quick-link title="@fromCustomClaim directive" icon="core" href="/docs/directives-reference/from-custom-claim-directive" description="Inject Custom Claims into Variables" /%}
 {% quick-link title="@jsonSchema directive" icon="core" href="/docs/directives-reference/json-schema-directive" description="Apply JSON Schema validation" /%}
 {% quick-link title="@hooksVariable directive" icon="core" href="/docs/directives-reference/hooks-variable-directive" description="Define variables for Hooks" /%}
 {% quick-link title="@rbac directive" icon="core" href="/docs/directives-reference/rbac-directive" description="Configure RBAC" /%}

@@ -1,13 +1,12 @@
 import {
 	ClaimConfig,
+	ClaimType,
 	CustomClaim,
-	CustomClaimConfig,
 	InjectVariableKind,
 	OperationExecutionEngine,
 	OperationRoleConfig,
 	OperationType,
 	VariableInjectionConfiguration,
-	WellKnownClaim,
 } from '@wundergraph/protobuf';
 import {
 	buildSchema,
@@ -69,7 +68,6 @@ export interface GraphQLOperation {
 	};
 	AuthorizationConfig: {
 		claims: ClaimConfig[];
-		customClaims: CustomClaimConfig[];
 		roleConfig: OperationRoleConfig;
 	};
 	HooksConfiguration: {
@@ -215,7 +213,6 @@ export const parseGraphQLOperations = (
 							},
 							AuthorizationConfig: {
 								claims: [],
-								customClaims: [],
 								roleConfig: {
 									requireMatchAll: [],
 									requireMatchAny: [],
@@ -243,12 +240,11 @@ export const parseGraphQLOperations = (
 							PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
 						};
 						node.variableDefinitions?.forEach((variable) => {
-							handleFromClaimDirective(variable, operation);
+							handleFromClaimDirective(variable, operation, options.customClaims ?? {});
 							handleJsonSchemaDirective(variable, operation);
 							handleUuidDirective(variable, operation);
 							handleDateTimeDirective(variable, operation);
 							handleInjectEnvironmentVariableDirective(variable, operation);
-							handleFromCustomClaimDirective(variable, operation, options.customClaims ?? {});
 						});
 						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
@@ -461,35 +457,39 @@ const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: 
 };
 
 const parseWellKnownClaim = (name: string) => {
-	const claims: Record<string, WellKnownClaim> = {
-		ISSUER: WellKnownClaim.ISSUER,
-		PROVIDER: WellKnownClaim.PROVIDER,
-		SUBJECT: WellKnownClaim.SUBJECT,
-		USERID: WellKnownClaim.USERID,
-		NAME: WellKnownClaim.NAME,
-		GIVEN_NAME: WellKnownClaim.GIVEN_NAME,
-		FAMILY_NAME: WellKnownClaim.FAMILY_NAME,
-		MIDDLE_NAME: WellKnownClaim.MIDDLE_NAME,
-		NICKNAME: WellKnownClaim.NICKNAME,
-		PREFERRED_USERNAME: WellKnownClaim.PREFERRED_USERNAME,
-		PROFILE: WellKnownClaim.PROFILE,
-		PICTURE: WellKnownClaim.PICTURE,
-		WEBSITE: WellKnownClaim.WEBSITE,
-		EMAIL: WellKnownClaim.EMAIL,
-		EMAIL_VERIFIED: WellKnownClaim.EMAIL_VERIFIED,
-		GENDER: WellKnownClaim.GENDER,
-		BIRTH_DATE: WellKnownClaim.BIRTH_DATE,
-		ZONE_INFO: WellKnownClaim.ZONE_INFO,
-		LOCALE: WellKnownClaim.LOCALE,
-		LOCATION: WellKnownClaim.LOCATION,
+	const claims: Record<string, ClaimType> = {
+		ISSUER: ClaimType.ISSUER,
+		PROVIDER: ClaimType.PROVIDER,
+		SUBJECT: ClaimType.SUBJECT,
+		USERID: ClaimType.USERID,
+		NAME: ClaimType.NAME,
+		GIVEN_NAME: ClaimType.GIVEN_NAME,
+		FAMILY_NAME: ClaimType.FAMILY_NAME,
+		MIDDLE_NAME: ClaimType.MIDDLE_NAME,
+		NICKNAME: ClaimType.NICKNAME,
+		PREFERRED_USERNAME: ClaimType.PREFERRED_USERNAME,
+		PROFILE: ClaimType.PROFILE,
+		PICTURE: ClaimType.PICTURE,
+		WEBSITE: ClaimType.WEBSITE,
+		EMAIL: ClaimType.EMAIL,
+		EMAIL_VERIFIED: ClaimType.EMAIL_VERIFIED,
+		GENDER: ClaimType.GENDER,
+		BIRTH_DATE: ClaimType.BIRTH_DATE,
+		ZONE_INFO: ClaimType.ZONE_INFO,
+		LOCALE: ClaimType.LOCALE,
+		LOCATION: ClaimType.LOCATION,
 	};
 	if (name in claims) {
 		return claims[name];
 	}
-	throw new Error(`unhandled well known claim ${name}`);
+	throw new Error(`unhandled claim ${name}`);
 };
 
-const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+const handleFromClaimDirective = (
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation,
+	customClaims: Record<string, CustomClaim>
+) => {
 	const variableName = variable.variable.name.value;
 	const fromClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromClaim');
 	if (fromClaimDirective === undefined || fromClaimDirective.arguments === undefined) {
@@ -497,17 +497,33 @@ const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: G
 	}
 	const nameArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'name');
 	if (nameArg === undefined) {
-		return;
+		throw new Error('@fromClaim does not have a name: argument');
 	}
 	if (nameArg.value.kind !== 'EnumValue') {
-		return;
+		throw new Error(`@fromClaim name: argument must be a WG_CLAIM, not ${nameArg.value.kind}`);
 	}
 	const claimName = nameArg.value.value;
+	let claim: ClaimConfig;
+	if (claimName in customClaims) {
+		const customClaim = customClaims[claimName];
+		claim = {
+			variableName: variableName,
+			claimType: ClaimType.CUSTOM,
+			custom: {
+				name: claimName,
+				jsonPathComponents: customClaim.jsonPathComponents,
+				type: customClaim.type,
+				required: customClaim.required,
+			},
+		};
+	} else {
+		claim = {
+			variableName: variableName,
+			claimType: parseWellKnownClaim(claimName),
+		};
+	}
 	operation.AuthenticationConfig.required = true;
-	operation.AuthorizationConfig.claims.push({
-		variableName,
-		claim: parseWellKnownClaim(claimName),
-	});
+	operation.AuthorizationConfig.claims.push(claim);
 };
 
 const handleInjectEnvironmentVariableDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
@@ -696,36 +712,6 @@ const handleDateTimeDirective = (variable: VariableDefinitionNode, operation: Gr
 		variableName,
 		dateFormat: '2006-01-02T15:04:05Z07:00',
 		variableKind: InjectVariableKind.DATE_TIME,
-	});
-};
-
-const handleFromCustomClaimDirective = (
-	variable: VariableDefinitionNode,
-	operation: GraphQLOperation,
-	customClaims: Record<string, CustomClaim>
-) => {
-	const variableName = variable.variable.name.value;
-	const fromCustomClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromCustomClaim');
-	if (fromCustomClaimDirective === undefined || fromCustomClaimDirective.arguments === undefined) {
-		return;
-	}
-	const nameArg = fromCustomClaimDirective.arguments.find((arg) => arg.name.value === 'name');
-	if (nameArg === undefined) {
-		throw new Error('@fromCustomClaim does not have a name: argument');
-	}
-	if (nameArg.value.kind !== 'EnumValue') {
-		throw new Error(`@fromCustomClaim name: argument must be a WG_CUSTOM_CLAIM, not ${nameArg.value.kind}`);
-	}
-	const claim = customClaims[nameArg.value.value];
-	if (claim == null) {
-		throw new Error(
-			`@fromCustomClaim claim ${nameArg.value.value} is not declared - available ones are ${customClaims}`
-		);
-	}
-	operation.AuthenticationConfig.required = true;
-	operation.AuthorizationConfig.customClaims.push({
-		variableName: variable.variable.name.value,
-		claim,
 	});
 };
 

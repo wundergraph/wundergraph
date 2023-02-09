@@ -2615,7 +2615,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "AuthorizationConfig": {
         "claims": [],
-        "customClaims": [],
         "roleConfig": {
           "denyMatchAll": [],
           "denyMatchAny": [],
@@ -2716,7 +2715,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "AuthorizationConfig": {
         "claims": [],
-        "customClaims": [],
         "roleConfig": {
           "denyMatchAll": [],
           "denyMatchAny": [],
@@ -2903,7 +2901,6 @@ exports[`parseGraphQLOperations 1`] = `
       },
       "AuthorizationConfig": {
         "claims": [],
-        "customClaims": [],
         "roleConfig": {
           "denyMatchAll": [],
           "denyMatchAny": [],

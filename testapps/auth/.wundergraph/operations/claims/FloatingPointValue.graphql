@@ -1,3 +1,3 @@
-query ($input: Float! @fromCustomClaim(name: floatingPointValue)) {
+query ($input: Float! @fromClaim(name: floatingPointValue)) {
 	echo_float(input: $input)
 }

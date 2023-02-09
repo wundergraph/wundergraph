@@ -107,7 +107,6 @@ const tags = {
 	'@directive': '/docs/directives-reference',
 	'@export': '/docs/directives-reference/export-directive',
 	'@fromClaim': '/docs/directives-reference/from-claim-directive',
-	'@fromCustomClaim': '/docs/directives-reference/from-custom-claim-directive',
 	'@hooksVariable': '/docs/directives-reference/hooks-variable-directive',
 	'@injectCurrentDateTime': '/docs/directives-reference/inject-current-date-time-directive',
 	'@injectEnvironmentVariable': '/docs/directives-reference/inject-environment-variable-directive',

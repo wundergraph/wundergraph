@@ -212,7 +212,7 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
   }
 }
 
-export enum WellKnownClaim {
+export enum ClaimType {
   /** ISSUER - iss */
   ISSUER = 0,
   /** PROVIDER - alias for iss, deprecated */
@@ -253,119 +253,125 @@ export enum WellKnownClaim {
   LOCALE = 16,
   /** LOCATION - location */
   LOCATION = 17,
+  CUSTOM = 999,
 }
 
-export function wellKnownClaimFromJSON(object: any): WellKnownClaim {
+export function claimTypeFromJSON(object: any): ClaimType {
   switch (object) {
     case 0:
     case "ISSUER":
-      return WellKnownClaim.ISSUER;
+      return ClaimType.ISSUER;
     case 0:
     case "PROVIDER":
-      return WellKnownClaim.PROVIDER;
+      return ClaimType.PROVIDER;
     case 1:
     case "SUBJECT":
-      return WellKnownClaim.SUBJECT;
+      return ClaimType.SUBJECT;
     case 1:
     case "USERID":
-      return WellKnownClaim.USERID;
+      return ClaimType.USERID;
     case 2:
     case "NAME":
-      return WellKnownClaim.NAME;
+      return ClaimType.NAME;
     case 3:
     case "GIVEN_NAME":
-      return WellKnownClaim.GIVEN_NAME;
+      return ClaimType.GIVEN_NAME;
     case 4:
     case "FAMILY_NAME":
-      return WellKnownClaim.FAMILY_NAME;
+      return ClaimType.FAMILY_NAME;
     case 5:
     case "MIDDLE_NAME":
-      return WellKnownClaim.MIDDLE_NAME;
+      return ClaimType.MIDDLE_NAME;
     case 6:
     case "NICKNAME":
-      return WellKnownClaim.NICKNAME;
+      return ClaimType.NICKNAME;
     case 7:
     case "PREFERRED_USERNAME":
-      return WellKnownClaim.PREFERRED_USERNAME;
+      return ClaimType.PREFERRED_USERNAME;
     case 8:
     case "PROFILE":
-      return WellKnownClaim.PROFILE;
+      return ClaimType.PROFILE;
     case 9:
     case "PICTURE":
-      return WellKnownClaim.PICTURE;
+      return ClaimType.PICTURE;
     case 10:
     case "WEBSITE":
-      return WellKnownClaim.WEBSITE;
+      return ClaimType.WEBSITE;
     case 11:
     case "EMAIL":
-      return WellKnownClaim.EMAIL;
+      return ClaimType.EMAIL;
     case 12:
     case "EMAIL_VERIFIED":
-      return WellKnownClaim.EMAIL_VERIFIED;
+      return ClaimType.EMAIL_VERIFIED;
     case 13:
     case "GENDER":
-      return WellKnownClaim.GENDER;
+      return ClaimType.GENDER;
     case 14:
     case "BIRTH_DATE":
-      return WellKnownClaim.BIRTH_DATE;
+      return ClaimType.BIRTH_DATE;
     case 15:
     case "ZONE_INFO":
-      return WellKnownClaim.ZONE_INFO;
+      return ClaimType.ZONE_INFO;
     case 16:
     case "LOCALE":
-      return WellKnownClaim.LOCALE;
+      return ClaimType.LOCALE;
     case 17:
     case "LOCATION":
-      return WellKnownClaim.LOCATION;
+      return ClaimType.LOCATION;
+    case 999:
+    case "CUSTOM":
+      return ClaimType.CUSTOM;
     default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum WellKnownClaim");
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ClaimType");
   }
 }
 
-export function wellKnownClaimToJSON(object: WellKnownClaim): string {
+export function claimTypeToJSON(object: ClaimType): string {
   switch (object) {
-    case WellKnownClaim.ISSUER:
+    case ClaimType.ISSUER:
       return "ISSUER";
-    case WellKnownClaim.PROVIDER:
+    case ClaimType.PROVIDER:
       return "PROVIDER";
-    case WellKnownClaim.SUBJECT:
+    case ClaimType.SUBJECT:
       return "SUBJECT";
-    case WellKnownClaim.USERID:
+    case ClaimType.USERID:
       return "USERID";
-    case WellKnownClaim.NAME:
+    case ClaimType.NAME:
       return "NAME";
-    case WellKnownClaim.GIVEN_NAME:
+    case ClaimType.GIVEN_NAME:
       return "GIVEN_NAME";
-    case WellKnownClaim.FAMILY_NAME:
+    case ClaimType.FAMILY_NAME:
       return "FAMILY_NAME";
-    case WellKnownClaim.MIDDLE_NAME:
+    case ClaimType.MIDDLE_NAME:
       return "MIDDLE_NAME";
-    case WellKnownClaim.NICKNAME:
+    case ClaimType.NICKNAME:
       return "NICKNAME";
-    case WellKnownClaim.PREFERRED_USERNAME:
+    case ClaimType.PREFERRED_USERNAME:
       return "PREFERRED_USERNAME";
-    case WellKnownClaim.PROFILE:
+    case ClaimType.PROFILE:
       return "PROFILE";
-    case WellKnownClaim.PICTURE:
+    case ClaimType.PICTURE:
       return "PICTURE";
-    case WellKnownClaim.WEBSITE:
+    case ClaimType.WEBSITE:
       return "WEBSITE";
-    case WellKnownClaim.EMAIL:
+    case ClaimType.EMAIL:
       return "EMAIL";
-    case WellKnownClaim.EMAIL_VERIFIED:
+    case ClaimType.EMAIL_VERIFIED:
       return "EMAIL_VERIFIED";
-    case WellKnownClaim.GENDER:
+    case ClaimType.GENDER:
       return "GENDER";
-    case WellKnownClaim.BIRTH_DATE:
+    case ClaimType.BIRTH_DATE:
       return "BIRTH_DATE";
-    case WellKnownClaim.ZONE_INFO:
+    case ClaimType.ZONE_INFO:
       return "ZONE_INFO";
-    case WellKnownClaim.LOCALE:
+    case ClaimType.LOCALE:
       return "LOCALE";
-    case WellKnownClaim.LOCATION:
+    case ClaimType.LOCATION:
       return "LOCATION";
+    case ClaimType.CUSTOM:
+      return "CUSTOM";
     default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum WellKnownClaim");
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ClaimType");
   }
 }
 
@@ -737,13 +743,6 @@ export function configurationVariableKindToJSON(object: ConfigurationVariableKin
   }
 }
 
-export interface CustomClaim {
-  name: string;
-  jsonPathComponents: string[];
-  type: ValueType;
-  required: boolean;
-}
-
 export interface ApiAuthenticationConfig {
   cookieBased: CookieBasedAuthentication | undefined;
   hooks: ApiAuthenticationHooks | undefined;
@@ -884,7 +883,6 @@ export interface MockResolveHookConfiguration {
 
 export interface OperationAuthorizationConfig {
   claims: ClaimConfig[];
-  customClaims: CustomClaimConfig[];
   roleConfig: OperationRoleConfig | undefined;
 }
 
@@ -899,14 +897,18 @@ export interface OperationRoleConfig {
   denyMatchAny: string[];
 }
 
-export interface ClaimConfig {
-  variableName: string;
-  claim: WellKnownClaim;
+export interface CustomClaim {
+  name: string;
+  jsonPathComponents: string[];
+  type: ValueType;
+  required: boolean;
 }
 
-export interface CustomClaimConfig {
+export interface ClaimConfig {
   variableName: string;
-  claim: CustomClaim | undefined;
+  claimType: ClaimType;
+  /** Available iff claimType == CUSTOM */
+  custom?: CustomClaim | undefined;
 }
 
 export interface OperationLiveQueryConfig {
@@ -1244,45 +1246,6 @@ export interface ConfigurationVariable {
   environmentVariableDefaultValue: string;
   placeholderVariableName: string;
 }
-
-function createBaseCustomClaim(): CustomClaim {
-  return { name: "", jsonPathComponents: [], type: 0, required: false };
-}
-
-export const CustomClaim = {
-  fromJSON(object: any): CustomClaim {
-    return {
-      name: isSet(object.name) ? String(object.name) : "",
-      jsonPathComponents: Array.isArray(object?.jsonPathComponents)
-        ? object.jsonPathComponents.map((e: any) => String(e))
-        : [],
-      type: isSet(object.type) ? valueTypeFromJSON(object.type) : 0,
-      required: isSet(object.required) ? Boolean(object.required) : false,
-    };
-  },
-
-  toJSON(message: CustomClaim): unknown {
-    const obj: any = {};
-    message.name !== undefined && (obj.name = message.name);
-    if (message.jsonPathComponents) {
-      obj.jsonPathComponents = message.jsonPathComponents.map((e) => e);
-    } else {
-      obj.jsonPathComponents = [];
-    }
-    message.type !== undefined && (obj.type = valueTypeToJSON(message.type));
-    message.required !== undefined && (obj.required = message.required);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<CustomClaim>, I>>(object: I): CustomClaim {
-    const message = createBaseCustomClaim();
-    message.name = object.name ?? "";
-    message.jsonPathComponents = object.jsonPathComponents?.map((e) => e) || [];
-    message.type = object.type ?? 0;
-    message.required = object.required ?? false;
-    return message;
-  },
-};
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
   return { cookieBased: undefined, hooks: undefined, jwksBased: undefined };
@@ -2137,16 +2100,13 @@ export const MockResolveHookConfiguration = {
 };
 
 function createBaseOperationAuthorizationConfig(): OperationAuthorizationConfig {
-  return { claims: [], customClaims: [], roleConfig: undefined };
+  return { claims: [], roleConfig: undefined };
 }
 
 export const OperationAuthorizationConfig = {
   fromJSON(object: any): OperationAuthorizationConfig {
     return {
       claims: Array.isArray(object?.claims) ? object.claims.map((e: any) => ClaimConfig.fromJSON(e)) : [],
-      customClaims: Array.isArray(object?.customClaims)
-        ? object.customClaims.map((e: any) => CustomClaimConfig.fromJSON(e))
-        : [],
       roleConfig: isSet(object.roleConfig) ? OperationRoleConfig.fromJSON(object.roleConfig) : undefined,
     };
   },
@@ -2158,11 +2118,6 @@ export const OperationAuthorizationConfig = {
     } else {
       obj.claims = [];
     }
-    if (message.customClaims) {
-      obj.customClaims = message.customClaims.map((e) => e ? CustomClaimConfig.toJSON(e) : undefined);
-    } else {
-      obj.customClaims = [];
-    }
     message.roleConfig !== undefined &&
       (obj.roleConfig = message.roleConfig ? OperationRoleConfig.toJSON(message.roleConfig) : undefined);
     return obj;
@@ -2171,7 +2126,6 @@ export const OperationAuthorizationConfig = {
   fromPartial<I extends Exact<DeepPartial<OperationAuthorizationConfig>, I>>(object: I): OperationAuthorizationConfig {
     const message = createBaseOperationAuthorizationConfig();
     message.claims = object.claims?.map((e) => ClaimConfig.fromPartial(e)) || [];
-    message.customClaims = object.customClaims?.map((e) => CustomClaimConfig.fromPartial(e)) || [];
     message.roleConfig = (object.roleConfig !== undefined && object.roleConfig !== null)
       ? OperationRoleConfig.fromPartial(object.roleConfig)
       : undefined;
@@ -2228,57 +2182,72 @@ export const OperationRoleConfig = {
   },
 };
 
+function createBaseCustomClaim(): CustomClaim {
+  return { name: "", jsonPathComponents: [], type: 0, required: false };
+}
+
+export const CustomClaim = {
+  fromJSON(object: any): CustomClaim {
+    return {
+      name: isSet(object.name) ? String(object.name) : "",
+      jsonPathComponents: Array.isArray(object?.jsonPathComponents)
+        ? object.jsonPathComponents.map((e: any) => String(e))
+        : [],
+      type: isSet(object.type) ? valueTypeFromJSON(object.type) : 0,
+      required: isSet(object.required) ? Boolean(object.required) : false,
+    };
+  },
+
+  toJSON(message: CustomClaim): unknown {
+    const obj: any = {};
+    message.name !== undefined && (obj.name = message.name);
+    if (message.jsonPathComponents) {
+      obj.jsonPathComponents = message.jsonPathComponents.map((e) => e);
+    } else {
+      obj.jsonPathComponents = [];
+    }
+    message.type !== undefined && (obj.type = valueTypeToJSON(message.type));
+    message.required !== undefined && (obj.required = message.required);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CustomClaim>, I>>(object: I): CustomClaim {
+    const message = createBaseCustomClaim();
+    message.name = object.name ?? "";
+    message.jsonPathComponents = object.jsonPathComponents?.map((e) => e) || [];
+    message.type = object.type ?? 0;
+    message.required = object.required ?? false;
+    return message;
+  },
+};
+
 function createBaseClaimConfig(): ClaimConfig {
-  return { variableName: "", claim: 0 };
+  return { variableName: "", claimType: 0, custom: undefined };
 }
 
 export const ClaimConfig = {
   fromJSON(object: any): ClaimConfig {
     return {
       variableName: isSet(object.variableName) ? String(object.variableName) : "",
-      claim: isSet(object.claim) ? wellKnownClaimFromJSON(object.claim) : 0,
+      claimType: isSet(object.claimType) ? claimTypeFromJSON(object.claimType) : 0,
+      custom: isSet(object.custom) ? CustomClaim.fromJSON(object.custom) : undefined,
     };
   },
 
   toJSON(message: ClaimConfig): unknown {
     const obj: any = {};
     message.variableName !== undefined && (obj.variableName = message.variableName);
-    message.claim !== undefined && (obj.claim = wellKnownClaimToJSON(message.claim));
+    message.claimType !== undefined && (obj.claimType = claimTypeToJSON(message.claimType));
+    message.custom !== undefined && (obj.custom = message.custom ? CustomClaim.toJSON(message.custom) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<ClaimConfig>, I>>(object: I): ClaimConfig {
     const message = createBaseClaimConfig();
     message.variableName = object.variableName ?? "";
-    message.claim = object.claim ?? 0;
-    return message;
-  },
-};
-
-function createBaseCustomClaimConfig(): CustomClaimConfig {
-  return { variableName: "", claim: undefined };
-}
-
-export const CustomClaimConfig = {
-  fromJSON(object: any): CustomClaimConfig {
-    return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
-      claim: isSet(object.claim) ? CustomClaim.fromJSON(object.claim) : undefined,
-    };
-  },
-
-  toJSON(message: CustomClaimConfig): unknown {
-    const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
-    message.claim !== undefined && (obj.claim = message.claim ? CustomClaim.toJSON(message.claim) : undefined);
-    return obj;
-  },
-
-  fromPartial<I extends Exact<DeepPartial<CustomClaimConfig>, I>>(object: I): CustomClaimConfig {
-    const message = createBaseCustomClaimConfig();
-    message.variableName = object.variableName ?? "";
-    message.claim = (object.claim !== undefined && object.claim !== null)
-      ? CustomClaim.fromPartial(object.claim)
+    message.claimType = object.claimType ?? 0;
+    message.custom = (object.custom !== undefined && object.custom !== null)
+      ? CustomClaim.fromPartial(object.custom)
       : undefined;
     return message;
   },

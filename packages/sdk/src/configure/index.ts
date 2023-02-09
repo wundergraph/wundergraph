@@ -1224,7 +1224,6 @@ const resolveOperationsConfigurations = async (
 					},
 					AuthorizationConfig: {
 						claims: [],
-						customClaims: [],
 						roleConfig: {
 							requireMatchAll: [],
 							requireMatchAny: [],
@@ -1293,7 +1292,6 @@ const applyNodeJsOperationOverrides = (
 	if (overrides.rbac) {
 		operation.AuthorizationConfig = {
 			claims: [],
-			customClaims: [],
 			roleConfig: {
 				requireMatchAll: overrides.rbac.requireMatchAll,
 				requireMatchAny: overrides.rbac.requireMatchAny,

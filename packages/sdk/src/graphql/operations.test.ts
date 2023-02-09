@@ -8,7 +8,7 @@ import {
 import { assert } from 'chai';
 import { buildSchema, OperationDefinitionNode, parse } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
-import { OperationExecutionEngine, OperationType, WellKnownClaim } from '@wundergraph/protobuf';
+import { ClaimType, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -157,7 +157,6 @@ const expectedTransformOperations: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
-				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -256,7 +255,6 @@ const expectedTransformOperations: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
-				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -381,7 +379,6 @@ const expectedTransformOperations: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
-				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -561,10 +558,9 @@ const fromClaimParsed: ParsedOperations = {
 				claims: [
 					{
 						variableName: 'email',
-						claim: WellKnownClaim.EMAIL,
+						claimType: ClaimType.EMAIL,
 					},
 				],
-				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],
@@ -796,7 +792,6 @@ const jsonSchemaDirectiveParsed: ParsedOperations = {
 			},
 			AuthorizationConfig: {
 				claims: [],
-				customClaims: [],
 				roleConfig: {
 					requireMatchAll: [],
 					requireMatchAny: [],

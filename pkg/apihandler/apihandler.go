@@ -972,66 +972,64 @@ func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables 
 	return variables, nil
 }
 
-func injectWellKnownClaims(claims []*wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
 	var err error
-	for _, claim := range claims {
-		var replacement string
+	var replacement string
 
-		switch claim.Claim {
-		case wgpb.WellKnownClaim_ISSUER:
-			replacement = user.ProviderID
-		case wgpb.WellKnownClaim_SUBJECT: // handles  wgpb.WellKnownClaim_USERID too
-			replacement = user.UserID
-		case wgpb.WellKnownClaim_NAME:
-			replacement = user.Name
-		case wgpb.WellKnownClaim_GIVEN_NAME:
-			replacement = user.FirstName
-		case wgpb.WellKnownClaim_FAMILY_NAME:
-			replacement = user.LastName
-		case wgpb.WellKnownClaim_MIDDLE_NAME:
-			replacement = user.MiddleName
-		case wgpb.WellKnownClaim_NICKNAME:
-			replacement = user.NickName
-		case wgpb.WellKnownClaim_PREFERRED_USERNAME:
-			replacement = user.PreferredUsername
-		case wgpb.WellKnownClaim_PROFILE:
-			replacement = user.Profile
-		case wgpb.WellKnownClaim_PICTURE:
-			replacement = user.Picture
-		case wgpb.WellKnownClaim_WEBSITE:
-			replacement = user.Website
-		case wgpb.WellKnownClaim_EMAIL:
-			replacement = user.Email
-		case wgpb.WellKnownClaim_EMAIL_VERIFIED:
-			var boolValue string
-			if user.EmailVerified {
-				boolValue = "true"
-			} else {
-				boolValue = "false"
-			}
-			variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
-			if err != nil {
-				return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.Claim, err)
-			}
-			// Don't go into the block after the switch that sets the variable as a string
-			continue
-		case wgpb.WellKnownClaim_GENDER:
-			replacement = user.Gender
-		case wgpb.WellKnownClaim_BIRTH_DATE:
-			replacement = user.BirthDate
-		case wgpb.WellKnownClaim_ZONE_INFO:
-			replacement = user.ZoneInfo
-		case wgpb.WellKnownClaim_LOCALE:
-			replacement = user.Locale
-		case wgpb.WellKnownClaim_LOCATION:
-			replacement = user.Location
-		default:
-			return nil, fmt.Errorf("unhandled well known claim %s", claim.Claim)
+	switch claim.ClaimType {
+	case wgpb.ClaimType_ISSUER:
+		replacement = user.ProviderID
+	case wgpb.ClaimType_SUBJECT: // handles  wgpb.ClaimType_USERID too
+		replacement = user.UserID
+	case wgpb.ClaimType_NAME:
+		replacement = user.Name
+	case wgpb.ClaimType_GIVEN_NAME:
+		replacement = user.FirstName
+	case wgpb.ClaimType_FAMILY_NAME:
+		replacement = user.LastName
+	case wgpb.ClaimType_MIDDLE_NAME:
+		replacement = user.MiddleName
+	case wgpb.ClaimType_NICKNAME:
+		replacement = user.NickName
+	case wgpb.ClaimType_PREFERRED_USERNAME:
+		replacement = user.PreferredUsername
+	case wgpb.ClaimType_PROFILE:
+		replacement = user.Profile
+	case wgpb.ClaimType_PICTURE:
+		replacement = user.Picture
+	case wgpb.ClaimType_WEBSITE:
+		replacement = user.Website
+	case wgpb.ClaimType_EMAIL:
+		replacement = user.Email
+	case wgpb.ClaimType_EMAIL_VERIFIED:
+		var boolValue string
+		if user.EmailVerified {
+			boolValue = "true"
+		} else {
+			boolValue = "false"
 		}
-		variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
 		if err != nil {
-			return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.Claim, err)
+			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
 		}
+		// Don't go into the block after the switch that sets the variable as a string
+		return variables, nil
+	case wgpb.ClaimType_GENDER:
+		replacement = user.Gender
+	case wgpb.ClaimType_BIRTH_DATE:
+		replacement = user.BirthDate
+	case wgpb.ClaimType_ZONE_INFO:
+		replacement = user.ZoneInfo
+	case wgpb.ClaimType_LOCALE:
+		replacement = user.Locale
+	case wgpb.ClaimType_LOCATION:
+		replacement = user.Location
+	default:
+		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
+	}
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	if err != nil {
+		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
 	}
 
 	return variables, nil
@@ -1049,62 +1047,61 @@ func lookupJsonPath(data interface{}, keys []string, keyIndex int) interface{} {
 	return nil
 }
 
-func injectCustomClaims(customClaims []*wgpb.CustomClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
-	for _, claim := range customClaims {
-		value := lookupJsonPath(user.CustomClaims, claim.Claim.JsonPathComponents, 0)
-		var replacement []byte
-		switch x := value.(type) {
-		case nil:
-			if claim.Claim.Required {
+func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+	custom := claim.GetCustom()
+	value := lookupJsonPath(user.CustomClaims, custom.JsonPathComponents, 0)
+	var replacement []byte
+	switch x := value.(type) {
+	case nil:
+		if custom.Required {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
+			}
+		}
+		return variables, nil
+	case string:
+		if custom.Type != wgpb.ValueType_STRING {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+		replacement = []byte("\"" + string(x) + "\"")
+	case bool:
+		if custom.Type != wgpb.ValueType_BOOLEAN {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+		if x {
+			replacement = []byte("true")
+		} else {
+			replacement = []byte("false")
+		}
+	case float64:
+		switch custom.Type {
+		case wgpb.ValueType_INT:
+			if x != float64(int(x)) {
+				// Value is not integral
 				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("required customClaim %s not found", claim.Claim.Name),
+					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
 				}
 			}
-			continue
-		case string:
-			if claim.Claim.Type != wgpb.ValueType_STRING {
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", claim.Claim.Name, claim.Claim.Type, x),
-				}
-			}
-			replacement = []byte("\"" + string(x) + "\"")
-		case bool:
-			if claim.Claim.Type != wgpb.ValueType_BOOLEAN {
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", claim.Claim.Name, claim.Claim.Type, x),
-				}
-			}
-			if x {
-				replacement = []byte("true")
-			} else {
-				replacement = []byte("false")
-			}
-		case float64:
-			switch claim.Claim.Type {
-			case wgpb.ValueType_INT:
-				if x != float64(int(x)) {
-					// Value is not integral
-					return nil, &inputvariables.ValidationError{
-						Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", claim.Claim.Name, claim.Claim.Type, "float"),
-					}
-				}
-				replacement = []byte(strconv.FormatInt(int64(x), 10))
-			case wgpb.ValueType_FLOAT:
-				// JSON number is always a valid float
-				replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
-			default:
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", claim.Claim.Name, claim.Claim.Type, x),
-				}
-			}
+			replacement = []byte(strconv.FormatInt(int64(x), 10))
+		case wgpb.ValueType_FLOAT:
+			// JSON number is always a valid float
+			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
-			return nil, fmt.Errorf("unhandled custom claim type %T", x)
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
 		}
-		var err error
-		variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
-		if err != nil {
-			return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", claim.Claim.Name, err)
-		}
+	default:
+		return nil, fmt.Errorf("unhandled custom claim type %T", x)
+	}
+	var err error
+	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	if err != nil {
+		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
 	}
 	return variables, nil
 }
@@ -1112,8 +1109,7 @@ func injectCustomClaims(customClaims []*wgpb.CustomClaimConfig, user *authentica
 func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
 	authorizationConfig := operation.GetAuthorizationConfig()
 	claims := authorizationConfig.GetClaims()
-	customClaims := authorizationConfig.GetCustomClaims()
-	if len(claims) == 0 && len(customClaims) == 0 {
+	if len(claims) == 0 {
 		return variables, nil
 	}
 	user := authentication.UserFromContext(r.Context())
@@ -1121,11 +1117,13 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 		return variables, nil
 	}
 	var err error
-	variables, err = injectWellKnownClaims(claims, user, variables)
-	if err != nil {
-		return nil, err
+	for _, claim := range claims {
+		if claim.GetClaimType() == wgpb.ClaimType_CUSTOM {
+			variables, err = injectCustomClaim(claim, user, variables)
+		} else {
+			variables, err = injectWellKnownClaim(claim, user, variables)
+		}
 	}
-	variables, err = injectCustomClaims(customClaims, user, variables)
 	if err != nil {
 		return nil, err
 	}

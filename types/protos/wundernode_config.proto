@@ -12,13 +12,6 @@ enum LogLevel {
 	FATAL = 5;
 }
 
-message CustomClaim {
-	string name = 1;
-	repeated string jsonPathComponents = 2;
-	ValueType type = 3;
-	bool required = 4;
-}
-
 message ApiAuthenticationConfig {
 	CookieBasedAuthentication cookieBased = 1;
 	ApiAuthenticationHooks hooks = 2;
@@ -182,8 +175,7 @@ message MockResolveHookConfiguration {
 
 message OperationAuthorizationConfig {
 	repeated ClaimConfig claims = 1;
-	repeated CustomClaimConfig customClaims = 2;
-	OperationRoleConfig roleConfig = 3;
+	OperationRoleConfig roleConfig = 2;
 }
 
 message OperationRoleConfig {
@@ -197,17 +189,21 @@ message OperationRoleConfig {
 	repeated string denyMatchAny = 4;
 }
 
+message CustomClaim {
+	string name = 1;
+	repeated string jsonPathComponents = 2;
+	ValueType type = 3;
+	bool required = 4;
+}
+
 message ClaimConfig {
 	string variableName = 1;
-	WellKnownClaim claim = 2;
+	ClaimType claimType = 2;
+	// Available iff claimType == CUSTOM
+	optional CustomClaim custom = 3;
 }
 
-message CustomClaimConfig {
-	string variableName = 1;
-	CustomClaim claim = 2;
-}
-
-enum WellKnownClaim {
+enum ClaimType {
 	// https://www.iana.org/assignments/jwt/jwt.xhtml
 	option allow_alias = true;
 	ISSUER = 0; // iss
@@ -230,6 +226,8 @@ enum WellKnownClaim {
 	ZONE_INFO = 15; // zoneinfo
 	LOCALE = 16; // locale
 	LOCATION = 17; // location
+
+	CUSTOM = 999;
 }
 
 enum ValueType {
