@@ -242,7 +242,7 @@ func TestInMemoryCache(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if bytes.Contains(data, []byte(`{"variables":{"first":null},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+		if bytes.Contains(data, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
 			if _, err := io.WriteString(w, `{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`); err != nil {
 				t.Fatal(err)
 			}
