@@ -1,3 +1,3 @@
-export { openApiSpecificationToGraphQLApi, loadOpenApi } from './introspection';
+export { openApiSpecificationToGraphQLApi } from './introspection';
 
 export { createExecutableSchema, openApiSpecsLocation } from './execution';

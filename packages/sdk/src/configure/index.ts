@@ -18,6 +18,7 @@ import {
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
+	ILazyIntrospection,
 	introspectGraphqlServer,
 	RESTApiCustom,
 	StaticApiCustom,
@@ -77,7 +78,7 @@ export interface WunderGraphCorsConfiguration {
 }
 
 export interface WunderGraphConfigApplicationConfig {
-	apis: Promise<Api<any>>[];
+	apis: ILazyIntrospection<Api<any>>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
@@ -93,7 +94,7 @@ export interface WunderGraphConfigApplicationConfig {
 			// authorizedRedirectUris is a whitelist of allowed URIs to redirect to after a successful login
 			// the values are used as exact string matches
 			// URIs always match, independent of a trailing slash or not
-			// e.g. if a authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
+			// e.g. if an authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
 			// or if the authorized URI is "http://localhost:3000/auth", the URI "http://localhost:3000/auth/" would also match
 			// if you need more flexibility, use authorizedRedirectUriRegexes instead
 			authorizedRedirectUris?: InputVariable[];
@@ -157,20 +158,6 @@ export interface SecurityConfig {
 	allowedHosts?: InputVariable[];
 }
 
-export interface DeploymentAPI {
-	apiConfig: () => {
-		id: string;
-		name: string;
-	};
-}
-
-export interface DeploymentEnvironment {
-	environmentConfig: () => {
-		id: string;
-		name: string;
-	};
-}
-
 export interface CodeGen {
 	path?: string;
 	templates: Template[];
@@ -218,13 +205,13 @@ export interface S3UploadProfile {
 	 */
 	maxAllowedFiles?: number;
 	/**
-	 * List of mime-types allowed to be uploaded, case insensitive
+	 * List of mime-types allowed to be uploaded, case-insensitive
 	 *
 	 * @default Any type
 	 */
 	allowedMimeTypes?: string[];
 	/**
-	 * Allowed file extensions, case insensitive
+	 * Allowed file extensions, case-insensitive
 	 *
 	 * @default Any extension
 	 */
@@ -618,12 +605,13 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: Promise<Api<any>>[],
+	apis: ILazyIntrospection<Api<any>>[],
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const resolvedApis = await Promise.all(apis);
+	const apiPromises = apis.map((api) => api());
+	const resolvedApis = await Promise.all(apiPromises);
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {

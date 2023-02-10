@@ -1,14 +1,4 @@
-import { configuration } from '../graphql/configuration';
-import {
-	buildClientSchema,
-	buildSchema,
-	GraphQLSchema,
-	introspectionFromSchema,
-	parse,
-	print,
-	printSchema,
-} from 'graphql';
-import { openApiSpecificationToRESTApiObject } from '../v2openapi';
+import { buildClientSchema, GraphQLSchema, introspectionFromSchema, parse, print, printSchema } from 'graphql';
 import { renameTypeFields, renameTypes } from '../graphql/renametypes';
 import {
 	ArgumentSource,
@@ -27,25 +17,26 @@ import {
 	UpstreamAuthentication,
 	UpstreamAuthenticationKind,
 } from '@wundergraph/protobuf';
-import { introspectPrismaDatabaseWithRetries } from '../db/introspection';
-import {
-	applyNameSpaceToFieldConfigurations,
-	applyNameSpaceToGraphQLSchema,
-	applyNameSpaceToTypeFields,
-	generateTypeConfigurationsForNamespace,
-} from './namespacing';
-import { introspectWithCache } from './introspection-cache';
+import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphql } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
-import { loadOpenApi, openApiSpecificationToGraphQLApi } from '../rest2graphql';
+import { loadOpenApi, openApi, openApiLegacy } from './openapi-introspection';
+import {
+	introspectMongoDB,
+	introspectMySQL,
+	introspectPlanetScale,
+	introspectPostgresql,
+	introspectPrisma,
+	introspectSQLite,
+	introspectSQLServer,
+} from './database-introspection';
 
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
-// Only use the instrospection cache, return an error when hitting the network
+// Only use the introspection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 // When true, throw an exception an error is found while loading operations
 export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
@@ -437,217 +428,78 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
-const databaseSchemaToKind = (schema: DatabaseSchema): DataSourceKind => {
-	switch (schema) {
-		case planetscale:
-			return DataSourceKind.MYSQL;
-		case mysql:
-			return DataSourceKind.MYSQL;
-		case postgresql:
-			return DataSourceKind.POSTGRESQL;
-		case sqlite:
-			return DataSourceKind.SQLITE;
-		case sqlserver:
-			return DataSourceKind.SQLSERVER;
-		case mongodb:
-			return DataSourceKind.MONGODB;
-		case prisma:
-			return DataSourceKind.PRISMA;
-		default:
-			throw new Error(`databaseSchemaToKind not implemented for: ${schema}`);
-	}
-};
+export const introspectGraphqlServer = (introspection: GraphQLServerConfiguration): ILazyIntrospection<GraphQLApi> => {
+	return async (): Promise<GraphQLApi> => {
+		const { schema, ...rest } = introspection;
+		const resolvedSchema = (await schema) as GraphQLSchema;
 
-const introspectDatabase = async (
-	introspection: DatabaseIntrospection,
-	databaseSchema: DatabaseSchema,
-	maxRetries: number
-) => {
-	const {
-		success,
-		message,
-		graphql_schema,
-		prisma_schema,
-		interpolateVariableDefinitionAsJSON,
-		jsonTypeFields,
-		jsonResponseFields,
-	} = await introspectPrismaDatabaseWithRetries(introspection, databaseSchema, maxRetries);
-	if (!success) {
-		return Promise.reject(message);
-	}
-	const schemaDocumentNode = parse(graphql_schema);
-	const schema = print(schemaDocumentNode);
-	const { RootNodes, ChildNodes, Fields } = configuration(schemaDocumentNode);
-	const jsonFields = [...jsonTypeFields, ...jsonResponseFields];
-	jsonFields.forEach((field) => {
-		const fieldConfig = Fields.find((f) => f.typeName == field.typeName && f.fieldName == field.fieldName);
-		if (fieldConfig) {
-			fieldConfig.unescapeResponseJson = true;
-		} else {
-			Fields.push({
-				fieldName: field.fieldName,
-				typeName: field.typeName,
-				unescapeResponseJson: true,
-				argumentsConfiguration: [],
-				path: [],
-				requiresFields: [],
-				disableDefaultFieldMapping: false,
-			});
-		}
-	});
-	const graphQLSchema = buildSchema(schema);
-	const dataSource: DataSource<DatabaseApiCustom> = {
-		Kind: databaseSchemaToKind(databaseSchema),
-		RootNodes: applyNameSpaceToTypeFields(RootNodes, graphQLSchema, introspection.apiNamespace),
-		ChildNodes: applyNameSpaceToTypeFields(ChildNodes, graphQLSchema, introspection.apiNamespace),
-		Custom: {
-			prisma_schema: prisma_schema,
-			databaseURL: mapInputVariable(introspection.databaseURL),
-			graphql_schema: schema,
-			jsonTypeFields: applyNameSpaceToSingleTypeFields(jsonTypeFields, introspection.apiNamespace),
-			jsonInputVariables: applyNameSpaceToTypeNames(interpolateVariableDefinitionAsJSON, introspection.apiNamespace),
-		},
-		Directives: [],
-		RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
-	};
-	const dataSources: DataSource<DatabaseApiCustom>[] = [];
-	dataSource.RootNodes.forEach((rootNode) => {
-		rootNode.fieldNames.forEach((field) => {
-			dataSources.push({
-				...Object.assign({}, dataSource),
-				RootNodes: [
-					{
-						typeName: rootNode.typeName,
-						fieldNames: [field],
-					},
-				],
-			});
+		return introspectGraphql({
+			...rest,
+			internal: true,
+			loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
 		});
-	});
-	return {
-		schema: applyNameSpaceToGraphQLSchema(schema, [], introspection.apiNamespace),
-		dataSources: dataSources,
-		fields: applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, [], introspection.apiNamespace),
-		types: generateTypeConfigurationsForNamespace(schema, introspection.apiNamespace),
-		interpolateVariableDefinitionAsJSON: applyNameSpaceToTypeNames(
-			interpolateVariableDefinitionAsJSON,
-			introspection.apiNamespace
-		),
 	};
 };
 
-const applyNameSpaceToSingleTypeFields = (typeFields: SingleTypeField[], namespace?: string): SingleTypeField[] => {
-	if (!namespace) {
-		return typeFields;
-	}
-	return typeFields.map((typeField) => ({
-		...typeField,
-		typeName: `${namespace}_${typeField.typeName}`,
-	}));
-};
-
-const applyNameSpaceToTypeNames = (typeNames: string[], namespace?: string): string[] => {
-	if (!namespace) {
-		return typeNames;
-	}
-	return typeNames.map((typeName) => {
-		return `${namespace}_${typeName}`;
-	});
-};
-
-export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration): Promise<GraphQLApi> => {
-	const { schema, ...rest } = introspection;
-	const resolvedSchema = (await schema) as GraphQLSchema;
-
-	return introspect.graphql({
-		...rest,
-		internal: true,
-		loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
-	});
-};
+export interface ILazyIntrospection<T> {
+	(): Promise<T>;
+}
 
 export const introspect = {
-	graphql: introspectGraphql,
-	postgresql: async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> =>
-		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				introspection,
-				postgresql,
-				5
-			);
-			return new PostgresqlApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	mysql: async (introspection: DatabaseIntrospection): Promise<MySQLApi> =>
-		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				introspection,
-				mysql,
-				5
-			);
-			return new MySQLApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	planetscale: async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> =>
-		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				introspection,
-				planetscale,
-				5
-			);
-			return new PlanetscaleApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	sqlite: async (introspection: DatabaseIntrospection): Promise<SQLiteApi> =>
-		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				introspection,
-				sqlite,
-				5
-			);
-			return new SQLiteApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	sqlserver: async (introspection: DatabaseIntrospection): Promise<SQLServerApi> =>
-		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				introspection,
-				sqlserver,
-				5
-			);
-			return new SQLServerApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	mongodb: async (introspection: DatabaseIntrospection): Promise<MongoDBApi> =>
-		introspectWithCache(introspection, async (introspection: DatabaseIntrospection): Promise<MongoDBApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				introspection,
-				mongodb,
-				5
-			);
-			return new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	prisma: async (introspection: PrismaIntrospection): Promise<PrismaApi> =>
-		introspectWithCache(introspection, async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
-			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-				{ ...introspection, databaseURL: introspection.prismaFilePath },
-				prisma,
-				5
-			);
-			return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-		}),
-	federation: introspectFederation,
-	openApiV2: async (introspection: OpenAPIV2Introspection): Promise<GraphQLApi> => {
-		const spec = loadOpenApi(introspection.source);
-		return openApiSpecificationToGraphQLApi(spec, introspection);
-	},
-	openApi: async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-		const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-			const spec = loadOpenApi(introspection.source);
-			return await openApiSpecificationToRESTApiObject(spec, introspection);
+	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): ILazyIntrospection<GraphQLApi> => {
+		return async (): Promise<GraphQLApi> => {
+			return introspectGraphql(introspection);
 		};
-		// If the source is a file we have all data required to perform the instrospection
-		// locally, which is also fast. Skip the cache in this case, so changes to the file
-		// are picked up immediately without requiring a cache flush.
-		if (introspection.source.kind === 'file') {
-			return generator(introspection);
-		}
-		return introspectWithCache(introspection, generator);
+	},
+	postgresql: (introspection: DatabaseIntrospection): ILazyIntrospection<PostgresqlApi> => {
+		return async (): Promise<PostgresqlApi> => {
+			return introspectPostgresql(introspection);
+		};
+	},
+	mysql: (introspection: DatabaseIntrospection): ILazyIntrospection<MySQLApi> => {
+		return async (): Promise<MySQLApi> => {
+			return introspectMySQL(introspection);
+		};
+	},
+	planetscale: (introspection: DatabaseIntrospection): ILazyIntrospection<PlanetscaleApi> => {
+		return async (): Promise<PlanetscaleApi> => {
+			return introspectPlanetScale(introspection);
+		};
+	},
+	sqlite: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLiteApi> => {
+		return async (): Promise<SQLiteApi> => {
+			return introspectSQLite(introspection);
+		};
+	},
+	sqlserver: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLServerApi> => {
+		return async (): Promise<SQLServerApi> => {
+			return introspectSQLServer(introspection);
+		};
+	},
+	mongodb: (introspection: DatabaseIntrospection): ILazyIntrospection<MongoDBApi> => {
+		return async (): Promise<MongoDBApi> => {
+			return introspectMongoDB(introspection);
+		};
+	},
+	prisma: (introspection: PrismaIntrospection): ILazyIntrospection<PrismaApi> => {
+		return async (): Promise<PrismaApi> => {
+			return introspectPrisma(introspection);
+		};
+	},
+	federation: (introspection: GraphQLFederationIntrospection): ILazyIntrospection<GraphQLApi> => {
+		return async (): Promise<GraphQLApi> => {
+			return introspectFederation(introspection);
+		};
+	},
+	openApiV2: (introspection: OpenAPIV2Introspection): ILazyIntrospection<GraphQLApi> => {
+		return async (): Promise<GraphQLApi> => {
+			return openApi(introspection);
+		};
+	},
+	openApi: (introspection: OpenAPIIntrospection): ILazyIntrospection<RESTApi> => {
+		return async (): Promise<RESTApi> => {
+			return openApiLegacy(introspection);
+		};
 	},
 };
 
@@ -705,3 +557,4 @@ const upstreamAuthenticationKind = (kind: HTTPUpstreamAuthentication['kind']): U
 			throw new Error(`upstreamAuthenticationKind, unsupported kind: ${kind}`);
 	}
 };
+export { loadOpenApi } from './openapi-introspection';

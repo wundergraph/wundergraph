@@ -10,6 +10,6 @@ test.skip('introspect federation', async () => {
 			{ url: 'http://localhost:4003/graphql' },
 			{ url: 'http://localhost:4004/graphql' },
 		],
-	});
+	})();
 	assert.notEqual(federated.Schema, '');
 });

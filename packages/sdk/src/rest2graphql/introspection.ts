@@ -1,13 +1,12 @@
-import { GraphQLApi, introspect, OpenAPIIntrospection, OpenAPIIntrospectionSource } from '../definition';
+import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource } from '../definition';
 import path from 'path';
 import yaml from 'js-yaml';
-import process from 'node:process';
-import fs from 'fs';
 import objectHash from 'object-hash';
 import { writeApiInfo } from './execution';
 import { createGraphQLSchema, Oas2, Oas3 } from 'openapi-to-graphql';
 import { printSchema } from 'graphql/index';
 import { WgEnv } from '../configure/options';
+import { introspectGraphql } from '../definition/graphql-introspection';
 
 export type OasSpec = Oas3 | Oas2 | (Oas3 | Oas2);
 
@@ -39,7 +38,7 @@ export const openApiSpecificationToGraphQLApi = async (
 		viewer: false,
 	});
 
-	return introspect.graphql({
+	return introspectGraphql({
 		url: '',
 		baseUrl: WgEnv.ServerUrl,
 		path: `/openapis/${apiID}/graphql`,
@@ -48,20 +47,6 @@ export const openApiSpecificationToGraphQLApi = async (
 		loadSchemaFromString: () => printSchema(schema),
 		headers: introspection.headers,
 	});
-};
-
-export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
-	switch (source.kind) {
-		case 'file':
-			const filePath = path.resolve(process.cwd(), source.filePath);
-			return fs.readFileSync(filePath).toString();
-		case 'object':
-			return JSON.stringify(source.openAPIObject);
-		case 'string':
-			return source.openAPISpec;
-		default:
-			return '';
-	}
 };
 
 const readSpec = (spec: string, source: OpenAPIIntrospectionSource): OasSpec => {
