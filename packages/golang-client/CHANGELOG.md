@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.33](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.32...@wundergraph/golang-client@0.3.33) (2023-02-10)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
 ## [0.3.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.31...@wundergraph/golang-client@0.3.32) (2023-02-03)
 
 ### Bug Fixes
