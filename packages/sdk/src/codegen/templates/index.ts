@@ -14,6 +14,7 @@ import { WunderGraphServer } from './typescript/server';
 import { WunderGraphHooksPlugin } from './typescript/hooks';
 import { AuthenticationProviderConfiguration } from './markdown/authentication';
 import { WunderGraphWebhooksPlugin } from './typescript/webhooks';
+import { TypeScriptClaims } from './typescript/claims';
 import { TypeScriptClient } from './typescript/client';
 import { TypeScriptLegacyWebClient } from './typescript/web.client';
 import { TypeScriptTesting } from './typescript/testing';
@@ -40,6 +41,7 @@ const typescriptAll = [
 
 const templates = {
 	typescript: {
+		claims: new TypeScriptClaims(),
 		// models generates all models for input and output
 		models: typescriptModels,
 		inputModels: new TypeScriptInputModels(),

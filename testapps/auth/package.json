@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@test/jwks",
+  "name": "@test/auth",
   "version": "0.0.1",
   "repository": {
     "type": "git",
