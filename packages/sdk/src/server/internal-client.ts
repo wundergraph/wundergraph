@@ -62,7 +62,7 @@ export const internalClientFactory = (operations: Operation[], baseNodeUrl: stri
 					return internalRequest({
 						extraHeaders: this.context.extraHeaders,
 						clientRequest: this.context.clientRequest,
-						operationName: op.name,
+						operationName: op.path,
 						input: options?.input,
 					});
 				};
@@ -80,7 +80,7 @@ export const internalClientFactory = (operations: Operation[], baseNodeUrl: stri
 					return internalRequest({
 						extraHeaders: this.context.extraHeaders,
 						clientRequest: this.context.clientRequest,
-						operationName: op.name,
+						operationName: op.path,
 						input: options?.input,
 					});
 				};
