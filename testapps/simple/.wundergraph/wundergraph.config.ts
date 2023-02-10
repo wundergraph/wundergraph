@@ -2,23 +2,9 @@ import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect,
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const stripe = introspect.openApiV2({
-	id: 'stripe',
-	baseURL: 'http://localhost:12111',
-	apiNamespace: 'stripe',
-	source: {
-		kind: 'file',
-		filePath: './stripe.yaml',
-	},
-	headers: (builder) =>
-		builder
-			.addClientRequestHeader('X-Authorization', 'FooBarBazz')
-			.addStaticHeader('Authorization', `Bearer sk_test_123`),
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [stripe],
+	apis: [],
 	server,
 	operations,
 	codeGenerators: [
