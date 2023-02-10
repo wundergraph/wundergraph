@@ -63,10 +63,8 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async 
 			};
 
 			const headers = Object.entries(request.headers).reduce((acc, [key, value]) => {
-				if (value instanceof Array) {
-					acc[key] = value.join(',');
-				} else if (value !== undefined) {
-					acc[key] = value;
+				if (value) {
+					acc[key] = value.toString();
 				}
 				return acc;
 			}, {} as Record<string, string>);
