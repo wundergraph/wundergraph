@@ -389,7 +389,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, hooksSe
 
 			fetchUrl := buildFetchUrl(
 				loadvariable.String(in.CustomGraphql.Fetch.GetUrl()),
-				baseUrl(loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()), hooksServerUrl),
+				baseUrl(loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl()), hooksServerUrl),
 				loadvariable.String(in.CustomGraphql.Fetch.GetPath()),
 			)
 

@@ -124,6 +124,7 @@ func NewBuilder(pool *pool.Pool,
 }
 
 func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+	r.api = api
 
 	if api.CacheConfig != nil {
 		err = r.configureCache(api)
@@ -155,7 +156,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, err
 	}
 
-	r.api = api
 	r.planConfig = *planConfig
 	r.resolver = resolve.New(ctx, resolve.NewFetcher(true), true)
 
