@@ -1,18 +1,10 @@
-import { ConfigurationVariableKind, CorsConfiguration } from '@wundergraph/protobuf';
+import { WunderGraphCorsConfiguration } from '../configure';
 
-const allowAll: CorsConfiguration = {
+const allowAll: WunderGraphCorsConfiguration = {
 	allowCredentials: true,
 	allowedHeaders: ['*'],
 	allowedMethods: ['GET', 'POST'],
-	allowedOrigins: [
-		{
-			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-			staticVariableContent: '*',
-			environmentVariableName: '',
-			environmentVariableDefaultValue: '',
-			placeholderVariableName: '',
-		},
-	],
+	allowedOrigins: ['http://*', 'https://*'],
 	exposedHeaders: ['*'],
 	maxAge: 120,
 };
