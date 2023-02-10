@@ -25,7 +25,7 @@ import type {
 } from './types';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
-import { createExecutableSchema, openApiSpecsLocation } from '../rest2graphql';
+import { createExecutableSchema, openApiSpecsLocation } from '../openapi';
 import { LazyGraphQLServerConfig } from './plugins/graphql';
 
 let WG_CONFIG: WunderGraphConfiguration;

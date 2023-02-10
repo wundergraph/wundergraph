@@ -3,7 +3,7 @@ import process from 'node:process';
 import fs from 'fs';
 
 import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource, OpenAPIV2Introspection, RESTApi } from './index';
-import { openApiSpecificationToGraphQLApi } from '../rest2graphql';
+import { openApiSpecificationToGraphQLApi } from '../openapi';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
 
