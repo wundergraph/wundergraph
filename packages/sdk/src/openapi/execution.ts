@@ -1,16 +1,17 @@
 import { mapInputVariable, resolveConfigurationVariable } from '../configure/variables';
 import path from 'path';
 import process from 'node:process';
-import { readFileSync } from 'fs';
 import { createGraphQLSchema } from 'openapi-to-graphql';
 import { ExecutionContext } from '../server/plugins/graphql';
 import { OpenApiSpec } from './introspection';
+import { readFile } from 'fs/promises';
 
 export const openApiSpecsLocation = path.join('generated', 'openapi');
 
 export const createExecutableSchema = async (specName: string) => {
 	const fullSpecPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation, specName);
-	const specContent = readFileSync(fullSpecPath).toString();
+	const specContent = await readFile(fullSpecPath, { encoding: 'utf8' });
+
 	const spec: OpenApiSpec = JSON.parse(specContent);
 
 	let baseUrl: string | undefined;

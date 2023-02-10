@@ -8,7 +8,7 @@ import { printSchema } from 'graphql/index';
 import { WgEnv } from '../configure/options';
 import { introspectGraphql } from '../definition/graphql-introspection';
 import process from 'node:process';
-import { mkdir, readdir, rmdir, stat, writeFile } from 'fs/promises';
+import { mkdir, readdir, rm, stat, writeFile } from 'fs/promises';
 import { InputVariable } from '../configure/variables';
 import { HeadersBuilder } from '../definition/headers-builder';
 
@@ -115,7 +115,7 @@ const writeApiInfo = async (name: string, spec: OasSpec, introspection: OpenAPII
 		headers: forwardHeaders(introspection),
 	};
 
-	await writeFile(filePath, JSON.stringify(item, null, 2), { encoding: 'base64' });
+	await writeFile(filePath, JSON.stringify(item, null, 2), { encoding: 'utf-8' });
 };
 
 export const cleanOpenApiSpecs = async () => {
@@ -125,7 +125,7 @@ export const cleanOpenApiSpecs = async () => {
 	}
 
 	const specsFolderPath = specsAbsPath();
-	await rmdir(specsFolderPath);
+	await rm(specsFolderPath, { recursive: true, force: true });
 };
 
 export const openApisExists = async (): Promise<boolean> => {
