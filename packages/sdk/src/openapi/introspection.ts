@@ -101,7 +101,7 @@ const forwardHeaders = (introspection: OpenAPIIntrospection): string[] => {
 	return headersBuilder.build().map((value) => value.key.toLowerCase());
 };
 
-const specsAbsPath = () => path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
+const specsAbsPath = () => path.join(process.env.WG_DIR_ABS || '', openApiSpecsLocation);
 
 const writeApiInfo = async (name: string, spec: OasSpec, introspection: OpenAPIIntrospection) => {
 	const specsFolderPath = specsAbsPath();
@@ -120,6 +120,11 @@ const writeApiInfo = async (name: string, spec: OasSpec, introspection: OpenAPII
 };
 
 export const cleanOpenApiSpecs = async () => {
+	const exists = await openApisExists();
+	if (!exists) {
+		return;
+	}
+
 	const specsFolderPath = specsAbsPath();
 	await rmdir(specsFolderPath);
 };
