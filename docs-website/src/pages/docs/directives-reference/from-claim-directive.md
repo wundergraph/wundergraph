@@ -48,28 +48,28 @@ So, the user must be authenticated to execute the operation.
 
 WunderGraph supports the following well known claims:
 
-| Name                  | Claim              | Type    |
-| --------------------- | ------------------ | ------- |
-| ISSUER                | iss                | string  |
-| PROVIDER (deprecated) | iss                | string  |
-| SUBJECT               | sub                | string  |
-| USERID (alias)        | sub                | string  |
-| NAME                  | name               | string  |
-| GIVEN_NAME            | given_name         | string  |
-| FAMILY_NAME           | family_name        | string  |
-| MIDDLE_NAME           | middle_name        | string  |
-| NICKNAME              | nickname           | string  |
-| PREFERRED_USERNAME    | preferred_username | string  |
-| PROFILE               | profile            | string  |
-| PICTURE               | picture            | string  |
-| WEBSITE               | website            | string  |
-| EMAIL                 | email              | string  |
-| EMAIL_VERIFIED        | email_verified     | boolean |
-| GENDER                | gender             | string  |
-| BIRTH_DATE            | birthdate          | string  |
-| ZONE_INFO             | zoneinfo           | string  |
-| LOCALE                | locale             | string  |
-| LOCATION              | location           | string  |
+| Name                  | Claim              | Type    | `User` field      |
+| --------------------- | ------------------ | ------- | ----------------- |
+| ISSUER                | iss                | string  | providerId        |
+| PROVIDER (deprecated) | iss                | string  | providerId        |
+| SUBJECT               | sub                | string  | userId            |
+| USERID (alias)        | sub                | string  | userId            |
+| NAME                  | name               | string  | name              |
+| GIVEN_NAME            | given_name         | string  | firstName         |
+| FAMILY_NAME           | family_name        | string  | lastName          |
+| MIDDLE_NAME           | middle_name        | string  | middleName        |
+| NICKNAME              | nickname           | string  | nickName          |
+| PREFERRED_USERNAME    | preferred_username | string  | preferredUsername |
+| PROFILE               | profile            | string  | profile           |
+| PICTURE               | picture            | string  | picture           |
+| WEBSITE               | website            | string  | website           |
+| EMAIL                 | email              | string  | email             |
+| EMAIL_VERIFIED        | email_verified     | boolean | emailVerified     |
+| GENDER                | gender             | string  | gender            |
+| BIRTH_DATE            | birthdate          | string  | birthDate         |
+| ZONE_INFO             | zoneinfo           | string  | zoneInfo          |
+| LOCALE                | locale             | string  | locale            |
+| LOCATION              | location           | string  | location          |
 
 ## Custom claims
 
@@ -109,3 +109,6 @@ mutation ($shopID: Int! @fromClaim(name: SHOPID), $productID: Int!) {
   }
 }
 ```
+
+Additionaly, custom claims are also available in `User` instances in both hooks and functions, under
+`User.customClaims.\<claimID\>` (e.g. `User.customClaims.shopID`).
