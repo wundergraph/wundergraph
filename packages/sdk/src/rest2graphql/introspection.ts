@@ -7,8 +7,11 @@ import objectHash from 'object-hash';
 import { writeApiInfo } from './execution';
 import { createGraphQLSchema, Oas2, Oas3 } from 'openapi-to-graphql';
 import { printSchema } from 'graphql/index';
+import { WgEnv } from '../configure/options';
 
 export type OasSpec = Oas3 | Oas2 | (Oas3 | Oas2);
+
+const apiIDRegexp = /^[_\-0-9a-z]+$/;
 
 export const openApiSpecificationToGraphQLApi = async (
 	oas: string,
@@ -18,8 +21,10 @@ export const openApiSpecificationToGraphQLApi = async (
 	let apiID: string;
 
 	if (introspection.id) {
-		if (!introspection.id.match(/^[_\-0-9a-z]+$/)) {
-			throw new Error('Invalid characters in api id - please use only alphanumeric characters, dashes and underscores');
+		if (!introspection.id.match(apiIDRegexp)) {
+			throw new Error(
+				'Invalid characters in api id - please use only lower case alphanumeric letters, dashes and underscores'
+			);
 		}
 		apiID = introspection.id;
 	} else {
@@ -36,7 +41,7 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	return introspect.graphql({
 		url: '',
-		baseUrl: '<SERVER_URL>',
+		baseUrl: WgEnv.ServerUrl,
 		path: `/openapis/${apiID}/graphql`,
 		apiNamespace: introspection.apiNamespace,
 		internal: true,

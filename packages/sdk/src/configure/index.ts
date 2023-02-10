@@ -359,18 +359,6 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		config.server?.hooks
 	);
 
-	for (const ds of resolved.EngineConfiguration.DataSources) {
-		if (ds.Kind === DataSourceKind.GRAPHQL) {
-			const custom = ds.Custom as unknown as GraphQLApiCustom;
-			if (
-				custom.Fetch.baseUrl?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
-				custom.Fetch.baseUrl.staticVariableContent.includes('<SERVER_URL>')
-			) {
-				custom.Fetch.baseUrl = resolvedServerOptions.serverUrl;
-			}
-		}
-	}
-
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
 			config.authentication.cookieBased !== undefined &&
