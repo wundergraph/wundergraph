@@ -8,10 +8,9 @@ import { printSchema } from 'graphql/index';
 import { WgEnv } from '../configure/options';
 import { introspectGraphql } from '../definition/graphql-introspection';
 import process from 'node:process';
-import { access, mkdir, readdir, rmdir, writeFile } from 'fs/promises';
+import { mkdir, readdir, rmdir, stat, writeFile } from 'fs/promises';
 import { InputVariable } from '../configure/variables';
 import { HeadersBuilder } from '../definition/headers-builder';
-import fs, { existsSync } from 'fs';
 
 export type OasSpec = Oas3 | Oas2 | (Oas3 | Oas2);
 
@@ -131,7 +130,7 @@ export const cleanOpenApiSpecs = async () => {
 
 export const openApisExists = async (): Promise<boolean> => {
 	const specsFolderPath = specsAbsPath();
-	return existsSync(specsFolderPath);
+	return (await stat(specsFolderPath)).isDirectory();
 };
 
 export const listOpenApiSpecs = async (): Promise<string[]> => {

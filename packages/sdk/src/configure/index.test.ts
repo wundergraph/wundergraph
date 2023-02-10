@@ -1,8 +1,8 @@
-import { introspect } from '../definition';
+import { GraphQLApi, introspect } from '../definition';
 import { assert } from 'chai';
 
 test.skip('introspect federation', async () => {
-	const federated = await introspect.federation({
+	const federated: GraphQLApi = await introspect.federation({
 		apiNamespace: 'federation',
 		upstreams: [
 			{ url: 'http://localhost:4001/graphql' },
