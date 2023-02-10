@@ -3,6 +3,7 @@ import { CodeGenerationConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { template } from './server.template';
+import { TypeScriptClaims } from './claims';
 import { WunderGraphHooksPlugin } from './hooks';
 import { WunderGraphInternalApiClient } from './internal.client';
 import { WunderGraphInternalOperationsApiClient } from './internal.operations.client';
@@ -27,6 +28,7 @@ export class WunderGraphServer implements Template {
 			new WunderGraphHooksPlugin(),
 			new WunderGraphInternalApiClient(),
 			new WunderGraphInternalOperationsApiClient(),
+			new TypeScriptClaims(),
 		];
 	}
 }

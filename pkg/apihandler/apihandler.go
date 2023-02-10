@@ -962,43 +962,172 @@ func (h *GraphQLHandler) preparePlan(operationHash uint64, requestOperationName 
 	return preparedPlan.(planWithExtractedVariables), nil
 }
 
-func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
-	variables = injectClaims(operation, r, variables)
+func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
+	var err error
+	variables, err = injectClaims(operation, r, variables)
+	if err != nil {
+		return nil, err
+	}
 	variables = injectVariables(operation, r, variables)
-	return variables
+	return variables, nil
 }
 
-func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
-	if operation.AuthorizationConfig == nil || len(operation.AuthorizationConfig.Claims) == 0 {
-		return variables
+func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+	var err error
+	var replacement string
+
+	switch claim.ClaimType {
+	case wgpb.ClaimType_ISSUER:
+		replacement = user.ProviderID
+	case wgpb.ClaimType_SUBJECT: // handles  wgpb.ClaimType_USERID too
+		replacement = user.UserID
+	case wgpb.ClaimType_NAME:
+		replacement = user.Name
+	case wgpb.ClaimType_GIVEN_NAME:
+		replacement = user.FirstName
+	case wgpb.ClaimType_FAMILY_NAME:
+		replacement = user.LastName
+	case wgpb.ClaimType_MIDDLE_NAME:
+		replacement = user.MiddleName
+	case wgpb.ClaimType_NICKNAME:
+		replacement = user.NickName
+	case wgpb.ClaimType_PREFERRED_USERNAME:
+		replacement = user.PreferredUsername
+	case wgpb.ClaimType_PROFILE:
+		replacement = user.Profile
+	case wgpb.ClaimType_PICTURE:
+		replacement = user.Picture
+	case wgpb.ClaimType_WEBSITE:
+		replacement = user.Website
+	case wgpb.ClaimType_EMAIL:
+		replacement = user.Email
+	case wgpb.ClaimType_EMAIL_VERIFIED:
+		var boolValue string
+		if user.EmailVerified {
+			boolValue = "true"
+		} else {
+			boolValue = "false"
+		}
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+		if err != nil {
+			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
+		}
+		// Don't go into the block after the switch that sets the variable as a string
+		return variables, nil
+	case wgpb.ClaimType_GENDER:
+		replacement = user.Gender
+	case wgpb.ClaimType_BIRTH_DATE:
+		replacement = user.BirthDate
+	case wgpb.ClaimType_ZONE_INFO:
+		replacement = user.ZoneInfo
+	case wgpb.ClaimType_LOCALE:
+		replacement = user.Locale
+	case wgpb.ClaimType_LOCATION:
+		replacement = user.Location
+	default:
+		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
+	}
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	if err != nil {
+		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
+	}
+
+	return variables, nil
+}
+
+func lookupJsonPath(data interface{}, keys []string, keyIndex int) interface{} {
+	key := keys[keyIndex]
+	if m, ok := data.(map[string]interface{}); ok {
+		item := m[key]
+		if keyIndex == len(keys)-1 {
+			return item
+		}
+		return lookupJsonPath(item, keys, keyIndex+1)
+	}
+	return nil
+}
+
+func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+	custom := claim.GetCustom()
+	value := lookupJsonPath(user.CustomClaims, custom.JsonPathComponents, 0)
+	var replacement []byte
+	switch x := value.(type) {
+	case nil:
+		if custom.Required {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
+			}
+		}
+		return variables, nil
+	case string:
+		if custom.Type != wgpb.ValueType_STRING {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+		replacement = []byte("\"" + string(x) + "\"")
+	case bool:
+		if custom.Type != wgpb.ValueType_BOOLEAN {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+		if x {
+			replacement = []byte("true")
+		} else {
+			replacement = []byte("false")
+		}
+	case float64:
+		switch custom.Type {
+		case wgpb.ValueType_INT:
+			if x != float64(int(x)) {
+				// Value is not integral
+				return nil, &inputvariables.ValidationError{
+					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
+				}
+			}
+			replacement = []byte(strconv.FormatInt(int64(x), 10))
+		case wgpb.ValueType_FLOAT:
+			// JSON number is always a valid float
+			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
+		default:
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+	default:
+		return nil, fmt.Errorf("unhandled custom claim type %T", x)
+	}
+	var err error
+	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	if err != nil {
+		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
+	}
+	return variables, nil
+}
+
+func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
+	authorizationConfig := operation.GetAuthorizationConfig()
+	claims := authorizationConfig.GetClaims()
+	if len(claims) == 0 {
+		return variables, nil
 	}
 	user := authentication.UserFromContext(r.Context())
 	if user == nil {
-		return variables
+		return variables, nil
 	}
-	for _, claim := range operation.AuthorizationConfig.Claims {
-		switch claim.Claim {
-		case wgpb.Claim_USERID:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.UserID+"\""), claim.VariableName)
-		case wgpb.Claim_EMAIL:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Email+"\""), claim.VariableName)
-		case wgpb.Claim_EMAIL_VERIFIED:
-			if user.EmailVerified {
-				variables, _ = jsonparser.Set(variables, []byte("true"), claim.VariableName)
-			} else {
-				variables, _ = jsonparser.Set(variables, []byte("false"), claim.VariableName)
-			}
-		case wgpb.Claim_LOCATION:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Location+"\""), claim.VariableName)
-		case wgpb.Claim_NAME:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Name+"\""), claim.VariableName)
-		case wgpb.Claim_NICKNAME:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.NickName+"\""), claim.VariableName)
-		case wgpb.Claim_PROVIDER:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.ProviderID+"\""), claim.VariableName)
+	var err error
+	for _, claim := range claims {
+		if claim.GetClaimType() == wgpb.ClaimType_CUSTOM {
+			variables, err = injectCustomClaim(claim, user, variables)
+		} else {
+			variables, err = injectWellKnownClaim(claim, user, variables)
 		}
 	}
-	return variables
+	if err != nil {
+		return nil, err
+	}
+	return variables, nil
 }
 
 func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
@@ -1189,7 +1318,12 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
-	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
+			return
+		}
+	}
 
 	flusher, flusherOk := w.(http.Flusher)
 	if isLive {
@@ -1625,7 +1759,12 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
-	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
+			return
+		}
+	}
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1774,7 +1913,12 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
-	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
+			return
+		}
+	}
 
 	var (
 		flushWriter *httpFlushWriter
@@ -2581,6 +2725,15 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 			zap.String("operationType", operation.OperationType.String()),
 		)
 		w.WriteHeader(http.StatusGatewayTimeout)
+		return true
+	}
+	var validationError *inputvariables.ValidationError
+	if errors.As(err, &validationError) {
+		w.WriteHeader(http.StatusBadRequest)
+		enc := json.NewEncoder(w)
+		if err := enc.Encode(&validationError); err != nil {
+			log.Error("error encoding validation error", zap.Error(err))
+		}
 		return true
 	}
 	log.Error(errorMessage,

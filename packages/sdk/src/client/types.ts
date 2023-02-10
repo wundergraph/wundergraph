@@ -150,25 +150,34 @@ export interface FetchUserRequestOptions {
 	revalidate?: boolean;
 }
 
-export interface User<Role extends string = string> {
+export interface User<Role extends string = any, CustomClaims extends {} = {}> {
 	provider?: string;
 	providerId?: string;
-	email?: string;
-	emailVerified?: boolean;
+	userId?: string;
 	name?: string;
 	firstName?: string;
 	lastName?: string;
+	middleName?: string;
 	nickName?: string;
-	description?: string;
-	userId?: string;
-	avatarUrl?: string;
+	preferredUsername?: string;
+	profile?: string;
+	picture?: string;
+	website?: string;
+	email?: string;
+	emailVerified?: boolean;
+	gender?: string;
+	birthDate?: string;
+	zoneInfo?: string;
+	locale?: string;
 	location?: string;
+
 	roles?: Role[];
 	customAttributes?: string[];
 	customClaims?: {
 		[key: string]: any;
-	};
+	} & CustomClaims;
 	accessToken?: JSONObject;
+	rawAccessToken?: string;
 	idToken?: JSONObject;
 	rawIdToken?: string;
 }

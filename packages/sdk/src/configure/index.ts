@@ -49,6 +49,7 @@ import {
 	PostResolveTransformationKind,
 	S3UploadProfile as _S3UploadProfile,
 	TypeConfiguration,
+	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
@@ -112,6 +113,7 @@ export interface WunderGraphConfigApplicationConfig {
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
+		customClaims?: Record<string, CustomClaim>;
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
@@ -125,6 +127,26 @@ export interface TokenAuthProvider {
 	jwksURL?: InputVariable;
 	userInfoEndpoint?: InputVariable;
 	userInfoCacheTtlSeconds?: number;
+}
+
+export interface CustomClaim {
+	/**
+	 * Path to the object inside the user payload to retrieve this claim
+	 */
+	jsonPath: string;
+
+	/** Value type
+	 *
+	 * @default 'string'
+	 */
+	type?: 'string' | 'int' | 'float' | 'boolean';
+
+	/** If required is true, users without this claim will
+	 * fail to authenticate
+	 *
+	 * @default true
+	 */
+	required?: boolean;
 }
 
 export interface SecurityConfig {
@@ -242,6 +264,7 @@ export interface ResolvedWunderGraphConfig {
 		roles: string[];
 		cookieBased: AuthProvider[];
 		tokenBased: TokenAuthProvider[];
+		customClaims: Record<string, CustomClaim>;
 		authorizedRedirectUris: ConfigurationVariable[];
 		authorizedRedirectUriRegexes: ConfigurationVariable[];
 		hooks: {
@@ -325,9 +348,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	}
 
 	const roles = config.authorization?.roles || ['admin', 'user'];
+	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
 	const resolved = await resolveApplication(
 		roles,
+		customClaims,
 		config.apis,
 		cors,
 		config.s3UploadProvider || [],
@@ -353,6 +378,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			roles,
 			cookieBased: cookieBasedAuthProviders,
 			tokenBased: config.authentication?.tokenBased?.providers || [],
+			customClaims: config.authentication?.customClaims || {},
 			authorizedRedirectUris:
 				config.authentication?.cookieBased?.authorizedRedirectUris?.map((stringOrEnvironmentVariable) => {
 					if (typeof stringOrEnvironmentVariable === 'string') {
@@ -591,13 +617,14 @@ const resolveUploadConfiguration = (
 
 const resolveApplication = async (
 	roles: string[],
+	customClaims: string[],
 	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
 	const resolvedApis = await Promise.all(apis);
-	const merged = mergeApis(roles, ...resolvedApis);
+	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
 		EngineConfiguration: merged,
@@ -907,6 +934,17 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 const total = 4;
 let doneCount = 0;
 
+const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
+	record: Record<TKey, TValue>,
+	fn: (key: TKey, value: TValue) => TOutputValue
+): Record<TKey, TOutputValue> => {
+	let output: Record<TKey, TOutputValue> = {} as any;
+	for (const key in record) {
+		output[key] = fn(key, record[key]);
+	}
+	return output;
+};
+
 const done = () => {
 	doneCount++;
 	Logger.info(`${doneCount}/${total} done`);
@@ -1120,10 +1158,39 @@ const resolveOperationsConfigurations = async (
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
+	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
+		let claimType: ValueType;
+		switch (claim.type) {
+			case 'string':
+				claimType = ValueType.STRING;
+				break;
+			case 'int':
+				claimType = ValueType.INT;
+				break;
+			case 'float':
+				claimType = ValueType.FLOAT;
+				break;
+			case 'boolean':
+				claimType = ValueType.FLOAT;
+				break;
+			case undefined:
+				claimType = ValueType.STRING;
+				break;
+			default:
+				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
+		}
+		return {
+			name: key,
+			jsonPathComponents: claim.jsonPath.split('.'),
+			type: claimType,
+			required: claim.required ?? true,
+		};
+	});
 	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
 		keepFromClaimVariables: false,
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
+		customClaims,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)
@@ -1204,7 +1271,7 @@ const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation)
 
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any>
 ): GraphQLOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

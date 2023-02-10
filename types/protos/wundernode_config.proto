@@ -189,19 +189,52 @@ message OperationRoleConfig {
 	repeated string denyMatchAny = 4;
 }
 
-message ClaimConfig {
-	string variableName = 1;
-	Claim claim = 2;
+message CustomClaim {
+	string name = 1;
+	repeated string jsonPathComponents = 2;
+	ValueType type = 3;
+	bool required = 4;
 }
 
-enum Claim {
-	EMAIL = 0;
-	EMAIL_VERIFIED = 1;
-	NAME = 2;
-	NICKNAME = 3;
-	LOCATION = 4;
-	PROVIDER = 5;
-	USERID = 6;
+message ClaimConfig {
+	string variableName = 1;
+	ClaimType claimType = 2;
+	// Available iff claimType == CUSTOM
+	optional CustomClaim custom = 3;
+}
+
+enum ClaimType {
+	// https://www.iana.org/assignments/jwt/jwt.xhtml
+	option allow_alias = true;
+	ISSUER = 0; // iss
+	PROVIDER = 0; // alias for iss, deprecated
+	SUBJECT = 1; // sub
+	USERID = 1; // alias for sub
+	NAME = 2; // name
+	GIVEN_NAME = 3; // given_name
+	FAMILY_NAME = 4; // family_name
+	MIDDLE_NAME = 5; // middle_name
+	NICKNAME = 6; // nickname
+	PREFERRED_USERNAME = 7; // preferred_username
+	PROFILE = 8; // profile
+	PICTURE = 9; // picture
+	WEBSITE = 10; // website
+	EMAIL = 11; // email
+	EMAIL_VERIFIED = 12; // email_verified
+	GENDER = 13; // gender
+	BIRTH_DATE = 14; // birthdate
+	ZONE_INFO = 15; // zoneinfo
+	LOCALE = 16; // locale
+	LOCATION = 17; // location
+
+	CUSTOM = 999;
+}
+
+enum ValueType {
+	STRING = 0;
+	INT = 1;
+	FLOAT = 2;
+	BOOLEAN = 3;
 }
 
 message OperationLiveQueryConfig {
