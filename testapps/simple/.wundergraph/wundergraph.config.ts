@@ -2,18 +2,9 @@ import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect,
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
-const stripe = introspect.openApiV2({
-	baseURL: 'http://localhost:12111',
-	apiNamespace: 'stripe',
-	source: {
-		kind: 'file',
-		filePath: './stripe.yaml',
-	},
-});
-
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [stripe],
+	apis: [],
 	server,
 	operations,
 	codeGenerators: [
