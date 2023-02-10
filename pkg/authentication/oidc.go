@@ -113,7 +113,7 @@ func (c *Claims) ToUser() User {
 func isCustomClaim(claim string) bool {
 	// XXX: Keep this list in sync with Claim's fields
 	switch claim {
-	case "iss", "sub", "name", "given_name", "family_name", "nickname", "picture", "email", "email_verified", "location", "locale":
+	case "iss", "sub", "name", "given_name", "family_name", "middle_name", "nickname", "preferred_username", "profile", "picture", "website", "email", "email_verified", "gender", "birthdate", "zoneinfo", "location", "locale":
 		return false
 	}
 	return true
