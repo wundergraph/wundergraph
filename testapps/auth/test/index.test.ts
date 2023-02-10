@@ -277,7 +277,7 @@ describe('test @fromClaim with custom claims', () => {
 		// Should fail because shopID is null, not because the claim is
 		// missing
 		expect(result.data).toBeUndefined();
-		expect(result.error?.message).toBe('Variable "$input" of non-null type "Int!" must not be null.');
+		expect(result.error?.message).toBe('Variable "$input" of required type "Int!" was not provided.');
 	});
 
 	test('token with floating point custom claim', async () => {
