@@ -30,7 +30,14 @@ configureWunderGraphApplication({
 	],
 	cors: {
 		...cors.allowAll,
-		allowedOrigins: ['http://localhost:5173'],
+		allowedOrigins: process.env.NODE_ENV === 'production' ? ['https://*'] : ['http://*'],
+		/**
+		 * Please configure CORS carefully to make sure that your users are protected.
+		 * Allowing all origins is usually the worst possible configuration.
+		 *
+		 * @docs https://docs.wundergraph.com/docs/wundergraph-config-ts-reference/configure-cors
+		 */
+		// allowedOrigins: process.env.NODE_ENV === 'production' ? ['http://your.app'] : ['http://localhost:3000'],
 	},
 	authentication: {
 		cookieBased: {
