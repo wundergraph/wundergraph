@@ -465,27 +465,7 @@ importers:
       '@types/tar': 4.0.5
       typescript: 4.9.5
 
-  testapps/default:
-    specifiers:
-      '@types/node': ^14.14.37
-      '@wundergraph/golang-client': workspace:*
-      '@wundergraph/sdk': workspace:*
-      graphql: ^16.3.0
-      pg: ^8.7.3
-      postgraphile: ^4.12.9
-      typescript: ^4.9.4
-      zod: ^3.20.2
-    dependencies:
-      '@types/node': 14.18.36
-      '@wundergraph/golang-client': link:../../packages/golang-client
-      '@wundergraph/sdk': link:../../packages/sdk
-      graphql: 16.6.0
-      pg: 8.9.0
-      postgraphile: 4.13.0
-      typescript: 4.9.5
-      zod: 3.20.6
-
-  testapps/jwks:
+  testapps/auth:
     specifiers:
       '@jest/globals': ^29.3.1
       '@types/node': ^18.11.18
@@ -511,6 +491,26 @@ importers:
       jose: 4.11.4
       ts-jest: 29.0.5_gelezmms3va3pnkofxaadhcvma
       ts-node: 10.9.1_4bewfcp2iebiwuold25d6rgcsy
+
+  testapps/default:
+    specifiers:
+      '@types/node': ^14.14.37
+      '@wundergraph/golang-client': workspace:*
+      '@wundergraph/sdk': workspace:*
+      graphql: ^16.3.0
+      pg: ^8.7.3
+      postgraphile: ^4.12.9
+      typescript: ^4.9.4
+      zod: ^3.20.2
+    dependencies:
+      '@types/node': 14.18.36
+      '@wundergraph/golang-client': link:../../packages/golang-client
+      '@wundergraph/sdk': link:../../packages/sdk
+      graphql: 16.6.0
+      pg: 8.9.0
+      postgraphile: 4.13.0
+      typescript: 4.9.5
+      zod: 3.20.6
 
   testapps/mtls:
     specifiers:
@@ -3892,7 +3892,7 @@ packages:
   /@types/cross-spawn/6.0.2:
     resolution: {integrity: sha512-KuwNhp3eza+Rhu8IFI5HUXRP0LIhqH5cAjubUvGXXthh4YYBuP2ntwEX+Cz8GJoZUHlKo247wPWOfA9LYEq4cw==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 18.13.0
     dev: false
 
   /@types/dashdash/1.14.1:
@@ -3923,7 +3923,7 @@ packages:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 14.18.36
+      '@types/node': 18.13.0
     dev: false
 
   /@types/glob/8.0.1:
@@ -4011,7 +4011,7 @@ packages:
   /@types/jsonwebtoken/9.0.1:
     resolution: {integrity: sha512-c5ltxazpWabia/4UzhIoaDcIza4KViOQhdbjRlfcIGVnsE3c3brkz9Z+F/EeJIECOQP7W7US2hNE930cWWkPiw==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 18.13.0
     dev: false
 
   /@types/keyv/3.1.4:
@@ -4047,7 +4047,7 @@ packages:
   /@types/node-fetch/2.6.2:
     resolution: {integrity: sha512-DHqhlq5jeESLy19TYhLakJ07kNumXWjcDdxXsLUMJZ6ue8VZJj4kLPQVE/2mdHh3xZziNF1xppu5lwmS53HR+A==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 18.13.0
       form-data: 3.0.1
 
   /@types/node/14.18.36:
@@ -4074,7 +4074,7 @@ packages:
   /@types/pg/8.6.6:
     resolution: {integrity: sha512-O2xNmXebtwVekJDD+02udOncjVcMZQuTEQEMpKJ0ZRf5E7/9JJX3izhKUcUifBkyKpljyUM6BTgy2trmviKlpw==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 18.13.0
       pg-protocol: 1.6.0
       pg-types: 2.2.0
     dev: false
@@ -4162,7 +4162,7 @@ packages:
   /@types/ws/7.4.7:
     resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
     dependencies:
-      '@types/node': 14.18.36
+      '@types/node': 18.13.0
     dev: false
 
   /@types/yargs-parser/21.0.0:
@@ -4772,7 +4772,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
     transitivePeerDependencies:
       - debug
     dev: false
@@ -7319,18 +7319,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-
-  /follow-redirects/1.15.2_debug@4.3.4:
-    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-    dependencies:
-      debug: 4.3.4
-    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
