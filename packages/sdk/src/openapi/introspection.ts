@@ -8,9 +8,10 @@ import { printSchema } from 'graphql/index';
 import { WgEnv } from '../configure/options';
 import { introspectGraphql } from '../definition/graphql-introspection';
 import process from 'node:process';
-import { mkdir, rmdir, writeFile } from 'fs/promises';
+import { access, mkdir, readdir, rmdir, writeFile } from 'fs/promises';
 import { InputVariable } from '../configure/variables';
 import { HeadersBuilder } from '../definition/headers-builder';
+import fs, { existsSync } from 'fs';
 
 export type OasSpec = Oas3 | Oas2 | (Oas3 | Oas2);
 
@@ -86,7 +87,7 @@ const tryReadSpec = (spec: string): OasSpec => {
 		if (obj) {
 			return obj;
 		}
-		throw new Error('cannot read OAS');
+		throw new Error('cannot read OAS: ${e}');
 	}
 };
 
@@ -100,8 +101,10 @@ const forwardHeaders = (introspection: OpenAPIIntrospection): string[] => {
 	return headersBuilder.build().map((value) => value.key.toLowerCase());
 };
 
+const specsAbsPath = () => path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
+
 const writeApiInfo = async (name: string, spec: OasSpec, introspection: OpenAPIIntrospection) => {
-	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
+	const specsFolderPath = specsAbsPath();
 	await mkdir(specsFolderPath);
 
 	const fileName = `${name}.json`;
@@ -117,6 +120,16 @@ const writeApiInfo = async (name: string, spec: OasSpec, introspection: OpenAPII
 };
 
 export const cleanOpenApiSpecs = async () => {
-	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
+	const specsFolderPath = specsAbsPath();
 	await rmdir(specsFolderPath);
+};
+
+export const openApisExists = async (): Promise<boolean> => {
+	const specsFolderPath = specsAbsPath();
+	return existsSync(specsFolderPath);
+};
+
+export const listOpenApiSpecs = async (): Promise<string[]> => {
+	const specsFolderPath = specsAbsPath();
+	return readdir(specsFolderPath);
 };

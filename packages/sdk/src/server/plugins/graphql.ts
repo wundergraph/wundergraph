@@ -73,8 +73,6 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<LazyGraphQLServerConfig> = async 
 
 			const pluginLogger = req.ctx.log.child({ server: config.serverName, plugin: 'graphql' });
 
-			pluginLogger.info(`GraphQL request  ${JSON.stringify(request)}`);
-
 			if (config.enableGraphQLEndpoint && shouldRenderGraphiQL(request)) {
 				reply.type('text/html');
 				reply.send(

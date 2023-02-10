@@ -27,6 +27,7 @@ import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
 import { createExecutableSchema, openApiSpecsLocation } from '../openapi';
 import { LazyGraphQLServerConfig } from './plugins/graphql';
+import { openApisExists, listOpenApiSpecs } from '../openapi/introspection';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -224,35 +225,40 @@ export const createServer = async ({
 			fastify.log.info('Hooks plugin registered');
 		}
 
-		if (serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0) {
-			for await (const server of serverConfig.graphqlServers) {
+		const hasGraphqlServers = serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0;
+		const hasOpenApis = await openApisExists();
+
+		let graphqlPlugin: any;
+		if (hasGraphqlServers || hasOpenApis) {
+			graphqlPlugin = await require('./plugins/graphql');
+		}
+
+		if (hasGraphqlServers) {
+			for await (const server of serverConfig.graphqlServers!) {
 				const routeUrl = customGqlServerMountPath(server.serverName);
-				await fastify.register(require('./plugins/graphql'), { ...server, routeUrl: routeUrl });
+				await fastify.register(graphqlPlugin, { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
 				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
 			}
 		}
 
-		const openApisSpecsPath = path.join(wundergraphDir, openApiSpecsLocation);
-		const openApisExists = fs.existsSync(openApisSpecsPath);
-		if (openApisExists) {
-			const specPaths: string[] = [];
-			fs.readdirSync(openApisSpecsPath).forEach((file) => {
-				specPaths.push(file);
-			});
+		if (hasOpenApis) {
+			const specPaths = await listOpenApiSpecs();
 
 			for await (const specPath of specPaths) {
-				const ext = path.extname(specPath);
-				const apiName = path.basename(specPath, ext);
+				const apiName = path.basename(specPath, path.extname(specPath));
 				const routeUrl = openApiServerMountPath(apiName);
 
-				fastify.register(require('./plugins/graphql') as FastifyPluginAsync<LazyGraphQLServerConfig>, {
-					serverName: apiName,
-					schema: () => createExecutableSchema(specPath),
-					routeUrl: routeUrl,
-				});
-				fastify.log.info('GraphQL plugin registered');
-				fastify.log.info(`OpenAPi Graphql server '${apiName}' listening at ${routeUrl}`);
+				fastify
+					.register(graphqlPlugin as FastifyPluginAsync<LazyGraphQLServerConfig>, {
+						serverName: apiName,
+						schema: () => createExecutableSchema(specPath),
+						routeUrl: routeUrl,
+					})
+					.ready(() => {
+						fastify.log.info('GraphQL plugin registered');
+						fastify.log.info(`OpenAPi Graphql server '${apiName}' listening at ${routeUrl}`);
+					});
 			}
 		}
 	});
