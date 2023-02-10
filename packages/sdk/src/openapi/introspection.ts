@@ -2,13 +2,23 @@ import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource } from '..
 import path from 'path';
 import yaml from 'js-yaml';
 import objectHash from 'object-hash';
-import { writeApiInfo } from './execution';
+import { openApiSpecsLocation } from './execution';
 import { createGraphQLSchema, Oas2, Oas3 } from 'openapi-to-graphql';
 import { printSchema } from 'graphql/index';
 import { WgEnv } from '../configure/options';
 import { introspectGraphql } from '../definition/graphql-introspection';
+import process from 'node:process';
+import { mkdir, rmdir, writeFile } from 'fs/promises';
+import { InputVariable } from '../configure/variables';
+import { HeadersBuilder } from '../definition/headers-builder';
 
 export type OasSpec = Oas3 | Oas2 | (Oas3 | Oas2);
+
+export interface OpenApiSpec {
+	content: OasSpec;
+	baseURL: InputVariable | undefined;
+	headers: string[];
+}
 
 const apiIDRegexp = /^[_\-0-9a-z]+$/;
 
@@ -30,8 +40,7 @@ export const openApiSpecificationToGraphQLApi = async (
 		apiID = objectHash(oas);
 	}
 
-	// TODO: in case apiID is changed the old one file still will exists. what could be a better place to cache the file?
-	writeApiInfo(apiID, spec, introspection);
+	await writeApiInfo(apiID, spec, introspection);
 
 	const { schema } = await createGraphQLSchema(spec, {
 		fillEmptyResponses: true,
@@ -79,4 +88,35 @@ const tryReadSpec = (spec: string): OasSpec => {
 		}
 		throw new Error('cannot read OAS');
 	}
+};
+
+const forwardHeaders = (introspection: OpenAPIIntrospection): string[] => {
+	const headersBuilder = new HeadersBuilder();
+
+	if (introspection.headers !== undefined) {
+		introspection.headers(headersBuilder);
+	}
+
+	return headersBuilder.build().map((value) => value.key.toLowerCase());
+};
+
+const writeApiInfo = async (name: string, spec: OasSpec, introspection: OpenAPIIntrospection) => {
+	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
+	await mkdir(specsFolderPath);
+
+	const fileName = `${name}.json`;
+	const filePath = path.join(specsFolderPath, fileName);
+
+	const item: OpenApiSpec = {
+		content: spec,
+		baseURL: introspection.baseURL,
+		headers: forwardHeaders(introspection),
+	};
+
+	await writeFile(filePath, JSON.stringify(item, null, 2), { encoding: 'base64' });
+};
+
+export const cleanOpenApiSpecs = async () => {
+	const specsFolderPath = path.join(process.env.WG_DIR_ABS!, openApiSpecsLocation);
+	await rmdir(specsFolderPath);
 };

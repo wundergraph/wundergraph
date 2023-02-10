@@ -67,6 +67,7 @@ import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/server-options';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
+import { cleanOpenApiSpecs } from '../openapi/introspection';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -610,6 +611,7 @@ const resolveApplication = async (
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
+	await cleanOpenApiSpecs();
 	const apiPromises = apis.map((api) => api());
 	const resolvedApis = await Promise.all(apiPromises);
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
