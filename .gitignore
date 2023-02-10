@@ -64,3 +64,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # WunderGraph
 **/.wundergraph/cache/
+
+# examples lock files
+examples/*/package-lock.json
+examples/*/yarn.lock
+examples/*/pnpm-lock.yaml

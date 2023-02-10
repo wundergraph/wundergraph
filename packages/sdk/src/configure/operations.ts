@@ -43,25 +43,6 @@ export type CustomizeMutation = (config: MutationConfiguration) => MutationConfi
 export type ConfigureSubscription = (config: BaseOperationConfiguration) => SubscriptionConfiguration;
 export type CustomizeSubscription = (config: SubscriptionConfiguration) => SubscriptionConfiguration;
 
-export interface BaseOperationConfiguration {
-	authentication: {
-		required: boolean;
-	};
-}
-
-export interface QueryConfiguration extends BaseOperationConfiguration {
-	caching: {
-		enable: boolean;
-		public: boolean;
-		maxAge: number;
-		staleWhileRevalidate: number;
-	};
-	liveQuery: {
-		enable: boolean;
-		pollingIntervalSeconds: number;
-	};
-}
-
 export interface WunderGraphOperationsConfig<T extends OperationsConfiguration> {
 	operations?: T;
 }

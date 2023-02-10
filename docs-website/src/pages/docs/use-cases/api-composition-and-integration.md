@@ -86,12 +86,12 @@ First, let's define two API dependencies:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 The virtual graph will be automatically generated,

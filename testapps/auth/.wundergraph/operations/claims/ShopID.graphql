@@ -1,0 +1,3 @@
+query ($input: Int! @fromClaim(name: shopID)) {
+	echo_int(input: $input)
+}

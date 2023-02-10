@@ -39,6 +39,7 @@ The following database management systems are currently supported:
 - [Planetscale](/docs/supported-data-sources/planetscale)
 - [SQLite](/docs/supported-data-sources/sqlite)
 - [SQLServer](/docs/supported-data-sources/sqlserver)
+- [Prisma](/docs/supported-data-sources/prisma)
 - [MongoDB](/docs/supported-data-sources/mongodb-atlas)
 - [FaunaDB](/docs/supported-data-sources/faunadb)
 - [Neo4J](/docs/supported-data-sources/neo4j)

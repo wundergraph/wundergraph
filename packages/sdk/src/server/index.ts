@@ -69,3 +69,7 @@ export { GithubWebhookVerifier, CreateWebhookVerifier, WebhookVerifierKind } fro
 export { EnvironmentVariable } from '../configure/variables';
 
 export { WgEnv } from '../configure/options';
+
+export { OperationsClient } from './operations-client';
+
+export type { OperationsClient as OperationsClientType, Operation, Operations } from './operations-client';

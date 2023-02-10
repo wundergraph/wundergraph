@@ -1,0 +1,4 @@
+query ($uid: String! @fromClaim(name: USERID), $data: String!) {
+	uid: echo_string(input: $uid)
+	data: echo_string(input: $data)
+}
