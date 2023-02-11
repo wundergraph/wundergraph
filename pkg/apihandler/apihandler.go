@@ -1977,16 +1977,16 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		jwksProviders                 []*wgpb.JwksAuthProvider
 	)
 
-	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
-		hashKey = []byte(h)
+	if h := r.api.CookieBasedSecrets.HashKey; h != nil {
+		hashKey = h
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
-		blockKey = []byte(b)
+	if b := r.api.CookieBasedSecrets.BlockKey; b != nil {
+		blockKey = b
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
+	if c := r.api.CookieBasedSecrets.CsrfSecret; c != nil {
+		csrfSecret = c
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {

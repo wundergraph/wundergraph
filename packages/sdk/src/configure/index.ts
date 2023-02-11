@@ -102,12 +102,15 @@ export interface WunderGraphConfigApplicationConfig {
 			// without boundaries, all URIs would match, e.g:
 			// "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
 			authorizedRedirectUriRegexes?: InputVariable[];
+			/** @deprecated: Not used anymore */
 			// secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
-			secureCookieHashKey?: InputVariable;
+			secureCookieHashKey?: any;
+			/** @deprecated: Not used anymore */
 			// secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
-			secureCookieBlockKey?: InputVariable;
+			secureCookieBlockKey?: any;
+			/** @deprecated: Not used anymore */
 			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
-			csrfTokenSecret?: InputVariable;
+			csrfTokenSecret?: any;
 		};
 		tokenBased?: {
 			providers: TokenAuthProvider[];
@@ -1014,9 +1017,6 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					providers: config.authentication.cookieBased,
 					authorizedRedirectUris: config.authentication.authorizedRedirectUris,
 					authorizedRedirectUriRegexes: config.authentication.authorizedRedirectUriRegexes,
-					blockKey: config.authentication.cookieSecurity.secureCookieBlockKey,
-					hashKey: config.authentication.cookieSecurity.secureCookieHashKey,
-					csrfSecret: config.authentication.cookieSecurity.csrfTokenSecret,
 				},
 				hooks: config.authentication.hooks,
 				jwksBased: {

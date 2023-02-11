@@ -626,9 +626,6 @@ export interface CookieBasedAuthentication {
   providers: AuthProvider[];
   authorizedRedirectUris: ConfigurationVariable[];
   authorizedRedirectUriRegexes: ConfigurationVariable[];
-  hashKey: ConfigurationVariable | undefined;
-  blockKey: ConfigurationVariable | undefined;
-  csrfSecret: ConfigurationVariable | undefined;
 }
 
 export interface AuthProvider {
@@ -1250,14 +1247,7 @@ export const ApiAuthenticationHooks = {
 };
 
 function createBaseCookieBasedAuthentication(): CookieBasedAuthentication {
-  return {
-    providers: [],
-    authorizedRedirectUris: [],
-    authorizedRedirectUriRegexes: [],
-    hashKey: undefined,
-    blockKey: undefined,
-    csrfSecret: undefined,
-  };
+  return { providers: [], authorizedRedirectUris: [], authorizedRedirectUriRegexes: [] };
 }
 
 export const CookieBasedAuthentication = {
@@ -1270,9 +1260,6 @@ export const CookieBasedAuthentication = {
       authorizedRedirectUriRegexes: Array.isArray(object?.authorizedRedirectUriRegexes)
         ? object.authorizedRedirectUriRegexes.map((e: any) => ConfigurationVariable.fromJSON(e))
         : [],
-      hashKey: isSet(object.hashKey) ? ConfigurationVariable.fromJSON(object.hashKey) : undefined,
-      blockKey: isSet(object.blockKey) ? ConfigurationVariable.fromJSON(object.blockKey) : undefined,
-      csrfSecret: isSet(object.csrfSecret) ? ConfigurationVariable.fromJSON(object.csrfSecret) : undefined,
     };
   },
 
@@ -1297,12 +1284,6 @@ export const CookieBasedAuthentication = {
     } else {
       obj.authorizedRedirectUriRegexes = [];
     }
-    message.hashKey !== undefined &&
-      (obj.hashKey = message.hashKey ? ConfigurationVariable.toJSON(message.hashKey) : undefined);
-    message.blockKey !== undefined &&
-      (obj.blockKey = message.blockKey ? ConfigurationVariable.toJSON(message.blockKey) : undefined);
-    message.csrfSecret !== undefined &&
-      (obj.csrfSecret = message.csrfSecret ? ConfigurationVariable.toJSON(message.csrfSecret) : undefined);
     return obj;
   },
 
@@ -1313,15 +1294,6 @@ export const CookieBasedAuthentication = {
       [];
     message.authorizedRedirectUriRegexes =
       object.authorizedRedirectUriRegexes?.map((e) => ConfigurationVariable.fromPartial(e)) || [];
-    message.hashKey = (object.hashKey !== undefined && object.hashKey !== null)
-      ? ConfigurationVariable.fromPartial(object.hashKey)
-      : undefined;
-    message.blockKey = (object.blockKey !== undefined && object.blockKey !== null)
-      ? ConfigurationVariable.fromPartial(object.blockKey)
-      : undefined;
-    message.csrfSecret = (object.csrfSecret !== undefined && object.csrfSecret !== null)
-      ? ConfigurationVariable.fromPartial(object.csrfSecret)
-      : undefined;
     return message;
   },
 };
