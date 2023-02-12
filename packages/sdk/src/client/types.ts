@@ -21,12 +21,21 @@ export interface ClientOperation {
 	requiresAuthentication: boolean;
 }
 
+export interface S3ProviderDefinition {
+	[provider: string]: {
+		hasProfiles: boolean;
+		profiles: {
+			[profile: string]: object;
+		};
+	};
+}
+
 export interface OperationsDefinition<
 	Queries extends OperationDefinition = OperationDefinition,
 	Mutations extends OperationDefinition = OperationDefinition,
 	Subscriptions extends OperationDefinition = OperationDefinition,
 	UserRole extends string = string,
-	S3Provider extends string = string,
+	S3Provider extends S3ProviderDefinition = S3ProviderDefinition,
 	AuthProvider extends string = string
 > {
 	user: User<UserRole>;
@@ -120,6 +129,18 @@ export interface UploadRequestOptions<ProviderName extends string = string> {
 	abortSignal?: AbortSignal;
 }
 
+export interface UploadRequestOptionsWithProfile<
+	ProviderName extends string = string,
+	ProfileName extends string = string,
+	Meta extends object = object
+> extends UploadRequestOptions<ProviderName> {
+	provider: ProviderName;
+	profile: ProfileName;
+	files: FileList;
+	abortSignal?: AbortSignal;
+	meta?: Meta;
+}
+
 export interface UploadResponse {
 	fileKeys: string[];
 }
@@ -129,32 +150,41 @@ export interface FetchUserRequestOptions {
 	revalidate?: boolean;
 }
 
-export interface User<Role extends string = string> {
+export interface User<Role extends string = any, CustomClaims extends {} = {}> {
 	provider?: string;
 	providerId?: string;
-	email?: string;
-	emailVerified?: boolean;
+	userId?: string;
 	name?: string;
 	firstName?: string;
 	lastName?: string;
+	middleName?: string;
 	nickName?: string;
-	description?: string;
-	userId?: string;
-	avatarUrl?: string;
+	preferredUsername?: string;
+	profile?: string;
+	picture?: string;
+	website?: string;
+	email?: string;
+	emailVerified?: boolean;
+	gender?: string;
+	birthDate?: string;
+	zoneInfo?: string;
+	locale?: string;
 	location?: string;
+
 	roles?: Role[];
 	customAttributes?: string[];
 	customClaims?: {
 		[key: string]: any;
-	};
+	} & CustomClaims;
 	accessToken?: JSONObject;
+	rawAccessToken?: string;
 	idToken?: JSONObject;
 	rawIdToken?: string;
 }
 
 export interface LogoutOptions {
 	/**
-	 * Wether to log out the user from the OpenID Connect provider.
+	 * Whether to log out the user from the OpenID Connect provider.
 	 * Some providers might require the user to visit a URL. See
 	 * the redirect field.
 	 */

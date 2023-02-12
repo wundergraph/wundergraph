@@ -1,6 +1,7 @@
 import {
-	Claim,
 	ClaimConfig,
+	ClaimType,
+	CustomClaim,
 	InjectVariableKind,
 	OperationExecutionEngine,
 	OperationRoleConfig,
@@ -111,6 +112,7 @@ export interface ParseOperationsOptions {
 	keepFromClaimVariables?: boolean;
 	interpolateVariableDefinitionAsJSON?: string[];
 	customJsonScalars?: string[];
+	customClaims?: Record<string, CustomClaim>;
 }
 
 const defaultParseOptions: ParseOperationsOptions = {
@@ -157,7 +159,7 @@ export const parseGraphQLOperations = (
 						});
 						const errors = validate(parsedGraphQLSchema, operationWithoutHooksVariables);
 						if (errors.length > 0) {
-							Logger.error(`Error parsing operation ${operationFile.operation_name}: ${errors.join(',')}`);
+							Logger.error(`Error parsing operation ${operationFile.file_path}: ${errors.join(',')}`);
 							Logger.error('Skipping operation');
 							if (WG_PRETTY_GRAPHQL_VALIDATION_ERRORS) {
 								console.log('\n' + errors.join(',') + '\n');
@@ -168,8 +170,8 @@ export const parseGraphQLOperations = (
 						const transformations: PostResolveTransformation[] = [];
 
 						const operation: GraphQLOperation = {
-							Name: operationFile.operation_name.replace('/', '_'),
-							PathName: operationFile.operation_name,
+							Name: operationFile.operation_name,
+							PathName: operationFile.api_mount_path,
 							Content: stripIgnoredCharacters(removeTransformDirectives(content)),
 							OperationType: parseOperationTypeNode(node.operation),
 							ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
@@ -238,7 +240,7 @@ export const parseGraphQLOperations = (
 							PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
 						};
 						node.variableDefinitions?.forEach((variable) => {
-							handleFromClaimDirective(variable, operation);
+							handleFromClaimDirective(variable, operation, options.customClaims ?? {});
 							handleJsonSchemaDirective(variable, operation);
 							handleUuidDirective(variable, operation);
 							handleDateTimeDirective(variable, operation);
@@ -454,7 +456,40 @@ const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: 
 	});
 };
 
-const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+const parseWellKnownClaim = (name: string) => {
+	const claims: Record<string, ClaimType> = {
+		ISSUER: ClaimType.ISSUER,
+		PROVIDER: ClaimType.PROVIDER,
+		SUBJECT: ClaimType.SUBJECT,
+		USERID: ClaimType.USERID,
+		NAME: ClaimType.NAME,
+		GIVEN_NAME: ClaimType.GIVEN_NAME,
+		FAMILY_NAME: ClaimType.FAMILY_NAME,
+		MIDDLE_NAME: ClaimType.MIDDLE_NAME,
+		NICKNAME: ClaimType.NICKNAME,
+		PREFERRED_USERNAME: ClaimType.PREFERRED_USERNAME,
+		PROFILE: ClaimType.PROFILE,
+		PICTURE: ClaimType.PICTURE,
+		WEBSITE: ClaimType.WEBSITE,
+		EMAIL: ClaimType.EMAIL,
+		EMAIL_VERIFIED: ClaimType.EMAIL_VERIFIED,
+		GENDER: ClaimType.GENDER,
+		BIRTH_DATE: ClaimType.BIRTH_DATE,
+		ZONE_INFO: ClaimType.ZONE_INFO,
+		LOCALE: ClaimType.LOCALE,
+		LOCATION: ClaimType.LOCATION,
+	};
+	if (name in claims) {
+		return claims[name];
+	}
+	throw new Error(`unhandled claim ${name}`);
+};
+
+const handleFromClaimDirective = (
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation,
+	customClaims: Record<string, CustomClaim>
+) => {
 	const variableName = variable.variable.name.value;
 	const fromClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromClaim');
 	if (fromClaimDirective === undefined || fromClaimDirective.arguments === undefined) {
@@ -462,63 +497,33 @@ const handleFromClaimDirective = (variable: VariableDefinitionNode, operation: G
 	}
 	const nameArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'name');
 	if (nameArg === undefined) {
-		return;
+		throw new Error('@fromClaim does not have a name: argument');
 	}
 	if (nameArg.value.kind !== 'EnumValue') {
-		return;
+		throw new Error(`@fromClaim name: argument must be a WG_CLAIM, not ${nameArg.value.kind}`);
 	}
-	const name = nameArg.value.value;
-	switch (name) {
-		case 'USERID':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.USERID,
-			});
-			break;
-		case 'EMAIL':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.EMAIL,
-			});
-			break;
-		case 'EMAIL_VERIFIED':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.EMAIL_VERIFIED,
-			});
-			break;
-		case 'NAME':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.NAME,
-			});
-			break;
-		case 'NICKNAME':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.NICKNAME,
-			});
-			break;
-		case 'LOCATION':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.LOCATION,
-			});
-			break;
-		case 'PROVIDER':
-			operation.AuthenticationConfig.required = true;
-			operation.AuthorizationConfig.claims.push({
-				variableName,
-				claim: Claim.PROVIDER,
-			});
-			break;
+	const claimName = nameArg.value.value;
+	let claim: ClaimConfig;
+	if (claimName in customClaims) {
+		const customClaim = customClaims[claimName];
+		claim = {
+			variableName: variableName,
+			claimType: ClaimType.CUSTOM,
+			custom: {
+				name: claimName,
+				jsonPathComponents: customClaim.jsonPathComponents,
+				type: customClaim.type,
+				required: customClaim.required,
+			},
+		};
+	} else {
+		claim = {
+			variableName: variableName,
+			claimType: parseWellKnownClaim(claimName),
+		};
 	}
+	operation.AuthenticationConfig.required = true;
+	operation.AuthorizationConfig.claims.push(claim);
 };
 
 const handleInjectEnvironmentVariableDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
@@ -773,6 +778,7 @@ export const operationVariablesToJSONSchema = (
 
 const internalVariables = [
 	'fromClaim',
+	'fromCustomClaim',
 	'internal',
 	'injectGeneratedUUID',
 	'injectCurrentDateTime',
@@ -1314,16 +1320,16 @@ export interface LoadOperationsOutput {
 
 export interface GraphQLOperationFile {
 	operation_name: string;
+	api_mount_path: string;
 	file_path: string;
 	content: string;
-	path: string[];
 }
 
 export interface TypeScriptOperationFile {
 	operation_name: string;
+	api_mount_path: string;
 	file_path: string;
 	module_path: string;
-	path: string[];
 }
 
 export const loadOperations = (schemaFileName: string): LoadOperationsOutput => {

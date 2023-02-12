@@ -36,9 +36,6 @@ configureWunderGraphApplication({
 				  ]
 				: ['http://localhost:3000', new EnvironmentVariable('WG_ALLOWED_ORIGIN')],
 	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
-	},
 	security: {
 		enableGraphQLEndpoint: process.env.NODE_ENV !== 'production',
 	},

@@ -2,7 +2,6 @@ package apihandler
 
 import (
 	"context"
-	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/buger/jsonparser"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
@@ -22,29 +20,35 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/inputvariables"
+	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 type InternalBuilder struct {
-	pool            *pool.Pool
-	log             *zap.Logger
-	loader          *engineconfigloader.EngineConfigLoader
-	api             *Api
-	planConfig      plan.Configuration
-	resolver        *resolve.Resolver
-	definition      *ast.Document
-	router          *mux.Router
-	renameTypeNames []resolve.RenameTypeName
+	pool             *pool.Pool
+	log              *zap.Logger
+	loader           *engineconfigloader.EngineConfigLoader
+	api              *Api
+	planConfig       plan.Configuration
+	resolver         *resolve.Resolver
+	definition       *ast.Document
+	router           *mux.Router
+	renameTypeNames  []resolve.RenameTypeName
+	middlewareClient *hooks.Client
 }
 
-func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
+func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
 	return &InternalBuilder{
-		pool:   pool,
-		log:    log,
-		loader: loader,
+		pool:             pool,
+		log:              log,
+		loader:           loader,
+		middlewareClient: hooksClient,
 	}
 }
 
@@ -107,8 +111,10 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 
 func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 
+	apiPath := operationApiPath(operation.Path)
+
 	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
-		return nil
+		return i.registerNodeJsOperation(operation, apiPath)
 	}
 
 	shared := i.pool.GetShared(context.Background(), i.planConfig, pool.Config{
@@ -132,10 +138,8 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		return fmt.Errorf(ErrMsgOperationValidationFailed, shared.Report)
 	}
 
-	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, "", shared.Report)
+	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
-
-	apiPath := fmt.Sprintf("/operations/%s", operation.Name)
 
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY,
@@ -158,28 +162,59 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+	case wgpb.OperationType_SUBSCRIPTION:
+		p, ok := preparedPlan.(*plan.SubscriptionResponsePlan)
+		if !ok {
+			return nil
+		}
+
+		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
+		copy(extractedVariables, shared.Doc.Input.Variables)
+
+		handler := &InternalSubscriptionApiHandler{
+			preparedPlan:       p,
+			operation:          operation,
+			extractedVariables: extractedVariables,
+			log:                i.log,
+			resolver:           i.resolver,
+			renameTypeNames:    i.renameTypeNames,
+		}
+
+		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
 	}
 
 	return nil
 }
 
-func GenSymmetricKey(bits int) (k []byte, err error) {
-	if bits <= 0 || bits%8 != 0 {
-		return nil, fmt.Errorf("key size invalid")
+func (i *InternalBuilder) registerNodeJsOperation(operation *wgpb.Operation, apiPath string) error {
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
+	if err != nil {
+		return err
 	}
 
-	size := bits / 8
-	k = make([]byte, size)
-	if _, err = rand.Read(k); err != nil {
-		return nil, err
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
+	if err != nil {
+		return err
 	}
 
-	return k, nil
-}
+	route := i.router.Methods(http.MethodPost).Path(apiPath)
 
-func CreateHooksJWT(secret []byte) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	return token.SignedString(secret)
+	handler := &FunctionsHandler{
+		operation:            operation,
+		log:                  i.log,
+		variablesValidator:   variablesValidator,
+		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
+		hooksClient:          i.middlewareClient,
+		queryParamsAllowList: generateQueryArgumentsAllowList(operation.VariablesSchema),
+		stringInterpolator:   stringInterpolator,
+		liveQuery: liveQueryConfig{
+			enabled:                operation.LiveQueryConfig.Enable,
+			pollingIntervalSeconds: operation.LiveQueryConfig.PollingIntervalSeconds,
+		},
+	}
+
+	route.Handler(handler)
+	return nil
 }
 
 type InternalApiHandler struct {
@@ -257,6 +292,99 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = buf.WriteTo(w)
+}
+
+type InternalSubscriptionApiHandler struct {
+	preparedPlan       *plan.SubscriptionResponsePlan
+	operation          *wgpb.Operation
+	extractedVariables []byte
+	log                *zap.Logger
+	resolver           *resolve.Resolver
+	bearerCache        sync.Map
+	renameTypeNames    []resolve.RenameTypeName
+}
+
+func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	reqID := r.Header.Get(logging.RequestIDHeader)
+	requestLogger := h.log.With(logging.WithRequestID(reqID))
+	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+
+	r = setOperationMetaData(r, h.operation)
+
+	bodyBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(bodyBuf)
+	_, err := io.Copy(bodyBuf, r.Body)
+	if err != nil && !errors.Is(err, io.EOF) {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	body := bodyBuf.Bytes()
+
+	// internal requests transmit the client request as a JSON object
+	// this makes it possible to expose the original client request to hooks triggered by internal requests
+	clientRequest, err := NewRequestFromWunderGraphClientRequest(r.Context(), body)
+	if err != nil {
+		requestLogger.Error("InternalApiHandler.ServeHTTP: Could not create request from __wg.clientRequest",
+			zap.Error(err),
+			zap.String("url", r.RequestURI),
+		)
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	ctx := pool.GetCtx(r, clientRequest, pool.Config{
+		RenameTypeNames: h.renameTypeNames,
+	})
+	defer pool.PutCtx(ctx)
+
+	variablesBuf, _, _, _ := jsonparser.Get(body, "input")
+	if len(variablesBuf) == 0 {
+		ctx.Variables = []byte("{}")
+	} else {
+		ctx.Variables = variablesBuf
+	}
+
+	compactBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(compactBuf)
+	err = json.Compact(compactBuf, ctx.Variables)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	ctx.Variables = compactBuf.Bytes()
+
+	if len(h.extractedVariables) != 0 {
+		ctx.Variables = MergeJsonRightIntoLeft(ctx.Variables, h.extractedVariables)
+	}
+
+	ctx.Variables = injectVariables(h.operation, r, ctx.Variables)
+
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	var (
+		flushWriter *httpFlushWriter
+		ok          bool
+	)
+
+	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
+	if !ok {
+		http.Error(w, "Connection not flushable", http.StatusBadRequest)
+		return
+	}
+
+	err = h.resolver.ResolveGraphQLSubscription(ctx, h.preparedPlan.Response, flushWriter)
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			// e.g. client closed connection
+			return
+		}
+		// if the deadline is exceeded (e.g. timeout), we don't have to return an HTTP error
+		// we've already flushed a response to the client
+		requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
+		return
+	}
 }
 
 func NewRequestFromWunderGraphClientRequest(ctx context.Context, body []byte) (*http.Request, error) {

@@ -23,7 +23,7 @@ scalar Map
 const gallery = introspect.graphql({
 	apiNamespace: 'gallery',
 	loadSchemaFromString: schema,
-	url: 'http://localhost:8084/',
+	url: 'http://localhost:8081/',
 	schemaExtension: `
 		type Geography {
 		  latitude: Float
@@ -78,9 +78,6 @@ configureWunderGraphApplication({
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: [],
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
 	},
 	security: {
 		enableGraphQLEndpoint: true,

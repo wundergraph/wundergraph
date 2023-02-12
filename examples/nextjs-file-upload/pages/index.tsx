@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth, useFileUpload, useUser, withWunderGraph } from '../components/generated/nextjs';
 
 const Upload = () => {
-	const { login } = useAuth();
+	const { login, logout } = useAuth();
 	const { data: user } = useUser();
 
 	const [files, setFiles] = useState<FileList>();
@@ -16,6 +16,8 @@ const Upload = () => {
 		if (e.target.files) setFiles(e.target.files);
 	};
 
+	let uploadProfile: 'avatar' | 'coverPicture' = 'avatar';
+
 	const onSubmit = async (e: React.FormEvent<Element>) => {
 		e.preventDefault();
 		if (!files) {
@@ -23,48 +25,67 @@ const Upload = () => {
 		}
 		try {
 			const result = await upload({
-				provider: 'minio',
+				provider: 'minio1',
+				profile: uploadProfile,
 				files,
 			});
 			result && setData(result);
 		} catch (e) {
-			alert('Upload failed!');
-			console.error("Couldn't upload files", e);
+			const msg = e instanceof Error ? e.message : 'Upload failed!';
+			alert(msg);
+			console.error("Couldn't upload files", msg);
 		}
 	};
 
-	if (!user) {
-		return (
-			<div className="mx-auto">
-				<p className="text-gray-400 text-center text-sm">You need to be authenticated to upload files.</p>
-				<button className="bg-white text-black p-2 rounded w-full mt-4" type="button" onClick={() => login('github')}>
-					Login
-				</button>
-			</div>
-		);
-	}
-
 	return (
 		<div>
-			<form className="flex flex-col items-center gap-4" onSubmit={onSubmit}>
+			<form className="grid grid-cols-2 items-center gap-4 py-10" onSubmit={onSubmit}>
 				<input
-					className="border border-slate-500 rounded"
+					className="col-span-2 border border-slate-500 rounded"
 					id="multiple_files"
 					type="file"
 					multiple
 					onChange={onFileChange}
 				/>
-				<button className="bg-white text-black px-2 rounded" type="submit">
-					Submit
+				<button
+					name="avatar"
+					className="col-span-1 bg-white text-black px-2 rounded"
+					type="submit"
+					onClick={() => (uploadProfile = 'avatar')}
+				>
+					Upload as 'avatar'
+				</button>
+				<button
+					name="coverPicture"
+					className="col-span-1 bg-white text-black px-2 rounded"
+					type="submit"
+					onClick={() => (uploadProfile = 'coverPicture')}
+				>
+					Upload as 'coverPicture'
 				</button>
 			</form>
 			<ul>
 				{data.map((file) => (
-					<li className="text-center mt-8" key={file}>
+					<li data-testid="result" className="text-center mt-8" key={file}>
 						Uploaded as {file}
 					</li>
 				))}
 			</ul>
+			{!user && (
+				<div className="mx-auto">
+					<p className="text-gray-400 text-center text-sm">
+						You need to be authenticated to upload files to all profiles.
+					</p>
+					<button className="bg-white text-black p-2 rounded w-full mt-4" type="button" onClick={() => login('gitHub')}>
+						Login
+					</button>
+				</div>
+			)}
+			{user && (
+				<button className="bg-white text-black p-2 rounded w-full mt-4" type="button" onClick={() => logout()}>
+					Logout
+				</button>
+			)}
 		</div>
 	);
 };

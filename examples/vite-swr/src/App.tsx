@@ -9,10 +9,10 @@ const Dragons: React.FC = () => {
 	return (
 		<div>
 			{isLoading && <p>Loading...</p>}
-			{error && <p>Error</p>}
+			{error && <p>Error: {JSON.stringify(error, null, 2)}</p>}
 			{data && (
 				<div>
-					<p>{JSON.stringify(data)}</p>
+					<p>{JSON.stringify(data, null, 2)}</p>
 				</div>
 			)}
 		</div>

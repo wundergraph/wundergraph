@@ -3,6 +3,7 @@ package telemetry
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,10 +21,10 @@ const (
 	DefaultTimeout = 5
 )
 
-type DurationMetric func() Metric
+type DurationMetric func() *Metric
 
 type Client interface {
-	Send(metrics []Metric) error
+	Send(metrics []*Metric) error
 }
 
 type ClientOption func(*client)
@@ -46,6 +47,14 @@ func WithTimeout(timeout time.Duration) ClientOption {
 	}
 }
 
+func WithAuthToken(token string) ClientOption {
+	return func(c *client) {
+		if token != "" {
+			c.authToken = token
+		}
+	}
+}
+
 type client struct {
 	address    string
 	httpClient *http.Client
@@ -53,12 +62,15 @@ type client struct {
 	debug      bool
 	clientInfo MetricClientInfo
 	log        *zap.Logger
+	authToken  string
 }
 
-func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption) Client {
+var _ Client = (*client)(nil)
+
+func NewClient(address string, clientInfo *MetricClientInfo, opts ...ClientOption) Client {
 	c := &client{
 		address:    address,
-		clientInfo: clientInfo,
+		clientInfo: *clientInfo,
 	}
 
 	if clientInfo.CpuCount == 0 {
@@ -70,6 +82,16 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 
 	for _, opt := range opts {
 		opt(c)
+	}
+
+	if clientInfo.GitRepoURLHash == "" {
+		gitRepoURLHash, err := gitRepoURLHash()
+		if err != nil {
+			if c.log != nil && c.debug {
+				c.log.Debug("error retrieving gitRepoURLHash", zap.Error(err))
+			}
+		}
+		c.clientInfo.GitRepoURLHash = gitRepoURLHash
 	}
 
 	if c.timeout == 0 {
@@ -88,13 +110,74 @@ func NewClient(address string, clientInfo MetricClientInfo, opts ...ClientOption
 }
 
 type MetricRequest struct {
-	Metrics    []Metric         `json:"metrics"`
+	Metrics    []*Metric        `json:"metrics"`
 	ClientInfo MetricClientInfo `json:"clientInfo"`
 }
 
+type MetricTag struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+// Equal returns true iff both Name and Value are Equal
+func (m MetricTag) Equal(other MetricTag) bool {
+	return m.Name == other.Name && m.Value == other.Value
+}
+
 type Metric struct {
-	Name  string  `json:"name"`
-	Value float64 `json:"value"`
+	Name  string      `json:"name"`
+	Value float64     `json:"value"`
+	Tags  []MetricTag `json:"tags,omitempty"`
+}
+
+// Equal returns true iff both Metric instances contain the same data (tags
+// might be in different order)
+func (m *Metric) Equal(other *Metric) bool {
+	if m.Name == other.Name && m.Value == other.Value && len(m.Tags) == len(other.Tags) {
+		for _, tag := range m.Tags {
+			found := false
+			for _, otherTag := range other.Tags {
+				if tag.Equal(otherTag) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return false
+			}
+		}
+		return true
+	}
+	return false
+}
+
+const (
+	invalidTagChars       = ";!^="
+	invalidTagInitialChar = '~'
+)
+
+// AddTag adds a tag to the Metric, validating its name and
+// ensuring there are no duplicates.
+func (m *Metric) AddTag(name string, value string) error {
+	if name == "" {
+		return errors.New("tag name is empty")
+	}
+	if name[0] == invalidTagInitialChar {
+		return fmt.Errorf("tag name %q starts with invalid initial character %c", name, invalidTagInitialChar)
+	}
+	if strings.ContainsAny(name, invalidTagChars) {
+		return fmt.Errorf("tag name %q contains invalid characters (%s)", name, invalidTagChars)
+	}
+	for _, tag := range m.Tags {
+		if tag.Name == name {
+			return fmt.Errorf("metric already contains a %q tag", name)
+		}
+	}
+	m.Tags = append(m.Tags, MetricTag{
+		Name:  name,
+		Value: value,
+	})
+	return nil
 }
 
 type GraphQLResponse struct {
@@ -112,9 +195,10 @@ type MetricClientInfo struct {
 	IsCI             bool   `json:"isCI"`
 	WunderctlVersion string `json:"wunderctlVersion,omitempty"`
 	AnonymousID      string `json:"anonymousID,omitempty"`
+	GitRepoURLHash   string `json:"gitRepoURLHash,omitempty"`
 }
 
-func (c *client) Send(metrics []Metric) error {
+func (c *client) Send(metrics []*Metric) error {
 	if c.log != nil && c.debug {
 		c.log.Info("Telemetry client info", zap.Any("clientInfo", c.clientInfo))
 		for _, m := range metrics {
@@ -137,6 +221,9 @@ func (c *client) Send(metrics []Metric) error {
 
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Add("Content-Type", "application/json")
+	if c.authToken != "" {
+		req.Header.Add("X-WG-TELEMETRY-AUTHORIZATION", fmt.Sprintf("Bearer %s", c.authToken))
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -167,8 +254,8 @@ func (c *client) Send(metrics []Metric) error {
 }
 
 // NewUsageMetric creates a simple metric. The value will be 1.
-func NewUsageMetric(name string) Metric {
-	return Metric{
+func NewUsageMetric(name string) *Metric {
+	return &Metric{
 		Name:  name,
 		Value: 1,
 	}
@@ -177,8 +264,8 @@ func NewUsageMetric(name string) Metric {
 // NewDurationMetric starts a duration metric. The duration will be stop when PrepareBatch is called.
 func NewDurationMetric(name string) DurationMetric {
 	start := time.Now()
-	return func() Metric {
-		return Metric{
+	return func() *Metric {
+		return &Metric{
 			Name:  name,
 			Value: time.Since(start).Seconds(),
 		}

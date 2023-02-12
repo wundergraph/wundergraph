@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.131.1",
+  "version": "0.135.0",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -122,11 +122,12 @@
     "@graphql-tools/schema": "^8.3.10",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
-    "@wundergraph/protobuf": "workspace:^0.101.0",
-    "@wundergraph/wunderctl": "workspace:>=0.126.1",
+    "@wundergraph/protobuf": "workspace:^0.105.0",
+    "@wundergraph/wunderctl": "workspace:>=0.131.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
+    "cross-fetch": "^3.1.5",
     "execa": "5.1.1",
     "fastify": "^4.10.2",
     "fastify-plugin": "^4.4.0",
@@ -135,6 +136,7 @@
     "handlebars": "^4.7.7",
     "js-yaml": "^4.1.0",
     "json-schema": "^0.4.0",
+    "json-schema-to-typescript": "^11.0.3",
     "lodash": "^4.17.21",
     "long": "^5.2.0",
     "object-hash": "^2.2.0",
@@ -148,7 +150,7 @@
     "terminate": "^2.5.0",
     "ts-retry-promise": "^0.7.0",
     "zod": "^3.20.2",
-    "zod-to-json-schema": "^3.20.1"
+    "zod-to-json-schema": "^3.20.2"
   },
   "jest": {
     "preset": "ts-jest",

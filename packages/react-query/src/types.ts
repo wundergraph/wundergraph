@@ -5,6 +5,7 @@ import {
 	OperationsDefinition,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
+	UploadRequestOptionsWithProfile,
 	WithInput,
 } from '@wundergraph/sdk/client';
 
@@ -82,7 +83,7 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
 		options: UseQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): UseQueryResult<Data, ClientResponseError>;
+	): UseQueryResult<Data, ClientResponseError> & { isSubscribed?: boolean };
 };
 
 export type UseSubscriptionOptions<
@@ -110,10 +111,10 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
 	>(
 		options: UseSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
-	): UseSubscriptionResponse<Data, ClientResponseError>;
+	): UseSubscriptionResult<Data, ClientResponseError>;
 };
 
-export type UseSubscriptionResponse<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
+export type UseSubscriptionResult<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
 	isSubscribed: boolean;
 };
 
@@ -159,21 +160,42 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 	(options?: UseUserOptions<Operations['user']>): UseQueryResult<Operations['user'], ClientResponseError>;
 };
 
+export type UseUploadOptions = Omit<
+	UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions, 'uploadFiles'>,
+	'fetcher'
+>;
+
 export type UseUploadHook<Operations extends OperationsDefinition> = {
-	(
-		options?: Omit<
-			UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions<Operations['s3Provider']>>,
-			'fetcher'
-		>
-	): Omit<
-		UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions<Operations['s3Provider']>>,
+	(options?: UseUploadOptions): Omit<
+		UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions>,
 		'mutate'
 	> & {
-		upload: UseMutationResult<string[], ClientResponseError, UploadRequestOptions<Operations['s3Provider']>>['mutate'];
-		uploadAsync: UseMutationResult<
-			string[],
-			ClientResponseError,
-			UploadRequestOptions<Operations['s3Provider']>
-		>['mutateAsync'];
+		upload: <
+			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName]['profiles'],
+				string
+			>,
+			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+		>(
+			options: ProfileName extends string
+				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
+				: UploadRequestOptions<ProviderName>,
+			config?: UseUploadOptions
+		) => Promise<string[]>;
+
+		uploadAsync: <
+			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
+			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
+				keyof Operations['s3Provider'][ProviderName]['profiles'],
+				string
+			>,
+			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+		>(
+			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
+				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
+				: UploadRequestOptions<ProviderName>,
+			config?: UseUploadOptions
+		) => Promise<string[]>;
 	};
 };

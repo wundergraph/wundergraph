@@ -49,6 +49,44 @@ export interface AuthenticationRequestContext<User extends WunderGraphUser = Wun
 	user: User;
 }
 
+export interface WunderGraphFile {
+	/**
+	 * Filename of the file, as returned by the browser.
+	 */
+	readonly name: string;
+	/**
+	 * Size of the file, in bytes
+	 */
+	readonly size: number;
+	/**
+	 * File mimetype
+	 */
+	readonly type: string;
+}
+
+export interface PreUploadHookRequest<User extends WunderGraphUser = WunderGraphUser> {
+	/**
+	 * The user that is currently logged in, if any.
+	 */
+	user?: User;
+	/**
+	 * File to be uploaded
+	 */
+	file: WunderGraphFile;
+	/**
+	 * Metadata received from the client
+	 */
+	meta: any;
+}
+
+export interface PostUploadHookRequest<
+	User extends WunderGraphUser = WunderGraphUser,
+	IC extends InternalClient = InternalClient
+> extends PreUploadHookRequest<User> {
+	internalClient: IC;
+	error: Error;
+}
+
 export interface ClientRequestHeaders extends Headers {}
 
 export type RequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
@@ -85,24 +123,32 @@ export type JSONObject = { [key: string]: JSONValue };
 
 // Changed the default type of Role to any.
 // It should be worked on
-export interface WunderGraphUser<Role extends string = any> {
+export interface WunderGraphUser<Role extends string = any, CustomClaims extends {} = {}> {
 	provider?: string;
 	providerId?: string;
-	email?: string;
-	emailVerified?: boolean;
+	userId?: string;
 	name?: string;
 	firstName?: string;
 	lastName?: string;
+	middleName?: string;
 	nickName?: string;
-	description?: string;
-	userId?: string;
-	avatarUrl?: string;
+	preferredUsername?: string;
+	profile?: string;
+	picture?: string;
+	website?: string;
+	email?: string;
+	emailVerified?: boolean;
+	gender?: string;
+	birthDate?: string;
+	zoneInfo?: string;
+	locale?: string;
 	location?: string;
+
 	roles?: Role[];
 	customAttributes?: string[];
 	customClaims?: {
 		[key: string]: any;
-	};
+	} & CustomClaims;
 	accessToken?: JSONObject;
 	rawAccessToken?: string;
 	idToken?: JSONObject;
@@ -160,10 +206,27 @@ export interface AuthenticationDeny {
 	message: string;
 }
 
+export interface UploadHookFileKeyResponse {
+	fileKey: string;
+}
+
+export interface UploadHookErrorResponse {
+	error: string;
+}
+
+export type PreUploadHookResponseData = UploadHookFileKeyResponse | UploadHookErrorResponse;
+export type PreUploadHookResponse =
+	| PreUploadHookResponseData
+	| Promise<PreUploadHookResponseData>
+	| Promise<void>
+	| void;
+export type PostUploadHookResponse = Promise<void> | void;
+
 export enum HooksConfigurationOperationType {
 	Queries = 'queries',
 	Mutations = 'mutations',
 	Subscriptions = 'subscriptions',
+	Uploads = 'uploads',
 }
 
 export interface OperationHookFunction {
@@ -182,11 +245,13 @@ export interface OperationHooksConfiguration<AsyncFn = OperationHookFunction> {
 // Any is used here because the exact type of the hooks is not known at compile time
 // We could work with an index signature + base type, but that would allow to add arbitrary data to the hooks
 export type OperationHooks = Record<string, any>;
+export type UploadHooks = Record<string, any>;
 
 export interface HooksConfiguration<
 	Queries extends OperationHooks = OperationHooks,
 	Mutations extends OperationHooks = OperationHooks,
 	Subscriptions extends OperationHooks = OperationHooks,
+	Uploads extends UploadHooks = UploadHooks,
 	User extends WunderGraphUser = WunderGraphUser,
 	// Any is used here because the exact type of the base client is not known at compile time
 	// We could work with an index signature + base type, but that would allow to add arbitrary data to the client
@@ -221,6 +286,7 @@ export interface HooksConfiguration<
 	[HooksConfigurationOperationType.Queries]?: Queries;
 	[HooksConfigurationOperationType.Mutations]?: Mutations;
 	[HooksConfigurationOperationType.Subscriptions]?: Subscriptions;
+	[HooksConfigurationOperationType.Uploads]?: Uploads;
 }
 
 export interface ServerOptions {

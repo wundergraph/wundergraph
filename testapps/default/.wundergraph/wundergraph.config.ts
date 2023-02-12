@@ -76,9 +76,17 @@ const db = introspect.sqlite({
 	databaseURL: 'file:./db.sqlite',
 });
 
+const usersPost = introspect.prisma({
+	apiNamespace: 'users_post',
+	prismaFilePath: './schema.prisma',
+	introspection: {
+		disableCache: true,
+	},
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost],
 	server,
 	operations,
 	authorization: {
@@ -114,12 +122,12 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [authProviders.demo()],
 			authorizedRedirectUris: ['http://localhost:3000'],
+			secureCookieHashKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'), // must be of length 32
+			secureCookieBlockKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
+			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
 		},
 	},
 	security: {
 		enableGraphQLEndpoint: true,
-	},
-	dotGraphQLConfig: {
-		hasDotWunderGraphDirectory: false,
 	},
 });

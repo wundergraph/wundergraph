@@ -18,8 +18,38 @@ import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 import { InputValidationError } from './InputValidationError';
+import { AuthorizationError } from './AuthorizationError';
+import { ClientResponseError } from './ClientResponseError';
 
 // https://graphql.org/learn/serving-over-http/
+
+export interface UploadValidationOptions {
+	/** Whether authentication is required to upload to this profile
+	 *
+	 * @default true
+	 */
+	requireAuthentication?: boolean;
+	/** Maximum file size allowed per upload
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
+	maxAllowedUploadSizeBytes?: number;
+	/** Maximum number of files allowed per upload
+	 *
+	 * @default unlimited
+	 */
+	maxAllowedFiles?: number;
+	/** List of allowed file extensions
+	 *
+	 * @default Any
+	 */
+	allowedFileExtensions?: string[];
+	/** List of allowed mime types
+	 *
+	 * @default Any
+	 */
+	allowedMimeTypes?: string[];
+}
 
 interface LogoutResponse {
 	redirect?: string;
@@ -112,23 +142,21 @@ export class Client {
 	}
 
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
-	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponse> {
+	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponseError> {
 		const text = await response.text();
-		if (!text) {
-			return {
-				error: new ResponseError('Unable to parse response body', response.status),
-			};
-		}
 		try {
 			const json = JSON.parse(text);
-			return {
-				error: new InputValidationError(json, response.status),
-			};
+
+			switch (response.status) {
+				case 401:
+					return new AuthorizationError(json.errors[0]?.message, response.status);
+				case 400:
+					return new InputValidationError(json, response.status);
+				default:
+					return new ResponseError(json.errors[0]?.message || json.message, response.status);
+			}
 		} catch {
-			// if the JSON.parse fails, we know the body must be plaintext
-			return {
-				error: new ResponseError(text, response.status),
-			};
+			return new ResponseError(text.length ? text : 'Response is not OK', response.status);
 		}
 	}
 
@@ -142,7 +170,7 @@ export class Client {
 		// even if the response is an HTTP 404 or 500.
 
 		if (!response.ok) {
-			return this.handleClientResponseError(response);
+			return { error: await this.handleClientResponseError(response) };
 		}
 
 		const json = await response.json();
@@ -162,6 +190,27 @@ export class Client {
 			...this.extraHeaders,
 			...headers,
 		};
+	}
+
+	/**
+	 * setAuthorizationToken is a shorthand method for setting up the
+	 * required headers for token authentication.
+	 *
+	 * @param token Bearer token
+	 */
+	public setAuthorizationToken(token: string) {
+		this.setExtraHeaders({
+			Authorization: `Bearer ${token}`,
+		});
+	}
+
+	/**
+	 * unsetAuthorization removes any previously set authorization credentials
+	 * (e.g. via setAuthorizationToken or via setExtraHeaders).
+	 * If there was no authorization set, it does nothing.
+	 */
+	public unsetAuthorization() {
+		delete this.extraHeaders['Authorization'];
 	}
 
 	/***
@@ -230,12 +279,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (
-			this.options.operationMetadata &&
-			this.options.operationMetadata[options.operationName] &&
-			this.options.operationMetadata[options.operationName].requiresAuthentication &&
-			this.csrfEnabled
-		) {
+		if (this.isAuthenticatedOperation(options.operationName) && this.csrfEnabled) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
@@ -366,7 +410,11 @@ export class Client {
 	 * could not be uploaded for any reason. If the upload was successful, your return a list
 	 * of file IDs that can be used to download the files from your S3 bucket.
 	 */
-	public async uploadFiles(config: UploadRequestOptions): Promise<UploadResponse> {
+	public async uploadFiles<UploadOptions extends UploadRequestOptions>(
+		config: UploadOptions,
+		validation?: UploadValidationOptions
+	): Promise<UploadResponse> {
+		this.validateFiles(config, validation);
 		const formData = new FormData();
 		for (const [_, file] of Object.entries(config.files)) {
 			if (file instanceof Blob) {
@@ -376,13 +424,21 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled) {
+		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});
+
+		if ('profile' in config) {
+			headers['X-Upload-Profile'] = (config as any).profile;
+		}
+
+		if ('meta' in config) {
+			headers['X-Metadata'] = (config as any).meta ? JSON.stringify((config as any).meta) : '';
+		}
 
 		const response = await this.fetch(
 			this.addUrlParams(`${this.options.baseURL}/s3/${config.provider}/upload`, params),
@@ -409,6 +465,42 @@ export class Client {
 		return {
 			fileKeys: json.map((x) => x.key),
 		};
+	}
+
+	public validateFiles(config: UploadRequestOptions, validation?: UploadValidationOptions) {
+		if (validation?.maxAllowedFiles && config.files.length > validation.maxAllowedFiles) {
+			throw new Error(`uploading ${config.files.length} exceeds the maximum allowed (${validation.maxAllowedFiles})`);
+		}
+		for (const file of config.files) {
+			if (validation?.maxAllowedUploadSizeBytes && file.size > validation.maxAllowedUploadSizeBytes) {
+				throw new Error(
+					`file ${file.name} with size ${file.size} exceeds the maximum allowed (${validation.maxAllowedUploadSizeBytes})`
+				);
+			}
+			if (validation?.allowedFileExtensions && file.name.includes('.')) {
+				const ext = file.name.substring(file.name.indexOf('.') + 1).toLowerCase();
+				if (ext) {
+					if (validation.allowedFileExtensions.findIndex((item) => item.toLocaleLowerCase()) < 0) {
+						throw new Error(`file ${file.name} with extension ${ext} is not allowed`);
+					}
+				}
+			}
+			if (validation?.allowedMimeTypes) {
+				const mimeType = file.type;
+				const idx = validation.allowedMimeTypes.findIndex((item) => {
+					// Full match
+					if (item == mimeType) {
+						return true;
+					}
+					// Try wildcard match. This is a bit brittle but it should be fine
+					// as long as profile?.allowedMimeTypes contains only valid entries
+					return mimeType.match(new RegExp(item.replace('*', '.*')));
+				});
+				if (idx < 0) {
+					throw new Error(`file ${file.name} with MIME type ${mimeType} is not allowed`);
+				}
+			}
+		}
 	}
 
 	public login(authProviderID: string, redirectURI?: string) {

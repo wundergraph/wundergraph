@@ -1,6 +1,6 @@
 ---
-title: GraphQl SSE subscriptions Example
-pageTitle: WunderGraph - Examples - GraphQl SSE subscriptions
+title: GraphQL SSE subscriptions Example
+pageTitle: WunderGraph - Examples - GraphQL SSE subscriptions
 description:
 ---
 
@@ -26,14 +26,14 @@ type Query {
 type Subscription {
   greetings: String
 }
-`
+`;
 
 const greetings = introspect.graphql({
   apiNamespace: 'sse',
   url: 'http://localhost:4000/graphql/stream',
   loadSchemaFromString: schema,
   subscriptionsUseSSE: true,
-})
+});
 ```
 
 ## Getting started

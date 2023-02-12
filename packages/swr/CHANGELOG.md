@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.4...@wundergraph/swr@0.12.5) (2023-02-10)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.12.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.3...@wundergraph/swr@0.12.4) (2023-02-03)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.12.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.2...@wundergraph/swr@0.12.3) (2023-02-01)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.12.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.1...@wundergraph/swr@0.12.2) (2023-01-30)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.12.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.0...@wundergraph/swr@0.12.1) (2023-01-23)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.12.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.11.1...@wundergraph/swr@0.12.0) (2023-01-20)
+
+### Features
+
+* add upload profiles for S3 providers ([#476](https://github.com/wundergraph/wundergraph/issues/476)) ([6144545](https://github.com/wundergraph/wundergraph/commit/614454539133c7f235aea6aa72ade36059f41c97)) (@fiam)
+
+## [0.11.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.11.0...@wundergraph/swr@0.11.1) (2023-01-20)
+
+**Note:** Version bump only for package @wundergraph/swr
+
 ## [0.11.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.10.0...@wundergraph/swr@0.11.0) (2023-01-19)
 
 ### Features

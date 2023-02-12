@@ -12,12 +12,16 @@ npm install && npm start
 curl http://localhost:9991/operations/Continents
 ```
 
-#### Get Andorra
+#### Get Country
 
 ```shell
-curl --get --data-urlencode 'wg_variables={ "filter": {"code": { "eq": "AD" } } }' \
-    --header 'Content-Type: application/json' \
-    http://localhost:9991/operations/Countries
+curl http://localhost:9991/operations/Country
+```
+
+#### Get user
+
+```shell
+curl http://localhost:9991/operations/users/get?id=1
 ```
 
 ## Learn More

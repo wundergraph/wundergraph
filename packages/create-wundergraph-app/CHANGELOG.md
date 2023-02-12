@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.2](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.1...create-wundergraph-app@0.3.2) (2023-02-03)
+
+### Bug Fixes
+
+* pass GH token in HTTTP call from getExamplesList() ([#640](https://github.com/wundergraph/wundergraph/issues/640)) ([c4371b8](https://github.com/wundergraph/wundergraph/commit/c4371b8714784a4aa5cd532388e9a6b63d3ea082)) (@fiam)
+
+## [0.3.1](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.0...create-wundergraph-app@0.3.1) (2023-01-30)
+
+### Bug Fixes
+
+* pass GITHUB_TOKEN to all API calls ([#589](https://github.com/wundergraph/wundergraph/issues/589)) ([9ebf805](https://github.com/wundergraph/wundergraph/commit/9ebf8056804c665e5bd1ddcfda31c87f18da504f)) (@fiam)
+
 ## [0.3.0](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.2.3...create-wundergraph-app@0.3.0) (2023-01-17)
 
 ### Features

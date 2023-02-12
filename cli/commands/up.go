@@ -18,6 +18,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/watcher"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
@@ -28,12 +29,10 @@ var upCmdPrettyLogging bool
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
-	Use:   UpCmdName,
-	Short: "Starts WunderGraph in development mode",
-	Long:  "Start the WunderGraph application in development mode and watch for changes",
-	Annotations: map[string]string{
-		"telemetry": "true",
-	},
+	Use:         UpCmdName,
+	Short:       "Starts WunderGraph in development mode",
+	Long:        "Start the WunderGraph application in development mode and watch for changes",
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -74,7 +73,6 @@ var upCmd = &cobra.Command{
 		webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 		configOutFile := filepath.Join("generated", "bundle", "config.js")
 		serverOutFile := filepath.Join("generated", "bundle", "server.js")
-		webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
 		operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 		generatedBundleOutDir := filepath.Join("generated", "bundle")
 
@@ -138,7 +136,7 @@ var upCmd = &cobra.Command{
 					Name:          "webhooks-bundler",
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
-					OutDir:        webhooksOutDir,
+					OutDir:        generatedBundleOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))

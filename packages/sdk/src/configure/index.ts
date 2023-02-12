@@ -1,4 +1,18 @@
 import fs from 'fs';
+import path from 'path';
+import process from 'node:process';
+import _ from 'lodash';
+import {
+	buildSchema,
+	FieldDefinitionNode,
+	InputValueDefinitionNode,
+	Kind,
+	parse,
+	parseType,
+	print,
+	visit,
+} from 'graphql';
+import { ZodType } from 'zod';
 import {
 	Api,
 	DatabaseApiCustom,
@@ -10,7 +24,6 @@ import {
 	WG_DATA_SOURCE_POLLING_MODE,
 } from '../definition';
 import { mergeApis } from '../definition/merge';
-import { generateDotGraphQLConfig } from '../dotgraphqlconfig';
 import {
 	GraphQLOperation,
 	loadOperations,
@@ -34,30 +47,19 @@ import {
 	OperationExecutionEngine,
 	OperationType,
 	PostResolveTransformationKind,
+	S3UploadProfile as _S3UploadProfile,
 	TypeConfiguration,
+	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
-import {
-	buildSchema,
-	FieldDefinitionNode,
-	InputValueDefinitionNode,
-	Kind,
-	parse,
-	parseType,
-	print,
-	visit,
-} from 'graphql';
 import { PostmanBuilder } from '../postman/builder';
-import path from 'path';
-import _ from 'lodash';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
-import { ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
+import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
 import { getWebhooks } from '../webhooks';
-import process from 'node:process';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { Logger } from '../logger';
@@ -111,10 +113,13 @@ export interface WunderGraphConfigApplicationConfig {
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
+		customClaims?: Record<string, CustomClaim>;
 	};
 	links?: LinkConfiguration;
-	dotGraphQLConfig?: DotGraphQLConfig;
 	security?: SecurityConfig;
+
+	/** @deprecated: Not used anymore */
+	dotGraphQLConfig?: any;
 }
 
 export interface TokenAuthProvider {
@@ -124,19 +129,32 @@ export interface TokenAuthProvider {
 	userInfoCacheTtlSeconds?: number;
 }
 
+export interface CustomClaim {
+	/**
+	 * Path to the object inside the user payload to retrieve this claim
+	 */
+	jsonPath: string;
+
+	/** Value type
+	 *
+	 * @default 'string'
+	 */
+	type?: 'string' | 'int' | 'float' | 'boolean';
+
+	/** If required is true, users without this claim will
+	 * fail to authenticate
+	 *
+	 * @default true
+	 */
+	required?: boolean;
+}
+
 export interface SecurityConfig {
 	enableGraphQLEndpoint?: boolean;
 	// allowedHosts defines allowed hosts
 	// e.g. when running WunderGraph on localhost:9991, but your external host pointing to the internal IP is example.com,
 	// you have to add "example.com" to the allowedHosts so that the WunderGraph router allows the hostname.
 	allowedHosts?: InputVariable[];
-}
-
-export interface DotGraphQLConfig {
-	// hasDotWunderGraphDirectory should be set to true if the project has a ".wundergraph" directory as the WunderGraph root
-	// the default is true so this config doesn't have to be touched usually
-	// only set it to false if you don't have a ".wundergraph" directory in your project
-	hasDotWunderGraphDirectory?: boolean;
 }
 
 export interface DeploymentAPI {
@@ -166,7 +184,7 @@ export interface ResolvedApplication {
 	Operations: GraphQLOperation[];
 	InvalidOperationNames: string[];
 	CorsConfiguration: CorsConfiguration;
-	S3UploadProvider: S3Provider;
+	S3UploadProvider: ResolvedS3UploadConfiguration[];
 }
 
 interface ResolvedDeployment {
@@ -179,6 +197,42 @@ interface ResolvedDeployment {
 	};
 }
 
+export interface S3UploadProfile {
+	/** Whether authentication is required to upload to this profile
+	 *
+	 * @default true
+	 */
+	requireAuthentication?: boolean;
+	/** JSON schema for metadata */
+	meta?: ZodType | object;
+	/**
+	 * Maximum file size, in bytes
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
+	maxAllowedUploadSizeBytes?: number;
+	/**
+	 * Maximum number of files
+	 *
+	 * @default unlimited
+	 */
+	maxAllowedFiles?: number;
+	/**
+	 * List of mime-types allowed to be uploaded, case insensitive
+	 *
+	 * @default Any type
+	 */
+	allowedMimeTypes?: string[];
+	/**
+	 * Allowed file extensions, case insensitive
+	 *
+	 * @default Any extension
+	 */
+	allowedFileExtensions?: string[];
+}
+
+export type S3UploadProfiles = Record<string, S3UploadProfile>;
+
 interface S3UploadConfiguration {
 	name: string;
 	endpoint: InputVariable;
@@ -187,9 +241,22 @@ interface S3UploadConfiguration {
 	bucketName: InputVariable;
 	bucketLocation: InputVariable;
 	useSSL: boolean;
+	uploadProfiles?: S3UploadProfiles;
+}
+
+export interface ResolvedS3UploadProfile extends Omit<Required<S3UploadProfile>, 'meta'> {
+	meta: ZodType | object | null;
+	preUploadHook: boolean;
+	postUploadHook: boolean;
+}
+
+interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'uploadProfiles'> {
+	uploadProfiles: Record<string, ResolvedS3UploadProfile>;
 }
 
 export interface ResolvedWunderGraphConfig {
+	// XXX: ResolvedWunderGraphConfig is hashed by several templates.
+	// DO NOT INCLUDE UNSTABLE DATA (paths, times, etc...) in it.
 	application: ResolvedApplication;
 	deployment: ResolvedDeployment;
 	sdkVersion: string;
@@ -197,6 +264,7 @@ export interface ResolvedWunderGraphConfig {
 		roles: string[];
 		cookieBased: AuthProvider[];
 		tokenBased: TokenAuthProvider[];
+		customClaims: Record<string, CustomClaim>;
 		authorizedRedirectUris: ConfigurationVariable[];
 		authorizedRedirectUriRegexes: ConfigurationVariable[];
 		hooks: {
@@ -221,7 +289,11 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
-export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+export interface CodeGenerationConfig {
+	// Keep ResolvedWunderGraphConfig in a separate field, so it can be
+	// hashed without using any unstable data as the hash input (e.g.
+	// paths like outPath or wunderGraphDir).
+	config: ResolvedWunderGraphConfig;
 	outPath: string;
 	wunderGraphDir: string;
 }
@@ -275,10 +347,17 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 		config.apis.push(...graphqlApis);
 	}
 
-	const apps = config.apis;
 	const roles = config.authorization?.roles || ['admin', 'user'];
+	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
-	const resolved = (await resolveApplications(roles, apps, cors, config.s3UploadProvider || []))[0];
+	const resolved = await resolveApplication(
+		roles,
+		customClaims,
+		config.apis,
+		cors,
+		config.s3UploadProvider || [],
+		config.server?.hooks
+	);
 
 	const cookieBasedAuthProviders: AuthProvider[] =
 		(config.authentication !== undefined &&
@@ -299,6 +378,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			roles,
 			cookieBased: cookieBasedAuthProviders,
 			tokenBased: config.authentication?.tokenBased?.providers || [],
+			customClaims: config.authentication?.customClaims || {},
 			authorizedRedirectUris:
 				config.authentication?.cookieBased?.authorizedRedirectUris?.map((stringOrEnvironmentVariable) => {
 					if (typeof stringOrEnvironmentVariable === 'string') {
@@ -506,26 +586,54 @@ const updateArguments = (dataSource: DataSource, fieldInfo: FieldInfo, link: Lin
 	return JSON.parse(json);
 };
 
-const resolveApplications = async (
+const resolveUploadConfiguration = (
+	configuration: S3UploadConfiguration,
+	hooks?: HooksConfiguration
+): ResolvedS3UploadConfiguration => {
+	let uploadProfiles: Record<string, ResolvedS3UploadProfile> = {};
+	if (configuration?.uploadProfiles) {
+		const configurationHooks = hooks?.uploads ? hooks.uploads[configuration.name] : undefined;
+		for (const key in configuration.uploadProfiles) {
+			const profile = configuration.uploadProfiles[key];
+			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
+
+			uploadProfiles[key] = {
+				requireAuthentication: profile.requireAuthentication ?? true,
+				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
+				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
+				allowedMimeTypes: profile.allowedMimeTypes ?? [],
+				allowedFileExtensions: profile.allowedFileExtensions ?? [],
+				meta: profile.meta ?? null,
+				preUploadHook: profileHooks?.preUpload !== undefined,
+				postUploadHook: profileHooks?.postUpload !== undefined,
+			};
+		}
+	}
+	return {
+		...configuration,
+		uploadProfiles,
+	};
+};
+
+const resolveApplication = async (
 	roles: string[],
+	customClaims: string[],
 	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
-	s3: S3Provider
-): Promise<ResolvedApplication[]> => {
-	const out: ResolvedApplication[] = [];
-
+	s3?: S3Provider,
+	hooks?: HooksConfiguration
+): Promise<ResolvedApplication> => {
 	const resolvedApis = await Promise.all(apis);
-	const merged = mergeApis(roles, ...resolvedApis);
-	out.push({
+	const merged = mergeApis(roles, customClaims, ...resolvedApis);
+	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
+	return {
 		EngineConfiguration: merged,
 		EnableSingleFlight: true,
 		Operations: [],
 		InvalidOperationNames: [],
 		CorsConfiguration: cors,
-		S3UploadProvider: s3,
-	});
-
-	return out;
+		S3UploadProvider: s3Configurations,
+	};
 };
 
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
@@ -802,33 +910,6 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 
 			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
-			const dotGraphQLNested =
-				config.dotGraphQLConfig?.hasDotWunderGraphDirectory !== undefined
-					? config.dotGraphQLConfig?.hasDotWunderGraphDirectory === true
-					: true;
-
-			const dotGraphQLConfig = generateDotGraphQLConfig(config, {
-				baseURL: publicNodeUrl,
-				nested: dotGraphQLNested,
-			});
-
-			const dotGraphQLConfigPath = path.join(dotGraphQLNested ? '..' + path.sep : '', '.graphqlconfig');
-			let shouldUpdateDotGraphQLConfig = true;
-			const dotGraphQLContent = JSON.stringify(dotGraphQLConfig, null, '  ');
-			if (fs.existsSync(dotGraphQLConfigPath)) {
-				const existingDotGraphQLContent = fs.readFileSync(dotGraphQLConfigPath, { encoding: 'utf8' });
-				if (dotGraphQLContent === existingDotGraphQLContent) {
-					shouldUpdateDotGraphQLConfig = false;
-				}
-			}
-
-			if (shouldUpdateDotGraphQLConfig) {
-				fs.writeFileSync(dotGraphQLConfigPath, dotGraphQLContent, { encoding: 'utf8' });
-				Logger.info(`.graphqlconfig updated`);
-			}
-
-			done();
-
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
 			});
@@ -850,8 +931,19 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 		});
 };
 
-const total = 5;
+const total = 4;
 let doneCount = 0;
+
+const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
+	record: Record<TKey, TValue>,
+	fn: (key: TKey, value: TValue) => TOutputValue
+): Record<TKey, TOutputValue> => {
+	let output: Record<TKey, TOutputValue> = {} as any;
+	for (const key in record) {
+		output[key] = fn(key, record[key]);
+	}
+	return output;
+};
 
 const done = () => {
 	doneCount++;
@@ -919,6 +1011,30 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 				typeConfigurations: types,
 			},
 			s3UploadConfiguration: config.application.S3UploadProvider.map((provider) => {
+				let uploadProfiles: { [key: string]: _S3UploadProfile } = {};
+				if (provider.uploadProfiles) {
+					for (const key in provider.uploadProfiles) {
+						const resolved = provider.uploadProfiles[key];
+						let metadataJSONSchema: string;
+						try {
+							metadataJSONSchema = resolved.meta ? JSON.stringify(resolved.meta) : '';
+						} catch (e) {
+							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
+						}
+						uploadProfiles[key] = {
+							requireAuthentication: resolved.requireAuthentication,
+							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
+							maxAllowedFiles: resolved.maxAllowedFiles,
+							allowedMimeTypes: resolved.allowedMimeTypes,
+							allowedFileExtensions: resolved.allowedFileExtensions,
+							metadataJSONSchema: metadataJSONSchema,
+							hooks: {
+								preUpload: resolved.preUploadHook,
+								postUpload: resolved.postUploadHook,
+							},
+						};
+					}
+				}
 				return {
 					name: provider.name,
 					accessKeyID: mapInputVariable(provider.accessKeyID),
@@ -927,6 +1043,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					endpoint: mapInputVariable(provider.endpoint),
 					secretAccessKey: mapInputVariable(provider.secretAccessKey),
 					useSSL: provider.useSSL,
+					uploadProfiles: uploadProfiles,
 				};
 			}),
 			corsConfiguration: config.application.CorsConfiguration,
@@ -1017,6 +1134,7 @@ const mapDataSource = (source: DataSource): DataSourceConfiguration => {
 		case DataSourceKind.MONGODB:
 		case DataSourceKind.SQLSERVER:
 		case DataSourceKind.SQLITE:
+		case DataSourceKind.PRISMA:
 			const database = source.Custom as DatabaseApiCustom;
 			out.customDatabase = {
 				databaseURL: database.databaseURL,
@@ -1040,10 +1158,39 @@ const resolveOperationsConfigurations = async (
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
+	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
+		let claimType: ValueType;
+		switch (claim.type) {
+			case 'string':
+				claimType = ValueType.STRING;
+				break;
+			case 'int':
+				claimType = ValueType.INT;
+				break;
+			case 'float':
+				claimType = ValueType.FLOAT;
+				break;
+			case 'boolean':
+				claimType = ValueType.FLOAT;
+				break;
+			case undefined:
+				claimType = ValueType.STRING;
+				break;
+			default:
+				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
+		}
+		return {
+			name: key,
+			jsonPathComponents: claim.jsonPath.split('.'),
+			type: claimType,
+			required: claim.required ?? true,
+		};
+	});
 	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
 		keepFromClaimVariables: false,
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
+		customClaims,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)
@@ -1052,8 +1199,8 @@ const resolveOperationsConfigurations = async (
 				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
 				const implementation = await loadNodeJsOperationDefaultModule(filePath);
 				const operation: GraphQLOperation = {
-					Name: file.operation_name.replace('/', '_'),
-					PathName: file.operation_name,
+					Name: file.operation_name,
+					PathName: file.api_mount_path,
 					Content: '',
 					OperationType:
 						implementation.type === 'query'
@@ -1067,7 +1214,7 @@ const resolveOperationsConfigurations = async (
 					InternalVariablesSchema: { type: 'object', properties: {} },
 					InjectedVariablesSchema: { type: 'object', properties: {} },
 					ResponseSchema: { type: 'object', properties: { data: {} } },
-					TypeScriptOperationImport: `function_${file.operation_name.replace('/', '_')}`,
+					TypeScriptOperationImport: `function_${file.operation_name}`,
 					AuthenticationConfig: {
 						required: implementation.requireAuthentication || false,
 					},
@@ -1105,7 +1252,7 @@ const resolveOperationsConfigurations = async (
 				};
 				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
-				logger.info(`Skipping operation ${file.operation_name} due to error: ${e.message}`);
+				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
 			}
 		}
 	return {
@@ -1124,10 +1271,12 @@ const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation)
 
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
-	overrides: NodeJSOperation<any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any>
 ): GraphQLOperation => {
 	if (overrides.inputSchema) {
-		operation.VariablesSchema = zodToJsonSchema(overrides.inputSchema) as any;
+		const schema = zodToJsonSchema(overrides.inputSchema) as any;
+		operation.VariablesSchema = schema;
+		operation.InternalVariablesSchema = schema;
 	}
 	if (overrides.liveQuery) {
 		operation.LiveQuery = {

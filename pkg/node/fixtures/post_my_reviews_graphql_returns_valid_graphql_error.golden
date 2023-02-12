@@ -1,0 +1,12 @@
+{
+  "errors": [
+    {
+      "message": "field: name not defined on type: User",
+      "path": [
+        "query",
+        "me",
+        "name"
+      ]
+    }
+  ]
+}

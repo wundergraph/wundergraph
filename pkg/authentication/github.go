@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -281,12 +282,9 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			Email:          email.Email,
 			EmailVerified:  email.Verified,
 			Name:           userInfo.Name,
-			FirstName:      "",
-			LastName:       "",
 			NickName:       userInfo.Login,
-			Description:    "",
-			UserID:         fmt.Sprintf("%d", userInfo.ID),
-			AvatarURL:      userInfo.AvatarURL,
+			UserID:         strconv.FormatInt(userInfo.ID, 10),
+			Picture:        userInfo.AvatarURL,
 			Location:       userInfo.Location,
 			ExpiresAt:      oauth2Token.Expiry,
 			AccessToken:    tryParseJWT(accessToken),

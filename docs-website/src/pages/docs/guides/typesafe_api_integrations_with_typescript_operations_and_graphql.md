@@ -48,21 +48,11 @@ Let's start with the Country Operation:
 
 ```graphql
 # operations/Country.graphql
-query ($city: String!) {
-  weather_getCityByName(name: $city, config: { units: metric }) {
-    weather {
-      summary {
-        title
-        description
-        icon
-      }
-      temperature {
-        actual
-        feelsLike
-        min
-        max
-      }
-    }
+query ($code: ID!) {
+  countries_country(code: $code) {
+    code
+    name
+    capital
   }
 }
 ```

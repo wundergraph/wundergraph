@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -67,6 +68,10 @@ func HeaderCSVToSlice(headers map[string]string) map[string][]string {
 	return result
 }
 
+type HookResponse interface {
+	ResponseError() string
+}
+
 type OnWsConnectionInitHookPayload struct {
 	DataSourceID string             `json:"dataSourceId"`
 	Request      WunderGraphRequest `json:"request"`
@@ -103,7 +108,18 @@ type MiddlewareHookResponse struct {
 	Response                json.RawMessage   `json:"response"`
 	Input                   json.RawMessage   `json:"input"`
 	SetClientRequestHeaders map[string]string `json:"setClientRequestHeaders"`
+	// ClientResponseStatusCode is the status code that should be returned to the client
+	ClientResponseStatusCode int
 }
+
+func (r *MiddlewareHookResponse) ResponseError() string { return r.Error }
+
+type UploadHookResponse struct {
+	Error   string `json:"error"`
+	FileKey string `json:"fileKey"`
+}
+
+func (r *UploadHookResponse) ResponseError() string { return r.Error }
 
 type MiddlewareHook string
 
@@ -127,12 +143,18 @@ const (
 	WsTransportOnConnectionInit MiddlewareHook = "onConnectionInit"
 )
 
+type UploadHook string
+
+const (
+	PreUpload  UploadHook = "preUpload"
+	PostUpload UploadHook = "postUpload"
+)
+
 type Client struct {
 	serverUrl           string
 	httpClient          *retryablehttp.Client
 	subscriptionsClient *retryablehttp.Client
 	log                 *zap.Logger
-	hostPort            string
 }
 
 func NewClient(serverUrl string, logger *zap.Logger) *Client {
@@ -140,6 +162,7 @@ func NewClient(serverUrl string, logger *zap.Logger) *Client {
 		serverUrl:           serverUrl,
 		httpClient:          buildClient(60 * time.Second),
 		subscriptionsClient: buildClient(0),
+		log:                 logger,
 	}
 }
 
@@ -154,19 +177,25 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient.RetryWaitMin = 50 * time.Millisecond
 	httpClient.HTTPClient.Timeout = requestTimeout
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
+	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
+		if resp != nil && resp.StatusCode == http.StatusInternalServerError {
+			return false, nil
+		}
+		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+	}
 	return httpClient
 }
 
 func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "global/httpTransport", hook, jsonData)
+	return c.doMiddlewareRequest(ctx, "global/httpTransport", hook, jsonData)
 }
 
 func (c *Client) DoWsTransportRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "global/wsTransport", hook, jsonData)
+	return c.doMiddlewareRequest(ctx, "global/wsTransport", hook, jsonData)
 }
 
 func (c *Client) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "operation/"+operationName, hook, jsonData)
+	return c.doMiddlewareRequest(ctx, "operation/"+operationName, hook, jsonData)
 }
 
 func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte) (*MiddlewareHookResponse, error) {
@@ -189,7 +218,14 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: %w", operationName, err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp == nil {
+		return nil, fmt.Errorf("error calling function %s: no response", operationName)
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusInternalServerError, http.StatusUnauthorized:
+		break
+	default:
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
 	}
 
@@ -203,6 +239,15 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 
 	if hookRes.Error != "" {
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
+	}
+
+	switch resp.StatusCode {
+	case http.StatusInternalServerError:
+		hookRes.ClientResponseStatusCode = http.StatusBadGateway
+	case http.StatusUnauthorized:
+		hookRes.ClientResponseStatusCode = http.StatusUnauthorized
+	default:
+		hookRes.ClientResponseStatusCode = http.StatusOK
 	}
 
 	return &hookRes, nil
@@ -294,7 +339,15 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 }
 
 func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doRequest(ctx, "authentication", hook, jsonData)
+	return c.doMiddlewareRequest(ctx, "authentication", hook, jsonData)
+}
+
+func (c *Client) DoUploadRequest(ctx context.Context, providerName string, profileName string, hook UploadHook, jsonData []byte) (*UploadHookResponse, error) {
+	var hookResponse UploadHookResponse
+	if err := c.doRequest(ctx, &hookResponse, path.Join("upload", providerName, profileName), MiddlewareHook(hook), jsonData); err != nil {
+		return nil, err
+	}
+	return &hookResponse, nil
 }
 
 func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byte {
@@ -310,11 +363,11 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byt
 	return jsonData
 }
 
-func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, action string, hook MiddlewareHook, jsonData []byte) error {
 	jsonData = c.setInternalHookData(ctx, jsonData)
 	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	r.Header.Set("Content-Type", "application/json")
@@ -322,31 +375,38 @@ func (c *Client) doRequest(ctx context.Context, action string, hook MiddlewareHo
 
 	req, err := retryablehttp.FromRequest(r)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("middleware hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
+		return fmt.Errorf("hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("middleware hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)
+		return fmt.Errorf("hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)
 	}
 
 	dec := json.NewDecoder(resp.Body)
 
-	var hookRes MiddlewareHookResponse
-	err = dec.Decode(&hookRes)
+	err = dec.Decode(hookResponse)
 	if err != nil {
-		return nil, fmt.Errorf("response of middleware hook %s could not be decoded: %w", string(hook), err)
+		return fmt.Errorf("hook %s response could not be decoded: %w", string(hook), err)
 	}
 
-	if hookRes.Error != "" {
-		return nil, fmt.Errorf("middleware hook %s failed with error: %s", string(hook), hookRes.Error)
+	if hookResponse.ResponseError() != "" {
+		return fmt.Errorf("hook %s failed with error: %s", string(hook), hookResponse.ResponseError())
 	}
 
-	return &hookRes, nil
+	return nil
+}
+
+func (c *Client) doMiddlewareRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+	var hookResponse MiddlewareHookResponse
+	if err := c.doRequest(ctx, &hookResponse, action, hook, jsonData); err != nil {
+		return nil, err
+	}
+	return &hookResponse, nil
 }
 
 func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {

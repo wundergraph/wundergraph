@@ -14,6 +14,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
+	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/webhooks"
 )
 
@@ -31,9 +32,7 @@ var generateCmd = &cobra.Command{
  server start'. All files are stored to .wundergraph/generated. The local
  introspection cache has precedence. You can overwrite this behavior by passing
  --no-cache to the command`,
-	Annotations: map[string]string{
-		"telemetry": "true",
-	},
+	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
@@ -84,7 +83,6 @@ var generateCmd = &cobra.Command{
 
 		if codeServerFilePath != "" {
 			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.js")
-			webhooksOutDir := filepath.Join("generated", "bundle", "webhooks")
 			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 			generatedBundleOutDir := filepath.Join("generated", "bundle")
@@ -101,7 +99,7 @@ var generateCmd = &cobra.Command{
 					Production:    true,
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
-					OutDir:        webhooksOutDir,
+					OutDir:        generatedBundleOutDir,
 					Logger:        log,
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))

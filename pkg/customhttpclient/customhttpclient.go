@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/buger/jsonparser"
 	"github.com/hetiansu5/urlquery"
@@ -13,6 +14,9 @@ import (
 	"github.com/klauspost/compress/gzip"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
+
+	"github.com/wundergraph/wundergraph/internal/unsafebytes"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 )
 
 const (
@@ -26,6 +30,19 @@ var (
 		{"value"},
 	}
 )
+
+// unescapeJSON tries to unescape the given JSON data over itself (to avoid)
+// any allocations. This means that in case of an error the data will be
+// malformed.
+func unescapeJSON(in []byte) ([]byte, error) {
+	// All variables that can be fed into Do()/DoWithStatus() output must be
+	// first formatted as valid JSON. This means the only escaping that will
+	// be added by the second encoding run is prepending a second "layer" of
+	// escaping and this should all be "deescapable" onto the same source
+	// slice because we're always at least writing one byte behind where we
+	// read from.
+	return jsonparser.Unescape(in, in)
+}
 
 func Do(client *http.Client, ctx context.Context, requestInput []byte, out io.Writer) (err error) {
 	_, err = DoWithStatus(client, ctx, requestInput, out)
@@ -80,33 +97,17 @@ func DoWithStatus(client *http.Client, ctx context.Context, requestInput []byte,
 	}
 
 	if queryParams != nil {
-		query := request.URL.Query()
-		_, err = jsonparser.ArrayEach(queryParams, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-			var (
-				parameterName, parameterValue []byte
-			)
-			jsonparser.EachKey(value, func(i int, bytes []byte, valueType jsonparser.ValueType, err error) {
-				switch i {
-				case 0:
-					parameterName = bytes
-				case 1:
-					parameterValue = bytes
-				}
-			}, queryParamsKeys...)
-			if len(parameterName) != 0 && len(parameterValue) != 0 {
-				if bytes.Equal(parameterValue[:1], literal.LBRACK) {
-					_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
-						query.Add(string(parameterName), string(value))
-					})
-				} else {
-					query.Add(string(parameterName), string(parameterValue))
-				}
-			}
-		})
+		// Copy queryParams to a buffer, so we can modify it in place
+		queryParamsBuf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(queryParamsBuf)
+		if _, err := io.Copy(queryParamsBuf, bytes.NewReader(queryParams)); err != nil {
+			return 0, err
+		}
+		rawQuery, err := encodeQueryParams(queryParamsBuf.Bytes())
 		if err != nil {
 			return 0, err
 		}
-		request.URL.RawQuery = query.Encode()
+		request.URL.RawQuery = rawQuery
 	}
 
 	response, err := client.Do(request)
@@ -137,6 +138,55 @@ func respBodyReader(req *http.Request, resp *http.Response) (io.ReadCloser, erro
 	}
 
 	return resp.Body, nil
+}
+
+// encodeQueryParams encodes the query parameters received as a JSON
+// array into a valid URL query string. NOTICE: If queryParams contains escape
+// sequences, they will be unescaped in place, overwriting the data.
+func encodeQueryParams(queryParams []byte) (string, error) {
+	var jsonErr error
+	query := make(url.Values)
+	_, err := jsonparser.ArrayEach(queryParams, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		if jsonErr != nil {
+			return
+		}
+		jsonErr = err
+		var (
+			parameterName, parameterValue []byte
+		)
+		jsonparser.EachKey(value, func(i int, bytes []byte, valueType jsonparser.ValueType, err error) {
+			if jsonErr != nil {
+				return
+			}
+			if err != nil {
+				jsonErr = err
+				return
+			}
+			switch i {
+			case 0:
+				parameterName, jsonErr = unescapeJSON(bytes)
+			case 1:
+				parameterValue, jsonErr = unescapeJSON(bytes)
+			}
+		}, queryParamsKeys...)
+		if len(parameterName) == 0 || len(parameterValue) == 0 {
+			return
+		}
+		if bytes.Equal(parameterValue[:1], literal.LBRACK) {
+			_, _ = jsonparser.ArrayEach(parameterValue, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+				query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(value))
+			})
+		} else {
+			query.Add(unsafebytes.BytesToString(parameterName), unsafebytes.BytesToString(parameterValue))
+		}
+	})
+	if err != nil {
+		return "", err
+	}
+	if jsonErr != nil {
+		return "", err
+	}
+	return query.Encode(), nil
 }
 
 const (
