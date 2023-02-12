@@ -428,6 +428,10 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
+export interface ILazyIntrospection<T> {
+	(): Promise<T>;
+}
+
 export const introspectGraphqlServer = (introspection: GraphQLServerConfiguration): ILazyIntrospection<GraphQLApi> => {
 	return async (): Promise<GraphQLApi> => {
 		const { schema, ...rest } = introspection;
@@ -441,63 +445,59 @@ export const introspectGraphqlServer = (introspection: GraphQLServerConfiguratio
 	};
 };
 
-export interface ILazyIntrospection<T> {
-	(): Promise<T>;
-}
-
 export const introspect = {
 	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): ILazyIntrospection<GraphQLApi> => {
-		return async (): Promise<GraphQLApi> => {
+		return (): Promise<GraphQLApi> => {
 			return introspectGraphql(introspection);
 		};
 	},
 	postgresql: (introspection: DatabaseIntrospection): ILazyIntrospection<PostgresqlApi> => {
-		return async (): Promise<PostgresqlApi> => {
+		return (): Promise<PostgresqlApi> => {
 			return introspectPostgresql(introspection);
 		};
 	},
 	mysql: (introspection: DatabaseIntrospection): ILazyIntrospection<MySQLApi> => {
-		return async (): Promise<MySQLApi> => {
+		return (): Promise<MySQLApi> => {
 			return introspectMySQL(introspection);
 		};
 	},
 	planetscale: (introspection: DatabaseIntrospection): ILazyIntrospection<PlanetscaleApi> => {
-		return async (): Promise<PlanetscaleApi> => {
+		return (): Promise<PlanetscaleApi> => {
 			return introspectPlanetScale(introspection);
 		};
 	},
 	sqlite: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLiteApi> => {
-		return async (): Promise<SQLiteApi> => {
+		return (): Promise<SQLiteApi> => {
 			return introspectSQLite(introspection);
 		};
 	},
 	sqlserver: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLServerApi> => {
-		return async (): Promise<SQLServerApi> => {
+		return (): Promise<SQLServerApi> => {
 			return introspectSQLServer(introspection);
 		};
 	},
 	mongodb: (introspection: DatabaseIntrospection): ILazyIntrospection<MongoDBApi> => {
-		return async (): Promise<MongoDBApi> => {
+		return (): Promise<MongoDBApi> => {
 			return introspectMongoDB(introspection);
 		};
 	},
 	prisma: (introspection: PrismaIntrospection): ILazyIntrospection<PrismaApi> => {
-		return async (): Promise<PrismaApi> => {
+		return (): Promise<PrismaApi> => {
 			return introspectPrisma(introspection);
 		};
 	},
 	federation: (introspection: GraphQLFederationIntrospection): ILazyIntrospection<GraphQLApi> => {
-		return async (): Promise<GraphQLApi> => {
+		return (): Promise<GraphQLApi> => {
 			return introspectFederation(introspection);
 		};
 	},
 	openApiV2: (introspection: OpenAPIV2Introspection): ILazyIntrospection<GraphQLApi> => {
-		return async (): Promise<GraphQLApi> => {
+		return (): Promise<GraphQLApi> => {
 			return openApi(introspection);
 		};
 	},
 	openApi: (introspection: OpenAPIIntrospection): ILazyIntrospection<RESTApi> => {
-		return async (): Promise<RESTApi> => {
+		return (): Promise<RESTApi> => {
 			return openApiLegacy(introspection);
 		};
 	},
