@@ -3,12 +3,10 @@ package hooks
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/buger/jsonparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
@@ -109,7 +107,7 @@ func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	var resp *MiddlewareHookResponse
 	var err error
 	if p.ResolveConfig.Pre {
-		hookData := hookBaseData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -122,7 +120,7 @@ func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.MutatingPre {
-		hookData := hookBaseData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -138,7 +136,7 @@ func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Mock {
-		hookData := hookBaseData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -156,7 +154,7 @@ func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Custom {
-		hookData := hookBaseData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -187,7 +185,7 @@ func (p *Pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	defer pool.PutBytesBuffer(hookBuf)
 
 	if p.PostResolveConfig.Post {
-		postResolveData := hookBaseData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
+		postResolveData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData)
 		if err != nil {
 			return nil, err
@@ -200,7 +198,7 @@ func (p *Pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	}
 
 	if p.PostResolveConfig.MutatingPost {
-		mutatingPostData := hookBaseData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
+		mutatingPostData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData)
 		if err != nil {
 			return nil, err
@@ -256,21 +254,4 @@ func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Requ
 	return &Response{
 		Data: transformed,
 	}, nil
-}
-
-func hookBaseData(authenticator Authenticator, r *http.Request, buf []byte, variables []byte, response []byte) []byte {
-	buf = buf[:0]
-	buf = append(buf, []byte(`{"__wg":{}}`)...)
-	if user := authenticator(r.Context()); user != nil {
-		if userJson, err := json.Marshal(user); err == nil {
-			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
-		}
-	}
-	if len(variables) > 2 {
-		buf, _ = jsonparser.Set(buf, variables, "input")
-	}
-	if len(response) != 0 {
-		buf, _ = jsonparser.Set(buf, response, "response")
-	}
-	return buf
 }

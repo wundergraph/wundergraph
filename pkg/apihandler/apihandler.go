@@ -2240,7 +2240,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hookBaseData(r, buf.Bytes(), ctx.Variables, nil)
+	input := hooks.EncodeData(hooksAuthenticator, r, buf.Bytes(), ctx.Variables, nil)
 
 	switch {
 	case isLive:
@@ -2405,23 +2405,6 @@ func getOperationMetaData(r *http.Request) *OperationMetaData {
 		return nil
 	}
 	return maybeMetaData.(*OperationMetaData)
-}
-
-func hookBaseData(r *http.Request, buf []byte, variables []byte, response []byte) []byte {
-	buf = buf[:0]
-	buf = append(buf, []byte(`{"__wg":{}}`)...)
-	if user := authentication.UserFromContext(r.Context()); user != nil {
-		if userJson, err := json.Marshal(user); err == nil {
-			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
-		}
-	}
-	if len(variables) > 2 {
-		buf, _ = jsonparser.Set(buf, variables, "input")
-	}
-	if len(response) != 0 {
-		buf, _ = jsonparser.Set(buf, response, "response")
-	}
-	return buf
 }
 
 func setSubscriptionHeaders(w http.ResponseWriter) {
