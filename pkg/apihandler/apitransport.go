@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/pool"

@@ -65,7 +65,7 @@ func TestNode(t *testing.T) {
 		assert.Equal(t, "67b77eab-d1a5-4cd8-b908-8443f24502b6", r.Header.Get("X-Request-Id"))
 		req, _ := httputil.DumpRequest(r, true)
 		_ = req
-		if bytes.Contains(req, []byte(`{"variables":{"first":null},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+		if bytes.Contains(req, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
 			_, _ = w.Write([]byte(`{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`))
 			return
 		}
@@ -242,7 +242,7 @@ func TestInMemoryCache(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if bytes.Contains(data, []byte(`{"variables":{"first":null},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
+		if bytes.Contains(data, []byte(`{"variables":{},"query":"query($first: Int){topProducts(first: $first){upc name price}}"}`)) {
 			if _, err := io.WriteString(w, `{"data":{"topProducts":[{"upc":"1","name":"A","price":1},{"upc":"2","name":"B","price":2}]}}`); err != nil {
 				t.Fatal(err)
 			}

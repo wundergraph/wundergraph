@@ -18,7 +18,7 @@ import {
 	TypeConfiguration,
 } from '@wundergraph/protobuf';
 
-export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[]): Api<T> => {
+export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
 		.map((api) => api.DataSources || [])
 		.reduce((previousValue, currentValue) => [...previousValue, ...currentValue], []);
@@ -32,7 +32,7 @@ export const mergeApis = <T extends {} = {}>(roles: string[], ...apis: Api<T>[])
 
 	const fields = mergeApiFields(apis);
 	const types = mergeTypeConfigurations(apis);
-	const schema = mergeApiSchemas(roles, apis, dataSources, fields);
+	const schema = mergeApiSchemas(roles, customClaims, apis, dataSources, fields);
 	const interpolateVariableDefinitionAsJSON = apis.flatMap((api) => api.interpolateVariableDefinitionAsJSON);
 	return new Api(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, jsonScalars);
 };
@@ -84,10 +84,6 @@ const mergeTypeConfigurations = <T extends {} = {}>(apis: Api<T>[]): TypeConfigu
 };
 
 export const baseSchema = `
-directive @fromClaim(
-  name: Claim
-) on VARIABLE_DEFINITION
-
 """
 The @removeNullVariables directive allows you to remove variables with null value from your GraphQL Query or Mutation Operations.
 
@@ -106,16 +102,6 @@ So upstream will receive the following variables:
 { "name": "world" }
 """
 directive @removeNullVariables on QUERY | MUTATION
-
-enum Claim {
-	USERID
-  EMAIL
-  EMAIL_VERIFIED
-  NAME
-  NICKNAME
-  LOCATION
-  PROVIDER
-}
 
 directive @hooksVariable on VARIABLE_DEFINITION
 
@@ -260,6 +246,105 @@ directive @rbac(
 
 enum WG_ROLE {
     ${roles.join(' ')}
+}
+`;
+
+const claimsSchema = (customClaims: string[]) => `
+"""
+The @fromClaim directive sets the variable to the value retrieved from the given a claim.
+Adding this directive makes the operation require authentication.
+"""
+
+directive @fromClaim(
+  name: WG_CLAIM
+) on VARIABLE_DEFINITION
+
+"""
+Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
+"""
+enum WG_CLAIM {
+	"""
+	iss
+	"""
+	ISSUER
+	"""
+	deprecated alias for ISSUER
+	"""
+	PROVIDER
+	"""
+	sub
+	"""
+	SUBJECT
+	"""
+	alias for sub
+	"""
+	USERID
+	"""
+	name
+	"""
+	NAME
+	"""
+	given_name
+	"""
+	GIVEN_NAME
+	"""
+	family_name
+	"""
+	FAMILY_NAME
+	"""
+	middle_name
+	"""
+	MIDDLE_NAME
+	"""
+	nickname
+	"""
+	NICKNAME
+	"""
+	preferred_username
+	"""
+	PREFERRED_USERNAME
+	"""
+	profile
+	"""
+	PROFILE
+	"""
+	picture
+	"""
+	PICTURE
+	"""
+	website
+	"""
+	WEBSITE
+	"""
+	email
+	"""
+	EMAIL
+	"""
+	email_verified
+	"""
+	EMAIL_VERIFIED
+	"""
+	gender
+	"""
+	GENDER
+	"""
+	birthdate
+	"""
+	BIRTH_DATE
+	"""
+	zoneinfo
+	"""
+	ZONE_INFO
+	"""
+	locale
+	"""
+	LOCALE
+	"""
+	location
+	"""
+	LOCATION
+
+    ${customClaims.join(' ')}
 }
 `;
 
@@ -415,6 +500,7 @@ directive @transform(
 
 const mergeApiSchemas = <T extends {} = {}>(
 	roles: string[],
+	customClaims: string[],
 	apis: Api<T>[],
 	dataSources: DataSource[],
 	fields: FieldConfiguration[]
@@ -438,6 +524,8 @@ const mergeApiSchemas = <T extends {} = {}>(
 	if (roles.length) {
 		graphQLSchemas.push(buildSchema(roleSchema(roles), { assumeValidSDL: true }));
 	}
+
+	graphQLSchemas.push(buildSchema(claimsSchema(customClaims), { assumeValidSDL: true }));
 
 	graphQLSchemas.push(buildSchema(dateTimeSchema, { assumeValidSDL: true }));
 	graphQLSchemas.push(buildSchema(uuidSchema, { assumeValidSDL: true }));

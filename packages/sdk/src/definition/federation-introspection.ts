@@ -105,5 +105,5 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 		}));
 
 		const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));
-		return mergeApis([], ...apis) as GraphQLApi;
+		return mergeApis([], [], ...apis) as GraphQLApi;
 	});

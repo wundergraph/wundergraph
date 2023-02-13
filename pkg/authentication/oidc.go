@@ -62,16 +62,73 @@ type ClaimsInfo struct {
 	ClaimsSupported []string `json:"claims_supported"`
 }
 
+// Claims decodes JWT claims. See https://www.iana.org/assignments/jwt/jwt.xhtml.
 type Claims struct {
-	Sub                string `json:"sub"`
-	Name               string `json:"name"`
-	GivenName          string `json:"given_name"`
-	FamilyName         string `json:"family_name"`
-	Picture            string `json:"picture"`
-	Email              string `json:"email"`
-	EmailVerified      bool   `json:"email_verified"`
-	Locale             string `json:"locale"`
-	HostedGSuiteDomain string `json:"hd"`
+	Issuer            string                 `json:"iss"`
+	Subject           string                 `json:"sub"`
+	Name              string                 `json:"name"`
+	GivenName         string                 `json:"given_name"`
+	FamilyName        string                 `json:"family_name"`
+	MiddleName        string                 `json:"middle_name"`
+	NickName          string                 `json:"nickname"`
+	PreferredUsername string                 `json:"preferred_username"`
+	Profile           string                 `json:"profile"`
+	Picture           string                 `json:"picture"`
+	Website           string                 `json:"website"`
+	Email             string                 `json:"email"`
+	EmailVerified     bool                   `json:"email_verified"`
+	Gender            string                 `json:"gender"`
+	BirthDate         string                 `json:"birthdate"`
+	ZoneInfo          string                 `json:"zoneinfo"`
+	Locale            string                 `json:"locale"`
+	Location          string                 `json:"location"`
+	Raw               map[string]interface{} `json:"-"`
+}
+
+func (c *Claims) ToUser() User {
+	return User{
+		UserID:            c.Subject,
+		Name:              c.Name,
+		FirstName:         c.GivenName,
+		LastName:          c.FamilyName,
+		MiddleName:        c.MiddleName,
+		NickName:          c.NickName,
+		PreferredUsername: c.PreferredUsername,
+		Profile:           c.Profile,
+		Picture:           c.Picture,
+		Website:           c.Website,
+		Email:             c.Email,
+		EmailVerified:     c.EmailVerified,
+		Gender:            c.Gender,
+		BirthDate:         c.BirthDate,
+		ZoneInfo:          c.ZoneInfo,
+		Locale:            c.Locale,
+		Location:          c.Location,
+		CustomClaims:      c.Custom(),
+	}
+}
+
+// isCustomClaim true if claim represents a token claim that we're not explicitely
+// handling in type Claim
+func isCustomClaim(claim string) bool {
+	// XXX: Keep this list in sync with Claim's fields
+	switch claim {
+	case "iss", "sub", "name", "given_name", "family_name", "middle_name", "nickname", "preferred_username", "profile", "picture", "website", "email", "email_verified", "gender", "birthdate", "zoneinfo", "location", "locale":
+		return false
+	}
+	return true
+}
+
+// Custom returns a non-nil map with claims from c.Raw that we do not
+// parse explicitly
+func (c *Claims) Custom() map[string]interface{} {
+	custom := make(map[string]interface{})
+	for k, v := range c.Raw {
+		if isCustomClaim(k) {
+			custom[k] = v
+		}
+	}
+	return custom
 }
 
 func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *mux.Router, config OpenIDConnectConfig, hooks Hooks) {
@@ -289,26 +346,23 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 		return err
 	}
 
+	err = userInfo.Claims(&claims.Raw)
+	if err != nil {
+		h.log.Error("oidc.userInfo.Claims.Raw", zap.Error(err))
+		return err
+	}
+
 	accessTokenJSON := tryParseJWT(accessToken)
 	idTokenJSON := tryParseJWT(idToken)
 
-	user := User{
-		ProviderName:   "oidc",
-		ProviderID:     config.ProviderID,
-		Email:          claims.Email,
-		EmailVerified:  claims.EmailVerified,
-		Name:           claims.Name,
-		FirstName:      claims.GivenName,
-		LastName:       claims.FamilyName,
-		UserID:         claims.Sub,
-		AvatarURL:      claims.Picture,
-		Location:       claims.Locale,
-		ExpiresAt:      oauth2Token.Expiry,
-		AccessToken:    accessTokenJSON,
-		RawAccessToken: accessToken,
-		RawIDToken:     idToken,
-		IdToken:        idTokenJSON,
-	}
+	user := claims.ToUser()
+	user.ProviderName = "oidc"
+	user.ProviderID = config.ProviderID
+	user.ExpiresAt = oauth2Token.Expiry
+	user.AccessToken = accessTokenJSON
+	user.RawAccessToken = accessToken
+	user.RawIDToken = idToken
+	user.IdToken = idTokenJSON
 
 	hooks.handlePostAuthentication(r.Context(), user)
 	proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)

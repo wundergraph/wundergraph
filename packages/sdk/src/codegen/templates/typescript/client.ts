@@ -98,6 +98,6 @@ export class TypeScriptClient implements Template {
 		]);
 	}
 	dependencies(): Template[] {
-		return templates.typescript.models;
+		return [...templates.typescript.models, templates.typescript.claims];
 	}
 }

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.105.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.104.0...@wundergraph/protobuf@0.105.0) (2023-02-10)
+
+### Features
+
+* add support for custom claims ([#648](https://github.com/wundergraph/wundergraph/issues/648) ([682b88c](https://github.com/wundergraph/wundergraph/commit/682b88c115512878aa22b57d4ed67c07fd88726b)) (@fiam)
+
 ## [0.104.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.103.0...@wundergraph/protobuf@0.104.0) (2023-02-03)
 
 ### Features

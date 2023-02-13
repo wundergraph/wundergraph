@@ -469,6 +469,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						postLogout: false,
 					},
 					tokenBased: [],
+					customClaims: {},
 				},
 				enableGraphQLEndpoint: true,
 				security: {
