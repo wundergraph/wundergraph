@@ -253,10 +253,13 @@ export interface ResolvedWunderGraphConfig {
 			revalidateAuthentication: boolean;
 			postLogout: boolean;
 		};
-		cookieSecurity: {
-			secureCookieHashKey: ConfigurationVariable;
-			secureCookieBlockKey: ConfigurationVariable;
-			csrfTokenSecret: ConfigurationVariable;
+		cookieSecurity?: {
+			/** @deprecated: Not used anymore */
+			secureCookieHashKey?: any;
+			/** @deprecated: Not used anymore */
+			secureCookieBlockKey?: any;
+			/** @deprecated: Not used anymore */
+			csrfTokenSecret?: any;
 		};
 	};
 	enableGraphQLEndpoint: boolean;
@@ -385,11 +388,6 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				mutatingPostAuthentication: config.server?.hooks?.authentication?.mutatingPostAuthentication !== undefined,
 				revalidateAuthentication: config.server?.hooks?.authentication?.revalidate !== undefined,
 				postLogout: config.server?.hooks?.authentication?.postLogout !== undefined,
-			},
-			cookieSecurity: {
-				secureCookieHashKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieHashKey || ''),
-				secureCookieBlockKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieBlockKey || ''),
-				csrfTokenSecret: mapInputVariable(config.authentication?.cookieBased?.csrfTokenSecret || ''),
 			},
 		},
 		enableGraphQLEndpoint: config.security?.enableGraphQLEndpoint === true,

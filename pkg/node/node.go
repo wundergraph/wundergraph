@@ -573,7 +573,6 @@ func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
 			n.log.Error(errorMessage)
 		}
 	}
-
 }
 
 func (n *Node) filterHosts(api apihandler.Api) []string {

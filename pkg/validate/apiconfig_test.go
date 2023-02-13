@@ -9,6 +9,9 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
+var elevenCharSecret = []byte("00000000000")
+var thirtyTwoCharSecret = []byte("00000000000000000000000000000000")
+
 func TestValidateApiConfig(t *testing.T) {
 	// if providers slice is empty, cookie based auth is disabled,
 	// so we always need to pass a provider
@@ -19,167 +22,128 @@ func TestValidateApiConfig(t *testing.T) {
 		},
 	}
 
-	t.Run("all valid", func(t *testing.T) {
+	t.Run("no cookie-based authentication is valid", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
-			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
-				CookieBased: &wgpb.CookieBasedAuthentication{
-					Providers: providers,
-					CsrfSecret: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaa",
-					},
-					BlockKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
-					HashKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
-				},
-			},
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{},
 		})
 
 		assert.True(t, valid)
 		assert.Len(t, messages, 0)
 	})
 
-	t.Run("authentication.cookieBased.secureCookieBlockKey is required", func(t *testing.T) {
+	t.Run("correct length of secrets returns no errors", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
-					CsrfSecret: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaa",
-					},
-					HashKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
 				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenCharSecret,
+				BlockKey:   thirtyTwoCharSecret,
+				HashKey:    thirtyTwoCharSecret,
 			},
 		})
 
-		assert.False(t, valid)
-		assert.Equal(t, messages[0], "authentication.cookieBased.secureCookieBlockKey is required")
+		assert.True(t, valid)
+		assert.Equal(t, 0, len(messages))
 	})
 
-	t.Run("authentication.cookieBased.secureCookieBlockKey is wrong", func(t *testing.T) {
+	t.Run("empty WUNDERGRAPH_CSRF_TOKEN_SECRET returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
-					CsrfSecret: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaa",
-					},
-					BlockKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaa",
-					},
-					HashKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
 				},
 			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{},
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, messages[0], "authentication.cookieBased.secureCookieBlockKey must be exactly 32 characters long")
+		assert.Equal(t, "the required environment variable WUNDERGRAPH_CSRF_TOKEN_SECRET must have a length of 11", messages[0])
 	})
 
-	t.Run("authentication.cookieBased.csrfTokenSecret is required", func(t *testing.T) {
+	t.Run("incorrect length for WUNDERGRAPH_CSRF_TOKEN_SECRET returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
-					BlockKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
-					HashKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
 				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: thirtyTwoCharSecret,
 			},
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, messages[0], "authentication.cookieBased.csrfTokenSecret is required")
+		assert.Equal(t, "the required environment variable WUNDERGRAPH_CSRF_TOKEN_SECRET must have a length of 11", messages[0])
 	})
 
-	t.Run("authentication.cookieBased.csrfTokenSecret is wrong", func(t *testing.T) {
+	t.Run("empty WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
-					CsrfSecret: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaa",
-					},
-					BlockKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
-					HashKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
 				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenCharSecret,
 			},
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, messages[0], "authentication.cookieBased.csrfTokenSecret must be exactly 11 characters long")
+		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY must have a length of 32", messages[0])
 	})
 
-	t.Run("authentication.cookieBased.secureCookieHashKey is required", func(t *testing.T) {
+	t.Run("incorrect length of WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
-					CsrfSecret: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaa",
-					},
-					BlockKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
 				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenCharSecret,
+				BlockKey:   elevenCharSecret,
 			},
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, messages[0], "authentication.cookieBased.secureCookieHashKey is required")
+		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY must have a length of 32", messages[0])
 	})
 
-	t.Run("authentication.cookieBased.secureCookieHashKey is wrong", func(t *testing.T) {
+	t.Run("empty WUNDERGRAPH_SECURE_COOKIE_HASH_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
 					Providers: providers,
-					CsrfSecret: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaa",
-					},
-					BlockKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-					},
-					HashKey: &wgpb.ConfigurationVariable{
-						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-						StaticVariableContent: "aaaa",
-					},
 				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenCharSecret,
+				BlockKey:   thirtyTwoCharSecret,
 			},
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, messages[0], "authentication.cookieBased.secureCookieHashKey must be exactly 32 characters long")
+		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_HASH_KEY must have a length of 32", messages[0])
 	})
 
+	t.Run("incorrect length of WUNDERGRAPH_SECURE_COOKIE_HASH_KEY returns error", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenCharSecret,
+				BlockKey:   thirtyTwoCharSecret,
+				HashKey:    elevenCharSecret,
+			},
+		})
+
+		assert.False(t, valid)
+		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_HASH_KEY must have a length of 32", messages[0])
+	})
 }

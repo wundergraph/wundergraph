@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	wgEnvHashKey          = "WUNDERGRAPH_SECURE_COOKIE_HASH_KEY"
-	wgEnvBlockKey         = "WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY"
-	wgEnvCsrfSecret       = "WUNDERGRAPH_CSRF_TOKEN_SECRET"
+	WgEnvCsrfSecret       = "WUNDERGRAPH_CSRF_TOKEN_SECRET"
+	WgEnvHashKey          = "WUNDERGRAPH_SECURE_COOKIE_HASH_KEY"
+	WgEnvBlockKey         = "WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY"
 	validSecretCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 )
 
@@ -54,11 +54,11 @@ func newCookieBasedSecrets(csrfSecret, blockKey, hashKey []byte) *CookieBasedSec
 
 func setCookieBasedSecrets(secretName string, secretValue []byte, cookieBasedSecrets *CookieBasedSecrets) {
 	switch secretName {
-	case wgEnvCsrfSecret:
+	case WgEnvCsrfSecret:
 		cookieBasedSecrets.CsrfSecret = secretValue
-	case wgEnvBlockKey:
+	case WgEnvBlockKey:
 		cookieBasedSecrets.BlockKey = secretValue
-	case wgEnvHashKey:
+	case WgEnvHashKey:
 		cookieBasedSecrets.HashKey = secretValue
 	}
 }
@@ -78,19 +78,21 @@ func NewCookieBasedSecrets(isDevMode bool) (cookieBasedSecrets *CookieBasedSecre
 		), nil
 	}
 	secretNamesAndLength := map[string]int{
-		wgEnvCsrfSecret: 11,
-		wgEnvHashKey:    32,
-		wgEnvBlockKey:   32,
+		WgEnvCsrfSecret: 11,
+		WgEnvHashKey:    32,
+		WgEnvBlockKey:   32,
 	}
+	cookieBasedSecrets = &CookieBasedSecrets{}
 	for k, v := range secretNamesAndLength {
-		secret := []byte(os.Getenv(k))
-		if len(secret) == v {
-			setCookieBasedSecrets(k, secret, cookieBasedSecrets)
-			continue
+		secret := os.Getenv(k)
+		// if the length is incorrect, it is handled in the validation stage
+		if secret == "" {
+			setCookieBasedSecrets(k, generateRandomStringOfLength(v), cookieBasedSecrets)
+			message := fmt.Sprintf("The secret %s was unset. A temporary randomised value has been created; please generate a new one.", k)
+			errorMessages = append(errorMessages, message)
+		} else {
+			setCookieBasedSecrets(k, []byte(secret), cookieBasedSecrets)
 		}
-		setCookieBasedSecrets(k, generateRandomStringOfLength(v), cookieBasedSecrets)
-		message := fmt.Sprintf("The secret %s was either unset or invalid. An insecure randomised value has been created; please create a secure one.", k)
-		errorMessages = append(errorMessages, message)
 	}
 	return cookieBasedSecrets, errorMessages
 }
