@@ -380,16 +380,20 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
+		return fmt.Errorf("hook %s failed with error: %w", string(hook), err)
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("hook %s failed with reading body with error: %w", string(hook), err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)
+		return fmt.Errorf("hook %s failed with invalid status code: %d (%s)", string(hook), resp.StatusCode, string(data))
 	}
 
-	dec := json.NewDecoder(resp.Body)
-
-	err = dec.Decode(hookResponse)
+	err = json.Unmarshal(data, hookResponse)
 	if err != nil {
 		return fmt.Errorf("hook %s response could not be decoded: %w", string(hook), err)
 	}

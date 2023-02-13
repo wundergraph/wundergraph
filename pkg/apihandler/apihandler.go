@@ -507,6 +507,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
+		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, r.log)
 		handler := &QueryHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -517,8 +518,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			configHash:             []byte(r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
-			hooksClient:            r.middlewareClient,
-			hooksConfig:            buildHooksConfig(operation),
+			hooksPipeline:          hooksPipeline,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
 			stringInterpolator:     stringInterpolator,
 			jsonStringInterpolator: jsonStringInterpolator,
@@ -1247,14 +1247,14 @@ type QueryHandler struct {
 	liveQuery              liveQueryConfig
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
-	hooksClient            *hooks.Client
-	hooksConfig            hooksConfig
 	rbacEnforcer           *authentication.RBACEnforcer
 	stringInterpolator     *interpolate.StringInterpolator
 	jsonStringInterpolator *interpolate.StringInterpolator
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
+
+	hooksPipeline *hooks.Pipeline
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1338,22 +1338,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 	}
 
-	hookBuf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(hookBuf)
-
-	if h.hooksConfig.mockResolve.enable {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MockResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mockResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "mockResolve hook out is nil", h.operation); done {
-			return
-		}
-		_, _ = w.Write(out.Response)
-		return
-	}
-
 	if isLive {
 		h.handleLiveQuery(r, w, ctx, buf, flusher, requestLogger)
 		return
@@ -1401,74 +1385,39 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(WG_CACHE_HEADER, "MISS")
 	}
 
-	if h.hooksConfig.preResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "preResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "preResolve hook out is nil", h.operation); done {
-			return
-		}
+	preResolveHooksResponse, err := h.hooksPipeline.PreResolve(ctx, w, r)
+	if done := handleOperationErr(requestLogger, err, w, "preResolve hooks failed", h.operation); done {
+		return
+	}
+	if preResolveHooksResponse.Done {
+		return
 	}
 
-	if h.hooksConfig.mutatingPreResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mutatingPreResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "mutatingPreResolve hook out is nil", h.operation); done {
-			return
-		}
-		ctx.Variables = out.Input
+	ctx.Variables = preResolveHooksResponse.Data
+
+	if preResolveHooksResponse.Resolved {
+		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
+	} else {
+		err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	}
 
-	if h.hooksConfig.customResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "customResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "customResolve hook out is nil", h.operation); done {
-			return
-		}
-		// the customResolve hook can indicate to "skip" by responding with "null"
-		// so, we only write the response if it's not null
-		if !bytes.Equal(out.Response, literal.NULL) {
-			_, _ = w.Write(out.Response)
-			return
-		}
-	}
-
-	err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
 	if done := handleOperationErr(requestLogger, err, w, "ResolveGraphQLResponse failed", h.operation); done {
 		return
 	}
+
 	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
 	if done := handleOperationErr(requestLogger, err, w, "postResolveTransformer failed", h.operation); done {
 		return
 	}
-	if h.hooksConfig.postResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-		_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "postResolve hook failed", h.operation); done {
-			return
-		}
+
+	postResolveHooksResponse, err := h.hooksPipeline.PostResolve(ctx, w, r, transformed)
+	if done := handleOperationErr(requestLogger, err, w, "postResolve hooks failed", h.operation); done {
+		return
 	}
-	if h.hooksConfig.mutatingPostResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mutatingPostResolve hook failed", h.operation); done {
-			return
-		}
-		if out == nil {
-			requestLogger.Error("MutatingPostResolve query hook response is empty")
-			http.Error(w, "MutatingPostResolve query hook response is empty", http.StatusInternalServerError)
-			return
-		}
-		transformed = out.Response
+	if postResolveHooksResponse.Done {
+		return
 	}
+	transformed = postResolveHooksResponse.Data
 
 	hash := xxhash.New()
 	_, _ = hash.Write(h.configHash)
@@ -1505,54 +1454,26 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer, requestLogger *zap.Logger) ([]byte, error) {
-	if h.hooksConfig.preResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if err != nil {
-			return nil, fmt.Errorf("handleLiveQueryEvent preResolve hook failed: %w", err)
-		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			return nil, errors.New("handleLiveQueryEvent preResolve hook response is nil")
-		}
+func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
+
+	preResolveHookResponse, err := h.hooksPipeline.PreResolve(ctx, nil, r)
+	if err != nil {
+		return nil, fmt.Errorf("handleLiveQueryEvent preResolve hooks failed: %w", err)
+	}
+	if preResolveHookResponse.Done {
+		return ctx.Variables, nil
 	}
 
-	if h.hooksConfig.mutatingPreResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if err != nil {
-			return nil, fmt.Errorf("handleLiveQueryEvent mutatingPreResolve hook failed: %w", err)
-		}
-		if out != nil {
-			ctx.Variables = out.Input
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			requestLogger.Error("handleLiveQueryEvent mutatingPreResolve hook response is nil")
-		}
-	}
-
-	if h.hooksConfig.customResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
-		if err != nil {
-			return nil, fmt.Errorf("handleLiveQueryEvent customResolve hook failed: %w", err)
-		}
-		if out != nil {
-			updateContextHeaders(ctx, out.SetClientRequestHeaders)
-		} else {
-			return nil, errors.New("handleLiveQueryEvent customResolve hook response is nil")
-		}
-		// when the hook is skipped
-		if !bytes.Equal(out.Response, literal.NULL) {
-			requestLogger.Debug("CustomResolve is skipped and empty response is written")
-			return out.Response, nil
-		}
-	}
+	resolved := preResolveHookResponse.Resolved
+	ctx.Variables = preResolveHookResponse.Data
 
 	requestBuf.Reset()
-	err := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, requestBuf)
+
+	if resolved {
+		_, err = io.Copy(requestBuf, bytes.NewReader(ctx.Variables))
+	} else {
+		err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, requestBuf)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("handleLiveQueryEvent ResolveGraphQLResponse failed: %w", err)
 	}
@@ -1561,25 +1482,17 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Reques
 	if err != nil {
 		return nil, fmt.Errorf("handleLiveQueryEvent postResolveTransformer.Transform failed: %w", err)
 	}
-	if h.hooksConfig.postResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-		_, err = h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-		if err != nil {
-			return nil, fmt.Errorf("handleLiveQueryEvent postResolve hook failed: %w", err)
-		}
+
+	postResolveResponse, err := h.hooksPipeline.PostResolve(ctx, nil, r, transformed)
+	if err != nil {
+		return nil, fmt.Errorf("handleLiveQueryEvent postResolve hooks failed: %w", err)
 	}
 
-	if h.hooksConfig.mutatingPostResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
-		if err != nil {
-			return nil, fmt.Errorf("handleLiveQueryEvent mutatingPostResolve hook failed: %w", err)
-		}
-		if out == nil {
-			return nil, errors.New("handleLiveQueryEvent mutatingPostResolve hook response is nil")
-		}
-		transformed = out.Response
+	if postResolveResponse.Done {
+		return transformed, nil
 	}
+
+	transformed = postResolveResponse.Data
 
 	return transformed, nil
 }
@@ -1597,7 +1510,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	var lastHash uint64
 	for {
 		var hookError bool
-		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf, requestLogger)
+		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				// context was canceled (e.g. client disconnected)
@@ -2741,7 +2654,7 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		zap.String("operationType", operation.OperationType.String()),
 		zap.Error(err),
 	)
-	http.Error(w, errorMessage, http.StatusInternalServerError)
+	http.Error(w, fmt.Sprintf("%s:%s", errorMessage, err.Error()), http.StatusInternalServerError)
 	return true
 }
 
@@ -2761,4 +2674,9 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
+}
+
+// hooksAuthenticator is used to break the import cycle between authentication and hooks
+func hooksAuthenticator(ctx context.Context) interface{} {
+	return authentication.UserFromContext(ctx)
 }
