@@ -238,7 +238,7 @@ export const createServer = async ({
 				const routeUrl = customGqlServerMountPath(server.serverName);
 				await fastify.register(graphqlPlugin, { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
-				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
+				fastify.log.info(`GraphQL server '${server.serverName}' listening at ${routeUrl}`);
 			}
 		}
 
@@ -257,7 +257,7 @@ export const createServer = async ({
 					})
 					.ready(() => {
 						fastify.log.info('GraphQL plugin registered');
-						fastify.log.info(`OpenAPi Graphql server '${apiName}' listening at ${routeUrl}`);
+						fastify.log.info(`OpenAPI GraphQL server '${apiName}' listening at ${routeUrl}`);
 					});
 			}
 		}
