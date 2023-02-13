@@ -99,7 +99,8 @@ Follow the steps from the `Import your repository` and `Deploy your project`.
 
 # Build script convention
 
-- If your `package.json` file contains a build script, WunderGraph Cloud will execute it during deployment.
+- If your `package.json` file contains a build:wundergraph script, WunderGraph Cloud will execute it during deployment.
+- If no build:wundergraph script, WunderGraph Cloud will fall back to build script.
 - If no build script, WunderGraph Cloud will execute `wunderctl generate` by default and detect the WunderGraph project's location
   via `wundergraph.config.ts` file.
 
@@ -112,7 +113,8 @@ As an example, let's check our [cloud-starter repository](https://github.com/wun
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
-    "build": "wunderctl generate --debug --pretty-logging=true",
+    "build:wundergraph": "wunderctl generate --debug --pretty-logging=true",
+    "build": "npm run build:wundergraph",
     "check": "tsc --noEmit"
   },
   "author": "",

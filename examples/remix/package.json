@@ -7,8 +7,9 @@
     "wundergraph": "wunderctl up --debug",
     "browser": "wait-on \"http-get://localhost:3000\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3000",
     "dev:remix": "remix dev",
-    "build": "wunderctl generate --debug",
-    "build:all": "npm run build && tsc && remix build",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build:remix": "remix build",
+    "build": "npm run build:wundergraph && npm run build:remix",
     "test": "jest"
   },
   "dependencies": {
@@ -16,8 +17,8 @@
     "@remix-run/react": "^1.11.1",
     "@remix-run/vercel": "^1.11.1",
     "@vercel/node": "^2.6.2",
-    "@wundergraph/sdk": "^0.134.0",
-    "@wundergraph/swr": "^0.12.4",
+    "@wundergraph/sdk": "^0.135.0",
+    "@wundergraph/swr": "^0.12.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
