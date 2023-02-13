@@ -1120,7 +1120,7 @@ const navigation = [
 				href: '/docs/operations-reference',
 			},
 			{
-				title: 'Graphql operations',
+				title: 'GraphQL Operations',
 				links: [
 					{
 						title: 'Overview',
@@ -1173,11 +1173,39 @@ const navigation = [
 				],
 			},
 			{
-				title: 'TypeScript operations',
+				title: 'TypeScript Operations',
 				links: [
 					{
 						title: 'Overview',
 						href: '/docs/typescript-operations-reference',
+					},
+					{
+						title: 'Queries (READ)',
+						href: '/docs/typescript-operations-reference/queries',
+					},
+					{
+						title: 'Mutations (WRITE)',
+						href: '/docs/typescript-operations-reference/mutations',
+					},
+					{
+						title: 'Subscriptions (STREAM)',
+						href: '/docs/typescript-operations-reference/subscriptions',
+					},
+					{
+						title: 'Authentication & Authorization',
+						href: '/docs/typescript-operations-reference/authentication-authorization',
+					},
+					{
+						title: 'Calling Operations from clients',
+						href: '/docs/typescript-operations-reference/calling-operations-from-clients',
+					},
+					{
+						title: 'Calling Operations from Operations',
+						href: '/docs/typescript-operations-reference/calling-operations-from-operations',
+					},
+					{
+						title: 'Security',
+						href: '/docs/typescript-operations-reference/security',
 					},
 				],
 			},
