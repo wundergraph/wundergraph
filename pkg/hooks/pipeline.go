@@ -5,17 +5,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/buger/jsonparser"
+	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"go.uber.org/zap"
 )
 
 type Authenticator func(ctx context.Context) (user interface{})
+
+type Resolver func(ctx *resolve.Context, w io.Writer) error
 
 type ResolveConfiguration struct {
 	// Pre indicates wheter the PreResolve hook should be run
@@ -42,22 +47,27 @@ type Response struct {
 }
 
 type Pipeline struct {
-	client            *Client
-	logger            *zap.Logger
-	operation         *wgpb.Operation
-	authenticator     Authenticator
-	ResolveConfig     ResolveConfiguration
-	PostResolveConfig PostResolveConfiguration
+	client                 *Client
+	logger                 *zap.Logger
+	operation              *wgpb.Operation
+	resolver               Resolver
+	preparedPlan           *plan.SynchronousResponsePlan
+	postResolveTransformer *postresolvetransform.Transformer
+	authenticator          Authenticator
+	ResolveConfig          ResolveConfiguration
+	PostResolveConfig      PostResolveConfiguration
 }
 
-func NewPipeline(client *Client, authenticator Authenticator, operation *wgpb.Operation, logger *zap.Logger) *Pipeline {
+func NewPipeline(client *Client, authenticator Authenticator, operation *wgpb.Operation, resolver Resolver, transformer *postresolvetransform.Transformer, logger *zap.Logger) *Pipeline {
 	hooksConfig := operation.GetHooksConfiguration()
 
 	return &Pipeline{
-		client:        client,
-		logger:        logger,
-		operation:     operation,
-		authenticator: authenticator,
+		client:                 client,
+		logger:                 logger,
+		operation:              operation,
+		resolver:               resolver,
+		postResolveTransformer: transformer,
+		authenticator:          authenticator,
 		ResolveConfig: ResolveConfiguration{
 			Pre:         hooksConfig.GetPreResolve(),
 			MutatingPre: hooksConfig.GetMutatingPreResolve(),
@@ -92,7 +102,6 @@ func (p *Pipeline) handleHookResponse(ctx *resolve.Context, w http.ResponseWrite
 }
 
 func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *http.Request) (*Response, error) {
-
 	// XXX: Errors returned by Client.DoOperationRequest() already contain the hook name, do not reannotate them!
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
@@ -206,6 +215,46 @@ func (p *Pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 
 	return &Response{
 		Data: responseData,
+	}, nil
+}
+
+func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Request, buf *bytes.Buffer) (*Response, error) {
+	preResolveResp, err := p.PreResolve(ctx, w, r)
+	if err != nil {
+		return nil, fmt.Errorf("preResolve hooks failed: %w", err)
+	}
+	if preResolveResp.Done {
+		return preResolveResp, nil
+	}
+
+	ctx.Variables = preResolveResp.Data
+
+	if preResolveResp.Resolved {
+		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
+	} else {
+		err = p.resolver(ctx, buf)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("ResolveGraphQLResponse failed: %w", err)
+	}
+
+	transformed, err := p.postResolveTransformer.Transform(buf.Bytes())
+	if err != nil {
+		return nil, fmt.Errorf("postResolveTransformer failed: %w", err)
+	}
+
+	postResolveResp, err := p.PostResolve(ctx, w, r, transformed)
+	if err != nil {
+		return nil, fmt.Errorf("postResolve hooks failed: %w", err)
+	}
+
+	if postResolveResp.Done {
+		return postResolveResp, nil
+	}
+
+	return &Response{
+		Data: transformed,
 	}, nil
 }
 

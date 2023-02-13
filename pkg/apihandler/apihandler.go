@@ -507,7 +507,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, r.log)
+		hooksResolver := func(ctx *resolve.Context, w io.Writer) error {
+			return r.resolver.ResolveGraphQLResponse(ctx, synchronousPlan.Response, nil, w)
+		}
+		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &QueryHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -518,13 +521,13 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			configHash:             []byte(r.api.ApiConfigHash),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
-			hooksPipeline:          hooksPipeline,
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
 			stringInterpolator:     stringInterpolator,
 			jsonStringInterpolator: jsonStringInterpolator,
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
 			queryParamsAllowList:   queryParamsAllowList,
+			hooksPipeline:          hooksPipeline,
 		}
 
 		if operation.LiveQueryConfig != nil && operation.LiveQueryConfig.Enable {
@@ -569,6 +572,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
+		hooksResolver := func(ctx *resolve.Context, w io.Writer) error {
+			return r.resolver.ResolveGraphQLResponse(ctx, synchronousPlan.Response, nil, w)
+		}
+		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &MutationHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -577,13 +584,12 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			extractedVariables:     make([]byte, len(shared.Doc.Input.Variables)),
 			operation:              operation,
 			variablesValidator:     variablesValidator,
-			hooksClient:            r.middlewareClient,
-			hooksConfig:            buildHooksConfig(operation),
 			rbacEnforcer:           authentication.NewRBACEnforcer(operation),
 			stringInterpolator:     stringInterpolator,
 			jsonStringInterpolator: jsonStringInterpolator,
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
+			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route := r.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath)
@@ -607,6 +613,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
+		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, nil, nil, r.log)
 		handler := &SubscriptionHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -621,8 +628,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 			postResolveTransformer: postResolveTransformer,
 			renameTypeNames:        r.renameTypeNames,
 			queryParamsAllowList:   queryParamsAllowList,
-			hooksClient:            r.middlewareClient,
-			hooksConfig:            buildHooksConfig(operation),
+			hooksPipeline:          hooksPipeline,
 		}
 		copy(handler.extractedVariables, shared.Doc.Input.Variables)
 		route := r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
@@ -1253,8 +1259,7 @@ type QueryHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
-
-	hooksPipeline *hooks.Pipeline
+	hooksPipeline          *hooks.Pipeline
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1385,39 +1390,16 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(WG_CACHE_HEADER, "MISS")
 	}
 
-	preResolveHooksResponse, err := h.hooksPipeline.PreResolve(ctx, w, r)
-	if done := handleOperationErr(requestLogger, err, w, "preResolve hooks failed", h.operation); done {
-		return
-	}
-	if preResolveHooksResponse.Done {
+	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
 
-	ctx.Variables = preResolveHooksResponse.Data
-
-	if preResolveHooksResponse.Resolved {
-		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
-	} else {
-		err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	}
-
-	if done := handleOperationErr(requestLogger, err, w, "ResolveGraphQLResponse failed", h.operation); done {
+	if resp.Done {
 		return
 	}
 
-	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
-	if done := handleOperationErr(requestLogger, err, w, "postResolveTransformer failed", h.operation); done {
-		return
-	}
-
-	postResolveHooksResponse, err := h.hooksPipeline.PostResolve(ctx, w, r, transformed)
-	if done := handleOperationErr(requestLogger, err, w, "postResolve hooks failed", h.operation); done {
-		return
-	}
-	if postResolveHooksResponse.Done {
-		return
-	}
-	transformed = postResolveHooksResponse.Data
+	transformed := resp.Data
 
 	hash := xxhash.New()
 	_, _ = hash.Write(h.configHash)
@@ -1587,13 +1569,12 @@ type MutationHandler struct {
 	pool                   *pool.Pool
 	operation              *wgpb.Operation
 	variablesValidator     *inputvariables.Validator
-	hooksClient            *hooks.Client
-	hooksConfig            hooksConfig
 	rbacEnforcer           *authentication.RBACEnforcer
 	stringInterpolator     *interpolate.StringInterpolator
 	jsonStringInterpolator *interpolate.StringInterpolator
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
+	hooksPipeline          *hooks.Pipeline
 }
 
 func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
@@ -1682,89 +1663,16 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	hookBuf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(hookBuf)
-
-	if h.hooksConfig.mockResolve.enable {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MockResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mockResolve hook failed", h.operation); done {
-			return
-		}
-		_, _ = w.Write(out.Response)
+	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
 
-	if h.hooksConfig.preResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "preResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "preResolve hook out is nil", h.operation); done {
-			return
-		}
-	}
-
-	if h.hooksConfig.mutatingPreResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mutatingPreResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "mutatingPreResolve hook out is nil", h.operation); done {
-			return
-		}
-		ctx.Variables = out.Input
-	}
-
-	if h.hooksConfig.customResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.CustomResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "customResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "customResolve hook out is nil", h.operation); done {
-			return
-		}
-		// when the hook is skipped
-		if !bytes.Equal(out.Response, literal.NULL) {
-			requestLogger.Debug("CustomResolve is skipped and empty response is written")
-			_, _ = w.Write(out.Response)
-			return
-		}
-	}
-
-	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if done := handleOperationErr(requestLogger, resolveErr, w, "ResolveGraphQLResponse", h.operation); done {
+	if resp.Done {
 		return
 	}
 
-	transformed, err := h.postResolveTransformer.Transform(buf.Bytes())
-	if done := handleOperationErr(requestLogger, err, w, "postResolveTransformer", h.operation); done {
-		return
-	}
-	if h.hooksConfig.postResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-		_, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PostResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "postResolve hook failed", h.operation); done {
-			return
-		}
-	}
-
-	if h.hooksConfig.mutatingPostResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, transformed)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPostResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mutatingPostResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "mutatingPostResolve hook out is nil", h.operation); done {
-			return
-		}
-		transformed = out.Response
-	}
-
-	reader := bytes.NewReader(transformed)
+	reader := bytes.NewReader(resp.Data)
 	_, err = reader.WriteTo(w)
 	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
 		return
@@ -1785,8 +1693,7 @@ type SubscriptionHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
-	hooksClient            *hooks.Client
-	hooksConfig            hooksConfig
+	hooksPipeline          *hooks.Pipeline
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1833,74 +1740,21 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	var (
-		flushWriter *httpFlushWriter
-		ok          bool
-	)
-
-	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
+	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
 	}
 
-	hookBuf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(hookBuf)
-
-	if h.hooksConfig.preResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.PreResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "preResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "preResolve hook out is nil", h.operation); done {
+	preResolveResponse, err := h.hooksPipeline.PreResolve(ctx, w, r)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "preResolve hooks failed", h.operation); done {
 			return
 		}
 	}
 
-	if h.hooksConfig.mutatingPreResolve {
-		hookData := hookBaseData(r, hookBuf.Bytes(), ctx.Variables, nil)
-		out, err := h.hooksClient.DoOperationRequest(ctx.Context, h.operation.Name, hooks.MutatingPreResolve, hookData)
-		if done := handleOperationErr(requestLogger, err, w, "mutatingPreResolve hook failed", h.operation); done {
-			return
-		}
-		if done := handleHookOut(ctx, w, requestLogger, out, "mutatingPreResolve hook out is nil", h.operation); done {
-			return
-		}
-		ctx.Variables = out.Input
-	}
-
-	if h.hooksConfig.postResolve {
-		var callback flushWriterPostResolveCallback = func(ctx context.Context, variables, resp []byte) {
-			hookData := hookBaseData(r, hookBuf.Bytes(), variables, resp)
-			_, err := h.hooksClient.DoOperationRequest(ctx, h.operation.Name, hooks.PostResolve, hookData)
-			_ = handleOperationErr(requestLogger, err, w, "postResolve hook failed", h.operation)
-		}
-
-		flushWriter.postResolveCallback = &callback
-	}
-
-	if h.hooksConfig.mutatingPostResolve {
-		var callback flushWriterMutatingPostResolveCallback = func(ctx context.Context, variables, resp []byte) ([]byte, error) {
-			hookData := hookBaseData(r, hookBuf.Bytes(), variables, resp)
-			out, err := h.hooksClient.DoOperationRequest(ctx, h.operation.Name, hooks.MutatingPostResolve, hookData)
-			if err != nil {
-				if errors.Is(err, context.Canceled) {
-					// e.g. client closed connection
-					return nil, nil
-				}
-
-				requestLogger.Error("MutatingPostResolve subscription hook failed", zap.Error(err))
-				return nil, err
-			}
-			if out == nil {
-				requestLogger.Error("MutatingPostResolve subscription hook response is empty")
-				return nil, errors.New("mutatingPostResolve hook response is empty")
-			}
-			return out.Response, nil
-		}
-
-		flushWriter.mutatingPostResolveCallback = &callback
+	if preResolveResponse.Done {
+		return
 	}
 
 	err = h.resolver.ResolveGraphQLSubscription(ctx, h.preparedPlan.Response, flushWriter)
@@ -1953,21 +1807,22 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 	o.walker.Stop()
 }
 
-type flushWriterMutatingPostResolveCallback func(ctx context.Context, variables, resp []byte) ([]byte, error)
-type flushWriterPostResolveCallback func(ctx context.Context, variables, resp []byte)
-
 type httpFlushWriter struct {
-	writer                      io.Writer
-	flusher                     http.Flusher
-	postResolveTransformer      *postresolvetransform.Transformer
-	subscribeOnce               bool
-	sse                         bool
-	close                       func()
-	buf                         *bytes.Buffer
-	mutatingPostResolveCallback *flushWriterMutatingPostResolveCallback
-	postResolveCallback         *flushWriterPostResolveCallback
-	ctx                         context.Context
-	variables                   []byte
+	ctx                    context.Context
+	writer                 io.Writer
+	flusher                http.Flusher
+	postResolveTransformer *postresolvetransform.Transformer
+	subscribeOnce          bool
+	sse                    bool
+	close                  func()
+	buf                    *bytes.Buffer
+	variables              []byte
+
+	// Used for hooks
+	resolveContext *resolve.Context
+	request        *http.Request
+	hooksPipeline  *hooks.Pipeline
+	logger         *zap.Logger
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -1985,13 +1840,14 @@ func (f *httpFlushWriter) Flush() {
 	resp := f.buf.Bytes()
 	f.buf.Reset()
 
-	if f.postResolveCallback != nil {
-		(*f.postResolveCallback)(f.ctx, f.variables, resp)
-	}
-
-	if f.mutatingPostResolveCallback != nil {
-		if r, err := (*f.mutatingPostResolveCallback)(f.ctx, f.variables, resp); err == nil {
-			resp = r
+	if f.hooksPipeline != nil {
+		postResolveResponse, err := f.hooksPipeline.PostResolve(f.resolveContext, nil, f.request, resp)
+		if err != nil {
+			if f.logger != nil {
+				f.logger.Error("subscription preResolve hooks", zap.Error(err))
+			}
+		} else {
+			resp = postResolveResponse.Data
 		}
 	}
 
@@ -2575,6 +2431,21 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	// allow unbuffered responses, it's used when it's necessary just to pass response through
 	// setting this to “yes” will allow the response to be cached
 	w.Header().Set("X-Accel-Buffering", "no")
+}
+
+func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.Pipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
+	var flushWriter *httpFlushWriter
+	var ok bool
+	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
+	if !ok {
+		return nil, false
+	}
+
+	flushWriter.resolveContext = ctx
+	flushWriter.request = r
+	flushWriter.hooksPipeline = pipeline
+	flushWriter.logger = logger
+	return flushWriter, true
 }
 
 func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
