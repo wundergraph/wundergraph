@@ -71,7 +71,6 @@ type Builder struct {
 	pool     *pool.Pool
 
 	middlewareClient *hooks.Client
-	hooksServerURL   string
 
 	definition *ast.Document
 
@@ -100,7 +99,6 @@ type BuilderConfig struct {
 	EnableIntrospection        bool
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
-	HookServerURL              string
 	DevMode                    bool
 }
 
@@ -116,7 +114,6 @@ func NewBuilder(pool *pool.Pool,
 		pool:                       pool,
 		insecureCookies:            config.InsecureCookies,
 		middlewareClient:           hooksClient,
-		hooksServerURL:             config.HookServerURL,
 		forceHttpsRedirects:        config.ForceHttpsRedirects,
 		enableDebugMode:            config.EnableDebugMode,
 		enableIntrospection:        config.EnableIntrospection,
@@ -127,6 +124,7 @@ func NewBuilder(pool *pool.Pool,
 }
 
 func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+	r.api = api
 
 	if api.CacheConfig != nil {
 		err = r.configureCache(api)
@@ -153,12 +151,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := r.loader.Load(*api.EngineConfiguration)
+	planConfig, err := r.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
 
-	r.api = api
 	r.planConfig = *planConfig
 	r.resolver = resolve.New(ctx, resolve.NewFetcher(true), true)
 
@@ -408,7 +405,7 @@ func (r *Builder) createSubRouter(router *mux.Router) *mux.Router {
 }
 
 func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
-	handler, err := webhookhandler.New(config, r.hooksServerURL, r.log)
+	handler, err := webhookhandler.New(config, r.api.Options.ServerUrl, r.log)
 	if err != nil {
 		return err
 	}
