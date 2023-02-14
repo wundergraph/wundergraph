@@ -119,21 +119,15 @@ function useTableOfContents(tableOfContents) {
 }
 
 export function Layout({ children, title, tableOfContents, frontmatter }) {
-	let router = useRouter();
-	let links = navigation.flatMap((section) => section.links);
-	let allLinks = links.flatMap((section) => {
-		if (section?.links) {
-			return section?.links;
-		} else {
-			return section;
-		}
-	});
+	const router = useRouter();
+	const links = navigation.flatMap((section) => section.links);
+	const allLinks = links.flatMap((section) => (section?.links ? section?.links : section));
 
-	let linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
-	let previousPage = allLinks[linkIndex - 1];
-	let nextPage = allLinks[linkIndex + 1];
-	let section = navigation.find((section) => section.links?.find((link) => link?.href === router.pathname));
-	let currentSection = useTableOfContents(tableOfContents);
+	const linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
+	const previousPage = allLinks[linkIndex - 1];
+	const nextPage = allLinks[linkIndex + 1];
+	const section = navigation.find((section) => section.links?.find((link) => link?.href === router.pathname));
+	const currentSection = useTableOfContents(tableOfContents);
 
 	const hideTableOfContents = frontmatter?.hideTableOfContents;
 	const fullWidthContent = frontmatter?.fullWidthContent;
