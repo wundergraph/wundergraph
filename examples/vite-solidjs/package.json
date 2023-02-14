@@ -1,0 +1,33 @@
+{
+  "name": "vite-template-solid",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "start": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
+    "check": "tsc --noEmit",
+    "clean": "rimraf ./.next",
+    "wundergraph": "wunderctl up --debug",
+    "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
+    "dev:vite": "vite",
+    "build:vite": "vite build",
+    "build:wundergraph": "wunderctl generate",
+    "build": "npm run build:wundergraph && npm run build:vite",
+    "preview": "vite preview",
+    "test": "jest"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "concurrently": "^7.6.0",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.1",
+    "vite-plugin-solid": "^2.5.0"
+  },
+  "dependencies": {
+    "@tanstack/solid-query": "^4.24.6",
+    "@wundergraph/sdk": "^0.135.0",
+    "solid-js": "^1.6.10"
+  }
+}
