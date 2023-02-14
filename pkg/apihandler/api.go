@@ -1,8 +1,9 @@
 package apihandler
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"os"
 	"time"
 
@@ -15,7 +16,7 @@ const (
 	WgEnvCsrfSecret       = "WUNDERGRAPH_CSRF_TOKEN_SECRET"
 	WgEnvHashKey          = "WUNDERGRAPH_SECURE_COOKIE_HASH_KEY"
 	WgEnvBlockKey         = "WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY"
-	validSecretCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	validSecretCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-"
 )
 
 type Listener struct {
@@ -63,12 +64,19 @@ func setCookieBasedSecrets(secretName string, secretValue []byte, cookieBasedSec
 	}
 }
 
-func generateRandomStringOfLength(length int) []byte {
+func generateRandomBytesOfLength(length int) ([]byte, error) {
 	bytes := make([]byte, length)
+	validSecretCharactersLength := len(validSecretCharacters)
+
 	for i := range bytes {
-		bytes[i] = validSecretCharacters[rand.Intn(len(validSecretCharacters))]
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(validSecretCharactersLength)))
+		if err != nil {
+			return nil, err
+		}
+		bytes[i] = validSecretCharacters[num.Int64()]
 	}
-	return bytes
+
+	return bytes, nil
 }
 
 func NewCookieBasedSecrets(isDevMode bool) (cookieBasedSecrets *CookieBasedSecrets, errorMessages []string) {
@@ -87,9 +95,14 @@ func NewCookieBasedSecrets(isDevMode bool) (cookieBasedSecrets *CookieBasedSecre
 		secret := os.Getenv(k)
 		// if the length is incorrect, it is handled in the validation stage
 		if secret == "" {
-			setCookieBasedSecrets(k, generateRandomStringOfLength(v), cookieBasedSecrets)
-			message := fmt.Sprintf("The secret %s was unset. A temporary randomised value has been created; please generate a new one.", k)
-			errorMessages = append(errorMessages, message)
+			bytes, err := generateRandomBytesOfLength(v)
+			if err != nil {
+				failureWarning := fmt.Sprintf("The secret %s was unset and your system failed to produce a secure, randomly-generated string. Please generate a new one. https://docs.wundergraph.com/docs/self-hosted/security", k)
+				return cookieBasedSecrets, append(errorMessages, failureWarning)
+			}
+			setCookieBasedSecrets(k, bytes, cookieBasedSecrets)
+			unsetWarning := fmt.Sprintf("The secret %s was unset. A temporary randomised value has been created; please generate a new one. https://docs.wundergraph.com/docs/self-hosted/security", k)
+			errorMessages = append(errorMessages, unsetWarning)
 		} else {
 			setCookieBasedSecrets(k, []byte(secret), cookieBasedSecrets)
 		}

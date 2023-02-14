@@ -103,13 +103,16 @@ export interface WunderGraphConfigApplicationConfig {
 			// without boundaries, all URIs would match, e.g:
 			// "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
 			authorizedRedirectUriRegexes?: InputVariable[];
-			/** @deprecated: Not used anymore */
+			/** @deprecated: Provide cryptographically-secure environment variables
+			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			// secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
 			secureCookieHashKey?: any;
-			/** @deprecated: Not used anymore */
+			/** @deprecated: Provide cryptographically-secure environment variables
+			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			// secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
 			secureCookieBlockKey?: any;
-			/** @deprecated: Not used anymore */
+			/** @deprecated: Provide cryptographically-secure environment variables
+			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
 			csrfTokenSecret?: any;
 		};
@@ -277,11 +280,14 @@ export interface ResolvedWunderGraphConfig {
 			postLogout: boolean;
 		};
 		cookieSecurity?: {
-			/** @deprecated: Not used anymore */
+			/** @deprecated: Provide cryptographically-secure environment variables
+			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			secureCookieHashKey?: any;
-			/** @deprecated: Not used anymore */
+			/** @deprecated: Provide cryptographically-secure environment variables
+			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			secureCookieBlockKey?: any;
-			/** @deprecated: Not used anymore */
+			/** @deprecated: Provide cryptographically-secure environment variables
+			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			csrfTokenSecret?: any;
 		};
 	};

@@ -771,6 +771,15 @@ export interface CookieBasedAuthentication {
   providers: AuthProvider[];
   authorizedRedirectUris: ConfigurationVariable[];
   authorizedRedirectUriRegexes: ConfigurationVariable[];
+	/** @deprecated: Provide cryptographically-secure environment variables
+	 * https://docs.wundergraph.com/docs/self-hosted/security */
+	secureCookieHashKey?: any;
+	/** @deprecated: Provide cryptographically-secure environment variables
+	 * https://docs.wundergraph.com/docs/self-hosted/security */
+	secureCookieBlockKey?: any;
+	/** @deprecated: Provide cryptographically-secure environment variables
+	 * https://docs.wundergraph.com/docs/self-hosted/security */
+	csrfTokenSecret?: any;
 }
 
 export interface AuthProvider {

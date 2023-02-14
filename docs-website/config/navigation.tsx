@@ -861,6 +861,10 @@ const navigation = [
 				title: 'Docker',
 				href: '/docs/self-hosted/docker',
 			},
+			{
+				title: 'Security',
+				href: '/docs/self-hosted/security',
+			},
 		],
 	},
 	{ type: 'divider' },
