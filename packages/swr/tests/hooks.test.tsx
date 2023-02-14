@@ -190,7 +190,7 @@ describe('SWR - useQuery', () => {
 		renderWithConfig(<Page />);
 
 		await waitFor(() => {
-			screen.getByText('Unable to parse response body');
+			screen.getByText('Response is not OK');
 		});
 
 		scope.done();
@@ -408,7 +408,7 @@ describe('SWR - useMutation', () => {
 		screen.getByText(/true/);
 
 		await waitFor(() => {
-			screen.getByText('Unable to parse response body');
+			screen.getByText('Response is not OK');
 		});
 
 		expect(() => csrfScope.done()).toThrow(); // should not be called

@@ -189,7 +189,7 @@ describe('Client', () => {
 			});
 
 			expect(resp.error).toBeInstanceOf(Error);
-			expect(resp.error).toEqual(new ResponseError('Unable to parse response body', 500));
+			expect(resp.error).toEqual(new ResponseError('Response is not OK', 500));
 			expect(resp.data).toBeUndefined();
 		});
 
@@ -396,7 +396,7 @@ describe('Client', () => {
 		apiScope.done();
 
 		expect(resp.error).toBeInstanceOf(Error);
-		expect(resp.error).toEqual(new ResponseError('Unable to parse response body', 500));
+		expect(resp.error).toEqual(new ResponseError('Response is not OK', 500));
 		expect(resp.data).toBeUndefined();
 	});
 

@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -281,6 +282,12 @@ func (e *Engine) ensurePrisma() error {
 
 	e.queryEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
 	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+
+	if runtime.GOOS == "windows" {
+		// Append .exe suffix
+		e.queryEnginePath += ".exe"
+		e.introspectionEnginePath += ".exe"
+	}
 
 	// Acquire a file lock before trying to download
 	lockPath := filepath.Join(prismaPath, ".lock")

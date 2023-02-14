@@ -71,7 +71,6 @@ type Builder struct {
 	pool     *pool.Pool
 
 	middlewareClient *hooks.Client
-	hooksServerURL   string
 
 	definition *ast.Document
 
@@ -100,7 +99,6 @@ type BuilderConfig struct {
 	EnableIntrospection        bool
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
-	HookServerURL              string
 	DevMode                    bool
 }
 
@@ -116,7 +114,6 @@ func NewBuilder(pool *pool.Pool,
 		pool:                       pool,
 		insecureCookies:            config.InsecureCookies,
 		middlewareClient:           hooksClient,
-		hooksServerURL:             config.HookServerURL,
 		forceHttpsRedirects:        config.ForceHttpsRedirects,
 		enableDebugMode:            config.EnableDebugMode,
 		enableIntrospection:        config.EnableIntrospection,
@@ -127,6 +124,7 @@ func NewBuilder(pool *pool.Pool,
 }
 
 func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Router, api *Api) (streamClosers []chan struct{}, err error) {
+	r.api = api
 
 	if api.CacheConfig != nil {
 		err = r.configureCache(api)
@@ -153,12 +151,11 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := r.loader.Load(*api.EngineConfiguration)
+	planConfig, err := r.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
 
-	r.api = api
 	r.planConfig = *planConfig
 	r.resolver = resolve.New(ctx, resolve.NewFetcher(true), true)
 
@@ -263,6 +260,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		profiles := make(map[string]*s3uploadclient.UploadProfile, len(s3Provider.UploadProfiles))
 		for name, profile := range s3Provider.UploadProfiles {
 			profiles[name] = &s3uploadclient.UploadProfile{
+				RequireAuthentication: profile.RequireAuthentication,
 				MaxFileSizeBytes:      int(profile.MaxAllowedUploadSizeBytes),
 				MaxAllowedFiles:       int(profile.MaxAllowedFiles),
 				AllowedMimeTypes:      append([]string(nil), profile.AllowedMimeTypes...),
@@ -289,7 +287,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			r.log.Error("registerS3UploadClient", zap.Error(err))
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
-			r.router.Handle(s3Path, authentication.RequiresAuthentication(http.HandlerFunc(s3.UploadFile)))
+			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
 			r.log.Debug("register S3 provider", zap.String("provider", s3Provider.Name))
 			r.log.Debug("register S3 endpoint", zap.String("path", s3Path))
 		}
@@ -407,7 +405,7 @@ func (r *Builder) createSubRouter(router *mux.Router) *mux.Router {
 }
 
 func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
-	handler, err := webhookhandler.New(config, r.hooksServerURL, r.log)
+	handler, err := webhookhandler.New(config, r.api.Options.ServerUrl, r.log)
 	if err != nil {
 		return err
 	}
@@ -419,18 +417,18 @@ func (r *Builder) registerWebhook(config *wgpb.WebhookConfiguration) error {
 	return nil
 }
 
-func (r *Builder) operationApiPath(name string) string {
+func operationApiPath(name string) string {
 	return fmt.Sprintf("/operations/%s", name)
 }
 
 func (r *Builder) registerInvalidOperation(name string) {
-	apiPath := r.operationApiPath(name)
+	apiPath := operationApiPath(name)
 	route := r.router.Methods(http.MethodGet, http.MethodPost, http.MethodOptions).Path(apiPath)
 	route.Handler(&EndpointUnavailableHandler{
 		OperationName: name,
 		Logger:        r.log,
 	})
-	r.log.Error("EndpointUnavailableHandler",
+	r.log.Warn("EndpointUnavailableHandler",
 		zap.String("Operation", name),
 		zap.String("Endpoint", apiPath),
 		zap.String("Help", "This operation is invalid. Please, check the logs"),
@@ -443,7 +441,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		return nil
 	}
 
-	apiPath := r.operationApiPath(operation.Path)
+	apiPath := operationApiPath(operation.Path)
 
 	if operation.Engine == wgpb.OperationExecutionEngine_ENGINE_NODEJS {
 		return r.registerNodejsOperation(operation, apiPath)
@@ -481,19 +479,19 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
 
-	queryParamsAllowList := r.generateQueryArgumentsAllowList(operation.VariablesSchema)
+	queryParamsAllowList := generateQueryArgumentsAllowList(operation.VariablesSchema)
 
-	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
 	}
 
-	jsonStringInterpolator, err := interpolate.NewStringInterpolatorJSONOnly(r.cleanupJsonSchema(operation.InterpolationVariablesSchema))
+	jsonStringInterpolator, err := interpolate.NewStringInterpolatorJSONOnly(cleanupJsonSchema(operation.InterpolationVariablesSchema))
 	if err != nil {
 		return err
 	}
@@ -650,9 +648,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	return nil
 }
 
-func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
+func generateQueryArgumentsAllowList(schema string) []string {
 	var allowList []string
-	schema = r.cleanupJsonSchema(schema)
+	schema = cleanupJsonSchema(schema)
 	_ = jsonparser.ObjectEach([]byte(schema), func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 		allowList = append(allowList, string(key))
 		return nil
@@ -660,7 +658,7 @@ func (r *Builder) generateQueryArgumentsAllowList(schema string) []string {
 	return allowList
 }
 
-func (r *Builder) cleanupJsonSchema(schema string) string {
+func cleanupJsonSchema(schema string) string {
 	schema = strings.Replace(schema, "/definitions/", "/$defs/", -1)
 	schema = strings.Replace(schema, "\"definitions\"", "\"$defs\"", -1)
 	return schema
@@ -961,43 +959,172 @@ func (h *GraphQLHandler) preparePlan(operationHash uint64, requestOperationName 
 	return preparedPlan.(planWithExtractedVariables), nil
 }
 
-func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
-	variables = injectClaims(operation, r, variables)
+func postProcessVariables(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
+	var err error
+	variables, err = injectClaims(operation, r, variables)
+	if err != nil {
+		return nil, err
+	}
 	variables = injectVariables(operation, r, variables)
-	return variables
+	return variables, nil
 }
 
-func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
-	if operation.AuthorizationConfig == nil || len(operation.AuthorizationConfig.Claims) == 0 {
-		return variables
+func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+	var err error
+	var replacement string
+
+	switch claim.ClaimType {
+	case wgpb.ClaimType_ISSUER:
+		replacement = user.ProviderID
+	case wgpb.ClaimType_SUBJECT: // handles  wgpb.ClaimType_USERID too
+		replacement = user.UserID
+	case wgpb.ClaimType_NAME:
+		replacement = user.Name
+	case wgpb.ClaimType_GIVEN_NAME:
+		replacement = user.FirstName
+	case wgpb.ClaimType_FAMILY_NAME:
+		replacement = user.LastName
+	case wgpb.ClaimType_MIDDLE_NAME:
+		replacement = user.MiddleName
+	case wgpb.ClaimType_NICKNAME:
+		replacement = user.NickName
+	case wgpb.ClaimType_PREFERRED_USERNAME:
+		replacement = user.PreferredUsername
+	case wgpb.ClaimType_PROFILE:
+		replacement = user.Profile
+	case wgpb.ClaimType_PICTURE:
+		replacement = user.Picture
+	case wgpb.ClaimType_WEBSITE:
+		replacement = user.Website
+	case wgpb.ClaimType_EMAIL:
+		replacement = user.Email
+	case wgpb.ClaimType_EMAIL_VERIFIED:
+		var boolValue string
+		if user.EmailVerified {
+			boolValue = "true"
+		} else {
+			boolValue = "false"
+		}
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+		if err != nil {
+			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
+		}
+		// Don't go into the block after the switch that sets the variable as a string
+		return variables, nil
+	case wgpb.ClaimType_GENDER:
+		replacement = user.Gender
+	case wgpb.ClaimType_BIRTH_DATE:
+		replacement = user.BirthDate
+	case wgpb.ClaimType_ZONE_INFO:
+		replacement = user.ZoneInfo
+	case wgpb.ClaimType_LOCALE:
+		replacement = user.Locale
+	case wgpb.ClaimType_LOCATION:
+		replacement = user.Location
+	default:
+		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
+	}
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	if err != nil {
+		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
+	}
+
+	return variables, nil
+}
+
+func lookupJsonPath(data interface{}, keys []string, keyIndex int) interface{} {
+	key := keys[keyIndex]
+	if m, ok := data.(map[string]interface{}); ok {
+		item := m[key]
+		if keyIndex == len(keys)-1 {
+			return item
+		}
+		return lookupJsonPath(item, keys, keyIndex+1)
+	}
+	return nil
+}
+
+func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
+	custom := claim.GetCustom()
+	value := lookupJsonPath(user.CustomClaims, custom.JsonPathComponents, 0)
+	var replacement []byte
+	switch x := value.(type) {
+	case nil:
+		if custom.Required {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
+			}
+		}
+		return variables, nil
+	case string:
+		if custom.Type != wgpb.ValueType_STRING {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+		replacement = []byte("\"" + string(x) + "\"")
+	case bool:
+		if custom.Type != wgpb.ValueType_BOOLEAN {
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+		if x {
+			replacement = []byte("true")
+		} else {
+			replacement = []byte("false")
+		}
+	case float64:
+		switch custom.Type {
+		case wgpb.ValueType_INT:
+			if x != float64(int(x)) {
+				// Value is not integral
+				return nil, &inputvariables.ValidationError{
+					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
+				}
+			}
+			replacement = []byte(strconv.FormatInt(int64(x), 10))
+		case wgpb.ValueType_FLOAT:
+			// JSON number is always a valid float
+			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
+		default:
+			return nil, &inputvariables.ValidationError{
+				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+			}
+		}
+	default:
+		return nil, fmt.Errorf("unhandled custom claim type %T", x)
+	}
+	var err error
+	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	if err != nil {
+		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
+	}
+	return variables, nil
+}
+
+func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) ([]byte, error) {
+	authorizationConfig := operation.GetAuthorizationConfig()
+	claims := authorizationConfig.GetClaims()
+	if len(claims) == 0 {
+		return variables, nil
 	}
 	user := authentication.UserFromContext(r.Context())
 	if user == nil {
-		return variables
+		return variables, nil
 	}
-	for _, claim := range operation.AuthorizationConfig.Claims {
-		switch claim.Claim {
-		case wgpb.Claim_USERID:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.UserID+"\""), claim.VariableName)
-		case wgpb.Claim_EMAIL:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Email+"\""), claim.VariableName)
-		case wgpb.Claim_EMAIL_VERIFIED:
-			if user.EmailVerified {
-				variables, _ = jsonparser.Set(variables, []byte("true"), claim.VariableName)
-			} else {
-				variables, _ = jsonparser.Set(variables, []byte("false"), claim.VariableName)
-			}
-		case wgpb.Claim_LOCATION:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Location+"\""), claim.VariableName)
-		case wgpb.Claim_NAME:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.Name+"\""), claim.VariableName)
-		case wgpb.Claim_NICKNAME:
-			variables, _ = jsonparser.Set(variables, []byte("\""+user.NickName+"\""), claim.VariableName)
-		case wgpb.Claim_PROVIDER:
-			variables, _ = jsonparser.Set(variables, []byte("\n"+user.ProviderID+"\""), claim.VariableName)
+	var err error
+	for _, claim := range claims {
+		if claim.GetClaimType() == wgpb.ClaimType_CUSTOM {
+			variables, err = injectCustomClaim(claim, user, variables)
+		} else {
+			variables, err = injectWellKnownClaim(claim, user, variables)
 		}
 	}
-	return variables
+	if err != nil {
+		return nil, err
+	}
+	return variables, nil
 }
 
 func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
@@ -1188,7 +1315,12 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
-	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
+			return
+		}
+	}
 
 	flusher, flusherOk := w.(http.Flusher)
 	if isLive {
@@ -1624,7 +1756,12 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
-	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
+			return
+		}
+	}
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1773,7 +1910,12 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		ctx.Variables = MergeJsonRightIntoLeft(h.extractedVariables, ctx.Variables)
 	}
 
-	ctx.Variables = postProcessVariables(h.operation, r, ctx.Variables)
+	ctx.Variables, err = postProcessVariables(h.operation, r, ctx.Variables)
+	if err != nil {
+		if done := handleOperationErr(requestLogger, err, w, "postProcessVariables failed", h.operation); done {
+			return
+		}
+	}
 
 	var (
 		flushWriter *httpFlushWriter
@@ -2212,12 +2354,12 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		route = r.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath)
 	}
 
-	variablesValidator, err := inputvariables.NewValidator(r.cleanupJsonSchema(operation.VariablesSchema), false)
+	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
 	if err != nil {
 		return err
 	}
 
-	stringInterpolator, err := interpolate.NewStringInterpolator(r.cleanupJsonSchema(operation.VariablesSchema))
+	stringInterpolator, err := interpolate.NewStringInterpolator(cleanupJsonSchema(operation.VariablesSchema))
 	if err != nil {
 		return err
 	}
@@ -2228,7 +2370,7 @@ func (r *Builder) registerNodejsOperation(operation *wgpb.Operation, apiPath str
 		variablesValidator:   variablesValidator,
 		rbacEnforcer:         authentication.NewRBACEnforcer(operation),
 		hooksClient:          r.middlewareClient,
-		queryParamsAllowList: r.generateQueryArgumentsAllowList(operation.VariablesSchema),
+		queryParamsAllowList: generateQueryArgumentsAllowList(operation.VariablesSchema),
 		stringInterpolator:   stringInterpolator,
 		liveQuery: liveQueryConfig{
 			enabled:                operation.LiveQueryConfig.Enable,
@@ -2263,8 +2405,14 @@ type FunctionsHandler struct {
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
+
+	reqID := r.Header.Get(logging.RequestIDHeader)
+	requestLogger := h.log.With(logging.WithRequestID(reqID))
+	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
+
 	r = setOperationMetaData(r, h.operation)
+
+	isInternal := strings.HasPrefix(r.URL.Path, "/internal/")
 
 	ctx := pool.GetCtx(r, r, pool.Config{})
 	defer pool.PutCtx(ctx)
@@ -2289,7 +2437,11 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		ctx.Variables = variablesBuf.Bytes()
+		if isInternal {
+			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
+		} else {
+			ctx.Variables = variablesBuf.Bytes()
+		}
 	}
 
 	if len(ctx.Variables) == 0 {
@@ -2381,8 +2533,10 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(out.Response)
+	w.WriteHeader(out.ClientResponseStatusCode)
+	if len(out.Response) > 0 {
+		_, _ = w.Write(out.Response)
+	}
 }
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
@@ -2568,6 +2722,15 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 			zap.String("operationType", operation.OperationType.String()),
 		)
 		w.WriteHeader(http.StatusGatewayTimeout)
+		return true
+	}
+	var validationError *inputvariables.ValidationError
+	if errors.As(err, &validationError) {
+		w.WriteHeader(http.StatusBadRequest)
+		enc := json.NewEncoder(w)
+		if err := enc.Encode(&validationError); err != nil {
+			log.Error("error encoding validation error", zap.Error(err))
+		}
 		return true
 	}
 	log.Error(errorMessage,

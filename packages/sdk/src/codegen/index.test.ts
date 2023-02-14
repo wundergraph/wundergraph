@@ -1,12 +1,12 @@
 import { CodeGenOutWriter, collectAllTemplates, GenerateCode, Template, TemplateOutputFile } from './index';
 import { Api } from '../definition';
-import { ResolvedWunderGraphConfig } from '../configure';
+import { CodeGenerationConfig } from '../configure';
 import { ConfigurationVariableKind, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { mapInputVariable } from '../configure/variables';
 
 class FakeTemplate implements Template {
-	generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
-		const content = config.application.Operations.map((op) => op.Name).join('+');
+	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
+		const content = generationConfig.config.application.Operations.map((op) => op.Name).join('+');
 		return Promise.resolve([
 			{
 				path: 'testFile.txt',
@@ -474,6 +474,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						secureCookieBlockKey: mapInputVariable(''),
 						csrfTokenSecret: mapInputVariable(''),
 					},
+					customClaims: {},
 				},
 				enableGraphQLEndpoint: true,
 				security: {
@@ -490,7 +491,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 
 test('should collect all template dependencies recursively and dedupe based on the template name', () => {
 	class Template1 implements Template {
-		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
 				{
 					path: 'template1.txt',
@@ -505,7 +506,7 @@ test('should collect all template dependencies recursively and dedupe based on t
 	}
 
 	class Template2 implements Template {
-		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
 				{
 					path: 'template2.txt',
@@ -521,7 +522,7 @@ test('should collect all template dependencies recursively and dedupe based on t
 	}
 
 	class Template3 implements Template {
-		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
 				{
 					path: 'template3.txt',
@@ -542,7 +543,7 @@ test('should collect all template dependencies recursively and dedupe based on t
 
 test('should collect templates up to maxTemplateDepth', () => {
 	class Template1 implements Template {
-		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
 				{
 					path: 'template1.txt',
@@ -557,7 +558,7 @@ test('should collect templates up to maxTemplateDepth', () => {
 	}
 
 	class Template2 implements Template {
-		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
 				{
 					path: 'template2.txt',
@@ -573,7 +574,7 @@ test('should collect templates up to maxTemplateDepth', () => {
 	}
 
 	class Template3 implements Template {
-		generate(config: ResolvedWunderGraphConfig): Promise<TemplateOutputFile[]> {
+		generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 			return Promise.resolve([
 				{
 					path: 'template3.txt',

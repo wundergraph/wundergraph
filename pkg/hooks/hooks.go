@@ -108,6 +108,8 @@ type MiddlewareHookResponse struct {
 	Response                json.RawMessage   `json:"response"`
 	Input                   json.RawMessage   `json:"input"`
 	SetClientRequestHeaders map[string]string `json:"setClientRequestHeaders"`
+	// ClientResponseStatusCode is the status code that should be returned to the client
+	ClientResponseStatusCode int
 }
 
 func (r *MiddlewareHookResponse) ResponseError() string { return r.Error }
@@ -175,6 +177,12 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	httpClient.RetryWaitMin = 50 * time.Millisecond
 	httpClient.HTTPClient.Timeout = requestTimeout
 	httpClient.Logger = log.New(ioutil.Discard, "", log.LstdFlags)
+	httpClient.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
+		if resp != nil && resp.StatusCode == http.StatusInternalServerError {
+			return false, nil
+		}
+		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+	}
 	return httpClient
 }
 
@@ -210,7 +218,14 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: %w", operationName, err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp == nil {
+		return nil, fmt.Errorf("error calling function %s: no response", operationName)
+	}
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusInternalServerError, http.StatusUnauthorized:
+		break
+	default:
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
 	}
 
@@ -224,6 +239,15 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 
 	if hookRes.Error != "" {
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
+	}
+
+	switch resp.StatusCode {
+	case http.StatusInternalServerError:
+		hookRes.ClientResponseStatusCode = http.StatusBadGateway
+	case http.StatusUnauthorized:
+		hookRes.ClientResponseStatusCode = http.StatusUnauthorized
+	default:
+		hookRes.ClientResponseStatusCode = http.StatusOK
 	}
 
 	return &hookRes, nil

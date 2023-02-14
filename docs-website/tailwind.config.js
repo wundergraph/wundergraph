@@ -1,4 +1,4 @@
-const defaultTheme = require('tailwindcss/defaultTheme')
+const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -27,8 +27,18 @@ module.exports = {
 			},
 			colors: {
 				gray: {
-					850: '#18202F',
-					950: '#0b0f1a',
+					50: '#F9F9FB',
+					100: '#F3F3F6',
+					200: '#E5E5EB',
+					300: '#D2D1DB',
+					400: '#9D9CB0',
+					500: '#6B6B80',
+					600: '#4B4B63',
+					700: '#393852',
+					800: '#201F38',
+					850: '#1A1A38',
+					900: '#171632',
+					950: '#101023',
 				},
 			},
 			maxWidth: {
@@ -36,5 +46,9 @@ module.exports = {
 			},
 		},
 	},
-	plugins: [require('tailwindcss-radix')(), require('@tailwindcss/typography')],
-}
+	plugins: [
+		require('tailwindcss-radix')(),
+		require('@tailwindcss/typography'),
+		require('tailwind-scrollbar')({ nocompatible: true }),
+	],
+};
