@@ -410,11 +410,13 @@ importers:
       '@types/jest': ^28.1.1
       '@types/node-fetch': 2.6.2
       '@wundergraph/sdk': workspace:*
+      babel-jest: ^29.4.2
       babel-preset-solid: ^1.6.10
       jest: ^29.0.3
       jest-environment-jsdom: ^29.3.0
       nock: ^13.2.9
       node-fetch: 2.6.7
+      regenerator-runtime: ^0.13.11
       solid-jest: ^0.2.0
       solid-js: ^1.6.11
       tsd: ^0.24.1
@@ -432,11 +434,13 @@ importers:
       '@types/jest': 28.1.8
       '@types/node-fetch': 2.6.2
       '@wundergraph/sdk': link:../sdk
+      babel-jest: 29.4.2_@babel+core@7.20.12
       babel-preset-solid: 1.6.10_@babel+core@7.20.12
       jest: 29.4.2
       jest-environment-jsdom: 29.3.0
       nock: 13.2.9
       node-fetch: 2.6.7
+      regenerator-runtime: 0.13.11
       solid-jest: 0.2.0_rvzumvnarvz6mgdwounpcl6sr4
       solid-js: 1.6.11
       tsd: 0.24.1
@@ -2302,7 +2306,7 @@ packages:
     resolution: {integrity: sha512-mrzLkl6U9YLF8qpqI7TB82PESyEGjm/0Ly91jG575eVxMMlb8fYfOXFZIJ8XfLrJZQbm7dlKry2bJmXBUEkdFg==}
     engines: {node: '>=6.9.0'}
     dependencies:
-      regenerator-runtime: 0.13.10
+      regenerator-runtime: 0.13.11
 
   /@babel/template/7.20.7:
     resolution: {integrity: sha512-8SegXApWe6VoNw0r9JHpSteLKTpTiLZ4rMlGIm9JQ18KiCtyQiAMEazujAHrUS5flrcqYZa75ukev3P6QmUwUw==}
@@ -15278,6 +15282,10 @@ packages:
 
   /regenerator-runtime/0.13.10:
     resolution: {integrity: sha512-KepLsg4dU12hryUO7bp/axHAKvwGOCV0sGloQtpagJ12ai+ojVDqkeGSiRX1zlq+kjIMZ1t7gpze+26QqtdGqw==}
+    dev: true
+
+  /regenerator-runtime/0.13.11:
+    resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
 
   /regenerator-transform/0.15.1:
     resolution: {integrity: sha512-knzmNAcuyxV+gQCufkYcvOqX/qIIfHLv0u5x79kRxuGojfYVky1f15TzZEu2Avte8QGepvUNTnLskf8E6X6Vyg==}
