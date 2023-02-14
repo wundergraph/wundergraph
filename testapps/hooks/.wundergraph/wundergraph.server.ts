@@ -4,41 +4,93 @@ import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 
+const logPreResolve = async (hook: any) => {
+	console.log(`preResolve: ${JSON.stringify(hook)}`);
+};
+
+const logMutatingPreResolve = async (hook: any) => {
+	console.log(`mutatingPreResolve: ${JSON.stringify(hook)}`);
+};
+
+const logCustomResolve = async (hook: any) => {
+	console.log(`customResolve: ${JSON.stringify(hook)}`);
+};
+
 export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
 		queries: {
+			Infinite: {
+				preResolve: async (hook) => {
+					logPreResolve(hook);
+					const result = await hook.internalClient.queries.Infinite({
+						input: hook.input,
+					});
+				},
+			},
 			PreResolveFailure: {
 				preResolve: async (hook) => {
-					console.log(`preResolve: ${hook.input}`);
+					logPreResolve(hook);
 					throw new Error('stop');
 				},
 			},
-			PreResolveChain: {
-				preResolve: async (hook) => {
-					console.log(`preResolve: ${hook.input}`);
-				},
+			MutatingPreResolveFailure: {
+				preResolve: logPreResolve,
 				mutatingPreResolve: async (hook) => {
-					console.log(`mutatingPreResolve: ${hook.input}`);
+					logMutatingPreResolve(hook);
+					throw new Error('stop');
+				},
+			},
+			CustomResolveFailure: {
+				preResolve: logPreResolve,
+				customResolve: async (hook) => {
+					logCustomResolve(hook);
+					throw new Error('stop');
+				},
+			},
+			CustomResolve: {
+				customResolve: async (hook) => {
+					return {
+						data: {
+							echo_string: 'customResolved',
+						},
+					};
+				},
+			},
+			CustomResolveSkip: {
+				customResolve: async (hook) => {
+					return null;
+				},
+			},
+			PreResolveChain: {
+				preResolve: logPreResolve,
+				mutatingPreResolve: async (hook) => {
+					logMutatingPreResolve(hook);
 					return {
 						s: hook.input.s + '.mutatingPreResolve',
+					};
+				},
+				mockResolve: async (hook) => {
+					console.log(`mockResolve: ${hook.input}`);
+					return {
+						data: {
+							echo_string: hook.input.s + '.mockResolve',
+						},
 					};
 				},
 			},
 			RecursiveContinents: {
 				customResolve: async (hook) => {
-					console.log('CUSTOM RESOLVE - RecursiveContinents');
 					return hook.internalClient.queries.Continents();
 				},
 			},
 			Continents: {
 				customResolve: async () => {
-					console.log('CUSTOM RESOLVE - Continents');
 					return {
 						data: {
 							countries_continents: [
 								{
-									code: '123',
-									name: 'abc',
+									code: 'FK',
+									name: 'Fake',
 								},
 							],
 						},
