@@ -120,7 +120,15 @@ function useTableOfContents(tableOfContents) {
 
 export function Layout({ children, title, tableOfContents, frontmatter }) {
 	let router = useRouter();
-	let allLinks = navigation.flatMap((section) => section.links);
+	let links = navigation.flatMap((section) => section.links);
+	let allLinks = links.flatMap((section) => {
+		if (section?.href) {
+			return section;
+		} else {
+			return section?.links;
+		}
+	});
+
 	let linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
 	let previousPage = allLinks[linkIndex - 1];
 	let nextPage = allLinks[linkIndex + 1];
