@@ -44,9 +44,7 @@ func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Pipel
 	preparedPlan := &plan.SynchronousResponsePlan{
 		Response: &resolve.GraphQLResponse{},
 	}
-	hooksResolver := func(ctx *resolve.Context, w io.Writer) error {
-		return resolver.ResolveGraphQLResponse(ctx, preparedPlan.Response, nil, w)
-	}
+	hooksResolver := newOperationHooksResolver(resolver, preparedPlan)
 	postResolveTransformer := &postresolvetransform.Transformer{}
 	return hooks.NewPipeline(nil, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, zap.NewNop())
 }

@@ -18,7 +18,9 @@ import (
 
 type Authenticator func(ctx context.Context) (user interface{})
 
-type Resolver func(ctx *resolve.Context, w io.Writer) error
+type Resolver interface {
+	Resolve(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
+}
 
 type ResolveConfiguration struct {
 	// Pre indicates wheter the PreResolve hook should be run
@@ -230,19 +232,24 @@ func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Requ
 	if preResolveResp.Resolved {
 		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
 	} else {
-		err = p.resolver(ctx, buf)
+		err = p.resolver.Resolve(ctx, w, buf)
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("ResolveGraphQLResponse failed: %w", err)
 	}
 
-	transformed, err := p.postResolveTransformer.Transform(buf.Bytes())
-	if err != nil {
-		return nil, fmt.Errorf("postResolveTransformer failed: %w", err)
+	var response []byte
+	if p.postResolveTransformer != nil {
+		response, err = p.postResolveTransformer.Transform(buf.Bytes())
+		if err != nil {
+			return nil, fmt.Errorf("postResolveTransformer failed: %w", err)
+		}
+	} else {
+		response = buf.Bytes()
 	}
 
-	postResolveResp, err := p.PostResolve(ctx, w, r, transformed)
+	postResolveResp, err := p.PostResolve(ctx, w, r, response)
 	if err != nil {
 		return nil, fmt.Errorf("postResolve hooks failed: %w", err)
 	}
@@ -252,6 +259,6 @@ func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Requ
 	}
 
 	return &Response{
-		Data: transformed,
+		Data: response,
 	}, nil
 }

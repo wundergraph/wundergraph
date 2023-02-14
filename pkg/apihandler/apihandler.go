@@ -507,9 +507,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := func(ctx *resolve.Context, w io.Writer) error {
-			return r.resolver.ResolveGraphQLResponse(ctx, synchronousPlan.Response, nil, w)
-		}
+		hooksResolver := newOperationHooksResolver(r.resolver, synchronousPlan)
 		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &QueryHandler{
 			resolver:               r.resolver,
@@ -572,9 +570,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := func(ctx *resolve.Context, w io.Writer) error {
-			return r.resolver.ResolveGraphQLResponse(ctx, synchronousPlan.Response, nil, w)
-		}
+		hooksResolver := newOperationHooksResolver(r.resolver, synchronousPlan)
 		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &MutationHandler{
 			resolver:               r.resolver,
@@ -613,7 +609,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, nil, nil, r.log)
+		hooksResolver := newSubscriptionHooksResolver(r.resolver, subscriptionPlan)
+		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &SubscriptionHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -1177,38 +1174,6 @@ type QueryResolver interface {
 type liveQueryConfig struct {
 	enabled                bool
 	pollingIntervalSeconds int64
-}
-
-type hooksConfig struct {
-	mockResolve         mockResolveConfig
-	preResolve          bool
-	postResolve         bool
-	mutatingPreResolve  bool
-	mutatingPostResolve bool
-	customResolve       bool
-}
-
-type mockResolveConfig struct {
-	enable                            bool
-	subscriptionPollingIntervalMillis int64
-}
-
-func buildHooksConfig(operation *wgpb.Operation) hooksConfig {
-	if operation == nil || operation.HooksConfiguration == nil {
-		return hooksConfig{}
-	}
-	config := operation.HooksConfiguration
-	return hooksConfig{
-		mockResolve: mockResolveConfig{
-			enable:                            config.MockResolve.Enable,
-			subscriptionPollingIntervalMillis: config.MockResolve.SubscriptionPollingIntervalMillis,
-		},
-		preResolve:          config.PreResolve,
-		postResolve:         config.PostResolve,
-		mutatingPreResolve:  config.MutatingPreResolve,
-		mutatingPostResolve: config.MutatingPostResolve,
-		customResolve:       config.CustomResolve,
-	}
 }
 
 func parseQueryVariables(r *http.Request, allowList []string) []byte {
@@ -1809,7 +1774,7 @@ func (o *operationKindVisitor) EnterOperationDefinition(ref int) {
 
 type httpFlushWriter struct {
 	ctx                    context.Context
-	writer                 io.Writer
+	writer                 http.ResponseWriter
 	flusher                http.Flusher
 	postResolveTransformer *postresolvetransform.Transformer
 	subscribeOnce          bool
@@ -1823,6 +1788,14 @@ type httpFlushWriter struct {
 	request        *http.Request
 	hooksPipeline  *hooks.Pipeline
 	logger         *zap.Logger
+}
+
+func (f *httpFlushWriter) Header() http.Header {
+	return f.writer.Header()
+}
+
+func (f *httpFlushWriter) WriteHeader(statusCode int) {
+	f.writer.WriteHeader(statusCode)
 }
 
 func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
@@ -2508,7 +2481,7 @@ func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, error
 		zap.String("operationType", operation.OperationType.String()),
 		zap.Error(err),
 	)
-	http.Error(w, fmt.Sprintf("%s:%s", errorMessage, err.Error()), http.StatusInternalServerError)
+	http.Error(w, fmt.Sprintf("%s: %s", errorMessage, err.Error()), http.StatusInternalServerError)
 	return true
 }
 
