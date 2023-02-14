@@ -62,7 +62,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := i.loader.Load(*api.EngineConfiguration)
+	planConfig, err := i.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
