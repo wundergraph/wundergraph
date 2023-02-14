@@ -103,18 +103,12 @@ export interface WunderGraphConfigApplicationConfig {
 			// without boundaries, all URIs would match, e.g:
 			// "http://localhost:3000" would match if the URI was "http://localhost:3000/anything" because of the missing boundary
 			authorizedRedirectUriRegexes?: InputVariable[];
-			/** @deprecated: Provide cryptographically-secure environment variables
-			 * https://docs.wundergraph.com/docs/self-hosted/security */
 			// secureCookieHashKey is used to encrypt user cookies, should be 11 bytes
-			secureCookieHashKey?: any;
-			/** @deprecated: Provide cryptographically-secure environment variables
-			 * https://docs.wundergraph.com/docs/self-hosted/security */
+			secureCookieHashKey?: InputVariable;
 			// secureCookieBlockKey is used to encrypt user cookies, should be 32 bytes
-			secureCookieBlockKey?: any;
-			/** @deprecated: Provide cryptographically-secure environment variables
-			 * https://docs.wundergraph.com/docs/self-hosted/security */
+			secureCookieBlockKey?: InputVariable;
 			// csrfTokenSecret is the secret to enable the csrf middleware, should be 32 bytes
-			csrfTokenSecret?: any;
+			csrfTokenSecret?: InputVariable;
 		};
 		tokenBased?: {
 			providers: TokenAuthProvider[];
@@ -279,16 +273,10 @@ export interface ResolvedWunderGraphConfig {
 			revalidateAuthentication: boolean;
 			postLogout: boolean;
 		};
-		cookieSecurity?: {
-			/** @deprecated: Provide cryptographically-secure environment variables
-			 * https://docs.wundergraph.com/docs/self-hosted/security */
-			secureCookieHashKey?: any;
-			/** @deprecated: Provide cryptographically-secure environment variables
-			 * https://docs.wundergraph.com/docs/self-hosted/security */
-			secureCookieBlockKey?: any;
-			/** @deprecated: Provide cryptographically-secure environment variables
-			 * https://docs.wundergraph.com/docs/self-hosted/security */
-			csrfTokenSecret?: any;
+		cookieSecurity: {
+			secureCookieHashKey: ConfigurationVariable;
+			secureCookieBlockKey: ConfigurationVariable;
+			csrfTokenSecret: ConfigurationVariable;
 		};
 	};
 	enableGraphQLEndpoint: boolean;
@@ -420,6 +408,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				mutatingPostAuthentication: config.server?.hooks?.authentication?.mutatingPostAuthentication !== undefined,
 				revalidateAuthentication: config.server?.hooks?.authentication?.revalidate !== undefined,
 				postLogout: config.server?.hooks?.authentication?.postLogout !== undefined,
+			},
+			cookieSecurity: {
+				secureCookieHashKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieHashKey || ''),
+				secureCookieBlockKey: mapInputVariable(config.authentication?.cookieBased?.secureCookieBlockKey || ''),
+				csrfTokenSecret: mapInputVariable(config.authentication?.cookieBased?.csrfTokenSecret || ''),
 			},
 		},
 		enableGraphQLEndpoint: config.security?.enableGraphQLEndpoint === true,
@@ -1059,6 +1052,9 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 					providers: config.authentication.cookieBased,
 					authorizedRedirectUris: config.authentication.authorizedRedirectUris,
 					authorizedRedirectUriRegexes: config.authentication.authorizedRedirectUriRegexes,
+					blockKey: config.authentication.cookieSecurity.secureCookieBlockKey,
+					hashKey: config.authentication.cookieSecurity.secureCookieHashKey,
+					csrfSecret: config.authentication.cookieSecurity.csrfTokenSecret,
 				},
 				hooks: config.authentication.hooks,
 				jwksBased: {

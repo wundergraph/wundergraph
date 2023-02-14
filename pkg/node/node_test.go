@@ -520,6 +520,11 @@ func BenchmarkNode(t *testing.B) {
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
 			},
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					HashKey:    &wgpb.ConfigurationVariable{},
+					BlockKey:   &wgpb.ConfigurationVariable{},
+					CsrfSecret: &wgpb.ConfigurationVariable{},
+				},
 				Hooks:     &wgpb.ApiAuthenticationHooks{},
 				JwksBased: &wgpb.JwksBasedAuthentication{},
 			},

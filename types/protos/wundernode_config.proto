@@ -40,6 +40,9 @@ message CookieBasedAuthentication {
 	repeated AuthProvider providers = 1;
 	repeated ConfigurationVariable authorizedRedirectUris = 2;
 	repeated ConfigurationVariable authorizedRedirectUriRegexes = 3;
+	ConfigurationVariable hashKey = 4;
+	ConfigurationVariable blockKey = 5;
+	ConfigurationVariable csrfSecret = 6;
 }
 
 message AuthProvider {

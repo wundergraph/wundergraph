@@ -9,8 +9,14 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
-var elevenCharSecret = []byte("00000000000")
-var thirtyTwoCharSecret = []byte("00000000000000000000000000000000")
+const (
+	elevenString    = "00000000000"
+	thirtyTwoString = "00000000000000000000000000000000"
+	incorrectString = "0000"
+)
+
+var elevenBytes = []byte(elevenString)
+var thirtyTwoBytes = []byte(thirtyTwoString)
 
 func TestValidateApiConfig(t *testing.T) {
 	// if providers slice is empty, cookie based auth is disabled,
@@ -22,6 +28,180 @@ func TestValidateApiConfig(t *testing.T) {
 		},
 	}
 
+	t.Run("cookie-based auth with valid config", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					CsrfSecret: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: elevenString,
+					},
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+					HashKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+				},
+			},
+		})
+
+		assert.True(t, valid)
+		assert.Len(t, messages, 0)
+	})
+
+	t.Run("if authentication.cookieBased.csrfTokenSecret is not provided, a fallback is used", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+					HashKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenBytes,
+				BlockKey:   thirtyTwoBytes,
+				HashKey:    thirtyTwoBytes,
+			},
+		})
+
+		assert.True(t, valid)
+		assert.Len(t, messages, 0)
+	})
+
+	t.Run("return error if authentication.cookieBased.csrfTokenSecret is invalid", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					CsrfSecret: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: incorrectString,
+					},
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+					HashKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+				},
+			},
+		})
+
+		assert.False(t, valid)
+		assert.Equal(t, "authentication.cookieBased.csrfTokenSecret must be exactly 11 characters long", messages[0])
+	})
+
+	t.Run("if authentication.cookieBased.secureCookieBlockKey is not provided, a fallback is used", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					CsrfSecret: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: elevenString,
+					},
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenBytes,
+				BlockKey:   thirtyTwoBytes,
+				HashKey:    thirtyTwoBytes,
+			},
+		})
+
+		assert.True(t, valid)
+		assert.Len(t, messages, 0)
+	})
+
+	t.Run("authentication.cookieBased.secureCookieBlockKey is incorrect", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					CsrfSecret: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: elevenString,
+					},
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: incorrectString,
+					},
+				},
+			},
+		})
+
+		assert.False(t, valid)
+		assert.Equal(t, "authentication.cookieBased.secureCookieBlockKey must be exactly 32 characters long", messages[0])
+	})
+
+	t.Run("if authentication.cookieBased.secureCookieHashKey is not provided, a fallback is used", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					CsrfSecret: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: elevenString,
+					},
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+				},
+			},
+			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
+				CsrfSecret: elevenBytes,
+				BlockKey:   thirtyTwoBytes,
+				HashKey:    thirtyTwoBytes,
+			},
+		})
+
+		assert.True(t, valid)
+		assert.Len(t, messages, 0)
+	})
+
+	t.Run("authentication.cookieBased.secureCookieHashKey is invalid", func(t *testing.T) {
+		valid, messages := ApiConfig(&apihandler.Api{
+			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
+				CookieBased: &wgpb.CookieBasedAuthentication{
+					Providers: providers,
+					CsrfSecret: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: elevenString,
+					},
+					BlockKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: thirtyTwoString,
+					},
+					HashKey: &wgpb.ConfigurationVariable{
+						Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
+						StaticVariableContent: incorrectString,
+					},
+				},
+			},
+		})
+
+		assert.False(t, valid)
+		assert.Equal(t, "authentication.cookieBased.secureCookieHashKey must be exactly 32 characters long", messages[0])
+	})
+
 	t.Run("no cookie-based authentication is valid", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{},
@@ -31,6 +211,7 @@ func TestValidateApiConfig(t *testing.T) {
 		assert.Len(t, messages, 0)
 	})
 
+	// Secret fallback tests
 	t.Run("correct length of secrets returns no errors", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
@@ -39,9 +220,9 @@ func TestValidateApiConfig(t *testing.T) {
 				},
 			},
 			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
-				CsrfSecret: elevenCharSecret,
-				BlockKey:   thirtyTwoCharSecret,
-				HashKey:    thirtyTwoCharSecret,
+				CsrfSecret: elevenBytes,
+				BlockKey:   thirtyTwoBytes,
+				HashKey:    thirtyTwoBytes,
 			},
 		})
 
@@ -71,7 +252,7 @@ func TestValidateApiConfig(t *testing.T) {
 				},
 			},
 			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
-				CsrfSecret: thirtyTwoCharSecret,
+				CsrfSecret: thirtyTwoBytes,
 			},
 		})
 
@@ -87,7 +268,7 @@ func TestValidateApiConfig(t *testing.T) {
 				},
 			},
 			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
-				CsrfSecret: elevenCharSecret,
+				CsrfSecret: elevenBytes,
 			},
 		})
 
@@ -103,8 +284,8 @@ func TestValidateApiConfig(t *testing.T) {
 				},
 			},
 			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
-				CsrfSecret: elevenCharSecret,
-				BlockKey:   elevenCharSecret,
+				CsrfSecret: elevenBytes,
+				BlockKey:   elevenBytes,
 			},
 		})
 
@@ -120,8 +301,8 @@ func TestValidateApiConfig(t *testing.T) {
 				},
 			},
 			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
-				CsrfSecret: elevenCharSecret,
-				BlockKey:   thirtyTwoCharSecret,
+				CsrfSecret: elevenBytes,
+				BlockKey:   thirtyTwoBytes,
 			},
 		})
 
@@ -137,9 +318,9 @@ func TestValidateApiConfig(t *testing.T) {
 				},
 			},
 			CookieBasedSecrets: &apihandler.CookieBasedSecrets{
-				CsrfSecret: elevenCharSecret,
-				BlockKey:   thirtyTwoCharSecret,
-				HashKey:    elevenCharSecret,
+				CsrfSecret: elevenBytes,
+				BlockKey:   thirtyTwoBytes,
+				HashKey:    elevenBytes,
 			},
 		})
 

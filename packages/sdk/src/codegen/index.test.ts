@@ -469,6 +469,11 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						postLogout: false,
 					},
 					tokenBased: [],
+					cookieSecurity: {
+						secureCookieHashKey: mapInputVariable(''),
+						secureCookieBlockKey: mapInputVariable(''),
+						csrfTokenSecret: mapInputVariable(''),
+					},
 					customClaims: {},
 				},
 				enableGraphQLEndpoint: true,

@@ -4,7 +4,7 @@ pageTitle: WunderGraph - Security
 description: Securing your self-hosted WunderGraph deployment
 ---
 
-WunderGraph uses three secrets to secure your deployment.
+WunderGraph uses three secrets to provide authentication to your deployment.
 Cryptographically-secure (pseudo-)randomly generated strings should be added to your `.env` file:
 
 ```js
@@ -17,6 +17,11 @@ WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; // 32 by
 Although values will be generated for you in the case that they have not been supplied, these secrets are your
 responsibility to generate securely.
 Please ensure to use cryptographically-secure (pseudo-)randomly generated strings of the correct length.
+
+{% callout type="warning" %}
+If you do not use fixed values, WunderGraph will regenerate them with every restart.
+Consequently, any users will be logged out after regeneration.
+{% /callout %}
 
 ## Example generation using openssl (Windows, Linux, and MacOS)
 

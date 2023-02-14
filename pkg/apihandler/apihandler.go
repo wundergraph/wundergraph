@@ -719,7 +719,7 @@ type GraphQLPlaygroundHandler struct {
 	nodeUrl string
 }
 
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
 	resp := []byte(tpl)
 
@@ -1130,7 +1130,7 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	return variables, nil
 }
 
-func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
+func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byte) []byte {
 	if operation.VariablesConfiguration == nil || operation.VariablesConfiguration.InjectVariables == nil {
 		return variables
 	}
@@ -2121,20 +2121,26 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		jwksProviders                 []*wgpb.JwksAuthProvider
 	)
 
-	if h := r.api.CookieBasedSecrets.HashKey; h != nil {
-		hashKey = h
+	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
+		hashKey = []byte(h)
+	} else if fallBackValue := r.api.CookieBasedSecrets.HashKey; fallBackValue != nil {
+		hashKey = fallBackValue
 	}
 
-	if b := r.api.CookieBasedSecrets.BlockKey; b != nil {
-		blockKey = b
+	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
+		blockKey = []byte(b)
+	} else if fallBackValue := r.api.CookieBasedSecrets.BlockKey; fallBackValue != nil {
+		blockKey = fallBackValue
 	}
 
-	if c := r.api.CookieBasedSecrets.CsrfSecret; c != nil {
-		csrfSecret = c
+	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
+		csrfSecret = []byte(c)
+	} else if fallBackValue := r.api.CookieBasedSecrets.CsrfSecret; fallBackValue != nil {
+		csrfSecret = fallBackValue
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
