@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -440,6 +441,12 @@ func EncodeData(authenticator Authenticator, r *http.Request, buf []byte, variab
 	}
 	if len(response) != 0 {
 		buf, _ = jsonparser.Set(buf, response, "response")
+	}
+	if r != nil {
+		counterHeader := r.Header.Get("Wg-Cycle-Counter")
+		counter, _ := strconv.ParseInt(counterHeader, 10, 64)
+		counterValue := []byte(strconv.FormatInt(counter+1, 10))
+		buf, _ = jsonparser.Set(buf, counterValue, "cycleCounter")
 	}
 	return buf
 }
