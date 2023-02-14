@@ -33,6 +33,31 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 					throw new Error('stop');
 				},
 			},
+			MockResolve: {
+				mockResolve: async (hook) => {
+					return {
+						data: {
+							echo_string: hook.input.s + '.mockResolve',
+						},
+					};
+				},
+			},
+			MutatingPostResolve: {
+				mockResolve: async (hook) => {
+					return {
+						data: {
+							echo_string: hook.input.s + '.mockResolve',
+						},
+					};
+				},
+				mutatingPostResolve: async (hook) => {
+					return {
+						data: {
+							echo_string: hook.response.data?.echo_string + '.mutatingPostResolve',
+						},
+					};
+				},
+			},
 			MutatingPreResolveFailure: {
 				preResolve: logPreResolve,
 				mutatingPreResolve: async (hook) => {

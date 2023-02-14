@@ -273,6 +273,6 @@ func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Requ
 	}
 
 	return &Response{
-		Data: response,
+		Data: postResolveResp.Data,
 	}, nil
 }

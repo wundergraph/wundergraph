@@ -92,6 +92,20 @@ describe('preResolve chain', () => {
 	});
 });
 
+describe('postResolve chain', () => {
+	test('mutatingPostResolve', async () => {
+		const client = wg.client();
+		const result = await client.query({
+			operationName: 'MutatingPostResolve',
+			input: {
+				s: 'initial',
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data?.echo_string).toBe('initial.mockResolve.mutatingPostResolve');
+	});
+});
+
 describe('prevent infinite recursion', () => {
 	test('Infinite recursion fails', async () => {
 		const client = wg.client();
