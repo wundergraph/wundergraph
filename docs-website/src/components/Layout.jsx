@@ -122,10 +122,10 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 	let router = useRouter();
 	let links = navigation.flatMap((section) => section.links);
 	let allLinks = links.flatMap((section) => {
-		if (section?.href) {
-			return section;
-		} else {
+		if (section?.links) {
 			return section?.links;
+		} else {
+			return section;
 		}
 	});
 
@@ -198,7 +198,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 											href={nextPage.href}
 											className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
 										>
-											{nextPage.title} <span aria-hidden="true">&rarr;</span>
+											{nextPage?.navTitle || nextPage.title} <span aria-hidden="true">&rarr;</span>
 										</Link>
 									</dd>
 								</div>
