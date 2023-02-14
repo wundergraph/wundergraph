@@ -121,7 +121,7 @@ function useTableOfContents(tableOfContents) {
 export function Layout({ children, title, tableOfContents, frontmatter }) {
 	const router = useRouter();
 	const links = navigation.flatMap((section) => section.links);
-	const allLinks = links.flatMap((section) => (section?.links ? section?.links : section));
+	const allLinks = links.flatMap((section) => (section?.links ? section.links : section));
 
 	const linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
 	const previousPage = allLinks[linkIndex - 1];
@@ -168,7 +168,6 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 								</header>
 							)}
 							<Prose>{children}</Prose>
-							<Comments />
 						</article>
 						<dl className="mt-12 flex border-t border-gray-200 pt-6 dark:border-gray-800">
 							{previousPage?.href && (
@@ -201,6 +200,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						<div className="pt-6">
 							<DocsFooter isIndexFile={isIndexFile} />
 						</div>
+						<Comments />
 					</div>
 				</div>
 
