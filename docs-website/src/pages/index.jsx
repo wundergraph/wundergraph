@@ -127,7 +127,7 @@ export default function HomePage() {
 						<Links
 							href="/docs/apis"
 							links={[
-								{ href: '/docs/apis/rest', label: 'REST', className: 'underline' },
+								{ href: '/docs/apis/rest-openapi', label: 'REST', className: 'underline' },
 								{ href: '/docs/apis/graphql', label: 'GraphQL', className: 'underline' },
 								{ href: '/docs/apis/apollo-federation', label: 'Apollo Federation', className: 'underline' },
 								{
@@ -141,14 +141,14 @@ export default function HomePage() {
 						title="Databases"
 						description="Create instant typesafe APIs on top of your databases."
 						icon={<CircleStackIcon />}
-						href="/docs/database"
+						href="/docs/databases"
 					>
 						<Links
 							href="/docs/databases"
 							links={[
-								{ href: '/docs/databases/postgres', label: 'Postgres', className: 'underline' },
+								{ href: '/docs/databases/postgresql', label: 'Postgres', className: 'underline' },
 								{ href: '/docs/databases/mysql', label: 'MySQL', className: 'underline' },
-								{ href: '/docs/databases/fauna', label: 'Fauna', className: 'underline' },
+								{ href: '/docs/databases/faunadb', label: 'Fauna', className: 'underline' },
 								{ href: '/docs/databases/planetscale', label: 'Planetscale', className: 'underline' },
 								{
 									href: '/docs/databases',
@@ -164,7 +164,7 @@ export default function HomePage() {
 						title="Authentication"
 						description="Add authentication with to your WunderGraph API."
 						icon={<LockClosedIcon />}
-						href="/auth/overview"
+						href="/docs/auth"
 					/>
 					{/* <QuickLink
 						title="Realtime"
@@ -176,7 +176,7 @@ export default function HomePage() {
 						title="Storage"
 						description="Add S3 compatible storage and file uploads with the WunderGraph client."
 						icon={<ServerIcon />}
-						href="/storage"
+						href="/docs/storage"
 					/>
 				</QuickLinks>
 			</div>
