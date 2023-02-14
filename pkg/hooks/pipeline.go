@@ -9,7 +9,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 
@@ -53,7 +52,6 @@ type Pipeline struct {
 	logger                 *zap.Logger
 	operation              *wgpb.Operation
 	resolver               Resolver
-	preparedPlan           *plan.SynchronousResponsePlan
 	postResolveTransformer *postresolvetransform.Transformer
 	authenticator          Authenticator
 	ResolveConfig          ResolveConfiguration
@@ -85,7 +83,21 @@ func NewPipeline(client *Client, authenticator Authenticator, operation *wgpb.Op
 }
 
 func (p *Pipeline) updateContextHeaders(ctx *resolve.Context, headers map[string]string) {
-	// TODO!
+	if len(headers) == 0 {
+		return
+	}
+	httpHeader := http.Header{}
+	for name := range headers {
+		httpHeader.Set(name, headers[name])
+	}
+	ctx.Request.Header = httpHeader
+	clientRequest := ctx.Context.Value(pool.ClientRequestKey)
+	if clientRequest == nil {
+		return
+	}
+	if cr, ok := clientRequest.(*http.Request); ok {
+		cr.Header = httpHeader
+	}
 }
 
 func (p *Pipeline) handleHookResponse(ctx *resolve.Context, w http.ResponseWriter, hook MiddlewareHook, resp *MiddlewareHookResponse) (done bool) {

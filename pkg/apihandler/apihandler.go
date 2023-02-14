@@ -2325,24 +2325,6 @@ func (m *EndpointUnavailableHandler) ServeHTTP(w http.ResponseWriter, r *http.Re
 	http.Error(w, fmt.Sprintf("Endpoint not available for Operation: %s, please check the logs.", m.OperationName), http.StatusServiceUnavailable)
 }
 
-func updateContextHeaders(ctx *resolve.Context, headers map[string]string) {
-	if len(headers) == 0 {
-		return
-	}
-	httpHeader := http.Header{}
-	for name := range headers {
-		httpHeader.Set(name, headers[name])
-	}
-	ctx.Request.Header = httpHeader
-	clientRequest := ctx.Context.Value(pool.ClientRequestKey)
-	if clientRequest == nil {
-		return
-	}
-	if cr, ok := clientRequest.(*http.Request); ok {
-		cr.Header = httpHeader
-	}
-}
-
 type OperationMetaData struct {
 	OperationName string
 	OperationType wgpb.OperationType
@@ -2431,19 +2413,6 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 	}
 
 	return ctx, flushWriter, true
-}
-
-func handleHookOut(ctx *resolve.Context, w http.ResponseWriter, log *zap.Logger, out *hooks.MiddlewareHookResponse, errorMessage string, operation *wgpb.Operation) (done bool) {
-	if out == nil {
-		log.Error(errorMessage,
-			zap.String("operationName", operation.Name),
-			zap.String("operationType", operation.OperationType.String()),
-		)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return true
-	}
-	updateContextHeaders(ctx, out.SetClientRequestHeaders)
-	return false
 }
 
 func handleOperationErr(log *zap.Logger, err error, w http.ResponseWriter, errorMessage string, operation *wgpb.Operation) (done bool) {
