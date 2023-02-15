@@ -1,7 +1,7 @@
 //language=handlebars
 export const template = `
 import type { {{ modelImports }} } from "./models";
-import type { RequestOptions, UserListener, Response } from "@wundergraph/sdk";
+import type { RequestOptions, UserListener, Response } from "@wundergraph/sdk/server";
 import type { User, Role } from "./wundergraph.server";
 import {
 	Client as WunderGraphClient,
