@@ -1050,6 +1050,10 @@ const navigation = [
 						title: 'Live Queries',
 						href: '/docs/wundergraph-operations-ts-reference/configure-live-queries',
 					},
+					{
+						title: 'Custom Operations Configuration',
+						href: '/docs/wundergraph-operations-ts-reference/custom-operations-configuration',
+					},
 				],
 			},
 			{

@@ -327,6 +327,7 @@ importers:
       nock: ^13.2.9
       node-fetch: ^2.6.7
       object-hash: ^2.2.0
+      openapi-to-graphql: ^2.2.5
       openapi-types: ^10.0.0
       pino: ^8.8.0
       pino-pretty: ^9.1.1
@@ -365,6 +366,7 @@ importers:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
+      openapi-to-graphql: 2.6.3_graphql@16.6.0
       openapi-types: 10.0.0
       pino: 8.8.0
       pino-pretty: 9.1.1
@@ -4964,7 +4966,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -7539,6 +7541,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -15979,6 +15993,7 @@ packages:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
+      openapi-to-graphql: 2.6.3_graphql@16.6.0
       openapi-types: 10.0.0
       pino: 8.8.0
       pino-pretty: 9.1.1
@@ -15991,7 +16006,9 @@ packages:
       zod: 3.20.2
       zod-to-json-schema: 3.20.2_zod@3.20.2
     transitivePeerDependencies:
+      - bufferutil
       - debug
       - encoding
       - supports-color
+      - utf-8-validate
     dev: false

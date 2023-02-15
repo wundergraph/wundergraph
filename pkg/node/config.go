@@ -89,7 +89,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 			AuthenticationConfig:  graphConfig.Api.AuthenticationConfig,
 			Webhooks:              graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
-				ServerUrl:     loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl),
+				ServerUrl:     strings.TrimSuffix(loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl), "/"),
 				PublicNodeUrl: loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
 				Listener:      listener,
 				Logging: apihandler.Logging{
