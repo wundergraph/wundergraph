@@ -1352,7 +1352,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(WG_CACHE_HEADER, "MISS")
 	}
 
-	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.RunOperation(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -1625,7 +1625,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.RunOperation(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -1708,18 +1708,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	preResolveResponse, err := h.hooksPipeline.PreResolve(ctx, w, r)
-	if err != nil {
-		if done := handleOperationErr(requestLogger, err, w, "preResolve hooks failed", h.operation); done {
-			return
-		}
-	}
-
-	if preResolveResponse.Done {
-		return
-	}
-
-	err = h.resolver.ResolveGraphQLSubscription(ctx, h.preparedPlan.Response, flushWriter)
+	_, err = h.hooksPipeline.RunSubscription(ctx, flushWriter, r)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			// e.g. client closed connection
@@ -1728,7 +1717,6 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		// if the deadline is exceeded (e.g. timeout), we don't have to return an HTTP error
 		// we've already flushed a response to the client
 		requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
-		return
 	}
 }
 

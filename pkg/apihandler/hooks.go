@@ -2,6 +2,7 @@ package apihandler
 
 import (
 	"bytes"
+	"errors"
 	"net/http"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
@@ -15,8 +16,12 @@ type operationHooksResolver struct {
 	plan     *plan.SynchronousResponsePlan
 }
 
-func (r *operationHooksResolver) Resolve(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
+func (r *operationHooksResolver) ResolveOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
 	return r.resolver.ResolveGraphQLResponse(ctx, r.plan.Response, nil, buf)
+}
+
+func (r *operationHooksResolver) ResolveSubscription(ctx *resolve.Context, w hooks.SubscriptionWriter) error {
+	return errors.New("can't resolve subscription")
 }
 
 func newOperationHooksResolver(r QueryResolver, plan *plan.SynchronousResponsePlan) hooks.Resolver {
@@ -31,9 +36,12 @@ type subscriptionHooksResolver struct {
 	plan     *plan.SubscriptionResponsePlan
 }
 
-func (r *subscriptionHooksResolver) Resolve(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
-	flushWriter := w.(resolve.FlushWriter)
-	return r.resolver.ResolveGraphQLSubscription(ctx, r.plan.Response, flushWriter)
+func (r *subscriptionHooksResolver) ResolveOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
+	return errors.New("can't resolve operation")
+}
+
+func (r *subscriptionHooksResolver) ResolveSubscription(ctx *resolve.Context, w hooks.SubscriptionWriter) error {
+	return r.resolver.ResolveGraphQLSubscription(ctx, r.plan.Response, w)
 }
 
 func newSubscriptionHooksResolver(r *resolve.Resolver, plan *plan.SubscriptionResponsePlan) hooks.Resolver {

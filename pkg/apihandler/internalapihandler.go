@@ -293,7 +293,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.RunOperation(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -383,7 +383,7 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 		return
 	}
 
-	_, err = h.hooksPipeline.Run(ctx, flushWriter, r, buf)
+	_, err = h.hooksPipeline.RunSubscription(ctx, flushWriter, r)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			// e.g. client closed connection

@@ -19,8 +19,16 @@ import (
 
 type Authenticator func(ctx context.Context) (user interface{})
 
+type SubscriptionWriter interface {
+	http.ResponseWriter
+	resolve.FlushWriter
+}
+
 type Resolver interface {
-	Resolve(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
+	// ResolveOperation resolves a Query/Mutation operation.
+	ResolveOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
+	// ResolveQuery resolves a Subscription operation
+	ResolveSubscription(ctx *resolve.Context, w SubscriptionWriter) error
 }
 
 type ResolveConfiguration struct {
@@ -115,6 +123,7 @@ func (p *Pipeline) handleHookResponse(ctx *resolve.Context, w http.ResponseWrite
 	return false
 }
 
+// PreResolve runs the pre-resolution hooks
 func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *http.Request) (*Response, error) {
 	// XXX: Errors returned by Client.DoOperationRequest() already contain the hook name, do not reannotate them!
 	hookBuf := pool.GetBytesBuffer()
@@ -194,6 +203,7 @@ func (p *Pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	return &Response{Data: ctx.Variables}, nil
 }
 
+// PostResolve runs the post-resolution hooks
 func (p *Pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *http.Request, responseData []byte) (*Response, error) {
 
 	// XXX: Errors returned by Client.DoOperationRequest() already contain the hook name, do not reannotate them!
@@ -232,7 +242,9 @@ func (p *Pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	}, nil
 }
 
-func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Request, buf *bytes.Buffer) (*Response, error) {
+// RunOperation runs the pre-resolution hooks, resolves the operation if needed and then runs the post-resolution
+// hooks. The pipeline Resolver must implement ResolveOperation.
+func (p *Pipeline) RunOperation(ctx *resolve.Context, w http.ResponseWriter, r *http.Request, buf *bytes.Buffer) (*Response, error) {
 	preResolveResp, err := p.PreResolve(ctx, w, r)
 	if err != nil {
 		return nil, fmt.Errorf("preResolve hooks failed: %w", err)
@@ -246,7 +258,7 @@ func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Requ
 	if preResolveResp.Resolved {
 		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
 	} else {
-		err = p.resolver.Resolve(ctx, w, buf)
+		err = p.resolver.ResolveOperation(ctx, w, buf)
 	}
 
 	if err != nil {
@@ -274,5 +286,34 @@ func (p *Pipeline) Run(ctx *resolve.Context, w http.ResponseWriter, r *http.Requ
 
 	return &Response{
 		Data: postResolveResp.Data,
+	}, nil
+}
+
+// RunSubscription runs the pre-resolution hooks and resolves the subscription if needed. The writer is responsible for
+// calling the post-resolution hooks (usually via Pipeline.PostResolve()). The pipeline Resolver must implement
+// ResolveSubscription.
+func (p *Pipeline) RunSubscription(ctx *resolve.Context, w SubscriptionWriter, r *http.Request) (*Response, error) {
+	preResolveResp, err := p.PreResolve(ctx, w, r)
+	if err != nil {
+		return nil, fmt.Errorf("preResolve hooks failed: %w", err)
+	}
+
+	if preResolveResp.Done {
+		return preResolveResp, nil
+	}
+
+	if preResolveResp.Resolved {
+		_, err = w.Write(preResolveResp.Data)
+	} else {
+		ctx.Variables = preResolveResp.Data
+		err = p.resolver.ResolveSubscription(ctx, w)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("ResolveGraphQLResponse failed: %w", err)
+	}
+
+	return &Response{
+		Done: true,
 	}, nil
 }
