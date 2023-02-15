@@ -78,13 +78,13 @@ func generateRandomBytesOfLength(length int) ([]byte, error) {
 
 	return bytes, nil
 }
+func NewDevModeCookieBasedSecrets() (cookieBasedSecrets *CookieBasedSecrets, errorMessages []string) {
+	return newCookieBasedSecrets(
+		[]byte("00000000000"), []byte("00000000000000000000000000000000"), []byte("00000000000000000000000000000000"),
+	), nil
+}
 
-func NewCookieBasedSecrets(isDevMode bool) (cookieBasedSecrets *CookieBasedSecrets, errorMessages []string) {
-	if isDevMode {
-		return newCookieBasedSecrets(
-			[]byte("00000000000"), []byte("00000000000000000000000000000000"), []byte("00000000000000000000000000000000"),
-		), nil
-	}
+func NewCookieBasedSecrets() (cookieBasedSecrets *CookieBasedSecrets, errorMessages []string) {
 	secretNamesAndLength := map[string]int{
 		WgEnvCsrfSecret: 11,
 		WgEnvHashKey:    32,

@@ -563,7 +563,11 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
 	var errorMessages []string
 	// we set these values statically so that auth never drops login sessions during development
-	api.CookieBasedSecrets, errorMessages = apihandler.NewCookieBasedSecrets(n.options.devMode)
+	if n.options.devMode {
+		api.CookieBasedSecrets, errorMessages = apihandler.NewDevModeCookieBasedSecrets()
+	} else {
+		api.CookieBasedSecrets, errorMessages = apihandler.NewCookieBasedSecrets()
+	}
 	for _, errorMessage := range errorMessages {
 		n.log.Error(errorMessage)
 	}

@@ -2120,20 +2120,20 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
 		hashKey = []byte(h)
-	} else if fallBackValue := r.api.CookieBasedSecrets.HashKey; fallBackValue != nil {
-		hashKey = fallBackValue
+	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
+		hashKey = fallback
 	}
 
 	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
 		blockKey = []byte(b)
-	} else if fallBackValue := r.api.CookieBasedSecrets.BlockKey; fallBackValue != nil {
-		blockKey = fallBackValue
+	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
+		blockKey = fallback
 	}
 
 	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
 		csrfSecret = []byte(c)
-	} else if fallBackValue := r.api.CookieBasedSecrets.CsrfSecret; fallBackValue != nil {
-		csrfSecret = fallBackValue
+	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
+		csrfSecret = fallback
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
