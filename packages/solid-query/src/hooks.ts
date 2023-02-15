@@ -3,7 +3,6 @@ import {
 	createMutation as createTanstackMutation,
 	useQueryClient,
 	QueryFunctionContext,
-	QueryClientProvider,
 } from '@tanstack/solid-query';
 
 import { OperationsDefinition, LogoutOptions, Client, UploadRequestOptions } from '@wundergraph/sdk/client';
@@ -22,8 +21,6 @@ import {
 	UseUserHook,
 	QueryKey,
 } from './types';
-
-export { useQueryClient, QueryClientProvider };
 
 export const userQueryKey = 'wg_user';
 
@@ -274,7 +271,6 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			}
 
 			onCleanup(() => {
-				console.log('cleanup');
 				unsubscribe?.();
 			});
 		});

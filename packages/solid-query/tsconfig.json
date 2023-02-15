@@ -10,7 +10,10 @@
     "jsxImportSource": "solid-js",
     "outDir": "./dist",
     "incremental": false,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@wundergraph/sdk/*": ["../../packages/sdk/src/*"]
+    }
   },
   "include": ["src/**/*", "tests"],
   "exclude": ["node_modules", "dist"]
