@@ -2,6 +2,7 @@ package validate
 
 import (
 	"fmt"
+
 	"github.com/wundergraph/wundergraph/pkg/apihandler"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 )
