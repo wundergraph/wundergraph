@@ -490,7 +490,6 @@ const handleFromClaimDirective = (
 	operation: GraphQLOperation,
 	customClaims: Record<string, CustomClaim>
 ) => {
-	const variableName = variable.variable.name.value;
 	const fromClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromClaim');
 	if (fromClaimDirective === undefined || fromClaimDirective.arguments === undefined) {
 		return;
@@ -502,12 +501,23 @@ const handleFromClaimDirective = (
 	if (nameArg.value.kind !== 'EnumValue') {
 		throw new Error(`@fromClaim name: argument must be a WG_CLAIM, not ${nameArg.value.kind}`);
 	}
+	const onArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'on');
+	const variableName = variable.variable.name.value;
+	let variablePathComponents: string[];
+	if (onArg) {
+		if (onArg.value.kind !== Kind.STRING) {
+			throw new Error(`@fromClaim on: argument must be a String, not ${nameArg.value.kind}`);
+		}
+		variablePathComponents = [variableName, ...onArg.value.value.split('.')];
+	} else {
+		variablePathComponents = [variableName];
+	}
 	const claimName = nameArg.value.value;
 	let claim: ClaimConfig;
 	if (claimName in customClaims) {
 		const customClaim = customClaims[claimName];
 		claim = {
-			variableName: variableName,
+			variablePathComponents,
 			claimType: ClaimType.CUSTOM,
 			custom: {
 				name: claimName,
@@ -518,7 +528,7 @@ const handleFromClaimDirective = (
 		};
 	} else {
 		claim = {
-			variableName: variableName,
+			variablePathComponents,
 			claimType: parseWellKnownClaim(claimName),
 		};
 	}

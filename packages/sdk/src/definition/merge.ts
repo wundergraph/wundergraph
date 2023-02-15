@@ -256,7 +256,8 @@ Adding this directive makes the operation require authentication.
 """
 
 directive @fromClaim(
-  name: WG_CLAIM
+  name: WG_CLAIM,
+  on: String = ""
 ) on VARIABLE_DEFINITION
 
 """

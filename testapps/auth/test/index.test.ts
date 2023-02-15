@@ -43,6 +43,7 @@ type Tokens = {
 	withShopIDInteger: string;
 	WithShopIDString: string;
 	withFloatingPoint: string;
+	withCountry: string;
 };
 
 let tokens: Tokens | undefined;
@@ -95,6 +96,7 @@ const startServer = async () => {
 		withShopIDInteger: await makeToken({ shop: { id: shopID } }, privateKey),
 		WithShopIDString: await makeToken({ shop: { id: `${shopID}` } }, privateKey),
 		withFloatingPoint: await makeToken(floatingPointClaim, privateKey),
+		withCountry: await makeToken({ cc: 'PT' }, privateKey),
 	};
 	return wg.start();
 };
@@ -289,5 +291,19 @@ describe('test @fromClaim with custom claims', () => {
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
 		expect(result.data?.echo_float).toBe(`float: ${floatingPointClaim.f.f.f.f}`);
+	});
+});
+
+describe('test @fromClaim with nested injection', () => {
+	test.only('inject country code', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withCountry);
+		const result = await client.query({
+			operationName: 'claims/NestedInjectedClaim',
+		});
+
+		const countries = result.data!.countries_countries;
+		expect(countries.length).toBe(1);
+		expect(countries[0].capital).toBe('Lisbon');
 	});
 });
