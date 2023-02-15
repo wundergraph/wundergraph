@@ -42,6 +42,7 @@ Let's take a look at the default configuration open `.wundergraph/wundergraph.co
 You can see that we have a single API configured, which is the [SpaceX GraphQL API](https://spacex-api.fly.dev/graphql).
 
 ```ts
+// the name of this const will be supplied to the apis property in the configuration
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
@@ -52,7 +53,8 @@ The API is introspected and added to the WunderGraph virtual graph, as you can s
 
 ```ts
 configureWunderGraphApplication({
-  apis: [countries],
+  // the const defined above is provided in the array of apis here
+  apis: [spaceX],
   // ...
   codeGenerators: [
     {
@@ -227,11 +229,10 @@ const client = createClientFromCookies(request);
 
 ## What's next?
 
-Wunderbar! You added a your first couple APIs to Remix. Next up you might want to add a database, authentication and support uploads to turn Remix into a full stack powerhouse 😎.
+Wunderbar! You added your first couple of APIs to Remix. Next up you might want to add a database, authentication and support uploads to turn Remix into a full stack powerhouse 😎.
 
 - [Databases](/docs/databases)
-- [Authentication](/docs/authentication)
-- [Realtime](/docs/realtime)
+- [Authentication](/docs/auth)
 - [File Storage](/docs/file-storage)
 
 ### Guides
