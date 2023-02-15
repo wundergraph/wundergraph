@@ -169,7 +169,7 @@ describe('Solid Query - createQuery', () => {
 		});
 
 		function Page() {
-			const { data, isFetched } = createQuery({
+			const query = createQuery({
 				operationName: 'Weather',
 				input: {
 					forCity: 'berlin',
@@ -179,7 +179,7 @@ describe('Solid Query - createQuery', () => {
 
 			return (
 				<div>
-					<div>Fetched: {isFetched ? 'true' : 'false'}</div>
+					<div>Fetched: {query.isFetched ? 'true' : 'false'}</div>
 				</div>
 			);
 		}
@@ -192,7 +192,7 @@ describe('Solid Query - createQuery', () => {
 
 		screen.getByText('Fetched: false');
 
-		await sleep(150);
+		await sleep(500);
 
 		screen.getByText('Fetched: false');
 
@@ -223,15 +223,15 @@ describe('Solid Query - createMutation', () => {
 		});
 
 		function Page() {
-			const { data, mutate } = createMutation({
+			const mutation = createMutation({
 				operationName: 'SetName',
 			});
 
 			createEffect(() => {
-				mutate({ name: 'Rick Astley' });
+				mutation.mutate({ name: 'Rick Astley' });
 			});
 
-			return <div>{data?.id}</div>;
+			return <div>{mutation.data?.id}</div>;
 		}
 
 		render(() => (
@@ -240,9 +240,9 @@ describe('Solid Query - createMutation', () => {
 			</QueryClientProvider>
 		));
 
-		// await waitFor(() => {
-		// 	screen.getByText('Never gonna give you up');
-		// });
+		await waitFor(() => {
+			screen.getByText('Never gonna give you up');
+		});
 
 		csrfScope.done();
 		scope.done();
@@ -258,13 +258,13 @@ describe('Solid Query - createMutation', () => {
 		});
 
 		function Page() {
-			const { data, mutate } = createMutation({
+			const mutation = createMutation({
 				operationName: 'SetNameWithoutAuth',
 			});
 
-			mutate({ name: 'Rick Astley' });
+			mutation.mutate({ name: 'Rick Astley' });
 
-			return <div>{data?.id}</div>;
+			return <div>{mutation.data?.id}</div>;
 		}
 
 		render(() => (
@@ -310,7 +310,7 @@ describe('Solid Query - createMutation', () => {
 				operationName: 'Weather',
 			});
 
-			const { mutate } = createMutation({
+			const mutation = createMutation({
 				operationName: 'SetName',
 				onSuccess: (data, input) => {
 					queryClient.invalidateQueries(queryKey({ operationName: 'Weather' }));
@@ -318,7 +318,7 @@ describe('Solid Query - createMutation', () => {
 			});
 
 			const onClick = () => {
-				mutate({ name: 'Rick Astley' });
+				mutation.mutate({ name: 'Rick Astley' });
 			};
 
 			return (
@@ -428,9 +428,9 @@ describe('Solid Query - useUser', () => {
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {
-			const { data, error } = useUser();
+			const user = useUser();
 
-			return <div>{data?.email}</div>;
+			return <div>{user.data?.email}</div>;
 		}
 
 		render(() => (
