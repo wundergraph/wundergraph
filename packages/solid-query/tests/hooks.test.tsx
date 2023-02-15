@@ -1,11 +1,11 @@
 import { waitFor, screen, render, fireEvent } from '@solidjs/testing-library';
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/solid-query';
+import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/solid-query';
 import { createEffect, JSX } from 'solid-js';
 import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
 
-import { createHooks } from '../src/hooks';
+import { createHooks } from '../src';
 
 export type Queries = {
 	Weather: {
@@ -211,7 +211,7 @@ describe('Solid Query - createMutation', () => {
 		nock.cleanAll();
 	});
 
-	const { createMutation, createQuery, queryKey } = createHooks<Operations>(client);
+	const hooks = createHooks<Operations>(client);
 
 	it('should trigger mutation with auth', async () => {
 		const { mutation, csrfScope } = nockMutation('SetName', { name: 'Rick Astley' }, true);
@@ -223,7 +223,7 @@ describe('Solid Query - createMutation', () => {
 		});
 
 		function Page() {
-			const mutation = createMutation({
+			const mutation = hooks.createMutation({
 				operationName: 'SetName',
 			});
 
@@ -258,7 +258,7 @@ describe('Solid Query - createMutation', () => {
 		});
 
 		function Page() {
-			const mutation = createMutation({
+			const mutation = hooks.createMutation({
 				operationName: 'SetNameWithoutAuth',
 			});
 
@@ -293,9 +293,9 @@ describe('Solid Query - createMutation', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.post('/operations/SetName', { name: 'Rick Astley' })
+			.post('/operations/SetNameWithoutAuth', { name: 'Not Rick Astley' })
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Rick Astley' } })
+			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } })
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
@@ -304,21 +304,21 @@ describe('Solid Query - createMutation', () => {
 			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
 
 		function Page() {
-			const queryClient = new QueryClient();
+			const queryClient = useQueryClient();
 
-			const query = createQuery({
+			const query = hooks.createQuery({
 				operationName: 'Weather',
 			});
 
-			const mutation = createMutation({
-				operationName: 'SetName',
-				onSuccess: (data, input) => {
-					queryClient.invalidateQueries(queryKey({ operationName: 'Weather' }));
+			const mutation = hooks.createMutation({
+				operationName: 'SetNameWithoutAuth',
+				onSuccess: () => {
+					queryClient.invalidateQueries(hooks.queryKey({ operationName: 'Weather' }));
 				},
 			});
 
 			const onClick = () => {
-				mutation.mutate({ name: 'Rick Astley' });
+				mutation.mutate({ name: 'Not Rick Astley' });
 			};
 
 			return (

@@ -1,12 +1,4 @@
 module.exports = {
-	globals: {
-		'ts-jest': {
-			isolatedModules: true,
-			diagnostics: {
-				exclude: ['**'],
-			},
-		},
-	},
 	setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],
 	transform: {
 		'^.+\\.mjs?$': require.resolve('babel-jest'),
