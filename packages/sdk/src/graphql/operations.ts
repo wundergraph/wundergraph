@@ -10,6 +10,7 @@ import {
 } from '@wundergraph/protobuf';
 import {
 	buildSchema,
+	ConstDirectiveNode,
 	DirectiveNode,
 	DocumentNode,
 	FieldNode,
@@ -240,7 +241,7 @@ export const parseGraphQLOperations = (
 							PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
 						};
 						node.variableDefinitions?.forEach((variable) => {
-							handleFromClaimDirective(variable, operation, options.customClaims ?? {});
+							handleFromClaimDirectives(variable, operation, options.customClaims ?? {});
 							handleJsonSchemaDirective(variable, operation);
 							handleUuidDirective(variable, operation);
 							handleDateTimeDirective(variable, operation);
@@ -456,7 +457,7 @@ const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: 
 	});
 };
 
-const parseWellKnownClaim = (name: string) => {
+const parseWellKnownClaim = (name: string, operation?: GraphQLOperation) => {
 	const claims: Record<string, ClaimType> = {
 		ISSUER: ClaimType.ISSUER,
 		PROVIDER: ClaimType.PROVIDER,
@@ -482,31 +483,39 @@ const parseWellKnownClaim = (name: string) => {
 	if (name in claims) {
 		return claims[name];
 	}
+	if (operation) {
+		throw new Error(`unhandled claim ${name} on operation ${operation.Name}`);
+	}
 	throw new Error(`unhandled claim ${name}`);
 };
 
 const handleFromClaimDirective = (
+	fromClaimDirective: ConstDirectiveNode,
 	variable: VariableDefinitionNode,
 	operation: GraphQLOperation,
 	customClaims: Record<string, CustomClaim>
 ) => {
-	const fromClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromClaim');
-	if (fromClaimDirective === undefined || fromClaimDirective.arguments === undefined) {
-		return;
+	if (fromClaimDirective.arguments === undefined) {
+		throw new Error(`@fromClaim directive on operation ${operation.Name} has no arguments`);
 	}
+
 	const nameArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'name');
 	if (nameArg === undefined) {
-		throw new Error('@fromClaim does not have a name: argument');
+		throw new Error(`@fromClaim on operation ${operation.Name} does not have a name: argument`);
 	}
 	if (nameArg.value.kind !== 'EnumValue') {
-		throw new Error(`@fromClaim name: argument must be a WG_CLAIM, not ${nameArg.value.kind}`);
+		throw new Error(
+			`@fromClaim name: argument on operation ${operation.Name} must be a WG_CLAIM, not ${nameArg.value.kind}`
+		);
 	}
 	const onArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'on');
 	const variableName = variable.variable.name.value;
 	let variablePathComponents: string[];
 	if (onArg) {
 		if (onArg.value.kind !== Kind.STRING) {
-			throw new Error(`@fromClaim on: argument must be a String, not ${nameArg.value.kind}`);
+			throw new Error(
+				`@fromClaim on: argument on operation ${operation.Name} must be a String, not ${nameArg.value.kind}`
+			);
 		}
 		variablePathComponents = [variableName, ...onArg.value.value.split('.')];
 	} else {
@@ -534,6 +543,17 @@ const handleFromClaimDirective = (
 	}
 	operation.AuthenticationConfig.required = true;
 	operation.AuthorizationConfig.claims.push(claim);
+};
+
+const handleFromClaimDirectives = (
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation,
+	customClaims: Record<string, CustomClaim>
+) => {
+	const fromClaimDirectives = variable.directives?.filter((directive) => directive.name.value === 'fromClaim');
+	fromClaimDirectives?.forEach((directive) => {
+		handleFromClaimDirective(directive, variable, operation, customClaims);
+	});
 };
 
 const handleInjectEnvironmentVariableDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {

@@ -258,7 +258,7 @@ Adding this directive makes the operation require authentication.
 directive @fromClaim(
   name: WG_CLAIM,
   on: String = ""
-) on VARIABLE_DEFINITION
+) repeatable on VARIABLE_DEFINITION
 
 """
 Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml

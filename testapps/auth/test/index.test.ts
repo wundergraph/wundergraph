@@ -44,6 +44,8 @@ type Tokens = {
 	WithShopIDString: string;
 	withFloatingPoint: string;
 	withCountry: string;
+	withCountryAndMatchingCurrency: string;
+	withCountryAndWrongCurrency: string;
 };
 
 let tokens: Tokens | undefined;
@@ -97,6 +99,8 @@ const startServer = async () => {
 		WithShopIDString: await makeToken({ shop: { id: `${shopID}` } }, privateKey),
 		withFloatingPoint: await makeToken(floatingPointClaim, privateKey),
 		withCountry: await makeToken({ cc: 'PT' }, privateKey),
+		withCountryAndMatchingCurrency: await makeToken({ cc: 'PT', currency: 'EUR' }, privateKey),
+		withCountryAndWrongCurrency: await makeToken({ cc: 'PT', currency: 'USD' }, privateKey),
 	};
 	return wg.start();
 };
@@ -295,7 +299,7 @@ describe('test @fromClaim with custom claims', () => {
 });
 
 describe('test @fromClaim with nested injection', () => {
-	test.only('inject country code', async () => {
+	test('inject country code', async () => {
 		const client = wg.client();
 		client.setAuthorizationToken(tokens!.withCountry);
 		const result = await client.query({
@@ -305,5 +309,28 @@ describe('test @fromClaim with nested injection', () => {
 		const countries = result.data!.countries_countries;
 		expect(countries.length).toBe(1);
 		expect(countries[0].capital).toBe('Lisbon');
+	});
+
+	test('inject country code with currency', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withCountryAndMatchingCurrency);
+		const result = await client.query({
+			operationName: 'claims/NestedInjectedClaims',
+		});
+
+		const countries = result.data!.countries_countries;
+		expect(countries.length).toBe(1);
+		expect(countries[0].capital).toBe('Lisbon');
+	});
+
+	test('inject country code with wrong currency', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withCountryAndWrongCurrency);
+		const result = await client.query({
+			operationName: 'claims/NestedInjectedClaims',
+		});
+
+		// There should be no results if both claims are injected
+		expect(result.data!.countries_countries.length).toBe(0);
 	});
 });

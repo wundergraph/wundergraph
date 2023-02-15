@@ -40,6 +40,9 @@ configureWunderGraphApplication({
 			country: {
 				jsonPath: 'cc',
 			},
+			currency: {
+				jsonPath: 'currency',
+			},
 		},
 	},
 	codeGenerators: [
