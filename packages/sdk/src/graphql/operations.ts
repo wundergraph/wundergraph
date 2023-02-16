@@ -122,7 +122,7 @@ const defaultParseOptions: ParseOperationsOptions = {
 
 const defaultVariableInjectionConfiguration: Omit<
 	Omit<VariableInjectionConfiguration, 'variableKind'>,
-	'variableName'
+	'variablePathComponents'
 > = {
 	environmentVariableName: '',
 	dateFormat: '',
@@ -243,9 +243,9 @@ export const parseGraphQLOperations = (
 						node.variableDefinitions?.forEach((variable) => {
 							handleFromClaimDirectives(variable, operation, options.customClaims ?? {});
 							handleJsonSchemaDirective(variable, operation);
-							handleUuidDirective(variable, operation);
-							handleDateTimeDirective(variable, operation);
-							handleInjectEnvironmentVariableDirective(variable, operation);
+							handleUuidDirectives(variable, operation);
+							handleDateTimeDirectives(variable, operation);
+							handleInjectEnvironmentVariableDirectives(variable, operation);
 						});
 						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
@@ -489,6 +489,27 @@ const parseWellKnownClaim = (name: string, operation?: GraphQLOperation) => {
 	throw new Error(`unhandled claim ${name}`);
 };
 
+const directiveInjectedVariablePathComponents = (
+	directive: ConstDirectiveNode,
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation
+): string[] => {
+	const onArg = directive.arguments?.find((arg) => arg.name.value === 'on');
+	const variableName = variable.variable.name.value;
+	let variablePathComponents: string[];
+	if (onArg) {
+		if (onArg.value.kind !== Kind.STRING) {
+			throw new Error(
+				`@${directive.name.value} on: argument on operation ${operation.Name} (${variableName}) must be a String, not ${onArg.value.kind}`
+			);
+		}
+		variablePathComponents = [variableName, ...onArg.value.value.split('.')];
+	} else {
+		variablePathComponents = [variableName];
+	}
+	return variablePathComponents;
+};
+
 const handleFromClaimDirective = (
 	fromClaimDirective: ConstDirectiveNode,
 	variable: VariableDefinitionNode,
@@ -498,29 +519,16 @@ const handleFromClaimDirective = (
 	if (fromClaimDirective.arguments === undefined) {
 		throw new Error(`@fromClaim directive on operation ${operation.Name} has no arguments`);
 	}
-
 	const nameArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'name');
 	if (nameArg === undefined) {
 		throw new Error(`@fromClaim on operation ${operation.Name} does not have a name: argument`);
 	}
-	if (nameArg.value.kind !== 'EnumValue') {
+	if (nameArg.value.kind !== Kind.ENUM) {
 		throw new Error(
 			`@fromClaim name: argument on operation ${operation.Name} must be a WG_CLAIM, not ${nameArg.value.kind}`
 		);
 	}
-	const onArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'on');
-	const variableName = variable.variable.name.value;
-	let variablePathComponents: string[];
-	if (onArg) {
-		if (onArg.value.kind !== Kind.STRING) {
-			throw new Error(
-				`@fromClaim on: argument on operation ${operation.Name} must be a String, not ${nameArg.value.kind}`
-			);
-		}
-		variablePathComponents = [variableName, ...onArg.value.value.split('.')];
-	} else {
-		variablePathComponents = [variableName];
-	}
+	let variablePathComponents = directiveInjectedVariablePathComponents(fromClaimDirective, variable, operation);
 	const claimName = nameArg.value.value;
 	let claim: ClaimConfig;
 	if (claimName in customClaims) {
@@ -550,198 +558,104 @@ const handleFromClaimDirectives = (
 	operation: GraphQLOperation,
 	customClaims: Record<string, CustomClaim>
 ) => {
-	const fromClaimDirectives = variable.directives?.filter((directive) => directive.name.value === 'fromClaim');
-	fromClaimDirectives?.forEach((directive) => {
+	directivesNamed(variable, 'fromClaim').forEach((directive) => {
 		handleFromClaimDirective(directive, variable, operation, customClaims);
 	});
 };
 
-const handleInjectEnvironmentVariableDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'injectEnvironmentVariable');
-	if (directive === undefined) {
-		return;
-	}
-	const arg = directive.arguments?.find((arg) => arg.name.value === 'name');
-	if (arg === undefined || arg.value.kind !== Kind.STRING) {
-		return;
-	}
-	operation.VariablesConfiguration.injectVariables.push({
-		...defaultVariableInjectionConfiguration,
-		variableName,
-		variableKind: InjectVariableKind.ENVIRONMENT_VARIABLE,
-		environmentVariableName: arg.value.value,
-	});
-};
-
-const handleUuidDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'injectGeneratedUUID');
-	if (directive === undefined) {
-		return;
-	}
-	operation.VariablesConfiguration.injectVariables.push({
-		...defaultVariableInjectionConfiguration,
-		variableName,
-		variableKind: InjectVariableKind.UUID,
-	});
-};
-
-const handleDateTimeDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'injectCurrentDateTime');
-	if (directive === undefined) {
-		return;
-	}
-	const formatArg = directive.arguments?.find((arg) => arg.name.value === 'format');
-	if (formatArg !== undefined && formatArg.value.kind === 'EnumValue') {
-		const format = formatArg.value.value;
-		switch (format) {
-			case 'ISO8601':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '2006-01-02T15:04:05Z07:00',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'ANSIC':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon Jan _2 15:04:05 2006',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'UnixDate':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon Jan _2 15:04:05 MST 2006',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RubyDate':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon Jan 02 15:04:05 -0700 2006',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC822':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '02 Jan 06 15:04 MST',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC822Z':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '02 Jan 06 15:04 -0700',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC850':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Monday, 02-Jan-06 15:04:05 MST',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC1123':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon, 02 Jan 2006 15:04:05 MST',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC1123Z':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon, 02 Jan 2006 15:04:05 -0700',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC3339':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '2006-01-02T15:04:05Z07:00',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC3339Nano':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '2006-01-02T15:04:05.999999999Z07:00',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'Kitchen':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '3:04PM',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'Stamp':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'StampMilli':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05.000',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'StampMicro':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05.000000',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'StampNano':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05.000000000',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
+const handleInjectEnvironmentVariableDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	const directiveName = 'injectEnvironmentVariable';
+	directivesNamed(variable, directiveName).forEach((directive) => {
+		const arg = directive.arguments?.find((arg) => arg.name.value === 'name');
+		if (!arg) {
+			throw new Error(`name: argument missing in @${directiveName} in operation ${operation.Name}`);
 		}
-	}
-	const customFormatArg = directive.arguments?.find((arg) => arg.name.value === 'customFormat');
-	if (customFormatArg !== undefined && customFormatArg.value.kind === 'StringValue') {
+		if (arg.value.kind !== Kind.STRING) {
+			throw new Error(
+				`name: argument in @${directiveName} in operation ${operation.Name} must be string, not ${arg.value.kind}`
+			);
+		}
+		let variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
 		operation.VariablesConfiguration.injectVariables.push({
 			...defaultVariableInjectionConfiguration,
-			variableName,
-			dateFormat: customFormatArg.value.value,
+			variablePathComponents,
+			variableKind: InjectVariableKind.ENVIRONMENT_VARIABLE,
+			environmentVariableName: arg.value.value,
+		});
+	});
+};
+
+const handleUuidDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	directivesNamed(variable, 'injectGeneratedUUID').forEach((directive) => {
+		let variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+		operation.VariablesConfiguration.injectVariables.push({
+			...defaultVariableInjectionConfiguration,
+			variablePathComponents,
+			variableKind: InjectVariableKind.UUID,
+		});
+	});
+};
+
+const getTimeFormat = (timeFormat: string): string => {
+	const availableTimeFormats: Record<string, string> = {
+		ISO8601: '2006-01-02T15:04:05Z07:00',
+		ANSIC: 'Mon Jan _2 15:04:05 2006',
+		UnixDate: 'Mon Jan _2 15:04:05 MST 2006',
+		RubyDate: 'Mon Jan 02 15:04:05 -0700 2006',
+		RFC822: '02 Jan 06 15:04 MST',
+		RFC822Z: '02 Jan 06 15:04 -0700',
+		RFC850: 'Monday, 02-Jan-06 15:04:05 MST',
+		RFC1123: 'Mon, 02 Jan 2006 15:04:05 MST',
+		RFC1123Z: 'Mon, 02 Jan 2006 15:04:05 -0700',
+		RFC3339: '2006-01-02T15:04:05Z07:00',
+		RFC3339Nano: '2006-01-02T15:04:05.999999999Z07:00',
+		Kitchen: '3:04PM',
+		Stamp: 'Jan _2 15:04:05',
+		StampMilli: 'Jan _2 15:04:05.000',
+		StampMicro: 'Jan _2 15:04:05.000000',
+		StampNano: 'Jan _2 15:04:05.000000000',
+	};
+
+	if (timeFormat in availableTimeFormats) {
+		return availableTimeFormats[timeFormat];
+	}
+	throw new Error(`unknown time format "${timeFormat}`);
+};
+
+const handleDateTimeDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	const directiveName = 'injectCurrentDateTime';
+	directivesNamed(variable, directiveName).forEach((directive) => {
+		const formatArg = directive.arguments?.find((arg) => arg.name.value === 'format');
+		const customFormatArg = directive.arguments?.find((arg) => arg.name.value === 'customFormat');
+		if (formatArg && customFormatArg) {
+			throw new Error(`@${directiveName} in operation ${operation.Name} has both format: and customFormat: arguments`);
+		}
+		let dateFormat: string;
+		if (formatArg) {
+			if (formatArg.value.kind !== Kind.ENUM) {
+				throw new Error(
+					`format: argument in @${directiveName} in operation ${operation.Name} must be an enum, not ${formatArg.value.kind}`
+				);
+			}
+			dateFormat = getTimeFormat(formatArg.value.value);
+		} else if (customFormatArg) {
+			if (customFormatArg.value.kind != Kind.STRING) {
+				throw new Error(
+					`customFormat: argument in @${directiveName} in operation ${operation.Name} must be a String, not ${customFormatArg.value.kind}`
+				);
+			}
+			dateFormat = customFormatArg.value.value;
+		} else {
+			// Default format
+			dateFormat = '2006-01-02T15:04:05Z07:00';
+		}
+		let variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+		operation.VariablesConfiguration.injectVariables.push({
+			...defaultVariableInjectionConfiguration,
+			variablePathComponents,
+			dateFormat: '2006-01-02T15:04:05Z07:00',
 			variableKind: InjectVariableKind.DATE_TIME,
 		});
-		return;
-	}
-	operation.VariablesConfiguration.injectVariables.push({
-		...defaultVariableInjectionConfiguration,
-		variableName,
-		dateFormat: '2006-01-02T15:04:05Z07:00',
-		variableKind: InjectVariableKind.DATE_TIME,
 	});
 };
 
@@ -837,8 +751,16 @@ const internalVariables = [
 
 const injectedVariables = ['injectGeneratedUUID', 'injectCurrentDateTime', 'injectEnvironmentVariable'];
 
-const directivesNamed = (variable: VariableDefinitionNode, directiveNames: string[]) => {
-	return variable.directives?.filter((directive) => directiveNames.includes(directive.name.value));
+const directivesNamed = (variable: VariableDefinitionNode, directiveNames: string | string[]): ConstDirectiveNode[] => {
+	const isDefined = (node: ConstDirectiveNode | undefined): node is ConstDirectiveNode => {
+		return !!node;
+	};
+	if (!Array.isArray(directiveNames)) {
+		directiveNames = [directiveNames];
+	}
+	return (
+		variable.directives?.filter((directive) => directiveNames.includes(directive.name.value)).filter(isDefined) ?? []
+	);
 };
 
 const directiveHasNoField = (node: ConstDirectiveNode) => {

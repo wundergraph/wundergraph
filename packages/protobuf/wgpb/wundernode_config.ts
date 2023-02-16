@@ -855,7 +855,7 @@ export interface OperationVariablesConfiguration {
 }
 
 export interface VariableInjectionConfiguration {
-  variableName: string;
+  variablePathComponents: string[];
   variableKind: InjectVariableKind;
   dateFormat: string;
   environmentVariableName: string;
@@ -1949,13 +1949,15 @@ export const OperationVariablesConfiguration = {
 };
 
 function createBaseVariableInjectionConfiguration(): VariableInjectionConfiguration {
-  return { variableName: "", variableKind: 0, dateFormat: "", environmentVariableName: "" };
+  return { variablePathComponents: [], variableKind: 0, dateFormat: "", environmentVariableName: "" };
 }
 
 export const VariableInjectionConfiguration = {
   fromJSON(object: any): VariableInjectionConfiguration {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
       variableKind: isSet(object.variableKind) ? injectVariableKindFromJSON(object.variableKind) : 0,
       dateFormat: isSet(object.dateFormat) ? String(object.dateFormat) : "",
       environmentVariableName: isSet(object.environmentVariableName) ? String(object.environmentVariableName) : "",
@@ -1964,7 +1966,11 @@ export const VariableInjectionConfiguration = {
 
   toJSON(message: VariableInjectionConfiguration): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
     message.variableKind !== undefined && (obj.variableKind = injectVariableKindToJSON(message.variableKind));
     message.dateFormat !== undefined && (obj.dateFormat = message.dateFormat);
     message.environmentVariableName !== undefined && (obj.environmentVariableName = message.environmentVariableName);
@@ -1975,7 +1981,7 @@ export const VariableInjectionConfiguration = {
     object: I,
   ): VariableInjectionConfiguration {
     const message = createBaseVariableInjectionConfiguration();
-    message.variableName = object.variableName ?? "";
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
     message.variableKind = object.variableKind ?? 0;
     message.dateFormat = object.dateFormat ?? "";
     message.environmentVariableName = object.environmentVariableName ?? "";
