@@ -5,7 +5,8 @@
   "scripts": {
     "start": "run-p wundergraph open",
     "wundergraph": "wunderctl up --debug",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/operations/Dragons",
     "wunderctl": "wunderctl",
     "check": "tsc --noEmit",

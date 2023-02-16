@@ -1,0 +1,285 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostmanBuilder 1`] = `
+{
+  "event": [],
+  "info": {
+    "_postman_id": "Wundergraph",
+    "description": {
+      "content": "Your Wundergraph collection",
+      "type": "text/plain",
+    },
+    "name": "Wundergraph",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": undefined,
+  },
+  "item": [
+    {
+      "_": {
+        "postman_id": "operatations",
+      },
+      "event": [],
+      "id": "operatations",
+      "item": [
+        {
+          "event": [],
+          "id": "GetRootObj",
+          "name": "GetRootObj",
+          "request": {
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+              },
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{apiBaseUrl}}",
+              ],
+              "path": [
+                "operations",
+                "GetRootObj",
+              ],
+              "query": [],
+              "variable": [],
+            },
+          },
+          "response": [],
+        },
+        {
+          "event": [],
+          "id": "GetRootObj2",
+          "name": "GetRootObj2",
+          "request": {
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+              },
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{apiBaseUrl}}",
+              ],
+              "path": [
+                "operations",
+                "GetRootObj2",
+              ],
+              "query": [],
+              "variable": [],
+            },
+          },
+          "response": [],
+        },
+        {
+          "event": [],
+          "id": "item",
+          "item": [
+            {
+              "event": [],
+              "id": "item/GetID",
+              "name": "GetID",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "item",
+                    "GetID",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+          ],
+          "name": "item",
+        },
+        {
+          "event": [],
+          "id": "location",
+          "item": [
+            {
+              "event": [],
+              "id": "location/GetID",
+              "name": "GetID",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "GetID",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+            {
+              "event": [],
+              "id": "location/GetUser",
+              "name": "GetUser",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                  },
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{apiBaseUrl}}",
+                  ],
+                  "path": [
+                    "operations",
+                    "location",
+                    "GetUser",
+                  ],
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+            {
+              "event": [],
+              "id": "location/query",
+              "item": [
+                {
+                  "event": [],
+                  "id": "location/query/GetUser",
+                  "name": "GetUser",
+                  "request": {
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                      },
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{apiBaseUrl}}",
+                      ],
+                      "path": [
+                        "operations",
+                        "location",
+                        "query",
+                        "GetUser",
+                      ],
+                      "query": [],
+                      "variable": [],
+                    },
+                  },
+                  "response": [],
+                },
+                {
+                  "event": [],
+                  "id": "location/query/GetUser",
+                  "name": "GetUser",
+                  "request": {
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json",
+                      },
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{apiBaseUrl}}",
+                      ],
+                      "path": [
+                        "operations",
+                        "location",
+                        "query",
+                        "GetUser",
+                      ],
+                      "query": [],
+                      "variable": [],
+                    },
+                  },
+                  "response": [],
+                },
+                {
+                  "event": [],
+                  "id": "GetSetUser",
+                  "name": "SetUser",
+                  "request": {
+                    "body": {
+                      "mode": "urlencoded",
+                      "urlencoded": [],
+                    },
+                    "method": "POST",
+                    "url": {
+                      "host": [
+                        "{{apiBaseUrl}}",
+                      ],
+                      "path": [
+                        "operations",
+                        "location",
+                        "query",
+                        "SetUser",
+                      ],
+                      "query": [],
+                      "variable": [],
+                    },
+                  },
+                  "response": [],
+                },
+              ],
+              "name": "query",
+            },
+            {
+              "event": [],
+              "id": "location/query",
+              "name": "query",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "query": [],
+                  "variable": [],
+                },
+              },
+              "response": [],
+            },
+          ],
+          "name": "location",
+        },
+      ],
+      "name": "operations",
+    },
+  ],
+  "variable": [
+    {
+      "key": "apiBaseUrl",
+      "type": "string",
+      "value": "http://localhost:9991",
+    },
+  ],
+}
+`;

@@ -327,6 +327,7 @@ importers:
       nock: ^13.2.9
       node-fetch: ^2.6.7
       object-hash: ^2.2.0
+      openapi-to-graphql: ^2.2.5
       openapi-types: ^10.0.0
       pino: ^8.8.0
       pino-pretty: ^9.1.1
@@ -365,6 +366,7 @@ importers:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
+      openapi-to-graphql: 2.6.3_graphql@16.6.0
       openapi-types: 10.0.0
       pino: 8.8.0
       pino-pretty: 9.1.1
@@ -17577,6 +17579,7 @@ packages:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
+      openapi-to-graphql: 2.6.3_graphql@16.6.0
       openapi-types: 10.0.0
       pino: 8.8.0
       pino-pretty: 9.1.1
@@ -17589,7 +17592,9 @@ packages:
       zod: 3.20.2
       zod-to-json-schema: 3.20.2_zod@3.20.2
     transitivePeerDependencies:
+      - bufferutil
       - debug
       - encoding
       - supports-color
+      - utf-8-validate
     dev: false
