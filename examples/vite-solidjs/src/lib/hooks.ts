@@ -271,7 +271,6 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			}
 
 			onCleanup(() => {
-				console.log('cleanup');
 				unsubscribe?.();
 			});
 		});

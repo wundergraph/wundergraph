@@ -1,84 +1,46 @@
+import './App.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/solid-query';
 import type { Component } from 'solid-js';
-import { createQuery, createMutation, createSubscription } from './lib/wundergraph';
+import { createQuery } from './lib/wundergraph';
 
 const queryClient = new QueryClient();
 
-const Countries: Component = () => {
-	const country = createQuery({
-		operationName: 'Country',
+const Dragons: Component = () => {
+	const dragons = createQuery({
+		operationName: 'Dragons',
 	});
-
-	return <pre class="text-4xl text-blue-700 py-20">{JSON.stringify(country.data, null, 2)}</pre>;
-};
-
-const Continents: Component = () => {
-	const continents = createQuery({
-		operationName: 'Continents',
-	});
-
-	return <pre class="text-4xl text-blue-700 py-20">{JSON.stringify(continents.data, null, 2)}</pre>;
-};
-
-const User: Component = () => {
-	const user = createQuery({
-		operationName: 'users/get',
-		input: {
-			id: '1',
-		},
-	});
-
-	return <pre class="text-4xl text-blue-700 py-20">{JSON.stringify(user.data, null, 2)}</pre>;
-};
-
-const UserSubscribe: Component = () => {
-	const user = createSubscription({
-		operationName: 'users/subscribe',
-		input: {
-			id: '1',
-		},
-	});
-
-	return <pre class="text-4xl text-blue-700 py-20">{JSON.stringify(user.data, null, 2)}</pre>;
-};
-
-const UserUpdate: Component = () => {
-	const mutation = createMutation({
-		operationName: 'users/update',
-	});
-
-	const handleClick = () => {
-		mutation.mutate({
-			id: '1',
-			name: 'John Doe',
-			bio: 'Lorem ipsum',
-		});
-	};
-
 	return (
-		<>
-			<button onClick={handleClick}>Update</button>
-			<pre class="text-4xl text-blue-700 py-20">{JSON.stringify(mutation.data, null, 2)}</pre>
-		</>
+		<div class="results">
+			{dragons.isLoading && <p>Loading...</p>}
+			{dragons.error && <pre>Error: {JSON.stringify(dragons.error, null, 2)}</pre>}
+			{dragons.data && <pre>{JSON.stringify(dragons.data, null, 2)}</pre>}
+		</div>
 	);
 };
 
-const App = () => {
+function App() {
 	return (
 		<QueryClientProvider client={queryClient}>
-			<div class="max-w-lg mx-auto space-y-4">
-				<Countries />
-
-				<Continents />
-
-				<User />
-
-				<UserSubscribe />
-
-				<UserUpdate />
+			<div class="App">
+				<div>
+					<a href="https://wundergraph.com" target="_blank">
+						<img src="/wundergraph.svg" class="logo wundergraph" alt="WunderGraph logo" />
+					</a>
+					<a href="https://vitejs.dev" target="_blank">
+						<img src="/vite.svg" class="logo" alt="Vite logo" />
+					</a>
+					<a href="https://www.solidjs.com/" target="_blank">
+						<img src="/solid.svg" class="logo solid" alt="Solid logo" />
+					</a>
+				</div>
+				<h1>WunderGraph + Vite + Solid</h1>
+				<div class="card">
+					<Dragons />
+				</div>
+				<p class="read-the-docs">Click on the WunderGraph, Vite and Solid logos to learn more</p>
 			</div>
 		</QueryClientProvider>
 	);
-};
+}
 
 export default App;
