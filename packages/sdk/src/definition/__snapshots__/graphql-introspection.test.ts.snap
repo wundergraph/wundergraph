@@ -1080,7 +1080,8 @@ directive @injectCurrentDateTime(
   customFormat must conform to the Golang specification for specifying a date time format
   """
   customFormat: String
-) on VARIABLE_DEFINITION
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -1090,7 +1091,7 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @internalOperation Directive marks an Operation as internal.
@@ -1102,7 +1103,7 @@ directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 """
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
-directive @injectEnvironmentVariable(name: String!) on VARIABLE_DEFINITION
+directive @injectEnvironmentVariable(name: String!, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.
@@ -2374,7 +2375,8 @@ directive @injectCurrentDateTime(
   customFormat must conform to the Golang specification for specifying a date time format
   """
   customFormat: String
-) on VARIABLE_DEFINITION
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -2384,7 +2386,7 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @internalOperation Directive marks an Operation as internal.
@@ -2396,7 +2398,7 @@ directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 """
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
-directive @injectEnvironmentVariable(name: String!) on VARIABLE_DEFINITION
+directive @injectEnvironmentVariable(name: String!, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.
