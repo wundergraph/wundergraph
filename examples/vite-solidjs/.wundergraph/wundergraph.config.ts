@@ -26,7 +26,7 @@ configureWunderGraphApplication({
 		},
 		{
 			templates: [templates.typescript.client],
-			path: '../src/lib/generated',
+			path: '../src/generated',
 		},
 	],
 	cors: {

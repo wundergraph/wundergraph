@@ -1,9 +1,9 @@
-import { createHooks } from './hooks';
-import { createClient, Operations } from './generated/client';
+import { createHooks } from '@wundergraph/solid-query';
+import { createClient, Operations } from '../generated/client';
 
 const client = createClient();
 
-const { createQuery, createMutation, createSubscription, queryKey, useAuth, useFileUpload, useUser } =
+const { createQuery, createMutation, createSubscription, createFileUpload, queryKey, useAuth, useUser } =
 	createHooks<Operations>(client);
 
-export { createQuery, createMutation, createSubscription, queryKey, useAuth, useFileUpload, useUser };
+export { createQuery, createMutation, createSubscription, createFileUpload, queryKey, useAuth, useUser };

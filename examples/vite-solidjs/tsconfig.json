@@ -14,7 +14,8 @@
     "strict": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "paths": {
-      "vite": ["./node_modules/vite"]
+      "vite": ["./node_modules/vite"],
+      "@wundergraph/solid-query": ["../../packages/solid-query/src"]
     },
     "baseUrl": "./"
   },
