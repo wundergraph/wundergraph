@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import * as fs from 'fs';
-import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser, Operations } from '../server';
-import { CustomClaim } from '@wundergraph/protobuf';
+import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
 
 export type SubscriptionHandler<
 	I,

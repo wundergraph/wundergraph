@@ -758,6 +758,19 @@ const parseOperationTypeNode = (node: OperationTypeNode): OperationType => {
 	}
 };
 
+const updateSkipFields = (skipFields: SchemaSkipFields, skipVariablePaths: string[]): SchemaSkipFields => {
+	skipVariablePaths.forEach((field) => {
+		let fields = skipFields;
+		for (let component of field?.split('.')) {
+			if (fields[component] === undefined) {
+				fields[component] = {};
+			}
+			fields = fields[component];
+		}
+	});
+	return skipFields;
+};
+
 export const operationVariablesToJSONSchema = (
 	graphQLSchema: GraphQLSchema,
 	operation: OperationDefinitionNode,
@@ -778,11 +791,18 @@ export const operationVariablesToJSONSchema = (
 	}
 
 	operation.variableDefinitions.forEach((variable) => {
-		if (!keepInternalVariables && hasInternalVariable(variable)) {
-			return;
+		let skipFields: SchemaSkipFields = {};
+		if (!keepInternalVariables) {
+			if (hasInternalVariable(variable)) {
+				return;
+			}
+			updateSkipFields(skipFields, directiveDefinedFields(variable, internalVariables));
 		}
-		if (!keepInjectedVariables && hasInjectedVariable(variable)) {
-			return;
+		if (!keepInjectedVariables) {
+			if (hasInjectedVariable(variable)) {
+				return;
+			}
+			updateSkipFields(skipFields, directiveDefinedFields(variable, injectedVariables));
 		}
 		let type = variable.type;
 		let nonNullType = false;
@@ -799,7 +819,8 @@ export const operationVariablesToJSONSchema = (
 			type,
 			name,
 			nonNullType,
-			customJsonScalars
+			customJsonScalars,
+			skipFields
 		);
 	});
 
@@ -808,7 +829,6 @@ export const operationVariablesToJSONSchema = (
 
 const internalVariables = [
 	'fromClaim',
-	'fromCustomClaim',
 	'internal',
 	'injectGeneratedUUID',
 	'injectCurrentDateTime',
@@ -817,21 +837,48 @@ const internalVariables = [
 
 const injectedVariables = ['injectGeneratedUUID', 'injectCurrentDateTime', 'injectEnvironmentVariable'];
 
+const directivesNamed = (variable: VariableDefinitionNode, directiveNames: string[]) => {
+	return variable.directives?.filter((directive) => directiveNames.includes(directive.name.value));
+};
+
+const directiveHasNoField = (node: ConstDirectiveNode) => {
+	return !directiveInjectedField(node);
+};
+
+const directiveInjectedField = (node: ConstDirectiveNode) => {
+	const onArgument = node.arguments?.find((arg) => arg.name.value === 'on');
+	if (!onArgument) {
+		return undefined;
+	}
+	if (onArgument.value.kind !== Kind.STRING) {
+		return undefined;
+	}
+	return onArgument.value.value;
+};
+
 const hasInternalVariable = (variable: VariableDefinitionNode): boolean => {
-	return (
-		variable.directives?.find(
-			(directive) => internalVariables.find((i) => i === directive.name.value) !== undefined
-		) !== undefined
-	);
+	return (directivesNamed(variable, internalVariables)?.filter(directiveHasNoField)?.length ?? 0) > 0;
 };
 
 const hasInjectedVariable = (variable: VariableDefinitionNode): boolean => {
+	return (directivesNamed(variable, injectedVariables)?.filter(directiveHasNoField)?.length ?? 0) > 0;
+};
+
+const directiveDefinedFields = (variable: VariableDefinitionNode, directiveNames: string[]) => {
+	const isString = (field: string | undefined): field is string => {
+		return !!field;
+	};
 	return (
-		variable.directives?.find(
-			(directive) => injectedVariables.find((i) => i === directive.name.value) !== undefined
-		) !== undefined
+		directivesNamed(variable, directiveNames)
+			?.map((directive) => directiveInjectedField(directive))
+			.filter(isString) ?? []
 	);
 };
+
+// Leafs are fields that should be skipped from schema generation
+interface SchemaSkipFields {
+	[key: string]: SchemaSkipFields;
+}
 
 const typeSchema = (
 	root: JSONSchema,
@@ -841,7 +888,8 @@ const typeSchema = (
 	type: TypeNode,
 	name: string,
 	nonNull: boolean,
-	customJsonScalars: string[]
+	customJsonScalars: string[],
+	skipFields?: SchemaSkipFields
 ): JSONSchema => {
 	switch (type.kind) {
 		case 'NonNullType':
@@ -861,7 +909,8 @@ const typeSchema = (
 				type.type,
 				name,
 				true,
-				customJsonScalars
+				customJsonScalars,
+				skipFields
 			);
 		case 'ListType':
 			const schema: JSONSchema = {
@@ -875,7 +924,8 @@ const typeSchema = (
 				type.type,
 				name,
 				false,
-				customJsonScalars
+				customJsonScalars,
+				skipFields
 			);
 			return schema;
 		case 'NamedType':
@@ -943,6 +993,11 @@ const typeSchema = (
 							schema.properties = {};
 							(namedType.astNode.fields || []).forEach((f) => {
 								const name = f.name.value;
+								let currentSkipFields = skipFields ? skipFields[name] : undefined;
+								if (currentSkipFields !== undefined && Object.keys(currentSkipFields).length == 0) {
+									// Leaf
+									return;
+								}
 								let fieldType = f.type;
 								if (f.defaultValue !== undefined && fieldType.kind === 'NonNullType') {
 									fieldType = fieldType.type;
@@ -955,7 +1010,8 @@ const typeSchema = (
 									fieldType,
 									name,
 									false,
-									customJsonScalars
+									customJsonScalars,
+									currentSkipFields
 								);
 							});
 							root.definitions![typeName] = schema;
