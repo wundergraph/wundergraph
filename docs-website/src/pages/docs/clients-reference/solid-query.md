@@ -63,7 +63,7 @@ export default App() {
 
 Now you can use the hooks in your components:
 
-### useQuery
+### createQuery
 
 ```ts
 const weather = createQuery({
@@ -72,7 +72,7 @@ const weather = createQuery({
 });
 ```
 
-### useQuery (Live query)
+### createQuery (Live query)
 
 ```ts
 const weather = createQuery({
@@ -82,7 +82,7 @@ const weather = createQuery({
 });
 ```
 
-### useSubscription
+### createSubscription
 
 ```ts
 const weather = createSubscription({
@@ -93,7 +93,7 @@ const weather = createSubscription({
 });
 ```
 
-### useMutation
+### createMutation
 
 ```ts
 const mutation = createMutation({
@@ -105,10 +105,10 @@ mutation.mutate({ name: 'WunderGraph' });
 await mutation.mutateAsync({ name: 'WunderGraph' });
 ```
 
-### useFileUpload
+### createFileUpload
 
 ```ts
-const uploader = useFileUpload();
+const uploader = createFileUpload();
 
 uploader.upload({
   provider: 'minio',

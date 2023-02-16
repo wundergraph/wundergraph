@@ -1,16 +1,16 @@
-# WunderGraph React Query Integration
+# WunderGraph Solid Query Integration
 
-![wunderctl](https://img.shields.io/npm/v/@wundergraph/react-query.svg)
+![wunderctl](https://img.shields.io/npm/v/@wundergraph/solid-query.svg)
 
-This package provides a type-safe integration of [React Query](https://tanstack.com/query/v4/docs/overview) with WunderGraph.
-React Query is a data fetching library for React. With just one hook, you can significantly simplify the data fetching logic in your project. And it also covered in all aspects of speed, correctness, and stability to help you build better experiences.
+This package provides a type-safe integration of [Solid Query](https://tanstack.com/query/v4/docs/solid/overview) with WunderGraph.
+Solid Query is a data fetching library for Solid.js.
 
 > **Warning**: Only works with WunderGraph.
 
 ## Getting Started
 
 ```shell
-npm install @wundergraph/react-query @tanstack/react-query
+npm install @wundergraph/solid-query @tanstack/solid-query
 ```
 
 Before you can use the hooks, you need to modify your code generation to include the base typescript client.
@@ -34,19 +34,19 @@ Second, run `wunderctl generate` to generate the code.
 Now you can configure the hooks. Create a new file, for example `lib/wundergraph.ts` and add the following code:
 
 ```ts
-import { createHooks } from '@wundergraph/react-query';
+import { createHooks } from '@wundergraph/solid-query';
 import { createClient, Operations } from './components/generated/client';
 
 const client = createClient(); // Typesafe WunderGraph client
 
-export const { useQuery, useMutation, useSubscription, useUser, useFileUpload, useAuth } =
+export const { createQuery, createMutation, createSubscription, createFileUpload, useUser, useAuth } =
   createHooks<Operations>(client);
 ```
 
 In your `App.tsx` add QueryClientProvider:
 
 ```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/solid-query';
 
 const queryClient = new QueryClient();
 
@@ -61,62 +61,64 @@ export default App() {
 
 Now you can use the hooks in your components:
 
-### useQuery
+### createQuery
 
 ```ts
-const { data, error, isLoading } = useQuery({
+const weather = createQuery({
   operationName: 'Weather',
   input: { forCity: city },
 });
 ```
 
-### useQuery (Live query)
+### createQuery (Live query)
 
 ```ts
-const { data, error, isLoading, isSubscribed } = useQuery({
+const weather = createQuery({
   operationName: 'Weather',
   input: { forCity: city },
   liveQuery: true,
 });
 ```
 
-### useSubscription
+### createSubscription
 
 ```ts
-const { data, error, isLoading, isSubscribed } = useSubscription({
-  operationName: 'Weather',
+const weather = createSubscription({
+  operationName: 'LiveWeather',
   input: {
     forCity: 'Berlin',
   },
 });
 ```
 
-### useMutation
+### createMutation
 
 ```ts
-const { data, mutate, mutateAsync } = useMutation({
+const mutation = createMutation({
   operationName: 'SetName',
 });
 
-mutate({ name: 'WunderGraph' });
+mutation.mutate({ name: 'WunderGraph' });
 
-await mutateAsync({ name: 'WunderGraph' });
+await mutation.mutateAsync({ name: 'WunderGraph' });
 ```
 
-### useFileUpload
+### createFileUpload
 
 ```ts
-const { upload, uploadAsync, data: fileKeys, error } = useFileUpload();
+const uploader = useFileUpload();
 
-upload({
+uploader.upload({
   provider: 'minio',
   files: new FileList(),
 });
 
-await upload({
+await uploader.upload({
   provider: 'minio',
   files: new FileList(),
 });
+
+uploader.fileKeys; // files that have been uploaded
 ```
 
 ### useAuth
@@ -132,7 +134,9 @@ logout({ logoutOpenidConnectProvider: true });
 ### useUser
 
 ```ts
-const { data: user, error } = useUser();
+const user = useUser();
+
+user.data;
 ```
 
 ### queryKey
@@ -142,16 +146,16 @@ You can use the `queryKey` helper function to create a unique key for the query 
 ```ts
 const queryClient = useQueryClient();
 
-const { mutate, mutateAsync } = useMutation({
+const mutation = useMutation({
   operationName: 'SetName',
   onSuccess() {
     queryClient.invalidateQueries(queryKey({ operationName: 'Profile' }));
   },
 });
 
-mutate({ name: 'WunderGraph' });
+mutation.mutate({ name: 'WunderGraph' });
 ```
 
 ## Options
 
-You can use all available options from [React Query](https://tanstack.com/query/v4/docs/reference/useQuery) with the hooks.
+You can use all available options from [Solid Query](https://tanstack.com/query/v4/docs/solid/overview).
