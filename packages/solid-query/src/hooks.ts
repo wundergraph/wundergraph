@@ -17,7 +17,7 @@ import {
 	CreateQueryHook,
 	CreateMutationHook,
 	CreateSubscriptionHook,
-	UseUploadHook,
+	CreateUploadHook,
 	UseUserHook,
 	QueryKey,
 } from './types';
@@ -174,7 +174,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 * }
 	 * ```
 	 */
-	const useFileUpload: UseUploadHook<Operations> = (options) => {
+	const createFileUpload: CreateUploadHook<Operations> = (options) => {
 		const upload = createTanstackMutation({
 			mutationKey: ['uploadFiles'],
 			mutationFn: async (input: UploadRequestOptions) => {
@@ -315,11 +315,11 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 
 	return {
 		useAuth,
-		useFileUpload,
 		useUser,
 		createQuery,
 		createMutation,
 		createSubscription,
+		createFileUpload,
 		queryKey,
 	};
 };

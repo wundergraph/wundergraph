@@ -167,13 +167,13 @@ export type UseUserHook<Operations extends OperationsDefinition> = {
 	(options?: UseUserOptions<Operations['user']>): CreateQueryResult<Operations['user'], ClientResponseError>;
 };
 
-export type UseUploadOptions = Omit<
+export type CreateUploadOptions = Omit<
 	CreateTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions, Context<QueryClient | undefined>>,
 	'mutationFn'
 >;
 
-export type UseUploadHook<Operations extends OperationsDefinition> = {
-	(options?: UseUploadOptions): Omit<
+export type CreateUploadHook<Operations extends OperationsDefinition> = {
+	(options?: CreateUploadOptions): Omit<
 		CreateTanstackMutationOptions<
 			string[],
 			ClientResponseError,
