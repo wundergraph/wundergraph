@@ -1417,47 +1417,21 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
-
-	preResolveHookResponse, err := h.hooksPipeline.PreResolve(ctx, nil, r)
-	if err != nil {
-		return nil, fmt.Errorf("handleLiveQueryEvent preResolve hooks failed: %w", err)
-	}
-	if preResolveHookResponse.Done {
-		return ctx.Variables, nil
-	}
-
-	resolved := preResolveHookResponse.Resolved
-	ctx.Variables = preResolveHookResponse.Data
+func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.ResponseWriter, r *http.Request, requestBuf *bytes.Buffer, hookBuf *bytes.Buffer) ([]byte, error) {
 
 	requestBuf.Reset()
-
-	if resolved {
-		_, err = io.Copy(requestBuf, bytes.NewReader(ctx.Variables))
-	} else {
-		err = h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, requestBuf)
-	}
+	hooksResponse, err := h.hooksPipeline.Run(ctx, w, r, requestBuf)
 	if err != nil {
-		return nil, fmt.Errorf("handleLiveQueryEvent ResolveGraphQLResponse failed: %w", err)
+		return nil, fmt.Errorf("handleLiveQueryEvent: %w", err)
 	}
 
-	transformed, err := h.postResolveTransformer.Transform(requestBuf.Bytes())
-	if err != nil {
-		return nil, fmt.Errorf("handleLiveQueryEvent postResolveTransformer.Transform failed: %w", err)
+	if hooksResponse.Done {
+		// Response is already written by hooks pipeline, tell
+		// caller to stop
+		return nil, context.Canceled
 	}
 
-	postResolveResponse, err := h.hooksPipeline.PostResolve(ctx, nil, r, transformed)
-	if err != nil {
-		return nil, fmt.Errorf("handleLiveQueryEvent postResolve hooks failed: %w", err)
-	}
-
-	if postResolveResponse.Done {
-		return transformed, nil
-	}
-
-	transformed = postResolveResponse.Data
-
-	return transformed, nil
+	return hooksResponse.Data, nil
 }
 
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
@@ -1473,7 +1447,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	var lastHash uint64
 	for {
 		var hookError bool
-		response, err := h.handleLiveQueryEvent(ctx, r, requestBuf, hookBuf)
+		response, err := h.handleLiveQueryEvent(ctx, w, r, requestBuf, hookBuf)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
 				// context was canceled (e.g. client disconnected)

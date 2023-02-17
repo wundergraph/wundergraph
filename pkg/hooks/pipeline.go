@@ -149,6 +149,9 @@ func (p *pipeline) handleHookResponse(ctx *resolve.Context, w http.ResponseWrite
 		)
 		if w != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			if flusher, ok := w.(http.Flusher); ok {
+				flusher.Flush()
+			}
 		}
 		return true
 	}
@@ -164,8 +167,9 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 
 	var resp *MiddlewareHookResponse
 	var err error
+	data := ctx.Variables
 	if p.ResolveConfig.Pre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -178,7 +182,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.MutatingPre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -190,11 +194,11 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 		}
 		// Update data with what the hook returned
 		// XXX: mutatingPreResolve returns the data in resp.Input
-		ctx.Variables = resp.Input
+		data = resp.Input
 	}
 
 	if p.ResolveConfig.Mock {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -212,7 +216,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Custom {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, nil)
+		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData)
 		if err != nil {
 			return nil, err
@@ -233,7 +237,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 		}
 	}
 
-	return &Response{Data: ctx.Variables}, nil
+	return &Response{Data: data}, nil
 }
 
 // PostResolve runs the post-resolution hooks
@@ -292,6 +296,7 @@ func (p *SynchronousOperationPipeline) Run(ctx *resolve.Context, w http.Response
 		return preResolveResp, nil
 	}
 
+	variables := ctx.Variables
 	ctx.Variables = preResolveResp.Data
 
 	if preResolveResp.Resolved {
@@ -299,6 +304,9 @@ func (p *SynchronousOperationPipeline) Run(ctx *resolve.Context, w http.Response
 	} else {
 		err = p.resolver.ResolveGraphQLResponse(ctx, p.plan.Response, nil, buf)
 	}
+
+	// Restore ctx.Variables, since ctx might be reused for live queries
+	ctx.Variables = variables
 
 	if err != nil {
 		return nil, fmt.Errorf("ResolveGraphQLResponse failed: %w", err)
@@ -350,8 +358,11 @@ func (p *SubscriptionOperationPipeline) RunSubscription(ctx *resolve.Context, w 
 	if preResolveResp.Resolved {
 		_, err = w.Write(preResolveResp.Data)
 	} else {
+		variables := ctx.Variables
 		ctx.Variables = preResolveResp.Data
 		err = p.resolver.ResolveGraphQLSubscription(ctx, p.plan.Response, w)
+		// Restore ctx.Variables, since ctx might be reused
+		ctx.Variables = variables
 	}
 
 	if err != nil {
