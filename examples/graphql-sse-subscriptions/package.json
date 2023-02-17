@@ -6,7 +6,8 @@
     "start": "run-p start:services wundergraph",
     "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
     "start:services": "ts-node gql-sse/server.ts",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "check": "tsc --noEmit",
     "test": "jest"
   },

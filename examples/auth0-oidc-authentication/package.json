@@ -5,9 +5,10 @@
   "scripts": {
     "start": "run-p dev wundergraph open",
     "wundergraph": "wunderctl up --debug",
-    "build": "wunderctl generate --debug",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
+    "build:wundergraph": "wunderctl generate --debug",
     "build:next": "next build",
+    "build": "npm run build:wundergraph && npm run build:next",
     "dev": "next dev",
     "wunderctl": "wunderctl",
     "check": "tsc --noEmit"
