@@ -119,13 +119,15 @@ function useTableOfContents(tableOfContents) {
 }
 
 export function Layout({ children, title, tableOfContents, frontmatter }) {
-	let router = useRouter();
-	let allLinks = navigation.flatMap((section) => section.links);
-	let linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
-	let previousPage = allLinks[linkIndex - 1];
-	let nextPage = allLinks[linkIndex + 1];
-	let section = navigation.find((section) => section.links?.find((link) => link?.href === router.pathname));
-	let currentSection = useTableOfContents(tableOfContents);
+	const router = useRouter();
+	const links = navigation.flatMap((section) => section.links);
+	const allLinks = links.flatMap((section) => (section?.links ? section.links : section));
+
+	const linkIndex = allLinks.findIndex((link) => link?.href === router.pathname);
+	const previousPage = allLinks[linkIndex - 1];
+	const nextPage = allLinks[linkIndex + 1];
+	const section = navigation.find((section) => section.links?.find((link) => link?.href === router.pathname));
+	const currentSection = useTableOfContents(tableOfContents);
 
 	const hideTableOfContents = frontmatter?.hideTableOfContents;
 	const fullWidthContent = frontmatter?.fullWidthContent;
@@ -166,7 +168,6 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 								</header>
 							)}
 							<Prose>{children}</Prose>
-							<Comments />
 						</article>
 						<dl className="mt-12 flex border-t border-gray-200 pt-6 dark:border-gray-800">
 							{previousPage?.href && (
@@ -190,7 +191,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 											href={nextPage.href}
 											className="text-base font-semibold text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
 										>
-											{nextPage.title} <span aria-hidden="true">&rarr;</span>
+											{nextPage?.navTitle || nextPage.title} <span aria-hidden="true">&rarr;</span>
 										</Link>
 									</dd>
 								</div>
@@ -199,6 +200,7 @@ export function Layout({ children, title, tableOfContents, frontmatter }) {
 						<div className="pt-6">
 							<DocsFooter isIndexFile={isIndexFile} />
 						</div>
+						<Comments />
 					</div>
 				</div>
 

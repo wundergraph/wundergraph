@@ -32,6 +32,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Getting started',
 				href: '/docs/getting-started',
 			},
 			{
@@ -182,6 +183,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Guides',
 				href: '/docs/guides',
 			},
 			{
@@ -277,6 +279,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'APIs',
 				href: '/docs/apis',
 			},
 			{
@@ -300,6 +303,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Authentication',
 				href: '/docs/auth',
 			},
 			{
@@ -307,6 +311,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'Cookie-based Auth',
 						href: '/docs/auth/cookie-based-auth',
 					},
 					{
@@ -336,6 +341,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'Token-based Auth',
 						href: '/docs/auth/token-based-auth',
 					},
 					{
@@ -357,6 +363,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Databases',
 				href: '/docs/databases',
 			},
 			{
@@ -431,6 +438,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Storage',
 				href: '/docs/storage',
 			},
 			{
@@ -466,6 +474,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'Architecture',
 						href: '/docs/architecture',
 					},
 					{
@@ -495,6 +504,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'Components of WunderGraph',
 						href: '/docs/components-of-wundergraph',
 					},
 					{
@@ -528,6 +538,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'Supported Data Sources',
 						href: '/docs/supported-data-sources',
 					},
 					{
@@ -675,6 +686,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Use Cases',
 				href: '/docs/use-cases',
 			},
 			{
@@ -722,6 +734,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Features',
 				href: '/docs/features',
 			},
 			{
@@ -829,6 +842,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Cloud',
 				href: '/docs/cloud',
 			},
 			{
@@ -856,7 +870,7 @@ const navigation = [
 		href: '/docs/self-hosted',
 		icon: <ServerIcon />,
 		links: [
-			{ title: 'Overview', href: '/docs/self-hosted' },
+			{ title: 'Overview', href: '/docs/self-hosted', navTitle: 'Self-hosted' },
 			{
 				title: 'Fly.io',
 				href: '/docs/self-hosted/flyio',
@@ -875,6 +889,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Clients reference',
 				href: '/docs/clients-reference',
 			},
 			{
@@ -908,6 +923,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'WunderGraph reference',
 				href: '/docs/wundergraph-reference',
 			},
 			{
@@ -915,6 +931,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'wundergraph.config.ts',
 						href: '/docs/wundergraph-config-ts-reference',
 					},
 					{
@@ -1018,6 +1035,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'wundergraph.operations.ts',
 						href: '/docs/wundergraph-operations-ts-reference',
 					},
 					{
@@ -1047,6 +1065,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'wundergraph.server.ts',
 						href: '/docs/wundergraph-server-ts-reference',
 					},
 					{
@@ -1125,6 +1144,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Operations reference',
 				href: '/docs/operations-reference',
 			},
 			{
@@ -1132,6 +1152,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'GraphQL Operations',
 						href: '/docs/directives-reference',
 					},
 					{
@@ -1185,6 +1206,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'TypeScript Operations',
 						href: '/docs/typescript-operations-reference',
 					},
 					{
@@ -1227,6 +1249,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'CLI Reference',
 				href: '/docs/cli-reference',
 			},
 			{
@@ -1243,6 +1266,7 @@ const navigation = [
 				links: [
 					{
 						title: 'Overview',
+						navTitle: 'wunderctl reference',
 						href: '/docs/wunderctl-reference',
 					},
 					{
@@ -1322,6 +1346,7 @@ const navigation = [
 		links: [
 			{
 				title: 'Overview',
+				navTitle: 'Upgrade guides',
 				href: '/docs/upgrade-guides',
 			},
 			{
