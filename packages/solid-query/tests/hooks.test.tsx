@@ -1,7 +1,6 @@
-import { act, waitFor, screen, render, fireEvent } from '@testing-library/react';
-import React from 'react';
-import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
-
+import { waitFor, screen, render, fireEvent } from '@solidjs/testing-library';
+import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/solid-query';
+import { createEffect, JSX } from 'solid-js';
 import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
@@ -43,15 +42,12 @@ export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
 }
 
-const _renderWithConfig = (element: React.ReactElement, config: any): ReturnType<typeof render> => {
-	const TestProvider = ({ children }: { children: React.ReactNode }) => (
-		<QueryClientProvider client={config.client}>{children}</QueryClientProvider>
-	);
-	return render(element, { wrapper: TestProvider });
+const _renderWithConfig = (element: JSX.Element, config: { client: QueryClient }): ReturnType<typeof render> => {
+	return render(() => <QueryClientProvider client={config.client}>{element}</QueryClientProvider>);
 };
 
 export const renderWithClient = (
-	element: React.ReactElement,
+	element: JSX.Element,
 	queryClient: QueryClient
 ): ReturnType<typeof _renderWithConfig> => {
 	return _renderWithConfig(element, { client: queryClient });
@@ -113,7 +109,7 @@ const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = 
 	};
 };
 
-describe('React Query - createHooks', () => {
+describe('Solid Query - createHooks', () => {
 	const client = createClient();
 
 	const hooks = createHooks<Operations>(client);
@@ -123,7 +119,7 @@ describe('React Query - createHooks', () => {
 	});
 });
 
-describe('React Query - useQuery', () => {
+describe('Solid Query - createQuery', () => {
 	const client = createClient();
 
 	const queryCache = new QueryCache();
@@ -134,7 +130,7 @@ describe('React Query - useQuery', () => {
 		nock.cleanAll();
 	});
 
-	const { useQuery } = createHooks<Operations>(client);
+	const { createQuery } = createHooks<Operations>(client);
 
 	it('should return data', async () => {
 		const scope = nockQuery()
@@ -146,14 +142,17 @@ describe('React Query - useQuery', () => {
 			});
 
 		function Page() {
-			const { data } = useQuery({
+			const weather = createQuery({
 				operationName: 'Weather',
 			});
-
-			return <div>Response: {data?.id}</div>;
+			return <div>Response: {weather.data?.id}</div>;
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		await waitFor(() => {
 			screen.getByText('Response: 1');
@@ -170,7 +169,7 @@ describe('React Query - useQuery', () => {
 		});
 
 		function Page() {
-			const { isFetched } = useQuery({
+			const query = createQuery({
 				operationName: 'Weather',
 				input: {
 					forCity: 'berlin',
@@ -180,16 +179,20 @@ describe('React Query - useQuery', () => {
 
 			return (
 				<div>
-					<div>Fetched: {isFetched ? 'true' : 'false'}</div>
+					<div>Fetched: {query.isFetched ? 'true' : 'false'}</div>
 				</div>
 			);
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		screen.getByText('Fetched: false');
 
-		await act(() => sleep(150));
+		await sleep(500);
 
 		screen.getByText('Fetched: false');
 
@@ -197,7 +200,7 @@ describe('React Query - useQuery', () => {
 	});
 });
 
-describe('React Query - useMutation', () => {
+describe('Solid Query - createMutation', () => {
 	const client = createClient();
 
 	const queryCache = new QueryCache();
@@ -208,7 +211,7 @@ describe('React Query - useMutation', () => {
 		nock.cleanAll();
 	});
 
-	const { useMutation, useQuery, queryKey } = createHooks<Operations>(client);
+	const hooks = createHooks<Operations>(client);
 
 	it('should trigger mutation with auth', async () => {
 		const { mutation, csrfScope } = nockMutation('SetName', { name: 'Rick Astley' }, true);
@@ -220,18 +223,22 @@ describe('React Query - useMutation', () => {
 		});
 
 		function Page() {
-			const { data, mutate } = useMutation({
+			const mutation = hooks.createMutation({
 				operationName: 'SetName',
 			});
 
-			React.useEffect(() => {
-				mutate({ name: 'Rick Astley' });
-			}, []);
+			createEffect(() => {
+				mutation.mutate({ name: 'Rick Astley' });
+			});
 
-			return <div>{data?.id}</div>;
+			return <div>{mutation.data?.id}</div>;
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		await waitFor(() => {
 			screen.getByText('Never gonna give you up');
@@ -251,18 +258,20 @@ describe('React Query - useMutation', () => {
 		});
 
 		function Page() {
-			const { data, mutate } = useMutation({
+			const mutation = hooks.createMutation({
 				operationName: 'SetNameWithoutAuth',
 			});
 
-			React.useEffect(() => {
-				mutate({ name: 'Rick Astley' });
-			}, []);
+			mutation.mutate({ name: 'Rick Astley' });
 
-			return <div>{data?.id}</div>;
+			return <div>{mutation.data?.id}</div>;
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		await waitFor(() => {
 			screen.getByText('1');
@@ -284,9 +293,9 @@ describe('React Query - useMutation', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.post('/operations/SetNameWithoutAuth', { name: 'Rick Astley' })
+			.post('/operations/SetNameWithoutAuth', { name: 'Not Rick Astley' })
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Rick Astley' } })
+			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } })
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
@@ -297,19 +306,19 @@ describe('React Query - useMutation', () => {
 		function Page() {
 			const queryClient = useQueryClient();
 
-			const query = useQuery({
+			const query = hooks.createQuery({
 				operationName: 'Weather',
 			});
 
-			const { mutate } = useMutation({
+			const mutation = hooks.createMutation({
 				operationName: 'SetNameWithoutAuth',
 				onSuccess: () => {
-					queryClient.invalidateQueries(queryKey({ operationName: 'Weather' }));
+					queryClient.invalidateQueries(hooks.queryKey({ operationName: 'Weather' }));
 				},
 			});
 
 			const onClick = () => {
-				mutate({ name: 'Rick Astley' });
+				mutation.mutate({ name: 'Not Rick Astley' });
 			};
 
 			return (
@@ -320,7 +329,11 @@ describe('React Query - useMutation', () => {
 			);
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		await waitFor(() => {
 			screen.getByText('Test');
@@ -336,7 +349,7 @@ describe('React Query - useMutation', () => {
 	});
 });
 
-describe('React Query - useSubscription', () => {
+describe('Solid Query - createSubscription', () => {
 	const client = createClient();
 
 	const queryCache = new QueryCache();
@@ -350,7 +363,7 @@ describe('React Query - useSubscription', () => {
 		queryCache.clear();
 	});
 
-	const { useSubscription } = createHooks<Operations>(client);
+	const { createSubscription } = createHooks<Operations>(client);
 
 	it('should subscribe', async () => {
 		// web streams not supported in node-fetch, we use subscribeOnce to test
@@ -363,17 +376,21 @@ describe('React Query - useSubscription', () => {
 			.reply(200, { data: { count: 100 } });
 
 		function Page() {
-			const { data } = useSubscription({
+			const subscription = createSubscription({
 				operationName: 'Countdown',
 				subscribeOnce: true,
 				input: {
 					from: 100,
 				},
 			});
-			return <div>{data?.count ? data.count : 'loading'}</div>;
+			return <div>{subscription.data?.count ? subscription.data.count : 'loading'}</div>;
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		screen.getByText('loading');
 
@@ -390,7 +407,7 @@ describe('React Query - useSubscription', () => {
 	});
 });
 
-describe('React Query - useUser', () => {
+describe('Solid Query - useUser', () => {
 	const client = createClient();
 
 	const queryCache = new QueryCache();
@@ -411,12 +428,16 @@ describe('React Query - useUser', () => {
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {
-			const { data } = useUser();
+			const user = useUser();
 
-			return <div>{data?.email}</div>;
+			return <div>{user.data?.email}</div>;
 		}
 
-		renderWithClient(<Page />, queryClient);
+		render(() => (
+			<QueryClientProvider client={queryClient}>
+				<Page />
+			</QueryClientProvider>
+		));
 
 		await waitFor(() => {
 			screen.getByText('info@wundergraph.com');

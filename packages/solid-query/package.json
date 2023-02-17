@@ -1,0 +1,75 @@
+{
+  "name": "@wundergraph/solid-query",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "description": "WunderGraph Solid Query Integration",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format esm,cjs",
+    "test": "jest && tsd"
+  },
+  "tsd": {
+    "directory": "tests"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wundergraph/wundergraph.git"
+  },
+  "peerDependencies": {
+    "@tanstack/solid-query": "^4.24.6",
+    "@wundergraph/sdk": ">=0.110.0",
+    "solid-js": "^1.5.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.12",
+    "@babel/plugin-transform-modules-commonjs": "^7.20.11",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-typescript": "^7.18.6",
+    "@jest/globals": "^29.3.1",
+    "@solidjs/testing-library": "^0.6.1",
+    "@tanstack/solid-query": "^4.24.6",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@types/jest": "^28.1.1",
+    "@types/node-fetch": "2.6.2",
+    "@wundergraph/sdk": "workspace:*",
+    "babel-jest": "^29.4.2",
+    "babel-preset-solid": "^1.6.10",
+    "jest": "^29.0.3",
+    "jest-environment-jsdom": "^29.3.0",
+    "nock": "^13.2.9",
+    "node-fetch": "2.6.7",
+    "regenerator-runtime": "^0.13.11",
+    "solid-js": "^1.6.11",
+    "ts-jest": "^29.0.5",
+    "tsd": "^0.24.1",
+    "tsup": "^6.5.0",
+    "typescript": "^4.8.2"
+  },
+  "homepage": "https://wundergraph.com",
+  "author": {
+    "name": "WunderGraph Maintainers",
+    "email": "info@wundergraph.com"
+  },
+  "keywords": [
+    "tanstack",
+    "solid-js",
+    "solid-query",
+    "wundergraph"
+  ]
+}

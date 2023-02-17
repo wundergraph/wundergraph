@@ -1,17 +1,7 @@
 ---
 title: Solid.js
 pageTitle: WunderGraph - Solid.js
-description:
+description: Solid.js support for WunderGraph
 ---
 
-Support for Solid.js is planned,
-but there's not yet a schedule.
-If you're interested in support for this platform,
-please join our Discord Server and let us know.
-
-That said, we're not far from supporting Solid.js,
-as WunderGraph already supports React.js.
-
-If you're planning to use WunderGraph commercially,
-we're also able to speed up the development of required features with our dedicated support team.
-Please reach out to our Sales Team if you're interested in learning more about our services.
+WunderGraph has full support for Solid.js. You can use the [Solid Query](https://tanstack.com/query/v4/docs/solid/overview) library to fetch data from your WunderGraph application. We have a [Solid Query client](/docs/clients-reference/solid-query) that you can use to generate type-safe hooks for your application.
