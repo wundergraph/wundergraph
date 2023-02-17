@@ -13,6 +13,9 @@ import {
 import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@web-std/fetch';
+import { FastifyRequest } from 'fastify';
+
+const maximumRecursionLimit = 16;
 
 export interface BodyResponse {
 	data?: any;
@@ -125,7 +128,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		reply.type('application/json').code(200);
 		try {
 			const maybeHookOut = await config.global?.httpTransport?.onOriginRequest?.hook({
-				...request.ctx,
+				...requestContext(request),
 				operation: {
 					name: request.body.operationName,
 					type: request.body.operationType,
@@ -165,7 +168,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		reply.type('application/json').code(200);
 		try {
 			const maybeHookOut = await config.global?.httpTransport?.onOriginResponse?.hook({
-				...request.ctx,
+				...requestContext(request),
 				response: {
 					...request.body.response,
 					headers: new Headers(request.body.response.headers),
@@ -207,7 +210,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			try {
 				const resp = await config.global?.wsTransport?.onConnectionInit?.hook({
 					dataSourceId: request.body.dataSourceId,
-					...request.ctx,
+					...requestContext(request),
 					request: {
 						...request.body.request,
 						headers: new Headers(request.body.request.headers),
@@ -235,6 +238,19 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		config.config.api?.operations.filter((op) => op.operationType == OperationType.SUBSCRIPTION).map((op) => op.name) ||
 		[];
 
+	const requestContext = (req: FastifyRequest) => {
+		const body = req.body as any;
+		if (body?.cycleCounter) {
+			if (body.cycleCounter > maximumRecursionLimit) {
+				const errorMessage = `maximum recursion limit reached (${maximumRecursionLimit})`;
+				req.log.error(errorMessage);
+				throw new Error(errorMessage);
+			}
+			req.ctx.internalClient = req.ctx.internalClient.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
+		}
+		return req.ctx;
+	};
+
 	const mockResolve =
 		(
 			operationName: string,
@@ -249,7 +265,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				const mutated = await hookFunction({
-					...request.ctx,
+					...requestContext(request),
 					input: request.body.input,
 				});
 				return {
@@ -279,7 +295,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				await hookFunction({
-					...request.ctx,
+					...requestContext(request),
 					input: request.body.input,
 				});
 				return {
@@ -308,7 +324,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				await hookFunction({
-					...request.ctx,
+					...requestContext(request),
 					input: request.body.input,
 					response: request.body.response,
 				});
@@ -338,7 +354,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				const mutatedInput = await hookFunction({
-					...request.ctx,
+					...requestContext(request),
 					input: request.body.input,
 				});
 				return {
@@ -368,7 +384,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				const mutatedResponse = await hookFunction({
-					...request.ctx,
+					...requestContext(request),
 					input: request.body.input,
 					response: request.body.response,
 				});
@@ -399,7 +415,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				const out = await hookFunction({
-					...request.ctx,
+					...requestContext(request),
 					input: request.body.input,
 				});
 				return {
@@ -483,7 +499,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				const result = await handler({
-					...request.ctx,
+					...requestContext(request),
 					file: request.body.file,
 					meta: request.body.meta,
 				});
@@ -507,7 +523,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			reply.type('application/json').code(200);
 			try {
 				const result = await handler({
-					...request.ctx,
+					...requestContext(request),
 					file: request.body.file,
 					meta: request.body.meta,
 					error: request.body.error,
