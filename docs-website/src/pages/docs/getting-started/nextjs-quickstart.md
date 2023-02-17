@@ -79,7 +79,7 @@ configureWunderGraphApplication({
 });
 ```
 
-What's different from the [1-minute quickstart](/docs/quickstart) here is we added a `NextJsTemplate` to the code generators. This will generate the typesafe client and React hooks that can be used in Next.js.
+What's different from the [1-minute quickstart](/docs/getting-started/quickstart) here is we added a `NextJsTemplate` to the code generators. This will generate the typesafe client and React hooks that can be used in Next.js.
 
 Now let's take a look at the operations.
 

@@ -79,7 +79,7 @@ configureWunderGraphApplication({
 });
 ```
 
-What's different from the [1-minute quickstart](/docs/quickstart) here is we added type Typescript client to the code generators. This will generate the typesafe client that we need to set up SWR.
+What's different from the [1-minute quickstart](/docs/getting-started/quickstart) here is we added type Typescript client to the code generators. This will generate the typesafe client that we need to set up SWR.
 
 Open `src/lib/wundergraph.ts`, you will see the following code:
 
