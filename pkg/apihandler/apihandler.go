@@ -498,14 +498,24 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
+	hooksPipelineCommonConfig := hooks.PipelineConfig{
+		Client:        r.middlewareClient,
+		Authenticator: hooksAuthenticator,
+		Operation:     operation,
+		Logger:        r.log,
+	}
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY:
 		synchronousPlan, ok := preparedPlan.(*plan.SynchronousResponsePlan)
 		if !ok {
 			break
 		}
-		hooksResolver := newSynchronousOperationHooksResolver(r.resolver, synchronousPlan)
-		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
+		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       newSynchronousOperationHooksResolver(r.resolver, synchronousPlan),
+		}
+		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 		handler := &QueryHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -567,8 +577,11 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := newSynchronousOperationHooksResolver(r.resolver, synchronousPlan)
-		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
+		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       newSynchronousOperationHooksResolver(r.resolver, synchronousPlan),
+		}
+		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 		handler := &MutationHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -606,8 +619,11 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := newSubscriptionOperationHooksResolver(r.resolver, subscriptionPlan)
-		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
+		hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       newSubscriptionOperationHooksResolver(r.resolver, subscriptionPlan),
+		}
+		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 		handler := &SubscriptionHandler{
 			resolver:               r.resolver,
 			log:                    r.log,
@@ -1221,7 +1237,7 @@ type QueryHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
-	hooksPipeline          *hooks.Pipeline
+	hooksPipeline          *hooks.SynchronousOperationPipeline
 }
 
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1352,7 +1368,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(WG_CACHE_HEADER, "MISS")
 	}
 
-	resp, err := h.hooksPipeline.RunOperation(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -1536,7 +1552,7 @@ type MutationHandler struct {
 	jsonStringInterpolator *interpolate.StringInterpolator
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
-	hooksPipeline          *hooks.Pipeline
+	hooksPipeline          *hooks.SynchronousOperationPipeline
 }
 
 func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
@@ -1625,7 +1641,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	resp, err := h.hooksPipeline.RunOperation(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -1655,7 +1671,7 @@ type SubscriptionHandler struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	renameTypeNames        []resolve.RenameTypeName
 	queryParamsAllowList   []string
-	hooksPipeline          *hooks.Pipeline
+	hooksPipeline          *hooks.SubscriptionOperationPipeline
 }
 
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -1771,7 +1787,7 @@ type httpFlushWriter struct {
 	// Used for hooks
 	resolveContext *resolve.Context
 	request        *http.Request
-	hooksPipeline  *hooks.Pipeline
+	hooksPipeline  *hooks.SubscriptionOperationPipeline
 	logger         *zap.Logger
 }
 
@@ -2356,7 +2372,7 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
-func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.Pipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
+func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseWriter, pipeline *hooks.SubscriptionOperationPipeline, logger *zap.Logger) (*httpFlushWriter, bool) {
 	var flushWriter *httpFlushWriter
 	var ok bool
 	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)

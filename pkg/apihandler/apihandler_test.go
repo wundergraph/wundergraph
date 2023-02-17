@@ -40,13 +40,20 @@ func (f *FakeResolver) ResolveGraphQLResponse(ctx *resolve.Context, response *re
 	return
 }
 
-func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Pipeline {
+func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.SynchronousOperationPipeline {
 	preparedPlan := &plan.SynchronousResponsePlan{
 		Response: &resolve.GraphQLResponse{},
 	}
-	hooksResolver := newSynchronousOperationHooksResolver(resolver, preparedPlan)
-	postResolveTransformer := &postresolvetransform.Transformer{}
-	return hooks.NewPipeline(nil, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, zap.NewNop())
+	config := hooks.SynchronousOperationPipelineConfig{
+		PipelineConfig: hooks.PipelineConfig{
+			Authenticator: hooksAuthenticator,
+			Operation:     operation,
+			Transformer:   &postresolvetransform.Transformer{},
+			Logger:        zap.NewNop(),
+		},
+		Resolver: newSynchronousOperationHooksResolver(resolver, preparedPlan),
+	}
+	return hooks.NewSynchonousOperationPipeline(config)
 }
 
 func TestQueryHandler_VariablesIgnore(t *testing.T) {

@@ -140,6 +140,13 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
+	hooksPipelineCommonConfig := hooks.PipelineConfig{
+		Client:        i.middlewareClient,
+		Authenticator: hooksAuthenticator,
+		Operation:     operation,
+		Logger:        i.log,
+	}
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY,
 		wgpb.OperationType_MUTATION:
@@ -151,8 +158,11 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
 		copy(extractedVariables, shared.Doc.Input.Variables)
 
-		hooksResolver := newSynchronousOperationHooksResolver(i.resolver, p)
-		hooksPipeline := hooks.NewPipeline(i.middlewareClient, hooksAuthenticator, operation, hooksResolver, nil, i.log)
+		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       newSynchronousOperationHooksResolver(i.resolver, p),
+		}
+		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 
 		handler := &InternalApiHandler{
 			preparedPlan:       p,
@@ -174,8 +184,11 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
 		copy(extractedVariables, shared.Doc.Input.Variables)
 
-		hooksResolver := newSubscriptionOperationHooksResolver(i.resolver, p)
-		hooksPipeline := hooks.NewPipeline(i.middlewareClient, hooksAuthenticator, operation, hooksResolver, nil, i.log)
+		hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       newSubscriptionOperationHooksResolver(i.resolver, p),
+		}
+		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 
 		handler := &InternalSubscriptionApiHandler{
 			preparedPlan:       p,
@@ -231,7 +244,7 @@ type InternalApiHandler struct {
 	log                *zap.Logger
 	resolver           *resolve.Resolver
 	renameTypeNames    []resolve.RenameTypeName
-	hooksPipeline      *hooks.Pipeline
+	hooksPipeline      *hooks.SynchronousOperationPipeline
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -293,7 +306,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	resp, err := h.hooksPipeline.RunOperation(ctx, w, r, buf)
+	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
 	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
@@ -315,7 +328,7 @@ type InternalSubscriptionApiHandler struct {
 	log                *zap.Logger
 	resolver           *resolve.Resolver
 	renameTypeNames    []resolve.RenameTypeName
-	hooksPipeline      *hooks.Pipeline
+	hooksPipeline      *hooks.SubscriptionOperationPipeline
 }
 
 func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
