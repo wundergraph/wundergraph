@@ -37,3 +37,28 @@ mutation ($email: String!, $name: String!, $id: String! @injectGeneratedUUID) {
 The user is allowed to enter their email and name while the WunderGraph Server injects the `$id` variable.
 This works independently of the upstream.
 You could use this with a database or API.
+
+## Injecting an UUID into a field
+
+`@injectGeneratedUUID` accepts an optional `on:` argument that might be used to inject a value into an
+specific field. Given the following type:
+
+```graphql
+input createUserInput {
+  id: String!
+  email: String!
+  name: String!
+}
+```
+
+We can use `@injectGeneratedUUID` to set the value of `id` using:
+
+```graphql
+mutation ($input: createUserInput! @injectGeneratedUUID(on: "id")) {
+  users_Create($input) {
+    id
+    email
+    name
+  }
+}
+```
