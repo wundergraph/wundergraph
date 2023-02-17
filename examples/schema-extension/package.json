@@ -7,7 +7,8 @@
     "start:api": "wait-on tcp:8081 && wunderctl up --debug",
     "start:services": "docker-compose up -d",
     "start:server": "wait-on -d 5000 tcp:54322 && cd server && go run server.go",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "cleanup": "docker-compose down -v",
     "check": "tsc --noEmit",
     "test": "jest"

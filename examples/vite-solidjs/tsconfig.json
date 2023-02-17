@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "allowJs": true,
+    "noEmit": true,
+    "checkJs": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsxImportSource": "solid-js",
+    "jsx": "preserve",
+    "types": ["./env"],
+    "strict": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "paths": {
+      "vite": ["./node_modules/vite"],
+      "@wundergraph/solid-query": ["../../packages/solid-query/src"]
+    },
+    "baseUrl": "./"
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "./**/*.js", "./**/*.jsx"],
+  "exclude": ["node_modules", "**/node_modules/*"]
+}

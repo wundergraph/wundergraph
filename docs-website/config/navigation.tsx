@@ -92,6 +92,10 @@ const navigation = [
 						href: '/docs/examples/vite-swr',
 					},
 					{
+						title: 'Vite + Solid.js',
+						href: '/docs/examples/vite-solidjs',
+					},
+					{
 						title: 'Hooks',
 						href: '/docs/examples/hooks',
 					},
