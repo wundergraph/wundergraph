@@ -160,15 +160,6 @@ func (l *Loader) readGraphQLOperation(filePath string) {
 	}
 
 	operationName := normalizeOperationName(fileName)
-
-	for _, file := range l.out.GraphQLOperationFiles {
-		if file.OperationName == operationName {
-			l.out.Info = append(l.out.Info, fmt.Sprintf(
-				"skipping file %s. Operation name collides with operation defined in: %s", filePath, file.FilePath))
-			return
-		}
-	}
-
 	l.out.GraphQLOperationFiles = append(l.out.GraphQLOperationFiles, GraphQLOperationFile{
 		OperationName: operationName,
 		ApiMountPath:  fileName,
