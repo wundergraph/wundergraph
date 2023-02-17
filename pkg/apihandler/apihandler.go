@@ -513,7 +513,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
 			PipelineConfig: hooksPipelineCommonConfig,
-			Resolver:       newSynchronousOperationHooksResolver(r.resolver, synchronousPlan),
+			Resolver:       r.resolver,
+			Plan:           synchronousPlan,
 		}
 		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 		handler := &QueryHandler{
@@ -579,7 +580,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
 			PipelineConfig: hooksPipelineCommonConfig,
-			Resolver:       newSynchronousOperationHooksResolver(r.resolver, synchronousPlan),
+			Resolver:       r.resolver,
+			Plan:           synchronousPlan,
 		}
 		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 		handler := &MutationHandler{
@@ -621,7 +623,8 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		}
 		hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
 			PipelineConfig: hooksPipelineCommonConfig,
-			Resolver:       newSubscriptionOperationHooksResolver(r.resolver, subscriptionPlan),
+			Resolver:       r.resolver,
+			Plan:           subscriptionPlan,
 		}
 		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 		handler := &SubscriptionHandler{

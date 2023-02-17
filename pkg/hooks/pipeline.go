@@ -9,6 +9,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 
@@ -24,14 +25,8 @@ type SubscriptionWriter interface {
 	resolve.FlushWriter
 }
 
-type SynchronousOperationResolver interface {
-	// ResolveSynchronousOperation resolves a Query/Mutation operation.
-	ResolveSynchronousOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
-}
-
-type SubscriptionOperationResolver interface {
-	// ResolveSubscriptionOperation resolves a Subscription operation
-	ResolveSubscriptionOperation(ctx *resolve.Context, w SubscriptionWriter) error
+type QueryResolver interface {
+	ResolveGraphQLResponse(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte, writer io.Writer) (err error)
 }
 
 type ResolveConfiguration struct {
@@ -58,8 +53,6 @@ type Response struct {
 	Data     []byte
 }
 
-type operationResolver func(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
-
 type PipelineConfig struct {
 	Client        *Client
 	Authenticator Authenticator
@@ -70,33 +63,33 @@ type PipelineConfig struct {
 
 type SynchronousOperationPipelineConfig struct {
 	PipelineConfig
-	Resolver SynchronousOperationResolver
+	Resolver QueryResolver
+	Plan     *plan.SynchronousResponsePlan
 }
 
 type SubscriptionOperationPipelineConfig struct {
 	PipelineConfig
-	Resolver SubscriptionOperationResolver
+	Resolver *resolve.Resolver
+	Plan     *plan.SubscriptionResponsePlan
 }
 
 type pipeline struct {
 	client                 *Client
 	logger                 *zap.Logger
 	operation              *wgpb.Operation
-	resolver               operationResolver
 	postResolveTransformer *postresolvetransform.Transformer
 	authenticator          Authenticator
 	ResolveConfig          ResolveConfiguration
 	PostResolveConfig      PostResolveConfiguration
 }
 
-func newPipeline(config PipelineConfig, resolver operationResolver) pipeline {
+func newPipeline(config PipelineConfig) pipeline {
 	hooksConfig := config.Operation.GetHooksConfiguration()
 
 	return pipeline{
 		client:                 config.Client,
 		logger:                 config.Logger,
 		operation:              config.Operation,
-		resolver:               resolver,
 		postResolveTransformer: config.Transformer,
 		authenticator:          config.Authenticator,
 		ResolveConfig: ResolveConfiguration{
@@ -115,20 +108,18 @@ func newPipeline(config PipelineConfig, resolver operationResolver) pipeline {
 
 func NewSynchonousOperationPipeline(config SynchronousOperationPipelineConfig) *SynchronousOperationPipeline {
 
-	resolver := func(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
-		return config.Resolver.ResolveSynchronousOperation(ctx, w, buf)
-	}
 	return &SynchronousOperationPipeline{
-		pipeline: newPipeline(config.PipelineConfig, resolver),
+		pipeline: newPipeline(config.PipelineConfig),
+		resolver: config.Resolver,
+		plan:     config.Plan,
 	}
 }
 
 func NewSubscriptionOperationPipeline(config SubscriptionOperationPipelineConfig) *SubscriptionOperationPipeline {
-	resolver := func(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
-		return config.Resolver.ResolveSubscriptionOperation(ctx, w.(SubscriptionWriter))
-	}
 	return &SubscriptionOperationPipeline{
-		pipeline: newPipeline(config.PipelineConfig, resolver),
+		pipeline: newPipeline(config.PipelineConfig),
+		resolver: config.Resolver,
+		plan:     config.Plan,
 	}
 }
 
@@ -286,6 +277,8 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 
 type SynchronousOperationPipeline struct {
 	pipeline
+	resolver QueryResolver
+	plan     *plan.SynchronousResponsePlan
 }
 
 // Run runs the pre-resolution hooks, resolves the operation if needed and then runs the post-resolution
@@ -304,7 +297,7 @@ func (p *SynchronousOperationPipeline) Run(ctx *resolve.Context, w http.Response
 	if preResolveResp.Resolved {
 		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
 	} else {
-		err = p.resolver(ctx, w, buf)
+		err = p.resolver.ResolveGraphQLResponse(ctx, p.plan.Response, nil, buf)
 	}
 
 	if err != nil {
@@ -337,6 +330,8 @@ func (p *SynchronousOperationPipeline) Run(ctx *resolve.Context, w http.Response
 
 type SubscriptionOperationPipeline struct {
 	pipeline
+	resolver *resolve.Resolver
+	plan     *plan.SubscriptionResponsePlan
 }
 
 // Run runs the pre-resolution hooks and resolves the subscription if needed. The writer is responsible for
@@ -356,7 +351,7 @@ func (p *SubscriptionOperationPipeline) RunSubscription(ctx *resolve.Context, w 
 		_, err = w.Write(preResolveResp.Data)
 	} else {
 		ctx.Variables = preResolveResp.Data
-		err = p.resolver(ctx, w, nil)
+		err = p.resolver.ResolveGraphQLSubscription(ctx, p.plan.Response, w)
 	}
 
 	if err != nil {

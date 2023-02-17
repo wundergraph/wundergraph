@@ -160,7 +160,8 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 
 		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
 			PipelineConfig: hooksPipelineCommonConfig,
-			Resolver:       newSynchronousOperationHooksResolver(i.resolver, p),
+			Resolver:       i.resolver,
+			Plan:           p,
 		}
 		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
 
@@ -186,7 +187,8 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 
 		hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
 			PipelineConfig: hooksPipelineCommonConfig,
-			Resolver:       newSubscriptionOperationHooksResolver(i.resolver, p),
+			Resolver:       i.resolver,
+			Plan:           p,
 		}
 		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
 

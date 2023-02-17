@@ -51,7 +51,8 @@ func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Synch
 			Transformer:   &postresolvetransform.Transformer{},
 			Logger:        zap.NewNop(),
 		},
-		Resolver: newSynchronousOperationHooksResolver(resolver, preparedPlan),
+		Resolver: resolver,
+		Plan:     preparedPlan,
 	}
 	return hooks.NewSynchonousOperationPipeline(config)
 }
