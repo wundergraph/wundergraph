@@ -44,7 +44,7 @@ export function Hero() {
 								Explore our guides and examples to integrate WunderGraph.
 							</p>
 							<div className="mt-8 flex gap-4 md:justify-center lg:justify-start">
-								<Button href="/getting-started">Get started</Button>
+								<Button href="/docs/getting-started">Get started</Button>
 								<Button href="https://github.com/wundergraph/wundergraph" variant="secondary">
 									View on GitHub
 								</Button>
