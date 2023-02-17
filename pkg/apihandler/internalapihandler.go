@@ -151,7 +151,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
 		copy(extractedVariables, shared.Doc.Input.Variables)
 
-		hooksResolver := newOperationHooksResolver(i.resolver, p)
+		hooksResolver := newSynchronousOperationHooksResolver(i.resolver, p)
 		hooksPipeline := hooks.NewPipeline(i.middlewareClient, hooksAuthenticator, operation, hooksResolver, nil, i.log)
 
 		handler := &InternalApiHandler{
@@ -174,7 +174,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
 		copy(extractedVariables, shared.Doc.Input.Variables)
 
-		hooksResolver := newSubscriptionHooksResolver(i.resolver, p)
+		hooksResolver := newSubscriptionOperationHooksResolver(i.resolver, p)
 		hooksPipeline := hooks.NewPipeline(i.middlewareClient, hooksAuthenticator, operation, hooksResolver, nil, i.log)
 
 		handler := &InternalSubscriptionApiHandler{

@@ -25,10 +25,10 @@ type SubscriptionWriter interface {
 }
 
 type Resolver interface {
-	// ResolveOperation resolves a Query/Mutation operation.
-	ResolveOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
-	// ResolveQuery resolves a Subscription operation
-	ResolveSubscription(ctx *resolve.Context, w SubscriptionWriter) error
+	// ResolveSynchronousOperation resolves a Query/Mutation operation.
+	ResolveSynchronousOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error
+	// ResolveSubscriptionOperation resolves a Subscription operation
+	ResolveSubscriptionOperation(ctx *resolve.Context, w SubscriptionWriter) error
 }
 
 type ResolveConfiguration struct {
@@ -258,7 +258,7 @@ func (p *Pipeline) RunOperation(ctx *resolve.Context, w http.ResponseWriter, r *
 	if preResolveResp.Resolved {
 		_, err = io.Copy(buf, bytes.NewReader(ctx.Variables))
 	} else {
-		err = p.resolver.ResolveOperation(ctx, w, buf)
+		err = p.resolver.ResolveSynchronousOperation(ctx, w, buf)
 	}
 
 	if err != nil {
@@ -306,7 +306,7 @@ func (p *Pipeline) RunSubscription(ctx *resolve.Context, w SubscriptionWriter, r
 		_, err = w.Write(preResolveResp.Data)
 	} else {
 		ctx.Variables = preResolveResp.Data
-		err = p.resolver.ResolveSubscription(ctx, w)
+		err = p.resolver.ResolveSubscriptionOperation(ctx, w)
 	}
 
 	if err != nil {

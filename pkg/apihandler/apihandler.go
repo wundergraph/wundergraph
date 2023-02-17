@@ -504,7 +504,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := newOperationHooksResolver(r.resolver, synchronousPlan)
+		hooksResolver := newSynchronousOperationHooksResolver(r.resolver, synchronousPlan)
 		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &QueryHandler{
 			resolver:               r.resolver,
@@ -567,7 +567,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := newOperationHooksResolver(r.resolver, synchronousPlan)
+		hooksResolver := newSynchronousOperationHooksResolver(r.resolver, synchronousPlan)
 		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &MutationHandler{
 			resolver:               r.resolver,
@@ -606,7 +606,7 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 		if !ok {
 			break
 		}
-		hooksResolver := newSubscriptionHooksResolver(r.resolver, subscriptionPlan)
+		hooksResolver := newSubscriptionOperationHooksResolver(r.resolver, subscriptionPlan)
 		hooksPipeline := hooks.NewPipeline(r.middlewareClient, hooksAuthenticator, operation, hooksResolver, postResolveTransformer, r.log)
 		handler := &SubscriptionHandler{
 			resolver:               r.resolver,

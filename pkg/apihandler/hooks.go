@@ -11,41 +11,41 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 )
 
-type operationHooksResolver struct {
+type synchronousOperationHooksResolver struct {
 	resolver QueryResolver
 	plan     *plan.SynchronousResponsePlan
 }
 
-func (r *operationHooksResolver) ResolveOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
+func (r *synchronousOperationHooksResolver) ResolveSynchronousOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
 	return r.resolver.ResolveGraphQLResponse(ctx, r.plan.Response, nil, buf)
 }
 
-func (r *operationHooksResolver) ResolveSubscription(ctx *resolve.Context, w hooks.SubscriptionWriter) error {
+func (r *synchronousOperationHooksResolver) ResolveSubscriptionOperation(ctx *resolve.Context, w hooks.SubscriptionWriter) error {
 	return errors.New("can't resolve subscription")
 }
 
-func newOperationHooksResolver(r QueryResolver, plan *plan.SynchronousResponsePlan) hooks.Resolver {
-	return &operationHooksResolver{
+func newSynchronousOperationHooksResolver(r QueryResolver, plan *plan.SynchronousResponsePlan) hooks.Resolver {
+	return &synchronousOperationHooksResolver{
 		resolver: r,
 		plan:     plan,
 	}
 }
 
-type subscriptionHooksResolver struct {
+type subscriptionOperationHooksResolver struct {
 	resolver *resolve.Resolver
 	plan     *plan.SubscriptionResponsePlan
 }
 
-func (r *subscriptionHooksResolver) ResolveOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
+func (r *subscriptionOperationHooksResolver) ResolveSynchronousOperation(ctx *resolve.Context, w http.ResponseWriter, buf *bytes.Buffer) error {
 	return errors.New("can't resolve operation")
 }
 
-func (r *subscriptionHooksResolver) ResolveSubscription(ctx *resolve.Context, w hooks.SubscriptionWriter) error {
+func (r *subscriptionOperationHooksResolver) ResolveSubscriptionOperation(ctx *resolve.Context, w hooks.SubscriptionWriter) error {
 	return r.resolver.ResolveGraphQLSubscription(ctx, r.plan.Response, w)
 }
 
-func newSubscriptionHooksResolver(r *resolve.Resolver, plan *plan.SubscriptionResponsePlan) hooks.Resolver {
-	return &subscriptionHooksResolver{
+func newSubscriptionOperationHooksResolver(r *resolve.Resolver, plan *plan.SubscriptionResponsePlan) hooks.Resolver {
+	return &subscriptionOperationHooksResolver{
 		resolver: r,
 		plan:     plan,
 	}
