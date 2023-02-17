@@ -17,6 +17,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
+	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -39,6 +40,23 @@ func (f *FakeResolver) ResolveGraphQLResponse(ctx *resolve.Context, response *re
 	return
 }
 
+func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.SynchronousOperationPipeline {
+	preparedPlan := &plan.SynchronousResponsePlan{
+		Response: &resolve.GraphQLResponse{},
+	}
+	config := hooks.SynchronousOperationPipelineConfig{
+		PipelineConfig: hooks.PipelineConfig{
+			Authenticator: hooksAuthenticator,
+			Operation:     operation,
+			Transformer:   &postresolvetransform.Transformer{},
+			Logger:        zap.NewNop(),
+		},
+		Resolver: resolver,
+		Plan:     preparedPlan,
+	}
+	return hooks.NewSynchonousOperationPipeline(config)
+}
+
 func TestQueryHandler_VariablesIgnore(t *testing.T) {
 
 	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
@@ -51,29 +69,32 @@ func TestQueryHandler_VariablesIgnore(t *testing.T) {
 
 	validateCalled := false
 
-	handler := &QueryHandler{
-		resolver: &FakeResolver{
-			response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
-			validate: func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte) {
-				assert.Equal(t, `{"id":123}`, string(ctx.Variables))
-				validateCalled = true
-			},
+	resolver := &FakeResolver{
+		response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
+		validate: func(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte) {
+			assert.Equal(t, `{"id":123}`, string(ctx.Variables))
+			validateCalled = true
 		},
-		log: zap.NewNop(),
+	}
+	operation := &wgpb.Operation{
+		Name:          "test",
+		OperationType: wgpb.OperationType_QUERY,
+	}
+	handler := &QueryHandler{
+		resolver: resolver,
+		log:      zap.NewNop(),
 		preparedPlan: &plan.SynchronousResponsePlan{
 			Response: &resolve.GraphQLResponse{},
 		},
-		pool: pool.New(),
-		operation: &wgpb.Operation{
-			Name:          "test",
-			OperationType: wgpb.OperationType_QUERY,
-		},
+		pool:                   pool.New(),
+		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpoalteNothing,
 		jsonStringInterpolator: interpoalteNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		queryParamsAllowList:   []string{"id"},
+		hooksPipeline:          newPipeline(resolver, operation),
 	}
 
 	srv := httptest.NewServer(handler)
@@ -103,24 +124,28 @@ func TestQueryHandler_ETag(t *testing.T) {
 	validateNothing, err := inputvariables.NewValidator(`{"type":"object","properties":{"id":{"type":"number"}}}`, true)
 	assert.NoError(t, err)
 
+	resolver := &FakeResolver{
+		response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
+	}
+	operation := &wgpb.Operation{
+		Name:          "test",
+		OperationType: wgpb.OperationType_QUERY,
+	}
+
 	handler := &QueryHandler{
-		resolver: &FakeResolver{
-			response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
-		},
-		log: zap.NewNop(),
+		resolver: resolver,
+		log:      zap.NewNop(),
 		preparedPlan: &plan.SynchronousResponsePlan{
 			Response: &resolve.GraphQLResponse{},
 		},
-		pool: pool.New(),
-		operation: &wgpb.Operation{
-			Name:          "test",
-			OperationType: wgpb.OperationType_QUERY,
-		},
+		pool:                   pool.New(),
+		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpoalteNothing,
 		jsonStringInterpolator: interpoalteNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
+		hooksPipeline:          newPipeline(resolver, operation),
 	}
 
 	srv := httptest.NewServer(handler)
@@ -161,6 +186,10 @@ func TestQueryHandler_Caching(t *testing.T) {
 	resolver := &FakeResolver{
 		response: []byte(`{"data":{"me":{"name":"Jens"}}}`),
 	}
+	operation := &wgpb.Operation{
+		Name:          "test",
+		OperationType: wgpb.OperationType_QUERY,
+	}
 
 	handler := &QueryHandler{
 		resolver: resolver,
@@ -175,16 +204,14 @@ func TestQueryHandler_Caching(t *testing.T) {
 			public:               true,
 			staleWhileRevalidate: 0,
 		},
-		cache: cache,
-		operation: &wgpb.Operation{
-			Name:          "test",
-			OperationType: wgpb.OperationType_QUERY,
-		},
+		cache:                  cache,
+		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
 		stringInterpolator:     interpoalteNothing,
 		jsonStringInterpolator: interpoalteNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
+		hooksPipeline:          newPipeline(resolver, operation),
 	}
 
 	srv := httptest.NewServer(handler)

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 
 	"github.com/buger/jsonparser"
 	"github.com/gorilla/mux"
@@ -141,6 +140,13 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
+	hooksPipelineCommonConfig := hooks.PipelineConfig{
+		Client:        i.middlewareClient,
+		Authenticator: hooksAuthenticator,
+		Operation:     operation,
+		Logger:        i.log,
+	}
+
 	switch operation.OperationType {
 	case wgpb.OperationType_QUERY,
 		wgpb.OperationType_MUTATION:
@@ -152,6 +158,13 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
 		copy(extractedVariables, shared.Doc.Input.Variables)
 
+		hooksPipelineConfig := hooks.SynchronousOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       i.resolver,
+			Plan:           p,
+		}
+		hooksPipeline := hooks.NewSynchonousOperationPipeline(hooksPipelineConfig)
+
 		handler := &InternalApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
@@ -159,6 +172,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			log:                i.log,
 			resolver:           i.resolver,
 			renameTypeNames:    i.renameTypeNames,
+			hooksPipeline:      hooksPipeline,
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
@@ -171,6 +185,13 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		extractedVariables := make([]byte, len(shared.Doc.Input.Variables))
 		copy(extractedVariables, shared.Doc.Input.Variables)
 
+		hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
+			PipelineConfig: hooksPipelineCommonConfig,
+			Resolver:       i.resolver,
+			Plan:           p,
+		}
+		hooksPipeline := hooks.NewSubscriptionOperationPipeline(hooksPipelineConfig)
+
 		handler := &InternalSubscriptionApiHandler{
 			preparedPlan:       p,
 			operation:          operation,
@@ -178,6 +199,7 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 			log:                i.log,
 			resolver:           i.resolver,
 			renameTypeNames:    i.renameTypeNames,
+			hooksPipeline:      hooksPipeline,
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
@@ -223,8 +245,8 @@ type InternalApiHandler struct {
 	extractedVariables []byte
 	log                *zap.Logger
 	resolver           *resolve.Resolver
-	bearerCache        sync.Map
 	renameTypeNames    []resolve.RenameTypeName
+	hooksPipeline      *hooks.SynchronousOperationPipeline
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -286,12 +308,19 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	resolveErr := h.resolver.ResolveGraphQLResponse(ctx, h.preparedPlan.Response, nil, buf)
-	if done := handleOperationErr(requestLogger, resolveErr, w, "Internal API Handler ResolveGraphQLResponse failed", h.operation); done {
+	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
+	if done := handleOperationErr(requestLogger, err, w, "hooks pipeline failed", h.operation); done {
 		return
 	}
+
+	if resp.Done {
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	_, _ = buf.WriteTo(w)
+	if _, err := w.Write(resp.Data); err != nil {
+		requestLogger.Error("writing response", zap.Error(err))
+	}
 }
 
 type InternalSubscriptionApiHandler struct {
@@ -300,8 +329,8 @@ type InternalSubscriptionApiHandler struct {
 	extractedVariables []byte
 	log                *zap.Logger
 	resolver           *resolve.Resolver
-	bearerCache        sync.Map
 	renameTypeNames    []resolve.RenameTypeName
+	hooksPipeline      *hooks.SubscriptionOperationPipeline
 }
 
 func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -363,18 +392,13 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	var (
-		flushWriter *httpFlushWriter
-		ok          bool
-	)
-
-	ctx.Context, flushWriter, ok = getFlushWriter(ctx.Context, ctx.Variables, r, w)
+	flushWriter, ok := getHooksFlushWriter(ctx, r, w, h.hooksPipeline, h.log)
 	if !ok {
 		http.Error(w, "Connection not flushable", http.StatusBadRequest)
 		return
 	}
 
-	err = h.resolver.ResolveGraphQLSubscription(ctx, h.preparedPlan.Response, flushWriter)
+	_, err = h.hooksPipeline.RunSubscription(ctx, flushWriter, r)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			// e.g. client closed connection
