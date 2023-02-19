@@ -464,6 +464,7 @@ importers:
       nock: ^13.2.9
       node-fetch: 2.6.7
       svelte: ^3.54.0
+      svelte-jester: ^2.3.2
       tsd: ^0.24.1
       typescript: ^4.8.2
     devDependencies:
@@ -480,6 +481,7 @@ importers:
       nock: 13.2.9
       node-fetch: 2.6.7
       svelte: 3.55.1
+      svelte-jester: 2.3.2_jest@29.4.2+svelte@3.55.1
       tsd: 0.24.1
       typescript: 4.9.4
 
@@ -16166,6 +16168,17 @@ packages:
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  /svelte-jester/2.3.2_jest@29.4.2+svelte@3.55.1:
+    resolution: {integrity: sha512-JtxSz4FWAaCRBXbPsh4LcDs4Ua7zdXgLC0TZvT1R56hRV0dymmNP+abw67DTPF7sQPyNxWsOKd0Sl7Q8SnP8kg==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      jest: '>= 27'
+      svelte: '>= 3'
+    dependencies:
+      jest: 29.4.2
+      svelte: 3.55.1
+    dev: true
 
   /svelte/3.55.1:
     resolution: {integrity: sha512-S+87/P0Ve67HxKkEV23iCdAh/SX1xiSfjF1HOglno/YTbSTW7RniICMCofWGdJJbdjw3S+0PfFb1JtGfTXE0oQ==}
