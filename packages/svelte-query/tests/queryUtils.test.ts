@@ -8,6 +8,8 @@ import { createQueryUtils } from '../src';
 import FetchDisabledWrapper from './TestComponents/FetchDisabledWrapper.svelte';
 import MutationWithAuthWrapper from './TestComponents/MutationWithAuthWrapper.svelte';
 import MutationWithInvalidationWrapper from './TestComponents/MutationWithInvalidationWrapper.svelte';
+import SubscriptionWrapper from './TestComponents/SubscriptionWrapper.svelte';
+import UserWrapper from './TestComponents/UserWrapper.svelte';
 
 export type Queries = {
 	Weather: {
@@ -281,6 +283,90 @@ describe('Svelte Query - createMutation', () => {
 
 		await waitFor(() => {
 			screen.getByText('Rick Astley');
+		});
+
+		scope.done();
+	});
+});
+
+describe('Svelte Query - createSubscription', () => {
+	const client = createClient();
+
+	const queryCache = new QueryCache();
+	const queryClient = new QueryClient({ queryCache });
+
+	beforeEach(() => {
+		queryCache.clear();
+	});
+
+	afterAll(() => {
+		queryCache.clear();
+	});
+
+	const { createSubscription } = createQueryUtils<Operations>(client);
+
+	it('should subscribe', async () => {
+		// web streams not supported in node-fetch, we use subscribeOnce to test
+		const scope = nock('https://api.com')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.matchHeader('accept', 'application/json')
+			.matchHeader('content-type', 'application/json')
+			.get('/operations/Countdown')
+			.query({ wg_api_hash: '123', wg_variables: JSON.stringify({ from: 100 }), wg_subscribe_once: 'true' })
+			.reply(200, { data: { count: 100 } });
+
+		const subscriptionCreator = () =>
+			createSubscription({
+				operationName: 'Countdown',
+				subscribeOnce: true,
+				input: {
+					from: 100,
+				},
+			});
+
+		render(SubscriptionWrapper, { queryClient, subscriptionCreator });
+
+		screen.getByText('loading');
+
+		await waitFor(
+			() => {
+				screen.getByText('100');
+			},
+			{
+				timeout: 10000,
+			}
+		);
+
+		scope.done();
+	});
+});
+
+describe('Svelte Query - getUser', () => {
+	const client = createClient();
+
+	const queryCache = new QueryCache();
+	const queryClient = new QueryClient({ queryCache });
+
+	beforeEach(() => {
+		queryCache.clear();
+	});
+
+	const { getUser } = createQueryUtils<Operations>(client);
+
+	it('should return user', async () => {
+		const scope = nock('https://api.com')
+			.matchHeader('accept', 'application/json')
+			.matchHeader('content-type', 'application/json')
+			.matchHeader('WG-SDK-Version', '1.0.0')
+			.get('/auth/user')
+			.reply(200, { email: 'info@wundergraph.com' });
+
+		const userGetter = () => getUser();
+
+		render(UserWrapper, { queryClient, userGetter });
+
+		await waitFor(() => {
+			screen.getByText('info@wundergraph.com');
 		});
 
 		scope.done();
