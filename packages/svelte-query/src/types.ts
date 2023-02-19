@@ -16,6 +16,7 @@ import type {
 	CreateMutationOptions as TanstackCreateMutationOptions,
 	CreateMutationResult,
 } from '@tanstack/svelte-query';
+import type { Readable } from 'svelte/store';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
@@ -83,7 +84,12 @@ export type CreateQuery<Operations extends OperationsDefinition, ExtraOptions ex
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
 		options: CreateQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): CreateQueryResult<Data, ClientResponseError> & { isSubscribed?: boolean };
+	): CreateQueryResult<Data, ClientResponseError> & {
+		subscriptionState?: Readable<{
+			isLoading: boolean;
+			isSubscribed: boolean;
+		}>;
+	};
 };
 
 export type UseSubscriptionOptions<
@@ -115,7 +121,10 @@ export type CreateSubscription<Operations extends OperationsDefinition, ExtraOpt
 };
 
 export type CreateSubscriptionResult<Data, Error = ClientResponseError> = CreateQueryResult<Data, Error> & {
-	isSubscribed: boolean;
+	subscriptionState: Readable<{
+		isLoading: boolean;
+		isSubscribed: boolean;
+	}>;
 };
 
 export type UseMutationOptions<Data, Error, Input, OperationName extends string> = Omit<

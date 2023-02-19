@@ -3,9 +3,11 @@ import {
 	createMutation as tanstackCreateMutation,
 	useQueryClient,
 } from '@tanstack/svelte-query';
+import { readable } from 'svelte/store';
+import { onMount } from 'svelte';
 import type { QueryFunctionContext } from '@tanstack/svelte-query';
 import type { OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
-// import { serialize } from '@wundergraph/sdk/internal';
+import { serialize } from '@wundergraph/sdk/internal';
 import type {
 	CreateFileUpload,
 	CreateMutation,
@@ -21,7 +23,7 @@ import type {
 
 export const userQueryKey = 'wg_user';
 
-export function createQueryUtils<Operations extends OperationsDefinition>(client: Client) {
+export default function createQueryUtils<Operations extends OperationsDefinition>(client: Client) {
 	const queryFetcher: QueryFetcher<Operations> = async (query) => {
 		const result = await client.query(query);
 
@@ -58,7 +60,7 @@ export function createQueryUtils<Operations extends OperationsDefinition>(client
 	 *
 	 * All queries support liveQuery by default, enabling this will set up a realtime subscription.
 	 * ```ts
-	 * const { data, error, isLoading, isSubscribed } = useQuery({
+	 * const { data, error, isLoading, subscriptionState } = useQuery({
 	 *   operationName: 'Weather',
 	 *   liveQuery: true,
 	 * })
@@ -67,8 +69,7 @@ export function createQueryUtils<Operations extends OperationsDefinition>(client
 	const createQuery: CreateQuery<Operations> = (options) => {
 		const { operationName, liveQuery, input, enabled, refetchOnWindowFocus, ...queryOptions } = options;
 
-		// TODO: will be needed for subscriptions
-		// const queryHash = serialize([operationName, input]);
+		const queryHash = serialize([operationName, input]);
 
 		const result = tanstackCreateQuery({
 			queryKey: queryKey({ operationName, input }),
@@ -78,22 +79,20 @@ export function createQueryUtils<Operations extends OperationsDefinition>(client
 			refetchOnWindowFocus: liveQuery ? false : refetchOnWindowFocus,
 		});
 
-		// TODO: Learn about how to build subscription utility in svelte
-		// const { isSubscribed } = useSubscribeTo({
-		// 	queryHash,
-		// 	operationName,
-		// 	input,
-		// 	liveQuery,
-		// 	enabled: options.enabled !== false && liveQuery,
-		// 	onSuccess: options.onSuccess,
-		// 	onError: options.onError
-		// });
+		const subscriptionState = createSubscribeTo({
+			queryHash,
+			operationName,
+			input,
+			liveQuery,
+			enabled: options.enabled !== false && liveQuery,
+			onSuccess: options.onSuccess,
+			onError: options.onError,
+		});
 
 		if (liveQuery) {
 			return {
 				...result,
-				// TODO: Subscription not ready yet
-				// isSubscribed
+				subscriptionState,
 			};
 		}
 		return result;
@@ -207,10 +206,63 @@ export function createQueryUtils<Operations extends OperationsDefinition>(client
 	// Helper function used in createQuery and createSubscription
 	const createSubscribeTo = (props: CreateSubscribeToProps) => {
 		const client = useQueryClient();
-		const { queryHash, operationName, input, enabled, liveQuery, subscribeOnce, resetOnMount, onSuccess, onError } =
-			props;
+		const { operationName, input, enabled, liveQuery, subscribeOnce, resetOnMount, onSuccess, onError } = props;
 
-		//TODO: Svelte style utility to setup subscriptions
+		let startedAtRef: number | null = null;
+		let unsubscribe: ReturnType<typeof subscribeTo>;
+
+		onMount(() => {
+			if (!startedAtRef && resetOnMount) {
+				client.removeQueries([operationName, input]);
+			}
+		});
+
+		const subscriptionState = readable(
+			{
+				isLoading: false,
+				isSubscribed: false,
+			},
+			function start(set) {
+				set({ isLoading: true, isSubscribed: false });
+				unsubscribe = subscribeTo({
+					operationName,
+					input,
+					liveQuery,
+					subscribeOnce,
+					onError(error) {
+						set({ isLoading: false, isSubscribed: false });
+						onError?.(error);
+						startedAtRef = null;
+					},
+					onResult(result) {
+						if (!startedAtRef) {
+							set({ isLoading: false, isSubscribed: true });
+							onSuccess?.(result);
+							startedAtRef = new Date().getTime();
+						}
+
+						// Promise is not handled because we are not interested in the result
+						// Errors are handled by React Query internally
+						client.setQueryData([operationName, input], () => {
+							if (result.error) {
+								throw result.error;
+							}
+
+							return result.data;
+						});
+					},
+					onAbort() {
+						set({ isLoading: false, isSubscribed: false });
+						startedAtRef = null;
+					},
+				});
+				return function stop() {
+					unsubscribe?.();
+				};
+			}
+		);
+
+		return subscriptionState;
 	};
 
 	/**
@@ -220,34 +272,32 @@ export function createQueryUtils<Operations extends OperationsDefinition>(client
 	 *
 	 * @usage
 	 * ```ts
-	 * const { data, error, isLoading, isSubscribed } = useSubscription({
+	 * const { data, error, isLoading, subscriptionState } = createSubscription({
 	 *   operationName: 'Countdown',
 	 * })
 	 */
 	const createSubscription: CreateSubscription<Operations> = (options) => {
 		const { enabled = true, operationName, input, subscribeOnce, onSuccess, onError } = options;
-		// const queryHash = serialize([operationName, input]);
+		const queryHash = serialize([operationName, input]);
 
 		const subscription = tanstackCreateQuery<any, any, any, any>({
 			queryKey: [operationName, input],
 			enabled: false, // we update the cache async
 		});
 
-		// TODO: Learn about how to build subscription utility in svelte
-		// const { isSubscribed } = useSubscribeTo({
-		// 	queryHash,
-		// 	operationName,
-		// 	input,
-		// 	subscribeOnce,
-		// 	enabled,
-		// 	onSuccess,
-		// 	onError
-		// });
+		const subscriptionState = createSubscribeTo({
+			queryHash,
+			operationName,
+			input,
+			subscribeOnce,
+			enabled,
+			onSuccess,
+			onError,
+		});
 
 		return {
 			...subscription,
-			// TODO: set actual value
-			isSubscribed: false,
+			subscriptionState,
 		};
 	};
 
