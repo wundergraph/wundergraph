@@ -224,7 +224,12 @@ directive @jsonSchema (
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+
+  """
+  Optional field to apply the JSON schema to
+  """
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 enum COMMON_REGEX_PATTERN {
     EMAIL

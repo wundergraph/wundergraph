@@ -315,17 +315,16 @@ export const parseGraphQLOperations = (
 
 const handleJsonSchemaDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
 	const directiveName = 'jsonSchema';
-	const variableName = variable.variable.name.value;
-	const updateJSONSchema = (schema: any, variablePathComponents: string[], update: (schema: JSONSchema) => void) => {
-		let properties = schema.properties;
-		for (const component of variablePathComponents) {
-			if (properties && typeof properties !== 'boolean') {
-				properties = properties[component];
-			}
+	const updateJSONSchema = (
+		schema: JSONSchema,
+		variablePathComponents: string[],
+		update: (schema: JSONSchema) => void
+	) => {
+		let prop = JSONSchemaPropertyResolvingRef(schema, schema, variablePathComponents[0]);
+		for (const component of variablePathComponents.slice(1, variablePathComponents.length)) {
+			prop = JSONSchemaPropertyResolvingRef(schema, prop, component);
 		}
-		if (properties !== undefined || typeof schema !== 'boolean') {
-			update(properties as JSONSchema);
-		}
+		update(prop);
 	};
 	const updateSchema = (directive: ConstDirectiveNode, update: (schema: JSONSchema) => void) => {
 		const variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
@@ -680,6 +679,41 @@ const updateSkipFields = (skipFields: SchemaSkipFields, skipVariablePaths: strin
 	return skipFields;
 };
 
+const JSONSchemaResolveRef = (root: JSONSchema, ref: string) => {
+	const prefix = '#/definitions/';
+	if (!ref || !ref.startsWith(prefix)) {
+		throw new Error(`invalid object ref ${ref}`);
+	}
+	const refName = ref.substring(prefix.length);
+	const def = root.definitions ? root.definitions[refName] : null;
+	if (!def) {
+		throw new Error(`missing object definition for reference ${refName}`);
+	}
+	return def as JSONSchema;
+};
+
+const JSONSchemaPropertyResolvingRef = (root: JSONSchema, parent: JSONSchema, propName: string) => {
+	let prop = parent.properties![propName] as JSONSchema;
+	if (prop.$ref) {
+		prop = JSONSchemaResolveRef(root, prop.$ref);
+		parent.properties![propName] = prop;
+	}
+	return prop;
+};
+
+const applySkipFields = (skipFields: SchemaSkipFields, root: JSONSchema, parent: JSONSchema, propName: string) => {
+	const keys = Object.keys(skipFields);
+	if (keys.length > 0) {
+		let prop = JSONSchemaPropertyResolvingRef(root, parent, propName);
+		for (const key of keys) {
+			applySkipFields(skipFields[key], root, prop, key);
+		}
+	} else {
+		// Leaf, remove from the schema
+		delete parent.properties![propName];
+	}
+};
+
 export const operationVariablesToJSONSchema = (
 	graphQLSchema: GraphQLSchema,
 	operation: OperationDefinitionNode,
@@ -728,9 +762,11 @@ export const operationVariablesToJSONSchema = (
 			type,
 			name,
 			nonNullType,
-			customJsonScalars,
-			skipFields
+			customJsonScalars
 		);
+		if (Object.keys(skipFields).length > 0) {
+			applySkipFields(skipFields, schema, schema, name);
+		}
 	});
 
 	return schema;
@@ -805,8 +841,7 @@ const typeSchema = (
 	type: TypeNode,
 	name: string,
 	nonNull: boolean,
-	customJsonScalars: string[],
-	skipFields?: SchemaSkipFields
+	customJsonScalars: string[]
 ): JSONSchema => {
 	switch (type.kind) {
 		case 'NonNullType':
@@ -826,8 +861,7 @@ const typeSchema = (
 				type.type,
 				name,
 				true,
-				customJsonScalars,
-				skipFields
+				customJsonScalars
 			);
 		case 'ListType':
 			const schema: JSONSchema = {
@@ -841,8 +875,7 @@ const typeSchema = (
 				type.type,
 				name,
 				false,
-				customJsonScalars,
-				skipFields
+				customJsonScalars
 			);
 			return schema;
 		case 'NamedType':
@@ -910,11 +943,6 @@ const typeSchema = (
 							schema.properties = {};
 							(namedType.astNode.fields || []).forEach((f) => {
 								const name = f.name.value;
-								let currentSkipFields = skipFields ? skipFields[name] : undefined;
-								if (currentSkipFields !== undefined && Object.keys(currentSkipFields).length == 0) {
-									// Leaf
-									return;
-								}
 								let fieldType = f.type;
 								if (f.defaultValue !== undefined && fieldType.kind === 'NonNullType') {
 									fieldType = fieldType.type;
@@ -927,8 +955,7 @@ const typeSchema = (
 									fieldType,
 									name,
 									false,
-									customJsonScalars,
-									currentSkipFields
+									customJsonScalars
 								);
 							});
 							root.definitions![typeName] = schema;
