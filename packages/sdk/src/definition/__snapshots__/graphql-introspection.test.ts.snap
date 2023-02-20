@@ -1058,7 +1058,9 @@ directive @jsonSchema(
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+  """Optional field to apply the JSON schema to"""
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
@@ -2353,7 +2355,9 @@ directive @jsonSchema(
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+  """Optional field to apply the JSON schema to"""
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
