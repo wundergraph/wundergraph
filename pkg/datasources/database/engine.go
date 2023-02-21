@@ -158,6 +158,14 @@ Loop:
 		return "", err
 	}
 	if response.Error != nil {
+		if response.Error.Data.Message != "" {
+			// This message is not helpful at all, just omit it
+			if response.Error.Message == "An error happened. Check the data field for details." {
+				return "", fmt.Errorf("error while introspecting database: %s", response.Error.Data.Message)
+
+			}
+			return "", fmt.Errorf("error while introspecting database: %s (%s)", response.Error.Message, response.Error.Data.Message)
+		}
 		return "", fmt.Errorf("error while introspecting database: %s", response.Error.Message)
 	}
 	return response.Result.DataModel, nil
