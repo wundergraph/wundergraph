@@ -44,7 +44,7 @@ func HttpRequestToWunderGraphRequestJSON(r *http.Request, withBody bool) ([]byte
 	var body []byte
 	if withBody {
 		body, _ = ioutil.ReadAll(r.Body)
-		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		r.Body = ioutil.NopCloser(bytes.NewReader(body))
 	}
 	return json.Marshal(WunderGraphRequest{
 		Method:     r.Method,
@@ -202,7 +202,7 @@ func (c *Client) DoOperationRequest(ctx context.Context, operationName string, h
 
 func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
 	jsonData = c.setInternalHookData(ctx, jsonData, buf)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewReader(jsonData))
 	if err != nil {
 		return nil, err
 	}
@@ -257,7 +257,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 
 func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce, useSSE, useJsonPatch bool, out io.Writer, buf *bytes.Buffer) error {
 	jsonData = c.setInternalHookData(ctx, jsonData, buf)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewReader(jsonData))
 	if err != nil {
 		return err
 	}
@@ -393,7 +393,7 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte, buf *
 
 func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, action string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) error {
 	jsonData = c.setInternalHookData(ctx, jsonData, buf)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewReader(jsonData))
 	if err != nil {
 		return err
 	}
