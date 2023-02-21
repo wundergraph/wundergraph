@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.136.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.135.0...@wundergraph/sdk@0.136.0) (2023-02-21)
+
+### Features
+
+* add support for hooks in internal API calls ([#669](https://github.com/wundergraph/wundergraph/issues/669)) ([3734d1d](https://github.com/wundergraph/wundergraph/commit/3734d1d42a978c378dd5d6c9b44ad0e93c5ede30)) (@fiam)
+* new open api introspection ([#621](https://github.com/wundergraph/wundergraph/issues/621)) ([0f070bb](https://github.com/wundergraph/wundergraph/commit/0f070bb28b37c4cfe30b356f2c11c1f69d1bd903)) (@spetrunin)
+* **postman:** add folders for postman collections + postman types ([#624](https://github.com/wundergraph/wundergraph/issues/624))Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> Co-authored-by: Dustin Deus <deusdustin@gmail.com> ([1f89f63](https://github.com/wundergraph/wundergraph/commit/1f89f630147105f72084020332546a093a0908f2)) (@andreimc)
+
+### Bug Fixes
+
+* client template imports ([#679](https://github.com/wundergraph/wundergraph/issues/679)) ([4ab4146](https://github.com/wundergraph/wundergraph/commit/4ab4146c7351feaa8817f7dad63efbdb59a1cb0e)) (@rwest202)
+* modify build scripts ([#660](https://github.com/wundergraph/wundergraph/issues/660)) ([8bbfa96](https://github.com/wundergraph/wundergraph/commit/8bbfa96aaa92243772bda44b62c23e191d5be54f)) (@JivusAyrus)
+
 ## [0.135.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.134.0...@wundergraph/sdk@0.135.0) (2023-02-10)
 
 ### Features
