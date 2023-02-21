@@ -149,14 +149,14 @@ export class Client {
 
 			switch (response.status) {
 				case 401:
-					return new AuthorizationError(json.errors[0]?.message, response.status);
+					return new AuthorizationError(json.errors[0]?.message.trim(), response.status);
 				case 400:
 					return new InputValidationError(json, response.status);
 				default:
-					return new ResponseError(json.errors[0]?.message || json.message, response.status);
+					return new ResponseError((json.errors[0]?.message || json.message).trim(), response.status);
 			}
 		} catch {
-			return new ResponseError(text.length ? text : 'Response is not OK', response.status);
+			return new ResponseError(text.length ? text.trim() : 'Response is not OK', response.status);
 		}
 	}
 

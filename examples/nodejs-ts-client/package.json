@@ -5,7 +5,8 @@
   "scripts": {
     "start": "wunderctl up --debug",
     "check": "tsc --noEmit",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "request": "ts-node client.ts",
     "test": "jest"
   },

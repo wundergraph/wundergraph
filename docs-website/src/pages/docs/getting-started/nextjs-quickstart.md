@@ -52,6 +52,7 @@ Let's take a look at the default configuration open `.wundergraph/wundergraph.co
 You can see that we have a single API configured, which is the [SpaceX GraphQL API](https://spacex-api.fly.dev/graphql).
 
 ```ts
+// the name of this const will be supplied to the apis property in the configuration
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
@@ -62,7 +63,8 @@ The API is introspected and added to the WunderGraph virtual graph, as you can s
 
 ```ts
 configureWunderGraphApplication({
-  apis: [countries],
+  // the const defined above is provided in the array of apis here
+  apis: [spaceX],
   // ...
   codeGenerators: [
     {
@@ -77,7 +79,9 @@ configureWunderGraphApplication({
 });
 ```
 
-What's different from the [1-minute quickstart](/docs/quickstart) here is we added a `NextJsTemplate` to the code generators. This will generate the typesafe client and React hooks that can be used in Next.js.
+The difference between this configuration and the one in the [1-minute quickstart](/docs/getting-started/quickstart)
+is the addition of the `NextJsTemplate` to the code generators. This will generate the typesafe client and React
+hooks that can be used in Next.js.
 
 Now let's take a look at the operations.
 
@@ -203,9 +207,8 @@ You can call TypeScript operations just like Graphql operations, fully type safe
 Wunderbar! You've added your first Graphql API to Next.js. Next up you might want to add a database, authentication and support uploads to turn Next.js into a full stack powerhouse 😎.
 
 - [Databases](/docs/databases)
-- [Authentication](/docs/authentication)
-- [Realtime](/docs/realtime)
-- [File Storage](/docs/file-storage)
+- [Authentication](/docs/auth)
+- [File Storage](/docs/storage)
 
 ### Guides
 

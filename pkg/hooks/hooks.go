@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -380,16 +381,20 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
+		return fmt.Errorf("hook %s failed with error: %w", string(hook), err)
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("hook %s failed with reading body with error: %w", string(hook), err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)
+		return fmt.Errorf("hook %s failed with invalid status code: %d (%s)", string(hook), resp.StatusCode, string(data))
 	}
 
-	dec := json.NewDecoder(resp.Body)
-
-	err = dec.Decode(hookResponse)
+	err = json.Unmarshal(data, hookResponse)
 	if err != nil {
 		return fmt.Errorf("hook %s response could not be decoded: %w", string(hook), err)
 	}
@@ -420,4 +425,28 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 	}
 
 	return true
+}
+
+func EncodeData(authenticator Authenticator, r *http.Request, buf []byte, variables []byte, response []byte) []byte {
+	// TODO: This doesn't really reuse the bytes.Buffer storage, refactor it after adding more tests
+	buf = buf[:0]
+	buf = append(buf, []byte(`{"__wg":{}}`)...)
+	if user := authenticator(r.Context()); user != nil {
+		if userJson, err := json.Marshal(user); err == nil {
+			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
+		}
+	}
+	if len(variables) > 2 {
+		buf, _ = jsonparser.Set(buf, variables, "input")
+	}
+	if len(response) != 0 {
+		buf, _ = jsonparser.Set(buf, response, "response")
+	}
+	if r != nil {
+		counterHeader := r.Header.Get("Wg-Cycle-Counter")
+		counter, _ := strconv.ParseInt(counterHeader, 10, 64)
+		counterValue := []byte(strconv.FormatInt(counter+1, 10))
+		buf, _ = jsonparser.Set(buf, counterValue, "cycleCounter")
+	}
+	return buf
 }
