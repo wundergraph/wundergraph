@@ -102,7 +102,12 @@ const counter = introspect.graphql({
 			}
 
 			type Subscription {
-				countdown(from: Int!): Int!
+				countdown(from: Int!): Countdown!
+			}
+
+			type Countdown {
+				countdown: Int!
+				description: String!
 			}
 			
 			schema {

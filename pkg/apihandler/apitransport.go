@@ -15,13 +15,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
 
-	"github.com/wundergraph/graphql-go-tools/pkg/pool"
-
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
-	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -131,10 +129,13 @@ func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) 
 		}
 	}
 
-	return t.roundTrip(request)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	return t.roundTrip(request, buf)
 }
 
-func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err error) {
+func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res *http.Response, err error) {
 	var (
 		onRequestHook, onResponseHook bool
 	)
@@ -150,7 +151,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 	}
 
 	if onRequestHook {
-		request, err = t.handleOnRequestHook(request, metaData)
+		request, err = t.handleOnRequestHook(request, metaData, buf)
 		if err != nil {
 			return nil, err
 		}
@@ -169,7 +170,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 		return nil, err
 	}
 
-	// in case of http Upgrade requests, we must not dump the response
+	// in case of http Upgrade requests, we must not dump the resolve
 	// otherwise, the upgrade will fail
 	if isUpgradeRequest || t.enableStreamingMode {
 		if t.debugMode {
@@ -189,7 +190,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 		} else if res != nil {
 			responseDump, _ = httputil.DumpResponse(res, true)
 		} else {
-			responseDump = []byte("<no response>")
+			responseDump = []byte("<no resolve>")
 		}
 
 		fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\nResponse:\n\n%s\n\n--- DebugTransport\n\n",
@@ -200,7 +201,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 	}
 
 	if onResponseHook {
-		return t.handleOnResponseHook(res, metaData)
+		return t.handleOnResponseHook(res, metaData, buf)
 	}
 
 	return
@@ -214,8 +215,8 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	request.Header.Del("X-WG-Internal-GraphQL-API")
 	user := authentication.UserFromContext(request.Context())
 
-	buf := pool.BytesBuffer.Get()
-	defer pool.BytesBuffer.Put(buf)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
 
 	_, err = buf.ReadFrom(request.Body)
 	if err != nil {
@@ -240,7 +241,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 		}
 	}
 
-	if clientRequest, ok := request.Context().Value(pool2.ClientRequestKey).(*http.Request); ok {
+	if clientRequest, ok := request.Context().Value(pool.ClientRequestKey).(*http.Request); ok {
 		requestJSON, err := hooks.HttpRequestToWunderGraphRequestJSON(clientRequest, false)
 		if err != nil {
 			return nil, err
@@ -261,7 +262,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	return t.roundTripper.RoundTrip(req)
 }
 
-func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData) (*http.Request, error) {
+func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
 	var (
 		body []byte
 		err  error
@@ -292,7 +293,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		}
 	}
 
-	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hooks.HttpTransportOnRequest, hookData)
+	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hooks.HttpTransportOnRequest, hookData, buf)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +321,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 	return r, nil
 }
 
-func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData) (*http.Response, error) {
+func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -347,7 +348,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 		}
 	}
 
-	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), hooks.HttpTransportOnResponse, hookData)
+	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), hooks.HttpTransportOnResponse, hookData, buf)
 	if err != nil {
 		return nil, err
 	}

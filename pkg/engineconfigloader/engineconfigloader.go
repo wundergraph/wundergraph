@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/graphql_datasource"
@@ -183,8 +184,9 @@ func (d *DefaultFactoryResolver) onWsConnectionInitCallback(dataSourceID string)
 				hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 			}
 		}
-
-		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData)
+		buf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(buf)
+		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData, buf)
 		if err != nil {
 			return nil, err
 		}

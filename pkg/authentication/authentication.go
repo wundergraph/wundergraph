@@ -22,6 +22,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/securecookie"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/hooks"
@@ -316,7 +317,9 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData, buf)
 	if err != nil {
 		h.Log.Error("PostAuthentication queries hook", zap.Error(err))
 		return
@@ -334,7 +337,9 @@ func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData, buf)
 	if err != nil {
 		h.Log.Error("PostLogout queries hook", zap.Error(err))
 	}
@@ -356,7 +361,9 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData, buf)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return false, "", updatedUser
@@ -749,7 +756,9 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if user.IdToken != nil {
 			hookData, _ = jsonparser.Set(hookData, user.IdToken, "id_token")
 		}
-		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
+		buf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(buf)
+		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData, buf)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication request failed", zap.Error(err))
 			http.NotFound(w, r)

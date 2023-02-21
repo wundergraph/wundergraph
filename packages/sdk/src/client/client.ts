@@ -20,6 +20,7 @@ import { ResponseError } from './ResponseError';
 import { InputValidationError } from './InputValidationError';
 import { AuthorizationError } from './AuthorizationError';
 import { ClientResponseError } from './ClientResponseError';
+import * as jsonPatch from 'fast-json-patch';
 
 // https://graphql.org/learn/serving-over-http/
 
@@ -346,7 +347,8 @@ export class Client {
 			const params = new URLSearchParams({
 				wg_variables: this.stringifyInput(subscription.input),
 				wg_live: subscription?.liveQuery ? 'true' : 'false',
-				wg_sse: 'true',
+				wg_sse: '',
+				wg_json_patch: '',
 			});
 			const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 			const eventSource = new EventSource(url, {
@@ -358,9 +360,15 @@ export class Client {
 			eventSource.addEventListener('open', () => {
 				resolve();
 			});
+			let lastResponse: GraphQLResponse | null = null;
 			eventSource.addEventListener('message', (ev) => {
 				const jsonResp = JSON.parse(ev.data);
-				cb(this.convertGraphQLResponse(jsonResp));
+				if (lastResponse !== null && Array.isArray(jsonResp)) {
+					lastResponse = jsonPatch.applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+				} else {
+					lastResponse = jsonResp as GraphQLResponse;
+				}
+				cb(this.convertGraphQLResponse(lastResponse));
 			});
 			if (subscription?.abortSignal) {
 				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
@@ -392,14 +400,20 @@ export class Client {
 		const reader = response.body.getReader();
 		const decoder = new TextDecoder();
 		let message: string = '';
+		let lastResponse: GraphQLResponse | null = null;
 		while (true) {
 			const { value, done } = await reader.read();
 			if (done) return;
 			if (!value) continue;
 			message += decoder.decode(value);
 			if (message.endsWith('\n\n')) {
-				const responseJSON = JSON.parse(message.substring(0, message.length - 2));
-				yield this.convertGraphQLResponse(responseJSON);
+				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
+				if (lastResponse !== null && Array.isArray(jsonResp)) {
+					lastResponse = jsonPatch.applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+				} else {
+					lastResponse = jsonResp as GraphQLResponse;
+				}
+				yield this.convertGraphQLResponse(lastResponse);
 				message = '';
 			}
 		}

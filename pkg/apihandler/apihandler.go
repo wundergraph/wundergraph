@@ -21,6 +21,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
+	"github.com/mattbaird/jsonpatch"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -57,10 +58,13 @@ import (
 )
 
 const (
-	WG_PREFIX       = "wg_"
-	WG_LIVE         = WG_PREFIX + "live"
-	WG_VARIABLES    = WG_PREFIX + "variables"
-	WG_CACHE_HEADER = "X-Wg-Cache"
+	WG_PREFIX         = "wg_"
+	WG_LIVE           = WG_PREFIX + "live"
+	WG_VARIABLES      = WG_PREFIX + "variables"
+	WG_CACHE_HEADER   = "X-Wg-Cache"
+	WG_JSON_PATCH     = WG_PREFIX + "json_patch"
+	WG_SSE            = WG_PREFIX + "sse"
+	WG_SUBSCRIBE_ONCE = WG_PREFIX + "subscribe_once"
 )
 
 type Builder struct {
@@ -869,12 +873,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			requestErrors := graphql.RequestErrors{
 				{
-					Message: "could not resolve response",
+					Message: "could not resolve resolve",
 				},
 			}
 
 			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write response", zap.Error(err))
+				requestLogger.Error("could not write resolve", zap.Error(err))
 			}
 
 			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
@@ -906,12 +910,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			requestErrors := graphql.RequestErrors{
 				{
-					Message: "could not resolve response",
+					Message: "could not resolve resolve",
 				},
 			}
 
 			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write response", zap.Error(err))
+				requestLogger.Error("could not write resolve", zap.Error(err))
 			}
 
 			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
@@ -938,7 +942,7 @@ func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w ht
 	requestErrors := graphql.RequestErrorsFromOperationReport(*report)
 	if requestErrors != nil {
 		if _, err := requestErrors.WriteResponse(w); err != nil {
-			requestLogger.Error("error writing response", zap.Error(err))
+			requestLogger.Error("error writing resolve", zap.Error(err))
 		}
 	}
 }
@@ -1187,6 +1191,10 @@ type QueryResolver interface {
 	ResolveGraphQLResponse(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte, writer io.Writer) (err error)
 }
 
+type SubscriptionResolver interface {
+	ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) (err error)
+}
+
 type liveQueryConfig struct {
 	enabled                bool
 	pollingIntervalSeconds int64
@@ -1257,7 +1265,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		cacheIsStale = false
 	)
 
-	isLive := h.liveQuery.enabled && r.URL.Query().Get(WG_LIVE) == "true"
+	isLive := h.liveQuery.enabled && r.URL.Query().Has(WG_LIVE)
 
 	buf := pool.GetBytesBuffer()
 	ctx := pool.GetCtx(r, r, pool.Config{
@@ -1412,7 +1420,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(transformed)
 	_, err = reader.WriteTo(w)
-	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
+	if done := handleOperationErr(requestLogger, err, w, "writing resolve failed", h.operation); done {
 		return
 	}
 }
@@ -1435,16 +1443,21 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.Respons
 }
 
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
+	subscribeOnce := r.URL.Query().Has(WG_SUBSCRIBE_ONCE)
+	useSSE := r.URL.Query().Has(WG_SSE)
+	useJsonPatch := r.URL.Query().Has(WG_JSON_PATCH)
 
 	done := ctx.Context.Done()
-	hash := xxhash.New()
 
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
 
-	var lastHash uint64
+	lastData := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(lastData)
+
+	currentData := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(currentData)
+
 	for {
 		var hookError bool
 		response, err := h.handleLiveQueryEvent(ctx, w, r, requestBuf, hookBuf)
@@ -1475,21 +1488,40 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			}
 		}
 
-		hash.Reset()
-		_, _ = hash.Write(response)
-		nextHash := hash.Sum64()
-
-		// only send the response if the content has changed
-		if nextHash != lastHash {
-			lastHash = nextHash
-
-			reader := bytes.NewReader(response)
-			if sse {
+		// only send the resolve if the content has changed
+		if !bytes.Equal(response, lastData.Bytes()) {
+			currentData.Reset()
+			_, _ = currentData.Write(response)
+			if useSSE {
 				_, _ = w.Write([]byte("data: "))
 			}
-			_, _ = reader.WriteTo(w)
 			if subscribeOnce {
 				flusher.Flush()
+				return
+			}
+			if useJsonPatch && lastData.Len() != 0 {
+				last := lastData.Bytes()
+				current := currentData.Bytes()
+				patch, err := jsonpatch.CreatePatch(last, current)
+				if err != nil {
+					requestLogger.Error("HandleLiveQueryEvent could not create json patch", zap.Error(err))
+					continue
+				}
+				patchBytes, err := json.Marshal(patch)
+				if err != nil {
+					requestLogger.Error("HandleLiveQueryEvent could not marshal json patch", zap.Error(err))
+					continue
+				}
+				if len(patchBytes) < len(current) {
+					_, err = w.Write(patchBytes)
+				} else {
+					_, err = w.Write(current)
+				}
+			} else {
+				_, err = w.Write(currentData.Bytes())
+			}
+			if err != nil {
+				requestLogger.Error("HandleLiveQueryEvent could not write resolve", zap.Error(err))
 				return
 			}
 			_, _ = w.Write(literal.LINETERMINATOR)
@@ -1498,6 +1530,8 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 				return
 			}
 			flusher.Flush()
+			lastData.Reset()
+			_, _ = lastData.Write(currentData.Bytes())
 		}
 
 		// After hook error we return the graphql compatible error to the client
@@ -1629,13 +1663,13 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(resp.Data)
 	_, err = reader.WriteTo(w)
-	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
+	if done := handleOperationErr(requestLogger, err, w, "writing resolve failed", h.operation); done {
 		return
 	}
 }
 
 type SubscriptionHandler struct {
-	resolver               *resolve.Resolver
+	resolver               SubscriptionResolver
 	log                    *zap.Logger
 	preparedPlan           *plan.SubscriptionResponsePlan
 	extractedVariables     []byte
@@ -1708,25 +1742,9 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		// if the deadline is exceeded (e.g. timeout), we don't have to return an HTTP error
-		// we've already flushed a response to the client
+		// we've already flushed a resolve to the client
 		requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
 	}
-}
-
-func getOperationType(operation, definition *ast.Document, operationName string) ast.OperationType {
-
-	walker := astvisitor.NewWalker(8)
-	visitor := &operationKindVisitor{
-		walker:        &walker,
-		operationName: operationName,
-	}
-
-	walker.RegisterEnterDocumentVisitor(visitor)
-	walker.RegisterEnterOperationVisitor(visitor)
-
-	var report operationreport.Report
-	walker.Walk(operation, definition, &report)
-	return visitor.operationType
 }
 
 type operationKindVisitor struct {
@@ -1757,8 +1775,10 @@ type httpFlushWriter struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	subscribeOnce          bool
 	sse                    bool
+	useJsonPatch           bool
 	close                  func()
 	buf                    *bytes.Buffer
+	lastMessage            *bytes.Buffer
 	variables              []byte
 
 	// Used for hooks
@@ -1804,10 +1824,37 @@ func (f *httpFlushWriter) Flush() {
 
 	if f.sse {
 		_, _ = f.writer.Write([]byte("data: "))
-		_, _ = f.writer.Write(resp)
-	} else {
+	}
+
+	if f.useJsonPatch && f.lastMessage.Len() != 0 {
+		last := f.lastMessage.Bytes()
+		patch, err := jsonpatch.CreatePatch(last, resp)
+		if err != nil {
+			if f.logger != nil {
+				f.logger.Error("subscription json patch", zap.Error(err))
+			}
+			return
+		}
+		patchData, err := json.Marshal(patch)
+		if err != nil {
+			if f.logger != nil {
+				f.logger.Error("subscription json patch", zap.Error(err))
+			}
+			return
+		}
+		if len(patchData) < len(resp) {
+			_, _ = f.writer.Write(patchData)
+		} else {
+			_, _ = f.writer.Write(resp)
+		}
+	}
+
+	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
 		_, _ = f.writer.Write(resp)
 	}
+
+	f.lastMessage.Reset()
+	_, _ = f.lastMessage.Write(resp)
 
 	if f.subscribeOnce {
 		f.flusher.Flush()
@@ -2186,7 +2233,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isLive := h.liveQuery.enabled && r.URL.Query().Get(WG_LIVE) == "true"
+	isLive := h.liveQuery.enabled && r.URL.Query().Has(WG_LIVE)
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -2219,12 +2266,19 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 		return
 	}
 
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	var (
+		lastResponse bytes.Buffer
+	)
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			out, err = h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
+			out, err = h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 			if err != nil {
 				if ctx.Err() != nil {
 					return
@@ -2232,19 +2286,28 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 				requestLogger.Error("failed to execute function", zap.Error(err))
 				return
 			}
+			if bytes.Equal(out.Response, lastResponse.Bytes()) {
+				continue
+			}
 			_, err = fw.Write(out.Response)
 			if err != nil {
-				requestLogger.Error("failed to write response", zap.Error(err))
+				requestLogger.Error("failed to write resolve", zap.Error(err))
 				return
 			}
 			fw.Flush()
+			lastResponse.Reset()
+			lastResponse.Write(out.Response)
 			time.Sleep(time.Duration(h.liveQuery.pollingIntervalSeconds) * time.Second)
 		}
 	}
 }
 
 func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
-	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
+
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")
@@ -2264,9 +2327,12 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
 	setSubscriptionHeaders(w)
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
-	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, subscribeOnce, sse, w)
+	subscribeOnce := r.URL.Query().Has(WG_SUBSCRIBE_ONCE)
+	sse := r.URL.Query().Has(WG_SSE)
+	useJsonPatch := r.URL.Query().Has(WG_JSON_PATCH)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, subscribeOnce, sse, useJsonPatch, w, buf)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")
@@ -2344,8 +2410,8 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	// allow unbuffered responses, it's used when it's necessary just to pass response through
-	// setting this to “yes” will allow the response to be cached
+	// allow unbuffered responses, it's used when it's necessary just to pass resolve through
+	// setting this to “yes” will allow the resolve to be cached
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
@@ -2370,8 +2436,9 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 		return ctx, nil, false
 	}
 
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
+	subscribeOnce := r.URL.Query().Has(WG_SUBSCRIBE_ONCE)
+	sse := r.URL.Query().Has(WG_SSE)
+	useJsonPatch := r.URL.Query().Has(WG_JSON_PATCH)
 
 	if !subscribeOnce {
 		setSubscriptionHeaders(w)
@@ -2380,12 +2447,14 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 	flusher.Flush()
 
 	flushWriter := &httpFlushWriter{
-		writer:    w,
-		flusher:   flusher,
-		sse:       sse,
-		buf:       &bytes.Buffer{},
-		ctx:       ctx,
-		variables: variables,
+		writer:       w,
+		flusher:      flusher,
+		sse:          sse,
+		useJsonPatch: useJsonPatch,
+		buf:          &bytes.Buffer{},
+		lastMessage:  &bytes.Buffer{},
+		ctx:          ctx,
+		variables:    variables,
 	}
 
 	if subscribeOnce {
@@ -2443,7 +2512,7 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 	if !valid {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := io.Copy(w, &buf); err != nil {
-			log.Error("copying validation to response", zap.Error(err))
+			log.Error("copying validation to resolve", zap.Error(err))
 		}
 		return false
 	}

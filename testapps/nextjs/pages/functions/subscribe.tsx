@@ -1,8 +1,8 @@
 import { useSubscription, withWunderGraph } from '../../components/generated/nextjs';
 
 const Functions = () => {
-	const { data: one } = useSubscription({
-		operationName: 'users/subscribe',
+	const { data } = useSubscription({
+		operationName: 'users/subscribe_without_schema',
 		input: {
 			id: '1',
 		},
@@ -11,10 +11,7 @@ const Functions = () => {
 		<div>
 			<h1>User</h1>
 			<div>
-				<div>id: {one?.id}</div>
-				<div>name: {one?.userName}</div>
-				<div>bio: {one?.bio}</div>
-				<div>time: {one?.time}</div>
+				<div>data: {JSON.stringify(data?.bio)}</div>
 			</div>
 		</div>
 	);

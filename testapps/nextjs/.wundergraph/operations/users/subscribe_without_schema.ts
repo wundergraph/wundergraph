@@ -5,18 +5,13 @@ const sub = createOperation.subscription({
 	input: z.object({
 		id: z.string(),
 	}),
-	response: z.object({
-		bio: z.string(),
-		counter: z.number(),
-		time: z.string().nullable(),
-	}),
 	handler: async function* (ctx) {
 		let bio =
 			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl nec ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nunc';
 		let time: string | null = null;
 
 		yield {
-			bio: bio,
+			bio,
 			counter: 0,
 			time,
 		};
@@ -33,7 +28,7 @@ const sub = createOperation.subscription({
 						' Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl nec ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nunc';
 				}
 				yield {
-					bio: bio,
+					bio,
 					counter: i,
 					time,
 				};
