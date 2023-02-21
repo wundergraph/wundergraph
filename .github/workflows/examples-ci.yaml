@@ -20,6 +20,7 @@ on:
       - '.github/actions/node/action.yaml'
       - '.github/workflows/examples-ci.yaml'
       - 'examples/**'
+      - 'scripts/test-examples/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref }}

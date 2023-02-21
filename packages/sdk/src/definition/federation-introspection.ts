@@ -1,4 +1,4 @@
-import { DocumentNode, GraphQLSchema, parse } from 'graphql';
+import { DocumentNode, parse } from 'graphql';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { GraphQLApi, GraphQLFederationIntrospection, GraphQLIntrospection } from './index';
 import { loadFile } from '../codegen/templates/typescript';
@@ -105,5 +105,5 @@ export const introspectFederation = async (introspection: GraphQLFederationIntro
 		}));
 
 		const apis = await Promise.all(graphQLIntrospections.map((i) => introspectGraphql(i)));
-		return mergeApis([], ...apis) as GraphQLApi;
+		return mergeApis([], [], ...apis) as GraphQLApi;
 	});

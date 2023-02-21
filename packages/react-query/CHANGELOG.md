@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.5...@wundergraph/react-query@0.6.0) (2023-02-21)
+
+### Features
+
+* add solid-js client ([#673](https://github.com/wundergraph/wundergraph/issues/673)) ([52a6595](https://github.com/wundergraph/wundergraph/commit/52a6595222cba6ae6c9424c4b6a734bc87909af3)) (@Pagebakers)
+
+## [0.5.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.4...@wundergraph/react-query@0.5.5) (2023-02-10)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.5.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.3...@wundergraph/react-query@0.5.4) (2023-02-03)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
 ## [0.5.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.2...@wundergraph/react-query@0.5.3) (2023-02-01)
 
 **Note:** Version bump only for package @wundergraph/react-query

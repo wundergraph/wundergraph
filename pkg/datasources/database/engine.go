@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -157,6 +158,14 @@ Loop:
 		return "", err
 	}
 	if response.Error != nil {
+		if response.Error.Data.Message != "" {
+			// This message is not helpful at all, just omit it
+			if response.Error.Message == "An error happened. Check the data field for details." {
+				return "", fmt.Errorf("error while introspecting database: %s", response.Error.Data.Message)
+
+			}
+			return "", fmt.Errorf("error while introspecting database: %s (%s)", response.Error.Message, response.Error.Data.Message)
+		}
 		return "", fmt.Errorf("error while introspecting database: %s", response.Error.Message)
 	}
 	return response.Result.DataModel, nil
@@ -281,6 +290,12 @@ func (e *Engine) ensurePrisma() error {
 
 	e.queryEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-query-engine-%s", platform.BinaryPlatformName()))
 	e.introspectionEnginePath = filepath.Join(prismaPath, binaries.EngineVersion, fmt.Sprintf("prisma-introspection-engine-%s", platform.BinaryPlatformName()))
+
+	if runtime.GOOS == "windows" {
+		// Append .exe suffix
+		e.queryEnginePath += ".exe"
+		e.introspectionEnginePath += ".exe"
+	}
 
 	// Acquire a file lock before trying to download
 	lockPath := filepath.Join(prismaPath, ".lock")

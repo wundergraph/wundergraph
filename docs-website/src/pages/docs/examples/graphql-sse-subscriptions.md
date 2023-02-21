@@ -26,14 +26,14 @@ type Query {
 type Subscription {
   greetings: String
 }
-`
+`;
 
 const greetings = introspect.graphql({
   apiNamespace: 'sse',
   url: 'http://localhost:4000/graphql/stream',
   loadSchemaFromString: schema,
   subscriptionsUseSSE: true,
-})
+});
 ```
 
 ## Getting started

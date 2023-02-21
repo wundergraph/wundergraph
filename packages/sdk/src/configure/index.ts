@@ -18,6 +18,7 @@ import {
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
+	ILazyIntrospection,
 	introspectGraphqlServer,
 	RESTApiCustom,
 	StaticApiCustom,
@@ -49,6 +50,7 @@ import {
 	PostResolveTransformationKind,
 	S3UploadProfile as _S3UploadProfile,
 	TypeConfiguration,
+	ValueType,
 	WebhookConfiguration,
 	WunderGraphConfiguration,
 } from '@wundergraph/protobuf';
@@ -62,9 +64,10 @@ import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/server-options';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
+import { cleanOpenApiSpecs } from '../openapi/introspection';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -76,7 +79,7 @@ export interface WunderGraphCorsConfiguration {
 }
 
 export interface WunderGraphConfigApplicationConfig {
-	apis: Promise<Api<any>>[];
+	apis: ILazyIntrospection<Api<any>>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
@@ -92,7 +95,7 @@ export interface WunderGraphConfigApplicationConfig {
 			// authorizedRedirectUris is a whitelist of allowed URIs to redirect to after a successful login
 			// the values are used as exact string matches
 			// URIs always match, independent of a trailing slash or not
-			// e.g. if a authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
+			// e.g. if an authorized URI is "http://localhost:3000", the URI "http://localhost:3000/" would also match
 			// or if the authorized URI is "http://localhost:3000/auth", the URI "http://localhost:3000/auth/" would also match
 			// if you need more flexibility, use authorizedRedirectUriRegexes instead
 			authorizedRedirectUris?: InputVariable[];
@@ -112,6 +115,7 @@ export interface WunderGraphConfigApplicationConfig {
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
+		customClaims?: Record<string, CustomClaim>;
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
@@ -127,26 +131,32 @@ export interface TokenAuthProvider {
 	userInfoCacheTtlSeconds?: number;
 }
 
+export interface CustomClaim {
+	/**
+	 * Path to the object inside the user payload to retrieve this claim
+	 */
+	jsonPath: string;
+
+	/** Value type
+	 *
+	 * @default 'string'
+	 */
+	type?: 'string' | 'int' | 'float' | 'boolean';
+
+	/** If required is true, users without this claim will
+	 * fail to authenticate
+	 *
+	 * @default true
+	 */
+	required?: boolean;
+}
+
 export interface SecurityConfig {
 	enableGraphQLEndpoint?: boolean;
 	// allowedHosts defines allowed hosts
 	// e.g. when running WunderGraph on localhost:9991, but your external host pointing to the internal IP is example.com,
 	// you have to add "example.com" to the allowedHosts so that the WunderGraph router allows the hostname.
 	allowedHosts?: InputVariable[];
-}
-
-export interface DeploymentAPI {
-	apiConfig: () => {
-		id: string;
-		name: string;
-	};
-}
-
-export interface DeploymentEnvironment {
-	environmentConfig: () => {
-		id: string;
-		name: string;
-	};
 }
 
 export interface CodeGen {
@@ -176,6 +186,11 @@ interface ResolvedDeployment {
 }
 
 export interface S3UploadProfile {
+	/** Whether authentication is required to upload to this profile
+	 *
+	 * @default true
+	 */
+	requireAuthentication?: boolean;
 	/** JSON schema for metadata */
 	meta?: ZodType | object;
 	/**
@@ -191,13 +206,13 @@ export interface S3UploadProfile {
 	 */
 	maxAllowedFiles?: number;
 	/**
-	 * List of mime-types allowed to be uploaded, case insensitive
+	 * List of mime-types allowed to be uploaded, case-insensitive
 	 *
 	 * @default Any type
 	 */
 	allowedMimeTypes?: string[];
 	/**
-	 * Allowed file extensions, case insensitive
+	 * Allowed file extensions, case-insensitive
 	 *
 	 * @default Any extension
 	 */
@@ -228,6 +243,8 @@ interface ResolvedS3UploadConfiguration extends Omit<S3UploadConfiguration, 'upl
 }
 
 export interface ResolvedWunderGraphConfig {
+	// XXX: ResolvedWunderGraphConfig is hashed by several templates.
+	// DO NOT INCLUDE UNSTABLE DATA (paths, times, etc...) in it.
 	application: ResolvedApplication;
 	deployment: ResolvedDeployment;
 	sdkVersion: string;
@@ -235,6 +252,7 @@ export interface ResolvedWunderGraphConfig {
 		roles: string[];
 		cookieBased: AuthProvider[];
 		tokenBased: TokenAuthProvider[];
+		customClaims: Record<string, CustomClaim>;
 		authorizedRedirectUris: ConfigurationVariable[];
 		authorizedRedirectUriRegexes: ConfigurationVariable[];
 		hooks: {
@@ -259,7 +277,11 @@ export interface ResolvedWunderGraphConfig {
 	serverOptions?: ResolvedServerOptions;
 }
 
-export interface CodeGenerationConfig extends ResolvedWunderGraphConfig {
+export interface CodeGenerationConfig {
+	// Keep ResolvedWunderGraphConfig in a separate field, so it can be
+	// hashed without using any unstable data as the hash input (e.g.
+	// paths like outPath or wunderGraphDir).
+	config: ResolvedWunderGraphConfig;
 	outPath: string;
 	wunderGraphDir: string;
 }
@@ -314,9 +336,11 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 	}
 
 	const roles = config.authorization?.roles || ['admin', 'user'];
+	const customClaims = Object.keys(config.authentication?.customClaims ?? {});
 
 	const resolved = await resolveApplication(
 		roles,
+		customClaims,
 		config.apis,
 		cors,
 		config.s3UploadProvider || [],
@@ -342,6 +366,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			roles,
 			cookieBased: cookieBasedAuthProviders,
 			tokenBased: config.authentication?.tokenBased?.providers || [],
+			customClaims: config.authentication?.customClaims || {},
 			authorizedRedirectUris:
 				config.authentication?.cookieBased?.authorizedRedirectUris?.map((stringOrEnvironmentVariable) => {
 					if (typeof stringOrEnvironmentVariable === 'string') {
@@ -561,6 +586,7 @@ const resolveUploadConfiguration = (
 			const profileHooks = configurationHooks ? configurationHooks[key] : undefined;
 
 			uploadProfiles[key] = {
+				requireAuthentication: profile.requireAuthentication ?? true,
 				maxAllowedUploadSizeBytes: profile.maxAllowedUploadSizeBytes ?? -1,
 				maxAllowedFiles: profile.maxAllowedFiles ?? -1,
 				allowedMimeTypes: profile.allowedMimeTypes ?? [],
@@ -579,13 +605,16 @@ const resolveUploadConfiguration = (
 
 const resolveApplication = async (
 	roles: string[],
-	apis: Promise<Api<any>>[],
+	customClaims: string[],
+	apis: ILazyIntrospection<Api<any>>[],
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	const resolvedApis = await Promise.all(apis);
-	const merged = mergeApis(roles, ...resolvedApis);
+	await cleanOpenApiSpecs();
+	const apiPromises = apis.map((api) => api());
+	const resolvedApis = await Promise.all(apiPromises);
+	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
 		EngineConfiguration: merged,
@@ -895,6 +924,17 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 const total = 4;
 let doneCount = 0;
 
+const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
+	record: Record<TKey, TValue>,
+	fn: (key: TKey, value: TValue) => TOutputValue
+): Record<TKey, TOutputValue> => {
+	let output: Record<TKey, TOutputValue> = {} as any;
+	for (const key in record) {
+		output[key] = fn(key, record[key]);
+	}
+	return output;
+};
+
 const done = () => {
 	doneCount++;
 	Logger.info(`${doneCount}/${total} done`);
@@ -972,6 +1012,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 							throw new Error(`error serializing JSON schema for upload profile ${provider.name}/${key}: ${e}`);
 						}
 						uploadProfiles[key] = {
+							requireAuthentication: resolved.requireAuthentication,
 							maxAllowedUploadSizeBytes: resolved.maxAllowedUploadSizeBytes,
 							maxAllowedFiles: resolved.maxAllowedFiles,
 							allowedMimeTypes: resolved.allowedMimeTypes,
@@ -1107,10 +1148,39 @@ const resolveOperationsConfigurations = async (
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
 ): Promise<ParsedOperations> => {
+	const customClaims = mapRecordValues(config.authentication.customClaims ?? {}, (key, claim) => {
+		let claimType: ValueType;
+		switch (claim.type) {
+			case 'string':
+				claimType = ValueType.STRING;
+				break;
+			case 'int':
+				claimType = ValueType.INT;
+				break;
+			case 'float':
+				claimType = ValueType.FLOAT;
+				break;
+			case 'boolean':
+				claimType = ValueType.FLOAT;
+				break;
+			case undefined:
+				claimType = ValueType.STRING;
+				break;
+			default:
+				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
+		}
+		return {
+			name: key,
+			jsonPathComponents: claim.jsonPath.split('.'),
+			type: claimType,
+			required: claim.required ?? true,
+		};
+	});
 	const graphQLOperations = parseGraphQLOperations(config.application.EngineConfiguration.Schema, loadedOperations, {
 		keepFromClaimVariables: false,
 		interpolateVariableDefinitionAsJSON: config.interpolateVariableDefinitionAsJSON,
 		customJsonScalars,
+		customClaims,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files)
@@ -1191,7 +1261,7 @@ const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation)
 
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
-	overrides: NodeJSOperation<any, any, any, any, any, any, any, any>
+	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any>
 ): GraphQLOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;

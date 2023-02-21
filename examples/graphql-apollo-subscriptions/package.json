@@ -6,14 +6,15 @@
     "start": "run-p start:services start:server",
     "start:server": "wait-on tcp:8085 && wunderctl up --debug",
     "start:services": "cd chat && go run server/server.go",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "check": "tsc --noEmit",
     "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.133.1",
+    "@wundergraph/sdk": "^0.135.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

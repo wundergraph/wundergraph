@@ -12,7 +12,7 @@ export interface Queries  {
   queries: {};
 {{/if}}
 }
-		
+
 export interface Mutations  {
 {{#if hasInternalMutations}}
     {{#each internalMutations}}

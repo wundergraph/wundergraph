@@ -110,12 +110,12 @@ Here's an example. Let's add two API dependencies to our project:
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 ```
 
 Next, let's create an Operation:

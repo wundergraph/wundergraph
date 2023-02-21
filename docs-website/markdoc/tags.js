@@ -1,6 +1,7 @@
-import { Callout } from '@/components/Callout'
-import { QuickLink, QuickLinks } from '@/components/QuickLinks'
-import Video from '../src/components/Video'
+import { Callout } from '@/components/Callout';
+import { QuickLink, QuickLinks } from '@/components/QuickLinks';
+import Video from '../src/components/Video';
+import { cta } from './cta.markdoc';
 
 const tags = {
 	callout: {
@@ -56,6 +57,29 @@ const tags = {
 			href: { type: String },
 		},
 	},
-}
+	cta,
+	youtube: {
+		selfClosing: true,
+		attributes: {
+			id: { type: String, required: true },
+			className: { type: String },
+		},
+		render: ({ id, className }) => {
+			return (
+				<iframe
+					width="560"
+					height="315"
+					src={`https://www.youtube-nocookie.com/embed/${id}`}
+					title="YouTube video player"
+					frameBorder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen
+					style={{ marginBottom: '2rem' }}
+					className={className}
+				></iframe>
+			);
+		},
+	},
+};
 
-export default tags
+export default tags;

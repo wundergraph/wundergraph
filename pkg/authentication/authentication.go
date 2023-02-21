@@ -1,13 +1,14 @@
 package authentication
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -58,10 +59,30 @@ func (cfg *UserLoadConfig) Keyfunc() jwt.Keyfunc {
 	return nil
 }
 
-func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User, revalidate bool) error {
+func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	// Deserialize twice to obtain raw claims
+	var claims Claims
+	if err := json.Unmarshal(data, &claims); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(data, &claims.Raw); err != nil {
+		return nil, err
+	}
+	return &claims, nil
+}
+
+// Load user from token. token is always non nil and contains at least a non-empty token.Raw
+// but it might be unvalidated if we have no key functions
+func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *User, revalidate bool) error {
+
+	cacheKey := token.Raw
 
 	if !revalidate {
-		fromCache, exists := u.cache.Get(token)
+		fromCache, exists := u.cache.Get(cacheKey)
 		if exists {
 			*user = fromCache.(User)
 			u.log.Debug("user loaded from cache",
@@ -71,51 +92,44 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 		}
 	}
 
-	var tempUser User
-
-	if cfg.userInfoEndpoint == "" {
-		tempUser = User{
-			ProviderName: "token",
-			ProviderID:   cfg.issuer,
-			AccessToken:  tryParseJWT(token),
-		}
-	} else {
+	var claims *Claims
+	if cfg.userInfoEndpoint != "" {
+		// Retrieve claims from userInfoEndpoint
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
 		if err != nil {
 			return err
 		}
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Raw))
 		res, err := u.client.Do(req)
 		if err != nil {
 			return err
 		}
 		defer res.Body.Close()
-		body, err := ioutil.ReadAll(res.Body)
+		claims, err = u.parseClaims(res.Body)
 		if err != nil {
 			return err
 		}
-		var claims Claims
-		err = json.Unmarshal(body, &claims)
+	} else {
+		// Parse claims from token
+		encoded, err := json.Marshal(token.Claims)
 		if err != nil {
 			return err
 		}
-
-		tempUser = User{
-			ProviderName:  "token",
-			ProviderID:    cfg.issuer,
-			Email:         claims.Email,
-			EmailVerified: claims.EmailVerified,
-			Name:          claims.Name,
-			FirstName:     claims.GivenName,
-			LastName:      claims.FamilyName,
-			UserID:        claims.Sub,
-			AvatarURL:     claims.Picture,
-			Location:      claims.Locale,
-			AccessToken:   tryParseJWT(token),
+		claims, err = u.parseClaims(bytes.NewReader(encoded))
+		if err != nil {
+			return err
 		}
 	}
+	issuer := cfg.issuer
+	if issuer == "" {
+		issuer = claims.Issuer
+	}
+	tempUser := claims.ToUser()
+	tempUser.ProviderName = "token"
+	tempUser.ProviderID = issuer
+	tempUser.AccessToken = tryParseJWT(token.Raw)
 	u.hooks.handlePostAuthentication(context.Background(), tempUser)
 	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
 	if !proceed {
@@ -123,34 +137,42 @@ func (u *UserLoader) userFromToken(token string, cfg *UserLoadConfig, user *User
 	}
 	*user = tempUser
 	if cfg.cacheTtlSeconds > 0 {
-		u.cache.SetWithTTL(token, *user, 1, time.Second*time.Duration(cfg.cacheTtlSeconds))
+		u.cache.SetWithTTL(cacheKey, *user, 1, time.Second*time.Duration(cfg.cacheTtlSeconds))
 	}
 	return nil
 }
 
 type User struct {
-	ProviderName     string          `json:"provider,omitempty"`
-	ProviderID       string          `json:"providerId,omitempty"`
-	Email            string          `json:"email,omitempty"`
-	EmailVerified    bool            `json:"emailVerified,omitempty"`
-	Name             string          `json:"name,omitempty"`
-	FirstName        string          `json:"firstName,omitempty"`
-	LastName         string          `json:"lastName,omitempty"`
-	NickName         string          `json:"nickName,omitempty"`
-	Description      string          `json:"description,omitempty"`
-	UserID           string          `json:"userId,omitempty"`
-	AvatarURL        string          `json:"avatarUrl,omitempty"`
-	Location         string          `json:"location,omitempty"`
-	CustomClaims     json.RawMessage `json:"customClaims,omitempty"`
-	CustomAttributes []string        `json:"customAttributes,omitempty"`
-	Roles            []string        `json:"roles"`
-	ExpiresAt        time.Time       `json:"-"`
-	ETag             string          `json:"etag,omitempty"`
-	FromCookie       bool            `json:"fromCookie,omitempty"`
-	AccessToken      json.RawMessage `json:"accessToken,omitempty"`
-	RawAccessToken   string          `json:"rawAccessToken,omitempty"`
-	IdToken          json.RawMessage `json:"idToken,omitempty"`
-	RawIDToken       string          `json:"rawIdToken,omitempty"`
+	ProviderName      string `json:"provider,omitempty"`
+	ProviderID        string `json:"providerId,omitempty"`
+	UserID            string `json:"userId,omitempty"`
+	Name              string `json:"name,omitempty"`
+	FirstName         string `json:"firstName,omitempty"`
+	LastName          string `json:"lastName,omitempty"`
+	MiddleName        string `json:"middleName,omitempty"`
+	NickName          string `json:"nickName,omitempty"`
+	PreferredUsername string `json:"preferredUsername,omitempty"`
+	Profile           string `json:"profile,omitempty"`
+	Picture           string `json:"picture,omitempty"`
+	Website           string `json:"website,omitempty"`
+	Email             string `json:"email,omitempty"`
+	EmailVerified     bool   `json:"emailVerified,omitempty"`
+	Gender            string `json:"gender,omitempty"`
+	BirthDate         string `json:"birthDate,omitempty"`
+	ZoneInfo          string `json:"zoneInfo,omitempty"`
+	Locale            string `json:"locale,omitempty"`
+	Location          string `json:"location,omitempty"`
+
+	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`
+	CustomAttributes []string               `json:"customAttributes,omitempty"`
+	Roles            []string               `json:"roles"`
+	ExpiresAt        time.Time              `json:"-"`
+	ETag             string                 `json:"etag,omitempty"`
+	FromCookie       bool                   `json:"fromCookie,omitempty"`
+	AccessToken      json.RawMessage        `json:"accessToken,omitempty"`
+	RawAccessToken   string                 `json:"rawAccessToken,omitempty"`
+	IdToken          json.RawMessage        `json:"idToken,omitempty"`
+	RawIDToken       string                 `json:"rawIdToken,omitempty"`
 }
 
 // RemoveInternalFields should be used before sending the user to the client to not expose internal fields
@@ -227,23 +249,32 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 		if !strings.HasPrefix(authorizationHeader, "Bearer ") {
 			return fmt.Errorf("invalid authorization Header")
 		}
-		trimmed := strings.TrimPrefix(authorizationHeader, "Bearer ")
+		tokenString := strings.TrimPrefix(authorizationHeader, "Bearer ")
 		revalidate := r.URL.Query().Get("revalidate") == "true"
 		for _, config := range loader.userLoadConfigs {
+			keyFunc := config.Keyfunc()
+			token, err := jwt.Parse(tokenString, keyFunc)
 			// If we have a Keyfunc, enforce a valid token. Otherwise fallback
 			// to loader.userFromToken
 			if keyFunc := config.Keyfunc(); keyFunc != nil {
-				token, err := jwt.Parse(trimmed, keyFunc)
 				if err != nil {
-					loader.log.Warn("could not parse token", zap.String("token", trimmed), zap.Error(err))
+					loader.log.Warn("could not parse token", zap.String("token", tokenString), zap.Error(err))
 					continue
 				}
 				if !token.Valid {
 					loader.log.Warn("token is invalid", zap.Any("token", token))
 					continue
 				}
+			} else {
+				// Make sure token is non-nil (e.g. it could be non-JWT)
+				if token == nil {
+					token = &jwt.Token{
+						Raw:   tokenString,
+						Valid: false,
+					}
+				}
 			}
-			if err := loader.userFromToken(trimmed, config, u, revalidate); err == nil {
+			if err := loader.userFromToken(token, config, u, revalidate); err == nil {
 				return nil
 			}
 		}

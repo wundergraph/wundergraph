@@ -109,9 +109,10 @@ const (
 import type {InternalClient} from "./wundergraph.internal.client";
 import {Queries,Mutations,Subscriptions} from "./wundergraph.internal.operations.client";
 import type {Role} from "./wundergraph.server";
+import type {CustomClaims} from "./claims";
 import {createOperationFactory} from "@wundergraph/sdk/operations";
 
 export {z, AuthorizationError} from "@wundergraph/sdk/operations";
-export const createOperation = createOperationFactory<InternalClient, Role, Queries,Mutations,Subscriptions>();
+export const createOperation = createOperationFactory<InternalClient, Role, CustomClaims, Queries, Mutations, Subscriptions>();
 `
 )

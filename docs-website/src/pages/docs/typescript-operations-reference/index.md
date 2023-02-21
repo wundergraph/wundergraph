@@ -45,159 +45,50 @@ Here's a typical file structure when using TypeScript Operations:
 
 With this API, we're able to get, create, update, delete and subscribe to users.
 
-## Creating TypeScript Read Operations (Query)
+You can create a TypeScript Operation by using the `createOperation` factory function,
+which can be imported from the `.wundergraph/generated/wundergraph.factory` file.
 
-Let's define the four operations, starting with the `get` operation:
+Here's a simple example:
 
 ```typescript
-// .wundergraph/operations/users/get.ts
-import { createOperation, z } from '../../generated/wundergraph.factory'
+// .wundergraph/operations/math/add.ts
+import { createOperation, z, AuthorizationError } from '../generated/wundergraph.factory';
 
 export default createOperation.query({
-  // by specifying the input schema, we're automatically creating a JSON Schema for input validation
   input: z.object({
-    id: z.string(),
+    a: z.number(),
+    b: z.number(),
   }),
   handler: async ({ input }) => {
-    // here you can do whatever you want, like calling an external API, a database, or other operations via the internalClient
     return {
-      id: input.id,
-      name: 'Jens',
-      bio: 'Founder of WunderGraph',
-    }
+      add: input.a + input.b,
+    };
   },
-})
+});
 ```
 
-## Creating TypeScript Write Operations (Mutation)
+Import `createOperation` (the factory function), `z` (the zod schema builder) and `AuthorizationError` (the error class for authorization errors).
+Then, make a default export with the result of calling `createOperation.query` or `createOperation.mutation` or `createOperation.subscription`,
+depending on what kind of operation you want to create.
 
-Next, let's define the `create` operation:
+Thanks to using zod to define the input schema, we're automatically creating a JSON Schema for input validation and the `input` argument to the handler function is type-safe.
 
-```typescript
-// .wundergraph/operations/users/create.ts
-import { createOperation, z } from '../../generated/wundergraph.factory'
+The `wunderctl up` command will automatically pick up the new operation, compile (transpile) the function and add it to the router of your WunderGraph Application.
+We've carefully crafted the `.wundergraph/generated/wundergraph.factory` file to be as type-safe as possible and only import the necessary modules from the `@wundergraph/sdk` package to keep the bundle size small.
+WunderGraph internally uses `esbuild` to transpile the TypeScript code, so it's reasonably fast.
 
-export default createOperation.mutation({
-  input: z.object({
-    name: z.string(),
-    bio: z.string(),
-  }),
-  handler: async ({ input }) => {
-    // you'd usually do something like this:
-    // const user = await db.users.create(input);
-    // return user;
-    return {
-      id: '1',
-      name: input.name,
-      bio: input.bio,
-    }
-  },
-})
+We can now use curl to call this operation:
+
+```bash
+curl http://localhost:9991/operations/math/add?a=1&b=2
 ```
 
-Now, let's implement the `update` operation:
+This will return the following JSON:
 
-```typescript
-// .wundergraph/operations/users/update.ts
-import { createOperation, z } from '../../generated/wundergraph.factory'
-
-export default createOperation.mutation({
-  input: z.object({
-    id: z.string(),
-    name: z.string(),
-    bio: z.string(),
-  }),
-  handler: async ({ input }) => {
-    // you'd usually do something like this:
-    // const user = await db.users.update(input);
-    // return user;
-    return {
-      id: input.id,
-      name: input.name,
-      bio: input.bio,
-    }
-  },
-})
-```
-
-## Creating TypeScript Subscribe Operations
-
-Finally, let's implement the `subscribe` operation:
-
-```typescript
-// .wundergraph/operations/users/subscribe.ts
-import { createOperation, z } from '../../generated/wundergraph.factory'
-
-export default createOperation.subscription({
-  input: z.object({
-    id: z.string(),
-  }),
-  handler: async function* ({ input }) {
-    // you'd usually do something like this:
-    // const user = await db.users.subscribe(input);
-    // yield user.next();
-    try {
-      for (let i = 0; i < 10; i++) {
-        yield {
-          id: input.id,
-          name: 'Jens',
-          bio: 'Founder of WunderGraph',
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-      }
-    } finally {
-      // user.unsubscribe();
-      // the finally block gets called when the user unsubscribes
-      // this means you can unsubscribe from the external API here
-    }
-  },
-})
-```
-
-## How do I use TypeScript Operations in my client?
-
-```typescript jsx
-// pages/users/index.tsx
-import { useQuery, withWunderGraph } from '../../components/generated/nextjs'
-
-const Users = () => {
-  const { data } = useQuery({
-    operationName: 'users/get',
-    input: {
-      id: '1',
-    },
-  })
-  return (
-    <div style={{ color: 'white' }}>
-      <div>{data?.id}</div>
-      <div>{data?.name}</div>
-      <div>{data?.bio}</div>
-    </div>
-  )
+```json
+{
+  "data": {
+    "add": 3
+  }
 }
-
-export default withWunderGraph(Users)
-```
-
-## How do I use my TypeScript Operations using plain HTTP, e.g. using curl
-
-Query:
-
-```bash
-curl http://localhost:9991/operations/users/get
-```
-
-Mutation:
-
-```bash
-curl http://localhost:9991/operations/users/create \
-  -X POST \
-  -H 'Content-Type: application/json' \
-  -d '{"name": "Jens", "bio": "Founder of WunderGraph"}'
-```
-
-Subscription:
-
-```bash
-curl http://localhost:9991/operations/users/subscribe
 ```
