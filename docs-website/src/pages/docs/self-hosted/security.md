@@ -9,9 +9,9 @@ Cryptographically-secure (pseudo-)randomly generated strings should be added to 
 
 ```js
 // these strings are insecure examples with the intention to display length
-WUNDERGRAPH_CSRF_TOKEN_SECRET = aaaaaaaaaaa; // 11 bytes
-WUNDERGRAPH_SECURE_COOKIE_HASH_KEY = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; // 32 bytes
-WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; // 32 bytes
+WG_CSRF_TOKEN_SECRET = aaaaaaaaaaa; // 11 bytes
+WG_SECURE_COOKIE_HASH_KEY = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; // 32 bytes
+WG_SECURE_COOKIE_BLOCK_KEY = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa; // 32 bytes
 ```
 
 Although values will be generated for you in the case that they have not been supplied, these secrets are your

@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	WgEnvCsrfSecret       = "WUNDERGRAPH_CSRF_TOKEN_SECRET"
-	WgEnvHashKey          = "WUNDERGRAPH_SECURE_COOKIE_HASH_KEY"
-	WgEnvBlockKey         = "WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY"
+	WgEnvCsrfSecret       = "WG_CSRF_TOKEN_SECRET"
+	WgEnvHashKey          = "WG_SECURE_COOKIE_HASH_KEY"
+	WgEnvBlockKey         = "WG_SECURE_COOKIE_BLOCK_KEY"
 	validSecretCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890-"
 )
 

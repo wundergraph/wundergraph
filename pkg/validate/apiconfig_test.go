@@ -230,7 +230,7 @@ func TestValidateApiConfig(t *testing.T) {
 		assert.Equal(t, 0, len(messages))
 	})
 
-	t.Run("empty WUNDERGRAPH_CSRF_TOKEN_SECRET returns error", func(t *testing.T) {
+	t.Run("empty WG_CSRF_TOKEN_SECRET returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
@@ -241,10 +241,10 @@ func TestValidateApiConfig(t *testing.T) {
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, "the required environment variable WUNDERGRAPH_CSRF_TOKEN_SECRET must have a length of 11", messages[0])
+		assert.Equal(t, "the required environment variable WG_CSRF_TOKEN_SECRET must have a length of 11", messages[0])
 	})
 
-	t.Run("incorrect length for WUNDERGRAPH_CSRF_TOKEN_SECRET returns error", func(t *testing.T) {
+	t.Run("incorrect length for WG_CSRF_TOKEN_SECRET returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
@@ -257,10 +257,10 @@ func TestValidateApiConfig(t *testing.T) {
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, "the required environment variable WUNDERGRAPH_CSRF_TOKEN_SECRET must have a length of 11", messages[0])
+		assert.Equal(t, "the required environment variable WG_CSRF_TOKEN_SECRET must have a length of 11", messages[0])
 	})
 
-	t.Run("empty WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY returns error", func(t *testing.T) {
+	t.Run("empty WG_SECURE_COOKIE_BLOCK_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
@@ -273,10 +273,10 @@ func TestValidateApiConfig(t *testing.T) {
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY must have a length of 32", messages[0])
+		assert.Equal(t, "the required environment variable WG_SECURE_COOKIE_BLOCK_KEY must have a length of 32", messages[0])
 	})
 
-	t.Run("incorrect length of WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY returns error", func(t *testing.T) {
+	t.Run("incorrect length of WG_SECURE_COOKIE_BLOCK_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
@@ -290,10 +290,10 @@ func TestValidateApiConfig(t *testing.T) {
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY must have a length of 32", messages[0])
+		assert.Equal(t, "the required environment variable WG_SECURE_COOKIE_BLOCK_KEY must have a length of 32", messages[0])
 	})
 
-	t.Run("empty WUNDERGRAPH_SECURE_COOKIE_HASH_KEY returns error", func(t *testing.T) {
+	t.Run("empty WG_SECURE_COOKIE_HASH_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
@@ -307,10 +307,10 @@ func TestValidateApiConfig(t *testing.T) {
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_HASH_KEY must have a length of 32", messages[0])
+		assert.Equal(t, "the required environment variable WG_SECURE_COOKIE_HASH_KEY must have a length of 32", messages[0])
 	})
 
-	t.Run("incorrect length of WUNDERGRAPH_SECURE_COOKIE_HASH_KEY returns error", func(t *testing.T) {
+	t.Run("incorrect length of WG_SECURE_COOKIE_HASH_KEY returns error", func(t *testing.T) {
 		valid, messages := ApiConfig(&apihandler.Api{
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
@@ -325,6 +325,6 @@ func TestValidateApiConfig(t *testing.T) {
 		})
 
 		assert.False(t, valid)
-		assert.Equal(t, "the required environment variable WUNDERGRAPH_SECURE_COOKIE_HASH_KEY must have a length of 32", messages[0])
+		assert.Equal(t, "the required environment variable WG_SECURE_COOKIE_HASH_KEY must have a length of 32", messages[0])
 	})
 }
