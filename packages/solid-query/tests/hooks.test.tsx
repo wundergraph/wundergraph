@@ -83,7 +83,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
 		.get('/operations/' + operationName)
-		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
+		.query({ wg_api_hash: '123', ...wgParams });
 };
 
 const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = false) => {
@@ -300,7 +300,7 @@ describe('Solid Query - createMutation', () => {
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/operations/Weather')
-			.query({ wg_api_hash: '123', wg_variables: '{}' })
+			.query({ wg_api_hash: '123' })
 			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
 
 		function Page() {
@@ -372,7 +372,12 @@ describe('Solid Query - createSubscription', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.get('/operations/Countdown')
-			.query({ wg_api_hash: '123', wg_variables: JSON.stringify({ from: 100 }), wg_subscribe_once: 'true' })
+			.query(
+				(obj) =>
+					obj.wg_api_hash === '123' &&
+					obj.wg_variables === JSON.stringify({ from: 100 }) &&
+					obj.wg_subscribe_once === ''
+			)
 			.reply(200, { data: { count: 100 } });
 
 		function Page() {
@@ -425,6 +430,7 @@ describe('Solid Query - useUser', () => {
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/auth/user')
+			.query({ wg_api_hash: '123' })
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {

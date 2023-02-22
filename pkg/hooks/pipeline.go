@@ -69,8 +69,12 @@ type SynchronousOperationPipelineConfig struct {
 
 type SubscriptionOperationPipelineConfig struct {
 	PipelineConfig
-	Resolver *resolve.Resolver
+	Resolver SubscriptionResolver
 	Plan     *plan.SubscriptionResponsePlan
+}
+
+type SubscriptionResolver interface {
+	ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) (err error)
 }
 
 type pipeline struct {
@@ -165,12 +169,15 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
 
+	payloadBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(payloadBuf)
+
 	var resp *MiddlewareHookResponse
 	var err error
 	data := ctx.Variables
 	if p.ResolveConfig.Pre {
 		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData)
+		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -183,7 +190,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 
 	if p.ResolveConfig.MutatingPre {
 		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData)
+		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -199,7 +206,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 
 	if p.ResolveConfig.Mock {
 		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData)
+		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -217,7 +224,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 
 	if p.ResolveConfig.Custom {
 		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
-		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData)
+		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -247,9 +254,12 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
 
+	payloadBuf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(payloadBuf)
+
 	if p.PostResolveConfig.Post {
 		postResolveData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData)
+		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -262,7 +272,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 
 	if p.PostResolveConfig.MutatingPost {
 		mutatingPostData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
-		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData)
+		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
 		if err != nil {
 			return nil, err
 		}
@@ -338,11 +348,11 @@ func (p *SynchronousOperationPipeline) Run(ctx *resolve.Context, w http.Response
 
 type SubscriptionOperationPipeline struct {
 	pipeline
-	resolver *resolve.Resolver
+	resolver SubscriptionResolver
 	plan     *plan.SubscriptionResponsePlan
 }
 
-// Run runs the pre-resolution hooks and resolves the subscription if needed. The writer is responsible for
+// RunSubscription runs the pre-resolution hooks and resolves the subscription if needed. The writer is responsible for
 // calling the post-resolution hooks (usually via Pipeline.PostResolve()). The pipeline Resolver must implement
 // ResolveSubscription.
 func (p *SubscriptionOperationPipeline) RunSubscription(ctx *resolve.Context, w SubscriptionWriter, r *http.Request) (*Response, error) {

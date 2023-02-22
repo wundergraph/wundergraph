@@ -2,9 +2,6 @@ import { createOperation, z } from '../../generated/wundergraph.factory';
 import { ExtractResponse } from '@wundergraph/sdk/dist/operations';
 
 const sub = createOperation.subscription({
-	input: z.object({
-		id: z.string(),
-	}),
 	response: z.object({
 		bio: z.string(),
 		counter: z.number(),
