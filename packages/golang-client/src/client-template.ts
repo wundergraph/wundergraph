@@ -6,12 +6,43 @@ import (
 	"github.com/wundergraph/client-go/pkg/execute"
 )
 
+type options struct {
+	httpClient *http.Client
+	baseURL string
+}
+
+type Option func(o *options)
+
+func WithHttpClient(httpClient *http.Client) Option {
+	return func(o *options) {
+		o.httpClient = httpClient
+	}
+}
+
+func WithBaseURL(baseURL string) Option {
+	return func(o *options) {
+		o.baseURL = baseURL
+	}
+}
+
 type Client struct {
 	httpClient  *http.Client
 	baseURL string
 }
 
-func New(httpClient *http.Client, baseURL string) *Client {
+func New(opts ...Option) *Client {
+	var o options
+	for _, opt := range opts {
+		opt(&o)
+	}
+	httpClient := o.httpClient
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	baseURL := o.baseURL
+	if baseURL == "" {
+		baseURL = "{{baseURL}}"
+	}
 	return &Client{httpClient, baseURL}
 }
 

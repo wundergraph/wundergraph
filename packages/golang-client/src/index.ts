@@ -226,6 +226,7 @@ export class GolangClient implements Template {
 			subscriptions: config.application.Operations.filter((op) => op.OperationType === OperationType.SUBSCRIPTION).map(
 				(op) => ({ name: op.Name, hasInput: hasInput(op) })
 			),
+			baseURL: config.deployment.environment.baseUrl,
 		});
 
 		return Promise.resolve([
