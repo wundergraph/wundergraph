@@ -87,7 +87,10 @@ export class Client {
 		// avoid stringify to 'undefined'
 		// remove empty params and values that are false
 		for (const [key, value] of queryParams.entries()) {
-			if (value == '' || value == undefined || value == 'false') {
+			if (value == undefined || value == 'false') {
+				queryParams.delete(key);
+			}
+			if (key === 'wg_variables' && value === '{}') {
 				queryParams.delete(key);
 			}
 		}
@@ -95,7 +98,9 @@ export class Client {
 		// stable stringify
 		queryParams.sort();
 
-		const queryString = queryParams.toString();
+		const intermediate = queryParams.toString();
+		const intermediate2 = intermediate.replace('=&', '&');
+		const queryString = intermediate2.endsWith('=') ? intermediate2.slice(0, -1) : intermediate2;
 
 		return url + (queryString ? `?${queryString}` : '');
 	}
@@ -231,7 +236,7 @@ export class Client {
 			new URLSearchParams(
 				options.subscribeOnce
 					? {
-							wg_subscribe_once: options.subscribeOnce ? 'true' : 'false',
+							wg_subscribe_once: options.subscribeOnce ? '' : 'false',
 							...params,
 					  }
 					: params
@@ -301,7 +306,7 @@ export class Client {
 	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
 		const params = new URLSearchParams({
-			revalidate: options?.revalidate ? 'true' : 'false',
+			revalidate: options?.revalidate ? '' : 'false',
 		});
 
 		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/user`, params), {
@@ -346,7 +351,7 @@ export class Client {
 		return new Promise<void>((resolve, reject) => {
 			const params = new URLSearchParams({
 				wg_variables: this.stringifyInput(subscription.input),
-				wg_live: subscription?.liveQuery ? 'true' : 'false',
+				wg_live: subscription?.liveQuery ? '' : 'false',
 				wg_sse: '',
 				wg_json_patch: '',
 			});
@@ -389,7 +394,7 @@ export class Client {
 	): AsyncGenerator<ClientResponse<ResponseData>> {
 		const params = new URLSearchParams({
 			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.liveQuery ? 'true' : 'false',
+			wg_live: subscription?.liveQuery ? '' : 'false',
 		});
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 		const response = await this.fetchJson(url, {

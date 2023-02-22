@@ -741,7 +741,7 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
+	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Has("revalidate") {
 		hookData := []byte(`{}`)
 		if userJson, err := json.Marshal(user); err != nil {
 			u.Log.Error("Could not marshal user", zap.Error(err))

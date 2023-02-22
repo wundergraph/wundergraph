@@ -873,12 +873,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			requestErrors := graphql.RequestErrors{
 				{
-					Message: "could not resolve resolve",
+					Message: "could not resolve",
 				},
 			}
 
 			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write resolve", zap.Error(err))
+				requestLogger.Error("could not write response", zap.Error(err))
 			}
 
 			requestLogger.Error("ResolveGraphQLResponse", zap.Error(err))
@@ -1495,7 +1495,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			}
 		}
 
-		// only send the resolve if the content has changed
+		// only send the response if the content has changed
 		if !bytes.Equal(response, lastData.Bytes()) {
 			currentData.Reset()
 			_, _ = currentData.Write(response)
@@ -1528,7 +1528,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 				} else {
 					_, err = w.Write(current)
 					if err != nil {
-						requestLogger.Error("HandleLiveQueryEvent could not write resolve", zap.Error(err))
+						requestLogger.Error("HandleLiveQueryEvent could not write response", zap.Error(err))
 						return
 					}
 				}
@@ -1536,7 +1536,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 				_, err = w.Write(currentData.Bytes())
 			}
 			if err != nil {
-				requestLogger.Error("HandleLiveQueryEvent could not write resolve", zap.Error(err))
+				requestLogger.Error("HandleLiveQueryEvent could not write response", zap.Error(err))
 				return
 			}
 			_, _ = w.Write(literal.LINETERMINATOR)
