@@ -117,7 +117,7 @@ type Claims struct {
 func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	request.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(request.Context()))
 
-	if request.Header.Get("X-WG-Internal-GraphQL-API") == "true" {
+	if request.Header.Get(WgInternalApiCallHeader) == "true" {
 		return t.internalGraphQLRoundTrip(request)
 	}
 
@@ -190,7 +190,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		} else if res != nil {
 			responseDump, _ = httputil.DumpResponse(res, true)
 		} else {
-			responseDump = []byte("<no resolve>")
+			responseDump = []byte("<no response>")
 		}
 
 		fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\nResponse:\n\n%s\n\n--- DebugTransport\n\n",
@@ -212,7 +212,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 // these get extracted by the fastify server
 // so that the graphql-js context has access to the original user and request
 func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *http.Response, err error) {
-	request.Header.Del("X-WG-Internal-GraphQL-API")
+	request.Header.Del(WgInternalApiCallHeader)
 	user := authentication.UserFromContext(request.Context())
 
 	buf := pool.GetBytesBuffer()

@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -58,14 +59,31 @@ import (
 )
 
 const (
-	WG_PREFIX         = "wg_"
-	WG_LIVE           = WG_PREFIX + "live"
-	WG_VARIABLES      = WG_PREFIX + "variables"
-	WG_CACHE_HEADER   = "X-Wg-Cache"
-	WG_JSON_PATCH     = WG_PREFIX + "json_patch"
-	WG_SSE            = WG_PREFIX + "sse"
-	WG_SUBSCRIBE_ONCE = WG_PREFIX + "subscribe_once"
+	WgCacheHeader           = "X-Wg-Cache"
+	WgInternalApiCallHeader = "X-WG-Internal-GraphQL-API"
+
+	WgPrefix             = "wg_"
+	WgVariables          = WgPrefix + "variables"
+	WgLiveParam          = WgPrefix + "live"
+	WgJsonPatchParam     = WgPrefix + "json_patch"
+	WgSseParam           = WgPrefix + "sse"
+	WgSubscribeOnceParam = WgPrefix + "subscribe_once"
 )
+
+type WgRequestParams struct {
+	UseJsonPatch bool
+	UseSse       bool
+	SubsribeOnce bool
+}
+
+func NewWgRequestParams(url *url.URL) WgRequestParams {
+	q := url.Query()
+	return WgRequestParams{
+		UseJsonPatch: q.Has(WgJsonPatchParam),
+		UseSse:       q.Has(WgSseParam),
+		SubsribeOnce: q.Has(WgSubscribeOnceParam),
+	}
+}
 
 type Builder struct {
 	router   *mux.Router
@@ -873,7 +891,7 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			requestErrors := graphql.RequestErrors{
 				{
-					Message: "could not resolve",
+					Message: "could not resolve response",
 				},
 			}
 
@@ -910,12 +928,12 @@ func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			requestErrors := graphql.RequestErrors{
 				{
-					Message: "could not resolve resolve",
+					Message: "could not resolve response",
 				},
 			}
 
 			if _, err := requestErrors.WriteResponse(w); err != nil {
-				requestLogger.Error("could not write resolve", zap.Error(err))
+				requestLogger.Error("could not write response", zap.Error(err))
 			}
 
 			requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
@@ -942,7 +960,7 @@ func (h *GraphQLHandler) writeRequestErrors(report *operationreport.Report, w ht
 	requestErrors := graphql.RequestErrorsFromOperationReport(*report)
 	if requestErrors != nil {
 		if _, err := requestErrors.WriteResponse(w); err != nil {
-			requestLogger.Error("error writing resolve", zap.Error(err))
+			requestLogger.Error("error writing response", zap.Error(err))
 		}
 	}
 }
@@ -1201,11 +1219,11 @@ type liveQueryConfig struct {
 }
 
 func parseQueryVariables(r *http.Request, allowList []string) []byte {
-	rawVariables := r.URL.Query().Get(WG_VARIABLES)
+	rawVariables := r.URL.Query().Get(WgVariables)
 	if rawVariables == "" {
 		rawVariables = "{}"
 		for name, val := range r.URL.Query() {
-			if len(val) > 0 && !strings.HasPrefix(name, WG_PREFIX) {
+			if len(val) > 0 && !strings.HasPrefix(name, WgPrefix) {
 				if !stringSliceContainsValue(allowList, name) {
 					continue
 				}
@@ -1265,7 +1283,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		cacheIsStale = false
 	)
 
-	isLive := h.liveQuery.enabled && r.URL.Query().Has(WG_LIVE)
+	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	buf := pool.GetBytesBuffer()
 	ctx := pool.GetCtx(r, r, pool.Config{
@@ -1342,7 +1360,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		item, hit := h.cache.Get(ctx.Context, cacheKey)
 		if hit {
 
-			w.Header().Set(WG_CACHE_HEADER, "HIT")
+			w.Header().Set(WgCacheHeader, "HIT")
 
 			_, _ = buf.Write(item.Data)
 
@@ -1376,7 +1394,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			_, _ = buf.WriteTo(w)
 			return
 		}
-		w.Header().Set(WG_CACHE_HEADER, "MISS")
+		w.Header().Set(WgCacheHeader, "MISS")
 	}
 
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
@@ -1443,9 +1461,7 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.Respons
 }
 
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
-	subscribeOnce := r.URL.Query().Has(WG_SUBSCRIBE_ONCE)
-	useSSE := r.URL.Query().Has(WG_SSE)
-	useJsonPatch := r.URL.Query().Has(WG_JSON_PATCH)
+	wgParams := NewWgRequestParams(r.URL)
 
 	done := ctx.Context.Done()
 
@@ -1458,7 +1474,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	currentData := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(currentData)
 
-	if useSSE {
+	if wgParams.UseSse {
 		defer func() {
 			_, _ = fmt.Fprintf(w, "event: close\n\n")
 			flusher.Flush()
@@ -1499,14 +1515,14 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 		if !bytes.Equal(response, lastData.Bytes()) {
 			currentData.Reset()
 			_, _ = currentData.Write(response)
-			if useSSE {
+			if wgParams.UseSse {
 				_, _ = w.Write([]byte("data: "))
 			}
-			if subscribeOnce {
+			if wgParams.SubsribeOnce {
 				flusher.Flush()
 				return
 			}
-			if useJsonPatch && lastData.Len() != 0 {
+			if wgParams.UseJsonPatch && lastData.Len() != 0 {
 				last := lastData.Bytes()
 				current := currentData.Bytes()
 				patch, err := jsonpatch.CreatePatch(last, current)
@@ -1519,6 +1535,7 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 					requestLogger.Error("HandleLiveQueryEvent could not marshal json patch", zap.Error(err))
 					continue
 				}
+				// we only send the patch if it's smaller than the full response
 				if len(patchBytes) < len(current) {
 					_, err = w.Write(patchBytes)
 					if err != nil {
@@ -1585,7 +1602,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 	rawVariables := "{}"
 	if err := r.ParseForm(); err == nil {
 		for name, val := range r.Form {
-			if len(val) == 0 || strings.HasSuffix(val[0], WG_PREFIX) {
+			if len(val) == 0 || strings.HasSuffix(val[0], WgPrefix) {
 				continue
 			}
 			// check if the user works with JSON values
@@ -2255,7 +2272,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isLive := h.liveQuery.enabled && r.URL.Query().Has(WG_LIVE)
+	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -2315,7 +2332,7 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 			}
 			_, err = fw.Write(out.Response)
 			if err != nil {
-				requestLogger.Error("failed to write resolve", zap.Error(err))
+				requestLogger.Error("failed to write response", zap.Error(err))
 				return
 			}
 			fw.Flush()
@@ -2350,13 +2367,12 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 }
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
+	wgParams := NewWgRequestParams(r.URL)
+
 	setSubscriptionHeaders(w)
-	subscribeOnce := r.URL.Query().Has(WG_SUBSCRIBE_ONCE)
-	sse := r.URL.Query().Has(WG_SSE)
-	useJsonPatch := r.URL.Query().Has(WG_JSON_PATCH)
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
-	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, subscribeOnce, sse, useJsonPatch, w, buf)
+	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, wgParams.SubsribeOnce, wgParams.UseSse, wgParams.UseJsonPatch, w, buf)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")
@@ -2372,7 +2388,7 @@ func (h *FunctionsHandler) parseFormVariables(r *http.Request) []byte {
 	rawVariables := "{}"
 	if err := r.ParseForm(); err == nil {
 		for name, val := range r.Form {
-			if len(val) == 0 || strings.HasSuffix(val[0], WG_PREFIX) {
+			if len(val) == 0 || strings.HasSuffix(val[0], WgPrefix) {
 				continue
 			}
 			// check if the user works with JSON values
@@ -2455,16 +2471,14 @@ func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseW
 }
 
 func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
+	wgParams := NewWgRequestParams(r.URL)
+
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		return ctx, nil, false
 	}
 
-	subscribeOnce := r.URL.Query().Has(WG_SUBSCRIBE_ONCE)
-	sse := r.URL.Query().Has(WG_SSE)
-	useJsonPatch := r.URL.Query().Has(WG_JSON_PATCH)
-
-	if !subscribeOnce {
+	if !wgParams.SubsribeOnce {
 		setSubscriptionHeaders(w)
 	}
 
@@ -2473,15 +2487,15 @@ func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w ht
 	flushWriter := &httpFlushWriter{
 		writer:       w,
 		flusher:      flusher,
-		sse:          sse,
-		useJsonPatch: useJsonPatch,
+		sse:          wgParams.UseSse,
+		useJsonPatch: wgParams.UseJsonPatch,
 		buf:          &bytes.Buffer{},
 		lastMessage:  &bytes.Buffer{},
 		ctx:          ctx,
 		variables:    variables,
 	}
 
-	if subscribeOnce {
+	if wgParams.SubsribeOnce {
 		flushWriter.subscribeOnce = true
 		ctx, flushWriter.close = context.WithCancel(ctx)
 	}
@@ -2536,7 +2550,7 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 	if !valid {
 		w.WriteHeader(http.StatusBadRequest)
 		if _, err := io.Copy(w, &buf); err != nil {
-			log.Error("copying validation to resolve", zap.Error(err))
+			log.Error("copying validation to response", zap.Error(err))
 		}
 		return false
 	}

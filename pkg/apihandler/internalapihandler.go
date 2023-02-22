@@ -319,7 +319,7 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(resp.Data); err != nil {
-		requestLogger.Error("writing resolve", zap.Error(err))
+		requestLogger.Error("writing response", zap.Error(err))
 	}
 }
 
