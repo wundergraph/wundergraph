@@ -20,7 +20,7 @@ import { ResponseError } from './ResponseError';
 import { InputValidationError } from './InputValidationError';
 import { AuthorizationError } from './AuthorizationError';
 import { ClientResponseError } from './ClientResponseError';
-import * as jsonPatch from 'fast-json-patch';
+import { applyPatch } from 'fast-json-patch';
 
 // https://graphql.org/learn/serving-over-http/
 
@@ -359,13 +359,21 @@ export class Client {
 			});
 			eventSource.addEventListener('open', () => {
 				resolve();
+				console.log('SSE connection opened');
+			});
+			eventSource.addEventListener('close', () => {
+				console.log('SSE connection closed');
 			});
 			let lastResponse: GraphQLResponse | null = null;
 			eventSource.addEventListener('message', (ev) => {
 				const jsonResp = JSON.parse(ev.data);
+				// we parse the json response, which might be a json patch (array) or a full response (object)
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
-					lastResponse = jsonPatch.applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+					// we have a lastResponse and the current response is a json patch
+					// we apply the patch to generate the latest response
+					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
 				} else {
+					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
 				cb(this.convertGraphQLResponse(lastResponse));
@@ -409,7 +417,7 @@ export class Client {
 			if (message.endsWith('\n\n')) {
 				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
-					lastResponse = jsonPatch.applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
 				} else {
 					lastResponse = jsonResp as GraphQLResponse;
 				}
