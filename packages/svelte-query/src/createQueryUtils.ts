@@ -3,8 +3,8 @@ import {
 	createMutation as tanstackCreateMutation,
 	useQueryClient,
 } from '@tanstack/svelte-query';
-import { readable } from 'svelte/store';
-import { onMount } from 'svelte';
+import { writable } from 'svelte/store';
+import { onDestroy, onMount } from 'svelte';
 import type { QueryFunctionContext } from '@tanstack/svelte-query';
 import type { OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
@@ -210,57 +210,54 @@ export function createQueryUtils<Operations extends OperationsDefinition>(client
 
 		let startedAtRef: number | null = null;
 		let unsubscribe: ReturnType<typeof subscribeTo>;
+		const subscriptionState = writable({
+			isLoading: false,
+			isSubscribed: false,
+		});
 
 		onMount(() => {
 			if (!startedAtRef && resetOnMount) {
 				client.removeQueries([operationName, input]);
 			}
-		});
 
-		const subscriptionState = readable(
-			{
-				isLoading: false,
-				isSubscribed: false,
-			},
-			function start(set) {
-				set({ isLoading: true, isSubscribed: false });
-				unsubscribe = subscribeTo({
-					operationName,
-					input,
-					liveQuery,
-					subscribeOnce,
-					onError(error) {
-						set({ isLoading: false, isSubscribed: false });
-						onError?.(error);
-						startedAtRef = null;
-					},
-					onResult(result) {
-						if (!startedAtRef) {
-							set({ isLoading: false, isSubscribed: true });
-							onSuccess?.(result);
-							startedAtRef = new Date().getTime();
+			subscriptionState.set({ isLoading: true, isSubscribed: false });
+			unsubscribe = subscribeTo({
+				operationName,
+				input,
+				liveQuery,
+				subscribeOnce,
+				onError(error) {
+					subscriptionState.set({ isLoading: false, isSubscribed: false });
+					onError?.(error);
+					startedAtRef = null;
+				},
+				onResult(result) {
+					if (!startedAtRef) {
+						subscriptionState.set({ isLoading: false, isSubscribed: true });
+						onSuccess?.(result);
+						startedAtRef = new Date().getTime();
+					}
+
+					// Promise is not handled because we are not interested in the result
+					// Errors are handled by React Query internally
+					client.setQueryData([operationName, input], () => {
+						if (result.error) {
+							throw result.error;
 						}
 
-						// Promise is not handled because we are not interested in the result
-						// Errors are handled by React Query internally
-						client.setQueryData([operationName, input], () => {
-							if (result.error) {
-								throw result.error;
-							}
+						return result.data;
+					});
+				},
+				onAbort() {
+					subscriptionState.set({ isLoading: false, isSubscribed: false });
+					startedAtRef = null;
+				},
+			});
+		});
 
-							return result.data;
-						});
-					},
-					onAbort() {
-						set({ isLoading: false, isSubscribed: false });
-						startedAtRef = null;
-					},
-				});
-				return function stop() {
-					unsubscribe?.();
-				};
-			}
-		);
+		onDestroy(() => {
+			unsubscribe?.();
+		});
 
 		return subscriptionState;
 	};
