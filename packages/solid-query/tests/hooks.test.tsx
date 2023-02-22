@@ -430,6 +430,7 @@ describe('Solid Query - useUser', () => {
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/auth/user')
+			.query({ wg_api_hash: '123' })
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {
