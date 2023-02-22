@@ -335,9 +335,18 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			}
 			if len(patch) < len(line) {
 				_, err = out.Write(patch)
+				if err != nil {
+					return err
+				}
 				_, err = out.Write([]byte("\n")) // add newline again
+				if err != nil {
+					return err
+				}
 			} else {
 				_, err = out.Write(line)
+				if err != nil {
+					return err
+				}
 			}
 		} else {
 			_, err = out.Write(line)

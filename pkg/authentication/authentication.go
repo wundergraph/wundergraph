@@ -22,11 +22,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/securecookie"
-	"github.com/wundergraph/wundergraph/pkg/pool"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 

@@ -1514,8 +1514,16 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 				}
 				if len(patchBytes) < len(current) {
 					_, err = w.Write(patchBytes)
+					if err != nil {
+						requestLogger.Error("HandleLiveQueryEvent could not write json patch", zap.Error(err))
+						return
+					}
 				} else {
 					_, err = w.Write(current)
+					if err != nil {
+						requestLogger.Error("HandleLiveQueryEvent could not write resolve", zap.Error(err))
+						return
+					}
 				}
 			} else {
 				_, err = w.Write(currentData.Bytes())
