@@ -121,6 +121,59 @@ to indicate that they want to receive live updates.
 GET https://<hostname>/operations/<operationName>?name=Jannik&wg_live=true
 ```
 
+## Streaming Responses (Subscriptions and Live Queries)
+
+For streaming responses like Subscriptions and Live Queries,
+there are a few things to keep in mind.
+
+### SSE (Server-Sent Events)
+
+WunderGraph supports SSE for streaming responses.
+If a client wants to consume a streaming response as SSE,
+it should add the `wg_sse` query parameter to the URL.
+
+```
+GET https://<hostname>/operations/<operationName>?wg_sse=true
+```
+
+This will prefix each message with `data: `, which is the format used by SSE.
+This way, browsers can use the `EventSource` API to consume the stream.
+The WunderGraph TypeScript Client does this automatically.
+
+There's one caveat though.
+When the server intends to close the connection,
+the client will always reconnect, as this is the default behavior of the `EventSource` API.
+
+For this reason, the server will always send a `data: done` message before closing the connection to indicate that there will be no more messages.
+
+### JSON-Patch (RFC 6902) Support for Streaming Responses
+
+WunderGraph supports JSON-Patch for streaming responses.
+If a client wants to consume a streaming response as JSON-Patch,
+it should add the `wg_json_patch` query parameter to the URL.
+
+```
+GET https://<hostname>/operations/<operationName>?wg_json_patch=true
+```
+
+You can combine this with the `wg_sse` query parameter to get SSE with JSON-Patch.
+
+```
+GET https://<hostname>/operations/<operationName>?wg_sse=true&wg_json_patch=true
+```
+
+With JSON-Patch enabled, the server will always calculate the difference between the previous message and the current message.
+If the generated JSON-Patch is smaller than the next message, the server will send the JSON-Patch instead of the next message.
+If the generated JSON-Patch is larger than the next message, the server will send the next message.
+
+A JSON-Patch response is always an array of JSON-Patch operations,
+as defined in [RFC 6902](https://tools.ietf.org/html/rfc6902),
+whereas a normal response is a JSON object.
+
+A client can distinguish between a JSON-Patch response and a normal response by checking the first character of the response,
+which is always `[` for a JSON-Patch response and `{` for a normal response.
+Alternatively, the client can parse the response as JSON and check if it's an array or an object.
+
 ## Response format
 
 The response format for all operations is a JSON object with two root fields,
