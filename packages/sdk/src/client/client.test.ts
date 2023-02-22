@@ -54,7 +54,7 @@ describe('Client', () => {
 				.matchHeader('X-Test', 'test')
 				.matchHeader('X-Test-From-Constructor', 'extra-header')
 				.get('/operations/Weather')
-				.query({ wg_api_hash: '123', wg_variables: '{}' })
+				.query({ wg_api_hash: '123' })
 				.once()
 				.reply(200, {
 					data: {
@@ -95,7 +95,7 @@ describe('Client', () => {
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.get('/operations/Weather')
-				.query({ wg_api_hash: '123', wg_variables: '{}' })
+				.query({ wg_api_hash: '123' })
 				.once()
 				.reply(200, {
 					data: {
@@ -155,7 +155,7 @@ describe('Client', () => {
 				.matchHeader('content-type', 'application/json')
 				.matchHeader('WG-SDK-Version', '1.0.0')
 				.get('/operations/Weather')
-				.query({ wg_api_hash: '123', wg_variables: '{}' })
+				.query({ wg_api_hash: '123' })
 				.once()
 				.reply(200, {
 					errors: [
@@ -178,11 +178,7 @@ describe('Client', () => {
 		test('Should return ResponseError when request fails with no response body', async () => {
 			const client = newClient();
 
-			nock('https://api.com')
-				.get('/operations/Weather')
-				.query({ wg_api_hash: '123', wg_variables: '{}' })
-				.once()
-				.reply(500);
+			nock('https://api.com').get('/operations/Weather').query({ wg_api_hash: '123' }).once().reply(500);
 
 			const resp = await client.query<QueryRequestOptions<'Weather'>>({
 				operationName: 'Weather',
@@ -196,11 +192,7 @@ describe('Client', () => {
 		test('Should return InputValidationError when response body contains errors', async () => {
 			const client = newClient();
 
-			nock('https://api.com')
-				.get('/operations/Weather')
-				.query({ wg_api_hash: '123', wg_variables: '{}' })
-				.once()
-				.reply(400, mockErrorJson);
+			nock('https://api.com').get('/operations/Weather').query({ wg_api_hash: '123' }).once().reply(400, mockErrorJson);
 
 			const resp = await client.query<QueryRequestOptions<'Weather'>>({
 				operationName: 'Weather',
@@ -215,11 +207,7 @@ describe('Client', () => {
 			const client = newClient();
 			const errorText = 'Some error text';
 
-			nock('https://api.com')
-				.get('/operations/Weather')
-				.query({ wg_api_hash: '123', wg_variables: '{}' })
-				.once()
-				.reply(400, errorText);
+			nock('https://api.com').get('/operations/Weather').query({ wg_api_hash: '123' }).once().reply(400, errorText);
 
 			const resp = await client.query<QueryRequestOptions<'Weather'>>({
 				operationName: 'Weather',

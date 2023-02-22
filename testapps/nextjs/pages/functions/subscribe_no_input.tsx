@@ -2,10 +2,7 @@ import { useSubscription, withWunderGraph } from '../../components/generated/nex
 
 const Functions = () => {
 	const { data } = useSubscription({
-		operationName: 'users/subscribe_without_schema',
-		input: {
-			id: '1',
-		},
+		operationName: 'users/subscribe_no_input',
 	});
 	return (
 		<div>

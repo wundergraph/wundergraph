@@ -88,7 +88,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
 		.get('/operations/' + operationName)
-		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
+		.query({ wg_api_hash: '123', ...wgParams });
 };
 
 const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = false) => {
@@ -499,10 +499,11 @@ describe('SWR - useUser', () => {
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/auth/user')
+			.query({ wg_api_hash: '123' })
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		function Page() {
-			const { data } = useUser();
+			const { data, ...rest } = useUser();
 
 			return <div>{data?.email}</div>;
 		}
