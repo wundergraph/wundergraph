@@ -71,7 +71,7 @@ func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Synch
 
 func TestQueryHandler_VariablesIgnore(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -103,8 +103,8 @@ func TestQueryHandler_VariablesIgnore(t *testing.T) {
 		pool:                   pool.New(),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		queryParamsAllowList:   []string{"id"},
@@ -132,7 +132,7 @@ func TestQueryHandler_VariablesIgnore(t *testing.T) {
 
 func TestQueryHandler_ETag(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	validateNothing, err := inputvariables.NewValidator(`{"type":"object","properties":{"id":{"type":"number"}}}`, true)
@@ -157,8 +157,8 @@ func TestQueryHandler_ETag(t *testing.T) {
 		pool:                   pool.New(),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		hooksPipeline:          newPipeline(resolver, operation),
@@ -190,7 +190,7 @@ func TestQueryHandler_ETag(t *testing.T) {
 
 func TestQueryHandler_LiveQuery(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -226,8 +226,8 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 		pool:                   pool.New(),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		queryParamsAllowList:   []string{"id"},
@@ -267,7 +267,7 @@ func TestQueryHandler_LiveQuery(t *testing.T) {
 
 func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -303,8 +303,8 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 		pool:                   pool.New(),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		queryParamsAllowList:   []string{"id"},
@@ -345,7 +345,7 @@ func TestQueryHandler_LiveQueryJsonPatch(t *testing.T) {
 
 func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -389,8 +389,8 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 		pool:                   pool.New(),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		queryParamsAllowList:   []string{"id"},
@@ -426,7 +426,7 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 
 func TestQueryHandler_Subscription(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -470,8 +470,8 @@ func TestQueryHandler_Subscription(t *testing.T) {
 		pool:                   pool.New(),
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		queryParamsAllowList:   []string{"id"},
@@ -507,7 +507,7 @@ func TestQueryHandler_Subscription(t *testing.T) {
 
 func TestFunctionsHandler_Default(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -534,7 +534,7 @@ func TestFunctionsHandler_Default(t *testing.T) {
 		log:                  zap.NewNop(),
 		operation:            operation,
 		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpoalteNothing,
+		stringInterpolator:   interpolateNothing,
 		variablesValidator:   validateNothing,
 		queryParamsAllowList: []string{"id"},
 		liveQuery: liveQueryConfig{
@@ -572,7 +572,7 @@ func TestFunctionsHandler_Default(t *testing.T) {
 
 func TestFunctionsHandler_Live(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -599,7 +599,7 @@ func TestFunctionsHandler_Live(t *testing.T) {
 		log:                  zap.NewNop(),
 		operation:            operation,
 		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpoalteNothing,
+		stringInterpolator:   interpolateNothing,
 		variablesValidator:   validateNothing,
 		queryParamsAllowList: []string{"id"},
 		liveQuery: liveQueryConfig{
@@ -638,7 +638,7 @@ func TestFunctionsHandler_Live(t *testing.T) {
 
 func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -665,7 +665,7 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 		log:                  zap.NewNop(),
 		operation:            operation,
 		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpoalteNothing,
+		stringInterpolator:   interpolateNothing,
 		variablesValidator:   validateNothing,
 		queryParamsAllowList: []string{"id"},
 		liveQuery: liveQueryConfig{
@@ -705,7 +705,7 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 
 func TestFunctionsHandler_Subscription(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -736,7 +736,7 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 		log:                  zap.NewNop(),
 		operation:            operation,
 		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpoalteNothing,
+		stringInterpolator:   interpolateNothing,
 		variablesValidator:   validateNothing,
 		queryParamsAllowList: []string{"id"},
 		liveQuery: liveQueryConfig{
@@ -774,7 +774,7 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 
 func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -805,7 +805,7 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 		log:                  zap.NewNop(),
 		operation:            operation,
 		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpoalteNothing,
+		stringInterpolator:   interpolateNothing,
 		variablesValidator:   validateNothing,
 		queryParamsAllowList: []string{"id"},
 		liveQuery: liveQueryConfig{
@@ -844,7 +844,7 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 
 func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
@@ -875,7 +875,7 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 		log:                  zap.NewNop(),
 		operation:            operation,
 		rbacEnforcer:         &authentication.RBACEnforcer{},
-		stringInterpolator:   interpoalteNothing,
+		stringInterpolator:   interpolateNothing,
 		variablesValidator:   validateNothing,
 		queryParamsAllowList: []string{"id"},
 		liveQuery: liveQueryConfig{
@@ -915,7 +915,7 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 
 func TestQueryHandler_Caching(t *testing.T) {
 
-	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	interpolateNothing, err := interpolate.NewStringInterpolator(`{}`)
 	assert.NoError(t, err)
 
 	validateNothing, err := inputvariables.NewValidator(`{"type":"object","properties":{"id":{"type":"number"}}}`, true)
@@ -950,8 +950,8 @@ func TestQueryHandler_Caching(t *testing.T) {
 		cache:                  cache,
 		operation:              operation,
 		rbacEnforcer:           &authentication.RBACEnforcer{},
-		stringInterpolator:     interpoalteNothing,
-		jsonStringInterpolator: interpoalteNothing,
+		stringInterpolator:     interpolateNothing,
+		jsonStringInterpolator: interpolateNothing,
 		variablesValidator:     validateNothing,
 		postResolveTransformer: &postresolvetransform.Transformer{},
 		hooksPipeline:          newPipeline(resolver, operation),

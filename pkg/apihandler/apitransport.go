@@ -170,7 +170,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		return nil, err
 	}
 
-	// in case of http Upgrade requests, we must not dump the resolve
+	// in case of http Upgrade requests, we must not dump the response
 	// otherwise, the upgrade will fail
 	if isUpgradeRequest || t.enableStreamingMode {
 		if t.debugMode {

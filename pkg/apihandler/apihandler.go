@@ -1774,7 +1774,7 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		// if the deadline is exceeded (e.g. timeout), we don't have to return an HTTP error
-		// we've already flushed a resolve to the client
+		// we've already flushed a response to the client
 		requestLogger.Error("ResolveGraphQLSubscription", zap.Error(err))
 	}
 }
@@ -2450,8 +2450,8 @@ func setSubscriptionHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
-	// allow unbuffered responses, it's used when it's necessary just to pass resolve through
-	// setting this to “yes” will allow the resolve to be cached
+	// allow unbuffered responses, it's used when it's necessary just to pass response through
+	// setting this to “yes” will allow the response to be cached
 	w.Header().Set("X-Accel-Buffering", "no")
 }
 
