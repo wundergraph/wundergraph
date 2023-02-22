@@ -87,7 +87,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
 		.get('/operations/' + operationName)
-		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
+		.query({ wg_api_hash: '123', ...wgParams });
 };
 
 const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = false) => {
@@ -291,7 +291,7 @@ describe('React Query - useMutation', () => {
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/operations/Weather')
-			.query({ wg_api_hash: '123', wg_variables: '{}' })
+			.query({ wg_api_hash: '123' })
 			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
 
 		function Page() {
@@ -359,7 +359,12 @@ describe('React Query - useSubscription', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.get('/operations/Countdown')
-			.query({ wg_api_hash: '123', wg_variables: JSON.stringify({ from: 100 }), wg_subscribe_once: 'true' })
+			.query(
+				(obj) =>
+					obj.wg_api_hash === '123' &&
+					obj.wg_subscribe_once === '' &&
+					obj.wg_variables === JSON.stringify({ from: 100 })
+			)
 			.reply(200, { data: { count: 100 } });
 
 		function Page() {

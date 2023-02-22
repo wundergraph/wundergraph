@@ -55,6 +55,7 @@ export interface UploadValidationOptions {
 interface LogoutResponse {
 	redirect?: string;
 }
+
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -84,25 +85,22 @@ export class Client {
 	}
 
 	private addUrlParams(url: string, queryParams: URLSearchParams): string {
-		// avoid stringify to 'undefined'
-		// remove empty params and values that are false
-		for (const [key, value] of queryParams.entries()) {
-			if (value == undefined || value == 'false') {
-				queryParams.delete(key);
-			}
-			if (key === 'wg_variables' && value === '{}') {
-				queryParams.delete(key);
-			}
+		if (queryParams.get('wg_variables') === '{}') {
+			queryParams.delete('wg_variables');
 		}
 
 		// stable stringify
 		queryParams.sort();
 
-		const intermediate = queryParams.toString();
-		const intermediate2 = intermediate.replace('=&', '&');
-		const queryString = intermediate2.endsWith('=') ? intermediate2.slice(0, -1) : intermediate2;
+		const queryString = this.encodeQueryParams(queryParams);
 
 		return url + (queryString ? `?${queryString}` : '');
+	}
+
+	private encodeQueryParams(queryParams: URLSearchParams): string {
+		const originalString = queryParams.toString();
+		const withoutEmptyArgs = originalString.replace('=&', '&');
+		return withoutEmptyArgs.endsWith('=') ? withoutEmptyArgs.slice(0, -1) : withoutEmptyArgs;
 	}
 
 	private async fetchJson(url: string, init: RequestInit = {}) {
@@ -188,7 +186,8 @@ export class Client {
 	}
 
 	private stringifyInput(input: any) {
-		return JSON.stringify(input || {});
+		const encoded = JSON.stringify(input || {});
+		return encoded === '{}' ? undefined : encoded;
 	}
 
 	public setExtraHeaders(headers: Headers) {
@@ -227,21 +226,17 @@ export class Client {
 	public async query<RequestOptions extends QueryRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
-		const params = {
-			wg_variables: this.stringifyInput(options.input),
+		const searchParams = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
-		};
-		const url = this.addUrlParams(
-			this.operationUrl(options.operationName),
-			new URLSearchParams(
-				options.subscribeOnce
-					? {
-							wg_subscribe_once: options.subscribeOnce ? '' : 'false',
-							...params,
-					  }
-					: params
-			)
-		);
+		});
+		const variables = this.stringifyInput(options.input);
+		if (variables) {
+			searchParams.set('wg_variables', variables);
+		}
+		if (options.subscribeOnce) {
+			searchParams.set('wg_subscribe_once', '');
+		}
+		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
 		const resp = await this.fetchJson(url, {
 			method: 'GET',
 			signal: options.abortSignal,
@@ -306,9 +301,11 @@ export class Client {
 	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
 		const params = new URLSearchParams({
-			revalidate: options?.revalidate ? '' : 'false',
+			wg_api_hash: this.options.applicationHash,
 		});
-
+		if (options?.revalidate) {
+			params.set('revalidate', '');
+		}
 		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/user`, params), {
 			method: 'GET',
 			signal: options?.abortSignal,
@@ -350,11 +347,17 @@ export class Client {
 	) {
 		return new Promise<void>((resolve, reject) => {
 			const params = new URLSearchParams({
-				wg_variables: this.stringifyInput(subscription.input),
-				wg_live: subscription?.liveQuery ? '' : 'false',
+				wg_api_hash: this.options.applicationHash,
 				wg_sse: '',
 				wg_json_patch: '',
 			});
+			const variables = this.stringifyInput(subscription.input);
+			if (variables) {
+				params.set('wg_variables', variables);
+			}
+			if (subscription.liveQuery) {
+				params.set('wg_live', '');
+			}
 			const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 			const eventSource = new EventSource(url, {
 				withCredentials: true,
@@ -393,9 +396,15 @@ export class Client {
 		subscription: SubscriptionRequestOptions
 	): AsyncGenerator<ClientResponse<ResponseData>> {
 		const params = new URLSearchParams({
-			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.liveQuery ? '' : 'false',
+			wg_api_hash: this.options.applicationHash,
 		});
+		const variables = this.stringifyInput(subscription.input);
+		if (variables) {
+			params.set('wg_variables', variables);
+		}
+		if (subscription.liveQuery) {
+			params.set('wg_live', '');
+		}
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 		const response = await this.fetchJson(url, {
 			method: 'GET',
