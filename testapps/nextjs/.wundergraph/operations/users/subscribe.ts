@@ -22,7 +22,7 @@ const sub = createOperation.subscription({
 		};
 
 		try {
-			for (let i = 0; i < 10; i++) {
+			for (let i = 0; i < 2; i++) {
 				const isOdd = i % 2 === 0;
 				if (i === 5) {
 					time = new Date().toISOString();

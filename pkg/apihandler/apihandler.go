@@ -1458,6 +1458,13 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 	currentData := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(currentData)
 
+	if useSSE {
+		defer func() {
+			_, _ = fmt.Fprintf(w, "event: close\n\n")
+			flusher.Flush()
+		}()
+	}
+
 	for {
 		var hookError bool
 		response, err := h.handleLiveQueryEvent(ctx, w, r, requestBuf, hookBuf)
@@ -1813,6 +1820,13 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 	}
 
 	return f.buf.Write(p)
+}
+
+func (f *httpFlushWriter) Close() {
+	if f.sse {
+		_, _ = f.writer.Write([]byte("event: done\n\n"))
+		f.flusher.Flush()
+	}
 }
 
 func (f *httpFlushWriter) Flush() {
@@ -2280,6 +2294,8 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 	var (
 		lastResponse bytes.Buffer
 	)
+
+	defer fw.Close()
 
 	for {
 		select {

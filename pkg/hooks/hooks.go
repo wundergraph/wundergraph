@@ -293,6 +293,13 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 		return fmt.Errorf("client connection is not flushable")
 	}
 
+	if useSSE {
+		defer func() {
+			_, _ = out.Write([]byte("data: done\n\n"))
+			flusher.Flush()
+		}()
+	}
+
 	reader := bufio.NewReader(resp.Body)
 	lastLine := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(lastLine)

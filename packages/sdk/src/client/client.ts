@@ -359,13 +359,13 @@ export class Client {
 			});
 			eventSource.addEventListener('open', () => {
 				resolve();
-				console.log('SSE connection opened');
-			});
-			eventSource.addEventListener('close', () => {
-				console.log('SSE connection closed');
 			});
 			let lastResponse: GraphQLResponse | null = null;
 			eventSource.addEventListener('message', (ev) => {
+				if (ev.data === 'done') {
+					eventSource.close();
+					return;
+				}
 				const jsonResp = JSON.parse(ev.data);
 				// we parse the json response, which might be a json patch (array) or a full response (object)
 				if (lastResponse !== null && Array.isArray(jsonResp)) {

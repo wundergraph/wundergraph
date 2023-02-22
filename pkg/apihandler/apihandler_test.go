@@ -846,6 +846,77 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 	assert.Equal(t, 3, hookServerRequestCount)
 }
 
+func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
+
+	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
+	assert.NoError(t, err)
+
+	inputSchema := `{"type":"object","properties":{"id":{"type":"number"}}}`
+
+	validateNothing, err := inputvariables.NewValidator(inputSchema, true)
+	assert.NoError(t, err)
+
+	hookServerRequestCount := 0
+
+	fakeHookServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		for i := 0; i < 3; i++ {
+			_, _ = w.Write([]byte(`{"response":{"data":{"me":{"name":"Jens","bio":"Founder & CEO of WunderGraph","counter":` + strconv.Itoa(hookServerRequestCount) + `}}}}`))
+			_, _ = w.Write([]byte("\n\n"))
+			w.(http.Flusher).Flush()
+			hookServerRequestCount++
+		}
+	}))
+
+	defer fakeHookServer.Close()
+
+	operation := &wgpb.Operation{
+		Name:          "test",
+		OperationType: wgpb.OperationType_SUBSCRIPTION,
+	}
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	handler := &FunctionsHandler{
+		log:                  zap.NewNop(),
+		operation:            operation,
+		rbacEnforcer:         &authentication.RBACEnforcer{},
+		stringInterpolator:   interpoalteNothing,
+		variablesValidator:   validateNothing,
+		queryParamsAllowList: []string{"id"},
+		liveQuery: liveQueryConfig{
+			enabled:                true,
+			pollingIntervalSeconds: 1,
+		},
+		hooksClient: hooksClient,
+	}
+
+	srv := httptest.NewServer(handler)
+	defer srv.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	u, err := url.Parse(srv.URL)
+	assert.NoError(t, err)
+	query := u.Query()
+	query.Set("id", "123")
+	query.Set("wg_json_patch", "")
+	query.Set("wg_sse", "")
+	u.RawQuery = query.Encode()
+
+	outURL := u.String()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, outURL, nil)
+	assert.NoError(t, err)
+
+	res, err := srv.Client().Do(req)
+	assert.NoError(t, err)
+
+	data, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, "data: {\"response\":{\"data\":{\"me\":{\"name\":\"Jens\",\"bio\":\"Founder & CEO of WunderGraph\",\"counter\":0}}}}\n\ndata: [{\"op\":\"replace\",\"path\":\"/response/data/me/counter\",\"value\":1}]\n\ndata: [{\"op\":\"replace\",\"path\":\"/response/data/me/counter\",\"value\":2}]\n\ndata: done\n\n", string(data))
+	assert.Equal(t, 3, hookServerRequestCount)
+}
+
 func TestQueryHandler_Caching(t *testing.T) {
 
 	interpoalteNothing, err := interpolate.NewStringInterpolator(`{}`)
