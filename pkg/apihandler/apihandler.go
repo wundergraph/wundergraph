@@ -1420,7 +1420,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(transformed)
 	_, err = reader.WriteTo(w)
-	if done := handleOperationErr(requestLogger, err, w, "writing resolve failed", h.operation); done {
+	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
 		return
 	}
 }
@@ -1678,7 +1678,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	reader := bytes.NewReader(resp.Data)
 	_, err = reader.WriteTo(w)
-	if done := handleOperationErr(requestLogger, err, w, "writing resolve failed", h.operation); done {
+	if done := handleOperationErr(requestLogger, err, w, "writing response failed", h.operation); done {
 		return
 	}
 }
