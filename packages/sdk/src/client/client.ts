@@ -85,10 +85,6 @@ export class Client {
 	}
 
 	private addUrlParams(url: string, queryParams: URLSearchParams): string {
-		if (queryParams.get('wg_variables') === '{}') {
-			queryParams.delete('wg_variables');
-		}
-
 		// stable stringify
 		queryParams.sort();
 
