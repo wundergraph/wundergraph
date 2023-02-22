@@ -13,7 +13,12 @@ export default createServer<{
 			}
 
 			type Subscription {
-				countdown(from: Int!): Int!
+				countdown(from: Int!): Countdown!
+			}
+
+			type Countdown {
+				countdown: Int!
+				description: String!
 			}
 		`,
 		resolvers: {
@@ -26,7 +31,13 @@ export default createServer<{
 					subscribe: async function* (_, { from }) {
 						for (let i = from; i >= 0; i--) {
 							await new Promise((resolve) => setTimeout(resolve, 1000));
-							yield { countdown: i };
+							yield {
+								countdown: {
+									countdown: i,
+									description:
+										'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl nec ultricies tincidunt, nunc nisl aliquam nisl, eget aliquam nunc',
+								},
+							};
 						}
 					},
 				},

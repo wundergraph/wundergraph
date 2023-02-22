@@ -273,7 +273,9 @@ func (s *S3UploadClient) preUpload(ctx context.Context, r *http.Request, part *m
 			if err != nil {
 				return "", fmt.Errorf("error preparing preUpload hook data: %w", err)
 			}
-			resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data)
+			payloadBuf := pool.GetBytesBuffer()
+			defer pool.PutBytesBuffer(payloadBuf)
+			resp, err := s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PreUpload, data, payloadBuf)
 			if err != nil {
 				return "", fmt.Errorf("error in preUpload hook: %w", err)
 			}
@@ -392,7 +394,9 @@ func (s *S3UploadClient) postUpload(ctx context.Context, r *http.Request, part *
 		if err != nil {
 			return fmt.Errorf("error preparing postUpload hook data: %w", err)
 		}
-		_, err = s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PostUpload, data)
+		payloadBuf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(payloadBuf)
+		_, err = s.hooksClient.DoUploadRequest(ctx, s.name, profileName, hooks.PostUpload, data, payloadBuf)
 		if err != nil {
 			return fmt.Errorf("error in postUpload hook: %w", err)
 		}

@@ -20,7 +20,7 @@
     "start": "wunderctl start --debug",
     "generate": "wunderctl generate --debug",
     "check": "tsc",
-    "test": "jest"
+    "test": "pnpm generate && jest"
   },
   "dependencies": {
     "@types/node-fetch": "2.6.2",
