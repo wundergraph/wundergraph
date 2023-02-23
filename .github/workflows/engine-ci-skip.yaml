@@ -16,7 +16,7 @@ on:
     branches:
       - main
       - next
-    paths:
+    paths-ignore:
       - '**/*.go'
       - 'types/**/*'
       - 'go.mod'
