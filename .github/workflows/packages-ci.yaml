@@ -24,7 +24,6 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
-      - '!packages/*-testapp/**'
       - 'examples/**/*'
       - '!*.md'
       - '!**/*.md'
