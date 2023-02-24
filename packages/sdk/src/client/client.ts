@@ -380,7 +380,10 @@ export class Client {
 					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				cb(this.convertGraphQLResponse(lastResponse));
+				console.log(`event ${JSON.stringify(lastResponse)}`);
+				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				console.log(`clientResponse ${JSON.stringify(clientResponse)}`);
+				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
 				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
