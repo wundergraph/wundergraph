@@ -1,4 +1,4 @@
-# fly.toml file generated for wg-federation-demo-products on 2023-02-23T22:11:02+02:00
+# fly.toml file generated for wg-federation-demo-products on 2023-02-23T23:06:28+02:00
 
 app = "wg-federation-demo-products"
 kill_signal = "SIGINT"
