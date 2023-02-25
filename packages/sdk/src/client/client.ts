@@ -375,12 +375,16 @@ export class Client {
 				if (lastResponse !== null && Array.isArray(jsonResp)) {
 					// we have a lastResponse and the current response is a json patch
 					// we apply the patch to generate the latest response
-					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+					// applyPatch deep clones the document before applying the patch
+					// in that way we always ensure that the response is not cached by reference by clients / caches
+					// e.g. react works with reference equality to determine if a component needs to be re-rendered
+					lastResponse = applyPatch(lastResponse, jsonResp, true, false, true).newDocument as GraphQLResponse;
 				} else {
 					// it's not a patch, so we just set the lastResponse to the current response
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				cb(this.convertGraphQLResponse(lastResponse));
+				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
 				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
