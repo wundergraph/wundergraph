@@ -8,6 +8,7 @@ export default createOperation.query({
 		const start = new Date().toISOString();
 		await new Promise((resolve) => setTimeout(resolve, input.seconds * 1000));
 		const end = new Date().toISOString();
+
 		return {
 			seconds: input.seconds,
 			start,

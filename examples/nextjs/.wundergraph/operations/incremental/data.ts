@@ -1,4 +1,5 @@
 import { createOperation } from '../../generated/wundergraph.factory';
+import type { IncrementalDelayResponseData } from '../../generated/models';
 
 export default createOperation.subscription({
 	handler: async function* ({ operations }) {
@@ -15,7 +16,7 @@ export default createOperation.subscription({
 			},
 		});
 		const fast = await fastPromise;
-		let list = [];
+		let list: IncrementalDelayResponseData[] = [];
 		yield {
 			fast: fast.data,
 			slow: null,
@@ -34,7 +35,9 @@ export default createOperation.subscription({
 					seconds: 1,
 				},
 			});
-			list = [...list, item.data];
+			if (item.data) {
+				list = [...list, item.data];
+			}
 			yield {
 				fast: fast.data,
 				slow: slow.data,
