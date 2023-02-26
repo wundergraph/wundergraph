@@ -28,6 +28,7 @@ export type {
 	WithInput,
 } from './types';
 
+export type { UploadValidationOptions } from './client';
 export { Client } from './client';
 
 export { GraphQLResponseError } from './GraphQLResponseError';

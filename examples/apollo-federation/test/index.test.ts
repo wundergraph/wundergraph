@@ -11,6 +11,6 @@ describe('Test federation API', () => {
 		const result = await wg.client().query({
 			operationName: 'TopProducts',
 		});
-		expect(result.data?.topProducts.length).toBe(3);
+		expect(result.data?.topProducts?.length).toBe(3);
 	});
 });
