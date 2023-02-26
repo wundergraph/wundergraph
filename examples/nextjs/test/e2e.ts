@@ -3,14 +3,12 @@ import { test, expect } from '@playwright/test';
 test('example loads and displays data', async ({ page }) => {
 	const hasFinishedLoading = () => {
 		const text = document.querySelector('[data-testid="result"]')?.textContent;
-		expect(text).toBeDefined();
 		const data = JSON.parse(text!);
 		return !data.isLoading;
 	};
 
 	const hasFinishedValidating = () => {
 		const text = document.querySelector('[data-testid="result"]')?.textContent;
-		expect(text).toBeDefined();
 		const data = JSON.parse(text!);
 		return !data.isValidating;
 	};
