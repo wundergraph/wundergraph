@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.0...@wundergraph/nextjs@0.9.1) (2023-02-26)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.9.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.9...@wundergraph/nextjs@0.9.0) (2023-02-23)
 
 ### Features

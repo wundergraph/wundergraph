@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.137.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.0...@wundergraph/sdk@0.137.1) (2023-02-26)
+
+### Bug Fixes
+
+* enable ts strict mode in examples for much faster type inference ([#696](https://github.com/wundergraph/wundergraph/issues/696)) ([85e6d88](https://github.com/wundergraph/wundergraph/commit/85e6d884e6a73ad752f65d06c6da91f56c85445d)) (@StarpTech)
+
 ## [0.137.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.136.0...@wundergraph/sdk@0.137.0) (2023-02-23)
 
 ### Features
