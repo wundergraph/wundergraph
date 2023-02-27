@@ -40,25 +40,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksC
 				};
 			},
 		},
-		global: {
-			httpTransport: {
-				onOriginRequest: {
-					enableForAllOperations: true,
-					hook: async ({ request }) => {
-						console.log('onOriginRequest', request.headers);
-						request.headers.set('X-Wundergraph-Test', 'test');
-						return request;
-					},
-				},
-				onOriginResponse: {
-					enableForAllOperations: true,
-					hook: async ({ response }) => {
-						console.log('onOriginResponse headers', response.headers);
-						return 'skip';
-					},
-				},
-			},
-		},
 		queries: {
 			Albums: {
 				preResolve: async (hook) => {

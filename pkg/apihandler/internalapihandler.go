@@ -398,6 +398,10 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 		return
 	}
 
+	if errors.Is(ctx.Err(), context.Canceled) {
+		fmt.Println("context canceled")
+	}
+
 	_, err = h.hooksPipeline.RunSubscription(ctx, flushWriter, r)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
