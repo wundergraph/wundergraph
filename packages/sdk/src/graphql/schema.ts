@@ -1,6 +1,7 @@
 import {
 	GraphQLSchema,
 	Kind,
+	NameNode,
 	OperationTypeDefinitionNode,
 	OperationTypeNode,
 	parse,
@@ -21,6 +22,32 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 	const queryTypeName = schema.getQueryType()?.name;
 	const mutationTypeName = schema.getMutationType()?.name;
 	const subscriptionTypeName = schema.getSubscriptionType()?.name;
+
+	const replaceOperationTypeName = (name: NameNode): NameNode => {
+		if (name.value === queryTypeName) {
+			return {
+				...name,
+				value: 'Query',
+			};
+		}
+
+		if (name.value === mutationTypeName) {
+			return {
+				...name,
+				value: 'Mutation',
+			};
+		}
+
+		if (name.value === subscriptionTypeName) {
+			return {
+				...name,
+				value: 'Subscription',
+			};
+		}
+
+		return name;
+	};
+
 	const cleanAst = visit(ast, {
 		SchemaDefinition: (node) => {
 			const operationTypes: OperationTypeDefinitionNode[] = [];
@@ -70,36 +97,6 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			return schemaNode;
 		},
 		ObjectTypeDefinition: (node) => {
-			if (node.name.value === queryTypeName) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Query',
-					},
-				};
-			}
-
-			if (node.name.value === mutationTypeName) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Mutation',
-					},
-				};
-			}
-
-			if (node.name.value === subscriptionTypeName) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Subscription',
-					},
-				};
-			}
-
 			switch (node.name.value) {
 				case '_Service':
 				case 'Entity':
@@ -108,6 +105,11 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			if (node.name.value.startsWith('__')) {
 				return null;
 			}
+
+			return {
+				...node,
+				name: replaceOperationTypeName(node.name),
+			};
 		},
 		UnionTypeDefinition: (node) => {
 			switch (node.name.value) {
@@ -153,6 +155,11 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 					},
 				};
 			}
+
+			return {
+				...node,
+				name: replaceOperationTypeName(node.name),
+			};
 		},
 		DirectiveDefinition: (node) => {
 			switch (node.name.value) {
