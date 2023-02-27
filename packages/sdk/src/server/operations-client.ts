@@ -1,4 +1,5 @@
 import fetch from 'cross-fetch';
+import { PassThrough, Readable } from 'stream';
 
 interface OperationArgs<OperationName, Input> {
 	operationName: OperationName;
@@ -109,22 +110,38 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 				if (res.status !== 200 || !res.body) {
 					throw new Error('Bad response' + JSON.stringify(res));
 				}
-				const reader = res.body.getReader();
-				const decoder = new TextDecoder();
-				let buffer = '';
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) {
-						break;
+
+				if (res.body instanceof PassThrough) {
+					for await (const chunk of res.body) {
+						const decoder = new TextDecoder();
+						const data = decoder.decode(chunk);
+						console.log(data);
+
+						if (data.endsWith('\n\n')) {
+							const json = JSON.parse(data);
+							yield json as Subscriptions[T] extends { response: any } ? Subscriptions[T]['response'] : never;
+						}
 					}
-					const data = decoder.decode(value);
-					buffer += data;
-					if (buffer.endsWith('\n\n')) {
-						const json = JSON.parse(buffer.substring(0, buffer.length - 2));
-						yield json as Subscriptions[T] extends { response: any } ? Subscriptions[T]['response'] : never;
-						buffer = '';
+				} else {
+					const reader = res.body.getReader();
+					const decoder = new TextDecoder();
+					let buffer = '';
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) {
+							break;
+						}
+						const data = decoder.decode(value);
+						buffer += data;
+						if (buffer.endsWith('\n\n')) {
+							const json = JSON.parse(buffer.substring(0, buffer.length - 2));
+							yield json as Subscriptions[T] extends { response: any } ? Subscriptions[T]['response'] : never;
+							buffer = '';
+						}
 					}
 				}
+			} catch (e) {
+				throw e;
 			} finally {
 				abort.abort();
 			}
