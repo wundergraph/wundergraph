@@ -1,10 +1,10 @@
 all: check-setup
 # Bootstrap pnpm workspace
-	make pnpm
+	make bootstrap-pnpm
 # prepare and install engine
 	make engine-dev
 
-pnpm:
+bootstrap-pnpm:
 	./scripts/pnpm.sh
 
 docs:
