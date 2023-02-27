@@ -10,6 +10,7 @@ import {
 } from '@wundergraph/protobuf';
 import {
 	buildSchema,
+	ConstArgumentNode,
 	ConstDirectiveNode,
 	DirectiveNode,
 	DocumentNode,
@@ -313,6 +314,88 @@ export const parseGraphQLOperations = (
 	return parsed;
 };
 
+const jsonSchemaUpdater = (arg: ConstArgumentNode) => {
+	const schemaProperties: Record<string, 'string' | 'int' | 'bool'> = {
+		title: 'string',
+		description: 'string',
+		multipleOf: 'int',
+		maximum: 'int',
+		exclusiveMaximum: 'int',
+		minimum: 'int',
+		exclusiveMinimum: 'int',
+		maxLength: 'int',
+		minLength: 'int',
+		pattern: 'string',
+		maxItems: 'int',
+		minItems: 'int',
+		uniqueItems: 'bool',
+	};
+
+	const propName = arg.name.value;
+	if (propName === 'on') {
+		// Used to set the field
+		return;
+	}
+	if (propName === 'commonPattern') {
+		if (arg.value.kind !== 'EnumValue') {
+			throw new Error(`commonPattern must be an enum, not ${arg.value.kind}`);
+		}
+		let pattern: string;
+		switch (arg.value.value) {
+			case 'EMAIL':
+				pattern =
+					'(?:[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\\])';
+				break;
+			case 'DOMAIN':
+				pattern = '^([a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}$';
+				break;
+			case 'URL':
+				pattern =
+					'/(((http|ftp|https):\\/{2})+(([0-9a-z_-]+\\.)+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mn|mn|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-9]+)?((\\/([~0-9a-zA-Z\\#\\+\\%@\\.\\/_-]+))?(\\?[0-9a-zA-Z\\+\\%@\\/&\\[\\];=_-]+)?)?))\\b/imuS\n';
+				break;
+			default:
+				throw new Error(`unhandled common pattern ${arg.value.value}`);
+		}
+		return (schema: JSONSchema) => {
+			if (schema.pattern) {
+				throw new Error(`pattern is already set`);
+			}
+			schema.pattern = pattern;
+		};
+	}
+	const propType = schemaProperties[propName];
+	if (!propType) {
+		throw new Error(`unknown JSON schema property ${propName}`);
+	}
+	let value: any;
+	switch (propType) {
+		case 'string':
+			if (arg.value.kind !== Kind.STRING) {
+				throw new Error(`${propName} must be a string, not ${arg.value.kind}`);
+			}
+			value = arg.value.value;
+			break;
+		case 'int':
+			if (arg.value.kind !== Kind.INT) {
+				throw new Error(`${propName} must be an int, not ${arg.value.kind}`);
+			}
+			value = parseInt(arg.value.value, 10);
+			break;
+		case 'bool':
+			if (arg.value.kind !== Kind.BOOLEAN) {
+				throw new Error(`${propName} must be a boolean, not ${arg.value.kind}`);
+			}
+			value = arg.value.value;
+			break;
+	}
+	return (schema: JSONSchema) => {
+		if ((schema as any)[propName]) {
+			throw new Error(`${propName} is already set`);
+		}
+		(schema as any)[propName] = value;
+	};
+};
+
 const handleJsonSchemaDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
 	const directiveName = 'jsonSchema';
 	const updateJSONSchema = (
@@ -326,8 +409,7 @@ const handleJsonSchemaDirectives = (variable: VariableDefinitionNode, operation:
 		}
 		update(prop);
 	};
-	const updateSchema = (directive: ConstDirectiveNode, update: (schema: JSONSchema) => void) => {
-		const variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+	const updateSchema = (variablePathComponents: string[], update: (schema: JSONSchema) => void) => {
 		updateJSONSchema(operation.VariablesSchema, variablePathComponents, update);
 		updateJSONSchema(operation.InterpolationVariablesSchema, variablePathComponents, update);
 		updateJSONSchema(operation.InternalVariablesSchema, variablePathComponents, update);
@@ -335,117 +417,19 @@ const handleJsonSchemaDirectives = (variable: VariableDefinitionNode, operation:
 	};
 	directivesNamed(variable, directiveName).forEach((directive) => {
 		directive.arguments?.forEach((arg) => {
-			switch (arg.name.value) {
-				case 'title':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'StringValue') {
-							schema.title = arg.value.value;
-						}
-					});
-					return;
-				case 'description':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'StringValue') {
-							schema.description = arg.value.value;
-						}
-					});
-					return;
-				case 'multipleOf':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.multipleOf = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'maximum':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.maximum = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'exclusiveMaximum':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.exclusiveMaximum = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'minimum':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.minimum = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'exclusiveMinimum':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.exclusiveMinimum = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'maxLength':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.maxLength = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'minLength':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.minLength = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'pattern':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'StringValue') {
-							schema.pattern = arg.value.value;
-						}
-					});
-					return;
-				case 'maxItems':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.maxItems = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'minItems':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'IntValue') {
-							schema.minItems = parseInt(arg.value.value, 10);
-						}
-					});
-					return;
-				case 'uniqueItems':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'BooleanValue') {
-							schema.uniqueItems = arg.value.value;
-						}
-					});
-					return;
-				case 'commonPattern':
-					updateSchema(directive, (schema) => {
-						if (arg.value.kind === 'EnumValue') {
-							switch (arg.value.value) {
-								case 'EMAIL':
-									schema.pattern =
-										'(?:[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\\])';
-									return;
-								case 'DOMAIN':
-									schema.pattern = '^([a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}$';
-									return;
-								case 'URL':
-									schema.pattern =
-										'/(((http|ftp|https):\\/{2})+(([0-9a-z_-]+\\.)+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mn|mn|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-9]+)?((\\/([~0-9a-zA-Z\\#\\+\\%@\\.\\/_-]+))?(\\?[0-9a-zA-Z\\+\\%@\\/&\\[\\];=_-]+)?)?))\\b/imuS\n';
-									return;
-							}
-						}
-					});
-					return;
+			const variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+			try {
+				const updater = jsonSchemaUpdater(arg);
+				if (updater) {
+					updateSchema(variablePathComponents, updater);
+				}
+			} catch (e: any) {
+				const variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+				throw new Error(
+					`invalid @${directiveName} directive on ${variablePathComponents.join('.')} in operation ${
+						operation.Name
+					}: ${e}`
+				);
 			}
 		});
 	});
@@ -724,7 +708,9 @@ const JSONSchemaLookupPath = (schema: JSONSchema, pathComponents: string[]) => {
 		}
 		let next = current.properties[component] as JSONSchema;
 		if (!next) {
-			throw new Error(`could not find ${component}, missing definition`);
+			throw new Error(
+				`could not find ${component}, available fields are: ${Object.keys(current.properties).join(', ')}`
+			);
 		}
 		if (next.$ref) {
 			let resolved = JSONSchemaResolveRef(schema, next.$ref);
