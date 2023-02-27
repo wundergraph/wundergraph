@@ -66,4 +66,4 @@ run:
 install:
 	cd cmd/wunderctl && CGO_ENABLED=0 go install
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio pnpm
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio bootstrap-pnpm
