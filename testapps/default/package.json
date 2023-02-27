@@ -19,7 +19,7 @@
     "build": "pnpm generate && pnpm check",
     "start": "wunderctl start --debug",
     "generate": "wunderctl generate --debug",
-    "test": "jest",
+    "test": "pnpm generate && jest",
     "check": "tsc"
   },
   "dependencies": {
