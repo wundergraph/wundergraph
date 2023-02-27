@@ -177,3 +177,9 @@ mutation ($input: createUserInput! @jsonSchema(pattern: "[0-9]+", on: "id")) {
   }
 }
 ```
+
+## Validating multiple values
+
+`@jsonSchema` can be used multiple times on the same operation, validating data for different fields.
+Additionally, `@jsonSchema` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectCurrentDateTime`, `@injectEnvironmentVariable` and `@injectGeneratedUUID`.

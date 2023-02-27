@@ -48,3 +48,9 @@ mutation ($input: createUserInput! @injectEnvironmentVariable(name: "ENVIRONMENT
   }
 }
 ```
+
+## Injecting multiple values
+
+`@injectEnvironmentVariable` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@injectEnvironmentVariable` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectCurrentDateTime`, `@injectGeneratedUUID` and `@jsonSchema`.

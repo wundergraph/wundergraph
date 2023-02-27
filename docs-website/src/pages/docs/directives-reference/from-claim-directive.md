@@ -134,3 +134,9 @@ mutation ($filter: countries_CountryFilterInput! @fromClaim(name: COUNTRY_CODE, 
   }
 }
 ```
+
+## Injecting multiple values
+
+`@fromClaim` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@fromClaim` can be combined with other directives for injecting or manipulating data
+like `@injectCurrentDateTime`, `@injectEnvironmentVariable`, `@injectGeneratedUUID` and `@jsonSchema`.

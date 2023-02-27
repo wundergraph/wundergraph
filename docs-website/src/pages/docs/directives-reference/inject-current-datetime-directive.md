@@ -186,3 +186,9 @@ mutation ($input: createUserInput! @injectCurrentDateTime(on: "createdAt")) {
   }
 }
 ```
+
+## Injecting multiple values
+
+`@injectCurrentDateTime` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@injectCurrentDateTime` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectEnvironmentVariable`, `@injectGeneratedUUID` and `@jsonSchema`.

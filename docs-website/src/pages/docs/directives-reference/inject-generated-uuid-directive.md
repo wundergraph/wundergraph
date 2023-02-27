@@ -62,3 +62,9 @@ mutation ($input: createUserInput! @injectGeneratedUUID(on: "id")) {
   }
 }
 ```
+
+## Injecting multiple values
+
+`@injectGeneratedUUID` can be used multiple times on the same operation, injecting data into different fields.
+Additionally, `@injectGeneratedUUID` can be combined with other directives for injecting or manipulating data
+like `@fromClaim`, `@injectCurrentDateTime`, `@injectEnvironmentVariable` and `@jsonSchema`.
