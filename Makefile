@@ -1,8 +1,11 @@
 all: check-setup
 # Bootstrap pnpm workspace
-	./scripts/pnpm.sh
+	make bootstrap-pnpm
 # prepare and install engine
 	make engine-dev
+
+bootstrap-pnpm:
+	./scripts/pnpm.sh
 
 docs:
 	pnpm --filter="./docs-website" dev
@@ -63,4 +66,4 @@ run:
 install:
 	cd cmd/wunderctl && CGO_ENABLED=0 go install
 
-.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio
+.PHONY: codegen build run tag install-proto format-templates dev all check-local docs wunderctl build-docs bootstrap-minio bootstrap-pnpm
