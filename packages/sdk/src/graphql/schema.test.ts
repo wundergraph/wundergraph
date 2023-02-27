@@ -1,11 +1,6 @@
-import { OperationDefinitionNode, parse } from 'graphql/index';
-import { configuration } from './configuration';
-import { assert } from 'chai';
 import { GraphQLIntrospection } from '../definition';
 import { cleanupSchema } from './schema';
-import { buildClientSchema } from 'graphql/utilities/buildClientSchema';
 import { buildSchema } from 'graphql';
-import { operationResponseToJSONSchema, operationVariablesToJSONSchema } from './operations';
 
 interface TestCase {
 	schema: string;

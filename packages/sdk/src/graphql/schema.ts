@@ -24,28 +24,25 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 	const subscriptionTypeName = schema.getSubscriptionType()?.name;
 
 	const replaceOperationTypeName = (name: NameNode): NameNode => {
-		if (name.value === queryTypeName) {
-			return {
-				...name,
-				value: 'Query',
-			};
+		switch (name.value) {
+			case queryTypeName:
+				return {
+					...name,
+					value: 'Query',
+				};
+			case mutationTypeName:
+				return {
+					...name,
+					value: 'Mutation',
+				};
+			case subscriptionTypeName:
+				return {
+					...name,
+					value: 'Subscription',
+				};
+			default:
+				return name;
 		}
-
-		if (name.value === mutationTypeName) {
-			return {
-				...name,
-				value: 'Mutation',
-			};
-		}
-
-		if (name.value === subscriptionTypeName) {
-			return {
-				...name,
-				value: 'Subscription',
-			};
-		}
-
-		return name;
 	};
 
 	const cleanAst = visit(ast, {
