@@ -1,5 +1,5 @@
 import fetch from 'cross-fetch';
-import { PassThrough, Readable } from 'stream';
+import type { Readable } from 'stream';
 
 interface OperationArgs<OperationName, Input> {
 	operationName: OperationName;
@@ -119,7 +119,7 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 					const data = decoder.decode(chunk);
 					buffer += data;
 					if (buffer.endsWith('\n\n')) {
-						const json = JSON.parse(buffer);
+						const json = JSON.parse(buffer.substring(0, buffer.length - 2));
 						yield json as Subscriptions[T] extends { response: any } ? Subscriptions[T]['response'] : never;
 						buffer = '';
 					}
