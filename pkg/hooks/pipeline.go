@@ -173,10 +173,12 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	defer pool.PutBytesBuffer(payloadBuf)
 
 	var resp *MiddlewareHookResponse
-	var err error
 	data := ctx.Variables
 	if p.ResolveConfig.Pre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -189,7 +191,10 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.MutatingPre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -205,7 +210,10 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Mock {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -223,7 +231,10 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Custom {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		if err != nil {
+			return nil, err
+		}
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -258,7 +269,10 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	defer pool.PutBytesBuffer(payloadBuf)
 
 	if p.PostResolveConfig.Post {
-		postResolveData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
+		postResolveData, err := EncodeData(p.authenticator, r, hookBuf, ctx.Variables, responseData)
+		if err != nil {
+			return nil, err
+		}
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -271,7 +285,10 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	}
 
 	if p.PostResolveConfig.MutatingPost {
-		mutatingPostData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
+		mutatingPostData, err := EncodeData(p.authenticator, r, hookBuf, ctx.Variables, responseData)
+		if err != nil {
+			return nil, err
+		}
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
 		if err != nil {
 			return nil, err
