@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.0...@wundergraph/swr@0.13.1) (2023-02-26)
+
+**Note:** Version bump only for package @wundergraph/swr
+
+## [0.13.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.6...@wundergraph/swr@0.13.0) (2023-02-23)
+
+### Features
+
+* add json patch support, response zod schema for ts operations ([#689](https://github.com/wundergraph/wundergraph/issues/689)) ([02f40dc](https://github.com/wundergraph/wundergraph/commit/02f40dc21e63c1771ee7b002c94a396a52f85187)) (@jensneuse)
+
 ## [0.12.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.12.5...@wundergraph/swr@0.12.6) (2023-02-21)
 
 **Note:** Version bump only for package @wundergraph/swr
