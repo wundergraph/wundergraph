@@ -494,12 +494,21 @@ const directiveInjectedVariablePathComponents = (
 	if (onArg) {
 		if (onArg.value.kind !== Kind.STRING) {
 			throw new Error(
-				`@${directive.name.value} on: argument on operation ${operation.Name} (${variableName}) must be a String, not ${onArg.value.kind}`
+				`@${directive.name.value} on: argument in operation ${operation.Name} (${variableName}) must be a String, not ${onArg.value.kind}`
 			);
 		}
 		variablePathComponents = [variableName, ...onArg.value.value.split('.')];
 	} else {
 		variablePathComponents = [variableName];
+	}
+	try {
+		JSONSchemaLookupPath(operation.InjectedVariablesSchema, variablePathComponents);
+	} catch (e: any) {
+		throw new Error(
+			`could not resolve on: attribute in @${directive.name.value} (${variablePathComponents.join('.')}) in operation ${
+				operation.Name
+			}: ${e}`
+		);
 	}
 	return variablePathComponents;
 };
@@ -699,6 +708,34 @@ const JSONSchemaPropertyResolvingRef = (root: JSONSchema, parent: JSONSchema, pr
 		parent.properties![propName] = prop;
 	}
 	return prop;
+};
+
+const JSONSchemaLookupPath = (schema: JSONSchema, pathComponents: string[]) => {
+	let current = schema;
+	for (let component of pathComponents) {
+		if (
+			current.type !== 'object' &&
+			!(Array.isArray(current.type) && (current.type as unknown as string[]).indexOf('object') >= 0)
+		) {
+			throw new Error(`could not find ${component}, parent is not an object`);
+		}
+		if (!current.properties) {
+			throw new Error(`could not find ${component}, schema is empty`);
+		}
+		let next = current.properties[component] as JSONSchema;
+		if (!next) {
+			throw new Error(`could not find ${component}, missing definition`);
+		}
+		if (next.$ref) {
+			let resolved = JSONSchemaResolveRef(schema, next.$ref);
+			if (!resolved) {
+				throw new Error(`could not find ${component}, reference ${next.$ref} not found`);
+			}
+			next = resolved;
+		}
+		current = next;
+	}
+	return current;
 };
 
 const applySkipFields = (skipFields: SchemaSkipFields, root: JSONSchema, parent: JSONSchema, propName: string) => {
