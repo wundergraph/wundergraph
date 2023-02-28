@@ -5,8 +5,17 @@
   "description": "WunderGraph Svelte Query Integration",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "svelte-package",
     "test": "jest && tsd"
   },
   "tsd": {
@@ -26,6 +35,7 @@
     "svelte": "^3.54.0"
   },
   "devDependencies": {
+    "@sveltejs/package": "^2.0.2",
     "@swc/core": "^1.3.14",
     "@swc/jest": "^0.2.23",
     "@tanstack/svelte-query": "^4.24.6",

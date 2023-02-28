@@ -1,4 +1,4 @@
-import { createSvelteClient } from '../src';
+import { createSvelteClient } from '../src/lib';
 import { Client } from '@wundergraph/sdk/client';
 import type { ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';

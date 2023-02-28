@@ -4,7 +4,7 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/svelte';
 import Weather from './TestComponents/WeatherWrapper.svelte';
-import { createSvelteClient } from '../src';
+import { createSvelteClient } from '../src/lib';
 import FetchDisabledWrapper from './TestComponents/FetchDisabledWrapper.svelte';
 import MutationWithAuthWrapper from './TestComponents/MutationWithAuthWrapper.svelte';
 import MutationWithInvalidationWrapper from './TestComponents/MutationWithInvalidationWrapper.svelte';
