@@ -1,4 +1,5 @@
 import fetch from 'cross-fetch';
+import type { Readable } from 'stream';
 
 interface OperationArgs<OperationName, Input> {
 	operationName: OperationName;
@@ -109,15 +110,13 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 				if (res.status !== 200 || !res.body) {
 					throw new Error('Bad response' + JSON.stringify(res));
 				}
-				const reader = res.body.getReader();
 				const decoder = new TextDecoder();
 				let buffer = '';
-				while (true) {
-					const { done, value } = await reader.read();
-					if (done) {
-						break;
-					}
-					const data = decoder.decode(value);
+				// due to cross-fetch, we need to cast the body to Readable
+				// res.body.getReader() is not available
+				// we've debugged this, so we know it's a Readable
+				for await (const chunk of res.body as unknown as Readable) {
+					const data = decoder.decode(chunk);
 					buffer += data;
 					if (buffer.endsWith('\n\n')) {
 						const json = JSON.parse(buffer.substring(0, buffer.length - 2));
