@@ -4,7 +4,7 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/svelte';
 import Weather from './TestComponents/WeatherWrapper.svelte';
-import { createQueryUtils } from '../src';
+import { createSvelteClient } from '../src';
 import FetchDisabledWrapper from './TestComponents/FetchDisabledWrapper.svelte';
 import MutationWithAuthWrapper from './TestComponents/MutationWithAuthWrapper.svelte';
 import MutationWithInvalidationWrapper from './TestComponents/MutationWithInvalidationWrapper.svelte';
@@ -102,7 +102,7 @@ const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = 
 	};
 };
 
-describe('Svelte Query - createQueryUtils', () => {
+describe('Svelte Query - createSvelteClient', () => {
 	const client = createClient();
 
 	const queryCache = new QueryCache();
@@ -113,7 +113,7 @@ describe('Svelte Query - createQueryUtils', () => {
 		nock.cleanAll();
 	});
 
-	const utils = createQueryUtils<Operations>(client);
+	const utils = createSvelteClient<Operations>(client);
 
 	it('should be able to init utility functions', async () => {
 		expect(utils).toBeTruthy();
@@ -179,7 +179,7 @@ describe('Svelte Query - createMutation', () => {
 		nock.cleanAll();
 	});
 
-	const { createMutation, createQuery, queryKey } = createQueryUtils<Operations>(client);
+	const { createMutation, createQuery, queryKey } = createSvelteClient<Operations>(client);
 
 	it('should trigger mutation with auth', async () => {
 		const { mutation, csrfScope } = nockMutation('SetName', { name: 'Rick Astley' }, true);
@@ -303,7 +303,7 @@ describe('Svelte Query - createSubscription', () => {
 		queryCache.clear();
 	});
 
-	const { createSubscription } = createQueryUtils<Operations>(client);
+	const { createSubscription } = createSvelteClient<Operations>(client);
 
 	it('should subscribe', async () => {
 		// web streams not supported in node-fetch, we use subscribeOnce to test
@@ -351,7 +351,7 @@ describe('Svelte Query - getUser', () => {
 		queryCache.clear();
 	});
 
-	const { getUser } = createQueryUtils<Operations>(client);
+	const { getUser } = createSvelteClient<Operations>(client);
 
 	it('should return user', async () => {
 		const scope = nock('https://api.com')

@@ -23,7 +23,7 @@ import type {
 
 export const userQueryKey = 'wg_user';
 
-export function createQueryUtils<Operations extends OperationsDefinition>(client: Client) {
+export function createSvelteClient<Operations extends OperationsDefinition>(client: Client) {
 	const queryFetcher: QueryFetcher<Operations> = async (query) => {
 		const result = await client.query(query);
 

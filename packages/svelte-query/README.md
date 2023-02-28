@@ -34,7 +34,7 @@ Second, run `wunderctl generate` to generate the code.
 Now you can use the utility functions.
 
 ```ts
-import { createQueryUtils } from '@wundergraph/svelte-query';
+import { createSvelteClient } from '@wundergraph/svelte-query';
 import { createClient } from '../generated/client';
 import type { Operations } from '../generated/client';
 
@@ -42,7 +42,7 @@ const client = createClient(); // Typesafe WunderGraph client
 
 // These utility functions needs to be imported into your app
 export const { createQuery, createFileUpload, createMutation, createSubscription, getAuth, getUser, queryKey } =
-  createQueryUtils<Operations>(client);
+  createSvelteClient<Operations>(client);
 ```
 
 Now, in your svelte layout setup Svelte Query Provider such that it is always wrapping above the rest of the app.
@@ -74,7 +74,7 @@ Now you can use svelte-query to call your wundergraph operations!
 
 ```svelte
 <script lang="ts">
-	import { createQuery } from '../lib/svelteQueryUtils';
+	import { createQuery } from '../lib/wundergraph';
 
 	const query = createQuery({
 		operationName: "Starwars",

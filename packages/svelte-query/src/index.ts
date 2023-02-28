@@ -1,3 +1,3 @@
-export { createQueryUtils, userQueryKey } from './createQueryUtils';
+export { createSvelteClient, userQueryKey } from './createSvelteClient';
 
 export * from './types';

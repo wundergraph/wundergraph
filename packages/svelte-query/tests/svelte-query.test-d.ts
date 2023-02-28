@@ -1,4 +1,4 @@
-import { createQueryUtils } from '../src';
+import { createSvelteClient } from '../src';
 import { Client } from '@wundergraph/sdk/client';
 import type { ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
@@ -35,7 +35,7 @@ interface Operations extends OperationsDefinition {
 	};
 }
 
-const { createSubscription, createQuery, createMutation, getUser, queryKey } = createQueryUtils<Operations>(
+const { createSubscription, createQuery, createMutation, getUser, queryKey } = createSvelteClient<Operations>(
 	new Client({
 		baseURL: 'http://localhost:8080',
 		applicationHash: 'my-application-hash',
