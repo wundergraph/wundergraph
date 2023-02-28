@@ -1874,6 +1874,10 @@ func (f *httpFlushWriter) Flush() {
 			}
 			return
 		}
+		if len(patch) == 0 {
+			// no changes
+			return
+		}
 		patchData, err := json.Marshal(patch)
 		if err != nil {
 			if f.logger != nil {
