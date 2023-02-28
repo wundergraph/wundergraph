@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.137.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.1...@wundergraph/sdk@0.137.2) (2023-02-28)
+
+### Bug Fixes
+
+* graphql introspection with renamed query types ([#699](https://github.com/wundergraph/wundergraph/issues/699)) ([864305f](https://github.com/wundergraph/wundergraph/commit/864305fe65368c390ce499ee42817d6456f5a281)) (@devsergiy)
+
 ## [0.137.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.0...@wundergraph/sdk@0.137.1) (2023-02-26)
 
 ### Bug Fixes

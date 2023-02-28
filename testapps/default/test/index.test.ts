@@ -5,9 +5,9 @@ import { createTestServer } from '../.wundergraph/generated/testing';
 const wg = createTestServer();
 
 // TODO: Remove this once the secret refactor is done
-process.env['WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-process.env['WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-process.env['WUNDERGRAPH_CSRF_TOKEN_SECRET'] = 'aaaaaaaaaaa';
+process.env['WG_SECURE_COOKIE_HASH_KEY'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+process.env['WG_SECURE_COOKIE_BLOCK_KEY'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+process.env['WG_CSRF_TOKEN_SECRET'] = 'aaaaaaaaaaa';
 
 beforeAll(() => wg.start());
 afterAll(() => wg.stop());
