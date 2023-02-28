@@ -852,6 +852,10 @@ const navigation = [
 						title: 'Deploy to WunderGraph Cloud',
 						href: '/docs/cloud/deployments',
 					},
+					{
+						title: 'Add custom domains to your deployment',
+						href: '/docs/cloud/custom-domains',
+					},
 				],
 			},
 			{
