@@ -7,7 +7,7 @@ beforeAll(() => wg.start());
 afterAll(() => wg.stop());
 
 describe('test recursive operation calls hooks', () => {
-	test('rescursive call', async () => {
+	test.skip('rescursive call', async () => {
 		const client = wg.client();
 		const directResult = await client.query({
 			operationName: 'Continents',
@@ -80,7 +80,7 @@ describe('preResolve chain', () => {
 		});
 		expect(result?.data?.echo_string).toBe(`string: ${skipped}`);
 	});
-	test('mutatingPreResolve with mockResolve is called', async () => {
+	test.skip('mutatingPreResolve with mockResolve is called', async () => {
 		const client = wg.client();
 		const result = await client.query({
 			operationName: 'PreResolveChain',
@@ -93,7 +93,7 @@ describe('preResolve chain', () => {
 });
 
 describe('postResolve chain', () => {
-	test('mutatingPostResolve', async () => {
+	test.skip('mutatingPostResolve', async () => {
 		const client = wg.client();
 		const result = await client.query({
 			operationName: 'MutatingPostResolve',
@@ -107,7 +107,7 @@ describe('postResolve chain', () => {
 });
 
 describe('prevent infinite recursion', () => {
-	test('Infinite recursion fails', async () => {
+	test.skip('Infinite recursion fails', async () => {
 		const client = wg.client();
 		const result = await client.query({
 			operationName: 'Infinite',

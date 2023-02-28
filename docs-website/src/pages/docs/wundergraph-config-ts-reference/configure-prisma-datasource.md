@@ -17,11 +17,11 @@ const db = introspect.prisma({
   introspection: {
     disableCache: true,
   },
-})
+});
 
 configureWunderGraphApplication({
   apis: [db],
-})
+});
 ```
 
 Define the `prismaFilePath` which is the file path to the schema.

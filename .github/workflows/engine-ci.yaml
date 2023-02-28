@@ -28,6 +28,7 @@ on:
       - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
+      - '!docs-website/**/*.md'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}

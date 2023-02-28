@@ -909,6 +909,10 @@ const navigation = [
 				href: '/docs/clients-reference/react-query',
 			},
 			{
+				title: 'Solid Query',
+				href: '/docs/clients-reference/solid-query',
+			},
+			{
 				title: 'Next.js',
 				href: '/docs/clients-reference/nextjs',
 			},

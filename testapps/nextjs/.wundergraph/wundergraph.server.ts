@@ -51,6 +51,12 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			},
 			FakeWeather: {
 				mockResolve: async (hook) => {
+					const randomWeatherDescription = ['sunny', 'cloudy', 'rainy', 'stormy', 'snowy', 'windy'];
+					const randomTemperatureCelsius = Math.floor(Math.random() * 40) - 20;
+					// '0°, cloudy'
+					const description = `${randomTemperatureCelsius}°, ${
+						randomWeatherDescription[Math.floor(Math.random() * randomWeatherDescription.length)]
+					}`;
 					return {
 						data: {
 							getCityByName: {
@@ -59,7 +65,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 								weather: {
 									summary: {
 										title: 'Weather for Berlin',
-										description: '0°, cloudy',
+										description,
 									},
 								},
 							},

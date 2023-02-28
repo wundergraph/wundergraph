@@ -13,6 +13,7 @@ import {
 	SubscriptionRequestOptions,
 	SubscriptionEventHandler,
 	FetchUserRequestOptions,
+	UploadValidationOptions
 } from "@wundergraph/sdk/client";
 
 import type { CustomClaims } from "./claims";
@@ -45,7 +46,7 @@ type S3Providers ={
 	{{/each}}
 }
 
-const S3UploadProviderData = {
+const S3UploadProviderData: { [provider: string]: { [profile: string]: UploadValidationOptions } } = {
 	{{#each s3Providers }}
 	{{name}}: {
 		{{#each uploadProfiles}}

@@ -7,7 +7,7 @@ const Functions = () => {
 			id: 1,
 		},
 	});
-	if (error) {
+	if (error || !data) {
 		return (
 			<div>
 				<pre>{JSON.stringify(error)}</pre>
@@ -18,8 +18,8 @@ const Functions = () => {
 		<div>
 			<h1>User</h1>
 			<div>
-				<div>id: {data?.id}</div>
-				<div>name: {data?.userName}</div>
+				<div>id: {data.id}</div>
+				<div>name: {data.userName}</div>
 				<div>bio: {data?.bio}</div>
 			</div>
 		</div>

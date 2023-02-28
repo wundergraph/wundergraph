@@ -49,7 +49,7 @@ WunderGraph will now do some code generation and start the server.
 Head over to [http://localhost:9991](http://localhost:9991) and you should see the WunderGraph status page.
 
 Now lets run one of the example queries, open the following URL in your browser:
-[http://localhost:9991/operations/Countries](http://localhost:9991/operations/Countries)
+[http://localhost:9991/operations/Country](http://localhost:9991/operations/Country)
 
 You'll see a JSON response with a list of countries.
 Pretty cool, right? Let's take a look at how this works.
