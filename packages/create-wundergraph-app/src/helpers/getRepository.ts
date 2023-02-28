@@ -118,7 +118,9 @@ export const getRepository = async ({
 			});
 			const spinner = ora('Installing wundergraph/sdk...').start();
 			// Install the wundergraph sdk
-			execSync(packageManagerPrompt['packageManager'] + ' install @wundergraph/sdk', { cwd: resolvedProjectPath });
+			const pm = packageManagerPrompt['packageManager'];
+			const command = pm === 'yarn' ? 'add' : 'install';
+			execSync(`${pm} ${command} @wundergraph/sdk`, { cwd: resolvedProjectPath });
 			spinner.succeed(chalk.green('Successfully installed wundergraph/sdk'));
 			exampleName = 'simple';
 		} else {

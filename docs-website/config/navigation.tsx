@@ -852,6 +852,10 @@ const navigation = [
 						title: 'Deploy to WunderGraph Cloud',
 						href: '/docs/cloud/deployments',
 					},
+					{
+						title: 'Add custom domains to your deployment',
+						href: '/docs/cloud/custom-domains',
+					},
 				],
 			},
 			{
@@ -878,6 +882,10 @@ const navigation = [
 			{
 				title: 'Docker',
 				href: '/docs/self-hosted/docker',
+			},
+			{
+				title: 'Security',
+				href: '/docs/self-hosted/security',
 			},
 		],
 	},
