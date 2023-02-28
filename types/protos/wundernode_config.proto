@@ -16,6 +16,7 @@ message ApiAuthenticationConfig {
 	CookieBasedAuthentication cookieBased = 1;
 	ApiAuthenticationHooks hooks = 2;
 	JwksBasedAuthentication jwksBased = 3;
+	repeated string publicClaims = 4;
 }
 
 message JwksBasedAuthentication {

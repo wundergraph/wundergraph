@@ -5,4 +5,5 @@ export interface CustomClaims {
 	{{name}}?: {{type}};
 	{{/each}}
 }
+export type PublicCustomClaims = {{#if hasPublicCustomClaims}}Pick<CustomClaims, {{{ publicCustomClaims }}}>{{ else }}CustomClaims{{/if}};
 `;

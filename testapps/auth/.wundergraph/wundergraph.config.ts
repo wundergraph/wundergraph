@@ -33,6 +33,7 @@ configureWunderGraphApplication({
 				jsonPath: 'a.b.c.d.e.f.g.h.i',
 			},
 		},
+		publicClaims: ['shopID', 'SUBJECT'],
 	},
 	codeGenerators: [
 		{

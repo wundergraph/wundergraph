@@ -291,3 +291,13 @@ describe('test @fromClaim with custom claims', () => {
 		expect(result.data?.echo_float).toBe(`float: ${floatingPointClaim.f.f.f.f}`);
 	});
 });
+
+describe('public claims', () => {
+	test('only public claims should be published', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.WithShopIDString);
+		const user = await client.fetchUser();
+		expect(user.userId).toBe(defaultTokenSubject);
+		expect((user as any)['providerId']).toBeUndefined();
+	});
+});
