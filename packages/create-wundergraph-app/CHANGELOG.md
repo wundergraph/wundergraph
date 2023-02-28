@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.3](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.2...create-wundergraph-app@0.3.3) (2023-02-28)
+
+### Bug Fixes
+
+* support yarn 3 with create-wundergraph-app --init ([#704](https://github.com/wundergraph/wundergraph/issues/704)) ([0ce00ec](https://github.com/wundergraph/wundergraph/commit/0ce00ec21c088481dfe78b3387fb9a9d6184cbb9)) (@Pagebakers)
+
 ## [0.3.2](https://github.com/wundergraph/wundergraph/compare/create-wundergraph-app@0.3.1...create-wundergraph-app@0.3.2) (2023-02-03)
 
 ### Bug Fixes
