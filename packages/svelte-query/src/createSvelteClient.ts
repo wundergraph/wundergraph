@@ -142,7 +142,7 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	 *
 	 * @usage
 	 * ```ts
-	 * const { user, error, isLoading } = getUser()
+	 * const { data, error, isLoading } = getUser()
 	 * ```
 	 */
 	const getUser: GetUser<Operations> = (options) => {
