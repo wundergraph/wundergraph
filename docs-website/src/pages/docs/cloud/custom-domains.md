@@ -7,7 +7,7 @@ description: How to add custom domains to your deployment
 By default, your WunderGraph Cloud project will immediately receive a dedicated subdomain upon deployment, i.e.,
 `https://{your-project-name}.wundergraph.dev`.
 
-If you own your own domain, it is possible to add it to your deployment.
+If you wish to use your own domain, it is possible to add it to your deployment.
 By default, each project may have up to three custom domains.
 If you need more, please [contact us](https://wundergraph.com/discord).
 
@@ -76,7 +76,7 @@ When you delete your project, all associated domains and certificates will be de
 
 # Troubleshooting
 
-Even when everything is configured correctly, it can take up to 24 hours to produce an uncached result.
+Even when everything is configured correctly, it can take up to 24 for DNS to propagate.
 
 You can use the following command to test whether your domain is working reliably:
 
