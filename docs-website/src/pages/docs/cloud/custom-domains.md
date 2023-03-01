@@ -67,6 +67,14 @@ If you believe this is happening, try the following:
 1. Click SSL/TLS > Overview
 1. Check `Off (not secure)`
 
+## Google
+
+1. Click `Manage` next to your domain
+1. Click `DNS` on the left side
+1. Click `Manage custom records`
+1. Using the copy buttons in your deployment, paste the `CNAME` and `Target` into the respective boxes.
+1. Save
+
 # Deleting a custom domain
 
 You can delete a custom domain by clicking the `Delete` button. You will then be asked to confirm the deletion.
