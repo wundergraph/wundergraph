@@ -14,7 +14,7 @@ export default createWebhook<WebhookHttpEvent<Stripe.Event>, WebhookHttpResponse
 		return {
 			statusCode: 200,
 			body: {
-				type: event.body?.type,
+				type: event.body?.type || 'unknown',
 				name: user.data?.gql_hello,
 			},
 		};

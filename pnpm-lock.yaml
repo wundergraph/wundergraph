@@ -560,6 +560,7 @@ importers:
   testapps/default:
     specifiers:
       '@jest/globals': ^29.3.1
+      '@octokit/webhooks-types': ^6.10.0
       '@types/node': ^14.14.37
       '@wundergraph/golang-client': workspace:*
       '@wundergraph/sdk': workspace:*
@@ -567,16 +568,19 @@ importers:
       jest: ^29.4.2
       pg: ^8.7.3
       postgraphile: ^4.12.9
+      stripe: ^11.12.0
       ts-jest: ^29.0.5
       typescript: ^4.9.4
       zod: ^3.20.2
     dependencies:
+      '@octokit/webhooks-types': 6.10.0
       '@types/node': 14.18.33
       '@wundergraph/golang-client': link:../../packages/golang-client
       '@wundergraph/sdk': link:../../packages/sdk
       graphql: 16.6.0
       pg: 8.8.0
       postgraphile: 4.12.11
+      stripe: 11.12.0
       typescript: 4.9.4
       zod: 3.20.2
     devDependencies:
@@ -4558,6 +4562,10 @@ packages:
     dependencies:
       '@octokit/openapi-types': 14.0.0
     dev: true
+
+  /@octokit/webhooks-types/6.10.0:
+    resolution: {integrity: sha512-lDNv83BeEyxxukdQ0UttiUXawk9+6DkdjjFtm2GFED+24IQhTVaoSbwV9vWWKONyGLzRmCQqZmoEWkDhkEmPlw==}
+    dev: false
 
   /@panva/hkdf/1.0.2:
     resolution: {integrity: sha512-MSAs9t3Go7GUkMhpKC44T58DJ5KGk2vBo+h1cqQeqlMfdGkxaVB78ZWpv9gYi/g2fa4sopag9gJsNvS8XGgWJA==}
