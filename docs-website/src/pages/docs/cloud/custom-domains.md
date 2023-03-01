@@ -78,6 +78,16 @@ If you believe this is happening, try the following:
 1. Using the copy buttons in your deployment, paste the `CNAME` and `Target` into the respective boxes.
 1. Save
 
+## GoDaddy
+
+1. Go to [GoDaddy products](https://account.godaddy.com/products)
+1. Click your domain
+1. Click `Domain` on the left side
+1. Click `Manage DNS`
+1. Click `Add` on the `DNS-Records` panel
+1. Using the copy buttons in your deployment, paste the `CNAME` and `Target` into the respective boxes.
+1. Save
+
 # Deleting a custom domain
 
 You can delete a custom domain by clicking the `Delete` button. You will then be asked to confirm the deletion.
