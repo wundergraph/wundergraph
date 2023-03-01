@@ -336,7 +336,7 @@ func isValidOperationName(s string) bool {
 		if i == 0 && !unicode.IsLetter(r) {
 			return false
 		}
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' && r != '_' {
 			return false
 		}
 	}
