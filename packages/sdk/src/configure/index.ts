@@ -33,6 +33,7 @@ import {
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	WellKnownClaim,
 } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
@@ -79,7 +80,10 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
-export interface WunderGraphConfigApplicationConfig {
+export interface WunderGraphConfigApplicationConfig<
+	TCustomClaim extends string = string,
+	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
+> {
 	apis: ILazyIntrospection<Api<any>>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
@@ -125,7 +129,7 @@ export interface WunderGraphConfigApplicationConfig {
 		 *
 		 * @see CustomClaim
 		 */
-		customClaims?: Record<string, CustomClaim>;
+		customClaims?: Record<TCustomClaim, CustomClaim>;
 		/**
 		 * Claims to be publicly available (i.e. served by the API to the frontend), referenced by
 		 * their shorthand name for custom claims (i.e. keys in the customClaims attribute) or by their
@@ -133,9 +137,10 @@ export interface WunderGraphConfigApplicationConfig {
 		 *
 		 * @default empty
 		 *
+		 * @see WellKnownClaim
 		 * @see WunderGraphConfigApplicationConfig.customClaims
 		 */
-		publicClaims?: string[];
+		publicClaims?: TPublicClaim[];
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
@@ -666,7 +671,12 @@ const resolveApplication = async (
 
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
-export const configureWunderGraphApplication = (config: WunderGraphConfigApplicationConfig) => {
+export const configureWunderGraphApplication = <
+	TCustomClaim extends string,
+	TPublicClaim extends TCustomClaim | WellKnownClaim
+>(
+	config: WunderGraphConfigApplicationConfig<TCustomClaim, TPublicClaim>
+) => {
 	if (WG_DATA_SOURCE_POLLING_MODE) {
 		// if the DataSourcePolling environment variable is set to 'true',
 		// we don't run the regular config build process which would generate the whole config

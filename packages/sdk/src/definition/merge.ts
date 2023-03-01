@@ -1,4 +1,3 @@
-import { Api, DataSource, StaticApiCustom } from './index';
 import {
 	ASTNode,
 	buildSchema,
@@ -17,6 +16,8 @@ import {
 	FieldConfiguration,
 	TypeConfiguration,
 } from '@wundergraph/protobuf';
+import { Api, DataSource, StaticApiCustom } from './index';
+import { WellKnownClaim, WellKnownClaimValues } from '../graphql/operations';
 
 export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
@@ -249,7 +250,34 @@ enum WG_ROLE {
 }
 `;
 
-const claimsSchema = (customClaims: string[]) => `
+const claimsSchema = (customClaims: string[]) => {
+	const docs: Record<WellKnownClaim, string> = {
+		ISSUER: 'iss',
+		PROVIDER: 'deprecated alias for ISSUER',
+		SUBJECT: 'sub',
+		USERID: 'alias for sub',
+		NAME: 'name',
+		GIVEN_NAME: 'given_name',
+		FAMILY_NAME: 'family_name',
+		MIDDLE_NAME: 'middle_name',
+		NICKNAME: 'nickname',
+		PREFERRED_USERNAME: 'preferred_username',
+		PROFILE: 'profile',
+		PICTURE: 'picture',
+		WEBSITE: 'website',
+		EMAIL: 'email',
+		EMAIL_VERIFIED: 'email_verified',
+		GENDER: 'gender',
+		BIRTH_DATE: 'birthdate',
+		ZONE_INFO: 'zoneinfo',
+		LOCALE: 'locale',
+		LOCATION: 'location',
+	};
+	if (Object.keys(docs).length !== WellKnownClaimValues.length) {
+		throw new Error('unhandled claims in claimsSchema()');
+	}
+	const wellKnownClaims = Object.keys(docs).map((key) => `"""${docs[key as WellKnownClaim]}"""\n${key}`);
+	return `
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
 Adding this directive makes the operation require authentication.
@@ -263,90 +291,12 @@ directive @fromClaim(
 Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
 """
 enum WG_CLAIM {
-	"""
-	iss
-	"""
-	ISSUER
-	"""
-	deprecated alias for ISSUER
-	"""
-	PROVIDER
-	"""
-	sub
-	"""
-	SUBJECT
-	"""
-	alias for sub
-	"""
-	USERID
-	"""
-	name
-	"""
-	NAME
-	"""
-	given_name
-	"""
-	GIVEN_NAME
-	"""
-	family_name
-	"""
-	FAMILY_NAME
-	"""
-	middle_name
-	"""
-	MIDDLE_NAME
-	"""
-	nickname
-	"""
-	NICKNAME
-	"""
-	preferred_username
-	"""
-	PREFERRED_USERNAME
-	"""
-	profile
-	"""
-	PROFILE
-	"""
-	picture
-	"""
-	PICTURE
-	"""
-	website
-	"""
-	WEBSITE
-	"""
-	email
-	"""
-	EMAIL
-	"""
-	email_verified
-	"""
-	EMAIL_VERIFIED
-	"""
-	gender
-	"""
-	GENDER
-	"""
-	birthdate
-	"""
-	BIRTH_DATE
-	"""
-	zoneinfo
-	"""
-	ZONE_INFO
-	"""
-	locale
-	"""
-	LOCALE
-	"""
-	location
-	"""
-	LOCATION
 
-    ${customClaims.join(' ')}
+	${customClaims.map((claim) => `"""custom"""\n${claim}`).join('\n')}
+	${wellKnownClaims.join('\n')}
 }
 `;
+};
 
 const uuidSchema = `
 """

@@ -456,8 +456,36 @@ const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: 
 	});
 };
 
+// XXX: Keep this in sync with User in authentication.go
+const wgClaimToTypescriptField = {
+	ISSUER: 'providerId',
+	PROVIDER: 'providerId',
+	SUBJECT: 'userId',
+	USERID: 'userId',
+	NAME: 'name',
+	GIVEN_NAME: 'firstName',
+	FAMILY_NAME: 'lastName',
+	MIDDLE_NAME: 'middleName',
+	NICKNAME: 'nickName',
+	PREFERRED_USERNAME: 'preferredUsername',
+	PROFILE: 'profile',
+	PICTURE: 'picture',
+	WEBSITE: 'website',
+	EMAIL: 'email',
+	EMAIL_VERIFIED: 'emailVerified',
+	GENDER: 'gender',
+	BIRTH_DATE: 'birthDate',
+	ZONE_INFO: 'zoneInfo',
+	LOCALE: 'locale',
+	LOCATION: 'location',
+} as const;
+
+export const WellKnownClaimValues = Object.keys(wgClaimToTypescriptField);
+
+export type WellKnownClaim = keyof typeof wgClaimToTypescriptField;
+
 const parseWellKnownClaim = (name: string) => {
-	const claims: Record<string, ClaimType> = {
+	const claims: Record<WellKnownClaim, ClaimType> = {
 		ISSUER: ClaimType.ISSUER,
 		PROVIDER: ClaimType.PROVIDER,
 		SUBJECT: ClaimType.SUBJECT,
@@ -479,8 +507,11 @@ const parseWellKnownClaim = (name: string) => {
 		LOCALE: ClaimType.LOCALE,
 		LOCATION: ClaimType.LOCATION,
 	};
+	if (Object.keys(claims).length !== WellKnownClaimValues.length) {
+		throw new Error('unhandled claims in parseWellKnownClaim()');
+	}
 	if (name in claims) {
-		return claims[name];
+		return claims[name as WellKnownClaim];
 	}
 	throw new Error(`unhandled claim ${name}`);
 };
@@ -488,42 +519,15 @@ const parseWellKnownClaim = (name: string) => {
 /**
  * Returns true iff name is a well known claim
  *
- * @param name Claim name as in WG_CLAIM
+ * @param name Claim name as in WellKnownClaim
  */
 export const isWellKnownClaim = (name: string) => {
-	try {
-		parseWellKnownClaim(name);
-		return true;
-	} catch {}
-	return false;
+	return name in wgClaimToTypescriptField;
 };
 
 export const wellKnownClaimField = (name: string) => {
-	// XXX: Keep this in sync with User in authentication.go
-	const claimsFields: Record<string, string> = {
-		ISSUER: 'providerId',
-		PROVIDER: 'providerId',
-		SUBJECT: 'userId',
-		USERID: 'userId',
-		NAME: 'name',
-		GIVEN_NAME: 'firstName',
-		FAMILY_NAME: 'lastName',
-		MIDDLE_NAME: 'middleName',
-		NICKNAME: 'nickName',
-		PREFERRED_USERNAME: 'preferredUsername',
-		PROFILE: 'profile',
-		PICTURE: 'picture',
-		WEBSITE: 'website',
-		EMAIL: 'email',
-		EMAIL_VERIFIED: 'emailVerified',
-		GENDER: 'gender',
-		BIRTH_DATE: 'birthDate',
-		ZONE_INFO: 'zoneInfo',
-		LOCALE: 'locale',
-		LOCATION: 'location',
-	};
-	if (name in claimsFields) {
-		return claimsFields[name];
+	if (name in wgClaimToTypescriptField) {
+		return wgClaimToTypescriptField[name as WellKnownClaim];
 	}
 	throw new Error(`unhandled claim ${name}`);
 };
