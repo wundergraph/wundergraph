@@ -1,0 +1,8 @@
+name: 'Setup wunderctl'
+description: 'This action install wunderctl with race detection enabled and sets up the SDK to use it'
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        cd cmd/wunderctl && go install -race
+        echo WUNDERCTL_BINARY_PATH=$(go env GOPATH)/bin/wunderctl) >> $GITHUB_ENV
