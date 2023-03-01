@@ -27,6 +27,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/validate"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -378,6 +379,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		With(zap.String("component", "@wundergraph/node"))
 
 	router := mux.NewRouter()
+	router.Use(trace.MuxMiddleware("wundergraph/node"))
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
 

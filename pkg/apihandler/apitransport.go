@@ -20,6 +20,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -106,7 +107,7 @@ func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Cli
 		}
 	}
 
-	return transport
+	return trace.HTTPClientTransporter(transport)
 }
 
 type Claims struct {
@@ -263,6 +264,11 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 }
 
 func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
+	ctx, span := trace.NewSpan(r.Context(), "handleOnRequestHook")
+	defer span.End()
+
+	r = r.WithContext(ctx)
+
 	var (
 		body []byte
 		err  error

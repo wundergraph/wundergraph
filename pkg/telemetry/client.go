@@ -130,7 +130,7 @@ type Metric struct {
 	Tags  []MetricTag `json:"tags,omitempty"`
 }
 
-// Equal returns true iff both Metric instances contain the same data (tags
+// Equal returns true if both Metric instances contain the same data (tags
 // might be in different order)
 func (m *Metric) Equal(other *Metric) bool {
 	if m.Name == other.Name && m.Value == other.Value && len(m.Tags) == len(other.Tags) {

@@ -22,6 +22,7 @@ import (
 
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 )
 
 type WunderGraphRequest struct {
@@ -185,6 +186,7 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 		}
 		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
 	}
+	httpClient.HTTPClient.Transport = trace.HTTPClientTransporter(httpClient.HTTPClient.Transport)
 	return httpClient
 }
 

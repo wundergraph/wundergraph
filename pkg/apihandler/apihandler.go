@@ -40,7 +40,6 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
-
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
@@ -54,6 +53,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/s3uploadclient"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/webhookhandler"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
@@ -794,6 +794,8 @@ var (
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1272,6 +1274,15 @@ type QueryHandler struct {
 func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
+	trace.AddSpanTags(
+		span,
+		map[string]string{
+			"operation":     h.operation.Name,
+			"operationType": h.operation.OperationType.String(),
+		},
+	)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1619,6 +1630,15 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
+	trace.AddSpanTags(
+		span,
+		map[string]string{
+			"operation":     h.operation.Name,
+			"operationType": h.operation.OperationType.String(),
+		},
+	)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -1720,6 +1740,15 @@ type SubscriptionHandler struct {
 func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
+	trace.AddSpanTags(
+		span,
+		map[string]string{
+			"operation":     h.operation.Name,
+			"operationType": h.operation.OperationType.String(),
+		},
+	)
 
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -2218,6 +2247,16 @@ type FunctionsHandler struct {
 }
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
+
+	trace.AddSpanTags(
+		span,
+		map[string]string{
+			"operation":     h.operation.Name,
+			"operationType": h.operation.OperationType.String(),
+		},
+	)
 
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
