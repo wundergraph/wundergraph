@@ -761,7 +761,7 @@ type GraphQLPlaygroundHandler struct {
 	nodeUrl string
 }
 
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
 	resp := []byte(tpl)
 
@@ -1160,7 +1160,7 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	return variables, nil
 }
 
-func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
+func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byte) []byte {
 	if operation.VariablesConfiguration == nil || operation.VariablesConfiguration.InjectVariables == nil {
 		return variables
 	}
@@ -1850,10 +1850,6 @@ func (f *httpFlushWriter) Flush() {
 		}
 	}
 
-	if f.sse {
-		_, _ = f.writer.Write([]byte("data: "))
-	}
-
 	if f.useJsonPatch && f.lastMessage.Len() != 0 {
 		last := f.lastMessage.Bytes()
 		patch, err := jsonpatch.CreatePatch(last, resp)
@@ -1863,12 +1859,19 @@ func (f *httpFlushWriter) Flush() {
 			}
 			return
 		}
+		if len(patch) == 0 {
+			// no changes
+			return
+		}
 		patchData, err := json.Marshal(patch)
 		if err != nil {
 			if f.logger != nil {
 				f.logger.Error("subscription json patch", zap.Error(err))
 			}
 			return
+		}
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
 		}
 		if len(patchData) < len(resp) {
 			_, _ = f.writer.Write(patchData)
@@ -1878,6 +1881,9 @@ func (f *httpFlushWriter) Flush() {
 	}
 
 	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		_, _ = f.writer.Write(resp)
 	}
 
@@ -1918,18 +1924,24 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
 		hashKey = []byte(h)
+	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
+		hashKey = fallback
 	}
 
 	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
 		blockKey = []byte(b)
+	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
+		blockKey = fallback
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
+	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
+		csrfSecret = []byte(c)
+	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
+		csrfSecret = fallback
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)

@@ -108,9 +108,9 @@ configureWunderGraphApplication({
           clientSecret: 'XXX', // client secret from Auth0
         }),
       ],
-      secureCookieHashKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'), // must be of length 32
-      secureCookieBlockKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
-      csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
+      secureCookieHashKey: new EnvironmentVariable('WG_SECURE_COOKIE_HASH_KEY'), // must be of length 32
+      secureCookieBlockKey: new EnvironmentVariable('WG_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
+      csrfTokenSecret: new EnvironmentVariable('WG_CSRF_TOKEN_SECRET'), // must be of length 11
     },
   },
 });
