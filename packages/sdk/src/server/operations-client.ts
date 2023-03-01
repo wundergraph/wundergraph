@@ -12,7 +12,7 @@ export interface Operation<Input, Response> {
 }
 
 export interface Operations {
-	[key: string]: Operation<any, any>;
+	[key: string]: Operation<object, unknown>;
 }
 
 type ExtractInput<B> = B extends Operation<infer T, any> ? T : never;
@@ -36,7 +36,7 @@ export interface Options {
 	clientRequest: any;
 }
 
-export class OperationsClient<Queries, Mutations, Subscriptions> {
+export class OperationsClient<Queries = any, Mutations = any, Subscriptions = any> {
 	constructor(options: Options) {
 		this.options = options;
 	}
