@@ -734,6 +734,7 @@ const applySkipFields = (skipFields: SchemaSkipFields, root: JSONSchema, parent:
 	} else {
 		// Leaf, remove from the schema
 		delete parent.properties![propName];
+		parent.required = parent.required?.filter((name) => name !== propName);
 	}
 };
 

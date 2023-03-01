@@ -333,4 +333,40 @@ describe('test @fromClaim with nested injection', () => {
 		// There should be no results if both claims are injected
 		expect(result.data!.countries_countries.length).toBe(0);
 	});
+
+	test('inject one argument', async () => {
+		const data = 'foo';
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.wellKnownClaims);
+		const result = await client.query({
+			operationName: 'claims/UserID',
+			input: {
+				data,
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+		expect(result.data?.uid).toBe(`string: ${wellKnownClaims.sub}`);
+		expect(result.data?.data).toBe(`string: ${data}`);
+	});
+
+	test('inject into struct', async () => {
+		const b = 'b';
+		const c = 'c';
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.wellKnownClaims);
+		const result = await client.query({
+			operationName: 'claims/IntoStruct',
+			input: {
+				// 'a' comes from a claim, should be removed from input schema
+				struct: {
+					b,
+					c,
+				},
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+		expect(result.data?.echo_struct).toBe(`struct: a:${wellKnownClaims.sub} b:${b} c:${c}`);
+	});
 });
