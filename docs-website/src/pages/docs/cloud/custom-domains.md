@@ -52,6 +52,7 @@ Certificates will expire after three months and should automatically reissue.
 
 ## Cloudflare
 
+1. Go to [your dashboard](https://dash.cloudflare.com/)
 1. Click your domain
 1. Click DNS > Records
 1. In the `DNS management for {domain}` UI, click `Add record`
@@ -67,8 +68,10 @@ If you believe this is happening, try the following:
 1. Click SSL/TLS > Overview
 1. Check `Off (not secure)`
 
-## Google
+## Google Domains
 
+1. Go to [Google Domains](https://domains.google/)
+1. Click `My domains`
 1. Click `Manage` next to your domain
 1. Click `DNS` on the left side
 1. Click `Manage custom records`
