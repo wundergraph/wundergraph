@@ -1861,10 +1861,6 @@ func (f *httpFlushWriter) Flush() {
 		}
 	}
 
-	if f.sse {
-		_, _ = f.writer.Write([]byte("data: "))
-	}
-
 	if f.useJsonPatch && f.lastMessage.Len() != 0 {
 		last := f.lastMessage.Bytes()
 		patch, err := jsonpatch.CreatePatch(last, resp)
@@ -1885,6 +1881,9 @@ func (f *httpFlushWriter) Flush() {
 			}
 			return
 		}
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		if len(patchData) < len(resp) {
 			_, _ = f.writer.Write(patchData)
 		} else {
@@ -1893,6 +1892,9 @@ func (f *httpFlushWriter) Flush() {
 	}
 
 	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		_, _ = f.writer.Write(resp)
 	}
 
