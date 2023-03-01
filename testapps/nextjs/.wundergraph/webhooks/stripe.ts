@@ -11,7 +11,6 @@ export default createWebhook<WebhookHttpEvent<Stripe.Event>, WebhookHttpResponse
 				hello: '1',
 			},
 		});
-
 		return {
 			statusCode: 200,
 			body: {
