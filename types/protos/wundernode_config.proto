@@ -141,7 +141,7 @@ message OperationVariablesConfiguration {
 }
 
 message VariableInjectionConfiguration {
-	string variableName = 1;
+	repeated string variablePathComponents = 1;
 	InjectVariableKind variableKind = 2;
 	string dateFormat = 3;
 	string environmentVariableName = 4;
@@ -197,7 +197,7 @@ message CustomClaim {
 }
 
 message ClaimConfig {
-	string variableName = 1;
+	repeated string variablePathComponents = 1;
 	ClaimType claimType = 2;
 	// Available iff claimType == CUSTOM
 	optional CustomClaim custom = 3;

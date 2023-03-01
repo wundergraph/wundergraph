@@ -1,4 +1,13 @@
-import { GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLInt, GraphQLFloat, GraphQLBoolean } from 'graphql';
+import {
+	GraphQLObjectType,
+	GraphQLSchema,
+	GraphQLString,
+	GraphQLInt,
+	GraphQLFloat,
+	GraphQLBoolean,
+	GraphQLInputObjectType,
+	GraphQLNonNull,
+} from 'graphql';
 import { configureWunderGraphServer } from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
@@ -50,6 +59,24 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 							type: GraphQLString,
 							resolve(obj, args, context, info) {
 								return `string: ${args.input}`;
+							},
+						},
+						struct: {
+							args: {
+								input: {
+									type: new GraphQLInputObjectType({
+										name: 'Struct',
+										fields: {
+											a: { type: new GraphQLNonNull(GraphQLString) },
+											b: { type: new GraphQLNonNull(GraphQLString) },
+											c: { type: new GraphQLNonNull(GraphQLString) },
+										},
+									}),
+								},
+							},
+							type: GraphQLString,
+							resolve(obj, args, context, info) {
+								return `struct: a:${args.input.a} b:${args.input.b} c:${args.input.c}`;
 							},
 						},
 					},
