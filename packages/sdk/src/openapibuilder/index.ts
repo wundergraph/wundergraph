@@ -32,6 +32,12 @@ const errorSchema: JSONSchema = {
 	required: ['message', 'input', 'errors'],
 };
 
+const invalidInputErrorName = 'InvalidInputError';
+
+const errorRefSchema: JSONSchema = {
+	$ref: `#/components/schemas/${invalidInputErrorName}`,
+};
+
 interface OpenAPIServer {
 	url: string;
 }
@@ -118,7 +124,7 @@ export class OpenAPIBuilder {
 				description: 'Invalid input',
 				content: {
 					'application/json': {
-						schema: errorSchema,
+						schema: errorRefSchema,
 					},
 				},
 			},
@@ -250,6 +256,9 @@ export class OpenAPIBuilder {
 			}
 		}
 
+		let schemas: Record<string, JSONSchema> = {};
+		schemas[invalidInputErrorName] = errorSchema;
+
 		let spec: OpenAPISpec = {
 			openapi: openAPIVersion,
 			info: {
@@ -260,6 +269,9 @@ export class OpenAPIBuilder {
 			},
 			servers: [{ url: this.config.baseURL }],
 			paths,
+			components: {
+				schemas: schemas,
+			},
 		};
 		return this.rewriteAPISchemaRefs(spec);
 	}
