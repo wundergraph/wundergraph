@@ -79,7 +79,7 @@ func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
 }
 
 // Load user from token. token is always non nil and contains at least a non-empty token.Raw
-// but it might be not validated if we have no key functions
+// but it might not be validated if we have no key functions
 func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
 	cacheKey := token.Raw
