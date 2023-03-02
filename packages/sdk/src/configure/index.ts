@@ -1,8 +1,6 @@
 import fs from 'fs';
 import path, { relative } from 'path';
 import process from 'node:process';
-import { JSONSchema7 as JSONSchema } from 'json-schema';
-import _ from 'lodash';
 import {
 	buildSchema,
 	FieldDefinitionNode,
@@ -13,6 +11,9 @@ import {
 	print,
 	visit,
 } from 'graphql';
+import { JSONSchema7 as JSONSchema } from 'json-schema';
+import objectHash from 'object-hash';
+import _ from 'lodash';
 import * as TJS from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
@@ -1175,6 +1176,14 @@ const typescriptOperationResponseSchemas = (files: TypeScriptOperationFile[]) =>
 		contents.push(`export type ${responseTypeName(file)} = ExtractResponse<typeof ${name}>`);
 	}
 
+	const cachePath = path.join('cache', `ts.operationTypes.${objectHash(contents)}.json`);
+	if (fs.existsSync(cachePath)) {
+		try {
+			const cached = fs.readFileSync(cachePath, { encoding: 'utf-8' });
+			return JSON.parse(cached) as Record<string, JSONSchema>;
+		} catch {}
+	}
+
 	const basePath = path.join(process.env.WG_DIR_ABS!, 'generated');
 	const programPath = path.join(basePath, programFile);
 
@@ -1197,16 +1206,26 @@ const typescriptOperationResponseSchemas = (files: TypeScriptOperationFile[]) =>
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
 	const generator = TJS.buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
-	if (generator) {
-		for (const file of files) {
-			let schema = generator!.getSchemaForSymbol(responseTypeName(file));
-			if (schema) {
-				delete schema.$schema;
-				schemas[file.operation_name] = schema as JSONSchema;
-			}
+	if (!generator) {
+		console.warn = warn;
+		throw new Error('could not parse .ts operation files');
+	}
+	for (const file of files) {
+		let schema = generator!.getSchemaForSymbol(responseTypeName(file));
+		if (schema) {
+			delete schema.$schema;
+			schemas[file.operation_name] = schema as JSONSchema;
 		}
 	}
 	console.warn = warn;
+	const cached = JSON.stringify(schemas);
+	try {
+		const cacheDir = path.dirname(cachePath);
+		if (!fs.existsSync(cacheDir)) {
+			fs.mkdirSync(cacheDir, { recursive: true });
+		}
+		fs.writeFileSync(cachePath, cached, { encoding: 'utf-8' });
+	} catch {}
 	return schemas;
 };
 
