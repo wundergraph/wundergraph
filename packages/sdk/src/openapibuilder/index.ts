@@ -195,10 +195,10 @@ export class OpenAPIBuilder {
 			delete schema.definitions;
 		}
 		// Rewrite references
-		if (schema.$ref) {
+		if (schema?.$ref) {
 			schema.$ref = schema.$ref.replace(/#\/definitions\/([^\/])/, `#/components/schemas/$1`);
 		}
-		if (schema.properties) {
+		if (schema?.properties) {
 			for (const key of Object.keys(schema.properties)) {
 				const prop = schema.properties[key];
 				if (typeof prop !== 'boolean') {
@@ -206,7 +206,7 @@ export class OpenAPIBuilder {
 				}
 			}
 		}
-		if (schema.items && typeof schema.items !== 'boolean') {
+		if (schema?.items && typeof schema.items !== 'boolean') {
 			if (Array.isArray(schema.items)) {
 				for (const item of schema.items) {
 					if (typeof item !== 'boolean') {
