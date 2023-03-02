@@ -328,7 +328,7 @@ importers:
       nock: ^13.2.9
       node-fetch: ^2.6.7
       object-hash: ^2.2.0
-      openapi-to-graphql: ^3.0.2
+      openapi-to-graphql: ^3.0.3
       openapi-types: ^10.0.0
       pino: ^8.8.0
       pino-pretty: ^9.1.1
@@ -368,7 +368,7 @@ importers:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
-      openapi-to-graphql: 3.0.2_graphql@16.6.0
+      openapi-to-graphql: 3.0.3_graphql@16.6.0
       openapi-types: 10.0.0
       pino: 8.8.0
       pino-pretty: 9.1.1
@@ -13824,8 +13824,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /openapi-to-graphql/3.0.2_graphql@16.6.0:
-    resolution: {integrity: sha512-JEWHMKkekVWf2NTIKIUp+fQKnlqZK4iz8VUimAvYF/YMcfwoPLJWr8HFMCMWsDrfOsVEyjULrpz/LLXFWYdP9A==}
+  /openapi-to-graphql/3.0.3_graphql@16.6.0:
+    resolution: {integrity: sha512-uGgSbNBKuNdQfLZCj1vX/rAEAbrJbqWpn3j59ZOB4D+8tDMN77VQQN1VPg6ItydzGRohFZoUJMe6I3c7uwdodA==}
     engines: {node: '>=14'}
     peerDependencies:
       graphql: ^16.0.0
@@ -17734,7 +17734,7 @@ packages:
       lodash: 4.17.21
       long: 5.2.1
       object-hash: 2.2.0
-      openapi-to-graphql: 3.0.2_graphql@16.6.0
+      openapi-to-graphql: 3.0.3_graphql@16.6.0
       openapi-types: 10.0.0
       pino: 8.8.0
       pino-pretty: 9.1.1
