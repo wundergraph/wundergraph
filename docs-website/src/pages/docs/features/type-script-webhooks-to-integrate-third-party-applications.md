@@ -13,25 +13,13 @@ For example, you might want to receive message when a User has starred your repo
 ```typescript
 // .wundergraph/webhooks/github.ts
 
-import type {
-  Webhook,
-  WebhookHttpEvent,
-  WebhookHttpResponse,
-} from '@wundergraph/sdk/server'
-import type { InternalClient } from '../generated/wundergraph.internal.client'
+import type { WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk/server';
+import { createWebhook } from '../generated/wundergraph.webhooks';
 
-const webhook: Webhook<
-  InternalClient,
-  WebhookHttpEvent<
-    { myBodyVar: string },
-    { myQueryVar: string },
-    { myHeaderVar: string }
-  >,
-  WebhookHttpResponse<
-    { myResponseBodyVar: string },
-    { myResponseHeaderVar: string }
-  >
-> = {
+export default createWebhook<
+  WebhookHttpEvent<{ myBodyVar: string }, { myQueryVar: string }, { myHeaderVar: string }>,
+  WebhookHttpResponse<{ myResponseBodyVar: string }, { myResponseHeaderVar: string }>
+>({
   handler: async (event, context) => {
     return {
       statusCode: 200,
@@ -41,11 +29,9 @@ const webhook: Webhook<
       body: {
         hello: 'github',
       },
-    }
+    };
   },
-}
-
-export default webhook
+});
 ```
 
 After adding your first webhook, you can test it by calling `http://localhost:9991/webhooks/github`. It should return `{ hello: 'github' }`.
@@ -57,16 +43,16 @@ You have access to the original client request.
 ```typescript
 // .wundergraph/webhooks/github.ts
 
-import type { Webhook } from '@wundergraph/sdk/server'
-import type { InternalClient } from '../generated/wundergraph.internal.client'
+import type { Webhook } from '@wundergraph/sdk/server';
+import { createWebhook } from '../generated/wundergraph.webhooks';
 
-const webhook: Webhook<InternalClient> = {
+export default createWebhook({
   handler: async (event, context) => {
-    event.body
-    event.url
-    event.headers
-    event.method
-    event.query
+    event.body;
+    event.url;
+    event.headers;
+    event.method;
+    event.query;
 
     return {
       statusCode: 200,
@@ -76,11 +62,11 @@ const webhook: Webhook<InternalClient> = {
       body: {
         hello: 'github',
       },
-    }
+    };
   },
-}
+});
 
-export default webhook
+export default webhook;
 ```
 
 ## Call internal operations
@@ -90,24 +76,25 @@ You can call internal operations from webhooks. Ensure to import the generated c
 ```typescript
 // .wundergraph/webhooks/github.ts
 
-import type { Webhook } from '@wundergraph/sdk/server'
-import type { InternalClient } from '../generated/wundergraph.internal.client'
+import type { Webhook } from '@wundergraph/sdk/server';
+import { createWebhook } from '../generated/wundergraph.webhooks';
 
-const webhook: Webhook<InternalClient> = {
+export default createWebhook({
   handler: async (event, context) => {
-    const data = context.internalClient.queries.Dragons()
-    console.log(data)
+    const data = await context.operations.query({
+      operationName: 'Dragons'
+    })
+
+    console.log(data);
 
     return {
       statusCode: 200,
       body: {
         hello: 'github',
       },
-    }
+    };
   },
-}
-
-export default webhook
+};
 ```
 
 ## Configure a verifier for your webhook
@@ -121,20 +108,12 @@ For Github, you can use our verifier in the SDK that implements the [validation]
 ```typescript
 // .wundergraph/wundergraph.server.ts
 
-import {
-  configureWunderGraphServer,
-  EnvironmentVariable,
-  GithubWebhookVerifier,
-} from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { WebhooksConfig } from './generated/wundergraph.webhooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
+import { configureWunderGraphServer, EnvironmentVariable, GithubWebhookVerifier } from '@wundergraph/sdk/server';
+import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { WebhooksConfig } from './generated/wundergraph.webhooks';
+import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<
-  HooksConfig,
-  InternalClient,
-  WebhooksConfig
->(() => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   webhooks: {
     // Enable this if you configure this endpoint on Github.
     // Don't forget to set the environment variable before starting your WunderNode
@@ -142,7 +121,7 @@ export default configureWunderGraphServer<
       verifier: GithubWebhookVerifier(new EnvironmentVariable('GITHUB_SECRET')),
     },
   },
-}))
+}));
 ```
 
 ### Generic HMAC Verifier
@@ -153,20 +132,12 @@ You can use our generic HMAC verifier to validate other webhooks as well.
 ```typescript
 // .wundergraph/wundergraph.server.ts
 
-import {
-  configureWunderGraphServer,
-  EnvironmentVariable,
-  GithubWebhookVerifier,
-} from '@wundergraph/sdk/server'
-import type { HooksConfig } from './generated/wundergraph.hooks'
-import type { WebhooksConfig } from './generated/wundergraph.webhooks'
-import type { InternalClient } from './generated/wundergraph.internal.client'
+import { configureWunderGraphServer, EnvironmentVariable, GithubWebhookVerifier } from '@wundergraph/sdk/server';
+import type { HooksConfig } from './generated/wundergraph.hooks';
+import type { WebhooksConfig } from './generated/wundergraph.webhooks';
+import type { InternalClient } from './generated/wundergraph.internal.client';
 
-export default configureWunderGraphServer<
-  HooksConfig,
-  InternalClient,
-  WebhooksConfig
->(() => ({
+export default configureWunderGraphServer<HooksConfig, InternalClient, WebhooksConfig>(() => ({
   webhooks: {
     github: {
       verifier: CreateWebhookVerifier({
@@ -177,10 +148,12 @@ export default configureWunderGraphServer<
       }),
     },
   },
-}))
+}));
 ```
 
 ## How to
 
 If you're looking for more specific information on how to configure Webhooks,
 have a look at the wundergraph.server.ts reference.
+
+- [Webhooks Configuration reference](/docs/wundergraph-server-reference/webhooks)
