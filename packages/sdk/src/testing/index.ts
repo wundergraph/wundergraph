@@ -148,7 +148,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 * it does nothing.
 	 */
 	async stop(): Promise<void> {
-		if (this.subprocess) {
+		if (this.subprocess?.pid) {
 			await terminate(this.subprocess.pid);
 			this.subprocess = undefined;
 		}

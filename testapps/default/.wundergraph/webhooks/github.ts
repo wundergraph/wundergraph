@@ -1,13 +1,11 @@
 import localImported from './../../local-import';
 import { buildSchema } from 'graphql';
-import type { Webhook, WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk/server';
-import type { InternalClient } from '../generated/wundergraph.internal.client';
+import type { WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk/server';
+import { createWebhook } from '../generated/wundergraph.webhooks';
 
-const webhook: Webhook<
-	InternalClient,
-	WebhookHttpEvent<{ myBodyVar: string }, { myQueryVar: string }, { myHeaderVar: string }>,
-	WebhookHttpResponse<{ myResponseBodyVar: string; localImported: number }, { myResponseHeaderVar: string }>
-> = {
+import type { WebhookEvent } from '@octokit/webhooks-types';
+
+const webhook = createWebhook<WebhookHttpEvent<WebhookEvent>, WebhookHttpResponse>({
 	handler: async (event, context) => {
 		event.query.myQueryVar;
 		// event.body.myBodyVar;
@@ -30,6 +28,6 @@ const webhook: Webhook<
 			},
 		};
 	},
-};
+});
 
 export default webhook;
