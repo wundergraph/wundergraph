@@ -241,7 +241,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 		}
 	}
 
-	if clientRequest, ok := request.Context().Value(pool.ClientRequestKey).(*http.Request); ok {
+	if clientRequest := request.Context().Value(pool.ClientRequestKey).(*http.Request); clientRequest != nil {
 		requestJSON, err := hooks.HttpRequestToWunderGraphRequestJSON(clientRequest, false)
 		if err != nil {
 			return nil, err
