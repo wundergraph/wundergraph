@@ -1049,7 +1049,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 		} else {
 			boolValue = "false"
 		}
-		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariablePathComponents...)
 		if err != nil {
 			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
 		}
@@ -1068,7 +1068,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	default:
 		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
 	}
-	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
 	}
@@ -1140,7 +1140,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)
 	}
 	var err error
-	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	variables, err = jsonparser.Set(variables, replacement, claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
 	}
@@ -1176,23 +1176,23 @@ func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byt
 		return variables
 	}
 	for i := range operation.VariablesConfiguration.InjectVariables {
-		key := operation.VariablesConfiguration.InjectVariables[i].VariableName
+		keys := operation.VariablesConfiguration.InjectVariables[i].VariablePathComponents
 		kind := operation.VariablesConfiguration.InjectVariables[i].VariableKind
 		switch kind {
 		case wgpb.InjectVariableKind_UUID:
 			id, _ := uuid.GenerateUUID()
-			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), keys...)
 		case wgpb.InjectVariableKind_DATE_TIME:
 			format := operation.VariablesConfiguration.InjectVariables[i].DateFormat
 			now := time.Now()
 			dateTime := now.Format(format)
-			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), keys...)
 		case wgpb.InjectVariableKind_ENVIRONMENT_VARIABLE:
 			value := os.Getenv(operation.VariablesConfiguration.InjectVariables[i].EnvironmentVariableName)
 			if value == "" {
 				continue
 			}
-			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), keys...)
 		}
 	}
 	return variables
@@ -1861,10 +1861,6 @@ func (f *httpFlushWriter) Flush() {
 		}
 	}
 
-	if f.sse {
-		_, _ = f.writer.Write([]byte("data: "))
-	}
-
 	if f.useJsonPatch && f.lastMessage.Len() != 0 {
 		last := f.lastMessage.Bytes()
 		patch, err := jsonpatch.CreatePatch(last, resp)
@@ -1885,6 +1881,9 @@ func (f *httpFlushWriter) Flush() {
 			}
 			return
 		}
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		if len(patchData) < len(resp) {
 			_, _ = f.writer.Write(patchData)
 		} else {
@@ -1893,6 +1892,9 @@ func (f *httpFlushWriter) Flush() {
 	}
 
 	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		_, _ = f.writer.Write(resp)
 	}
 
