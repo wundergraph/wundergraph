@@ -151,6 +151,7 @@
     "swagger2openapi": "^7.0.8",
     "terminate": "^2.5.0",
     "ts-retry-promise": "^0.7.0",
+    "typescript-json-schema": "^0.55.0",
     "zod": "^3.20.2",
     "zod-to-json-schema": "^3.20.2"
   },

@@ -1,11 +1,11 @@
 import { OperationType } from '@wundergraph/protobuf';
-import { JSONSchema7 } from 'json-schema';
+import { JSONSchema7 as JSONSchema } from 'json-schema';
 import { GraphQLOperation } from '../graphql/operations';
 import { buildPath, JSONSchemaParameterPath } from './operations';
 
 const openAPIVersion = '3.1.0';
 
-const errorSchema: JSONSchema7 = {
+const errorSchema: JSONSchema = {
 	type: 'object',
 	properties: {
 		message: {
@@ -49,11 +49,11 @@ interface OpenAPIParameter {
 	in: 'query' | 'header' | 'path' | 'cookie';
 	required: boolean;
 	allowEmptyValue: boolean;
-	schema: JSONSchema7;
+	schema: JSONSchema;
 }
 
 interface OpenAPIMediaType {
-	schema: JSONSchema7;
+	schema: JSONSchema;
 }
 
 interface OpenAPIRequestBody {
@@ -82,11 +82,16 @@ interface OpenAPIPath {
 	post?: OpenAPIOperation;
 }
 
+interface OpenAPIComponents {
+	schemas?: Record<string, JSONSchema>;
+}
+
 interface OpenAPISpec {
 	openapi: string;
 	info: OpenAPIInfo;
 	servers: OpenAPIServer[];
 	paths: Record<string, OpenAPIPath>;
+	components?: OpenAPIComponents;
 }
 
 export interface OpenAPIBuilderOptions {
@@ -120,8 +125,6 @@ export class OpenAPIBuilder {
 		};
 	}
 
-	// TODO: models.ts has TS return types
-
 	private queryOperation(op: GraphQLOperation): OpenAPIOperation {
 		let parameters: OpenAPIParameter[] = [];
 		let paths: JSONSchemaParameterPath[] = [];
@@ -129,7 +132,7 @@ export class OpenAPIBuilder {
 		for (const path of paths) {
 			parameters.push({
 				name: path.path.join('.'),
-				description: `Type ${path.type}, ${path.required ? 'Required' : 'Optional'}`,
+				description: `Type: ${path.type}`,
 				in: 'query',
 				required: path.required,
 				allowEmptyValue: !path.required,
@@ -159,6 +162,69 @@ export class OpenAPIBuilder {
 			},
 			responses: this.operationResponses(op),
 		};
+	}
+
+	private rewriteSchemaRefs(spec: OpenAPISpec, schema: JSONSchema, prefix: string) {
+		// Move definitions to spec
+		if (schema?.definitions) {
+			if (!spec.components) {
+				spec.components = {};
+			}
+			if (!spec.components.schemas) {
+				spec.components.schemas = {};
+			}
+			for (const key of Object.keys(schema.definitions)) {
+				const definition = schema.definitions[key];
+				if (typeof definition !== 'boolean') {
+					this.rewriteSchemaRefs(spec, definition, prefix);
+					spec.components.schemas[`${prefix}_${key}`] = definition;
+				}
+			}
+			delete schema.definitions;
+		}
+		// Rewrite references
+		if (schema.$ref) {
+			schema.$ref = schema.$ref.replace(/#\/definitions\/([^\/])/, `#/components/schemas/${prefix}_$1`);
+		}
+		if (schema.properties) {
+			for (const key of Object.keys(schema.properties)) {
+				const prop = schema.properties[key];
+				if (typeof prop !== 'boolean') {
+					this.rewriteSchemaRefs(spec, prop, prefix);
+				}
+			}
+		}
+		if (schema.items && typeof schema.items !== 'boolean') {
+			if (Array.isArray(schema.items)) {
+				for (const item of schema.items) {
+					if (typeof item !== 'boolean') {
+						this.rewriteSchemaRefs(spec, item, prefix);
+					}
+				}
+			} else {
+				this.rewriteSchemaRefs(spec, schema.items, prefix);
+			}
+		}
+	}
+
+	private rewriteOperationSchemaRefs(spec: OpenAPISpec, op: OpenAPIOperation) {
+		for (const response of Object.values(op.responses)) {
+			for (const contents of Object.values(response.content)) {
+				this.rewriteSchemaRefs(spec, contents.schema, op.operationId);
+			}
+		}
+	}
+
+	private rewriteAPISchemaRefs(spec: OpenAPISpec) {
+		for (const p of Object.values(spec.paths)) {
+			if (p.get) {
+				this.rewriteOperationSchemaRefs(spec, p.get);
+			}
+			if (p.post) {
+				this.rewriteOperationSchemaRefs(spec, p.post);
+			}
+		}
+		return spec;
 	}
 
 	generate(operations: GraphQLOperation[]) {
@@ -195,6 +261,6 @@ export class OpenAPIBuilder {
 			servers: [{ url: this.config.baseURL }],
 			paths,
 		};
-		return spec;
+		return this.rewriteAPISchemaRefs(spec);
 	}
 }

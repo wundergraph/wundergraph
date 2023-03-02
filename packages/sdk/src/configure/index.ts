@@ -1,6 +1,7 @@
 import fs from 'fs';
-import path from 'path';
+import path, { relative } from 'path';
 import process from 'node:process';
+import { JSONSchema7 as JSONSchema } from 'json-schema';
 import _ from 'lodash';
 import {
 	buildSchema,
@@ -12,6 +13,7 @@ import {
 	print,
 	visit,
 } from 'graphql';
+import * as TJS from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
@@ -32,6 +34,7 @@ import {
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	TypeScriptOperationFile,
 } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
@@ -57,6 +60,7 @@ import {
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
+import { OpenAPIBuilder } from '../openapibuilder';
 import { PostmanBuilder } from '../postman/builder';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
@@ -68,7 +72,6 @@ import { resolveServerOptions, serverOptionsWithDefaults } from '../server/serve
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { cleanOpenApiSpecs } from '../openapi/introspection';
-import { OpenAPIBuilder } from '../openapibuilder';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -1155,6 +1158,58 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
+// typescriptOperationResponseSchemas generates the response schemas for all TypeScript
+// operations at once, since it's several times faster than generating them one by one
+const typescriptOperationResponseSchemas = (files: TypeScriptOperationFile[]) => {
+	const functionTypeName = (file: TypeScriptOperationFile) => `function_${file.operation_name}`;
+	const responseTypeName = (file: TypeScriptOperationFile) => `${functionTypeName(file)}_Response`;
+
+	const programFile = 'typescript_schema_generator.ts';
+
+	let contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
+
+	for (const file of files) {
+		const relativePath = `../operations/${file.api_mount_path}`;
+		const name = functionTypeName(file);
+		contents.push(`import type ${name} from "${relativePath}";`);
+		contents.push(`export type ${responseTypeName(file)} = ExtractResponse<typeof ${name}>`);
+	}
+
+	const basePath = path.join(process.env.WG_DIR_ABS!, 'generated');
+	const programPath = path.join(basePath, programFile);
+
+	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
+
+	const compilerOptions: TJS.CompilerOptions = {
+		strictNullChecks: true,
+		noEmit: true,
+		ignoreErrors: true,
+	};
+
+	const program = TJS.getProgramFromFiles([programPath], compilerOptions, basePath);
+
+	let schemas: Record<string, JSONSchema> = {};
+	const settings: TJS.PartialArgs = {
+		required: true,
+	};
+	// XXX: There's no way to silence warnings from TJS, override console.warn
+	const warn = console.warn;
+	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
+	const generator = TJS.buildGenerator(program, settings);
+	// generator can be null if the program can't be compiled
+	if (generator) {
+		for (const file of files) {
+			let schema = generator!.getSchemaForSymbol(responseTypeName(file));
+			if (schema) {
+				delete schema.$schema;
+				schemas[file.operation_name] = schema as JSONSchema;
+			}
+		}
+	}
+	console.warn = warn;
+	return schemas;
+};
+
 const resolveOperationsConfigurations = async (
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
@@ -1195,11 +1250,16 @@ const resolveOperationsConfigurations = async (
 		customClaims,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
-	if (loadedOperations.typescript_operation_files)
+	if (loadedOperations.typescript_operation_files) {
+		const defaultResponseSchema = { type: 'object', properties: { data: {} } } as JSONSchema;
+		const responseSchemas = typescriptOperationResponseSchemas(loadedOperations.typescript_operation_files);
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
 				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
 				const implementation = await loadNodeJsOperationDefaultModule(filePath);
+				const responseSchema = responseSchemas[file.operation_name]
+					? responseSchemas[file.operation_name]
+					: defaultResponseSchema;
 				const operation: GraphQLOperation = {
 					Name: file.operation_name,
 					PathName: file.api_mount_path,
@@ -1215,7 +1275,7 @@ const resolveOperationsConfigurations = async (
 					InterpolationVariablesSchema: { type: 'object', properties: {} },
 					InternalVariablesSchema: { type: 'object', properties: {} },
 					InjectedVariablesSchema: { type: 'object', properties: {} },
-					ResponseSchema: { type: 'object', properties: { data: {} } },
+					ResponseSchema: responseSchema,
 					TypeScriptOperationImport: `function_${file.operation_name}`,
 					AuthenticationConfig: {
 						required: implementation.requireAuthentication || false,
@@ -1257,6 +1317,7 @@ const resolveOperationsConfigurations = async (
 				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
 			}
 		}
+	}
 	return {
 		operations: [...graphQLOperations.operations, ...nodeJSOperations],
 	};
