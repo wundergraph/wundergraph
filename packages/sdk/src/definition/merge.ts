@@ -224,7 +224,12 @@ directive @jsonSchema (
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+
+  """
+  Optional field to apply the JSON schema to
+  """
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 enum COMMON_REGEX_PATTERN {
     EMAIL
@@ -256,8 +261,9 @@ Adding this directive makes the operation require authentication.
 """
 
 directive @fromClaim(
-  name: WG_CLAIM
-) on VARIABLE_DEFINITION
+  name: WG_CLAIM,
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
@@ -357,7 +363,10 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(
+	on: String = ""
+) repeatable on VARIABLE_DEFINITION
+
 `;
 
 const injectEnvironmentVariableSchema = `
@@ -365,8 +374,9 @@ const injectEnvironmentVariableSchema = `
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
 directive @injectEnvironmentVariable (
-    name: String!
-) on VARIABLE_DEFINITION
+    name: String!,
+	on: String = ""
+) repeatable on VARIABLE_DEFINITION
 `;
 
 const dateTimeSchema = `
@@ -381,8 +391,9 @@ Custom formats are allowed by specifying a format conforming to the Golang speci
 directive @injectCurrentDateTime (
     format: WunderGraphDateTimeFormat = ISO8601
     """customFormat must conform to the Golang specification for specifying a date time format"""
-    customFormat: String
-) on VARIABLE_DEFINITION
+    customFormat: String,
+	on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 enum WunderGraphDateTimeFormat {
     "2006-01-02T15:04:05-0700"
