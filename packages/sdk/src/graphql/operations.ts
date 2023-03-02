@@ -504,12 +504,9 @@ export const isWellKnownClaim = (name: string) => {
 	return name in wgClaimToTypescriptField;
 };
 
-export const wellKnownClaimField = (name: string, operation?: GraphQLOperation) => {
+export const wellKnownClaimField = (name: string) => {
 	if (name in wgClaimToTypescriptField) {
 		return wgClaimToTypescriptField[name as WellKnownClaim];
-	}
-	if (operation) {
-		throw new Error(`unhandled claim ${name} on operation ${operation.Name}`);
 	}
 	throw new Error(`unhandled claim ${name}`);
 };
