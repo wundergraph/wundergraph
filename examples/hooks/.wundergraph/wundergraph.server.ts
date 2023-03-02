@@ -19,7 +19,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 									name: 'Custom Falcon 9',
 									active: true,
 								},
-								...response.data.spacex_dragons,
+								...(response.data?.spacex_dragons ?? []),
 							],
 						},
 					};

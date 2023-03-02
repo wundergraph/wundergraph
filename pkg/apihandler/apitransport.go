@@ -12,16 +12,14 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
-
-	"github.com/wundergraph/graphql-go-tools/pkg/pool"
 
 	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
-	pool2 "github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -119,7 +117,7 @@ type Claims struct {
 func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) {
 	request.Header.Set(logging.RequestIDHeader, logging.RequestIDFromContext(request.Context()))
 
-	if request.Header.Get("X-WG-Internal-GraphQL-API") == "true" {
+	if request.Header.Get(WgInternalApiCallHeader) == "true" {
 		return t.internalGraphQLRoundTrip(request)
 	}
 
@@ -131,10 +129,13 @@ func (t *ApiTransport) RoundTrip(request *http.Request) (*http.Response, error) 
 		}
 	}
 
-	return t.roundTrip(request)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	return t.roundTrip(request, buf)
 }
 
-func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err error) {
+func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res *http.Response, err error) {
 	var (
 		onRequestHook, onResponseHook bool
 	)
@@ -150,7 +151,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 	}
 
 	if onRequestHook {
-		request, err = t.handleOnRequestHook(request, metaData)
+		request, err = t.handleOnRequestHook(request, metaData, buf)
 		if err != nil {
 			return nil, err
 		}
@@ -200,7 +201,7 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 	}
 
 	if onResponseHook {
-		return t.handleOnResponseHook(res, metaData)
+		return t.handleOnResponseHook(res, metaData, buf)
 	}
 
 	return
@@ -211,11 +212,11 @@ func (t *ApiTransport) roundTrip(request *http.Request) (res *http.Response, err
 // these get extracted by the fastify server
 // so that the graphql-js context has access to the original user and request
 func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *http.Response, err error) {
-	request.Header.Del("X-WG-Internal-GraphQL-API")
+	request.Header.Del(WgInternalApiCallHeader)
 	user := authentication.UserFromContext(request.Context())
 
-	buf := pool.BytesBuffer.Get()
-	defer pool.BytesBuffer.Put(buf)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
 
 	_, err = buf.ReadFrom(request.Body)
 	if err != nil {
@@ -240,7 +241,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 		}
 	}
 
-	if clientRequest, ok := request.Context().Value(pool2.ClientRequestKey).(*http.Request); ok {
+	if clientRequest := request.Context().Value(pool.ClientRequestKey).(*http.Request); clientRequest != nil {
 		requestJSON, err := hooks.HttpRequestToWunderGraphRequestJSON(clientRequest, false)
 		if err != nil {
 			return nil, err
@@ -261,7 +262,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	return t.roundTripper.RoundTrip(req)
 }
 
-func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData) (*http.Request, error) {
+func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
 	var (
 		body []byte
 		err  error
@@ -292,7 +293,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 		}
 	}
 
-	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hooks.HttpTransportOnRequest, hookData)
+	out, err := t.hooksClient.DoGlobalRequest(r.Context(), hooks.HttpTransportOnRequest, hookData, buf)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +321,7 @@ func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationM
 	return r, nil
 }
 
-func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData) (*http.Response, error) {
+func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Response, error) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -347,7 +348,7 @@ func (t *ApiTransport) handleOnResponseHook(r *http.Response, metaData *Operatio
 		}
 	}
 
-	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), hooks.HttpTransportOnResponse, hookData)
+	out, err := t.hooksClient.DoGlobalRequest(r.Request.Context(), hooks.HttpTransportOnResponse, hookData, buf)
 	if err != nil {
 		return nil, err
 	}

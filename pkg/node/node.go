@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -24,7 +23,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
-	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -423,9 +421,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
-	serverUrl := strings.TrimSuffix(nodeConfig.Api.Options.ServerUrl, "/")
-
-	hooksClient := hooks.NewClient(serverUrl, n.log)
+	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
 
 	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
 
@@ -448,12 +444,11 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		EnableIntrospection:        n.options.enableIntrospection,
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,
-		HookServerURL:              serverUrl,
 		DevMode:                    n.options.devMode,
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, loader)
+	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader)
 
 	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
@@ -566,32 +561,15 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
 func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
+	var errorMessages []string
+	// we set these values statically so that auth never drops login sessions during development
 	if n.options.devMode {
-
-		// we set these values statically so that auth never drops login sessions during development
-		if api.AuthenticationConfig != nil && api.AuthenticationConfig.CookieBased != nil {
-			if csrfSecret := loadvariable.String(api.AuthenticationConfig.CookieBased.CsrfSecret); csrfSecret == "" {
-				api.AuthenticationConfig.CookieBased.CsrfSecret = &wgpb.ConfigurationVariable{
-					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-					StaticVariableContent: "aaaaaaaaaaa",
-				}
-			}
-
-			if blockKey := loadvariable.String(api.AuthenticationConfig.CookieBased.BlockKey); blockKey == "" {
-				api.AuthenticationConfig.CookieBased.BlockKey = &wgpb.ConfigurationVariable{
-					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				}
-			}
-
-			if hashKey := loadvariable.String(api.AuthenticationConfig.CookieBased.HashKey); hashKey == "" {
-				api.AuthenticationConfig.CookieBased.HashKey = &wgpb.ConfigurationVariable{
-					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				}
-			}
-		}
-
+		api.CookieBasedSecrets, errorMessages = apihandler.NewDevModeCookieBasedSecrets()
+	} else {
+		api.CookieBasedSecrets, errorMessages = apihandler.NewCookieBasedSecrets()
+	}
+	for _, errorMessage := range errorMessages {
+		n.log.Error(errorMessage)
 	}
 }
 

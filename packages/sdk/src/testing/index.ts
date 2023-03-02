@@ -148,15 +148,8 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 * it does nothing.
 	 */
 	async stop(): Promise<void> {
-		if (this.subprocess) {
+		if (this.subprocess?.pid) {
 			await terminate(this.subprocess.pid);
-			try {
-				await this.subprocess;
-			} catch (e: any) {
-				if (!(e instanceof Error && e.message.indexOf('SIGKILL') >= 0)) {
-					console.error(`error shutting down ${e}`);
-				}
-			}
 			this.subprocess = undefined;
 		}
 	}

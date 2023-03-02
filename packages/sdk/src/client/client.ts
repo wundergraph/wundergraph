@@ -18,19 +18,44 @@ import { serialize } from '../utils';
 import { GraphQLResponseError } from './GraphQLResponseError';
 import { ResponseError } from './ResponseError';
 import { InputValidationError } from './InputValidationError';
+import { AuthorizationError } from './AuthorizationError';
+import { ClientResponseError } from './ClientResponseError';
+import { applyPatch } from 'fast-json-patch';
 
 // https://graphql.org/learn/serving-over-http/
 
 export interface UploadValidationOptions {
+	/** Whether authentication is required to upload to this profile
+	 *
+	 * @default true
+	 */
+	requireAuthentication?: boolean;
+	/** Maximum file size allowed per upload
+	 *
+	 * @default 10 * 1024 * 1024 (10MB)
+	 */
 	maxAllowedUploadSizeBytes?: number;
+	/** Maximum number of files allowed per upload
+	 *
+	 * @default unlimited
+	 */
 	maxAllowedFiles?: number;
+	/** List of allowed file extensions
+	 *
+	 * @default Any
+	 */
 	allowedFileExtensions?: string[];
+	/** List of allowed mime types
+	 *
+	 * @default Any
+	 */
 	allowedMimeTypes?: string[];
 }
 
 interface LogoutResponse {
 	redirect?: string;
 }
+
 export class Client {
 	constructor(private options: ClientConfig) {
 		this.baseHeaders = {
@@ -60,20 +85,18 @@ export class Client {
 	}
 
 	private addUrlParams(url: string, queryParams: URLSearchParams): string {
-		// avoid stringify to 'undefined'
-		// remove empty params and values that are false
-		for (const [key, value] of queryParams.entries()) {
-			if (value == '' || value == undefined || value == 'false') {
-				queryParams.delete(key);
-			}
-		}
-
 		// stable stringify
 		queryParams.sort();
 
-		const queryString = queryParams.toString();
+		const queryString = this.encodeQueryParams(queryParams);
 
 		return url + (queryString ? `?${queryString}` : '');
+	}
+
+	private encodeQueryParams(queryParams: URLSearchParams): string {
+		const originalString = queryParams.toString();
+		const withoutEmptyArgs = originalString.replace('=&', '&');
+		return withoutEmptyArgs.endsWith('=') ? withoutEmptyArgs.slice(0, -1) : withoutEmptyArgs;
 	}
 
 	private async fetchJson(url: string, init: RequestInit = {}) {
@@ -119,23 +142,21 @@ export class Client {
 	}
 
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
-	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponse> {
+	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponseError> {
 		const text = await response.text();
-		if (!text) {
-			return {
-				error: new ResponseError('Unable to parse response body', response.status),
-			};
-		}
 		try {
 			const json = JSON.parse(text);
-			return {
-				error: new InputValidationError(json, response.status),
-			};
+
+			switch (response.status) {
+				case 401:
+					return new AuthorizationError(json.errors[0]?.message.trim(), response.status);
+				case 400:
+					return new InputValidationError(json, response.status);
+				default:
+					return new ResponseError((json.errors[0]?.message || json.message).trim(), response.status);
+			}
 		} catch {
-			// if the JSON.parse fails, we know the body must be plaintext
-			return {
-				error: new ResponseError(text, response.status),
-			};
+			return new ResponseError(text.length ? text.trim() : 'Response is not OK', response.status);
 		}
 	}
 
@@ -149,7 +170,7 @@ export class Client {
 		// even if the response is an HTTP 404 or 500.
 
 		if (!response.ok) {
-			return this.handleClientResponseError(response);
+			return { error: await this.handleClientResponseError(response) };
 		}
 
 		const json = await response.json();
@@ -161,7 +182,8 @@ export class Client {
 	}
 
 	private stringifyInput(input: any) {
-		return JSON.stringify(input || {});
+		const encoded = JSON.stringify(input || {});
+		return encoded === '{}' ? undefined : encoded;
 	}
 
 	public setExtraHeaders(headers: Headers) {
@@ -200,21 +222,17 @@ export class Client {
 	public async query<RequestOptions extends QueryRequestOptions, ResponseData = any>(
 		options: RequestOptions
 	): Promise<ClientResponse<ResponseData>> {
-		const params = {
-			wg_variables: this.stringifyInput(options.input),
+		const searchParams = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
-		};
-		const url = this.addUrlParams(
-			this.operationUrl(options.operationName),
-			new URLSearchParams(
-				options.subscribeOnce
-					? {
-							wg_subscribe_once: options.subscribeOnce ? 'true' : 'false',
-							...params,
-					  }
-					: params
-			)
-		);
+		});
+		const variables = this.stringifyInput(options.input);
+		if (variables) {
+			searchParams.set('wg_variables', variables);
+		}
+		if (options.subscribeOnce) {
+			searchParams.set('wg_subscribe_once', '');
+		}
+		const url = this.addUrlParams(this.operationUrl(options.operationName), searchParams);
 		const resp = await this.fetchJson(url, {
 			method: 'GET',
 			signal: options.abortSignal,
@@ -279,9 +297,11 @@ export class Client {
 	 */
 	public async fetchUser<U extends User>(options?: FetchUserRequestOptions): Promise<U> {
 		const params = new URLSearchParams({
-			revalidate: options?.revalidate ? 'true' : 'false',
+			wg_api_hash: this.options.applicationHash,
 		});
-
+		if (options?.revalidate) {
+			params.set('revalidate', '');
+		}
 		const response = await this.fetchJson(this.addUrlParams(`${this.options.baseURL}/auth/user`, params), {
 			method: 'GET',
 			signal: options?.abortSignal,
@@ -323,10 +343,17 @@ export class Client {
 	) {
 		return new Promise<void>((resolve, reject) => {
 			const params = new URLSearchParams({
-				wg_variables: this.stringifyInput(subscription.input),
-				wg_live: subscription?.liveQuery ? 'true' : 'false',
-				wg_sse: 'true',
+				wg_api_hash: this.options.applicationHash,
+				wg_sse: '',
+				wg_json_patch: '',
 			});
+			const variables = this.stringifyInput(subscription.input);
+			if (variables) {
+				params.set('wg_variables', variables);
+			}
+			if (subscription.liveQuery) {
+				params.set('wg_live', '');
+			}
 			const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 			const eventSource = new EventSource(url, {
 				withCredentials: true,
@@ -337,9 +364,27 @@ export class Client {
 			eventSource.addEventListener('open', () => {
 				resolve();
 			});
+			let lastResponse: GraphQLResponse | null = null;
 			eventSource.addEventListener('message', (ev) => {
+				if (ev.data === 'done') {
+					eventSource.close();
+					return;
+				}
 				const jsonResp = JSON.parse(ev.data);
-				cb(this.convertGraphQLResponse(jsonResp));
+				// we parse the json response, which might be a json patch (array) or a full response (object)
+				if (lastResponse !== null && Array.isArray(jsonResp)) {
+					// we have a lastResponse and the current response is a json patch
+					// we apply the patch to generate the latest response
+					// applyPatch deep clones the document before applying the patch
+					// in that way we always ensure that the response is not cached by reference by clients / caches
+					// e.g. react works with reference equality to determine if a component needs to be re-rendered
+					lastResponse = applyPatch(lastResponse, jsonResp, true, false, true).newDocument as GraphQLResponse;
+				} else {
+					// it's not a patch, so we just set the lastResponse to the current response
+					lastResponse = jsonResp as GraphQLResponse;
+				}
+				const clientResponse = this.convertGraphQLResponse(lastResponse);
+				cb(clientResponse);
 			});
 			if (subscription?.abortSignal) {
 				subscription?.abortSignal.addEventListener('abort', () => eventSource.close());
@@ -351,9 +396,15 @@ export class Client {
 		subscription: SubscriptionRequestOptions
 	): AsyncGenerator<ClientResponse<ResponseData>> {
 		const params = new URLSearchParams({
-			wg_variables: this.stringifyInput(subscription.input),
-			wg_live: subscription?.liveQuery ? 'true' : 'false',
+			wg_api_hash: this.options.applicationHash,
 		});
+		const variables = this.stringifyInput(subscription.input);
+		if (variables) {
+			params.set('wg_variables', variables);
+		}
+		if (subscription.liveQuery) {
+			params.set('wg_live', '');
+		}
 		const url = this.addUrlParams(this.operationUrl(subscription.operationName), params);
 		const response = await this.fetchJson(url, {
 			method: 'GET',
@@ -371,14 +422,20 @@ export class Client {
 		const reader = response.body.getReader();
 		const decoder = new TextDecoder();
 		let message: string = '';
+		let lastResponse: GraphQLResponse | null = null;
 		while (true) {
 			const { value, done } = await reader.read();
 			if (done) return;
 			if (!value) continue;
 			message += decoder.decode(value);
 			if (message.endsWith('\n\n')) {
-				const responseJSON = JSON.parse(message.substring(0, message.length - 2));
-				yield this.convertGraphQLResponse(responseJSON);
+				const jsonResp = JSON.parse(message.substring(0, message.length - 2));
+				if (lastResponse !== null && Array.isArray(jsonResp)) {
+					lastResponse = applyPatch(lastResponse, jsonResp).newDocument as GraphQLResponse;
+				} else {
+					lastResponse = jsonResp as GraphQLResponse;
+				}
+				yield this.convertGraphQLResponse(lastResponse);
 				message = '';
 			}
 		}
@@ -403,7 +460,7 @@ export class Client {
 
 		const headers: Headers = {};
 
-		if (this.csrfEnabled) {
+		if (this.csrfEnabled && (validation?.requireAuthentication ?? true)) {
 			headers['X-CSRF-Token'] = await this.getCSRFToken();
 		}
 

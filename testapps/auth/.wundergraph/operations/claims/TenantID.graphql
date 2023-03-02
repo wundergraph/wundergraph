@@ -1,0 +1,3 @@
+query ($input: String! @fromClaim(name: tenantID)) {
+	echo_string(input: $input)
+}

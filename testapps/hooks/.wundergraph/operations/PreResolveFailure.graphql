@@ -1,0 +1,3 @@
+query ($s: String!) {
+	echo_string(input: $s)
+}

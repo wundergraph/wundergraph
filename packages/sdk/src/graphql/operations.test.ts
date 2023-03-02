@@ -8,7 +8,7 @@ import {
 import { assert } from 'chai';
 import { buildSchema, OperationDefinitionNode, parse } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
-import { Claim, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
+import { ClaimType, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
 
@@ -557,8 +557,8 @@ const fromClaimParsed: ParsedOperations = {
 			AuthorizationConfig: {
 				claims: [
 					{
-						variableName: 'email',
-						claim: Claim.EMAIL,
+						variablePathComponents: ['email'],
+						claimType: ClaimType.EMAIL,
 					},
 				],
 				roleConfig: {

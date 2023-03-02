@@ -1,20 +1,23 @@
 import { createOperation, z } from '../../generated/wundergraph.factory';
+import { ExtractResponse } from '@wundergraph/sdk/dist/operations';
+import { ZodType } from 'zod';
 
-export default createOperation.query({
+const query = createOperation.query({
 	input: z.object({
 		id: z.number(),
 	}),
+	response: z.object({
+		id: z.number(),
+		userName: z.string(),
+		bio: z.string().optional(),
+	}),
 	handler: async (ctx) => {
-		const weather = await ctx.internalClient.queries.Weather({
-			input: {
-				forCity: 'Berlin',
-			},
-		});
 		return {
 			id: ctx.input.id,
 			userName: 'Jens Neuse',
 			bio: 'Founder of WunderGraph',
-			weather: weather.data?.getCityByName,
 		};
 	},
 });
+
+export default query;

@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,7 +22,7 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 	}
 
 	if len(data) == 0 {
-		return 0, fmt.Errorf("config file is empty")
+		return 0, errors.New("config file is empty")
 	}
 
 	var graphConfig struct {
@@ -33,8 +34,13 @@ func ServerPortFromConfig(configJsonPath string) (int, error) {
 		return 0, err
 	}
 
-	newPort := loadvariable.Int(graphConfig.Api.ServerOptions.Listen.Port)
-	return newPort, nil
+	if graphConfig.Api != nil && graphConfig.Api.ServerOptions != nil {
+		variable := graphConfig.Api.ServerOptions.GetListen().GetPort()
+		if variable != nil {
+			return loadvariable.Int(variable), nil
+		}
+	}
+	return 0, errors.New("configuration is invalid")
 }
 
 // KillExistingHooksProcess kills the existing hooks process before we start the new one

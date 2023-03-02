@@ -1,6 +1,7 @@
 import {
 	GraphQLSchema,
 	Kind,
+	NameNode,
 	OperationTypeDefinitionNode,
 	OperationTypeNode,
 	parse,
@@ -37,6 +38,28 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 	let fieldName: undefined | string;
 	let argName: undefined | string;
 	let typeName: undefined | string;
+
+	const replaceOperationTypeName = (name: NameNode): NameNode => {
+		switch (name.value) {
+			case queryTypeName:
+				return {
+					...name,
+					value: 'Query',
+				};
+			case mutationTypeName:
+				return {
+					...name,
+					value: 'Mutation',
+				};
+			case subscriptionTypeName:
+				return {
+					...name,
+					value: 'Subscription',
+				};
+			default:
+				return name;
+		}
+	};
 
 	const cleanAst = visit(ast, {
 		SchemaDefinition: (node) => {
@@ -113,36 +136,6 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 		ObjectTypeDefinition: {
 			enter: (node) => {
 				typeName = node.name.value;
-				if (node.name.value === queryTypeName) {
-					return {
-						...node,
-						name: {
-							...node.name,
-							value: 'Query',
-						},
-					};
-				}
-
-				if (node.name.value === mutationTypeName) {
-					return {
-						...node,
-						name: {
-							...node.name,
-							value: 'Mutation',
-						},
-					};
-				}
-
-				if (node.name.value === subscriptionTypeName) {
-					return {
-						...node,
-						name: {
-							...node.name,
-							value: 'Subscription',
-						},
-					};
-				}
-
 				switch (node.name.value) {
 					case '_Service':
 					case 'Entity':
@@ -151,6 +144,11 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 				if (node.name.value.startsWith('__')) {
 					return null;
 				}
+
+				return {
+					...node,
+					name: replaceOperationTypeName(node.name),
+				};
 			},
 			leave: (node) => {
 				typeName = undefined;
@@ -216,6 +214,11 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 					},
 				};
 			}
+
+			return {
+				...node,
+				name: replaceOperationTypeName(node.name),
+			};
 		},
 		DirectiveDefinition: (node) => {
 			switch (node.name.value) {

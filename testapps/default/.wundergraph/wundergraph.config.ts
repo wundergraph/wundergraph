@@ -30,23 +30,23 @@ const jsp2 = introspect.openApi({
 	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
-/*const federatedApi = introspect.federation({
+const federatedApi = introspect.federation({
 	apiNamespace: 'federated',
 	upstreams: [
 		{
-			url: 'http://localhost:4001/graphql',
+			url: 'https://wg-federation-demo-accounts.fly.dev/graphql',
 		},
 		{
-			url: 'http://localhost:4002/graphql',
+			url: 'https://wg-federation-demo-products.fly.dev/graphql',
 		},
 		{
-			url: 'http://localhost:4003/graphql',
+			url: 'https://wg-federation-demo-reviews.fly.dev/graphql',
 		},
 		{
-			url: 'http://localhost:4004/graphql',
+			url: 'https://wg-federation-demo-inventory.fly.dev/graphql',
 		},
 	],
-});*/
+});
 
 const spacex = introspect.graphql({
 	apiNamespace: 'spacex',
@@ -86,7 +86,7 @@ const usersPost = introspect.prisma({
 
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost],
+	apis: [jsp, weather, countries, spacex, chinook, db, jsp2, usersPost, federatedApi],
 	server,
 	operations,
 	authorization: {

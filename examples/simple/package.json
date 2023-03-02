@@ -4,20 +4,21 @@
   "description": "",
   "scripts": {
     "start": "wunderctl up --debug",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "check": "tsc --noEmit",
     "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.132.1",
+    "@wundergraph/sdk": "^0.137.4",
     "graphql": "^16.3.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",
-    "@types/node": "^14.14.37",
     "@types/node-fetch": "^2.6.2",
+    "@types/node": "^14.14.37",
     "jest": "^29.3.1",
     "node-fetch": "^2.6.7",
     "ts-jest": "^29.0.3",

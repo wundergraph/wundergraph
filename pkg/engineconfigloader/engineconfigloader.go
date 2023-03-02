@@ -26,6 +26,7 @@ import (
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -183,8 +184,9 @@ func (d *DefaultFactoryResolver) onWsConnectionInitCallback(dataSourceID string)
 				hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 			}
 		}
-
-		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData)
+		buf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(buf)
+		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData, buf)
 		if err != nil {
 			return nil, err
 		}
@@ -262,16 +264,7 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 	}
 }
 
-func (l *EngineConfigLoader) LoadJson(engineConfigJson json.RawMessage) (*plan.Configuration, error) {
-	var engineConfig wgpb.EngineConfiguration
-	err := json.Unmarshal(engineConfigJson, &engineConfig)
-	if err != nil {
-		return nil, err
-	}
-	return l.Load(engineConfig)
-}
-
-func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.Configuration, error) {
+func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, hooksServerUrl string) (*plan.Configuration, error) {
 	var (
 		outConfig plan.Configuration
 	)
@@ -354,7 +347,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 
 			fetchURL := buildFetchUrl(
 				loadvariable.String(in.CustomRest.Fetch.GetUrl()),
-				loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()),
+				baseUrl(loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()), hooksServerUrl),
 				loadvariable.String(in.CustomRest.Fetch.GetPath()))
 
 			// resolves arguments like {{ .arguments.tld }} are allowed
@@ -398,7 +391,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 
 			fetchUrl := buildFetchUrl(
 				loadvariable.String(in.CustomGraphql.Fetch.GetUrl()),
-				loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl()),
+				baseUrl(loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl()), hooksServerUrl),
 				loadvariable.String(in.CustomGraphql.Fetch.GetPath()),
 			)
 
@@ -537,4 +530,13 @@ func buildFetchUrl(url, baseUrl, path string) string {
 	}
 
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(baseUrl, "/"), strings.TrimPrefix(path, "/"))
+}
+
+const serverUrlPlaceholder = "WG_SERVER_URL"
+
+func baseUrl(baseUrl, serverUrl string) string {
+	if baseUrl == serverUrlPlaceholder {
+		return serverUrl
+	}
+	return baseUrl
 }

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "run-p start:services wundergraph",
     "wundergraph": "wait-on tcp:4000 && wunderctl up --debug",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "start:services": "ts-node graphql-ws/server.ts",
     "check": "tsc --noEmit",
     "test": "jest"
@@ -14,7 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/websocket": "^7.0.1",
-    "@wundergraph/sdk": "^0.132.1",
+    "@wundergraph/sdk": "^0.137.4",
     "fastify": "^4.6.0",
     "graphql": "^16.3.0",
     "graphql-ws": "^5.11.2",

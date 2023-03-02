@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.4.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.4.4...@wundergraph/golang-client@0.4.5) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.4.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.4.3...@wundergraph/golang-client@0.4.4) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.4.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.4.2...@wundergraph/golang-client@0.4.3) (2023-02-28)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.4.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.4.1...@wundergraph/golang-client@0.4.2) (2023-02-26)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.4.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.4.0...@wundergraph/golang-client@0.4.1) (2023-02-23)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.4.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.33...@wundergraph/golang-client@0.4.0) (2023-02-21)
+
+### Features
+
+* provide a default baseURL in the Go client ([#680](https://github.com/wundergraph/wundergraph/issues/680)) ([0ac7144](https://github.com/wundergraph/wundergraph/commit/0ac7144b8c2b71d2489ea82be506c66bd9dcfdd4)) (@fiam)
+
+## [0.3.33](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.32...@wundergraph/golang-client@0.3.33) (2023-02-10)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.3.32](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.31...@wundergraph/golang-client@0.3.32) (2023-02-03)
+
+### Bug Fixes
+
+* avoid feeding paths into applicationHash calculation ([#636](https://github.com/wundergraph/wundergraph/issues/636)) ([8542cf6](https://github.com/wundergraph/wundergraph/commit/8542cf6789de51711b05b0fbc4bb78d895e0e099)) (@fiam)
+
+## [0.3.31](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.30...@wundergraph/golang-client@0.3.31) (2023-02-01)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
+## [0.3.30](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.29...@wundergraph/golang-client@0.3.30) (2023-01-30)
+
+**Note:** Version bump only for package @wundergraph/golang-client
+
 ## [0.3.29](https://github.com/wundergraph/wundergraph/compare/@wundergraph/golang-client@0.3.28...@wundergraph/golang-client@0.3.29) (2023-01-23)
 
 **Note:** Version bump only for package @wundergraph/golang-client

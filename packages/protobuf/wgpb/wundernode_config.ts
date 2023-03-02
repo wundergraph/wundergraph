@@ -212,62 +212,207 @@ export function injectVariableKindToJSON(object: InjectVariableKind): string {
   }
 }
 
-export enum Claim {
-  EMAIL = 0,
-  EMAIL_VERIFIED = 1,
+export enum ClaimType {
+  /** ISSUER - iss */
+  ISSUER = 0,
+  /** PROVIDER - alias for iss, deprecated */
+  PROVIDER = 0,
+  /** SUBJECT - sub */
+  SUBJECT = 1,
+  /** USERID - alias for sub */
+  USERID = 1,
+  /** NAME - name */
   NAME = 2,
-  NICKNAME = 3,
-  LOCATION = 4,
-  PROVIDER = 5,
-  USERID = 6,
+  /** GIVEN_NAME - given_name */
+  GIVEN_NAME = 3,
+  /** FAMILY_NAME - family_name */
+  FAMILY_NAME = 4,
+  /** MIDDLE_NAME - middle_name */
+  MIDDLE_NAME = 5,
+  /** NICKNAME - nickname */
+  NICKNAME = 6,
+  /** PREFERRED_USERNAME - preferred_username */
+  PREFERRED_USERNAME = 7,
+  /** PROFILE - profile */
+  PROFILE = 8,
+  /** PICTURE - picture */
+  PICTURE = 9,
+  /** WEBSITE - website */
+  WEBSITE = 10,
+  /** EMAIL - email */
+  EMAIL = 11,
+  /** EMAIL_VERIFIED - email_verified */
+  EMAIL_VERIFIED = 12,
+  /** GENDER - gender */
+  GENDER = 13,
+  /** BIRTH_DATE - birthdate */
+  BIRTH_DATE = 14,
+  /** ZONE_INFO - zoneinfo */
+  ZONE_INFO = 15,
+  /** LOCALE - locale */
+  LOCALE = 16,
+  /** LOCATION - location */
+  LOCATION = 17,
+  CUSTOM = 999,
 }
 
-export function claimFromJSON(object: any): Claim {
+export function claimTypeFromJSON(object: any): ClaimType {
   switch (object) {
     case 0:
-    case "EMAIL":
-      return Claim.EMAIL;
+    case "ISSUER":
+      return ClaimType.ISSUER;
+    case 0:
+    case "PROVIDER":
+      return ClaimType.PROVIDER;
     case 1:
-    case "EMAIL_VERIFIED":
-      return Claim.EMAIL_VERIFIED;
+    case "SUBJECT":
+      return ClaimType.SUBJECT;
+    case 1:
+    case "USERID":
+      return ClaimType.USERID;
     case 2:
     case "NAME":
-      return Claim.NAME;
+      return ClaimType.NAME;
     case 3:
-    case "NICKNAME":
-      return Claim.NICKNAME;
+    case "GIVEN_NAME":
+      return ClaimType.GIVEN_NAME;
     case 4:
-    case "LOCATION":
-      return Claim.LOCATION;
+    case "FAMILY_NAME":
+      return ClaimType.FAMILY_NAME;
     case 5:
-    case "PROVIDER":
-      return Claim.PROVIDER;
+    case "MIDDLE_NAME":
+      return ClaimType.MIDDLE_NAME;
     case 6:
-    case "USERID":
-      return Claim.USERID;
+    case "NICKNAME":
+      return ClaimType.NICKNAME;
+    case 7:
+    case "PREFERRED_USERNAME":
+      return ClaimType.PREFERRED_USERNAME;
+    case 8:
+    case "PROFILE":
+      return ClaimType.PROFILE;
+    case 9:
+    case "PICTURE":
+      return ClaimType.PICTURE;
+    case 10:
+    case "WEBSITE":
+      return ClaimType.WEBSITE;
+    case 11:
+    case "EMAIL":
+      return ClaimType.EMAIL;
+    case 12:
+    case "EMAIL_VERIFIED":
+      return ClaimType.EMAIL_VERIFIED;
+    case 13:
+    case "GENDER":
+      return ClaimType.GENDER;
+    case 14:
+    case "BIRTH_DATE":
+      return ClaimType.BIRTH_DATE;
+    case 15:
+    case "ZONE_INFO":
+      return ClaimType.ZONE_INFO;
+    case 16:
+    case "LOCALE":
+      return ClaimType.LOCALE;
+    case 17:
+    case "LOCATION":
+      return ClaimType.LOCATION;
+    case 999:
+    case "CUSTOM":
+      return ClaimType.CUSTOM;
     default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum Claim");
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ClaimType");
   }
 }
 
-export function claimToJSON(object: Claim): string {
+export function claimTypeToJSON(object: ClaimType): string {
   switch (object) {
-    case Claim.EMAIL:
-      return "EMAIL";
-    case Claim.EMAIL_VERIFIED:
-      return "EMAIL_VERIFIED";
-    case Claim.NAME:
-      return "NAME";
-    case Claim.NICKNAME:
-      return "NICKNAME";
-    case Claim.LOCATION:
-      return "LOCATION";
-    case Claim.PROVIDER:
+    case ClaimType.ISSUER:
+      return "ISSUER";
+    case ClaimType.PROVIDER:
       return "PROVIDER";
-    case Claim.USERID:
+    case ClaimType.SUBJECT:
+      return "SUBJECT";
+    case ClaimType.USERID:
       return "USERID";
+    case ClaimType.NAME:
+      return "NAME";
+    case ClaimType.GIVEN_NAME:
+      return "GIVEN_NAME";
+    case ClaimType.FAMILY_NAME:
+      return "FAMILY_NAME";
+    case ClaimType.MIDDLE_NAME:
+      return "MIDDLE_NAME";
+    case ClaimType.NICKNAME:
+      return "NICKNAME";
+    case ClaimType.PREFERRED_USERNAME:
+      return "PREFERRED_USERNAME";
+    case ClaimType.PROFILE:
+      return "PROFILE";
+    case ClaimType.PICTURE:
+      return "PICTURE";
+    case ClaimType.WEBSITE:
+      return "WEBSITE";
+    case ClaimType.EMAIL:
+      return "EMAIL";
+    case ClaimType.EMAIL_VERIFIED:
+      return "EMAIL_VERIFIED";
+    case ClaimType.GENDER:
+      return "GENDER";
+    case ClaimType.BIRTH_DATE:
+      return "BIRTH_DATE";
+    case ClaimType.ZONE_INFO:
+      return "ZONE_INFO";
+    case ClaimType.LOCALE:
+      return "LOCALE";
+    case ClaimType.LOCATION:
+      return "LOCATION";
+    case ClaimType.CUSTOM:
+      return "CUSTOM";
     default:
-      throw new globalThis.Error("Unrecognized enum value " + object + " for enum Claim");
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ClaimType");
+  }
+}
+
+export enum ValueType {
+  STRING = 0,
+  INT = 1,
+  FLOAT = 2,
+  BOOLEAN = 3,
+}
+
+export function valueTypeFromJSON(object: any): ValueType {
+  switch (object) {
+    case 0:
+    case "STRING":
+      return ValueType.STRING;
+    case 1:
+    case "INT":
+      return ValueType.INT;
+    case 2:
+    case "FLOAT":
+      return ValueType.FLOAT;
+    case 3:
+    case "BOOLEAN":
+      return ValueType.BOOLEAN;
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
+  }
+}
+
+export function valueTypeToJSON(object: ValueType): string {
+  switch (object) {
+    case ValueType.STRING:
+      return "STRING";
+    case ValueType.INT:
+      return "INT";
+    case ValueType.FLOAT:
+      return "FLOAT";
+    case ValueType.BOOLEAN:
+      return "BOOLEAN";
+    default:
+      throw new globalThis.Error("Unrecognized enum value " + object + " for enum ValueType");
   }
 }
 
@@ -710,7 +855,7 @@ export interface OperationVariablesConfiguration {
 }
 
 export interface VariableInjectionConfiguration {
-  variableName: string;
+  variablePathComponents: string[];
   variableKind: InjectVariableKind;
   dateFormat: string;
   environmentVariableName: string;
@@ -752,9 +897,18 @@ export interface OperationRoleConfig {
   denyMatchAny: string[];
 }
 
+export interface CustomClaim {
+  name: string;
+  jsonPathComponents: string[];
+  type: ValueType;
+  required: boolean;
+}
+
 export interface ClaimConfig {
-  variableName: string;
-  claim: Claim;
+  variablePathComponents: string[];
+  claimType: ClaimType;
+  /** Available iff claimType == CUSTOM */
+  custom?: CustomClaim | undefined;
 }
 
 export interface OperationLiveQueryConfig {
@@ -963,6 +1117,7 @@ export interface S3UploadProfileHooksConfiguration {
 }
 
 export interface S3UploadProfile {
+  requireAuthentication: boolean;
   maxAllowedUploadSizeBytes: number;
   maxAllowedFiles: number;
   allowedMimeTypes: string[];
@@ -1795,13 +1950,15 @@ export const OperationVariablesConfiguration = {
 };
 
 function createBaseVariableInjectionConfiguration(): VariableInjectionConfiguration {
-  return { variableName: "", variableKind: 0, dateFormat: "", environmentVariableName: "" };
+  return { variablePathComponents: [], variableKind: 0, dateFormat: "", environmentVariableName: "" };
 }
 
 export const VariableInjectionConfiguration = {
   fromJSON(object: any): VariableInjectionConfiguration {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
       variableKind: isSet(object.variableKind) ? injectVariableKindFromJSON(object.variableKind) : 0,
       dateFormat: isSet(object.dateFormat) ? String(object.dateFormat) : "",
       environmentVariableName: isSet(object.environmentVariableName) ? String(object.environmentVariableName) : "",
@@ -1810,7 +1967,11 @@ export const VariableInjectionConfiguration = {
 
   toJSON(message: VariableInjectionConfiguration): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
     message.variableKind !== undefined && (obj.variableKind = injectVariableKindToJSON(message.variableKind));
     message.dateFormat !== undefined && (obj.dateFormat = message.dateFormat);
     message.environmentVariableName !== undefined && (obj.environmentVariableName = message.environmentVariableName);
@@ -1821,7 +1982,7 @@ export const VariableInjectionConfiguration = {
     object: I,
   ): VariableInjectionConfiguration {
     const message = createBaseVariableInjectionConfiguration();
-    message.variableName = object.variableName ?? "";
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
     message.variableKind = object.variableKind ?? 0;
     message.dateFormat = object.dateFormat ?? "";
     message.environmentVariableName = object.environmentVariableName ?? "";
@@ -2028,29 +2189,79 @@ export const OperationRoleConfig = {
   },
 };
 
+function createBaseCustomClaim(): CustomClaim {
+  return { name: "", jsonPathComponents: [], type: 0, required: false };
+}
+
+export const CustomClaim = {
+  fromJSON(object: any): CustomClaim {
+    return {
+      name: isSet(object.name) ? String(object.name) : "",
+      jsonPathComponents: Array.isArray(object?.jsonPathComponents)
+        ? object.jsonPathComponents.map((e: any) => String(e))
+        : [],
+      type: isSet(object.type) ? valueTypeFromJSON(object.type) : 0,
+      required: isSet(object.required) ? Boolean(object.required) : false,
+    };
+  },
+
+  toJSON(message: CustomClaim): unknown {
+    const obj: any = {};
+    message.name !== undefined && (obj.name = message.name);
+    if (message.jsonPathComponents) {
+      obj.jsonPathComponents = message.jsonPathComponents.map((e) => e);
+    } else {
+      obj.jsonPathComponents = [];
+    }
+    message.type !== undefined && (obj.type = valueTypeToJSON(message.type));
+    message.required !== undefined && (obj.required = message.required);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CustomClaim>, I>>(object: I): CustomClaim {
+    const message = createBaseCustomClaim();
+    message.name = object.name ?? "";
+    message.jsonPathComponents = object.jsonPathComponents?.map((e) => e) || [];
+    message.type = object.type ?? 0;
+    message.required = object.required ?? false;
+    return message;
+  },
+};
+
 function createBaseClaimConfig(): ClaimConfig {
-  return { variableName: "", claim: 0 };
+  return { variablePathComponents: [], claimType: 0, custom: undefined };
 }
 
 export const ClaimConfig = {
   fromJSON(object: any): ClaimConfig {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
-      claim: isSet(object.claim) ? claimFromJSON(object.claim) : 0,
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
+      claimType: isSet(object.claimType) ? claimTypeFromJSON(object.claimType) : 0,
+      custom: isSet(object.custom) ? CustomClaim.fromJSON(object.custom) : undefined,
     };
   },
 
   toJSON(message: ClaimConfig): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
-    message.claim !== undefined && (obj.claim = claimToJSON(message.claim));
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
+    message.claimType !== undefined && (obj.claimType = claimTypeToJSON(message.claimType));
+    message.custom !== undefined && (obj.custom = message.custom ? CustomClaim.toJSON(message.custom) : undefined);
     return obj;
   },
 
   fromPartial<I extends Exact<DeepPartial<ClaimConfig>, I>>(object: I): ClaimConfig {
     const message = createBaseClaimConfig();
-    message.variableName = object.variableName ?? "";
-    message.claim = object.claim ?? 0;
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
+    message.claimType = object.claimType ?? 0;
+    message.custom = (object.custom !== undefined && object.custom !== null)
+      ? CustomClaim.fromPartial(object.custom)
+      : undefined;
     return message;
   },
 };
@@ -3275,6 +3486,7 @@ export const S3UploadProfileHooksConfiguration = {
 
 function createBaseS3UploadProfile(): S3UploadProfile {
   return {
+    requireAuthentication: false,
     maxAllowedUploadSizeBytes: 0,
     maxAllowedFiles: 0,
     allowedMimeTypes: [],
@@ -3287,6 +3499,7 @@ function createBaseS3UploadProfile(): S3UploadProfile {
 export const S3UploadProfile = {
   fromJSON(object: any): S3UploadProfile {
     return {
+      requireAuthentication: isSet(object.requireAuthentication) ? Boolean(object.requireAuthentication) : false,
       maxAllowedUploadSizeBytes: isSet(object.maxAllowedUploadSizeBytes) ? Number(object.maxAllowedUploadSizeBytes) : 0,
       maxAllowedFiles: isSet(object.maxAllowedFiles) ? Number(object.maxAllowedFiles) : 0,
       allowedMimeTypes: Array.isArray(object?.allowedMimeTypes)
@@ -3302,6 +3515,7 @@ export const S3UploadProfile = {
 
   toJSON(message: S3UploadProfile): unknown {
     const obj: any = {};
+    message.requireAuthentication !== undefined && (obj.requireAuthentication = message.requireAuthentication);
     message.maxAllowedUploadSizeBytes !== undefined &&
       (obj.maxAllowedUploadSizeBytes = Math.round(message.maxAllowedUploadSizeBytes));
     message.maxAllowedFiles !== undefined && (obj.maxAllowedFiles = Math.round(message.maxAllowedFiles));
@@ -3323,6 +3537,7 @@ export const S3UploadProfile = {
 
   fromPartial<I extends Exact<DeepPartial<S3UploadProfile>, I>>(object: I): S3UploadProfile {
     const message = createBaseS3UploadProfile();
+    message.requireAuthentication = object.requireAuthentication ?? false;
     message.maxAllowedUploadSizeBytes = object.maxAllowedUploadSizeBytes ?? 0;
     message.maxAllowedFiles = object.maxAllowedFiles ?? 0;
     message.allowedMimeTypes = object.allowedMimeTypes?.map((e) => e) || [];

@@ -1,18 +1,15 @@
-import type { Webhook } from '@wundergraph/sdk/server';
-import type { InternalClient } from '../generated/wundergraph.internal.client';
+import { createWebhook } from '../generated/wundergraph.webhooks';
+import Stripe from 'stripe';
 
-const webhook: Webhook<InternalClient> = {
-	handler: async (event, context) => {
+import { WebhookHttpEvent, WebhookHttpResponse } from '@wundergraph/sdk/server';
+
+export default createWebhook<WebhookHttpEvent<Stripe.Event>, WebhookHttpResponse<{ type: string }>>({
+	handler: async (event, ctx) => {
 		return {
 			statusCode: 200,
 			body: {
-				hello: 'stripe',
-			},
-			headers: {
-				'X-header': 'test',
+				type: event.body?.type || 'unknown',
 			},
 		};
 	},
-};
-
-export default webhook;
+});

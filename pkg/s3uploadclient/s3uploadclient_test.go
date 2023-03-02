@@ -21,13 +21,13 @@ func TestS3UploadClient_UploadFile(t *testing.T) {
 
 	client.UploadFile(w, r)
 
-	res := w.Result()
-	defer res.Body.Close()
+	resp := w.Result()
+	defer resp.Body.Close()
 
-	resp := make([]s3uploadclient.UploadedFile, 0)
-	err := json.NewDecoder(res.Body).Decode(&resp)
+	var decoded []s3uploadclient.UploadedFile
+	err := json.NewDecoder(resp.Body).Decode(&decoded)
 	require.NoError(t, err)
 
 	require.NotEmpty(t, resp)
-	assert.Equal(t, "cec8f2d4d95a43d0.json", resp[0].Key)
+	assert.Equal(t, "cec8f2d4d95a43d0.json", decoded[0].Key)
 }

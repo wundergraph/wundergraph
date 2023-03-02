@@ -57,8 +57,9 @@ configureWunderGraphApplication({
           clientId: 'XXX.apps.googleusercontent.com', // client ID from Google
           clientSecret: 'XXX', // client secret from Google
         }),
-        authProviders.openIDConnect({
+        authProviders.auth0({
           id: 'auth0', // you have to choose this ID
+          issuer: 'XXX', // issuer from Auth0
           clientId: 'XXX', // client ID from Auth0
           clientSecret: 'XXX', // client secret from Auth0
         }),
@@ -76,7 +77,7 @@ configureWunderGraphApplication({
       ],
     },
   },
-})
+});
 ```
 
 ## Important Notes for Production Use
@@ -100,20 +101,17 @@ configureWunderGraphApplication({
   authentication: {
     cookieBased: {
       providers: [
-        authProviders.openIDConnect({
+        authProviders.auth0({
           id: 'auth0', // you have to choose this ID
+          issuer: 'XXX', // issuer from Auth0
           clientId: 'XXX', // client ID from Auth0
           clientSecret: 'XXX', // client secret from Auth0
         }),
       ],
-      secureCookieHashKey: new EnvironmentVariable(
-        'WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'
-      ), // must be of length 32
-      secureCookieBlockKey: new EnvironmentVariable(
-        'WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'
-      ), // must be of length 32
-      csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
+      secureCookieHashKey: new EnvironmentVariable('WG_SECURE_COOKIE_HASH_KEY'), // must be of length 32
+      secureCookieBlockKey: new EnvironmentVariable('WG_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
+      csrfTokenSecret: new EnvironmentVariable('WG_CSRF_TOKEN_SECRET'), // must be of length 11
     },
   },
-})
+});
 ```

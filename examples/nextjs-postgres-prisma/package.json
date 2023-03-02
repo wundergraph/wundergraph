@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "npm run start:services && npm run setup && npm run build && run-p dev wundergraph seed",
+    "start": "npm run start:services && npm run setup && run-p dev wundergraph seed",
     "start:services": "docker-compose up -d",
     "wait-on:services": "wait-on -d 5000 tcp:54322",
     "setup": "npm run migrate init",
     "wundergraph": "wunderctl up --debug",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
     "build:next": "next build",
+    "build": "npm run build:wundergraph && npm run build:next",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "seed": "wait-on -d 2000 http://localhost:9991 && ts-node ./seed/seed.ts && npm run open",
     "dev": "next dev",
@@ -20,8 +21,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.8.4",
-    "@wundergraph/sdk": "^0.132.1",
+    "@wundergraph/nextjs": "^0.9.4",
+    "@wundergraph/sdk": "^0.137.4",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",

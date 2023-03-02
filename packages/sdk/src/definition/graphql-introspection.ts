@@ -69,9 +69,7 @@ export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HT
 	return baseHeaders;
 };
 
-export const introspectGraphql = async (
-	introspection: Omit<GraphQLIntrospection, 'isFederation'>
-): Promise<GraphQLApi> => {
+export const introspectGraphql = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
 	return introspectWithCache(introspection, async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
 		const headersBuilder = new HeadersBuilder();
 		const introspectionHeadersBuilder = new HeadersBuilder();
