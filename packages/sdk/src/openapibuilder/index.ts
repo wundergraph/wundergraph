@@ -170,7 +170,7 @@ export class OpenAPIBuilder {
 		};
 	}
 
-	private rewriteSchemaRefs(spec: OpenAPISpec, schema: JSONSchema, prefix: string) {
+	private rewriteSchemaRefs(spec: OpenAPISpec, schema: JSONSchema) {
 		// Move definitions to spec
 		if (schema?.definitions) {
 			if (!spec.components) {
@@ -182,21 +182,27 @@ export class OpenAPIBuilder {
 			for (const key of Object.keys(schema.definitions)) {
 				const definition = schema.definitions[key];
 				if (typeof definition !== 'boolean') {
-					this.rewriteSchemaRefs(spec, definition, prefix);
-					spec.components.schemas[`${prefix}_${key}`] = definition;
+					this.rewriteSchemaRefs(spec, definition);
+					const prevSchema = spec.components.schemas?.[key];
+					if (prevSchema && JSON.stringify(prevSchema) !== JSON.stringify(definition)) {
+						throw new Error(
+							`could not merge schemas for ${key}: ${JSON.stringify(prevSchema)} != ${JSON.stringify(definition)}`
+						);
+					}
+					spec.components.schemas[key] = definition;
 				}
 			}
 			delete schema.definitions;
 		}
 		// Rewrite references
 		if (schema.$ref) {
-			schema.$ref = schema.$ref.replace(/#\/definitions\/([^\/])/, `#/components/schemas/${prefix}_$1`);
+			schema.$ref = schema.$ref.replace(/#\/definitions\/([^\/])/, `#/components/schemas/$1`);
 		}
 		if (schema.properties) {
 			for (const key of Object.keys(schema.properties)) {
 				const prop = schema.properties[key];
 				if (typeof prop !== 'boolean') {
-					this.rewriteSchemaRefs(spec, prop, prefix);
+					this.rewriteSchemaRefs(spec, prop);
 				}
 			}
 		}
@@ -204,11 +210,11 @@ export class OpenAPIBuilder {
 			if (Array.isArray(schema.items)) {
 				for (const item of schema.items) {
 					if (typeof item !== 'boolean') {
-						this.rewriteSchemaRefs(spec, item, prefix);
+						this.rewriteSchemaRefs(spec, item);
 					}
 				}
 			} else {
-				this.rewriteSchemaRefs(spec, schema.items, prefix);
+				this.rewriteSchemaRefs(spec, schema.items);
 			}
 		}
 	}
@@ -216,7 +222,7 @@ export class OpenAPIBuilder {
 	private rewriteOperationSchemaRefs(spec: OpenAPISpec, op: OpenAPIOperation) {
 		for (const response of Object.values(op.responses)) {
 			for (const contents of Object.values(response.content)) {
-				this.rewriteSchemaRefs(spec, contents.schema, op.operationId);
+				this.rewriteSchemaRefs(spec, contents.schema);
 			}
 		}
 	}
