@@ -750,7 +750,6 @@ export const operationVariablesToJSONSchema = (
 		type: 'object',
 		properties: {},
 		additionalProperties: false,
-		definitions: {},
 	};
 
 	if (!operation.variableDefinitions) {
@@ -954,6 +953,9 @@ const typeSchema = (
 							break;
 						case 'InputObjectTypeDefinition':
 							const typeName = namedType.name;
+							if (!root.definitions) {
+								root.definitions = {};
+							}
 							if (Object.keys(root.definitions!).includes(typeName)) {
 								return {
 									$ref: '#/definitions/' + typeName,
