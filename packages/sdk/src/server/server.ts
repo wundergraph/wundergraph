@@ -161,6 +161,10 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
+	const nodeURL = WG_CONFIG?.api?.nodeOptions?.nodeUrl
+		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
+		: '';
+
 	const fastify = Fastify({
 		logger,
 		genReqId: (req) => {
@@ -268,6 +272,7 @@ export const createServer = async ({
 			wundergraphDir,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
+			nodeURL,
 		});
 		fastify.log.info('Webhooks plugin registered');
 	}
@@ -286,9 +291,7 @@ export const createServer = async ({
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
-				nodeURL: WG_CONFIG?.api?.nodeOptions?.nodeUrl
-					? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
-					: '',
+				nodeURL,
 			});
 			fastify.log.info('Functions plugin registered');
 		}
