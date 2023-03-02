@@ -315,7 +315,7 @@ export interface CodeGenerationConfig {
 const resolvePublicClaims = (config: WunderGraphConfigApplicationConfig) => {
 	let publicClaims: string[] = [];
 	for (const claim of config.authentication?.publicClaims ?? []) {
-		let customClaim = config.authentication?.customClaims?.[claim];
+		const customClaim = config.authentication?.customClaims?.[claim];
 		if (customClaim) {
 			publicClaims.push(customClaim.jsonPath);
 		} else {
@@ -1219,7 +1219,7 @@ const resolveOperationsConfigurations = async (
 				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
 		}
 		const jsonPathComponents = claim.jsonPath.split('.');
-		if (jsonPathComponents.length == 0) {
+		if (jsonPathComponents.length === 0) {
 			throw new Error(`empty jsonPath in customClaim ${key}`);
 		}
 		return {

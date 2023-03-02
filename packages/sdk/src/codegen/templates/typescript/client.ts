@@ -64,10 +64,7 @@ export class TypeScriptClient implements Template {
 		const publicWellKnownClaims = generationConfig.config.authentication.publicClaims.filter((claim) =>
 			isWellKnownClaim(claim)
 		);
-		const publicUserFields = publicWellKnownClaims
-			.map(wellKnownClaimField)
-			.map((s) => `"${s}"`)
-			.join(' | ');
+		const publicUserFields = publicWellKnownClaims.map((s) => `"${wellKnownClaimField(s)}"`).join(' | ');
 
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),

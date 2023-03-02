@@ -281,7 +281,7 @@ const claimsSchema = (customClaims: string[]) => {
 	if (Object.keys(docs).length !== WellKnownClaimValues.length) {
 		throw new Error('unhandled claims in claimsSchema()');
 	}
-	const wellKnownClaims = Object.keys(docs).map((key) => `"""${docs[key as WellKnownClaim]}"""\n${key}`);
+	const wellKnownClaims = Object.entries(docs).map(([key, doc]) => `"""${doc}"""\n${key}`);
 	return `
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.

@@ -195,12 +195,13 @@ func (u *User) ToPublic(publicClaims []string) *User {
 		Roles:            u.Roles,
 	}
 	for _, claim := range publicClaims {
-		if !cpy.copyWellKnownClaim(claim, u) {
-			keys := strings.Split(claim, ".")
-			value := jsonpath.GetKeys(u.CustomClaims, keys...)
-			if value != nil {
-				cpy.CustomClaims = jsonpath.SetKeys(cpy.CustomClaims, value, keys...)
-			}
+		if cpy.copyWellKnownClaim(claim, u) {
+			continue
+		}
+		keys := strings.Split(claim, ".")
+		value := jsonpath.GetKeys(u.CustomClaims, keys...)
+		if value != nil {
+			cpy.CustomClaims = jsonpath.SetKeys(cpy.CustomClaims, value, keys...)
 		}
 	}
 	return cpy

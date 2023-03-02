@@ -8,8 +8,7 @@ export class TypeScriptClaims implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const tmpl = Handlebars.compile(handlebarTemplate);
 		const claims = generationConfig.config.authentication.customClaims;
-		const customClaims = Object.keys(claims).map((key) => {
-			const claim = claims[key];
+		const customClaims = Object.entries(claims).map(([key, claim]) => {
 			let claimType: string;
 			switch (claim.type ?? 'string') {
 				case 'string':
