@@ -68,6 +68,7 @@ import { resolveServerOptions, serverOptionsWithDefaults } from '../server/serve
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { cleanOpenApiSpecs } from '../openapi/introspection';
+import { OpenAPIBuilder } from '../openapibuilder';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -911,6 +912,17 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				}
 			);
 			Logger.info(`wundergraph.postman.json updated`);
+
+			const openAPIBuilder = new OpenAPIBuilder({
+				title: 'WunderGraph Application',
+				baseURL: publicNodeUrl,
+			});
+
+			const openAPISpec = openAPIBuilder.generate(app.Operations);
+			fs.writeFileSync(path.join('generated', 'wundergraph.openapi.json'), JSON.stringify(openAPISpec, null, '  '), {
+				encoding: 'utf8',
+			});
+			Logger.info(`wundergraph.openapi.json updated`);
 
 			done();
 		})
