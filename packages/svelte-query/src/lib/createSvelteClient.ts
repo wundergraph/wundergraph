@@ -62,7 +62,7 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	 *
 	 * All queries support liveQuery by default, enabling this will set up a realtime subscription.
 	 * ```ts
-	 * const { data, error, isLoading, subscriptionState } = useQuery({
+	 * const { data, error, isLoading, isSubscribed } = useQuery({
 	 *   operationName: 'Weather',
 	 *   liveQuery: true,
 	 * })
@@ -278,7 +278,7 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	 *
 	 * @usage
 	 * ```ts
-	 * const { data, error, isLoading, subscriptionState } = createSubscription({
+	 * const { data, error, isLoading, isSubscribed } = createSubscription({
 	 *   operationName: 'Countdown',
 	 * })
 	 */
