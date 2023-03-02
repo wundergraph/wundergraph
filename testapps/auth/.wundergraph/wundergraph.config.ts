@@ -1,10 +1,15 @@
-import { configureWunderGraphApplication, cors, EnvironmentVariable, templates } from '@wundergraph/sdk';
+import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
+const countries = introspect.graphql({
+	apiNamespace: 'countries',
+	url: 'https://countries.trevorblades.com/',
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [],
+	apis: [countries],
 	server,
 	operations,
 	authentication: {
@@ -31,6 +36,12 @@ configureWunderGraphApplication({
 			},
 			nonExistingDeepValue: {
 				jsonPath: 'a.b.c.d.e.f.g.h.i',
+			},
+			country: {
+				jsonPath: 'cc',
+			},
+			currency: {
+				jsonPath: 'currency',
 			},
 		},
 		publicClaims: ['SUBJECT', 'shopID'],

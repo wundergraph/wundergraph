@@ -856,7 +856,7 @@ export interface OperationVariablesConfiguration {
 }
 
 export interface VariableInjectionConfiguration {
-  variableName: string;
+  variablePathComponents: string[];
   variableKind: InjectVariableKind;
   dateFormat: string;
   environmentVariableName: string;
@@ -906,7 +906,7 @@ export interface CustomClaim {
 }
 
 export interface ClaimConfig {
-  variableName: string;
+  variablePathComponents: string[];
   claimType: ClaimType;
   /** Available iff claimType == CUSTOM */
   custom?: CustomClaim | undefined;
@@ -1957,13 +1957,15 @@ export const OperationVariablesConfiguration = {
 };
 
 function createBaseVariableInjectionConfiguration(): VariableInjectionConfiguration {
-  return { variableName: "", variableKind: 0, dateFormat: "", environmentVariableName: "" };
+  return { variablePathComponents: [], variableKind: 0, dateFormat: "", environmentVariableName: "" };
 }
 
 export const VariableInjectionConfiguration = {
   fromJSON(object: any): VariableInjectionConfiguration {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
       variableKind: isSet(object.variableKind) ? injectVariableKindFromJSON(object.variableKind) : 0,
       dateFormat: isSet(object.dateFormat) ? String(object.dateFormat) : "",
       environmentVariableName: isSet(object.environmentVariableName) ? String(object.environmentVariableName) : "",
@@ -1972,7 +1974,11 @@ export const VariableInjectionConfiguration = {
 
   toJSON(message: VariableInjectionConfiguration): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
     message.variableKind !== undefined && (obj.variableKind = injectVariableKindToJSON(message.variableKind));
     message.dateFormat !== undefined && (obj.dateFormat = message.dateFormat);
     message.environmentVariableName !== undefined && (obj.environmentVariableName = message.environmentVariableName);
@@ -1983,7 +1989,7 @@ export const VariableInjectionConfiguration = {
     object: I,
   ): VariableInjectionConfiguration {
     const message = createBaseVariableInjectionConfiguration();
-    message.variableName = object.variableName ?? "";
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
     message.variableKind = object.variableKind ?? 0;
     message.dateFormat = object.dateFormat ?? "";
     message.environmentVariableName = object.environmentVariableName ?? "";
@@ -2230,13 +2236,15 @@ export const CustomClaim = {
 };
 
 function createBaseClaimConfig(): ClaimConfig {
-  return { variableName: "", claimType: 0, custom: undefined };
+  return { variablePathComponents: [], claimType: 0, custom: undefined };
 }
 
 export const ClaimConfig = {
   fromJSON(object: any): ClaimConfig {
     return {
-      variableName: isSet(object.variableName) ? String(object.variableName) : "",
+      variablePathComponents: Array.isArray(object?.variablePathComponents)
+        ? object.variablePathComponents.map((e: any) => String(e))
+        : [],
       claimType: isSet(object.claimType) ? claimTypeFromJSON(object.claimType) : 0,
       custom: isSet(object.custom) ? CustomClaim.fromJSON(object.custom) : undefined,
     };
@@ -2244,7 +2252,11 @@ export const ClaimConfig = {
 
   toJSON(message: ClaimConfig): unknown {
     const obj: any = {};
-    message.variableName !== undefined && (obj.variableName = message.variableName);
+    if (message.variablePathComponents) {
+      obj.variablePathComponents = message.variablePathComponents.map((e) => e);
+    } else {
+      obj.variablePathComponents = [];
+    }
     message.claimType !== undefined && (obj.claimType = claimTypeToJSON(message.claimType));
     message.custom !== undefined && (obj.custom = message.custom ? CustomClaim.toJSON(message.custom) : undefined);
     return obj;
@@ -2252,7 +2264,7 @@ export const ClaimConfig = {
 
   fromPartial<I extends Exact<DeepPartial<ClaimConfig>, I>>(object: I): ClaimConfig {
     const message = createBaseClaimConfig();
-    message.variableName = object.variableName ?? "";
+    message.variablePathComponents = object.variablePathComponents?.map((e) => e) || [];
     message.claimType = object.claimType ?? 0;
     message.custom = (object.custom !== undefined && object.custom !== null)
       ? CustomClaim.fromPartial(object.custom)

@@ -557,7 +557,7 @@ const fromClaimParsed: ParsedOperations = {
 			AuthorizationConfig: {
 				claims: [
 					{
-						variableName: 'email',
+						variablePathComponents: ['email'],
 						claimType: ClaimType.EMAIL,
 					},
 				],
