@@ -887,6 +887,13 @@ export const configureWunderGraphApplication = (config: WunderGraphConfigApplica
 				Logger.info(`Code generation completed.`);
 			}
 
+			// Update response types for TS operations. Do this only after code generation completes,
+			// since TS operations need some of the generated files
+			const tsOperations = app.Operations.filter(
+				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
+			);
+			updateTypeScriptOperationsResponseSchemas(tsOperations);
+
 			const configJsonPath = path.join('generated', 'wundergraph.config.json');
 			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
 			// config json exists
@@ -1159,21 +1166,21 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
-// typescriptOperationResponseSchemas generates the response schemas for all TypeScript
+// typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
 // operations at once, since it's several times faster than generating them one by one
-const typescriptOperationResponseSchemas = (files: TypeScriptOperationFile[]) => {
-	const functionTypeName = (file: TypeScriptOperationFile) => `function_${file.operation_name}`;
-	const responseTypeName = (file: TypeScriptOperationFile) => `${functionTypeName(file)}_Response`;
+const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => {
+	const functionTypeName = (op: GraphQLOperation) => `function_${op.Name}`;
+	const responseTypeName = (op: GraphQLOperation) => `${functionTypeName(op)}_Response`;
 
 	const programFile = 'typescript_schema_generator.ts';
 
 	let contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
 
-	for (const file of files) {
-		const relativePath = `../operations/${file.api_mount_path}`;
-		const name = functionTypeName(file);
+	for (const op of operations) {
+		const relativePath = `../operations/${op.PathName}`;
+		const name = functionTypeName(op);
 		contents.push(`import type ${name} from "${relativePath}";`);
-		contents.push(`export type ${responseTypeName(file)} = ExtractResponse<typeof ${name}>`);
+		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
 	}
 
 	const cachePath = path.join('cache', `ts.operationTypes.${objectHash(contents)}.json`);
@@ -1204,17 +1211,17 @@ const typescriptOperationResponseSchemas = (files: TypeScriptOperationFile[]) =>
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const warn = console.warn;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	const generator = TJS.buildGenerator(program, settings);
+	let generator = TJS.buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
 		console.warn = warn;
 		throw new Error('could not parse .ts operation files');
 	}
-	for (const file of files) {
-		let schema = generator!.getSchemaForSymbol(responseTypeName(file));
+	for (const op of operations) {
+		let schema = generator!.getSchemaForSymbol(responseTypeName(op));
 		if (schema) {
 			delete schema.$schema;
-			schemas[file.operation_name] = schema as JSONSchema;
+			schemas[op.Name] = schema as JSONSchema;
 		}
 	}
 	console.warn = warn;
@@ -1227,6 +1234,16 @@ const typescriptOperationResponseSchemas = (files: TypeScriptOperationFile[]) =>
 		fs.writeFileSync(cachePath, cached, { encoding: 'utf-8' });
 	} catch {}
 	return schemas;
+};
+
+const updateTypeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => {
+	const schemas = typeScriptOperationsResponseSchemas(operations);
+	for (const op of operations) {
+		const responseSchema = schemas[op.Name];
+		if (responseSchema) {
+			op.ResponseSchema = responseSchema;
+		}
+	}
 };
 
 const resolveOperationsConfigurations = async (
@@ -1270,15 +1287,10 @@ const resolveOperationsConfigurations = async (
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
 	if (loadedOperations.typescript_operation_files) {
-		const defaultResponseSchema = { type: 'object', properties: { data: {} } } as JSONSchema;
-		const responseSchemas = typescriptOperationResponseSchemas(loadedOperations.typescript_operation_files);
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
 				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
 				const implementation = await loadNodeJsOperationDefaultModule(filePath);
-				const responseSchema = responseSchemas[file.operation_name]
-					? responseSchemas[file.operation_name]
-					: defaultResponseSchema;
 				const operation: GraphQLOperation = {
 					Name: file.operation_name,
 					PathName: file.api_mount_path,
@@ -1294,7 +1306,9 @@ const resolveOperationsConfigurations = async (
 					InterpolationVariablesSchema: { type: 'object', properties: {} },
 					InternalVariablesSchema: { type: 'object', properties: {} },
 					InjectedVariablesSchema: { type: 'object', properties: {} },
-					ResponseSchema: responseSchema,
+					// Use an empty default for now, we'll fill that later because we
+					// need some generated files to be ready
+					ResponseSchema: { type: 'object', properties: { data: {} } },
 					TypeScriptOperationImport: `function_${file.operation_name}`,
 					AuthenticationConfig: {
 						required: implementation.requireAuthentication || false,
