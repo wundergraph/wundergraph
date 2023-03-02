@@ -313,7 +313,7 @@ export interface CodeGenerationConfig {
 }
 
 const resolvePublicClaims = (config: WunderGraphConfigApplicationConfig) => {
-	let publicClaims: string[] = [];
+	const publicClaims: string[] = [];
 	for (const claim of config.authentication?.publicClaims ?? []) {
 		const customClaim = config.authentication?.customClaims?.[claim];
 		if (customClaim) {
