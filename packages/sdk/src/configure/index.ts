@@ -1222,7 +1222,7 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 
 	const programFile = 'typescript_schema_generator.ts';
 
-	let contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
+	const contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
 
 	for (const op of operations) {
 		const relativePath = `../operations/${op.PathName}`;
@@ -1252,21 +1252,21 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 
 	const program = TJS.getProgramFromFiles([programPath], compilerOptions, basePath);
 
-	let schemas: Record<string, JSONSchema> = {};
+	const schemas: Record<string, JSONSchema> = {};
 	const settings: TJS.PartialArgs = {
 		required: true,
 	};
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const warn = console.warn;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	let generator = TJS.buildGenerator(program, settings);
+	const generator = TJS.buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
 		console.warn = warn;
 		throw new Error('could not parse .ts operation files');
 	}
 	for (const op of operations) {
-		let schema = generator!.getSchemaForSymbol(responseTypeName(op));
+		const schema = generator.getSchemaForSymbol(responseTypeName(op));
 		if (schema) {
 			delete schema.$schema;
 			schemas[op.Name] = schema as JSONSchema;

@@ -262,7 +262,7 @@ export class OpenAPIBuilder {
 			}
 		}
 
-		let schemas: Record<string, JSONSchema> = {};
+		const schemas: Record<string, JSONSchema> = {};
 		schemas[invalidInputErrorName] = errorSchema;
 
 		let spec: OpenAPISpec = {
