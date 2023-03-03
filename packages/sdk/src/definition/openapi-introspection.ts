@@ -2,8 +2,7 @@ import path from 'path';
 import process from 'node:process';
 import fs from 'fs';
 
-import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource, OpenAPIV2Introspection, RESTApi } from './index';
-import { openApiSpecificationToGraphQLApi } from '../openapi';
+import { OpenAPIIntrospection, OpenAPIIntrospectionSource, RESTApi } from './index';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
 
@@ -21,12 +20,7 @@ export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
 	}
 };
 
-export const openApi = (introspection: OpenAPIV2Introspection): Promise<GraphQLApi> => {
-	const spec = loadOpenApi(introspection.source);
-	return openApiSpecificationToGraphQLApi(spec, introspection);
-};
-
-export const openApiLegacy = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 	const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 		const spec = loadOpenApi(introspection.source);
 		return await openApiSpecificationToRESTApiObject(spec, introspection);
