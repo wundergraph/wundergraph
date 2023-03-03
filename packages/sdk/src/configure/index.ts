@@ -36,6 +36,7 @@ import {
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	TypeScriptOperationFile,
 	WellKnownClaim,
 } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
@@ -1299,6 +1300,66 @@ const updateTypeScriptOperationsResponseSchemas = (operations: GraphQLOperation[
 	}
 };
 
+const loadNodeJsOperation = async (file: TypeScriptOperationFile) => {
+	const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+	const operation: GraphQLOperation = {
+		Name: file.operation_name,
+		PathName: file.api_mount_path,
+		Content: '',
+		OperationType:
+			implementation.type === 'query'
+				? OperationType.QUERY
+				: implementation.type === 'mutation'
+				? OperationType.MUTATION
+				: OperationType.SUBSCRIPTION,
+		ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+		VariablesSchema: { type: 'object', properties: {} },
+		InterpolationVariablesSchema: { type: 'object', properties: {} },
+		InternalVariablesSchema: { type: 'object', properties: {} },
+		InjectedVariablesSchema: { type: 'object', properties: {} },
+		// Use an empty default for now, we'll fill that later because we
+		// need some generated files to be ready
+		ResponseSchema: { type: 'object', properties: { data: {} } },
+		TypeScriptOperationImport: `function_${file.operation_name}`,
+		AuthenticationConfig: {
+			required: implementation.requireAuthentication || false,
+		},
+		LiveQuery: {
+			enable: true,
+			pollingIntervalSeconds: 5,
+		},
+		AuthorizationConfig: {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: [],
+				requireMatchAny: [],
+				denyMatchAll: [],
+				denyMatchAny: [],
+			},
+		},
+		HooksConfiguration: {
+			preResolve: false,
+			postResolve: false,
+			mutatingPreResolve: false,
+			mutatingPostResolve: false,
+			mockResolve: {
+				enable: false,
+				subscriptionPollingIntervalMillis: 0,
+			},
+			httpTransportOnResponse: false,
+			httpTransportOnRequest: false,
+			customResolve: false,
+		},
+		VariablesConfiguration: {
+			injectVariables: [],
+		},
+		Internal: implementation.internal ? implementation.internal : false,
+		PostResolveTransformations: undefined,
+	};
+	return { operation, implementation };
+};
+
 const resolveOperationsConfigurations = async (
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
@@ -1346,62 +1407,7 @@ const resolveOperationsConfigurations = async (
 	if (loadedOperations.typescript_operation_files) {
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
-				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
-				const implementation = await loadNodeJsOperationDefaultModule(filePath);
-				const operation: GraphQLOperation = {
-					Name: file.operation_name,
-					PathName: file.api_mount_path,
-					Content: '',
-					OperationType:
-						implementation.type === 'query'
-							? OperationType.QUERY
-							: implementation.type === 'mutation'
-							? OperationType.MUTATION
-							: OperationType.SUBSCRIPTION,
-					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
-					VariablesSchema: { type: 'object', properties: {} },
-					InterpolationVariablesSchema: { type: 'object', properties: {} },
-					InternalVariablesSchema: { type: 'object', properties: {} },
-					InjectedVariablesSchema: { type: 'object', properties: {} },
-					// Use an empty default for now, we'll fill that later because we
-					// need some generated files to be ready
-					ResponseSchema: { type: 'object', properties: { data: {} } },
-					TypeScriptOperationImport: `function_${file.operation_name}`,
-					AuthenticationConfig: {
-						required: implementation.requireAuthentication || false,
-					},
-					LiveQuery: {
-						enable: true,
-						pollingIntervalSeconds: 5,
-					},
-					AuthorizationConfig: {
-						claims: [],
-						roleConfig: {
-							requireMatchAll: [],
-							requireMatchAny: [],
-							denyMatchAll: [],
-							denyMatchAny: [],
-						},
-					},
-					HooksConfiguration: {
-						preResolve: false,
-						postResolve: false,
-						mutatingPreResolve: false,
-						mutatingPostResolve: false,
-						mockResolve: {
-							enable: false,
-							subscriptionPollingIntervalMillis: 0,
-						},
-						httpTransportOnResponse: false,
-						httpTransportOnRequest: false,
-						customResolve: false,
-					},
-					VariablesConfiguration: {
-						injectVariables: [],
-					},
-					Internal: implementation.internal ? implementation.internal : false,
-					PostResolveTransformations: undefined,
-				};
+				const { operation, implementation } = await loadNodeJsOperation(file);
 				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
 				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
