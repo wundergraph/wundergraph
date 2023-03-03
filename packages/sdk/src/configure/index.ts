@@ -18,7 +18,6 @@ import {
 	DatabaseApiCustom,
 	DataSource,
 	GraphQLApiCustom,
-	ILazyIntrospection,
 	introspectGraphqlServer,
 	RESTApiCustom,
 	StaticApiCustom,
@@ -64,10 +63,9 @@ import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
 import logger, { Logger } from '../logger';
-import { resolveServerOptions, serverOptionsWithDefaults } from '../server/server-options';
+import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
-import { cleanOpenApiSpecs } from '../openapi/introspection';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -79,7 +77,7 @@ export interface WunderGraphCorsConfiguration {
 }
 
 export interface WunderGraphConfigApplicationConfig {
-	apis: ILazyIntrospection<Api<any>>[];
+	apis: Promise<Api<any>>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
 	server?: WunderGraphHooksAndServerConfig;
@@ -606,14 +604,12 @@ const resolveUploadConfiguration = (
 const resolveApplication = async (
 	roles: string[],
 	customClaims: string[],
-	apis: ILazyIntrospection<Api<any>>[],
+	apis: Promise<Api<any>>[],
 	cors: CorsConfiguration,
 	s3?: S3Provider,
 	hooks?: HooksConfiguration
 ): Promise<ResolvedApplication> => {
-	await cleanOpenApiSpecs();
-	const apiPromises = apis.map((api) => api());
-	const resolvedApis = await Promise.all(apiPromises);
+	const resolvedApis = await Promise.all(apis);
 	const merged = mergeApis(roles, customClaims, ...resolvedApis);
 	const s3Configurations = s3?.map((config) => resolveUploadConfiguration(config, hooks)) || [];
 	return {
