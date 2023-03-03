@@ -27,11 +27,13 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	WellKnownClaim,
 } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
 import {
@@ -78,7 +80,10 @@ export interface WunderGraphCorsConfiguration {
 	allowCredentials?: boolean;
 }
 
-export interface WunderGraphConfigApplicationConfig {
+export interface WunderGraphConfigApplicationConfig<
+	TCustomClaim extends string = string,
+	TPublicClaim extends TCustomClaim | WellKnownClaim = TCustomClaim | WellKnownClaim
+> {
 	apis: ILazyIntrospection<Api<any>>[];
 	codeGenerators?: CodeGen[];
 	options?: NodeOptions;
@@ -115,7 +120,27 @@ export interface WunderGraphConfigApplicationConfig {
 		tokenBased?: {
 			providers: TokenAuthProvider[];
 		};
-		customClaims?: Record<string, CustomClaim>;
+		/**
+		 * Custom claims defined by the application. Each key represents its shorthand name
+		 * (used in User attributes or references to custom claims) while each value is
+		 * a CustomClaim object.
+		 *
+		 * @default none
+		 *
+		 * @see CustomClaim
+		 */
+		customClaims?: Record<TCustomClaim, CustomClaim>;
+		/**
+		 * Claims to be publicly available (i.e. served by the API to the frontend), referenced by
+		 * their shorthand name for custom claims (i.e. keys in the customClaims attribute) or by their
+		 * enum value for well known ones. If the list is empty, all claims are made public.
+		 *
+		 * @default empty
+		 *
+		 * @see WellKnownClaim
+		 * @see WunderGraphConfigApplicationConfig.customClaims
+		 */
+		publicClaims?: TPublicClaim[];
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
@@ -253,6 +278,7 @@ export interface ResolvedWunderGraphConfig {
 		cookieBased: AuthProvider[];
 		tokenBased: TokenAuthProvider[];
 		customClaims: Record<string, CustomClaim>;
+		publicClaims: string[];
 		authorizedRedirectUris: ConfigurationVariable[];
 		authorizedRedirectUriRegexes: ConfigurationVariable[];
 		hooks: {
@@ -285,6 +311,22 @@ export interface CodeGenerationConfig {
 	outPath: string;
 	wunderGraphDir: string;
 }
+
+const resolvePublicClaims = (config: WunderGraphConfigApplicationConfig) => {
+	const publicClaims: string[] = [];
+	for (const claim of config.authentication?.publicClaims ?? []) {
+		const customClaim = config.authentication?.customClaims?.[claim];
+		if (customClaim) {
+			publicClaims.push(customClaim.jsonPath);
+		} else {
+			if (!isWellKnownClaim(claim)) {
+				throw new Error(`invalid public claim ${claim}: not a custom nor a well known claim`);
+			}
+			publicClaims.push(claim);
+		}
+	}
+	return publicClaims;
+};
 
 const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promise<ResolvedWunderGraphConfig> => {
 	const api = {
@@ -367,6 +409,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 			cookieBased: cookieBasedAuthProviders,
 			tokenBased: config.authentication?.tokenBased?.providers || [],
 			customClaims: config.authentication?.customClaims || {},
+			publicClaims: resolvePublicClaims(config),
 			authorizedRedirectUris:
 				config.authentication?.cookieBased?.authorizedRedirectUris?.map((stringOrEnvironmentVariable) => {
 					if (typeof stringOrEnvironmentVariable === 'string') {
@@ -628,7 +671,12 @@ const resolveApplication = async (
 
 // configureWunderGraphApplication generates the file "generated/wundergraph.config.json" and runs the configured code generators
 // the wundergraph.config.json file will be picked up by "wunderctl up" to configure your development environment
-export const configureWunderGraphApplication = (config: WunderGraphConfigApplicationConfig) => {
+export const configureWunderGraphApplication = <
+	TCustomClaim extends string,
+	TPublicClaim extends TCustomClaim | WellKnownClaim
+>(
+	config: WunderGraphConfigApplicationConfig<TCustomClaim, TPublicClaim>
+) => {
 	if (WG_DATA_SOURCE_POLLING_MODE) {
 		// if the DataSourcePolling environment variable is set to 'true',
 		// we don't run the regular config build process which would generate the whole config
@@ -1055,6 +1103,7 @@ const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): str
 						userInfoCacheTtlSeconds: provider.userInfoCacheTtlSeconds || 60 * 60,
 					})),
 				},
+				publicClaims: config.authentication.publicClaims,
 			},
 			allowedHostNames: config.security.allowedHostNames,
 			webhooks: config.webhooks,
@@ -1169,9 +1218,13 @@ const resolveOperationsConfigurations = async (
 			default:
 				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
 		}
+		const jsonPathComponents = claim.jsonPath.split('.');
+		if (jsonPathComponents.length === 0) {
+			throw new Error(`empty jsonPath in customClaim ${key}`);
+		}
 		return {
 			name: key,
-			jsonPathComponents: claim.jsonPath.split('.'),
+			jsonPathComponents: jsonPathComponents,
 			type: claimType,
 			required: claim.required ?? true,
 		};
