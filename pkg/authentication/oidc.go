@@ -108,7 +108,7 @@ func (c *Claims) ToUser() User {
 	}
 }
 
-// isCustomClaim true if claim represents a token claim that we're not explicitely
+// isCustomClaim true if claim represents a token claim that we're not explicitly
 // handling in type Claim
 func isCustomClaim(claim string) bool {
 	// XXX: Keep this list in sync with Claim's fields
