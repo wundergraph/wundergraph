@@ -13,26 +13,27 @@ If you need more, please [contact us](https://wundergraph.com/discord).
 
 # Adding a custom domain
 
-Click your project and then click on the `Settings` tab. On this screen, click on the menu item named `z`Custom domains`.
+Click your project and then click on the `Settings` tab.
+On this screen, click on the menu item labeled `Custom domains`.
 
-In the input field named `Domain`, enter your domain (without `https://`), for example, `mysubdomain.domain.com`.
-If your domain was rejected, but you're sure that it was valid, [please let us know](https://wundergraph.com/discord).
+In the input field labeled `Domain`, enter your domain (without `https://`), for example, `mysubdomain.domain.com`.
+If your domain was rejected, but you're certain that it was valid, [please let us know](https://wundergraph.com/discord).
 
-The `Branch` dropdown is currently disabled while only one project environment is available per project. This will be
-enabled in the future.
+The `Branch` dropdown is currently disabled while only one project environment is available per project.
+This will be enabled in the future.
 
-Click `Add`. You should see a loading icon, and a toast should report either success or failure. In the case of failure,
-the message within the toast should explain the reason. If you're experiencing continued trouble creating a domain,
-[please report it](https://wundergraph.com/discord).
+Click `Add`. You should see a loading icon, and a toast should report either success or failure.
+In the case of failure, the message within the toast should explain the reason.
+If you're experiencing continued trouble creating a domain, [please report it](https://wundergraph.com/discord).
 
-After success, you will be able to see your custom domain within a list, and a (unverified) certificate will
-automatically added to your deployment for the domain.
+After success, you will be able to see your custom domain within a list, and a (unverified) certificate for that domain
+will be automatically added to your deployment.
 
 # DNS configuration
 
-Each custom domain list item contains a dropdown named `DNS configurations`. Clicking this will display some CNAMEs and
-targets that you should enter into domain provider's DNS configuration. You can use the copy button to add each item
-directly to your clipboard.
+Each custom domain list item contains a dropdown labeled `DNS configurations`.
+Clicking this will display some CNAMEs and targets that you should enter into domain provider's DNS configuration.
+You can use the copy button to add each item directly to your clipboard.
 
 The first CNAME points your domain to the WunderGraph domain.
 
@@ -42,11 +43,12 @@ You can find more specific domain provider instructions in the following section
 
 ## Verification
 
-A certificate for your domain is produced automatically when you add the domain. The UI will read that it is either
-`unverified` or `pending`. `Pending` means that the request for the certificate verification is currently in-flight.
-Once the response arrives, it will change to `unverified` or `verified`. Once you have added the DNS configurations
-correctly, the UI will display `verified`. You can click the `Verify` button to check the status of your certificate at
-any time.
+A certificate for your domain is produced automatically when you add the domain.
+The UI will read either `unverified` or `pending`.
+`Pending` means that the request for the certificate verification is currently in-flight.
+Once the response arrives, it will change to `unverified` or `verified`.
+Once you have added the DNS configurations correctly, the UI will display `verified`.
+You can click the `Verify` button to check the status of your certificate at any time.
 
 Certificates will expire after three months and should automatically reissue.
 
@@ -90,7 +92,8 @@ If you believe this is happening, try the following:
 
 # Deleting a custom domain
 
-You can delete a custom domain by clicking the `Delete` button. You will then be asked to confirm the deletion.
+You can delete a custom domain by clicking the `Delete` button.
+You will then be asked to confirm the deletion.
 Deleting the domain will also automatically delete the certificate associated with it.
 
 When you delete your project, all associated domains and certificates will be deleted automatically.
@@ -105,5 +108,5 @@ You can use the following command to test whether your domain is working reliabl
 curl -H "Host: your-domain-here" https://{your-project-name}.wundergraph.dev
 ```
 
-If your browser is displaying DNS errors but `curl` returns the expected response, it's likely a temporary caching
-issue.
+If your browser is displaying DNS errors, but `curl` returns the expected response, consider waiting up to 24 hours
+before troubleshooting further.
