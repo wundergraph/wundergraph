@@ -16,6 +16,9 @@ export function buildPath(
 ) {
 	if (typeof obj === 'boolean') return;
 
+	// those nodes are limited due to recursion
+	if (!obj.type) return;
+
 	if (obj.type === 'array') {
 		if (typeof obj.items === 'boolean') return;
 		if (!obj.items) return;
@@ -25,9 +28,6 @@ export function buildPath(
 		items.forEach((obj, index) => buildPath([...path, index.toString()], false, obj, paths));
 		return;
 	}
-
-	// those nodes are limited due to recursion
-	if (!obj.type) return;
 
 	if (obj.properties) {
 		Object.keys(obj.properties).forEach((key) => {
