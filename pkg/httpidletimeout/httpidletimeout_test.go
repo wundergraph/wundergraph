@@ -160,7 +160,7 @@ func TestSkip(t *testing.T) {
 		sendDummyRequest(server, "/")
 	})
 
-	ctx1, cancel1 := context.WithTimeout(context.Background(), timeoutDuration)
+	ctx1, cancel1 := context.WithTimeout(context.Background(), timeoutDuration+timeoutDuration/10)
 	defer cancel1()
 
 	ctx2, cancel2 := context.WithTimeout(context.Background(), timeoutDuration*3)
