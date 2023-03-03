@@ -218,14 +218,12 @@ const navigation = [
 						title: 'Enable autocompletion in your IDE',
 						href: '/docs/guides/enable-autocompletion-in-your-ide',
 					},
+					{
+						title: 'Debugging WunderGraph applications',
+						href: '/docs/guides/debugging',
+					},
 				],
 			},
-			// {
-			// 	title: 'Debugging',
-			// 	links: [
-
-			// 	],
-			// },
 			{
 				title: 'Testing',
 				links: [
