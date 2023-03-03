@@ -13,3 +13,17 @@ After running `wunderctl generate`, usually via `npm build` or `npm build:wunder
 specification and a Postman collection will be produced inside `.wundergraph/generated`.
 
 To update these files after making changes in your API, just run the code generation again.
+
+## OpenAPI customization
+
+By default, your OpenAPI specification will use `WunderGraph Application` as its title and `0` as its version.
+These can be customized by setting the `openAPI` field when calling `configureWunderGraphApplication()`:
+
+```typescript
+configureWunderGraphApplication({
+  openAPI: {
+    title: 'My Awesome API',
+    apiVersion: '1.0',
+  },
+});
+```
