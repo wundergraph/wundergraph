@@ -17,11 +17,11 @@ To update these files after making changes in your API, just run the code genera
 ## OpenAPI customization
 
 By default, your OpenAPI specification will use `WunderGraph Application` as its title and `0` as its version.
-These can be customized by setting the `openAPI` field when calling `configureWunderGraphApplication()`:
+These can be customized by setting the `openApi` field when calling `configureWunderGraphApplication()`:
 
 ```typescript
 configureWunderGraphApplication({
-  openAPI: {
+  openApi: {
     title: 'My Awesome API',
     apiVersion: '1.0',
   },

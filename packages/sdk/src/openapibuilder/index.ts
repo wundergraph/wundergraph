@@ -3,7 +3,7 @@ import { JSONSchema7 as JSONSchema } from 'json-schema';
 import { GraphQLOperation } from '../graphql/operations';
 import { buildPath, JSONSchemaParameterPath } from './operations';
 
-const openAPIVersion = '3.1.0';
+const openApiVersion = '3.1.0';
 
 const errorSchema: JSONSchema = {
 	type: 'object',
@@ -38,18 +38,18 @@ const errorRefSchema: JSONSchema = {
 	$ref: `#/components/schemas/${invalidInputErrorName}`,
 };
 
-interface OpenAPIServer {
+interface OpenApiServer {
 	url: string;
 }
 
-interface OpenAPIInfo {
+interface OpenApiInfo {
 	title: string;
 	version: string;
 	summary?: string;
 	description?: string;
 }
 
-interface OpenAPIParameter {
+interface OpenApiParameter {
 	name: string;
 	description: string;
 	in: 'query' | 'header' | 'path' | 'cookie';
@@ -58,49 +58,49 @@ interface OpenAPIParameter {
 	schema: JSONSchema;
 }
 
-interface OpenAPIMediaType {
+interface OpenApiMediaType {
 	schema: JSONSchema;
 }
 
-interface OpenAPIRequestBody {
+interface OpenApiRequestBody {
 	description?: string;
-	content: Record<string, OpenAPIMediaType>;
+	content: Record<string, OpenApiMediaType>;
 	required: boolean;
 }
 
-interface OpenAPIResponse {
+interface OpenApiResponse {
 	description: string;
-	content: Record<string, OpenAPIMediaType>;
+	content: Record<string, OpenApiMediaType>;
 }
 
-interface OpenAPIOperation {
+interface OpenApiOperation {
 	operationId: string;
-	parameters?: OpenAPIParameter[];
-	requestBody?: OpenAPIRequestBody;
-	responses: Record<string, OpenAPIResponse>;
+	parameters?: OpenApiParameter[];
+	requestBody?: OpenApiRequestBody;
+	responses: Record<string, OpenApiResponse>;
 }
 
-interface OpenAPIPath {
+interface OpenApiPath {
 	$ref?: string;
 	summary?: string;
 	description?: string;
-	get?: OpenAPIOperation;
-	post?: OpenAPIOperation;
+	get?: OpenApiOperation;
+	post?: OpenApiOperation;
 }
 
-interface OpenAPIComponents {
+interface OpenApiComponents {
 	schemas?: Record<string, JSONSchema>;
 }
 
-interface OpenAPISpec {
+interface OpenApiSpec {
 	openapi: string;
-	info: OpenAPIInfo;
-	servers: OpenAPIServer[];
-	paths: Record<string, OpenAPIPath>;
-	components?: OpenAPIComponents;
+	info: OpenApiInfo;
+	servers: OpenApiServer[];
+	paths: Record<string, OpenApiPath>;
+	components?: OpenApiComponents;
 }
 
-export interface OpenAPIBuilderOptions {
+export interface OpenApiBuilderOptions {
 	baseURL: string;
 	title: string;
 	version: string;
@@ -108,10 +108,10 @@ export interface OpenAPIBuilderOptions {
 	description?: string;
 }
 
-export class OpenAPIBuilder {
-	constructor(private config: OpenAPIBuilderOptions) {}
+export class OpenApiBuilder {
+	constructor(private config: OpenApiBuilderOptions) {}
 
-	private operationResponses(op: GraphQLOperation): Record<string, OpenAPIResponse> {
+	private operationResponses(op: GraphQLOperation): Record<string, OpenApiResponse> {
 		return {
 			'200': {
 				description: 'Success',
@@ -132,8 +132,8 @@ export class OpenAPIBuilder {
 		};
 	}
 
-	private queryOperation(op: GraphQLOperation): OpenAPIOperation {
-		const parameters: OpenAPIParameter[] = [];
+	private queryOperation(op: GraphQLOperation): OpenApiOperation {
+		const parameters: OpenApiParameter[] = [];
 		const paths: JSONSchemaParameterPath[] = [];
 		buildPath([], false, op.VariablesSchema, paths);
 		for (const path of paths) {
@@ -156,7 +156,7 @@ export class OpenAPIBuilder {
 		};
 	}
 
-	private mutationOperation(op: GraphQLOperation): OpenAPIOperation {
+	private mutationOperation(op: GraphQLOperation): OpenApiOperation {
 		return {
 			operationId: op.Name,
 			requestBody: {
@@ -171,7 +171,7 @@ export class OpenAPIBuilder {
 		};
 	}
 
-	private rewriteSchemaRefs(spec: OpenAPISpec, schema: JSONSchema) {
+	private rewriteSchemaRefs(spec: OpenApiSpec, schema: JSONSchema) {
 		// Move definitions to spec
 		if (schema?.definitions) {
 			if (!spec.components) {
@@ -220,7 +220,7 @@ export class OpenAPIBuilder {
 		}
 	}
 
-	private rewriteOperationSchemaRefs(spec: OpenAPISpec, op: OpenAPIOperation) {
+	private rewriteOperationSchemaRefs(spec: OpenApiSpec, op: OpenApiOperation) {
 		for (const response of Object.values(op.responses)) {
 			for (const contents of Object.values(response.content)) {
 				this.rewriteSchemaRefs(spec, contents.schema);
@@ -228,7 +228,7 @@ export class OpenAPIBuilder {
 		}
 	}
 
-	private rewriteAPISchemaRefs(spec: OpenAPISpec) {
+	private rewriteAPISchemaRefs(spec: OpenApiSpec) {
 		for (const p of Object.values(spec.paths)) {
 			if (p.get) {
 				this.rewriteOperationSchemaRefs(spec, p.get);
@@ -241,10 +241,10 @@ export class OpenAPIBuilder {
 	}
 
 	generate(operations: GraphQLOperation[]) {
-		const paths: Record<string, OpenAPIPath> = {};
+		const paths: Record<string, OpenApiPath> = {};
 
 		for (const op of operations) {
-			let opPath: OpenAPIPath | undefined;
+			let opPath: OpenApiPath | undefined;
 			switch (op.OperationType) {
 				case OperationType.QUERY:
 				case OperationType.SUBSCRIPTION:
@@ -266,8 +266,8 @@ export class OpenAPIBuilder {
 		const schemas: Record<string, JSONSchema> = {};
 		schemas[invalidInputErrorName] = errorSchema;
 
-		const spec: OpenAPISpec = {
-			openapi: openAPIVersion,
+		const spec: OpenApiSpec = {
+			openapi: openApiVersion,
 			info: {
 				title: this.config.title ? this.config.title : this.config.baseURL,
 				version: this.config.version,

@@ -63,7 +63,7 @@ import {
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
-import { OpenAPIBuilder } from '../openapibuilder';
+import { OpenApiBuilder } from '../openapibuilder';
 import { PostmanBuilder } from '../postman/builder';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
@@ -153,7 +153,7 @@ export interface WunderGraphConfigApplicationConfig<
 	/**
 	 * OpenAPI generator configuration
 	 */
-	openAPI?: {
+	openApi?: {
 		title?: string;
 		apiVersion?: string;
 	};
@@ -980,14 +980,14 @@ export const configureWunderGraphApplication = <
 			);
 			Logger.info(`wundergraph.postman.json updated`);
 
-			const openAPIBuilder = new OpenAPIBuilder({
-				title: config.openAPI?.title || 'WunderGraph Application',
-				version: config.openAPI?.apiVersion || '0',
+			const openApiBuilder = new OpenApiBuilder({
+				title: config.openApi?.title || 'WunderGraph Application',
+				version: config.openApi?.apiVersion || '0',
 				baseURL: publicNodeUrl,
 			});
 
-			const openAPISpec = openAPIBuilder.generate(app.Operations);
-			fs.writeFileSync(path.join('generated', 'wundergraph.openapi.json'), JSON.stringify(openAPISpec, null, '  '), {
+			const openApiSpec = openApiBuilder.generate(app.Operations);
+			fs.writeFileSync(path.join('generated', 'wundergraph.openapi.json'), JSON.stringify(openApiSpec, null, '  '), {
 				encoding: 'utf8',
 			});
 			Logger.info(`wundergraph.openapi.json updated`);
