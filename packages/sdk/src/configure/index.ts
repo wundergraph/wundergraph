@@ -701,6 +701,11 @@ export const configureWunderGraphApplication = <
 		return;
 	}
 
+	const wgDirAbs = process.env.WG_DIR_ABS;
+	if (!wgDirAbs) {
+		throw new Error('environment variable WG_DIR_ABS is empty');
+	}
+
 	resolveConfig(config)
 		.then(async (resolved) => {
 			const app = resolved.application;
@@ -752,6 +757,7 @@ export const configureWunderGraphApplication = <
 
 			const loadedOperations = loadOperations(schemaFileName);
 			const operations = await resolveOperationsConfigurations(
+				wgDirAbs,
 				resolved,
 				loadedOperations,
 				app.EngineConfiguration.CustomJsonScalars || []
@@ -770,7 +776,7 @@ export const configureWunderGraphApplication = <
 							if (customize as CustomizeMutation) {
 								mutationConfig = customize(mutationConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
@@ -782,7 +788,7 @@ export const configureWunderGraphApplication = <
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								CacheConfig: {
 									enable: queryConfig.caching.enable,
@@ -801,7 +807,7 @@ export const configureWunderGraphApplication = <
 							if (customize as CustomizeSubscription) {
 								subscriptionConfig = customize(subscriptionConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
@@ -948,7 +954,7 @@ export const configureWunderGraphApplication = <
 			const tsOperations = app.Operations.filter(
 				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
 			);
-			updateTypeScriptOperationsResponseSchemas(tsOperations);
+			updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
 			const configJsonPath = path.join('generated', 'wundergraph.config.json');
 			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
@@ -1226,7 +1232,7 @@ const trimTrailingSlash = (url: string): string => {
 
 // typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
 // operations at once, since it's several times faster than generating them one by one
-const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => {
+const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: GraphQLOperation[]) => {
 	const functionTypeName = (op: GraphQLOperation) => `function_${op.Name}`;
 	const responseTypeName = (op: GraphQLOperation) => `${functionTypeName(op)}_Response`;
 
@@ -1252,7 +1258,7 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 		}
 	}
 
-	const basePath = path.join(process.env.WG_DIR_ABS!, 'generated');
+	const basePath = path.join(wgDirAbs, 'generated');
 	const programPath = path.join(basePath, programFile);
 
 	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
@@ -1299,8 +1305,8 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 	return schemas;
 };
 
-const updateTypeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => {
-	const schemas = typeScriptOperationsResponseSchemas(operations);
+const updateTypeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: GraphQLOperation[]) => {
+	const schemas = typeScriptOperationsResponseSchemas(wgDirAbs, operations);
 	for (const op of operations) {
 		const responseSchema = schemas[op.Name];
 		if (responseSchema) {
@@ -1309,8 +1315,8 @@ const updateTypeScriptOperationsResponseSchemas = (operations: GraphQLOperation[
 	}
 };
 
-const loadNodeJsOperation = async (file: TypeScriptOperationFile) => {
-	const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
+const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
+	const filePath = path.join(wgDirAbs, file.module_path);
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 	const operation: GraphQLOperation = {
 		Name: file.operation_name,
@@ -1370,6 +1376,7 @@ const loadNodeJsOperation = async (file: TypeScriptOperationFile) => {
 };
 
 const resolveOperationsConfigurations = async (
+	wgDirAbs: string,
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
@@ -1416,7 +1423,7 @@ const resolveOperationsConfigurations = async (
 	if (loadedOperations.typescript_operation_files) {
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
-				const { operation, implementation } = await loadNodeJsOperation(file);
+				const { operation, implementation } = await loadNodeJsOperation(wgDirAbs, file);
 				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
 				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
@@ -1428,11 +1435,14 @@ const resolveOperationsConfigurations = async (
 	};
 };
 
-const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+const loadAndApplyNodeJsOperationOverrides = async (
+	wgDirAbs: string,
+	operation: GraphQLOperation
+): Promise<GraphQLOperation> => {
 	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
 		return operation;
 	}
-	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const filePath = path.join(wgDirAbs, 'generated', 'bundle', 'operations', operation.PathName + '.js');
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 	return applyNodeJsOperationOverrides(operation, implementation);
 };
