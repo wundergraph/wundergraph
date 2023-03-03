@@ -48,10 +48,10 @@ require (
 	github.com/valyala/fasthttp v1.44.0
 	github.com/wundergraph/graphql-go-tools v1.61.3
 	go.uber.org/zap v1.18.1
-	golang.org/x/net v0.5.0
+	golang.org/x/net v0.7.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	golang.org/x/text v0.6.0
+	golang.org/x/text v0.7.0
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	google.golang.org/protobuf v1.28.1
 )
