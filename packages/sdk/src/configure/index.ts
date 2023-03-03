@@ -1236,7 +1236,10 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 		try {
 			const cached = fs.readFileSync(cachePath, { encoding: 'utf-8' });
 			return JSON.parse(cached) as Record<string, JSONSchema>;
-		} catch {}
+		} catch {
+			// If the cache loading fails (maybe the file ended up corrupted somehow), we'd rather
+			// fail silently and try to regenerate everything as if there was no cache entry.
+		}
 	}
 
 	const basePath = path.join(process.env.WG_DIR_ABS!, 'generated');
@@ -1280,7 +1283,9 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 			fs.mkdirSync(cacheDir, { recursive: true });
 		}
 		fs.writeFileSync(cachePath, cached, { encoding: 'utf-8' });
-	} catch {}
+	} catch (e: any) {
+		logger.debug(`error storing cache entry: ${e}`);
+	}
 	return schemas;
 };
 
