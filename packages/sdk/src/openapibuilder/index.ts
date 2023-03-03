@@ -103,6 +103,7 @@ interface OpenAPISpec {
 export interface OpenAPIBuilderOptions {
 	baseURL: string;
 	title: string;
+	version: string;
 	summary?: string;
 	description?: string;
 }
@@ -132,8 +133,8 @@ export class OpenAPIBuilder {
 	}
 
 	private queryOperation(op: GraphQLOperation): OpenAPIOperation {
-		let parameters: OpenAPIParameter[] = [];
-		let paths: JSONSchemaParameterPath[] = [];
+		const parameters: OpenAPIParameter[] = [];
+		const paths: JSONSchemaParameterPath[] = [];
 		buildPath([], false, op.VariablesSchema, paths);
 		for (const path of paths) {
 			parameters.push({
@@ -240,7 +241,7 @@ export class OpenAPIBuilder {
 	}
 
 	generate(operations: GraphQLOperation[]) {
-		let paths: Record<string, OpenAPIPath> = {};
+		const paths: Record<string, OpenAPIPath> = {};
 
 		for (const op of operations) {
 			let opPath: OpenAPIPath | undefined;
@@ -265,13 +266,11 @@ export class OpenAPIBuilder {
 		const schemas: Record<string, JSONSchema> = {};
 		schemas[invalidInputErrorName] = errorSchema;
 
-		let spec: OpenAPISpec = {
+		const spec: OpenAPISpec = {
 			openapi: openAPIVersion,
 			info: {
 				title: this.config.title ? this.config.title : this.config.baseURL,
-				version: '1.0',
-				summary: this.config.summary,
-				description: this.config.description,
+				version: this.config.version,
 			},
 			servers: [{ url: this.config.baseURL }],
 			paths,
@@ -279,6 +278,12 @@ export class OpenAPIBuilder {
 				schemas: schemas,
 			},
 		};
+		if (this.config.summary) {
+			spec.info.summary = this.config.summary;
+		}
+		if (this.config.description) {
+			spec.info.description = this.config.description;
+		}
 		return this.rewriteAPISchemaRefs(spec);
 	}
 }

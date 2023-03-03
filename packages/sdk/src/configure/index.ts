@@ -150,6 +150,14 @@ export interface WunderGraphConfigApplicationConfig<
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
 
+	/**
+	 * OpenAPI generator configuration
+	 */
+	openAPI?: {
+		title?: string;
+		apiVersion?: string;
+	};
+
 	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
 }
@@ -973,7 +981,8 @@ export const configureWunderGraphApplication = <
 			Logger.info(`wundergraph.postman.json updated`);
 
 			const openAPIBuilder = new OpenAPIBuilder({
-				title: 'WunderGraph Application',
+				title: config.openAPI?.title || 'WunderGraph Application',
+				version: config.openAPI?.apiVersion || '0',
 				baseURL: publicNodeUrl,
 			});
 
