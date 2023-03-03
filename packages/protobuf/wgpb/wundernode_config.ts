@@ -747,6 +747,7 @@ export interface ApiAuthenticationConfig {
   cookieBased: CookieBasedAuthentication | undefined;
   hooks: ApiAuthenticationHooks | undefined;
   jwksBased: JwksBasedAuthentication | undefined;
+  publicClaims: string[];
 }
 
 export interface JwksBasedAuthentication {
@@ -1248,7 +1249,7 @@ export interface ConfigurationVariable {
 }
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
-  return { cookieBased: undefined, hooks: undefined, jwksBased: undefined };
+  return { cookieBased: undefined, hooks: undefined, jwksBased: undefined, publicClaims: [] };
 }
 
 export const ApiAuthenticationConfig = {
@@ -1257,6 +1258,7 @@ export const ApiAuthenticationConfig = {
       cookieBased: isSet(object.cookieBased) ? CookieBasedAuthentication.fromJSON(object.cookieBased) : undefined,
       hooks: isSet(object.hooks) ? ApiAuthenticationHooks.fromJSON(object.hooks) : undefined,
       jwksBased: isSet(object.jwksBased) ? JwksBasedAuthentication.fromJSON(object.jwksBased) : undefined,
+      publicClaims: Array.isArray(object?.publicClaims) ? object.publicClaims.map((e: any) => String(e)) : [],
     };
   },
 
@@ -1268,6 +1270,11 @@ export const ApiAuthenticationConfig = {
       (obj.hooks = message.hooks ? ApiAuthenticationHooks.toJSON(message.hooks) : undefined);
     message.jwksBased !== undefined &&
       (obj.jwksBased = message.jwksBased ? JwksBasedAuthentication.toJSON(message.jwksBased) : undefined);
+    if (message.publicClaims) {
+      obj.publicClaims = message.publicClaims.map((e) => e);
+    } else {
+      obj.publicClaims = [];
+    }
     return obj;
   },
 
@@ -1282,6 +1289,7 @@ export const ApiAuthenticationConfig = {
     message.jwksBased = (object.jwksBased !== undefined && object.jwksBased !== null)
       ? JwksBasedAuthentication.fromPartial(object.jwksBased)
       : undefined;
+    message.publicClaims = object.publicClaims?.map((e) => e) || [];
     return message;
   },
 };
