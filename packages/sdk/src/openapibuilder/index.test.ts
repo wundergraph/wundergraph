@@ -1,6 +1,6 @@
 import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../graphql/operations';
-import { OpenAPIBuilder } from './index';
+import { OpenApiBuilder } from './index';
 
 const operations = [
 	{
@@ -46,7 +46,7 @@ describe('OpenAPI builder', () => {
 		const apiTitle = 'WunderGraph';
 		const apiVersion = '1';
 		const apiPublicUrl = 'http://localhost:9991';
-		const builder = new OpenAPIBuilder({
+		const builder = new OpenApiBuilder({
 			title: apiTitle,
 			version: apiVersion,
 			baseURL: apiPublicUrl,
@@ -59,7 +59,7 @@ describe('OpenAPI builder', () => {
 	});
 
 	test('operation properties', async () => {
-		const builder = new OpenAPIBuilder({
+		const builder = new OpenApiBuilder({
 			title: 'WunderGraph',
 			version: '1.0',
 			baseURL: 'http://localhost:9991',
@@ -140,7 +140,7 @@ describe('OpenAPI builder', () => {
 	});
 
 	test('OpenAPI Builder', async () => {
-		const builder = new OpenAPIBuilder({
+		const builder = new OpenApiBuilder({
 			title: 'WunderGraph',
 			version: '0',
 			baseURL: 'http://localhost:9991',
