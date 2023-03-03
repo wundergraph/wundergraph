@@ -1270,12 +1270,12 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 		required: true,
 	};
 	// XXX: There's no way to silence warnings from TJS, override console.warn
-	const warn = console.warn;
+	const originalWarn = console.warn;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
 	const generator = TJS.buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
-		console.warn = warn;
+		console.warn = originalWarn;
 		throw new Error('could not parse .ts operation files');
 	}
 	for (const op of operations) {
@@ -1285,7 +1285,7 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 			schemas[op.Name] = schema as JSONSchema;
 		}
 	}
-	console.warn = warn;
+	console.warn = originalWarn;
 	const cached = JSON.stringify(schemas);
 	try {
 		const cacheDir = path.dirname(cachePath);
