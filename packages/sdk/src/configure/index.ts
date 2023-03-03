@@ -1294,7 +1294,7 @@ const typeScriptOperationsResponseSchemas = (operations: GraphQLOperation[]) => 
 		}
 		fs.writeFileSync(cachePath, cached, { encoding: 'utf-8' });
 	} catch (e: any) {
-		logger.debug(`error storing cache entry: ${e}`);
+		logger.error(`error storing cache entry: ${e}`);
 	}
 	return schemas;
 };
