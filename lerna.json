@@ -21,7 +21,8 @@
     "packages/golang-client",
     "packages/swr",
     "packages/create-wundergraph-app",
-    "packages/react-query"
+    "packages/react-query",
+    "packages/solid-query"
   ],
   "npmClient": "pnpm",
   "version": "independent"

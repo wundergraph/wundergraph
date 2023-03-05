@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.3...@wundergraph/react-query@0.7.4) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.2...@wundergraph/react-query@0.7.3) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.1...@wundergraph/react-query@0.7.2) (2023-02-28)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.0...@wundergraph/react-query@0.7.1) (2023-02-26)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.6.0...@wundergraph/react-query@0.7.0) (2023-02-23)
+
+### Features
+
+* add json patch support, response zod schema for ts operations ([#689](https://github.com/wundergraph/wundergraph/issues/689)) ([02f40dc](https://github.com/wundergraph/wundergraph/commit/02f40dc21e63c1771ee7b002c94a396a52f85187)) (@jensneuse)
+
+## [0.6.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.5...@wundergraph/react-query@0.6.0) (2023-02-21)
+
+### Features
+
+* add solid-js client ([#673](https://github.com/wundergraph/wundergraph/issues/673)) ([52a6595](https://github.com/wundergraph/wundergraph/commit/52a6595222cba6ae6c9424c4b6a734bc87909af3)) (@Pagebakers)
+
 ## [0.5.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.5.4...@wundergraph/react-query@0.5.5) (2023-02-10)
 
 **Note:** Version bump only for package @wundergraph/react-query

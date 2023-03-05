@@ -42,6 +42,11 @@ const nextConfig = {
 				destination: '/docs/wundergraph-config-ts-reference',
 				permanent: true,
 			},
+			{
+				source: '/getting-started',
+				destination: '/docs/getting-started',
+				permanent: true,
+			},
 		];
 	},
 };

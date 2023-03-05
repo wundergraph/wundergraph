@@ -115,13 +115,13 @@ func (l *Loader) readOperations() error {
 			return err
 		}
 
-		switch {
-		case strings.HasSuffix(filePath, ".ts"):
+		switch strings.ToLower(filepath.Ext(filePath)) {
+		case ".ts":
 			l.readTypescriptOperation(filePath)
-		case strings.HasSuffix(filePath, ".graphql"):
+		case ".graphql":
 			l.readGraphQLOperation(filePath)
 		default:
-			l.out.Info = append(l.out.Info, fmt.Sprintf("skipping non .graphql file: %s", filePath))
+			l.out.Info = append(l.out.Info, fmt.Sprintf("skipping non .graphql nor .ts file: %s", filePath))
 		}
 
 		return nil
@@ -129,50 +129,75 @@ func (l *Loader) readOperations() error {
 }
 
 func (l *Loader) readTypescriptOperation(relativeFilePath string) {
+	mountPath, operationName, ok := l.normalizedUniqueOperationName(relativeFilePath)
+	if !ok {
+		return
+	}
+	modulePath := filepath.ToSlash(filepath.Join("generated", "bundle", "operations", filepath.FromSlash(mountPath)))
+	typeScriptFile := TypeScriptOperationFile{
+		OperationName: operationName,
+		ApiMountPath:  mountPath,
+		FilePath:      relativeFilePath,
+		ModulePath:    modulePath,
+	}
+	l.out.TypeScriptOperationFiles = append(l.out.TypeScriptOperationFiles, typeScriptFile)
+}
+
+// operationMountPath takes a relative native filename and returns a the URL path
+// the operation should be mounted at. If the mount path results in an invalid
+// operation name, it appends an INFO log message to the Loader's output and returns
+// an empty string.
+func (l *Loader) operationMountPath(relativeFilePath string) string {
 	ext := filepath.Ext(relativeFilePath)
 	relativeFilePathNonExt := relativeFilePath[:len(relativeFilePath)-len(ext)]
 	unixLikeRelativeFilePathNonExt := filepath.ToSlash(relativeFilePathNonExt)
-	operationName := normalizeOperationName(unixLikeRelativeFilePathNonExt)
+
+	if !isValidOperationName(unixLikeRelativeFilePathNonExt) {
+		l.out.Info = append(l.out.Info, fmt.Sprintf("operation names must be alphanumeric only, skipping file: %s", relativeFilePath))
+		return ""
+	}
+
+	return unixLikeRelativeFilePathNonExt
+}
+
+// ensureUniqueOperationName checks that the given normalized operationName is not already used
+// by another operation. If the name is already taken, it appends an INFO log entry to
+// the Loader's output and returns false. Otherwise it returns true.
+func (l *Loader) normalizedUniqueOperationName(relativeFilePath string) (mountPath string, operationName string, ok bool) {
+	mountPath = l.operationMountPath(relativeFilePath)
+	if mountPath == "" {
+		return "", "", false
+	}
+	operationName = normalizeOperationName(mountPath)
+
+	for _, file := range l.out.GraphQLOperationFiles {
+		if file.OperationName == operationName {
+			l.out.Info = append(l.out.Info, fmt.Sprintf(
+				"skipping file %s. Operation name collides with operation defined in: %s", relativeFilePath, file.FilePath))
+			return "", "", false
+		}
+	}
 
 	for _, file := range l.out.TypeScriptOperationFiles {
 		if file.OperationName == operationName {
 			l.out.Info = append(l.out.Info, fmt.Sprintf(
 				"skipping file %s. Operation name collides with operation defined in: %s", relativeFilePath, file.FilePath))
-			return
+			return "", "", false
 		}
 	}
 
-	typeScriptFile := TypeScriptOperationFile{
-		OperationName: operationName,
-		ApiMountPath:  unixLikeRelativeFilePathNonExt,
-		FilePath:      relativeFilePath,
-		ModulePath:    filepath.ToSlash(filepath.Join("generated", "bundle", "operations", relativeFilePathNonExt)),
-	}
-	l.out.TypeScriptOperationFiles = append(l.out.TypeScriptOperationFiles, typeScriptFile)
+	return mountPath, operationName, true
 }
 
-func (l *Loader) readGraphQLOperation(filePath string) {
-	fileName := strings.TrimSuffix(strings.TrimPrefix(filePath, l.operationsRootPath+"/"), ".graphql")
-
-	if !isValidOperationName(fileName) {
-		l.out.Info = append(l.out.Info, fmt.Sprintf("file names must be alpanumeric only, skipping file: %s", fileName))
+func (l *Loader) readGraphQLOperation(relativeFilePath string) {
+	mountPath, operationName, ok := l.normalizedUniqueOperationName(relativeFilePath)
+	if !ok {
 		return
 	}
-
-	operationName := normalizeOperationName(fileName)
-
-	for _, file := range l.out.GraphQLOperationFiles {
-		if file.OperationName == operationName {
-			l.out.Info = append(l.out.Info, fmt.Sprintf(
-				"skipping file %s. Operation name collides with operation defined in: %s", filePath, file.FilePath))
-			return
-		}
-	}
-
 	l.out.GraphQLOperationFiles = append(l.out.GraphQLOperationFiles, GraphQLOperationFile{
 		OperationName: operationName,
-		ApiMountPath:  fileName,
-		FilePath:      filePath,
+		ApiMountPath:  mountPath,
+		FilePath:      relativeFilePath,
 	})
 }
 
@@ -311,7 +336,7 @@ func isValidOperationName(s string) bool {
 		if i == 0 && !unicode.IsLetter(r) {
 			return false
 		}
-		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '/' && r != '_' {
 			return false
 		}
 	}

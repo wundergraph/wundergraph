@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.135.0",
+  "version": "0.137.4",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -62,7 +62,8 @@
   "types": "./dist/index.d.ts",
   "description": "WunderGraph SDK",
   "files": [
-    "dist"
+    "dist",
+    "tsconfig.json"
   ],
   "bin": {
     "wunderctl": "./dist/wunderctl/bin/run.js"
@@ -83,17 +84,12 @@
   "bugs": {
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
-  "tsd": {
-    "directory": "./test-d",
-    "compilerOptions": {
-      "typeRoots": []
-    }
-  },
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "tsc",
     "watch": "tsc -w",
-    "test": "jest && tsd",
+    "test": "jest && npm run test:types",
+    "test:types": "tsd --typings ./tsconfig.json",
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
@@ -105,7 +101,7 @@
     "@types/js-yaml": "^4.0.0",
     "@types/json-schema": "^7.0.6",
     "@types/lodash": "^4.14.178",
-    "@types/node": "^14.18.16",
+    "@types/node": "^18.14.4",
     "@types/node-fetch": "^2.6.2",
     "@types/object-hash": "^1.3.4",
     "chai": "^4.3.4",
@@ -123,12 +119,13 @@
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@wundergraph/protobuf": "workspace:^0.105.0",
-    "@wundergraph/wunderctl": "workspace:>=0.131.0",
+    "@wundergraph/wunderctl": "workspace:>=0.131.3",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
     "cross-fetch": "^3.1.5",
     "execa": "5.1.1",
+    "fast-json-patch": "^3.1.1",
     "fastify": "^4.10.2",
     "fastify-plugin": "^4.4.0",
     "graphql": "^16.6.0",
@@ -158,6 +155,9 @@
       "dist"
     ],
     "testEnvironment": "node"
+  },
+  "tsd": {
+    "directory": "test-d"
   },
   "sideEffects": false
 }

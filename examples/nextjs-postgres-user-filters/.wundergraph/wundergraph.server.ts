@@ -17,7 +17,7 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 						where: {
 							...input.where,
 							created_at: {
-								gt: user.data.db_findFirstUser.Filter.node_created_after,
+								gt: user.data?.db_findFirstUser?.Filter?.node_created_after,
 							},
 						},
 					};

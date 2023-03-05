@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.3...@wundergraph/nextjs@0.9.4) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.2...@wundergraph/nextjs@0.9.3) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.1...@wundergraph/nextjs@0.9.2) (2023-02-28)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.0...@wundergraph/nextjs@0.9.1) (2023-02-26)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.9...@wundergraph/nextjs@0.9.0) (2023-02-23)
+
+### Features
+
+* add json patch support, response zod schema for ts operations ([#689](https://github.com/wundergraph/wundergraph/issues/689)) ([02f40dc](https://github.com/wundergraph/wundergraph/commit/02f40dc21e63c1771ee7b002c94a396a52f85187)) (@jensneuse)
+
+## [0.8.9](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.8...@wundergraph/nextjs@0.8.9) (2023-02-21)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.8.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.8.7...@wundergraph/nextjs@0.8.8) (2023-02-10)
 
 **Note:** Version bump only for package @wundergraph/nextjs

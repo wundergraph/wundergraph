@@ -15,7 +15,7 @@ To use it, follow these steps:
 In your `wundergraph.config.ts`, import the golang client generator:
 
 ```ts
-import { golangClient } from '@wundergraph/golang-client'
+import { golangClient } from '@wundergraph/golang-client';
 ```
 
 Then, add it to the `codeGenerators` of `configureWunderGraphApplication`:
@@ -37,7 +37,7 @@ configureWunderGraphApplication({
       path: './generated/golang/client',
     },
   ],
-})
+});
 ```
 
 As the path, you can choose any path you like.
@@ -48,3 +48,7 @@ Finally, add the dependency to your `go.mod` as the generated client depends on 
 ```shell
 go get https://github.com/wundergraph/client-go
 ```
+
+## Examples
+
+- [golang-client](https://github.com/wundergraph/wundergraph/tree/main/examples/golang-client)

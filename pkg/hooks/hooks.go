@@ -11,11 +11,13 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/buger/jsonparser"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/mattbaird/jsonpatch"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/logging"
@@ -42,7 +44,7 @@ func HttpRequestToWunderGraphRequestJSON(r *http.Request, withBody bool) ([]byte
 	var body []byte
 	if withBody {
 		body, _ = ioutil.ReadAll(r.Body)
-		r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+		r.Body = ioutil.NopCloser(bytes.NewReader(body))
 	}
 	return json.Marshal(WunderGraphRequest{
 		Method:     r.Method,
@@ -186,21 +188,21 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 	return httpClient
 }
 
-func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "global/httpTransport", hook, jsonData)
+func (c *Client) DoGlobalRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+	return c.doMiddlewareRequest(ctx, "global/httpTransport", hook, jsonData, buf)
 }
 
-func (c *Client) DoWsTransportRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "global/wsTransport", hook, jsonData)
+func (c *Client) DoWsTransportRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+	return c.doMiddlewareRequest(ctx, "global/wsTransport", hook, jsonData, buf)
 }
 
-func (c *Client) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "operation/"+operationName, hook, jsonData)
+func (c *Client) DoOperationRequest(ctx context.Context, operationName string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+	return c.doMiddlewareRequest(ctx, "operation/"+operationName, hook, jsonData, buf)
 }
 
-func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte) (*MiddlewareHookResponse, error) {
-	jsonData = c.setInternalHookData(ctx, jsonData)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+	jsonData = c.setInternalHookData(ctx, jsonData, buf)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewReader(jsonData))
 	if err != nil {
 		return nil, err
 	}
@@ -253,9 +255,9 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 	return &hookRes, nil
 }
 
-func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce, sse bool, out io.Writer) error {
-	jsonData = c.setInternalHookData(ctx, jsonData)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewBuffer(jsonData))
+func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationName string, jsonData []byte, subscribeOnce, useSSE, useJsonPatch bool, out io.Writer, buf *bytes.Buffer) error {
+	jsonData = c.setInternalHookData(ctx, jsonData, buf)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/functions/"+operationName, bytes.NewReader(jsonData))
 	if err != nil {
 		return err
 	}
@@ -291,15 +293,25 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 		return fmt.Errorf("client connection is not flushable")
 	}
 
-	buf := bufio.NewReader(resp.Body)
+	if useSSE {
+		defer func() {
+			_, _ = out.Write([]byte("data: done\n\n"))
+			flusher.Flush()
+		}()
+	}
+
+	reader := bufio.NewReader(resp.Body)
+	lastLine := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(lastLine)
+
 	var (
 		line []byte
 	)
 
 	for {
-		line, err = buf.ReadBytes('\n')
+		line, err = reader.ReadBytes('\n')
 		if err == nil {
-			_, err = buf.ReadByte()
+			_, err = reader.ReadByte()
 		}
 		if err != nil {
 			if err == io.EOF {
@@ -310,7 +322,7 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			}
 			return err
 		}
-		if sse {
+		if useSSE {
 			_, err = out.Write([]byte("data: "))
 			if err != nil {
 				if ctx.Err() != nil {
@@ -319,7 +331,33 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 				return fmt.Errorf("error writing to client: %w", err)
 			}
 		}
-		_, err = out.Write(line)
+		if useJsonPatch && lastLine.Len() != 0 {
+			patchOperation, err := jsonpatch.CreatePatch(lastLine.Bytes(), line[:len(line)-1]) // remove newline
+			if err != nil {
+				return fmt.Errorf("error creating json patch: %w", err)
+			}
+			patch, err := json.Marshal(patchOperation)
+			if err != nil {
+				return fmt.Errorf("error marshalling json patch: %w", err)
+			}
+			if len(patch) < len(line) {
+				_, err = out.Write(patch)
+				if err != nil {
+					return err
+				}
+				_, err = out.Write([]byte("\n")) // add newline again
+				if err != nil {
+					return err
+				}
+			} else {
+				_, err = out.Write(line)
+				if err != nil {
+					return err
+				}
+			}
+		} else {
+			_, err = out.Write(line)
+		}
 		if err != nil {
 			if ctx.Err() != nil {
 				return nil
@@ -335,37 +373,43 @@ func (c *Client) DoFunctionSubscriptionRequest(ctx context.Context, operationNam
 			return fmt.Errorf("error writing to client: %w", err)
 		}
 		flusher.Flush()
+		lastLine.Reset()
+		_, _ = lastLine.Write(line)
 	}
 }
 
-func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
-	return c.doMiddlewareRequest(ctx, "authentication", hook, jsonData)
+func (c *Client) DoAuthenticationRequest(ctx context.Context, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
+	return c.doMiddlewareRequest(ctx, "authentication", hook, jsonData, buf)
 }
 
-func (c *Client) DoUploadRequest(ctx context.Context, providerName string, profileName string, hook UploadHook, jsonData []byte) (*UploadHookResponse, error) {
+func (c *Client) DoUploadRequest(ctx context.Context, providerName string, profileName string, hook UploadHook, jsonData []byte, buf *bytes.Buffer) (*UploadHookResponse, error) {
 	var hookResponse UploadHookResponse
-	if err := c.doRequest(ctx, &hookResponse, path.Join("upload", providerName, profileName), MiddlewareHook(hook), jsonData); err != nil {
+	if err := c.doRequest(ctx, &hookResponse, path.Join("upload", providerName, profileName), MiddlewareHook(hook), jsonData, buf); err != nil {
 		return nil, err
 	}
 	return &hookResponse, nil
 }
 
-func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte) []byte {
+func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte, buf *bytes.Buffer) []byte {
 	if len(jsonData) == 0 {
 		jsonData = []byte(`{}`)
 	}
-	if clientRequest, ok := ctx.Value(pool.ClientRequestKey).(*http.Request); ok {
+	if clientRequest := ctx.Value(pool.ClientRequestKey).(*http.Request); clientRequest != nil {
 		_, wgClientRequestType, _, _ := jsonparser.Get(jsonData, "__wg", "clientRequest")
 		if clientRequestData, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false); err == nil && wgClientRequestType == jsonparser.NotExist {
-			jsonData, _ = jsonparser.Set(jsonData, clientRequestData, "__wg", "clientRequest")
+			buf.Reset()
+			_, _ = buf.Write(jsonData)
+			// because we modify the original json data, we need to make sure that the original data is not modified
+			// so we copy it first with enough space to append the clientRequestData
+			jsonData, _ = jsonparser.Set(buf.Bytes(), clientRequestData, "__wg", "clientRequest")
 		}
 	}
 	return jsonData
 }
 
-func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, action string, hook MiddlewareHook, jsonData []byte) error {
-	jsonData = c.setInternalHookData(ctx, jsonData)
-	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewBuffer(jsonData))
+func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, action string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) error {
+	jsonData = c.setInternalHookData(ctx, jsonData, buf)
+	r, err := http.NewRequestWithContext(ctx, "POST", c.serverUrl+"/"+action+"/"+string(hook), bytes.NewReader(jsonData))
 	if err != nil {
 		return err
 	}
@@ -380,16 +424,20 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("hook %s failed with invalid status code: %d, cause: %w", string(hook), 500, err)
+		return fmt.Errorf("hook %s failed with error: %w", string(hook), err)
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("hook %s failed with reading body with error: %w", string(hook), err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("hook %s failed with invalid status code: %d", string(hook), resp.StatusCode)
+		return fmt.Errorf("hook %s failed with invalid status code: %d (%s)", string(hook), resp.StatusCode, string(data))
 	}
 
-	dec := json.NewDecoder(resp.Body)
-
-	err = dec.Decode(hookResponse)
+	err = json.Unmarshal(data, hookResponse)
 	if err != nil {
 		return fmt.Errorf("hook %s response could not be decoded: %w", string(hook), err)
 	}
@@ -401,9 +449,9 @@ func (c *Client) doRequest(ctx context.Context, hookResponse HookResponse, actio
 	return nil
 }
 
-func (c *Client) doMiddlewareRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte) (*MiddlewareHookResponse, error) {
+func (c *Client) doMiddlewareRequest(ctx context.Context, action string, hook MiddlewareHook, jsonData []byte, buf *bytes.Buffer) (*MiddlewareHookResponse, error) {
 	var hookResponse MiddlewareHookResponse
-	if err := c.doRequest(ctx, &hookResponse, action, hook, jsonData); err != nil {
+	if err := c.doRequest(ctx, &hookResponse, action, hook, jsonData, buf); err != nil {
 		return nil, err
 	}
 	return &hookResponse, nil
@@ -420,4 +468,28 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 	}
 
 	return true
+}
+
+func EncodeData(authenticator Authenticator, r *http.Request, buf []byte, variables []byte, response []byte) []byte {
+	// TODO: This doesn't really reuse the bytes.Buffer storage, refactor it after adding more tests
+	buf = buf[:0]
+	buf = append(buf, []byte(`{"__wg":{}}`)...)
+	if user := authenticator(r.Context()); user != nil {
+		if userJson, err := json.Marshal(user); err == nil {
+			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
+		}
+	}
+	if len(variables) > 2 {
+		buf, _ = jsonparser.Set(buf, variables, "input")
+	}
+	if len(response) != 0 {
+		buf, _ = jsonparser.Set(buf, response, "response")
+	}
+	if r != nil {
+		counterHeader := r.Header.Get("Wg-Cycle-Counter")
+		counter, _ := strconv.ParseInt(counterHeader, 10, 64)
+		counterValue := []byte(strconv.FormatInt(counter+1, 10))
+		buf, _ = jsonparser.Set(buf, counterValue, "cycleCounter")
+	}
+	return buf
 }

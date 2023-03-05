@@ -11,10 +11,10 @@ function SubNavigation({ navigation, className }) {
 		<>
 			<div className="relative">
 				<Link
-					className="font-xs group flex items-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+					className="font-xs group -ml-5 flex items-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
 					href="/"
 				>
-					<span className="absolute -left-5 mr-2 inline-block h-4 w-4 transition-all  group-hover:-left-6">
+					<span className="mr-1 inline-block h-4 w-4 transition-all group-hover:-translate-x-1">
 						<ArrowLeftIcon />
 					</span>
 					All docs

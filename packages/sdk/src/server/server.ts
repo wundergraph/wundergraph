@@ -158,6 +158,10 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
+	const nodeURL = WG_CONFIG?.api?.nodeOptions?.nodeUrl
+		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
+		: '';
+
 	const fastify = Fastify({
 		logger,
 		genReqId: (req) => {
@@ -222,12 +226,19 @@ export const createServer = async ({
 			fastify.log.info('Hooks plugin registered');
 		}
 
-		if (serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0) {
-			for await (const server of serverConfig.graphqlServers) {
+		const hasGraphqlServers = serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0;
+
+		let graphqlPlugin: any;
+		if (hasGraphqlServers) {
+			graphqlPlugin = await require('./plugins/graphql');
+		}
+
+		if (hasGraphqlServers) {
+			for await (const server of serverConfig.graphqlServers!) {
 				const routeUrl = customGqlServerMountPath(server.serverName);
-				await fastify.register(require('./plugins/graphql'), { ...server, routeUrl: routeUrl });
+				await fastify.register(graphqlPlugin, { ...server, routeUrl: routeUrl });
 				fastify.log.info('GraphQL plugin registered');
-				fastify.log.info(`Graphql server '${server.serverName}' listening at ${routeUrl}`);
+				fastify.log.info(`GraphQL server '${server.serverName}' listening at ${routeUrl}`);
 			}
 		}
 	});
@@ -237,6 +248,7 @@ export const createServer = async ({
 			wundergraphDir,
 			webhooks: config.api.webhooks,
 			internalClientFactory: clientFactory,
+			nodeURL,
 		});
 		fastify.log.info('Webhooks plugin registered');
 	}
@@ -255,9 +267,7 @@ export const createServer = async ({
 			await fastify.register(FastifyFunctionsPlugin, {
 				operations: operationsConfig.typescript_operation_files,
 				internalClientFactory: clientFactory,
-				nodeURL: WG_CONFIG?.api?.nodeOptions?.nodeUrl
-					? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
-					: '',
+				nodeURL,
 			});
 			fastify.log.info('Functions plugin registered');
 		}

@@ -5,14 +5,15 @@
   "scripts": {
     "start": "wunderctl up --debug",
     "check": "tsc --noEmit",
-    "build": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate --debug",
+    "build": "npm run build:wundergraph",
     "request": "ts-node client.ts",
     "test": "jest"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.135.0"
+    "@wundergraph/sdk": "^0.137.4"
   },
   "devDependencies": {
     "@jest/globals": "^29.3.1",

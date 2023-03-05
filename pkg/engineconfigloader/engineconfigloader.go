@@ -26,6 +26,7 @@ import (
 	oas_datasource "github.com/wundergraph/wundergraph/pkg/datasources/oas"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -183,8 +184,9 @@ func (d *DefaultFactoryResolver) onWsConnectionInitCallback(dataSourceID string)
 				hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 			}
 		}
-
-		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData)
+		buf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(buf)
+		out, err := d.hooksClient.DoWsTransportRequest(ctx, hooks.WsTransportOnConnectionInit, hookData, buf)
 		if err != nil {
 			return nil, err
 		}
@@ -260,15 +262,6 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 		wundergraphDir: wundergraphDir,
 		resolvers:      resolvers,
 	}
-}
-
-func (l *EngineConfigLoader) LoadJson(engineConfigJson json.RawMessage) (*plan.Configuration, error) {
-	var engineConfig wgpb.EngineConfiguration
-	err := json.Unmarshal(engineConfigJson, &engineConfig)
-	if err != nil {
-		return nil, err
-	}
-	return l.Load(engineConfig)
 }
 
 func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.Configuration, error) {

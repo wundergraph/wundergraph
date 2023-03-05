@@ -13,9 +13,10 @@ import {
 	SubscriptionRequestOptions,
 	SubscriptionEventHandler,
 	FetchUserRequestOptions,
+	UploadValidationOptions
 } from "@wundergraph/sdk/client";
 
-import type { CustomClaims } from "./claims";
+import type { PublicCustomClaims } from "./claims";
 import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
@@ -45,7 +46,7 @@ type S3Providers ={
 	{{/each}}
 }
 
-const S3UploadProviderData = {
+const S3UploadProviderData: { [provider: string]: { [profile: string]: UploadValidationOptions } } = {
 	{{#each s3Providers }}
 	{{name}}: {
 		{{#each uploadProfiles}}
@@ -98,6 +99,8 @@ export const operationMetadata: OperationMetadata = {
 {{/each}}
 }
 
+export type PublicUser = {{#if hasPublicUserFields}}Pick<User<UserRole, PublicCustomClaims>, {{{publicUserFields}}}>{{else}}User<UserRole, PublicCustomClaims>{{/if}};
+
 export class WunderGraphClient extends Client {
 	query<
 		OperationName extends Extract<keyof Operations['queries'], string>,
@@ -146,7 +149,7 @@ export class WunderGraphClient extends Client {
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
 	}
-	public async fetchUser<TUser extends User = User<UserRole, CustomClaims>>(options?: FetchUserRequestOptions) {
+	public async fetchUser<TUser extends PublicUser = PublicUser>(options?: FetchUserRequestOptions) {
 		return super.fetchUser<TUser>(options);
 	}
 }
