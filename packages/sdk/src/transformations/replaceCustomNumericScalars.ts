@@ -67,7 +67,6 @@ export const replaceCustomNumericScalars = (
 				fieldName = undefined;
 			},
 		},
-
 		InputValueDefinition: {
 			enter: (node) => {
 				argName = node.name.value;
@@ -75,6 +74,14 @@ export const replaceCustomNumericScalars = (
 			leave: (node) => {
 				argName = undefined;
 			},
+		},
+		ScalarTypeDefinition: (node) => {
+			if (customFloatScalars.includes(node.name.value)) {
+				return null;
+			}
+			if (customIntScalars.includes(node.name.value)) {
+				return null;
+			}
 		},
 		NamedType: (node) => {
 			if (customFloatScalars.includes(node.name.value)) {
