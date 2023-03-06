@@ -1,6 +1,6 @@
 //language=handlebars
 export const template = `
-import type { Operation } from "@wundergraph/sdk/server";
+import type { OperationsClientType } from "@wundergraph/sdk/server";
 import { {{ modelImports }} } from "./models"
 
 export interface Queries {
@@ -26,4 +26,6 @@ export interface Subscriptions {
 		{{/each}}
 {{/if}}
 }
+
+export type InternalOperations = OperationsClientType<Queries, Mutations, Subscriptions>
 `;

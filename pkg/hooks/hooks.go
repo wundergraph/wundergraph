@@ -394,7 +394,7 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte, buf *
 	if len(jsonData) == 0 {
 		jsonData = []byte(`{}`)
 	}
-	if clientRequest, ok := ctx.Value(pool.ClientRequestKey).(*http.Request); ok {
+	if clientRequest := ctx.Value(pool.ClientRequestKey).(*http.Request); clientRequest != nil {
 		_, wgClientRequestType, _, _ := jsonparser.Get(jsonData, "__wg", "clientRequest")
 		if clientRequestData, err := HttpRequestToWunderGraphRequestJSON(clientRequest, false); err == nil && wgClientRequestType == jsonparser.NotExist {
 			buf.Reset()
