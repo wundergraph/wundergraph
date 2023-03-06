@@ -11,30 +11,17 @@ import {
 	StringValueNode,
 	visit,
 } from 'graphql';
-import { GraphQLIntrospection } from '../definition';
 
-export interface ArgumentReplacement {
-	fieldName: string;
-	typeName: string;
-	argName: string;
-	renameTypeTo: string;
-}
-
-export interface CleanupSchemaResult {
-	upstreamSchema: string;
-	argumentReplacements: ArgumentReplacement[];
-}
-
-export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): CleanupSchemaResult => {
-	const customFloatScalars = introspection.customFloatScalars || [];
-	const customIntScalars = introspection.customIntScalars || [];
-
+/*
+	cleanupSchema - cleans up the upstream schema by removing service fields, federation directives,
+	and replacing the operation type names with the standard names. 
+ */
+export const cleanupSchema = (schema: GraphQLSchema): string => {
 	const printed = printSchema(schema);
 	const ast = parse(printed);
 	const queryTypeName = schema.getQueryType()?.name;
 	const mutationTypeName = schema.getMutationType()?.name;
 	const subscriptionTypeName = schema.getSubscriptionType()?.name;
-	const argumentReplacements: ArgumentReplacement[] = [];
 	let fieldName: undefined | string;
 	let argName: undefined | string;
 	let typeName: undefined | string;
@@ -174,43 +161,6 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			}
 		},
 		NamedType: (node) => {
-			if (customFloatScalars.includes(node.name.value)) {
-				if (argName && fieldName && typeName) {
-					argumentReplacements.push({
-						argName,
-						fieldName,
-						typeName,
-						renameTypeTo: node.name.value,
-					});
-					return node;
-				}
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Float',
-					},
-				};
-			}
-			if (customIntScalars.includes(node.name.value)) {
-				if (argName && fieldName && typeName) {
-					argumentReplacements.push({
-						argName,
-						fieldName,
-						typeName,
-						renameTypeTo: node.name.value,
-					});
-					return node;
-				}
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Int',
-					},
-				};
-			}
-
 			return {
 				...node,
 				name: replaceOperationTypeName(node.name),
@@ -288,8 +238,5 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 		},
 	});
 
-	return {
-		upstreamSchema: print(cleanAst),
-		argumentReplacements,
-	};
+	return print(cleanAst);
 };

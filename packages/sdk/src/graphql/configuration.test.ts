@@ -2,7 +2,7 @@ import { configuration, GraphQLConfiguration } from './configuration';
 import { assert } from 'chai';
 import { parse } from 'graphql';
 import { ArgumentRenderConfiguration, ArgumentSource } from '@wundergraph/protobuf';
-import { ArgumentReplacement } from './schema';
+import { ArgumentReplacement } from '../transformations/transformSchema';
 
 const tests: {
 	schema: string;

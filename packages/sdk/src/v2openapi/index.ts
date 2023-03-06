@@ -49,7 +49,7 @@ import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configu
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
-import transformSchema from '../transformations/schema';
+import transformSchema from '../transformations/transformSchema';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,

@@ -15,7 +15,7 @@ import {
 	TypeConfiguration,
 	TypeField,
 } from '@wundergraph/protobuf';
-import { ArgumentReplacement } from './schema';
+import { ArgumentReplacement } from '../transformations/transformSchema';
 import { TypeNode } from 'graphql/language/ast';
 import { Kind } from 'graphql/language/kinds';
 
