@@ -1,39 +1,68 @@
-import { Client, ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
+import { Client, ClientResponseError, OperationsDefinition, UploadResponse, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { SWRResponse } from 'swr';
 import { createHooks } from '../src';
+import { SWRMutationResponse } from 'swr/mutation';
 
-interface Operations extends OperationsDefinition {
-	queries: {
-		Weather: {
-			input: {
-				city: string;
-			};
-			data: any;
-			requiresAuthentication: boolean;
-		};
-	};
-	subscriptions: {
-		Weather: {
-			input: {
-				forCity: string;
-			};
-			data: any;
-			requiresAuthentication: boolean;
-		};
-	};
-	mutations: {
-		CreateUser: {
-			input: {
-				name: string;
-			};
-			data: any;
-			requiresAuthentication: boolean;
-		};
-	};
+export type UserRole = 'admin' | 'user';
+
+export enum AuthProviderId {
+	'github' = 'github',
+	'auth0' = 'auth0',
 }
 
-const { useSubscription, useQuery, useMutation, useUser } = createHooks<Operations>(
+type Queries = {
+	Weather: {
+		input: {
+			city: string;
+		};
+		data: any;
+		requiresAuthentication: boolean;
+	};
+};
+
+type Mutations = {
+	CreateUser: {
+		input: {
+			name: string;
+		};
+		data: any;
+		requiresAuthentication: boolean;
+	};
+};
+
+type Subscriptions = {
+	Weather: {
+		input: {
+			forCity: string;
+		};
+		data: any;
+		requiresAuthentication: boolean;
+	};
+};
+
+type S3Providers = {
+	minio: {
+		hasProfiles: true;
+		profiles: {
+			avatar: object;
+			coverPicture: {
+				postId: string;
+			};
+		};
+	};
+};
+
+type Operations = OperationsDefinition<
+	Queries,
+	Mutations,
+	Subscriptions,
+	UserRole,
+	S3Providers,
+	keyof typeof AuthProviderId
+>;
+
+const { useSubscription, useQuery, useMutation, useUser, useFileUpload } = createHooks<Operations>(
 	new Client({
 		baseURL: 'http://localhost:8080',
 		applicationHash: 'my-application-hash',
@@ -81,10 +110,23 @@ expectType<Promise<any>>(
 	})
 );
 
-expectType<SWRResponse<User<string>, ClientResponseError>>(useUser());
-expectType<SWRResponse<User<string>, ClientResponseError>>(
+expectType<SWRResponse<User<UserRole>, ClientResponseError>>(useUser());
+expectType<SWRResponse<User<UserRole>, ClientResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,
+	})
+);
+
+const { upload } = useFileUpload();
+
+expectType<Promise<string[]>>(
+	upload({
+		provider: 'minio',
+		profile: 'coverPicture',
+		meta: {
+			postId: '1',
+		},
+		files: new FileList(),
 	})
 );
