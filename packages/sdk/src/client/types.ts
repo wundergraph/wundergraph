@@ -123,27 +123,30 @@ export interface SubscriptionResult {
 	data: any;
 }
 
-export interface UploadRequestOptions<ProviderName extends string = string> {
-	provider: ProviderName;
-	files: FileList;
-	abortSignal?: AbortSignal;
-}
+export type UploadRequestOptions<ProviderName = any, ProfileName = any, Meta = any> = ProfileName extends
+	| never
+	| undefined
+	? { provider: ProviderName; files: FileList; abortSignal?: AbortSignal; profile?: ProfileName; meta?: Meta }
+	: { provider: ProviderName; files: FileList; abortSignal?: AbortSignal; profile: ProfileName; meta?: Meta };
 
-export interface UploadRequestOptionsWithProfile<
-	ProviderName extends string = string,
-	ProfileName extends string = string,
-	Meta extends object = object
-> extends UploadRequestOptions<ProviderName> {
-	provider: ProviderName;
-	profile: ProfileName;
-	files: FileList;
-	abortSignal?: AbortSignal;
-	meta?: Meta;
-}
+/**
+ * @deprecated use `UploadRequestOptions` instead
+ */
+export type UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta> = UploadRequestOptions<
+	ProviderName,
+	ProfileName,
+	Meta
+>;
 
 export interface UploadResponse {
 	fileKeys: string[];
 }
+
+export type ExtractProfileName<Profile> = keyof Profile extends never ? undefined : Extract<keyof Profile, string>;
+export type ExtractMeta<
+	Profiles extends Record<string, object>,
+	ProfileName extends string | undefined
+> = ProfileName extends string ? Profiles[ProfileName] : never;
 
 export interface FetchUserRequestOptions {
 	abortSignal?: AbortSignal;
