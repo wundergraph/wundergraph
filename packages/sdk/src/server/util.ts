@@ -2,6 +2,10 @@ import { EnvironmentVariable, mapInputVariable } from '../configure/variables';
 import { defaultHost, defaultServerPort, fallbackUrl, isCloud, LoggerLevel, WgEnv } from '../configure/options';
 import { ResolvedServerOptions, ServerOptions, MandatoryServerOptions } from './types';
 
+export const customGqlServerMountPath = (name: string): string => {
+	return `/gqls/${name}/graphql`;
+};
+
 const DefaultServerOptions: MandatoryServerOptions = {
 	listen: {
 		host: new EnvironmentVariable(WgEnv.ServerHost, defaultHost),
