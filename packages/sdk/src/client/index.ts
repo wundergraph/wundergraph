@@ -26,6 +26,8 @@ export type {
 	S3ProviderDefinition,
 	HasRequiredInput,
 	WithInput,
+	ExtractProfileName,
+	ExtractMeta,
 } from './types';
 
 export type { UploadValidationOptions } from './client';

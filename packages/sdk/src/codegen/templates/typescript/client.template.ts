@@ -6,14 +6,15 @@ import {
 	CreateClientConfig,
 	User,
 	UploadRequestOptions,
-	UploadRequestOptionsWithProfile,
 	OperationMetadata,
 	OperationsDefinition,
 	OperationRequestOptions,
 	SubscriptionRequestOptions,
 	SubscriptionEventHandler,
 	FetchUserRequestOptions,
-	UploadValidationOptions
+	UploadValidationOptions,
+	ExtractProfileName,
+	ExtractMeta,
 } from "@wundergraph/sdk/client";
 
 import type { CustomClaims } from "./claims";
@@ -129,17 +130,14 @@ export class WunderGraphClient extends Client {
 	{{#if hasS3Providers}}
 	public async uploadFiles<
 		ProviderName extends Extract<keyof S3Providers, string>,
-		ProfileName extends Extract<keyof S3Providers[ProviderName]['profiles'], string> = Extract<
-			keyof S3Providers[ProviderName]['profiles'],
-			string
+		ProfileName extends ExtractProfileName<S3Providers[ProviderName]['profiles']> = ExtractProfileName<
+			S3Providers[ProviderName]['profiles']
 		>,
-		Meta extends Extract<S3Providers[ProviderName]['profiles'][ProfileName], object> = Extract<
-			S3Providers[ProviderName]['profiles'][ProfileName],
-			object
+		Meta extends ExtractMeta<S3Providers[ProviderName]['profiles'], ProfileName> = ExtractMeta<
+			S3Providers[ProviderName]['profiles'],
+			ProfileName
 		>
-	>(
-		config: ProfileName extends string ? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta> : UploadRequestOptions
-	) {
+	>(config: UploadRequestOptions<ProviderName, ProfileName, Meta>) {
 		const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
 		return super.uploadFiles(config, profile);
 	}
