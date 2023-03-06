@@ -1,7 +1,6 @@
 import fs from 'fs';
-import path from 'path';
+import path, { relative } from 'path';
 import process from 'node:process';
-import _ from 'lodash';
 import {
 	buildSchema,
 	FieldDefinitionNode,
@@ -12,6 +11,10 @@ import {
 	print,
 	visit,
 } from 'graphql';
+import { JSONSchema7 as JSONSchema } from 'json-schema';
+import objectHash from 'object-hash';
+import _ from 'lodash';
+import { buildGenerator, getProgramFromFiles } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
@@ -32,6 +35,7 @@ import {
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	TypeScriptOperationFile,
 	WellKnownClaim,
 } from '../graphql/operations';
 import { GenerateCode, Template } from '../codegen';
@@ -58,6 +62,7 @@ import {
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
+import { OpenApiBuilder } from '../openapibuilder';
 import { PostmanBuilder } from '../postman/builder';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
 import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerConfig } from '../server/types';
@@ -142,6 +147,14 @@ export interface WunderGraphConfigApplicationConfig<
 	};
 	links?: LinkConfiguration;
 	security?: SecurityConfig;
+
+	/**
+	 * OpenAPI generator configuration
+	 */
+	openApi?: {
+		title?: string;
+		apiVersion?: string;
+	};
 
 	/** @deprecated: Not used anymore */
 	dotGraphQLConfig?: any;
@@ -684,6 +697,11 @@ export const configureWunderGraphApplication = <
 		return;
 	}
 
+	const wgDirAbs = process.env.WG_DIR_ABS;
+	if (!wgDirAbs) {
+		throw new Error('environment variable WG_DIR_ABS is empty');
+	}
+
 	resolveConfig(config)
 		.then(async (resolved) => {
 			const app = resolved.application;
@@ -735,6 +753,7 @@ export const configureWunderGraphApplication = <
 
 			const loadedOperations = loadOperations(schemaFileName);
 			const operations = await resolveOperationsConfigurations(
+				wgDirAbs,
 				resolved,
 				loadedOperations,
 				app.EngineConfiguration.CustomJsonScalars || []
@@ -753,7 +772,7 @@ export const configureWunderGraphApplication = <
 							if (customize as CustomizeMutation) {
 								mutationConfig = customize(mutationConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
@@ -765,7 +784,7 @@ export const configureWunderGraphApplication = <
 							if (customize as CustomizeQuery) {
 								queryConfig = customize(queryConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								CacheConfig: {
 									enable: queryConfig.caching.enable,
@@ -784,7 +803,7 @@ export const configureWunderGraphApplication = <
 							if (customize as CustomizeSubscription) {
 								subscriptionConfig = customize(subscriptionConfig);
 							}
-							return loadAndApplyNodeJsOperationOverrides({
+							return loadAndApplyNodeJsOperationOverrides(wgDirAbs, {
 								...op,
 								AuthenticationConfig: {
 									...op.AuthenticationConfig,
@@ -926,6 +945,13 @@ export const configureWunderGraphApplication = <
 				Logger.info(`Code generation completed.`);
 			}
 
+			// Update response types for TS operations. Do this only after code generation completes,
+			// since TS operations need some of the generated files
+			const tsOperations = app.Operations.filter(
+				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
+			);
+			updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
+
 			const configJsonPath = path.join('generated', 'wundergraph.config.json');
 			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
 			// config json exists
@@ -955,6 +981,18 @@ export const configureWunderGraphApplication = <
 				}
 			);
 			Logger.info(`wundergraph.postman.json updated`);
+
+			const openApiBuilder = new OpenApiBuilder({
+				title: config.openApi?.title || 'WunderGraph Application',
+				version: config.openApi?.apiVersion || '0',
+				baseURL: publicNodeUrl,
+			});
+
+			const openApiSpec = openApiBuilder.build(app.Operations);
+			fs.writeFileSync(path.join('generated', 'wundergraph.openapi.json'), JSON.stringify(openApiSpec, null, '  '), {
+				encoding: 'utf8',
+			});
+			Logger.info(`wundergraph.openapi.json updated`);
 
 			done();
 		})
@@ -1188,7 +1226,153 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
+// typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
+// operations at once, since it's several times faster than generating them one by one
+const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: GraphQLOperation[]) => {
+	const functionTypeName = (op: GraphQLOperation) => `function_${op.Name}`;
+	const responseTypeName = (op: GraphQLOperation) => `${functionTypeName(op)}_Response`;
+
+	const programFile = 'typescript_schema_generator.ts';
+
+	const contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
+
+	for (const op of operations) {
+		const relativePath = `../operations/${op.PathName}`;
+		const name = functionTypeName(op);
+		contents.push(`import type ${name} from "${relativePath}";`);
+		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
+	}
+
+	const cachePath = path.join('cache', `ts.operationTypes.${objectHash(contents)}.json`);
+	if (fs.existsSync(cachePath)) {
+		try {
+			const cached = fs.readFileSync(cachePath, { encoding: 'utf-8' });
+			return JSON.parse(cached) as Record<string, JSONSchema>;
+		} catch {
+			// If the cache loading fails (maybe the file ended up corrupted somehow), we'd rather
+			// fail silently and try to regenerate everything as if there was no cache entry.
+		}
+	}
+
+	const basePath = path.join(wgDirAbs, 'generated');
+	const programPath = path.join(basePath, programFile);
+
+	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
+
+	const compilerOptions = {
+		strictNullChecks: true,
+		noEmit: true,
+		ignoreErrors: true,
+	};
+
+	const program = getProgramFromFiles([programPath], compilerOptions, basePath);
+
+	const schemas: Record<string, JSONSchema> = {};
+	const settings = {
+		required: true,
+	};
+	// XXX: There's no way to silence warnings from TJS, override console.warn
+	const originalWarn = console.warn;
+	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
+	const generator = buildGenerator(program, settings);
+	// generator can be null if the program can't be compiled
+	if (!generator) {
+		console.warn = originalWarn;
+		throw new Error('could not parse .ts operation files');
+	}
+	for (const op of operations) {
+		const schema = generator.getSchemaForSymbol(responseTypeName(op));
+		if (schema) {
+			delete schema.$schema;
+			schemas[op.Name] = schema as JSONSchema;
+		}
+	}
+	console.warn = originalWarn;
+	const cached = JSON.stringify(schemas);
+	try {
+		const cacheDir = path.dirname(cachePath);
+		if (!fs.existsSync(cacheDir)) {
+			fs.mkdirSync(cacheDir, { recursive: true });
+		}
+		fs.writeFileSync(cachePath, cached, { encoding: 'utf-8' });
+	} catch (e: any) {
+		logger.error(`error storing cache entry: ${e}`);
+	}
+	return schemas;
+};
+
+const updateTypeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: GraphQLOperation[]) => {
+	const schemas = typeScriptOperationsResponseSchemas(wgDirAbs, operations);
+	for (const op of operations) {
+		const responseSchema = schemas[op.Name];
+		if (responseSchema) {
+			op.ResponseSchema = responseSchema;
+		}
+	}
+};
+
+const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
+	const filePath = path.join(wgDirAbs, file.module_path);
+	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+	const operation: GraphQLOperation = {
+		Name: file.operation_name,
+		PathName: file.api_mount_path,
+		Content: '',
+		OperationType:
+			implementation.type === 'query'
+				? OperationType.QUERY
+				: implementation.type === 'mutation'
+				? OperationType.MUTATION
+				: OperationType.SUBSCRIPTION,
+		ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
+		VariablesSchema: { type: 'object', properties: {} },
+		InterpolationVariablesSchema: { type: 'object', properties: {} },
+		InternalVariablesSchema: { type: 'object', properties: {} },
+		InjectedVariablesSchema: { type: 'object', properties: {} },
+		// Use an empty default for now, we'll fill that later because we
+		// need some generated files to be ready
+		ResponseSchema: { type: 'object', properties: { data: {} } },
+		TypeScriptOperationImport: `function_${file.operation_name}`,
+		AuthenticationConfig: {
+			required: implementation.requireAuthentication || false,
+		},
+		LiveQuery: {
+			enable: true,
+			pollingIntervalSeconds: 5,
+		},
+		AuthorizationConfig: {
+			claims: [],
+			roleConfig: {
+				requireMatchAll: [],
+				requireMatchAny: [],
+				denyMatchAll: [],
+				denyMatchAny: [],
+			},
+		},
+		HooksConfiguration: {
+			preResolve: false,
+			postResolve: false,
+			mutatingPreResolve: false,
+			mutatingPostResolve: false,
+			mockResolve: {
+				enable: false,
+				subscriptionPollingIntervalMillis: 0,
+			},
+			httpTransportOnResponse: false,
+			httpTransportOnRequest: false,
+			customResolve: false,
+		},
+		VariablesConfiguration: {
+			injectVariables: [],
+		},
+		Internal: implementation.internal ? implementation.internal : false,
+		PostResolveTransformations: undefined,
+	};
+	return { operation, implementation };
+};
+
 const resolveOperationsConfigurations = async (
+	wgDirAbs: string,
 	config: ResolvedWunderGraphConfig,
 	loadedOperations: LoadOperationsOutput,
 	customJsonScalars: string[]
@@ -1214,13 +1398,13 @@ const resolveOperationsConfigurations = async (
 			default:
 				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
 		}
-		const jsonPathComponents = claim.jsonPath.split('.');
+		const jsonPathComponents: string[] = claim.jsonPath.split('.');
 		if (jsonPathComponents.length === 0) {
 			throw new Error(`empty jsonPath in customClaim ${key}`);
 		}
 		return {
 			name: key,
-			jsonPathComponents: jsonPathComponents,
+			jsonPathComponents,
 			type: claimType,
 			required: claim.required ?? true,
 		};
@@ -1232,82 +1416,40 @@ const resolveOperationsConfigurations = async (
 		customClaims,
 	});
 	const nodeJSOperations: GraphQLOperation[] = [];
-	if (loadedOperations.typescript_operation_files)
+	if (loadedOperations.typescript_operation_files) {
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
-				const filePath = path.join(process.env.WG_DIR_ABS!, file.module_path);
-				const implementation = await loadNodeJsOperationDefaultModule(filePath);
-				const operation: GraphQLOperation = {
-					Name: file.operation_name,
-					PathName: file.api_mount_path,
-					Content: '',
-					OperationType:
-						implementation.type === 'query'
-							? OperationType.QUERY
-							: implementation.type === 'mutation'
-							? OperationType.MUTATION
-							: OperationType.SUBSCRIPTION,
-					ExecutionEngine: OperationExecutionEngine.ENGINE_NODEJS,
-					VariablesSchema: { type: 'object', properties: {} },
-					InterpolationVariablesSchema: { type: 'object', properties: {} },
-					InternalVariablesSchema: { type: 'object', properties: {} },
-					InjectedVariablesSchema: { type: 'object', properties: {} },
-					ResponseSchema: { type: 'object', properties: { data: {} } },
-					TypeScriptOperationImport: `function_${file.operation_name}`,
-					AuthenticationConfig: {
-						required: implementation.requireAuthentication || false,
-					},
-					LiveQuery: {
-						enable: true,
-						pollingIntervalSeconds: 5,
-					},
-					AuthorizationConfig: {
-						claims: [],
-						roleConfig: {
-							requireMatchAll: [],
-							requireMatchAny: [],
-							denyMatchAll: [],
-							denyMatchAny: [],
-						},
-					},
-					HooksConfiguration: {
-						preResolve: false,
-						postResolve: false,
-						mutatingPreResolve: false,
-						mutatingPostResolve: false,
-						mockResolve: {
-							enable: false,
-							subscriptionPollingIntervalMillis: 0,
-						},
-						httpTransportOnResponse: false,
-						httpTransportOnRequest: false,
-						customResolve: false,
-					},
-					VariablesConfiguration: {
-						injectVariables: [],
-					},
-					Internal: implementation.internal ? implementation.internal : false,
-					PostResolveTransformations: undefined,
-				};
+				const { operation, implementation } = await loadNodeJsOperation(wgDirAbs, file);
 				nodeJSOperations.push(applyNodeJsOperationOverrides(operation, implementation));
 			} catch (e: any) {
 				logger.info(`Skipping operation ${file.file_path} due to error: ${e.message}`);
 			}
 		}
+	}
 	return {
 		operations: [...graphQLOperations.operations, ...nodeJSOperations],
 	};
 };
 
-const loadAndApplyNodeJsOperationOverrides = async (operation: GraphQLOperation): Promise<GraphQLOperation> => {
+// loadAndApplyNodeJsOperationOverrides loads the implementation file from the given operation and
+// then calls applyNodeJsOperationOverrides with the implementation. If the operation doesn't use
+// the NODEJS engine, it returns the operation unchanged.
+const loadAndApplyNodeJsOperationOverrides = async (
+	wgDirAbs: string,
+	operation: GraphQLOperation
+): Promise<GraphQLOperation> => {
 	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
 		return operation;
 	}
-	const filePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const filePath = path.join(wgDirAbs, 'generated', 'bundle', 'operations', operation.PathName + '.js');
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 	return applyNodeJsOperationOverrides(operation, implementation);
 };
 
+// applyNodeJsOperationOverrides takes a GraphQLOperation using the NODEJS engine as well as the operation implementation
+// and sets the input schema, authorization and authentication configuration for the operation based on what the implementation
+// does. Notice that, for performance reasons, the response schema is set by updateTypeScriptOperationsResponseSchemas instead of
+// this function.
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
 	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
