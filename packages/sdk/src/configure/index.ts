@@ -14,7 +14,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import objectHash from 'object-hash';
 import _ from 'lodash';
-import * as TJS from 'typescript-json-schema';
+import { buildGenerator, getProgramFromFiles } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
@@ -1259,22 +1259,22 @@ const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: Graph
 
 	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
 
-	const compilerOptions: TJS.CompilerOptions = {
+	const compilerOptions = {
 		strictNullChecks: true,
 		noEmit: true,
 		ignoreErrors: true,
 	};
 
-	const program = TJS.getProgramFromFiles([programPath], compilerOptions, basePath);
+	const program = getProgramFromFiles([programPath], compilerOptions, basePath);
 
 	const schemas: Record<string, JSONSchema> = {};
-	const settings: TJS.PartialArgs = {
+	const settings = {
 		required: true,
 	};
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const originalWarn = console.warn;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	const generator = TJS.buildGenerator(program, settings);
+	const generator = buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
 		console.warn = originalWarn;
