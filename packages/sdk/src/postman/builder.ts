@@ -39,7 +39,7 @@ const buildItem = (op: GraphQLOperation, operationURL: string, opName: string) =
 export const PostmanBuilder = (operations: GraphQLOperation[], options: PostmanBuilderOptions) => {
 	const mapOfItems = new Map<string, any[]>();
 	const operationsGroup = new Collection();
-	operationsGroup.id = 'operatations';
+	operationsGroup.id = 'operations';
 	operationsGroup.name = 'operations';
 
 	operations.forEach((op) => {

@@ -1,5 +1,7 @@
 import {
 	ClientResponse,
+	ExtractMeta,
+	ExtractProfileName,
 	FetchUserRequestOptions,
 	OperationRequestOptions,
 	OperationsDefinition,
@@ -184,29 +186,29 @@ export type CreateUploadHook<Operations extends OperationsDefinition> = {
 	> & {
 		upload: <
 			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
-			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
-				keyof Operations['s3Provider'][ProviderName]['profiles'],
-				string
+			ProfileName extends ExtractProfileName<Operations['s3Provider'][ProviderName]['profiles']> = ExtractProfileName<
+				Operations['s3Provider'][ProviderName]['profiles']
 			>,
-			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+			Meta extends ExtractMeta<Operations['s3Provider'][ProviderName]['profiles'], ProfileName> = ExtractMeta<
+				Operations['s3Provider'][ProviderName]['profiles'],
+				ProfileName
+			>
 		>(
-			options: ProfileName extends string
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions<ProviderName>,
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
 			config?: MutateOptions<string[], ClientResponseError, UploadRequestOptions, Context<QueryClient | undefined>>
 		) => void;
 
 		uploadAsync: <
 			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
-			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
-				keyof Operations['s3Provider'][ProviderName]['profiles'],
-				string
+			ProfileName extends ExtractProfileName<Operations['s3Provider'][ProviderName]['profiles']> = ExtractProfileName<
+				Operations['s3Provider'][ProviderName]['profiles']
 			>,
-			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+			Meta extends ExtractMeta<Operations['s3Provider'][ProviderName]['profiles'], ProfileName> = ExtractMeta<
+				Operations['s3Provider'][ProviderName]['profiles'],
+				ProfileName
+			>
 		>(
-			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions<ProviderName>,
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
 			config?: MutateOptions<string[], ClientResponseError, UploadRequestOptions, Context<QueryClient | undefined>>
 		) => Promise<string[] | undefined>;
 	};

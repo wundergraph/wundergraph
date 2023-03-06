@@ -6,11 +6,10 @@ import {
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
 } from '@wundergraph/sdk/client';
-import { UploadRequestOptionsWithProfile } from '@wundergraph/sdk/dist/client/types';
 import { Key, SWRConfiguration, SWRResponse } from 'swr';
 import { SWRMutationConfiguration, SWRMutationResponse } from 'swr/mutation';
 import { ClientResponseError } from '@wundergraph/sdk/client';
-import type { WithInput } from '@wundergraph/sdk/client';
+import type { WithInput, ExtractProfileName, ExtractMeta } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
@@ -167,18 +166,16 @@ export type UseUploadHook<Operations extends OperationsDefinition> = {
 	> & {
 		upload: <
 			ProviderName extends Extract<keyof Operations['s3Provider'], string>,
-			ProfileName extends Extract<keyof Operations['s3Provider'][ProviderName]['profiles'], string> = Extract<
-				keyof Operations['s3Provider'][ProviderName]['profiles'],
-				string
+			ProfileName extends ExtractProfileName<Operations['s3Provider'][ProviderName]['profiles']> = ExtractProfileName<
+				Operations['s3Provider'][ProviderName]['profiles']
 			>,
-			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
+			Meta extends ExtractMeta<Operations['s3Provider'][ProviderName]['profiles'], ProfileName> = ExtractMeta<
+				Operations['s3Provider'][ProviderName]['profiles'],
+				ProfileName
+			>
 		>(
-			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions,
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
 			config?: UseUploadOptions
 		) => Promise<string[]>;
 	};
 };
-
-// type Test<ProfileName> =
