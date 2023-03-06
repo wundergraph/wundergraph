@@ -116,7 +116,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		const health = this.url('/health');
 		const checkHealth = async () => {
 			const controller = new AbortController();
-			const id = setTimeout(() => controller.abort(), 5000);
+			const id = setTimeout(() => controller.abort(), 10000);
 			try {
 				const resp = await this.options.fetch(health, { signal: controller.signal });
 				if (resp.status == 200) {
@@ -134,7 +134,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: 10 });
+			await retry(checkHealth, { retries: 20 });
 		} catch (e: any) {
 			await this.stop();
 			throw new Error(`could not start WunderGraph server: ${e}`);
