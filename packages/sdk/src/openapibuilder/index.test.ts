@@ -51,7 +51,7 @@ describe('OpenAPI builder', () => {
 			version: apiVersion,
 			baseURL: apiPublicUrl,
 		});
-		const result = builder.generate([]);
+		const result = builder.build([]);
 		expect(result.openapi).toBe('3.1.0');
 		expect(result.info.title).toBe(apiTitle);
 		expect(result.info.version).toBe(apiVersion);
@@ -115,7 +115,7 @@ describe('OpenAPI builder', () => {
 				},
 			},
 		] as unknown as GraphQLOperation[];
-		const result = builder.generate(operations);
+		const result = builder.build(operations);
 
 		const querySpec = result.paths['/operations/QueryPath'];
 		expect(querySpec).toBeDefined();
@@ -145,7 +145,7 @@ describe('OpenAPI builder', () => {
 			version: '0',
 			baseURL: 'http://localhost:9991',
 		});
-		const result = builder.generate(operations);
+		const result = builder.build(operations);
 
 		expect(result).toMatchSnapshot();
 	});
