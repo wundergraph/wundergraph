@@ -139,7 +139,7 @@ expectType<Promise<UploadResponse>>(
 );
 
 /**
- * These tests simular how we make the upload handler type safe in the generated client and other clients.
+ * These tests simulate how we make the upload handler type safe in the generated client and other clients.
  * @todo Test the complete generated client.
  */
 type S3ProvidersWithLegacy = {
