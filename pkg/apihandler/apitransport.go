@@ -242,7 +242,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 	}
 
 	// Make sure we account for both pool.ClientRequestKey being nil and being non present
-	if clientRequest, _ := request.Context().Value(pool.ClientRequestKey).(*http.Request); clientRequest != nil {
+	if clientRequest, ok := request.Context().Value(pool.ClientRequestKey).(*http.Request); ok && clientRequest != nil {
 		requestJSON, err := hooks.HttpRequestToWunderGraphRequestJSON(clientRequest, false)
 		if err != nil {
 			return nil, err
