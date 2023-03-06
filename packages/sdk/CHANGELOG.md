@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.138.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.4...@wundergraph/sdk@0.138.0) (2023-03-06)
+
+### Features
+
+* add support for declaring a list of public claims ([#706](https://github.com/wundergraph/wundergraph/issues/706)) ([2223d5c](https://github.com/wundergraph/wundergraph/commit/2223d5c02f1eadaad7ecb6ac863bb2f9e34c926c)) (@fiam)
+* add support for generating OpenAPI specs for applications ([#716](https://github.com/wundergraph/wundergraph/issues/716)) ([fca90e3](https://github.com/wundergraph/wundergraph/commit/fca90e3c662001cb88822088533a500da6979c82)) (@fiam)
+* add support for injecting variables into nested paths ([#678](https://github.com/wundergraph/wundergraph/issues/678)) ([ce0a0a0](https://github.com/wundergraph/wundergraph/commit/ce0a0a09b4e739767b17f1ad391074f6ba597253)) (@fiam)
+* improve webhooks API and add support for the new operations client ([#709](https://github.com/wundergraph/wundergraph/issues/709)) ([35e69a3](https://github.com/wundergraph/wundergraph/commit/35e69a3c174ba94189a95428f06946a0f992db31)) (@Pagebakers)
+
+### Bug Fixes
+
+* upload types ([#723](https://github.com/wundergraph/wundergraph/issues/723)) ([5077a7d](https://github.com/wundergraph/wundergraph/commit/5077a7d2ab363d3bbbb1df35423e5ad799b1800f)) (@Pagebakers)
+
 ## [0.137.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.3...@wundergraph/sdk@0.137.4) (2023-03-01)
 
 **Note:** Version bump only for package @wundergraph/sdk
