@@ -172,12 +172,6 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			if (node.name.value.startsWith('__')) {
 				return null;
 			}
-			if (customFloatScalars.includes(node.name.value)) {
-				return null;
-			}
-			if (customIntScalars.includes(node.name.value)) {
-				return null;
-			}
 		},
 		NamedType: (node) => {
 			if (customFloatScalars.includes(node.name.value)) {
@@ -188,6 +182,7 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 						typeName,
 						renameTypeTo: node.name.value,
 					});
+					return node;
 				}
 				return {
 					...node,
@@ -205,6 +200,7 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 						typeName,
 						renameTypeTo: node.name.value,
 					});
+					return node;
 				}
 				return {
 					...node,
