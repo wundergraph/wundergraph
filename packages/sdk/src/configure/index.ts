@@ -14,7 +14,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import objectHash from 'object-hash';
 import _ from 'lodash';
-import { buildGenerator, getProgramFromFiles } from 'typescript-json-schema';
+import { buildGenerator, getProgramFromFiles, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
@@ -1273,12 +1273,25 @@ const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: Graph
 	};
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const originalWarn = console.warn;
+	const originalError = console.error;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	const generator = buildGenerator(program, settings);
+	console.error = (_message?: any, ..._optionalParams: any[]) => {};
+	let generator = buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
-		console.warn = originalWarn;
-		throw new Error('could not parse .ts operation files');
+		// Try to fallback to generating a program from tsconfig.json
+		const tsConfigPath = path.join(path.dirname(wgDirAbs), 'tsconfig.json');
+		if (fs.existsSync(tsConfigPath)) {
+			const tsConfigProgram = programFromConfig(tsConfigPath);
+			if (tsConfigProgram) {
+				generator = buildGenerator(tsConfigProgram, settings);
+			}
+		}
+		if (!generator) {
+			console.warn = originalWarn;
+			console.error = originalError;
+			throw new Error('could not parse .ts operation files');
+		}
 	}
 	for (const op of operations) {
 		const schema = generator.getSchemaForSymbol(responseTypeName(op));
@@ -1288,6 +1301,7 @@ const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: Graph
 		}
 	}
 	console.warn = originalWarn;
+	console.error = originalError;
 	const cached = JSON.stringify(schemas);
 	try {
 		const cacheDir = path.dirname(cachePath);
