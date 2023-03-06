@@ -108,6 +108,13 @@ export interface OpenApiBuilderOptions {
 	description?: string;
 }
 
+// OpenApiBuilder generates an OpenAPI specification for querying the provided operations.
+// Each operation should have proper VariablesSchema and ResponseSchema. Query and Subscription
+// operations produce GET requests with querystring parameters, while Mutation operations produce
+// POST requests with a JSON body. Responses always use JSON.
+//
+// Due to OpenAPI requirements, the builder needs the base URL as well as the API title and version.
+// These can be provided using OpenApiBuilderOptions.
 export class OpenApiBuilder {
 	constructor(private config: OpenApiBuilderOptions) {}
 
@@ -240,7 +247,7 @@ export class OpenApiBuilder {
 		return spec;
 	}
 
-	generate(operations: GraphQLOperation[]) {
+	build(operations: GraphQLOperation[]) {
 		const paths: Record<string, OpenApiPath> = {};
 
 		for (const op of operations) {

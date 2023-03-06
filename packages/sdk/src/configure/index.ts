@@ -988,7 +988,7 @@ export const configureWunderGraphApplication = <
 				baseURL: publicNodeUrl,
 			});
 
-			const openApiSpec = openApiBuilder.generate(app.Operations);
+			const openApiSpec = openApiBuilder.build(app.Operations);
 			fs.writeFileSync(path.join('generated', 'wundergraph.openapi.json'), JSON.stringify(openApiSpec, null, '  '), {
 				encoding: 'utf8',
 			});
@@ -1398,13 +1398,13 @@ const resolveOperationsConfigurations = async (
 			default:
 				throw new Error(`customClaim ${key} has invalid type ${claim.type}`);
 		}
-		const jsonPathComponents = claim.jsonPath.split('.');
+		const jsonPathComponents: string[] = claim.jsonPath.split('.');
 		if (jsonPathComponents.length === 0) {
 			throw new Error(`empty jsonPath in customClaim ${key}`);
 		}
 		return {
 			name: key,
-			jsonPathComponents: jsonPathComponents,
+			jsonPathComponents,
 			type: claimType,
 			required: claim.required ?? true,
 		};
@@ -1431,6 +1431,9 @@ const resolveOperationsConfigurations = async (
 	};
 };
 
+// loadAndApplyNodeJsOperationOverrides loads the implementation file from the given operation and
+// then calls applyNodeJsOperationOverrides with the implementation. If the operation doesn't use
+// the NODEJS engine, it returns the operation unchanged.
 const loadAndApplyNodeJsOperationOverrides = async (
 	wgDirAbs: string,
 	operation: GraphQLOperation
@@ -1443,6 +1446,10 @@ const loadAndApplyNodeJsOperationOverrides = async (
 	return applyNodeJsOperationOverrides(operation, implementation);
 };
 
+// applyNodeJsOperationOverrides takes a GraphQLOperation using the NODEJS engine as well as the operation implementation
+// and sets the input schema, authorization and authentication configuration for the operation based on what the implementation
+// does. Notice that, for performance reasons, the response schema is set by updateTypeScriptOperationsResponseSchemas instead of
+// this function.
 const applyNodeJsOperationOverrides = (
 	operation: GraphQLOperation,
 	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
