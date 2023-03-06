@@ -370,3 +370,13 @@ describe('test @fromClaim with nested injection', () => {
 		expect(result.data?.echo_struct).toBe(`struct: a:${wellKnownClaims.sub} b:${b} c:${c}`);
 	});
 });
+
+describe('public claims', () => {
+	test('only public claims should be published', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.WithShopIDString);
+		const user = await client.fetchUser();
+		expect(user.userId).toBe(defaultTokenSubject);
+		expect((user as any)['providerId']).toBeUndefined();
+	});
+});
