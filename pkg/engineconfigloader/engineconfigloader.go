@@ -274,8 +274,9 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, hooksSe
 		var args []plan.ArgumentConfiguration
 		for _, argumentConfiguration := range configuration.ArgumentsConfiguration {
 			arg := plan.ArgumentConfiguration{
-				Name:       argumentConfiguration.Name,
-				SourcePath: argumentConfiguration.SourcePath,
+				Name:         argumentConfiguration.Name,
+				SourcePath:   argumentConfiguration.SourcePath,
+				RenameTypeTo: argumentConfiguration.RenameTypeTo,
 			}
 			switch argumentConfiguration.SourceType {
 			case wgpb.ArgumentSource_FIELD_ARGUMENT:
