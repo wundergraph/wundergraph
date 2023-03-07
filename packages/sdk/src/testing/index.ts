@@ -134,7 +134,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: 50 });
+			await retry(checkHealth, { retries: 100 });
 		} catch (e: any) {
 			await this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);
