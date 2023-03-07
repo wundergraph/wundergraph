@@ -96,6 +96,8 @@ jobs:
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code
 
+      - uses: lhotari/action-upterm@v1
+
       - name: Run all NPM tests
         run: pnpm test
         env:
