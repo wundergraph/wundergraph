@@ -573,6 +573,7 @@ const addLink = (
 				sourceType: arg.type === 'objectField' ? ArgumentSource.OBJECT_FIELD : ArgumentSource.FIELD_ARGUMENT,
 				sourcePath: arg.path,
 				renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_GRAPHQL_VALUE,
+				renameTypeTo: '',
 			});
 		});
 		config.application.EngineConfiguration.Fields.push(copy);

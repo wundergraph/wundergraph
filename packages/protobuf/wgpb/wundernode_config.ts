@@ -1102,6 +1102,7 @@ export interface ArgumentConfiguration {
   sourceType: ArgumentSource;
   sourcePath: string[];
   renderConfiguration: ArgumentRenderConfiguration;
+  renameTypeTo: string;
 }
 
 export interface WunderGraphConfiguration {
@@ -3378,7 +3379,7 @@ export const SingleTypeField = {
 };
 
 function createBaseArgumentConfiguration(): ArgumentConfiguration {
-  return { name: "", sourceType: 0, sourcePath: [], renderConfiguration: 0 };
+  return { name: "", sourceType: 0, sourcePath: [], renderConfiguration: 0, renameTypeTo: "" };
 }
 
 export const ArgumentConfiguration = {
@@ -3390,6 +3391,7 @@ export const ArgumentConfiguration = {
       renderConfiguration: isSet(object.renderConfiguration)
         ? argumentRenderConfigurationFromJSON(object.renderConfiguration)
         : 0,
+      renameTypeTo: isSet(object.renameTypeTo) ? String(object.renameTypeTo) : "",
     };
   },
 
@@ -3404,6 +3406,7 @@ export const ArgumentConfiguration = {
     }
     message.renderConfiguration !== undefined &&
       (obj.renderConfiguration = argumentRenderConfigurationToJSON(message.renderConfiguration));
+    message.renameTypeTo !== undefined && (obj.renameTypeTo = message.renameTypeTo);
     return obj;
   },
 
@@ -3413,6 +3416,7 @@ export const ArgumentConfiguration = {
     message.sourceType = object.sourceType ?? 0;
     message.sourcePath = object.sourcePath?.map((e) => e) || [];
     message.renderConfiguration = object.renderConfiguration ?? 0;
+    message.renameTypeTo = object.renameTypeTo ?? "";
     return message;
   },
 };

@@ -1,17 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cleanupSchema custom Int/Float scalars should replace float scalar 1`] = `
-"type Query {
-  foo: Float
-}"
-`;
-
-exports[`cleanupSchema custom Int/Float scalars should replace int scalar 1`] = `
-"type Query {
-  foo: Int
-}"
-`;
-
 exports[`cleanupSchema renamed query types should rename query type 1`] = `
 "schema {
   query: Query
