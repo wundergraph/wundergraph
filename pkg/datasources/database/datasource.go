@@ -853,12 +853,7 @@ func (f *LazyEngineFactory) Engine(prismaSchema, wundergraphDir string, closeTim
 	if exists {
 		return engine
 	}
-	engine = &LazyEngine{
-		m:                   &sync.RWMutex{},
-		prismaSchema:        prismaSchema,
-		wundergraphDir:      wundergraphDir,
-		closeTimeoutSeconds: closeTimeoutSeconds,
-	}
+	engine = newLazyEngine(prismaSchema, wundergraphDir, closeTimeoutSeconds)
 	go engine.Start(f.closer)
 	runtime.SetFinalizer(engine, finalizeEngine)
 	f.engines[prismaSchema] = engine
@@ -884,10 +879,18 @@ type LazyEngine struct {
 	requestWasProcessed chan struct{}
 }
 
+func newLazyEngine(prismaSchema string, wundergraphDir string, closeTimeoutSeconds int64) *LazyEngine {
+	return &LazyEngine{
+		m:                   &sync.RWMutex{},
+		prismaSchema:        prismaSchema,
+		wundergraphDir:      wundergraphDir,
+		closeTimeoutSeconds: closeTimeoutSeconds,
+
+		requestWasProcessed: make(chan struct{}),
+	}
+}
+
 func (e *LazyEngine) Start(closer <-chan struct{}) {
-
-	e.requestWasProcessed = make(chan struct{})
-
 	var stopEngine <-chan time.Time
 
 	for {
