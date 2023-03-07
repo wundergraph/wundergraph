@@ -8,7 +8,7 @@ usage()
   exit 2
 }
 
-default_node_url=http://localhost:9991
+default_node_url=http://127.0.0.1:9991
 update_package_json="no"
 
 kill_with_children() {
@@ -87,6 +87,12 @@ while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
     kill -0 ${pid}
 done
 
+# Wait for server health check
+while ! curl -f -s ${default_node_url}/health; do
+    sleep 0.1
+    # Make sure npm start is still running
+    kill -0 ${pid}
+done
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
