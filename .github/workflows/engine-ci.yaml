@@ -86,6 +86,6 @@ jobs:
           args: --timeout 2m
 
       - name: Run unit and integration tests
-        run: make test-go
+        run: go test -race ./...
         env:
           INT: true
