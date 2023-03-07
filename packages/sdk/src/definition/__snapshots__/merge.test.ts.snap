@@ -419,7 +419,8 @@ exports[`Should be merged: merged_apis 1`] = `
           "name": "first",
           "sourceType": 1,
           "sourcePath": [],
-          "renderConfiguration": 1
+          "renderConfiguration": 1,
+          "renameTypeTo": ""
         }
       ],
       "requiresFields": [],

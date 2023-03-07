@@ -7,7 +7,7 @@ export interface ReplaceCustomScalarsResult {
 	customScalarTypeFields: SingleTypeField[];
 }
 
-const replaceCustomScalars = (
+export const replaceCustomScalars = (
 	schemaSDL: string,
 	introspection: GraphQLIntrospection | OpenAPIIntrospection
 ): ReplaceCustomScalarsResult => {
@@ -112,9 +112,3 @@ const replaceCustomScalars = (
 
 	return { schemaSDL: schema, customScalarTypeFields: customScalarTypeFields };
 };
-
-const transformSchema = {
-	replaceCustomScalars,
-};
-
-export default transformSchema;

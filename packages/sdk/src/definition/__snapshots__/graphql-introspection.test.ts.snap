@@ -764,12 +764,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "first",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "random",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -827,12 +829,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "upc",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "price",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -2061,12 +2065,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "first",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "random",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -2124,12 +2130,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "upc",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "price",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
