@@ -13,12 +13,15 @@ import {
 } from './index';
 import fs from 'fs/promises';
 import crypto from 'crypto';
-import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
+
 import objectHash from 'object-hash';
+
+import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
+import { loadFile } from '../codegen/templates/typescript';
+import { resolveVariable } from '../configure/variables';
 import { LocalCache } from '../localcache';
 import { Logger } from '../logger';
 import { onParentProcessExit } from '../utils/process';
-import { resolveVariable } from '../configure/variables';
 
 export interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
@@ -110,14 +113,8 @@ const urlHash = async (url: string) => {
 };
 
 const graphqlIntrospectionHash = async (introspection: GraphQLIntrospection) => {
-	const loadSchemaFromString = introspection.loadSchemaFromString;
-	if (loadSchemaFromString) {
-		let schema: string;
-		if (typeof loadSchemaFromString === 'function') {
-			schema = loadSchemaFromString();
-		} else {
-			schema = loadSchemaFromString;
-		}
+	if (introspection.loadSchemaFromString) {
+		const schema = loadFile(introspection.loadSchemaFromString);
 		if (schema) {
 			return objectHash([schema, introspection]);
 		}
