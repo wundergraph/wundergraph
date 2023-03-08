@@ -62,6 +62,7 @@ import {
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
+import { LocalCache } from '../localcache';
 import { OpenApiBuilder } from '../openapibuilder';
 import { PostmanBuilder } from '../postman/builder';
 import { CustomizeMutation, CustomizeQuery, CustomizeSubscription, OperationsConfiguration } from './operations';
@@ -951,7 +952,7 @@ export const configureWunderGraphApplication = <
 			const tsOperations = app.Operations.filter(
 				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
 			);
-			updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
+			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
 			const configJsonPath = path.join('generated', 'wundergraph.config.json');
 			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
@@ -1229,7 +1230,7 @@ const trimTrailingSlash = (url: string): string => {
 
 // typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
 // operations at once, since it's several times faster than generating them one by one
-const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: GraphQLOperation[]) => {
+const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
 	const functionTypeName = (op: GraphQLOperation) => `function_${op.Name}`;
 	const responseTypeName = (op: GraphQLOperation) => `${functionTypeName(op)}_Response`;
 
@@ -1244,15 +1245,11 @@ const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: Graph
 		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
 	}
 
-	const cachePath = path.join('cache', `ts.operationTypes.${objectHash(contents)}.json`);
-	if (fs.existsSync(cachePath)) {
-		try {
-			const cached = fs.readFileSync(cachePath, { encoding: 'utf-8' });
-			return JSON.parse(cached) as Record<string, JSONSchema>;
-		} catch {
-			// If the cache loading fails (maybe the file ended up corrupted somehow), we'd rather
-			// fail silently and try to regenerate everything as if there was no cache entry.
-		}
+	const cache = new LocalCache(wgDirAbs).bucket('operationTypes');
+	const cacheKey = `ts.operationTypes.${objectHash(contents)}`;
+	const cachedData = await cache.getJSON(cacheKey);
+	if (cachedData) {
+		return cachedData;
 	}
 
 	const basePath = path.join(wgDirAbs, 'generated');
@@ -1303,21 +1300,13 @@ const typeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: Graph
 	}
 	console.warn = originalWarn;
 	console.error = originalError;
-	const cached = JSON.stringify(schemas);
-	try {
-		const cacheDir = path.dirname(cachePath);
-		if (!fs.existsSync(cacheDir)) {
-			fs.mkdirSync(cacheDir, { recursive: true });
-		}
-		fs.writeFileSync(cachePath, cached, { encoding: 'utf-8' });
-	} catch (e: any) {
-		logger.error(`error storing cache entry: ${e}`);
-	}
+
+	await cache.setJSON(cacheKey, schemas);
 	return schemas;
 };
 
-const updateTypeScriptOperationsResponseSchemas = (wgDirAbs: string, operations: GraphQLOperation[]) => {
-	const schemas = typeScriptOperationsResponseSchemas(wgDirAbs, operations);
+const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
+	const schemas = await typeScriptOperationsResponseSchemas(wgDirAbs, operations);
 	for (const op of operations) {
 		const responseSchema = schemas[op.Name];
 		if (responseSchema) {

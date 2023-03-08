@@ -438,30 +438,14 @@ export const introspect = {
 	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): Promise<GraphQLApi> => {
 		return introspectGraphql(introspection);
 	},
-	postgresql: (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
-		return introspectPostgresql(introspection);
-	},
-	mysql: (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
-		return introspectMySQL(introspection);
-	},
-	planetscale: (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
-		return introspectPlanetScale(introspection);
-	},
-	sqlite: (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
-		return introspectSQLite(introspection);
-	},
-	sqlserver: (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
-		return introspectSQLServer(introspection);
-	},
-	mongodb: (introspection: DatabaseIntrospection): Promise<MongoDBApi> => {
-		return introspectMongoDB(introspection);
-	},
-	prisma: (introspection: PrismaIntrospection): Promise<PrismaApi> => {
-		return introspectPrisma(introspection);
-	},
-	federation: (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
-		return introspectFederation(introspection);
-	},
+	postgresql: introspectPostgresql,
+	mysql: introspectMySQL,
+	planetscale: introspectPlanetScale,
+	sqlite: introspectSQLite,
+	sqlserver: introspectSQLServer,
+	mongodb: introspectMongoDB,
+	prisma: introspectPrisma,
+	federation: introspectFederation,
 	openApi: (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 		return openApi(introspection);
 	},
