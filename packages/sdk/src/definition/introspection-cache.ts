@@ -89,10 +89,15 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 };
 
 const fileHash = async (filePath: string) => {
-	const buffer = await fs.readFile(filePath);
-	const hash = crypto.createHash('sha1');
-	hash.update(buffer);
-	return hash.digest('hex');
+	const st = await fs.stat(filePath);
+	// For files up to 4K, hash the file, otherwise use the mtime
+	if (st.size < 4 * 1024) {
+		const buffer = await fs.readFile(filePath);
+		const hash = crypto.createHash('sha1');
+		hash.update(buffer);
+		return hash.digest('hex');
+	}
+	return objectHash(st.mtime);
 };
 
 const urlHash = async (url: string) => {
