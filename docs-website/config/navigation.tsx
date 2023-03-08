@@ -177,6 +177,34 @@ const navigation = [
 		],
 	},
 	{
+		title: 'WunderGraph By Example',
+		href: '/docs/wundergraph-by-example',
+		paths: ['/docs/wundergraph-by-example'],
+		icon: <BoltIcon />,
+		links: [
+			{
+				title: 'Introduction',
+				href: '/docs/wundergraph-by-example',
+			},
+			{
+				title: 'Hello World',
+				href: '/docs/wundergraph-by-example/hello_world',
+			},
+			{
+				title: 'Thinking in API Dependencies',
+				href: '/docs/wundergraph-by-example/thinking_in_api_dependencies',
+			},
+			{
+				title: 'Joining data across APIs',
+				href: '/docs/wundergraph-by-example/joining_data_across_apis',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/docs/wundergraph-by-example/typescript_operations',
+			},
+		],
+	},
+	{
 		title: 'Guides',
 		href: '/docs/guides',
 		icon: <BookOpenIcon />,
