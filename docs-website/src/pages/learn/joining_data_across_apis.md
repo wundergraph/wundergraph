@@ -1,5 +1,5 @@
 ---
-title: 'WunderGraph by Example - Joining Data Across APIs'
+title: 'Joining Data Across APIs'
 tags: []
 date: 2022-01-02
 description: ''

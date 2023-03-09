@@ -1,5 +1,5 @@
 ---
-title: 'WunderGraph by Example'
+title: 'Introduction'
 tags: []
 date: 2022-01-02
 description: 'Learn how to use WunderGraph and get an understanding of the philosophy behind it by following the examples.'

@@ -1,5 +1,5 @@
 ---
-title: 'WunderGraph by Example - TypeScript Operations'
+title: 'TypeScript Operations'
 tags: []
 date: 2022-01-02
 description: ''

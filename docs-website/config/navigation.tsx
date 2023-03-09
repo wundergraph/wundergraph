@@ -179,28 +179,28 @@ const navigation = [
 	},
 	{
 		title: 'Learn WunderGraph',
-		href: '/learn-wundergraph',
+		href: '/learn',
 		icon: <AcademicCapIcon />,
 		links: [
 			{
 				title: 'Introduction',
-				href: '/learn-wundergraph',
+				href: '/learn',
 			},
 			{
 				title: 'Hello World',
-				href: '/learn-wundergraph/hello_world',
+				href: '/learn/hello_world',
 			},
 			{
 				title: 'Thinking in API Dependencies',
-				href: '/learn-wundergraph/thinking_in_api_dependencies',
+				href: '/learn/thinking_in_api_dependencies',
 			},
 			{
 				title: 'Joining data across APIs',
-				href: '/learn-wundergraph/joining_data_across_apis',
+				href: '/learn/joining_data_across_apis',
 			},
 			{
 				title: 'TypeScript Operations',
-				href: '/learn-wundergraph/typescript_operations',
+				href: '/learn/typescript_operations',
 			},
 		],
 	},

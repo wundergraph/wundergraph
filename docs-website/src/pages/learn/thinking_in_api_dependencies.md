@@ -1,5 +1,5 @@
 ---
-title: 'WunderGraph by Example - Thinking in API Dependencies'
+title: 'Thinking in API Dependencies'
 tags: []
 date: 2022-01-02
 description: ''

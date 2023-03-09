@@ -1,5 +1,5 @@
 ---
-title: 'WunderGraph by Example - Hello World'
+title: 'Hello World'
 tags: []
 date: 2022-01-02
 description: ''
