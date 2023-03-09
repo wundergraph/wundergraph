@@ -16,6 +16,7 @@ import {
 	ArrowUpCircleIcon,
 	LightBulbIcon,
 	ListBulletIcon,
+	AcademicCapIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -177,30 +178,29 @@ const navigation = [
 		],
 	},
 	{
-		title: 'WunderGraph By Example',
-		href: '/docs/wundergraph-by-example',
-		paths: ['/docs/wundergraph-by-example'],
-		icon: <BoltIcon />,
+		title: 'Learn WunderGraph',
+		href: '/wundergraph-by-example',
+		icon: <AcademicCapIcon />,
 		links: [
 			{
 				title: 'Introduction',
-				href: '/docs/wundergraph-by-example',
+				href: '/wundergraph-by-example',
 			},
 			{
 				title: 'Hello World',
-				href: '/docs/wundergraph-by-example/hello_world',
+				href: '/wundergraph-by-example/hello_world',
 			},
 			{
 				title: 'Thinking in API Dependencies',
-				href: '/docs/wundergraph-by-example/thinking_in_api_dependencies',
+				href: '/wundergraph-by-example/thinking_in_api_dependencies',
 			},
 			{
 				title: 'Joining data across APIs',
-				href: '/docs/wundergraph-by-example/joining_data_across_apis',
+				href: '/wundergraph-by-example/joining_data_across_apis',
 			},
 			{
 				title: 'TypeScript Operations',
-				href: '/docs/wundergraph-by-example/typescript_operations',
+				href: '/wundergraph-by-example/typescript_operations',
 			},
 		],
 	},
