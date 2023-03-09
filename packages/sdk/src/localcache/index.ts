@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import syncFs from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
@@ -6,31 +7,34 @@ import objectHash from 'object-hash';
 import semver from 'semver';
 
 import logger from '../logger';
-import { SDK_VERSION } from '../version';
 
 const cacheDirname = 'cache';
 
+export const fileHash = async (filePath: string) => {
+	const st = await fs.stat(filePath);
+	// For files up to 4K, hash the file, otherwise use the mtime
+	if (st.size < 4 * 1024) {
+		const buffer = await fs.readFile(filePath);
+		const hash = crypto.createHash('sha1');
+		hash.update(buffer);
+		return hash.digest('hex');
+	}
+	return objectHash(st.mtime);
+};
+
+export const urlHash = async (url: string) => {
+	const filePrefix = 'file:';
+	if (url.startsWith(filePrefix)) {
+		const filePath = url.substring(filePrefix.length);
+		return fileHash(filePath);
+	}
+	return url;
+};
 export class LocalCache {
 	private readonly root: string = '';
 
 	constructor(wgDir: string) {
-		const sdkVersion = SDK_VERSION;
-		const root = path.join(wgDir, cacheDirname);
-		let version: string;
-		if (sdkVersion && semver.valid(sdkVersion)) {
-			try {
-				this.cleanup(root, sdkVersion);
-			} catch (e: any) {
-				if (!(e instanceof Error) || !e.message.includes('ENOENT')) {
-					throw e;
-				}
-			}
-			version = sdkVersion;
-		} else {
-			// Unknown version?
-			version = '_';
-		}
-		this.root = path.join(root, version);
+		this.root = path.join(wgDir, cacheDirname);
 	}
 
 	private cleanup(root: string, sdkVersion: string) {
@@ -58,7 +62,7 @@ class Bucket {
 	}
 
 	private hasExpired(expiration: number, ignoreTtl?: boolean) {
-		return expiration == 0 || ignoreTtl || Date.now() / 1000 <= expiration;
+		return !(ignoreTtl ?? false) && expiration > 0 && Date.now() / 1000 > expiration;
 	}
 
 	async has(key: any, ignoreTtl?: boolean): Promise<boolean> {
@@ -76,9 +80,11 @@ class Bucket {
 		const filePath = this.keyPath(key);
 		try {
 			const blob = await fs.readFile(filePath);
-			const expiration = blob.readUInt32LE();
-			if (!this.hasExpired(expiration, ignoreTtl)) {
-				return blob.toString('utf-8', 4);
+			if (blob.length > 4 || true) {
+				const expiration = blob.readUInt32LE();
+				if (!this.hasExpired(expiration, ignoreTtl)) {
+					return blob.toString('utf-8', 4);
+				}
 			}
 		} catch (e: any) {
 			if (e instanceof Error && e.message.includes('ENOENT')) {

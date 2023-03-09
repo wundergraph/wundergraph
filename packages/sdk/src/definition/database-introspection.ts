@@ -1,6 +1,8 @@
 import { introspectWithCache } from './introspection-cache';
 import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
 import {
+	Api,
+	ApiType,
 	DatabaseApiCustom,
 	DatabaseIntrospection,
 	DataSource,
@@ -22,8 +24,9 @@ import {
 	applyNameSpaceToTypeFields,
 	generateTypeConfigurationsForNamespace,
 } from './namespacing';
-import { mapInputVariable } from '../configure/variables';
+import { mapInputVariable, resolveVariable } from '../configure/variables';
 import { DataSourceKind, FieldConfiguration, SingleTypeField, TypeConfiguration } from '@wundergraph/protobuf';
+import { fileHash, urlHash } from '../localcache';
 
 const introspectDatabase = async (
 	introspection: DatabaseIntrospection,
@@ -143,55 +146,115 @@ const applyNameSpaceToTypeNames = (typeNames: string[], namespace?: string): str
 	});
 };
 
-interface databaseConstructor<T> {
-	new (
+type databaseConstructor<T> = (
+	schema: string,
+	dataSources: DataSource<DatabaseApiCustom>[],
+	fields: FieldConfiguration[],
+	types: TypeConfiguration[],
+	interpolateVariableDefinitionAsJSON: string[],
+	customJsonScalars?: string[] | undefined
+) => T;
+
+function introspectDatabaseWithCache<TApi extends Api<ApiType>>(
+	ctor: databaseConstructor<TApi>,
+	databaseUrlSchema: DatabaseSchema
+): (introspection: DatabaseIntrospection) => Promise<Api<ApiType>> {
+	const generator = async (introspection: DatabaseIntrospection) => {
+		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+			introspection,
+			databaseUrlSchema,
+			5
+		);
+		return ctor(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+	};
+
+	return async (introspection: DatabaseIntrospection): Promise<Api<ApiType>> => {
+		const url = resolveVariable(introspection.databaseURL);
+		const hash = await urlHash(url);
+		const cacheConfig = { keyInput: hash };
+		return introspectWithCache(introspection, cacheConfig, generator);
+	};
+}
+
+export const introspectPostgresql = introspectDatabaseWithCache(
+	(
 		schema: string,
 		dataSources: DataSource<DatabaseApiCustom>[],
 		fields: FieldConfiguration[],
 		types: TypeConfiguration[],
 		interpolateVariableDefinitionAsJSON: string[],
 		customJsonScalars?: string[] | undefined
-	): T;
-}
+	) => new PostgresqlApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
+	postgresql
+);
+export const introspectMySQL = introspectDatabaseWithCache(
+	(
+		schema: string,
+		dataSources: DataSource<DatabaseApiCustom>[],
+		fields: FieldConfiguration[],
+		types: TypeConfiguration[],
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[] | undefined
+	) => new MySQLApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
+	mysql
+);
+export const introspectPlanetScale = introspectDatabaseWithCache(
+	(
+		schema: string,
+		dataSources: DataSource<DatabaseApiCustom>[],
+		fields: FieldConfiguration[],
+		types: TypeConfiguration[],
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[] | undefined
+	) => new PlanetscaleApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
+	planetscale
+);
+export const introspectSQLite = introspectDatabaseWithCache(
+	(
+		schema: string,
+		dataSources: DataSource<DatabaseApiCustom>[],
+		fields: FieldConfiguration[],
+		types: TypeConfiguration[],
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[] | undefined
+	) => new SQLiteApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
+	sqlite
+);
+export const introspectSQLServer = introspectDatabaseWithCache(
+	(
+		schema: string,
+		dataSources: DataSource<DatabaseApiCustom>[],
+		fields: FieldConfiguration[],
+		types: TypeConfiguration[],
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[] | undefined
+	) => new SQLServerApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
+	sqlserver
+);
+export const introspectMongoDB = introspectDatabaseWithCache(
+	(
+		schema: string,
+		dataSources: DataSource<DatabaseApiCustom>[],
+		fields: FieldConfiguration[],
+		types: TypeConfiguration[],
+		interpolateVariableDefinitionAsJSON: string[],
+		customJsonScalars?: string[] | undefined
+	) => new MongoDBApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON, customJsonScalars),
+	mongodb
+);
 
-function databaseIntrospector<T>(
-	ctor: databaseConstructor<T>,
-	databaseUrlSchema: DatabaseSchema
-): (introspection: DatabaseIntrospection) => Promise<T> {
-	return async (introspection: DatabaseIntrospection) => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			introspection,
-			databaseUrlSchema,
-			5
-		);
-		return new ctor(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	};
-}
-
-export const introspectPostgresql = (introspection: DatabaseIntrospection): Promise<PostgresqlApi> =>
-	introspectWithCache(introspection, databaseIntrospector(PostgresqlApi, postgresql));
-
-export const introspectMySQL = (introspection: DatabaseIntrospection): Promise<MySQLApi> =>
-	introspectWithCache(introspection, databaseIntrospector(MySQLApi, mysql));
-
-export const introspectPlanetScale = async (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> =>
-	introspectWithCache(introspection, databaseIntrospector(PlanetscaleApi, planetscale));
-
-export const introspectSQLite = async (introspection: DatabaseIntrospection): Promise<SQLiteApi> =>
-	introspectWithCache(introspection, databaseIntrospector(SQLiteApi, sqlite));
-
-export const introspectSQLServer = async (introspection: DatabaseIntrospection): Promise<SQLServerApi> =>
-	introspectWithCache(introspection, databaseIntrospector(SQLServerApi, sqlserver));
-
-export const introspectMongoDB = async (introspection: DatabaseIntrospection): Promise<MongoDBApi> =>
-	introspectWithCache(introspection, databaseIntrospector(MongoDBApi, mongodb));
-
-export const introspectPrisma = async (introspection: PrismaIntrospection): Promise<PrismaApi> =>
-	introspectWithCache(introspection, async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
-		const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
-			{ ...introspection, databaseURL: introspection.prismaFilePath },
-			prisma,
-			5
-		);
-		return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
-	});
+export const introspectPrisma = async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+	const cacheConfig = { keyInput: await fileHash(introspection.prismaFilePath) };
+	return introspectWithCache(
+		introspection,
+		cacheConfig,
+		async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+			const { schema, fields, types, dataSources, interpolateVariableDefinitionAsJSON } = await introspectDatabase(
+				{ ...introspection, databaseURL: introspection.prismaFilePath },
+				prisma,
+				5
+			);
+			return new PrismaApi(schema, dataSources, fields, types, interpolateVariableDefinitionAsJSON);
+		}
+	);
+};

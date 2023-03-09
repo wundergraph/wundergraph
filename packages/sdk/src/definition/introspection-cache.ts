@@ -12,7 +12,6 @@ import {
 	WG_ENABLE_INTROSPECTION_OFFLINE,
 } from './index';
 import fs from 'fs/promises';
-import crypto from 'crypto';
 
 import objectHash from 'object-hash';
 
@@ -58,23 +57,30 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 
 export const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	api: Api<A>,
-	introspectionCacheKey: string
+	cacheKey: string
 ): Promise<boolean> => {
 	const wgDirAbs = process.env.WG_DIR_ABS!;
-	new LocalCache(wgDirAbs).bucket('introspection').setJSON(introspectionCacheKey, toCacheEntry(api));
-	return true;
+	const cache = new LocalCache(wgDirAbs).bucket('introspection');
+	const cached = await cache.get(cacheKey);
+	const data = JSON.stringify(toCacheEntry(api));
+	if (cached !== data) {
+		cache.set(cacheKey, data);
+		return true;
+	}
+	return false;
 };
 
 export const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	intervalInSeconds: number,
-	introspectionCacheKey: string,
+	configuration: IntrospectionCacheConfiguration,
 	introspection: Introspection,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
 	const pollingRunner = async () => {
 		try {
+			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 			const api = await generator(introspection);
-			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
+			const updated = await updateIntrospectionCache(api, cacheKey);
 			if (updated) {
 				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
@@ -91,82 +97,26 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 	});
 };
 
-const fileHash = async (filePath: string) => {
-	const st = await fs.stat(filePath);
-	// For files up to 4K, hash the file, otherwise use the mtime
-	if (st.size < 4 * 1024) {
-		const buffer = await fs.readFile(filePath);
-		const hash = crypto.createHash('sha1');
-		hash.update(buffer);
-		return hash.digest('hex');
-	}
-	return objectHash(st.mtime);
-};
+export interface IntrospectionCacheConfiguration {
+	keyInput: string;
+	local?: boolean;
+}
 
-const urlHash = async (url: string) => {
-	const filePrefix = 'file:';
-	if (url.startsWith(filePrefix)) {
-		const filePath = url.substring(filePrefix.length);
-		return fileHash(filePath);
-	}
-	return url;
-};
-
-const graphqlIntrospectionHash = async (introspection: GraphQLIntrospection) => {
-	if (introspection.loadSchemaFromString) {
-		const schema = loadFile(introspection.loadSchemaFromString);
-		if (schema) {
-			return objectHash([schema, introspection]);
-		}
-	}
-	const url = resolveVariable(introspection.url);
-	const baseUrl = introspection.baseUrl ? resolveVariable(introspection.baseUrl) : '';
-	const path = introspection.path ? resolveVariable(introspection.path) : '';
-	const hash = await urlHash(url);
-	const baseUrlHash = await urlHash(baseUrl + path);
-	return objectHash([hash, baseUrlHash, introspection]);
-};
-
-const introspectionCacheKey = async <Introspection extends IntrospectionConfiguration>(
-	introspection: Introspection
+const introspectionCacheConfigurationKey = <Introspection extends IntrospectionConfiguration>(
+	introspection: Introspection,
+	config: IntrospectionCacheConfiguration
 ) => {
-	if ('databaseURL' in introspection) {
-		const databaseIntrospection = introspection as DatabaseIntrospection;
-		const url = resolveVariable(databaseIntrospection.databaseURL);
-		const hash = await urlHash(url);
-		return objectHash([hash, databaseIntrospection]);
-	}
-
-	if ('upstreams' in introspection) {
-		const federationIntrospection = introspection as GraphQLFederationIntrospection;
-		const hashes: string[] = [];
-		federationIntrospection.upstreams.forEach(async (upstream) => {
-			hashes.push(await graphqlIntrospectionHash(upstream));
-		});
-		return objectHash(hashes);
-	}
-
-	if ('prismaFilePath' in introspection) {
-		const prismaIntrospection = introspection as PrismaIntrospection;
-		const hash = await fileHash(prismaIntrospection.prismaFilePath);
-		return objectHash([hash, prismaIntrospection]);
-	}
-
-	if ('url' in introspection) {
-		const graphqlIntrospection = introspection as GraphQLIntrospection;
-		return graphqlIntrospectionHash(graphqlIntrospection);
-	}
-
-	return objectHash(introspection);
+	return objectHash([config.keyInput, introspection]);
 };
 
 export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	introspection: Introspection,
+	configuration: IntrospectionCacheConfiguration,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
 	const wgDirAbs = process.env.WG_DIR_ABS!;
 	const cache = new LocalCache(wgDirAbs).bucket('introspection');
-	const cacheKey = await introspectionCacheKey(introspection);
+	const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
@@ -179,7 +129,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		) {
 			await introspectInInterval(
 				introspection.introspection?.pollingIntervalSeconds,
-				cacheKey,
+				configuration,
 				introspection,
 				generator
 			);

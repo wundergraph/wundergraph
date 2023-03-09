@@ -22,7 +22,7 @@ import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphql } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { loadOpenApi, openApi } from './openapi-introspection';
+import { openApi } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -505,4 +505,3 @@ const upstreamAuthenticationKind = (kind: HTTPUpstreamAuthentication['kind']): U
 			throw new Error(`upstreamAuthenticationKind, unsupported kind: ${kind}`);
 	}
 };
-export { loadOpenApi } from './openapi-introspection';
