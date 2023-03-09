@@ -9,7 +9,7 @@ layout: 'wg_by_example'
 The very first thing we'll do is to create a simple Hello World application by following the docs.
 
 ```shell
-npx create-wundergraph-app my-project -E wundergraph-by-example \ &&
+npx create-wundergraph-app my-project -E learn-wundergraph \ &&
 cd my-project && npm i && npm start
 ```
 
