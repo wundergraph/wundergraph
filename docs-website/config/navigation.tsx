@@ -179,28 +179,28 @@ const navigation = [
 	},
 	{
 		title: 'Learn WunderGraph',
-		href: '/wundergraph-by-example',
+		href: '/learn-wundergraph',
 		icon: <AcademicCapIcon />,
 		links: [
 			{
 				title: 'Introduction',
-				href: '/wundergraph-by-example',
+				href: '/learn-wundergraph',
 			},
 			{
 				title: 'Hello World',
-				href: '/wundergraph-by-example/hello_world',
+				href: '/learn-wundergraph/hello_world',
 			},
 			{
 				title: 'Thinking in API Dependencies',
-				href: '/wundergraph-by-example/thinking_in_api_dependencies',
+				href: '/learn-wundergraph/thinking_in_api_dependencies',
 			},
 			{
 				title: 'Joining data across APIs',
-				href: '/wundergraph-by-example/joining_data_across_apis',
+				href: '/learn-wundergraph/joining_data_across_apis',
 			},
 			{
 				title: 'TypeScript Operations',
-				href: '/wundergraph-by-example/typescript_operations',
+				href: '/learn-wundergraph/typescript_operations',
 			},
 		],
 	},
