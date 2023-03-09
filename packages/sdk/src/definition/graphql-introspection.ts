@@ -83,7 +83,7 @@ export const graphqlIntrospectionCacheConfiguration = async (
 	const baseUrl = introspection.baseUrl ? resolveVariable(introspection.baseUrl) : '';
 	const path = introspection.path ? resolveVariable(introspection.path) : '';
 	const hash = await urlHash(url);
-	const dataSource = urlIsLocalNetwork(url) ? 'localNetwork' : 'remote';
+	const dataSource = (await urlIsLocalNetwork(url)) ? 'localNetwork' : 'remote';
 	const baseUrlHash = await urlHash(baseUrl + path);
 	return { keyInput: hash + baseUrlHash, dataSource };
 };

@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import dns from 'node:dns/promises';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -37,11 +38,26 @@ export const urlHash = async (url: string) => {
 	return url;
 };
 
+function isPrivateIP(ip: string) {
+	const parts = ip.split('.');
+	return (
+		parts[0] === '127' ||
+		parts[0] == '10' ||
+		(parts[0] === '172' && parseInt(parts[1], 10) >= 16 && parseInt(parts[1], 10) <= 31) ||
+		(parts[0] === '192' && parts[1] === '168')
+	);
+}
+
 /*
  * urlIsLocalNetwork returns true iff the url points to
  * an address within the local network
  */
-export const urlIsLocalNetwork = (url: string) => {
+export const urlIsLocalNetwork = async (url: string) => {
+	try {
+		const parsed = new URL(url);
+		const addr = await dns.lookup(parsed.hostname, { family: 4 });
+		return isPrivateIP(addr.address);
+	} catch (e: any) {}
 	return false;
 };
 
