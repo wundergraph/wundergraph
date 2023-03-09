@@ -1,14 +1,20 @@
 import crypto from 'crypto';
-import syncFs from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
 import objectHash from 'object-hash';
-import semver from 'semver';
 
 import logger from '../logger';
 
 const cacheDirname = 'cache';
+
+interface CacheSetOptions {
+	ttlSeconds?: number;
+}
+
+interface CacheGetOptions {
+	ignoreTtl?: boolean;
+}
 
 export const fileHash = async (filePath: string) => {
 	const st = await fs.stat(filePath);
@@ -30,23 +36,20 @@ export const urlHash = async (url: string) => {
 	}
 	return url;
 };
+
+/*
+ * urlIsLocalNetwork returns true iff the url points to
+ * an address within the local network
+ */
+export const urlIsLocalNetwork = (url: string) => {
+	return false;
+};
+
 export class LocalCache {
 	private readonly root: string = '';
 
 	constructor(wgDir: string) {
 		this.root = path.join(wgDir, cacheDirname);
-	}
-
-	private cleanup(root: string, sdkVersion: string) {
-		// Cleanup caches for older versions
-		for (const entry of syncFs.readdirSync(root)) {
-			if (!semver.valid(entry)) {
-				continue;
-			}
-			if (semver.lt(entry, sdkVersion)) {
-				syncFs.rmSync(path.join(root, entry), { recursive: true, force: true });
-			}
-		}
 	}
 
 	bucket(name: string) {
@@ -61,28 +64,29 @@ class Bucket {
 		return path.join(this.dir, objectHash(key));
 	}
 
-	private hasExpired(expiration: number, ignoreTtl?: boolean) {
-		return !(ignoreTtl ?? false) && expiration > 0 && Date.now() / 1000 > expiration;
+	private hasExpired(expiration: number, opts?: CacheGetOptions) {
+		const ignoreTtl = opts?.ignoreTtl ?? false;
+		return !ignoreTtl && expiration > 0 && Date.now() / 1000 > expiration;
 	}
 
-	async has(key: any, ignoreTtl?: boolean): Promise<boolean> {
+	async has(key: any, opts?: CacheGetOptions): Promise<boolean> {
 		const filePath = this.keyPath(key);
 		try {
 			const blob = await fs.readFile(filePath);
 			const expiration = blob.readUInt32LE();
-			return !this.hasExpired(expiration, ignoreTtl);
+			return !this.hasExpired(expiration, opts);
 		} catch (e: any) {
 			return false;
 		}
 	}
 
-	async get(key: any, ignoreTtl?: boolean): Promise<string | undefined> {
+	async get(key: any, opts?: CacheGetOptions): Promise<string | undefined> {
 		const filePath = this.keyPath(key);
 		try {
 			const blob = await fs.readFile(filePath);
 			if (blob.length > 4 || true) {
 				const expiration = blob.readUInt32LE();
-				if (!this.hasExpired(expiration, ignoreTtl)) {
+				if (!this.hasExpired(expiration, opts)) {
 					return blob.toString('utf-8', 4);
 				}
 			}
@@ -115,9 +119,10 @@ class Bucket {
 		}
 	}
 
-	async set(key: any, data: string, ttlSeconds?: number): Promise<void> {
+	async set(key: any, data: string, opts?: CacheSetOptions): Promise<void> {
 		const filePath = this.keyPath(key);
-		const expiration = (ttlSeconds ?? 0) > 0 ? Date.now() / 1000 + ttlSeconds! : 0;
+		const ttlSeconds = opts?.ttlSeconds ?? 0;
+		const expiration = ttlSeconds > 0 ? Date.now() / 1000 + ttlSeconds : 0;
 		const expirationBuf = Buffer.alloc(4);
 		expirationBuf.writeUint32LE(expiration);
 		const buf = Buffer.concat([expirationBuf, Buffer.from(data, 'utf-8')]);
@@ -128,8 +133,8 @@ class Bucket {
 		}
 	}
 
-	async getJSON(key: any, ignoreTtl?: boolean): Promise<any> {
-		const data = await this.get(key);
+	async getJSON(key: any, opts?: CacheGetOptions): Promise<any> {
+		const data = await this.get(key, opts);
 		if (data !== undefined) {
 			try {
 				return JSON.parse(data);
@@ -140,7 +145,7 @@ class Bucket {
 		return undefined;
 	}
 
-	async setJSON(key: any, data: any, ttlSeconds?: number): Promise<void> {
+	async setJSON(key: any, data: any, opts?: CacheSetOptions): Promise<void> {
 		let encoded: string;
 		try {
 			encoded = JSON.stringify(data);
@@ -149,6 +154,6 @@ class Bucket {
 			return;
 		}
 
-		await this.set(key, encoded, ttlSeconds);
+		await this.set(key, encoded, opts);
 	}
 }

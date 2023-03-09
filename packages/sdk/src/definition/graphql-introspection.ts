@@ -26,12 +26,12 @@ import {
 } from './namespacing';
 import { loadFile } from '../codegen/templates/typescript';
 import * as https from 'https';
-import { introspectWithCache } from './introspection-cache';
+import { IntrospectionCacheConfiguration, introspectWithCache } from './introspection-cache';
 import { mapInputVariable, resolveVariable } from '../configure/variables';
 import { buildMTLSConfiguration, buildUpstreamAuthentication, GraphQLApi, GraphQLIntrospection } from './index';
 import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
-import { urlHash } from '../localcache';
+import { urlHash, urlIsLocalNetwork } from '../localcache';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
 import transformSchema from '../transformations/transformSchema';
@@ -70,19 +70,22 @@ export const resolveGraphqlIntrospectionHeaders = (headers?: { [key: string]: HT
 	return baseHeaders;
 };
 
-export const graphqlIntrospectionCacheConfiguration = async (introspection: GraphQLIntrospection) => {
+export const graphqlIntrospectionCacheConfiguration = async (
+	introspection: GraphQLIntrospection
+): Promise<IntrospectionCacheConfiguration> => {
 	if (introspection.loadSchemaFromString) {
 		const schema = loadFile(introspection.loadSchemaFromString);
 		if (schema) {
-			return { keyInput: schema };
+			return { keyInput: schema, dataSource: 'localFilesystem' };
 		}
 	}
 	const url = resolveVariable(introspection.url);
 	const baseUrl = introspection.baseUrl ? resolveVariable(introspection.baseUrl) : '';
 	const path = introspection.path ? resolveVariable(introspection.path) : '';
 	const hash = await urlHash(url);
+	const dataSource = urlIsLocalNetwork(url) ? 'localNetwork' : 'remote';
 	const baseUrlHash = await urlHash(baseUrl + path);
-	return { keyInput: hash + baseUrlHash };
+	return { keyInput: hash + baseUrlHash, dataSource };
 };
 
 export const introspectGraphql = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {

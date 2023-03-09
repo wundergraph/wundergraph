@@ -22,7 +22,7 @@ const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 
 export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 	const spec = await loadOpenApi(introspection.source);
-	const configuration = { keyInput: spec, local: true };
+	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
 		introspection,
 		configuration,

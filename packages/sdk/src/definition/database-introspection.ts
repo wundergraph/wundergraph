@@ -1,4 +1,4 @@
-import { introspectWithCache } from './introspection-cache';
+import { IntrospectionCacheConfiguration, introspectWithCache } from './introspection-cache';
 import { DatabaseSchema, mongodb, mysql, planetscale, postgresql, prisma, sqlite, sqlserver } from '../db/types';
 import {
 	Api,
@@ -171,6 +171,8 @@ function introspectDatabaseWithCache<TApi extends Api<ApiType>>(
 	return async (introspection: DatabaseIntrospection): Promise<Api<ApiType>> => {
 		const url = resolveVariable(introspection.databaseURL);
 		const hash = await urlHash(url);
+		// Introspecting a database might be expensive, even if it's a local network URL.
+		// Consider all sources as remote to cache them more aggressively
 		const cacheConfig = { keyInput: hash };
 		return introspectWithCache(introspection, cacheConfig, generator);
 	};
@@ -244,7 +246,10 @@ export const introspectMongoDB = introspectDatabaseWithCache(
 );
 
 export const introspectPrisma = async (introspection: PrismaIntrospection): Promise<PrismaApi> => {
-	const cacheConfig = { keyInput: await fileHash(introspection.prismaFilePath) };
+	const cacheConfig: IntrospectionCacheConfiguration = {
+		keyInput: await fileHash(introspection.prismaFilePath),
+		dataSource: 'localFilesystem',
+	};
 	return introspectWithCache(
 		introspection,
 		cacheConfig,
