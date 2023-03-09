@@ -1237,16 +1237,20 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const programFile = 'typescript_schema_generator.ts';
 
 	const contents: string[] = ['import type { ExtractResponse } from "@wundergraph/sdk/operations";'];
+	const operationHashes: string[] = [];
 
 	for (const op of operations) {
 		const relativePath = `../operations/${op.PathName}`;
 		const name = functionTypeName(op);
 		contents.push(`import type ${name} from "${relativePath}";`);
 		contents.push(`export type ${responseTypeName(op)} = ExtractResponse<typeof ${name}>`);
+		const implementationFilePath = operationFilePath(wgDirAbs, op);
+		const implementationContents = fs.readFileSync(implementationFilePath, { encoding: 'utf8' });
+		operationHashes.push(objectHash(implementationContents));
 	}
 
 	const cache = new LocalCache(wgDirAbs).bucket('operationTypes');
-	const cacheKey = `ts.operationTypes.${objectHash(contents)}`;
+	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
 	const cachedData = await cache.getJSON(cacheKey);
 	if (cachedData) {
 		return cachedData;
@@ -1433,6 +1437,20 @@ const resolveOperationsConfigurations = async (
 	return {
 		operations: [...graphQLOperations.operations, ...nodeJSOperations],
 	};
+};
+
+// operationFilePath returns the absolute path for the implementation file of an operation
+const operationFilePath = (wgDirAbs: string, operation: GraphQLOperation) => {
+	let extension: string;
+	switch (operation.ExecutionEngine) {
+		case OperationExecutionEngine.ENGINE_GRAPHQL:
+			extension = '.graphql';
+			break;
+		case OperationExecutionEngine.ENGINE_NODEJS:
+			extension = '.ts';
+			break;
+	}
+	return path.join(wgDirAbs, 'operations', `${operation.PathName}${extension}`);
 };
 
 // loadAndApplyNodeJsOperationOverrides loads the implementation file from the given operation and
