@@ -46,22 +46,26 @@ export const urlIsLocalNetwork = (url: string) => {
 };
 
 export class LocalCache {
-	private readonly root: string = '';
+	private readonly root: string | undefined;
 
-	constructor(wgDir: string) {
-		this.root = path.join(wgDir, cacheDirname);
+	constructor(wgDir?: string) {
+		if (wgDir) {
+			this.root = path.join(wgDir, cacheDirname);
+		} else {
+			logger.debug('could not determine $WG_ABS_DIR, caching is disabled');
+		}
 	}
 
 	bucket(name: string) {
-		return new Bucket(path.join(this.root, path.normalize(name)));
+		return new Bucket(this.root ? path.join(this.root, path.normalize(name)) : undefined);
 	}
 }
 
 class Bucket {
-	constructor(private dir: string) {}
+	constructor(private dir?: string) {}
 
-	private keyPath(key: any): string {
-		return path.join(this.dir, objectHash(key));
+	private keyPath(key: any): string | undefined {
+		return this.dir ? path.join(this.dir, objectHash(key)) : undefined;
 	}
 
 	private hasExpired(expiration: number, opts?: CacheGetOptions) {
@@ -71,17 +75,21 @@ class Bucket {
 
 	async has(key: any, opts?: CacheGetOptions): Promise<boolean> {
 		const filePath = this.keyPath(key);
-		try {
-			const blob = await fs.readFile(filePath);
-			const expiration = blob.readUInt32LE();
-			return !this.hasExpired(expiration, opts);
-		} catch (e: any) {
-			return false;
+		if (filePath) {
+			try {
+				const blob = await fs.readFile(filePath);
+				const expiration = blob.readUInt32LE();
+				return !this.hasExpired(expiration, opts);
+			} catch (e: any) {}
 		}
+		return false;
 	}
 
 	async get(key: any, opts?: CacheGetOptions): Promise<string | undefined> {
 		const filePath = this.keyPath(key);
+		if (!filePath) {
+			return undefined;
+		}
 		try {
 			const blob = await fs.readFile(filePath);
 			if (blob.length > 4 || true) {
@@ -121,6 +129,9 @@ class Bucket {
 
 	async set(key: any, data: string, opts?: CacheSetOptions): Promise<void> {
 		const filePath = this.keyPath(key);
+		if (!filePath) {
+			return;
+		}
 		const ttlSeconds = opts?.ttlSeconds ?? 0;
 		const expiration = ttlSeconds > 0 ? Date.now() / 1000 + ttlSeconds : 0;
 		const expirationBuf = Buffer.alloc(4);
