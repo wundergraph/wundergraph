@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/wundergraph/wundergraph/pkg/relay"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
@@ -120,6 +121,9 @@ func (l *Loader) readOperations() error {
 			l.readTypescriptOperation(filePath)
 		case ".graphql":
 			l.readGraphQLOperation(filePath)
+		case ".json":
+			r := relay.NewRelay(filepath.Join(l.operationsRootPath, filePath))
+			return r.ExpandOperationsJson()
 		default:
 			l.out.Info = append(l.out.Info, fmt.Sprintf("skipping non .graphql nor .ts file: %s", filePath))
 		}
