@@ -33,7 +33,7 @@ import { HeadersBuilder, mapHeaders } from './headers-builder';
 import { Fetcher } from './introspection-fetcher';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
-import transformSchema from '../transformations/schema';
+import transformSchema from '../transformations/transformSchema';
 
 class MissingKeyError extends Error {
 	constructor(private key: string, private introspection: GraphQLIntrospection) {
@@ -85,11 +85,21 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const headers = mapHeaders(headersBuilder);
 		const introspectionHeaders = resolveGraphqlIntrospectionHeaders(mapHeaders(introspectionHeadersBuilder));
 
-		let schema = await introspectGraphQLSchema(introspection, introspectionHeaders);
-		schema = lexicographicSortSchema(schema);
+		let upstreamSchema = await introspectGraphQLSchema(introspection, introspectionHeaders);
+		upstreamSchema = lexicographicSortSchema(upstreamSchema);
 		const federationEnabled = introspection.isFederation || false;
-		const upstreamSchema = cleanupSchema(schema, introspection);
-		const { schemaSDL, customScalarTypeFields } = transformSchema.replaceCustomScalars(upstreamSchema, introspection);
+		const cleanUpstreamSchema = cleanupSchema(upstreamSchema);
+
+		const { schemaSDL: schemaSDLWithCustomScalars, customScalarTypeFields } = transformSchema.replaceCustomScalars(
+			cleanUpstreamSchema,
+			introspection
+		);
+
+		const { schemaSDL, argumentReplacements } = transformSchema.replaceCustomNumericScalars(
+			schemaSDLWithCustomScalars,
+			introspection
+		);
+
 		let serviceSDL: string | undefined;
 		if (federationEnabled) {
 			if (introspection.loadSchemaFromString) {
@@ -109,9 +119,10 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 		const { RootNodes, ChildNodes, Fields } = configuration(
 			schemaDocumentNode,
 			introspection.customJSONScalars,
-			serviceDocumentNode
+			serviceDocumentNode,
+			argumentReplacements
 		);
-		const subscriptionsEnabled = hasSubscriptions(schema);
+		const subscriptionsEnabled = hasSubscriptions(upstreamSchema);
 		if (introspection.internal === true) {
 			headers['X-WG-Internal-GraphQL-API'] = {
 				values: [
@@ -160,7 +171,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							Enabled: federationEnabled,
 							ServiceSDL: serviceSDL || '',
 						},
-						UpstreamSchema: upstreamSchema,
+						UpstreamSchema: cleanUpstreamSchema,
 						HooksConfiguration: {
 							onWSTransportConnectionInit: false,
 						},
@@ -170,7 +181,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 							introspection.apiNamespace
 						),
 					},
-					Directives: applyNamespaceToDirectiveConfiguration(schema, introspection.apiNamespace),
+					Directives: applyNamespaceToDirectiveConfiguration(upstreamSchema, introspection.apiNamespace),
 					RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
 				},
 			],

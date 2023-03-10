@@ -457,6 +457,7 @@ message ArgumentConfiguration {
 	ArgumentSource sourceType = 2;
 	repeated string sourcePath = 3;
 	ArgumentRenderConfiguration renderConfiguration = 4;
+	string renameTypeTo = 5;
 }
 
 enum ArgumentRenderConfiguration {
