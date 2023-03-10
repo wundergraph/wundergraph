@@ -70,6 +70,8 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "description": "Invalid input",
           },
         },
+        "x-wundergraph-operation-type": "query",
+        "x-wundergraph-requires-authentication": false,
       },
     },
     "/GetRootObj2": {
@@ -96,9 +98,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "description": "Invalid input",
           },
         },
+        "x-wundergraph-operation-type": "query",
+        "x-wundergraph-requires-authentication": false,
       },
     },
-    "/item/GetID": {
+    "/users/get": {
       "get": {
         "operationId": "GetUser",
         "parameters": [],
@@ -122,6 +126,76 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "description": "Invalid input",
           },
         },
+        "x-wundergraph-operation-type": "query",
+        "x-wundergraph-requires-authentication": false,
+      },
+    },
+    "/users/put": {
+      "post": {
+        "operationId": "PutUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "definitions": {},
+                "properties": {},
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": undefined,
+              },
+            },
+            "description": "Success",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputError",
+                },
+              },
+            },
+            "description": "Invalid input",
+          },
+        },
+        "x-wundergraph-operation-type": "mutation",
+        "x-wundergraph-requires-authentication": true,
+      },
+    },
+    "/users/subscribe": {
+      "get": {
+        "operationId": "SubscribeToUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": undefined,
+              },
+            },
+            "description": "Success",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputError",
+                },
+              },
+            },
+            "description": "Invalid input",
+          },
+        },
+        "x-wundergraph-operation-type": "subscription",
+        "x-wundergraph-requires-authentication": false,
       },
     },
   },
