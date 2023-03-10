@@ -4,6 +4,7 @@ import fs from 'fs';
 
 import { OpenAPIIntrospection, OpenAPIIntrospectionSource, RESTApi } from './index';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
+import { openApiSpecificationToRESTApiObject as meshTodo } from '../v2openapi/mesh';
 import { introspectWithCache } from './introspection-cache';
 
 export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
@@ -23,6 +24,9 @@ export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
 export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 	const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 		const spec = loadOpenApi(introspection.source);
+
+		await meshTodo(spec, introspection);
+
 		return await openApiSpecificationToRESTApiObject(spec, introspection);
 	};
 	// If the source is a file we have all data required to perform the instrospection

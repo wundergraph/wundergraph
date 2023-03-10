@@ -116,6 +116,9 @@
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
     "@graphql-tools/schema": "^8.3.10",
+    "@graphql-tools/utils": "^9.2.1",
+    "@omnigraph/json-schema": "^0.38.16",
+    "@omnigraph/openapi": "^0.19.18",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
     "@wundergraph/protobuf": "workspace:^0.106.0",

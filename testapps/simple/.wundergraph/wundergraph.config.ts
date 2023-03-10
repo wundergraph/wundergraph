@@ -2,9 +2,70 @@ import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect,
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
+function serviceUrl(serviceName: string): string {
+	return 'http://' + serviceName + '.dev-stage.onramp2dev.com';
+}
+
+const kyc_storage = introspect.openApi({
+	apiNamespace: 'kyc_storage',
+	source: {
+		kind: 'file',
+		filePath: '../openapi/openapi_kyc_storage.yaml',
+	},
+	introspection: {
+		pollingIntervalSeconds: 2,
+	},
+	requestTimeoutSeconds: 10, // optional
+	baseURL: serviceUrl('kyc-storage-api-facade-service'),
+	statusCodeUnions: true,
+});
+
+// const kyc_status = introspect.openApi({
+// 	apiNamespace: 'kyc_status',
+// 	source: {
+// 		kind: 'file',
+// 		filePath: '../openapi/openapi_kyc_status.yaml',
+// 	},
+// 	introspection: {
+// 		pollingIntervalSeconds: 2,
+// 	},
+// 	requestTimeoutSeconds: 10, // optional
+// 	baseURL: serviceUrl('kyc-status-service'),
+// 	statusCodeUnions: true,
+// });
+//
+// const purchase_component = introspect.openApi({
+// 	apiNamespace: 'purchase_component',
+// 	source: {
+// 		kind: 'file',
+// 		filePath: '../openapi/openapi_purchase_component.yaml',
+// 	},
+// 	introspection: {
+// 		pollingIntervalSeconds: 2,
+// 	},
+// 	requestTimeoutSeconds: 10, // optional
+// 	baseURL: serviceUrl('purchase-service'),
+// 	statusCodeUnions: true,
+// });
+//
+// const authentication = introspect.openApi({
+// 	apiNamespace: 'authentication',
+// 	source: {
+// 		kind: 'file',
+// 		filePath: '../openapi/openapi_authentication.yaml',
+// 	},
+// 	introspection: {
+// 		pollingIntervalSeconds: 2,
+// 	},
+// 	requestTimeoutSeconds: 10, // optional
+// 	baseURL: serviceUrl('auth-service'),
+// 	statusCodeUnions: true,
+// });
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [],
+	// apis: [kyc_status, kyc_storage, authentication, purchase_component],
+	apis: [kyc_storage],
 	server,
 	operations,
 	codeGenerators: [
