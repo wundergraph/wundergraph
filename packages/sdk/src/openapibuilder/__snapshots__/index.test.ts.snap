@@ -46,7 +46,7 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
   },
   "openapi": "3.1.0",
   "paths": {
-    "/operations/GetRootObj": {
+    "/GetRootObj": {
       "get": {
         "operationId": "GetRootObj",
         "parameters": [],
@@ -72,7 +72,7 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         },
       },
     },
-    "/operations/GetRootObj2": {
+    "/GetRootObj2": {
       "get": {
         "operationId": "GetRootObj2",
         "parameters": [],
@@ -98,7 +98,7 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         },
       },
     },
-    "/operations/item/GetID": {
+    "/item/GetID": {
       "get": {
         "operationId": "GetUser",
         "parameters": [],
@@ -127,7 +127,7 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
   },
   "servers": [
     {
-      "url": "http://localhost:9991",
+      "url": "http://localhost:9991/operations",
     },
   ],
 }

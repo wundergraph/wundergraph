@@ -55,7 +55,7 @@ describe('OpenAPI builder', () => {
 		expect(result.openapi).toBe('3.1.0');
 		expect(result.info.title).toBe(apiTitle);
 		expect(result.info.version).toBe(apiVersion);
-		expect(result.servers[0].url).toBe(apiPublicUrl);
+		expect(result.servers[0].url).toBe(`${apiPublicUrl}/operations`);
 	});
 
 	test('operation properties', async () => {
@@ -117,7 +117,7 @@ describe('OpenAPI builder', () => {
 		] as unknown as GraphQLOperation[];
 		const result = builder.build(operations);
 
-		const querySpec = result.paths['/operations/QueryPath'];
+		const querySpec = result.paths['/QueryPath'];
 		expect(querySpec).toBeDefined();
 		expect(querySpec.post).toBeUndefined();
 		expect(querySpec.get?.operationId).toBe('Query');
@@ -129,7 +129,7 @@ describe('OpenAPI builder', () => {
 		expect(queryResponse).toBeDefined();
 		expect(queryResponse?.content['application/json'].schema).toBe(operations[0].ResponseSchema);
 
-		const mutationSpec = result.paths['/operations/MutationPath'];
+		const mutationSpec = result.paths['/MutationPath'];
 		expect(mutationSpec).toBeDefined();
 		expect(mutationSpec.get).toBeUndefined();
 		expect(mutationSpec.post?.operationId).toBe('Mutation');
@@ -137,6 +137,31 @@ describe('OpenAPI builder', () => {
 		const mutationResponse = mutationSpec.post?.responses['200'];
 		expect(mutationResponse).toBeDefined();
 		expect(mutationResponse?.content['application/json'].schema).toBe(operations[1].ResponseSchema);
+	});
+
+	test('skip internal operations', async () => {
+		const operations = [
+			{
+				Name: 'Query',
+				PathName: 'QueryPath',
+				OperationType: OperationType.QUERY,
+			},
+			{
+				Name: 'InternalQuery',
+				PathName: 'InternalQueryPath',
+				OperationType: OperationType.QUERY,
+				Internal: true,
+			},
+		] as unknown as GraphQLOperation[];
+		const builder = new OpenApiBuilder({
+			title: 'WunderGraph',
+			version: '0',
+			baseURL: 'http://localhost:9991',
+		});
+		const result = builder.build(operations);
+		expect(Object.keys(result.paths).length).toBe(1);
+		expect(result.paths['/QueryPath']).toBeDefined();
+		expect(result.paths['/InternalQueryPath']).toBeUndefined();
 	});
 
 	test('OpenAPI Builder', async () => {

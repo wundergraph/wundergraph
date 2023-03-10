@@ -251,6 +251,9 @@ export class OpenApiBuilder {
 		const paths: Record<string, OpenApiPath> = {};
 
 		for (const op of operations) {
+			if (op.Internal) {
+				continue;
+			}
 			let opPath: OpenApiPath | undefined;
 			switch (op.OperationType) {
 				case OperationType.QUERY:
@@ -266,7 +269,7 @@ export class OpenApiBuilder {
 					break;
 			}
 			if (opPath) {
-				paths[`/operations/${op.PathName}`] = opPath;
+				paths[`/${op.PathName}`] = opPath;
 			}
 		}
 
@@ -279,7 +282,7 @@ export class OpenApiBuilder {
 				title: this.config.title ? this.config.title : this.config.baseURL,
 				version: this.config.version,
 			},
-			servers: [{ url: this.config.baseURL }],
+			servers: [{ url: `${this.config.baseURL}/operations` }],
 			paths,
 			components: {
 				schemas: schemas,
