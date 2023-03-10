@@ -7,16 +7,15 @@ import {
 	WG_ENABLE_INTROSPECTION_CACHE,
 	WG_ENABLE_INTROSPECTION_OFFLINE,
 } from './index';
-import fs from 'fs/promises';
 
 import objectHash from 'object-hash';
 
 import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
-import { LocalCache } from '../localcache';
+import { LocalCache, LocalCacheBucket } from '../localcache';
 import { Logger } from '../logger';
 import { onParentProcessExit } from '../utils/process';
 
-export interface IntrospectionCacheFile<A extends ApiType> {
+interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
 	schema: string;
 	dataSources: DataSource<A>[];
@@ -26,7 +25,7 @@ export interface IntrospectionCacheFile<A extends ApiType> {
 	customJsonScalars: string[] | undefined;
 }
 
-export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
+function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
 	return {
 		version: '1.0.0',
 		schema: api.Schema,
@@ -38,7 +37,7 @@ export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCache
 	};
 }
 
-export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Api<A> {
+function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Api<A> {
 	return new Api<A>(
 		cache.schema,
 		cache.dataSources,
@@ -49,26 +48,26 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 	);
 }
 
-export const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	api: Api<A>,
+	bucket: LocalCacheBucket,
 	cacheKey: string,
 	ttlSeconds: number
 ): Promise<boolean> => {
-	const wgDirAbs = process.env.WG_DIR_ABS!;
-	const cache = new LocalCache(wgDirAbs).bucket('introspection');
-	const cached = await cache.get(cacheKey);
+	const cached = await bucket.get(cacheKey);
 	const data = JSON.stringify(toCacheEntry(api));
 	if (cached !== data) {
-		cache.set(cacheKey, data, { ttlSeconds: ttlSeconds });
+		bucket.set(cacheKey, data, { ttlSeconds: ttlSeconds });
 		return true;
 	}
 	return false;
 };
 
-export const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	intervalInSeconds: number,
 	configuration: IntrospectionCacheConfiguration,
 	introspection: Introspection,
+	bucket: LocalCacheBucket,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
 	const ttlSeconds = introspectionCacheConfigurationTtl(configuration);
@@ -76,7 +75,7 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 		try {
 			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 			const api = await generator(introspection);
-			const updated = await updateIntrospectionCache(api, cacheKey, ttlSeconds);
+			const updated = await updateIntrospectionCache(api, bucket, cacheKey, ttlSeconds);
 			if (updated) {
 				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
@@ -153,8 +152,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	configuration: IntrospectionCacheConfiguration,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const wgDirAbs = process.env.WG_DIR_ABS!;
-	const cache = new LocalCache(wgDirAbs).bucket('introspection');
+	const cache = new LocalCache().bucket('introspection');
 	const dataSource = introspectionCacheConfigurationDataSource(configuration);
 	const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 
@@ -171,6 +169,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 				introspection.introspection?.pollingIntervalSeconds,
 				configuration,
 				introspection,
+				cache,
 				generator
 			);
 		}

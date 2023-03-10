@@ -64,20 +64,19 @@ export const urlIsLocalNetwork = async (url: string) => {
 export class LocalCache {
 	private readonly root: string | undefined;
 
-	constructor(wgDir?: string) {
-		if (wgDir) {
-			this.root = path.join(wgDir, cacheDirname);
-		} else {
-			logger.debug('could not determine $WG_ABS_DIR, caching is disabled');
+	constructor() {
+		this.root = process.env['WUNDERGRAPH_CACHE_DIR'];
+		if (!this.root) {
+			logger.debug('could not determine $WUNDERGRAPH_CACHE_DIR, caching is disabled');
 		}
 	}
 
 	bucket(name: string) {
-		return new Bucket(this.root ? path.join(this.root, path.normalize(name)) : undefined);
+		return new LocalCacheBucket(this.root ? path.join(this.root, path.normalize(name)) : undefined);
 	}
 }
 
-class Bucket {
+export class LocalCacheBucket {
 	constructor(private dir?: string) {}
 
 	private keyPath(key: any): string | undefined {

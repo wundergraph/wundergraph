@@ -57,15 +57,13 @@ var generateCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
-			ScriptEnv: append(
-				helpers.CliEnv(rootFlags),
+			ScriptEnv: append(append(
+				helpers.CliEnv(rootFlags), commonScriptEnv(wunderGraphDir)...),
 				// Run scripts in prod mode
 				"NODE_ENV=production",
 				"WG_THROW_ON_OPERATION_LOADING_ERROR=true",
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
 				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
-				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
-				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
 			),
 		})
 		defer func() {

@@ -2,9 +2,9 @@ package commands
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/fatih/color"
@@ -106,9 +106,10 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			cacheDir := filepath.Join(wunderGraphDir, "cache")
-			if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-				return err
+			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {
+				if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+					return err
+				}
 			}
 		}
 
@@ -225,6 +226,19 @@ func wunderctlBinaryPath() string {
 		}
 	}
 	return path
+}
+
+// commonScriptEnv returns environment variables that all script invocations should use
+func commonScriptEnv(wunderGraphDir string) []string {
+	cacheDir, err := helpers.LocalWunderGraphCacheDir(wunderGraphDir)
+	if err != nil {
+		log.Warn("could not determine cache directory", zap.Error(err))
+	}
+	return []string{
+		fmt.Sprintf("WUNDERGRAPH_CACHE_DIR=%s", cacheDir),
+		fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+		fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
+	}
 }
 
 func init() {

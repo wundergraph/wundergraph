@@ -1249,7 +1249,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 		operationHashes.push(objectHash(implementationContents));
 	}
 
-	const cache = new LocalCache(wgDirAbs).bucket('operationTypes');
+	const cache = new LocalCache().bucket('operationTypes');
 	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
 	const cachedData = await cache.getJSON(cacheKey);
 	if (cachedData) {
