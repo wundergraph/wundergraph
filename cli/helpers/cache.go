@@ -19,17 +19,19 @@ func GlobalWunderGraphCacheDir() (string, error) {
 // LocalWunderGraphCacheDir returns the absolute path to the
 // cache directory for the current WunderGraph app
 func LocalWunderGraphCacheDir(wgDir string) (string, error) {
-	// Find node modules
+	// Find the top node_modules directory from the WunderGraph
+	// directory by walking up
 	abs, err := filepath.Abs(wgDir)
 	if err != nil {
 		return "", err
 	}
 	const nodeModulesDirName = "node_modules"
+	topNodeModules := ""
 	cur := abs
 	for {
 		nodeModules := filepath.Join(cur, nodeModulesDirName)
 		if st, err := os.Stat(nodeModules); err == nil && st.IsDir() {
-			return filepath.Join(nodeModules, ".cache", ".wundergraph"), nil
+			topNodeModules = nodeModules
 		}
 		next := filepath.Dir(cur)
 		if next == cur {
@@ -37,6 +39,9 @@ func LocalWunderGraphCacheDir(wgDir string) (string, error) {
 			break
 		}
 		cur = next
+	}
+	if topNodeModules != "" {
+		return filepath.Join(topNodeModules, ".cache", ".wundergraph"), nil
 	}
 	return "", fmt.Errorf("could not find %s", nodeModulesDirName)
 }
