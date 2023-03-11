@@ -15,6 +15,56 @@ import { LocalCache, LocalCacheBucket } from '../localcache';
 import { Logger } from '../logger';
 import { onParentProcessExit } from '../utils/process';
 
+/**
+ * Introspection cache
+ * =================================
+ *
+ * The introspection cache stores introspection results for APIs ready to be used, to allow for
+ * faster reloads/startup times. No intermediate data is stored, only the final introspection result.
+ *
+ * Cache keys are derived so that when the local data / configuration for an API changes, the derived
+ * key is different. Special care must be taken for configurations that reference the environment (using the
+ * resolved environment variable, NOT the variable name and default value) as well as for Introspection subclasses
+ * that use function pointers (objectHash cannot know what the function returns, so the hash is based on the function name
+ * and won't change if the return value is different).
+ *
+ * Note that there's no way to find out wether a remote API has changed, so we make some assumptions to
+ * walk the fine line between responsiveness and correctness.
+ *
+ * There are 3 different types of sources when it comes to API introspection, and we use different caching
+ * strategies for these:
+ *
+ * ## Introspection from data coming from the filesystem
+ *
+ * There are some API types (like OpenAPI) where all we use for introspection comes from the local filesystem.
+ * This means that we know for sure that if the local data hasn't changed, the introspection will return the same
+ * value. For this type of sources, we cache the value forever.
+ *
+ * ## Introspection from data coming from remote sources
+ *
+ * Other APIs, like GraphQL, might produce a different introspection result when either the local data changes
+ * (e.g. custom scalars) or when changes are made to the remote end. There's no way to derive a perfect cache key
+ * for these, so we cache them. Notice that if introspection fails and the cache is enabled, we try to load a
+ * cached result ignoring its expiration as a fallback.
+ *
+ * ## Introspection from data coming from remote sources IN THE LOCAL NETWORK
+ *
+ * There'a a subset of APIs coming from remote data that warrant special consideration: those coming off the
+ * local network (including localhost). This have a higher chance that someone working on a WunderGraph app
+ * and an API using these network addresses is also making changes to the API, while at the same time should
+ * be faster to introspect than APIs further away. To provide a better experience for this use case, we always
+ * try to introspect APIs coming from the local network, ignoring the cache, but falling back to it if the
+ * introspection fails.
+ *
+ *
+ * # Polling
+ *
+ * Additionally, the introspection cache implements an optional polling mechanism that users can opt into when
+ * defining their API. This causes the remote API to be periodically polled and introspected. If the result is
+ * different that what we have in the cache, we update the cache entry and the Go side responds by reloading
+ * the development server.
+ */
+
 interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
 	schema: string;

@@ -48,7 +48,7 @@ function isPrivateIP(ip: string) {
 	);
 }
 
-/*
+/**
  * urlIsLocalNetwork returns true iff the url points to
  * an address within the local network
  */
@@ -61,6 +61,15 @@ export const urlIsLocalNetwork = async (url: string) => {
 	return false;
 };
 
+/**
+ * LocalCache implements a filesystem backed cache local to the current WunderGraph
+ * project. The go side is expected to determine WUNDERGRAPH_CACHE_DIR and pass it to
+ * the SDK in an environment variable.
+ *
+ * Each LocalCache consists of several buckets, each one mapped to a directory, that
+ * store data associated to a given key. To obtain a bucket call LocalCache.bucket().
+ * See LocalCacheBucket for further details.
+ */
 export class LocalCache {
 	private readonly root: string | undefined;
 
@@ -76,6 +85,13 @@ export class LocalCache {
 	}
 }
 
+/**
+ * LocalCacheBucket implements a cache bucket that stores keys associated to values, with an
+ * optional expiration TTL. Internally, this TTL is translated to an expiration time. If TTL
+ * is zero, then the cached entry never expires. To create an entry that is immediately expired
+ * use a negative TTL. When looking up keys, CacheGetOptions.ignoreTTL can be used to retrieve
+ * a key even if it's expired.
+ */
 export class LocalCacheBucket {
 	constructor(private dir?: string) {}
 
@@ -148,7 +164,7 @@ export class LocalCacheBucket {
 			return;
 		}
 		const ttlSeconds = opts?.ttlSeconds ?? 0;
-		const expiration = ttlSeconds > 0 ? Date.now() / 1000 + ttlSeconds : 0;
+		const expiration = ttlSeconds !== 0 ? Date.now() / 1000 + ttlSeconds : 0;
 		const expirationBuf = Buffer.alloc(4);
 		expirationBuf.writeUint32LE(expiration);
 		const buf = Buffer.concat([expirationBuf, Buffer.from(data, 'utf-8')]);
