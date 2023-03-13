@@ -48,16 +48,18 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 }
 
 export const readIntrospectionCacheFile = async (cacheKey: string): Promise<string> => {
-	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
-	try {
-		return await fsP.readFile(cacheFile, 'utf8');
-	} catch (e) {
-		if (e instanceof Error && e.message.startsWith('ENOENT')) {
-			// File does not exist
-			return '';
-		}
-		throw e;
-	}
+	return '';
+
+	// const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
+	// try {
+	// 	return await fsP.readFile(cacheFile, 'utf8');
+	// } catch (e) {
+	// 	if (e instanceof Error && e.message.startsWith('ENOENT')) {
+	// 		// File does not exist
+	// 		return '';
+	// 	}
+	// 	throw e;
+	// }
 };
 
 export const writeIntrospectionCacheFile = async (cacheKey: string, content: string): Promise<void> => {
@@ -189,7 +191,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	if (isIntrospectionCacheEnabled) {
 		try {
 			const cacheEntry = toCacheEntry<A>(api);
-			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
+			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry, null, 2));
 		} catch (e) {
 			Logger.error(`Error storing cache: ${e}`);
 		}

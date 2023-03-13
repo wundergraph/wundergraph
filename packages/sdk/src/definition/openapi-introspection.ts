@@ -25,15 +25,28 @@ export const openApi = async (introspection: OpenAPIIntrospection): Promise<REST
 	const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 		const spec = loadOpenApi(introspection.source);
 
-		await meshTodo(spec, introspection);
-
 		return await openApiSpecificationToRESTApiObject(spec, introspection);
 	};
 	// If the source is a file we have all data required to perform the instrospection
 	// locally, which is also fast. Skip the cache in this case, so changes to the file
 	// are picked up immediately without requiring a cache flush.
-	if (introspection.source.kind === 'file') {
-		return generator(introspection);
-	}
+	// if (introspection.source.kind === 'file') {
+	// 	return generator(introspection);
+	// }
+	return introspectWithCache(introspection, generator);
+};
+
+export const openApiNew = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+	const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		const spec = loadOpenApi(introspection.source);
+
+		return await meshTodo(spec, introspection);
+	};
+	// If the source is a file we have all data required to perform the instrospection
+	// locally, which is also fast. Skip the cache in this case, so changes to the file
+	// are picked up immediately without requiring a cache flush.
+	// if (introspection.source.kind === 'file') {
+	// 	return generator(introspection);
+	// }
 	return introspectWithCache(introspection, generator);
 };
