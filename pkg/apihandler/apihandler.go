@@ -49,6 +49,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -173,7 +174,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := r.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
+	planConfig, err := r.loader.Load(*api.EngineConfiguration)
 	if err != nil {
 		return streamClosers, err
 	}
@@ -499,6 +500,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	}
 
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
+	if shared.Report.HasErrors() {
+		return fmt.Errorf(ErrMsgOperationPlanningFailed, shared.Report)
+	}
 	shared.Postprocess.Process(preparedPlan)
 
 	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
@@ -760,7 +764,7 @@ type GraphQLPlaygroundHandler struct {
 	nodeUrl string
 }
 
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
 	resp := []byte(tpl)
 
@@ -1049,7 +1053,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 		} else {
 			boolValue = "false"
 		}
-		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariablePathComponents...)
 		if err != nil {
 			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
 		}
@@ -1068,7 +1072,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	default:
 		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
 	}
-	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
 	}
@@ -1076,21 +1080,9 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	return variables, nil
 }
 
-func lookupJsonPath(data interface{}, keys []string, keyIndex int) interface{} {
-	key := keys[keyIndex]
-	if m, ok := data.(map[string]interface{}); ok {
-		item := m[key]
-		if keyIndex == len(keys)-1 {
-			return item
-		}
-		return lookupJsonPath(item, keys, keyIndex+1)
-	}
-	return nil
-}
-
 func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
 	custom := claim.GetCustom()
-	value := lookupJsonPath(user.CustomClaims, custom.JsonPathComponents, 0)
+	value := jsonpath.GetKeys(user.CustomClaims, custom.JsonPathComponents...)
 	var replacement []byte
 	switch x := value.(type) {
 	case nil:
@@ -1140,7 +1132,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)
 	}
 	var err error
-	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	variables, err = jsonparser.Set(variables, replacement, claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
 	}
@@ -1171,28 +1163,28 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	return variables, nil
 }
 
-func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
+func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byte) []byte {
 	if operation.VariablesConfiguration == nil || operation.VariablesConfiguration.InjectVariables == nil {
 		return variables
 	}
 	for i := range operation.VariablesConfiguration.InjectVariables {
-		key := operation.VariablesConfiguration.InjectVariables[i].VariableName
+		keys := operation.VariablesConfiguration.InjectVariables[i].VariablePathComponents
 		kind := operation.VariablesConfiguration.InjectVariables[i].VariableKind
 		switch kind {
 		case wgpb.InjectVariableKind_UUID:
 			id, _ := uuid.GenerateUUID()
-			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), keys...)
 		case wgpb.InjectVariableKind_DATE_TIME:
 			format := operation.VariablesConfiguration.InjectVariables[i].DateFormat
 			now := time.Now()
 			dateTime := now.Format(format)
-			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), keys...)
 		case wgpb.InjectVariableKind_ENVIRONMENT_VARIABLE:
 			value := os.Getenv(operation.VariablesConfiguration.InjectVariables[i].EnvironmentVariableName)
 			if value == "" {
 				continue
 			}
-			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), keys...)
 		}
 	}
 	return variables
@@ -1861,10 +1853,6 @@ func (f *httpFlushWriter) Flush() {
 		}
 	}
 
-	if f.sse {
-		_, _ = f.writer.Write([]byte("data: "))
-	}
-
 	if f.useJsonPatch && f.lastMessage.Len() != 0 {
 		last := f.lastMessage.Bytes()
 		patch, err := jsonpatch.CreatePatch(last, resp)
@@ -1874,12 +1862,19 @@ func (f *httpFlushWriter) Flush() {
 			}
 			return
 		}
+		if len(patch) == 0 {
+			// no changes
+			return
+		}
 		patchData, err := json.Marshal(patch)
 		if err != nil {
 			if f.logger != nil {
 				f.logger.Error("subscription json patch", zap.Error(err))
 			}
 			return
+		}
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
 		}
 		if len(patchData) < len(resp) {
 			_, _ = f.writer.Write(patchData)
@@ -1889,6 +1884,9 @@ func (f *httpFlushWriter) Flush() {
 	}
 
 	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		_, _ = f.writer.Write(resp)
 	}
 
@@ -1929,18 +1927,24 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
 		hashKey = []byte(h)
+	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
+		hashKey = fallback
 	}
 
 	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
 		blockKey = []byte(b)
+	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
+		blockKey = fallback
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
+	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
+		csrfSecret = []byte(c)
+	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
+		csrfSecret = fallback
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
@@ -1976,6 +1980,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		Log:               r.log,
 		InsecureCookies:   insecureCookies,
 		Cookie:            cookie,
+		PublicClaims:      r.api.AuthenticationConfig.PublicClaims,
 	}
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)

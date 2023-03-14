@@ -16,6 +16,7 @@ import {
 	ArrowUpCircleIcon,
 	LightBulbIcon,
 	ListBulletIcon,
+	AcademicCapIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -177,6 +178,33 @@ const navigation = [
 		],
 	},
 	{
+		title: 'Learn WunderGraph',
+		href: '/learn',
+		icon: <AcademicCapIcon />,
+		links: [
+			{
+				title: 'Introduction',
+				href: '/learn',
+			},
+			{
+				title: 'Hello World',
+				href: '/learn/hello_world',
+			},
+			{
+				title: 'Thinking in API Dependencies',
+				href: '/learn/thinking_in_api_dependencies',
+			},
+			{
+				title: 'Joining data across APIs',
+				href: '/learn/joining_data_across_apis',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/learn/typescript_operations',
+			},
+		],
+	},
+	{
 		title: 'Guides',
 		href: '/docs/guides',
 		icon: <BookOpenIcon />,
@@ -218,14 +246,12 @@ const navigation = [
 						title: 'Enable autocompletion in your IDE',
 						href: '/docs/guides/enable-autocompletion-in-your-ide',
 					},
+					{
+						title: 'Debugging WunderGraph applications',
+						href: '/docs/guides/debugging',
+					},
 				],
 			},
-			// {
-			// 	title: 'Debugging',
-			// 	links: [
-
-			// 	],
-			// },
 			{
 				title: 'Testing',
 				links: [
@@ -833,6 +859,10 @@ const navigation = [
 				title: 'Custom GraphQL Resolvers',
 				href: '/docs/features/custom-graphql-resolvers',
 			},
+			{
+				title: 'Generate OpenAPI specs and Postman collections',
+				href: '/docs/features/openapi-postman',
+			},
 		],
 	},
 	{
@@ -851,6 +881,10 @@ const navigation = [
 					{
 						title: 'Deploy to WunderGraph Cloud',
 						href: '/docs/cloud/deployments',
+					},
+					{
+						title: 'Add custom domains to your deployment',
+						href: '/docs/cloud/custom-domains',
 					},
 				],
 			},
@@ -878,6 +912,10 @@ const navigation = [
 			{
 				title: 'Docker',
 				href: '/docs/self-hosted/docker',
+			},
+			{
+				title: 'Security',
+				href: '/docs/self-hosted/security',
 			},
 		],
 	},
@@ -1318,10 +1356,6 @@ const navigation = [
 			{
 				title: 'Frequently Asked Questions',
 				links: [
-					{
-						title: 'Does WunderGraph support Postman Collections?',
-						href: '/docs/frequently-asked-questions/does-wundergraph-support-postman-collections',
-					},
 					{
 						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
 						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',

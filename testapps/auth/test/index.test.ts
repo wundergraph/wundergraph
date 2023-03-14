@@ -43,6 +43,9 @@ type Tokens = {
 	withShopIDInteger: string;
 	WithShopIDString: string;
 	withFloatingPoint: string;
+	withCountry: string;
+	withCountryAndMatchingCurrency: string;
+	withCountryAndWrongCurrency: string;
 };
 
 let tokens: Tokens | undefined;
@@ -95,6 +98,9 @@ const startServer = async () => {
 		withShopIDInteger: await makeToken({ shop: { id: shopID } }, privateKey),
 		WithShopIDString: await makeToken({ shop: { id: `${shopID}` } }, privateKey),
 		withFloatingPoint: await makeToken(floatingPointClaim, privateKey),
+		withCountry: await makeToken({ cc: 'PT' }, privateKey),
+		withCountryAndMatchingCurrency: await makeToken({ cc: 'PT', currency: 'EUR' }, privateKey),
+		withCountryAndWrongCurrency: await makeToken({ cc: 'PT', currency: 'USD' }, privateKey),
 	};
 	return wg.start();
 };
@@ -289,5 +295,88 @@ describe('test @fromClaim with custom claims', () => {
 		expect(result.error).toBeUndefined();
 		expect(result.data).toBeDefined();
 		expect(result.data?.echo_float).toBe(`float: ${floatingPointClaim.f.f.f.f}`);
+	});
+});
+
+describe('test @fromClaim with nested injection', () => {
+	test('inject country code', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withCountry);
+		const result = await client.query({
+			operationName: 'claims/NestedInjectedClaim',
+		});
+
+		const countries = result.data!.countries_countries;
+		expect(countries.length).toBe(1);
+		expect(countries[0].capital).toBe('Lisbon');
+	});
+
+	test('inject country code with currency', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withCountryAndMatchingCurrency);
+		const result = await client.query({
+			operationName: 'claims/NestedInjectedClaims',
+		});
+
+		const countries = result.data!.countries_countries;
+		expect(countries.length).toBe(1);
+		expect(countries[0].capital).toBe('Lisbon');
+	});
+
+	test('inject country code with wrong currency', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withCountryAndWrongCurrency);
+		const result = await client.query({
+			operationName: 'claims/NestedInjectedClaims',
+		});
+
+		// There should be no results if both claims are injected
+		expect(result.data!.countries_countries.length).toBe(0);
+	});
+
+	test('inject one argument', async () => {
+		const data = 'foo';
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.wellKnownClaims);
+		const result = await client.query({
+			operationName: 'claims/UserID',
+			input: {
+				data,
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+		expect(result.data?.uid).toBe(`string: ${wellKnownClaims.sub}`);
+		expect(result.data?.data).toBe(`string: ${data}`);
+	});
+
+	test('inject into struct', async () => {
+		const b = 'b';
+		const c = 'c';
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.wellKnownClaims);
+		const result = await client.query({
+			operationName: 'claims/IntoStruct',
+			input: {
+				// 'a' comes from a claim, should be removed from input schema
+				struct: {
+					b,
+					c,
+				},
+			},
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.data).toBeDefined();
+		expect(result.data?.echo_struct).toBe(`struct: a:${wellKnownClaims.sub} b:${b} c:${c}`);
+	});
+});
+
+describe('public claims', () => {
+	test('only public claims should be published', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.WithShopIDString);
+		const user = await client.fetchUser();
+		expect(user.userId).toBe(defaultTokenSubject);
+		expect((user as any)['providerId']).toBeUndefined();
 	});
 });

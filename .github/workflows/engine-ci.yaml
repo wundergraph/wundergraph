@@ -28,6 +28,7 @@ on:
       - '.github/workflows/engine-ci.yaml'
       - '!examples/**/*'
       - '!**/*.md'
+      - '!docs-website/**/*.md'
 
 concurrency:
   group: ${{github.workflow}}-${{github.head_ref}}
@@ -85,6 +86,6 @@ jobs:
           args: --timeout 2m
 
       - name: Run unit and integration tests
-        run: make test-go
+        run: go test -race ./...
         env:
           INT: true

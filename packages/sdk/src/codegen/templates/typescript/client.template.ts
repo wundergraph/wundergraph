@@ -6,16 +6,18 @@ import {
 	CreateClientConfig,
 	User,
 	UploadRequestOptions,
-	UploadRequestOptionsWithProfile,
 	OperationMetadata,
 	OperationsDefinition,
 	OperationRequestOptions,
 	SubscriptionRequestOptions,
 	SubscriptionEventHandler,
 	FetchUserRequestOptions,
+	UploadValidationOptions,
+	ExtractProfileName,
+	ExtractMeta,
 } from "@wundergraph/sdk/client";
 
-import type { CustomClaims } from "./claims";
+import type { PublicCustomClaims } from "./claims";
 import type { {{ modelImports }} } from "./models";
 
 export type UserRole = {{{ roleDefinitions }}};
@@ -45,7 +47,7 @@ type S3Providers ={
 	{{/each}}
 }
 
-const S3UploadProviderData = {
+const S3UploadProviderData: { [provider: string]: { [profile: string]: UploadValidationOptions } } = {
 	{{#each s3Providers }}
 	{{name}}: {
 		{{#each uploadProfiles}}
@@ -98,6 +100,8 @@ export const operationMetadata: OperationMetadata = {
 {{/each}}
 }
 
+export type PublicUser = {{#if hasPublicUserFields}}Pick<User<UserRole, PublicCustomClaims>, {{{publicUserFields}}}>{{else}}User<UserRole, PublicCustomClaims>{{/if}};
+
 export class WunderGraphClient extends Client {
 	query<
 		OperationName extends Extract<keyof Operations['queries'], string>,
@@ -128,17 +132,14 @@ export class WunderGraphClient extends Client {
 	{{#if hasS3Providers}}
 	public async uploadFiles<
 		ProviderName extends Extract<keyof S3Providers, string>,
-		ProfileName extends Extract<keyof S3Providers[ProviderName]['profiles'], string> = Extract<
-			keyof S3Providers[ProviderName]['profiles'],
-			string
+		ProfileName extends ExtractProfileName<S3Providers[ProviderName]['profiles']> = ExtractProfileName<
+			S3Providers[ProviderName]['profiles']
 		>,
-		Meta extends Extract<S3Providers[ProviderName]['profiles'][ProfileName], object> = Extract<
-			S3Providers[ProviderName]['profiles'][ProfileName],
-			object
+		Meta extends ExtractMeta<S3Providers[ProviderName]['profiles'], ProfileName> = ExtractMeta<
+			S3Providers[ProviderName]['profiles'],
+			ProfileName
 		>
-	>(
-		config: ProfileName extends string ? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta> : UploadRequestOptions
-	) {
+	>(config: UploadRequestOptions<ProviderName, ProfileName, Meta>) {
 		const profile = config.profile ? S3UploadProviderData[config.provider][config.profile as string] : undefined;
 		return super.uploadFiles(config, profile);
 	}
@@ -146,7 +147,7 @@ export class WunderGraphClient extends Client {
 	public login(authProviderID: Operations['authProvider'], redirectURI?: string) {
 		return super.login(authProviderID, redirectURI);
 	}
-	public async fetchUser<TUser extends User = User<UserRole, CustomClaims>>(options?: FetchUserRequestOptions) {
+	public async fetchUser<TUser extends PublicUser = PublicUser>(options?: FetchUserRequestOptions) {
 		return super.fetchUser<TUser>(options);
 	}
 }

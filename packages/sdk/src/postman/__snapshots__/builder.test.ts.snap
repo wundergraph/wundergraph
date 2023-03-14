@@ -16,10 +16,10 @@ exports[`PostmanBuilder 1`] = `
   "item": [
     {
       "_": {
-        "postman_id": "operatations",
+        "postman_id": "operations",
       },
       "event": [],
-      "id": "operatations",
+      "id": "operations",
       "item": [
         {
           "event": [],
