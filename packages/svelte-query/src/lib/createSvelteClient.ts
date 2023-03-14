@@ -3,9 +3,8 @@ import {
 	createMutation as tanstackCreateMutation,
 	useQueryClient,
 } from '@tanstack/svelte-query';
-import type { QueryObserverResult } from '@tanstack/svelte-query';
 import { writable, derived } from 'svelte/store';
-import type { Readable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import { onDestroy, onMount } from 'svelte';
 import type { QueryFunctionContext } from '@tanstack/svelte-query';
 import type { OperationsDefinition, LogoutOptions, Client } from '@wundergraph/sdk/client';
@@ -24,6 +23,32 @@ import type {
 } from './types';
 
 export const userQueryKey = 'wg_user';
+
+const withSubscriptionState = <Q>(
+	query: Readable<Q>,
+	subscriptionState: Writable<{
+		isLoading: boolean;
+		isSubscribed: boolean;
+	}>
+): Readable<Q & { isSubscribed: boolean }> => {
+	const queryWithSubscription = derived<
+		[
+			Readable<Q>,
+			Writable<{
+				isLoading: boolean;
+				isSubscribed: boolean;
+			}>
+		],
+		Q & { isSubscribed: boolean }
+	>([query, subscriptionState], ($values, set) => {
+		const newObject = Object.assign({}, $values[0], {
+			isSubscribed: $values[1].isSubscribed,
+		});
+		set(newObject);
+	});
+
+	return queryWithSubscription;
+};
 
 export function createSvelteClient<Operations extends OperationsDefinition>(client: Client) {
 	const queryFetcher: QueryFetcher<Operations> = async (query) => {
@@ -73,7 +98,7 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 
 		const queryHash = serialize([operationName, input]);
 
-		const result = tanstackCreateQuery({
+		const queryResult = tanstackCreateQuery({
 			queryKey: queryKey({ operationName, input }),
 			queryFn: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
 			...queryOptions,
@@ -92,19 +117,9 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 		});
 
 		if (liveQuery) {
-			const queryWithSubscriptionState: Readable<
-				QueryObserverResult<any, any> & {
-					isSubscribed: boolean;
-				}
-			> = derived([result, subscriptionState], ($values, set) => {
-				const newObject = Object.assign({}, $values[0], {
-					isSubscribed: $values[1].isSubscribed,
-				});
-				set(newObject);
-			});
-			return queryWithSubscriptionState;
+			return withSubscriptionState(queryResult, subscriptionState);
 		}
-		return result;
+		return queryResult;
 	};
 
 	/**
@@ -301,18 +316,7 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 			onError,
 		});
 
-		const subscriptionWithIndicator: Readable<
-			QueryObserverResult<any, any> & {
-				isSubscribed: boolean;
-			}
-		> = derived([subscription, subscriptionState], ($values, set) => {
-			const newObject = Object.assign({}, $values[0], {
-				isSubscribed: $values[1].isSubscribed,
-			});
-			set(newObject);
-		});
-
-		return subscriptionWithIndicator;
+		return withSubscriptionState(subscription, subscriptionState);
 	};
 
 	return {
