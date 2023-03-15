@@ -285,10 +285,11 @@ const JSONSchemaToTypescriptInterface = (
 		},
 		array: {
 			enter: (name, isRequired, isArray) => {
+				if (name === '') return;
 				out += `${name + (isRequired ? '' : '?')}: `;
 			},
 			leave: (name, isRequired, isArray) => {
-				out += '[],';
+				out += name === '' ? '[]' : '[],';
 			},
 		},
 		string: (name, isRequired, isArray, enumValues) => {
