@@ -3,6 +3,45 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.138.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.4...@wundergraph/sdk@0.138.0) (2023-03-06)
+
+### Features
+
+* add support for declaring a list of public claims ([#706](https://github.com/wundergraph/wundergraph/issues/706)) ([2223d5c](https://github.com/wundergraph/wundergraph/commit/2223d5c02f1eadaad7ecb6ac863bb2f9e34c926c)) (@fiam)
+* add support for generating OpenAPI specs for applications ([#716](https://github.com/wundergraph/wundergraph/issues/716)) ([fca90e3](https://github.com/wundergraph/wundergraph/commit/fca90e3c662001cb88822088533a500da6979c82)) (@fiam)
+* add support for injecting variables into nested paths ([#678](https://github.com/wundergraph/wundergraph/issues/678)) ([ce0a0a0](https://github.com/wundergraph/wundergraph/commit/ce0a0a09b4e739767b17f1ad391074f6ba597253)) (@fiam)
+* improve webhooks API and add support for the new operations client ([#709](https://github.com/wundergraph/wundergraph/issues/709)) ([35e69a3](https://github.com/wundergraph/wundergraph/commit/35e69a3c174ba94189a95428f06946a0f992db31)) (@Pagebakers)
+
+### Bug Fixes
+
+* upload types ([#723](https://github.com/wundergraph/wundergraph/issues/723)) ([5077a7d](https://github.com/wundergraph/wundergraph/commit/5077a7d2ab363d3bbbb1df35423e5ad799b1800f)) (@Pagebakers)
+
+## [0.137.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.3...@wundergraph/sdk@0.137.4) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.137.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.2...@wundergraph/sdk@0.137.3) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.137.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.1...@wundergraph/sdk@0.137.2) (2023-02-28)
+
+### Bug Fixes
+
+* graphql introspection with renamed query types ([#699](https://github.com/wundergraph/wundergraph/issues/699)) ([864305f](https://github.com/wundergraph/wundergraph/commit/864305fe65368c390ce499ee42817d6456f5a281)) (@devsergiy)
+
+## [0.137.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.0...@wundergraph/sdk@0.137.1) (2023-02-26)
+
+### Bug Fixes
+
+* enable ts strict mode in examples for much faster type inference ([#696](https://github.com/wundergraph/wundergraph/issues/696)) ([85e6d88](https://github.com/wundergraph/wundergraph/commit/85e6d884e6a73ad752f65d06c6da91f56c85445d)) (@StarpTech)
+
+## [0.137.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.136.0...@wundergraph/sdk@0.137.0) (2023-02-23)
+
+### Features
+
+* add json patch support, response zod schema for ts operations ([#689](https://github.com/wundergraph/wundergraph/issues/689)) ([02f40dc](https://github.com/wundergraph/wundergraph/commit/02f40dc21e63c1771ee7b002c94a396a52f85187)) (@jensneuse)
+
 ## [0.136.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.135.0...@wundergraph/sdk@0.136.0) (2023-02-21)
 
 ### Features

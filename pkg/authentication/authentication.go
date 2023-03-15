@@ -25,12 +25,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
+	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func init() {
 	gob.Register(User{})
+	gob.Register(map[string]interface{}(nil))
 }
 
 type UserLoader struct {
@@ -76,7 +79,7 @@ func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
 }
 
 // Load user from token. token is always non nil and contains at least a non-empty token.Raw
-// but it might be unvalidated if we have no key functions
+// but it might not be validated if we have no key functions
 func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
 	cacheKey := token.Raw
@@ -142,6 +145,10 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	return nil
 }
 
+// User holds user data for non public APIs (backend and hooks). Before exposing
+// a User publicly, always call User.ToPublic().
+//
+// XXX: Keep in sync with the TS side (wellKnownClaimField, type User, type WunderGraphUser)
 type User struct {
 	ProviderName      string `json:"provider,omitempty"`
 	ProviderID        string `json:"providerId,omitempty"`
@@ -166,23 +173,83 @@ type User struct {
 	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`
 	CustomAttributes []string               `json:"customAttributes,omitempty"`
 	Roles            []string               `json:"roles"`
-	ExpiresAt        time.Time              `json:"-"`
-	ETag             string                 `json:"etag,omitempty"`
-	FromCookie       bool                   `json:"fromCookie,omitempty"`
-	AccessToken      json.RawMessage        `json:"accessToken,omitempty"`
-	RawAccessToken   string                 `json:"rawAccessToken,omitempty"`
-	IdToken          json.RawMessage        `json:"idToken,omitempty"`
-	RawIDToken       string                 `json:"rawIdToken,omitempty"`
+	/* Internal fields */
+	ExpiresAt      time.Time       `json:"-"`
+	ETag           string          `json:"etag,omitempty"`
+	FromCookie     bool            `json:"fromCookie,omitempty"`
+	AccessToken    json.RawMessage `json:"accessToken,omitempty"`
+	RawAccessToken string          `json:"rawAccessToken,omitempty"`
+	IdToken        json.RawMessage `json:"idToken,omitempty"`
+	RawIDToken     string          `json:"rawIdToken,omitempty"`
 }
 
-// RemoveInternalFields should be used before sending the user to the client to not expose internal fields
-func (u *User) RemoveInternalFields() {
-	u.ETag = ""
-	u.FromCookie = false
-	u.AccessToken = nil
-	u.RawAccessToken = ""
-	u.IdToken = nil
-	u.RawIDToken = ""
+// ToPublic returns a copy of the User with fields non intended for public consumption erased. If publicClaims
+// is non-empty, only fields listed in it are included. Each public claim must be either a well known claim
+// (as in the WG_CLAIM enum) or a JSON path to a custom claim.
+func (u *User) ToPublic(publicClaims []string) *User {
+	if len(publicClaims) == 0 {
+		return u
+	}
+	cpy := &User{
+		CustomAttributes: u.CustomAttributes,
+		Roles:            u.Roles,
+	}
+	for _, claim := range publicClaims {
+		if cpy.copyWellKnownClaim(claim, u) {
+			continue
+		}
+		keys := strings.Split(claim, ".")
+		value := jsonpath.GetKeys(u.CustomClaims, keys...)
+		if value != nil {
+			cpy.CustomClaims = jsonpath.SetKeys(cpy.CustomClaims, value, keys...)
+		}
+	}
+	return cpy
+}
+
+func (u *User) copyWellKnownClaim(claim string, from *User) bool {
+	// XXX: Keep this in sync with WG_CLAIM
+	switch claim {
+	case wgpb.ClaimType_ISSUER.String(), "PROVIDER":
+		u.ProviderID = from.ProviderID
+	case wgpb.ClaimType_SUBJECT.String(), "USERID":
+		u.UserID = from.UserID
+	case wgpb.ClaimType_NAME.String():
+		u.Name = from.Name
+	case wgpb.ClaimType_GIVEN_NAME.String():
+		u.FirstName = from.FirstName
+	case wgpb.ClaimType_FAMILY_NAME.String():
+		u.LastName = from.LastName
+	case wgpb.ClaimType_MIDDLE_NAME.String():
+		u.MiddleName = from.MiddleName
+	case wgpb.ClaimType_NICKNAME.String():
+		u.NickName = from.NickName
+	case wgpb.ClaimType_PREFERRED_USERNAME.String():
+		u.PreferredUsername = from.PreferredUsername
+	case wgpb.ClaimType_PROFILE.String():
+		u.Profile = from.Profile
+	case wgpb.ClaimType_PICTURE.String():
+		u.Picture = from.Picture
+	case wgpb.ClaimType_WEBSITE.String():
+		u.Website = from.Website
+	case wgpb.ClaimType_EMAIL.String():
+		u.Email = from.Email
+	case wgpb.ClaimType_EMAIL_VERIFIED.String():
+		u.EmailVerified = from.EmailVerified
+	case wgpb.ClaimType_GENDER.String():
+		u.Gender = from.Gender
+	case wgpb.ClaimType_BIRTH_DATE.String():
+		u.BirthDate = from.BirthDate
+	case wgpb.ClaimType_ZONE_INFO.String():
+		u.ZoneInfo = from.ZoneInfo
+	case wgpb.ClaimType_LOCALE.String():
+		u.Locale = from.Locale
+	case wgpb.ClaimType_LOCATION.String():
+		u.Location = from.Location
+	default:
+		return false
+	}
+	return true
 }
 
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
@@ -316,7 +383,9 @@ func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData, buf)
 	if err != nil {
 		h.Log.Error("PostAuthentication queries hook", zap.Error(err))
 		return
@@ -334,7 +403,9 @@ func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData, buf)
 	if err != nil {
 		h.Log.Error("PostLogout queries hook", zap.Error(err))
 	}
@@ -356,7 +427,9 @@ func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User)
 	} else {
 		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
 	}
-	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData, buf)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return false, "", updatedUser
@@ -725,6 +798,7 @@ type UserHandler struct {
 	Host              string
 	InsecureCookies   bool
 	Cookie            *securecookie.SecureCookie
+	PublicClaims      []string
 }
 
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -734,7 +808,7 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Get("revalidate") == "true" {
+	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Has("revalidate") {
 		hookData := []byte(`{}`)
 		if userJson, err := json.Marshal(user); err != nil {
 			u.Log.Error("Could not marshal user", zap.Error(err))
@@ -749,7 +823,9 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if user.IdToken != nil {
 			hookData, _ = jsonparser.Set(hookData, user.IdToken, "id_token")
 		}
-		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData)
+		buf := pool.GetBytesBuffer()
+		defer pool.PutBytesBuffer(buf)
+		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData, buf)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication request failed", zap.Error(err))
 			http.NotFound(w, r)
@@ -790,19 +866,18 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
 	}
 
-	user.RemoveInternalFields()
+	encoder := json.NewEncoder(w)
 	if r.Header.Get("Accept") != "application/json" {
-		encoder := json.NewEncoder(w)
 		encoder.SetIndent("", "  ")
-		_ = encoder.Encode(user)
-		return
 	}
-	_ = json.NewEncoder(w).Encode(user)
+	if err := encoder.Encode(user.ToPublic(u.PublicClaims)); err != nil {
+		u.Log.Error("encoding user", zap.Error(err))
+	}
 }
 
 type CSRFTokenHandler struct{}
 
-func (_ *CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (*CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := csrf.Token(r)
 	_, _ = w.Write([]byte(token))
 }

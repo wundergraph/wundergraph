@@ -30,6 +30,7 @@ require (
 	github.com/jensneuse/goprisma v0.2.0
 	github.com/joho/godotenv v1.4.0
 	github.com/klauspost/compress v1.15.15
+	github.com/mattbaird/jsonpatch v0.0.0-20200820163806-098863c1fc24
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pires/go-proxyproto v0.6.2
@@ -45,12 +46,12 @@ require (
 	github.com/tidwall/gjson v1.11.0
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
-	github.com/wundergraph/graphql-go-tools v1.61.1
+	github.com/wundergraph/graphql-go-tools v1.61.3
 	go.uber.org/zap v1.18.1
-	golang.org/x/net v0.5.0
+	golang.org/x/net v0.7.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
-	golang.org/x/text v0.6.0
+	golang.org/x/text v0.7.0
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	google.golang.org/protobuf v1.28.1
 )
@@ -66,6 +67,7 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0 // indirect
+	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/gin-gonic/gin v1.8.2 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect

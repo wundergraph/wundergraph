@@ -77,10 +77,7 @@ jobs:
       - name: Build libs
         run: pnpm build:libs
 
-      - name: Build wunderctl
-        run: |
-          make install
-          echo "WUNDERCTL_BINARY_PATH=$(which wunderctl)" >> $GITHUB_ENV
+      - uses: ./.github/actions/wunderctl
 
       - name: Run tests
         run: ./scripts/test-examples/all.sh

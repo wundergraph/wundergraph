@@ -30,7 +30,7 @@ describe('Test User and Nodes', () => {
 			},
 		});
 		expect(result.error).toBeFalsy();
-		expect(result.data?.db_findFirstUser.name).toBe('Jens');
+		expect(result.data?.db_findFirstUser?.name).toBe('Jens');
 	});
 	test('create nodes and query nodes', async () => {
 		const nodes = await wg.client().mutate({

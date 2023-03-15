@@ -22,7 +22,7 @@ import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphql } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { loadOpenApi, openApi, openApiLegacy } from './openapi-introspection';
+import { loadOpenApi, openApi } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -378,11 +378,6 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
-export interface OpenAPIV2Introspection extends Omit<HTTPUpstream, 'authentication' | 'mTLS'> {
-	source: OpenAPIIntrospectionSource;
-	baseURL?: InputVariable;
-}
-
 export interface StaticApiCustom {
 	data: ConfigurationVariable;
 }
@@ -428,78 +423,47 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
-export interface ILazyIntrospection<T> {
-	(): Promise<T>;
-}
+export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration): Promise<GraphQLApi> => {
+	const { schema, ...rest } = introspection;
+	const resolvedSchema = (await schema) as GraphQLSchema;
 
-export const introspectGraphqlServer = (introspection: GraphQLServerConfiguration): ILazyIntrospection<GraphQLApi> => {
-	return async (): Promise<GraphQLApi> => {
-		const { schema, ...rest } = introspection;
-		const resolvedSchema = (await schema) as GraphQLSchema;
-
-		return introspectGraphql({
-			...rest,
-			internal: true,
-			loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
-		});
-	};
+	return introspectGraphql({
+		...rest,
+		internal: true,
+		loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
+	});
 };
 
 export const introspect = {
-	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return introspectGraphql(introspection);
-		};
+	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): Promise<GraphQLApi> => {
+		return introspectGraphql(introspection);
 	},
-	postgresql: (introspection: DatabaseIntrospection): ILazyIntrospection<PostgresqlApi> => {
-		return (): Promise<PostgresqlApi> => {
-			return introspectPostgresql(introspection);
-		};
+	postgresql: (introspection: DatabaseIntrospection): Promise<PostgresqlApi> => {
+		return introspectPostgresql(introspection);
 	},
-	mysql: (introspection: DatabaseIntrospection): ILazyIntrospection<MySQLApi> => {
-		return (): Promise<MySQLApi> => {
-			return introspectMySQL(introspection);
-		};
+	mysql: (introspection: DatabaseIntrospection): Promise<MySQLApi> => {
+		return introspectMySQL(introspection);
 	},
-	planetscale: (introspection: DatabaseIntrospection): ILazyIntrospection<PlanetscaleApi> => {
-		return (): Promise<PlanetscaleApi> => {
-			return introspectPlanetScale(introspection);
-		};
+	planetscale: (introspection: DatabaseIntrospection): Promise<PlanetscaleApi> => {
+		return introspectPlanetScale(introspection);
 	},
-	sqlite: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLiteApi> => {
-		return (): Promise<SQLiteApi> => {
-			return introspectSQLite(introspection);
-		};
+	sqlite: (introspection: DatabaseIntrospection): Promise<SQLiteApi> => {
+		return introspectSQLite(introspection);
 	},
-	sqlserver: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLServerApi> => {
-		return (): Promise<SQLServerApi> => {
-			return introspectSQLServer(introspection);
-		};
+	sqlserver: (introspection: DatabaseIntrospection): Promise<SQLServerApi> => {
+		return introspectSQLServer(introspection);
 	},
-	mongodb: (introspection: DatabaseIntrospection): ILazyIntrospection<MongoDBApi> => {
-		return (): Promise<MongoDBApi> => {
-			return introspectMongoDB(introspection);
-		};
+	mongodb: (introspection: DatabaseIntrospection): Promise<MongoDBApi> => {
+		return introspectMongoDB(introspection);
 	},
-	prisma: (introspection: PrismaIntrospection): ILazyIntrospection<PrismaApi> => {
-		return (): Promise<PrismaApi> => {
-			return introspectPrisma(introspection);
-		};
+	prisma: (introspection: PrismaIntrospection): Promise<PrismaApi> => {
+		return introspectPrisma(introspection);
 	},
-	federation: (introspection: GraphQLFederationIntrospection): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return introspectFederation(introspection);
-		};
+	federation: (introspection: GraphQLFederationIntrospection): Promise<GraphQLApi> => {
+		return introspectFederation(introspection);
 	},
-	openApiV2: (introspection: OpenAPIV2Introspection): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return openApi(introspection);
-		};
-	},
-	openApi: (introspection: OpenAPIIntrospection): ILazyIntrospection<RESTApi> => {
-		return (): Promise<RESTApi> => {
-			return openApiLegacy(introspection);
-		};
+	openApi: (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		return openApi(introspection);
 	},
 };
 

@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -21,6 +22,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
+	"github.com/mattbaird/jsonpatch"
 	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -47,6 +49,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -57,11 +60,31 @@ import (
 )
 
 const (
-	WG_PREFIX       = "wg_"
-	WG_LIVE         = WG_PREFIX + "live"
-	WG_VARIABLES    = WG_PREFIX + "variables"
-	WG_CACHE_HEADER = "X-Wg-Cache"
+	WgCacheHeader           = "X-Wg-Cache"
+	WgInternalApiCallHeader = "X-WG-Internal-GraphQL-API"
+
+	WgPrefix             = "wg_"
+	WgVariables          = WgPrefix + "variables"
+	WgLiveParam          = WgPrefix + "live"
+	WgJsonPatchParam     = WgPrefix + "json_patch"
+	WgSseParam           = WgPrefix + "sse"
+	WgSubscribeOnceParam = WgPrefix + "subscribe_once"
 )
+
+type WgRequestParams struct {
+	UseJsonPatch bool
+	UseSse       bool
+	SubsribeOnce bool
+}
+
+func NewWgRequestParams(url *url.URL) WgRequestParams {
+	q := url.Query()
+	return WgRequestParams{
+		UseJsonPatch: q.Has(WgJsonPatchParam),
+		UseSse:       q.Has(WgSseParam),
+		SubsribeOnce: q.Has(WgSubscribeOnceParam),
+	}
+}
 
 type Builder struct {
 	router   *mux.Router
@@ -151,7 +174,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := r.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
+	planConfig, err := r.loader.Load(*api.EngineConfiguration)
 	if err != nil {
 		return streamClosers, err
 	}
@@ -477,6 +500,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	}
 
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
+	if shared.Report.HasErrors() {
+		return fmt.Errorf(ErrMsgOperationPlanningFailed, shared.Report)
+	}
 	shared.Postprocess.Process(preparedPlan)
 
 	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
@@ -738,7 +764,7 @@ type GraphQLPlaygroundHandler struct {
 	nodeUrl string
 }
 
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
 	resp := []byte(tpl)
 
@@ -1027,7 +1053,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 		} else {
 			boolValue = "false"
 		}
-		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariablePathComponents...)
 		if err != nil {
 			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
 		}
@@ -1046,7 +1072,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	default:
 		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
 	}
-	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
 	}
@@ -1054,21 +1080,9 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	return variables, nil
 }
 
-func lookupJsonPath(data interface{}, keys []string, keyIndex int) interface{} {
-	key := keys[keyIndex]
-	if m, ok := data.(map[string]interface{}); ok {
-		item := m[key]
-		if keyIndex == len(keys)-1 {
-			return item
-		}
-		return lookupJsonPath(item, keys, keyIndex+1)
-	}
-	return nil
-}
-
 func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
 	custom := claim.GetCustom()
-	value := lookupJsonPath(user.CustomClaims, custom.JsonPathComponents, 0)
+	value := jsonpath.GetKeys(user.CustomClaims, custom.JsonPathComponents...)
 	var replacement []byte
 	switch x := value.(type) {
 	case nil:
@@ -1118,7 +1132,7 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)
 	}
 	var err error
-	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	variables, err = jsonparser.Set(variables, replacement, claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
 	}
@@ -1149,28 +1163,28 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	return variables, nil
 }
 
-func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
+func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byte) []byte {
 	if operation.VariablesConfiguration == nil || operation.VariablesConfiguration.InjectVariables == nil {
 		return variables
 	}
 	for i := range operation.VariablesConfiguration.InjectVariables {
-		key := operation.VariablesConfiguration.InjectVariables[i].VariableName
+		keys := operation.VariablesConfiguration.InjectVariables[i].VariablePathComponents
 		kind := operation.VariablesConfiguration.InjectVariables[i].VariableKind
 		switch kind {
 		case wgpb.InjectVariableKind_UUID:
 			id, _ := uuid.GenerateUUID()
-			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), keys...)
 		case wgpb.InjectVariableKind_DATE_TIME:
 			format := operation.VariablesConfiguration.InjectVariables[i].DateFormat
 			now := time.Now()
 			dateTime := now.Format(format)
-			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), keys...)
 		case wgpb.InjectVariableKind_ENVIRONMENT_VARIABLE:
 			value := os.Getenv(operation.VariablesConfiguration.InjectVariables[i].EnvironmentVariableName)
 			if value == "" {
 				continue
 			}
-			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), keys...)
 		}
 	}
 	return variables
@@ -1187,17 +1201,21 @@ type QueryResolver interface {
 	ResolveGraphQLResponse(ctx *resolve.Context, response *resolve.GraphQLResponse, data []byte, writer io.Writer) (err error)
 }
 
+type SubscriptionResolver interface {
+	ResolveGraphQLSubscription(ctx *resolve.Context, subscription *resolve.GraphQLSubscription, writer resolve.FlushWriter) (err error)
+}
+
 type liveQueryConfig struct {
 	enabled                bool
 	pollingIntervalSeconds int64
 }
 
 func parseQueryVariables(r *http.Request, allowList []string) []byte {
-	rawVariables := r.URL.Query().Get(WG_VARIABLES)
+	rawVariables := r.URL.Query().Get(WgVariables)
 	if rawVariables == "" {
 		rawVariables = "{}"
 		for name, val := range r.URL.Query() {
-			if len(val) > 0 && !strings.HasPrefix(name, WG_PREFIX) {
+			if len(val) > 0 && !strings.HasPrefix(name, WgPrefix) {
 				if !stringSliceContainsValue(allowList, name) {
 					continue
 				}
@@ -1257,7 +1275,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		cacheIsStale = false
 	)
 
-	isLive := h.liveQuery.enabled && r.URL.Query().Get(WG_LIVE) == "true"
+	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	buf := pool.GetBytesBuffer()
 	ctx := pool.GetCtx(r, r, pool.Config{
@@ -1334,7 +1352,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		item, hit := h.cache.Get(ctx.Context, cacheKey)
 		if hit {
 
-			w.Header().Set(WG_CACHE_HEADER, "HIT")
+			w.Header().Set(WgCacheHeader, "HIT")
 
 			_, _ = buf.Write(item.Data)
 
@@ -1368,7 +1386,7 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			_, _ = buf.WriteTo(w)
 			return
 		}
-		w.Header().Set(WG_CACHE_HEADER, "MISS")
+		w.Header().Set(WgCacheHeader, "MISS")
 	}
 
 	resp, err := h.hooksPipeline.Run(ctx, w, r, buf)
@@ -1435,16 +1453,26 @@ func (h *QueryHandler) handleLiveQueryEvent(ctx *resolve.Context, w http.Respons
 }
 
 func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, ctx *resolve.Context, requestBuf *bytes.Buffer, flusher http.Flusher, requestLogger *zap.Logger) {
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
+	wgParams := NewWgRequestParams(r.URL)
 
 	done := ctx.Context.Done()
-	hash := xxhash.New()
 
 	hookBuf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(hookBuf)
 
-	var lastHash uint64
+	lastData := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(lastData)
+
+	currentData := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(currentData)
+
+	if wgParams.UseSse {
+		defer func() {
+			_, _ = fmt.Fprintf(w, "event: close\n\n")
+			flusher.Flush()
+		}()
+	}
+
 	for {
 		var hookError bool
 		response, err := h.handleLiveQueryEvent(ctx, w, r, requestBuf, hookBuf)
@@ -1475,21 +1503,49 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 			}
 		}
 
-		hash.Reset()
-		_, _ = hash.Write(response)
-		nextHash := hash.Sum64()
-
 		// only send the response if the content has changed
-		if nextHash != lastHash {
-			lastHash = nextHash
-
-			reader := bytes.NewReader(response)
-			if sse {
+		if !bytes.Equal(response, lastData.Bytes()) {
+			currentData.Reset()
+			_, _ = currentData.Write(response)
+			if wgParams.UseSse {
 				_, _ = w.Write([]byte("data: "))
 			}
-			_, _ = reader.WriteTo(w)
-			if subscribeOnce {
+			if wgParams.SubsribeOnce {
 				flusher.Flush()
+				return
+			}
+			if wgParams.UseJsonPatch && lastData.Len() != 0 {
+				last := lastData.Bytes()
+				current := currentData.Bytes()
+				patch, err := jsonpatch.CreatePatch(last, current)
+				if err != nil {
+					requestLogger.Error("HandleLiveQueryEvent could not create json patch", zap.Error(err))
+					continue
+				}
+				patchBytes, err := json.Marshal(patch)
+				if err != nil {
+					requestLogger.Error("HandleLiveQueryEvent could not marshal json patch", zap.Error(err))
+					continue
+				}
+				// we only send the patch if it's smaller than the full response
+				if len(patchBytes) < len(current) {
+					_, err = w.Write(patchBytes)
+					if err != nil {
+						requestLogger.Error("HandleLiveQueryEvent could not write json patch", zap.Error(err))
+						return
+					}
+				} else {
+					_, err = w.Write(current)
+					if err != nil {
+						requestLogger.Error("HandleLiveQueryEvent could not write response", zap.Error(err))
+						return
+					}
+				}
+			} else {
+				_, err = w.Write(currentData.Bytes())
+			}
+			if err != nil {
+				requestLogger.Error("HandleLiveQueryEvent could not write response", zap.Error(err))
 				return
 			}
 			_, _ = w.Write(literal.LINETERMINATOR)
@@ -1498,6 +1554,8 @@ func (h *QueryHandler) handleLiveQuery(r *http.Request, w http.ResponseWriter, c
 				return
 			}
 			flusher.Flush()
+			lastData.Reset()
+			_, _ = lastData.Write(currentData.Bytes())
 		}
 
 		// After hook error we return the graphql compatible error to the client
@@ -1536,7 +1594,7 @@ func (h *MutationHandler) parseFormVariables(r *http.Request) []byte {
 	rawVariables := "{}"
 	if err := r.ParseForm(); err == nil {
 		for name, val := range r.Form {
-			if len(val) == 0 || strings.HasSuffix(val[0], WG_PREFIX) {
+			if len(val) == 0 || strings.HasSuffix(val[0], WgPrefix) {
 				continue
 			}
 			// check if the user works with JSON values
@@ -1635,7 +1693,7 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type SubscriptionHandler struct {
-	resolver               *resolve.Resolver
+	resolver               SubscriptionResolver
 	log                    *zap.Logger
 	preparedPlan           *plan.SubscriptionResponsePlan
 	extractedVariables     []byte
@@ -1713,22 +1771,6 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func getOperationType(operation, definition *ast.Document, operationName string) ast.OperationType {
-
-	walker := astvisitor.NewWalker(8)
-	visitor := &operationKindVisitor{
-		walker:        &walker,
-		operationName: operationName,
-	}
-
-	walker.RegisterEnterDocumentVisitor(visitor)
-	walker.RegisterEnterOperationVisitor(visitor)
-
-	var report operationreport.Report
-	walker.Walk(operation, definition, &report)
-	return visitor.operationType
-}
-
 type operationKindVisitor struct {
 	operationName         string
 	operation, definition *ast.Document
@@ -1757,8 +1799,10 @@ type httpFlushWriter struct {
 	postResolveTransformer *postresolvetransform.Transformer
 	subscribeOnce          bool
 	sse                    bool
+	useJsonPatch           bool
 	close                  func()
 	buf                    *bytes.Buffer
+	lastMessage            *bytes.Buffer
 	variables              []byte
 
 	// Used for hooks
@@ -1787,6 +1831,13 @@ func (f *httpFlushWriter) Write(p []byte) (n int, err error) {
 	return f.buf.Write(p)
 }
 
+func (f *httpFlushWriter) Close() {
+	if f.sse {
+		_, _ = f.writer.Write([]byte("event: done\n\n"))
+		f.flusher.Flush()
+	}
+}
+
 func (f *httpFlushWriter) Flush() {
 	resp := f.buf.Bytes()
 	f.buf.Reset()
@@ -1802,12 +1853,45 @@ func (f *httpFlushWriter) Flush() {
 		}
 	}
 
-	if f.sse {
-		_, _ = f.writer.Write([]byte("data: "))
-		_, _ = f.writer.Write(resp)
-	} else {
+	if f.useJsonPatch && f.lastMessage.Len() != 0 {
+		last := f.lastMessage.Bytes()
+		patch, err := jsonpatch.CreatePatch(last, resp)
+		if err != nil {
+			if f.logger != nil {
+				f.logger.Error("subscription json patch", zap.Error(err))
+			}
+			return
+		}
+		if len(patch) == 0 {
+			// no changes
+			return
+		}
+		patchData, err := json.Marshal(patch)
+		if err != nil {
+			if f.logger != nil {
+				f.logger.Error("subscription json patch", zap.Error(err))
+			}
+			return
+		}
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
+		if len(patchData) < len(resp) {
+			_, _ = f.writer.Write(patchData)
+		} else {
+			_, _ = f.writer.Write(resp)
+		}
+	}
+
+	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		_, _ = f.writer.Write(resp)
 	}
+
+	f.lastMessage.Reset()
+	_, _ = f.lastMessage.Write(resp)
 
 	if f.subscribeOnce {
 		f.flusher.Flush()
@@ -1843,18 +1927,24 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
 		hashKey = []byte(h)
+	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
+		hashKey = fallback
 	}
 
 	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
 		blockKey = []byte(b)
+	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
+		blockKey = fallback
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
+	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
+		csrfSecret = []byte(c)
+	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
+		csrfSecret = fallback
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
@@ -1890,6 +1980,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		Log:               r.log,
 		InsecureCookies:   insecureCookies,
 		Cookie:            cookie,
+		PublicClaims:      r.api.AuthenticationConfig.PublicClaims,
 	}
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
@@ -2186,7 +2277,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isLive := h.liveQuery.enabled && r.URL.Query().Get(WG_LIVE) == "true"
+	isLive := h.liveQuery.enabled && r.URL.Query().Has(WgLiveParam)
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -2219,12 +2310,21 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 		return
 	}
 
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	var (
+		lastResponse bytes.Buffer
+	)
+
+	defer fw.Close()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			out, err = h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
+			out, err = h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 			if err != nil {
 				if ctx.Err() != nil {
 					return
@@ -2232,19 +2332,28 @@ func (h *FunctionsHandler) handleLiveQuery(ctx context.Context, w http.ResponseW
 				requestLogger.Error("failed to execute function", zap.Error(err))
 				return
 			}
+			if bytes.Equal(out.Response, lastResponse.Bytes()) {
+				continue
+			}
 			_, err = fw.Write(out.Response)
 			if err != nil {
 				requestLogger.Error("failed to write response", zap.Error(err))
 				return
 			}
 			fw.Flush()
+			lastResponse.Reset()
+			lastResponse.Write(out.Response)
 			time.Sleep(time.Duration(h.liveQuery.pollingIntervalSeconds) * time.Second)
 		}
 	}
 }
 
 func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWriter, input []byte, requestLogger *zap.Logger) {
-	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input)
+
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+
+	out, err := h.hooksClient.DoFunctionRequest(ctx, h.operation.Path, input, buf)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")
@@ -2263,10 +2372,12 @@ func (h *FunctionsHandler) handleRequest(ctx context.Context, w http.ResponseWri
 }
 
 func (h *FunctionsHandler) handleSubscriptionRequest(ctx context.Context, w http.ResponseWriter, r *http.Request, input []byte, requestLogger *zap.Logger) {
+	wgParams := NewWgRequestParams(r.URL)
+
 	setSubscriptionHeaders(w)
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
-	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, subscribeOnce, sse, w)
+	buf := pool.GetBytesBuffer()
+	defer pool.PutBytesBuffer(buf)
+	err := h.hooksClient.DoFunctionSubscriptionRequest(ctx, h.operation.Path, input, wgParams.SubsribeOnce, wgParams.UseSse, wgParams.UseJsonPatch, w, buf)
 	if err != nil {
 		if ctx.Err() != nil {
 			requestLogger.Debug("request cancelled")
@@ -2282,7 +2393,7 @@ func (h *FunctionsHandler) parseFormVariables(r *http.Request) []byte {
 	rawVariables := "{}"
 	if err := r.ParseForm(); err == nil {
 		for name, val := range r.Form {
-			if len(val) == 0 || strings.HasSuffix(val[0], WG_PREFIX) {
+			if len(val) == 0 || strings.HasSuffix(val[0], WgPrefix) {
 				continue
 			}
 			// check if the user works with JSON values
@@ -2365,30 +2476,31 @@ func getHooksFlushWriter(ctx *resolve.Context, r *http.Request, w http.ResponseW
 }
 
 func getFlushWriter(ctx context.Context, variables []byte, r *http.Request, w http.ResponseWriter) (context.Context, *httpFlushWriter, bool) {
+	wgParams := NewWgRequestParams(r.URL)
+
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		return ctx, nil, false
 	}
 
-	subscribeOnce := r.URL.Query().Get("wg_subscribe_once") == "true"
-	sse := r.URL.Query().Get("wg_sse") == "true"
-
-	if !subscribeOnce {
+	if !wgParams.SubsribeOnce {
 		setSubscriptionHeaders(w)
 	}
 
 	flusher.Flush()
 
 	flushWriter := &httpFlushWriter{
-		writer:    w,
-		flusher:   flusher,
-		sse:       sse,
-		buf:       &bytes.Buffer{},
-		ctx:       ctx,
-		variables: variables,
+		writer:       w,
+		flusher:      flusher,
+		sse:          wgParams.UseSse,
+		useJsonPatch: wgParams.UseJsonPatch,
+		buf:          &bytes.Buffer{},
+		lastMessage:  &bytes.Buffer{},
+		ctx:          ctx,
+		variables:    variables,
 	}
 
-	if subscribeOnce {
+	if wgParams.SubsribeOnce {
 		flushWriter.subscribeOnce = true
 		ctx, flushWriter.close = context.WithCancel(ctx)
 	}
