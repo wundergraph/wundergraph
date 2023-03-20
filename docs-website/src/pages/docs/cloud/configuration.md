@@ -18,6 +18,7 @@ version = 1
 
 [projects]
 
+# The key is the name of the project. It must be unique.
 [projects.project1NameInCloud]
 workspace = "/path/to/your/workspace"
 
