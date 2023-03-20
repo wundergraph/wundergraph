@@ -33,7 +33,7 @@ import { onParentProcessExit } from '../utils/process';
  * Note that there's no way to find out wether a remote API has changed, so we make some assumptions to
  * walk the fine line between responsiveness and correctness.
  *
- * There are 3 different types of sources when it comes to API introspection, and we use different caching
+ * There are different types of sources when it comes to API introspection, and we use different caching
  * strategies for these:
  *
  * ## Introspection from data coming from the filesystem
@@ -42,21 +42,12 @@ import { onParentProcessExit } from '../utils/process';
  * This means that we know for sure that if the local data hasn't changed, the introspection will return the same
  * value. For this type of sources, we cache the value forever.
  *
- * ## Introspection from data coming from remote sources
+ * ## Introspection from data remote sources
  *
  * Other APIs, like GraphQL, might produce a different introspection result when either the local data changes
  * (e.g. custom scalars) or when changes are made to the remote end. There's no way to derive a perfect cache key
  * for these, so we cache them. Notice that if introspection fails and the cache is enabled, we try to load a
  * cached result ignoring its expiration as a fallback.
- *
- * ## Introspection from data coming from remote sources IN THE LOCAL NETWORK
- *
- * There'a a subset of APIs coming from remote data that warrant special consideration: those coming off the
- * local network (including localhost). This have a higher chance that someone working on a WunderGraph app
- * and an API using these network addresses is also making changes to the API, while at the same time should
- * be faster to introspect than APIs further away. To provide a better experience for this use case, we always
- * try to introspect APIs coming from the local network, ignoring the cache, but falling back to it if the
- * introspection fails.
  *
  * # Skipping
  *
@@ -107,13 +98,12 @@ function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Ap
 const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	api: Api<A>,
 	bucket: LocalCacheBucket,
-	cacheKey: string,
-	ttlSeconds: number
+	cacheKey: string
 ): Promise<boolean> => {
-	const cached = await bucket.get(cacheKey, { ignoreTtl: true });
+	const cached = await bucket.get(cacheKey);
 	const data = JSON.stringify(toCacheEntry(api));
 	if (cached !== data) {
-		bucket.set(cacheKey, data, { ttlSeconds: ttlSeconds });
+		bucket.set(cacheKey, data);
 		return true;
 	}
 	return false;
@@ -126,12 +116,11 @@ const introspectInInterval = async <Introspection extends IntrospectionConfigura
 	bucket: LocalCacheBucket,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
-	const ttlSeconds = introspectionCacheConfigurationTtl(configuration);
 	const pollingRunner = async () => {
 		try {
 			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 			const api = await generator(introspection);
-			const updated = await updateIntrospectionCache(api, bucket, cacheKey, ttlSeconds);
+			const updated = await updateIntrospectionCache(api, bucket, cacheKey);
 			if (updated) {
 				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
@@ -186,21 +175,6 @@ const introspectionCacheConfigurationKey = <Introspection extends IntrospectionC
 
 const introspectionCacheConfigurationDataSource = (config: IntrospectionCacheConfiguration) => {
 	return config?.dataSource ?? 'remote';
-};
-
-const introspectionCacheConfigurationTtl = (config: IntrospectionCacheConfiguration) => {
-	switch (introspectionCacheConfigurationDataSource(config)) {
-		case 'localFilesystem':
-			// Cache forever
-			return 0;
-		case 'localNetwork':
-			// Cache for a day, but notice that we try to skip the cache
-			// for these ones, favoring refetching
-			return 24 * 60 * 60;
-		case 'remote':
-			// Cache for an hour
-			return 60 * 60;
-	}
 };
 
 export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
@@ -271,10 +245,10 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		api = await generator(introspection);
 	} catch (e: any) {
 		/*
-		 * If the introspection cache is enabled, try to fallback to it ignoring ttl
+		 * If the introspection cache is enabled, try to fallback to it
 		 */
 		if (isIntrospectionCacheEnabled) {
-			const result = await cache.getJSON(cacheKey, { ignoreTtl: true });
+			const result = await cache.getJSON(cacheKey);
 			if (result) {
 				api = fromCacheEntry<A>(result as IntrospectionCacheFile<A>);
 			}
@@ -289,9 +263,7 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	 * We got a result. If the cache is enabled, populate it
 	 */
 	if (isIntrospectionCacheEnabled && api) {
-		await cache.setJSON(cacheKey, toCacheEntry<A>(api), {
-			ttlSeconds: introspectionCacheConfigurationTtl(configuration),
-		});
+		await cache.setJSON(cacheKey, toCacheEntry<A>(api));
 	}
 
 	return api;
