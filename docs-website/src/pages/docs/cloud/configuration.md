@@ -40,4 +40,4 @@ The `projects` field is optional. It contains a list of projects. Each project h
 
 ## Demo Project
 
-We have prepared a demo project to show you how to configure your project. You can find it here: [cloud-multi-workspaces](https://github.com/wundergraph/cloud-multi-workspaces)
+We have prepared a demo project to show you how to configure your project. You can find it here: [cloud-multi-projects-demo](https://github.com/wundergraph/cloud-multi-projects-demo)
