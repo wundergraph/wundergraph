@@ -17,12 +17,11 @@ In the future, we might add more configuration options to this file.
 version = 1
 
 [projects]
-
-# The key is the name of the project. It must be unique.
-[projects.project1NameInCloud]
+name = "project-a" # The name of the project in WunderGraph Cloud
 workspace = "/path/to/your/workspace"
 
-[projects.project2NameInCloud]
+[projects]
+name = "project-b"
 workspace = "/path/to/your/workspace"
 ```
 
@@ -35,8 +34,8 @@ The `version` field is optional. If you don't specify it, the latest version wil
 ### projects
 
 The `projects` field is optional. It contains a list of projects. Each project has a name and a workspace path.
-The name is used to identify the project in the WunderGraph Cloud CI. The workspace path is used to locate the project in the repository.
 
+- `name` field is required. It contains the name of the project. The name is used to identify the project in the WunderGraph Cloud CI.
 - `workspace` field is required. It contains the path to the workspace directory. The path is absolute to the root of the repository.
 
 ## Demo Project
