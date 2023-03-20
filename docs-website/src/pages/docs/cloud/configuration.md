@@ -38,3 +38,7 @@ The `projects` field is optional. It contains a list of projects. Each project h
 The name is used to identify the project in the WunderGraph Cloud CI. The workspace path is used to locate the project in the repository.
 
 - `workspace` field is required. It contains the path to the workspace directory. The path is absolute to the root of the repository.
+
+## Demo Project
+
+We have prepared a demo project to show you how to configure your project. You can find it here: [cloud-multi-workspaces](https://github.com/wundergraph/cloud-multi-workspaces)
