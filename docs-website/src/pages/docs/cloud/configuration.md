@@ -5,7 +5,7 @@ description: Configure your WunderGraph Cloud Project
 ---
 
 Optionally, WunderGraph Cloud uses a `wg.toml` file to configure your cloud project. This file is located in the root of your repository.
-You can configure multiple workspaces in a single repository. This is useful, if you have a monorepo with multiple WunderGraph projects. If you have a single workspace, you can skip this section and we will auto-detect your repository.
+You can configure multiple projects in a single repository. This is useful, if you have a monorepo with multiple WunderGraph projects. If you have a single workspace, you can skip this section and we will auto-detect your repository.
 In the future, we might add more configuration options to this file.
 
 > Note: If you are not familiar with writing TOML files, you can visit [https://toml.io/](https://toml.io/) to learn it.
