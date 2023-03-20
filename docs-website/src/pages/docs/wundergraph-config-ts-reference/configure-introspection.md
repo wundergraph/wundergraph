@@ -52,13 +52,15 @@ To verify that your tests can run without fetching data from the network
 in a connected machine, the `--offline` flag can be used to disable loading
 remote resources.
 
-## Enable Introspection Polling
+## Introspection Polling
 
-If you want to enable introspection polling,
-set a reasonable interval for the `pollingIntervalSeconds` value.
-For most data sources, an interval of 2-5 seconds should be fine.
+By default, `wunderctl up` will poll remote data sources periodically every 5 seconds,
+which should be fine for most data sources. The default interval can be changed using
+the `--default-polling-interval` flag.
+
 For remote data sources with large schemas,
 we recommend setting the interval to a higher value to not overload the remote server.
+To set a different polling interval, use `pollingIntervalSeconds`:
 
 ```typescript
 // wundergraph.config.ts
@@ -66,10 +68,13 @@ const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
   introspection: {
-    pollingIntervalSeconds: 5,
+    pollingIntervalSeconds: 30,
   },
-})
+});
 ```
+
+To disable polling for a given data source, set its `pollingIntervalSeconds` to `0`. Additionally,
+the default polling interval can also be disabled using `--default-polling-interval=5`.
 
 ## Disable Introspection Caching
 
@@ -84,7 +89,7 @@ const spaceX = introspect.graphql({
   introspection: {
     disableCache: true,
   },
-})
+});
 ```
 
 Disabling the cache can result in reduced performance,
@@ -118,7 +123,7 @@ const countries = introspect.graphql({
       .addClientRequestHeader('X-Authorization', 'Authorization')
       // this header is shared between introspection and actual requests
       .addStaticHeader('Authorization', 'Secret'),
-})
+});
 
 // or federated api
 const federatedApi = introspect.federation({
@@ -129,7 +134,7 @@ const federatedApi = introspect.federation({
       headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
     },
   ],
-})
+});
 ```
 
 ### Provide headers with introspection configuration
@@ -142,12 +147,11 @@ Headers configured in a such way will be used only for the graphql introspection
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: ' http://localhost:4000/',
-  headers: (builder) =>
-    builder.addClientRequestHeader('X-Authorization', 'Authorization'),
+  headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
   introspection: {
     headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
   },
-})
+});
 
 // or federated api
 const federatedApi = introspect.federation({
@@ -156,12 +160,11 @@ const federatedApi = introspect.federation({
     {
       url: 'http://localhost:4001/graphql',
       introspection: {
-        headers: (builder) =>
-          builder.addStaticHeader('Authorization', 'Secret'),
+        headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
       },
     },
   ],
-})
+});
 ```
 
 You could even mix up both approaches.
@@ -173,8 +176,7 @@ const countries = introspect.graphql({
   url: ' http://localhost:4000/',
   headers: (builder) => builder.addStaticHeader('Authorization', 'Secret One'),
   introspection: {
-    headers: (builder) =>
-      builder.addStaticHeader('Authorization', 'Secret Two'),
+    headers: (builder) => builder.addStaticHeader('Authorization', 'Secret Two'),
   },
-})
+});
 ```

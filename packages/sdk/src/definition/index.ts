@@ -43,6 +43,11 @@ export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECT
 export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
 
 export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
+// Default polling interval for data sources without one
+export const WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS = (() => {
+	const seconds = parseInt(process.env['WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS'] ?? '', 10);
+	return isNaN(seconds) ? 0 : seconds;
+})();
 
 export interface RenameType {
 	from: string;

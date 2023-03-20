@@ -250,10 +250,11 @@ func cacheConfigurationEnv(isCacheEnabled bool) []string {
 }
 
 type configScriptEnvOptions struct {
-	WunderGraphDir string
-	RootFlags      helpers.RootFlags
-	EnableCache    bool
-	FirstRun       bool
+	WunderGraphDir                string
+	RootFlags                     helpers.RootFlags
+	EnableCache                   bool
+	DefaultPollingIntervalSeconds int
+	FirstRun                      bool
 }
 
 // configScriptEnv returns the environment variables that scripts running the SDK configuration
@@ -264,6 +265,7 @@ func configScriptEnv(opts configScriptEnvOptions) []string {
 	env = append(env, commonScriptEnv(opts.WunderGraphDir)...)
 	env = append(env, cacheConfigurationEnv(opts.EnableCache)...)
 	env = append(env, "WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true")
+	env = append(env, fmt.Sprintf("WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS=%d", opts.DefaultPollingIntervalSeconds))
 	if opts.FirstRun {
 		// WG_INTROSPECTION_CACHE_SKIP=true causes the cache to try to load the remote data on the first run
 		env = append(env, "WG_INTROSPECTION_CACHE_SKIP=true")

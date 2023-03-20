@@ -3,6 +3,7 @@ import {
 	ApiType,
 	DataSource,
 	IntrospectionConfiguration,
+	WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
 	WG_ENABLE_INTROSPECTION_OFFLINE,
@@ -57,6 +58,10 @@ import { onParentProcessExit } from '../utils/process';
  * try to introspect APIs coming from the local network, ignoring the cache, but falling back to it if the
  * introspection fails.
  *
+ * # Skipping
+ *
+ * When starting wunderctl with wunderctl up, the first time the script for generating the config runs, we
+ * skip the cache lookup to refresh the data.
  *
  * # Polling
  *
@@ -105,7 +110,7 @@ const updateIntrospectionCache = async <Introspection extends IntrospectionConfi
 	cacheKey: string,
 	ttlSeconds: number
 ): Promise<boolean> => {
-	const cached = await bucket.get(cacheKey);
+	const cached = await bucket.get(cacheKey, { ignoreTtl: true });
 	const data = JSON.stringify(toCacheEntry(api));
 	if (cached !== data) {
 		bucket.set(cacheKey, data, { ttlSeconds: ttlSeconds });
@@ -212,17 +217,11 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	 * The return value is ignorable because we don't use it.
 	 */
 	if (WG_DATA_SOURCE_POLLING_MODE) {
-		if (
-			introspection.introspection?.pollingIntervalSeconds !== undefined &&
-			introspection.introspection?.pollingIntervalSeconds > 0
-		) {
-			await introspectInInterval(
-				introspection.introspection?.pollingIntervalSeconds,
-				configuration,
-				introspection,
-				cache,
-				generator
-			);
+		const defaultPollingInterval =
+			dataSource === 'localFilesystem' ? 0 : WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS;
+		const pollingInterval = introspection.introspection?.pollingIntervalSeconds ?? defaultPollingInterval;
+		if (pollingInterval > 0) {
+			await introspectInInterval(pollingInterval, configuration, introspection, cache, generator);
 		}
 		return {} as Api<A>;
 	}

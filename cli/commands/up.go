@@ -25,6 +25,7 @@ import (
 const UpCmdName = "up"
 
 var upCmdPrettyLogging bool
+var defaultDataSourcePollingIntervalSeconds int
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -105,9 +106,10 @@ var upCmd = &cobra.Command{
 			Logger:        log,
 			// WG_DATA_SOURCE_POLLING_MODE=true starts the config runner in "Polling Mode"
 			ScriptEnv: append(configScriptEnv(configScriptEnvOptions{
-				RootFlags:      rootFlags,
-				WunderGraphDir: wunderGraphDir,
-				EnableCache:    !disableCache,
+				RootFlags:                     rootFlags,
+				WunderGraphDir:                wunderGraphDir,
+				EnableCache:                   !disableCache,
+				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
 		})
 
@@ -335,6 +337,7 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
+	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
 
 	rootCmd.AddCommand(upCmd)
 }
