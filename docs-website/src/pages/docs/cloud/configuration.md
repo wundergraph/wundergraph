@@ -16,11 +16,11 @@ In the future, we might add more configuration options to this file.
 
 version = 1
 
-[projects]
+[[projects]]
 name = "project-a" # The name of the project in WunderGraph Cloud
 workspace = "/path/to/your/workspace"
 
-[projects]
+[[projects]]
 name = "project-b"
 workspace = "/path/to/your/workspace"
 ```
