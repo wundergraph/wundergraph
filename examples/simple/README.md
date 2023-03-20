@@ -12,10 +12,10 @@ npm install && npm start
 curl http://localhost:9991/operations/Continents
 ```
 
-#### Get Country
+#### Get all Countries
 
 ```shell
-curl http://localhost:9991/operations/Country
+curl http://localhost:9991/operations/Countries
 ```
 
 #### Get user
