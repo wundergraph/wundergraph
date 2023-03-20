@@ -6,6 +6,7 @@ import {
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
 	WG_ENABLE_INTROSPECTION_OFFLINE,
+	WG_INTROSPECTION_CACHE_SKIP,
 } from './index';
 
 import objectHash from 'object-hash';
@@ -232,16 +233,20 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 
 	/**
 	 * If the cache is enabled and we either:
+	 *
 	 * - Are in cache only mode
-	 * - The source is not the local network, try the cache first
+	 * - The source data comes from the local filesystem
+	 * - WG_INTROSPECTION_CACHE_SKIP is disabled
+	 *
+	 * We try the cache first
 	 *
 	 * Data from the local filesystem won't match if it changed, while remote
-	 * data is expensive to regenerate. We try to refetch data coming from
-	 * the local network to avoid problems with a stale cache.
+	 * data is expensive to regenerate. We use WG_INTROSPECTION_CACHE_SKIP on the first
+	 * run to avoid problems with a stale cache.
 	 */
 
 	if (isIntrospectionCacheEnabled) {
-		if (WG_ENABLE_INTROSPECTION_OFFLINE || dataSource !== 'localNetwork') {
+		if (WG_ENABLE_INTROSPECTION_OFFLINE || dataSource === 'localFilesystem' || !WG_INTROSPECTION_CACHE_SKIP) {
 			const cached = (await cache.getJSON(cacheKey)) as IntrospectionCacheFile<A>;
 			if (cached) {
 				return fromCacheEntry<A>(cached);

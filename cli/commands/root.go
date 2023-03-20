@@ -241,6 +241,36 @@ func commonScriptEnv(wunderGraphDir string) []string {
 	}
 }
 
+// cacheConfigurationEnv returns the environment variables required to configure the
+// cache in the SDK side
+func cacheConfigurationEnv(isCacheEnabled bool) []string {
+	return []string{
+		fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", isCacheEnabled),
+	}
+}
+
+type configScriptEnvOptions struct {
+	WunderGraphDir string
+	RootFlags      helpers.RootFlags
+	EnableCache    bool
+	FirstRun       bool
+}
+
+// configScriptEnv returns the environment variables that scripts running the SDK configuration
+// must use
+func configScriptEnv(opts configScriptEnvOptions) []string {
+	var env []string
+	env = append(env, helpers.CliEnv(opts.RootFlags)...)
+	env = append(env, commonScriptEnv(opts.WunderGraphDir)...)
+	env = append(env, cacheConfigurationEnv(opts.EnableCache)...)
+	env = append(env, "WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true")
+	if opts.FirstRun {
+		// WG_INTROSPECTION_CACHE_SKIP=true causes the cache to try to load the remote data on the first run
+		env = append(env, "WG_INTROSPECTION_CACHE_SKIP=true")
+	}
+	return env
+}
+
 func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")

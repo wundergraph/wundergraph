@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -84,10 +83,17 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(append(helpers.CliEnv(rootFlags), commonScriptEnv(wunderGraphDir)...),
-				"WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true",
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
-			),
+			FirstRunEnv: configScriptEnv(configScriptEnvOptions{
+				RootFlags:      rootFlags,
+				WunderGraphDir: wunderGraphDir,
+				EnableCache:    !disableCache,
+				FirstRun:       true,
+			}),
+			ScriptEnv: configScriptEnv(configScriptEnvOptions{
+				RootFlags:      rootFlags,
+				WunderGraphDir: wunderGraphDir,
+				EnableCache:    !disableCache,
+			}),
 		})
 
 		// responsible for executing the config in "polling" mode
@@ -97,11 +103,12 @@ var upCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			ScriptArgs:    []string{configOutFile},
 			Logger:        log,
-			ScriptEnv: append(append(helpers.CliEnv(rootFlags), commonScriptEnv(wunderGraphDir)...),
-				// this environment variable starts the config runner in "Polling Mode"
-				"WG_DATA_SOURCE_POLLING_MODE=true",
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
-			),
+			// WG_DATA_SOURCE_POLLING_MODE=true starts the config runner in "Polling Mode"
+			ScriptEnv: append(configScriptEnv(configScriptEnvOptions{
+				RootFlags:      rootFlags,
+				WunderGraphDir: wunderGraphDir,
+				EnableCache:    !disableCache,
+			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
 		})
 
 		var hookServerRunner *scriptrunner.ScriptRunner

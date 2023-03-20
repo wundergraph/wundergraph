@@ -36,6 +36,7 @@ import {
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+export const WG_INTROSPECTION_CACHE_SKIP = process.env['WG_INTROSPECTION_CACHE_SKIP'] === 'true';
 // Only use the introspection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 // When true, throw an exception an error is found while loading operations
