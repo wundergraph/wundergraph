@@ -876,6 +876,10 @@ const navigation = [
 				href: '/docs/cloud',
 			},
 			{
+				title: 'Workspace Configuration (wg.toml)',
+				href: '/docs/cloud/configuration',
+			},
+			{
 				title: 'Deployments',
 				links: [
 					{
