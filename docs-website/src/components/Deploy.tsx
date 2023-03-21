@@ -18,7 +18,7 @@ export const Deploy: React.FC<DeployProps> = (props) => {
 
 	return (
 		<a href={url}>
-			<img src="/button-full.svg" alt="Deploy to WunderGraph" />
+			<img src="https://wundergraph.com/button" alt="Deploy to WunderGraph" />
 		</a>
 	);
 };
