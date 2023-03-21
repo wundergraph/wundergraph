@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.139.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.138.0...@wundergraph/sdk@0.139.0) (2023-03-16)
+
+### Features
+
+* annotate OpenAPI spec with operation types and auth requirements ([#728](https://github.com/wundergraph/wundergraph/issues/728)) ([67836a8](https://github.com/wundergraph/wundergraph/commit/67836a84f51ca0875c20e8d9e9a5144e091e4499)) (@fiam)
+
+### Bug Fixes
+
+* custom int/float scalars usage in arguments ([#427](https://github.com/wundergraph/wundergraph/issues/427))Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: spetrunin <neyasut@gmail.com> ([2b424f3](https://github.com/wundergraph/wundergraph/commit/2b424f3daaabea25abb4a23139751ff0ab2adefe)) (@OLingard)
+* do not inject empty queries ([#718](https://github.com/wundergraph/wundergraph/issues/718))Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: Eelco Wiersma <contact@pagebakers.nl> Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> ([47c1cf3](https://github.com/wundergraph/wundergraph/commit/47c1cf39b7a36e86e0dc5adc77ac1113fea4f178)) (@erguotou520)
+* fixing multidimensional array schema in codegen ([#731](https://github.com/wundergraph/wundergraph/issues/731))Co-authored-by: abdelhameedalsayed <abdulhameed.azab@gmail.com> ([73e2a09](https://github.com/wundergraph/wundergraph/commit/73e2a097826d593bbb0dbda9c2a7856110aa3b36)) (@abdelhameedhamdy)
+
 ## [0.138.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.4...@wundergraph/sdk@0.138.0) (2023-03-06)
 
 ### Features

@@ -14,7 +14,7 @@ export function buildPath(
 	obj: JSONSchema7Definition,
 	paths: JSONSchemaParameterPath[]
 ) {
-	if (typeof obj === 'boolean') return;
+	if (typeof obj === 'boolean' || typeof obj === 'undefined') return;
 
 	// those nodes are limited due to recursion
 	if (!obj.type) return;

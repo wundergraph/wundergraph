@@ -17,6 +17,7 @@ import {
 	LightBulbIcon,
 	ListBulletIcon,
 	CloudArrowUpIcon,
+	AcademicCapIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -174,6 +175,33 @@ const navigation = [
 						href: '/docs/examples/nextjs-todos',
 					},
 				],
+			},
+		],
+	},
+	{
+		title: 'Learn WunderGraph',
+		href: '/learn',
+		icon: <AcademicCapIcon />,
+		links: [
+			{
+				title: 'Introduction',
+				href: '/learn',
+			},
+			{
+				title: 'Hello World',
+				href: '/learn/hello_world',
+			},
+			{
+				title: 'Thinking in API Dependencies',
+				href: '/learn/thinking_in_api_dependencies',
+			},
+			{
+				title: 'Joining data across APIs',
+				href: '/learn/joining_data_across_apis',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/learn/typescript_operations',
 			},
 		],
 	},
@@ -853,6 +881,10 @@ const navigation = [
 				title: 'Overview',
 				navTitle: 'Cloud',
 				href: '/docs/cloud',
+			},
+			{
+				title: 'Workspace Configuration (wg.toml)',
+				href: '/docs/cloud/configuration',
 			},
 			{
 				title: 'Deployments',
