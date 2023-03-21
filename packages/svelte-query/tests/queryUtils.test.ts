@@ -76,7 +76,7 @@ const nockQuery = (operationName = 'Weather', wgParams = {}) => {
 		.matchHeader('content-type', 'application/json')
 		.matchHeader('WG-SDK-Version', '1.0.0')
 		.get('/operations/' + operationName)
-		.query({ wg_api_hash: '123', wg_variables: '{}', ...wgParams });
+		.query({ wg_api_hash: '123', ...wgParams });
 };
 
 const nockMutation = (operationName = 'SetName', wgParams = {}, authenticated = false) => {
@@ -247,14 +247,14 @@ describe('Svelte Query - createMutation', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.post('/operations/SetNameWithoutAuth', { name: 'Rick Astley' })
+			.post('/operations/SetNameWithoutAuth', { name: 'Not Rick Astley' })
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Rick Astley' } })
+			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } })
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/operations/Weather')
-			.query({ wg_api_hash: '123', wg_variables: '{}' })
+			.query({ wg_api_hash: '123' })
 			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
 
 		const queryCache = new QueryCache();
@@ -312,7 +312,12 @@ describe('Svelte Query - createSubscription', () => {
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.get('/operations/Countdown')
-			.query({ wg_api_hash: '123', wg_variables: JSON.stringify({ from: 100 }), wg_subscribe_once: 'true' })
+			.query(
+				(obj) =>
+					obj.wg_api_hash === '123' &&
+					obj.wg_variables === JSON.stringify({ from: 100 }) &&
+					obj.wg_subscribe_once === ''
+			)
 			.reply(200, { data: { count: 100 } });
 
 		const subscriptionCreator = () =>
@@ -359,6 +364,7 @@ describe('Svelte Query - getUser', () => {
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/auth/user')
+			.query({ wg_api_hash: '123' })
 			.reply(200, { email: 'info@wundergraph.com' });
 
 		const userGetter = () => getUser();

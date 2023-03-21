@@ -5,7 +5,7 @@
 	const mutation = mutationCreator()
 
 	const onClick = () => {
-		$mutation.mutate({ name: 'Rick Astley' })
+		$mutation.mutate({ name: 'Not Rick Astley' })
 	}
 </script>
 
