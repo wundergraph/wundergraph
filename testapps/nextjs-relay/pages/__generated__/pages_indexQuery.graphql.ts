@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<03ea527fc0254ebb47f0b697efe16f6d>>
- * @relayHash 05f3222dcc24dc05b04e37315cc76388
+ * @generated SignedSource<<3bae8de6ce7a4d573f05b334b6a14f3b>>
+ * @relayHash d0cce0203f588fe54ac645eb33ba3f22
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,7 +9,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID 05f3222dcc24dc05b04e37315cc76388
+// @relayRequestID d0cce0203f588fe54ac645eb33ba3f22
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from 'relay-runtime';
@@ -169,6 +169,13 @@ const node: ConcreteRequest = (function () {
 											name: 'description',
 											storageKey: null,
 										},
+										{
+											alias: null,
+											args: null,
+											kind: 'ScalarField',
+											name: 'icon',
+											storageKey: null,
+										},
 									],
 									storageKey: null,
 								},
@@ -188,7 +195,7 @@ const node: ConcreteRequest = (function () {
 			],
 		},
 		params: {
-			id: '05f3222dcc24dc05b04e37315cc76388',
+			id: 'd0cce0203f588fe54ac645eb33ba3f22',
 			metadata: {},
 			name: 'pages_indexQuery',
 			operationKind: 'query',
