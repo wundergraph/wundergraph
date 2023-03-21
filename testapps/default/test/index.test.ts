@@ -1,13 +1,9 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
-import { InputValidationError } from '@wundergraph/sdk/client';
+import { ClientResponse, InputValidationError } from '@wundergraph/sdk/client';
+import { NestedInternalResponse } from '../.wundergraph/generated/models';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
 const wg = createTestServer();
-
-// TODO: Remove this once the secret refactor is done
-process.env['WG_SECURE_COOKIE_HASH_KEY'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-process.env['WG_SECURE_COOKIE_BLOCK_KEY'] = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
-process.env['WG_CSRF_TOKEN_SECRET'] = 'aaaaaaaaaaa';
 
 beforeAll(() => wg.start());
 afterAll(() => wg.stop());
@@ -15,11 +11,18 @@ afterAll(() => wg.stop());
 describe('functions', () => {
 	test('internal operation call from  function', async () => {
 		const client = wg.client();
-		const result = await client.query({
-			operationName: 'nested/InternalWrapper',
-		});
-		expect(result.error).toBeUndefined();
-		expect(result.data?.data?.chinook_findFirstAlbum?.AlbumId).toBe(1);
+		const promises: Promise<ClientResponse<NestedInternalResponse>>[] = [];
+		for (let ii = 0; ii < 50; ii++) {
+			const op = client.query({
+				operationName: 'nested/InternalWrapper',
+			});
+			promises.push(op);
+		}
+		const results = await Promise.all(promises);
+		for (const result of results) {
+			expect(result.error).toBeUndefined();
+			expect(result.data?.data?.chinook_findFirstAlbum?.AlbumId).toBe(1);
+		}
 	});
 });
 
