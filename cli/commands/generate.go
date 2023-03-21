@@ -50,10 +50,10 @@ var generateCmd = &cobra.Command{
 
 		configOutFile := filepath.Join("generated", "bundle", "config.js")
 
+		// XXX: generate never uses the cache
 		scriptEnv := configScriptEnv(configScriptEnvOptions{
 			RootFlags:      rootFlags,
 			WunderGraphDir: wunderGraphDir,
-			EnableCache:    !disableCache,
 		})
 		// Run scripts in prod mode
 		scriptEnv = append(scriptEnv, "NODE_ENV=production", "WG_THROW_ON_OPERATION_LOADING_ERROR=true")

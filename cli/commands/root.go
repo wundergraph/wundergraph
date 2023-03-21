@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -39,8 +38,6 @@ var (
 	log                   *zap.Logger
 	cmdDurationMetric     telemetry.DurationMetric
 	_wunderGraphDirConfig string
-	disableCache          bool
-	clearCache            bool
 
 	rootFlags helpers.RootFlags
 
@@ -99,18 +96,6 @@ var rootCmd = &cobra.Command{
 			log.Debug("env file successfully loaded",
 				zap.String("file", DotEnvFile),
 			)
-		}
-
-		if clearCache {
-			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-			if err != nil {
-				return err
-			}
-			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {
-				if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-					return err
-				}
-			}
 		}
 
 		// Check if we want to track telemetry for this command
@@ -293,7 +278,5 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
-	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
-	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
 }

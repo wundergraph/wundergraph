@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -24,8 +25,12 @@ import (
 
 const UpCmdName = "up"
 
-var upCmdPrettyLogging bool
-var defaultDataSourcePollingIntervalSeconds int
+var (
+	upCmdPrettyLogging                      bool
+	defaultDataSourcePollingIntervalSeconds int
+	disableCache                            bool
+	clearCache                              bool
+)
 
 // upCmd represents the up command
 var upCmd = &cobra.Command{
@@ -40,6 +45,14 @@ var upCmd = &cobra.Command{
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
 			return err
+		}
+
+		if clearCache {
+			if cacheDir, _ := helpers.LocalWunderGraphCacheDir(wunderGraphDir); cacheDir != "" {
+				if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+					return err
+				}
+			}
 		}
 
 		// only validate if the file exists
@@ -338,6 +351,8 @@ var upCmd = &cobra.Command{
 func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
+	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
+	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
 
 	rootCmd.AddCommand(upCmd)
 }
