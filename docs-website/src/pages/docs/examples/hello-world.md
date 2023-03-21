@@ -19,11 +19,11 @@ As the data source, we add a single API, the SpaceX GraphQL API in this case.
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [spaceX],
-})
+});
 ```
 
 ## Operation configuration
@@ -47,3 +47,13 @@ Now, we can run the application using `npm run start` and access the generated R
 ```bash
 curl http://localhost:9991/operations/Dragons
 ```
+
+## Learn more
+
+- [Guides](/docs/guides)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="simple" /%}

@@ -7,27 +7,29 @@ description:
 [The Cross API Joins example](https://github.com/wundergraph/wundergraph/tree/main/examples/cross-api-joins) shows one of the most powerful features of WunderGraph,
 being able to join data from different APIs without having to stitch or federate the APIs.
 
+{% deploy template="cross-api-joins" /%}
+
 ## Data source configuration
 
 For this scenario, we need to introspect two APIs,
 a weather and a countries GraphQL API:
 
 ```typescript
-import { configureWunderGraphApplication } from './index'
+import { configureWunderGraphApplication } from './index';
 
 const weather = introspect.graphql({
   apiNamespace: 'weather',
   url: 'https://weather-api.wundergraph.com/',
-})
+});
 
 const countries = introspect.graphql({
   apiNamespace: 'countries',
   url: 'https://countries.trevorblades.com/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [weather, countries],
-})
+});
 ```
 
 As you can see,
@@ -81,3 +83,13 @@ removing unnecessary nesting.
 
 We've just combined two APIs without having to use any glue code.
 This Operation is a valid GraphQL Operation and can be defined in your IDE with full type safety.
+
+## Learn more
+
+- [The \_join field explain](/docs/core-concepts/_join-field)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="cross-api-joins" /%}

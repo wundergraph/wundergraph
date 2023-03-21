@@ -88,8 +88,14 @@ const App = () => {
 export default App;
 ```
 
-## Next
+## Learn more
 
 - [WunderGraph Solid client reference](/docs/clients-reference/solid-query)
 - [Solid Query documentation](https://tanstack.com/query/v4/docs/solid/overview)
 - [Solid.js documentation](https://www.solidjs.com/)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use [WunderGraph Cloud](https://cloud.wundergraph.com). Enable the [Vercel integration](https://vercel.com/integrations/wundergraph) to deploy the Vite frontend to Vercel.
+
+{% deploy template="vite-solidjs" /%}

@@ -66,21 +66,21 @@ model User {
 We're using WunderGraph to seed the database:
 
 ```typescript
-import { createClient } from '../.wundergraph/generated/client'
-import fetch from 'node-fetch'
+import { createClient } from '../.wundergraph/generated/client';
+import fetch from 'node-fetch';
 
 const seed = async () => {
   const client = createClient({
     customFetch: fetch as any,
-  })
+  });
   const user = await client.query({
     operationName: 'UserByEmail',
     input: {
       email: 'jens@wundergraph.com',
     },
-  })
+  });
   if (user?.data?.db_findFirstUser) {
-    return
+    return;
   }
   const out = await client.mutate({
     operationName: 'CreateUser',
@@ -92,9 +92,21 @@ const seed = async () => {
       content: 'This is WunderGraph =)',
       published: true,
     },
-  })
-  console.log('seed:out', JSON.stringify(out))
-}
+  });
+  console.log('seed:out', JSON.stringify(out));
+};
 
-seed()
+seed();
 ```
+
+## Learn more
+
+- [@wundergraph/react-query reference](/docs/clients-reference/react-query)
+- [React Query documentation](https://tanstack.com/query/v4/docs/overview)
+- [Next.js client documentation](/docs/clients-reference/nextjs)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use [WunderGraph Cloud](https://cloud.wundergraph.com). Enable the [Vercel integration](https://vercel.com/integrations/wundergraph) to deploy the Next.js frontend to Vercel.
+
+{% deploy template="nextjs-postgresql-prisma" /%}
