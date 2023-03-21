@@ -29,9 +29,34 @@ const operations = [
 	},
 	{
 		Name: 'GetUser',
-		PathName: 'item/GetID',
+		PathName: 'users/get',
 		OperationType: OperationType.QUERY,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+		VariablesSchema: {
+			type: 'object',
+			properties: {},
+			additionalProperties: false,
+			definitions: {},
+		},
+	},
+	{
+		Name: 'SubscribeToUser',
+		PathName: 'users/subscribe',
+		OperationType: OperationType.SUBSCRIPTION,
+		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+		VariablesSchema: {
+			type: 'object',
+			properties: {},
+			additionalProperties: false,
+			definitions: {},
+		},
+	},
+	{
+		Name: 'PutUser',
+		PathName: 'users/put',
+		OperationType: OperationType.MUTATION,
+		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
+		AuthenticationConfig: { required: true },
 		VariablesSchema: {
 			type: 'object',
 			properties: {},
@@ -55,7 +80,7 @@ describe('OpenAPI builder', () => {
 		expect(result.openapi).toBe('3.1.0');
 		expect(result.info.title).toBe(apiTitle);
 		expect(result.info.version).toBe(apiVersion);
-		expect(result.servers[0].url).toBe(apiPublicUrl);
+		expect(result.servers[0].url).toBe(`${apiPublicUrl}/operations`);
 	});
 
 	test('operation properties', async () => {
@@ -117,7 +142,7 @@ describe('OpenAPI builder', () => {
 		] as unknown as GraphQLOperation[];
 		const result = builder.build(operations);
 
-		const querySpec = result.paths['/operations/QueryPath'];
+		const querySpec = result.paths['/QueryPath'];
 		expect(querySpec).toBeDefined();
 		expect(querySpec.post).toBeUndefined();
 		expect(querySpec.get?.operationId).toBe('Query');
@@ -129,7 +154,7 @@ describe('OpenAPI builder', () => {
 		expect(queryResponse).toBeDefined();
 		expect(queryResponse?.content['application/json'].schema).toBe(operations[0].ResponseSchema);
 
-		const mutationSpec = result.paths['/operations/MutationPath'];
+		const mutationSpec = result.paths['/MutationPath'];
 		expect(mutationSpec).toBeDefined();
 		expect(mutationSpec.get).toBeUndefined();
 		expect(mutationSpec.post?.operationId).toBe('Mutation');
@@ -137,6 +162,68 @@ describe('OpenAPI builder', () => {
 		const mutationResponse = mutationSpec.post?.responses['200'];
 		expect(mutationResponse).toBeDefined();
 		expect(mutationResponse?.content['application/json'].schema).toBe(operations[1].ResponseSchema);
+	});
+
+	test('skip internal operations', async () => {
+		const operations = [
+			{
+				Name: 'Query',
+				PathName: 'QueryPath',
+				OperationType: OperationType.QUERY,
+			},
+			{
+				Name: 'InternalQuery',
+				PathName: 'InternalQueryPath',
+				OperationType: OperationType.QUERY,
+				Internal: true,
+			},
+		] as unknown as GraphQLOperation[];
+		const builder = new OpenApiBuilder({
+			title: 'WunderGraph',
+			version: '0',
+			baseURL: 'http://localhost:9991',
+		});
+		const result = builder.build(operations);
+		expect(Object.keys(result.paths).length).toBe(1);
+		expect(result.paths['/QueryPath']).toBeDefined();
+		expect(result.paths['/InternalQueryPath']).toBeUndefined();
+	});
+
+	test('annotate operations', async () => {
+		const operations = [
+			{
+				Name: 'Query',
+				PathName: 'QueryPath',
+				OperationType: OperationType.QUERY,
+			},
+			{
+				Name: 'Mutation',
+				PathName: 'MutationPath',
+				OperationType: OperationType.MUTATION,
+				AuthenticationConfig: { required: true },
+			},
+			{
+				Name: 'Subscription',
+				PathName: 'SubscriptionPath',
+				OperationType: OperationType.SUBSCRIPTION,
+			},
+		] as unknown as GraphQLOperation[];
+		const builder = new OpenApiBuilder({
+			title: 'WunderGraph',
+			version: '0',
+			baseURL: 'http://localhost:9991',
+		});
+		const result = builder.build(operations);
+		expect(Object.keys(result.paths).length).toBe(3);
+		const query = result.paths['/QueryPath'].get;
+		expect(query?.['x-wundergraph-operation-type']).toBe('query');
+		expect(query?.['x-wundergraph-requires-authentication']).toBe(false);
+		const mutation = result.paths['/MutationPath'].post;
+		expect(mutation?.['x-wundergraph-operation-type']).toBe('mutation');
+		expect(mutation?.['x-wundergraph-requires-authentication']).toBe(true);
+		const subscription = result.paths['/SubscriptionPath'].get;
+		expect(subscription?.['x-wundergraph-operation-type']).toBe('subscription');
+		expect(subscription?.['x-wundergraph-requires-authentication']).toBe(false);
 	});
 
 	test('OpenAPI Builder', async () => {

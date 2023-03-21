@@ -11,7 +11,7 @@ This example demonstrates how to use NextJS, PostgreSQL and Prisma in WunderGrap
 Scaffold the project:
 
 ```bash
-npx create-wundergraph-app my-project -E nextjs-postgresql-prisma
+npx create-wundergraph-app my-project -E nextjs-postgres-prisma
 ```
 
 Then from the project root,
