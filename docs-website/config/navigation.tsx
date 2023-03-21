@@ -871,6 +871,10 @@ const navigation = [
 				title: 'Integrations',
 				links: [
 					{
+						title: 'Deploy button',
+						href: '/docs/cloud/deploy-button',
+					},
+					{
 						title: 'Vercel',
 						href: '/docs/cloud/integrations/vercel',
 					},
@@ -1317,11 +1321,6 @@ const navigation = [
 				],
 			},
 		],
-	},
-	{
-		title: 'Deploy button',
-		href: '/docs/deploy-button',
-		icon: <CloudArrowUpIcon />,
 	},
 	{ type: 'divider' },
 	{
