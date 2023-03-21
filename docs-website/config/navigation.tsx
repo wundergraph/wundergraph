@@ -16,6 +16,7 @@ import {
 	ArrowUpCircleIcon,
 	LightBulbIcon,
 	ListBulletIcon,
+	CloudArrowUpIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -192,18 +193,6 @@ const navigation = [
 					{
 						title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
 						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
-					},
-					{
-						title: 'API Namespacing',
-						href: '/docs/core-concepts/api-namespacing',
-					},
-					{
-						title: 'Virtual Graph',
-						href: '/docs/core-concepts/virtual-graph',
-					},
-					{
-						title: 'The `_join` field',
-						href: '/docs/core-concepts/_join-field',
 					},
 				],
 			},
@@ -464,6 +453,7 @@ const navigation = [
 			'/docs/supported-data-sources',
 			'/docs/supported-frontend-frameworks',
 			'/docs/supported-backend-languages-frameworks',
+			'/docs/core-concepts',
 		],
 		icon: <CubeIcon />,
 		links: [
@@ -528,6 +518,23 @@ const navigation = [
 					{
 						title: 'WunderHub',
 						href: '/docs/components-of-wundergraph/wunderhub',
+					},
+				],
+			},
+			{
+				title: 'Core Concepts',
+				links: [
+					{
+						title: 'API Namespacing',
+						href: '/docs/core-concepts/api-namespacing',
+					},
+					{
+						title: 'Virtual Graph',
+						href: '/docs/core-concepts/virtual-graph',
+					},
+					{
+						title: 'The `_join` field',
+						href: '/docs/core-concepts/_join-field',
 					},
 				],
 			},
@@ -1310,6 +1317,11 @@ const navigation = [
 				],
 			},
 		],
+	},
+	{
+		title: 'Deploy button',
+		href: '/docs/deploy-button',
+		icon: <CloudArrowUpIcon />,
 	},
 	{ type: 'divider' },
 	{
