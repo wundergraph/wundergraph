@@ -123,7 +123,7 @@ export class LocalCacheBucket {
 		}
 		try {
 			const blob = await fs.readFile(filePath);
-			if (blob.length > 4 || true) {
+			if (blob.length > 4) {
 				const expiration = blob.readUInt32LE();
 				if (!this.hasExpired(expiration, opts)) {
 					return blob.toString('utf-8', 4);
