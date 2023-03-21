@@ -41,7 +41,7 @@ func LocalWunderGraphCacheDir(wgDir string) (string, error) {
 		cur = next
 	}
 	if topNodeModules != "" {
-		return filepath.Join(topNodeModules, ".cache", ".wundergraph"), nil
+		return filepath.Join(topNodeModules, ".cache", "wundergraph"), nil
 	}
 	return "", fmt.Errorf("could not find %s", nodeModulesDirName)
 }
