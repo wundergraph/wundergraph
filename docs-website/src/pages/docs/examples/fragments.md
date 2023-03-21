@@ -42,3 +42,9 @@ fragment User on User {
 
 This fragment, although named `UserFragment.graphql`,
 is available to all Operations with the name `User`.
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="fragments" /%}

@@ -17,7 +17,7 @@ Let's start by configuring WunderGraph.
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 
 configureWunderGraphApplication({
   apis: [spaceX],
@@ -32,7 +32,7 @@ configureWunderGraphApplication({
       path: '../components/generated',
     },
   ],
-})
+});
 ```
 
 What's notable here is that we're using the `NextJsTemplate` to generate a Next.js client.
@@ -56,14 +56,14 @@ query Dragons {
 ## Use from Next.js
 
 ```typescript
-import { NextPage } from 'next'
-import { useQuery, withWunderGraph } from '../components/generated/nextjs'
+import { NextPage } from 'next';
+import { useQuery, withWunderGraph } from '../components/generated/nextjs';
 
 const Home: NextPage = () => {
-  const dragons = useQuery({ operationName: 'Dragons' })
-  return <div>{JSON.stringify(dragons)}</div>
-}
-export default withWunderGraph(Home)
+  const dragons = useQuery({ operationName: 'Dragons' });
+  return <div>{JSON.stringify(dragons)}</div>;
+};
+export default withWunderGraph(Home);
 ```
 
 Your operations will be compiled into RPC endpoints.
@@ -73,6 +73,13 @@ so all you have to do is to import he `useQuery` hook and call your newly create
 Wrapping the Page in `withWunderGraph` will make sure that Server Side Rendering (SSR) works,
 that's it.
 
-## What's next
+## Learn more
 
-Check out the [Next.js client documentation](/docs/clients-reference/nextjs) for more information.
+- [Guides](/docs/guides)
+- [Next.js client documentation](/docs/clients-reference/nextjs)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use [WunderGraph Cloud](https://cloud.wundergraph.com). Enable the [Vercel integration](https://vercel.com/integrations/wundergraph) to deploy the Next.js frontend to Vercel.
+
+{% deploy template="nextjs" /%}

@@ -14,9 +14,9 @@ React Native doesn't support the new Node.js exports field yet. Add this configu
 
 ```js
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require('expo/metro-config')
+const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(__dirname)
+const config = getDefaultConfig(__dirname);
 
 module.exports = {
   ...config,
@@ -25,25 +25,17 @@ module.exports = {
     resolveRequest: (context, moduleName, platform) => {
       // React Native doesn't support exports field in package.json, so we resolve it manually.
       if (moduleName.startsWith('@wundergraph/sdk/client')) {
-        return context.resolveRequest(
-          context,
-          '@wundergraph/sdk/dist/client',
-          platform
-        )
+        return context.resolveRequest(context, '@wundergraph/sdk/dist/client', platform);
       }
 
       if (moduleName.startsWith('@wundergraph/sdk/internal')) {
-        return context.resolveRequest(
-          context,
-          '@wundergraph/sdk/dist/internal',
-          platform
-        )
+        return context.resolveRequest(context, '@wundergraph/sdk/dist/internal', platform);
       }
 
-      return context.resolveRequest(context, moduleName, platform)
+      return context.resolveRequest(context, moduleName, platform);
     },
   },
-}
+};
 ```
 
 ### Fetch Api
@@ -85,12 +77,12 @@ As the data source, we add a single API, the SpaceX GraphQL API in this case.
 const spaceX = introspect.graphql({
   apiNamespace: 'spacex',
   url: 'https://spacex-api.fly.dev/graphql/',
-})
+});
 
 const myApplication = new Application({
   name: 'app',
   apis: [spaceX],
-})
+});
 ```
 
 ## Operation configuration
@@ -110,3 +102,14 @@ query Dragons {
 ## Running the application
 
 Now, we can run the application using `npm run start`, this will start WunderGraph and Expo. Use the Expo CLI to choose which device you want to run the app on.
+
+## Learn more
+
+- [Guides](/docs/guides)
+- [Expo](https://expo.io/)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="simple" /%}
