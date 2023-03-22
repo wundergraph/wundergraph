@@ -68,7 +68,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
-      - name: Install Protoc2
+      - name: Install Protoc
         uses: abelfodil/protoc-action@v1
         with:
           protoc-version: '21.5'

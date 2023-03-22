@@ -12,6 +12,7 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
+      - 'scripts/minio-setup.sh'
       - '!examples/**/*'
       - '!**/*.md'
   pull_request:
