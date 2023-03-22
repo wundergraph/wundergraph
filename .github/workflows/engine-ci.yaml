@@ -51,7 +51,7 @@ jobs:
         env:
           MINIO_ROOT_USER: minio
           MINIO_ROOT_PASSWORD: minio123
-        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live" --entrypoint="minio server /data"
+        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live" --entrypoint=minio server /data
     steps:
       - uses: actions/checkout@v3
         with:
