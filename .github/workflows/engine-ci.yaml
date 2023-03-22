@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 20
     services:
       minio:
-        image: minio/minio:edge-cicd
+        image: quay.io/minio/minio server /data
         ports:
           - 9000:9000
         env:
