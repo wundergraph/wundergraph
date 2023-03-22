@@ -10,7 +10,7 @@ function setupMinio () {
     docker-compose exec -T minio mc admin user add myminio test 12345678
     docker-compose exec -T minio mc admin user info myminio test
     docker-compose exec -T minio mc mb myminio/uploads
-    docker-compose exec -T minio anonymous -r set public myminio/uploads
+    docker-compose exec -T minio mc anonymous -r set public myminio/uploads
     return $?
 }
 
