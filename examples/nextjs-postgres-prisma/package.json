@@ -13,6 +13,7 @@
     "build": "npm run build:wundergraph && npm run build:next",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "seed": "wait-on -d 2000 http://localhost:9991 && ts-node ./seed/seed.ts && npm run open",
+    "prisma:ts": "ts-node prisma.ts",
     "dev": "next dev",
     "migrate": "prisma format && prisma migrate dev --name",
     "cleanup": "docker-compose down -v",
@@ -21,6 +22,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@prisma/client": "^4.11.0",
     "@wundergraph/nextjs": "^0.9.5",
     "@wundergraph/sdk": "^0.138.0",
     "graphql": "^16.3.0",

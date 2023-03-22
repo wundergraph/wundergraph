@@ -1,0 +1,18 @@
+query {
+	orm: users_post_findFirstUser {
+		id
+		email
+		name
+		posts {
+			id
+			title
+			content
+		}
+	}
+	row: users_post_queryRawRow(query: "select id,email,name from \"User\" limit 2") {
+		id: Int
+		email: String
+		name: String
+	}
+	json: users_post_queryRaw(query: "select id,email,name from \"User\" limit 2")
+}
