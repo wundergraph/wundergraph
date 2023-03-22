@@ -115,7 +115,7 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
 		} catch (e) {
-			Logger.error('Error during introspection cache update', e);
+			Logger.error(`error polling API: ${e}`);
 		}
 	};
 

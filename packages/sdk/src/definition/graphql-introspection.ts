@@ -238,7 +238,7 @@ const introspectGraphQLAPI = async (
 				}
 				msg += ` retryAttempt: ${retryCount}`;
 
-				Logger.info(msg);
+				Logger.debug(msg);
 			},
 		},
 	};
