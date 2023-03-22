@@ -32,12 +32,14 @@ import {
 	FieldConfiguration,
 	HTTPHeader,
 	HTTPMethod,
+	URLQueryConfiguration,
 } from '@wundergraph/protobuf';
 import yaml from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import {
 	applyNamespaceToExistingRootFieldConfigurations,
 	applyNameSpaceToGraphQLSchema,
+	applyNameSpaceToTypeFields,
 } from '../definition/namespacing';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { convertOpenApiV3 } from './index';
@@ -100,6 +102,8 @@ const prepareGraphqlSchema = async (
 	return graphQLSchema;
 };
 
+type DataSourceHeaders = { [key: string]: HTTPHeader };
+
 class RESTApiBuilder {
 	constructor(introspection: OpenAPIIntrospection, graphQLSchema: GraphQLSchema) {
 		this.introspection = introspection;
@@ -120,7 +124,7 @@ class RESTApiBuilder {
 	private statusCodeUnions: boolean;
 
 	private dataSources: DataSource<RESTApiCustom>[] = [];
-	private headers: { [key: string]: HTTPHeader } = {};
+	private headers: DataSourceHeaders = {};
 	private fields: FieldConfiguration[] = [];
 	private baseUrlArgs: string[] = [];
 
@@ -129,7 +133,14 @@ class RESTApiBuilder {
 
 		const schemaString: string = printSchema(this.graphQLSchema);
 		const schema = buildASTSchema(parse(schemaString));
-		const dataSources = this.dataSources;
+
+		const dataSources = this.dataSources.map((ds) => {
+			return {
+				...ds,
+				RootNodes: applyNameSpaceToTypeFields(ds.RootNodes, schema, this.apiNamespace),
+				ChildNodes: applyNameSpaceToTypeFields(ds.ChildNodes, schema, this.apiNamespace),
+			};
+		});
 
 		return new RESTApi(
 			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
@@ -140,7 +151,17 @@ class RESTApiBuilder {
 		);
 	};
 
-	private addDataSource = (parentType: any, fieldName: string, verb: HTTPMethod, path: string, baseUrl: string) => {
+	private addDataSource = (
+		parentType: any,
+		fieldName: string,
+		verb: HTTPMethod,
+		headers: DataSourceHeaders,
+		path: ConfigurationVariable,
+		baseUrl: ConfigurationVariable,
+		body: ConfigurationVariable,
+		query: URLQueryConfiguration[] = [],
+		urlEncodeBody: boolean = false
+	) => {
 		const ds: DataSource<RESTApiCustom> = {
 			RootNodes: [
 				{
@@ -152,15 +173,15 @@ class RESTApiBuilder {
 			Custom: {
 				Fetch: {
 					method: verb,
-					path: mapInputVariable(path),
-					baseUrl: mapInputVariable(baseUrl),
+					path: path,
+					baseUrl: baseUrl,
 					url: mapInputVariable(''),
-					body: mapInputVariable(''),
-					header: this.headers,
-					query: [],
+					body: body,
+					header: headers,
+					query: query,
 					mTLS: buildMTLSConfiguration(this.introspection),
 					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
-					urlEncodeBody: false,
+					urlEncodeBody: urlEncodeBody,
 				},
 				Subscription: {
 					Enabled: false,
@@ -215,14 +236,15 @@ class RESTApiBuilder {
 	private processInputObjectType = (type: GraphQLInputObjectType) => {};
 
 	private processObjectType = (type: GraphQLObjectType) => {
+		const typeName = type.name;
 		const fields = type.getFields();
 		for (const fieldName in fields) {
 			const field = fields[fieldName];
-			this.processFieldDirectives(field);
+			this.processFieldDirectives(typeName, field);
 		}
 	};
 
-	private processFieldDirectives = (field: GraphQLField<any, any>) => {
+	private processFieldDirectives = (parentTypeName: string, field: GraphQLField<any, any>) => {
 		const directiveAnnotations = getDirectives(this.graphQLSchema, field);
 		for (const directiveAnnotation of directiveAnnotations) {
 			switch (directiveAnnotation.name) {
@@ -235,7 +257,7 @@ class RESTApiBuilder {
 				case 'pubsubOperation':
 					break;
 				case 'httpOperation':
-					this.processHttpOperation(field, directiveAnnotation.args as HTTPRootFieldResolverOpts);
+					this.processHttpOperation(parentTypeName, field, directiveAnnotation.args as HTTPRootFieldResolverOpts);
 					break;
 				case 'responseMetadata':
 					// processResponseMetadataAnnotations(field as GraphQLField<any, any>);
@@ -253,7 +275,11 @@ class RESTApiBuilder {
 		}
 	};
 
-	private processHttpOperation = (field: GraphQLField<any, any>, directiveArgs: HTTPRootFieldResolverOpts) => {
+	private processHttpOperation = (
+		parentTypeName: string,
+		field: GraphQLField<any, any>,
+		directiveArgs: HTTPRootFieldResolverOpts
+	) => {
 		const {
 			path,
 			operationSpecificHeaders,
@@ -268,6 +294,18 @@ class RESTApiBuilder {
 		const operationEndpoint = this.getEndpoint();
 		const operationPath = this.getOperationPath(path);
 		const verb = this.getMethod(httpMethod);
+
+		this.addDataSource(
+			parentTypeName,
+			field.name,
+			verb,
+			operationHeaders,
+			operationPath,
+			operationEndpoint,
+			mapInputVariable(''),
+			[],
+			false
+		);
 	};
 
 	private getEndpoint = (): ConfigurationVariable => {
@@ -279,13 +317,7 @@ class RESTApiBuilder {
 			// TODO: implement me
 		}
 
-		const endpoint: ConfigurationVariable = {
-			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-			environmentVariableDefaultValue: '',
-			environmentVariableName: '',
-			placeholderVariableName: '',
-			staticVariableContent: interpolationToTemplate('DUMMY'),
-		};
+		const endpoint: ConfigurationVariable = mapInputVariable(interpolationToTemplate('DUMMY'));
 
 		return endpoint;
 	};
@@ -308,17 +340,11 @@ class RESTApiBuilder {
 	};
 
 	private getOperationPath = (path: string): ConfigurationVariable => {
-		return {
-			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-			environmentVariableDefaultValue: '',
-			environmentVariableName: '',
-			placeholderVariableName: '',
-			staticVariableContent: interpolationToTemplate(path),
-		};
+		return mapInputVariable(interpolationToTemplate(path));
 	};
 
-	private getOperationHeaders = (operationSpecificHeaders: Record<string, string>): { [key: string]: HTTPHeader } => {
-		let headers: { [key: string]: HTTPHeader } = {};
+	private getOperationHeaders = (operationSpecificHeaders: Record<string, string>): DataSourceHeaders => {
+		let headers: DataSourceHeaders = {};
 
 		// 1. set global headers
 		// TODO: implement me
@@ -330,15 +356,7 @@ class RESTApiBuilder {
 				const valueTemplate = interpolationToTemplate(nonInterpolatedValue);
 
 				headers[headerName.toLowerCase()] = {
-					values: [
-						{
-							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
-							staticVariableContent: valueTemplate,
-							environmentVariableDefaultValue: '',
-							environmentVariableName: '',
-							placeholderVariableName: '',
-						},
-					],
+					values: [mapInputVariable(valueTemplate)],
 				};
 			}
 		}
