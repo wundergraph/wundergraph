@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 if ! [[ -x scripts/mc ]]; then
 	if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -17,6 +18,7 @@ fi
 chmod +x ./scripts/mc
 ./scripts/mc alias set minio http://localhost:9000 minio minio123
 ./scripts/mc admin user add minio test 12345678
+./scripts/mc admin policy attach minio readwrite -u test
 ./scripts/mc admin user info minio test
 ./scripts/mc mb --ignore-existing minio/uploads
-./scripts/mc anonymous -r set public minio/uploads
+./scripts/mc policy set public minio/uploads
