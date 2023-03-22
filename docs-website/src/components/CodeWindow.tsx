@@ -70,7 +70,7 @@ export const CodeWindow: React.FC<CodeWindowProps> = ({ snippets, hideCopy, ...r
 				<div>
 					{snippets.map(({ filename, content, language }, index) => (
 						<Tabs.Content key={index} value={filename} className="flex overflow-y-hidden focus:outline-none">
-							<div className="w-8 shrink-0 grow-0 bg-gray-800 pt-[19px] pb-3 text-right font-mono text-sm leading-none text-gray-300 dark:bg-[#0d1116] dark:text-gray-700">
+							<div className="w-8 shrink-0 grow-0 bg-gray-800 pt-[19px] pb-3 text-right font-mono text-sm leading-none text-gray-300 dark:bg-[#0d1116] dark:text-gray-600">
 								{[...new Array(content.trimEnd().split(/\r?\n/).length)].map((v, index) => (
 									<div key={index} className="h-[20px] px-2">
 										{index + 1}
