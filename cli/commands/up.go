@@ -352,7 +352,7 @@ func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
-	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
+	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches before startup")
 
 	rootCmd.AddCommand(upCmd)
 }
