@@ -105,3 +105,14 @@ curl -N  http://localhost:9991/operations/Ws\?from\=5
 
 - Check the output.
 - Check the logs to see the hooks being executed.
+
+## Learn more
+
+- [Guides](/docs/guides)
+- [WunderGraph Server TS Reference](/docs/wundergraph-server-ts-reference)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="graphql-subscriptions-hooks" /%}

@@ -21,7 +21,7 @@
 
 </div>
 
-> **Note**: 🌍 We are working on a serverless version of WunderGraph. If you're interested, please see [here](https://wundergraph.com/pricing).
+> **Note**: 🌍 WunderGraph Cloud is in beta! :rocket: It's a fully managed and optimized platform for your WunderGraph. Deploy everywhere and scale to millions! Get deep insights in your stack with advanced analytics, distributed tracing and client usage. If you're interested, please signup [here](https://cloud.wundergraph.com/).
 
 ## What is WunderGraph?
 
@@ -66,6 +66,11 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 - [Type-safe Golang Client](/examples/golang-client)
 - [Type-safe Node.js Client](/examples/nodejs-ts-client)
 - [OpenAPI and mocking](/examples/openapi-mocking)
+
+## Advanced Examples:
+
+- [Use Turborepo to speed up builds in monorepos.](https://github.com/wundergraph/cloud-starter-turbo)
+- [Manage multiple WunderGraph Cloud Projects in a single repository](https://github.com/wundergraph/cloud-multi-projects-demo)
 
 ## The WunderGraph Stack
 
