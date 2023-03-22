@@ -33,14 +33,16 @@ import { onParentProcessExit } from '../utils/process';
  * Note that there's no way to find out wether a remote API has changed, so we make some assumptions to
  * walk the fine line between responsiveness and correctness.
  *
- * There are different types of sources when it comes to API introspection, and we use different caching
- * strategies for these:
- *
  * ## Initial introspection during wunderctl up
  *
  * When wunderctl up starts, it always tries to introspect the APIs again, to make sure we're not using stale
  * data (the remote API might have changed). If this initial introspection fails, we fallback to the cache.
  * Subsequent introspections without restarting wunderctl will use the cache.
+ *
+ * ## Data source types
+ *
+ * There are different types of sources when it comes to API introspection, and we use different caching
+ * strategies for these:
  *
  * ## Introspection from data coming from the filesystem
  *
