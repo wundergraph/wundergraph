@@ -1918,6 +1918,17 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 	return left
 }
 
+func (r *Builder) authenticationHooks() authentication.Hooks {
+	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
+		Client:                     r.middlewareClient,
+		Log:                        r.log,
+		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
+		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
+		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
+		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
+	})
+}
+
 func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	var (
@@ -1953,13 +1964,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
 	}
 
-	authHooks := authentication.Hooks{
-		Log:                        r.log,
-		Client:                     r.middlewareClient,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-	}
+	authHooks := r.authenticationHooks()
 
 	loadUserConfig := authentication.LoadUserConfig{
 		Log:           r.log,
@@ -1975,12 +1980,11 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 	}))
 
 	userHandler := &authentication.UserHandler{
-		HasRevalidateHook: r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-		MWClient:          r.middlewareClient,
-		Log:               r.log,
-		InsecureCookies:   insecureCookies,
-		Cookie:            cookie,
-		PublicClaims:      r.api.AuthenticationConfig.PublicClaims,
+		Hooks:           authHooks,
+		Log:             r.log,
+		InsecureCookies: insecureCookies,
+		Cookie:          cookie,
+		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
@@ -2103,12 +2107,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
 			zap.String("providerId", provider.Id),
@@ -2139,12 +2138,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
 			zap.String("providerId", provider.Id),
