@@ -36,6 +36,12 @@ import { onParentProcessExit } from '../utils/process';
  * There are different types of sources when it comes to API introspection, and we use different caching
  * strategies for these:
  *
+ * ## Initial introspection during wunderctl up
+ *
+ * When wunderctl up starts, it always tries to introspect the APIs again, to make sure we're not using stale
+ * data (the remote API might have changed). If this initial introspection fails, we fallback to the cache.
+ * Subsequent introspections without restarting wunderctl will use the cache.
+ *
  * ## Introspection from data coming from the filesystem
  *
  * There are some API types (like OpenAPI) where all we use for introspection comes from the local filesystem.
@@ -59,7 +65,8 @@ import { onParentProcessExit } from '../utils/process';
  * Additionally, the introspection cache implements an optional polling mechanism that users can opt into when
  * defining their API. This causes the remote API to be periodically polled and introspected. If the result is
  * different that what we have in the cache, we update the cache entry and the Go side responds by reloading
- * the development server.
+ * the development server. Polling is enabled by default for all remote APIs, every 5 seconds. This can be overridden
+ * or disabled by the user, either on a per-API basis or globally.
  */
 
 interface IntrospectionCacheFile<A extends ApiType> {
