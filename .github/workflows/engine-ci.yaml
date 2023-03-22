@@ -43,15 +43,6 @@ jobs:
   build_test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    services:
-      minio:
-        image: quay.io/minio/minio
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: minio
-          MINIO_ROOT_PASSWORD: minio123
-        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live" --entrypoint=minio server /data
     steps:
       - uses: actions/checkout@v3
         with:
@@ -71,7 +62,11 @@ jobs:
         with:
           protoc-version: '21.5'
 
-      - run: make bootstrap-minio
+      - name: Start MinIO container
+        run: docker run --rm --name=minio --health-cmd "curl http://localhost:9000/minio/health/live" -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 -p 9000:9000 -p 9090:9090 quay.io/minio/minio server /data --console-address ":9090"
+
+      - name: Setup MinIO container
+        run: make bootstrap-minio
 
       - run: pnpm install --ignore-scripts
 
