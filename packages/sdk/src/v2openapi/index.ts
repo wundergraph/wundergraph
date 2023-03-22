@@ -50,6 +50,8 @@ import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
 import _ from 'lodash';
 import transformSchema from '../transformations/transformSchema';
+import fs from 'fs';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -142,6 +144,9 @@ class RESTApiBuilder {
 		const { schemaSDL: replaced } = transformSchema.replaceCustomScalars(print(filtered), this.introspection);
 		const schema = buildASTSchema(parse(replaced));
 		const schemaString = printSchema(schema);
+
+		fs.writeFileSync('WG_schema.graphql', schemaString);
+
 		const dataSources = this.dataSources.map((ds) => {
 			return {
 				...ds,

@@ -1,15 +1,38 @@
-import { DataSource, OpenAPIIntrospection, RESTApi, RESTApiCustom } from '../definition';
+import {
+	buildMTLSConfiguration,
+	buildUpstreamAuthentication,
+	DataSource,
+	OpenAPIIntrospection,
+	RESTApi,
+	RESTApiCustom,
+} from '../definition';
 import {
 	buildASTSchema,
-	FieldDefinitionNode,
+	GraphQLEnumType,
+	GraphQLField,
+	GraphQLInputObjectType,
+	GraphQLInterfaceType,
+	GraphQLObjectType,
+	GraphQLScalarType,
 	GraphQLSchema,
-	Kind,
-	ObjectTypeDefinitionNode,
+	GraphQLUnionType,
+	isEnumType,
+	isInputObjectType,
+	isInterfaceType,
+	isObjectType,
+	isScalarType,
+	isUnionType,
 	parse,
 	printSchema,
-	visit,
 } from 'graphql';
-import { FieldConfiguration, HTTPHeader } from '@wundergraph/protobuf';
+import {
+	ConfigurationVariable,
+	ConfigurationVariableKind,
+	DataSourceKind,
+	FieldConfiguration,
+	HTTPHeader,
+	HTTPMethod,
+} from '@wundergraph/protobuf';
 import yaml from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import {
@@ -18,17 +41,21 @@ import {
 } from '../definition/namespacing';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { convertOpenApiV3 } from './index';
-import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
+import {
+	loadNonExecutableGraphQLSchemaFromJSONSchemas,
+	HTTPMethod as OmnigraphHTTPMethod,
+} from '@omnigraph/json-schema';
 import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
-import { getDocumentNodeFromSchema } from '@graphql-tools/utils';
+import { getDirectives, printSchemaWithDirectives } from '@graphql-tools/utils';
 import fs from 'fs';
-import { JsonSchemaOptions, Options } from './jsonSchemaOptions';
+import { Options } from './jsonSchemaOptions';
+import { mapInputVariable } from '../configure/variables';
+import { HTTPRootFieldResolverOpts } from '@omnigraph/json-schema/typings/addRootFieldResolver';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
 	introspection: OpenAPIIntrospection
-	// ): Promise<RESTApi> => {
-) => {
+): Promise<RESTApi> => {
 	let spec: OpenAPIV3.Document;
 
 	try {
@@ -42,82 +69,289 @@ export const openApiSpecificationToRESTApiObject = async (
 		spec = await convertOpenApiV3(obj);
 	}
 
-	const builder = new RESTApiBuilder(spec, introspection);
+	const graphqlSchema = await prepareGraphqlSchema(spec, introspection);
+
+	const builder = new RESTApiBuilder(introspection, graphqlSchema);
 	return builder.build();
 };
 
+const prepareGraphqlSchema = async (
+	spec: OpenAPIV3.Document,
+	introspection: OpenAPIIntrospection
+): Promise<GraphQLSchema> => {
+	const options: Options = {
+		source: spec,
+		endpoint: 'dummy-url',
+		name: introspection.apiNamespace || 'api',
+	};
+
+	const extraJSONSchemaOptions = await getJSONSchemaOptionsFromOpenAPIOptions(options.name, options);
+
+	fs.writeFileSync('MESH_extraJSONSchemaOptions.json', JSON.stringify(extraJSONSchemaOptions, null, 2));
+
+	const graphQLSchema = await loadNonExecutableGraphQLSchemaFromJSONSchemas(options.name, {
+		...options,
+		...extraJSONSchemaOptions,
+	});
+
+	// fs.writeFileSync('MESH_schema.graphql', printSchema(this.graphQLSchema));
+	fs.writeFileSync('MESH_schema_directives.graphql', printSchemaWithDirectives(graphQLSchema));
+
+	return graphQLSchema;
+};
+
 class RESTApiBuilder {
-	constructor(spec: OpenAPIV3.Document, introspection: OpenAPIIntrospection) {
-		this.spec = spec;
-		this.statusCodeUnions = introspection.statusCodeUnions || false;
+	constructor(introspection: OpenAPIIntrospection, graphQLSchema: GraphQLSchema) {
 		this.introspection = introspection;
+		this.statusCodeUnions = introspection.statusCodeUnions || false;
 		this.apiNamespace = introspection.apiNamespace;
 
 		if (introspection.headers !== undefined) {
 			this.headers = mapHeaders(introspection.headers(new HeadersBuilder()) as HeadersBuilder);
 		}
+
+		this.graphQLSchema = graphQLSchema;
 	}
 
-	private statusCodeUnions: boolean;
-	private apiNamespace?: string;
+	private graphQLSchema: GraphQLSchema;
+
 	private introspection: OpenAPIIntrospection;
-	private spec: OpenAPIV3.Document;
-	private headers: { [key: string]: HTTPHeader } = {};
-	private graphQLSchema?: GraphQLSchema;
+	private apiNamespace?: string;
+	private statusCodeUnions: boolean;
+
 	private dataSources: DataSource<RESTApiCustom>[] = [];
+	private headers: { [key: string]: HTTPHeader } = {};
 	private fields: FieldConfiguration[] = [];
 	private baseUrlArgs: string[] = [];
 
-	// public build = async (): RESTApi => {
-	public build = async () => {
-		const options: Options = {
-			source: this.spec,
-			endpoint: 'dummy-url',
-			name: this.introspection.apiNamespace || 'api',
+	public build = (): RESTApi => {
+		this.processDirectives();
+
+		const schemaString: string = printSchema(this.graphQLSchema);
+		const schema = buildASTSchema(parse(schemaString));
+		const dataSources = this.dataSources;
+
+		return new RESTApi(
+			applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
+			dataSources,
+			applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
+			[],
+			[]
+		);
+	};
+
+	private addDataSource = (parentType: any, fieldName: string, verb: HTTPMethod, path: string, baseUrl: string) => {
+		const ds: DataSource<RESTApiCustom> = {
+			RootNodes: [
+				{
+					typeName: parentType,
+					fieldNames: [fieldName],
+				},
+			],
+			Kind: DataSourceKind.REST,
+			Custom: {
+				Fetch: {
+					method: verb,
+					path: mapInputVariable(path),
+					baseUrl: mapInputVariable(baseUrl),
+					url: mapInputVariable(''),
+					body: mapInputVariable(''),
+					header: this.headers,
+					query: [],
+					mTLS: buildMTLSConfiguration(this.introspection),
+					upstreamAuthentication: buildUpstreamAuthentication(this.introspection),
+					urlEncodeBody: false,
+				},
+				Subscription: {
+					Enabled: false,
+				},
+				DefaultTypeName: this.statusCodeUnions ? 'UnspecifiedHttpResponse' : '',
+				StatusCodeTypeMappings: [],
+			},
+			ChildNodes: [],
+			Directives: [],
+			RequestTimeoutSeconds: this.introspection.requestTimeoutSeconds ?? 0,
 		};
 
-		const extraOpts = new JsonSchemaOptions(options);
-		const extraJSONSchemaOptions = await extraOpts.getExtraJSONSchemaOptions();
+		this.dataSources.push(ds);
+	};
 
-		fs.writeFileSync('MESH_extraJSONSchemaOptions.json', JSON.stringify(extraJSONSchemaOptions, null, 2));
+	private processDirectives = () => {
+		const typeMap = this.graphQLSchema.getTypeMap();
 
-		this.graphQLSchema = await loadNonExecutableGraphQLSchemaFromJSONSchemas(options.name, {
-			...options,
-			...extraJSONSchemaOptions,
-		});
+		for (const typeName in typeMap) {
+			const type = typeMap[typeName];
 
-		fs.writeFileSync('MESH_schema.graphql', printSchema(this.graphQLSchema));
+			if (isScalarType(type)) {
+				this.processScalarType(type);
+			}
 
-		const astNode = getDocumentNodeFromSchema(this.graphQLSchema);
+			if (isInterfaceType(type)) {
+				this.processInterfaceType(type);
+			}
 
-		let currentNodeName = '';
-		visit(astNode, {
-			[Kind.OBJECT_TYPE_DEFINITION]: (node: ObjectTypeDefinitionNode) => {
-				currentNodeName = node.name.value;
-			},
-			[Kind.FIELD_DEFINITION]: (node: FieldDefinitionNode) => {
-				if (node.directives && node.directives.length > 0) {
-					node.directives.forEach((directive) => {
-						if (directive.name.value === 'httpOperation') {
-							const meta = extraOpts.findMetaData(currentNodeName.toLowerCase(), node.name.value);
+			if (isUnionType(type)) {
+				this.processUnionType(type);
+			}
 
-							console.log('metadata', meta);
-						}
-					});
-				}
-			},
-		});
+			if (isEnumType(type)) {
+				this.processEnumType(type);
+			}
 
-		// const schemaString: string = '';
-		// const schema = buildASTSchema(parse(schemaString));
-		// const dataSources = this.dataSources;
-		//
-		// return new RESTApi(
-		// 	applyNameSpaceToGraphQLSchema(schemaString, [], this.apiNamespace),
-		// 	dataSources,
-		// 	applyNamespaceToExistingRootFieldConfigurations(this.fields, schema, this.apiNamespace),
-		// 	[],
-		// 	[]
-		// );
+			if (isInputObjectType(type)) {
+				this.processInputObjectType(type);
+			}
+
+			if (isObjectType(type)) {
+				this.processObjectType(type);
+			}
+		}
+	};
+
+	private processScalarType = (type: GraphQLScalarType) => {};
+	private processInterfaceType = (type: GraphQLInterfaceType) => {};
+	private processUnionType = (type: GraphQLUnionType) => {};
+	private processEnumType = (type: GraphQLEnumType) => {};
+	private processInputObjectType = (type: GraphQLInputObjectType) => {};
+
+	private processObjectType = (type: GraphQLObjectType) => {
+		const fields = type.getFields();
+		for (const fieldName in fields) {
+			const field = fields[fieldName];
+			this.processFieldDirectives(field);
+		}
+	};
+
+	private processFieldDirectives = (field: GraphQLField<any, any>) => {
+		const directiveAnnotations = getDirectives(this.graphQLSchema, field);
+		for (const directiveAnnotation of directiveAnnotations) {
+			switch (directiveAnnotation.name) {
+				case 'resolveRoot':
+					// processResolveRootAnnotations(field);
+					break;
+				case 'resolveRootField':
+					// processResolveRootFieldAnnotations(field as GraphQLField<any, any>, directiveAnnotation.args.field);
+					break;
+				case 'pubsubOperation':
+					break;
+				case 'httpOperation':
+					this.processHttpOperation(field, directiveAnnotation.args as HTTPRootFieldResolverOpts);
+					break;
+				case 'responseMetadata':
+					// processResponseMetadataAnnotations(field as GraphQLField<any, any>);
+					break;
+				case 'link':
+					// processLinkFieldAnnotations(
+					// 	field as GraphQLField<any, any>,
+					// 	directiveAnnotation.args.defaultRootType,
+					// 	directiveAnnotation.args.defaultField
+					// );
+					break;
+				case 'dictionary':
+				// processDictionaryDirective(fields as Record<string, GraphQLField<any, any>>, field as GraphQLField<any, any>);
+			}
+		}
+	};
+
+	private processHttpOperation = (field: GraphQLField<any, any>, directiveArgs: HTTPRootFieldResolverOpts) => {
+		const {
+			path,
+			operationSpecificHeaders,
+			httpMethod,
+			isBinary,
+			requestBaseBody,
+			queryParamArgMap,
+			queryStringOptionsByParam,
+		} = directiveArgs;
+
+		const operationHeaders = this.getOperationHeaders(operationSpecificHeaders);
+		const operationEndpoint = this.getEndpoint();
+		const operationPath = this.getOperationPath(path);
+		const verb = this.getMethod(httpMethod);
+	};
+
+	private getEndpoint = (): ConfigurationVariable => {
+		// TODO: this is not correct
+		// we should get it from the global options
+		// or from the introspection
+
+		if (this.introspection.baseURL) {
+			// TODO: implement me
+		}
+
+		const endpoint: ConfigurationVariable = {
+			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+			environmentVariableDefaultValue: '',
+			environmentVariableName: '',
+			placeholderVariableName: '',
+			staticVariableContent: interpolationToTemplate('DUMMY'),
+		};
+
+		return endpoint;
+	};
+
+	private getMethod = (verb: OmnigraphHTTPMethod): HTTPMethod => {
+		switch (verb) {
+			case 'GET':
+				return HTTPMethod.GET;
+			case 'POST':
+				return HTTPMethod.POST;
+			case 'PUT':
+				return HTTPMethod.PUT;
+			case 'DELETE':
+				return HTTPMethod.DELETE;
+			// case 'PATCH':
+			// 	return HTTPMethod.PATCH; // TODO: add support to protobuf
+			default:
+				throw new Error(`Unsupported HTTP method: ${verb}`);
+		}
+	};
+
+	private getOperationPath = (path: string): ConfigurationVariable => {
+		return {
+			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+			environmentVariableDefaultValue: '',
+			environmentVariableName: '',
+			placeholderVariableName: '',
+			staticVariableContent: interpolationToTemplate(path),
+		};
+	};
+
+	private getOperationHeaders = (operationSpecificHeaders: Record<string, string>): { [key: string]: HTTPHeader } => {
+		let headers: { [key: string]: HTTPHeader } = {};
+
+		// 1. set global headers
+		// TODO: implement me
+
+		// 2. set headers specific to this operation
+		if (operationSpecificHeaders) {
+			for (const headerName in operationSpecificHeaders) {
+				const nonInterpolatedValue = operationSpecificHeaders[headerName];
+				const valueTemplate = interpolationToTemplate(nonInterpolatedValue);
+
+				headers[headerName.toLowerCase()] = {
+					values: [
+						{
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: valueTemplate,
+							environmentVariableDefaultValue: '',
+							environmentVariableName: '',
+							placeholderVariableName: '',
+						},
+					],
+				};
+			}
+		}
+
+		// 3. set introspection headers
+		for (const headerName in this.headers) {
+			headers[headerName] = this.headers[headerName];
+		}
+
+		return headers;
 	};
 }
+
+export const interpolationToTemplate = (interpolation: string): string => {
+	return interpolation.replace(/{args./g, '{{ .arguments.').replace(/}/g, ' }}');
+};
