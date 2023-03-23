@@ -55,8 +55,9 @@ type Planner struct {
 	insideJsonField bool
 	jsonFieldRef    int
 
-	isQueryRaw    bool
-	isQueryRawRow bool
+	operationTypeDefinitionRef int
+	isQueryRaw                 bool
+	isQueryRawRow              bool
 }
 
 type inlinedVariable struct {
@@ -264,6 +265,7 @@ func (p *Planner) EnterOperationDefinition(ref int) {
 	})
 	p.disallowSingleFlight = operationType == ast.OperationTypeMutation
 	p.nodes = append(p.nodes, definition)
+	p.operationTypeDefinitionRef = ref
 }
 
 func (p *Planner) LeaveOperationDefinition(_ int) {
@@ -379,7 +381,7 @@ func (p *Planner) EnterField(ref int) {
 		}
 	}
 
-	if p.isQueryRawRowField(ref) {
+	if p.isQueryRawJSONField(ref) {
 		p.isQueryRawRow = true
 		p.insideJsonField = true
 		p.jsonFieldRef = ref
@@ -423,7 +425,7 @@ func (p *Planner) EnterField(ref int) {
 // we don't want to force the user to define an empty parameters,
 // so we "fix" it in the backend by modifying the AST
 func (p *Planner) ensureEmptyParametersArgOnRawOperations(fieldRef int) {
-	if !p.isQueryRawField(fieldRef) && !p.isQueryRawRowField(fieldRef) && !p.isExecuteRawField(fieldRef) {
+	if !p.isQueryRawField(fieldRef) && !p.isQueryRawJSONField(fieldRef) && !p.isExecuteRawField(fieldRef) {
 		return
 	}
 	_, exists := p.visitor.Operation.FieldArgument(fieldRef, []byte("parameters"))
@@ -441,9 +443,9 @@ func (p *Planner) ensureEmptyParametersArgOnRawOperations(fieldRef int) {
 	p.visitor.Operation.AddArgumentToField(fieldRef, argRef)
 }
 
-func (p *Planner) isQueryRawRowField(field int) bool {
+func (p *Planner) isQueryRawJSONField(field int) bool {
 	name := p.visitor.Operation.FieldNameString(field)
-	return name == "queryRawRow" || strings.HasSuffix(name, "_queryRawRow")
+	return name == "queryRawJSON" || strings.HasSuffix(name, "_queryRawJSON")
 }
 
 func (p *Planner) isQueryRawField(field int) bool {
@@ -652,7 +654,7 @@ func (p *Planner) addVariableDefinitionsRecursively(value ast.Value, downstreamF
 // isRawArgument searches for a queryRaw/executeRaw field and the parameters arg
 // which needs to be encoded as a JSON (string) so that prisma understands it
 func (p *Planner) isRawArgument(fieldRef int, argumentName string) bool {
-	if p.isQueryRawRowField(fieldRef) || p.isQueryRawField(fieldRef) || p.isExecuteRawField(fieldRef) {
+	if p.isQueryRawJSONField(fieldRef) || p.isQueryRawField(fieldRef) || p.isExecuteRawField(fieldRef) {
 		return argumentName == "parameters"
 	}
 	return false
@@ -701,11 +703,6 @@ func (p *Planner) configureObjectFieldSource(upstreamFieldRef, downstreamFieldRe
 	}
 }
 
-const (
-	normalizationFailedErrMsg = "printOperation: normalization failed"
-	parseDocumentFailedErrMsg = "printOperation: parse %s failed"
-)
-
 // printOperation - prints normalized upstream operation
 func (p *Planner) printOperation() []byte {
 
@@ -715,11 +712,12 @@ func (p *Planner) printOperation() []byte {
 		// we've added rawQuery and rawQueryRow to the Query type for better ergonomics,
 		// but prisma expects them to be on the Mutation type
 		// so we simply rewrite the AST if we have a rawQuery root field
-		p.upstreamOperation.OperationDefinitions[0].OperationType = ast.OperationTypeMutation
+		p.upstreamOperation.OperationDefinitions[p.operationTypeDefinitionRef].OperationType = ast.OperationTypeMutation
 	}
 
 	err := astprinter.Print(p.upstreamOperation, nil, buf)
 	if err != nil {
+		p.stopWithError("printOperation: printing operation failed")
 		return nil
 	}
 
@@ -873,10 +871,10 @@ func (p *Planner) addField(ref int) {
 		}
 	}
 
-	if p.isQueryRawRowField(ref) {
+	if p.isQueryRawJSONField(ref) {
 		// queryRawRow doesn't exist in the prisma schema, only queryRaw
 		// so we rewrite it
-		fieldName = strings.Replace(fieldName, "queryRawRow", "queryRaw", 1)
+		fieldName = strings.Replace(fieldName, "queryRawJSON", "queryRaw", 1)
 	}
 
 	astField := ast.Field{

@@ -181,7 +181,7 @@ export const cleanupPrismaSchema = (
 	if (introspection.schemaExtension) {
 		result.graphql_schema = result.graphql_schema + ' ' + introspection.schemaExtension;
 	}
-	result.graphql_schema = result.graphql_schema + rawRowSchema;
+	result.graphql_schema = result.graphql_schema + rowSchema;
 
 	let insideCustomScalarType = false;
 	let insideCustomScalarField = false;
@@ -369,37 +369,11 @@ export const cleanupPrismaSchema = (
 	return print(cleaned);
 };
 
-// the rawRowSchema allows us to define the shape of a SQL response via GraphQL fields
-const rawRowSchema = `
-
-type __Row {
-	ID: ID!
-	Int: Int!
-	Float: Float!
-	String: String!
-	Boolean: Boolean!
-	DateTime: DateTime!
-	JSON: JSON!
-	Object: __Row!
-	Array: [__Row!]!
-	OptionalID: ID
-	OptionalInt: Int
-	OptionalFloat: Float
-	OptionalString: String
-	OptionalBoolean: Boolean
-	OptionalDateTime: DateTime
-	OptionalJSON: JSON
-	OptionalObject: __Row
-	OptionalArray: [__Row!]
-}
-
-`;
-
 const queryRawRowField = (): FieldDefinitionNode => ({
 	kind: Kind.FIELD_DEFINITION,
 	name: {
 		kind: Kind.NAME,
-		value: 'queryRawRow',
+		value: 'queryRaw',
 	},
 	type: {
 		kind: Kind.NON_NULL_TYPE,
@@ -411,7 +385,7 @@ const queryRawRowField = (): FieldDefinitionNode => ({
 					kind: Kind.NAMED_TYPE,
 					name: {
 						kind: Kind.NAME,
-						value: '__Row',
+						value: '_Row',
 					},
 				},
 			},
@@ -459,7 +433,7 @@ const queryRawJsonField = (): FieldDefinitionNode => ({
 	kind: Kind.FIELD_DEFINITION,
 	name: {
 		kind: Kind.NAME,
-		value: 'queryRaw',
+		value: 'queryRawJSON',
 	},
 	type: {
 		kind: Kind.NAMED_TYPE,
@@ -559,6 +533,31 @@ const executeRawField = (): FieldDefinitionNode => ({
 		},
 	],
 });
+
+const rowSchema = `
+
+type _Row {
+	ID: ID!
+	Int: Int!
+	Float: Float!
+	String: String!
+	Boolean: Boolean!
+	DateTime: DateTime!
+	JSON: JSON!
+	Object: _Row!
+	Array: [_Row!]!
+	OptionalID: ID
+	OptionalInt: Int
+	OptionalFloat: Float
+	OptionalString: String
+	OptionalBoolean: Boolean
+	OptionalDateTime: DateTime
+	OptionalJSON: JSON
+	OptionalObject: _Row
+	OptionalArray: [_Row!]
+}
+
+`;
 
 const unwrapNamedType = (node: TypeNode): NamedTypeNode => {
 	if (node.kind === 'NamedType') {
