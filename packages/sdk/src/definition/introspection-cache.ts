@@ -3,18 +3,75 @@ import {
 	ApiType,
 	DataSource,
 	IntrospectionConfiguration,
+	WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS,
 	WG_DATA_SOURCE_POLLING_MODE,
 	WG_ENABLE_INTROSPECTION_CACHE,
 	WG_ENABLE_INTROSPECTION_OFFLINE,
+	WG_INTROSPECTION_CACHE_SKIP,
 } from './index';
-import path from 'path';
-import fsP from 'fs/promises';
-import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
+
 import objectHash from 'object-hash';
+
+import { FieldConfiguration, TypeConfiguration } from '@wundergraph/protobuf';
+import { LocalCache, LocalCacheBucket } from '../localcache';
 import { Logger } from '../logger';
 import { onParentProcessExit } from '../utils/process';
 
-export interface IntrospectionCacheFile<A extends ApiType> {
+/**
+ * Introspection cache
+ * =================================
+ *
+ * The introspection cache stores introspection results for APIs ready to be used, to allow for
+ * faster reloads/startup times. No intermediate data is stored, only the final introspection result.
+ *
+ * Cache keys are derived so that when the local data / configuration for an API changes, the derived
+ * key is different. Special care must be taken for configurations that reference the environment (using the
+ * resolved environment variable, NOT the variable name and default value) as well as for Introspection subclasses
+ * that use function pointers (objectHash cannot know what the function returns, so the hash is based on the function name
+ * and won't change if the return value is different).
+ *
+ * Note that there's no way to find out wether a remote API has changed, so we make some assumptions to
+ * walk the fine line between responsiveness and correctness.
+ *
+ * ## Initial introspection during wunderctl up
+ *
+ * When wunderctl up starts, it always tries to introspect the APIs again, to make sure we're not using stale
+ * data (the remote API might have changed). If this initial introspection fails, we fallback to the cache.
+ * Subsequent introspections without restarting wunderctl will use the cache.
+ *
+ * ## Data source types
+ *
+ * There are different types of sources when it comes to API introspection, and we use different caching
+ * strategies for these:
+ *
+ * ## Introspection from data coming from the filesystem
+ *
+ * There are some API types (like OpenAPI) where all we use for introspection comes from the local filesystem.
+ * This means that we know for sure that if the local data hasn't changed, the introspection will return the same
+ * value. For this type of sources, we cache the value forever.
+ *
+ * ## Introspection from data remote sources
+ *
+ * Other APIs, like GraphQL, might produce a different introspection result when either the local data changes
+ * (e.g. custom scalars) or when changes are made to the remote end. There's no way to derive a perfect cache key
+ * for these, so we cache them. Notice that if introspection fails and the cache is enabled, we try to load a
+ * cached result ignoring its expiration as a fallback.
+ *
+ * # Skipping
+ *
+ * When starting wunderctl with wunderctl up, the first time the script for generating the config runs, we
+ * skip the cache lookup to refresh the data.
+ *
+ * # Polling
+ *
+ * Additionally, the introspection cache implements an optional polling mechanism that users can opt into when
+ * defining their API. This causes the remote API to be periodically polled and introspected. If the result is
+ * different that what we have in the cache, we update the cache entry and the Go side responds by reloading
+ * the development server. Polling is enabled by default for all remote APIs, every 5 seconds. This can be overridden
+ * or disabled by the user, either on a per-API basis or globally.
+ */
+
+interface IntrospectionCacheFile<A extends ApiType> {
 	version: '1.0.0';
 	schema: string;
 	dataSources: DataSource<A>[];
@@ -24,7 +81,7 @@ export interface IntrospectionCacheFile<A extends ApiType> {
 	customJsonScalars: string[] | undefined;
 }
 
-export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
+function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCacheFile<T> {
 	return {
 		version: '1.0.0',
 		schema: api.Schema,
@@ -36,7 +93,7 @@ export function toCacheEntry<T extends ApiType>(api: Api<T>): IntrospectionCache
 	};
 }
 
-export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Api<A> {
+function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<A>): Api<A> {
 	return new Api<A>(
 		cache.schema,
 		cache.dataSources,
@@ -47,75 +104,37 @@ export function fromCacheEntry<A extends ApiType>(cache: IntrospectionCacheFile<
 	);
 }
 
-export const readIntrospectionCacheFile = async (cacheKey: string): Promise<string> => {
-	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
-	try {
-		return await fsP.readFile(cacheFile, 'utf8');
-	} catch (e) {
-		if (e instanceof Error && e.message.startsWith('ENOENT')) {
-			// File does not exist
-			return '';
-		}
-		throw e;
-	}
-};
-
-export const writeIntrospectionCacheFile = async (cacheKey: string, content: string): Promise<void> => {
-	const cacheFile = path.join('cache', 'introspection', `${cacheKey}.json`);
-	try {
-		return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
-	} catch (e) {
-		if (e instanceof Error && e.message.startsWith('ENOENT')) {
-			const dir = path.dirname(cacheFile);
-			try {
-				await fsP.mkdir(dir, { recursive: true });
-			} catch (de) {
-				Logger.error(`Error creating cache directory: ${de}`);
-			}
-			// Now try again. Avoid calling writeIntrospectionCacheFile(), otherwise
-			// a bug could end up causing infinite recursion instead of a a non-working
-			// cache
-			return await fsP.writeFile(cacheFile, content, { encoding: 'utf8' });
-		}
-		// Could not write cache file, rethrow original error
-		throw e;
-	}
-};
-
-export const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+const updateIntrospectionCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	api: Api<A>,
-	introspectionCacheKey: string
+	bucket: LocalCacheBucket,
+	cacheKey: string
 ): Promise<boolean> => {
-	const cachedIntrospectionString = await readIntrospectionCacheFile(introspectionCacheKey);
-	const actualApiCacheEntry = toCacheEntry(api);
-	const actualApiCacheEntryString = JSON.stringify(actualApiCacheEntry);
-
-	if (actualApiCacheEntryString === cachedIntrospectionString) {
-		return false;
+	const cached = await bucket.get(cacheKey);
+	const data = JSON.stringify(toCacheEntry(api));
+	if (cached !== data) {
+		bucket.set(cacheKey, data);
+		return true;
 	}
-
-	// we only write to the file system if the introspection result has changed.
-	// A file change will trigger a rebuild of the entire WunderGraph config.
-	await writeIntrospectionCacheFile(introspectionCacheKey, actualApiCacheEntryString);
-
-	return true;
+	return false;
 };
 
-export const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
+const introspectInInterval = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	intervalInSeconds: number,
-	introspectionCacheKey: string,
+	configuration: IntrospectionCacheConfiguration,
 	introspection: Introspection,
+	bucket: LocalCacheBucket,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ) => {
 	const pollingRunner = async () => {
 		try {
+			const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 			const api = await generator(introspection);
-			const updated = await updateIntrospectionCache(api, introspectionCacheKey);
+			const updated = await updateIntrospectionCache(api, bucket, cacheKey);
 			if (updated) {
 				Logger.info(`Introspection cache updated. Trigger rebuild of WunderGraph config.`);
 			}
 		} catch (e) {
-			Logger.error('Error during introspection cache update', e);
+			Logger.error(`error polling API: ${e}`);
 		}
 	};
 
@@ -127,27 +146,66 @@ export const introspectInInterval = async <Introspection extends IntrospectionCo
 	});
 };
 
+/*
+ * CachedDataSource indicates where the data that we're going to cache comes from
+ *
+ * - localFilesystem: indicates all the data comes from the local filesystem and
+ * we can determine with total certainty when it has changed, hence we can cache
+ * the key forever
+ *
+ * - localNetwork: indicates the data comes from a remote end, but it's in localhost
+ * or a local network address, which suggests it's fast to regenerate as well as
+ * that the remote data might change frequently (e.g. a user developing their GraphQL
+ * API at the same time as the WunderGraph app)
+ *
+ * - remote: indicates the data comes from a remote end, but it's not a local network
+ * address, hence it's assumed to be expensive to recalculate
+ */
+
+type CachedDataSource = 'localFilesystem' | 'localNetwork' | 'remote';
+
+export interface IntrospectionCacheConfiguration {
+	/*
+	 * keyInput represents an piece that should be considered when calculating the
+	 * cache key, to avoid calculating equal keys for different data (e.g. objectHash
+	 * will hash functions with the same name to the same value, but they might return
+	 * different data)
+	 */
+	keyInput: string;
+	dataSource?: CachedDataSource;
+}
+
+const introspectionCacheConfigurationKey = <Introspection extends IntrospectionConfiguration>(
+	introspection: Introspection,
+	config: IntrospectionCacheConfiguration
+) => {
+	return objectHash([config.keyInput, introspection]);
+};
+
+const introspectionCacheConfigurationDataSource = (config: IntrospectionCacheConfiguration) => {
+	return config?.dataSource ?? 'remote';
+};
+
 export const introspectWithCache = async <Introspection extends IntrospectionConfiguration, A extends ApiType>(
 	introspection: Introspection,
+	configuration: IntrospectionCacheConfiguration,
 	generator: (introspection: Introspection) => Promise<Api<A>>
 ): Promise<Api<A>> => {
-	const cacheKey = objectHash(introspection);
+	const cache = new LocalCache().bucket('introspection');
+	const dataSource = introspectionCacheConfigurationDataSource(configuration);
+	const cacheKey = introspectionCacheConfigurationKey(introspection, configuration);
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
-	 * The return value is ignorable because we don't use it.
+	 * The return value is ignorable because we don't use it (polling runs as a separate process).
 	 */
 	if (WG_DATA_SOURCE_POLLING_MODE) {
-		if (
-			introspection.introspection?.pollingIntervalSeconds !== undefined &&
-			introspection.introspection?.pollingIntervalSeconds > 0
-		) {
-			await introspectInInterval(
-				introspection.introspection?.pollingIntervalSeconds,
-				cacheKey,
-				introspection,
-				generator
-			);
+		// For sources from the local network, use the default polling interval, since they're more
+		// likely to change. Otherwise, use polling only when it's explicitly enabled.
+		const defaultPollingInterval = dataSource === 'localNetwork' ? WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS : 0;
+		const pollingInterval = introspection.introspection?.pollingIntervalSeconds ?? defaultPollingInterval;
+		if (pollingInterval > 0) {
+			await introspectInInterval(pollingInterval, configuration, introspection, cache, generator);
 		}
 		return {} as Api<A>;
 	}
@@ -157,14 +215,25 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 	const isIntrospectionCacheEnabled = !isIntrospectionDisabledBySource && isIntrospectionEnabledByEnv;
 
 	/**
-	 * As long as the cache is enabled, always try to hit it first
+	 * If the cache is enabled and we either:
+	 *
+	 * - Are in cache only mode
+	 * - The source data comes from the local filesystem
+	 * - WG_INTROSPECTION_CACHE_SKIP is disabled
+	 *
+	 * We try the cache first
+	 *
+	 * Data from the local filesystem won't match if it changed, while remote
+	 * data is expensive to regenerate. We use WG_INTROSPECTION_CACHE_SKIP on the first
+	 * run to avoid problems with a stale cache.
 	 */
 
 	if (isIntrospectionCacheEnabled) {
-		const cacheEntryString = await readIntrospectionCacheFile(cacheKey);
-		if (cacheEntryString) {
-			const cacheEntry = JSON.parse(cacheEntryString) as IntrospectionCacheFile<A>;
-			return fromCacheEntry<A>(cacheEntry);
+		if (WG_ENABLE_INTROSPECTION_OFFLINE || dataSource === 'localFilesystem' || !WG_INTROSPECTION_CACHE_SKIP) {
+			const cached = (await cache.getJSON(cacheKey)) as IntrospectionCacheFile<A>;
+			if (cached) {
+				return fromCacheEntry<A>(cached);
+			}
 		}
 	}
 
@@ -181,18 +250,30 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 		);
 	}
 
-	const api = await generator(introspection);
+	let api: Api<A> | undefined;
+	try {
+		api = await generator(introspection);
+	} catch (e: any) {
+		/*
+		 * If the introspection cache is enabled, try to fallback to it
+		 */
+		if (isIntrospectionCacheEnabled) {
+			const result = await cache.getJSON(cacheKey);
+			if (result) {
+				api = fromCacheEntry<A>(result as IntrospectionCacheFile<A>);
+			}
+		}
+
+		if (!api) {
+			throw e;
+		}
+	}
 
 	/*
 	 * We got a result. If the cache is enabled, populate it
 	 */
-	if (isIntrospectionCacheEnabled) {
-		try {
-			const cacheEntry = toCacheEntry<A>(api);
-			await writeIntrospectionCacheFile(cacheKey, JSON.stringify(cacheEntry));
-		} catch (e) {
-			Logger.error(`Error storing cache: ${e}`);
-		}
+	if (isIntrospectionCacheEnabled && api) {
+		await cache.setJSON(cacheKey, toCacheEntry<A>(api));
 	}
 
 	return api;

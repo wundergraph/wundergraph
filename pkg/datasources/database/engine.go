@@ -239,6 +239,13 @@ func (e *Engine) Request(ctx context.Context, request []byte, rw io.Writer) (err
 		return err
 	}
 	if res.StatusCode != http.StatusOK {
+		if res.Body != nil {
+			defer res.Body.Close()
+			body, err := io.ReadAll(res.Body)
+			if err == nil {
+				return fmt.Errorf("http status != 200: %s", string(body))
+			}
+		}
 		return fmt.Errorf("http status != 200")
 	}
 	_, err = io.Copy(rw, res.Body)
@@ -259,7 +266,7 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	port := strconv.Itoa(freePort)
 	ctx, cancel := context.WithCancel(context.Background())
 	e.cancel = cancel
-	e.cmd = exec.CommandContext(ctx, e.queryEnginePath, "-p", port)
+	e.cmd = exec.CommandContext(ctx, e.queryEnginePath, "-p", port, "--enable-raw-queries")
 	// ensure that prisma starts with the dir set to the .wundergraph directory
 	// this is important for sqlite support as it's expected that the path of the sqlite file is the same
 	// (relative to the .wundergraph directory) during introspection and at runtime

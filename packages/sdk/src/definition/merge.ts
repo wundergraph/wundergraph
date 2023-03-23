@@ -1,10 +1,12 @@
 import {
 	ASTNode,
 	buildSchema,
+	BuildSchemaOptions,
 	GraphQLSchema,
 	Kind,
 	ObjectTypeDefinitionNode,
 	parse,
+	ParseOptions,
 	print,
 	printSchema,
 	visit,
@@ -482,24 +484,27 @@ const mergeApiSchemas = <T extends {} = {}>(
 		})
 	);
 
+	const options: BuildSchemaOptions & ParseOptions = {
+		assumeValidSDL: true,
+		assumeValid: true,
+	};
+
 	if (roles.length) {
-		graphQLSchemas.push(buildSchema(roleSchema(roles), { assumeValidSDL: true }));
+		graphQLSchemas.push(buildSchema(roleSchema(roles), options));
 	}
-
-	graphQLSchemas.push(buildSchema(claimsSchema(customClaims), { assumeValidSDL: true }));
-
-	graphQLSchemas.push(buildSchema(dateTimeSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(uuidSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(internalSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(injectEnvironmentVariableSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(exportSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(transformSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(claimsSchema(customClaims), options));
+	graphQLSchemas.push(buildSchema(dateTimeSchema, options));
+	graphQLSchemas.push(buildSchema(uuidSchema, options));
+	graphQLSchemas.push(buildSchema(internalSchema, options));
+	graphQLSchemas.push(buildSchema(injectEnvironmentVariableSchema, options));
+	graphQLSchemas.push(buildSchema(exportSchema, options));
+	graphQLSchemas.push(buildSchema(transformSchema, options));
 
 	let mergedGraphQLSchema: GraphQLSchema;
 	try {
 		mergedGraphQLSchema = mergeSchemas({
 			schemas: graphQLSchemas,
-			assumeValid: true,
+			...options,
 		});
 	} catch (e: any) {
 		throw new Error(
