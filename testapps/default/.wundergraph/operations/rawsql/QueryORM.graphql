@@ -1,0 +1,12 @@
+query {
+	orm: users_post_findFirstUser {
+		id
+		email
+		name
+		posts {
+			id
+			title
+			content
+		}
+	}
+}

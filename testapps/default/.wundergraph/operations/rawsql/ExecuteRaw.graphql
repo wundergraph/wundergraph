@@ -1,0 +1,6 @@
+mutation ($id: String!, $name: String!, $email: String!) {
+	users_post_executeRaw(
+		query: "insert or ignore into User (id,name,email) values (?,?,?)"
+		parameters: [$id, $name, $email]
+	)
+}
