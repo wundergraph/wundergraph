@@ -62,10 +62,36 @@ const kyc_storage = introspect.openApi({
 // 	statusCodeUnions: true,
 // });
 
+const pets = introspect.openApiNew({
+	apiNamespace: 'pets',
+	source: {
+		kind: 'file',
+		filePath: './petstore.json',
+	},
+	introspection: {
+		pollingIntervalSeconds: 2,
+	},
+	requestTimeoutSeconds: 10, // optional
+	baseURL: 'petstore.swagger.io',
+});
+
+// const pets2 = introspect.openApi({
+// 	apiNamespace: 'pets2',
+// 	source: {
+// 		kind: 'file',
+// 		filePath: './petstore.json',
+// 	},
+// 	introspection: {
+// 		pollingIntervalSeconds: 2,
+// 	},
+// 	requestTimeoutSeconds: 10, // optional
+// 	baseURL: 'petstore.swagger.io',
+// });
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
 	// apis: [kyc_status, kyc_storage, authentication, purchase_component],
-	apis: [kyc_storage],
+	apis: [pets],
 	server,
 	operations,
 	codeGenerators: [

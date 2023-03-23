@@ -1,0 +1,89 @@
+type Query {
+	findPetsByStatus(status: [findPetsByStatus_status]!): [Pet]
+	findPetsByTags(tags: [String]!): [Pet]
+	getPetById(petId: Int!): Pet
+	getOrderById(orderId: Int!): Order
+	getInventory: JSON
+	getUserByName(username: String!): User
+	loginUser(username: String!, password: String!): String
+}
+
+type Mutation {
+	uploadFile(petId: Int!): ApiResponse
+	placeOrder(postStoreOrderInput: OrderInput!): Order
+}
+
+type ApiResponse {
+	code: Int
+	type: String
+	message: String
+}
+
+type Pet {
+	id: Int
+	category: Category
+	name: String!
+	photoUrls: [String]!
+	tags: [Tag]
+}
+
+type Category {
+	id: Int
+	name: String
+}
+
+type Tag {
+	id: Int
+	name: String
+}
+
+enum findPetsByStatus_status {
+	available
+	pending
+	sold
+}
+
+input postPetPetIdInput {
+	name: String
+	status: String
+}
+
+type Order {
+	id: Int
+	petId: Int
+	quantity: Int
+	shipDate: String
+	complete: Boolean
+}
+
+input OrderInput {
+	id: Int
+	petId: Int
+	quantity: Int
+	shipDate: String
+	complete: Boolean
+}
+
+scalar JSON
+
+type User {
+	id: Int
+	username: String
+	firstName: String
+	lastName: String
+	email: String
+	password: String
+	phone: String
+	userStatus: Int
+}
+
+input UserInput {
+	id: Int
+	username: String
+	firstName: String
+	lastName: String
+	email: String
+	password: String
+	phone: String
+	userStatus: Int
+}
