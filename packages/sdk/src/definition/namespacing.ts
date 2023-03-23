@@ -46,6 +46,7 @@ const wellKnownTypeNames: string[] = [
 	'UUID',
 	'_Any',
 	'UnspecifiedHttpResponse',
+	'_Row',
 ];
 
 const uniqueWellKnownTypes = (schema: DocumentNode): string[] => {
