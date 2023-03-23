@@ -2,7 +2,6 @@ package hooks
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,8 +16,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
-
-type Authenticator func(ctx context.Context) (user interface{})
 
 type SubscriptionWriter interface {
 	http.ResponseWriter
@@ -54,11 +51,10 @@ type Response struct {
 }
 
 type PipelineConfig struct {
-	Client        *Client
-	Authenticator Authenticator
-	Operation     *wgpb.Operation
-	Transformer   *postresolvetransform.Transformer
-	Logger        *zap.Logger
+	Client      *Client
+	Operation   *wgpb.Operation
+	Transformer *postresolvetransform.Transformer
+	Logger      *zap.Logger
 }
 
 type SynchronousOperationPipelineConfig struct {
@@ -82,7 +78,6 @@ type pipeline struct {
 	logger                 *zap.Logger
 	operation              *wgpb.Operation
 	postResolveTransformer *postresolvetransform.Transformer
-	authenticator          Authenticator
 	ResolveConfig          ResolveConfiguration
 	PostResolveConfig      PostResolveConfiguration
 }
@@ -95,7 +90,6 @@ func newPipeline(config PipelineConfig) pipeline {
 		logger:                 config.Logger,
 		operation:              config.Operation,
 		postResolveTransformer: config.Transformer,
-		authenticator:          config.Authenticator,
 		ResolveConfig: ResolveConfiguration{
 			Pre:         hooksConfig.GetPreResolve(),
 			MutatingPre: hooksConfig.GetMutatingPreResolve(),
@@ -176,7 +170,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	var err error
 	data := ctx.Variables
 	if p.ResolveConfig.Pre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData := EncodeData(r, hookBuf.Bytes(), data, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, PreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -189,7 +183,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.MutatingPre {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData := EncodeData(r, hookBuf.Bytes(), data, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPreResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -205,7 +199,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Mock {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData := EncodeData(r, hookBuf.Bytes(), data, nil)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MockResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -223,7 +217,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Custom {
-		hookData := EncodeData(p.authenticator, r, hookBuf.Bytes(), data, nil)
+		hookData := EncodeData(r, hookBuf.Bytes(), data, nil)
 		resp, err = p.client.DoOperationRequest(ctx.Context, p.operation.Name, CustomResolve, hookData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -258,7 +252,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	defer pool.PutBytesBuffer(payloadBuf)
 
 	if p.PostResolveConfig.Post {
-		postResolveData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
+		postResolveData := EncodeData(r, hookBuf.Bytes(), ctx.Variables, responseData)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, PostResolve, postResolveData, payloadBuf)
 		if err != nil {
 			return nil, err
@@ -271,7 +265,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	}
 
 	if p.PostResolveConfig.MutatingPost {
-		mutatingPostData := EncodeData(p.authenticator, r, hookBuf.Bytes(), ctx.Variables, responseData)
+		mutatingPostData := EncodeData(r, hookBuf.Bytes(), ctx.Variables, responseData)
 		resp, err := p.client.DoOperationRequest(ctx.Context, p.operation.Name, MutatingPostResolve, mutatingPostData, payloadBuf)
 		if err != nil {
 			return nil, err

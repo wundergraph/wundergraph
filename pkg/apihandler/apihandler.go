@@ -525,10 +525,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        r.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        r.log,
+		Client:    r.middlewareClient,
+		Operation: operation,
+		Logger:    r.log,
 	}
 
 	switch operation.OperationType {
@@ -2276,7 +2275,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hooks.EncodeData(hooksAuthenticator, r, buf.Bytes(), ctx.Variables, nil)
+	input := hooks.EncodeData(r, buf.Bytes(), ctx.Variables, nil)
 
 	switch {
 	case isLive:
@@ -2554,9 +2553,4 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
-}
-
-// hooksAuthenticator is used to break the import cycle between authentication and hooks
-func hooksAuthenticator(ctx context.Context) interface{} {
-	return authentication.UserFromContext(ctx)
 }

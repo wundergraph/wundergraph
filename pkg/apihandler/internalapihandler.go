@@ -141,10 +141,9 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	shared.Postprocess.Process(preparedPlan)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        i.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        i.log,
+		Client:    i.middlewareClient,
+		Operation: operation,
+		Logger:    i.log,
 	}
 
 	switch operation.OperationType {
