@@ -9,8 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"go.uber.org/zap"
+
+	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 )
 
 func IntrospectPrismaDatabase(ctx context.Context, introspectionSchema, wundergraphDir string, loadPrismaSchemaFromDatabase bool, log *zap.Logger) (prismaSchema, graphqlSDL, dmmf string, err error) {
