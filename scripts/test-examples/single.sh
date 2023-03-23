@@ -74,18 +74,15 @@ if ! test -d node_modules; then
     npm install
 fi
 
+# Run code generation first, to ensure the test run has all the generated files
+wunderctl generate
+
 # Check for a script to bring up the required services
 npm start &
 pid=$!
 
 trap "kill_with_children ${pid}" EXIT
 
-# Wait for code generation to complete
-while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
-    sleep 0.1
-    # Make sure npm start is still running
-    kill -0 ${pid}
-done
 
 # Wait for server health check
 while ! curl -f -s ${default_node_url}/health; do
