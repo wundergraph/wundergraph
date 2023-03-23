@@ -30,6 +30,7 @@ type Bundler struct {
 	skipWatchOnEntryPoint bool
 	outFile               string
 	outDir                string
+	outExtension          map[string]string
 	fileLoaders           []string
 	buildResult           *api.BuildResult
 	onAfterBundle         func() error
@@ -48,6 +49,7 @@ type Config struct {
 	IgnorePaths           []string
 	OutFile               string
 	OutDir                string
+	OutExtension          map[string]string
 	OnAfterBundle         func() error
 }
 
@@ -59,6 +61,7 @@ func NewBundler(config Config) *Bundler {
 		absWorkingDir:         config.AbsWorkingDir,
 		outFile:               config.OutFile,
 		outDir:                config.OutDir,
+		outExtension:          config.OutExtension,
 		entryPoints:           entryPoints(config),
 		watchPaths:            config.WatchPaths,
 		ignorePaths:           config.IgnorePaths,
@@ -163,6 +166,7 @@ func (b *Bundler) initialBuild() api.BuildResult {
 	options := api.BuildOptions{
 		Outfile:             b.outFile,
 		Outdir:              b.outDir,
+		OutExtension:        b.outExtension,
 		Bundle:              true,
 		Incremental:         true,
 		EntryPointsAdvanced: b.entryPoints,
