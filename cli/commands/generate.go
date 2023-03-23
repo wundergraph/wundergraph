@@ -79,6 +79,8 @@ var generateCmd = &cobra.Command{
 		}()
 
 		var onAfterBuild func() error
+		outExtension := make(map[string]string)
+		outExtension[".js"] = ".cjs"
 
 		if codeServerFilePath != "" {
 			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.cjs")
@@ -99,6 +101,7 @@ var generateCmd = &cobra.Command{
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
 					OutDir:        generatedBundleOutDir,
+					OutExtension:  outExtension,
 					Logger:        log,
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
@@ -136,6 +139,7 @@ var generateCmd = &cobra.Command{
 						EntryPoints:   operationsPaths,
 						AbsWorkingDir: wunderGraphDir,
 						OutDir:        generatedBundleOutDir,
+						OutExtension:  outExtension,
 						Logger:        log,
 					})
 					err = operationsBundler.Bundle()
