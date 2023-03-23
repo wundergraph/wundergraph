@@ -83,6 +83,12 @@ pid=$!
 
 trap "kill_with_children ${pid}" EXIT
 
+# Wait for code generation to complete
+while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
+    sleep 0.1
+    # Make sure npm start is still running
+    kill -0 ${pid}
+done
 
 # Wait for server health check
 while ! curl -f -s ${default_node_url}/health; do
@@ -90,6 +96,8 @@ while ! curl -f -s ${default_node_url}/health; do
     # Make sure npm start is still running
     kill -0 ${pid}
 done
+
+sleep 5
 
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
@@ -105,7 +113,7 @@ fi
 # If the example uses Next.js, compile it
 if grep -q '"build:next"' package.json; then
     # This example doesn't build under a pnpm workspace
-    if !grep -q '"nextjs-react-query"' package.json; then
+    if ! grep -q '"nextjs-react-query"' package.json; then
         npm run build:next
     fi
 elif grep -q '"check"' package.json; then
