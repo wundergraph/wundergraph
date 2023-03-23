@@ -4,10 +4,9 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import objectHash from 'object-hash';
+import writeFileAtomic from 'write-file-atomic';
 
 import logger from '../logger';
-
-const cacheDirname = 'cache';
 
 interface CacheSetOptions {
 	ttlSeconds?: number;
@@ -96,7 +95,7 @@ export class LocalCacheBucket {
 	constructor(private dir?: string) {}
 
 	private keyPath(key: any): string | undefined {
-		return this.dir ? path.join(this.dir, objectHash(key)) : undefined;
+		return this.dir ? path.join(this.dir, key) : undefined;
 	}
 
 	private hasExpired(expiration: number, opts?: CacheGetOptions) {
@@ -141,7 +140,7 @@ export class LocalCacheBucket {
 
 	async write(filePath: string, data: Buffer): Promise<void> {
 		try {
-			return await fs.writeFile(filePath, data);
+			return await writeFileAtomic(filePath, data);
 		} catch (e) {
 			if (e instanceof Error && e.message.includes('ENOENT')) {
 				const dir = path.dirname(filePath);
@@ -151,7 +150,7 @@ export class LocalCacheBucket {
 					logger.error(`error creating cache directory: ${de}`);
 				}
 				// Avoid recursive call, otherwise we could end up with infinite recursion
-				return await fs.writeFile(filePath, data);
+				return await writeFileAtomic(filePath, data);
 			}
 			// Could not write cache file, rethrow original error
 			throw e;
