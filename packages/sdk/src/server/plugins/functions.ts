@@ -17,7 +17,11 @@ interface FastifyFunctionsOptions {
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
 	for (const operation of config.operations) {
 		try {
-			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
+			let operationPath = operation.module_path;
+			if (operationPath.endsWith('.cjs')) {
+				operationPath = operationPath.slice(0, -4);
+			}
+			const filePath = path.join(process.env.WG_DIR_ABS!, operationPath + '.cjs');
 			const routeUrl = `/functions/${operation.api_mount_path}`;
 			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any, any> | undefined;
 			try {

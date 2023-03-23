@@ -48,7 +48,7 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		configOutFile := filepath.Join("generated", "bundle", "config.js")
+		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
 
 		// XXX: generate never uses the cache
 		scriptEnv := configScriptEnv(configScriptEnvOptions{
@@ -81,7 +81,7 @@ var generateCmd = &cobra.Command{
 		var onAfterBuild func() error
 
 		if codeServerFilePath != "" {
-			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.js")
+			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.cjs")
 			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 			generatedBundleOutDir := filepath.Join("generated", "bundle")
