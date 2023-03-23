@@ -155,8 +155,9 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 			],
 		};
 	}
+	const skipRenameRootFields = introspection.skipRenameRootFields || [];
 	return new GraphQLApi(
-		applyNameSpaceToGraphQLSchema(schemaSDL, introspection.skipRenameRootFields || [], introspection.apiNamespace),
+		applyNameSpaceToGraphQLSchema(schemaSDL, skipRenameRootFields, introspection.apiNamespace),
 		[
 			{
 				Id: introspection.id,
@@ -184,7 +185,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 								: typeof introspection.url === 'string'
 								? mapInputVariable(introspection.url)
 								: mapInputVariable(''),
-						UseSSE: introspection.subscriptionsUseSSE !== undefined ? introspection.subscriptionsUseSSE : false,
+						UseSSE: introspection.subscriptionsUseSSE ?? false,
 					},
 					Federation: {
 						Enabled: federationEnabled,
@@ -204,12 +205,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 				RequestTimeoutSeconds: introspection.requestTimeoutSeconds ?? 0,
 			},
 		],
-		applyNameSpaceToFieldConfigurations(
-			Fields,
-			graphQLSchema,
-			introspection.skipRenameRootFields || [],
-			introspection.apiNamespace
-		),
+		applyNameSpaceToFieldConfigurations(Fields, graphQLSchema, skipRenameRootFields, introspection.apiNamespace),
 		generateTypeConfigurationsForNamespace(schemaSDL, introspection.apiNamespace),
 		[],
 		introspection.customJSONScalars
