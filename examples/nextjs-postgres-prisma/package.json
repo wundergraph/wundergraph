@@ -13,7 +13,6 @@
     "build": "npm run build:wundergraph && npm run build:next",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "seed": "wait-on -d 2000 http://localhost:9991 && ts-node ./seed/seed.ts && npm run open",
-    "prisma:ts": "ts-node prisma.ts",
     "dev": "next dev",
     "migrate": "prisma format && prisma migrate dev --name",
     "cleanup": "docker-compose down -v",
