@@ -364,8 +364,7 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 	user.RawIDToken = idToken
 	user.IdToken = idTokenJSON
 
-	user, err = postAuthentication(ctx, w, r, hooks, user, config.Cookie, config.InsecureCookies)
-	if err != nil {
+	if err := postAuthentication(ctx, w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
 		h.log.Error("OpenIDConnectCookieHandler postAuthentication failed",
 			zap.Error(err),
 		)

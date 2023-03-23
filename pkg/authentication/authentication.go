@@ -899,16 +899,16 @@ func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
 	}
 }
 
-func postAuthentication(ctx context.Context, w http.ResponseWriter, r *http.Request, hooks Hooks, user *User, cookie *securecookie.SecureCookie, insecureCookies bool) (*User, error) {
+func postAuthentication(ctx context.Context, w http.ResponseWriter, r *http.Request, hooks Hooks, user *User, cookie *securecookie.SecureCookie, insecureCookies bool) error {
 	if err := hooks.PostAuthentication(ctx, user); err != nil {
-		return nil, err
+		return err
 	}
 	user, err := hooks.MutatingPostAuthentication(r.Context(), user)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := user.Save(cookie, w, r, r.Host, insecureCookies); err != nil {
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }

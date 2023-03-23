@@ -293,8 +293,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			RawIDToken:     idToken,
 		}
 
-		user, err = postAuthentication(r.Context(), w, r, hooks, user, config.Cookie, config.InsecureCookies)
-		if err != nil {
+		if err := postAuthentication(r.Context(), w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
 			g.log.Error("GithubCookieHandler postAuthentication failed", zap.Error(err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
