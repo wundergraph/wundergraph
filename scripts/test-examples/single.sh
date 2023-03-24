@@ -74,9 +74,6 @@ if ! test -d node_modules; then
     npm install
 fi
 
-# Run code generation first, to ensure the test run has all the generated files
-wunderctl generate
-
 # Check for a script to bring up the required services
 npm start &
 pid=$!
@@ -90,13 +87,25 @@ while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
     kill -0 ${pid}
 done
 
+set -x
+
 # Wait for server health check
-while ! curl -f -s ${default_node_url}/health; do
-    sleep 0.1
+while true; do
+    if ! curl -f -s ${default_node_url}/health; then
+        continue
+    fi
+    health=$(curl -f -s ${default_node_url}/health)
+    node_status=$(echo ${health} | jq .nodeStatus)
+    server_status=$(echo ${health} | jq .serverStatus)
+    echo status ${node_status} ${server_status}
+    if [ x${node_status} == 'x"READY"' ] && ([ x${server_status} == 'x"READY' ] || [ x${server_status} == 'x"SKIP"' ]); then
+        break
+    fi
     # Make sure npm start is still running
     kill -0 ${pid}
 done
 
+# Some examples in CI are not fully ready when the health endpoi
 sleep 5
 
 # Run test if available, otherwise just build or type-check
