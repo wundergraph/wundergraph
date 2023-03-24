@@ -87,8 +87,6 @@ while ! test -f .wundergraph/generated/wundergraph.schema.graphql; do
     kill -0 ${pid}
 done
 
-set -x
-
 # Wait for server health check
 while true; do
     if ! curl -f -s ${default_node_url}/health; then
@@ -121,7 +119,7 @@ fi
 # If the example uses Next.js, compile it
 if grep -q '"build:next"' package.json; then
     # This example doesn't build under a pnpm workspace
-    if ! grep -q '"nextjs-react-query"' package.json; then
+    if ! grep -q '"wundergraph-nextjs-react-query"' package.json; then
         npm run build:next
     fi
 elif grep -q '"check"' package.json; then
