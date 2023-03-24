@@ -102,9 +102,6 @@ while true; do
     kill -0 ${pid}
 done
 
-# Some examples in CI are not fully ready when the health endpoi
-sleep 5
-
 # Run test if available, otherwise just build or type-check
 if grep -q '"test"' package.json; then
     WG_NODE_URL=${default_node_url} npm test
