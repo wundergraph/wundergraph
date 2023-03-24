@@ -1297,6 +1297,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	}
 	for (const op of operations) {
 		const schema = generator.getSchemaForSymbol(responseTypeName(op));
+		console.log(`schema for ${op} is ${schema}`);
 		if (schema) {
 			delete schema.$schema;
 			schemas[op.Name] = schema as JSONSchema;
