@@ -252,7 +252,6 @@ type InternalApiHandler struct {
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	span := trace.SpanFromContext(r.Context())
-	defer span.End()
 
 	trace.AddSpanTags(
 		span,
@@ -347,7 +346,6 @@ type InternalSubscriptionApiHandler struct {
 
 func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	span := trace.SpanFromContext(r.Context())
-	defer span.End()
 
 	trace.AddSpanTags(
 		span,
