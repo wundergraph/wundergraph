@@ -482,7 +482,7 @@ func encodeData(authenticator Authenticator, r *http.Request, w *bytes.Buffer, v
 
 	if user := authenticator(r.Context()); user != nil {
 		userJson, err := json.Marshal(user)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		if buf, err = jsonparser.Set(buf, userJson, wgKey, "user"); err != nil {
