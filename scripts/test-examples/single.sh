@@ -97,8 +97,7 @@ while true; do
     health=$(curl -f -s ${default_node_url}/health)
     node_status=$(echo ${health} | jq .nodeStatus)
     server_status=$(echo ${health} | jq .serverStatus)
-    echo status ${node_status} ${server_status}
-    if [ x${node_status} == 'x"READY"' ] && ([ x${server_status} == 'x"READY' ] || [ x${server_status} == 'x"SKIP"' ]); then
+    if [ x${node_status} = 'x"READY"' ] && ([ x${server_status} = 'x"READY' ] || [ x${server_status} = 'x"SKIP"' ]); then
         break
     fi
     # Make sure npm start is still running
