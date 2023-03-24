@@ -26,6 +26,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -250,6 +251,17 @@ type InternalApiHandler struct {
 }
 
 func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
+
+	trace.AddSpanTags(
+		span,
+		map[string]string{
+			"operation":     h.operation.Name,
+			"operationType": h.operation.OperationType.String(),
+		},
+	)
+
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))
@@ -334,6 +346,17 @@ type InternalSubscriptionApiHandler struct {
 }
 
 func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	span := trace.SpanFromContext(r.Context())
+	defer span.End()
+
+	trace.AddSpanTags(
+		span,
+		map[string]string{
+			"operation":     h.operation.Name,
+			"operationType": h.operation.OperationType.String(),
+		},
+	)
+
 	reqID := r.Header.Get(logging.RequestIDHeader)
 	requestLogger := h.log.With(logging.WithRequestID(reqID))
 	r = r.WithContext(context.WithValue(r.Context(), logging.RequestIDKey{}, reqID))

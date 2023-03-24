@@ -67,7 +67,7 @@ export const resolveConfigurationVariable = (variable: ConfigurationVariable): s
  * mapInputVariable converts user InputVariable to a ConfigurationVariable stored in config.
  * Throws an error if the variable is undefined.
  */
-export const mapInputVariable = (stringOrEnvironmentVariable: InputVariable) => {
+export const mapInputVariable = <T = string>(stringOrEnvironmentVariable: InputVariable<T>) => {
 	if (stringOrEnvironmentVariable === undefined) {
 		Logger.error('unable to load environment variable');
 		Logger.info('make sure to replace \'process.env...\' with new EnvironmentVariable("%VARIABLE_NAME%")');
@@ -84,6 +84,17 @@ export const mapInputVariable = (stringOrEnvironmentVariable: InputVariable) => 
 		};
 		return configVariable;
 	}
+	if (typeof stringOrEnvironmentVariable === 'boolean') {
+		const configVariable: ConfigurationVariable = {
+			kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+			environmentVariableDefaultValue: '',
+			environmentVariableName: '',
+			placeholderVariableName: '',
+			staticVariableContent: stringOrEnvironmentVariable.toString(),
+		};
+		return configVariable;
+	}
+
 	if ((stringOrEnvironmentVariable as PlaceHolder)._identifier === 'placeholder') {
 		const variable: ConfigurationVariable = {
 			kind: ConfigurationVariableKind.PLACEHOLDER_CONFIGURATION_VARIABLE,

@@ -1164,12 +1164,19 @@ export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
 
+export interface TelemetryOptions {
+  otelEnabled: ConfigurationVariable | undefined;
+  otelExporterHttpEndpoint: ConfigurationVariable | undefined;
+  otelExporterJaegerEndpoint: ConfigurationVariable | undefined;
+}
+
 export interface NodeOptions {
   nodeUrl: ConfigurationVariable | undefined;
   publicNodeUrl: ConfigurationVariable | undefined;
   listen: ListenerOptions | undefined;
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
+  telemetry: TelemetryOptions | undefined;
 }
 
 export interface ServerLogging {
@@ -3833,6 +3840,54 @@ export const NodeLogging = {
   },
 };
 
+function createBaseTelemetryOptions(): TelemetryOptions {
+  return { otelEnabled: undefined, otelExporterHttpEndpoint: undefined, otelExporterJaegerEndpoint: undefined };
+}
+
+export const TelemetryOptions = {
+  fromJSON(object: any): TelemetryOptions {
+    return {
+      otelEnabled: isSet(object.otelEnabled) ? ConfigurationVariable.fromJSON(object.otelEnabled) : undefined,
+      otelExporterHttpEndpoint: isSet(object.otelExporterHttpEndpoint)
+        ? ConfigurationVariable.fromJSON(object.otelExporterHttpEndpoint)
+        : undefined,
+      otelExporterJaegerEndpoint: isSet(object.otelExporterJaegerEndpoint)
+        ? ConfigurationVariable.fromJSON(object.otelExporterJaegerEndpoint)
+        : undefined,
+    };
+  },
+
+  toJSON(message: TelemetryOptions): unknown {
+    const obj: any = {};
+    message.otelEnabled !== undefined &&
+      (obj.otelEnabled = message.otelEnabled ? ConfigurationVariable.toJSON(message.otelEnabled) : undefined);
+    message.otelExporterHttpEndpoint !== undefined && (obj.otelExporterHttpEndpoint = message.otelExporterHttpEndpoint
+      ? ConfigurationVariable.toJSON(message.otelExporterHttpEndpoint)
+      : undefined);
+    message.otelExporterJaegerEndpoint !== undefined &&
+      (obj.otelExporterJaegerEndpoint = message.otelExporterJaegerEndpoint
+        ? ConfigurationVariable.toJSON(message.otelExporterJaegerEndpoint)
+        : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<TelemetryOptions>, I>>(object: I): TelemetryOptions {
+    const message = createBaseTelemetryOptions();
+    message.otelEnabled = (object.otelEnabled !== undefined && object.otelEnabled !== null)
+      ? ConfigurationVariable.fromPartial(object.otelEnabled)
+      : undefined;
+    message.otelExporterHttpEndpoint =
+      (object.otelExporterHttpEndpoint !== undefined && object.otelExporterHttpEndpoint !== null)
+        ? ConfigurationVariable.fromPartial(object.otelExporterHttpEndpoint)
+        : undefined;
+    message.otelExporterJaegerEndpoint =
+      (object.otelExporterJaegerEndpoint !== undefined && object.otelExporterJaegerEndpoint !== null)
+        ? ConfigurationVariable.fromPartial(object.otelExporterJaegerEndpoint)
+        : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeOptions(): NodeOptions {
   return {
     nodeUrl: undefined,
@@ -3840,6 +3895,7 @@ function createBaseNodeOptions(): NodeOptions {
     listen: undefined,
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
+    telemetry: undefined,
   };
 }
 
@@ -3853,6 +3909,7 @@ export const NodeOptions = {
       defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
+      telemetry: isSet(object.telemetry) ? TelemetryOptions.fromJSON(object.telemetry) : undefined,
     };
   },
 
@@ -3866,6 +3923,8 @@ export const NodeOptions = {
     message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
     message.defaultRequestTimeoutSeconds !== undefined &&
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
+    message.telemetry !== undefined &&
+      (obj.telemetry = message.telemetry ? TelemetryOptions.toJSON(message.telemetry) : undefined);
     return obj;
   },
 
@@ -3884,6 +3943,9 @@ export const NodeOptions = {
       ? NodeLogging.fromPartial(object.logger)
       : undefined;
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
+    message.telemetry = (object.telemetry !== undefined && object.telemetry !== null)
+      ? TelemetryOptions.fromPartial(object.telemetry)
+      : undefined;
     return message;
   },
 };

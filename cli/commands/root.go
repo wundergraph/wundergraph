@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"errors"
 	"io/fs"
 	"os"
@@ -20,7 +19,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
-	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 )
 
 const (
@@ -37,7 +35,6 @@ var (
 	BuildInfo             node.BuildInfo
 	GitHubAuthDemo        node.GitHubAuthDemo
 	TelemetryClient       telemetry.Client
-	TracerProvider        *trace.Provider
 	DotEnvFile            string
 	log                   *zap.Logger
 	cmdDurationMetric     telemetry.DurationMetric
@@ -102,17 +99,6 @@ var rootCmd = &cobra.Command{
 			log.Debug("env file successfully loaded",
 				zap.String("file", DotEnvFile),
 			)
-		}
-
-		if _, otelEnabled := os.LookupEnv("WG_OTEL_ENABLED"); otelEnabled {
-			TracerProvider, err = trace.NewProvider(context.Background(), &trace.ProviderConfig{
-				Endpoint:    os.Getenv("WG_OTEL_ENDPOINT"),
-				ServiceName: "wunderctl",
-				Enabled:     true,
-			})
-			if err != nil {
-				log.Fatal("failed to initialize otel tracer provider", zap.Error(err))
-			}
 		}
 
 		if clearCache {
@@ -221,12 +207,6 @@ func FlushTelemetry() {
 			} else {
 				log.Info("Telemetry data sent")
 			}
-		}
-	}
-
-	if TracerProvider != nil {
-		if err := TracerProvider.Shutdown(context.Background()); err != nil {
-			log.Error("failed to shutdown otel tracer provider", zap.Error(err))
 		}
 	}
 }

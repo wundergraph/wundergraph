@@ -17,12 +17,19 @@ type Logging struct {
 	Level zapcore.Level
 }
 
+type Telemetry struct {
+	OtelEnabled                bool
+	OtelExporterHTTPEndpoint   string
+	OtelExporterJaegerEndpoint string
+}
+
 type Options struct {
 	ServerUrl      string
 	PublicNodeUrl  string
 	Listener       *Listener
 	Logging        Logging
 	DefaultTimeout time.Duration
+	OpenTelemetry  *Telemetry
 }
 
 type Api struct {

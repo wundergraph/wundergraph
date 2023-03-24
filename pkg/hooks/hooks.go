@@ -160,16 +160,16 @@ type Client struct {
 	log                 *zap.Logger
 }
 
-func NewClient(serverUrl string, logger *zap.Logger) *Client {
+func NewClient(serverUrl string, logger *zap.Logger, tp *trace.TracerProvider) *Client {
 	return &Client{
 		serverUrl:           serverUrl,
-		httpClient:          buildClient(60 * time.Second),
-		subscriptionsClient: buildClient(0),
+		httpClient:          buildClient(60*time.Second, tp),
+		subscriptionsClient: buildClient(0, tp),
 		log:                 logger,
 	}
 }
 
-func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
+func buildClient(requestTimeout time.Duration, tp *trace.TracerProvider) *retryablehttp.Client {
 	httpClient := retryablehttp.NewClient()
 	// we will try 40 times with a constant delay of 50ms after max 2s we will give up
 	httpClient.RetryMax = 40
@@ -186,7 +186,7 @@ func buildClient(requestTimeout time.Duration) *retryablehttp.Client {
 		}
 		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
 	}
-	httpClient.HTTPClient.Transport = trace.HTTPClientTransporter(httpClient.HTTPClient.Transport)
+	httpClient.HTTPClient.Transport = trace.HTTPClientTransporter(httpClient.HTTPClient.Transport, tp.Provider)
 	return httpClient
 }
 

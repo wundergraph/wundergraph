@@ -33,10 +33,11 @@ type apiTransportFactory struct {
 	api             *Api
 	hooksClient     *hooks.Client
 	enableDebugMode bool
+	tracerProvider  *trace.TracerProvider
 }
 
 func (f *apiTransportFactory) RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
-	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableDebugMode, enableStreamingMode)
+	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableDebugMode, enableStreamingMode, f.tracerProvider)
 }
 
 func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
@@ -54,15 +55,16 @@ type ApiTransport struct {
 	enableStreamingMode        bool
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) ApiTransportFactory {
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool, tracerProvider *trace.TracerProvider) ApiTransportFactory {
 	return &apiTransportFactory{
 		api:             api,
 		hooksClient:     hooksClient,
 		enableDebugMode: enableDebugMode,
+		tracerProvider:  tracerProvider,
 	}
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool, enableStreamingMode bool) http.RoundTripper {
+func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool, enableStreamingMode bool, tp *trace.TracerProvider) http.RoundTripper {
 	transport := &ApiTransport{
 		roundTripper:               tripper,
 		debugMode:                  enableDebugMode,
@@ -107,7 +109,7 @@ func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Cli
 		}
 	}
 
-	return trace.HTTPClientTransporter(transport)
+	return trace.HTTPClientTransporter(transport, tp.Provider)
 }
 
 type Claims struct {
@@ -264,11 +266,6 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 }
 
 func (t *ApiTransport) handleOnRequestHook(r *http.Request, metaData *OperationMetaData, buf *bytes.Buffer) (*http.Request, error) {
-	ctx, span := trace.NewSpan(r.Context(), "handleOnRequestHook")
-	defer span.End()
-
-	r = r.WithContext(ctx)
-
 	var (
 		body []byte
 		err  error

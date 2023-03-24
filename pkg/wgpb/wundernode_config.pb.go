@@ -4865,6 +4865,69 @@ func (x *NodeLogging) GetLevel() *ConfigurationVariable {
 	return nil
 }
 
+type TelemetryOptions struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	OtelEnabled                *ConfigurationVariable `protobuf:"bytes,1,opt,name=otelEnabled,proto3" json:"otelEnabled,omitempty"`
+	OtelExporterHttpEndpoint   *ConfigurationVariable `protobuf:"bytes,2,opt,name=otelExporterHttpEndpoint,proto3" json:"otelExporterHttpEndpoint,omitempty"`
+	OtelExporterJaegerEndpoint *ConfigurationVariable `protobuf:"bytes,3,opt,name=otelExporterJaegerEndpoint,proto3" json:"otelExporterJaegerEndpoint,omitempty"`
+}
+
+func (x *TelemetryOptions) Reset() {
+	*x = TelemetryOptions{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_wundernode_config_proto_msgTypes[57]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TelemetryOptions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelemetryOptions) ProtoMessage() {}
+
+func (x *TelemetryOptions) ProtoReflect() protoreflect.Message {
+	mi := &file_wundernode_config_proto_msgTypes[57]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelemetryOptions.ProtoReflect.Descriptor instead.
+func (*TelemetryOptions) Descriptor() ([]byte, []int) {
+	return file_wundernode_config_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *TelemetryOptions) GetOtelEnabled() *ConfigurationVariable {
+	if x != nil {
+		return x.OtelEnabled
+	}
+	return nil
+}
+
+func (x *TelemetryOptions) GetOtelExporterHttpEndpoint() *ConfigurationVariable {
+	if x != nil {
+		return x.OtelExporterHttpEndpoint
+	}
+	return nil
+}
+
+func (x *TelemetryOptions) GetOtelExporterJaegerEndpoint() *ConfigurationVariable {
+	if x != nil {
+		return x.OtelExporterJaegerEndpoint
+	}
+	return nil
+}
+
 type NodeOptions struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -4875,12 +4938,13 @@ type NodeOptions struct {
 	Listen                       *ListenerOptions       `protobuf:"bytes,2,opt,name=listen,proto3" json:"listen,omitempty"`
 	Logger                       *NodeLogging           `protobuf:"bytes,3,opt,name=logger,proto3" json:"logger,omitempty"`
 	DefaultRequestTimeoutSeconds int64                  `protobuf:"varint,5,opt,name=defaultRequestTimeoutSeconds,proto3" json:"defaultRequestTimeoutSeconds,omitempty"`
+	Telemetry                    *TelemetryOptions      `protobuf:"bytes,6,opt,name=telemetry,proto3" json:"telemetry,omitempty"`
 }
 
 func (x *NodeOptions) Reset() {
 	*x = NodeOptions{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[57]
+		mi := &file_wundernode_config_proto_msgTypes[58]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4893,7 +4957,7 @@ func (x *NodeOptions) String() string {
 func (*NodeOptions) ProtoMessage() {}
 
 func (x *NodeOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[57]
+	mi := &file_wundernode_config_proto_msgTypes[58]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4906,7 +4970,7 @@ func (x *NodeOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeOptions.ProtoReflect.Descriptor instead.
 func (*NodeOptions) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{57}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *NodeOptions) GetNodeUrl() *ConfigurationVariable {
@@ -4944,6 +5008,13 @@ func (x *NodeOptions) GetDefaultRequestTimeoutSeconds() int64 {
 	return 0
 }
 
+func (x *NodeOptions) GetTelemetry() *TelemetryOptions {
+	if x != nil {
+		return x.Telemetry
+	}
+	return nil
+}
+
 type ServerLogging struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -4955,7 +5026,7 @@ type ServerLogging struct {
 func (x *ServerLogging) Reset() {
 	*x = ServerLogging{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[58]
+		mi := &file_wundernode_config_proto_msgTypes[59]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4968,7 +5039,7 @@ func (x *ServerLogging) String() string {
 func (*ServerLogging) ProtoMessage() {}
 
 func (x *ServerLogging) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[58]
+	mi := &file_wundernode_config_proto_msgTypes[59]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4981,7 +5052,7 @@ func (x *ServerLogging) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerLogging.ProtoReflect.Descriptor instead.
 func (*ServerLogging) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{58}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *ServerLogging) GetLevel() *ConfigurationVariable {
@@ -5004,7 +5075,7 @@ type ServerOptions struct {
 func (x *ServerOptions) Reset() {
 	*x = ServerOptions{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[59]
+		mi := &file_wundernode_config_proto_msgTypes[60]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5017,7 +5088,7 @@ func (x *ServerOptions) String() string {
 func (*ServerOptions) ProtoMessage() {}
 
 func (x *ServerOptions) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[59]
+	mi := &file_wundernode_config_proto_msgTypes[60]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5030,7 +5101,7 @@ func (x *ServerOptions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerOptions.ProtoReflect.Descriptor instead.
 func (*ServerOptions) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{59}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *ServerOptions) GetServerUrl() *ConfigurationVariable {
@@ -5070,7 +5141,7 @@ type WebhookConfiguration struct {
 func (x *WebhookConfiguration) Reset() {
 	*x = WebhookConfiguration{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[60]
+		mi := &file_wundernode_config_proto_msgTypes[61]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5083,7 +5154,7 @@ func (x *WebhookConfiguration) String() string {
 func (*WebhookConfiguration) ProtoMessage() {}
 
 func (x *WebhookConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[60]
+	mi := &file_wundernode_config_proto_msgTypes[61]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5096,7 +5167,7 @@ func (x *WebhookConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WebhookConfiguration.ProtoReflect.Descriptor instead.
 func (*WebhookConfiguration) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{60}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *WebhookConfiguration) GetName() string {
@@ -5134,7 +5205,7 @@ type WebhookVerifier struct {
 func (x *WebhookVerifier) Reset() {
 	*x = WebhookVerifier{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[61]
+		mi := &file_wundernode_config_proto_msgTypes[62]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5147,7 +5218,7 @@ func (x *WebhookVerifier) String() string {
 func (*WebhookVerifier) ProtoMessage() {}
 
 func (x *WebhookVerifier) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[61]
+	mi := &file_wundernode_config_proto_msgTypes[62]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5160,7 +5231,7 @@ func (x *WebhookVerifier) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WebhookVerifier.ProtoReflect.Descriptor instead.
 func (*WebhookVerifier) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{61}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *WebhookVerifier) GetKind() WebhookVerifierKind {
@@ -5225,7 +5296,7 @@ type CorsConfiguration struct {
 func (x *CorsConfiguration) Reset() {
 	*x = CorsConfiguration{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[62]
+		mi := &file_wundernode_config_proto_msgTypes[63]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5238,7 +5309,7 @@ func (x *CorsConfiguration) String() string {
 func (*CorsConfiguration) ProtoMessage() {}
 
 func (x *CorsConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[62]
+	mi := &file_wundernode_config_proto_msgTypes[63]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5251,7 +5322,7 @@ func (x *CorsConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CorsConfiguration.ProtoReflect.Descriptor instead.
 func (*CorsConfiguration) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{62}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *CorsConfiguration) GetAllowedOrigins() []*ConfigurationVariable {
@@ -5311,7 +5382,7 @@ type ConfigurationVariable struct {
 func (x *ConfigurationVariable) Reset() {
 	*x = ConfigurationVariable{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wundernode_config_proto_msgTypes[63]
+		mi := &file_wundernode_config_proto_msgTypes[64]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -5324,7 +5395,7 @@ func (x *ConfigurationVariable) String() string {
 func (*ConfigurationVariable) ProtoMessage() {}
 
 func (x *ConfigurationVariable) ProtoReflect() protoreflect.Message {
-	mi := &file_wundernode_config_proto_msgTypes[63]
+	mi := &file_wundernode_config_proto_msgTypes[64]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5337,7 +5408,7 @@ func (x *ConfigurationVariable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigurationVariable.ProtoReflect.Descriptor instead.
 func (*ConfigurationVariable) Descriptor() ([]byte, []int) {
-	return file_wundernode_config_proto_rawDescGZIP(), []int{63}
+	return file_wundernode_config_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *ConfigurationVariable) GetKind() ConfigurationVariableKind {
@@ -6176,25 +6247,45 @@ var file_wundernode_config_proto_rawDesc = []byte{
 	0x67, 0x67, 0x69, 0x6e, 0x67, 0x12, 0x31, 0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6e, 0x66,
 	0x69, 0x67, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c,
-	0x65, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x22, 0xa5, 0x02, 0x0a, 0x0b, 0x4e, 0x6f, 0x64,
-	0x65, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x35, 0x0a, 0x07, 0x6e, 0x6f, 0x64, 0x65,
-	0x55, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62,
+	0x65, 0x52, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x22, 0x87, 0x02, 0x0a, 0x10, 0x54, 0x65, 0x6c,
+	0x65, 0x6d, 0x65, 0x74, 0x72, 0x79, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x3d, 0x0a,
+	0x0b, 0x6f, 0x74, 0x65, 0x6c, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
+	0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52,
+	0x0b, 0x6f, 0x74, 0x65, 0x6c, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x64, 0x12, 0x57, 0x0a, 0x18,
+	0x6f, 0x74, 0x65, 0x6c, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x65, 0x72, 0x48, 0x74, 0x74, 0x70,
+	0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b,
+	0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x75, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x18, 0x6f, 0x74, 0x65,
+	0x6c, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x65, 0x72, 0x48, 0x74, 0x74, 0x70, 0x45, 0x6e, 0x64,
+	0x70, 0x6f, 0x69, 0x6e, 0x74, 0x12, 0x5b, 0x0a, 0x1a, 0x6f, 0x74, 0x65, 0x6c, 0x45, 0x78, 0x70,
+	0x6f, 0x72, 0x74, 0x65, 0x72, 0x4a, 0x61, 0x65, 0x67, 0x65, 0x72, 0x45, 0x6e, 0x64, 0x70, 0x6f,
+	0x69, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62,
 	0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61,
-	0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x07, 0x6e, 0x6f, 0x64, 0x65, 0x55, 0x72, 0x6c, 0x12,
-	0x41, 0x0a, 0x0d, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4e, 0x6f, 0x64, 0x65, 0x55, 0x72, 0x6c,
-	0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f,
-	0x6e, 0x66, 0x69, 0x67, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61,
-	0x62, 0x6c, 0x65, 0x52, 0x0d, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x4e, 0x6f, 0x64, 0x65, 0x55,
-	0x72, 0x6c, 0x12, 0x2d, 0x0a, 0x06, 0x6c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x15, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e,
-	0x65, 0x72, 0x4f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x06, 0x6c, 0x69, 0x73, 0x74, 0x65,
-	0x6e, 0x12, 0x29, 0x0a, 0x06, 0x6c, 0x6f, 0x67, 0x67, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x11, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x4c, 0x6f, 0x67,
-	0x67, 0x69, 0x6e, 0x67, 0x52, 0x06, 0x6c, 0x6f, 0x67, 0x67, 0x65, 0x72, 0x12, 0x42, 0x0a, 0x1c,
-	0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x54, 0x69,
-	0x6d, 0x65, 0x6f, 0x75, 0x74, 0x53, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73, 0x18, 0x05, 0x20, 0x01,
-	0x28, 0x03, 0x52, 0x1c, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x53, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73,
+	0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x1a, 0x6f, 0x74, 0x65, 0x6c, 0x45, 0x78, 0x70, 0x6f,
+	0x72, 0x74, 0x65, 0x72, 0x4a, 0x61, 0x65, 0x67, 0x65, 0x72, 0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69,
+	0x6e, 0x74, 0x22, 0xdb, 0x02, 0x0a, 0x0b, 0x4e, 0x6f, 0x64, 0x65, 0x4f, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x12, 0x35, 0x0a, 0x07, 0x6e, 0x6f, 0x64, 0x65, 0x55, 0x72, 0x6c, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69,
+	0x67, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65,
+	0x52, 0x07, 0x6e, 0x6f, 0x64, 0x65, 0x55, 0x72, 0x6c, 0x12, 0x41, 0x0a, 0x0d, 0x70, 0x75, 0x62,
+	0x6c, 0x69, 0x63, 0x4e, 0x6f, 0x64, 0x65, 0x55, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x75, 0x72,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x52, 0x0d, 0x70,
+	0x75, 0x62, 0x6c, 0x69, 0x63, 0x4e, 0x6f, 0x64, 0x65, 0x55, 0x72, 0x6c, 0x12, 0x2d, 0x0a, 0x06,
+	0x6c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x77,
+	0x67, 0x70, 0x62, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x65, 0x72, 0x4f, 0x70, 0x74, 0x69,
+	0x6f, 0x6e, 0x73, 0x52, 0x06, 0x6c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x12, 0x29, 0x0a, 0x06, 0x6c,
+	0x6f, 0x67, 0x67, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x77, 0x67,
+	0x70, 0x62, 0x2e, 0x4e, 0x6f, 0x64, 0x65, 0x4c, 0x6f, 0x67, 0x67, 0x69, 0x6e, 0x67, 0x52, 0x06,
+	0x6c, 0x6f, 0x67, 0x67, 0x65, 0x72, 0x12, 0x42, 0x0a, 0x1c, 0x64, 0x65, 0x66, 0x61, 0x75, 0x6c,
+	0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x6f, 0x75, 0x74, 0x53,
+	0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x1c, 0x64, 0x65,
+	0x66, 0x61, 0x75, 0x6c, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x54, 0x69, 0x6d, 0x65,
+	0x6f, 0x75, 0x74, 0x53, 0x65, 0x63, 0x6f, 0x6e, 0x64, 0x73, 0x12, 0x34, 0x0a, 0x09, 0x74, 0x65,
+	0x6c, 0x65, 0x6d, 0x65, 0x74, 0x72, 0x79, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x16, 0x2e,
+	0x77, 0x67, 0x70, 0x62, 0x2e, 0x54, 0x65, 0x6c, 0x65, 0x6d, 0x65, 0x74, 0x72, 0x79, 0x4f, 0x70,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x09, 0x74, 0x65, 0x6c, 0x65, 0x6d, 0x65, 0x74, 0x72, 0x79,
 	0x22, 0x42, 0x0a, 0x0d, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4c, 0x6f, 0x67, 0x67, 0x69, 0x6e,
 	0x67, 0x12, 0x31, 0x0a, 0x05, 0x6c, 0x65, 0x76, 0x65, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
 	0x32, 0x1b, 0x2e, 0x77, 0x67, 0x70, 0x62, 0x2e, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67, 0x75, 0x72,
@@ -6388,7 +6479,7 @@ func file_wundernode_config_proto_rawDescGZIP() []byte {
 }
 
 var file_wundernode_config_proto_enumTypes = make([]protoimpl.EnumInfo, 17)
-var file_wundernode_config_proto_msgTypes = make([]protoimpl.MessageInfo, 66)
+var file_wundernode_config_proto_msgTypes = make([]protoimpl.MessageInfo, 67)
 var file_wundernode_config_proto_goTypes = []interface{}{
 	(LogLevel)(0),                                            // 0: wgpb.LogLevel
 	(AuthProviderKind)(0),                                    // 1: wgpb.AuthProviderKind
@@ -6464,40 +6555,41 @@ var file_wundernode_config_proto_goTypes = []interface{}{
 	(*UserDefinedApi)(nil),                                   // 71: wgpb.UserDefinedApi
 	(*ListenerOptions)(nil),                                  // 72: wgpb.ListenerOptions
 	(*NodeLogging)(nil),                                      // 73: wgpb.NodeLogging
-	(*NodeOptions)(nil),                                      // 74: wgpb.NodeOptions
-	(*ServerLogging)(nil),                                    // 75: wgpb.ServerLogging
-	(*ServerOptions)(nil),                                    // 76: wgpb.ServerOptions
-	(*WebhookConfiguration)(nil),                             // 77: wgpb.WebhookConfiguration
-	(*WebhookVerifier)(nil),                                  // 78: wgpb.WebhookVerifier
-	(*CorsConfiguration)(nil),                                // 79: wgpb.CorsConfiguration
-	(*ConfigurationVariable)(nil),                            // 80: wgpb.ConfigurationVariable
-	nil,                                                      // 81: wgpb.FetchConfiguration.HeaderEntry
-	nil,                                                      // 82: wgpb.S3UploadConfiguration.UploadProfilesEntry
+	(*TelemetryOptions)(nil),                                 // 74: wgpb.TelemetryOptions
+	(*NodeOptions)(nil),                                      // 75: wgpb.NodeOptions
+	(*ServerLogging)(nil),                                    // 76: wgpb.ServerLogging
+	(*ServerOptions)(nil),                                    // 77: wgpb.ServerOptions
+	(*WebhookConfiguration)(nil),                             // 78: wgpb.WebhookConfiguration
+	(*WebhookVerifier)(nil),                                  // 79: wgpb.WebhookVerifier
+	(*CorsConfiguration)(nil),                                // 80: wgpb.CorsConfiguration
+	(*ConfigurationVariable)(nil),                            // 81: wgpb.ConfigurationVariable
+	nil,                                                      // 82: wgpb.FetchConfiguration.HeaderEntry
+	nil,                                                      // 83: wgpb.S3UploadConfiguration.UploadProfilesEntry
 }
 var file_wundernode_config_proto_depIdxs = []int32{
 	21,  // 0: wgpb.ApiAuthenticationConfig.cookieBased:type_name -> wgpb.CookieBasedAuthentication
 	20,  // 1: wgpb.ApiAuthenticationConfig.hooks:type_name -> wgpb.ApiAuthenticationHooks
 	18,  // 2: wgpb.ApiAuthenticationConfig.jwksBased:type_name -> wgpb.JwksBasedAuthentication
 	19,  // 3: wgpb.JwksBasedAuthentication.providers:type_name -> wgpb.JwksAuthProvider
-	80,  // 4: wgpb.JwksAuthProvider.jwksUrl:type_name -> wgpb.ConfigurationVariable
-	80,  // 5: wgpb.JwksAuthProvider.jwksJson:type_name -> wgpb.ConfigurationVariable
-	80,  // 6: wgpb.JwksAuthProvider.userInfoEndpoint:type_name -> wgpb.ConfigurationVariable
+	81,  // 4: wgpb.JwksAuthProvider.jwksUrl:type_name -> wgpb.ConfigurationVariable
+	81,  // 5: wgpb.JwksAuthProvider.jwksJson:type_name -> wgpb.ConfigurationVariable
+	81,  // 6: wgpb.JwksAuthProvider.userInfoEndpoint:type_name -> wgpb.ConfigurationVariable
 	22,  // 7: wgpb.CookieBasedAuthentication.providers:type_name -> wgpb.AuthProvider
-	80,  // 8: wgpb.CookieBasedAuthentication.authorizedRedirectUris:type_name -> wgpb.ConfigurationVariable
-	80,  // 9: wgpb.CookieBasedAuthentication.authorizedRedirectUriRegexes:type_name -> wgpb.ConfigurationVariable
-	80,  // 10: wgpb.CookieBasedAuthentication.hashKey:type_name -> wgpb.ConfigurationVariable
-	80,  // 11: wgpb.CookieBasedAuthentication.blockKey:type_name -> wgpb.ConfigurationVariable
-	80,  // 12: wgpb.CookieBasedAuthentication.csrfSecret:type_name -> wgpb.ConfigurationVariable
+	81,  // 8: wgpb.CookieBasedAuthentication.authorizedRedirectUris:type_name -> wgpb.ConfigurationVariable
+	81,  // 9: wgpb.CookieBasedAuthentication.authorizedRedirectUriRegexes:type_name -> wgpb.ConfigurationVariable
+	81,  // 10: wgpb.CookieBasedAuthentication.hashKey:type_name -> wgpb.ConfigurationVariable
+	81,  // 11: wgpb.CookieBasedAuthentication.blockKey:type_name -> wgpb.ConfigurationVariable
+	81,  // 12: wgpb.CookieBasedAuthentication.csrfSecret:type_name -> wgpb.ConfigurationVariable
 	1,   // 13: wgpb.AuthProvider.kind:type_name -> wgpb.AuthProviderKind
 	23,  // 14: wgpb.AuthProvider.githubConfig:type_name -> wgpb.GithubAuthProviderConfig
 	25,  // 15: wgpb.AuthProvider.oidcConfig:type_name -> wgpb.OpenIDConnectAuthProviderConfig
-	80,  // 16: wgpb.GithubAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
-	80,  // 17: wgpb.GithubAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
-	80,  // 18: wgpb.OpenIDConnectQueryParameter.name:type_name -> wgpb.ConfigurationVariable
-	80,  // 19: wgpb.OpenIDConnectQueryParameter.value:type_name -> wgpb.ConfigurationVariable
-	80,  // 20: wgpb.OpenIDConnectAuthProviderConfig.issuer:type_name -> wgpb.ConfigurationVariable
-	80,  // 21: wgpb.OpenIDConnectAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
-	80,  // 22: wgpb.OpenIDConnectAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
+	81,  // 16: wgpb.GithubAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
+	81,  // 17: wgpb.GithubAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
+	81,  // 18: wgpb.OpenIDConnectQueryParameter.name:type_name -> wgpb.ConfigurationVariable
+	81,  // 19: wgpb.OpenIDConnectQueryParameter.value:type_name -> wgpb.ConfigurationVariable
+	81,  // 20: wgpb.OpenIDConnectAuthProviderConfig.issuer:type_name -> wgpb.ConfigurationVariable
+	81,  // 21: wgpb.OpenIDConnectAuthProviderConfig.clientId:type_name -> wgpb.ConfigurationVariable
+	81,  // 22: wgpb.OpenIDConnectAuthProviderConfig.clientSecret:type_name -> wgpb.ConfigurationVariable
 	24,  // 23: wgpb.OpenIDConnectAuthProviderConfig.queryParameters:type_name -> wgpb.OpenIDConnectQueryParameter
 	2,   // 24: wgpb.ApiCacheConfig.kind:type_name -> wgpb.ApiCacheKind
 	27,  // 25: wgpb.ApiCacheConfig.inMemoryConfig:type_name -> wgpb.InMemoryCacheConfig
@@ -6540,73 +6632,77 @@ var file_wundernode_config_proto_depIdxs = []int32{
 	51,  // 62: wgpb.DataSourceCustom_GraphQL.federation:type_name -> wgpb.GraphQLFederationConfiguration
 	34,  // 63: wgpb.DataSourceCustom_GraphQL.hooksConfiguration:type_name -> wgpb.GraphQLDataSourceHooksConfiguration
 	65,  // 64: wgpb.DataSourceCustom_GraphQL.customScalarTypeFields:type_name -> wgpb.SingleTypeField
-	80,  // 65: wgpb.DataSourceCustom_Database.databaseURL:type_name -> wgpb.ConfigurationVariable
+	81,  // 65: wgpb.DataSourceCustom_Database.databaseURL:type_name -> wgpb.ConfigurationVariable
 	65,  // 66: wgpb.DataSourceCustom_Database.jsonTypeFields:type_name -> wgpb.SingleTypeField
-	80,  // 67: wgpb.DataSourceCustom_Static.data:type_name -> wgpb.ConfigurationVariable
-	80,  // 68: wgpb.GraphQLSubscriptionConfiguration.url:type_name -> wgpb.ConfigurationVariable
-	80,  // 69: wgpb.FetchConfiguration.url:type_name -> wgpb.ConfigurationVariable
+	81,  // 67: wgpb.DataSourceCustom_Static.data:type_name -> wgpb.ConfigurationVariable
+	81,  // 68: wgpb.GraphQLSubscriptionConfiguration.url:type_name -> wgpb.ConfigurationVariable
+	81,  // 69: wgpb.FetchConfiguration.url:type_name -> wgpb.ConfigurationVariable
 	12,  // 70: wgpb.FetchConfiguration.method:type_name -> wgpb.HTTPMethod
-	81,  // 71: wgpb.FetchConfiguration.header:type_name -> wgpb.FetchConfiguration.HeaderEntry
-	80,  // 72: wgpb.FetchConfiguration.body:type_name -> wgpb.ConfigurationVariable
+	82,  // 71: wgpb.FetchConfiguration.header:type_name -> wgpb.FetchConfiguration.HeaderEntry
+	81,  // 72: wgpb.FetchConfiguration.body:type_name -> wgpb.ConfigurationVariable
 	60,  // 73: wgpb.FetchConfiguration.query:type_name -> wgpb.URLQueryConfiguration
 	56,  // 74: wgpb.FetchConfiguration.upstreamAuthentication:type_name -> wgpb.UpstreamAuthentication
 	55,  // 75: wgpb.FetchConfiguration.mTLS:type_name -> wgpb.MTLSConfiguration
-	80,  // 76: wgpb.FetchConfiguration.baseUrl:type_name -> wgpb.ConfigurationVariable
-	80,  // 77: wgpb.FetchConfiguration.path:type_name -> wgpb.ConfigurationVariable
-	80,  // 78: wgpb.MTLSConfiguration.key:type_name -> wgpb.ConfigurationVariable
-	80,  // 79: wgpb.MTLSConfiguration.cert:type_name -> wgpb.ConfigurationVariable
+	81,  // 76: wgpb.FetchConfiguration.baseUrl:type_name -> wgpb.ConfigurationVariable
+	81,  // 77: wgpb.FetchConfiguration.path:type_name -> wgpb.ConfigurationVariable
+	81,  // 78: wgpb.MTLSConfiguration.key:type_name -> wgpb.ConfigurationVariable
+	81,  // 79: wgpb.MTLSConfiguration.cert:type_name -> wgpb.ConfigurationVariable
 	10,  // 80: wgpb.UpstreamAuthentication.kind:type_name -> wgpb.UpstreamAuthenticationKind
 	57,  // 81: wgpb.UpstreamAuthentication.jwtConfig:type_name -> wgpb.JwtUpstreamAuthenticationConfig
 	58,  // 82: wgpb.UpstreamAuthentication.jwtWithAccessTokenExchangeConfig:type_name -> wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange
-	80,  // 83: wgpb.JwtUpstreamAuthenticationConfig.secret:type_name -> wgpb.ConfigurationVariable
+	81,  // 83: wgpb.JwtUpstreamAuthenticationConfig.secret:type_name -> wgpb.ConfigurationVariable
 	11,  // 84: wgpb.JwtUpstreamAuthenticationConfig.signingMethod:type_name -> wgpb.SigningMethod
-	80,  // 85: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.secret:type_name -> wgpb.ConfigurationVariable
+	81,  // 85: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.secret:type_name -> wgpb.ConfigurationVariable
 	11,  // 86: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.signingMethod:type_name -> wgpb.SigningMethod
-	80,  // 87: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.accessTokenExchangeEndpoint:type_name -> wgpb.ConfigurationVariable
-	80,  // 88: wgpb.HTTPHeader.values:type_name -> wgpb.ConfigurationVariable
+	81,  // 87: wgpb.JwtUpstreamAuthenticationWithAccessTokenExchange.accessTokenExchangeEndpoint:type_name -> wgpb.ConfigurationVariable
+	81,  // 88: wgpb.HTTPHeader.values:type_name -> wgpb.ConfigurationVariable
 	66,  // 89: wgpb.FieldConfiguration.argumentsConfiguration:type_name -> wgpb.ArgumentConfiguration
 	13,  // 90: wgpb.ArgumentConfiguration.sourceType:type_name -> wgpb.ArgumentSource
 	14,  // 91: wgpb.ArgumentConfiguration.renderConfiguration:type_name -> wgpb.ArgumentRenderConfiguration
 	71,  // 92: wgpb.WunderGraphConfiguration.api:type_name -> wgpb.UserDefinedApi
 	68,  // 93: wgpb.S3UploadProfile.hooks:type_name -> wgpb.S3UploadProfileHooksConfiguration
-	80,  // 94: wgpb.S3UploadConfiguration.endpoint:type_name -> wgpb.ConfigurationVariable
-	80,  // 95: wgpb.S3UploadConfiguration.accessKeyID:type_name -> wgpb.ConfigurationVariable
-	80,  // 96: wgpb.S3UploadConfiguration.secretAccessKey:type_name -> wgpb.ConfigurationVariable
-	80,  // 97: wgpb.S3UploadConfiguration.bucketName:type_name -> wgpb.ConfigurationVariable
-	80,  // 98: wgpb.S3UploadConfiguration.bucketLocation:type_name -> wgpb.ConfigurationVariable
-	82,  // 99: wgpb.S3UploadConfiguration.uploadProfiles:type_name -> wgpb.S3UploadConfiguration.UploadProfilesEntry
+	81,  // 94: wgpb.S3UploadConfiguration.endpoint:type_name -> wgpb.ConfigurationVariable
+	81,  // 95: wgpb.S3UploadConfiguration.accessKeyID:type_name -> wgpb.ConfigurationVariable
+	81,  // 96: wgpb.S3UploadConfiguration.secretAccessKey:type_name -> wgpb.ConfigurationVariable
+	81,  // 97: wgpb.S3UploadConfiguration.bucketName:type_name -> wgpb.ConfigurationVariable
+	81,  // 98: wgpb.S3UploadConfiguration.bucketLocation:type_name -> wgpb.ConfigurationVariable
+	83,  // 99: wgpb.S3UploadConfiguration.uploadProfiles:type_name -> wgpb.S3UploadConfiguration.UploadProfilesEntry
 	44,  // 100: wgpb.UserDefinedApi.engineConfiguration:type_name -> wgpb.EngineConfiguration
 	29,  // 101: wgpb.UserDefinedApi.operations:type_name -> wgpb.Operation
-	79,  // 102: wgpb.UserDefinedApi.corsConfiguration:type_name -> wgpb.CorsConfiguration
+	80,  // 102: wgpb.UserDefinedApi.corsConfiguration:type_name -> wgpb.CorsConfiguration
 	17,  // 103: wgpb.UserDefinedApi.authenticationConfig:type_name -> wgpb.ApiAuthenticationConfig
 	70,  // 104: wgpb.UserDefinedApi.s3UploadConfiguration:type_name -> wgpb.S3UploadConfiguration
-	80,  // 105: wgpb.UserDefinedApi.allowedHostNames:type_name -> wgpb.ConfigurationVariable
-	77,  // 106: wgpb.UserDefinedApi.webhooks:type_name -> wgpb.WebhookConfiguration
-	76,  // 107: wgpb.UserDefinedApi.serverOptions:type_name -> wgpb.ServerOptions
-	74,  // 108: wgpb.UserDefinedApi.nodeOptions:type_name -> wgpb.NodeOptions
-	80,  // 109: wgpb.ListenerOptions.host:type_name -> wgpb.ConfigurationVariable
-	80,  // 110: wgpb.ListenerOptions.port:type_name -> wgpb.ConfigurationVariable
-	80,  // 111: wgpb.NodeLogging.level:type_name -> wgpb.ConfigurationVariable
-	80,  // 112: wgpb.NodeOptions.nodeUrl:type_name -> wgpb.ConfigurationVariable
-	80,  // 113: wgpb.NodeOptions.publicNodeUrl:type_name -> wgpb.ConfigurationVariable
-	72,  // 114: wgpb.NodeOptions.listen:type_name -> wgpb.ListenerOptions
-	73,  // 115: wgpb.NodeOptions.logger:type_name -> wgpb.NodeLogging
-	80,  // 116: wgpb.ServerLogging.level:type_name -> wgpb.ConfigurationVariable
-	80,  // 117: wgpb.ServerOptions.serverUrl:type_name -> wgpb.ConfigurationVariable
-	72,  // 118: wgpb.ServerOptions.listen:type_name -> wgpb.ListenerOptions
-	75,  // 119: wgpb.ServerOptions.logger:type_name -> wgpb.ServerLogging
-	78,  // 120: wgpb.WebhookConfiguration.verifier:type_name -> wgpb.WebhookVerifier
-	15,  // 121: wgpb.WebhookVerifier.kind:type_name -> wgpb.WebhookVerifierKind
-	80,  // 122: wgpb.WebhookVerifier.secret:type_name -> wgpb.ConfigurationVariable
-	80,  // 123: wgpb.CorsConfiguration.allowedOrigins:type_name -> wgpb.ConfigurationVariable
-	16,  // 124: wgpb.ConfigurationVariable.kind:type_name -> wgpb.ConfigurationVariableKind
-	61,  // 125: wgpb.FetchConfiguration.HeaderEntry.value:type_name -> wgpb.HTTPHeader
-	69,  // 126: wgpb.S3UploadConfiguration.UploadProfilesEntry.value:type_name -> wgpb.S3UploadProfile
-	127, // [127:127] is the sub-list for method output_type
-	127, // [127:127] is the sub-list for method input_type
-	127, // [127:127] is the sub-list for extension type_name
-	127, // [127:127] is the sub-list for extension extendee
-	0,   // [0:127] is the sub-list for field type_name
+	81,  // 105: wgpb.UserDefinedApi.allowedHostNames:type_name -> wgpb.ConfigurationVariable
+	78,  // 106: wgpb.UserDefinedApi.webhooks:type_name -> wgpb.WebhookConfiguration
+	77,  // 107: wgpb.UserDefinedApi.serverOptions:type_name -> wgpb.ServerOptions
+	75,  // 108: wgpb.UserDefinedApi.nodeOptions:type_name -> wgpb.NodeOptions
+	81,  // 109: wgpb.ListenerOptions.host:type_name -> wgpb.ConfigurationVariable
+	81,  // 110: wgpb.ListenerOptions.port:type_name -> wgpb.ConfigurationVariable
+	81,  // 111: wgpb.NodeLogging.level:type_name -> wgpb.ConfigurationVariable
+	81,  // 112: wgpb.TelemetryOptions.otelEnabled:type_name -> wgpb.ConfigurationVariable
+	81,  // 113: wgpb.TelemetryOptions.otelExporterHttpEndpoint:type_name -> wgpb.ConfigurationVariable
+	81,  // 114: wgpb.TelemetryOptions.otelExporterJaegerEndpoint:type_name -> wgpb.ConfigurationVariable
+	81,  // 115: wgpb.NodeOptions.nodeUrl:type_name -> wgpb.ConfigurationVariable
+	81,  // 116: wgpb.NodeOptions.publicNodeUrl:type_name -> wgpb.ConfigurationVariable
+	72,  // 117: wgpb.NodeOptions.listen:type_name -> wgpb.ListenerOptions
+	73,  // 118: wgpb.NodeOptions.logger:type_name -> wgpb.NodeLogging
+	74,  // 119: wgpb.NodeOptions.telemetry:type_name -> wgpb.TelemetryOptions
+	81,  // 120: wgpb.ServerLogging.level:type_name -> wgpb.ConfigurationVariable
+	81,  // 121: wgpb.ServerOptions.serverUrl:type_name -> wgpb.ConfigurationVariable
+	72,  // 122: wgpb.ServerOptions.listen:type_name -> wgpb.ListenerOptions
+	76,  // 123: wgpb.ServerOptions.logger:type_name -> wgpb.ServerLogging
+	79,  // 124: wgpb.WebhookConfiguration.verifier:type_name -> wgpb.WebhookVerifier
+	15,  // 125: wgpb.WebhookVerifier.kind:type_name -> wgpb.WebhookVerifierKind
+	81,  // 126: wgpb.WebhookVerifier.secret:type_name -> wgpb.ConfigurationVariable
+	81,  // 127: wgpb.CorsConfiguration.allowedOrigins:type_name -> wgpb.ConfigurationVariable
+	16,  // 128: wgpb.ConfigurationVariable.kind:type_name -> wgpb.ConfigurationVariableKind
+	61,  // 129: wgpb.FetchConfiguration.HeaderEntry.value:type_name -> wgpb.HTTPHeader
+	69,  // 130: wgpb.S3UploadConfiguration.UploadProfilesEntry.value:type_name -> wgpb.S3UploadProfile
+	131, // [131:131] is the sub-list for method output_type
+	131, // [131:131] is the sub-list for method input_type
+	131, // [131:131] is the sub-list for extension type_name
+	131, // [131:131] is the sub-list for extension extendee
+	0,   // [0:131] is the sub-list for field type_name
 }
 
 func init() { file_wundernode_config_proto_init() }
@@ -7300,7 +7396,7 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[57].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NodeOptions); i {
+			switch v := v.(*TelemetryOptions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7312,7 +7408,7 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[58].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ServerLogging); i {
+			switch v := v.(*NodeOptions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7324,7 +7420,7 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[59].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ServerOptions); i {
+			switch v := v.(*ServerLogging); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7336,7 +7432,7 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[60].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WebhookConfiguration); i {
+			switch v := v.(*ServerOptions); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7348,7 +7444,7 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[61].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WebhookVerifier); i {
+			switch v := v.(*WebhookConfiguration); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7360,7 +7456,7 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[62].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CorsConfiguration); i {
+			switch v := v.(*WebhookVerifier); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -7372,6 +7468,18 @@ func file_wundernode_config_proto_init() {
 			}
 		}
 		file_wundernode_config_proto_msgTypes[63].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CorsConfiguration); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_wundernode_config_proto_msgTypes[64].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ConfigurationVariable); i {
 			case 0:
 				return &v.state
@@ -7391,7 +7499,7 @@ func file_wundernode_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_wundernode_config_proto_rawDesc,
 			NumEnums:      17,
-			NumMessages:   66,
+			NumMessages:   67,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -12,6 +12,7 @@ require (
 	github.com/docker/go-units v0.5.0
 	github.com/evanw/esbuild v0.16.10
 	github.com/fatih/color v1.13.0
+	github.com/felixge/httpsnoop v1.0.3
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.0
 	github.com/go-cmd/cmd v1.4.1
@@ -47,9 +48,9 @@ require (
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
 	github.com/wundergraph/graphql-go-tools v1.61.1
-	go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux v0.40.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.40.0
 	go.opentelemetry.io/otel v1.14.0
+	go.opentelemetry.io/otel/exporters/jaeger v1.14.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.14.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.14.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.14.0
@@ -78,7 +79,6 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.2.0 // indirect
 	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/gin-gonic/gin v1.8.2 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -154,7 +154,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20230203172020-98cc5a0785f9 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230227214838-9b19f0bdc514 // indirect

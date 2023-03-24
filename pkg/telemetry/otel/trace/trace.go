@@ -2,62 +2,34 @@ package trace
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/gorilla/mux"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	sdkresource "go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
-func HTTPClientTransporter(rt http.RoundTripper) http.RoundTripper {
-	propagators := propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	)
-
-	return otelhttp.NewTransport(
-		rt,
-		otelhttp.WithTracerProvider(otel.GetTracerProvider()),
-		otelhttp.WithPropagators(propagators),
-	)
+type TracerProviderConfig struct {
+	Endpoint       string
+	JaegerEndpoint string
+	ServiceName    string
+	Enabled        bool
 }
 
-func MuxMiddleware(service string) mux.MiddlewareFunc {
-	propagators := propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{},
-		propagation.Baggage{},
-	)
-
-	return otelmux.Middleware(
-		service,
-		otelmux.WithTracerProvider(otel.GetTracerProvider()),
-		otelmux.WithPropagators(propagators),
-	)
+type TracerProvider struct {
+	Provider trace.TracerProvider
 }
 
-type ProviderConfig struct {
-	Endpoint    string
-	ServiceName string
-	Enabled     bool
-}
-
-type Provider struct {
-	provider trace.TracerProvider
-}
-
-func NewProvider(ctx context.Context, config *ProviderConfig) (*Provider, error) {
+func NewTracerProvider(ctx context.Context, config *TracerProviderConfig) (*TracerProvider, error) {
 	if !config.Enabled {
-		return &Provider{
-			provider: trace.NewNoopTracerProvider(),
+		return &TracerProvider{
+			Provider: trace.NewNoopTracerProvider(),
 		}, nil
 	}
 
@@ -67,6 +39,7 @@ func NewProvider(ctx context.Context, config *ProviderConfig) (*Provider, error)
 	}
 
 	p := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(sdkresource.NewWithAttributes(
 			semconv.SchemaURL,
@@ -74,16 +47,21 @@ func NewProvider(ctx context.Context, config *ProviderConfig) (*Provider, error)
 		)),
 	)
 
-	otel.SetTracerProvider(p)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{},
 		propagation.Baggage{},
 	))
 
-	return &Provider{provider: p}, nil
+	return &TracerProvider{Provider: p}, nil
 }
 
-func configureExporter(ctx context.Context, config *ProviderConfig) (sdktrace.SpanExporter, error) {
+func NewNoopTracerProvider() *TracerProvider {
+	return &TracerProvider{
+		Provider: trace.NewNoopTracerProvider(),
+	}
+}
+
+func configureExporter(ctx context.Context, config *TracerProviderConfig) (sdktrace.SpanExporter, error) {
 	switch {
 	case config.Endpoint != "":
 		client := otlptracehttp.NewClient(
@@ -92,6 +70,15 @@ func configureExporter(ctx context.Context, config *ProviderConfig) (sdktrace.Sp
 		)
 
 		return otlptrace.New(ctx, client)
+	case config.JaegerEndpoint != "":
+		exp, err := jaeger.New(
+			jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(config.JaegerEndpoint)),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return exp, nil
 	default:
 		exp, err := stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
@@ -102,8 +89,8 @@ func configureExporter(ctx context.Context, config *ProviderConfig) (sdktrace.Sp
 	}
 }
 
-func (p Provider) Shutdown(ctx context.Context) error {
-	if prv, ok := p.provider.(*sdktrace.TracerProvider); ok {
+func (p TracerProvider) Shutdown(ctx context.Context) error {
+	if prv, ok := p.Provider.(*sdktrace.TracerProvider); ok {
 		return prv.Shutdown(ctx)
 	}
 

@@ -68,6 +68,7 @@ type Node struct {
 	apiClient      *fasthttp.Client
 	options        options
 	WundergraphDir string
+	tracerProvider *trace.TracerProvider
 }
 
 type options struct {
@@ -243,6 +244,12 @@ func (n *Node) StartBlocking(opts ...Option) error {
 }
 
 func (n *Node) Shutdown(ctx context.Context) error {
+	if n.tracerProvider != nil {
+		if err := n.tracerProvider.Shutdown(ctx); err != nil {
+			n.log.Error("failed to shutdown otel tracer provider", zap.Error(err))
+		}
+	}
+
 	if n.server != nil {
 		return n.server.Shutdown(ctx)
 	}
@@ -261,6 +268,12 @@ func (n *Node) Close() error {
 			return err
 		}
 		n.server = nil
+	}
+	if n.tracerProvider != nil {
+		if err := n.tracerProvider.Shutdown(context.Background()); err != nil {
+			return err
+		}
+		n.tracerProvider = nil
 	}
 	return nil
 }
@@ -378,8 +391,21 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		New(n.options.prettyLogging, n.options.enableDebugMode, logLevel).
 		With(zap.String("component", "@wundergraph/node"))
 
+	tracer, err := trace.NewTracerProvider(n.ctx, &trace.TracerProviderConfig{
+		Endpoint:       nodeConfig.Api.Options.OpenTelemetry.OtelExporterHTTPEndpoint,
+		JaegerEndpoint: nodeConfig.Api.Options.OpenTelemetry.OtelExporterJaegerEndpoint,
+		ServiceName:    "wundergraph-node",
+		Enabled:        nodeConfig.Api.Options.OpenTelemetry.OtelEnabled,
+	})
+	if err != nil {
+		n.log.Error("failed to initialize otel tracer provider", zap.Error(err))
+		return err
+	}
+
+	n.tracerProvider = tracer
+
 	router := mux.NewRouter()
-	router.Use(trace.MuxMiddleware("wundergraph/node"))
+	router.Use(trace.MuxMiddleware("wundergraph-node", tracer.Provider))
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
 
@@ -424,9 +450,9 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
-	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log, tracer)
 
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
+	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode, tracer)
 
 	n.log.Debug("http.Client.Transport",
 		zap.Bool("enableDebugMode", n.options.enableDebugMode),

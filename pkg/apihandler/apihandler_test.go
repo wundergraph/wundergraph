@@ -26,6 +26,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
+	"github.com/wundergraph/wundergraph/pkg/telemetry/otel/trace"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -369,7 +370,7 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop(), trace.NewNoopTracerProvider())
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
 		Client:        hooksClient,
 		Authenticator: hooksAuthenticator,
@@ -450,7 +451,7 @@ func TestQueryHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop())
+	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop(), trace.NewNoopTracerProvider())
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
 		Client:        hooksClient,
 		Authenticator: hooksAuthenticator,
@@ -529,7 +530,7 @@ func TestFunctionsHandler_Default(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop(), trace.NewNoopTracerProvider())
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -594,7 +595,7 @@ func TestFunctionsHandler_Live(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop(), trace.NewNoopTracerProvider())
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -660,7 +661,7 @@ func TestFunctionsHandler_Live_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_QUERY,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop(), trace.NewNoopTracerProvider())
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -731,7 +732,7 @@ func TestFunctionsHandler_Subscription(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop(), trace.NewNoopTracerProvider())
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -800,7 +801,7 @@ func TestFunctionsHandler_Subscription_JSONPatch(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop(), trace.NewNoopTracerProvider())
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,
@@ -870,7 +871,7 @@ func TestFunctionsHandler_Subscription_JSONPatch_SSE(t *testing.T) {
 		Name:          "test",
 		OperationType: wgpb.OperationType_SUBSCRIPTION,
 	}
-	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop())
+	hooksClient := hooks.NewClient(fakeHookServer.URL, zap.NewNop(), trace.NewNoopTracerProvider())
 	handler := &FunctionsHandler{
 		log:                  zap.NewNop(),
 		operation:            operation,

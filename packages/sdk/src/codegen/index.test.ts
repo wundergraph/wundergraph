@@ -80,6 +80,29 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							placeholderVariableName: '',
 						},
 					},
+					telemetry: {
+						otelEnabled: {
+							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+							environmentVariableName: '',
+							environmentVariableDefaultValue: 'false',
+							placeholderVariableName: '',
+							staticVariableContent: '',
+						},
+						otelExporterHttpEndpoint: {
+							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+						otelExporterJaegerEndpoint: {
+							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
+							staticVariableContent: '',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 					defaultRequestTimeoutSeconds: 0,
 				},
 				serverOptions: {

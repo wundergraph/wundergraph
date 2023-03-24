@@ -49,6 +49,12 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
 	}
 
+	telemetry := &apihandler.Telemetry{
+		OtelEnabled:                loadvariable.Bool(graphConfig.Api.NodeOptions.Telemetry.OtelEnabled),
+		OtelExporterHTTPEndpoint:   loadvariable.String(graphConfig.Api.NodeOptions.Telemetry.OtelExporterHttpEndpoint),
+		OtelExporterJaegerEndpoint: loadvariable.String(graphConfig.Api.NodeOptions.Telemetry.OtelExporterJaegerEndpoint),
+	}
+
 	defaultRequestTimeout := defaultTimeout
 	if graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds > 0 {
 		defaultRequestTimeout = time.Duration(graphConfig.Api.NodeOptions.DefaultRequestTimeoutSeconds) * time.Second
@@ -95,6 +101,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},
+				OpenTelemetry:  telemetry,
 				DefaultTimeout: defaultRequestTimeout,
 			},
 		},

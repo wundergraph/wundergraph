@@ -12,6 +12,9 @@ export enum WgEnv {
 	ServerUrl = 'WG_SERVER_URL',
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
+	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
+	OtelExporterJaegerEndpoint = 'WG_OTEL_EXPORTER_JAEGER_ENDPOINT',
+	OtelEnabled = 'WG_OTEL_ENABLED',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -30,6 +33,11 @@ const DefaultNodeOptions = {
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
+	telemetry: {
+		otelEnabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
+		otelExporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, ''),
+		otelExporterJaegerEndpoint: new EnvironmentVariable(WgEnv.OtelExporterJaegerEndpoint, ''),
+	},
 	defaultRequestTimeoutSeconds: 0,
 };
 
@@ -43,6 +51,18 @@ export interface ResolvedListenOptions {
 	port: ConfigurationVariable;
 }
 
+export interface TelemetryOptions {
+	otelEnabled: InputVariable<boolean>;
+	otelExporterHttpEndpoint?: InputVariable;
+	otelExporterJaegerEndpoint?: InputVariable;
+}
+
+export interface ResolvedTelemetryOptions {
+	otelEnabled: ConfigurationVariable;
+	otelExporterHttpEndpoint: ConfigurationVariable;
+	otelExporterJaegerEndpoint: ConfigurationVariable;
+}
+
 export interface NodeOptions {
 	nodeUrl?: InputVariable;
 	publicNodeUrl?: InputVariable;
@@ -50,6 +70,7 @@ export interface NodeOptions {
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
+	telemetry?: TelemetryOptions;
 	/**
 	 * Default timeout for network requests, in seconds.
 	 *
@@ -69,6 +90,7 @@ export interface ResolvedNodeOptions {
 	logger: {
 		level: ConfigurationVariable;
 	};
+	telemetry: ResolvedTelemetryOptions;
 	defaultRequestTimeoutSeconds: number;
 }
 
@@ -92,6 +114,13 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
+				telemetry: {
+					otelEnabled: options?.telemetry?.otelEnabled || DefaultNodeOptions.telemetry.otelEnabled,
+					otelExporterHttpEndpoint:
+						options?.telemetry?.otelExporterHttpEndpoint || DefaultNodeOptions.telemetry.otelExporterHttpEndpoint,
+					otelExporterJaegerEndpoint:
+						options?.telemetry?.otelExporterJaegerEndpoint || DefaultNodeOptions.telemetry.otelExporterJaegerEndpoint,
+				},
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions?.defaultRequestTimeoutSeconds,
 		  };
@@ -105,6 +134,11 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		},
 		logger: {
 			level: mapInputVariable(nodeOptions.logger.level),
+		},
+		telemetry: {
+			otelEnabled: mapInputVariable<boolean>(nodeOptions.telemetry.otelEnabled),
+			otelExporterHttpEndpoint: mapInputVariable(nodeOptions.telemetry.otelExporterHttpEndpoint),
+			otelExporterJaegerEndpoint: mapInputVariable(nodeOptions.telemetry.otelExporterJaegerEndpoint),
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
 	};

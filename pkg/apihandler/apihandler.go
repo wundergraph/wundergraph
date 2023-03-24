@@ -40,6 +40,7 @@ import (
 	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/wundergraph/graphql-go-tools/pkg/lexer/literal"
 	"github.com/wundergraph/graphql-go-tools/pkg/operationreport"
+
 	"github.com/wundergraph/wundergraph/internal/unsafebytes"
 	"github.com/wundergraph/wundergraph/pkg/apicache"
 	"github.com/wundergraph/wundergraph/pkg/authentication"
@@ -794,8 +795,6 @@ var (
 
 func (h *GraphQLHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
-	span := trace.SpanFromContext(r.Context())
-	defer span.End()
 
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
@@ -1275,7 +1274,6 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 	span := trace.SpanFromContext(r.Context())
-	defer span.End()
 	trace.AddSpanTags(
 		span,
 		map[string]string{
@@ -1631,7 +1629,6 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 	span := trace.SpanFromContext(r.Context())
-	defer span.End()
 	trace.AddSpanTags(
 		span,
 		map[string]string{
@@ -1741,7 +1738,6 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 	span := trace.SpanFromContext(r.Context())
-	defer span.End()
 	trace.AddSpanTags(
 		span,
 		map[string]string{
@@ -2248,8 +2244,6 @@ type FunctionsHandler struct {
 
 func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	span := trace.SpanFromContext(r.Context())
-	defer span.End()
-
 	trace.AddSpanTags(
 		span,
 		map[string]string{

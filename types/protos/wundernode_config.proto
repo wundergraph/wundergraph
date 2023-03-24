@@ -520,12 +520,19 @@ message NodeLogging {
 	ConfigurationVariable level = 1;
 }
 
+message TelemetryOptions {
+	ConfigurationVariable otelEnabled = 1;
+	ConfigurationVariable otelExporterHttpEndpoint = 2;
+	ConfigurationVariable otelExporterJaegerEndpoint = 3;
+}
+
 message NodeOptions {
 	ConfigurationVariable nodeUrl = 1;
 	ConfigurationVariable publicNodeUrl = 4;
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
 	int64 defaultRequestTimeoutSeconds = 5;
+	TelemetryOptions telemetry = 6;
 }
 
 message ServerLogging {
