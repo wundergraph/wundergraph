@@ -73,7 +73,7 @@ import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
-import * as os from 'os';
+import os from 'os';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
