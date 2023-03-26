@@ -197,11 +197,12 @@ export const introspectWithCache = async <Introspection extends IntrospectionCon
 
 	/**
 	 * This section is only executed when WG_DATA_SOURCE_POLLING_MODE is set to 'true'
-	 * The return value is ignorable because we don't use it.
+	 * The return value is ignorable because we don't use it (polling runs as a separate process).
 	 */
 	if (WG_DATA_SOURCE_POLLING_MODE) {
-		const defaultPollingInterval =
-			dataSource === 'localFilesystem' ? 0 : WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS;
+		// For sources from the local network, use the default polling interval, since they're more
+		// likely to change. Otherwise, use polling only when it's explicitly enabled.
+		const defaultPollingInterval = dataSource === 'localNetwork' ? WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS : 0;
 		const pollingInterval = introspection.introspection?.pollingIntervalSeconds ?? defaultPollingInterval;
 		if (pollingInterval > 0) {
 			await introspectInInterval(pollingInterval, configuration, introspection, cache, generator);

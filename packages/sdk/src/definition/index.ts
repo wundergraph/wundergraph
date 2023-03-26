@@ -19,7 +19,7 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphql } from './graphql-introspection';
+import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
 import { openApi } from './openapi-introspection';
@@ -433,7 +433,7 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 	const { schema, ...rest } = introspection;
 	const resolvedSchema = (await schema) as GraphQLSchema;
 
-	return introspectGraphql({
+	return introspectGraphqlWithCache({
 		...rest,
 		internal: true,
 		loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
@@ -442,7 +442,7 @@ export const introspectGraphqlServer = async (introspection: GraphQLServerConfig
 
 export const introspect = {
 	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): Promise<GraphQLApi> => {
-		return introspectGraphql(introspection);
+		return introspectGraphqlWithCache(introspection);
 	},
 	postgresql: introspectPostgresql,
 	mysql: introspectMySQL,
