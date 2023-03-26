@@ -32,7 +32,7 @@ export type Mutations = {
 export type Subscriptions = {
 	Countdown: {
 		input: { from: number };
-		response: { data?: any; error?: ResponseError };
+		response: { data?: { count: number }; error?: ResponseError };
 		requiresAuthentication: false;
 	};
 };
