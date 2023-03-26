@@ -12,6 +12,7 @@ export interface PetInput {
 export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
 
 export type JSONObject = { [key: string]: JSONValue };
+import type { GraphQLError } from "@wundergraph/sdk/client";
 
 export interface CreatePetInput {
 	petInput: PetInput;
@@ -38,6 +39,7 @@ export interface PetInput {
 export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
 
 export type JSONObject = { [key: string]: JSONValue };
+import type { GraphQLError } from "@wundergraph/sdk/client";
 
 export interface MyReviewsResponse {
 	data: MyReviewsResponseData;
