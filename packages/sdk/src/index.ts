@@ -14,13 +14,14 @@ export type {
 } from './configure/operations';
 export type { GraphQLOperation } from './graphql/operations';
 export type { Template, TemplateOutputFile } from './codegen/index';
+export type { LoggerLevel } from './configure/options';
+
 export { default as templates } from './codegen/templates';
 export { introspect, createMockApi, Api } from './definition';
 export { configureWunderGraphApplication } from './configure';
 export { configureWunderGraphOperations, enableAuth, enableCaching, disableAuth } from './configure/operations';
 export { default as cors } from './cors';
 export { authProviders } from './configure/authentication';
-export type { LoggerLevel } from './configure/options';
 export { WgEnv } from './configure/options';
 export {
 	BaseTypeScriptDataModel,

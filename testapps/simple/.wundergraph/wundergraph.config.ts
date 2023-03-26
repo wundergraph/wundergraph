@@ -2,9 +2,14 @@ import { configureWunderGraphApplication, cors, EnvironmentVariable, introspect,
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
+const weather = introspect.graphql({
+	apiNamespace: 'weather',
+	url: 'https://weather-api.wundergraph.com/',
+});
+
 // configureWunderGraph emits the configuration
 configureWunderGraphApplication({
-	apis: [],
+	apis: [weather],
 	server,
 	operations,
 	codeGenerators: [

@@ -12,7 +12,6 @@ export type {
 	QueryRequestOptions,
 	MutationRequestOptions,
 	SubscriptionRequestOptions,
-	GraphQLError,
 	ClientConfig,
 	CreateClientConfig,
 	JSONObject,
@@ -29,11 +28,8 @@ export type {
 	ExtractProfileName,
 	ExtractMeta,
 } from './types';
-
 export type { UploadValidationOptions } from './client';
 export { Client } from './client';
 
-export type { ClientResponseError } from './ClientResponseError';
-export { GraphQLResponseError } from './GraphQLResponseError';
-export { InputValidationError } from './InputValidationError';
-export { ResponseError } from './ResponseError';
+export type { GraphQLError, GraphQLErrorLocation, ClientOperationErrors } from './errors';
+export { OperationError, ResponseError, AuthorizationError, InputValidationError } from './errors';

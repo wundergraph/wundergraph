@@ -176,12 +176,13 @@ const { fileKeys } = await client.uploadFiles({
 controller.abort();
 ```
 
-## Error handling
+## Type-safe error handling
 
 ### Operations
 
-Query and mutation errors are returned as a `GraphQLResponseError` object. By default, the first error specifiy the error message but you can access all GraphQL errors through the `errors` property.
-Network errors and non 2xx responses are returned as a `ResponseError` object and contain the status code as `statusCode` property.
+Query, Subscription and mutation errors are returned as a `ResponseError` object. By default, the first error specify the error message but you can access all errors through the `errors` property.
+Every error contain the HTTP status code as `statusCode` property. Errors in GraphQL aren't type-safe. Due to this, we recommend to use union types to identify the error on the client side.
+If you want to create customer errors for TypeScript operations, you can use the `code` property to identify the error on the client side.
 
 ```ts
 const { data, error } = await client.query({
@@ -191,10 +192,44 @@ const { data, error } = await client.query({
   },
 });
 
-if (error instanceof GraphQLResponseError) {
-  error.errors[0].location;
-} else if (error instanceof ResponseError) {
+if (error instanceof ResponseError) {
+  // handle server or network error
+  error.errors;
   error.statusCode;
+  error.code;
+}
+
+if (createProjectStatus?.__typename === 'cloud_ProjectCreationStatusFailure') {
+  // handle error the GraphQL way
+}
+```
+
+#### Base Errors
+
+For common errors like 401, 400, 500, we provide built in Error classes that can be used to identify the error more conveniently. Those errors are available to GraphQL and TypeScript operations.
+
+```ts
+import { AuthorizationError, InputValidationError } from '@wundergraph/sdk/client';
+
+if (error instanceof AuthorizationError) {
+}
+if (error instanceof InputValidationError) {
+}
+```
+
+#### TypeScript Operations
+
+All known and custom errors have a `code` property that can be used to identify the error. This is useful if you want to work with custom errors in a type-safe way.
+
+```ts
+const { data, error } = await client.query({
+  operationName: 'users/get',
+});
+
+if (error?.code === 'AuthorizationError') {
+  // handle error
+} else if (error?.code === 'OperationNotFoundError') {
+  // handle error
 }
 ```
 

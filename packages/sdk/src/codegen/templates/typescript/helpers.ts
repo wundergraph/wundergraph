@@ -36,6 +36,7 @@ export const operations = (application: ResolvedApplication, operationType: Oper
 				hasInternalInput: hasInternalInput(op),
 				liveQuery: !!op.LiveQuery?.enable,
 				requiresAuthentication: op.AuthenticationConfig.required,
+				isTypeScriptOperation: op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS,
 			};
 		});
 

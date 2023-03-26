@@ -1,5 +1,5 @@
-import { ClientResponseError } from './ClientResponseError';
 import type { RequiredKeysOf, SetRequired } from 'type-fest';
+import { GraphQLError, ResponseError } from './errors';
 
 export type Headers = { [key: string]: string };
 
@@ -17,7 +17,7 @@ export interface OperationMetadata {
 export interface ClientOperation {
 	input?: object;
 	liveQuery?: boolean;
-	data: any;
+	response: ClientResponse;
 	requiresAuthentication: boolean;
 }
 
@@ -60,31 +60,19 @@ export interface ClientConfig {
 	csrfEnabled?: boolean;
 }
 
-type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata';
+type PrivateConfigProperties = 'applicationHash' | 'sdkVersion' | 'operationMetadata' | 'operationErrorTypes';
 export type CreateClientConfig = Partial<Omit<ClientConfig, PrivateConfigProperties>>;
 
-export type SubscriptionEventHandler<Data = any> = (resp: ClientResponse<Data>) => void;
+export type SubscriptionEventHandler<Data = any, ResponseError = any> = (
+	resp: ClientResponse<Data, ResponseError>
+) => void;
 
-export interface GraphQLErrorLocation {
-	line: number;
-	column: number;
+export interface ClientResponse<Data = any, Error = any> {
+	data?: Data;
+	error?: Error;
 }
 
-export interface GraphQLError {
-	message: string;
-	location?: ReadonlyArray<GraphQLErrorLocation>;
-	path?: ReadonlyArray<string | number>;
-}
-
-export interface ClientResponse<ResponseData = any> {
-	data?: ResponseData;
-	error?: ClientResponseError;
-}
-
-export interface GraphQLResponse<
-	ResponseData extends { [key: string]: any } = any,
-	ResponseError extends GraphQLError = GraphQLError
-> {
+export interface GraphQLResponse<ResponseData extends JSONObject = any, ResponseError extends GraphQLError = any> {
 	data?: ResponseData;
 	errors?: ResponseError[];
 }

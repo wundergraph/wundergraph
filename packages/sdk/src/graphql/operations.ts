@@ -38,6 +38,7 @@ import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
 import * as fs from 'fs';
 import process from 'node:process';
+import { OperationError } from '../client';
 
 export interface GraphQLOperation {
 	Name: string;
@@ -90,6 +91,10 @@ export interface GraphQLOperation {
 	};
 	Internal: boolean;
 	PostResolveTransformations?: PostResolveTransformation[];
+}
+
+export interface TypeScriptOperation extends GraphQLOperation {
+	Errors?: OperationError[];
 }
 
 type PostResolveTransformation = PostResolveGetTransformation;
