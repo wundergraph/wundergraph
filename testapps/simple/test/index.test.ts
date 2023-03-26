@@ -1,6 +1,4 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
-import { OperationNotFound } from '../.wundergraph/generated/ts-operation-errors';
-import { AuthorizationError, ResponseError } from '@wundergraph/sdk/client';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
 const wg = createTestServer();

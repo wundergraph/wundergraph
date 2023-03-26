@@ -211,6 +211,8 @@ export class BaseTypeScriptDataModel implements Template {
 				});
 		});
 
+		const graphQLTypeImport = "import type { GraphQLError } from '@wundergraph/sdk/client';";
+
 		const models = Array.from(definitions.entries())
 			.map(([definitionName, definition]) => JSONSchemaToTypescriptInterface(definition, definitionName, false))
 			.join('\n\n');
@@ -222,7 +224,7 @@ export class BaseTypeScriptDataModel implements Template {
 		return Promise.resolve([
 			{
 				path: 'models.ts',
-				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n'),
+				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n' + graphQLTypeImport),
 				header: doNotEditHeader,
 			},
 		]);
