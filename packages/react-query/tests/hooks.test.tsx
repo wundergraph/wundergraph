@@ -19,7 +19,7 @@ export type Queries = {
 export type Mutations = {
 	SetNameWithoutAuth: {
 		input: { name: string };
-		response: { data?: any; error?: ResponseError };
+		response: { data?: { id: string }; error?: ResponseError };
 		requiresAuthentication: false;
 	};
 	SetName: {
