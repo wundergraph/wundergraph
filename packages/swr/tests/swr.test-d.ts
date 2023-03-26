@@ -103,7 +103,7 @@ const {
 expectType<Operations['mutations']['CreateUser']['response']['data']>(mutData);
 expectType<ResponseError | undefined>(mutError);
 
-expectType<Promise<any>>(
+expectType<Promise<{ name: string } | undefined>>(
 	trigger({
 		name: 'John Doe',
 	})

@@ -169,7 +169,7 @@ describe('SWR - useQuery', () => {
 		renderWithConfig(<Page />);
 
 		await waitFor(() => {
-			screen.getByText('Invalid response from server');
+			screen.getByText('Bad Request');
 		});
 
 		scope.done();
@@ -373,7 +373,7 @@ describe('SWR - useMutation', () => {
 		screen.getByText(/true/);
 
 		await waitFor(() => {
-			screen.getByText(/Invalid response from server/);
+			screen.getByText(/An error/);
 		});
 
 		expect(() => csrfScope.done()).toThrow(); // should not be called

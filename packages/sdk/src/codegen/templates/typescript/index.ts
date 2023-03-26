@@ -252,7 +252,6 @@ const typescriptFunctionsImports = (generationConfig: CodeGenerationConfig): str
 	const relImport = (op: GraphQLOperation) => path.join(relBasePath, 'operations', op.PathName).replace(/\\/g, '/');
 	return (
 		ops.map((op) => `import type function_${op.Name} from '${relImport(op)}';\n`).join('') +
-		"import type { GraphQLError } from '@wundergraph/sdk/client';\n" +
 		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
 		'import type { OperationErrors } from "./ts-operation-errors";\n' +
 		'\n'

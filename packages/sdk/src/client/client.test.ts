@@ -279,7 +279,7 @@ describe('Client', () => {
 			expect(resp.error).toBeInstanceOf(ResponseError);
 			expect(resp.error.code).toBe('ResponseError');
 			expect(resp.error.statusCode).toBe(400);
-			expect(resp.error.message).toBe('Invalid response from server');
+			expect(resp.error.message).toBe('Some error text');
 			expect(resp.error.errors).toBeUndefined();
 			expect(resp.data).toBeUndefined();
 		});
@@ -527,7 +527,7 @@ describe('Client', () => {
 		expect(resp.error).toBeInstanceOf(ResponseError);
 		expect(resp.error.code).toBe('ResponseError');
 		expect(resp.error.statusCode).toBe(400);
-		expect(resp.error.message).toBe('Invalid response from server');
+		expect(resp.error.message).toBe('Error text');
 		expect(resp.error.errors).toBeUndefined();
 		expect(resp.data).toBeUndefined();
 	});
