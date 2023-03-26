@@ -115,7 +115,7 @@ export interface ValidationResponseJSON {
  */
 export class InputValidationError extends ResponseError<'InputValidationError'> {
 	public errors: ValidationError[];
-	constructor(opts: { json: ValidationResponseJSON; message?: string; cause?: Error; statusCode: number }) {
+	constructor(opts: { message?: string; cause?: Error; statusCode: number; errors: ValidationError[] }) {
 		super({
 			code: 'InputValidationError',
 			message: opts.message ?? 'Validation error',
@@ -124,7 +124,7 @@ export class InputValidationError extends ResponseError<'InputValidationError'> 
 		});
 
 		this.name = 'InputValidationError';
-		this.errors = opts.json.errors;
+		this.errors = opts.errors;
 	}
 }
 

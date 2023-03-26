@@ -1,8 +1,7 @@
-import { Client, ClientResponseError, OperationsDefinition, UploadResponse, User } from '@wundergraph/sdk/client';
+import { Client, ResponseError, OperationsDefinition, UploadResponse, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { SWRResponse } from 'swr';
 import { createHooks } from '../src';
-import { SWRMutationResponse } from 'swr/mutation';
 
 export type UserRole = 'admin' | 'user';
 
@@ -16,7 +15,7 @@ type Queries = {
 		input: {
 			city: string;
 		};
-		data: any;
+		response: { data?: { temperature: number }; error?: ResponseError };
 		requiresAuthentication: boolean;
 	};
 };
@@ -26,7 +25,7 @@ type Mutations = {
 		input: {
 			name: string;
 		};
-		data: any;
+		response: { data?: { name: string }; error?: ResponseError };
 		requiresAuthentication: boolean;
 	};
 };
@@ -36,7 +35,7 @@ type Subscriptions = {
 		input: {
 			forCity: string;
 		};
-		data: any;
+		response: { data?: { temperature: number }; error?: ResponseError };
 		requiresAuthentication: boolean;
 	};
 };
@@ -78,8 +77,8 @@ const { data: queryData, error: queryError } = useQuery({
 	},
 });
 
-expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<ClientResponseError | undefined>(queryError);
+expectType<Operations['queries']['Weather']['response']['data']>(queryData);
+expectType<ResponseError | undefined>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
@@ -90,8 +89,8 @@ const { data: subData, error: subError } = useSubscription({
 	},
 });
 
-expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<ClientResponseError | undefined>(subError);
+expectType<Operations['subscriptions']['Weather']['response']['data']>(subData);
+expectType<ResponseError | undefined>(subError);
 
 const {
 	data: mutData,
@@ -101,8 +100,8 @@ const {
 	operationName: 'CreateUser',
 });
 
-expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<ClientResponseError | undefined>(mutError);
+expectType<Operations['mutations']['CreateUser']['response']['data']>(mutData);
+expectType<ResponseError | undefined>(mutError);
 
 expectType<Promise<any>>(
 	trigger({
@@ -110,8 +109,8 @@ expectType<Promise<any>>(
 	})
 );
 
-expectType<SWRResponse<User<UserRole>, ClientResponseError>>(useUser());
-expectType<SWRResponse<User<UserRole>, ClientResponseError>>(
+expectType<SWRResponse<User<UserRole>, ResponseError>>(useUser());
+expectType<SWRResponse<User<UserRole>, ResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,

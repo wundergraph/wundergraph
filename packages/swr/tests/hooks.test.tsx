@@ -7,7 +7,7 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 
 import { createHooks } from '../src';
-import { InputValidationError } from '@wundergraph/sdk/dist/client/InputValidationError';
+import { InputValidationError } from '@wundergraph/sdk/client';
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
@@ -156,8 +156,7 @@ describe('SWR - useQuery', () => {
 	});
 
 	it('returns a ResponseError if the response is not 2xx and has a plaintext body', async () => {
-		const errorMessage = 'Computer says no.';
-		const scope = nockQuery().once().reply(400, errorMessage);
+		const scope = nockQuery().once().reply(400, 'Bad Request');
 
 		function Page() {
 			const { error } = useQuery({
@@ -170,7 +169,7 @@ describe('SWR - useQuery', () => {
 		renderWithConfig(<Page />);
 
 		await waitFor(() => {
-			screen.getByText(errorMessage);
+			screen.getByText('Invalid response from server');
 		});
 
 		scope.done();
@@ -190,7 +189,7 @@ describe('SWR - useQuery', () => {
 		renderWithConfig(<Page />);
 
 		await waitFor(() => {
-			screen.getByText('Response is not OK');
+			screen.getByText('Invalid response from server');
 		});
 
 		scope.done();
@@ -374,7 +373,7 @@ describe('SWR - useMutation', () => {
 		screen.getByText(/true/);
 
 		await waitFor(() => {
-			screen.getByText(/An error/);
+			screen.getByText(/Invalid response from server/);
 		});
 
 		expect(() => csrfScope.done()).toThrow(); // should not be called
@@ -408,7 +407,7 @@ describe('SWR - useMutation', () => {
 		screen.getByText(/true/);
 
 		await waitFor(() => {
-			screen.getByText('Response is not OK');
+			screen.getByText('Invalid response from server');
 		});
 
 		expect(() => csrfScope.done()).toThrow(); // should not be called

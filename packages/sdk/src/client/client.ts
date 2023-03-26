@@ -16,7 +16,7 @@ import {
 } from './types';
 import { serialize } from '../utils';
 import { applyPatch } from 'fast-json-patch';
-import { ResponseError, InputValidationError, AuthorizationError } from './errors';
+import { ResponseError, InputValidationError, AuthorizationError, ValidationResponseJSON } from './errors';
 
 // We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 
@@ -156,9 +156,10 @@ export class Client {
 				case 401:
 					return new AuthorizationError(message);
 				case 400:
+					const validationResult: ValidationResponseJSON = json;
 					return new InputValidationError({
-						json,
-						message: message,
+						errors: validationResult.errors,
+						message: validationResult.message,
 						statusCode: response.status,
 					});
 				default:
