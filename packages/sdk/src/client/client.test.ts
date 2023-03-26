@@ -261,7 +261,7 @@ describe('Client', () => {
 			expect(resp.error).toBeInstanceOf(InputValidationError);
 			expect(resp.error.code).toBe('InputValidationError');
 			expect(resp.error.statusCode).toBe(400);
-			expect(resp.error.message).toBe('some error message');
+			expect(resp.error.message).toBe('Bad Request: Invalid input');
 			expect(resp.error.errors).toEqual([{ invalidValue: {}, message: 'some error message', propertyPath: '/' }]);
 			expect(resp.data).toBeUndefined();
 		});
@@ -493,7 +493,7 @@ describe('Client', () => {
 		expect(resp.error).toBeInstanceOf(ResponseError);
 		expect(resp.error.code).toBe('InputValidationError');
 		expect(resp.error.statusCode).toBe(400);
-		expect(resp.error.message).toBe('some error message');
+		expect(resp.error.message).toBe('Bad Request: Invalid input');
 		expect(resp.error.errors).toEqual([{ invalidValue: {}, message: 'some error message', propertyPath: '/' }]);
 		expect(resp.data).toBeUndefined();
 	});
@@ -548,7 +548,7 @@ describe('Client', () => {
 			.post('/operations/CreateWeather')
 			.query({ wg_api_hash: '123' })
 			.once()
-			.reply(401, {});
+			.reply(401, 'Not authorized');
 
 		const resp = await client.mutate({
 			operationName: 'CreateWeather',

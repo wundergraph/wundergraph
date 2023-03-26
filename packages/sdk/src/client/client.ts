@@ -149,9 +149,22 @@ export class Client {
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
 	private async handleClientResponseError(response: globalThis.Response): Promise<ResponseError> {
 		try {
-			const text = await response.text();
-			const json = JSON.parse(text);
-			let message: string = json.errors[0]?.message || text;
+			// In some cases, the server does not return JSON to communicate errors.
+			// TODO: We should align it to always return JSON
+			if (!response.headers.get('Content-Type')?.includes('application/json')) {
+				switch (response.status) {
+					case 401:
+						return new AuthorizationError();
+					default:
+						return new ResponseError({
+							statusCode: response.status,
+							message: 'Invalid response from server',
+						});
+				}
+			}
+
+			const json = await response.json();
+			let message: string = json.errors[0]?.message;
 			switch (response.status) {
 				case 401:
 					return new AuthorizationError(message);
@@ -170,11 +183,9 @@ export class Client {
 						message: message,
 					});
 			}
-		} catch {
-			if (response.status === 401) {
-				return new AuthorizationError();
-			}
+		} catch (e: any) {
 			return new ResponseError({
+				cause: e,
 				statusCode: response.status,
 				message: 'Invalid response from server',
 			});
