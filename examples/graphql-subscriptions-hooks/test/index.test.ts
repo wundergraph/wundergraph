@@ -24,8 +24,8 @@ describe('test ws subscription', () => {
 			}
 		);
 
-		expect(result.error).toBeFalsy();
-		expect(result.data?.ws_countdown).toBe(data?.ws_countdown);
-		expect(result.data?.ws_countdown).toBe(8);
+		expect(result?.error).toBeFalsy();
+		expect(result?.data?.ws_countdown).toBe(data?.ws_countdown);
+		expect(result?.data?.ws_countdown).toBe(8);
 	});
 });

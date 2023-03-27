@@ -20,9 +20,9 @@ describe('test chat subscription', () => {
 			}
 		);
 
-		expect(result.error).toBeFalsy();
+		expect(result?.error).toBeFalsy();
 		expect(result?.data?.chat_messageAdded.id.length).toBeGreaterThan(0);
-		expect(result.data?.chat_messageAdded.id).toBe(data?.chat_messageAdded.id);
-		expect(result.data?.chat_messageAdded.text).toBe(data?.chat_messageAdded.text);
+		expect(result?.data?.chat_messageAdded.id).toBe(data?.chat_messageAdded.id);
+		expect(result?.data?.chat_messageAdded.text).toBe(data?.chat_messageAdded.text);
 	});
 });

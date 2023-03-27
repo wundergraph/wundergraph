@@ -20,7 +20,7 @@ describe('test sse subscription', () => {
 				data = resp.data;
 			}
 		);
-		expect(result.error).toBeFalsy();
-		expect(result.data?.sse_greetings).toBe(data?.sse_greetings);
+		expect(result?.error).toBeFalsy();
+		expect(result?.data?.sse_greetings).toBe(data?.sse_greetings);
 	});
 });

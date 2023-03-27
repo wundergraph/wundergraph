@@ -21,7 +21,7 @@ describe('test counter subscription', () => {
 			}
 		);
 
-		expect(result.error).toBeFalsy();
-		expect(result.data?.counter_countdown).toBe(data?.counter_countdown);
+		expect(result?.error).toBeFalsy();
+		expect(result?.data?.counter_countdown).toBe(data?.counter_countdown);
 	});
 });

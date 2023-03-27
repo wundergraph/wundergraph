@@ -20,8 +20,8 @@ describe('test ws subscription', () => {
 			}
 		);
 
-		expect(result.error).toBeFalsy();
-		expect(result.data?.ws_greetings).toBe('Hi');
-		expect(result.data?.ws_greetings).toBe(data?.ws_greetings);
+		expect(result?.error).toBeFalsy();
+		expect(result?.data?.ws_greetings).toBe('Hi');
+		expect(result?.data?.ws_greetings).toBe(data?.ws_greetings);
 	});
 });
