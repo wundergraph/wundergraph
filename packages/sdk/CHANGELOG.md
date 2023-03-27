@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.140.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.139.0...@wundergraph/sdk@0.140.0) (2023-03-23)
+
+### Features
+
+* add raw sql support ([#745](https://github.com/wundergraph/wundergraph/issues/745)) ([081ef23](https://github.com/wundergraph/wundergraph/commit/081ef23ca4e63a12344b24cfed858a1fb1a0d5b8)) (@jensneuse)
+* new local cache implementation ([#727](https://github.com/wundergraph/wundergraph/issues/727)) ([111decc](https://github.com/wundergraph/wundergraph/commit/111decc1cdba258ce9936cfbe396511536b48ee2)) (@fiam)
+
+### Bug Fixes
+
+* data corruption when polling is enabled for federation sources ([#753](https://github.com/wundergraph/wundergraph/issues/753)) ([daa8a8c](https://github.com/wundergraph/wundergraph/commit/daa8a8c386ab9ad9bfd707f351815d0976d26ae4)) (@fiam)
+
 ## [0.139.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.138.0...@wundergraph/sdk@0.139.0) (2023-03-16)
 
 ### Features

@@ -27,3 +27,9 @@ curl -N http://localhost:9991/operations/Ws
 ```shell
  curl -N http://localhost:9991/operations/Ws\?wg_sse\=true
 ```
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="graphql-ws-subscriptions" /%}

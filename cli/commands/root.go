@@ -1,10 +1,9 @@
 package commands
 
 import (
-	"errors"
+	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/fatih/color"
@@ -39,8 +38,6 @@ var (
 	log                   *zap.Logger
 	cmdDurationMetric     telemetry.DurationMetric
 	_wunderGraphDirConfig string
-	disableCache          bool
-	clearCache            bool
 
 	rootFlags helpers.RootFlags
 
@@ -99,17 +96,6 @@ var rootCmd = &cobra.Command{
 			log.Debug("env file successfully loaded",
 				zap.String("file", DotEnvFile),
 			)
-		}
-
-		if clearCache {
-			wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
-			if err != nil {
-				return err
-			}
-			cacheDir := filepath.Join(wunderGraphDir, "cache")
-			if err := os.RemoveAll(cacheDir); err != nil && !errors.Is(err, os.ErrNotExist) {
-				return err
-			}
 		}
 
 		// Check if we want to track telemetry for this command
@@ -227,6 +213,51 @@ func wunderctlBinaryPath() string {
 	return path
 }
 
+// commonScriptEnv returns environment variables that all script invocations should use
+func commonScriptEnv(wunderGraphDir string) []string {
+	cacheDir, err := helpers.LocalWunderGraphCacheDir(wunderGraphDir)
+	if err != nil {
+		log.Warn("could not determine cache directory", zap.Error(err))
+	}
+	return []string{
+		fmt.Sprintf("WUNDERGRAPH_CACHE_DIR=%s", cacheDir),
+		fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
+		fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
+	}
+}
+
+// cacheConfigurationEnv returns the environment variables required to configure the
+// cache in the SDK side
+func cacheConfigurationEnv(isCacheEnabled bool) []string {
+	return []string{
+		fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", isCacheEnabled),
+	}
+}
+
+type configScriptEnvOptions struct {
+	WunderGraphDir                string
+	RootFlags                     helpers.RootFlags
+	EnableCache                   bool
+	DefaultPollingIntervalSeconds int
+	FirstRun                      bool
+}
+
+// configScriptEnv returns the environment variables that scripts running the SDK configuration
+// must use
+func configScriptEnv(opts configScriptEnvOptions) []string {
+	var env []string
+	env = append(env, helpers.CliEnv(opts.RootFlags)...)
+	env = append(env, commonScriptEnv(opts.WunderGraphDir)...)
+	env = append(env, cacheConfigurationEnv(opts.EnableCache)...)
+	env = append(env, "WG_PRETTY_GRAPHQL_VALIDATION_ERRORS=true")
+	env = append(env, fmt.Sprintf("WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS=%d", opts.DefaultPollingIntervalSeconds))
+	if opts.FirstRun {
+		// WG_INTROSPECTION_CACHE_SKIP=true causes the cache to try to load the remote data on the first run
+		env = append(env, "WG_INTROSPECTION_CACHE_SKIP=true")
+	}
+	return env
+}
+
 func init() {
 	_, isTelemetryDisabled := os.LookupEnv("WG_TELEMETRY_DISABLED")
 	_, isTelemetryDebugEnabled := os.LookupEnv("WG_TELEMETRY_DEBUG")
@@ -247,7 +278,5 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
-	rootCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
-	rootCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches during startup")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
 }

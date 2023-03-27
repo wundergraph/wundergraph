@@ -9,7 +9,6 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -51,22 +50,22 @@ var generateCmd = &cobra.Command{
 
 		configOutFile := filepath.Join("generated", "bundle", "config.js")
 
+		// XXX: generate never uses the cache
+		scriptEnv := configScriptEnv(configScriptEnvOptions{
+			RootFlags:      rootFlags,
+			WunderGraphDir: wunderGraphDir,
+		})
+		// Run scripts in prod mode
+		scriptEnv = append(scriptEnv, "NODE_ENV=production", "WG_THROW_ON_OPERATION_LOADING_ERROR=true")
+		scriptEnv = append(scriptEnv, fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline))
+
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
 			Executable:    "node",
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
-			ScriptEnv: append(
-				helpers.CliEnv(rootFlags),
-				// Run scripts in prod mode
-				"NODE_ENV=production",
-				"WG_THROW_ON_OPERATION_LOADING_ERROR=true",
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
-				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
-				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
-			),
+			ScriptEnv:     scriptEnv,
 		})
 		defer func() {
 			log.Debug("Stopping config-runner")

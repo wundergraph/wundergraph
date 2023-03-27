@@ -1,5 +1,5 @@
 import { wunderctlExecAsync } from '../wunderctlexec';
-import { InputValueDefinitionNode, parse, parseType, print, TypeNode, visit } from 'graphql';
+import { FieldDefinitionNode, InputValueDefinitionNode, Kind, parse, parseType, print, TypeNode, visit } from 'graphql';
 import { DatabaseIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
 import { DMMF } from '@prisma/generator-helper';
@@ -181,6 +181,7 @@ export const cleanupPrismaSchema = (
 	if (introspection.schemaExtension) {
 		result.graphql_schema = result.graphql_schema + ' ' + introspection.schemaExtension;
 	}
+	result.graphql_schema = result.graphql_schema + rowSchema;
 
 	let insideCustomScalarType = false;
 	let insideCustomScalarField = false;
@@ -199,6 +200,24 @@ export const cleanupPrismaSchema = (
 						currentTypeName = node.name.value;
 					}
 				});
+				if (node.name.value === 'Mutation') {
+					// we don't like the prisma schema using just JSON, so we rewrite the fields
+					return {
+						...node,
+						fields: [
+							...(node.fields || []).filter((f) => f.name.value !== 'queryRaw' && f.name.value !== 'executeRaw'),
+							executeRawField(),
+						],
+					};
+				}
+				if (node.name.value === 'Query') {
+					// adding raw query fields to query instead of mutation (as prisma does)
+					// we're rewriting it later back to Mutation in the go engine
+					return {
+						...node,
+						fields: [...(node.fields || []), queryRawRowField(), queryRawJsonField()],
+					};
+				}
 			},
 			leave: () => {
 				insideCustomScalarType = false;
@@ -349,6 +368,196 @@ export const cleanupPrismaSchema = (
 	});
 	return print(cleaned);
 };
+
+const queryRawRowField = (): FieldDefinitionNode => ({
+	kind: Kind.FIELD_DEFINITION,
+	name: {
+		kind: Kind.NAME,
+		value: 'queryRaw',
+	},
+	type: {
+		kind: Kind.NON_NULL_TYPE,
+		type: {
+			kind: Kind.LIST_TYPE,
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: '_Row',
+					},
+				},
+			},
+		},
+	},
+	arguments: [
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'query',
+			},
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'parameters',
+			},
+			type: {
+				kind: Kind.LIST_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+	],
+});
+
+const queryRawJsonField = (): FieldDefinitionNode => ({
+	kind: Kind.FIELD_DEFINITION,
+	name: {
+		kind: Kind.NAME,
+		value: 'queryRawJSON',
+	},
+	type: {
+		kind: Kind.NAMED_TYPE,
+		name: {
+			kind: Kind.NAME,
+			value: 'JSON',
+		},
+	},
+	arguments: [
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'query',
+			},
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'parameters',
+			},
+			type: {
+				kind: Kind.LIST_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+	],
+});
+
+const executeRawField = (): FieldDefinitionNode => ({
+	kind: Kind.FIELD_DEFINITION,
+	name: {
+		kind: Kind.NAME,
+		value: 'executeRaw',
+	},
+	type: {
+		kind: Kind.NON_NULL_TYPE,
+		type: {
+			kind: Kind.NAMED_TYPE,
+			name: {
+				kind: Kind.NAME,
+				value: 'Int',
+			},
+		},
+	},
+	arguments: [
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'query',
+			},
+			type: {
+				kind: Kind.NON_NULL_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+		{
+			kind: Kind.INPUT_VALUE_DEFINITION,
+			name: {
+				kind: Kind.NAME,
+				value: 'parameters',
+			},
+			type: {
+				kind: Kind.LIST_TYPE,
+				type: {
+					kind: Kind.NAMED_TYPE,
+					name: {
+						kind: Kind.NAME,
+						value: 'String',
+					},
+				},
+			},
+		},
+	],
+});
+
+const rowSchema = `
+
+type _Row {
+	ID: ID!
+	Int: Int!
+	Float: Float!
+	String: String!
+	Boolean: Boolean!
+	DateTime: DateTime!
+	JSON: JSON!
+	Object: _Row!
+	Array: [_Row!]!
+	OptionalID: ID
+	OptionalInt: Int
+	OptionalFloat: Float
+	OptionalString: String
+	OptionalBoolean: Boolean
+	OptionalDateTime: DateTime
+	OptionalJSON: JSON
+	OptionalObject: _Row
+	OptionalArray: [_Row!]
+}
+
+`;
 
 const unwrapNamedType = (node: TypeNode): NamedTypeNode => {
 	if (node.kind === 'NamedType') {
