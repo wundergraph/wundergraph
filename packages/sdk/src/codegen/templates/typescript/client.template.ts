@@ -16,6 +16,8 @@ import {
 	SubscriptionEventHandler,
 	FetchUserRequestOptions,
 	UploadValidationOptions,
+	QueryRequestOptions,
+  MutationRequestOptions,
 	ExtractProfileName,
 	ExtractMeta,
 	GraphQLError
@@ -111,14 +113,14 @@ export class WunderGraphClient extends Client {
 		OperationName extends Extract<keyof Operations['queries'], string>,
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
     Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response']
-	>(options: OperationName extends string ? OperationRequestOptions<OperationName, Input> : OperationRequestOptions) {
+	>(options: OperationName extends string ? QueryRequestOptions<OperationName, Input> : OperationRequestOptions) {
 		return super.query<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
 	mutate<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
     Response extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response']
-	>(options: OperationName extends string ? OperationRequestOptions<OperationName, Input> : OperationRequestOptions) {
+	>(options: OperationName extends string ? MutationRequestOptions<OperationName, Input> : OperationRequestOptions) {
 		return super.mutate<OperationRequestOptions, Response['data'], Response['error']>(options);
 	}
 	subscribe<

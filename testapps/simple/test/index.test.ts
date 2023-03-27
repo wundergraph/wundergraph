@@ -43,6 +43,7 @@ describe('functions', () => {
 
 		const { data, error } = await client.query({
 			operationName: 'Weather',
+			input: { forCity: 'Berlin' },
 		});
 
 		expect(error).toBeUndefined();
