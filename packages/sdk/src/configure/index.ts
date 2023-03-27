@@ -1329,7 +1329,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 		Name: file.operation_name,
 		PathName: file.api_mount_path,
 		Content: '',
-		Errors: implementation.errors || [],
+		Errors: implementation.errors?.map((E) => new E()) || [],
 		OperationType:
 			implementation.type === 'query'
 				? OperationType.QUERY
@@ -1497,7 +1497,7 @@ const applyNodeJsOperationOverrides = (
 		};
 	}
 	if (overrides.errors) {
-		operation.Errors = overrides.errors;
+		operation.Errors = overrides.errors.map((E) => new E());
 	}
 	if (overrides.rbac) {
 		operation.AuthorizationConfig = {

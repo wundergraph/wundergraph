@@ -20,6 +20,7 @@ type MockError = {
 };
 
 const mockErrorJson = {
+	code: 'InputValidationError',
 	message: 'Bad Request: Invalid input',
 	errors: [
 		{
@@ -195,7 +196,7 @@ describe('SWR - useQuery', () => {
 		scope.done();
 	});
 
-	it('returns an InputValidationError if the response is not 2xx and has a json body', async () => {
+	it('returns an InputValidationError if the response is 400 and has error code "InputValidationError"', async () => {
 		const scope = nockQuery().once().reply(400, mockErrorJson);
 
 		function Page() {

@@ -52,7 +52,7 @@ Here's a simple example:
 
 ```typescript
 // .wundergraph/operations/math/add.ts
-import { createOperation, z, AuthorizationError } from '../generated/wundergraph.factory';
+import { createOperation, z } from '../generated/wundergraph.factory';
 
 export default createOperation.query({
   input: z.object({
@@ -67,10 +67,7 @@ export default createOperation.query({
 });
 ```
 
-Import `createOperation` (the factory function), `z` (the zod schema builder) and `AuthorizationError` (the error class for authorization errors).
-Then, make a default export with the result of calling `createOperation.query` or `createOperation.mutation` or `createOperation.subscription`,
-depending on what kind of operation you want to create.
-
+Import `createOperation` to create a query, mutation or subscription. `z` is a schema builder from the `zod` package to define your input schema or response schema.
 Thanks to using zod to define the input schema, we're automatically creating a JSON Schema for input validation and the `input` argument to the handler function is type-safe.
 
 The `wunderctl up` command will automatically pick up the new operation, compile (transpile) the function and add it to the router of your WunderGraph Application.
@@ -90,5 +87,85 @@ This will return the following JSON:
   "data": {
     "add": 3
   }
+}
+```
+
+## Error Handling
+
+TypeScript Operations can throw errors, which will be handled by the hooks server. The error will be logged and the client will receive an error in the form of:
+
+```json
+{
+  "errors": [
+    {
+      "code": "InternalError",
+      "message": "Something went wrong"
+    }
+  ]
+}
+```
+
+### Custom Error
+
+You can also create custom errors, which will be available to the client in the `code` field of the error. This allows you to have typed errors on the client side, which can be used to handle errors in a more granular way.
+Custom errors are defined by extending the `OperationError` class and must be passed to the `errors` field of the handler definition for code-generation. The `statusCode` field is optional and defines the final response status code (defaults to `500`).
+
+```typescript
+// .wundergraph/operations/math/divide.ts
+import { OperationError } from '@wundergraph/sdk/operations';
+import { createOperation, z } from '../generated/wundergraph.factory';
+
+export class DividedByZero extends OperationError {
+  statusCode = 400;
+  code = 'DividedByZero' as const;
+  message = 'Cannot divide by zero';
+}
+
+export default createOperation.query({
+  errors: [NotFoundErr],
+  input: z.object({
+    a: z.number(),
+    b: z.number(),
+  }),
+  handler: async ({ input }) => {
+    if (input.b === 0) {
+      throw new DividedByZero();
+    }
+    return {
+      add: input.a / input.b,
+    };
+  },
+});
+```
+
+Now, when we call this operation with `b` being `0`, we'll get the following error:
+
+```json
+{
+  "errors": [
+    {
+      "code": "DividedByZero",
+      "message": "Cannot divide by zero"
+    }
+  ]
+}
+```
+
+#### Handle Errors on the Client
+
+The generated clients are aware of the error codes, so you can handle them in a type-safe way:
+
+```typescript
+const { data, error } = await client.query({
+  operationName: 'users/get',
+});
+
+if (error?.code === 'AuthorizationError') {
+  // handle error
+} else if (error?.code === 'DividedByZero') {
+  // handle error
+} else {
+  // log unhandled error
+  console.error(error);
 }
 ```

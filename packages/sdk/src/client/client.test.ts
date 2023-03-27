@@ -33,6 +33,7 @@ const newClient = (overrides?: Partial<ClientConfig>) => {
 
 describe('Client', () => {
 	const mockErrorJson = {
+		code: 'InputValidationError',
 		message: 'Bad Request: Invalid input',
 		errors: [
 			{

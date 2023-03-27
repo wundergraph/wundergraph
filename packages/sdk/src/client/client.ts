@@ -16,7 +16,13 @@ import {
 } from './types';
 import { serialize } from '../utils';
 import { applyPatch } from 'fast-json-patch';
-import { ResponseError, InputValidationError, AuthorizationError, ValidationResponseJSON } from './errors';
+import {
+	ResponseError,
+	InputValidationError,
+	AuthorizationError,
+	ValidationResponseJSON,
+	ClientOperationErrorCodes,
+} from './errors';
 
 // We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 
@@ -149,32 +155,35 @@ export class Client {
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
 	private async handleClientResponseError(response: globalThis.Response): Promise<ResponseError> {
 		// In some cases, the server does not return JSON to communicate errors.
-		// TODO: We should align it to always return JSON
+		// TODO: We should align it to always return JSON and in a consistent format.
 
 		if (response.status === 401) {
 			return new AuthorizationError();
 		}
 
 		const text = await response.text();
+
+		console.log('text', text);
 		try {
 			const json = JSON.parse(text);
 
-			switch (response.status) {
-				case 400:
+			if (response.status === 400) {
+				if ((json?.code as ClientOperationErrorCodes) === 'InputValidationError') {
 					const validationResult: ValidationResponseJSON = json;
 					return new InputValidationError({
 						errors: validationResult.errors,
 						message: validationResult.message,
 						statusCode: response.status,
 					});
-				default:
-					return new ResponseError({
-						code: json.errors[0]?.code,
-						statusCode: response.status,
-						errors: json.errors,
-						message: json.errors[0]?.message ?? 'Invalid response from server',
-					});
+				}
 			}
+
+			return new ResponseError({
+				code: json.errors[0]?.code,
+				statusCode: response.status,
+				errors: json.errors,
+				message: json.errors[0]?.message ?? 'Invalid response from server',
+			});
 		} catch (e: any) {
 			return new ResponseError({
 				cause: e,

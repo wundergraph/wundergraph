@@ -107,7 +107,7 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 							}
 							response.errors.push(e);
 						} else if (e instanceof Error) {
-							response.errors.push(new InternalError(e.message));
+							response.errors.push(new InternalError({ message: e.message }));
 						} else {
 							response.errors.push(new InternalError());
 						}

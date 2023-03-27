@@ -2,7 +2,7 @@ import { createOperation, z } from '../../generated/wundergraph.factory';
 import { NotFoundErr, RateLimitErr } from '../../../errors/errors';
 
 export default createOperation.query({
-	errors: [NotFoundErr(), RateLimitErr()],
+	errors: [NotFoundErr, RateLimitErr],
 	handler: async ({ operations, input }) => {
 		// GraphQL operation
 		const { errors, data } = await operations.query({

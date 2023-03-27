@@ -77,7 +77,7 @@ const createQuery =
 		errors = [],
 	}: {
 		input?: Input;
-		errors?: OperationError[];
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -132,7 +132,7 @@ const createMutation =
 		errors = [],
 	}: {
 		input?: Input;
-		errors?: OperationError[];
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -186,7 +186,7 @@ const createSubscription =
 		errors = [],
 	}: {
 		input?: I;
-		errors?: OperationError[];
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: SubscriptionHandler<
 			I,
@@ -281,7 +281,7 @@ export type NodeJSOperation<
 		Mutations,
 		Subscriptions
 	>;
-	errors?: OperationError[];
+	errors?: { new (): OperationError }[];
 	requireAuthentication?: boolean;
 	internal: boolean;
 	liveQuery: {

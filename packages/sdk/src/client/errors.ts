@@ -16,28 +16,27 @@ export interface GraphQLError {
 export type OperationErrorBaseFields = {
 	message?: string;
 	code: string;
-	statusCode: number;
 };
 
 /**
  * The base error class for all operation errors
  * This error can be used to create custom errors on the server
  */
-export class OperationError<Code extends string | TypeScriptOperationErrorCodes = string> extends Error {
-	public cause?: Error;
+export class OperationError<Code extends string = string> extends Error {
+	public readonly cause?: Error;
 	public readonly statusCode: number;
 	public readonly code: Code;
 
-	constructor(opts: { message?: string; code: Code; cause?: Error; statusCode: number }) {
-		const message = opts.message ?? opts.code;
-		const cause = opts.cause !== undefined ? opts.cause : undefined;
+	constructor(opts?: { message?: string; code: Code; cause?: Error; statusCode: number }) {
+		const message = opts?.message ?? 'Operation error';
+		const cause = opts?.cause !== undefined ? opts.cause : undefined;
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore https://github.com/tc39/proposal-error-cause
 		super(message, { cause });
 
-		this.code = opts.code;
-		this.statusCode = opts.statusCode ?? 500;
+		this.code = opts?.code ?? ('OperationError' as Code);
+		this.statusCode = opts?.statusCode ?? 500;
 		this.name = this.constructor.name;
 	}
 
@@ -45,7 +44,6 @@ export class OperationError<Code extends string | TypeScriptOperationErrorCodes 
 		const result: OperationErrorBaseFields = {
 			code: this.code,
 			message: this?.message,
-			statusCode: this.statusCode,
 		};
 		return result;
 	}
@@ -56,9 +54,13 @@ export class OperationError<Code extends string | TypeScriptOperationErrorCodes 
  * This error can be used on the client and server
  */
 export class AuthorizationError extends OperationError<'AuthorizationError'> {
-	constructor(public message: string = 'Not authorized') {
-		super({ message: message ?? 'Not authorized', code: 'AuthorizationError', statusCode: 401 });
-		this.name = 'AuthorizationError';
+	constructor(opts?: { message?: string; cause?: Error }) {
+		super({
+			message: opts?.message ?? 'Not authorized',
+			code: 'AuthorizationError',
+			statusCode: 401,
+			cause: opts?.cause,
+		});
 	}
 }
 
@@ -67,14 +69,8 @@ export class AuthorizationError extends OperationError<'AuthorizationError'> {
  * This error can only be used on the server
  */
 export class InternalError extends OperationError<'InternalError'> {
-	constructor(public message: string = 'Internal server error') {
-		super({
-			message: message ?? 'Internal server error',
-			code: 'InternalError',
-			statusCode: 500,
-		});
-
-		this.name = 'InternalError';
+	constructor(opts?: { message?: string; cause?: Error }) {
+		super({ message: opts?.message, code: 'InternalError', statusCode: 500, cause: opts?.cause });
 	}
 }
 
@@ -83,7 +79,7 @@ export class InternalError extends OperationError<'InternalError'> {
  * This error is thrown when the client receives a response that is not ok
  * This error can only be used on the client
  */
-export class ResponseError<Code extends string | ClientOperationErrorCodes = string> extends OperationError<Code> {
+export class ResponseError<Code extends ClientOperationErrorCodes | string = string> extends OperationError<Code> {
 	public readonly errors?: GraphQLError[];
 	constructor(opts: { code?: Code; message?: string; cause?: Error; statusCode: number; errors?: GraphQLError[] }) {
 		super({
@@ -93,7 +89,6 @@ export class ResponseError<Code extends string | ClientOperationErrorCodes = str
 			statusCode: opts.statusCode,
 		});
 		this.errors = opts.errors;
-		this.name = 'ResponseError';
 	}
 }
 
@@ -122,8 +117,6 @@ export class InputValidationError extends ResponseError<'InputValidationError'> 
 			statusCode: opts.statusCode,
 			cause: opts.cause,
 		});
-
-		this.name = 'InputValidationError';
 		this.errors = opts.errors;
 	}
 }
@@ -131,7 +124,4 @@ export class InputValidationError extends ResponseError<'InputValidationError'> 
 /**
  * The client operation errors that are used only in the client
  */
-export type ClientOperationErrors =
-	| AuthorizationError
-	| InputValidationError
-	| ResponseError<ClientOperationErrorCodes>;
+export type ClientOperationErrors = AuthorizationError | InputValidationError | ResponseError<'ResponseError'>;

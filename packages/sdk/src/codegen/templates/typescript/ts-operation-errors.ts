@@ -3,9 +3,10 @@ import { CodeGenerationConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { template } from './ts-operation-errors.template';
-import { uniqBy, filter, startCase } from 'lodash';
+import { uniqBy, filter } from 'lodash';
 import { TypeScriptOperation } from '../../../graphql/operations';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
+import { stringToCamelCase } from '../../../strings';
 
 type OpTemplateError = {
 	operationName: string;
@@ -33,7 +34,7 @@ export class TypeScriptOperationErrors implements Template {
 					code: tsErr.code,
 					statusCode: tsErr.statusCode,
 					message: tsErr.message,
-					name: startCase(tsErr.code),
+					name: toCamelCaseWithCapitalized(tsErr.code),
 				};
 				return e;
 			}).flat();
@@ -61,4 +62,9 @@ export class TypeScriptOperationErrors implements Template {
 			},
 		]);
 	}
+}
+
+function toCamelCaseWithCapitalized(str: string) {
+	const name = stringToCamelCase(str);
+	return name.charAt(0).toUpperCase() + name.slice(1);
 }

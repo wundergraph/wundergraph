@@ -10,16 +10,20 @@ describe('functions', () => {
 	test('internal operation call from function', async () => {
 		const client = wg.client();
 
-		const { data, error } = await client.query({
+		const { data: notFoundData, error: notFoundError } = await client.query({
 			operationName: 'users/throw',
 			input: { throw: 'NotFound' },
 		});
 
-		if (error?.code == 'NotFound') {
-			console.log('Not Found');
-		}
+		expect(notFoundError?.code).toBe('NotFound');
+		expect(notFoundError?.statusCode).toBe(404);
 
-		expect(error?.code).toBe('NotFound');
-		expect(error?.statusCode).toBe(404);
+		const { data: badRequestData, error: badRequestError } = await client.query({
+			operationName: 'users/throw',
+			input: { throw: 'BadRequest' },
+		});
+
+		expect(badRequestError?.code).toBe('BadRequest');
+		expect(badRequestError?.statusCode).toBe(400);
 	});
 });
