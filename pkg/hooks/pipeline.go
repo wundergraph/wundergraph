@@ -2,7 +2,6 @@ package hooks
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,8 +16,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
-
-type Authenticator func(ctx context.Context) (user interface{})
 
 type SubscriptionWriter interface {
 	http.ResponseWriter
@@ -54,11 +51,10 @@ type Response struct {
 }
 
 type PipelineConfig struct {
-	Client        *Client
-	Authenticator Authenticator
-	Operation     *wgpb.Operation
-	Transformer   *postresolvetransform.Transformer
-	Logger        *zap.Logger
+	Client      *Client
+	Operation   *wgpb.Operation
+	Transformer *postresolvetransform.Transformer
+	Logger      *zap.Logger
 }
 
 type SynchronousOperationPipelineConfig struct {
@@ -82,7 +78,6 @@ type pipeline struct {
 	logger                 *zap.Logger
 	operation              *wgpb.Operation
 	postResolveTransformer *postresolvetransform.Transformer
-	authenticator          Authenticator
 	ResolveConfig          ResolveConfiguration
 	PostResolveConfig      PostResolveConfiguration
 }
@@ -95,7 +90,6 @@ func newPipeline(config PipelineConfig) pipeline {
 		logger:                 config.Logger,
 		operation:              config.Operation,
 		postResolveTransformer: config.Transformer,
-		authenticator:          config.Authenticator,
 		ResolveConfig: ResolveConfiguration{
 			Pre:         hooksConfig.GetPreResolve(),
 			MutatingPre: hooksConfig.GetMutatingPreResolve(),
@@ -175,7 +169,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	var resp *MiddlewareHookResponse
 	data := ctx.Variables
 	if p.ResolveConfig.Pre {
-		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +185,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.MutatingPre {
-		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -210,7 +204,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Mock {
-		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -231,7 +225,7 @@ func (p *pipeline) PreResolve(ctx *resolve.Context, w http.ResponseWriter, r *ht
 	}
 
 	if p.ResolveConfig.Custom {
-		hookData, err := EncodeData(p.authenticator, r, hookBuf, data, nil)
+		hookData, err := EncodeData(r, hookBuf, data, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -269,7 +263,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	defer pool.PutBytesBuffer(payloadBuf)
 
 	if p.PostResolveConfig.Post {
-		postResolveData, err := EncodeData(p.authenticator, r, hookBuf, ctx.Variables, responseData)
+		postResolveData, err := EncodeData(r, hookBuf, ctx.Variables, responseData)
 		if err != nil {
 			return nil, err
 		}
@@ -285,7 +279,7 @@ func (p *pipeline) PostResolve(ctx *resolve.Context, w http.ResponseWriter, r *h
 	}
 
 	if p.PostResolveConfig.MutatingPost {
-		mutatingPostData, err := EncodeData(p.authenticator, r, hookBuf, ctx.Variables, responseData)
+		mutatingPostData, err := EncodeData(r, hookBuf, ctx.Variables, responseData)
 		if err != nil {
 			return nil, err
 		}

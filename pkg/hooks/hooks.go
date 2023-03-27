@@ -20,6 +20,7 @@ import (
 	"github.com/mattbaird/jsonpatch"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
@@ -471,7 +472,7 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 	return true
 }
 
-func encodeData(authenticator Authenticator, r *http.Request, w *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
+func encodeData(r *http.Request, w *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
 	const (
 		wgKey = "__wg"
 		root  = `{"` + wgKey + `":{}}`
@@ -480,7 +481,7 @@ func encodeData(authenticator Authenticator, r *http.Request, w *bytes.Buffer, v
 	buf := w.Bytes()[0:]
 	buf = append(buf, []byte(root)...)
 
-	if user := authenticator(r.Context()); user != nil {
+	if user := authentication.UserFromContext(r.Context()); user != nil {
 		userJson, err := json.Marshal(user)
 		if err != nil {
 			return nil, err
@@ -516,8 +517,8 @@ func encodeData(authenticator Authenticator, r *http.Request, w *bytes.Buffer, v
 }
 
 // EncodeData encodes the given input data for a hook as a JSON payload to be sent to the hooks server
-func EncodeData(authenticator Authenticator, r *http.Request, buf *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
-	data, err := encodeData(authenticator, r, buf, variables, response)
+func EncodeData(r *http.Request, buf *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
+	data, err := encodeData(r, buf, variables, response)
 	if err != nil {
 		return nil, fmt.Errorf("encoding hook data: %w", err)
 	}
