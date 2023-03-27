@@ -7,7 +7,7 @@ beforeAll(() => wg.start());
 afterAll(() => wg.stop());
 
 describe('functions', () => {
-	test('internal operation call from function', async () => {
+	test('Call users/throw typescript function', async () => {
 		const client = wg.client();
 
 		const { data: notFoundData, error: notFoundError } = await client.query({
@@ -25,5 +25,26 @@ describe('functions', () => {
 
 		expect(badRequestError?.code).toBe('BadRequest');
 		expect(badRequestError?.statusCode).toBe(400);
+	});
+
+	test('Call users/throw typescript function', async () => {
+		const client = wg.client();
+
+		const { data, error } = await client.query({
+			operationName: 'users/simple',
+		});
+
+		expect(error).toBeUndefined();
+		expect(data).toBe('hello simple');
+	});
+
+	test('Call Weather graphql operation', async () => {
+		const client = wg.client();
+
+		const { data, error } = await client.query({
+			operationName: 'Weather',
+		});
+
+		expect(error).toBeUndefined();
 	});
 });
