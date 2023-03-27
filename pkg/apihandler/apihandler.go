@@ -525,10 +525,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        r.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        r.log,
+		Client:    r.middlewareClient,
+		Operation: operation,
+		Logger:    r.log,
 	}
 
 	switch operation.OperationType {
@@ -1924,6 +1923,17 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 	return left
 }
 
+func (r *Builder) authenticationHooks() authentication.Hooks {
+	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
+		Client:                     r.middlewareClient,
+		Log:                        r.log,
+		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
+		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
+		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
+		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
+	})
+}
+
 func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	var (
@@ -1959,13 +1969,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
 	}
 
-	authHooks := authentication.Hooks{
-		Log:                        r.log,
-		Client:                     r.middlewareClient,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-	}
+	authHooks := r.authenticationHooks()
 
 	loadUserConfig := authentication.LoadUserConfig{
 		Log:           r.log,
@@ -1981,12 +1985,11 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 	}))
 
 	userHandler := &authentication.UserHandler{
-		HasRevalidateHook: r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-		MWClient:          r.middlewareClient,
-		Log:               r.log,
-		InsecureCookies:   insecureCookies,
-		Cookie:            cookie,
-		PublicClaims:      r.api.AuthenticationConfig.PublicClaims,
+		Hooks:           authHooks,
+		Log:             r.log,
+		InsecureCookies: insecureCookies,
+		Cookie:          cookie,
+		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
@@ -2109,12 +2112,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
 			zap.String("providerId", provider.Id),
@@ -2145,12 +2143,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
 			zap.String("providerId", provider.Id),
@@ -2288,7 +2281,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hooks.EncodeData(hooksAuthenticator, r, buf.Bytes(), ctx.Variables, nil)
+	input := hooks.EncodeData(r, buf.Bytes(), ctx.Variables, nil)
 
 	switch {
 	case isLive:
@@ -2566,9 +2559,4 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
-}
-
-// hooksAuthenticator is used to break the import cycle between authentication and hooks
-func hooksAuthenticator(ctx context.Context) interface{} {
-	return authentication.UserFromContext(ctx)
 }

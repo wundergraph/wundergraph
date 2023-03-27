@@ -20,6 +20,7 @@ import (
 	"github.com/mattbaird/jsonpatch"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/pkg/authentication"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 )
@@ -457,11 +458,11 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 	return true
 }
 
-func EncodeData(authenticator Authenticator, r *http.Request, buf []byte, variables []byte, response []byte) []byte {
+func EncodeData(r *http.Request, buf []byte, variables []byte, response []byte) []byte {
 	// TODO: This doesn't really reuse the bytes.Buffer storage, refactor it after adding more tests
 	buf = buf[:0]
 	buf = append(buf, []byte(`{"__wg":{}}`)...)
-	if user := authenticator(r.Context()); user != nil {
+	if user := authentication.UserFromContext(r.Context()); user != nil {
 		if userJson, err := json.Marshal(user); err == nil {
 			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
 		}

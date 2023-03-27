@@ -75,6 +75,7 @@ import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
+import os from 'os';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -996,6 +997,34 @@ export const configureWunderGraphApplication = <
 				encoding: 'utf8',
 			});
 			Logger.info(`wundergraph.openapi.json updated`);
+
+			fs.writeFileSync(
+				path.join('generated', 'wundergraph.build_info.json'),
+				JSON.stringify(
+					{
+						sdk: {
+							version: SDK_VERSION ?? 'unknown',
+						},
+						wunderctl: {
+							version: process.env.WUNDERCTL_VERSION ?? 'unknown',
+						},
+						node: {
+							version: process.version,
+						},
+						os: {
+							type: os.type(),
+							platform: os.platform(),
+							arch: os.arch(),
+							version: os.version(),
+							release: os.release(),
+						},
+					},
+					null,
+					2
+				),
+				{ encoding: 'utf8' }
+			);
+			Logger.debug(`wundergraph.build_info.json updated`);
 
 			done();
 		})
