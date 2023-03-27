@@ -276,7 +276,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			idToken = maybeIdToken.(string)
 		}
 
-		user := User{
+		user := &User{
 			ProviderName:   "github",
 			ProviderID:     config.ProviderID,
 			Email:          email.Email,
@@ -293,18 +293,11 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 			RawIDToken:     idToken,
 		}
 
-		hooks.handlePostAuthentication(r.Context(), user)
-		proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)
-		if proceed {
-			err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
-			if err != nil {
-				g.log.Error("GithubCookieHandler.user.Save",
-					zap.Error(err),
-				)
-				return
-			}
+		if err := postAuthentication(r.Context(), w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
+			g.log.Error("GithubCookieHandler postAuthentication failed", zap.Error(err))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-
 		scheme := "https"
 		if !config.ForceRedirectHttps && r.TLS == nil {
 			scheme = "http"
