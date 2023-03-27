@@ -1001,8 +1001,15 @@ export const configureWunderGraphApplication = <
 				path.join('generated', 'wundergraph.build_info.json'),
 				JSON.stringify(
 					{
-						sdk: SDK_VERSION,
-						wunderctl: '',
+						sdk: {
+							version: SDK_VERSION,
+						},
+						wunderctl: {
+							version: process.env.WUNDERCTL_VERSION,
+						},
+						node: {
+							version: process.version,
+						},
 						os: {
 							type: os.type(),
 							platform: os.platform(),
@@ -1017,6 +1024,7 @@ export const configureWunderGraphApplication = <
 				{ encoding: 'utf8' }
 			);
 			Logger.info(`wundergraph.build_info.json updated`);
+
 			done();
 		})
 		.catch((e: any) => {
