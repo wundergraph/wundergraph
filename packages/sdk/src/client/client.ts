@@ -163,7 +163,6 @@ export class Client {
 
 		const text = await response.text();
 
-		console.log('text', text);
 		try {
 			const json = JSON.parse(text);
 
