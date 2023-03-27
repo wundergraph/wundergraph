@@ -209,11 +209,16 @@ if (createProjectStatus?.__typename === 'cloud_ProjectCreationStatusFailure') {
 For common errors like 401, 400, 500, we provide built in Error classes that can be used to identify the error more conveniently. Those errors are available to GraphQL and TypeScript operations.
 
 ```ts
-import { AuthorizationError, InputValidationError } from '@wundergraph/sdk/client';
+import { AuthorizationError, InputValidationError, InternalError } from '@wundergraph/sdk/client';
 
 if (error instanceof AuthorizationError) {
+  // 401
 }
 if (error instanceof InputValidationError) {
+  // 400
+}
+if (error instanceof InternalError) {
+  // 500
 }
 ```
 
@@ -228,7 +233,7 @@ const { data, error } = await client.query({
 
 if (error?.code === 'AuthorizationError') {
   // handle error
-} else if (error?.code === 'OperationNotFoundError') {
+} else if (error?.code === 'YourCustomErrorCode') {
   // handle error
 }
 ```

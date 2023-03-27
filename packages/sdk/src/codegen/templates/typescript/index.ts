@@ -27,7 +27,7 @@ export class TypeScriptInputModels implements Template {
 					op.VariablesSchema,
 					op.Name + 'Input',
 					false,
-					op.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
 					op.TypeScriptOperationImport
 						? {
 								importName: op.TypeScriptOperationImport,
@@ -59,7 +59,7 @@ export class TypeScriptInternalInputModels implements Template {
 					op.InternalVariablesSchema,
 					'Internal' + op.Name + 'Input',
 					false,
-					op.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 				)
 			)
 			.join('\n\n');
@@ -85,7 +85,7 @@ export class TypeScriptInjectedInputModels implements Template {
 					op.InjectedVariablesSchema,
 					'Injected' + op.Name + 'Input',
 					false,
-					op.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 				)
 			)
 			.join('\n\n');
@@ -118,7 +118,7 @@ export class TypeScriptResponseModels implements Template {
 				responseSchema,
 				op.Name + 'Response',
 				true,
-				op.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
+				op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
 			);
 		}).join('\n\n');
 		return Promise.resolve([
@@ -145,7 +145,7 @@ export class TypeScriptResponseDataModels implements Template {
 					op.ResponseSchema.properties!['data'] as JSONSchema7,
 					op.Name + 'ResponseData',
 					false,
-					op.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
 					op.TypeScriptOperationImport
 						? {
 								importName: op.TypeScriptOperationImport,
