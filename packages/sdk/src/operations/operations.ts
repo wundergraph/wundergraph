@@ -320,21 +320,21 @@ export const loadNodeJsOperationDefaultModule = async (
 	operationPath: string
 ): Promise<NodeJSOperation<any, any, any, any, any, any, any, any, any, any>> => {
 	// remove .js or / from the end of operationPath if present
-	if (operationPath.endsWith('.js')) {
-		operationPath = operationPath.slice(0, -3);
+	if (operationPath.endsWith('.cjs')) {
+		operationPath = operationPath.slice(0, -4);
 	}
 	if (operationPath.endsWith('/')) {
 		operationPath = operationPath.slice(0, -1);
 	}
 	const modulePath = operationPath;
-	const filePath = modulePath + '.js';
+	const filePath = modulePath + '.cjs';
 	const exists = fs.existsSync(filePath);
 	if (!exists) {
 		throw new Error(`Operation file not found at ${filePath}`);
 	}
 	let module: any | undefined;
 	try {
-		module = await import(modulePath);
+		module = await import(filePath);
 	} catch (e: any) {
 		throw new Error(`Error loading module at ${filePath}: ${e.message}: ${e?.stack}`);
 	}

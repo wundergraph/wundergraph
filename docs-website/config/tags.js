@@ -48,6 +48,7 @@ const tags = {
 	'configuration as code': '/docs/features/configuration-as-code',
 	'file-based Operations': '/docs/features/file-based-operations',
 	'file based Operations': '/docs/features/file-based-operations',
+	'TypeScript Operations': '/docs/typescript-operations-reference',
 	'file uploads': '/docs/features/file-uploads-to-s3-compatible-file-storages',
 	'generate APIs': '/docs/features/generated-apis-for-any-database',
 	'generate clients': '/docs/features/generated-clients-and-sdks',

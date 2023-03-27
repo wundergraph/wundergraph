@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.13.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.7...@wundergraph/swr@0.13.8) (2023-03-27)
+
+**Note:** Version bump only for package @wundergraph/swr
+
 ## [0.13.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.6...@wundergraph/swr@0.13.7) (2023-03-23)
 
 **Note:** Version bump only for package @wundergraph/swr
