@@ -14,7 +14,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import objectHash from 'object-hash';
 import _ from 'lodash';
-import { buildGenerator, getProgramFromFiles, programFromConfig } from 'typescript-json-schema';
+import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
@@ -1266,52 +1266,49 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 
 	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
 
-	const compilerOptions = {
-		strictNullChecks: true,
-		noEmit: true,
-		ignoreErrors: true,
-	};
-
-	const program = getProgramFromFiles([programPath], compilerOptions, basePath);
-
-	const schemas: Record<string, JSONSchema> = {};
 	const settings = {
 		required: true,
 	};
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const originalWarn = console.warn;
-	const originalError = console.error;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	const errorMessages: consoleMessage[] = [];
-	console.error = (message?: any, ...optionalParams: any[]) => {
-		// We might get duplicates because we try to call the generator twice, once
-		// using the raw files and once again using the tsconfig.json if we can find
-		// it. Filter out duplicates.
-		let msg = { message, optionalParams };
-		if (errorMessages.find((m) => _.isEqual(m, msg)) === undefined) {
-			errorMessages.push(msg);
+	// If we can find a tsconfig.json, use it
+	let tsConfigPath: string | undefined;
+	let currentDir = wgDirAbs;
+	while (true) {
+		const tsConfig = path.join(currentDir, 'tsconfig.json');
+		if (fs.existsSync(tsConfig)) {
+			tsConfigPath = tsConfig;
+			break;
 		}
-	};
-	let generator = buildGenerator(program, settings);
+		const next = path.dirname(currentDir);
+		if (next === currentDir) {
+			break;
+		}
+		currentDir = next;
+	}
+	let generator: JsonSchemaGenerator | null = null;
+	if (tsConfigPath) {
+		const tsConfigProgram = programFromConfig(tsConfigPath);
+		if (tsConfigProgram) {
+			generator = buildGenerator(tsConfigProgram, settings);
+		}
+	} else {
+		// Otherwise, use the default configuration feeding the TS files
+		const compilerOptions = {
+			strictNullChecks: true,
+			noEmit: true,
+			ignoreErrors: true,
+		};
+		const program = getProgramFromFiles([programPath], compilerOptions, basePath);
+		generator = buildGenerator(program, settings);
+	}
 	// generator can be null if the program can't be compiled
 	if (!generator) {
-		// Try to fallback to generating a program from tsconfig.json
-		const tsConfigPath = path.join(path.dirname(wgDirAbs), 'tsconfig.json');
-		if (fs.existsSync(tsConfigPath)) {
-			const tsConfigProgram = programFromConfig(tsConfigPath);
-			if (tsConfigProgram) {
-				generator = buildGenerator(tsConfigProgram, settings);
-			}
-		}
-		if (!generator) {
-			console.warn = originalWarn;
-			console.error = originalError;
-			for (const msg of errorMessages) {
-				console.error(msg.message, ...msg.optionalParams);
-			}
-			throw new Error('could not parse .ts operation files');
-		}
+		console.warn = originalWarn;
+		throw new Error('could not parse .ts operation files');
 	}
+	const schemas: Record<string, JSONSchema> = {};
 	for (const op of operations) {
 		const schema = generator.getSchemaForSymbol(responseTypeName(op));
 		if (schema) {
@@ -1320,7 +1317,6 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 		}
 	}
 	console.warn = originalWarn;
-	console.error = originalError;
 
 	await cache.setJSON(cacheKey, schemas);
 	return schemas;
