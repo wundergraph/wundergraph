@@ -6,7 +6,6 @@ import {
 	Client,
 	ClientConfig,
 	CreateClientConfig,
-	ResponseError,
 	User,
 	UploadRequestOptions,
 	OperationMetadata,
@@ -18,6 +17,7 @@ import {
 	UploadValidationOptions,
 	QueryRequestOptions,
   MutationRequestOptions,
+	ClientOperationErrors,
 	ExtractProfileName,
 	ExtractMeta,
 	GraphQLError
@@ -171,7 +171,7 @@ export type Queries = {
 {{#each queries}}
     "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
-    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ResponseError<'ResponseError'> }{{/if}}
+    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
         requiresAuthentication: {{requiresAuthentication}}
         {{#if liveQuery}}liveQuery: boolean{{/if}}
     }
@@ -182,7 +182,7 @@ export type Mutations = {
 {{#each mutations}}
     "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
-    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ResponseError<'ResponseError'> }{{/if}}
+    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
@@ -192,7 +192,7 @@ export type Subscriptions = {
 {{#each subscriptions}}
     "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
-    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ResponseError<'ResponseError'> }{{/if}}
+    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
         requiresAuthentication: {{requiresAuthentication}}
     }
 {{/each}}
@@ -202,7 +202,7 @@ export type LiveQueries = {
 {{#each liveQueries}}
     "{{operationPath}}": {
         {{#if hasInput}}input: {{operationName}}Input{{else}}input?: undefined{{/if}}
-    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ResponseError<'ResponseError'> }{{/if}}
+    		response: {{#if isTypeScriptOperation}}{ data?: {{operationName}}ResponseData, error?: OperationErrors['{{operationPath}}'] }{{else}}{ data?: {{operationName}}Response['data'], error?: ClientOperationErrors }{{/if}}
         liveQuery: true
         requiresAuthentication: {{requiresAuthentication}}
     }
