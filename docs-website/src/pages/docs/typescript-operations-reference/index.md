@@ -140,7 +140,7 @@ export class DividedByZero extends OperationError {
 }
 
 export default createOperation.query({
-  errors: [NotFoundErr],
+  errors: [DividedByZero],
   input: z.object({
     a: z.number(),
     b: z.number(),
