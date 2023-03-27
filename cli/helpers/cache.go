@@ -28,8 +28,11 @@ func LocalWunderGraphCacheDir(wgDir string) (string, error) {
 	cur := abs
 	for {
 		if st, err := os.Stat(filepath.Join(cur, packageJSON)); err == nil && !st.IsDir() {
+			// XXX: Make sure we initialize the introspection cache directory too, since we
+			// do watch it from the Go side.
 			cacheDir := filepath.Join(cur, "node_modules", ".cache", "wundergraph")
-			if err := os.MkdirAll(cacheDir, 0755); err != nil {
+			introspectionCacheDir := filepath.Join(cacheDir, "introspection")
+			if err := os.MkdirAll(introspectionCacheDir, 0755); err != nil {
 				return "", err
 			}
 			return cacheDir, nil

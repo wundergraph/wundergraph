@@ -3,6 +3,10 @@ datasource db {
   url      = "postgresql://admin:admin@localhost:54322/example?schema=public"
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model Post {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
