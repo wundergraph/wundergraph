@@ -1,6 +1,4 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
-import { ClientResponse } from '@wundergraph/sdk/client';
-import { WsResponseData } from '../.wundergraph/generated/models';
 import fetch from 'node-fetch';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
@@ -11,7 +9,7 @@ afterAll(() => wg.stop());
 describe('test ws subscription', () => {
 	test('subscribeOnce', async () => {
 		let data: WsResponseData | undefined;
-		const result = (await wg.client().subscribe(
+		const result = await wg.client().subscribe(
 			{
 				operationName: 'Ws',
 				subscribeOnce: true,
@@ -20,7 +18,7 @@ describe('test ws subscription', () => {
 				expect(resp.error).toBeFalsy();
 				data = resp.data;
 			}
-		)) as ClientResponse<WsResponseData>;
+		);
 
 		expect(result.error).toBeFalsy();
 		expect(result.data?.ws_greetings).toBe('Hi');
