@@ -1228,6 +1228,11 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
+interface consoleMessage {
+	message?: any;
+	optionalParams: any[];
+}
+
 // typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
 // operations at once, since it's several times faster than generating them one by one
 const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
@@ -1277,7 +1282,16 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const originalWarn = console.warn;
 	const originalError = console.error;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	console.error = (_message?: any, ..._optionalParams: any[]) => {};
+	const errorMessages: consoleMessage[] = [];
+	console.error = (message?: any, ...optionalParams: any[]) => {
+		// We might get duplicates because we try to call the generator twice, once
+		// using the raw files and once again using the tsconfig.json if we can find
+		// it. Filter out duplicates.
+		let msg = { message, optionalParams };
+		if (errorMessages.find((m) => _.isEqual(m, msg)) === undefined) {
+			errorMessages.push(msg);
+		}
+	};
 	let generator = buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
@@ -1292,6 +1306,9 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 		if (!generator) {
 			console.warn = originalWarn;
 			console.error = originalError;
+			for (const msg of errorMessages) {
+				console.error(msg.message, ...msg.optionalParams);
+			}
 			throw new Error('could not parse .ts operation files');
 		}
 	}
