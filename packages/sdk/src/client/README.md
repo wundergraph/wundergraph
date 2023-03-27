@@ -181,30 +181,7 @@ controller.abort();
 ### Operations
 
 Query, Subscription and mutation errors are returned as a `ResponseError` object. By default, the first error specify the error message but you can access all errors through the `errors` property.
-Every error contain the HTTP status code as `statusCode` property. Errors in GraphQL aren't type-safe. Due to this, we recommend to use union types to identify the error on the client side.
-If you want to create customer errors for TypeScript operations, you can use the `code` property to identify the error on the client side.
-
-```ts
-const { data, error } = await client.query({
-  operationName: 'Hello',
-  input: {
-    hello: 'World',
-  },
-});
-
-if (error instanceof ResponseError) {
-  // handle server or network error
-  error.errors;
-  error.statusCode;
-  error.code;
-}
-
-// or type-safe
-
-if (createProjectStatus?.__typename === 'cloud_ProjectCreationStatusFailure') {
-  // handle error the GraphQL way
-}
-```
+Every error contain the HTTP response status code as `statusCode` property.
 
 #### Base Errors
 
@@ -224,9 +201,27 @@ if (error instanceof InternalError) {
 }
 ```
 
+#### GraphQL Operations
+
+GraphQL operation errors are not meant to be used to communicate application errors to the client. We recommend to design them as part of your GraphQL schema.
+
+```ts
+const { data, error } = await client.query({
+  operationName: 'GetWeather',
+  input: {
+    forCity: 'Berlin',
+  },
+});
+
+if (createProjectStatus?.__typename === 'cityNotFound') {
+  // handle error the GraphQL way
+}
+```
+
 #### TypeScript Operations
 
 All known and custom errors have a `code` property that can be used to identify the error. This is useful if you want to work with custom errors in a type-safe way.
+If you want to create customer errors for TypeScript operations, you can extend the `OperationError` base class and throw it in your handler.
 
 ```ts
 import { ReponseError } from '@wundergraph/sdk/client';
