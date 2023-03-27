@@ -1,15 +1,21 @@
 import { OperationError } from '@wundergraph/sdk/operations';
 
-export const NotFoundErr = () =>
-	new OperationError({
-		code: 'NotFound',
-		statusCode: 404,
-		message: 'Not found',
-	});
+export class NotFoundErr extends OperationError {
+	statusCode = 404;
+	code = 'NotFound' as const;
+	message = 'Not found';
+}
 
-export const RateLimitErr = () =>
-	new OperationError({
-		code: 'RateLimit',
-		statusCode: 429,
-		message: 'Rate limit exceeded',
-	});
+export class BadRequestErr extends OperationError {
+	statusCode = 400;
+	code = 'BadRequest' as const;
+	message = 'Bad request';
+}
+
+export class RateLimitErr extends OperationError {
+	statusCode = 429;
+	code = 'RateLimit' as const;
+	message = 'Rate limit exceeded';
+}
+
+export type Errors = NotFoundErr | RateLimitErr;
