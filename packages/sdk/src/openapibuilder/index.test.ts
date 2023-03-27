@@ -14,6 +14,12 @@ const operations = [
 			additionalProperties: false,
 			definitions: {},
 		},
+		ResponseSchema: {
+			type: 'object',
+			properties: {},
+			additionalProperties: false,
+			definitions: {},
+		},
 	},
 	{
 		Name: 'GetRootObj2',

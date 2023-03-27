@@ -128,10 +128,10 @@ export class GolangResponseDataModels implements Template {
 
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.filter(
-			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
+			(op) => op.ResponseSchema?.properties !== undefined && op.ResponseSchema?.properties['data'] !== undefined
 		)
 			.map((op) =>
-				JSONSchemaToGolangStruct(op.ResponseSchema.properties!['data'] as JSONSchema7, op.Name + 'ResponseData', false)
+				JSONSchemaToGolangStruct(op.ResponseSchema?.properties!['data'] as JSONSchema7, op.Name + 'ResponseData', false)
 			)
 			.join('\n\n');
 		return Promise.resolve([

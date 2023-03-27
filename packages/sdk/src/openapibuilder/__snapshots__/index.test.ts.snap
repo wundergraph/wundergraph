@@ -54,7 +54,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -79,14 +83,6 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         "operationId": "GetRootObj2",
         "parameters": [],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": undefined,
-              },
-            },
-            "description": "Success",
-          },
           "400": {
             "content": {
               "application/json": {
@@ -107,14 +103,6 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         "operationId": "GetUser",
         "parameters": [],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": undefined,
-              },
-            },
-            "description": "Success",
-          },
           "400": {
             "content": {
               "application/json": {
@@ -147,14 +135,6 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "required": true,
         },
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": undefined,
-              },
-            },
-            "description": "Success",
-          },
           "400": {
             "content": {
               "application/json": {
@@ -175,14 +155,6 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         "operationId": "SubscribeToUser",
         "parameters": [],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": undefined,
-              },
-            },
-            "description": "Success",
-          },
           "400": {
             "content": {
               "application/json": {
