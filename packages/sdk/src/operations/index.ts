@@ -7,4 +7,4 @@ export type {
 	ClientOperationErrors,
 	TypeScriptOperationErrorCodes,
 } from '../client/errors';
-export { OperationError, ResponseError, AuthorizationError, InputValidationError } from '../client/errors';
+export { OperationError, AuthorizationError, InputValidationError } from '../client/errors';

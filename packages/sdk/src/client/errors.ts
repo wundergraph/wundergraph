@@ -19,8 +19,8 @@ export type OperationErrorBaseFields = {
 };
 
 /**
- * The base error class for all operation errors
- * This error can be used to create custom errors on the server
+ * The base error class for all operation errors.
+ * This error can be used to create custom errors on the server.
  */
 export class OperationError<Code extends string = string> extends Error {
 	public readonly cause?: Error;
@@ -50,8 +50,8 @@ export class OperationError<Code extends string = string> extends Error {
 }
 
 /**
- * The authorization error is thrown when the user is not authorized to perform an operation
- * This error can be used on the client and server
+ * The authorization error is thrown when the user is not authorized to perform an operation.
+ * This error can be used on the client and server.
  */
 export class AuthorizationError extends OperationError<'AuthorizationError'> {
 	constructor(opts?: { message?: string; cause?: Error }) {
@@ -65,8 +65,8 @@ export class AuthorizationError extends OperationError<'AuthorizationError'> {
 }
 
 /**
- * The internal error is thrown when an internal error occurs
- * This error can only be used on the server
+ * The internal error is thrown when an internal error occurs.
+ * This error should only be used on the server.
  */
 export class InternalError extends OperationError<'InternalError'> {
 	constructor(opts?: { message?: string; cause?: Error }) {
@@ -75,9 +75,9 @@ export class InternalError extends OperationError<'InternalError'> {
 }
 
 /**
- * The base error class for all client operation errors
- * This error is thrown when the client receives a response that is not ok
- * This error can only be used on the client
+ * The base error class for all client operation errors.
+ * This error is thrown when the client receives a response that is not ok.
+ * This error should only be used on the client
  */
 export class ResponseError<Code extends ClientOperationErrorCodes | string = string> extends OperationError<Code> {
 	public readonly errors?: GraphQLError[];
@@ -105,8 +105,8 @@ export interface ValidationResponseJSON {
 }
 
 /**
- * The input validation error is thrown when the server returns a validation error
- * This error can only be used on the client
+ * The input validation error is thrown when the server returns a validation error.
+ * This error should only be used on the client.
  */
 export class InputValidationError extends ResponseError<'InputValidationError'> {
 	public errors: ValidationError[];
@@ -122,6 +122,6 @@ export class InputValidationError extends ResponseError<'InputValidationError'> 
 }
 
 /**
- * The client operation errors that are used only in the client
+ * The client operation errors that are used only in the client.
  */
 export type ClientOperationErrors = AuthorizationError | InputValidationError | ResponseError<'ResponseError'>;

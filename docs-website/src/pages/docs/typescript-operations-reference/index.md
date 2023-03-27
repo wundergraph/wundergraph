@@ -105,6 +105,24 @@ TypeScript Operations can throw errors, which will be handled by the hooks serve
 }
 ```
 
+### Built-in Errors
+
+WunderGraph comes with a few built-in errors, which you can use to throw errors from your operations:
+
+- `AuthorizationError`: Thrown when the user is not authorized to perform the operation
+- `InternalError`: Thrown when an internal error occurs
+
+```typescript
+import { AuthorizationError, InternalError } from '@wundergraph/sdk/operations';
+import { createOperation, z } from '../generated/wundergraph.factory';
+
+export default createOperation.query({
+  handler: async ({ input }) => {
+    throw new AuthorizationError();
+  },
+});
+```
+
 ### Custom Error
 
 You can also create custom errors, which will be available to the client in the `code` field of the error. This allows you to have typed errors on the client side, which can be used to handle errors in a more granular way.
