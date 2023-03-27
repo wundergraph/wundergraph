@@ -174,16 +174,21 @@ Now, when we call this operation with `b` being `0`, we'll get the following err
 The generated clients are aware of the error codes, so you can handle them in a type-safe way:
 
 ```typescript
+import { ReponseError } from '@wundergraph/sdk/client';
 const { data, error } = await client.query({
   operationName: 'users/get',
 });
+
+if (error instanceof ReponseError) {
+  // handle error
+  error.code;
+}
+
+// or type-safe
 
 if (error?.code === 'AuthorizationError') {
   // handle error
 } else if (error?.code === 'DividedByZero') {
   // handle error
-} else {
-  // log unhandled error
-  console.error(error);
 }
 ```

@@ -199,6 +199,8 @@ if (error instanceof ResponseError) {
   error.code;
 }
 
+// or type-safe
+
 if (createProjectStatus?.__typename === 'cloud_ProjectCreationStatusFailure') {
   // handle error the GraphQL way
 }
@@ -227,13 +229,21 @@ if (error instanceof InternalError) {
 All known and custom errors have a `code` property that can be used to identify the error. This is useful if you want to work with custom errors in a type-safe way.
 
 ```ts
+import { ReponseError } from '@wundergraph/sdk/client';
 const { data, error } = await client.query({
   operationName: 'users/get',
 });
 
+if (error instanceof ReponseError) {
+  // handle error
+  error.code;
+}
+
+// or type-safe
+
 if (error?.code === 'AuthorizationError') {
   // handle error
-} else if (error?.code === 'YourCustomErrorCode') {
+} else if (error?.code === 'DividedByZero') {
   // handle error
 }
 ```
