@@ -223,6 +223,7 @@ func commonScriptEnv(wunderGraphDir string) []string {
 		fmt.Sprintf("WUNDERGRAPH_CACHE_DIR=%s", cacheDir),
 		fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
 		fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
+		fmt.Sprintf("WUNDERCTL_VERSION=%s", BuildInfo.Version),
 	}
 }
 
