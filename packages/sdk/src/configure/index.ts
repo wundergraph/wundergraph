@@ -1002,10 +1002,10 @@ export const configureWunderGraphApplication = <
 				JSON.stringify(
 					{
 						sdk: {
-							version: SDK_VERSION,
+							version: SDK_VERSION ?? 'unknown',
 						},
 						wunderctl: {
-							version: process.env.WUNDERCTL_VERSION,
+							version: process.env.WUNDERCTL_VERSION ?? 'unknown',
 						},
 						node: {
 							version: process.version,
@@ -1023,7 +1023,7 @@ export const configureWunderGraphApplication = <
 				),
 				{ encoding: 'utf8' }
 			);
-			Logger.info(`wundergraph.build_info.json updated`);
+			Logger.debug(`wundergraph.build_info.json updated`);
 
 			done();
 		})
