@@ -3,8 +3,7 @@ import { CodeGenerationConfig } from '../../../configure';
 import Handlebars from 'handlebars';
 import { formatTypeScript } from './index';
 import { template } from './ts-operation-errors.template';
-import _ from 'lodash';
-import { stringToCamelCase } from '../../../strings';
+import { uniqBy, filter, startCase } from 'lodash';
 import { TypeScriptOperation } from '../../../graphql/operations';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
 
@@ -34,7 +33,7 @@ export class TypeScriptOperationErrors implements Template {
 					code: tsErr.code,
 					statusCode: tsErr.statusCode,
 					message: tsErr.message,
-					name: toCamelCaseWithUpperCaseLetter(tsErr.code),
+					name: startCase(tsErr.code),
 				};
 				return e;
 			}).flat();
@@ -43,10 +42,10 @@ export class TypeScriptOperationErrors implements Template {
 			}
 		}
 
-		let uniqueErrors = _.uniqBy(tsErrors, 'code');
+		let uniqueErrors = uniqBy(tsErrors, 'code');
 		let opToErrors: { [path: string]: OpTemplateError[] } = {};
 		for (const op of tsOperations) {
-			opToErrors[op.Name] = _.filter(tsErrors, (tsErr) => tsErr?.operationPathName === op.PathName);
+			opToErrors[op.Name] = filter(tsErrors, (tsErr) => tsErr?.operationPathName === op.PathName);
 		}
 
 		const content = tmpl({
@@ -62,9 +61,4 @@ export class TypeScriptOperationErrors implements Template {
 			},
 		]);
 	}
-}
-
-function toCamelCaseWithUpperCaseLetter(str: string) {
-	const name = stringToCamelCase(str);
-	return name.charAt(0).toUpperCase() + name.slice(1);
 }

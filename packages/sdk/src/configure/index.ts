@@ -13,7 +13,7 @@ import {
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import objectHash from 'object-hash';
-import _ from 'lodash';
+import { camelCase } from 'lodash';
 import { buildGenerator, getProgramFromFiles, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
@@ -409,7 +409,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				.map((provider) => provider.resolve())
 				.map((provider) => ({
 					...provider,
-					id: _.camelCase(provider.id),
+					id: camelCase(provider.id),
 				}))) ||
 		[];
 
