@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.141.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.140.0...@wundergraph/sdk@0.141.0) (2023-03-27)
+
+### Features
+
+* add build_info.json to sdk ([#758](https://github.com/wundergraph/wundergraph/issues/758)) ([e34c94f](https://github.com/wundergraph/wundergraph/commit/e34c94fefc6b624ada2d4ad36ce8589309620950)) (@Aenimus)
+
 ## [0.140.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.139.0...@wundergraph/sdk@0.140.0) (2023-03-23)
 
 ### Features
