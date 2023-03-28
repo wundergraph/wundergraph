@@ -12,6 +12,9 @@ describe('functions', () => {
 	test('internal operation call from  function', async () => {
 		const client = wg.client();
 		const promises: Promise<ClientResponse<NestedInternalResponse>>[] = [];
+		// Call this 50 times to exercise some code paths that share cached
+		// buffers. If we have a race condition in there, the go race detector
+		// (which we use in CI) will likely catch it.
 		for (let ii = 0; ii < 50; ii++) {
 			const op = client.query({
 				operationName: 'nested/InternalWrapper',
