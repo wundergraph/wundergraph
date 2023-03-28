@@ -23,7 +23,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mattbaird/jsonpatch"
-	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
@@ -253,23 +252,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			handler.ServeHTTP(w, request)
 		})
 	})
-
-	if api.CorsConfiguration != nil {
-		corsMiddleware := cors.New(cors.Options{
-			MaxAge:           int(api.CorsConfiguration.MaxAge),
-			AllowCredentials: api.CorsConfiguration.AllowCredentials,
-			AllowedHeaders:   api.CorsConfiguration.AllowedHeaders,
-			AllowedMethods:   api.CorsConfiguration.AllowedMethods,
-			AllowedOrigins:   loadvariable.Strings(api.CorsConfiguration.AllowedOrigins),
-			ExposedHeaders:   api.CorsConfiguration.ExposedHeaders,
-		})
-		r.router.Use(func(handler http.Handler) http.Handler {
-			return corsMiddleware.Handler(handler)
-		})
-		r.log.Debug("configuring CORS",
-			zap.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
-		)
-	}
 
 	if err := r.registerAuth(r.insecureCookies); err != nil {
 		if !r.devMode {

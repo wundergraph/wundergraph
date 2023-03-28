@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
+	"github.com/rs/cors"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -23,6 +24,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/engineconfigloader"
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
+	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -500,8 +502,10 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		_ = json.NewEncoder(w).Encode(report)
 	}))
 
+	handler := n.setupGlobalMiddlewares(router, nodeConfig)
+
 	n.server = &http.Server{
-		Handler: router,
+		Handler: handler,
 		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
 			return context.WithValue(ctx, "conn", c)
 		},
@@ -557,6 +561,28 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	)
 
 	return g.Wait()
+}
+
+// setupGlobalMiddlewares sets up middlewares that must run in all endpoints, not just valid ones.
+// gorilla/mux only runs middlewares when a handler path/method matches, that's why this workaround
+// is needed. See https://github.com/gorilla/mux/issues/416
+func (n *Node) setupGlobalMiddlewares(router *mux.Router, nodeConfig WunderNodeConfig) http.Handler {
+	handler := http.Handler(router)
+	if corsConfig := nodeConfig.Api.CorsConfiguration; corsConfig != nil {
+		corsMiddleware := cors.New(cors.Options{
+			MaxAge:           int(corsConfig.MaxAge),
+			AllowCredentials: corsConfig.AllowCredentials,
+			AllowedHeaders:   corsConfig.AllowedHeaders,
+			AllowedMethods:   corsConfig.AllowedMethods,
+			AllowedOrigins:   loadvariable.Strings(corsConfig.AllowedOrigins),
+			ExposedHeaders:   corsConfig.ExposedHeaders,
+		})
+		handler = corsMiddleware.Handler(handler)
+		n.log.Debug("configuring CORS",
+			zap.Strings("allowedOrigins", loadvariable.Strings(corsConfig.AllowedOrigins)),
+		)
+	}
+	return handler
 }
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
