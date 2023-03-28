@@ -1336,10 +1336,12 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	}
 	const schemas: Record<string, JSONSchema> = {};
 	for (const op of operations) {
-		const schema = generator.getSchemaForSymbol(responseTypeName(op));
-		if (schema) {
+		try {
+			const schema = generator.getSchemaForSymbol(responseTypeName(op));
 			delete schema.$schema;
 			schemas[op.Name] = schema as JSONSchema;
+		} catch (e: any) {
+			Logger.warn(`could not generate response schema for ${op.Name}: ${e}`);
 		}
 	}
 	console.warn = originalWarn;
@@ -1351,9 +1353,16 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
 	const schemas = await typeScriptOperationsResponseSchemas(wgDirAbs, operations);
 	for (const op of operations) {
-		const responseSchema = schemas[op.Name];
-		if (responseSchema) {
-			op.ResponseSchema = responseSchema;
+		const schema = schemas[op.Name];
+		if (schema) {
+			op.ResponseSchema = schemas[schema];
+		} else {
+			// For functions that don't return anything, we return an empty JSON object
+			op.ResponseSchema = {
+				type: 'object',
+				additionalProperties: false,
+				properties: {},
+			};
 		}
 	}
 };

@@ -54,7 +54,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -82,7 +86,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -110,7 +118,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -138,7 +150,6 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "application/json": {
               "schema": {
                 "additionalProperties": false,
-                "definitions": {},
                 "properties": {},
                 "type": "object",
               },
@@ -150,7 +161,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -178,7 +193,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
