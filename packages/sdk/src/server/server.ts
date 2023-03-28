@@ -25,6 +25,9 @@ import type {
 } from './types';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
+import { ConfigurationVariableKind, DataSourceKind } from '@wundergraph/protobuf';
+import { WgEnv } from '../configure/options';
+import { executableSchema } from '../v2openapi/omnigraph';
 
 let WG_CONFIG: WunderGraphConfiguration;
 let clientFactory: InternalClientFactory;
@@ -226,11 +229,59 @@ export const createServer = async ({
 			fastify.log.info('Hooks plugin registered');
 		}
 
+		interface OpenApiServer {
+			mountPath: string;
+			schema: string;
+			baseURL?: string;
+		}
+
+		let openApiServers: Set<OpenApiServer> = new Set();
+
+		config.api?.engineConfiguration?.datasourceConfigurations?.forEach((ds) => {
+			if (
+				ds.kind == DataSourceKind.GRAPHQL &&
+				ds.customGraphql?.fetch?.url?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
+				ds.customGraphql?.fetch?.url?.staticVariableContent === WgEnv.ServerUrl
+			) {
+				let server: OpenApiServer = {
+					schema: ds.customGraphql.upstreamSchema,
+					mountPath: '',
+				};
+
+				if (ds.customGraphql?.fetch?.baseUrl) {
+					server.baseURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
+				}
+
+				if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
+					server.mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
+				}
+
+				openApiServers.add(server);
+			}
+		});
+
+		const hasOpenApiServers = openApiServers.size > 0;
 		const hasGraphqlServers = serverConfig.graphqlServers && serverConfig.graphqlServers.length > 0;
 
 		let graphqlPlugin: any;
-		if (hasGraphqlServers) {
+		if (hasGraphqlServers || hasOpenApiServers) {
 			graphqlPlugin = await require('./plugins/graphql');
+		}
+
+		if (hasOpenApiServers) {
+			for (const server of openApiServers) {
+				const apiID = server.mountPath.split('/').pop()!;
+
+				const schema = executableSchema(server.schema, logger, server.baseURL);
+
+				await fastify.register(require('./plugins/graphql'), {
+					serverName: apiID,
+					schema: schema,
+					routeUrl: server.mountPath,
+				});
+				fastify.log.info('GraphQL plugin registered');
+				fastify.log.info(`OpenAPI GraphQL server '${apiID}' listening at ${server.mountPath}`);
+			}
 		}
 
 		if (hasGraphqlServers) {
