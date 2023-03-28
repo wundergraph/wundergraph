@@ -175,6 +175,9 @@ The generated clients are aware of the error codes, so you can handle them in a 
 
 ```typescript
 import { ReponseError } from '@wundergraph/sdk/client';
+import { createClient } from '../.wundergraph/generated/client';
+
+const client = createClient();
 const { data, error } = await client.query({
   operationName: 'users/get',
 });

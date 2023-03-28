@@ -186,6 +186,9 @@ Now, when we call this operation with `b` being `0`, we'll get the following err
 
 ```typescript
 import { ReponseError } from '@wundergraph/sdk/client';
+import { createClient } from '../generated/client';
+
+const client = createClient();
 const { data, error } = await client.query({
   operationName: 'users/get',
 });

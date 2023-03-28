@@ -47,6 +47,15 @@ const client = new Client({
 });
 ```
 
+### Type-safe Client
+
+If you use the client in combination with your WunderGraph you can use the auto-generated `createClient` function to create a fully type-safe client. This is the recommended way to use the client.
+
+```ts
+import { createClient } from '../.wundergraph/generated/client';
+const client = createClient();
+```
+
 ### Browser
 
 If you target older browsers you will need a polyfill for fetch, AbortController, AbortSignal and possibly Promise.
@@ -225,6 +234,9 @@ If you want to create customer errors for TypeScript operations, you can extend 
 
 ```ts
 import { ReponseError } from '@wundergraph/sdk/client';
+import { createClient } from '../.wundergraph/generated/client';
+
+const client = createClient();
 const { data, error } = await client.query({
   operationName: 'users/get',
 });
@@ -242,6 +254,8 @@ if (error?.code === 'AuthorizationError') {
   // handle error
 }
 ```
+
+> Note: The TypeScript client is compatible with Node.js and the browser. We provide optimized packages for Next.js, React, Vite and Remix.
 
 ### Other
 
