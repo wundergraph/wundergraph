@@ -125,7 +125,15 @@ export class OpenApiBuilder {
 	constructor(private config: OpenApiBuilderOptions) {}
 
 	private operationResponses(op: GraphQLOperation): Record<string, OpenApiResponse> {
-		const responses: Record<string, OpenApiResponse> = {
+		return {
+			'200': {
+				description: 'Success',
+				content: {
+					'application/json': {
+						schema: op.ResponseSchema,
+					},
+				},
+			},
 			'400': {
 				description: 'Invalid input',
 				content: {
@@ -135,17 +143,6 @@ export class OpenApiBuilder {
 				},
 			},
 		};
-		if (op.ResponseSchema) {
-			responses['200'] = {
-				description: 'Success',
-				content: {
-					'application/json': {
-						schema: op.ResponseSchema,
-					},
-				},
-			};
-		}
-		return responses;
 	}
 
 	private commonOperation(op: GraphQLOperation) {
