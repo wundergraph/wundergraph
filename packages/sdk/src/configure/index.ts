@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import process from 'node:process';
 import {
 	buildSchema,
@@ -75,7 +76,6 @@ import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
-import os from 'os';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -1258,6 +1258,23 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
+// return the first file named filename starting from cwd and walking
+// up the filesystem hierarchy until the root
+const findUp = (filename: string, cwd: string) => {
+	let cur = path.resolve(cwd);
+	const { root } = path.parse(cur);
+	while (true) {
+		const potentialMatch = path.join(cur, filename);
+		if (fs.existsSync(potentialMatch)) {
+			return potentialMatch;
+		}
+		if (cur === root) {
+			break;
+		}
+		cur = path.dirname(cur);
+	}
+};
+
 // typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
 // operations at once, since it's several times faster than generating them one by one
 const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
@@ -1299,20 +1316,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const originalWarn = console.warn;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
 	// If we can find a tsconfig.json, use it
-	let tsConfigPath: string | undefined;
-	let currentDir = wgDirAbs;
-	while (true) {
-		const tsConfig = path.join(currentDir, 'tsconfig.json');
-		if (fs.existsSync(tsConfig)) {
-			tsConfigPath = tsConfig;
-			break;
-		}
-		const next = path.dirname(currentDir);
-		if (next === currentDir) {
-			break;
-		}
-		currentDir = next;
-	}
+	const tsConfigPath = findUp('tsconfig.json', wgDirAbs);
 	let generator: JsonSchemaGenerator | null = null;
 	if (tsConfigPath) {
 		const tsConfigProgram = programFromConfig(tsConfigPath);
