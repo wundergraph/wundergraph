@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path, { relative } from 'path';
+import path from 'path';
 import process from 'node:process';
 import {
 	buildSchema,
@@ -74,6 +74,7 @@ import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
+import os from 'os';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -996,6 +997,34 @@ export const configureWunderGraphApplication = <
 			});
 			Logger.info(`wundergraph.openapi.json updated`);
 
+			fs.writeFileSync(
+				path.join('generated', 'wundergraph.build_info.json'),
+				JSON.stringify(
+					{
+						sdk: {
+							version: SDK_VERSION ?? 'unknown',
+						},
+						wunderctl: {
+							version: process.env.WUNDERCTL_VERSION ?? 'unknown',
+						},
+						node: {
+							version: process.version,
+						},
+						os: {
+							type: os.type(),
+							platform: os.platform(),
+							arch: os.arch(),
+							version: os.version(),
+							release: os.release(),
+						},
+					},
+					null,
+					2
+				),
+				{ encoding: 'utf8' }
+			);
+			Logger.debug(`wundergraph.build_info.json updated`);
+
 			done();
 		})
 		.catch((e: any) => {
@@ -1472,7 +1501,7 @@ const loadAndApplyNodeJsOperationOverrides = async (
 	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
 		return operation;
 	}
-	const filePath = path.join(wgDirAbs, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const filePath = path.join(wgDirAbs, 'generated', 'bundle', 'operations', operation.PathName + '.cjs');
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 	return applyNodeJsOperationOverrides(operation, implementation);
 };
