@@ -295,7 +295,6 @@ importers:
       '@fastify/formbody': ^7.3.0
       '@graphql-tools/schema': ^8.3.10
       '@prisma/generator-helper': ^3.9.2
-      '@types/axios': ^0.14.0
       '@types/chai': ^4.2.22
       '@types/cors': ^2.8.10
       '@types/debug': ^4.1.7
@@ -386,7 +385,6 @@ importers:
       zod: 3.20.2
       zod-to-json-schema: 3.20.2_zod@3.20.2
     devDependencies:
-      '@types/axios': 0.14.0
       '@types/chai': 4.3.3
       '@types/cors': 2.8.12
       '@types/debug': 4.1.7
@@ -5503,15 +5501,6 @@ packages:
       '@types/retry': 0.12.2
     dev: true
 
-  /@types/axios/0.14.0:
-    resolution: {integrity: sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==}
-    deprecated: This is a stub types definition for axios (https://github.com/mzabriskie/axios). axios provides its own type definitions, so you don't need @types/axios installed!
-    dependencies:
-      axios: 0.27.2
-    transitivePeerDependencies:
-      - debug
-    dev: true
-
   /@types/babel__core/7.1.19:
     resolution: {integrity: sha512-WEOTgRsbYkvA/KCsDwVEGkd7WAr1e3g31VHQ8zy5gul/V1qKullU/BU5I68X5v7V3GnB9eotmom4v5a5gjxorw==}
     dependencies:
@@ -6458,15 +6447,6 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: false
-
-  /axios/0.27.2:
-    resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
-    dependencies:
-      follow-redirects: 1.15.2
-      form-data: 4.0.0
-    transitivePeerDependencies:
-      - debug
-    dev: true
 
   /axobject-query/2.2.0:
     resolution: {integrity: sha512-Td525n+iPOOyUQIeBfcASuG6uJsDOITl7Mds5gFyerkWiX7qhUTdYUBlSgNMyVqtSJqwpt1kXGLdUt6SykLMRA==}
