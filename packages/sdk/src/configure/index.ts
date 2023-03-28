@@ -63,6 +63,7 @@ import {
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
+import { findUp } from './findup';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
 import { LocalCache } from '../localcache';
 import { OpenApiBuilder } from '../openapibuilder';
@@ -1258,23 +1259,6 @@ const trimTrailingSlash = (url: string): string => {
 	return url.endsWith('/') ? url.slice(0, -1) : url;
 };
 
-// return the first file named filename starting from cwd and walking
-// up the filesystem hierarchy until the root
-const findUp = (filename: string, cwd: string) => {
-	let cur = path.resolve(cwd);
-	const { root } = path.parse(cur);
-	while (true) {
-		const potentialMatch = path.join(cur, filename);
-		if (fs.existsSync(potentialMatch)) {
-			return potentialMatch;
-		}
-		if (cur === root) {
-			break;
-		}
-		cur = path.dirname(cur);
-	}
-};
-
 // typeScriptOperationsResponseSchemas generates the response schemas for all TypeScript
 // operations at once, since it's several times faster than generating them one by one
 const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
@@ -1316,7 +1300,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const originalWarn = console.warn;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
 	// If we can find a tsconfig.json, use it
-	const tsConfigPath = findUp('tsconfig.json', wgDirAbs);
+	const tsConfigPath = await findUp('tsconfig.json', wgDirAbs);
 	let generator: JsonSchemaGenerator | null = null;
 	if (tsConfigPath) {
 		const tsConfigProgram = programFromConfig(tsConfigPath);
