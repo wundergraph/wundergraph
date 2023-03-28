@@ -22,7 +22,7 @@ import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { openApi } from './openapi-introspection';
+import { openApi, OpenAPIIntrospectionNew, openApiNew } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -454,6 +454,9 @@ export const introspect = {
 	federation: introspectFederation,
 	openApi: (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 		return openApi(introspection);
+	},
+	openApiNew: (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
+		return openApiNew(introspection);
 	},
 };
 
