@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
-import { ClientResponse, InputValidationError } from '@wundergraph/sdk/client';
-import { NestedInternalResponse } from '../.wundergraph/generated/models';
+import { InputValidationError } from '@wundergraph/sdk/client';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
 const wg = createTestServer();
@@ -11,7 +10,7 @@ afterAll(() => wg.stop());
 describe('functions', () => {
 	test('internal operation call from  function', async () => {
 		const client = wg.client();
-		const promises: Promise<ClientResponse<NestedInternalResponse>>[] = [];
+		const promises = [];
 		// Call this 50 times to exercise some code paths that share cached
 		// buffers. If we have a race condition in there, the go race detector
 		// (which we use in CI) will likely catch it.
