@@ -2,6 +2,7 @@
   "name": "@test/vite",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",

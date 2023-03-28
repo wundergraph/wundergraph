@@ -1086,23 +1086,25 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 	switch x := value.(type) {
 	case nil:
 		if custom.Required {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
-			}
+			return nil, inputvariables.NewValidationError(fmt.Sprintf("required customClaim %s not found", custom.Name), nil, nil)
 		}
 		return variables, nil
 	case string:
 		if custom.Type != wgpb.ValueType_STRING {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		replacement = []byte("\"" + string(x) + "\"")
 	case bool:
 		if custom.Type != wgpb.ValueType_BOOLEAN {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		if x {
 			replacement = []byte("true")
@@ -1114,18 +1116,22 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		case wgpb.ValueType_INT:
 			if x != float64(int(x)) {
 				// Value is not integral
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
-				}
+				return nil, inputvariables.NewValidationError(
+					fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
+					nil,
+					nil,
+				)
 			}
 			replacement = []byte(strconv.FormatInt(int64(x), 10))
 		case wgpb.ValueType_FLOAT:
 			// JSON number is always a valid float
 			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 	default:
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)

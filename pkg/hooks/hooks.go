@@ -225,13 +225,6 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: no response", operationName)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusInternalServerError, http.StatusUnauthorized:
-		break
-	default:
-		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
-	}
-
 	dec := json.NewDecoder(resp.Body)
 
 	var hookRes MiddlewareHookResponse
@@ -244,14 +237,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusInternalServerError:
-		hookRes.ClientResponseStatusCode = http.StatusBadGateway
-	case http.StatusUnauthorized:
-		hookRes.ClientResponseStatusCode = http.StatusUnauthorized
-	default:
-		hookRes.ClientResponseStatusCode = http.StatusOK
-	}
+	hookRes.ClientResponseStatusCode = resp.StatusCode
 
 	return &hookRes, nil
 }

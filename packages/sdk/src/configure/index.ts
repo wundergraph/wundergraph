@@ -13,7 +13,7 @@ import {
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import objectHash from 'object-hash';
-import _ from 'lodash';
+import { camelCase } from 'lodash';
 import { buildGenerator, getProgramFromFiles, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
@@ -35,6 +35,7 @@ import {
 	ParsedOperations,
 	parseGraphQLOperations,
 	removeHookVariables,
+	TypeScriptOperation,
 	TypeScriptOperationFile,
 	WellKnownClaim,
 } from '../graphql/operations';
@@ -409,7 +410,7 @@ const resolveConfig = async (config: WunderGraphConfigApplicationConfig): Promis
 				.map((provider) => provider.resolve())
 				.map((provider) => ({
 					...provider,
-					id: _.camelCase(provider.id),
+					id: camelCase(provider.id),
 				}))) ||
 		[];
 
@@ -950,7 +951,7 @@ export const configureWunderGraphApplication = <
 
 			// Update response types for TS operations. Do this only after code generation completes,
 			// since TS operations need some of the generated files
-			const tsOperations = app.Operations.filter(
+			const tsOperations: TypeScriptOperation[] = app.Operations.filter(
 				(operation) => operation.ExecutionEngine == OperationExecutionEngine.ENGINE_NODEJS
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
@@ -1302,11 +1303,13 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const settings = {
 		required: true,
 	};
+
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const originalWarn = console.warn;
 	const originalError = console.error;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
 	console.error = (_message?: any, ..._optionalParams: any[]) => {};
+
 	let generator = buildGenerator(program, settings);
 	// generator can be null if the program can't be compiled
 	if (!generator) {
@@ -1351,10 +1354,11 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
 	const filePath = path.join(wgDirAbs, file.module_path);
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
-	const operation: GraphQLOperation = {
+	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
 		PathName: file.api_mount_path,
 		Content: '',
+		Errors: implementation.errors?.map((E) => new E()) || [],
 		OperationType:
 			implementation.type === 'query'
 				? OperationType.QUERY
@@ -1452,7 +1456,7 @@ const resolveOperationsConfigurations = async (
 		customJsonScalars,
 		customClaims,
 	});
-	const nodeJSOperations: GraphQLOperation[] = [];
+	const nodeJSOperations: TypeScriptOperation[] = [];
 	if (loadedOperations.typescript_operation_files) {
 		for (const file of loadedOperations.typescript_operation_files) {
 			try {
@@ -1487,12 +1491,12 @@ const operationFilePath = (wgDirAbs: string, operation: GraphQLOperation) => {
 // the NODEJS engine, it returns the operation unchanged.
 const loadAndApplyNodeJsOperationOverrides = async (
 	wgDirAbs: string,
-	operation: GraphQLOperation
-): Promise<GraphQLOperation> => {
+	operation: TypeScriptOperation
+): Promise<TypeScriptOperation> => {
 	if (operation.ExecutionEngine !== OperationExecutionEngine.ENGINE_NODEJS) {
 		return operation;
 	}
-	const filePath = path.join(wgDirAbs, 'generated', 'bundle', 'operations', operation.PathName + '.js');
+	const filePath = path.join(wgDirAbs, 'generated', 'bundle', 'operations', operation.PathName + '.cjs');
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 	return applyNodeJsOperationOverrides(operation, implementation);
 };
@@ -1502,9 +1506,9 @@ const loadAndApplyNodeJsOperationOverrides = async (
 // does. Notice that, for performance reasons, the response schema is set by updateTypeScriptOperationsResponseSchemas instead of
 // this function.
 const applyNodeJsOperationOverrides = (
-	operation: GraphQLOperation,
+	operation: TypeScriptOperation,
 	overrides: NodeJSOperation<any, any, any, any, any, any, any, any, any, any>
-): GraphQLOperation => {
+): TypeScriptOperation => {
 	if (overrides.inputSchema) {
 		const schema = zodToJsonSchema(overrides.inputSchema) as any;
 		operation.VariablesSchema = schema;
@@ -1520,6 +1524,9 @@ const applyNodeJsOperationOverrides = (
 		operation.AuthenticationConfig = {
 			required: overrides.requireAuthentication,
 		};
+	}
+	if (overrides.errors) {
+		operation.Errors = overrides.errors.map((E) => new E());
 	}
 	if (overrides.rbac) {
 		operation.AuthorizationConfig = {
