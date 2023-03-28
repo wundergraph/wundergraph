@@ -117,11 +117,11 @@ export class TypeScriptResponseModels implements Template {
 export class TypeScriptResponseDataModels implements Template {
 	generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.filter(
-			(op) => op.ResponseSchema?.properties !== undefined && op.ResponseSchema?.properties['data'] !== undefined
+			(op) => op.ResponseSchema.properties !== undefined && op.ResponseSchema.properties['data'] !== undefined
 		)
 			.map((op) =>
 				JSONSchemaToTypescriptInterface(
-					op.ResponseSchema?.properties!['data'] as JSONSchema7,
+					op.ResponseSchema.properties!['data'] as JSONSchema7,
 					op.Name + 'ResponseData',
 					false,
 					op.TypeScriptOperationImport

@@ -2,60 +2,44 @@ import { OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../graphql/operations';
 import { OpenApiBuilder } from './index';
 
+const emptySchema = {
+	type: 'object',
+	properties: {},
+	additionalProperties: false,
+};
+
 const operations = [
 	{
 		Name: 'GetRootObj',
 		PathName: 'GetRootObj',
 		OperationType: OperationType.QUERY,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
-		VariablesSchema: {
-			type: 'object',
-			properties: {},
-			additionalProperties: false,
-			definitions: {},
-		},
-		ResponseSchema: {
-			type: 'object',
-			properties: {},
-			additionalProperties: false,
-			definitions: {},
-		},
+		VariablesSchema: emptySchema,
+		ResponseSchema: emptySchema,
 	},
 	{
 		Name: 'GetRootObj2',
 		PathName: 'GetRootObj2',
 		OperationType: OperationType.QUERY,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
-		VariablesSchema: {
-			type: 'object',
-			properties: {},
-			additionalProperties: false,
-			definitions: {},
-		},
+		VariablesSchema: emptySchema,
+		ResponseSchema: emptySchema,
 	},
 	{
 		Name: 'GetUser',
 		PathName: 'users/get',
 		OperationType: OperationType.QUERY,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
-		VariablesSchema: {
-			type: 'object',
-			properties: {},
-			additionalProperties: false,
-			definitions: {},
-		},
+		VariablesSchema: emptySchema,
+		ResponseSchema: emptySchema,
 	},
 	{
 		Name: 'SubscribeToUser',
 		PathName: 'users/subscribe',
 		OperationType: OperationType.SUBSCRIPTION,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
-		VariablesSchema: {
-			type: 'object',
-			properties: {},
-			additionalProperties: false,
-			definitions: {},
-		},
+		VariablesSchema: emptySchema,
+		ResponseSchema: emptySchema,
 	},
 	{
 		Name: 'PutUser',
@@ -63,12 +47,8 @@ const operations = [
 		OperationType: OperationType.MUTATION,
 		ExecutionEngine: OperationExecutionEngine.ENGINE_GRAPHQL,
 		AuthenticationConfig: { required: true },
-		VariablesSchema: {
-			type: 'object',
-			properties: {},
-			additionalProperties: false,
-			definitions: {},
-		},
+		VariablesSchema: emptySchema,
+		ResponseSchema: emptySchema,
 	},
 ] as GraphQLOperation[];
 

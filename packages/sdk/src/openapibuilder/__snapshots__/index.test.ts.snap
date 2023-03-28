@@ -83,6 +83,18 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         "operationId": "GetRootObj2",
         "parameters": [],
         "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Success",
+          },
           "400": {
             "content": {
               "application/json": {
@@ -103,6 +115,18 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         "operationId": "GetUser",
         "parameters": [],
         "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Success",
+          },
           "400": {
             "content": {
               "application/json": {
@@ -126,7 +150,6 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "application/json": {
               "schema": {
                 "additionalProperties": false,
-                "definitions": {},
                 "properties": {},
                 "type": "object",
               },
@@ -135,6 +158,18 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "required": true,
         },
         "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Success",
+          },
           "400": {
             "content": {
               "application/json": {
@@ -155,6 +190,18 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
         "operationId": "SubscribeToUser",
         "parameters": [],
         "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Success",
+          },
           "400": {
             "content": {
               "application/json": {

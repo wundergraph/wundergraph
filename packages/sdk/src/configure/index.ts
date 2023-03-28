@@ -1314,7 +1314,17 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations: GraphQLOperation[]) => {
 	const schemas = await typeScriptOperationsResponseSchemas(wgDirAbs, operations);
 	for (const op of operations) {
-		op.ResponseSchema = schemas[op.Name];
+		const schema = schemas[op.Name];
+		if (schema) {
+			op.ResponseSchema = schemas[schema];
+		} else {
+			// For functions that don't return anything, we return an empty JSON object
+			op.ResponseSchema = {
+				type: 'object',
+				additionalProperties: false,
+				properties: {},
+			};
+		}
 	}
 };
 

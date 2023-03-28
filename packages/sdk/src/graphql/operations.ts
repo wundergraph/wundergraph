@@ -51,7 +51,7 @@ export interface GraphQLOperation {
 	InternalVariablesSchema: JSONSchema;
 	// ResponseSchema is undefined if the operation never returns
 	// a non-error response (e.g. a TS operation that always throws)
-	ResponseSchema?: JSONSchema;
+	ResponseSchema: JSONSchema;
 	TypeScriptOperationImport?: string;
 	Mock?: {
 		Endpoint: string;
