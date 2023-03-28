@@ -27,5 +27,5 @@ Now that the integration is installed, you can re-deploy your WunderGraph projec
 
 ## Important Instructions
 
-1. WunderGraph creates a role in the Neon project selected during the integration process, please do not delete or change the password of the role.
+1. WunderGraph creates a role named `wundergraph-$project_id` in the Neon project selected during the integration process, please do not delete or change the password of the role.
 2. WunderGraph configures a environment variable called `NEON_DATABASE_URL`. Please use this variable wherever you need the database url.
