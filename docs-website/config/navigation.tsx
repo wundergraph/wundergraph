@@ -382,44 +382,12 @@ const navigation = [
 				href: '/docs/databases',
 			},
 			{
-				title: 'PostgreSQL',
-				href: '/docs/databases/postgresql',
-			},
-			{
-				title: 'MySQL',
-				href: '/docs/databases/mysql',
-			},
-			{
-				title: 'SQLite',
-				href: '/docs/databases/sqlite',
-			},
-			{
-				title: 'SQLServer',
-				href: '/docs/databases/sqlserver',
-			},
-			{
-				title: 'Prisma',
+				title: 'Prisma Datasource',
 				href: '/docs/databases/prisma',
-			},
-			{
-				title: 'MongoDB + Atlas',
-				href: '/docs/databases/mongodb-atlas',
-			},
-			{
-				title: 'Planetscale',
-				href: '/docs/databases/planetscale',
 			},
 			{
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
-			},
-			{
-				title: 'Neo4j',
-				href: '/docs/databases/neo4j',
-			},
-			{
-				title: 'Yugabyte',
-				href: '/docs/databases/yugabyte',
 			},
 		],
 	},

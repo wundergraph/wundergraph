@@ -1,0 +1,34 @@
+projects:
+  auth:
+    schema: 'testapps/auth/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/auth/.wundergraph/operations/**/*.graphql'
+  default:
+    schema: 'testapps/default/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/default/.wundergraph/operations/**/*.graphql'
+  hooks:
+    schema: 'testapps/hooks/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/hooks/.wundergraph/operations/**/*.graphql'
+  jwks:
+    schema: 'testapps/jwks/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/jwks/.wundergraph/operations/**/*.graphql'
+  mtls:
+    schema: 'testapps/mtls/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/mtls/.wundergraph/operations/**/*.graphql'
+  nextauth:
+    schema: 'testapps/nextauth/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/nextauth/.wundergraph/operations/**/*.graphql'
+  nextjs:
+    schema: 'testapps/nextjs/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/nextjs/.wundergraph/operations/**/*.graphql'
+  openapi:
+    schema: 'testapps/openapi/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/openapi/.wundergraph/operations/**/*.graphql'
+  postgres:
+    schema: 'testapps/postgres/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/postgres/.wundergraph/operations/**/*.graphql'
+  simple:
+    schema: 'testapps/simple/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/simple/.wundergraph/operations/**/*.graphql'
+  vite:
+    schema: 'testapps/vite/.wundergraph/generated/wundergraph.schema.graphql'
+    documents: 'testapps/vite/.wundergraph/operations/**/*.graphql'

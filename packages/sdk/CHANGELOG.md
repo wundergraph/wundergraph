@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.142.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.141.0...@wundergraph/sdk@0.142.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+* use .cjs extension for commonjs to support esm projects ([#752](https://github.com/wundergraph/wundergraph/issues/752)) ([7045b52](https://github.com/wundergraph/wundergraph/commit/7045b529d0f6ac339c6959668c77325777326a6f)) (@Pagebakers)
+
+## [0.141.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.140.0...@wundergraph/sdk@0.141.0) (2023-03-27)
+
+### Features
+
+* add build_info.json to sdk ([#758](https://github.com/wundergraph/wundergraph/issues/758)) ([e34c94f](https://github.com/wundergraph/wundergraph/commit/e34c94fefc6b624ada2d4ad36ce8589309620950)) (@Aenimus)
+
 ## [0.140.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.139.0...@wundergraph/sdk@0.140.0) (2023-03-23)
 
 ### Features

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.8...@wundergraph/react-query@0.8.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+
+## [0.7.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.7...@wundergraph/react-query@0.7.8) (2023-03-27)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
 ## [0.7.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.6...@wundergraph/react-query@0.7.7) (2023-03-23)
 
 **Note:** Version bump only for package @wundergraph/react-query

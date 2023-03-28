@@ -23,7 +23,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mattbaird/jsonpatch"
-	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
@@ -253,23 +252,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			handler.ServeHTTP(w, request)
 		})
 	})
-
-	if api.CorsConfiguration != nil {
-		corsMiddleware := cors.New(cors.Options{
-			MaxAge:           int(api.CorsConfiguration.MaxAge),
-			AllowCredentials: api.CorsConfiguration.AllowCredentials,
-			AllowedHeaders:   api.CorsConfiguration.AllowedHeaders,
-			AllowedMethods:   api.CorsConfiguration.AllowedMethods,
-			AllowedOrigins:   loadvariable.Strings(api.CorsConfiguration.AllowedOrigins),
-			ExposedHeaders:   api.CorsConfiguration.ExposedHeaders,
-		})
-		r.router.Use(func(handler http.Handler) http.Handler {
-			return corsMiddleware.Handler(handler)
-		})
-		r.log.Debug("configuring CORS",
-			zap.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
-		)
-	}
 
 	if err := r.registerAuth(r.insecureCookies); err != nil {
 		if !r.devMode {
@@ -525,10 +507,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        r.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        r.log,
+		Client:    r.middlewareClient,
+		Operation: operation,
+		Logger:    r.log,
 	}
 
 	switch operation.OperationType {
@@ -1087,23 +1068,25 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 	switch x := value.(type) {
 	case nil:
 		if custom.Required {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
-			}
+			return nil, inputvariables.NewValidationError(fmt.Sprintf("required customClaim %s not found", custom.Name), nil, nil)
 		}
 		return variables, nil
 	case string:
 		if custom.Type != wgpb.ValueType_STRING {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		replacement = []byte("\"" + string(x) + "\"")
 	case bool:
 		if custom.Type != wgpb.ValueType_BOOLEAN {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		if x {
 			replacement = []byte("true")
@@ -1115,18 +1098,22 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		case wgpb.ValueType_INT:
 			if x != float64(int(x)) {
 				// Value is not integral
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
-				}
+				return nil, inputvariables.NewValidationError(
+					fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
+					nil,
+					nil,
+				)
 			}
 			replacement = []byte(strconv.FormatInt(int64(x), 10))
 		case wgpb.ValueType_FLOAT:
 			// JSON number is always a valid float
 			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 	default:
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)
@@ -1918,6 +1905,17 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 	return left
 }
 
+func (r *Builder) authenticationHooks() authentication.Hooks {
+	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
+		Client:                     r.middlewareClient,
+		Log:                        r.log,
+		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
+		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
+		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
+		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
+	})
+}
+
 func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	var (
@@ -1953,13 +1951,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
 	}
 
-	authHooks := authentication.Hooks{
-		Log:                        r.log,
-		Client:                     r.middlewareClient,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-	}
+	authHooks := r.authenticationHooks()
 
 	loadUserConfig := authentication.LoadUserConfig{
 		Log:           r.log,
@@ -1975,12 +1967,11 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 	}))
 
 	userHandler := &authentication.UserHandler{
-		HasRevalidateHook: r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-		MWClient:          r.middlewareClient,
-		Log:               r.log,
-		InsecureCookies:   insecureCookies,
-		Cookie:            cookie,
-		PublicClaims:      r.api.AuthenticationConfig.PublicClaims,
+		Hooks:           authHooks,
+		Log:             r.log,
+		InsecureCookies: insecureCookies,
+		Cookie:          cookie,
+		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
@@ -2103,12 +2094,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
 			zap.String("providerId", provider.Id),
@@ -2139,12 +2125,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
 			zap.String("providerId", provider.Id),
@@ -2282,7 +2263,10 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hooks.EncodeData(hooksAuthenticator, r, buf.Bytes(), ctx.Variables, nil)
+	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
+	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
+		return
+	}
 
 	switch {
 	case isLive:
@@ -2560,9 +2544,4 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
-}
-
-// hooksAuthenticator is used to break the import cycle between authentication and hooks
-func hooksAuthenticator(ctx context.Context) interface{} {
-	return authentication.UserFromContext(ctx)
 }
