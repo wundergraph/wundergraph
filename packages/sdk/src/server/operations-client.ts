@@ -75,6 +75,7 @@ export class OperationsClient<Queries = any, Mutations = any, Subscriptions = an
 		});
 		return (await res.json()) as Queries[T] extends { response: any } ? Queries[T]['response'] : never;
 	};
+
 	public mutate = <T extends keyof Mutations>(
 		args: ExtractInput<Mutations[T]> extends never
 			? Omit<OperationArgs<T, never>, 'input'>
@@ -82,6 +83,7 @@ export class OperationsClient<Queries = any, Mutations = any, Subscriptions = an
 	): Promise<Mutations[T] extends { response: any } ? Mutations[T]['response'] : never> => {
 		return this.query(args as any);
 	};
+
 	public subscribe = async <T extends keyof Subscriptions>(
 		args: ExtractInput<Subscriptions[T]> extends never
 			? Omit<OperationArgs<T, never>, 'input'>

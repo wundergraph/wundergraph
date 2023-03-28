@@ -1,7 +1,7 @@
 import { waitFor, screen, render, fireEvent } from '@solidjs/testing-library';
 import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/solid-query';
 import { createEffect, JSX } from 'solid-js';
-import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, OperationsDefinition, ResponseError } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
 
@@ -9,7 +9,7 @@ import { createHooks } from '../src';
 
 export type Queries = {
 	Weather: {
-		data: any;
+		response: { data?: any; error?: ResponseError };
 		requiresAuthentication: false;
 		liveQuery: boolean;
 	};
@@ -18,12 +18,12 @@ export type Queries = {
 export type Mutations = {
 	SetNameWithoutAuth: {
 		input: { name: string };
-		data: { id: string };
+		response: { data?: { id: string }; error?: ResponseError };
 		requiresAuthentication: false;
 	};
 	SetName: {
 		input: { name: string };
-		data: { id: string };
+		response: { data?: { id: string }; error?: ResponseError };
 		requiresAuthentication: true;
 	};
 };
@@ -31,7 +31,7 @@ export type Mutations = {
 export type Subscriptions = {
 	Countdown: {
 		input: { from: number };
-		data: { count: number };
+		response: { data?: { count: number }; error?: ResponseError };
 		requiresAuthentication: false;
 	};
 };
