@@ -1,6 +1,7 @@
 import * as z from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
+import { OperationError } from '../client';
 
 export type SubscriptionHandler<
 	Input,
@@ -73,8 +74,10 @@ const createQuery =
 		requireAuthentication = false,
 		internal = false,
 		rbac,
+		errors = [],
 	}: {
 		input?: Input;
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -109,6 +112,7 @@ const createQuery =
 				requireMatchAll: rbac?.requireMatchAll || [],
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
+			errors,
 			liveQuery: {
 				enable: live?.enable || true,
 				pollingIntervalSeconds: live?.pollingIntervalSeconds || 5,
@@ -125,8 +129,10 @@ const createMutation =
 		requireAuthentication = false,
 		internal = false,
 		rbac,
+		errors = [],
 	}: {
 		input?: Input;
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -160,6 +166,7 @@ const createMutation =
 				requireMatchAll: rbac?.requireMatchAll || [],
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
+			errors,
 			liveQuery: {
 				enable: false,
 				pollingIntervalSeconds: 0,
@@ -176,8 +183,10 @@ const createSubscription =
 		requireAuthentication = false,
 		internal = false,
 		rbac,
+		errors = [],
 	}: {
 		input?: I;
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: SubscriptionHandler<
 			I,
@@ -215,6 +224,7 @@ const createSubscription =
 				requireMatchAll: rbac?.requireMatchAll || [],
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
+			errors,
 			liveQuery: {
 				enable: false,
 				pollingIntervalSeconds: 0,
@@ -271,6 +281,7 @@ export type NodeJSOperation<
 		Mutations,
 		Subscriptions
 	>;
+	errors?: { new (): OperationError }[];
 	requireAuthentication?: boolean;
 	internal: boolean;
 	liveQuery: {
@@ -325,7 +336,7 @@ export const loadNodeJsOperationDefaultModule = async (
 	try {
 		module = await import(filePath);
 	} catch (e: any) {
-		throw new Error(`Error loading module at ${filePath}: ${e.message}`);
+		throw new Error(`Error loading module at ${filePath}: ${e.message}: ${e?.stack}`);
 	}
 	if (!module || !module.default) {
 		throw new Error(`Module at ${filePath} does not export default`);

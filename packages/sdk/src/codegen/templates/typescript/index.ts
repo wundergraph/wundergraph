@@ -8,6 +8,7 @@ import path from 'path';
 import { visitJSONSchema } from '../../jsonschema';
 import { OperationExecutionEngine } from '@wundergraph/protobuf';
 import { GraphQLOperation } from '../../../graphql/operations';
+import { TypeScriptOperationErrors } from './ts-operation-errors';
 
 export const formatTypeScript = (input: string): string => {
 	return prettier.format(input, {
@@ -26,6 +27,7 @@ export class TypeScriptInputModels implements Template {
 					op.VariablesSchema,
 					op.Name + 'Input',
 					false,
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
 					op.TypeScriptOperationImport
 						? {
 								importName: op.TypeScriptOperationImport,
@@ -52,7 +54,14 @@ export class TypeScriptInputModels implements Template {
 export class TypeScriptInternalInputModels implements Template {
 	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.filter(hasInternalInput)
-			.map((op) => JSONSchemaToTypescriptInterface(op.InternalVariablesSchema, 'Internal' + op.Name + 'Input', false))
+			.map((op) =>
+				JSONSchemaToTypescriptInterface(
+					op.InternalVariablesSchema,
+					'Internal' + op.Name + 'Input',
+					false,
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
+				)
+			)
 			.join('\n\n');
 		return Promise.resolve([
 			{
@@ -71,7 +80,14 @@ export class TypeScriptInternalInputModels implements Template {
 export class TypeScriptInjectedInputModels implements Template {
 	async generate(generationConfig: CodeGenerationConfig): Promise<TemplateOutputFile[]> {
 		const content = generationConfig.config.application.Operations.filter(hasInjectedInput)
-			.map((op) => JSONSchemaToTypescriptInterface(op.InjectedVariablesSchema, 'Injected' + op.Name + 'Input', false))
+			.map((op) =>
+				JSONSchemaToTypescriptInterface(
+					op.InjectedVariablesSchema,
+					'Injected' + op.Name + 'Input',
+					false,
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
+				)
+			)
 			.join('\n\n');
 
 		return Promise.resolve([
@@ -98,7 +114,12 @@ export class TypeScriptResponseModels implements Template {
 					$ref: dataName,
 				};
 			}
-			return JSONSchemaToTypescriptInterface(responseSchema, op.Name + 'Response', true);
+			return JSONSchemaToTypescriptInterface(
+				responseSchema,
+				op.Name + 'Response',
+				true,
+				op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined
+			);
 		}).join('\n\n');
 		return Promise.resolve([
 			{
@@ -124,6 +145,7 @@ export class TypeScriptResponseDataModels implements Template {
 					op.ResponseSchema.properties!['data'] as JSONSchema7,
 					op.Name + 'ResponseData',
 					false,
+					op.ExecutionEngine === OperationExecutionEngine.ENGINE_NODEJS ? { pathName: op.PathName } : undefined,
 					op.TypeScriptOperationImport
 						? {
 								importName: op.TypeScriptOperationImport,
@@ -189,6 +211,8 @@ export class BaseTypeScriptDataModel implements Template {
 				});
 		});
 
+		const graphQLTypeImport = "import type { GraphQLError } from '@wundergraph/sdk/client';";
+
 		const models = Array.from(definitions.entries())
 			.map(([definitionName, definition]) => JSONSchemaToTypescriptInterface(definition, definitionName, false))
 			.join('\n\n');
@@ -200,10 +224,14 @@ export class BaseTypeScriptDataModel implements Template {
 		return Promise.resolve([
 			{
 				path: 'models.ts',
-				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n' + graphQLErrorDefinition),
+				content: formatTypeScript('\n' + content + '\n\n' + typeScriptJsonDefinition + '\n' + graphQLTypeImport),
 				header: doNotEditHeader,
 			},
 		]);
+	}
+
+	dependencies(): Template[] {
+		return [new TypeScriptOperationErrors()];
 	}
 }
 
@@ -211,13 +239,6 @@ const typeScriptJsonDefinition = `
 export type JSONValue = string | number | boolean | JSONObject | Array<JSONValue>;
 
 export type JSONObject = { [key: string]: JSONValue };`;
-
-const graphQLErrorDefinition = `
-export interface GraphQLError {
-    message: string;
-    path?: ReadonlyArray<string | number>;
-}
-`;
 
 const typescriptFunctionsImports = (generationConfig: CodeGenerationConfig): string => {
 	const ops = generationConfig.config.application.Operations.filter(
@@ -232,27 +253,44 @@ const typescriptFunctionsImports = (generationConfig: CodeGenerationConfig): str
 	return (
 		ops.map((op) => `import type function_${op.Name} from '${relImport(op)}';\n`).join('') +
 		'import type {ExtractInput,ExtractResponse} from "@wundergraph/sdk/operations";\n' +
+		'import type { OperationErrors } from "./ts-operation-errors";\n' +
 		'\n'
 	);
 };
 
-interface typeScriptOperation {
+interface typeScriptOperationImport {
 	importName: string;
 	extract: 'Input' | 'Response';
 }
+
+interface typeScriptOperation {
+	pathName: string;
+}
+
+const getTypeScriptOperationTypeExports = (
+	interfaceName: string,
+	typeScriptOperationImport: typeScriptOperationImport
+): string => {
+	switch (typeScriptOperationImport.extract) {
+		case 'Input':
+			return `export type ${interfaceName} = ExtractInput<typeof ${typeScriptOperationImport.importName}>;`;
+		case 'Response':
+			return `export type ${interfaceName} = ExtractResponse<typeof ${typeScriptOperationImport.importName}>;`;
+	}
+	return '';
+};
 
 const JSONSchemaToTypescriptInterface = (
 	schema: JSONSchema,
 	interfaceName: string,
 	withErrors: boolean,
-	typeScriptOperation?: typeScriptOperation
+	typeScriptOperation?: typeScriptOperation,
+	typeScriptOperationImport?: typeScriptOperationImport
 ): string => {
-	if (typeScriptOperation) {
-		switch (typeScriptOperation.extract) {
-			case 'Input':
-				return `export type ${interfaceName} = ExtractInput<typeof ${typeScriptOperation.importName}>;`;
-			case 'Response':
-				return `export type ${interfaceName} = ExtractResponse<typeof ${typeScriptOperation.importName}>;`;
+	if (typeScriptOperationImport) {
+		const exportType = getTypeScriptOperationTypeExports(interfaceName, typeScriptOperationImport);
+		if (exportType) {
+			return exportType;
 		}
 	}
 
@@ -271,7 +309,13 @@ const JSONSchemaToTypescriptInterface = (
 			},
 			leave: () => {
 				if (withErrors) {
-					out += `errors?: ReadonlyArray<GraphQLError>;\n`;
+					// TODO: Differentiate between ts errors and graphql errors for the base models
+					//  as soon as we have a common abstraction for errors
+					if (typeScriptOperation) {
+						out += `errors?: GraphQLError[];\n`;
+					} else {
+						out += `errors?: GraphQLError[];\n`;
+					}
 				}
 				out += '}';
 			},
@@ -351,9 +395,6 @@ const JSONSchemaToTypescriptInterface = (
 export const loadFile = (file: string | (() => string)): string => {
 	if (typeof file === 'function') {
 		return file();
-	}
-	if (typeof file !== 'string') {
-		return '';
 	}
 	try {
 		if (path.basename(file) === file) {

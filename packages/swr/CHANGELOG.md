@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.8...@wundergraph/swr@0.14.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+
 ## [0.13.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/swr@0.13.7...@wundergraph/swr@0.13.8) (2023-03-27)
 
 **Note:** Version bump only for package @wundergraph/swr

@@ -4,7 +4,7 @@ import { DatabaseIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from
 import { SingleTypeField } from '@wundergraph/protobuf';
 import { DMMF } from '@prisma/generator-helper';
 import { NamedTypeNode } from 'graphql/language/ast';
-import _ from 'lodash';
+import { startCase } from 'lodash';
 import * as fs from 'fs';
 import hash from 'object-hash';
 import path from 'path';
@@ -602,7 +602,7 @@ const resolveRelationship = (connectionType: string): Relationship | undefined =
 	if (connectionType.endsWith('WhereUnique')) {
 		connectionType = connectionType.substring(0, connectionType.length - 'WhereUnique'.length);
 	}
-	const fromTo = _.startCase(connectionType).split(' ');
+	const fromTo = startCase(connectionType).split(' ');
 	if (fromTo.length === 1) {
 		return undefined;
 	}
