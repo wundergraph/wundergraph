@@ -190,7 +190,13 @@ const { data, error } = await client.query({
   operationName: 'users/get',
 });
 
-// type-safe error handling
+if (error instanceof ReponseError) {
+  // handle error
+  error.code;
+}
+
+// or type-safe
+
 if (error?.code === 'DividedByZero') {
   // handle error
   error.statusCode; // 400
