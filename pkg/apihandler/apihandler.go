@@ -2281,7 +2281,10 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hooks.EncodeData(r, buf.Bytes(), ctx.Variables, nil)
+	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
+	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
+		return
+	}
 
 	switch {
 	case isLive:
