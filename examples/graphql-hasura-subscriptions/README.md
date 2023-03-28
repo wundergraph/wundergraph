@@ -5,19 +5,11 @@
 - Go to: https://hasura.io/learn/graphql/graphiql
 
 You will need to complete a simple signup form (just mail and password) to get access to the
-GraphiQL interface, and obtain token.
+GraphiQL interface, and obtain token. Make sure you copy the entire token, since it
+overflows its bounding box.
 
-- Set the authorization header, using the token you obtained from the previous step,
-  replace `Secret` with your token in `wundergraph.config.ts`:
-
-````bash
-```typescript
-const hasura = introspect.graphql({
-  apiNamespace: 'hasura',
-  url: 'https://hasura.io/learn/graphql',
-  headers: (builder) => builder.addStaticHeader('Authorization', 'Secret'),
-});
-````
+- Copy .env.example to .env
+- Set your token as HASURA_BEARER_TOKEN=your_token
 
 #### Getting started
 
