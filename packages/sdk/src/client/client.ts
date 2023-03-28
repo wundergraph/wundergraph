@@ -15,14 +15,16 @@ import {
 	User,
 } from './types';
 import { serialize } from '../utils';
-import { GraphQLResponseError } from './GraphQLResponseError';
-import { ResponseError } from './ResponseError';
-import { InputValidationError } from './InputValidationError';
-import { AuthorizationError } from './AuthorizationError';
-import { ClientResponseError } from './ClientResponseError';
 import { applyPatch } from 'fast-json-patch';
+import {
+	ResponseError,
+	InputValidationError,
+	AuthorizationError,
+	ValidationResponseJSON,
+	ClientOperationErrorCodes,
+} from './errors';
 
-// https://graphql.org/learn/serving-over-http/
+// We follow https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained
 
 export interface UploadValidationOptions {
 	/** Whether authentication is required to upload to this profile
@@ -70,7 +72,7 @@ export class Client {
 	private readonly baseHeaders: Headers = {};
 	private extraHeaders: Headers = {};
 	private csrfToken: string | undefined;
-	private csrfEnabled: boolean = true;
+	private readonly csrfEnabled: boolean = true;
 
 	public static buildCacheKey(query: OperationRequestOptions): string {
 		return serialize(query);
@@ -120,19 +122,28 @@ export class Client {
 		});
 	}
 
-	private convertGraphQLResponse(resp: GraphQLResponse): ClientResponse {
+	private convertGraphQLResponse(resp: GraphQLResponse, statusCode: number = 200): ClientResponse {
 		// If there were no errors returned, the "errors" field should not be present on the response.
 		// If no data is returned, according to the GraphQL spec,
 		// the "data" field should only be included if no errors occurred during execution.
 		if (resp.errors && resp.errors.length) {
 			return {
-				error: new GraphQLResponseError(resp.errors),
+				error: new ResponseError({
+					statusCode,
+					code: resp.errors[0]?.code,
+					message: resp.errors[0]?.message,
+					errors: resp.errors,
+				}),
 			};
 		}
 
 		if (!resp.data) {
 			return {
-				error: new ResponseError('Invalid response from the server', 200),
+				error: new ResponseError({
+					code: 'ResponseError',
+					statusCode,
+					message: 'Server returned no data',
+				}),
 			};
 		}
 
@@ -142,21 +153,42 @@ export class Client {
 	}
 
 	// Determines whether the body is unparseable, plain text, or json (and assumes an invalid input if json)
-	private async handleClientResponseError(response: globalThis.Response): Promise<ClientResponseError> {
+	private async handleClientResponseError(response: globalThis.Response): Promise<ResponseError> {
+		// In some cases, the server does not return JSON to communicate errors.
+		// TODO: We should align it to always return JSON and in a consistent format.
+
+		if (response.status === 401) {
+			return new AuthorizationError();
+		}
+
 		const text = await response.text();
+
 		try {
 			const json = JSON.parse(text);
 
-			switch (response.status) {
-				case 401:
-					return new AuthorizationError(json.errors[0]?.message.trim(), response.status);
-				case 400:
-					return new InputValidationError(json, response.status);
-				default:
-					return new ResponseError((json.errors[0]?.message || json.message).trim(), response.status);
+			if (response.status === 400) {
+				if ((json?.code as ClientOperationErrorCodes) === 'InputValidationError') {
+					const validationResult: ValidationResponseJSON = json;
+					return new InputValidationError({
+						errors: validationResult.errors,
+						message: validationResult.message,
+						statusCode: response.status,
+					});
+				}
 			}
-		} catch {
-			return new ResponseError(text.length ? text.trim() : 'Response is not OK', response.status);
+
+			return new ResponseError({
+				code: json.errors[0]?.code,
+				statusCode: response.status,
+				errors: json.errors,
+				message: json.errors[0]?.message ?? 'Invalid response from server',
+			});
+		} catch (e: any) {
+			return new ResponseError({
+				cause: e,
+				statusCode: response.status,
+				message: text || 'Invalid response from server',
+			});
 		}
 	}
 
@@ -175,10 +207,13 @@ export class Client {
 
 		const json = await response.json();
 
-		return this.convertGraphQLResponse({
-			data: json.data,
-			errors: json.errors,
-		});
+		return this.convertGraphQLResponse(
+			{
+				data: json.data,
+				errors: json.errors,
+			},
+			response.status
+		);
 	}
 
 	private stringifyInput(input: any) {
@@ -219,9 +254,9 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async query<RequestOptions extends QueryRequestOptions, ResponseData = any>(
+	public async query<RequestOptions extends QueryRequestOptions, Data = any, Error = any>(
 		options: RequestOptions
-	): Promise<ClientResponse<ResponseData>> {
+	): Promise<ClientResponse<Data, Error>> {
 		const searchParams = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});
@@ -264,9 +299,9 @@ export class Client {
 	 * The method only throws an error if the request fails to reach the server or
 	 * the server returns a non-200 status code. Application errors are returned as part of the response.
 	 */
-	public async mutate<RequestOptions extends MutationRequestOptions, ResponseData = any>(
+	public async mutate<RequestOptions extends MutationRequestOptions, Data = any, Error = any>(
 		options: RequestOptions
-	): Promise<ClientResponse<ResponseData>> {
+	): Promise<ClientResponse<Data, Error>> {
 		const url = this.addUrlParams(
 			this.operationUrl(options.operationName),
 			new URLSearchParams({
@@ -320,26 +355,26 @@ export class Client {
 	 * without setting up a subscription.
 	 * @see https://docs.wundergraph.com/docs/architecture/wundergraph-rpc-protocol-explained#subscriptions
 	 */
-	public async subscribe<RequestOptions extends SubscriptionRequestOptions, ResponseData = unknown>(
+	public async subscribe<RequestOptions extends SubscriptionRequestOptions, Data = any, Error = any>(
 		options: RequestOptions,
-		cb: SubscriptionEventHandler<ResponseData>
+		cb: SubscriptionEventHandler<Data, Error>
 	) {
 		if (options.subscribeOnce) {
-			const result = await this.query<RequestOptions, ResponseData>(options);
+			const result = await this.query<RequestOptions, Data, Error>(options);
 			cb(result);
 			return result;
 		}
 		if ('EventSource' in globalThis) {
-			return this.subscribeWithSSE<ResponseData>(options, cb);
+			return this.subscribeWithSSE<Data, Error>(options, cb);
 		}
-		for await (const event of this.subscribeWithFetch<ResponseData>(options)) {
+		for await (const event of this.subscribeWithFetch<Data, Error>(options)) {
 			cb(event);
 		}
 	}
 
-	private subscribeWithSSE<ResponseData = any>(
+	private subscribeWithSSE<Data = any, Error = any>(
 		subscription: SubscriptionRequestOptions,
-		cb: SubscriptionEventHandler<ResponseData>
+		cb: SubscriptionEventHandler<Data, Error>
 	) {
 		return new Promise<void>((resolve, reject) => {
 			const params = new URLSearchParams({
@@ -392,9 +427,9 @@ export class Client {
 		});
 	}
 
-	private async *subscribeWithFetch<ResponseData = any>(
+	private async *subscribeWithFetch<Data = any, Error = any>(
 		subscription: SubscriptionRequestOptions
-	): AsyncGenerator<ClientResponse<ResponseData>> {
+	): AsyncGenerator<ClientResponse<Data, Error>> {
 		const params = new URLSearchParams({
 			wg_api_hash: this.options.applicationHash,
 		});
@@ -413,7 +448,11 @@ export class Client {
 
 		if (!response.ok || response.body === null) {
 			yield {
-				error: new ResponseError('HTTP Error', response.status),
+				error: new ResponseError({
+					code: 'ResponseError',
+					message: `Response is not ok. Failed to subscribe to '${url}'`,
+					statusCode: response.status,
+				}) as Error,
 			};
 			return;
 		}
@@ -435,7 +474,7 @@ export class Client {
 				} else {
 					lastResponse = jsonResp as GraphQLResponse;
 				}
-				yield this.convertGraphQLResponse(lastResponse);
+				yield this.convertGraphQLResponse(lastResponse, response.status);
 				message = '';
 			}
 		}
@@ -494,7 +533,11 @@ export class Client {
 		const result = await response.json();
 
 		if (!result.length) {
-			throw new ResponseError(`Invalid server response shape`, response.status);
+			throw new ResponseError({
+				code: 'ResponseError',
+				message: `Invalid server response shape. Failed to upload files to '${config.provider}' provider`,
+				statusCode: response.status,
+			});
 		}
 
 		const json = result as { key: string }[];

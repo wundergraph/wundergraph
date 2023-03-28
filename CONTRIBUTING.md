@@ -46,7 +46,7 @@ Before you run any testapp, you need to ensure that you use your local wunderctl
 ```bash
 # Install the wunderctl binary in your GOBIN.
 make install
-# Set this environment variable to use your local wunderctl binary.
+# Set this environment variable to use your local wunderctl binary for all calls in the SDK.
 WUNDERCTL_BINARY_PATH="$(which wunderctl)"
 ```
 
