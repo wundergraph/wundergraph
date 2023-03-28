@@ -3,8 +3,8 @@ import fs from 'fs/promises';
 
 const fileExists = async (filename: string) => {
 	try {
-		await fs.access(filename, fs.constants.R_OK);
-		return true;
+		const stats = await fs.stat(filename);
+		return !stats.isDirectory();
 	} catch {}
 	return false;
 };
