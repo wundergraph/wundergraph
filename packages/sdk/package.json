@@ -93,7 +93,6 @@
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.22",
     "@types/cors": "^2.8.10",
     "@types/debug": "^4.1.7",
