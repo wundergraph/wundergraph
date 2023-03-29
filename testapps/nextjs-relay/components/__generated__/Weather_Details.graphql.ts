@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3a46daee4d63da2fdf8f16697b54c02a>>
+ * @generated SignedSource<<6bc9744d0b7371690dbeb7cb75667649>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,7 +12,6 @@ import { Fragment, ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from 'relay-runtime';
 export type Weather_Details$data = {
 	readonly description: string | null;
-	readonly icon: string | null;
 	readonly title: string | null;
 	readonly ' $fragmentType': 'Weather_Details';
 };
@@ -41,18 +40,11 @@ const node: ReaderFragment = {
 			name: 'description',
 			storageKey: null,
 		},
-		{
-			alias: null,
-			args: null,
-			kind: 'ScalarField',
-			name: 'icon',
-			storageKey: null,
-		},
 	],
 	type: 'weather_Summary',
 	abstractKey: null,
 };
 
-(node as any).hash = '369f087cfe9aa28a7ccd82995d9a49dd';
+(node as any).hash = '36c68eecc585e16aff22655f35e72ddd';
 
 export default node;

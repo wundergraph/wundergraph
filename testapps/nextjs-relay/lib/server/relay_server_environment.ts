@@ -14,6 +14,9 @@ export function createServerNetwork() {
 			},
 			body,
 		});
+		console.log(
+			`createServerNetwork-response: ${JSON.stringify({ response: response.status, headers: response.headers })}`
+		);
 		return await response.json();
 	});
 }

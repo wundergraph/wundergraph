@@ -548,17 +548,6 @@ importers:
       ts-jest: 29.0.5_p6ekqnroyms5nhqbfxosryz7rm
       ts-node: 10.9.1_awa2wsr5thmg3i7jqycphctjfq
 
-  testapps/cloud-starter:
-    specifiers:
-      '@types/node': ^14.14.37
-      '@wundergraph/sdk': ^0.134.0
-      typescript: ^4.8.2
-    dependencies:
-      '@wundergraph/sdk': 0.134.0
-    devDependencies:
-      '@types/node': 14.18.33
-      typescript: 4.9.4
-
   testapps/default:
     specifiers:
       '@jest/globals': ^29.3.1
@@ -5850,71 +5839,6 @@ packages:
       web-streams-polyfill: 3.2.1
     transitivePeerDependencies:
       - encoding
-    dev: false
-
-  /@wundergraph/protobuf/0.104.0:
-    resolution: {integrity: sha512-rj8xjfE/EMp7RretWn+u5CXQk2StmO7XwRjpkdWwHol9P3w9so6/DRA9FK0KNbsQvPPLy16RoH83u2xDSwheYQ==}
-    dependencies:
-      long: 5.2.1
-      protobufjs: 6.11.3
-      ts-proto: 1.131.0
-    dev: false
-
-  /@wundergraph/sdk/0.134.0:
-    resolution: {integrity: sha512-cckqxeHeb53g7S1bcFqWRmsJ+iKcapc1Pk5U3hHcBGyp1BPf3oRM1zforIkVVTgVU0ZjAtYsjaHUm+Js28GEAg==}
-    hasBin: true
-    dependencies:
-      '@fastify/formbody': 7.3.0
-      '@graphql-tools/schema': 8.5.1_graphql@16.6.0
-      '@prisma/generator-helper': 3.15.2
-      '@web-std/fetch': 4.1.0
-      '@wundergraph/protobuf': 0.104.0
-      '@wundergraph/wunderctl': 0.132.0
-      axios: 0.26.1
-      axios-retry: 3.3.1
-      close-with-grace: 1.1.0
-      cross-fetch: 3.1.5
-      execa: 5.1.1
-      fastify: 4.10.2
-      fastify-plugin: 4.4.0
-      graphql: 16.6.0
-      graphql-helix: 1.13.0_graphql@16.6.0
-      handlebars: 4.7.7
-      js-yaml: 4.1.0
-      json-schema: 0.4.0
-      json-schema-to-typescript: 11.0.3
-      lodash: 4.17.21
-      long: 5.2.1
-      object-hash: 2.2.0
-      openapi-types: 10.0.0
-      pino: 8.8.0
-      pino-pretty: 9.1.1
-      postman-collection: 4.1.5
-      prettier: 2.7.1
-      protobufjs: 6.11.3
-      swagger2openapi: 7.0.8
-      terminate: 2.5.0
-      ts-retry-promise: 0.7.0
-      zod: 3.20.2
-      zod-to-json-schema: 3.20.2_zod@3.20.2
-    transitivePeerDependencies:
-      - debug
-      - encoding
-      - supports-color
-    dev: false
-
-  /@wundergraph/wunderctl/0.132.0:
-    resolution: {integrity: sha512-02HiE0h2krLkrTwTqqFbmMFzMcw0J/GYGY0v8SSUuT/8PPyTCajZE3W/TQk7kREUTavXU0glP4UaU0N+BKazzw==}
-    hasBin: true
-    requiresBuild: true
-    dependencies:
-      axios: 0.26.1_debug@4.3.4
-      debug: 4.3.4
-      execa: 5.1.1
-      rimraf: 3.0.2
-      tar: 6.1.12
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /@yarnpkg/lockfile/1.1.0:

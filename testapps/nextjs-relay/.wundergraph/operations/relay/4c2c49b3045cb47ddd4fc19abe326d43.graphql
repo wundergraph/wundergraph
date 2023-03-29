@@ -1,9 +1,11 @@
-query indexPage_indexQuery($city: String!) {
+query pages_indexQuery($city: String!) {
 	weather_getCityByName(name: $city) {
 		weather {
 			temperature {
 				actual
 				feelsLike
+				min
+				max
 			}
 			summary {
 				...Weather_Details

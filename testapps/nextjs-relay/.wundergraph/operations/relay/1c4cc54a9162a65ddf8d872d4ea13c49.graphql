@@ -4,6 +4,8 @@ query pages_indexQuery($city: String!) {
 			temperature {
 				actual
 				feelsLike
+				min
+				max
 			}
 			summary {
 				...Weather_Details
@@ -15,6 +17,4 @@ query pages_indexQuery($city: String!) {
 
 fragment Weather_Details on weather_Summary {
 	title
-	description
-	icon
 }

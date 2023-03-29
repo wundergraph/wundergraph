@@ -3,17 +3,17 @@ import React from 'react';
 import { graphql, usePreloadedQuery } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
 import { withRelay } from 'relay-nextjs';
-import type { indexPage_indexQuery as IndexQueryType } from '../queries/__generated__/indexPage_indexQuery.graphql';
+import type { pages_indexQuery as IndexQueryType } from './__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
 import { getClientEnvironment } from '../lib/relay_client_environment';
+import TemperatureDetails from '../components/Temperature';
 
 const IndexQuery = graphql`
 	query pages_indexQuery($city: String!) {
 		weather_getCityByName(name: $city) {
 			weather {
 				temperature {
-					actual
-					feelsLike
+					...Temperature_Details
 				}
 				summary {
 					...Weather_Details
@@ -25,6 +25,7 @@ const IndexQuery = graphql`
 
 function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 	const data = usePreloadedQuery(IndexQuery, preloadedQuery);
+	console.log(data);
 	return (
 		<div className={styles.container}>
 			<main className={styles.main}>
@@ -32,6 +33,7 @@ function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 					Welcome to <a href="https://nextjs.org">Next.js!</a>
 				</h1>
 				<Weather weather={data.weather_getCityByName.weather.summary} />
+				<TemperatureDetails weather={data.weather_getCityByName.weather.temperature} />
 			</main>
 		</div>
 	);

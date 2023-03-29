@@ -8,8 +8,6 @@ const Weather = ({ weather }: { weather: Weather_Details$data }) => (
 			title: {weather.title}
 			<br />
 			description: {weather.description}
-			<br />
-			icon: {weather.icon}
 		</ul>
 	</div>
 );
@@ -19,7 +17,6 @@ export default createFragmentContainer(Weather, {
 		fragment Weather_Details on weather_Summary {
 			title
 			description
-			icon
 		}
 	`,
 });

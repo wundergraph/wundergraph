@@ -1,6 +1,6 @@
 /**
- * @generated SignedSource<<3bae8de6ce7a4d573f05b334b6a14f3b>>
- * @relayHash d0cce0203f588fe54ac645eb33ba3f22
+ * @generated SignedSource<<d5e3540b2fbc6bdb5745199cfbf84207>>
+ * @relayHash 7ecdb16f3bad5bee1edfe9ea039f3449
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,7 +9,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-// @relayRequestID d0cce0203f588fe54ac645eb33ba3f22
+// @relayRequestID 7ecdb16f3bad5bee1edfe9ea039f3449
 
 import { ConcreteRequest, Query } from 'relay-runtime';
 import { FragmentRefs } from 'relay-runtime';
@@ -23,8 +23,7 @@ export type pages_indexQuery$data = {
 				readonly ' $fragmentSpreads': FragmentRefs<'Weather_Details'>;
 			} | null;
 			readonly temperature: {
-				readonly actual: number | null;
-				readonly feelsLike: number | null;
+				readonly ' $fragmentSpreads': FragmentRefs<'Temperature_Details'>;
 			} | null;
 		} | null;
 	} | null;
@@ -48,32 +47,7 @@ const node: ConcreteRequest = (function () {
 				name: 'name',
 				variableName: 'city',
 			},
-		],
-		v2 = {
-			alias: null,
-			args: null,
-			concreteType: 'weather_Temperature',
-			kind: 'LinkedField',
-			name: 'temperature',
-			plural: false,
-			selections: [
-				{
-					alias: null,
-					args: null,
-					kind: 'ScalarField',
-					name: 'actual',
-					storageKey: null,
-				},
-				{
-					alias: null,
-					args: null,
-					kind: 'ScalarField',
-					name: 'feelsLike',
-					storageKey: null,
-				},
-			],
-			storageKey: null,
-		};
+		];
 	return {
 		fragment: {
 			argumentDefinitions: v0 /*: any*/,
@@ -97,7 +71,22 @@ const node: ConcreteRequest = (function () {
 							name: 'weather',
 							plural: false,
 							selections: [
-								v2 /*: any*/,
+								{
+									alias: null,
+									args: null,
+									concreteType: 'weather_Temperature',
+									kind: 'LinkedField',
+									name: 'temperature',
+									plural: false,
+									selections: [
+										{
+											args: null,
+											kind: 'FragmentSpread',
+											name: 'Temperature_Details',
+										},
+									],
+									storageKey: null,
+								},
 								{
 									alias: null,
 									args: null,
@@ -146,7 +135,45 @@ const node: ConcreteRequest = (function () {
 							name: 'weather',
 							plural: false,
 							selections: [
-								v2 /*: any*/,
+								{
+									alias: null,
+									args: null,
+									concreteType: 'weather_Temperature',
+									kind: 'LinkedField',
+									name: 'temperature',
+									plural: false,
+									selections: [
+										{
+											alias: null,
+											args: null,
+											kind: 'ScalarField',
+											name: 'min',
+											storageKey: null,
+										},
+										{
+											alias: null,
+											args: null,
+											kind: 'ScalarField',
+											name: 'max',
+											storageKey: null,
+										},
+										{
+											alias: null,
+											args: null,
+											kind: 'ScalarField',
+											name: 'actual',
+											storageKey: null,
+										},
+										{
+											alias: null,
+											args: null,
+											kind: 'ScalarField',
+											name: 'feelsLike',
+											storageKey: null,
+										},
+									],
+									storageKey: null,
+								},
 								{
 									alias: null,
 									args: null,
@@ -169,13 +196,6 @@ const node: ConcreteRequest = (function () {
 											name: 'description',
 											storageKey: null,
 										},
-										{
-											alias: null,
-											args: null,
-											kind: 'ScalarField',
-											name: 'icon',
-											storageKey: null,
-										},
 									],
 									storageKey: null,
 								},
@@ -195,7 +215,7 @@ const node: ConcreteRequest = (function () {
 			],
 		},
 		params: {
-			id: 'd0cce0203f588fe54ac645eb33ba3f22',
+			id: '7ecdb16f3bad5bee1edfe9ea039f3449',
 			metadata: {},
 			name: 'pages_indexQuery',
 			operationKind: 'query',
@@ -204,6 +224,6 @@ const node: ConcreteRequest = (function () {
 	};
 })();
 
-(node as any).hash = '2dbe6cf2d72d83a2ac62697021271dd0';
+(node as any).hash = '004342d9586324d7a0f9caa838ca73b7';
 
 export default node;
