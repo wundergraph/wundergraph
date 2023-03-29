@@ -9,7 +9,7 @@ How to integrate WunderGraph with Neon.
 ## How it works
 
 The Neon integration allows you to sync your Neon database settings with your WunderGraph projects.
-This integration sets the connection string of your Neon database allowing the wundernode to perform operations on it. Do note that any changes made to the connection string on the neon dashboard are not automatically synced.
+This integration sets the connection string of your Neon database allowing the wundernode to perform operations on it. Do note that any changes made to the connection string on the Neon dashboard are not automatically synced.
 
 ## Installation
 
