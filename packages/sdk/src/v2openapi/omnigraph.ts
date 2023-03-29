@@ -76,8 +76,6 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	const schema = printSchemaWithDirectives(graphQLSchema);
 
-	fs.writeFileSync('./schema.graphql', schema);
-
 	return introspectGraphql(
 		{
 			url: WgEnv.ServerUrl,
@@ -87,6 +85,7 @@ export const openApiSpecificationToGraphQLApi = async (
 			internal: true,
 			loadSchemaFromString: () => schema,
 			headers: introspection.headers,
+			customIntScalars: ['BigInt'],
 		},
 		true
 	);

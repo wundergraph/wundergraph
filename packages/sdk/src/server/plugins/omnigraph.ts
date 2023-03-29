@@ -4,7 +4,7 @@ import { getGraphQLParameters, processRequest, sendResult } from 'graphql-helix'
 import { pino } from 'pino';
 import { buildSchema } from 'graphql/index';
 import { DefaultLogger, PubSub } from '@graphql-mesh/utils';
-import { LazyLoggerMessage, MeshPubSub } from '@graphql-mesh/types';
+import { LazyLoggerMessage, Logger, MeshFetch, MeshPubSub } from '@graphql-mesh/types';
 import { processDirectives } from '@omnigraph/openapi';
 import { fetch } from '@whatwg-node/fetch';
 
@@ -12,13 +12,16 @@ export interface OpenApiServerConfig {
 	serverName: string;
 	schema: string;
 	mountPath: string;
-	baseURL?: string;
+	upstreamURL?: string;
 }
 
 const FastifyGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fastify, config) => {
-	// console.log('serverName:', config.serverName, 'mountPath:', config.mountPath, 'baseURL:', config.baseURL);
+	if (process.env.WG_DEBUG_MODE === 'true') {
+		// enable debugging queries in mesh omnigraph
+		process.env.DEBUG = 'true';
+	}
 
-	const schema = executableSchema(config.schema, fastify.log, config.baseURL);
+	const schema = executableSchema(config.schema, fastify.log, config.upstreamURL);
 
 	fastify.route({
 		method: ['GET', 'POST'],
@@ -31,24 +34,9 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fas
 				query: req.query,
 			};
 
-			// console.log('request:', request);
-
 			reply.hijack();
 
 			const { operationName, query, variables } = getGraphQLParameters(request);
-
-			// const document = parse(query!);
-
-			// const result = await execute({
-			// 	schema,
-			// 	document,
-			// 	operationName,
-			// 	contextValue: {
-			// 		headers: {
-			// 			Authorization: 'Bearer sk_test_123',
-			// 		},
-			// 	},
-			// });
 
 			const result = await processRequest({
 				operationName,
@@ -58,21 +46,19 @@ const FastifyGraphQLPlugin: FastifyPluginAsync<OpenApiServerConfig> = async (fas
 				schema,
 				contextFactory: () => ({
 					headers: req.headers,
-					// headers: {
-					// 	Authorization: 'Bearer sk_test_123',
-					// },
 				}),
 			});
 
 			await sendResult(result, reply.raw);
-
-			// console.log('execute result:', result);
-			// reply.send(result);
 		},
 	});
 };
 
-const executableSchema = (schemaStr: string, logger: FastifyBaseLogger, baseURL: string | undefined): GraphQLSchema => {
+const executableSchema = (
+	schemaStr: string,
+	logger: FastifyBaseLogger,
+	upstreamURL: string | undefined
+): GraphQLSchema => {
 	const schema = buildSchema(schemaStr, {
 		assumeValidSDL: true,
 		assumeValid: true,
@@ -81,18 +67,17 @@ const executableSchema = (schemaStr: string, logger: FastifyBaseLogger, baseURL:
 
 	const logWrapper = new LoggerWrapper(logger);
 
-	// const deflogger = new DefaultLogger('getComposerFromJSONSchema - test');
-
-	process.env.DEBUG = 'true';
-
-	return processDirectives({
+	let opts: ProcessDirectiveArgs = {
 		schema,
-		// logger: deflogger,
 		logger: logWrapper,
 		pubsub,
 		globalFetch: fetch,
-		endpoint: baseURL != '' ? baseURL : undefined,
-	});
+	};
+	if (upstreamURL !== '') {
+		opts['endpoint'] = upstreamURL;
+	}
+
+	return processDirectives(opts);
 };
 
 class LoggerWrapper {
@@ -113,11 +98,21 @@ class LoggerWrapper {
 		this.logger.error(args);
 	}
 	public debug(...lazyArgs: LazyLoggerMessage[]) {
-		console.log(lazyArgs);
+		// not sure what happens with lazy messages
 	}
 	public child(name: string) {
 		return this;
 	}
+}
+
+interface ProcessDirectiveArgs {
+	schema: GraphQLSchema;
+	pubsub: MeshPubSub;
+	logger: Logger;
+	globalFetch: MeshFetch;
+	endpoint?: string;
+	operationHeaders?: Record<string, string>;
+	queryParams?: Record<string, any>;
 }
 
 export default FastifyGraphQLPlugin;

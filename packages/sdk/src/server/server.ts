@@ -237,22 +237,24 @@ export const createServer = async ({
 				ds.customGraphql?.fetch?.url?.kind === ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE &&
 				ds.customGraphql?.fetch?.url?.staticVariableContent === WgEnv.ServerUrl
 			) {
-				let server: OpenApiServerConfig = {
-					serverName: '',
-					mountPath: '',
-					schema: ds.customGraphql.upstreamSchema,
-				};
+				const schema = ds.customGraphql.upstreamSchema;
+				let serverName, mountPath, upstreamURL;
 
 				if (ds.customGraphql?.fetch?.baseUrl) {
-					server.baseURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
+					upstreamURL = resolveConfigurationVariable(ds.customGraphql?.fetch?.baseUrl);
 				}
 
 				if (ds.customGraphql?.fetch?.path?.staticVariableContent) {
-					server.mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
-					server.serverName = server.mountPath.split('/').pop()!;
+					mountPath = ds.customGraphql?.fetch?.path?.staticVariableContent;
+					serverName = mountPath.split('/').pop()!;
 				}
 
-				openApiServers.add(server);
+				openApiServers.add(<OpenApiServerConfig>{
+					serverName,
+					mountPath,
+					upstreamURL,
+					schema,
+				});
 			}
 		});
 
