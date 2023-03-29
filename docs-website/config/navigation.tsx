@@ -878,6 +878,10 @@ const navigation = [
 						title: 'Vercel',
 						href: '/docs/cloud/integrations/vercel',
 					},
+					{
+						title: 'Neon',
+						href: '/docs/cloud/integrations/neon',
+					},
 				],
 			},
 		],
