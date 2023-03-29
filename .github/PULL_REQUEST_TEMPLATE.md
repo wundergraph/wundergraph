@@ -53,7 +53,3 @@ without being familiar with the codebase. Mention @advocates for review and trac
 - [ ] tests and/or benchmarks are included
 - [ ] documentation is changed or added
 - [ ] commit message and code follows the [Code of conduct](https://github.com/wundergraph/wundergraph/blob/main/CODE_OF_CONDUCT.md)
-
-<!--
-Squashed commit must follow https://www.conventionalcommits.org/en/v1.0.0/ so we can generate the changelog.
--->
