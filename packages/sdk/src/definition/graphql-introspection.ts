@@ -36,6 +36,7 @@ import { urlHash, urlIsLocalNetwork } from '../localcache';
 import { Logger } from '../logger';
 import { mergeSchemas } from '@graphql-tools/schema';
 import transformSchema from '../transformations/transformSchema';
+import { printSchemaWithDirectives } from '@graphql-tools/utils';
 
 class MissingKeyError extends Error {
 	constructor(private key: string, private introspection: GraphQLIntrospection) {
@@ -89,7 +90,10 @@ export const graphqlIntrospectionCacheConfiguration = async (
 	return { keyInput: hash + baseUrlHash, dataSource };
 };
 
-export const introspectGraphql = async (introspection: GraphQLIntrospection): Promise<GraphQLApi> => {
+export const introspectGraphql = async (
+	introspection: GraphQLIntrospection,
+	openAPI?: boolean
+): Promise<GraphQLApi> => {
 	const headersBuilder = new HeadersBuilder();
 	const introspectionHeadersBuilder = new HeadersBuilder();
 
@@ -107,7 +111,7 @@ export const introspectGraphql = async (introspection: GraphQLIntrospection): Pr
 	let upstreamSchema = await introspectGraphQLSchema(introspection, introspectionHeaders);
 	upstreamSchema = lexicographicSortSchema(upstreamSchema);
 	const federationEnabled = introspection.isFederation || false;
-	const cleanUpstreamSchema = cleanupSchema(upstreamSchema);
+	const cleanUpstreamSchema = openAPI ? printSchemaWithDirectives(upstreamSchema) : cleanupSchema(upstreamSchema);
 
 	const { schemaSDL: schemaSDLWithCustomScalars, customScalarTypeFields } = transformSchema.replaceCustomScalars(
 		cleanUpstreamSchema,

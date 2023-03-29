@@ -7,14 +7,10 @@ import { HeadersBuilder } from '../definition/headers-builder';
 import { WgEnv } from '../configure/options';
 import { z as zod } from 'zod';
 import { OpenAPIV3 } from 'openapi-types';
-import { getJSONSchemaOptionsFromOpenAPIOptions, processDirectives } from '@omnigraph/openapi';
+import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
 import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
-import { buildSchema, GraphQLSchema } from 'graphql';
-import { fetch } from '@whatwg-node/fetch';
-import { PubSub } from '@graphql-mesh/utils';
-import { LazyLoggerMessage, MeshPubSub } from '@graphql-mesh/types';
-import { pino } from 'pino';
+import fs from 'fs';
 
 const apiIDRegexp = /^[_\-0-9a-z]+$/;
 const apiIDSchema = zod
@@ -63,12 +59,11 @@ export const openApiSpecificationToGraphQLApi = async (
 	let operationHeaders: Record<string, string> = {};
 
 	for (const { key } of headersConfiguration) {
-		operationHeaders[key] = `{context.headers['${key}']}`;
+		operationHeaders[key] = `{context.headers['${key.toLowerCase()}']}`;
 	}
 
 	const options: Options = {
 		source: spec,
-		endpoint: 'dummy-url',
 		name: introspection.apiNamespace || 'api',
 		operationHeaders: operationHeaders,
 	};
@@ -81,15 +76,20 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	const schema = printSchemaWithDirectives(graphQLSchema);
 
-	return introspectGraphql({
-		url: WgEnv.ServerUrl,
-		baseUrl: introspection.baseURL || '',
-		path: `/openapis/${apiID}`,
-		apiNamespace: introspection.apiNamespace,
-		internal: true,
-		loadSchemaFromString: () => schema,
-		headers: introspection.headers,
-	});
+	fs.writeFileSync('./schema.graphql', schema);
+
+	return introspectGraphql(
+		{
+			url: WgEnv.ServerUrl,
+			baseUrl: introspection.baseURL || '',
+			path: `/openapis/${apiID}`,
+			apiNamespace: introspection.apiNamespace,
+			internal: true,
+			loadSchemaFromString: () => schema,
+			headers: introspection.headers,
+		},
+		true
+	);
 };
 
 const readSpec = (spec: string, source: OpenAPIIntrospectionSource): Object => {
@@ -123,52 +123,3 @@ const tryReadSpec = (spec: string): Object => {
 		throw new Error('cannot read OAS: ${e}');
 	}
 };
-
-export const executableSchema = (
-	schemaStr: string,
-	logger: pino.Logger,
-	baseURL: string | undefined
-): GraphQLSchema => {
-	const schema = buildSchema(schemaStr);
-	const pubsub = new PubSub() as MeshPubSub;
-
-	const logWrapper = new LoggerWrapper(logger);
-
-	return processDirectives({
-		schema,
-		logger: logWrapper,
-		pubsub,
-		globalFetch: fetch,
-		endpoint: baseURL != '' ? baseURL : undefined,
-	});
-};
-
-class LoggerWrapper {
-	constructor(private logger: pino.Logger) {
-		this.logger = logger;
-	}
-
-	public log(...args: any[]) {
-		console.log(args);
-		this.logger.info(args);
-	}
-	public warn(...args: any[]) {
-		console.log(args);
-		this.logger.warn(args);
-	}
-	public info(...args: any[]) {
-		console.log(args);
-		this.logger.info(args);
-	}
-	public error(...args: any[]) {
-		console.log(args);
-		this.logger.error(args);
-	}
-	public debug(...lazyArgs: LazyLoggerMessage[]) {
-		console.log(lazyArgs);
-	}
-	public child(name: string) {
-		console.log('child: ', name);
-		return this;
-	}
-}
