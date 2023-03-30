@@ -507,9 +507,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:    r.middlewareClient,
-		Operation: operation,
-		Logger:    r.log,
+		Client:      r.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      r.log,
 	}
 
 	switch operation.OperationType {
