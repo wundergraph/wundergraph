@@ -256,8 +256,8 @@ func (h *InternalApiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trace.AddSpanTags(
 		span,
 		map[string]string{
-			"operation":     h.operation.Name,
-			"operationType": h.operation.OperationType.String(),
+			"wg.operation.name": h.operation.Name,
+			"wg.operation.type": h.operation.OperationType.String(),
 		},
 	)
 
@@ -350,8 +350,8 @@ func (h *InternalSubscriptionApiHandler) ServeHTTP(w http.ResponseWriter, r *htt
 	trace.AddSpanTags(
 		span,
 		map[string]string{
-			"operation":     h.operation.Name,
-			"operationType": h.operation.OperationType.String(),
+			"wg.operation.name": h.operation.Name,
+			"wg.operation.type": h.operation.OperationType.String(),
 		},
 	)
 

@@ -126,6 +126,7 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		Body: { request: WunderGraphRequest; operationName: string; operationType: 'query' | 'mutation' | 'subscription' };
 	}>('/global/httpTransport/onOriginRequest', async (request, reply) => {
 		reply.type('application/json').code(200);
+
 		try {
 			const maybeHookOut = await config.global?.httpTransport?.onOriginRequest?.hook({
 				...requestContext(request),
@@ -137,6 +138,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					...request.body.request,
 					headers: new Headers(request.body.request.headers),
 				},
+			});
+			const { span } = request.telemetry();
+			span?.setAttributes({
+				'wg.hook.name': 'onOriginRequest',
+				'wg.hook.type': 'global',
+				'wg.operation.name': request.body.operationName,
+				'wg.operation.type': request.body.operationType,
 			});
 			const hookOut = maybeHookOut || 'skip';
 			return {
@@ -178,6 +186,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					type: request.body.operationType,
 				},
 			});
+			const { span } = request.telemetry();
+			span?.setAttributes({
+				'wg.hook.name': 'onOriginRequest',
+				'wg.hook.type': 'global',
+				'wg.operation.name': request.body.operationName,
+				'wg.operation.type': request.body.operationType,
+			});
 			const hookOut = maybeHookOut || 'skip';
 			return {
 				op: request.body.operationName,
@@ -215,6 +230,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 						...request.body.request,
 						headers: new Headers(request.body.request.headers),
 					},
+				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'onConnectionInit',
+					'wg.hook.type': 'global',
 				});
 				return {
 					hook: 'onConnectionInit',
@@ -298,6 +318,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					...requestContext(request),
 					input: request.body.input,
 				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'preResolve',
+					'wg.hook.type': 'operation',
+					'wg.operation.name': operationName,
+				});
 				return {
 					op: operationName,
 					hook: 'preResolve',
@@ -328,6 +354,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					input: request.body.input,
 					response: request.body.response,
 				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'postResolve',
+					'wg.hook.type': 'operation',
+					'wg.operation.name': operationName,
+				});
 				return {
 					op: operationName,
 					hook: 'postResolve',
@@ -356,6 +388,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				const mutatedInput = await hookFunction({
 					...requestContext(request),
 					input: request.body.input,
+				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'mutatingPreResolve',
+					'wg.hook.type': 'operation',
+					'wg.operation.name': operationName,
 				});
 				return {
 					op: operationName,
@@ -388,6 +426,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					input: request.body.input,
 					response: request.body.response,
 				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'mutatingPostResolve',
+					'wg.hook.type': 'operation',
+					'wg.operation.name': operationName,
+				});
 				return {
 					op: operationName,
 					hook: 'mutatingPostResolve',
@@ -417,6 +461,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 				const out = await hookFunction({
 					...requestContext(request),
 					input: request.body.input,
+				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'customResolve',
+					'wg.hook.type': 'operation',
+					'wg.operation.name': operationName,
 				});
 				return {
 					op: operationName,
@@ -503,6 +553,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					file: request.body.file,
 					meta: request.body.meta,
 				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'preUpload',
+				});
 				return result || {};
 			} catch (err) {
 				request.log.error(err);
@@ -527,6 +581,10 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					file: request.body.file,
 					meta: request.body.meta,
 					error: request.body.error,
+				});
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'postUpload',
 				});
 				return result || {};
 			} catch (err) {

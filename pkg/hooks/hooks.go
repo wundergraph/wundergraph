@@ -158,6 +158,7 @@ type Client struct {
 	httpClient          *retryablehttp.Client
 	subscriptionsClient *retryablehttp.Client
 	log                 *zap.Logger
+	tp                  *trace.TracerProvider
 }
 
 func NewClient(serverUrl string, logger *zap.Logger, tp *trace.TracerProvider) *Client {
@@ -166,6 +167,7 @@ func NewClient(serverUrl string, logger *zap.Logger, tp *trace.TracerProvider) *
 		httpClient:          buildClient(60*time.Second, tp),
 		subscriptionsClient: buildClient(0, tp),
 		log:                 logger,
+		tp:                  tp,
 	}
 }
 
@@ -186,7 +188,7 @@ func buildClient(requestTimeout time.Duration, tp *trace.TracerProvider) *retrya
 		}
 		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
 	}
-	httpClient.HTTPClient.Transport = trace.HTTPClientTransporter(httpClient.HTTPClient.Transport, tp.Provider)
+	httpClient.HTTPClient.Transport = trace.HTTPClientTransporter(http.DefaultTransport, tp.Provider)
 	return httpClient
 }
 

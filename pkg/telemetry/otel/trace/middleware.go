@@ -91,7 +91,7 @@ func putRRW(rrw *recordingResponseWriter) {
 }
 
 func spanNameFormatter(routeName string, r *http.Request) string {
-	return fmt.Sprintf("HTTP %s %s", r.Method, routeName)
+	return fmt.Sprintf("%s %s", r.Method, routeName)
 }
 
 func defaultPropagators() propagation.TextMapPropagator {
@@ -167,7 +167,7 @@ func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 
 	// otelhttp client transport does not provide a path to the span name formatter, so we have to do it manually
 	// redefine the span name
-	span.SetName(fmt.Sprintf("HTTP %s %s", r.Method, r.URL.Path))
+	span.SetName(fmt.Sprintf("%s %s", r.Method, r.URL.Path))
 
 	resp, err := t.rt.RoundTrip(r)
 	if err != nil {

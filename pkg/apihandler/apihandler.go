@@ -1277,8 +1277,8 @@ func (h *QueryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trace.AddSpanTags(
 		span,
 		map[string]string{
-			"operation":     h.operation.Name,
-			"operationType": h.operation.OperationType.String(),
+			"wg.operation.name": h.operation.Name,
+			"wg.operation.type": h.operation.OperationType.String(),
 		},
 	)
 
@@ -1632,8 +1632,8 @@ func (h *MutationHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trace.AddSpanTags(
 		span,
 		map[string]string{
-			"operation":     h.operation.Name,
-			"operationType": h.operation.OperationType.String(),
+			"wg.operation.name": h.operation.Name,
+			"wg.operation.type": h.operation.OperationType.String(),
 		},
 	)
 
@@ -1741,8 +1741,8 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	trace.AddSpanTags(
 		span,
 		map[string]string{
-			"operation":     h.operation.Name,
-			"operationType": h.operation.OperationType.String(),
+			"wg.operation.name": h.operation.Name,
+			"wg.operation.type": h.operation.OperationType.String(),
 		},
 	)
 
@@ -2247,8 +2247,8 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trace.AddSpanTags(
 		span,
 		map[string]string{
-			"operation":     h.operation.Name,
-			"operationType": h.operation.OperationType.String(),
+			"wg.operation.name": h.operation.Name,
+			"wg.operation.type": h.operation.OperationType.String(),
 		},
 	)
 

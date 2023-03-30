@@ -1,3 +1,4 @@
+import configureTracerProvider from './trace';
 import closeWithGrace from 'close-with-grace';
 import { Headers } from '@web-std/fetch';
 import process from 'node:process';
@@ -161,6 +162,8 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
+	const tracerProvider = configureTracerProvider(config.api?.nodeOptions?.telemetry);
+
 	const fastify = Fastify({
 		logger,
 		genReqId: (req) => {
@@ -177,6 +180,8 @@ export const createServer = async ({
 			reply.code(200).send({ status: 'ok' });
 		},
 	});
+
+	await fastify.register(require('./plugins/telemetry'), tracerProvider);
 
 	/**
 	 * Calls per event registration. We use it for debugging only.
@@ -301,6 +306,7 @@ export const createServer = async ({
 			}
 			fastify.log.info({ err, signal, manual }, 'graceful shutdown was initiated manually');
 
+			await tracerProvider.provider.shutdown();
 			await fastify.close();
 			fastify.log.info({ err, signal, manual }, 'server process shutdown');
 		};

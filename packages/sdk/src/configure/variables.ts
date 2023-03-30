@@ -37,7 +37,7 @@ export const resolveVariable = (variable: string | EnvironmentVariable): string 
 		if (resolved) {
 			return resolved;
 		}
-		if (environmentVariable.defaultValue) {
+		if (environmentVariable.defaultValue !== undefined) {
 			return environmentVariable.defaultValue as string;
 		}
 
