@@ -1,6 +1,10 @@
+import fs from 'fs/promises';
+import path from 'path';
+
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import { InputValidationError } from '@wundergraph/sdk/client';
 import { createTestServer } from '../.wundergraph/generated/testing';
+import users from '../.wundergraph/operations/nested/users';
 
 const wg = createTestServer();
 
@@ -146,5 +150,49 @@ describe('sql', () => {
 		expect(result.data?.row[0].id).toEqual(2);
 		expect(result.data?.row[0].name).toEqual('Jannik');
 		expect(result.data?.row[0].email).toEqual('jannik@wundergraph.com');
+	});
+});
+
+describe('@transform directive', () => {
+	test('@transform in public operation', async () => {
+		const result = await wg.client().query({
+			operationName: 'CountryWeather',
+			input: {
+				countryCode: 'ES',
+			},
+		});
+		expect(result.error).toBeUndefined();
+		const country = result?.data?.country?.[0];
+		expect(country).toBeDefined();
+		expect(country?.capital).toBe('Madrid');
+		expect(country?.weather.temperature?.max).toBeDefined();
+	});
+	test('@transform in internal operation', async () => {
+		const result = await wg.client().query({
+			operationName: 'CountryWeatherViaInternal',
+			input: {
+				countryCode: 'ES',
+			},
+		});
+		expect(result.error).toBeUndefined();
+		const country = result?.data?.data?.country?.[0];
+		expect(country).toBeDefined();
+		expect(country?.capital).toBe('Madrid');
+		expect(country?.weather.temperature?.max).toBeDefined();
+	});
+});
+
+describe('OpenAPI generation', () => {
+	test('OpenAPI includes TypeScript operation response schema', async () => {
+		const filePath = path.join(__dirname, '..', '.wundergraph', 'generated', 'wundergraph.openapi.json');
+		const data = await fs.readFile(filePath, { encoding: 'utf-8' });
+		const spec = JSON.parse(data);
+		const usersGet = spec.paths?.['/users/get'];
+		expect(usersGet).toBeDefined();
+		const response = usersGet?.['get']?.['responses']?.['200'];
+		expect(response).toBeDefined();
+		const responseSchema = response['content']?.['application/json']?.['schema'];
+		expect(responseSchema).toBeDefined();
+		expect(responseSchema['properties']?.['hello']?.['type']).toBe('string');
 	});
 });
