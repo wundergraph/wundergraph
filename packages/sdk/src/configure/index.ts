@@ -1284,7 +1284,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
 	const cachedData = await cache.getJSON(cacheKey);
 	if (cachedData) {
-		return cachedData;
+		return cachedData as Record<string, JSONSchema>;
 	}
 
 	const basePath = path.join(wgDirAbs, 'generated');
@@ -1294,6 +1294,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 
 	const settings = {
 		required: true,
+		ignoreErrors: true,
 	};
 
 	// XXX: There's no way to silence warnings from TJS, override console.warn
@@ -1303,7 +1304,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const tsConfigPath = await findUp('tsconfig.json', wgDirAbs);
 	let generator: JsonSchemaGenerator | null = null;
 	if (tsConfigPath) {
-		const tsConfigProgram = programFromConfig(tsConfigPath);
+		const tsConfigProgram = programFromConfig(tsConfigPath, [programPath]);
 		if (tsConfigProgram) {
 			generator = buildGenerator(tsConfigProgram, settings);
 		}
@@ -1343,7 +1344,7 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 	for (const op of operations) {
 		const schema = schemas[op.Name];
 		if (schema) {
-			op.ResponseSchema = schemas[schema];
+			op.ResponseSchema = schema;
 		} else {
 			// For functions that don't return anything, we return an empty JSON object
 			op.ResponseSchema = {
