@@ -1,6 +1,6 @@
 import { createSvelteClient } from '../src/lib';
 import { Client } from '@wundergraph/sdk/client';
-import type { ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
+import type { ResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { get } from 'svelte/store';
 import type { CreateQueryResult } from '@tanstack/svelte-query';
@@ -11,7 +11,7 @@ interface Operations extends OperationsDefinition {
 			input: {
 				city: string;
 			};
-			data: any;
+			response: { data?: { id: 1 }; error?: ResponseError };
 			requiresAuthentication: boolean;
 		};
 	};
@@ -20,7 +20,7 @@ interface Operations extends OperationsDefinition {
 			input: {
 				forCity: string;
 			};
-			data: any;
+			response: { data?: { id: 1 }; error?: ResponseError };
 			requiresAuthentication: boolean;
 		};
 	};
@@ -29,7 +29,7 @@ interface Operations extends OperationsDefinition {
 			input: {
 				name: string;
 			};
-			data: any;
+			response: { data?: { id: 1 }; error?: ResponseError };
 			requiresAuthentication: boolean;
 		};
 	};
@@ -53,8 +53,8 @@ const query = createQuery({
 
 const { data: queryData, error: queryError } = get(query);
 
-expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<ClientResponseError | null>(queryError);
+expectType<Operations['queries']['Weather']['response']['data']>(queryData);
+expectType<ResponseError | null | undefined>(queryError);
 
 const subscription = createSubscription({
 	enabled: true,
@@ -66,8 +66,8 @@ const subscription = createSubscription({
 });
 
 const { data: subData, error: subError } = get(subscription);
-expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<ClientResponseError | null>(subError);
+expectType<Operations['subscriptions']['Weather']['response']['data']>(subData);
+expectType<ResponseError | null | undefined>(subError);
 
 const mutation = createMutation({
 	operationName: 'CreateUser',
@@ -75,8 +75,8 @@ const mutation = createMutation({
 
 const { data: mutData, error: mutError, mutate, mutateAsync } = get(mutation);
 
-expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<ClientResponseError | null>(mutError);
+expectType<Operations['mutations']['CreateUser']['response']['data']>(mutData);
+expectType<ResponseError | null | undefined>(mutError);
 
 expectType<void>(
 	mutate({
@@ -84,14 +84,14 @@ expectType<void>(
 	})
 );
 
-expectType<Promise<any>>(
+expectType<Promise<{ id: 1 } | undefined>>(
 	mutateAsync({
 		name: 'John Doe',
 	})
 );
 
-expectType<CreateQueryResult<User<string>, ClientResponseError>>(getUser());
-expectType<CreateQueryResult<User<string>, ClientResponseError>>(
+expectType<CreateQueryResult<User<string>, ResponseError>>(getUser());
+expectType<CreateQueryResult<User<string>, ResponseError>>(
 	getUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,

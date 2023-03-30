@@ -5,9 +5,8 @@ import type {
 	FetchUserRequestOptions,
 	OperationsDefinition,
 	WithInput,
-	ClientResponseError,
 	UploadRequestOptions,
-	UploadRequestOptionsWithProfile,
+	ResponseError,
 } from '@wundergraph/sdk/client';
 
 import type {
@@ -22,7 +21,7 @@ import type { Writable, Readable } from 'svelte/store';
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		Data extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		RequestOptions extends OperationRequestOptions<
 			Extract<keyof Operations['queries'], string>,
 			Operations['queries'][OperationName]['input']
@@ -38,7 +37,7 @@ export type QueryFetcher<Operations extends OperationsDefinition> = {
 export type MutationFetcher<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
+		Data extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response'],
 		RequestOptions extends OperationRequestOptions<
 			Extract<keyof Operations['mutations'], string>,
 			Operations['mutations'][OperationName]['input']
@@ -81,11 +80,11 @@ export type CreateQuery<Operations extends OperationsDefinition, ExtraOptions ex
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
-		options: CreateQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): CreateQueryResult<Data, ClientResponseError> & {
+		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
+	): CreateQueryResult<Response['data'], Response['error']> & {
 		subscriptionState?: Writable<{
 			isLoading: boolean;
 			isSubscribed: boolean;
@@ -115,13 +114,14 @@ export type CreateSubscription<Operations extends OperationsDefinition, ExtraOpt
 	<
 		OperationName extends Extract<keyof Operations['subscriptions'], string>,
 		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
-		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
+		Response extends Operations['subscriptions'][OperationName]['response'] = Operations['subscriptions'][OperationName]['response']
 	>(
-		options: UseSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
-	): CreateSubscriptionResult<Data, ClientResponseError>;
+		options: UseSubscriptionOptions<Response['data'] | undefined, Response['error'], Input, OperationName> &
+			ExtraOptions
+	): CreateSubscriptionResult<Response['data'], Response['error']>;
 };
 
-export type CreateSubscriptionResult<Data, Error = ClientResponseError> = Readable<
+export type CreateSubscriptionResult<Data, Error = ResponseError> = Readable<
 	QueryObserverResult<Data, Error> & {
 		isSubscribed: boolean;
 	}
@@ -138,30 +138,30 @@ export type CreateMutation<Operations extends OperationsDefinition, ExtraOptions
 	<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
+		Response extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response']
 	>(
-		options: UseMutationOptions<Data, ClientResponseError, Input, OperationName> & ExtraOptions
-	): CreateMutationResult<Data, ClientResponseError, Input>;
+		options: UseMutationOptions<Response['data'], Response['error'], Input, OperationName> & ExtraOptions
+	): CreateMutationResult<Response['data'], Response['error'], Input>;
 };
 
 export interface UseUserOptions<User>
 	extends FetchUserRequestOptions,
-		TanstackCreateQueryOptions<User, ClientResponseError, User, [string]> {
+		TanstackCreateQueryOptions<User, ResponseError, User, [string]> {
 	enabled?: boolean;
 }
 
 export type GetUser<Operations extends OperationsDefinition> = {
-	(options?: UseUserOptions<Operations['user']>): CreateQueryResult<Operations['user'], ClientResponseError>;
+	(options?: UseUserOptions<Operations['user']>): CreateQueryResult<Operations['user'], ResponseError>;
 };
 
 export type UseUploadOptions = Omit<
-	TanstackCreateMutationOptions<string[], ClientResponseError, UploadRequestOptions, 'uploadFiles'>,
+	TanstackCreateMutationOptions<string[], ResponseError, UploadRequestOptions, 'uploadFiles'>,
 	'fetcher'
 >;
 
 export type CreateFileUpload<Operations extends OperationsDefinition> = {
 	(options?: UseUploadOptions): Omit<
-		TanstackCreateMutationOptions<string[], ClientResponseError, UploadRequestOptions>,
+		TanstackCreateMutationOptions<string[], ResponseError, UploadRequestOptions>,
 		'mutate'
 	> & {
 		upload: <
@@ -172,9 +172,7 @@ export type CreateFileUpload<Operations extends OperationsDefinition> = {
 			>,
 			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
 		>(
-			options: ProfileName extends string
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions<ProviderName>,
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
 			config?: UseUploadOptions
 		) => Promise<string[]>;
 
@@ -186,9 +184,7 @@ export type CreateFileUpload<Operations extends OperationsDefinition> = {
 			>,
 			Meta extends Operations['s3Provider'][ProviderName]['profiles'][ProfileName] = Operations['s3Provider'][ProviderName]['profiles'][ProfileName]
 		>(
-			options: Operations['s3Provider'][ProviderName]['hasProfiles'] extends true
-				? UploadRequestOptionsWithProfile<ProviderName, ProfileName, Meta>
-				: UploadRequestOptions<ProviderName>,
+			options: UploadRequestOptions<ProviderName, ProfileName, Meta>,
 			config?: UseUploadOptions
 		) => Promise<string[]>;
 	};
@@ -197,7 +193,7 @@ export type CreateFileUpload<Operations extends OperationsDefinition> = {
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: ResponseError): void;
 	onAbort?(): void;
 }
 
@@ -206,5 +202,5 @@ export interface CreateSubscribeToProps extends SubscriptionRequestOptions {
 	enabled?: boolean;
 	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: ResponseError): void;
 }

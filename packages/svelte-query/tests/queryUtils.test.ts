@@ -1,5 +1,5 @@
 import { QueryCache, QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/svelte-query';
-import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, GraphQLError, OperationsDefinition } from '@wundergraph/sdk/client';
 import nock from 'nock';
 import fetch from 'node-fetch';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/svelte';
@@ -13,7 +13,7 @@ import UserWrapper from './TestComponents/UserWrapper.svelte';
 
 export type Queries = {
 	Weather: {
-		data: any;
+		response: { data: any };
 		requiresAuthentication: false;
 		liveQuery: boolean;
 	};
@@ -22,12 +22,12 @@ export type Queries = {
 export type Mutations = {
 	SetNameWithoutAuth: {
 		input: { name: string };
-		data: { id: string };
+		response: { data: { id: string }; error: GraphQLError };
 		requiresAuthentication: false;
 	};
 	SetName: {
 		input: { name: string };
-		data: { id: string };
+		response: { data: { id: string }; error: GraphQLError };
 		requiresAuthentication: true;
 	};
 };
@@ -35,7 +35,7 @@ export type Mutations = {
 export type Subscriptions = {
 	Countdown: {
 		input: { from: number };
-		data: { count: number };
+		response: { data: { count: number } };
 		requiresAuthentication: false;
 	};
 };
@@ -237,25 +237,33 @@ describe('Svelte Query - createMutation', () => {
 	});
 
 	it('should invalidate query', async () => {
+		const mutation = nockMutation('SetNameWithoutAuth', { name: 'Not Rick Astley' })
+			.mutation.once()
+			.reply(200, {
+				data: {
+					name: 'Rick Astley',
+				},
+			});
+
 		const scope = nockQuery()
 			.reply(200, {
 				data: {
 					id: '1',
-					name: 'Test',
+					name: 'Rick Astley',
 				},
 			})
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.post('/operations/SetNameWithoutAuth', { name: 'Not Rick Astley' })
+			.get('/operations/Weather')
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } })
+			.reply(200, { data: { id: '1', name: 'Not Ricky Astley' } })
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/operations/Weather')
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
+			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } });
 
 		const queryCache = new QueryCache();
 		const queryClient = new QueryClient({ queryCache });
@@ -276,15 +284,25 @@ describe('Svelte Query - createMutation', () => {
 		render(MutationWithInvalidationWrapper, { queryClient, queryCreator, mutationCreator });
 
 		await waitFor(() => {
-			screen.getByText('Test');
-		});
-
-		fireEvent.click(screen.getByText('submit'));
-
-		await waitFor(() => {
 			screen.getByText('Rick Astley');
 		});
 
+		await sleep(1000);
+
+		fireEvent.click(screen.getByText('submit'));
+
+		await sleep(1000);
+
+		await waitFor(
+			() => {
+				screen.getByText('Not Rick Astley');
+			},
+			{
+				timeout: 1000,
+			}
+		);
+
+		mutation.done();
 		scope.done();
 	});
 });
