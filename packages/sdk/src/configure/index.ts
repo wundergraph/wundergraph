@@ -1294,7 +1294,6 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 
 	const settings = {
 		required: true,
-		ignoreErrors: true,
 	};
 
 	// XXX: There's no way to silence warnings from TJS, override console.warn
@@ -1304,7 +1303,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const tsConfigPath = await findUp('tsconfig.json', wgDirAbs);
 	let generator: JsonSchemaGenerator | null = null;
 	if (tsConfigPath) {
-		const tsConfigProgram = programFromConfig(tsConfigPath, [programPath]);
+		const tsConfigProgram = programFromConfig(tsConfigPath);
 		if (tsConfigProgram) {
 			generator = buildGenerator(tsConfigProgram, settings);
 		}
