@@ -1,6 +1,4 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
-
-import { ClientResponse } from '@wundergraph/sdk/client';
 import { ChatResponseData } from '../.wundergraph/generated/models';
 import { createTestServer } from '../.wundergraph/generated/testing';
 
@@ -11,7 +9,7 @@ afterAll(() => wg.stop());
 describe('test chat subscription', () => {
 	test('subscribeOnce', async () => {
 		let data: ChatResponseData | undefined;
-		const result = (await wg.client().subscribe(
+		const result = await wg.client().subscribe(
 			{
 				operationName: 'Chat',
 				subscribeOnce: true,
@@ -20,11 +18,11 @@ describe('test chat subscription', () => {
 				expect(resp.error).toBeFalsy();
 				data = resp.data;
 			}
-		)) as ClientResponse<ChatResponseData>;
+		);
 
-		expect(result.error).toBeFalsy();
+		expect(result?.error).toBeFalsy();
 		expect(result?.data?.chat_messageAdded.id.length).toBeGreaterThan(0);
-		expect(result.data?.chat_messageAdded.id).toBe(data?.chat_messageAdded.id);
-		expect(result.data?.chat_messageAdded.text).toBe(data?.chat_messageAdded.text);
+		expect(result?.data?.chat_messageAdded.id).toBe(data?.chat_messageAdded.id);
+		expect(result?.data?.chat_messageAdded.text).toBe(data?.chat_messageAdded.text);
 	});
 });

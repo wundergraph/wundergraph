@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.140.0",
+  "version": "0.142.1",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -93,7 +93,6 @@
     "test:int": "TEST_INTEGRATION=true jest"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.22",
     "@types/cors": "^2.8.10",
     "@types/debug": "^4.1.7",
@@ -127,7 +126,7 @@
     "@web-std/fetch": "^4.1.0",
     "@whatwg-node/fetch": "^0.8.4",
     "@wundergraph/protobuf": "workspace:^0.106.1",
-    "@wundergraph/wunderctl": "workspace:>=0.133.0",
+    "@wundergraph/wunderctl": "workspace:^0.136.0",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",

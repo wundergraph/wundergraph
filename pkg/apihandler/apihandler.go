@@ -23,7 +23,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mattbaird/jsonpatch"
-	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
@@ -253,23 +252,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			handler.ServeHTTP(w, request)
 		})
 	})
-
-	if api.CorsConfiguration != nil {
-		corsMiddleware := cors.New(cors.Options{
-			MaxAge:           int(api.CorsConfiguration.MaxAge),
-			AllowCredentials: api.CorsConfiguration.AllowCredentials,
-			AllowedHeaders:   api.CorsConfiguration.AllowedHeaders,
-			AllowedMethods:   api.CorsConfiguration.AllowedMethods,
-			AllowedOrigins:   loadvariable.Strings(api.CorsConfiguration.AllowedOrigins),
-			ExposedHeaders:   api.CorsConfiguration.ExposedHeaders,
-		})
-		r.router.Use(func(handler http.Handler) http.Handler {
-			return corsMiddleware.Handler(handler)
-		})
-		r.log.Debug("configuring CORS",
-			zap.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
-		)
-	}
 
 	if err := r.registerAuth(r.insecureCookies); err != nil {
 		if !r.devMode {
@@ -525,9 +507,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:    r.middlewareClient,
-		Operation: operation,
-		Logger:    r.log,
+		Client:      r.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      r.log,
 	}
 
 	switch operation.OperationType {
@@ -1086,23 +1069,25 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 	switch x := value.(type) {
 	case nil:
 		if custom.Required {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
-			}
+			return nil, inputvariables.NewValidationError(fmt.Sprintf("required customClaim %s not found", custom.Name), nil, nil)
 		}
 		return variables, nil
 	case string:
 		if custom.Type != wgpb.ValueType_STRING {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		replacement = []byte("\"" + string(x) + "\"")
 	case bool:
 		if custom.Type != wgpb.ValueType_BOOLEAN {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		if x {
 			replacement = []byte("true")
@@ -1114,18 +1099,22 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		case wgpb.ValueType_INT:
 			if x != float64(int(x)) {
 				// Value is not integral
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
-				}
+				return nil, inputvariables.NewValidationError(
+					fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
+					nil,
+					nil,
+				)
 			}
 			replacement = []byte(strconv.FormatInt(int64(x), 10))
 		case wgpb.ValueType_FLOAT:
 			// JSON number is always a valid float
 			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 	default:
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)
@@ -2275,7 +2264,10 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hooks.EncodeData(r, buf.Bytes(), ctx.Variables, nil)
+	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
+	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
+		return
+	}
 
 	switch {
 	case isLive:

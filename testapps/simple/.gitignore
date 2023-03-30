@@ -9,7 +9,6 @@ test/*.js
 # WunderGraph build output
 .wundergraph/cache
 .wundergraph/generated
-.wundergraph/operations/*.graphql
 .wundergraph/*.ts
 
 # dependencies

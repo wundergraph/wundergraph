@@ -225,13 +225,6 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: no response", operationName)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusInternalServerError, http.StatusUnauthorized:
-		break
-	default:
-		return nil, fmt.Errorf("error calling function %s: %s", operationName, resp.Status)
-	}
-
 	dec := json.NewDecoder(resp.Body)
 
 	var hookRes MiddlewareHookResponse
@@ -244,14 +237,7 @@ func (c *Client) DoFunctionRequest(ctx context.Context, operationName string, js
 		return nil, fmt.Errorf("error calling function %s: %s", operationName, hookRes.Error)
 	}
 
-	switch resp.StatusCode {
-	case http.StatusInternalServerError:
-		hookRes.ClientResponseStatusCode = http.StatusBadGateway
-	case http.StatusUnauthorized:
-		hookRes.ClientResponseStatusCode = http.StatusUnauthorized
-	default:
-		hookRes.ClientResponseStatusCode = http.StatusOK
-	}
+	hookRes.ClientResponseStatusCode = resp.StatusCode
 
 	return &hookRes, nil
 }
@@ -472,26 +458,55 @@ func (c *Client) DoHealthCheckRequest(ctx context.Context) (status bool) {
 	return true
 }
 
-func EncodeData(r *http.Request, buf []byte, variables []byte, response []byte) []byte {
-	// TODO: This doesn't really reuse the bytes.Buffer storage, refactor it after adding more tests
-	buf = buf[:0]
-	buf = append(buf, []byte(`{"__wg":{}}`)...)
+func encodeData(r *http.Request, w *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
+	const (
+		wgKey = "__wg"
+		root  = `{"` + wgKey + `":{}}`
+	)
+	var err error
+	buf := w.Bytes()[0:]
+	buf = append(buf, []byte(root)...)
+
 	if user := authentication.UserFromContext(r.Context()); user != nil {
-		if userJson, err := json.Marshal(user); err == nil {
-			buf, _ = jsonparser.Set(buf, userJson, "__wg", "user")
+		userJson, err := json.Marshal(user)
+		if err != nil {
+			return nil, err
+		}
+		if buf, err = jsonparser.Set(buf, userJson, wgKey, "user"); err != nil {
+			return nil, err
 		}
 	}
 	if len(variables) > 2 {
-		buf, _ = jsonparser.Set(buf, variables, "input")
+		if buf, err = jsonparser.Set(buf, variables, "input"); err != nil {
+			return nil, err
+		}
 	}
 	if len(response) != 0 {
-		buf, _ = jsonparser.Set(buf, response, "response")
+		if buf, err = jsonparser.Set(buf, response, "response"); err != nil {
+			return nil, err
+		}
 	}
 	if r != nil {
 		counterHeader := r.Header.Get("Wg-Cycle-Counter")
 		counter, _ := strconv.ParseInt(counterHeader, 10, 64)
 		counterValue := []byte(strconv.FormatInt(counter+1, 10))
-		buf, _ = jsonparser.Set(buf, counterValue, "cycleCounter")
+		if buf, err = jsonparser.Set(buf, counterValue, "cycleCounter"); err != nil {
+			return nil, err
+		}
 	}
-	return buf
+	// If buf required more bytes than what w provided, copy buf into w so next time w's backing slice has enough
+	// room to fit the whole payload
+	if cap(buf) > w.Cap() {
+		_, _ = w.Write(buf)
+	}
+	return buf, nil
+}
+
+// EncodeData encodes the given input data for a hook as a JSON payload to be sent to the hooks server
+func EncodeData(r *http.Request, buf *bytes.Buffer, variables []byte, response []byte) ([]byte, error) {
+	data, err := encodeData(r, buf, variables, response)
+	if err != nil {
+		return nil, fmt.Errorf("encoding hook data: %w", err)
+	}
+	return data, nil
 }
