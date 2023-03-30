@@ -1,6 +1,10 @@
+import fs from 'fs/promises';
+import path from 'path';
+
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import { InputValidationError } from '@wundergraph/sdk/client';
 import { createTestServer } from '../.wundergraph/generated/testing';
+import users from '../.wundergraph/operations/nested/users';
 
 const wg = createTestServer();
 
@@ -175,5 +179,20 @@ describe('@transform directive', () => {
 		expect(country).toBeDefined();
 		expect(country?.capital).toBe('Madrid');
 		expect(country?.weather.temperature?.max).toBeDefined();
+	});
+});
+
+describe('OpenAPI generation', () => {
+	test('OpenAPI includes TypeScript operation response schema', async () => {
+		const filePath = path.join(__dirname, '..', '.wundergraph', 'generated', 'wundergraph.openapi.json');
+		const data = await fs.readFile(filePath, { encoding: 'utf-8' });
+		const spec = JSON.parse(data);
+		const usersGet = spec.paths?.['/users/get'];
+		expect(usersGet).toBeDefined();
+		const response = usersGet?.['get']?.['responses']?.['200'];
+		expect(response).toBeDefined();
+		const responseSchema = response['content']?.['application/json']?.['schema'];
+		expect(responseSchema).toBeDefined();
+		expect(responseSchema['properties']?.['hello']?.['type']).toBe('string');
 	});
 });
