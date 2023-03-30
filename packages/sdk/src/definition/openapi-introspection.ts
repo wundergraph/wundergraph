@@ -34,9 +34,11 @@ export const openApi = async (introspection: OpenAPIIntrospection): Promise<REST
 };
 
 export interface OpenAPIIntrospectionNew
-	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {}
+	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
+	id: string;
+}
 
-export const openApiNew = async (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
+export const openApiV2 = async (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
