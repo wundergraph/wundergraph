@@ -1,5 +1,5 @@
 import { createHooks } from '../src';
-import { Client, ClientResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
+import { Client, ResponseError, OperationsDefinition, User } from '@wundergraph/sdk/client';
 import { expectType } from 'tsd';
 import { UseQueryResult } from '@tanstack/react-query';
 
@@ -9,7 +9,7 @@ interface Operations extends OperationsDefinition {
 			input: {
 				city: string;
 			};
-			data: any;
+			response: { data?: { temperature: number }; error?: ResponseError };
 			requiresAuthentication: boolean;
 		};
 	};
@@ -18,7 +18,7 @@ interface Operations extends OperationsDefinition {
 			input: {
 				forCity: string;
 			};
-			data: any;
+			response: { data?: { temperature: number }; error?: ResponseError };
 			requiresAuthentication: boolean;
 		};
 	};
@@ -27,7 +27,7 @@ interface Operations extends OperationsDefinition {
 			input: {
 				name: string;
 			};
-			data: any;
+			response: { data?: { name: string }; error?: ResponseError };
 			requiresAuthentication: boolean;
 		};
 	};
@@ -49,8 +49,8 @@ const { data: queryData, error: queryError } = useQuery({
 	},
 });
 
-expectType<Operations['queries']['Weather']['data']>(queryData);
-expectType<ClientResponseError | null>(queryError);
+expectType<Operations['queries']['Weather']['response']['data']>(queryData);
+expectType<ResponseError | null | undefined>(queryError);
 
 const { data: subData, error: subError } = useSubscription({
 	enabled: true,
@@ -61,8 +61,8 @@ const { data: subData, error: subError } = useSubscription({
 	},
 });
 
-expectType<Operations['subscriptions']['Weather']['data']>(subData);
-expectType<ClientResponseError | null>(subError);
+expectType<Operations['subscriptions']['Weather']['response']['data']>(subData);
+expectType<ResponseError | null | undefined>(subError);
 
 const {
 	data: mutData,
@@ -73,8 +73,8 @@ const {
 	operationName: 'CreateUser',
 });
 
-expectType<Operations['mutations']['CreateUser']['data']>(mutData);
-expectType<ClientResponseError | null>(mutError);
+expectType<Operations['mutations']['CreateUser']['response']['data']>(mutData);
+expectType<ResponseError | null | undefined>(mutError);
 
 expectType<void>(
 	mutate({
@@ -82,14 +82,14 @@ expectType<void>(
 	})
 );
 
-expectType<Promise<any>>(
+expectType<Promise<{ name: string } | undefined>>(
 	mutateAsync({
 		name: 'John Doe',
 	})
 );
 
-expectType<UseQueryResult<User<string>, ClientResponseError>>(useUser());
-expectType<UseQueryResult<User<string>, ClientResponseError>>(
+expectType<UseQueryResult<User<string>, ResponseError>>(useUser());
+expectType<UseQueryResult<User<string>, ResponseError>>(
 	useUser({
 		revalidate: true,
 		abortSignal: new AbortController().signal,

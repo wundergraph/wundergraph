@@ -2,6 +2,8 @@ import { Callout } from '@/components/Callout';
 import { QuickLink, QuickLinks } from '@/components/QuickLinks';
 import Video from '../src/components/Video';
 import { cta } from './cta.markdoc';
+import { Deploy } from '../src/components/Deploy';
+import { DeployButtonGenerator } from '../src/components/DeployButtonGenerator';
 
 const tags = {
 	callout: {
@@ -79,6 +81,17 @@ const tags = {
 				></iframe>
 			);
 		},
+	},
+	deploy: {
+		attributes: {
+			template: { type: String, required: false },
+			repository: { type: String, required: false },
+		},
+		render: Deploy,
+	},
+	'deploy-button-generator': {
+		selfClosing: true,
+		render: DeployButtonGenerator,
 	},
 };
 

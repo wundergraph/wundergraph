@@ -38,7 +38,12 @@ func (e *jsonError) Error() string {
 	return e.Message
 }
 
+func NewValidationError(message string, input json.RawMessage, errors []error) *ValidationError {
+	return &ValidationError{Code: "InputValidationError", Message: message, Input: input, Errors: errors}
+}
+
 type ValidationError struct {
+	Code    string          `json:"code,omitempty"`
 	Message string          `json:"message,omitempty"`
 	Input   json.RawMessage `json:"input,omitempty"`
 	Errors  []error         `json:"errors,omitempty"`
@@ -78,11 +83,7 @@ func (v *Validator) Validate(ctx context.Context, variables []byte, errOut io.Wr
 				validationErrors = append(validationErrors, v)
 			}
 		}
-		validationError := ValidationError{
-			Message: "Bad Request: Invalid input",
-			Input:   input,
-			Errors:  validationErrors,
-		}
+		validationError := NewValidationError("Bad Request: Invalid input", input, validationErrors)
 		if err := json.NewEncoder(errOut).Encode(validationError); err != nil {
 			return false, err
 		}

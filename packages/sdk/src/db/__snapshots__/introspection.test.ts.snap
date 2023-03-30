@@ -542,6 +542,8 @@ type Query {
   aggregateusers(where: usersWhereInput, orderBy: [usersOrderByWithRelationInput], cursor: usersWhereUniqueInput, take: Int, skip: Int): AggregateUsers!
   groupByusers(where: usersWhereInput, orderBy: [usersOrderByWithAggregationInput], by: [UsersScalarFieldEnum]!, having: usersScalarWhereWithAggregatesInput, take: Int, skip: Int): [UsersGroupByOutputType]!
   findUniqueusers(where: usersWhereUniqueInput!): users
+  queryRaw(query: String!, parameters: [String]): [_Row!]!
+  queryRawJSON(query: String!, parameters: [String]): JSON
 }
 
 input usersCreateWithoutMessagesInput {
@@ -735,6 +737,7 @@ type Mutation {
   updateOneusers(data: usersUpdateInput!, where: usersWhereUniqueInput!): users
   updateManyusers(data: usersUpdateManyMutationInput!, where: usersWhereInput): AffectedRowsOutput
   deleteManyusers(where: usersWhereInput): AffectedRowsOutput
+  executeRaw(query: String!, parameters: [String]): Int!
 }
 
 scalar DateTime
@@ -765,5 +768,26 @@ type Contact {
 input ContactInput {
   type: String
   phone: String
+}
+
+type _Row {
+  ID: ID!
+  Int: Int!
+  Float: Float!
+  String: String!
+  Boolean: Boolean!
+  DateTime: DateTime!
+  JSON: JSON!
+  Object: _Row!
+  Array: [_Row!]!
+  OptionalID: ID
+  OptionalInt: Int
+  OptionalFloat: Float
+  OptionalString: String
+  OptionalBoolean: Boolean
+  OptionalDateTime: DateTime
+  OptionalJSON: JSON
+  OptionalObject: _Row
+  OptionalArray: [_Row!]
 }"
 `;

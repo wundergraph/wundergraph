@@ -26,6 +26,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -140,11 +141,12 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
+	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        i.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        i.log,
+		Client:      i.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      i.log,
 	}
 
 	switch operation.OperationType {

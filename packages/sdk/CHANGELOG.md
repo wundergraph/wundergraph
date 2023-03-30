@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.142.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.0...@wundergraph/sdk@0.142.1) (2023-03-29)
+
+### Bug Fixes
+
+* print compiler error messages during TS operation response schema generation ([#761](https://github.com/wundergraph/wundergraph/issues/761)) ([0ff8feb](https://github.com/wundergraph/wundergraph/commit/0ff8feb80b9ca83452bb8888fc651f4a5a535c4e)) (@fiam)
+* support TS operations that never return ([#762](https://github.com/wundergraph/wundergraph/issues/762)) ([7092f90](https://github.com/wundergraph/wundergraph/commit/7092f907f1448fe6a7455e868726bb6e511478f9)) (@fiam)
+
+## [0.142.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.141.0...@wundergraph/sdk@0.142.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+* use .cjs extension for commonjs to support esm projects ([#752](https://github.com/wundergraph/wundergraph/issues/752)) ([7045b52](https://github.com/wundergraph/wundergraph/commit/7045b529d0f6ac339c6959668c77325777326a6f)) (@Pagebakers)
+
+## [0.141.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.140.0...@wundergraph/sdk@0.141.0) (2023-03-27)
+
+### Features
+
+* add build_info.json to sdk ([#758](https://github.com/wundergraph/wundergraph/issues/758)) ([e34c94f](https://github.com/wundergraph/wundergraph/commit/e34c94fefc6b624ada2d4ad36ce8589309620950)) (@Aenimus)
+
+## [0.140.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.139.0...@wundergraph/sdk@0.140.0) (2023-03-23)
+
+### Features
+
+* add raw sql support ([#745](https://github.com/wundergraph/wundergraph/issues/745)) ([081ef23](https://github.com/wundergraph/wundergraph/commit/081ef23ca4e63a12344b24cfed858a1fb1a0d5b8)) (@jensneuse)
+* new local cache implementation ([#727](https://github.com/wundergraph/wundergraph/issues/727)) ([111decc](https://github.com/wundergraph/wundergraph/commit/111decc1cdba258ce9936cfbe396511536b48ee2)) (@fiam)
+
+### Bug Fixes
+
+* data corruption when polling is enabled for federation sources ([#753](https://github.com/wundergraph/wundergraph/issues/753)) ([daa8a8c](https://github.com/wundergraph/wundergraph/commit/daa8a8c386ab9ad9bfd707f351815d0976d26ae4)) (@fiam)
+
 ## [0.139.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.138.0...@wundergraph/sdk@0.139.0) (2023-03-16)
 
 ### Features

@@ -23,6 +23,10 @@ Each file becomes an Operation. The Operation name is not relevant, the file nam
 
 Read the [Docs](https://wundergraph.com/docs).
 
+## Deploy to WunderGraph Cloud
+
+[![Deploy to WunderGraph](https://wundergraph.com/button)](https://cloud.wundergraph.com/new/clone?templateName=nextjs-react-query)
+
 ## Got Questions?
 
 Join us on [Discord](https://wundergraph.com/discord)!

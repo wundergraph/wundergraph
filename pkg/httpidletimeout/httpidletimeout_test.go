@@ -150,20 +150,20 @@ func TestSkip(t *testing.T) {
 
 	var wg sync.WaitGroup
 	wg.Add(4)
-	time.AfterFunc(maxWait/2, func() {
+	time.AfterFunc(timeoutDuration/2, func() {
 		defer wg.Done()
 		sendDummyRequest(server, skipPath)
 	})
 
-	time.AfterFunc(maxWait*2, func() {
+	time.AfterFunc(timeoutDuration-timeoutDuration/10, func() {
 		defer wg.Done()
 		sendDummyRequest(server, "/")
 	})
 
-	ctx1, cancel1 := context.WithTimeout(context.Background(), timeoutDuration+timeoutDuration/10)
+	ctx1, cancel1 := context.WithTimeout(context.Background(), timeoutDuration+timeoutDuration/2)
 	defer cancel1()
 
-	ctx2, cancel2 := context.WithTimeout(context.Background(), timeoutDuration*3)
+	ctx2, cancel2 := context.WithTimeout(context.Background(), maxWait+timeoutDuration)
 	defer cancel2()
 
 	go func() {

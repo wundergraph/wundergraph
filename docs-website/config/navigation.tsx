@@ -16,6 +16,7 @@ import {
 	ArrowUpCircleIcon,
 	LightBulbIcon,
 	ListBulletIcon,
+	CloudArrowUpIcon,
 	AcademicCapIcon,
 } from '@heroicons/react/24/solid';
 
@@ -221,18 +222,6 @@ const navigation = [
 						title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
 						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
 					},
-					{
-						title: 'API Namespacing',
-						href: '/docs/core-concepts/api-namespacing',
-					},
-					{
-						title: 'Virtual Graph',
-						href: '/docs/core-concepts/virtual-graph',
-					},
-					{
-						title: 'The `_join` field',
-						href: '/docs/core-concepts/_join-field',
-					},
 				],
 			},
 			// {
@@ -393,44 +382,12 @@ const navigation = [
 				href: '/docs/databases',
 			},
 			{
-				title: 'PostgreSQL',
-				href: '/docs/databases/postgresql',
-			},
-			{
-				title: 'MySQL',
-				href: '/docs/databases/mysql',
-			},
-			{
-				title: 'SQLite',
-				href: '/docs/databases/sqlite',
-			},
-			{
-				title: 'SQLServer',
-				href: '/docs/databases/sqlserver',
-			},
-			{
-				title: 'Prisma',
+				title: 'Prisma Datasource',
 				href: '/docs/databases/prisma',
-			},
-			{
-				title: 'MongoDB + Atlas',
-				href: '/docs/databases/mongodb-atlas',
-			},
-			{
-				title: 'Planetscale',
-				href: '/docs/databases/planetscale',
 			},
 			{
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
-			},
-			{
-				title: 'Neo4j',
-				href: '/docs/databases/neo4j',
-			},
-			{
-				title: 'Yugabyte',
-				href: '/docs/databases/yugabyte',
 			},
 		],
 	},
@@ -492,6 +449,7 @@ const navigation = [
 			'/docs/supported-data-sources',
 			'/docs/supported-frontend-frameworks',
 			'/docs/supported-backend-languages-frameworks',
+			'/docs/core-concepts',
 		],
 		icon: <CubeIcon />,
 		links: [
@@ -556,6 +514,23 @@ const navigation = [
 					{
 						title: 'WunderHub',
 						href: '/docs/components-of-wundergraph/wunderhub',
+					},
+				],
+			},
+			{
+				title: 'Core Concepts',
+				links: [
+					{
+						title: 'API Namespacing',
+						href: '/docs/core-concepts/api-namespacing',
+					},
+					{
+						title: 'Virtual Graph',
+						href: '/docs/core-concepts/virtual-graph',
+					},
+					{
+						title: 'The `_join` field',
+						href: '/docs/core-concepts/_join-field',
 					},
 				],
 			},
@@ -896,8 +871,16 @@ const navigation = [
 				title: 'Integrations',
 				links: [
 					{
+						title: 'Deploy button',
+						href: '/docs/cloud/deploy-button',
+					},
+					{
 						title: 'Vercel',
 						href: '/docs/cloud/integrations/vercel',
+					},
+					{
+						title: 'Neon',
+						href: '/docs/cloud/integrations/neon',
 					},
 				],
 			},

@@ -3,7 +3,7 @@
 #### Getting started
 
 ```shell
-npm install && npm start
+npm i && npm start
 ```
 
 #### Get all Continents
@@ -27,6 +27,10 @@ curl http://localhost:9991/operations/users/get?id=1
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
+
+## Deploy to WunderGraph Cloud
+
+[![Deploy to WunderGraph](https://wundergraph.com/button)](https://cloud.wundergraph.com/new/clone?templateName=simple)
 
 ## Got Questions?
 

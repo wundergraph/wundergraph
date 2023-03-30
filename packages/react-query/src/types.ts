@@ -7,7 +7,6 @@ import {
 	OperationsDefinition,
 	SubscriptionRequestOptions,
 	UploadRequestOptions,
-	UploadRequestOptionsWithProfile,
 	WithInput,
 } from '@wundergraph/sdk/client';
 
@@ -17,12 +16,12 @@ import {
 	UseQueryResult,
 	UseMutationResult,
 } from '@tanstack/react-query';
-import { ClientResponseError } from '@wundergraph/sdk/client';
+import { ResponseError } from '@wundergraph/sdk/client';
 
 export type QueryFetcher<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		Data extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		RequestOptions extends OperationRequestOptions<
 			Extract<keyof Operations['queries'], string>,
 			Operations['queries'][OperationName]['input']
@@ -38,7 +37,7 @@ export type QueryFetcher<Operations extends OperationsDefinition> = {
 export type MutationFetcher<Operations extends OperationsDefinition> = {
 	<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data'],
+		Data extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response'],
 		RequestOptions extends OperationRequestOptions<
 			Extract<keyof Operations['mutations'], string>,
 			Operations['mutations'][OperationName]['input']
@@ -81,11 +80,11 @@ export type UseQueryHook<Operations extends OperationsDefinition, ExtraOptions e
 	<
 		OperationName extends Extract<keyof Operations['queries'], string>,
 		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
-		Data extends Operations['queries'][OperationName]['data'] = Operations['queries'][OperationName]['data'],
+		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
-		options: UseQueryOptions<Data, ClientResponseError, Input, OperationName, LiveQuery> & ExtraOptions
-	): UseQueryResult<Data, ClientResponseError> & { isSubscribed?: boolean };
+		options: UseQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
+	): UseQueryResult<Response['data'], Response['error']> & { isSubscribed?: boolean };
 };
 
 export type UseSubscriptionOptions<
@@ -110,13 +109,14 @@ export type UseSubscriptionHook<Operations extends OperationsDefinition, ExtraOp
 	<
 		OperationName extends Extract<keyof Operations['subscriptions'], string>,
 		Input extends Operations['subscriptions'][OperationName]['input'] = Operations['subscriptions'][OperationName]['input'],
-		Data extends Operations['subscriptions'][OperationName]['data'] = Operations['subscriptions'][OperationName]['data']
+		Response extends Operations['subscriptions'][OperationName]['response'] = Operations['subscriptions'][OperationName]['response']
 	>(
-		options: UseSubscriptionOptions<Data | undefined, ClientResponseError, Input, OperationName> & ExtraOptions
-	): UseSubscriptionResult<Data, ClientResponseError>;
+		options: UseSubscriptionOptions<Response['data'] | undefined, Response['error'], Input, OperationName> &
+			ExtraOptions
+	): UseSubscriptionResult<Response['data'], Response['error']>;
 };
 
-export type UseSubscriptionResult<Data, Error = ClientResponseError> = UseQueryResult<Data, Error> & {
+export type UseSubscriptionResult<Data, Error = ResponseError> = UseQueryResult<Data, Error> & {
 	isSubscribed: boolean;
 };
 
@@ -131,10 +131,10 @@ export type UseMutationHook<Operations extends OperationsDefinition, ExtraOption
 	<
 		OperationName extends Extract<keyof Operations['mutations'], string>,
 		Input extends Operations['mutations'][OperationName]['input'] = Operations['mutations'][OperationName]['input'],
-		Data extends Operations['mutations'][OperationName]['data'] = Operations['mutations'][OperationName]['data']
+		Response extends Operations['mutations'][OperationName]['response'] = Operations['mutations'][OperationName]['response']
 	>(
-		options: UseMutationOptions<Data, ClientResponseError, Input, OperationName> & ExtraOptions
-	): UseMutationResult<Data, ClientResponseError, Input>;
+		options: UseMutationOptions<Response['data'], Response['error'], Input, OperationName> & ExtraOptions
+	): UseMutationResult<Response['data'], Response['error'], Input>;
 };
 
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
@@ -142,34 +142,34 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	enabled?: boolean;
 	resetOnMount?: boolean;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: ResponseError): void;
 }
 
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
-	onError?(error: ClientResponseError): void;
+	onError?(error: ResponseError): void;
 	onAbort?(): void;
 }
 
 export interface UseUserOptions<User>
 	extends FetchUserRequestOptions,
-		UseTanstackQueryOptions<User, ClientResponseError, User, [string]> {
+		UseTanstackQueryOptions<User, ResponseError, User, [string]> {
 	enabled?: boolean;
 }
 
 export type UseUserHook<Operations extends OperationsDefinition> = {
-	(options?: UseUserOptions<Operations['user']>): UseQueryResult<Operations['user'], ClientResponseError>;
+	(options?: UseUserOptions<Operations['user']>): UseQueryResult<Operations['user'], ResponseError>;
 };
 
 export type UseUploadOptions = Omit<
-	UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions, 'uploadFiles'>,
+	UseTanstackMutationOptions<string[], ResponseError, UploadRequestOptions, 'uploadFiles'>,
 	'fetcher'
 >;
 
 export type UseUploadHook<Operations extends OperationsDefinition> = {
 	(options?: UseUploadOptions): Omit<
-		UseTanstackMutationOptions<string[], ClientResponseError, UploadRequestOptions>,
+		UseTanstackMutationOptions<string[], ResponseError, UploadRequestOptions>,
 		'mutate'
 	> & {
 		upload: <
