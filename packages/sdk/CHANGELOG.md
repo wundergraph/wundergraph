@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.142.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.1...@wundergraph/sdk@0.142.2) (2023-03-30)
+
+### Bug Fixes
+
+* make TS operation response schema generation more forgiving ([#776](https://github.com/wundergraph/wundergraph/issues/776)) ([f6cde4f](https://github.com/wundergraph/wundergraph/commit/f6cde4fa3c3e3027feab87deb078eca749e975ea)), closes [#762](https://github.com/wundergraph/wundergraph/issues/762) (@fiam)
+
 ## [0.142.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.0...@wundergraph/sdk@0.142.1) (2023-03-29)
 
 ### Bug Fixes
