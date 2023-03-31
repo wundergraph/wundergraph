@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/sdk",
-  "version": "0.142.1",
+  "version": "0.142.2",
   "license": "Apache-2.0",
   "exports": {
     ".": {
@@ -115,11 +115,18 @@
   },
   "dependencies": {
     "@fastify/formbody": "^7.3.0",
+    "@graphql-mesh/cross-helpers": "^0.3.4",
+    "@graphql-mesh/types": "^0.91.12",
+    "@graphql-mesh/utils": "^0.43.20",
     "@graphql-tools/schema": "^8.3.10",
+    "@graphql-tools/utils": "^9.2.1",
+    "@omnigraph/json-schema": "^0.38.24",
+    "@omnigraph/openapi": "^0.19.26",
     "@prisma/generator-helper": "^3.9.2",
     "@web-std/fetch": "^4.1.0",
+    "@whatwg-node/fetch": "^0.8.4",
     "@wundergraph/protobuf": "workspace:^0.106.1",
-    "@wundergraph/wunderctl": "workspace:^0.136.0",
+    "@wundergraph/wunderctl": "workspace:^0.136.1",
     "axios": "^0.26.1",
     "axios-retry": "^3.3.1",
     "close-with-grace": "^1.1.0",
@@ -146,6 +153,7 @@
     "swagger2openapi": "^7.0.8",
     "terminate": "^2.5.0",
     "ts-retry-promise": "^0.7.0",
+    "tslib": "^2.5.0",
     "typescript-json-schema": "^0.55.0",
     "write-file-atomic": "^5.0.0",
     "zod": "^3.20.2",
