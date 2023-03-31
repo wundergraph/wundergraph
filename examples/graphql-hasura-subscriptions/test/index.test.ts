@@ -10,7 +10,7 @@ beforeAll(() => wg.start());
 afterAll(() => wg.stop());
 
 // Only run tests if we have a valid token
-const testIfToken = !!process.env.HASURA_BEARER_TOKEN ? test : test.skip;
+const testIfToken = !!process.env.HASURA_AUTH_TOKEN ? test : test.skip;
 
 describe('test hasura subscriptions', () => {
 	testIfToken('todos subscribe once', async () => {

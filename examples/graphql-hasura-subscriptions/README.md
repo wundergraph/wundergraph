@@ -9,7 +9,7 @@ GraphiQL interface, and obtain token. Make sure you copy the entire token, since
 overflows its bounding box.
 
 - Copy .env.example to .env
-- Set your token as HASURA_BEARER_TOKEN=your_token
+- Set your token as HASURA_AUTH_TOKEN=your_token (e.g. Bearer ey...)
 
 #### Getting started
 
