@@ -455,6 +455,44 @@ importers:
       tsup: 6.5.0_typescript@4.9.4
       typescript: 4.9.4
 
+  packages/svelte-query:
+    specifiers:
+      '@sveltejs/package': ^2.0.2
+      '@swc/core': ^1.3.14
+      '@swc/jest': ^0.2.23
+      '@tanstack/svelte-query': ^4.24.6
+      '@testing-library/jest-dom': ^5.16.5
+      '@testing-library/svelte': ^3.2.2
+      '@types/jest': ^28.1.1
+      '@types/node-fetch': 2.6.2
+      '@wundergraph/sdk': workspace:*
+      jest: ^29.0.3
+      jest-environment-jsdom: ^29.3.0
+      nock: ^13.2.9
+      node-fetch: 2.6.7
+      svelte: ^3.54.0
+      svelte-jester: ^2.3.2
+      tsd: ^0.24.1
+      typescript: ^4.8.2
+    devDependencies:
+      '@sveltejs/package': 2.0.2_atrrhq7vg4ekua4nnyrpuardle
+      '@swc/core': 1.3.14
+      '@swc/jest': 0.2.23_@swc+core@1.3.14
+      '@tanstack/svelte-query': 4.24.9_svelte@3.55.1
+      '@testing-library/jest-dom': 5.16.5
+      '@testing-library/svelte': 3.2.2_svelte@3.55.1
+      '@types/jest': 28.1.8
+      '@types/node-fetch': 2.6.2
+      '@wundergraph/sdk': link:../sdk
+      jest: 29.4.2
+      jest-environment-jsdom: 29.3.0
+      nock: 13.2.9
+      node-fetch: 2.6.7
+      svelte: 3.55.1
+      svelte-jester: 2.3.2_jest@29.4.2+svelte@3.55.1
+      tsd: 0.24.1
+      typescript: 4.9.4
+
   packages/swr:
     specifiers:
       '@swc/core': ^1.3.14
@@ -3039,7 +3077,7 @@ packages:
       jest-validate: 29.2.2
       jest-watcher: 29.2.2
       micromatch: 4.0.5
-      pretty-format: 29.3.1
+      pretty-format: 29.4.2
       slash: 3.0.0
       strip-ansi: 6.0.1
     transitivePeerDependencies:
@@ -3319,7 +3357,7 @@ packages:
     resolution: {integrity: sha512-QivM7GlSHSsIAWzgfyP8dgeExPRZ9BIe2LsdPyEhCGkZkoyA+kGsoIzbKAfZCvvRzfZioKwPtCZIt5SaoxYCvg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dependencies:
-      expect: 29.3.1
+      expect: 29.4.2
       jest-snapshot: 29.3.1
     transitivePeerDependencies:
       - supports-color
@@ -5171,6 +5209,22 @@ packages:
       solid-js: 1.6.11
     dev: true
 
+  /@sveltejs/package/2.0.2_atrrhq7vg4ekua4nnyrpuardle:
+    resolution: {integrity: sha512-cCOCcO8yMHnhHyaR51nQtvKZ3o/vSU9UYI1EXLT1j2CKNPMuH1/g6JNwKcNNrtQGwwquudc69ZeYy8D/TDNwEw==}
+    engines: {node: ^16.14 || >=18}
+    hasBin: true
+    peerDependencies:
+      svelte: ^3.44.0
+    dependencies:
+      chokidar: 3.5.3
+      kleur: 4.1.5
+      sade: 1.8.1
+      svelte: 3.55.1
+      svelte2tsx: 0.6.2_atrrhq7vg4ekua4nnyrpuardle
+    transitivePeerDependencies:
+      - typescript
+    dev: true
+
   /@swc/core-darwin-arm64/1.3.14:
     resolution: {integrity: sha512-QFuUq3341uOCrJMIWGuo+CmRC5qZoM2lUo7o2lmv1FO1Dh9njTG85pLD83vz6y4j/F034DBGzvRgSti/Bsoccw==}
     engines: {node: '>=10'}
@@ -5339,6 +5393,10 @@ packages:
     resolution: {integrity: sha512-Tfru6YTDTCpX7dKVwHp/sosw/dNjEdzrncduUjIkQxn7n7u+74HT2ZrGtwwrU6Orws4x7zp3FKRqBPWVVhpx9w==}
     dev: true
 
+  /@tanstack/query-core/4.24.9:
+    resolution: {integrity: sha512-pZQ2NpdaHzx8gPPkAPh06d6zRkjfonUzILSYBXrdHDapP2eaBbGsx5L4/dMF+fyAglFzQZdDDzZgAykbM20QVw==}
+    dev: true
+
   /@tanstack/react-query/4.16.1_biqbaboplfbrettd7655fr4n2y:
     resolution: {integrity: sha512-PDE9u49wSDykPazlCoLFevUpceLjQ0Mm8i6038HgtTEKb/aoVnUZdlUP7C392ds3Cd75+EGlHU7qpEX06R7d9Q==}
     peerDependencies:
@@ -5382,6 +5440,15 @@ packages:
     dependencies:
       '@tanstack/query-core': 4.24.6
       solid-js: 1.6.11
+    dev: true
+
+  /@tanstack/svelte-query/4.24.9_svelte@3.55.1:
+    resolution: {integrity: sha512-sKZgyrHbCVWxbGPNOwRG3py7b/si2lXCMP0jCLHIK6ncHrrxhZXhYDQgbIy75D44wKRDV7jjP2GJ7CIktWxNrA==}
+    peerDependencies:
+      svelte: ^3.54.0
+    dependencies:
+      '@tanstack/query-core': 4.24.9
+      svelte: 3.55.1
     dev: true
 
   /@testing-library/dom/8.19.0:
@@ -5439,6 +5506,16 @@ packages:
       '@types/react-dom': 18.0.8
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+    dev: true
+
+  /@testing-library/svelte/3.2.2_svelte@3.55.1:
+    resolution: {integrity: sha512-IKwZgqbekC3LpoRhSwhd0JswRGxKdAGkf39UiDXTywK61YyLXbCYoR831e/UUC6EeNW4hiHPY+2WuovxOgI5sw==}
+    engines: {node: '>= 10'}
+    peerDependencies:
+      svelte: 3.x
+    dependencies:
+      '@testing-library/dom': 8.20.0
+      svelte: 3.55.1
     dev: true
 
   /@tokenizer/token/0.3.0:
@@ -6443,7 +6520,7 @@ packages:
   /axios/0.26.1_debug@4.3.4:
     resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
     dependencies:
-      follow-redirects: 1.15.2
+      follow-redirects: 1.15.2_debug@4.3.4
     transitivePeerDependencies:
       - debug
     dev: false
@@ -7755,6 +7832,10 @@ packages:
     dependencies:
       mimic-response: 3.1.0
 
+  /dedent-js/1.0.1:
+    resolution: {integrity: sha512-OUepMozQULMLUmhxS95Vudo0jb0UchLimi3+pQ2plj61Fcy8axbP9hbiD4Sz6DPqn6XG3kfmziVfQ1rSys5AJQ==}
+    dev: true
+
   /dedent/0.7.0:
     resolution: {integrity: sha512-Q6fKUPqnAHAyhiUgFU7BUzLiv0kd8saH9al7tnu5Q/okj6dnupxyTgFIBjVzJATdfIAm9NAsvXNzjaKa+bxVyA==}
     dev: true
@@ -8854,17 +8935,6 @@ packages:
       jest-util: 29.4.2
     dev: true
 
-  /expect/29.3.1:
-    resolution: {integrity: sha512-gGb1yTgU30Q0O/tQq+z30KBWv24ApkMgFUpvKBkyLUBL68Wv8dHdJxTBZFl/iT8K/bqDHvUYRH6IIN3rToopPA==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    dependencies:
-      '@jest/expect-utils': 29.5.0
-      jest-get-type: 29.4.3
-      jest-matcher-utils: 29.5.0
-      jest-message-util: 29.5.0
-      jest-util: 29.5.0
-    dev: true
-
   /expect/29.4.2:
     resolution: {integrity: sha512-+JHYg9O3hd3RlICG90OPVjRkPBoiUH7PxvDVMnRiaq1g6JUgZStX514erMl0v2Dc5SkfVbm7ztqbd6qHHPn+mQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -9155,6 +9225,18 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  /follow-redirects/1.15.2_debug@4.3.4:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dependencies:
+      debug: 4.3.4
+    dev: false
 
   /for-each/0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -12944,6 +13026,11 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /kleur/4.1.5:
+    resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
+    engines: {node: '>=6'}
+    dev: true
+
   /language-subtag-registry/0.3.22:
     resolution: {integrity: sha512-tN0MCzyWnoz/4nHS6uxdlFWoUZT7ABptwKPQ52Ea7URk6vll88bWBVhodtnlfEuCcKWNGoc+uGbw1cwa9IKh/w==}
     dev: true
@@ -13253,6 +13340,12 @@ packages:
     resolution: {integrity: sha512-OvKfgCC2Ndby6aSTREl5aCCPTNIzlDfQZvZxNUrBrihDhL3xcrYegTblhmEiCrg2kKQz4XsFIaemE5BF4ybSaQ==}
     dependencies:
       get-func-name: 2.0.0
+    dev: true
+
+  /lower-case/2.0.2:
+    resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
+    dependencies:
+      tslib: 2.4.1
     dev: true
 
   /lowercase-keys/2.0.0:
@@ -13652,6 +13745,11 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /mri/1.2.0:
+    resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
+    engines: {node: '>=4'}
+    dev: true
+
   /mrmime/1.0.1:
     resolution: {integrity: sha512-hzzEagAgDyoU1Q6yg5uI+AorQgdvMCur3FcKf7NhMKWsaYg+RnbTyHRa/9IlLF9rf455MOCtcqqrQQ83pPP7Uw==}
     engines: {node: '>=10'}
@@ -13861,6 +13959,13 @@ packages:
 
   /nice-try/1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
+    dev: true
+
+  /no-case/3.0.4:
+    resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
+    dependencies:
+      lower-case: 2.0.2
+      tslib: 2.4.1
     dev: true
 
   /nock/13.2.9:
@@ -14765,6 +14870,13 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
     dev: false
+
+  /pascal-case/3.1.2:
+    resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
+    dependencies:
+      no-case: 3.0.4
+      tslib: 2.4.1
+    dev: true
 
   /path-equal/1.2.5:
     resolution: {integrity: sha512-i73IctDr3F2W+bsOWDyyVm/lqsXO47aY9nsFZUjTT/aljSbkxHxxCoyZ9UUrM8jK0JVod+An+rl48RCsvWM+9g==}
@@ -16107,6 +16219,13 @@ packages:
     dependencies:
       tslib: 2.4.1
 
+  /sade/1.8.1:
+    resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
+    engines: {node: '>=6'}
+    dependencies:
+      mri: 1.2.0
+    dev: true
+
   /safe-buffer/5.1.2:
     resolution: {integrity: sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==}
     dev: true
@@ -16779,6 +16898,34 @@ packages:
   /supports-preserve-symlinks-flag/1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  /svelte-jester/2.3.2_jest@29.4.2+svelte@3.55.1:
+    resolution: {integrity: sha512-JtxSz4FWAaCRBXbPsh4LcDs4Ua7zdXgLC0TZvT1R56hRV0dymmNP+abw67DTPF7sQPyNxWsOKd0Sl7Q8SnP8kg==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      jest: '>= 27'
+      svelte: '>= 3'
+    dependencies:
+      jest: 29.4.2
+      svelte: 3.55.1
+    dev: true
+
+  /svelte/3.55.1:
+    resolution: {integrity: sha512-S+87/P0Ve67HxKkEV23iCdAh/SX1xiSfjF1HOglno/YTbSTW7RniICMCofWGdJJbdjw3S+0PfFb1JtGfTXE0oQ==}
+    engines: {node: '>= 8'}
+    dev: true
+
+  /svelte2tsx/0.6.2_atrrhq7vg4ekua4nnyrpuardle:
+    resolution: {integrity: sha512-0ircYY2/jMOfistf+iq8fVHERnu1i90nku56c78+btC8svyafsc3OjOV37LDEOV7buqYY1Rv/uy03eMxhopH2Q==}
+    peerDependencies:
+      svelte: ^3.55
+      typescript: ^4.9.4
+    dependencies:
+      dedent-js: 1.0.1
+      pascal-case: 3.1.2
+      svelte: 3.55.1
+      typescript: 4.9.4
+    dev: true
 
   /swagger2openapi/7.0.8:
     resolution: {integrity: sha512-upi/0ZGkYgEcLeGieoz8gT74oWHA0E7JivX7aN9mAf+Tc7BQoRBvnIGHoPDw+f9TXTW4s6kGYCZJtauP6OYp7g==}
