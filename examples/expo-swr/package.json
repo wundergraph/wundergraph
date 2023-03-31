@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@expo/webpack-config": "^0.17.2",
-    "@wundergraph/sdk": "^0.142.2",
-    "@wundergraph/swr": "^0.14.2",
+    "@wundergraph/sdk": "^0.143.0",
+    "@wundergraph/swr": "^0.14.3",
     "event-source-polyfill": "^1.0.31",
     "expo": "^47.0.0",
     "react": "18.1.0",
