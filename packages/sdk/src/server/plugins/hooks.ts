@@ -128,6 +128,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		reply.type('application/json').code(200);
 
 		try {
+			const { span } = request.telemetry();
+			span?.setAttributes({
+				'wg.hook.name': 'onOriginRequest',
+				'wg.hook.type': 'global',
+				'wg.operation.name': request.body.operationName,
+				'wg.operation.type': request.body.operationType,
+			});
 			const maybeHookOut = await config.global?.httpTransport?.onOriginRequest?.hook({
 				...requestContext(request),
 				operation: {
@@ -138,13 +145,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					...request.body.request,
 					headers: new Headers(request.body.request.headers),
 				},
-			});
-			const { span } = request.telemetry();
-			span?.setAttributes({
-				'wg.hook.name': 'onOriginRequest',
-				'wg.hook.type': 'global',
-				'wg.operation.name': request.body.operationName,
-				'wg.operation.type': request.body.operationType,
 			});
 			const hookOut = maybeHookOut || 'skip';
 			return {
@@ -175,6 +175,13 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 	}>('/global/httpTransport/onOriginResponse', async (request, reply) => {
 		reply.type('application/json').code(200);
 		try {
+			const { span } = request.telemetry();
+			span?.setAttributes({
+				'wg.hook.name': 'onOriginRequest',
+				'wg.hook.type': 'global',
+				'wg.operation.name': request.body.operationName,
+				'wg.operation.type': request.body.operationType,
+			});
 			const maybeHookOut = await config.global?.httpTransport?.onOriginResponse?.hook({
 				...requestContext(request),
 				response: {
@@ -185,13 +192,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 					name: request.body.operationName,
 					type: request.body.operationType,
 				},
-			});
-			const { span } = request.telemetry();
-			span?.setAttributes({
-				'wg.hook.name': 'onOriginRequest',
-				'wg.hook.type': 'global',
-				'wg.operation.name': request.body.operationName,
-				'wg.operation.type': request.body.operationType,
 			});
 			const hookOut = maybeHookOut || 'skip';
 			return {
@@ -223,6 +223,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		}>(`/global/wsTransport/onConnectionInit`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'onConnectionInit',
+					'wg.hook.type': 'global',
+				});
 				const resp = await config.global?.wsTransport?.onConnectionInit?.hook({
 					dataSourceId: request.body.dataSourceId,
 					...requestContext(request),
@@ -230,11 +235,6 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 						...request.body.request,
 						headers: new Headers(request.body.request.headers),
 					},
-				});
-				const { span } = request.telemetry();
-				span?.setAttributes({
-					'wg.hook.name': 'onConnectionInit',
-					'wg.hook.type': 'global',
 				});
 				return {
 					hook: 'onConnectionInit',
@@ -314,15 +314,15 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				await hookFunction({
-					...requestContext(request),
-					input: request.body.input,
-				});
 				const { span } = request.telemetry();
 				span?.setAttributes({
 					'wg.hook.name': 'preResolve',
 					'wg.hook.type': 'operation',
 					'wg.operation.name': operationName,
+				});
+				await hookFunction({
+					...requestContext(request),
+					input: request.body.input,
 				});
 				return {
 					op: operationName,
@@ -349,16 +349,16 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				await hookFunction({
-					...requestContext(request),
-					input: request.body.input,
-					response: request.body.response,
-				});
 				const { span } = request.telemetry();
 				span?.setAttributes({
 					'wg.hook.name': 'postResolve',
 					'wg.hook.type': 'operation',
 					'wg.operation.name': operationName,
+				});
+				await hookFunction({
+					...requestContext(request),
+					input: request.body.input,
+					response: request.body.response,
 				});
 				return {
 					op: operationName,
@@ -385,15 +385,15 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const mutatedInput = await hookFunction({
-					...requestContext(request),
-					input: request.body.input,
-				});
 				const { span } = request.telemetry();
 				span?.setAttributes({
 					'wg.hook.name': 'mutatingPreResolve',
 					'wg.hook.type': 'operation',
 					'wg.operation.name': operationName,
+				});
+				const mutatedInput = await hookFunction({
+					...requestContext(request),
+					input: request.body.input,
 				});
 				return {
 					op: operationName,
@@ -421,16 +421,16 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const mutatedResponse = await hookFunction({
-					...requestContext(request),
-					input: request.body.input,
-					response: request.body.response,
-				});
 				const { span } = request.telemetry();
 				span?.setAttributes({
 					'wg.hook.name': 'mutatingPostResolve',
 					'wg.hook.type': 'operation',
 					'wg.operation.name': operationName,
+				});
+				const mutatedResponse = await hookFunction({
+					...requestContext(request),
+					input: request.body.input,
+					response: request.body.response,
 				});
 				return {
 					op: operationName,
@@ -458,15 +458,15 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
-				const out = await hookFunction({
-					...requestContext(request),
-					input: request.body.input,
-				});
 				const { span } = request.telemetry();
 				span?.setAttributes({
 					'wg.hook.name': 'customResolve',
 					'wg.hook.type': 'operation',
 					'wg.operation.name': operationName,
+				});
+				const out = await hookFunction({
+					...requestContext(request),
+					input: request.body.input,
 				});
 				return {
 					op: operationName,
@@ -548,14 +548,14 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		}>(`/upload/${providerName}/${profileName}/preUpload`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'preUpload',
+				});
 				const result = await handler({
 					...requestContext(request),
 					file: request.body.file,
 					meta: request.body.meta,
-				});
-				const { span } = request.telemetry();
-				span?.setAttributes({
-					'wg.hook.name': 'preUpload',
 				});
 				return result || {};
 			} catch (err) {
@@ -576,15 +576,15 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		}>(`/upload/${providerName}/${profileName}/postUpload`, async (request, reply) => {
 			reply.type('application/json').code(200);
 			try {
+				const { span } = request.telemetry();
+				span?.setAttributes({
+					'wg.hook.name': 'postUpload',
+				});
 				const result = await handler({
 					...requestContext(request),
 					file: request.body.file,
 					meta: request.body.meta,
 					error: request.body.error,
-				});
-				const { span } = request.telemetry();
-				span?.setAttributes({
-					'wg.hook.name': 'postUpload',
 				});
 				return result || {};
 			} catch (err) {

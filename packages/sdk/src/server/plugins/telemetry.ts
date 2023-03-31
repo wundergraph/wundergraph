@@ -1,11 +1,11 @@
-import { FastifyPluginAsync, FastifyPluginCallback } from 'fastify';
+import { FastifyPluginAsync } from 'fastify';
 import { TelemetryTracerProvider } from '../trace';
-import { context, propagation, Span, SpanStatusCode, trace } from '@opentelemetry/api';
+import { context, propagation, Span, SpanStatusCode, trace, Context } from '@opentelemetry/api';
 import fp from 'fastify-plugin';
 
 const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryTracerProvider> = async (fastify, options) => {
 	const contextMap = new WeakMap();
-	const tracer = trace.getTracer('hook-server', '0.0.1');
+	const tracer = options.provider.getTracer('hook-server', '0.0.1');
 
 	fastify.addHook('onRequest', async (req, resp) => {
 		let activeContext = context.active();
@@ -14,13 +14,11 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryTracerProvider> = asyn
 			activeContext = propagation.extract(activeContext, req.headers);
 		}
 
-		//const t = process.hrtime();
-		const span = tracer.startSpan(`${req.method} ${req.url}`, {}, activeContext);
+		const span = tracer.startSpan(`${req.method} ${req.url}`, { startTime: performance.now() }, activeContext);
 		span.setAttributes({
 			'http.method': req.raw.method,
 			'http.url': req.raw.url,
 		});
-		//fastify.log.debug(`Starting span time ----> ${t}`);
 
 		contextMap.set(req, trace.setSpan(activeContext, span));
 	});
@@ -62,6 +60,9 @@ const FastifyTelemetryPlugin: FastifyPluginAsync<TelemetryTracerProvider> = asyn
 				const activeContext = contextMap.get(req) || context.active();
 
 				return trace.getSpan(activeContext)!;
+			},
+			get context(): Context {
+				return contextMap.get(req) || context.active();
 			},
 		};
 	});

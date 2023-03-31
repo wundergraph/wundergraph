@@ -172,6 +172,10 @@ const navigation = [
 						title: 'Next.js Todos',
 						href: '/docs/examples/nextjs-todos',
 					},
+					{
+						title: 'WunderGraph open telemetry',
+						href: '/docs/examples/open-telemetry',
+					},
 				],
 			},
 		],
@@ -1031,6 +1035,10 @@ const navigation = [
 					{
 						title: 'WunderNode Options',
 						href: '/docs/wundergraph-config-ts-reference/configure-wundernode-options',
+					},
+					{
+						title: 'Open Telemetry',
+						href: '/docs/wundergraph-config-ts-reference/configure-open-telemetry',
 					},
 				],
 			},

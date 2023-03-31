@@ -6,7 +6,7 @@ import type { ConfigurationVariable, WunderGraphConfiguration } from '@wundergra
 import type { WebhooksConfig } from '../webhooks/types';
 import type { InputVariable } from '../configure/variables';
 import type { ListenOptions, LoggerLevel, ResolvedListenOptions } from '../configure/options';
-import { Span } from '@opentelemetry/api';
+import { Context, Span } from '@opentelemetry/api';
 
 declare module 'fastify' {
 	interface FastifyRequest extends FastifyRequestContext {}
@@ -54,6 +54,7 @@ export interface AuthenticationRequestContext<User extends WunderGraphUser = Wun
 
 export interface TelemetryInstance {
 	span: Span | undefined;
+	context: Context;
 }
 
 export interface WunderGraphFile {

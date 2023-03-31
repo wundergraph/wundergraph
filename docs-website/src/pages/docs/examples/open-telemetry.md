@@ -1,8 +1,14 @@
-# WunderGraph open telemetry example
+---
+title: WunderGraph open telemetry Example
+pageTitle: WunderGraph - Examples - Open Telemetry
+description:
+---
 
-#### Configuration
+[Check the example](https://github.com/wundergraph/wundergraph/tree/main/examples/open-telemetry)
 
-Check the `wundergraph.config.ts` file:
+## Configuration
+
+Check the `wundergraph.config.ts` confile:
 
 ```typescript
 configureWunderGraphApplication({
@@ -18,7 +24,7 @@ configureWunderGraphApplication({
 });
 ```
 
-#### Getting started
+## Getting started
 
 Install the dependencies and run the complete example in one command:
 
@@ -26,13 +32,13 @@ Install the dependencies and run the complete example in one command:
 npm install && npm start
 ```
 
-#### Get Dragons
+## Get Dragons
 
 ```shell
 curl -H "traceparent: 00-80e1afed08e019fc1110464cfa66635c-7a085853722dc6d2-01" http://localhost:9991/operations/Dragons
 ```
 
-#### Test the tracing
+## Test the tracing
 
 You can access Jaeger from http://localhost:16686/
 
@@ -40,11 +46,3 @@ To obtain meaningful results, it is recommended to change the trace id in the re
 If you don't provide a traceparent header, a new trace id will be generated automatically.
 
 Header format: `traceparent: {version}-{trace_id}-{span_id}-{trace_flags}`
-
-## Learn More
-
-Read the [Docs](https://wundergraph.com/docs).
-
-## Got Questions?
-
-Join us on [Discord](https://wundergraph.com/discord)!

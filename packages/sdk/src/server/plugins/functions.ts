@@ -7,6 +7,7 @@ import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
 import { AuthorizationError } from '../../errors';
 import { OperationsClient } from '../operations-client';
+import { propagation } from '@opentelemetry/api';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -34,10 +35,19 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 				config: {},
 				handler: async (request, reply) => {
 					const implementation = maybeImplementation!;
+					const { span, context } = request.telemetry();
+					span?.setAttributes({
+						'wg.function.name': operation.operation_name,
+						'wg.function.type': implementation.type,
+					});
 					try {
+						const headers: { [key: string]: string } = {};
+						propagation.inject(context, headers);
+
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
 							clientRequest: (request.body as any)?.__wg.clientRequest,
+							extraHeaders: headers,
 						});
 						const ctx: HandlerContext<any, any, any, any, any, any, any> = {
 							log: fastify.log,

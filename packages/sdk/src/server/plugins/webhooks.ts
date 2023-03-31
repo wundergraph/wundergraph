@@ -6,6 +6,7 @@ import type { RequestMethod } from '../types';
 import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
+import { propagation } from '@opentelemetry/api';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
@@ -30,6 +31,12 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 				method: ['GET', 'POST'],
 				config: { webhookName: hook.name, kind: 'webhook' },
 				handler: async (request, reply) => {
+					const { span, context } = request.telemetry();
+					span?.setAttributes({
+						'wg.hook.name': hook.name,
+						'wg.hook.type': 'webhook',
+					});
+					propagation.inject(context, request.headers);
 					const eventResponse = await webhook.handler(
 						{
 							method: request.method as RequestMethod,
