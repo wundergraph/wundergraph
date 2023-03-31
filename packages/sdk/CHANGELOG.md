@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.143.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.2...@wundergraph/sdk@0.143.0) (2023-03-31)
+
+### Features
+
+* add beta omnigraph backed open api data ([#771](https://github.com/wundergraph/wundergraph/issues/771)) ([a2c94f6](https://github.com/wundergraph/wundergraph/commit/a2c94f6b081f8ed3d3f2df2e9bf605fa1278713d)) (@devsergiy)
+
 ## [0.142.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.1...@wundergraph/sdk@0.142.2) (2023-03-30)
 
 ### Bug Fixes
