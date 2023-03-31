@@ -1,10 +1,10 @@
 query ($userID: Int! @internal) {
-	posts: jsp_getPosts(tld: "com") {
+	posts: jsp_getPosts {
 		id
 		title
 		userId @export(as: "userID")
 		user: _join @transform(get: "jsp_getUser") {
-			jsp_getUser(tld: "com", id: $userID) {
+			jsp_getUser(id: $userID) {
 				id
 				email
 				name

@@ -4,7 +4,6 @@ import path from 'path';
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import { InputValidationError } from '@wundergraph/sdk/client';
 import { createTestServer } from '../.wundergraph/generated/testing';
-import users from '../.wundergraph/operations/nested/users';
 
 const wg = createTestServer();
 
