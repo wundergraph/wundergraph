@@ -965,8 +965,8 @@ export const configureWunderGraphApplication = <
 			);
 			await updateTypeScriptOperationsResponseSchemas(wgDirAbs, tsOperations);
 
-			const configJsonPath = path.join('generated', 'wundergraph.config.json');
-			const configJSON = ResolvedWunderGraphConfigToStringifiedJSON(resolved);
+			const configJsonPath = path.join(generated, 'wundergraph.config.json');
+			const configJSON = ResolvedWunderGraphConfigToJSON(resolved);
 			// config json exists
 			// done #4 (conditional)
 			if (fs.existsSync(configJsonPath)) {
@@ -1029,7 +1029,7 @@ const done = () => {
 	}
 };
 
-const ResolvedWunderGraphConfigToStringifiedJSON = (config: ResolvedWunderGraphConfig): string => {
+const ResolvedWunderGraphConfigToJSON = (config: ResolvedWunderGraphConfig): string => {
 	const operations: Operation[] = config.application.Operations.map((op) => ({
 		content: removeHookVariables(op.Content),
 		name: op.Name,
