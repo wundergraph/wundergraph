@@ -80,6 +80,8 @@ import zodToJsonSchema from 'zod-to-json-schema';
 
 const utf8 = 'utf8';
 const generated = 'generated';
+const jsonExtension = 'json';
+const unknown = 'unknown';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -1513,7 +1515,12 @@ const applyNodeJsOperationOverrides = (
 	return operation;
 };
 
-const writeWunderGraphFileSync = (pathToJson: string, fileName: string, json: object | string, extension = 'json') => {
+const writeWunderGraphFileSync = (
+	pathToJson: string,
+	fileName: string,
+	json: object | string,
+	extension = jsonExtension
+) => {
 	if (typeof json !== 'string') {
 		json = JSON.stringify(json, null, 2);
 	}
@@ -1525,10 +1532,10 @@ const writeWunderGraphFileSync = (pathToJson: string, fileName: string, json: ob
 
 const buildInfoJSON = {
 	sdk: {
-		version: SDK_VERSION ?? 'unknown',
+		version: SDK_VERSION ?? unknown,
 	},
 	wunderctl: {
-		version: process.env.WUNDERCTL_VERSION ?? 'unknown',
+		version: process.env.WUNDERCTL_VERSION ?? unknown,
 	},
 	node: {
 		version: process.version,
