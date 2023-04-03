@@ -4,8 +4,7 @@ This example demonstrates how to use the `mutatingPostResolve` hook to change th
 
 ## Getting Started
 
-1. Copy the `.env.example` file to `.env` and fill in the required values.
-2. Install the dependencies and run the complete example in one command:
+1. Install the dependencies and run the complete example in one command:
 
 ```shell
 npm install && npm start
