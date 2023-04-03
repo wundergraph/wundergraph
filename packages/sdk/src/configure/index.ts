@@ -708,6 +708,36 @@ export const configureWunderGraphApplication = <
 
 	resolveConfig(config)
 		.then(async (resolved) => {
+			fs.writeFileSync(
+				path.join('generated', 'wundergraph.build_info.json'),
+				JSON.stringify(
+					{
+						sdk: {
+							version: SDK_VERSION ?? 'unknown',
+						},
+						wunderctl: {
+							version: process.env.WUNDERCTL_VERSION ?? 'unknown',
+						},
+						node: {
+							version: process.version,
+						},
+						os: {
+							type: os.type(),
+							platform: os.platform(),
+							arch: os.arch(),
+							version: os.version(),
+							release: os.release(),
+						},
+					},
+					null,
+					2
+				),
+				{ encoding: 'utf8' }
+			);
+			Logger.debug(`wundergraph.build_info.json updated`);
+
+			done();
+
 			const app = resolved.application;
 
 			const schemaFileName = `wundergraph.schema.graphql`;
@@ -972,7 +1002,7 @@ export const configureWunderGraphApplication = <
 
 			done();
 
-			let publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
+			const publicNodeUrl = trimTrailingSlash(resolveConfigurationVariable(resolved.nodeOptions.publicNodeUrl));
 
 			const postman = PostmanBuilder(app.Operations, {
 				baseURL: publicNodeUrl,
@@ -997,36 +1027,6 @@ export const configureWunderGraphApplication = <
 				encoding: 'utf8',
 			});
 			Logger.info(`wundergraph.openapi.json updated`);
-
-			fs.writeFileSync(
-				path.join('generated', 'wundergraph.build_info.json'),
-				JSON.stringify(
-					{
-						sdk: {
-							version: SDK_VERSION ?? 'unknown',
-						},
-						wunderctl: {
-							version: process.env.WUNDERCTL_VERSION ?? 'unknown',
-						},
-						node: {
-							version: process.version,
-						},
-						os: {
-							type: os.type(),
-							platform: os.platform(),
-							arch: os.arch(),
-							version: os.version(),
-							release: os.release(),
-						},
-					},
-					null,
-					2
-				),
-				{ encoding: 'utf8' }
-			);
-			Logger.debug(`wundergraph.build_info.json updated`);
-
-			done();
 		})
 		.catch((e: any) => {
 			//throw e;
@@ -1052,7 +1052,7 @@ const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputV
 const done = () => {
 	doneCount++;
 	Logger.info(`${doneCount}/${total} done`);
-	if (doneCount === 3) {
+	if (doneCount === total) {
 		setTimeout(() => {
 			Logger.info(`code generation completed`);
 			process.exit(0);
