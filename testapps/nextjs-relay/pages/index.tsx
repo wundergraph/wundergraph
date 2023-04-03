@@ -5,7 +5,7 @@ import type { RelayProps } from 'relay-nextjs';
 import { withRelay } from 'relay-nextjs';
 import type { pages_indexQuery as IndexQueryType } from './__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
-import { createClientEnvironment } from '@wundergraph/relay-nextjs';
+import { createClientEnvironment } from '../lib/createRelayApp';
 import TemperatureDetails from '../components/Temperature';
 
 const IndexQuery = graphql`
@@ -42,7 +42,7 @@ function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 export default withRelay(Home, IndexQuery, {
 	createClientEnvironment: () => createClientEnvironment()!,
 	createServerEnvironment: async () => {
-		const { createServerEnvironment } = await import('@wundergraph/relay-nextjs');
+		const { createServerEnvironment } = await import('../lib/createRelayApp');
 		return createServerEnvironment();
 	},
 	variablesFromContext: (ctx) => {
