@@ -47,7 +47,7 @@ export const openApiSpecificationToGraphQLApi = async (
 	}
 
 	const apiID: string = validationResult.data;
-	const spec = readSpec(oas, introspection.source);
+	const spec = removeExtensions(readSpec(oas, introspection.source));
 
 	const headersBuilder = new HeadersBuilder();
 	if (introspection.headers !== undefined) {
@@ -89,6 +89,18 @@ export const openApiSpecificationToGraphQLApi = async (
 		},
 		true
 	);
+};
+
+const removeExtensions = (spec: OasOrSwagger): OasOrSwagger => {
+	const specJson = JSON.stringify(spec);
+
+	return JSON.parse(specJson, (key, value) => {
+		if (key.startsWith('x-')) {
+			// remove field
+			return undefined;
+		}
+		return value;
+	});
 };
 
 const readSpec = (spec: string, source: OpenAPIIntrospectionSource): OasOrSwagger => {
