@@ -261,19 +261,20 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 
 	const requestContext = (req: FastifyRequest) => {
 		const body = req.body as any;
+		const { context } = req.telemetry();
 		if (body?.cycleCounter) {
 			if (body.cycleCounter > maximumRecursionLimit) {
 				const errorMessage = `maximum recursion limit reached (${maximumRecursionLimit})`;
 				req.log.error(errorMessage);
 				throw new Error(errorMessage);
 			}
-			req.ctx.internalClient = req.ctx.internalClient.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
-		}
+			const headers: { [key: string]: string } = {
+				'Wg-Cycle-Counter': body.cycleCounter,
+			};
+			propagation.inject(context, headers);
 
-		const { context } = req.telemetry();
-		const headers: { [key: string]: string } = {};
-		propagation.inject(context, headers);
-		req.ctx.internalClient = req.ctx.internalClient.withHeaders(headers);
+			req.ctx.internalClient = req.ctx.internalClient.withHeaders(headers);
+		}
 
 		return req.ctx;
 	};
