@@ -147,6 +147,11 @@ func TestNode(t *testing.T) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
+				OpenTelemetry: &apihandler.Telemetry{
+					OtelEnabled:                false,
+					OtelExporterHTTPEndpoint:   "",
+					OtelExporterJaegerEndpoint: "",
+				},
 			},
 		},
 	}
@@ -315,6 +320,11 @@ func TestInMemoryCache(t *testing.T) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
+				OpenTelemetry: &apihandler.Telemetry{
+					OtelEnabled:                false,
+					OtelExporterJaegerEndpoint: "",
+					OtelExporterHTTPEndpoint:   "",
+				},
 			},
 		},
 	}
@@ -422,6 +432,11 @@ func TestWebHooks(t *testing.T) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
+				OpenTelemetry: &apihandler.Telemetry{
+					OtelEnabled:                false,
+					OtelExporterJaegerEndpoint: "",
+					OtelExporterHTTPEndpoint:   "",
+				},
 			},
 		},
 	}
@@ -518,6 +533,11 @@ func BenchmarkNode(t *testing.B) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
+				OpenTelemetry: &apihandler.Telemetry{
+					OtelEnabled:                false,
+					OtelExporterJaegerEndpoint: "",
+					OtelExporterHTTPEndpoint:   "",
+				},
 			},
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{
 				CookieBased: &wgpb.CookieBasedAuthentication{
