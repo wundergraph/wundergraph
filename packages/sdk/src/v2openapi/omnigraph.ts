@@ -1,12 +1,11 @@
 import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource } from '../definition';
 import path from 'path';
 import yaml from 'js-yaml';
-import { convertOpenApiV3 } from './index';
 import { introspectGraphql } from '../definition/graphql-introspection';
 import { HeadersBuilder } from '../definition/headers-builder';
 import { WgEnv } from '../configure/options';
 import { z as zod } from 'zod';
-import { OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
 import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
@@ -28,8 +27,10 @@ const apiIDSchema = zod
 		message: 'id must be at most 20 characters long',
 	});
 
+type OasOrSwagger = OpenAPIV3.Document | OpenAPIV2.Document;
+
 export interface Options {
-	source: OpenAPIV3.Document;
+	source: OasOrSwagger;
 	endpoint?: string;
 	name: string;
 	operationHeaders: Record<string, string>;
@@ -46,8 +47,7 @@ export const openApiSpecificationToGraphQLApi = async (
 	}
 
 	const apiID: string = validationResult.data;
-	const specObj = readSpec(oas, introspection.source);
-	const spec = await convertOpenApiV3(specObj);
+	const spec = readSpec(oas, introspection.source);
 
 	const headersBuilder = new HeadersBuilder();
 	if (introspection.headers !== undefined) {
@@ -91,14 +91,14 @@ export const openApiSpecificationToGraphQLApi = async (
 	);
 };
 
-const readSpec = (spec: string, source: OpenAPIIntrospectionSource): Object => {
+const readSpec = (spec: string, source: OpenAPIIntrospectionSource): OasOrSwagger => {
 	if (source.kind === 'file') {
 		switch (path.extname(source.filePath)) {
 			case '.yaml':
 			case '.yml':
 				const obj = yaml.load(spec);
 				if (obj) {
-					return obj;
+					return obj as any;
 				}
 				throw new Error('cannot read OAS');
 			case '.json':
@@ -111,13 +111,13 @@ const readSpec = (spec: string, source: OpenAPIIntrospectionSource): Object => {
 	return tryReadSpec(spec);
 };
 
-const tryReadSpec = (spec: string): Object => {
+const tryReadSpec = (spec: string): OasOrSwagger => {
 	try {
 		return JSON.parse(spec);
 	} catch (e) {
 		const obj = yaml.load(spec);
 		if (obj) {
-			return obj;
+			return obj as any;
 		}
 		throw new Error('cannot read OAS: ${e}');
 	}
