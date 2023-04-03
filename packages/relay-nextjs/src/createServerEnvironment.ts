@@ -1,6 +1,6 @@
 import { Environment, Network, RecordSource, Store } from 'relay-runtime';
 
-export function createServerNetwork() {
+export const createServerNetwork = () => {
 	return Network.create(async (params, variables) => {
 		console.log(`createServerNetwork-params: ${JSON.stringify({ params, variables })}`);
 		const { id, operationKind } = params;
@@ -19,12 +19,12 @@ export function createServerNetwork() {
 		);
 		return await response.json();
 	});
-}
+};
 
-export function createServerEnvironment() {
+export const createServerEnvironment = () => {
 	return new Environment({
 		network: createServerNetwork(),
 		store: new Store(new RecordSource()),
 		isServer: true,
 	});
-}
+};

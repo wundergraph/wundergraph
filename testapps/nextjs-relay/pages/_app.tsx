@@ -1,11 +1,11 @@
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
-import { getClientEnvironment } from '../lib/relay_client_environment';
+import { createClientEnvironment } from '@wundergraph/relay-nextjs';
 import type { AppProps } from 'next/app';
 
-const clientEnv = getClientEnvironment();
+const clientEnv = createClientEnvironment();
 const initialPreloadedQuery = getInitialPreloadedQuery({
-	createClientEnvironment: () => getClientEnvironment()!,
+	createClientEnvironment: () => createClientEnvironment()!,
 });
 
 function ExampleApp({ Component, pageProps }: AppProps) {

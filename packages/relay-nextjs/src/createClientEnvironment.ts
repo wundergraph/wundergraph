@@ -1,7 +1,7 @@
 import { hydrateRelayEnvironment } from 'relay-nextjs';
 import { Environment, Network, Store, RecordSource } from 'relay-runtime';
 
-export function createClientNetwork() {
+export const createClientNetwork = () => {
 	return Network.create(async (params, variables) => {
 		console.log(`createClientNetwork-params: ${JSON.stringify({ params, variables })}`);
 		const { id, operationKind } = params;
@@ -17,10 +17,10 @@ export function createClientNetwork() {
 		});
 		return await response.json();
 	});
-}
+};
 
 let clientEnv: Environment | undefined;
-export function getClientEnvironment() {
+export const createClientEnvironment = () => {
 	if (typeof window === 'undefined') return null;
 
 	if (clientEnv == null) {
@@ -34,4 +34,4 @@ export function getClientEnvironment() {
 	}
 
 	return clientEnv;
-}
+};
