@@ -987,15 +987,15 @@ export const configureWunderGraphApplication = <
 			const openApiSpec = openApiBuilder.build(app.Operations);
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
+
+			Logger.info(`Code generation completed.`);
+			process.exit(0);
 		})
 		.catch((e: any) => {
 			//throw e;
 			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
 			process.exit(1);
 		});
-
-	Logger.info(`Code generation completed.`);
-	process.exit(0);
 };
 
 const mapRecordValues = <TKey extends string | number | symbol, TValue, TOutputValue>(
@@ -1238,7 +1238,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const basePath = path.join(wgDirAbs, generated);
 	const programPath = path.join(basePath, programFile);
 
-	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
+	fs.writeFileSync(programPath, contents.join('\n'), { encoding: utf8 });
 
 	const settings = {
 		required: true,
