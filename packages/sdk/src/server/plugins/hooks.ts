@@ -14,6 +14,7 @@ import { OperationType, WunderGraphConfiguration } from '@wundergraph/protobuf';
 import { RawRequestDefaultExpression, RawServerDefault } from 'fastify/types/utils';
 import { Headers } from '@web-std/fetch';
 import { FastifyRequest } from 'fastify';
+import { propagation } from '@opentelemetry/api';
 
 const maximumRecursionLimit = 16;
 
@@ -268,6 +269,12 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 			}
 			req.ctx.internalClient = req.ctx.internalClient.withHeaders({ 'Wg-Cycle-Counter': body.cycleCounter });
 		}
+
+		const { context } = req.telemetry();
+		const headers: { [key: string]: string } = {};
+		propagation.inject(context, headers);
+		req.ctx.internalClient = req.ctx.internalClient.withHeaders(headers);
+
 		return req.ctx;
 	};
 
