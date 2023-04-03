@@ -1,0 +1,26 @@
+query pages_indexQuery($city: String!) {
+	weather_getCityByName(name: $city) {
+		weather {
+			temperature {
+				...Temperature_Details
+			}
+			summary {
+				...Weather_Details
+			}
+		}
+		id
+	}
+}
+
+fragment Temperature_Details on weather_Temperature {
+	min
+	max
+	actual
+	feelsLike
+}
+
+fragment Weather_Details on weather_Summary {
+	title
+	description
+	weatherIcon: icon
+}
