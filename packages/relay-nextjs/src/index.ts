@@ -1,4 +1,3 @@
-import { createClientEnvironment } from './createClientEnvironment';
-import { createServerEnvironment } from './createServerEnvironment';
+import { createRelayApp } from './createRelayApp';
 
-export { createClientEnvironment, createServerEnvironment };
+export { createRelayApp };
