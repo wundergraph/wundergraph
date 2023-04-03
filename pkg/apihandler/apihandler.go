@@ -173,7 +173,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := r.loader.Load(*api.EngineConfiguration)
+	planConfig, err := r.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
@@ -507,9 +507,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:    r.middlewareClient,
-		Operation: operation,
-		Logger:    r.log,
+		Client:      r.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      r.log,
 	}
 
 	switch operation.OperationType {

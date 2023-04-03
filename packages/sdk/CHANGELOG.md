@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.143.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.2...@wundergraph/sdk@0.143.0) (2023-03-31)
+
+### Features
+
+* add beta omnigraph backed open api data ([#771](https://github.com/wundergraph/wundergraph/issues/771)) ([a2c94f6](https://github.com/wundergraph/wundergraph/commit/a2c94f6b081f8ed3d3f2df2e9bf605fa1278713d)) (@devsergiy)
+
+## [0.142.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.1...@wundergraph/sdk@0.142.2) (2023-03-30)
+
+### Bug Fixes
+
+* make TS operation response schema generation more forgiving ([#776](https://github.com/wundergraph/wundergraph/issues/776)) ([f6cde4f](https://github.com/wundergraph/wundergraph/commit/f6cde4fa3c3e3027feab87deb078eca749e975ea)), closes [#762](https://github.com/wundergraph/wundergraph/issues/762) (@fiam)
+
+## [0.142.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.0...@wundergraph/sdk@0.142.1) (2023-03-29)
+
+### Bug Fixes
+
+* print compiler error messages during TS operation response schema generation ([#761](https://github.com/wundergraph/wundergraph/issues/761)) ([0ff8feb](https://github.com/wundergraph/wundergraph/commit/0ff8feb80b9ca83452bb8888fc651f4a5a535c4e)) (@fiam)
+* support TS operations that never return ([#762](https://github.com/wundergraph/wundergraph/issues/762)) ([7092f90](https://github.com/wundergraph/wundergraph/commit/7092f907f1448fe6a7455e868726bb6e511478f9)) (@fiam)
+
 ## [0.142.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.141.0...@wundergraph/sdk@0.142.0) (2023-03-28)
 
 ### Features

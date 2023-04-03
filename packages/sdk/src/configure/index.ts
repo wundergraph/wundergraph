@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import process from 'node:process';
 import {
 	buildSchema,
@@ -14,7 +15,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import objectHash from 'object-hash';
 import { camelCase } from 'lodash';
-import { buildGenerator, getProgramFromFiles, programFromConfig } from 'typescript-json-schema';
+import { buildGenerator, getProgramFromFiles, JsonSchemaGenerator, programFromConfig } from 'typescript-json-schema';
 import { ZodType } from 'zod';
 import {
 	Api,
@@ -62,6 +63,7 @@ import {
 } from '@wundergraph/protobuf';
 import { SDK_VERSION } from '../version';
 import { AuthenticationProvider } from './authentication';
+import { findUp } from './findup';
 import { FieldInfo, LinkConfiguration, LinkDefinition, queryTypeFields } from '../linkbuilder';
 import { LocalCache } from '../localcache';
 import { OpenApiBuilder } from '../openapibuilder';
@@ -75,7 +77,6 @@ import logger, { Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
-import os from 'os';
 
 export interface WunderGraphCorsConfiguration {
 	allowedOrigins: InputVariable[];
@@ -1283,7 +1284,7 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 	const cacheKey = `ts.operationTypes.${objectHash([contents, operationHashes])}`;
 	const cachedData = await cache.getJSON(cacheKey);
 	if (cachedData) {
-		return cachedData;
+		return cachedData as Record<string, JSONSchema>;
 	}
 
 	const basePath = path.join(wgDirAbs, 'generated');
@@ -1291,42 +1292,38 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 
 	fs.writeFileSync(programPath, contents.join('\n'), { encoding: 'utf-8' });
 
-	const compilerOptions = {
-		strictNullChecks: true,
-		noEmit: true,
-		ignoreErrors: true,
-	};
-
-	const program = getProgramFromFiles([programPath], compilerOptions, basePath);
-
-	const schemas: Record<string, JSONSchema> = {};
 	const settings = {
 		required: true,
+		ignoreErrors: true,
 	};
 
 	// XXX: There's no way to silence warnings from TJS, override console.warn
 	const originalWarn = console.warn;
-	const originalError = console.error;
 	console.warn = (_message?: any, ..._optionalParams: any[]) => {};
-	console.error = (_message?: any, ..._optionalParams: any[]) => {};
-
-	let generator = buildGenerator(program, settings);
+	// If we can find a tsconfig.json, use it
+	const tsConfigPath = await findUp('tsconfig.json', wgDirAbs);
+	let generator: JsonSchemaGenerator | null = null;
+	if (tsConfigPath) {
+		const tsConfigProgram = programFromConfig(tsConfigPath, [programPath]);
+		if (tsConfigProgram) {
+			generator = buildGenerator(tsConfigProgram, settings);
+		}
+	} else {
+		// Otherwise, use the default configuration feeding the TS files
+		const compilerOptions = {
+			strictNullChecks: true,
+			noEmit: true,
+			ignoreErrors: true,
+		};
+		const program = getProgramFromFiles([programPath], compilerOptions, basePath);
+		generator = buildGenerator(program, settings);
+	}
 	// generator can be null if the program can't be compiled
 	if (!generator) {
-		// Try to fallback to generating a program from tsconfig.json
-		const tsConfigPath = path.join(path.dirname(wgDirAbs), 'tsconfig.json');
-		if (fs.existsSync(tsConfigPath)) {
-			const tsConfigProgram = programFromConfig(tsConfigPath);
-			if (tsConfigProgram) {
-				generator = buildGenerator(tsConfigProgram, settings);
-			}
-		}
-		if (!generator) {
-			console.warn = originalWarn;
-			console.error = originalError;
-			throw new Error('could not parse .ts operation files');
-		}
+		console.warn = originalWarn;
+		throw new Error('could not parse .ts operation files');
 	}
+	const schemas: Record<string, JSONSchema> = {};
 	for (const op of operations) {
 		try {
 			const schema = generator.getSchemaForSymbol(responseTypeName(op));
@@ -1337,7 +1334,6 @@ const typeScriptOperationsResponseSchemas = async (wgDirAbs: string, operations:
 		}
 	}
 	console.warn = originalWarn;
-	console.error = originalError;
 
 	await cache.setJSON(cacheKey, schemas);
 	return schemas;
@@ -1348,7 +1344,7 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 	for (const op of operations) {
 		const schema = schemas[op.Name];
 		if (schema) {
-			op.ResponseSchema = schemas[schema];
+			op.ResponseSchema = schema;
 		} else {
 			// For functions that don't return anything, we return an empty JSON object
 			op.ResponseSchema = {

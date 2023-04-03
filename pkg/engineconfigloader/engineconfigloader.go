@@ -264,7 +264,7 @@ func New(wundergraphDir string, resolvers ...FactoryResolver) *EngineConfigLoade
 	}
 }
 
-func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.Configuration, error) {
+func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration, wgServerUrl string) (*plan.Configuration, error) {
 	var (
 		outConfig plan.Configuration
 	)
@@ -349,7 +349,8 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 			fetchURL := buildFetchUrl(
 				loadvariable.String(in.CustomRest.Fetch.GetUrl()),
 				loadvariable.String(in.CustomRest.Fetch.GetBaseUrl()),
-				loadvariable.String(in.CustomRest.Fetch.GetPath()))
+				loadvariable.String(in.CustomRest.Fetch.GetPath()),
+				wgServerUrl)
 
 			// resolves arguments like {{ .arguments.tld }} are allowed
 			// unresolved arguments like {tld} are not allowed
@@ -394,6 +395,7 @@ func (l *EngineConfigLoader) Load(engineConfig wgpb.EngineConfiguration) (*plan.
 				loadvariable.String(in.CustomGraphql.Fetch.GetUrl()),
 				loadvariable.String(in.CustomGraphql.Fetch.GetBaseUrl()),
 				loadvariable.String(in.CustomGraphql.Fetch.GetPath()),
+				wgServerUrl,
 			)
 
 			subscriptionUrl := loadvariable.String(in.CustomGraphql.Subscription.Url)
@@ -525,7 +527,13 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 	return dataSource + schema
 }
 
-func buildFetchUrl(url, baseUrl, path string) string {
+const serverUrlPlaceholder = "WG_SERVER_URL"
+
+func buildFetchUrl(url, baseUrl, path string, hooksServerUrl string) string {
+	if url == serverUrlPlaceholder {
+		return fmt.Sprintf("%s/%s", strings.TrimSuffix(hooksServerUrl, "/"), strings.TrimPrefix(path, "/"))
+	}
+
 	if url != "" {
 		return url
 	}

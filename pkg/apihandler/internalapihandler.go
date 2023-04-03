@@ -26,6 +26,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
+	"github.com/wundergraph/wundergraph/pkg/postresolvetransform"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -62,7 +63,7 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		return streamClosers, fmt.Errorf("authentication config missing")
 	}
 
-	planConfig, err := i.loader.Load(*api.EngineConfiguration)
+	planConfig, err := i.loader.Load(*api.EngineConfiguration, api.Options.ServerUrl)
 	if err != nil {
 		return streamClosers, err
 	}
@@ -140,10 +141,12 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 	preparedPlan := shared.Planner.Plan(shared.Doc, i.definition, operation.Name, shared.Report)
 	shared.Postprocess.Process(preparedPlan)
 
+	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:    i.middlewareClient,
-		Operation: operation,
-		Logger:    i.log,
+		Client:      i.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      i.log,
 	}
 
 	switch operation.OperationType {

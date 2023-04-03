@@ -3,6 +3,7 @@ package hooks
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/buger/jsonparser"
 	"go.uber.org/zap"
@@ -13,7 +14,7 @@ import (
 
 type AuthenticationDeniedError string
 
-func (e AuthenticationDeniedError) Error() string { return string(e) }
+func (e AuthenticationDeniedError) Error() string { return fmt.Sprintf("access denied: %s", string(e)) }
 
 type AuthenticationConfig struct {
 	Client                     *Client
@@ -85,7 +86,7 @@ func (h *AuthenticationHooks) MutatingPostAuthentication(ctx context.Context, us
 		return user, nil
 	}
 	log := h.config.Log.With(zap.String("hook", "mutatingPostAuthentication"))
-	return runMutatingAuthenticationHook(ctx, h.config.Client, log, user)
+	return runMutatingAuthenticationHook(ctx, MutatingPostAuthentication, h.config.Client, log, user)
 }
 
 func (h *AuthenticationHooks) RevalidateAuthentication(ctx context.Context, user *authentication.User) (*authentication.User, error) {
@@ -93,7 +94,7 @@ func (h *AuthenticationHooks) RevalidateAuthentication(ctx context.Context, user
 		return user, nil
 	}
 	log := h.config.Log.With(zap.String("hook", "revalidateAuthentication"))
-	result, err := runMutatingAuthenticationHook(ctx, h.config.Client, log, user)
+	result, err := runMutatingAuthenticationHook(ctx, RevalidateAuthentication, h.config.Client, log, user)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +129,7 @@ func authenticationHookData(user *authentication.User) ([]byte, error) {
 	return hookData, nil
 }
 
-func runMutatingAuthenticationHook(ctx context.Context, client *Client, log *zap.Logger, user *authentication.User) (*authentication.User, error) {
+func runMutatingAuthenticationHook(ctx context.Context, hook MiddlewareHook, client *Client, log *zap.Logger, user *authentication.User) (*authentication.User, error) {
 	hookData, err := authenticationHookData(user)
 	if err != nil {
 		log.Error("could not encode hook data", zap.Error(err))
@@ -136,7 +137,7 @@ func runMutatingAuthenticationHook(ctx context.Context, client *Client, log *zap
 	}
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
-	out, err := client.DoAuthenticationRequest(ctx, MutatingPostAuthentication, hookData, buf)
+	out, err := client.DoAuthenticationRequest(ctx, hook, hookData, buf)
 	if err != nil {
 		log.Error("hook failed", zap.Error(err))
 		return nil, err

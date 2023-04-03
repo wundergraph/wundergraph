@@ -1,0 +1,66 @@
+{
+  "name": "@wundergraph/svelte-query",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "description": "WunderGraph Svelte Query Integration",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "svelte-package",
+    "test": "jest && tsd"
+  },
+  "tsd": {
+    "directory": "tests"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wundergraph/wundergraph.git"
+  },
+  "peerDependencies": {
+    "@tanstack/svelte-query": "^4.24.6",
+    "@wundergraph/sdk": ">=0.110.0",
+    "svelte": "^3.54.0"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2.0.2",
+    "@swc/core": "^1.3.14",
+    "@swc/jest": "^0.2.23",
+    "@tanstack/svelte-query": "^4.24.6",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/svelte": "^3.2.2",
+    "@types/jest": "^28.1.1",
+    "@types/node-fetch": "2.6.2",
+    "@wundergraph/sdk": "workspace:*",
+    "jest": "^29.0.3",
+    "jest-environment-jsdom": "^29.3.0",
+    "nock": "^13.2.9",
+    "node-fetch": "2.6.7",
+    "svelte": "^3.54.0",
+    "svelte-jester": "^2.3.2",
+    "tsd": "^0.24.1",
+    "typescript": "^4.8.2"
+  },
+  "homepage": "https://wundergraph.com",
+  "author": {
+    "name": "WunderGraph Maintainers",
+    "email": "info@wundergraph.com"
+  },
+  "keywords": [
+    "svelte-query",
+    "wundergraph",
+    "svelte"
+  ]
+}
