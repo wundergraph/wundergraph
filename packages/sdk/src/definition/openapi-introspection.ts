@@ -1,17 +1,17 @@
 import path from 'path';
 import process from 'node:process';
-import fs from 'fs';
+import fs from 'fs/promises';
 
-import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource, OpenAPIV2Introspection, RESTApi } from './index';
-import { openApiSpecificationToGraphQLApi } from '../openapi';
+import { GraphQLApi, OpenAPIIntrospection, OpenAPIIntrospectionSource, RESTApi } from './index';
 import { openApiSpecificationToRESTApiObject } from '../v2openapi';
 import { introspectWithCache } from './introspection-cache';
+import { openApiSpecificationToGraphQLApi } from '../v2openapi/omnigraph';
 
-export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
+const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 	switch (source.kind) {
 		case 'file':
 			const filePath = path.resolve(process.cwd(), source.filePath);
-			return fs.readFileSync(filePath).toString();
+			return await fs.readFile(filePath, { encoding: 'utf-8' });
 		case 'object':
 			return JSON.stringify(source.openAPIObject);
 		case 'string':
@@ -21,21 +21,31 @@ export const loadOpenApi = (source: OpenAPIIntrospectionSource): string => {
 	}
 };
 
-export const openApi = (introspection: OpenAPIV2Introspection): Promise<GraphQLApi> => {
-	const spec = loadOpenApi(introspection.source);
-	return openApiSpecificationToGraphQLApi(spec, introspection);
+export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+	const spec = await loadOpenApi(introspection.source);
+	const configuration = { keyInput: spec, source: 'localFilesystem' };
+	return introspectWithCache(
+		introspection,
+		configuration,
+		async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+			return await openApiSpecificationToRESTApiObject(spec, introspection);
+		}
+	);
 };
 
-export const openApiLegacy = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-	const generator = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
-		const spec = loadOpenApi(introspection.source);
-		return await openApiSpecificationToRESTApiObject(spec, introspection);
-	};
-	// If the source is a file we have all data required to perform the instrospection
-	// locally, which is also fast. Skip the cache in this case, so changes to the file
-	// are picked up immediately without requiring a cache flush.
-	if (introspection.source.kind === 'file') {
-		return generator(introspection);
-	}
-	return introspectWithCache(introspection, generator);
+export interface OpenAPIIntrospectionNew
+	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
+	id: string;
+}
+
+export const openApiV2 = async (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
+	const spec = await loadOpenApi(introspection.source);
+	const configuration = { keyInput: spec, source: 'localFilesystem' };
+	return introspectWithCache(
+		introspection,
+		configuration,
+		async (introspection: OpenAPIIntrospection): Promise<GraphQLApi> => {
+			return await openApiSpecificationToGraphQLApi(spec, introspection);
+		}
+	);
 };

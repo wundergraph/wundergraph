@@ -1,5 +1,5 @@
 {
-  "name": "wundergraph-fragmnets",
+  "name": "wundergraph-fragments",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.137.1",
+    "@wundergraph/sdk": "^0.143.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

@@ -55,6 +55,8 @@ jobs:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: ./.github/actions/wunderctl
+
       - name: Cache Nextjs builds
         uses: actions/cache@v3
         with:
@@ -70,11 +72,6 @@ jobs:
         uses: abelfodil/protoc-action@v1
         with:
           protoc-version: '21.5'
-
-      - name: Setup wunderctl
-        run: |
-          make install
-          echo WUNDERCTL_BINARY_PATH=$(which wunderctl) >> $GITHUB_ENV
 
       - name: Bootstrap PNPM workspace
         run: ./scripts/pnpm.sh
@@ -93,7 +90,8 @@ jobs:
           main-branch-name: ${{ steps.branch-name.outputs.current_branch }} # Get the last successful commit for the current branch.
 
       - name: Check for formatting errors
-        run: eval "pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.last_successful_commit_push.outputs.base }} | xargs)"
+        # Use sed and tr instead of xargs to handle filenames with $
+        run: pnpx prettier --check -u $(git diff --name-only --diff-filter=ACMRT -r ${{ steps.last_successful_commit_push.outputs.base }} | sed 's/\$/\\\$/g' | tr '\n' ' ')
 
       - name: Check if git is not dirty after generating files
         run: git diff --no-ext-diff --exit-code

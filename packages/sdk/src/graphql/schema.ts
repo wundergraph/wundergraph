@@ -11,17 +11,20 @@ import {
 	StringValueNode,
 	visit,
 } from 'graphql';
-import { GraphQLIntrospection } from '../definition';
 
-export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntrospection): string => {
-	const customFloatScalars = introspection.customFloatScalars || [];
-	const customIntScalars = introspection.customIntScalars || [];
-
+/*
+	cleanupSchema - cleans up the upstream schema by removing service fields, federation directives,
+	and replacing the operation type names with the standard names. 
+ */
+export const cleanupSchema = (schema: GraphQLSchema): string => {
 	const printed = printSchema(schema);
 	const ast = parse(printed);
 	const queryTypeName = schema.getQueryType()?.name;
 	const mutationTypeName = schema.getMutationType()?.name;
 	const subscriptionTypeName = schema.getSubscriptionType()?.name;
+	let fieldName: undefined | string;
+	let argName: undefined | string;
+	let typeName: undefined | string;
 
 	const replaceOperationTypeName = (name: NameNode): NameNode => {
 		switch (name.value) {
@@ -93,20 +96,50 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			};
 			return schemaNode;
 		},
-		ObjectTypeDefinition: (node) => {
-			switch (node.name.value) {
-				case '_Service':
-				case 'Entity':
+		InterfaceTypeDefinition: {
+			enter: (node) => {
+				typeName = node.name.value;
+			},
+			leave: () => {
+				typeName = undefined;
+			},
+		},
+		ObjectTypeExtension: {
+			enter: (node) => {
+				typeName = node.name.value;
+			},
+			leave: () => {
+				typeName = undefined;
+			},
+		},
+		InterfaceTypeExtension: {
+			enter: (node) => {
+				typeName = node.name.value;
+			},
+			leave: () => {
+				typeName = undefined;
+			},
+		},
+		ObjectTypeDefinition: {
+			enter: (node) => {
+				typeName = node.name.value;
+				switch (node.name.value) {
+					case '_Service':
+					case 'Entity':
+						return null;
+				}
+				if (node.name.value.startsWith('__')) {
 					return null;
-			}
-			if (node.name.value.startsWith('__')) {
-				return null;
-			}
+				}
 
-			return {
-				...node,
-				name: replaceOperationTypeName(node.name),
-			};
+				return {
+					...node,
+					name: replaceOperationTypeName(node.name),
+				};
+			},
+			leave: (node) => {
+				typeName = undefined;
+			},
 		},
 		UnionTypeDefinition: (node) => {
 			switch (node.name.value) {
@@ -126,33 +159,8 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 			if (node.name.value.startsWith('__')) {
 				return null;
 			}
-			if (customFloatScalars.includes(node.name.value)) {
-				return null;
-			}
-			if (customIntScalars.includes(node.name.value)) {
-				return null;
-			}
 		},
 		NamedType: (node) => {
-			if (customFloatScalars.includes(node.name.value)) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Float',
-					},
-				};
-			}
-			if (customIntScalars.includes(node.name.value)) {
-				return {
-					...node,
-					name: {
-						...node.name,
-						value: 'Int',
-					},
-				};
-			}
-
 			return {
 				...node,
 				name: replaceOperationTypeName(node.name),
@@ -170,6 +178,7 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 		},
 		FieldDefinition: {
 			enter: (node) => {
+				fieldName = node.name.value;
 				switch (node.name.value) {
 					case '_entities':
 					case '_service':
@@ -197,9 +206,13 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 					}
 				}
 			},
+			leave: (node) => {
+				fieldName = undefined;
+			},
 		},
 		InputValueDefinition: {
 			enter: (node) => {
+				argName = node.name.value;
 				if (node.description) {
 					if (node.description.value === '') {
 						return {
@@ -218,6 +231,9 @@ export const cleanupSchema = (schema: GraphQLSchema, introspection: GraphQLIntro
 						};
 					}
 				}
+			},
+			leave: (node) => {
+				argName = undefined;
 			},
 		},
 	});

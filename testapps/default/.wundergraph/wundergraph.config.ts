@@ -10,14 +10,13 @@ import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import { golangClient } from '@wundergraph/golang-client';
 
-const jsp = introspect.openApi({
+const jsp = introspect.openApiV2({
+	id: 'jsp',
 	apiNamespace: 'jsp',
 	source: {
 		kind: 'file',
 		filePath: '../json_placeholder.json',
 	},
-	baseURL: 'https://jsonplaceholder.typicode.{tld}',
-	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
 const jsp2 = introspect.openApi({
@@ -122,9 +121,6 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [authProviders.demo()],
 			authorizedRedirectUris: ['http://localhost:3000'],
-			secureCookieHashKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_HASH_KEY'), // must be of length 32
-			secureCookieBlockKey: new EnvironmentVariable('WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY'), // must be of length 32
-			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET'), // must be of length 11
 		},
 	},
 	security: {

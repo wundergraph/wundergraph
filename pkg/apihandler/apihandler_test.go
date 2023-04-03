@@ -59,10 +59,9 @@ func newPipeline(resolver *FakeResolver, operation *wgpb.Operation) *hooks.Synch
 	}
 	config := hooks.SynchronousOperationPipelineConfig{
 		PipelineConfig: hooks.PipelineConfig{
-			Authenticator: hooksAuthenticator,
-			Operation:     operation,
-			Transformer:   &postresolvetransform.Transformer{},
-			Logger:        zap.NewNop(),
+			Operation:   operation,
+			Transformer: &postresolvetransform.Transformer{},
+			Logger:      zap.NewNop(),
 		},
 		Resolver: resolver,
 		Plan:     preparedPlan,
@@ -372,10 +371,9 @@ func TestQueryHandler_SubscriptionJsonPatch(t *testing.T) {
 	}
 	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop(), trace.NewNoopTracerProvider())
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        hooksClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        zap.NewNop(),
+		Client:    hooksClient,
+		Operation: operation,
+		Logger:    zap.NewNop(),
 	}
 	hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
 		PipelineConfig: hooksPipelineCommonConfig,
@@ -453,10 +451,9 @@ func TestQueryHandler_Subscription(t *testing.T) {
 	}
 	hooksClient := hooks.NewClient("http://localhost:8080", zap.NewNop(), trace.NewNoopTracerProvider())
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        hooksClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        zap.NewNop(),
+		Client:    hooksClient,
+		Operation: operation,
+		Logger:    zap.NewNop(),
 	}
 	hooksPipelineConfig := hooks.SubscriptionOperationPipelineConfig{
 		PipelineConfig: hooksPipelineCommonConfig,

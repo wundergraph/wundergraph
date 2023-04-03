@@ -1,0 +1,3 @@
+query ($struct: echo_Struct! @fromClaim(name: USERID, on: "a")) {
+	echo_struct(input: $struct)
+}

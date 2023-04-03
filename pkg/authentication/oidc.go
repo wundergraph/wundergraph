@@ -85,8 +85,8 @@ type Claims struct {
 	Raw               map[string]interface{} `json:"-"`
 }
 
-func (c *Claims) ToUser() User {
-	return User{
+func (c *Claims) ToUser() *User {
+	return &User{
 		UserID:            c.Subject,
 		Name:              c.Name,
 		FirstName:         c.GivenName,
@@ -108,7 +108,7 @@ func (c *Claims) ToUser() User {
 	}
 }
 
-// isCustomClaim true if claim represents a token claim that we're not explicitely
+// isCustomClaim true if claim represents a token claim that we're not explicitly
 // handling in type Claim
 func isCustomClaim(claim string) bool {
 	// XXX: Keep this list in sync with Claim's fields
@@ -159,7 +159,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	})
 
 	callbackRouter.Path(fmt.Sprintf("/%s", config.ProviderID)).Methods(http.MethodGet).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		h.authorizationCallback(ctx, w, r, provider, &config, &hooks)
+		h.authorizationCallback(ctx, w, r, provider, &config, hooks)
 	})
 }
 
@@ -243,7 +243,7 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 	http.Redirect(w, r, redirect, http.StatusFound)
 }
 
-func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) {
+func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) {
 	state, err := r.Cookie("state")
 	if err != nil {
 		h.log.Error("OIDCCookieHandler state missing",
@@ -314,7 +314,7 @@ func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, 
 	http.Redirect(w, r, redirect, http.StatusFound)
 }
 
-func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.ResponseWriter, r *http.Request, oauth2Config *oauth2.Config, provider *oidc.Provider, config *OpenIDConnectConfig, hooks *Hooks) error {
+func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.ResponseWriter, r *http.Request, oauth2Config *oauth2.Config, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) error {
 	oauth2Token, err := oauth2Config.Exchange(r.Context(), r.URL.Query().Get("code"))
 	if err != nil {
 		h.log.Error("OIDCCookieHandler.exchange.token",
@@ -364,17 +364,11 @@ func (h *OpenIDConnectCookieHandler) exchangeToken(ctx context.Context, w http.R
 	user.RawIDToken = idToken
 	user.IdToken = idTokenJSON
 
-	hooks.handlePostAuthentication(r.Context(), user)
-	proceed, _, user := hooks.handleMutatingPostAuthentication(r.Context(), user)
-	if proceed {
-		err = user.Save(config.Cookie, w, r, r.Host, config.InsecureCookies)
-		if err != nil {
-			h.log.Error("OpenIDConnectCookieHandler.user.Save",
-				zap.Error(err),
-			)
-			return err
-		}
-
+	if err := postAuthentication(ctx, w, r, hooks, user, config.Cookie, config.InsecureCookies); err != nil {
+		h.log.Error("OpenIDConnectCookieHandler postAuthentication failed",
+			zap.Error(err),
+		)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	return nil
 }

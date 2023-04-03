@@ -1,7 +1,7 @@
 import useSWR, { useSWRConfig } from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { OperationsDefinition, LogoutOptions, Client, ClientResponseError } from '@wundergraph/sdk/client';
+import { OperationsDefinition, LogoutOptions, Client, ResponseError } from '@wundergraph/sdk/client';
 import { serialize } from '@wundergraph/sdk/internal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -74,7 +74,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		);
 
 		const onError = useCallback(
-			(err: ClientResponseError) => {
+			(err: ResponseError) => {
 				onErrorProp?.(err, _key, swrConfig as any);
 			},
 			[onErrorProp, _key]
@@ -154,7 +154,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	 */
 	const useUser: UseUserHook<Operations> = (options) => {
 		const { enabled = true, revalidate, ...swrOptions } = options || {};
-		return useSWR<Operations['user'], ClientResponseError>(
+		return useSWR<Operations['user'], ResponseError>(
 			enabled ? userSWRKey : null,
 			() => client.fetchUser(options),
 			swrOptions
@@ -312,7 +312,7 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		);
 
 		const onError = useCallback(
-			(error: ClientResponseError) => {
+			(error: ResponseError) => {
 				onErrorProp?.(error, _key, options);
 			},
 			[onErrorProp, _key]

@@ -218,7 +218,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 			if err != nil {
 				// Skip errors for optional directories
 				if wPath.Optional && os.IsNotExist(err) {
-					b.log.Debug("skip watch because optional path not found",
+					b.log.Debug("not watching non existing optional path",
 						zap.String("watcherName", b.name),
 						zap.String("path", wPath.Path),
 					)

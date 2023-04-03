@@ -7,6 +7,7 @@ import type { WebhookConfiguration } from '@wundergraph/protobuf';
 import type { InternalClientFactory } from '../internal-client';
 import process from 'node:process';
 import { propagation } from '@opentelemetry/api';
+import { OperationsClient } from '../operations-client';
 
 export interface WebHookRouteConfig {
 	kind: 'webhook';
@@ -16,6 +17,7 @@ export interface WebHookRouteConfig {
 interface FastifyWebHooksOptions {
 	webhooks: WebhookConfiguration[];
 	internalClientFactory: InternalClientFactory;
+	nodeURL: string;
 }
 
 const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async (fastify, config) => {
@@ -37,34 +39,44 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 						'wg.hook.type': 'webhook',
 					});
 					propagation.inject(context, request.headers);
-					const eventResponse = await webhook.handler(
-						{
-							method: request.method as RequestMethod,
-							url: request.url,
-							body: request.body,
-							headers: (request.headers as WebhookHeaders) || {},
-							query: (request.query as WebhookQuery) || {},
-						},
-						{
-							log: request.log.child({ webhook: hook.name }),
-							internalClient: config.internalClientFactory(
-								{},
-								{
-									headers: new Headers(request.headers as Record<string, string>),
-									method: request.method as RequestMethod,
-									requestURI: request.url,
-								}
-							),
-						}
-					);
+					try {
+						const operationClient = new OperationsClient({
+							baseURL: config.nodeURL,
+							clientRequest: (request.body as any)?.__wg.clientRequest,
+						});
+						const eventResponse = await webhook.handler(
+							{
+								method: request.method as RequestMethod,
+								url: request.url,
+								body: request.body,
+								headers: (request.headers as WebhookHeaders) || {},
+								query: (request.query as WebhookQuery) || {},
+							},
+							{
+								log: request.log.child({ webhook: hook.name }),
+								internalClient: config.internalClientFactory(
+									{},
+									{
+										headers: new Headers(request.headers as Record<string, string>),
+										method: request.method as RequestMethod,
+										requestURI: request.url,
+									}
+								),
+								operations: operationClient,
+							}
+						);
 
-					if (eventResponse.headers) {
-						reply.headers(eventResponse.headers);
+						if (eventResponse.headers) {
+							reply.headers(eventResponse.headers);
+						}
+						if (eventResponse.body) {
+							reply.send(eventResponse.body);
+						}
+						reply.code(eventResponse.statusCode || 200);
+					} catch (e) {
+						request.log.child({ webhook: hook.name }).error(e, 'Webhook handler threw an error');
+						reply.code(500);
 					}
-					if (eventResponse.body) {
-						reply.send(eventResponse.body);
-					}
-					reply.code(eventResponse.statusCode || 200);
 				},
 			});
 		} catch (err) {

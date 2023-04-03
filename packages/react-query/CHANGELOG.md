@@ -3,6 +3,50 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.2...@wundergraph/react-query@0.8.3) (2023-03-31)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.1...@wundergraph/react-query@0.8.2) (2023-03-30)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.8.0...@wundergraph/react-query@0.8.1) (2023-03-29)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.8.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.8...@wundergraph/react-query@0.8.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+
+## [0.7.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.7...@wundergraph/react-query@0.7.8) (2023-03-27)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.6...@wundergraph/react-query@0.7.7) (2023-03-23)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.5...@wundergraph/react-query@0.7.6) (2023-03-16)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.4...@wundergraph/react-query@0.7.5) (2023-03-06)
+
+### Bug Fixes
+
+* upload types ([#723](https://github.com/wundergraph/wundergraph/issues/723)) ([5077a7d](https://github.com/wundergraph/wundergraph/commit/5077a7d2ab363d3bbbb1df35423e5ad799b1800f)) (@Pagebakers)
+
+## [0.7.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.3...@wundergraph/react-query@0.7.4) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
+## [0.7.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.2...@wundergraph/react-query@0.7.3) (2023-03-01)
+
+**Note:** Version bump only for package @wundergraph/react-query
+
 ## [0.7.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/react-query@0.7.1...@wundergraph/react-query@0.7.2) (2023-02-28)
 
 **Note:** Version bump only for package @wundergraph/react-query

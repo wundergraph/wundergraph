@@ -13,6 +13,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
+	"github.com/rs/cors"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -529,8 +530,10 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		_ = json.NewEncoder(w).Encode(report)
 	}))
 
+	handler := n.setupGlobalMiddlewares(router, nodeConfig)
+
 	n.server = &http.Server{
-		Handler: router,
+		Handler: handler,
 		ConnContext: func(ctx context.Context, c net.Conn) context.Context {
 			return context.WithValue(ctx, "conn", c)
 		},
@@ -588,34 +591,39 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	return g.Wait()
 }
 
+// setupGlobalMiddlewares sets up middlewares that must run in all endpoints, not just valid ones.
+// gorilla/mux only runs middlewares when a handler path/method matches, that's why this workaround
+// is needed. See https://github.com/gorilla/mux/issues/416
+func (n *Node) setupGlobalMiddlewares(router *mux.Router, nodeConfig WunderNodeConfig) http.Handler {
+	handler := http.Handler(router)
+	if corsConfig := nodeConfig.Api.CorsConfiguration; corsConfig != nil {
+		corsMiddleware := cors.New(cors.Options{
+			MaxAge:           int(corsConfig.MaxAge),
+			AllowCredentials: corsConfig.AllowCredentials,
+			AllowedHeaders:   corsConfig.AllowedHeaders,
+			AllowedMethods:   corsConfig.AllowedMethods,
+			AllowedOrigins:   loadvariable.Strings(corsConfig.AllowedOrigins),
+			ExposedHeaders:   corsConfig.ExposedHeaders,
+		})
+		handler = corsMiddleware.Handler(handler)
+		n.log.Debug("configuring CORS",
+			zap.Strings("allowedOrigins", loadvariable.Strings(corsConfig.AllowedOrigins)),
+		)
+	}
+	return handler
+}
+
 // setApiDevConfigDefaults sets default values for the api config in dev mode
 func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
+	var errorMessages []string
+	// we set these values statically so that auth never drops login sessions during development
 	if n.options.devMode {
-
-		// we set these values statically so that auth never drops login sessions during development
-		if api.AuthenticationConfig != nil && api.AuthenticationConfig.CookieBased != nil {
-			if csrfSecret := loadvariable.String(api.AuthenticationConfig.CookieBased.CsrfSecret); csrfSecret == "" {
-				api.AuthenticationConfig.CookieBased.CsrfSecret = &wgpb.ConfigurationVariable{
-					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-					StaticVariableContent: "aaaaaaaaaaa",
-				}
-			}
-
-			if blockKey := loadvariable.String(api.AuthenticationConfig.CookieBased.BlockKey); blockKey == "" {
-				api.AuthenticationConfig.CookieBased.BlockKey = &wgpb.ConfigurationVariable{
-					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				}
-			}
-
-			if hashKey := loadvariable.String(api.AuthenticationConfig.CookieBased.HashKey); hashKey == "" {
-				api.AuthenticationConfig.CookieBased.HashKey = &wgpb.ConfigurationVariable{
-					Kind:                  wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE,
-					StaticVariableContent: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-				}
-			}
-		}
-
+		api.CookieBasedSecrets, errorMessages = apihandler.NewDevModeCookieBasedSecrets()
+	} else {
+		api.CookieBasedSecrets, errorMessages = apihandler.NewCookieBasedSecrets()
+	}
+	for _, errorMessage := range errorMessages {
+		n.log.Error(errorMessage)
 	}
 }
 

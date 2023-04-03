@@ -1,4 +1,4 @@
-import { GraphQLApi, introspect } from './index';
+import { introspect } from './index';
 import fetch from 'node-fetch';
 import nock from 'nock';
 import axios from 'axios';
@@ -94,7 +94,7 @@ test('introspection via http', async () => {
 		.reply(200, inventoryIntrospection)
 		.persist();
 
-	const federatedApi: GraphQLApi = await introspect.federation({
+	const federatedApi = await introspect.federation({
 		apiNamespace: 'federated',
 		upstreams: [
 			{
@@ -113,7 +113,7 @@ test('introspection via http', async () => {
 		introspection: {
 			disableCache: true,
 		},
-	})();
+	});
 
 	expect(federatedApi).toMatchSnapshot();
 });
@@ -122,7 +122,7 @@ test('introspection via string', async () => {
 	const data = await fs.readFile(path.join(__dirname, 'testdata', 'introspection.json'), { encoding: 'utf8' });
 	const { accountsSDL, productsSDL, reviewsSDL, inventorySDL } = JSON.parse(data);
 
-	const federatedApiFromString: GraphQLApi = await introspect.federation({
+	const federatedApiFromString = await introspect.federation({
 		apiNamespace: 'federated',
 		upstreams: [
 			{
@@ -145,7 +145,7 @@ test('introspection via string', async () => {
 		introspection: {
 			disableCache: true,
 		},
-	})();
+	});
 
 	expect(federatedApiFromString).toMatchSnapshot();
 });

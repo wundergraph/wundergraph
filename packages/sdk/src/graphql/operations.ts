@@ -10,6 +10,8 @@ import {
 } from '@wundergraph/protobuf';
 import {
 	buildSchema,
+	ConstArgumentNode,
+	ConstDirectiveNode,
 	DirectiveNode,
 	DocumentNode,
 	FieldNode,
@@ -36,6 +38,7 @@ import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
 import * as fs from 'fs';
 import process from 'node:process';
+import { OperationError } from '../client';
 
 export interface GraphQLOperation {
 	Name: string;
@@ -90,6 +93,10 @@ export interface GraphQLOperation {
 	PostResolveTransformations?: PostResolveTransformation[];
 }
 
+export interface TypeScriptOperation extends GraphQLOperation {
+	Errors?: OperationError[];
+}
+
 type PostResolveTransformation = PostResolveGetTransformation;
 
 export interface BasePostResolveTransformation {
@@ -121,7 +128,7 @@ const defaultParseOptions: ParseOperationsOptions = {
 
 const defaultVariableInjectionConfiguration: Omit<
 	Omit<VariableInjectionConfiguration, 'variableKind'>,
-	'variableName'
+	'variablePathComponents'
 > = {
 	environmentVariableName: '',
 	dateFormat: '',
@@ -240,11 +247,11 @@ export const parseGraphQLOperations = (
 							PostResolveTransformations: transformations.length > 0 ? transformations : undefined,
 						};
 						node.variableDefinitions?.forEach((variable) => {
-							handleFromClaimDirective(variable, operation, options.customClaims ?? {});
-							handleJsonSchemaDirective(variable, operation);
-							handleUuidDirective(variable, operation);
-							handleDateTimeDirective(variable, operation);
-							handleInjectEnvironmentVariableDirective(variable, operation);
+							handleFromClaimDirectives(variable, operation, options.customClaims ?? {});
+							handleJsonSchemaDirectives(variable, operation);
+							handleUuidDirectives(variable, operation);
+							handleDateTimeDirectives(variable, operation);
+							handleInjectEnvironmentVariableDirectives(variable, operation);
 						});
 						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
@@ -312,152 +319,157 @@ export const parseGraphQLOperations = (
 	return parsed;
 };
 
-const handleJsonSchemaDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'jsonSchema');
-	if (directive === undefined || directive.arguments === undefined) {
+const jsonSchemaUpdater = (arg: ConstArgumentNode) => {
+	const schemaProperties: Record<string, 'string' | 'int' | 'bool'> = {
+		title: 'string',
+		description: 'string',
+		multipleOf: 'int',
+		maximum: 'int',
+		exclusiveMaximum: 'int',
+		minimum: 'int',
+		exclusiveMinimum: 'int',
+		maxLength: 'int',
+		minLength: 'int',
+		pattern: 'string',
+		maxItems: 'int',
+		minItems: 'int',
+		uniqueItems: 'bool',
+	};
+
+	const propName = arg.name.value;
+	if (propName === 'on') {
+		// Used to set the field
 		return;
 	}
-	const updateSchema = (update: (schema: JSONSchema) => void) => {
-		const schema = operation.VariablesSchema.properties && operation.VariablesSchema.properties[variableName];
-		if (schema !== undefined || typeof schema !== 'boolean') {
-			update(schema as JSONSchema);
+	if (propName === 'commonPattern') {
+		if (arg.value.kind !== 'EnumValue') {
+			throw new Error(`commonPattern must be an enum, not ${arg.value.kind}`);
 		}
-		const schema2 =
-			operation.InterpolationVariablesSchema.properties &&
-			operation.InterpolationVariablesSchema.properties[variableName];
-		if (schema2 !== undefined || typeof schema2 !== 'boolean') {
-			update(schema2 as JSONSchema);
+		let pattern: string;
+		switch (arg.value.value) {
+			case 'EMAIL':
+				pattern =
+					'(?:[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\\])';
+				break;
+			case 'DOMAIN':
+				pattern = '^([a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}$';
+				break;
+			case 'URL':
+				pattern =
+					'/(((http|ftp|https):\\/{2})+(([0-9a-z_-]+\\.)+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mn|mn|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-9]+)?((\\/([~0-9a-zA-Z\\#\\+\\%@\\.\\/_-]+))?(\\?[0-9a-zA-Z\\+\\%@\\/&\\[\\];=_-]+)?)?))\\b/imuS\n';
+				break;
+			default:
+				throw new Error(`unhandled common pattern ${arg.value.value}`);
 		}
-		const schema3 =
-			operation.InternalVariablesSchema.properties && operation.InternalVariablesSchema.properties[variableName];
-		if (schema3 !== undefined || typeof schema3 !== 'boolean') {
-			update(schema3 as JSONSchema);
+		return (schema: JSONSchema) => {
+			if (schema.pattern) {
+				throw new Error(`pattern is already set`);
+			}
+			schema.pattern = pattern;
+		};
+	}
+	const propType = schemaProperties[propName];
+	if (!propType) {
+		throw new Error(`unknown JSON schema property ${propName}`);
+	}
+	let value: any;
+	switch (propType) {
+		case 'string':
+			if (arg.value.kind !== Kind.STRING) {
+				throw new Error(`${propName} must be a string, not ${arg.value.kind}`);
+			}
+			value = arg.value.value;
+			break;
+		case 'int':
+			if (arg.value.kind !== Kind.INT) {
+				throw new Error(`${propName} must be an int, not ${arg.value.kind}`);
+			}
+			value = parseInt(arg.value.value, 10);
+			break;
+		case 'bool':
+			if (arg.value.kind !== Kind.BOOLEAN) {
+				throw new Error(`${propName} must be a boolean, not ${arg.value.kind}`);
+			}
+			value = arg.value.value;
+			break;
+	}
+	return (schema: JSONSchema) => {
+		if ((schema as any)[propName]) {
+			throw new Error(`${propName} is already set`);
 		}
-		const schema4 =
-			operation.InjectedVariablesSchema.properties && operation.InjectedVariablesSchema.properties[variableName];
-		if (schema4 !== undefined || typeof schema4 !== 'boolean') {
-			update(schema4 as JSONSchema);
-		}
+		(schema as any)[propName] = value;
 	};
-	directive.arguments.forEach((arg) => {
-		switch (arg.name.value) {
-			case 'title':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'StringValue') {
-						schema.title = arg.value.value;
-					}
-				});
-				return;
-			case 'description':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'StringValue') {
-						schema.description = arg.value.value;
-					}
-				});
-				return;
-			case 'multipleOf':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.multipleOf = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'maximum':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.maximum = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'exclusiveMaximum':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.exclusiveMaximum = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'minimum':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.minimum = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'exclusiveMinimum':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.exclusiveMinimum = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'maxLength':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.maxLength = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'minLength':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.minLength = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'pattern':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'StringValue') {
-						schema.pattern = arg.value.value;
-					}
-				});
-				return;
-			case 'maxItems':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.maxItems = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'minItems':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'IntValue') {
-						schema.minItems = parseInt(arg.value.value, 10);
-					}
-				});
-				return;
-			case 'uniqueItems':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'BooleanValue') {
-						schema.uniqueItems = arg.value.value;
-					}
-				});
-				return;
-			case 'commonPattern':
-				updateSchema((schema) => {
-					if (arg.value.kind === 'EnumValue') {
-						switch (arg.value.value) {
-							case 'EMAIL':
-								schema.pattern =
-									'(?:[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\\])';
-								return;
-							case 'DOMAIN':
-								schema.pattern = '^([a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,}$';
-								return;
-							case 'URL':
-								schema.pattern =
-									'/(((http|ftp|https):\\/{2})+(([0-9a-z_-]+\\.)+(aero|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cu|cv|cx|cy|cz|cz|de|dj|dk|dm|do|dz|ec|ee|eg|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mn|mn|mo|mp|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|nom|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ra|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|arpa)(:[0-9]+)?((\\/([~0-9a-zA-Z\\#\\+\\%@\\.\\/_-]+))?(\\?[0-9a-zA-Z\\+\\%@\\/&\\[\\];=_-]+)?)?))\\b/imuS\n';
-								return;
-						}
-					}
-				});
-				return;
+};
+
+const handleJsonSchemaDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	const directiveName = 'jsonSchema';
+	const updateJSONSchema = (
+		schema: JSONSchema,
+		variablePathComponents: string[],
+		update: (schema: JSONSchema) => void
+	) => {
+		let prop = JSONSchemaPropertyResolvingRef(schema, schema, variablePathComponents[0]);
+		for (const component of variablePathComponents.slice(1, variablePathComponents.length)) {
+			prop = JSONSchemaPropertyResolvingRef(schema, prop, component);
 		}
+		update(prop);
+	};
+	const updateSchema = (variablePathComponents: string[], update: (schema: JSONSchema) => void) => {
+		updateJSONSchema(operation.VariablesSchema, variablePathComponents, update);
+		updateJSONSchema(operation.InterpolationVariablesSchema, variablePathComponents, update);
+		updateJSONSchema(operation.InternalVariablesSchema, variablePathComponents, update);
+		updateJSONSchema(operation.InjectedVariablesSchema, variablePathComponents, update);
+	};
+	directivesNamed(variable, directiveName).forEach((directive) => {
+		directive.arguments?.forEach((arg) => {
+			const variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+			try {
+				const updater = jsonSchemaUpdater(arg);
+				if (updater) {
+					updateSchema(variablePathComponents, updater);
+				}
+			} catch (e: any) {
+				const variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+				throw new Error(
+					`invalid @${directiveName} directive on ${variablePathComponents.join('.')} in operation ${
+						operation.Name
+					}: ${e}`
+				);
+			}
+		});
 	});
 };
 
+// XXX: Keep this in sync with User in authentication.go
+const wgClaimToTypescriptField = {
+	ISSUER: 'providerId',
+	PROVIDER: 'providerId',
+	SUBJECT: 'userId',
+	USERID: 'userId',
+	NAME: 'name',
+	GIVEN_NAME: 'firstName',
+	FAMILY_NAME: 'lastName',
+	MIDDLE_NAME: 'middleName',
+	NICKNAME: 'nickName',
+	PREFERRED_USERNAME: 'preferredUsername',
+	PROFILE: 'profile',
+	PICTURE: 'picture',
+	WEBSITE: 'website',
+	EMAIL: 'email',
+	EMAIL_VERIFIED: 'emailVerified',
+	GENDER: 'gender',
+	BIRTH_DATE: 'birthDate',
+	ZONE_INFO: 'zoneInfo',
+	LOCALE: 'locale',
+	LOCATION: 'location',
+} as const;
+
+export const WellKnownClaimValues = Object.keys(wgClaimToTypescriptField);
+
+export type WellKnownClaim = keyof typeof wgClaimToTypescriptField;
+
 const parseWellKnownClaim = (name: string) => {
-	const claims: Record<string, ClaimType> = {
+	const claims: Record<WellKnownClaim, ClaimType> = {
 		ISSUER: ClaimType.ISSUER,
 		PROVIDER: ClaimType.PROVIDER,
 		SUBJECT: ClaimType.SUBJECT,
@@ -479,35 +491,86 @@ const parseWellKnownClaim = (name: string) => {
 		LOCALE: ClaimType.LOCALE,
 		LOCATION: ClaimType.LOCATION,
 	};
+	if (Object.keys(claims).length !== WellKnownClaimValues.length) {
+		throw new Error('unhandled claims in parseWellKnownClaim()');
+	}
 	if (name in claims) {
-		return claims[name];
+		return claims[name as WellKnownClaim];
 	}
 	throw new Error(`unhandled claim ${name}`);
 };
 
+/**
+ * Returns true iff name is a well known claim
+ *
+ * @param name Claim name as in WellKnownClaim
+ */
+export const isWellKnownClaim = (name: string) => {
+	return name in wgClaimToTypescriptField;
+};
+
+export const wellKnownClaimField = (name: string) => {
+	if (name in wgClaimToTypescriptField) {
+		return wgClaimToTypescriptField[name as WellKnownClaim];
+	}
+	throw new Error(`unhandled claim ${name}`);
+};
+
+const directiveInjectedVariablePathComponents = (
+	directive: ConstDirectiveNode,
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation
+): string[] => {
+	const onArg = directive.arguments?.find((arg) => arg.name.value === 'on');
+	const variableName = variable.variable.name.value;
+	let variablePathComponents: string[];
+	if (onArg) {
+		if (onArg.value.kind !== Kind.STRING) {
+			throw new Error(
+				`@${directive.name.value} on: argument in operation ${operation.Name} (${variableName}) must be a String, not ${onArg.value.kind}`
+			);
+		}
+		variablePathComponents = [variableName, ...onArg.value.value.split('.')];
+	} else {
+		variablePathComponents = [variableName];
+	}
+	try {
+		JSONSchemaLookupPath(operation.InjectedVariablesSchema, variablePathComponents);
+	} catch (e: any) {
+		throw new Error(
+			`could not resolve on: attribute in @${directive.name.value} (${variablePathComponents.join('.')}) in operation ${
+				operation.Name
+			}: ${e}`
+		);
+	}
+	return variablePathComponents;
+};
+
 const handleFromClaimDirective = (
+	fromClaimDirective: ConstDirectiveNode,
 	variable: VariableDefinitionNode,
 	operation: GraphQLOperation,
 	customClaims: Record<string, CustomClaim>
 ) => {
-	const variableName = variable.variable.name.value;
-	const fromClaimDirective = variable.directives?.find((directive) => directive.name.value === 'fromClaim');
-	if (fromClaimDirective === undefined || fromClaimDirective.arguments === undefined) {
-		return;
+	if (fromClaimDirective.arguments === undefined) {
+		throw new Error(`@fromClaim directive on operation ${operation.Name} has no arguments`);
 	}
 	const nameArg = fromClaimDirective.arguments.find((arg) => arg.name.value === 'name');
 	if (nameArg === undefined) {
-		throw new Error('@fromClaim does not have a name: argument');
+		throw new Error(`@fromClaim on operation ${operation.Name} does not have a name: argument`);
 	}
-	if (nameArg.value.kind !== 'EnumValue') {
-		throw new Error(`@fromClaim name: argument must be a WG_CLAIM, not ${nameArg.value.kind}`);
+	if (nameArg.value.kind !== Kind.ENUM) {
+		throw new Error(
+			`@fromClaim name: argument on operation ${operation.Name} must be a WG_CLAIM, not ${nameArg.value.kind}`
+		);
 	}
+	let variablePathComponents = directiveInjectedVariablePathComponents(fromClaimDirective, variable, operation);
 	const claimName = nameArg.value.value;
 	let claim: ClaimConfig;
 	if (claimName in customClaims) {
 		const customClaim = customClaims[claimName];
 		claim = {
-			variableName: variableName,
+			variablePathComponents,
 			claimType: ClaimType.CUSTOM,
 			custom: {
 				name: claimName,
@@ -518,7 +581,7 @@ const handleFromClaimDirective = (
 		};
 	} else {
 		claim = {
-			variableName: variableName,
+			variablePathComponents,
 			claimType: parseWellKnownClaim(claimName),
 		};
 	}
@@ -526,192 +589,109 @@ const handleFromClaimDirective = (
 	operation.AuthorizationConfig.claims.push(claim);
 };
 
-const handleInjectEnvironmentVariableDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'injectEnvironmentVariable');
-	if (directive === undefined) {
-		return;
-	}
-	const arg = directive.arguments?.find((arg) => arg.name.value === 'name');
-	if (arg === undefined || arg.value.kind !== Kind.STRING) {
-		return;
-	}
-	operation.VariablesConfiguration.injectVariables.push({
-		...defaultVariableInjectionConfiguration,
-		variableName,
-		variableKind: InjectVariableKind.ENVIRONMENT_VARIABLE,
-		environmentVariableName: arg.value.value,
+const handleFromClaimDirectives = (
+	variable: VariableDefinitionNode,
+	operation: GraphQLOperation,
+	customClaims: Record<string, CustomClaim>
+) => {
+	directivesNamed(variable, 'fromClaim').forEach((directive) => {
+		handleFromClaimDirective(directive, variable, operation, customClaims);
 	});
 };
 
-const handleUuidDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'injectGeneratedUUID');
-	if (directive === undefined) {
-		return;
-	}
-	operation.VariablesConfiguration.injectVariables.push({
-		...defaultVariableInjectionConfiguration,
-		variableName,
-		variableKind: InjectVariableKind.UUID,
-	});
-};
-
-const handleDateTimeDirective = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
-	const variableName = variable.variable.name.value;
-	const directive = variable.directives?.find((directive) => directive.name.value === 'injectCurrentDateTime');
-	if (directive === undefined) {
-		return;
-	}
-	const formatArg = directive.arguments?.find((arg) => arg.name.value === 'format');
-	if (formatArg !== undefined && formatArg.value.kind === 'EnumValue') {
-		const format = formatArg.value.value;
-		switch (format) {
-			case 'ISO8601':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '2006-01-02T15:04:05Z07:00',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'ANSIC':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon Jan _2 15:04:05 2006',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'UnixDate':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon Jan _2 15:04:05 MST 2006',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RubyDate':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon Jan 02 15:04:05 -0700 2006',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC822':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '02 Jan 06 15:04 MST',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC822Z':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '02 Jan 06 15:04 -0700',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC850':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Monday, 02-Jan-06 15:04:05 MST',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC1123':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon, 02 Jan 2006 15:04:05 MST',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC1123Z':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Mon, 02 Jan 2006 15:04:05 -0700',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC3339':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '2006-01-02T15:04:05Z07:00',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'RFC3339Nano':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '2006-01-02T15:04:05.999999999Z07:00',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'Kitchen':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: '3:04PM',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'Stamp':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'StampMilli':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05.000',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'StampMicro':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05.000000',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
-			case 'StampNano':
-				operation.VariablesConfiguration.injectVariables.push({
-					...defaultVariableInjectionConfiguration,
-					variableName,
-					dateFormat: 'Jan _2 15:04:05.000000000',
-					variableKind: InjectVariableKind.DATE_TIME,
-				});
-				return;
+const handleInjectEnvironmentVariableDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	const directiveName = 'injectEnvironmentVariable';
+	directivesNamed(variable, directiveName).forEach((directive) => {
+		const arg = directive.arguments?.find((arg) => arg.name.value === 'name');
+		if (!arg) {
+			throw new Error(`name: argument missing in @${directiveName} in operation ${operation.Name}`);
 		}
-	}
-	const customFormatArg = directive.arguments?.find((arg) => arg.name.value === 'customFormat');
-	if (customFormatArg !== undefined && customFormatArg.value.kind === 'StringValue') {
+		if (arg.value.kind !== Kind.STRING) {
+			throw new Error(
+				`name: argument in @${directiveName} in operation ${operation.Name} must be string, not ${arg.value.kind}`
+			);
+		}
+		let variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
 		operation.VariablesConfiguration.injectVariables.push({
 			...defaultVariableInjectionConfiguration,
-			variableName,
-			dateFormat: customFormatArg.value.value,
+			variablePathComponents,
+			variableKind: InjectVariableKind.ENVIRONMENT_VARIABLE,
+			environmentVariableName: arg.value.value,
+		});
+	});
+};
+
+const handleUuidDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	directivesNamed(variable, 'injectGeneratedUUID').forEach((directive) => {
+		let variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+		operation.VariablesConfiguration.injectVariables.push({
+			...defaultVariableInjectionConfiguration,
+			variablePathComponents,
+			variableKind: InjectVariableKind.UUID,
+		});
+	});
+};
+
+const getTimeFormat = (timeFormat: string): string => {
+	const availableTimeFormats: Record<string, string> = {
+		ISO8601: '2006-01-02T15:04:05Z07:00',
+		ANSIC: 'Mon Jan _2 15:04:05 2006',
+		UnixDate: 'Mon Jan _2 15:04:05 MST 2006',
+		RubyDate: 'Mon Jan 02 15:04:05 -0700 2006',
+		RFC822: '02 Jan 06 15:04 MST',
+		RFC822Z: '02 Jan 06 15:04 -0700',
+		RFC850: 'Monday, 02-Jan-06 15:04:05 MST',
+		RFC1123: 'Mon, 02 Jan 2006 15:04:05 MST',
+		RFC1123Z: 'Mon, 02 Jan 2006 15:04:05 -0700',
+		RFC3339: '2006-01-02T15:04:05Z07:00',
+		RFC3339Nano: '2006-01-02T15:04:05.999999999Z07:00',
+		Kitchen: '3:04PM',
+		Stamp: 'Jan _2 15:04:05',
+		StampMilli: 'Jan _2 15:04:05.000',
+		StampMicro: 'Jan _2 15:04:05.000000',
+		StampNano: 'Jan _2 15:04:05.000000000',
+	};
+
+	if (timeFormat in availableTimeFormats) {
+		return availableTimeFormats[timeFormat];
+	}
+	throw new Error(`unknown time format "${timeFormat}`);
+};
+
+const handleDateTimeDirectives = (variable: VariableDefinitionNode, operation: GraphQLOperation) => {
+	const directiveName = 'injectCurrentDateTime';
+	directivesNamed(variable, directiveName).forEach((directive) => {
+		const formatArg = directive.arguments?.find((arg) => arg.name.value === 'format');
+		const customFormatArg = directive.arguments?.find((arg) => arg.name.value === 'customFormat');
+		if (formatArg && customFormatArg) {
+			throw new Error(`@${directiveName} in operation ${operation.Name} has both format: and customFormat: arguments`);
+		}
+		let dateFormat: string;
+		if (formatArg) {
+			if (formatArg.value.kind !== Kind.ENUM) {
+				throw new Error(
+					`format: argument in @${directiveName} in operation ${operation.Name} must be an enum, not ${formatArg.value.kind}`
+				);
+			}
+			dateFormat = getTimeFormat(formatArg.value.value);
+		} else if (customFormatArg) {
+			if (customFormatArg.value.kind != Kind.STRING) {
+				throw new Error(
+					`customFormat: argument in @${directiveName} in operation ${operation.Name} must be a String, not ${customFormatArg.value.kind}`
+				);
+			}
+			dateFormat = customFormatArg.value.value;
+		} else {
+			// Default format
+			dateFormat = '2006-01-02T15:04:05Z07:00';
+		}
+		let variablePathComponents = directiveInjectedVariablePathComponents(directive, variable, operation);
+		operation.VariablesConfiguration.injectVariables.push({
+			...defaultVariableInjectionConfiguration,
+			variablePathComponents,
+			dateFormat: '2006-01-02T15:04:05Z07:00',
 			variableKind: InjectVariableKind.DATE_TIME,
 		});
-		return;
-	}
-	operation.VariablesConfiguration.injectVariables.push({
-		...defaultVariableInjectionConfiguration,
-		variableName,
-		dateFormat: '2006-01-02T15:04:05Z07:00',
-		variableKind: InjectVariableKind.DATE_TIME,
 	});
 };
 
@@ -728,6 +708,85 @@ const parseOperationTypeNode = (node: OperationTypeNode): OperationType => {
 	}
 };
 
+const updateSkipFields = (skipFields: SchemaSkipFields, skipVariablePaths: string[]): SchemaSkipFields => {
+	skipVariablePaths.forEach((field) => {
+		let fields = skipFields;
+		for (let component of field?.split('.')) {
+			if (fields[component] === undefined) {
+				fields[component] = {};
+			}
+			fields = fields[component];
+		}
+	});
+	return skipFields;
+};
+
+const JSONSchemaResolveRef = (root: JSONSchema, ref: string) => {
+	const prefix = '#/definitions/';
+	if (!ref || !ref.startsWith(prefix)) {
+		throw new Error(`invalid object ref ${ref}`);
+	}
+	const refName = ref.substring(prefix.length);
+	const def = root.definitions ? root.definitions[refName] : null;
+	if (!def) {
+		throw new Error(`missing object definition for reference ${refName}`);
+	}
+	return def as JSONSchema;
+};
+
+const JSONSchemaPropertyResolvingRef = (root: JSONSchema, parent: JSONSchema, propName: string) => {
+	let prop = parent.properties![propName] as JSONSchema;
+	if (prop.$ref) {
+		prop = JSONSchemaResolveRef(root, prop.$ref);
+		parent.properties![propName] = prop;
+	}
+	return prop;
+};
+
+const JSONSchemaLookupPath = (schema: JSONSchema, pathComponents: string[]) => {
+	let current = schema;
+	for (let component of pathComponents) {
+		if (
+			current.type !== 'object' &&
+			!(Array.isArray(current.type) && (current.type as unknown as string[]).indexOf('object') >= 0)
+		) {
+			throw new Error(`could not find ${component}, parent is not an object`);
+		}
+		if (!current.properties) {
+			throw new Error(`could not find ${component}, schema is empty`);
+		}
+		let next = current.properties[component] as JSONSchema;
+		if (!next) {
+			throw new Error(
+				`could not find ${component}, available fields are: ${Object.keys(current.properties).join(', ')}`
+			);
+		}
+		if (next.$ref) {
+			let resolved = JSONSchemaResolveRef(schema, next.$ref);
+			if (!resolved) {
+				throw new Error(`could not find ${component}, reference ${next.$ref} not found`);
+			}
+			next = resolved;
+		}
+		current = next;
+	}
+	return current;
+};
+
+const applySkipFields = (skipFields: SchemaSkipFields, root: JSONSchema, parent: JSONSchema, propName: string) => {
+	const keys = Object.keys(skipFields);
+	if (keys.length > 0) {
+		let prop = JSONSchemaPropertyResolvingRef(root, parent, propName);
+		for (const key of keys) {
+			applySkipFields(skipFields[key], root, prop, key);
+		}
+	} else {
+		// Leaf, remove from the schema
+		delete parent.properties![propName];
+		parent.required = parent.required?.filter((name) => name !== propName);
+	}
+};
+
 export const operationVariablesToJSONSchema = (
 	graphQLSchema: GraphQLSchema,
 	operation: OperationDefinitionNode,
@@ -740,7 +799,6 @@ export const operationVariablesToJSONSchema = (
 		type: 'object',
 		properties: {},
 		additionalProperties: false,
-		definitions: {},
 	};
 
 	if (!operation.variableDefinitions) {
@@ -748,11 +806,18 @@ export const operationVariablesToJSONSchema = (
 	}
 
 	operation.variableDefinitions.forEach((variable) => {
-		if (!keepInternalVariables && hasInternalVariable(variable)) {
-			return;
+		let skipFields: SchemaSkipFields = {};
+		if (!keepInternalVariables) {
+			if (hasInternalVariable(variable)) {
+				return;
+			}
+			updateSkipFields(skipFields, directiveDefinedFields(variable, internalVariables));
 		}
-		if (!keepInjectedVariables && hasInjectedVariable(variable)) {
-			return;
+		if (!keepInjectedVariables) {
+			if (hasInjectedVariable(variable)) {
+				return;
+			}
+			updateSkipFields(skipFields, directiveDefinedFields(variable, injectedVariables));
 		}
 		let type = variable.type;
 		let nonNullType = false;
@@ -771,6 +836,9 @@ export const operationVariablesToJSONSchema = (
 			nonNullType,
 			customJsonScalars
 		);
+		if (Object.keys(skipFields).length > 0) {
+			applySkipFields(skipFields, schema, schema, name);
+		}
 	});
 
 	return schema;
@@ -778,7 +846,6 @@ export const operationVariablesToJSONSchema = (
 
 const internalVariables = [
 	'fromClaim',
-	'fromCustomClaim',
 	'internal',
 	'injectGeneratedUUID',
 	'injectCurrentDateTime',
@@ -787,21 +854,56 @@ const internalVariables = [
 
 const injectedVariables = ['injectGeneratedUUID', 'injectCurrentDateTime', 'injectEnvironmentVariable'];
 
-const hasInternalVariable = (variable: VariableDefinitionNode): boolean => {
+const directivesNamed = (variable: VariableDefinitionNode, directiveNames: string | string[]): ConstDirectiveNode[] => {
+	const isDefined = (node: ConstDirectiveNode | undefined): node is ConstDirectiveNode => {
+		return !!node;
+	};
+	if (!Array.isArray(directiveNames)) {
+		directiveNames = [directiveNames];
+	}
 	return (
-		variable.directives?.find(
-			(directive) => internalVariables.find((i) => i === directive.name.value) !== undefined
-		) !== undefined
+		variable.directives?.filter((directive) => directiveNames.includes(directive.name.value)).filter(isDefined) ?? []
 	);
 };
 
+const directiveHasNoField = (node: ConstDirectiveNode) => {
+	return !directiveInjectedField(node);
+};
+
+const directiveInjectedField = (node: ConstDirectiveNode) => {
+	const onArgument = node.arguments?.find((arg) => arg.name.value === 'on');
+	if (!onArgument) {
+		return undefined;
+	}
+	if (onArgument.value.kind !== Kind.STRING) {
+		return undefined;
+	}
+	return onArgument.value.value;
+};
+
+const hasInternalVariable = (variable: VariableDefinitionNode): boolean => {
+	return (directivesNamed(variable, internalVariables)?.filter(directiveHasNoField)?.length ?? 0) > 0;
+};
+
 const hasInjectedVariable = (variable: VariableDefinitionNode): boolean => {
+	return (directivesNamed(variable, injectedVariables)?.filter(directiveHasNoField)?.length ?? 0) > 0;
+};
+
+const directiveDefinedFields = (variable: VariableDefinitionNode, directiveNames: string[]) => {
+	const isString = (field: string | undefined): field is string => {
+		return !!field;
+	};
 	return (
-		variable.directives?.find(
-			(directive) => injectedVariables.find((i) => i === directive.name.value) !== undefined
-		) !== undefined
+		directivesNamed(variable, directiveNames)
+			?.map((directive) => directiveInjectedField(directive))
+			.filter(isString) ?? []
 	);
 };
+
+// Leafs are fields that should be skipped from schema generation
+interface SchemaSkipFields {
+	[key: string]: SchemaSkipFields;
+}
 
 const typeSchema = (
 	root: JSONSchema,
@@ -900,6 +1002,9 @@ const typeSchema = (
 							break;
 						case 'InputObjectTypeDefinition':
 							const typeName = namedType.name;
+							if (!root.definitions) {
+								root.definitions = {};
+							}
 							if (Object.keys(root.definitions!).includes(typeName)) {
 								return {
 									$ref: '#/definitions/' + typeName,

@@ -19,7 +19,7 @@ export class WunderGraphInternalOperationsApiClient implements Template {
 		const _internalSubscriptions = operations(config.application, OperationType.SUBSCRIPTION, true);
 
 		const content = tmpl({
-			modelImports: modelImports(config.application, true),
+			modelImports: modelImports(config.application, true, true),
 			queries: _queries,
 			hasQueries: _queries.length !== 0,
 			mutations: _mutations,

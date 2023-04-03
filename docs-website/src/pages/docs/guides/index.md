@@ -13,6 +13,8 @@ Here's an overview of all the available guides.
 
 {% quick-link title="Enable autocompletion in your IDE" icon="core" href="/docs/guides/enable-autocompletion-in-your-ide" description="Follow this guide to enable autocompletion in your IDE. This helps a lot when defining your (GraphQL) Operations." /%}
 
+{% quick-link title="Debug your WunderGraph application" icon="core" href="/docs/guides/debugging" description="Learn how to run your WunderGraph application in a debugger" /%}
+
 {% quick-link title="Inject short-lived token into upstream requests" icon="core" href="/docs/guides/inject-short-lived-token-into-upstream-requests" description="This guide helps you to add a middleware to inject short-lived auth tokens into origin requests." /%}
 
 {% quick-link title="Expose a GraphQL API from WunderGraph" icon="core" href="/docs/guides/expose-a-graphql-api-from-wundergraph" description="A fundamental feature of WunderGraph is to secure your GraphQL API by putting a RPC interface in front of it. But sometimes, you really want to directly expose your GraphQL API instead. In this case, you can follow this guide." /%}

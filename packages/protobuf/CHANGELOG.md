@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.106.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.0...@wundergraph/protobuf@0.106.1) (2023-03-16)
+
+### Bug Fixes
+
+* custom int/float scalars usage in arguments ([#427](https://github.com/wundergraph/wundergraph/issues/427))Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: spetrunin <neyasut@gmail.com> ([2b424f3](https://github.com/wundergraph/wundergraph/commit/2b424f3daaabea25abb4a23139751ff0ab2adefe)) (@OLingard)
+
+## [0.106.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.105.0...@wundergraph/protobuf@0.106.0) (2023-03-06)
+
+### Features
+
+* add support for declaring a list of public claims ([#706](https://github.com/wundergraph/wundergraph/issues/706)) ([2223d5c](https://github.com/wundergraph/wundergraph/commit/2223d5c02f1eadaad7ecb6ac863bb2f9e34c926c)) (@fiam)
+* add support for injecting variables into nested paths ([#678](https://github.com/wundergraph/wundergraph/issues/678)) ([ce0a0a0](https://github.com/wundergraph/wundergraph/commit/ce0a0a09b4e739767b17f1ad391074f6ba597253)) (@fiam)
+
 ## [0.105.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.104.0...@wundergraph/protobuf@0.105.0) (2023-02-10)
 
 ### Features

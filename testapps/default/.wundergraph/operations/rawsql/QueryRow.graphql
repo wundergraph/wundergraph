@@ -1,0 +1,7 @@
+query ($email: String!) {
+	row: users_post_queryRaw(query: "select id,email,name from User where email = ? limit 1", parameters: [$email]) {
+		id: Int
+		email: String
+		name: String
+	}
+}

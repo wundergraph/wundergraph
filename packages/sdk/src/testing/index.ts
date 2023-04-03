@@ -134,9 +134,9 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			}
 		};
 		try {
-			await retry(checkHealth, { retries: 10 });
+			await retry(checkHealth, { retries: 100 });
 		} catch (e: any) {
-			await this.stop();
+			await this.stopSubprocess(subprocess);
 			throw new Error(`could not start WunderGraph server: ${e}`);
 		}
 		// Server is up and running
@@ -148,10 +148,8 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 	 * it does nothing.
 	 */
 	async stop(): Promise<void> {
-		if (this.subprocess) {
-			await terminate(this.subprocess.pid);
-			this.subprocess = undefined;
-		}
+		await this.stopSubprocess(this.subprocess);
+		this.subprocess = undefined;
 	}
 	/**
 	 * Returns a configuration suitable for createClient() which allows
@@ -167,6 +165,12 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			baseURL: this.nodeUrl,
 			customFetch: this.options.fetch,
 		};
+	}
+
+	private async stopSubprocess(proc?: Subprocess): Promise<void> {
+		if (proc?.pid) {
+			await terminate(proc.pid);
+		}
 	}
 
 	private async freeport(): Promise<number> {

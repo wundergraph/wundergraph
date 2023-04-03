@@ -16,6 +16,8 @@ import {
 	ArrowUpCircleIcon,
 	LightBulbIcon,
 	ListBulletIcon,
+	CloudArrowUpIcon,
+	AcademicCapIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -181,6 +183,33 @@ const navigation = [
 		],
 	},
 	{
+		title: 'Learn WunderGraph',
+		href: '/learn',
+		icon: <AcademicCapIcon />,
+		links: [
+			{
+				title: 'Introduction',
+				href: '/learn',
+			},
+			{
+				title: 'Hello World',
+				href: '/learn/hello_world',
+			},
+			{
+				title: 'Thinking in API Dependencies',
+				href: '/learn/thinking_in_api_dependencies',
+			},
+			{
+				title: 'Joining data across APIs',
+				href: '/learn/joining_data_across_apis',
+			},
+			{
+				title: 'TypeScript Operations',
+				href: '/learn/typescript_operations',
+			},
+		],
+	},
+	{
 		title: 'Guides',
 		href: '/docs/guides',
 		icon: <BookOpenIcon />,
@@ -197,18 +226,6 @@ const navigation = [
 						title: 'TypeSafe API Integrations with TypeScript Operations & GraphQL',
 						href: '/docs/guides/typesafe_api_integrations_with_typescript_operations_and_graphql',
 					},
-					{
-						title: 'API Namespacing',
-						href: '/docs/core-concepts/api-namespacing',
-					},
-					{
-						title: 'Virtual Graph',
-						href: '/docs/core-concepts/virtual-graph',
-					},
-					{
-						title: 'The `_join` field',
-						href: '/docs/core-concepts/_join-field',
-					},
 				],
 			},
 			// {
@@ -222,14 +239,12 @@ const navigation = [
 						title: 'Enable autocompletion in your IDE',
 						href: '/docs/guides/enable-autocompletion-in-your-ide',
 					},
+					{
+						title: 'Debugging WunderGraph applications',
+						href: '/docs/guides/debugging',
+					},
 				],
 			},
-			// {
-			// 	title: 'Debugging',
-			// 	links: [
-
-			// 	],
-			// },
 			{
 				title: 'Testing',
 				links: [
@@ -371,44 +386,12 @@ const navigation = [
 				href: '/docs/databases',
 			},
 			{
-				title: 'PostgreSQL',
-				href: '/docs/databases/postgresql',
-			},
-			{
-				title: 'MySQL',
-				href: '/docs/databases/mysql',
-			},
-			{
-				title: 'SQLite',
-				href: '/docs/databases/sqlite',
-			},
-			{
-				title: 'SQLServer',
-				href: '/docs/databases/sqlserver',
-			},
-			{
-				title: 'Prisma',
+				title: 'Prisma Datasource',
 				href: '/docs/databases/prisma',
-			},
-			{
-				title: 'MongoDB + Atlas',
-				href: '/docs/databases/mongodb-atlas',
-			},
-			{
-				title: 'Planetscale',
-				href: '/docs/databases/planetscale',
 			},
 			{
 				title: 'FaunaDB',
 				href: '/docs/databases/faunadb',
-			},
-			{
-				title: 'Neo4j',
-				href: '/docs/databases/neo4j',
-			},
-			{
-				title: 'Yugabyte',
-				href: '/docs/databases/yugabyte',
 			},
 		],
 	},
@@ -470,6 +453,7 @@ const navigation = [
 			'/docs/supported-data-sources',
 			'/docs/supported-frontend-frameworks',
 			'/docs/supported-backend-languages-frameworks',
+			'/docs/core-concepts',
 		],
 		icon: <CubeIcon />,
 		links: [
@@ -534,6 +518,23 @@ const navigation = [
 					{
 						title: 'WunderHub',
 						href: '/docs/components-of-wundergraph/wunderhub',
+					},
+				],
+			},
+			{
+				title: 'Core Concepts',
+				links: [
+					{
+						title: 'API Namespacing',
+						href: '/docs/core-concepts/api-namespacing',
+					},
+					{
+						title: 'Virtual Graph',
+						href: '/docs/core-concepts/virtual-graph',
+					},
+					{
+						title: 'The `_join` field',
+						href: '/docs/core-concepts/_join-field',
 					},
 				],
 			},
@@ -837,6 +838,10 @@ const navigation = [
 				title: 'Custom GraphQL Resolvers',
 				href: '/docs/features/custom-graphql-resolvers',
 			},
+			{
+				title: 'Generate OpenAPI specs and Postman collections',
+				href: '/docs/features/openapi-postman',
+			},
 		],
 	},
 	{
@@ -850,11 +855,19 @@ const navigation = [
 				href: '/docs/cloud',
 			},
 			{
+				title: 'Workspace Configuration (wg.toml)',
+				href: '/docs/cloud/configuration',
+			},
+			{
 				title: 'Deployments',
 				links: [
 					{
 						title: 'Deploy to WunderGraph Cloud',
 						href: '/docs/cloud/deployments',
+					},
+					{
+						title: 'Add custom domains to your deployment',
+						href: '/docs/cloud/custom-domains',
 					},
 				],
 			},
@@ -862,8 +875,16 @@ const navigation = [
 				title: 'Integrations',
 				links: [
 					{
+						title: 'Deploy button',
+						href: '/docs/cloud/deploy-button',
+					},
+					{
 						title: 'Vercel',
 						href: '/docs/cloud/integrations/vercel',
+					},
+					{
+						title: 'Neon',
+						href: '/docs/cloud/integrations/neon',
 					},
 				],
 			},
@@ -882,6 +903,10 @@ const navigation = [
 			{
 				title: 'Docker',
 				href: '/docs/self-hosted/docker',
+			},
+			{
+				title: 'Security',
+				href: '/docs/self-hosted/security',
 			},
 		],
 	},
@@ -1326,10 +1351,6 @@ const navigation = [
 			{
 				title: 'Frequently Asked Questions',
 				links: [
-					{
-						title: 'Does WunderGraph support Postman Collections?',
-						href: '/docs/frequently-asked-questions/does-wundergraph-support-postman-collections',
-					},
 					{
 						title: 'How is WunderGraph faster and more secure than other GraphQL solutions?',
 						href: '/docs/frequently-asked-questions/how-is-wundergraph-faster-and-more-secure-than-other-graphql-solutions',

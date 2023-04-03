@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -26,7 +25,7 @@ var loadoperationsCmd = &cobra.Command{
 			return err
 		}
 
-		outFile := path.Join(wunderGraphDir, "generated", "wundergraph.operations.json")
+		outFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.operations.json")
 		outFile, err = filepath.Abs(outFile)
 		if err != nil {
 			return err

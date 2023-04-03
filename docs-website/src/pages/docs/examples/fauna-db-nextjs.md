@@ -53,16 +53,12 @@ Once the environment is set up, we're ready to configure our application.
 const faunaDB = introspect.graphql({
   apiNamespace: 'faunaDB',
   url: new EnvironmentVariable('FAUNADB_GRAPHQL_URL'),
-  headers: (builder) =>
-    builder.addStaticHeader(
-      'Authorization',
-      new EnvironmentVariable('FAUNADB_TOKEN')
-    ),
-})
+  headers: (builder) => builder.addStaticHeader('Authorization', new EnvironmentVariable('FAUNADB_TOKEN')),
+});
 
 configureWunderGraphApplication({
   apis: [faunaDB],
-})
+});
 ```
 
 This configuration adds `faunaDB` as a data source and configures the API key to be used.
@@ -87,16 +83,28 @@ query AllStores {
 
 ```typescript
 const Home: NextPage = () => {
-  const stores = useQuery({ operationName: 'AllStores' })
+  const stores = useQuery({ operationName: 'AllStores' });
   return (
     <div>
       {stores.data?.allStores.data?.map((store) => (
         <div>{store._id}</div>
       ))}
     </div>
-  )
-}
-export default withWunderGraph(Home)
+  );
+};
+export default withWunderGraph(Home);
 ```
 
 And that's it! We've fully integrated FaunaDB, WunderGraph and Next.js.
+
+## Learn more
+
+- [Guides](/docs/guides)
+- [Next.js client documentation](/docs/clients-reference/nextjs)
+- [FaunaDB documentation](https://docs.fauna.com/fauna/current)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use [WunderGraph Cloud](https://cloud.wundergraph.com). Enable the [Vercel integration](https://vercel.com/integrations/wundergraph) to deploy the Next.js frontend to Vercel.
+
+{% deploy template="nextjs" /%}

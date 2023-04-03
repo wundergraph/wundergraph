@@ -7,12 +7,12 @@ beforeAll(() => wg.start());
 afterAll(() => wg.stop());
 
 describe('test Countries API', () => {
-	test('country by code', async () => {
+	test('countries', async () => {
 		const result = await wg.client().query({
-			operationName: 'Country',
+			operationName: 'Countries',
 		});
-		const country = result.data?.countries_country;
-		expect(country?.capital).toBe('Berlin');
+		const countries = result.data?.countries_countries;
+		expect(countries?.length).toBe(250);
 	});
 
 	test('continents', async () => {

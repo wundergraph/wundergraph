@@ -498,6 +498,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						csrfTokenSecret: mapInputVariable(''),
 					},
 					customClaims: {},
+					publicClaims: [],
 				},
 				enableGraphQLEndpoint: true,
 				security: {

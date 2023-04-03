@@ -1,11 +1,12 @@
-import { Api, DataSource, StaticApiCustom } from './index';
 import {
 	ASTNode,
 	buildSchema,
+	BuildSchemaOptions,
 	GraphQLSchema,
 	Kind,
 	ObjectTypeDefinitionNode,
 	parse,
+	ParseOptions,
 	print,
 	printSchema,
 	visit,
@@ -17,6 +18,8 @@ import {
 	FieldConfiguration,
 	TypeConfiguration,
 } from '@wundergraph/protobuf';
+import { Api, DataSource, StaticApiCustom } from './index';
+import { WellKnownClaim, WellKnownClaimValues } from '../graphql/operations';
 
 export const mergeApis = <T extends {} = {}>(roles: string[], customClaims: string[], ...apis: Api<T>[]): Api<T> => {
 	const dataSources: DataSource<T>[] = apis
@@ -224,7 +227,12 @@ directive @jsonSchema (
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+
+  """
+  Optional field to apply the JSON schema to
+  """
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 enum COMMON_REGEX_PATTERN {
     EMAIL
@@ -249,104 +257,54 @@ enum WG_ROLE {
 }
 `;
 
-const claimsSchema = (customClaims: string[]) => `
+const claimsSchema = (customClaims: string[]) => {
+	const docs: Record<WellKnownClaim, string> = {
+		ISSUER: 'iss',
+		PROVIDER: 'deprecated alias for ISSUER',
+		SUBJECT: 'sub',
+		USERID: 'alias for sub',
+		NAME: 'name',
+		GIVEN_NAME: 'given_name',
+		FAMILY_NAME: 'family_name',
+		MIDDLE_NAME: 'middle_name',
+		NICKNAME: 'nickname',
+		PREFERRED_USERNAME: 'preferred_username',
+		PROFILE: 'profile',
+		PICTURE: 'picture',
+		WEBSITE: 'website',
+		EMAIL: 'email',
+		EMAIL_VERIFIED: 'email_verified',
+		GENDER: 'gender',
+		BIRTH_DATE: 'birthdate',
+		ZONE_INFO: 'zoneinfo',
+		LOCALE: 'locale',
+		LOCATION: 'location',
+	};
+	if (Object.keys(docs).length !== WellKnownClaimValues.length) {
+		throw new Error('unhandled claims in claimsSchema()');
+	}
+	const wellKnownClaims = Object.entries(docs).map(([key, doc]) => `"""${doc}"""\n${key}`);
+	return `
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
 Adding this directive makes the operation require authentication.
 """
 
 directive @fromClaim(
-  name: WG_CLAIM
-) on VARIABLE_DEFINITION
+  name: WG_CLAIM,
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 Well known claims - https://www.iana.org/assignments/jwt/jwt.xhtml
 """
 enum WG_CLAIM {
-	"""
-	iss
-	"""
-	ISSUER
-	"""
-	deprecated alias for ISSUER
-	"""
-	PROVIDER
-	"""
-	sub
-	"""
-	SUBJECT
-	"""
-	alias for sub
-	"""
-	USERID
-	"""
-	name
-	"""
-	NAME
-	"""
-	given_name
-	"""
-	GIVEN_NAME
-	"""
-	family_name
-	"""
-	FAMILY_NAME
-	"""
-	middle_name
-	"""
-	MIDDLE_NAME
-	"""
-	nickname
-	"""
-	NICKNAME
-	"""
-	preferred_username
-	"""
-	PREFERRED_USERNAME
-	"""
-	profile
-	"""
-	PROFILE
-	"""
-	picture
-	"""
-	PICTURE
-	"""
-	website
-	"""
-	WEBSITE
-	"""
-	email
-	"""
-	EMAIL
-	"""
-	email_verified
-	"""
-	EMAIL_VERIFIED
-	"""
-	gender
-	"""
-	GENDER
-	"""
-	birthdate
-	"""
-	BIRTH_DATE
-	"""
-	zoneinfo
-	"""
-	ZONE_INFO
-	"""
-	locale
-	"""
-	LOCALE
-	"""
-	location
-	"""
-	LOCATION
 
-    ${customClaims.join(' ')}
+	${customClaims.map((claim) => `"""custom"""\n${claim}`).join('\n')}
+	${wellKnownClaims.join('\n')}
 }
 `;
+};
 
 const uuidSchema = `
 """
@@ -357,7 +315,10 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(
+	on: String = ""
+) repeatable on VARIABLE_DEFINITION
+
 `;
 
 const injectEnvironmentVariableSchema = `
@@ -365,8 +326,9 @@ const injectEnvironmentVariableSchema = `
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
 directive @injectEnvironmentVariable (
-    name: String!
-) on VARIABLE_DEFINITION
+    name: String!,
+	on: String = ""
+) repeatable on VARIABLE_DEFINITION
 `;
 
 const dateTimeSchema = `
@@ -381,8 +343,9 @@ Custom formats are allowed by specifying a format conforming to the Golang speci
 directive @injectCurrentDateTime (
     format: WunderGraphDateTimeFormat = ISO8601
     """customFormat must conform to the Golang specification for specifying a date time format"""
-    customFormat: String
-) on VARIABLE_DEFINITION
+    customFormat: String,
+	on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 enum WunderGraphDateTimeFormat {
     "2006-01-02T15:04:05-0700"
@@ -521,24 +484,27 @@ const mergeApiSchemas = <T extends {} = {}>(
 		})
 	);
 
+	const options: BuildSchemaOptions & ParseOptions = {
+		assumeValidSDL: true,
+		assumeValid: true,
+	};
+
 	if (roles.length) {
-		graphQLSchemas.push(buildSchema(roleSchema(roles), { assumeValidSDL: true }));
+		graphQLSchemas.push(buildSchema(roleSchema(roles), options));
 	}
-
-	graphQLSchemas.push(buildSchema(claimsSchema(customClaims), { assumeValidSDL: true }));
-
-	graphQLSchemas.push(buildSchema(dateTimeSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(uuidSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(internalSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(injectEnvironmentVariableSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(exportSchema, { assumeValidSDL: true }));
-	graphQLSchemas.push(buildSchema(transformSchema, { assumeValidSDL: true }));
+	graphQLSchemas.push(buildSchema(claimsSchema(customClaims), options));
+	graphQLSchemas.push(buildSchema(dateTimeSchema, options));
+	graphQLSchemas.push(buildSchema(uuidSchema, options));
+	graphQLSchemas.push(buildSchema(internalSchema, options));
+	graphQLSchemas.push(buildSchema(injectEnvironmentVariableSchema, options));
+	graphQLSchemas.push(buildSchema(exportSchema, options));
+	graphQLSchemas.push(buildSchema(transformSchema, options));
 
 	let mergedGraphQLSchema: GraphQLSchema;
 	try {
 		mergedGraphQLSchema = mergeSchemas({
 			schemas: graphQLSchemas,
-			assumeValid: true,
+			...options,
 		});
 	} catch (e: any) {
 		throw new Error(

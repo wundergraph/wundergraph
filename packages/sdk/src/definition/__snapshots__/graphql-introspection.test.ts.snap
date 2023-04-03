@@ -764,12 +764,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "first",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "random",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -827,12 +829,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "upc",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "price",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -1058,13 +1062,15 @@ directive @jsonSchema(
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+  """Optional field to apply the JSON schema to"""
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
 Adding this directive makes the operation require authentication.
 """
-directive @fromClaim(name: WG_CLAIM) on VARIABLE_DEFINITION
+directive @fromClaim(name: WG_CLAIM, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectCurrentDateTime injects a DateTime string of the current date and time into the variable.
@@ -1080,7 +1086,8 @@ directive @injectCurrentDateTime(
   customFormat must conform to the Golang specification for specifying a date time format
   """
   customFormat: String
-) on VARIABLE_DEFINITION
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -1090,7 +1097,7 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @internalOperation Directive marks an Operation as internal.
@@ -1102,7 +1109,7 @@ directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 """
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
-directive @injectEnvironmentVariable(name: String!) on VARIABLE_DEFINITION
+directive @injectEnvironmentVariable(name: String!, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.
@@ -2058,12 +2065,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "first",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "random",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -2121,12 +2130,14 @@ type Query",
       "argumentsConfiguration": [
         {
           "name": "upc",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
         },
         {
           "name": "price",
+          "renameTypeTo": "",
           "renderConfiguration": 0,
           "sourcePath": [],
           "sourceType": 1,
@@ -2352,13 +2363,15 @@ directive @jsonSchema(
   """
   uniqueItems: Boolean
   commonPattern: COMMON_REGEX_PATTERN
-) on VARIABLE_DEFINITION
+  """Optional field to apply the JSON schema to"""
+  on: String
+) repeatable on VARIABLE_DEFINITION
 
 """
 The @fromClaim directive sets the variable to the value retrieved from the given a claim.
 Adding this directive makes the operation require authentication.
 """
-directive @fromClaim(name: WG_CLAIM) on VARIABLE_DEFINITION
+directive @fromClaim(name: WG_CLAIM, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectCurrentDateTime injects a DateTime string of the current date and time into the variable.
@@ -2374,7 +2387,8 @@ directive @injectCurrentDateTime(
   customFormat must conform to the Golang specification for specifying a date time format
   """
   customFormat: String
-) on VARIABLE_DEFINITION
+  on: String = ""
+) repeatable on VARIABLE_DEFINITION
 
 """
 The directive @injectGeneratedUUID injects a generated UUID into the variable.
@@ -2384,7 +2398,7 @@ disallowing the user to supply it.
 
 This means, the UUID is 100% generated server-side and can be considered untempered.
 """
-directive @injectGeneratedUUID on VARIABLE_DEFINITION
+directive @injectGeneratedUUID(on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @internalOperation Directive marks an Operation as internal.
@@ -2396,7 +2410,7 @@ directive @internalOperation on QUERY | MUTATION | SUBSCRIPTION
 """
 The directive @injectEnvironmentVariable allows you to inject an environment variable into the variable definition.
 """
-directive @injectEnvironmentVariable(name: String!) on VARIABLE_DEFINITION
+directive @injectEnvironmentVariable(name: String!, on: String = "") repeatable on VARIABLE_DEFINITION
 
 """
 The @export directive instructs the Execution Planner to export the field during the execution into the variable of the 'as' argument.

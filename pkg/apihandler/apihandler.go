@@ -23,7 +23,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mattbaird/jsonpatch"
-	"github.com/rs/cors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
@@ -49,6 +48,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/inputvariables"
 	"github.com/wundergraph/wundergraph/pkg/interpolate"
+	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/pool"
@@ -253,23 +253,6 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			handler.ServeHTTP(w, request)
 		})
 	})
-
-	if api.CorsConfiguration != nil {
-		corsMiddleware := cors.New(cors.Options{
-			MaxAge:           int(api.CorsConfiguration.MaxAge),
-			AllowCredentials: api.CorsConfiguration.AllowCredentials,
-			AllowedHeaders:   api.CorsConfiguration.AllowedHeaders,
-			AllowedMethods:   api.CorsConfiguration.AllowedMethods,
-			AllowedOrigins:   loadvariable.Strings(api.CorsConfiguration.AllowedOrigins),
-			ExposedHeaders:   api.CorsConfiguration.ExposedHeaders,
-		})
-		r.router.Use(func(handler http.Handler) http.Handler {
-			return corsMiddleware.Handler(handler)
-		})
-		r.log.Debug("configuring CORS",
-			zap.Strings("allowedOrigins", loadvariable.Strings(api.CorsConfiguration.AllowedOrigins)),
-		)
-	}
 
 	if err := r.registerAuth(r.insecureCookies); err != nil {
 		if !r.devMode {
@@ -500,6 +483,9 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	}
 
 	preparedPlan := shared.Planner.Plan(shared.Doc, r.definition, operation.Name, shared.Report)
+	if shared.Report.HasErrors() {
+		return fmt.Errorf(ErrMsgOperationPlanningFailed, shared.Report)
+	}
 	shared.Postprocess.Process(preparedPlan)
 
 	variablesValidator, err := inputvariables.NewValidator(cleanupJsonSchema(operation.VariablesSchema), false)
@@ -522,10 +508,10 @@ func (r *Builder) registerOperation(operation *wgpb.Operation) error {
 	postResolveTransformer := postresolvetransform.NewTransformer(operation.PostResolveTransformations)
 
 	hooksPipelineCommonConfig := hooks.PipelineConfig{
-		Client:        r.middlewareClient,
-		Authenticator: hooksAuthenticator,
-		Operation:     operation,
-		Logger:        r.log,
+		Client:      r.middlewareClient,
+		Operation:   operation,
+		Transformer: postResolveTransformer,
+		Logger:      r.log,
 	}
 
 	switch operation.OperationType {
@@ -761,7 +747,7 @@ type GraphQLPlaygroundHandler struct {
 	nodeUrl string
 }
 
-func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GraphQLPlaygroundHandler) ServeHTTP(w http.ResponseWriter, _ *http.Request) {
 	tpl := strings.Replace(h.html, "{{apiURL}}", h.nodeUrl, 1)
 	resp := []byte(tpl)
 
@@ -1050,7 +1036,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 		} else {
 			boolValue = "false"
 		}
-		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariableName)
+		variables, err = jsonparser.Set(variables, []byte(boolValue), claim.VariablePathComponents...)
 		if err != nil {
 			return nil, fmt.Errorf("error replacing variable for claim %s: %w", claim.ClaimType, err)
 		}
@@ -1069,7 +1055,7 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	default:
 		return nil, fmt.Errorf("unhandled well known claim %s", claim.ClaimType)
 	}
-	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariableName)
+	variables, err = jsonparser.Set(variables, []byte("\""+replacement+"\""), claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for well known claim %s: %w", claim.ClaimType, err)
 	}
@@ -1077,42 +1063,32 @@ func injectWellKnownClaim(claim *wgpb.ClaimConfig, user *authentication.User, va
 	return variables, nil
 }
 
-func lookupJsonPath(data interface{}, keys []string, keyIndex int) interface{} {
-	key := keys[keyIndex]
-	if m, ok := data.(map[string]interface{}); ok {
-		item := m[key]
-		if keyIndex == len(keys)-1 {
-			return item
-		}
-		return lookupJsonPath(item, keys, keyIndex+1)
-	}
-	return nil
-}
-
 func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, variables []byte) ([]byte, error) {
 	custom := claim.GetCustom()
-	value := lookupJsonPath(user.CustomClaims, custom.JsonPathComponents, 0)
+	value := jsonpath.GetKeys(user.CustomClaims, custom.JsonPathComponents...)
 	var replacement []byte
 	switch x := value.(type) {
 	case nil:
 		if custom.Required {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("required customClaim %s not found", custom.Name),
-			}
+			return nil, inputvariables.NewValidationError(fmt.Sprintf("required customClaim %s not found", custom.Name), nil, nil)
 		}
 		return variables, nil
 	case string:
 		if custom.Type != wgpb.ValueType_STRING {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		replacement = []byte("\"" + string(x) + "\"")
 	case bool:
 		if custom.Type != wgpb.ValueType_BOOLEAN {
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 		if x {
 			replacement = []byte("true")
@@ -1124,24 +1100,28 @@ func injectCustomClaim(claim *wgpb.ClaimConfig, user *authentication.User, varia
 		case wgpb.ValueType_INT:
 			if x != float64(int(x)) {
 				// Value is not integral
-				return nil, &inputvariables.ValidationError{
-					Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
-				}
+				return nil, inputvariables.NewValidationError(
+					fmt.Sprintf("customClaim %s expected to be of type %s, found %s instead", custom.Name, custom.Type, "float"),
+					nil,
+					nil,
+				)
 			}
 			replacement = []byte(strconv.FormatInt(int64(x), 10))
 		case wgpb.ValueType_FLOAT:
 			// JSON number is always a valid float
 			replacement = []byte(strconv.FormatFloat(x, 'f', -1, 64))
 		default:
-			return nil, &inputvariables.ValidationError{
-				Message: fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
-			}
+			return nil, inputvariables.NewValidationError(
+				fmt.Sprintf("customClaim %s expected to be of type %s, found %T instead", custom.Name, custom.Type, x),
+				nil,
+				nil,
+			)
 		}
 	default:
 		return nil, fmt.Errorf("unhandled custom claim type %T", x)
 	}
 	var err error
-	variables, err = jsonparser.Set(variables, replacement, claim.VariableName)
+	variables, err = jsonparser.Set(variables, replacement, claim.VariablePathComponents...)
 	if err != nil {
 		return nil, fmt.Errorf("error replacing variable for customClaim %s: %w", custom.Name, err)
 	}
@@ -1172,28 +1152,28 @@ func injectClaims(operation *wgpb.Operation, r *http.Request, variables []byte) 
 	return variables, nil
 }
 
-func injectVariables(operation *wgpb.Operation, r *http.Request, variables []byte) []byte {
+func injectVariables(operation *wgpb.Operation, _ *http.Request, variables []byte) []byte {
 	if operation.VariablesConfiguration == nil || operation.VariablesConfiguration.InjectVariables == nil {
 		return variables
 	}
 	for i := range operation.VariablesConfiguration.InjectVariables {
-		key := operation.VariablesConfiguration.InjectVariables[i].VariableName
+		keys := operation.VariablesConfiguration.InjectVariables[i].VariablePathComponents
 		kind := operation.VariablesConfiguration.InjectVariables[i].VariableKind
 		switch kind {
 		case wgpb.InjectVariableKind_UUID:
 			id, _ := uuid.GenerateUUID()
-			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+id+"\""), keys...)
 		case wgpb.InjectVariableKind_DATE_TIME:
 			format := operation.VariablesConfiguration.InjectVariables[i].DateFormat
 			now := time.Now()
 			dateTime := now.Format(format)
-			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+dateTime+"\""), keys...)
 		case wgpb.InjectVariableKind_ENVIRONMENT_VARIABLE:
 			value := os.Getenv(operation.VariablesConfiguration.InjectVariables[i].EnvironmentVariableName)
 			if value == "" {
 				continue
 			}
-			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), key)
+			variables, _ = jsonparser.Set(variables, []byte("\""+value+"\""), keys...)
 		}
 	}
 	return variables
@@ -1886,10 +1866,6 @@ func (f *httpFlushWriter) Flush() {
 		}
 	}
 
-	if f.sse {
-		_, _ = f.writer.Write([]byte("data: "))
-	}
-
 	if f.useJsonPatch && f.lastMessage.Len() != 0 {
 		last := f.lastMessage.Bytes()
 		patch, err := jsonpatch.CreatePatch(last, resp)
@@ -1910,6 +1886,9 @@ func (f *httpFlushWriter) Flush() {
 			}
 			return
 		}
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		if len(patchData) < len(resp) {
 			_, _ = f.writer.Write(patchData)
 		} else {
@@ -1918,6 +1897,9 @@ func (f *httpFlushWriter) Flush() {
 	}
 
 	if f.lastMessage.Len() == 0 || !f.useJsonPatch {
+		if f.sse {
+			_, _ = f.writer.Write([]byte("data: "))
+		}
 		_, _ = f.writer.Write(resp)
 	}
 
@@ -1949,6 +1931,17 @@ func MergeJsonRightIntoLeft(left, right []byte) []byte {
 	return left
 }
 
+func (r *Builder) authenticationHooks() authentication.Hooks {
+	return hooks.NewAuthenticationHooks(hooks.AuthenticationConfig{
+		Client:                     r.middlewareClient,
+		Log:                        r.log,
+		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
+		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
+		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
+		Revalidate:                 r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
+	})
+}
+
 func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	var (
@@ -1958,18 +1951,24 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 
 	if h := loadvariable.String(r.api.AuthenticationConfig.CookieBased.HashKey); h != "" {
 		hashKey = []byte(h)
+	} else if fallback := r.api.CookieBasedSecrets.HashKey; fallback != nil {
+		hashKey = fallback
 	}
 
 	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.BlockKey); b != "" {
 		blockKey = []byte(b)
+	} else if fallback := r.api.CookieBasedSecrets.BlockKey; fallback != nil {
+		blockKey = fallback
 	}
 
-	if b := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); b != "" {
-		csrfSecret = []byte(b)
+	if c := loadvariable.String(r.api.AuthenticationConfig.CookieBased.CsrfSecret); c != "" {
+		csrfSecret = []byte(c)
+	} else if fallback := r.api.CookieBasedSecrets.CsrfSecret; fallback != nil {
+		csrfSecret = fallback
 	}
 
 	if r.api == nil || r.api.HasCookieAuthEnabled() && (hashKey == nil || blockKey == nil || csrfSecret == nil) {
-		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened, validation didn't detect broken configuration, someone broke the validation code")
+		panic("API is nil or hashkey, blockkey, csrfsecret invalid: This should never have happened. Either validation didn't detect broken configuration, or someone broke the validation code")
 	}
 
 	cookie := securecookie.New(hashKey, blockKey)
@@ -1978,13 +1977,7 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 		jwksProviders = r.api.AuthenticationConfig.JwksBased.Providers
 	}
 
-	authHooks := authentication.Hooks{
-		Log:                        r.log,
-		Client:                     r.middlewareClient,
-		MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-		PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-		PostLogout:                 r.api.AuthenticationConfig.Hooks.PostLogout,
-	}
+	authHooks := r.authenticationHooks()
 
 	loadUserConfig := authentication.LoadUserConfig{
 		Log:           r.log,
@@ -2000,11 +1993,11 @@ func (r *Builder) registerAuth(insecureCookies bool) error {
 	}))
 
 	userHandler := &authentication.UserHandler{
-		HasRevalidateHook: r.api.AuthenticationConfig.Hooks.RevalidateAuthentication,
-		MWClient:          r.middlewareClient,
-		Log:               r.log,
-		InsecureCookies:   insecureCookies,
-		Cookie:            cookie,
+		Hooks:           authHooks,
+		Log:             r.log,
+		InsecureCookies: insecureCookies,
+		Cookie:          cookie,
+		PublicClaims:    r.api.AuthenticationConfig.PublicClaims,
 	}
 
 	r.router.Path("/auth/user").Methods(http.MethodGet, http.MethodOptions).Handler(userHandler)
@@ -2127,12 +2120,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "github"),
 			zap.String("providerId", provider.Id),
@@ -2163,12 +2151,7 @@ func (r *Builder) configureCookieProvider(router *mux.Router, provider *wgpb.Aut
 			InsecureCookies:    r.insecureCookies,
 			ForceRedirectHttps: r.forceHttpsRedirects,
 			Cookie:             cookie,
-		}, authentication.Hooks{
-			Client:                     r.middlewareClient,
-			MutatingPostAuthentication: r.api.AuthenticationConfig.Hooks.MutatingPostAuthentication,
-			PostAuthentication:         r.api.AuthenticationConfig.Hooks.PostAuthentication,
-			Log:                        r.log,
-		})
+		}, r.authenticationHooks())
 		r.log.Debug("api.configureCookieProvider",
 			zap.String("provider", "oidc"),
 			zap.String("providerId", provider.Id),
@@ -2314,7 +2297,10 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	buf := pool.GetBytesBuffer()
 	defer pool.PutBytesBuffer(buf)
 
-	input := hooks.EncodeData(hooksAuthenticator, r, buf.Bytes(), ctx.Variables, nil)
+	input, err := hooks.EncodeData(r, buf, ctx.Variables, nil)
+	if done := handleOperationErr(requestLogger, err, w, "encoding hook data failed", h.operation); done {
+		return
+	}
 
 	switch {
 	case isLive:
@@ -2592,9 +2578,4 @@ func validateInputVariables(ctx context.Context, log *zap.Logger, variables []by
 		return false
 	}
 	return true
-}
-
-// hooksAuthenticator is used to break the import cycle between authentication and hooks
-func hooksAuthenticator(ctx context.Context) interface{} {
-	return authentication.UserFromContext(ctx)
 }

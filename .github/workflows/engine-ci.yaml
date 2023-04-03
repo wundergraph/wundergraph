@@ -12,6 +12,7 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
+      - 'scripts/minio-setup.sh'
       - '!examples/**/*'
       - '!**/*.md'
   pull_request:
@@ -42,15 +43,6 @@ jobs:
   build_test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    services:
-      minio:
-        image: minio/minio:edge-cicd
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: minio
-          MINIO_ROOT_PASSWORD: minio123
-        options: --name=minio --health-cmd "curl http://localhost:9000/minio/health/live"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -70,7 +62,11 @@ jobs:
         with:
           protoc-version: '21.5'
 
-      - run: make bootstrap-minio
+      - name: Start MinIO container
+        run: docker run -d --rm --name=minio --health-cmd "curl http://localhost:9000/minio/health/live" -e MINIO_ROOT_USER=minio -e MINIO_ROOT_PASSWORD=minio123 -p 9000:9000 -p 9090:9090 quay.io/minio/minio:RELEASE.2023-03-20T20-16-18Z server /data --console-address ":9090"
+
+      - name: Setup MinIO container
+        run: make bootstrap-minio
 
       - run: pnpm install --ignore-scripts
 
@@ -86,6 +82,6 @@ jobs:
           args: --timeout 2m
 
       - name: Run unit and integration tests
-        run: make test-go
+        run: go test -race ./...
         env:
           INT: true

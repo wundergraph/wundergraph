@@ -48,8 +48,8 @@ import {
 import { EnvironmentVariable, InputVariable, mapInputVariable } from '../configure/variables';
 import { HeadersBuilder, mapHeaders } from '../definition/headers-builder';
 import { Logger } from '../logger';
-import _ from 'lodash';
-import transformSchema from '../transformations/schema';
+import { camelCase } from 'lodash';
+import transformSchema from '../transformations/transformSchema';
 
 export const openApiSpecificationToRESTApiObject = async (
 	oas: string,
@@ -338,6 +338,7 @@ class RESTApiBuilder {
 							renderConfiguration: ArgumentRenderConfiguration.RENDER_ARGUMENT_AS_ARRAY_CSV,
 							sourceType: ArgumentSource.FIELD_ARGUMENT,
 							sourcePath: [param.name],
+							renameTypeTo: '',
 						});
 					}
 					break;
@@ -1208,8 +1209,8 @@ class RESTApiBuilder {
 
 	private cleanupTypeName = (typeName: string, parentTypeName: string): string => {
 		// remove all non-alphanumeric characters and all leading numbers
-		typeName = _.camelCase(typeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
-		parentTypeName = _.camelCase(parentTypeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
+		typeName = camelCase(typeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
+		parentTypeName = camelCase(parentTypeName.replace(/[^_a-zA-Z0-9]/g, '_').replace(/^[0-9]+/, '_'));
 		// and make the first character uppercase
 		typeName = typeName[0].toUpperCase() + typeName.substring(1);
 		parentTypeName = parentTypeName[0].toUpperCase() + parentTypeName.substring(1);
@@ -1224,7 +1225,7 @@ class RESTApiBuilder {
 	};
 }
 
-const convertOpenApiV3 = async (openApiSpec: Object): Promise<OpenAPIV3.Document> => {
+export const convertOpenApiV3 = async (openApiSpec: Object): Promise<OpenAPIV3.Document> => {
 	const converted = await swagger2openapi.convertObj(openApiSpec, {});
 	return converted.openapi;
 };

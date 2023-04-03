@@ -19,10 +19,10 @@ import {
 } from '@wundergraph/protobuf';
 import { applyNameSpaceToGraphQLSchema } from './namespacing';
 import { InputVariable, mapInputVariable } from '../configure/variables';
-import { introspectGraphql } from './graphql-introspection';
+import { introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { loadOpenApi, openApi, openApiLegacy } from './openapi-introspection';
+import { openApi, OpenAPIIntrospectionNew, openApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
@@ -36,12 +36,18 @@ import {
 // Use UPPERCASE for environment variables
 export const WG_DATA_SOURCE_POLLING_MODE = process.env['WG_DATA_SOURCE_POLLING_MODE'] === 'true';
 export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTION_CACHE'] === 'true';
+export const WG_INTROSPECTION_CACHE_SKIP = process.env['WG_INTROSPECTION_CACHE_SKIP'] === 'true';
 // Only use the introspection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
 // When true, throw an exception an error is found while loading operations
 export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
 
 export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
+// Default polling interval for data sources without one
+export const WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS = (() => {
+	const seconds = parseInt(process.env['WG_DATA_SOURCE_DEFAULT_POLLING_INTERVAL_SECONDS'] ?? '', 10);
+	return isNaN(seconds) ? 0 : seconds;
+})();
 
 export interface RenameType {
 	from: string;
@@ -378,11 +384,6 @@ export interface OpenAPIIntrospection extends HTTPUpstream {
 	replaceCustomScalarTypeFields?: ReplaceCustomScalarTypeFieldConfiguration[];
 }
 
-export interface OpenAPIV2Introspection extends Omit<HTTPUpstream, 'authentication' | 'mTLS'> {
-	source: OpenAPIIntrospectionSource;
-	baseURL?: InputVariable;
-}
-
 export interface StaticApiCustom {
 	data: ConfigurationVariable;
 }
@@ -428,78 +429,34 @@ export interface GraphQLServerConfiguration extends Omit<GraphQLIntrospection, '
 	schema: GraphQLSchema | Promise<GraphQLSchema>;
 }
 
-export interface ILazyIntrospection<T> {
-	(): Promise<T>;
-}
+export const introspectGraphqlServer = async (introspection: GraphQLServerConfiguration): Promise<GraphQLApi> => {
+	const { schema, ...rest } = introspection;
+	const resolvedSchema = (await schema) as GraphQLSchema;
 
-export const introspectGraphqlServer = (introspection: GraphQLServerConfiguration): ILazyIntrospection<GraphQLApi> => {
-	return async (): Promise<GraphQLApi> => {
-		const { schema, ...rest } = introspection;
-		const resolvedSchema = (await schema) as GraphQLSchema;
-
-		return introspectGraphql({
-			...rest,
-			internal: true,
-			loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
-		});
-	};
+	return introspectGraphqlWithCache({
+		...rest,
+		internal: true,
+		loadSchemaFromString: () => printSchema(buildClientSchema(introspectionFromSchema(resolvedSchema))),
+	});
 };
 
 export const introspect = {
-	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return introspectGraphql(introspection);
-		};
+	graphql: (introspection: Omit<GraphQLIntrospection, 'isFederation'>): Promise<GraphQLApi> => {
+		return introspectGraphqlWithCache(introspection);
 	},
-	postgresql: (introspection: DatabaseIntrospection): ILazyIntrospection<PostgresqlApi> => {
-		return (): Promise<PostgresqlApi> => {
-			return introspectPostgresql(introspection);
-		};
+	postgresql: introspectPostgresql,
+	mysql: introspectMySQL,
+	planetscale: introspectPlanetScale,
+	sqlite: introspectSQLite,
+	sqlserver: introspectSQLServer,
+	mongodb: introspectMongoDB,
+	prisma: introspectPrisma,
+	federation: introspectFederation,
+	openApi: (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
+		return openApi(introspection);
 	},
-	mysql: (introspection: DatabaseIntrospection): ILazyIntrospection<MySQLApi> => {
-		return (): Promise<MySQLApi> => {
-			return introspectMySQL(introspection);
-		};
-	},
-	planetscale: (introspection: DatabaseIntrospection): ILazyIntrospection<PlanetscaleApi> => {
-		return (): Promise<PlanetscaleApi> => {
-			return introspectPlanetScale(introspection);
-		};
-	},
-	sqlite: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLiteApi> => {
-		return (): Promise<SQLiteApi> => {
-			return introspectSQLite(introspection);
-		};
-	},
-	sqlserver: (introspection: DatabaseIntrospection): ILazyIntrospection<SQLServerApi> => {
-		return (): Promise<SQLServerApi> => {
-			return introspectSQLServer(introspection);
-		};
-	},
-	mongodb: (introspection: DatabaseIntrospection): ILazyIntrospection<MongoDBApi> => {
-		return (): Promise<MongoDBApi> => {
-			return introspectMongoDB(introspection);
-		};
-	},
-	prisma: (introspection: PrismaIntrospection): ILazyIntrospection<PrismaApi> => {
-		return (): Promise<PrismaApi> => {
-			return introspectPrisma(introspection);
-		};
-	},
-	federation: (introspection: GraphQLFederationIntrospection): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return introspectFederation(introspection);
-		};
-	},
-	openApiV2: (introspection: OpenAPIV2Introspection): ILazyIntrospection<GraphQLApi> => {
-		return (): Promise<GraphQLApi> => {
-			return openApi(introspection);
-		};
-	},
-	openApi: (introspection: OpenAPIIntrospection): ILazyIntrospection<RESTApi> => {
-		return (): Promise<RESTApi> => {
-			return openApiLegacy(introspection);
-		};
+	openApiV2: (introspection: OpenAPIIntrospectionNew): Promise<GraphQLApi> => {
+		return openApiV2(introspection);
 	},
 };
 
@@ -557,4 +514,3 @@ const upstreamAuthenticationKind = (kind: HTTPUpstreamAuthentication['kind']): U
 			throw new Error(`upstreamAuthenticationKind, unsupported kind: ${kind}`);
 	}
 };
-export { loadOpenApi } from './openapi-introspection';

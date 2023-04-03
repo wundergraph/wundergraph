@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,9 +19,7 @@ import (
 
 	"github.com/wundergraph/graphql-go-tools/pkg/ast"
 	"github.com/wundergraph/graphql-go-tools/pkg/astnormalization"
-	"github.com/wundergraph/graphql-go-tools/pkg/astparser"
 	"github.com/wundergraph/graphql-go-tools/pkg/astprinter"
-	"github.com/wundergraph/graphql-go-tools/pkg/asttransform"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/httpclient"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/resolve"
@@ -55,12 +54,18 @@ type Planner struct {
 
 	insideJsonField bool
 	jsonFieldRef    int
+
+	operationTypeDefinitionRef int
+	isQueryRaw                 bool
+	isQueryRawRow              bool
 }
 
 type inlinedVariable struct {
-	name    string
-	typeRef int
-	isJSON  bool
+	name         string
+	typeRef      int
+	isJSON       bool
+	isRaw        bool
+	parentIsJson bool
 }
 
 func (p *Planner) DownstreamResponseFieldAlias(downstreamFieldRef int) (alias string, exists bool) {
@@ -94,7 +99,7 @@ func (p *Planner) DownstreamResponseFieldAlias(downstreamFieldRef int) (alias st
 func (p *Planner) DataSourcePlanningBehavior() plan.DataSourcePlanningBehavior {
 	return plan.DataSourcePlanningBehavior{
 		MergeAliasedRootNodes:      true,
-		OverrideFieldPathFromAlias: false,
+		OverrideFieldPathFromAlias: true,
 	}
 }
 
@@ -146,6 +151,31 @@ type fetchInput struct {
 	Variables json.RawMessage `json:"variables"`
 }
 
+type RawJsonVariableRenderer struct {
+	parentIsJson bool
+}
+
+func (r *RawJsonVariableRenderer) GetKind() string {
+	return "raw_json"
+}
+
+func (r *RawJsonVariableRenderer) RenderVariable(ctx context.Context, data []byte, out io.Writer) error {
+	if !r.parentIsJson {
+		// when the parent is already rendering as a JSON, we don't need to wrap the child in quotes
+		// this happens when using a variable inside the parameters list, e.g.
+		// query($id: String!){rawQuery(query: "select foo from bar where id = $1", parameters: [$id])}
+		// in this case, there will be a 2 variable renderers, one that renders the list (as JSON)
+		// and a second one to inline render the value of $id
+		// which doesn't need to be quoted again
+		_, _ = out.Write([]byte(`\"`))
+	}
+	_, _ = out.Write([]byte(strings.ReplaceAll(string(data), `"`, `\\\"`)))
+	if !r.parentIsJson {
+		_, _ = out.Write([]byte(`\"`))
+	}
+	return nil
+}
+
 func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 
 	operation := string(p.printOperation())
@@ -161,7 +191,11 @@ func (p *Planner) ConfigureFetch() plan.FetchConfiguration {
 			renderer resolve.VariableRenderer
 			err      error
 		)
-		if inlinedVariable.isJSON {
+		if inlinedVariable.isRaw {
+			renderer = &RawJsonVariableRenderer{
+				parentIsJson: inlinedVariable.parentIsJson,
+			}
+		} else if inlinedVariable.isJSON {
 			renderer = resolve.NewGraphQLVariableRenderer(`{"type":"string"}`)
 		} else {
 			renderer, err = resolve.NewGraphQLVariableRendererFromTypeRefWithoutValidation(p.visitor.Operation, p.visitor.Definition, inlinedVariable.typeRef)
@@ -231,6 +265,7 @@ func (p *Planner) EnterOperationDefinition(ref int) {
 	})
 	p.disallowSingleFlight = operationType == ast.OperationTypeMutation
 	p.nodes = append(p.nodes, definition)
+	p.operationTypeDefinitionRef = ref
 }
 
 func (p *Planner) LeaveOperationDefinition(_ int) {
@@ -346,6 +381,18 @@ func (p *Planner) EnterField(ref int) {
 		}
 	}
 
+	if p.isQueryRawJSONField(ref) {
+		p.isQueryRawRow = true
+		p.insideJsonField = true
+		p.jsonFieldRef = ref
+	}
+
+	if p.isQueryRawField(ref) {
+		p.isQueryRaw = true
+	}
+
+	p.ensureEmptyParametersArgOnRawOperations(ref)
+
 	// store root field name and ref
 	if p.rootFieldName == "" {
 		p.rootFieldName = fieldName
@@ -373,11 +420,57 @@ func (p *Planner) EnterField(ref int) {
 	}
 }
 
+// ensureEmptyParametersArgOnRawOperations adds an empty parameters arg to raw operations
+// this is required because prisma won't execute without parameters, even if empty
+// we don't want to force the user to define an empty parameters,
+// so we "fix" it in the backend by modifying the AST
+func (p *Planner) ensureEmptyParametersArgOnRawOperations(fieldRef int) {
+	if !p.isQueryRawField(fieldRef) && !p.isQueryRawJSONField(fieldRef) && !p.isExecuteRawField(fieldRef) {
+		return
+	}
+	_, exists := p.visitor.Operation.FieldArgument(fieldRef, []byte("parameters"))
+	if exists {
+		return
+	}
+	listRef := p.visitor.Operation.AddListValue(ast.ListValue{})
+	argRef := p.visitor.Operation.AddArgument(ast.Argument{
+		Name: p.visitor.Operation.Input.AppendInputString("parameters"),
+		Value: ast.Value{
+			Kind: ast.ValueKindList,
+			Ref:  listRef,
+		},
+	})
+	p.visitor.Operation.AddArgumentToField(fieldRef, argRef)
+}
+
+func (p *Planner) isQueryRawJSONField(field int) bool {
+	name := p.visitor.Operation.FieldNameString(field)
+	return name == "queryRawJSON" || strings.HasSuffix(name, "_queryRawJSON")
+}
+
+func (p *Planner) isQueryRawField(field int) bool {
+	name := p.visitor.Operation.FieldNameString(field)
+	return name == "queryRaw" || strings.HasSuffix(name, "_queryRaw")
+}
+
+func (p *Planner) isExecuteRawField(field int) bool {
+	name := p.visitor.Operation.FieldNameString(field)
+	return name == "executeRaw" || strings.HasSuffix(name, "_executeRaw")
+}
+
 func (p *Planner) addJsonField(ref int) {
 	fieldName := p.visitor.Operation.FieldNameString(ref)
-	field := p.upstreamOperation.AddField(ast.Field{
+	nameOrAlias := p.visitor.Operation.FieldAliasOrNameString(ref)
+	astField := ast.Field{
 		Name: p.upstreamOperation.Input.AppendInputString(fieldName),
-	})
+	}
+	if nameOrAlias != fieldName {
+		astField.Alias = ast.Alias{
+			IsDefined: true,
+			Name:      p.upstreamOperation.Input.AppendInputString(nameOrAlias),
+		}
+	}
+	field := p.upstreamOperation.AddField(astField)
 	selection := ast.Selection{
 		Kind: ast.SelectionKindField,
 		Ref:  field.Ref,
@@ -412,6 +505,8 @@ func (p *Planner) EnterDocument(operation, definition *ast.Document) {
 	p.upstreamVariables = nil
 	p.variables = p.variables[:0]
 	p.disallowSingleFlight = false
+	p.isQueryRaw = false
+	p.isQueryRawRow = false
 
 	// reset information about root type
 	p.rootTypeName = ""
@@ -444,13 +539,13 @@ func (p *Planner) isNestedRequest() bool {
 func (p *Planner) configureArgument(upstreamFieldRef, downstreamFieldRef int, fieldConfig plan.FieldConfiguration, argumentConfiguration plan.ArgumentConfiguration) {
 	switch argumentConfiguration.SourceType {
 	case plan.FieldArgumentSource:
-		p.configureFieldArgumentSource(upstreamFieldRef, downstreamFieldRef, argumentConfiguration.Name, argumentConfiguration.SourcePath)
+		p.configureFieldArgumentSource(upstreamFieldRef, downstreamFieldRef, argumentConfiguration.Name, argumentConfiguration.SourcePath, false)
 	case plan.ObjectFieldSource:
 		p.configureObjectFieldSource(upstreamFieldRef, downstreamFieldRef, fieldConfig, argumentConfiguration)
 	}
 }
 
-func (p *Planner) configureFieldArgumentSource(upstreamFieldRef, downstreamFieldRef int, argumentName string, sourcePath []string) {
+func (p *Planner) configureFieldArgumentSource(upstreamFieldRef, downstreamFieldRef int, argumentName string, sourcePath []string, parentIsJson bool) {
 	fieldArgument, ok := p.visitor.Operation.FieldArgument(downstreamFieldRef, []byte(argumentName))
 	if !ok {
 		return
@@ -482,9 +577,11 @@ func (p *Planner) configureFieldArgumentSource(upstreamFieldRef, downstreamField
 	}
 
 	p.inlinedVariables = append(p.inlinedVariables, inlinedVariable{
-		name:    variableNameStr,
-		typeRef: variableDefinitionType,
-		isJSON:  isJSON,
+		name:         variableNameStr,
+		typeRef:      variableDefinitionType,
+		isJSON:       isJSON,
+		isRaw:        p.isRawArgument(downstreamFieldRef, argumentName),
+		parentIsJson: parentIsJson,
 	})
 }
 
@@ -495,24 +592,34 @@ func (p *Planner) applyInlineFieldArgument(upstreamField, downstreamField int, a
 	}
 	value := p.visitor.Operation.ArgumentValue(fieldArgument)
 	importedValue := p.visitor.Importer.ImportValue(value, p.visitor.Operation, p.upstreamOperation)
-	argRef := p.upstreamOperation.AddArgument(ast.Argument{
+	arg := ast.Argument{
 		Name:  p.upstreamOperation.Input.AppendInputString(argumentName),
 		Value: importedValue,
-	})
+	}
+	isRaw := p.isRawArgument(downstreamField, argumentName)
+	if isRaw && value.Kind == ast.ValueKindList {
+		// prisma requires the "parameters" arg to be a JSON (string) instead of a list
+		// to turn the list into a JSON, we print quotes before and after the list
+		// additionally, we indicate via "isRaw" to "addVariableDefinitionsRecursively" that we're inside a JSON
+		// this is because nested args need to be triple quoted, otherwise they'd close the parent JSON quotes
+		arg.PrintBeforeValue = []byte(`"`)
+		arg.PrintAfterValue = []byte(`"`)
+	}
+	argRef := p.upstreamOperation.AddArgument(arg)
 	p.upstreamOperation.AddArgumentToField(upstreamField, argRef)
-	p.addVariableDefinitionsRecursively(value, argumentName, sourcePath)
+	p.addVariableDefinitionsRecursively(value, downstreamField, argumentName, sourcePath, isRaw)
 }
 
-func (p *Planner) addVariableDefinitionsRecursively(value ast.Value, argumentName string, sourcePath []string) {
+func (p *Planner) addVariableDefinitionsRecursively(value ast.Value, downstreamFieldRef int, argumentName string, sourcePath []string, parentIsJson bool) {
 	switch value.Kind {
 	case ast.ValueKindObject:
 		for _, i := range p.visitor.Operation.ObjectValues[value.Ref].Refs {
-			p.addVariableDefinitionsRecursively(p.visitor.Operation.ObjectFields[i].Value, argumentName, sourcePath)
+			p.addVariableDefinitionsRecursively(p.visitor.Operation.ObjectFields[i].Value, downstreamFieldRef, argumentName, sourcePath, parentIsJson)
 		}
 		return
 	case ast.ValueKindList:
 		for _, i := range p.visitor.Operation.ListValues[value.Ref].Refs {
-			p.addVariableDefinitionsRecursively(p.visitor.Operation.Values[i], argumentName, sourcePath)
+			p.addVariableDefinitionsRecursively(p.visitor.Operation.Values[i], downstreamFieldRef, argumentName, sourcePath, parentIsJson)
 		}
 		return
 	case ast.ValueKindVariable:
@@ -536,10 +643,21 @@ func (p *Planner) addVariableDefinitionsRecursively(value ast.Value, argumentNam
 	}
 
 	p.inlinedVariables = append(p.inlinedVariables, inlinedVariable{
-		name:    variableNameStr,
-		typeRef: variableDefinitionType,
-		isJSON:  isJSON,
+		name:         variableNameStr,
+		typeRef:      variableDefinitionType,
+		isJSON:       isJSON,
+		isRaw:        p.isRawArgument(downstreamFieldRef, argumentName),
+		parentIsJson: parentIsJson,
 	})
+}
+
+// isRawArgument searches for a queryRaw/executeRaw field and the parameters arg
+// which needs to be encoded as a JSON (string) so that prisma understands it
+func (p *Planner) isRawArgument(fieldRef int, argumentName string) bool {
+	if p.isQueryRawJSONField(fieldRef) || p.isQueryRawField(fieldRef) || p.isExecuteRawField(fieldRef) {
+		return argumentName == "parameters"
+	}
+	return false
 }
 
 func (p *Planner) configureObjectFieldSource(upstreamFieldRef, downstreamFieldRef int, fieldConfiguration plan.FieldConfiguration, argumentConfiguration plan.ArgumentConfiguration) {
@@ -585,67 +703,21 @@ func (p *Planner) configureObjectFieldSource(upstreamFieldRef, downstreamFieldRe
 	}
 }
 
-const (
-	normalizationFailedErrMsg = "printOperation: normalization failed"
-	parseDocumentFailedErrMsg = "printOperation: parse %s failed"
-)
-
 // printOperation - prints normalized upstream operation
 func (p *Planner) printOperation() []byte {
 
 	buf := &bytes.Buffer{}
 
+	if p.isQueryRaw || p.isQueryRawRow {
+		// we've added rawQuery and rawQueryRow to the Query type for better ergonomics,
+		// but prisma expects them to be on the Mutation type
+		// so we simply rewrite the AST if we have a rawQuery root field
+		p.upstreamOperation.OperationDefinitions[p.operationTypeDefinitionRef].OperationType = ast.OperationTypeMutation
+	}
+
 	err := astprinter.Print(p.upstreamOperation, nil, buf)
 	if err != nil {
-		return nil
-	}
-
-	rawQuery := buf.Bytes()
-
-	// create empty operation and definition documents
-	operation := ast.NewDocument()
-	definition := ast.NewDocument()
-	report := &operationreport.Report{}
-	parser := astparser.NewParser()
-
-	// creates a copy of operation and schema to be able to safely modify them
-	definition.Input.ResetInputString(p.config.GraphqlSchema)
-	operation.Input.ResetInputBytes(rawQuery)
-
-	parser.Parse(operation, report)
-	if report.HasErrors() {
-		p.stopWithError(parseDocumentFailedErrMsg, "operation")
-		return nil
-	}
-
-	parser.Parse(definition, report)
-	if report.HasErrors() {
-		p.stopWithError(parseDocumentFailedErrMsg, "definition")
-		return nil
-	}
-
-	err = asttransform.MergeDefinitionWithBaseSchema(definition)
-	if err != nil {
-		p.stopWithError("merging upstream schema with base schema failed")
-		return nil
-	}
-
-	// When datasource is nested and definition query type do not contain operation field
-	// we have to replace a query type with a current root type
-	p.replaceQueryType(definition)
-
-	// normalize upstream operation
-	if !p.normalizeOperation(operation, definition, report) {
-		p.stopWithError(normalizationFailedErrMsg)
-		return nil
-	}
-
-	buf.Reset()
-
-	// print upstream operation
-	err = astprinter.Print(operation, p.visitor.Definition, buf)
-	if err != nil {
-		p.stopWithError(normalizationFailedErrMsg)
+		p.stopWithError("printOperation: printing operation failed")
 		return nil
 	}
 
@@ -799,9 +871,25 @@ func (p *Planner) addField(ref int) {
 		}
 	}
 
-	field := p.upstreamOperation.AddField(ast.Field{
+	if p.isQueryRawJSONField(ref) {
+		// queryRawRow doesn't exist in the prisma schema, only queryRaw
+		// so we rewrite it
+		fieldName = strings.Replace(fieldName, "queryRawJSON", "queryRaw", 1)
+	}
+
+	astField := ast.Field{
 		Name: p.upstreamOperation.Input.AppendInputString(fieldName),
-	})
+	}
+
+	downstreamFieldName := p.visitor.Operation.FieldAliasOrNameString(ref)
+	if downstreamFieldName != fieldName {
+		astField.Alias = ast.Alias{
+			IsDefined: true,
+			Name:      p.upstreamOperation.Input.AppendInputString(downstreamFieldName),
+		}
+	}
+
+	field := p.upstreamOperation.AddField(astField)
 
 	selection := ast.Selection{
 		Kind: ast.SelectionKindField,
@@ -853,12 +941,7 @@ func (f *LazyEngineFactory) Engine(prismaSchema, wundergraphDir string, closeTim
 	if exists {
 		return engine
 	}
-	engine = &LazyEngine{
-		m:                   &sync.RWMutex{},
-		prismaSchema:        prismaSchema,
-		wundergraphDir:      wundergraphDir,
-		closeTimeoutSeconds: closeTimeoutSeconds,
-	}
+	engine = newLazyEngine(prismaSchema, wundergraphDir, closeTimeoutSeconds)
 	go engine.Start(f.closer)
 	runtime.SetFinalizer(engine, finalizeEngine)
 	f.engines[prismaSchema] = engine
@@ -884,10 +967,18 @@ type LazyEngine struct {
 	requestWasProcessed chan struct{}
 }
 
+func newLazyEngine(prismaSchema string, wundergraphDir string, closeTimeoutSeconds int64) *LazyEngine {
+	return &LazyEngine{
+		m:                   &sync.RWMutex{},
+		prismaSchema:        prismaSchema,
+		wundergraphDir:      wundergraphDir,
+		closeTimeoutSeconds: closeTimeoutSeconds,
+
+		requestWasProcessed: make(chan struct{}),
+	}
+}
+
 func (e *LazyEngine) Start(closer <-chan struct{}) {
-
-	e.requestWasProcessed = make(chan struct{})
-
 	var stopEngine <-chan time.Time
 
 	for {
@@ -1037,7 +1128,6 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 		}
 		break
 	}
-
 	if s.debug {
 		s.log.Debug("database.Source.Execute.Succeed",
 			zap.ByteString("request", request),

@@ -1,0 +1,6 @@
+query ($filter: countries_CountryFilterInput @fromClaim(name: country, on: "code.eq")) {
+	countries_countries(filter: $filter) {
+		name
+		capital
+	}
+}

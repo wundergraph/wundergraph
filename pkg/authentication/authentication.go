@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/MicahParks/keyfunc"
-	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
 	"github.com/dgraph-io/ristretto"
 	"github.com/golang-jwt/jwt/v4"
@@ -24,14 +23,14 @@ import (
 	"github.com/gorilla/securecookie"
 	"go.uber.org/zap"
 
-	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
 func init() {
 	gob.Register(User{})
+	gob.Register(map[string]interface{}(nil))
 }
 
 type UserLoader struct {
@@ -77,10 +76,12 @@ func (u *UserLoader) parseClaims(r io.Reader) (*Claims, error) {
 }
 
 // Load user from token. token is always non nil and contains at least a non-empty token.Raw
-// but it might be unvalidated if we have no key functions
+// but it might not be validated if we have no key functions
 func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *User, revalidate bool) error {
 
 	cacheKey := token.Raw
+
+	ctx := context.Background()
 
 	if !revalidate {
 		fromCache, exists := u.cache.Get(cacheKey)
@@ -96,7 +97,7 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	var claims *Claims
 	if cfg.userInfoEndpoint != "" {
 		// Retrieve claims from userInfoEndpoint
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 		defer cancel()
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
 		if err != nil {
@@ -131,18 +132,22 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	tempUser.ProviderName = "token"
 	tempUser.ProviderID = issuer
 	tempUser.AccessToken = tryParseJWT(token.Raw)
-	u.hooks.handlePostAuthentication(context.Background(), tempUser)
-	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
-	if !proceed {
-		return fmt.Errorf("access denied")
+	u.hooks.PostAuthentication(ctx, tempUser)
+	tempUser, err := u.hooks.MutatingPostAuthentication(ctx, tempUser)
+	if err != nil {
+		return fmt.Errorf("access denied: %w", err)
 	}
-	*user = tempUser
+	*user = *tempUser
 	if cfg.cacheTtlSeconds > 0 {
 		u.cache.SetWithTTL(cacheKey, *user, 1, time.Second*time.Duration(cfg.cacheTtlSeconds))
 	}
 	return nil
 }
 
+// User holds user data for non public APIs (backend and hooks). Before exposing
+// a User publicly, always call User.ToPublic().
+//
+// XXX: Keep in sync with the TS side (wellKnownClaimField, type User, type WunderGraphUser)
 type User struct {
 	ProviderName      string `json:"provider,omitempty"`
 	ProviderID        string `json:"providerId,omitempty"`
@@ -167,23 +172,83 @@ type User struct {
 	CustomClaims     map[string]interface{} `json:"customClaims,omitempty"`
 	CustomAttributes []string               `json:"customAttributes,omitempty"`
 	Roles            []string               `json:"roles"`
-	ExpiresAt        time.Time              `json:"-"`
-	ETag             string                 `json:"etag,omitempty"`
-	FromCookie       bool                   `json:"fromCookie,omitempty"`
-	AccessToken      json.RawMessage        `json:"accessToken,omitempty"`
-	RawAccessToken   string                 `json:"rawAccessToken,omitempty"`
-	IdToken          json.RawMessage        `json:"idToken,omitempty"`
-	RawIDToken       string                 `json:"rawIdToken,omitempty"`
+	/* Internal fields */
+	ExpiresAt      time.Time       `json:"-"`
+	ETag           string          `json:"etag,omitempty"`
+	FromCookie     bool            `json:"fromCookie,omitempty"`
+	AccessToken    json.RawMessage `json:"accessToken,omitempty"`
+	RawAccessToken string          `json:"rawAccessToken,omitempty"`
+	IdToken        json.RawMessage `json:"idToken,omitempty"`
+	RawIDToken     string          `json:"rawIdToken,omitempty"`
 }
 
-// RemoveInternalFields should be used before sending the user to the client to not expose internal fields
-func (u *User) RemoveInternalFields() {
-	u.ETag = ""
-	u.FromCookie = false
-	u.AccessToken = nil
-	u.RawAccessToken = ""
-	u.IdToken = nil
-	u.RawIDToken = ""
+// ToPublic returns a copy of the User with fields non intended for public consumption erased. If publicClaims
+// is non-empty, only fields listed in it are included. Each public claim must be either a well known claim
+// (as in the WG_CLAIM enum) or a JSON path to a custom claim.
+func (u *User) ToPublic(publicClaims []string) *User {
+	if len(publicClaims) == 0 {
+		return u
+	}
+	cpy := &User{
+		CustomAttributes: u.CustomAttributes,
+		Roles:            u.Roles,
+	}
+	for _, claim := range publicClaims {
+		if cpy.copyWellKnownClaim(claim, u) {
+			continue
+		}
+		keys := strings.Split(claim, ".")
+		value := jsonpath.GetKeys(u.CustomClaims, keys...)
+		if value != nil {
+			cpy.CustomClaims = jsonpath.SetKeys(cpy.CustomClaims, value, keys...)
+		}
+	}
+	return cpy
+}
+
+func (u *User) copyWellKnownClaim(claim string, from *User) bool {
+	// XXX: Keep this in sync with WG_CLAIM
+	switch claim {
+	case wgpb.ClaimType_ISSUER.String(), "PROVIDER":
+		u.ProviderID = from.ProviderID
+	case wgpb.ClaimType_SUBJECT.String(), "USERID":
+		u.UserID = from.UserID
+	case wgpb.ClaimType_NAME.String():
+		u.Name = from.Name
+	case wgpb.ClaimType_GIVEN_NAME.String():
+		u.FirstName = from.FirstName
+	case wgpb.ClaimType_FAMILY_NAME.String():
+		u.LastName = from.LastName
+	case wgpb.ClaimType_MIDDLE_NAME.String():
+		u.MiddleName = from.MiddleName
+	case wgpb.ClaimType_NICKNAME.String():
+		u.NickName = from.NickName
+	case wgpb.ClaimType_PREFERRED_USERNAME.String():
+		u.PreferredUsername = from.PreferredUsername
+	case wgpb.ClaimType_PROFILE.String():
+		u.Profile = from.Profile
+	case wgpb.ClaimType_PICTURE.String():
+		u.Picture = from.Picture
+	case wgpb.ClaimType_WEBSITE.String():
+		u.Website = from.Website
+	case wgpb.ClaimType_EMAIL.String():
+		u.Email = from.Email
+	case wgpb.ClaimType_EMAIL_VERIFIED.String():
+		u.EmailVerified = from.EmailVerified
+	case wgpb.ClaimType_GENDER.String():
+		u.Gender = from.Gender
+	case wgpb.ClaimType_BIRTH_DATE.String():
+		u.BirthDate = from.BirthDate
+	case wgpb.ClaimType_ZONE_INFO.String():
+		u.ZoneInfo = from.ZoneInfo
+	case wgpb.ClaimType_LOCALE.String():
+		u.Locale = from.Locale
+	case wgpb.ClaimType_LOCATION.String():
+		u.Location = from.Location
+	default:
+		return false
+	}
+	return true
 }
 
 func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http.Request, domain string, insecureCookies bool) error {
@@ -296,93 +361,6 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
 	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
-}
-
-type Hooks struct {
-	Client                     *hooks.Client
-	Log                        *zap.Logger
-	PostAuthentication         bool
-	MutatingPostAuthentication bool
-	PostLogout                 bool
-}
-
-func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
-	if !h.PostAuthentication {
-		return
-	}
-	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err != nil {
-		h.Log.Error("Could not marshal user", zap.Error(err))
-		return
-	} else {
-		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
-	}
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData, buf)
-	if err != nil {
-		h.Log.Error("PostAuthentication queries hook", zap.Error(err))
-		return
-	}
-}
-
-func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
-	if !h.PostLogout || user == nil {
-		return
-	}
-	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err != nil {
-		h.Log.Error("Could not marshal user", zap.Error(err))
-		return
-	} else {
-		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
-	}
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData, buf)
-	if err != nil {
-		h.Log.Error("PostLogout queries hook", zap.Error(err))
-	}
-}
-
-type MutatingPostAuthenticationResponse struct {
-	User    User   `json:"user"`
-	Message string `json:"message"`
-	Status  string `json:"status"`
-}
-
-func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User) (proceed bool, message string, updatedUser User) {
-	if !h.MutatingPostAuthentication {
-		return true, "", user
-	}
-	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err != nil {
-		return false, "", User{}
-	} else {
-		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
-	}
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData, buf)
-	if err != nil {
-		if errors.Is(err, context.Canceled) {
-			return false, "", updatedUser
-		}
-		h.Log.Error("MutatingPostAuthentication queries hook", zap.Error(err))
-		return
-	}
-	if out.Error != "" {
-		return false, "", User{}
-	}
-	var res MutatingPostAuthenticationResponse
-	err = json.Unmarshal(out.Response, &res)
-	if err != nil {
-		return false, "", User{}
-	}
-	if res.Status == "ok" {
-		return true, "", res.User
-	}
-	return false, res.Message, User{}
 }
 
 func bearerTokenToJSON(token string) ([]byte, error) {
@@ -726,12 +704,12 @@ func UserFromContext(ctx context.Context) *User {
 }
 
 type UserHandler struct {
-	HasRevalidateHook bool
-	MWClient          *hooks.Client
-	Log               *zap.Logger
-	Host              string
-	InsecureCookies   bool
-	Cookie            *securecookie.SecureCookie
+	Log             *zap.Logger
+	Host            string
+	InsecureCookies bool
+	Hooks           Hooks
+	Cookie          *securecookie.SecureCookie
+	PublicClaims    []string
 }
 
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -741,48 +719,18 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Has("revalidate") {
-		hookData := []byte(`{}`)
-		if userJson, err := json.Marshal(user); err != nil {
-			u.Log.Error("Could not marshal user", zap.Error(err))
-			http.NotFound(w, r)
-			return
-		} else {
-			hookData, _ = jsonparser.Set(hookData, userJson, "user")
-		}
-		if user.AccessToken != nil {
-			hookData, _ = jsonparser.Set(hookData, user.AccessToken, "access_token")
-		}
-		if user.IdToken != nil {
-			hookData, _ = jsonparser.Set(hookData, user.IdToken, "id_token")
-		}
-		buf := pool.GetBytesBuffer()
-		defer pool.PutBytesBuffer(buf)
-		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData, buf)
+	if user.FromCookie && r.URL.Query().Has("revalidate") {
+		var err error
+		user, err = u.Hooks.RevalidateAuthentication(r.Context(), user)
 		if err != nil {
-			u.Log.Error("RevalidateAuthentication request failed", zap.Error(err))
-			http.NotFound(w, r)
+			u.Log.Error("revalidating authentication", zap.Error(err))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if out.Error != "" {
-			u.Log.Error("RevalidateAuthentication returned an error", zap.Error(err))
-			http.NotFound(w, r)
-			return
-		}
-		var res MutatingPostAuthenticationResponse
-		err = json.Unmarshal(out.Response, &res)
-		if res.Status != "ok" {
-			u.Log.Error("RevalidateAuthentication status is not ok", zap.Error(err))
-			http.NotFound(w, r)
-			return
-		}
-		res.User.AccessToken = user.AccessToken
-		res.User.IdToken = user.IdToken
-		user = &res.User
 		err = user.Save(u.Cookie, w, r, u.Host, u.InsecureCookies)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication could not save cookie", zap.Error(err))
-			http.NotFound(w, r)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -799,19 +747,18 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "private, max-age=0, stale-while-revalidate=60")
 	}
 
-	user.RemoveInternalFields()
+	encoder := json.NewEncoder(w)
 	if r.Header.Get("Accept") != "application/json" {
-		encoder := json.NewEncoder(w)
 		encoder.SetIndent("", "  ")
-		_ = encoder.Encode(user)
-		return
 	}
-	_ = json.NewEncoder(w).Encode(user)
+	if err := encoder.Encode(user.ToPublic(u.PublicClaims)); err != nil {
+		u.Log.Error("encoding user", zap.Error(err))
+	}
 }
 
 type CSRFTokenHandler struct{}
 
-func (_ *CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (*CSRFTokenHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token := csrf.Token(r)
 	_, _ = w.Write([]byte(token))
 }
@@ -829,7 +776,13 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		return
 	}
-	u.Hooks.handlePostLogout(r.Context(), user)
+	if err := u.Hooks.PostLogout(r.Context(), user); err != nil {
+		if u.Log != nil {
+			u.Log.Error("running postLogout hook", zap.Error(err))
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	if strings.ToLower(r.URL.Query().Get("logout_openid_connect_provider")) == "true" {
 		if err := u.logoutFromProvider(w, r, user); err != nil {
 			if u.Log != nil {
@@ -944,4 +897,18 @@ func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
 		}
 		http.SetCookie(w, userCookie)
 	}
+}
+
+func postAuthentication(ctx context.Context, w http.ResponseWriter, r *http.Request, hooks Hooks, user *User, cookie *securecookie.SecureCookie, insecureCookies bool) error {
+	if err := hooks.PostAuthentication(ctx, user); err != nil {
+		return err
+	}
+	user, err := hooks.MutatingPostAuthentication(r.Context(), user)
+	if err != nil {
+		return err
+	}
+	if err := user.Save(cookie, w, r, r.Host, insecureCookies); err != nil {
+		return err
+	}
+	return nil
 }

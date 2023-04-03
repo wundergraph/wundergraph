@@ -1,11 +1,4 @@
-import {
-	authProviders,
-	configureWunderGraphApplication,
-	cors,
-	EnvironmentVariable,
-	introspect,
-	templates,
-} from '@wundergraph/sdk';
+import { authProviders, configureWunderGraphApplication, cors, introspect, templates } from '@wundergraph/sdk';
 import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 
@@ -43,15 +36,6 @@ configureWunderGraphApplication({
 		cookieBased: {
 			providers: [authProviders.demo()],
 			authorizedRedirectUriRegexes: ['http://localhost:5173*'],
-			secureCookieHashKey: new EnvironmentVariable(
-				'WUNDERGRAPH_SECURE_COOKIE_HASH_KEY',
-				'00000000000000000000000000000000'
-			), // must be of length 32
-			secureCookieBlockKey: new EnvironmentVariable(
-				'WUNDERGRAPH_SECURE_COOKIE_BLOCK_KEY',
-				'00000000000000000000000000000000'
-			), // must be of length 32
-			csrfTokenSecret: new EnvironmentVariable('WUNDERGRAPH_CSRF_TOKEN_SECRET', '00000000000'), // must be of length 11
 		},
 	},
 	security: {

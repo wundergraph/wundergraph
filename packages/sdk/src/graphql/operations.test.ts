@@ -117,25 +117,21 @@ const expectedTransformOperations: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InjectedVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			ResponseSchema: {
 				type: 'object',
@@ -202,25 +198,21 @@ const expectedTransformOperations: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InjectedVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			ResponseSchema: {
 				type: 'object',
@@ -301,25 +293,21 @@ const expectedTransformOperations: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InjectedVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			ResponseSchema: {
 				type: 'object',
@@ -499,13 +487,11 @@ const fromClaimParsed: ParsedOperations = {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InterpolationVariablesSchema: {
 				type: 'object',
 				properties: {},
 				additionalProperties: false,
-				definitions: {},
 			},
 			InternalVariablesSchema: {
 				type: 'object',
@@ -515,7 +501,6 @@ const fromClaimParsed: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-				definitions: {},
 				required: ['email'],
 			},
 			InjectedVariablesSchema: {
@@ -526,7 +511,6 @@ const fromClaimParsed: ParsedOperations = {
 					},
 				},
 				additionalProperties: false,
-				definitions: {},
 				required: ['email'],
 			},
 			ResponseSchema: {
@@ -557,7 +541,7 @@ const fromClaimParsed: ParsedOperations = {
 			AuthorizationConfig: {
 				claims: [
 					{
-						variableName: 'email',
+						variablePathComponents: ['email'],
 						claimType: ClaimType.EMAIL,
 					},
 				],
@@ -739,7 +723,6 @@ const jsonSchemVariablesSchema: JSONSchema = {
 		},
 	},
 	additionalProperties: false,
-	definitions: {},
 	required: [
 		'stringWithTitle',
 		'stringWithDescription',

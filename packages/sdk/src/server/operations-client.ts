@@ -12,7 +12,7 @@ export interface Operation<Input, Response> {
 }
 
 export interface Operations {
-	[key: string]: Operation<any, any>;
+	[key: string]: Operation<object, unknown>;
 }
 
 type ExtractInput<B> = B extends Operation<infer T, any> ? T : never;
@@ -36,7 +36,7 @@ export interface Options {
 	clientRequest: any;
 }
 
-export class OperationsClient<Queries, Mutations, Subscriptions> {
+export class OperationsClient<Queries = any, Mutations = any, Subscriptions = any> {
 	constructor(options: Options) {
 		this.options = options;
 	}
@@ -75,6 +75,7 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 		});
 		return (await res.json()) as Queries[T] extends { response: any } ? Queries[T]['response'] : never;
 	};
+
 	public mutate = <T extends keyof Mutations>(
 		args: ExtractInput<Mutations[T]> extends never
 			? Omit<OperationArgs<T, never>, 'input'>
@@ -82,6 +83,7 @@ export class OperationsClient<Queries, Mutations, Subscriptions> {
 	): Promise<Mutations[T] extends { response: any } ? Mutations[T]['response'] : never> => {
 		return this.query(args as any);
 	};
+
 	public subscribe = async <T extends keyof Subscriptions>(
 		args: ExtractInput<Subscriptions[T]> extends never
 			? Omit<OperationArgs<T, never>, 'input'>

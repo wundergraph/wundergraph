@@ -12,6 +12,7 @@ import { OperationType } from '@wundergraph/protobuf';
 import { CodeGenerationConfig } from '../../../configure';
 import { liveQueries, modelImports, operations, queries as allQueries } from './helpers';
 import templates from '../index';
+import { isWellKnownClaim, wellKnownClaimField } from '../../../graphql/operations';
 
 export class TypeScriptClient implements Template {
 	constructor(reactNative: boolean = false) {}
@@ -60,6 +61,11 @@ export class TypeScriptClient implements Template {
 			}
 		}
 		const hasAuthProviders = config.authentication.cookieBased.length !== 0;
+		const publicWellKnownClaims = generationConfig.config.authentication.publicClaims.filter((claim) =>
+			isWellKnownClaim(claim)
+		);
+		const publicUserFields = publicWellKnownClaims.map((s) => `"${wellKnownClaimField(s)}"`).join(' | ');
+
 		const content = tmpl({
 			modelImports: modelImports(config.application, false, true),
 			baseURL: config.deployment.environment.baseUrl,
@@ -88,6 +94,8 @@ export class TypeScriptClient implements Template {
 			uploadProfileTypeDefinitions: _uploadProfileTypeDefinitions,
 			uploadProfileTypeNames: _uploadProfileTypeNames,
 			csrfEnabled: hasAuthProviders,
+			hasPublicUserFields: publicUserFields.length > 0,
+			publicUserFields: publicUserFields,
 		});
 		return Promise.resolve([
 			{
