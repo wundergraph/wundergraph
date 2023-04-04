@@ -100,10 +100,7 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 		// Retrieve claims from userInfoEndpoint
 		ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 		defer cancel()
-		// Replace $token in cfg.userInfoEndpoint with the actual token. This way it's
-		// possible to read the token in an operation
-		userInfoEndpoint := strings.ReplaceAll(cfg.userInfoEndpoint, "$token", token.Raw)
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, userInfoEndpoint, nil)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
 		if err != nil {
 			return err
 		}
