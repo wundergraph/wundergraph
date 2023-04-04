@@ -15,7 +15,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.9.13",
+    "@wundergraph/nextjs": "^0.10.0",
     "@wundergraph/sdk": "^0.143.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
