@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.143.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.143.0...@wundergraph/sdk@0.143.1) (2023-04-04)
+
+### Bug Fixes
+
+* translating oas spec in the v2 oas introspection ([#787](https://github.com/wundergraph/wundergraph/issues/787)) ([30496a4](https://github.com/wundergraph/wundergraph/commit/30496a44b7bf03aae77a8e5bfb037ce8d3165d37)) (@devsergiy)
+
 ## [0.143.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.2...@wundergraph/sdk@0.143.0) (2023-03-31)
 
 ### Features
