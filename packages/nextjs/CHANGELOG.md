@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.13...@wundergraph/nextjs@0.10.0) (2023-04-04)
+
+### Features
+
+* add auth middleware hook to nextjs client ([#795](https://github.com/wundergraph/wundergraph/issues/795)) ([77f92e3](https://github.com/wundergraph/wundergraph/commit/77f92e328028f15b6eede6084dae9318dca1a008)) (@Pagebakers)
+
 ## [0.9.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.12...@wundergraph/nextjs@0.9.13) (2023-04-04)
 
 **Note:** Version bump only for package @wundergraph/nextjs
