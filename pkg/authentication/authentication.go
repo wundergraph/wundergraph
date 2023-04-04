@@ -23,6 +23,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"go.uber.org/zap"
 
+	"github.com/wundergraph/wundergraph/pkg/customhttpclient"
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
@@ -99,11 +100,16 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 		// Retrieve claims from userInfoEndpoint
 		ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 		defer cancel()
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
+		// Replace $token in cfg.userInfoEndpoint with the actual token. This way it's
+		// possible to read the token in an operation
+		userInfoEndpoint := strings.ReplaceAll(cfg.userInfoEndpoint, "$token", token.Raw)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, userInfoEndpoint, nil)
 		if err != nil {
 			return err
 		}
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Raw))
+		// Prevent infinite loops when the userInfo endpoint is also an operation
+		customhttpclient.SetTag(req, customhttpclient.RequestTagUserInfo)
 		res, err := u.client.Do(req)
 		if err != nil {
 			return err
@@ -311,7 +317,10 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 func (u *User) Load(loader *UserLoader, r *http.Request) error {
 
 	authorizationHeader := r.Header.Get("Authorization")
-	if loader.userLoadConfigs != nil && authorizationHeader != "" {
+	// If the request is tagged as an attempt to load the userInfo for a token, don't
+	// do anything. Otherwise setting an operation as the endPoint causes an infinite
+	// loop.
+	if loader.userLoadConfigs != nil && authorizationHeader != "" && customhttpclient.Tag(r) != customhttpclient.RequestTagUserInfo {
 		if !strings.HasPrefix(authorizationHeader, "Bearer ") {
 			return fmt.Errorf("invalid authorization Header")
 		}
