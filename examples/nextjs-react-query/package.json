@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^4.16.1",
-    "@wundergraph/nextjs": "^0.9.13",
+    "@wundergraph/nextjs": "^0.10.0",
     "@wundergraph/react-query": "^0.8.4",
     "@wundergraph/sdk": "^0.143.1",
     "graphql": "^16.3.0",
