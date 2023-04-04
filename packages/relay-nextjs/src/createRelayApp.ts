@@ -2,7 +2,7 @@ import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions 
 import { usePreloadedQuery } from 'react-relay';
 import { useEffect, useState, useRef } from 'react';
 import { hydrateRelayEnvironment } from 'relay-nextjs';
-import { Environment, Network, RecordSource, Store } from 'relay-runtime';
+import { Environment, FetchFunction, Network, Observable, RecordSource, Store, SubscribeFunction } from 'relay-runtime';
 
 let clientEnv: Environment | undefined;
 
@@ -20,25 +20,58 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 }
 
 export const createRelayApp = (client: Client) => {
-	const createServerNetwork = () => {
-		return Network.create(async (params, variables) => {
-			const { id, operationKind } = params;
-			const response =
-				operationKind === 'query'
-					? await client.query({
-							operationName: `relay/${id}`,
-							input: variables,
-					  })
-					: await client.mutate({
-							operationName: `relay/${id}`,
-							input: variables,
-					  });
-			// TODO: figure out a better way to return errors for relay
-			return {
-				...response,
-				errors: response.error ? [response.error] : [],
+	const fetchQuery: FetchFunction = async (params, variables) => {
+		const { id, operationKind } = params;
+		const response =
+			operationKind === 'query'
+				? await client.query({
+						operationName: `relay/${id}`,
+						input: variables,
+				  })
+				: await client.mutate({
+						operationName: `relay/${id}`,
+						input: variables,
+				  });
+		// TODO: figure out a better way to return errors for relay
+		return {
+			...response,
+			errors: response.error ? [response.error] : [],
+		};
+	};
+
+	const subscribe: SubscribeFunction = (params, variables) => {
+		return Observable.create((sink) => {
+			const { id } = params;
+			const abort = new AbortController();
+			client
+				.subscribe(
+					{
+						operationName: `relay/${id}`,
+						input: variables,
+						abortSignal: abort.signal,
+					},
+					(response) => {
+						const graphQLResponse = {
+							...response,
+							errors: response.error ? [response.error] : [],
+						};
+						// TODO: response data is unknown & it is throwing type error
+						// @ts-expect-error
+						sink.next(graphQLResponse);
+					}
+				)
+				.catch((e) => {
+					sink.error(e);
+				});
+			return () => {
+				sink.complete();
+				abort.abort();
 			};
 		});
+	};
+
+	const createServerNetwork = () => {
+		return Network.create(fetchQuery, subscribe);
 	};
 
 	const createServerEnvironment = () => {
@@ -50,24 +83,7 @@ export const createRelayApp = (client: Client) => {
 	};
 
 	const createClientNetwork = () => {
-		return Network.create(async (params, variables) => {
-			const { id, operationKind } = params;
-			const response =
-				operationKind === 'query'
-					? await client.query({
-							operationName: `relay/${id}`,
-							input: variables,
-					  })
-					: await client.mutate({
-							operationName: `relay/${id}`,
-							input: variables,
-					  });
-			// TODO: figure out a better way to return errors for relay
-			return {
-				...response,
-				errors: response.error ? [response.error] : [],
-			};
-		});
+		return Network.create(fetchQuery, subscribe);
 	};
 
 	const createClientEnvironment = () => {
@@ -183,11 +199,10 @@ export const createRelayApp = (client: Client) => {
 			input: variables,
 		});
 
-		console.log({ data, liveData });
-
 		// TODO: figure out a safe way to commit livedata into relay
 		// Reference: https://relay.dev/docs/guided-tour/updating-data/imperatively-modifying-store-data-unsafe/#complex-client-updates
-		return liveData || data;
+		// liveData ||
+		return data;
 	};
 
 	return {

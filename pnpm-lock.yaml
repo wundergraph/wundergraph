@@ -292,6 +292,7 @@ importers:
 
   packages/relay-nextjs:
     specifiers:
+      '@types/react': ^18.0.33
       '@types/react-relay': ^14.1.3
       '@types/relay-runtime': ^14.1.10
       '@wundergraph/sdk': workspace:*
@@ -307,6 +308,7 @@ importers:
       relay-runtime: 15.0.0
       tsup: 6.5.0_typescript@5.0.3
     devDependencies:
+      '@types/react': 18.0.33
       '@types/react-relay': 14.1.3
       '@types/relay-runtime': 14.1.10
       typescript: 5.0.3
@@ -5640,7 +5642,7 @@ packages:
   /@types/react-relay/14.1.3:
     resolution: {integrity: sha512-tsu+3jN0zeOYKV485fwUy3yMEZWkDVzC2JG0tJgEH6p9tcPQkBAUoXqEZFwSBtHtNo1etfa1Eityg3fC55qDvQ==}
     dependencies:
-      '@types/react': 18.0.24
+      '@types/react': 18.0.33
       '@types/relay-runtime': 14.1.10
     dev: true
 
@@ -5650,6 +5652,14 @@ packages:
       '@types/prop-types': 15.7.5
       '@types/scheduler': 0.16.2
       csstype: 3.1.1
+
+  /@types/react/18.0.33:
+    resolution: {integrity: sha512-sHxzVxeanvQyQ1lr8NSHaj0kDzcNiGpILEVt69g9S31/7PfMvNCKLKcsHw4lYKjs3cGNJjXSP4mYzX43QlnjNA==}
+    dependencies:
+      '@types/prop-types': 15.7.5
+      '@types/scheduler': 0.16.2
+      csstype: 3.1.1
+    dev: true
 
   /@types/relay-runtime/14.1.10:
     resolution: {integrity: sha512-px/vskDhwlsh+fRiF9s9TBB84U6FbCfFzdgusnVtN8iQ3lLebHlt/v1v6YzpqUZFDXZxvC6GWUbhXcCfSZwN9A==}
