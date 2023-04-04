@@ -1225,7 +1225,7 @@ class RESTApiBuilder {
 	};
 }
 
-export const convertOpenApiV3 = async (openApiSpec: Object): Promise<OpenAPIV3.Document> => {
+const convertOpenApiV3 = async (openApiSpec: Object): Promise<OpenAPIV3.Document> => {
 	const converted = await swagger2openapi.convertObj(openApiSpec, {});
 	return converted.openapi;
 };
