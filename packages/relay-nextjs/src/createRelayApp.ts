@@ -1,8 +1,18 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
-import { usePreloadedQuery } from 'react-relay';
+import { usePreloadedQuery, useRelayEnvironment } from 'react-relay/hooks';
 import { useEffect, useState, useRef } from 'react';
 import { hydrateRelayEnvironment } from 'relay-nextjs';
-import { Environment, FetchFunction, Network, Observable, RecordSource, Store, SubscribeFunction } from 'relay-runtime';
+import {
+	Environment,
+	FetchFunction,
+	Network,
+	Observable,
+	RecordSource,
+	Store,
+	SubscribeFunction,
+	createOperationDescriptor,
+	getRequest,
+} from 'relay-runtime';
 
 let clientEnv: Environment | undefined;
 
@@ -185,6 +195,7 @@ export const createRelayApp = (client: Client) => {
 
 	const useLivePreloadedQuery: typeof usePreloadedQuery = (gqlQuery, preloadedQuery, options) => {
 		const data = usePreloadedQuery(gqlQuery, preloadedQuery, options);
+		const environment = useRelayEnvironment();
 
 		const { id, variables } = preloadedQuery;
 
@@ -199,9 +210,14 @@ export const createRelayApp = (client: Client) => {
 			input: variables,
 		});
 
-		// TODO: figure out a safe way to commit livedata into relay
-		// Reference: https://relay.dev/docs/guided-tour/updating-data/imperatively-modifying-store-data-unsafe/#complex-client-updates
-		// liveData ||
+		useEffect(() => {
+			if (liveData) {
+				const request = getRequest(gqlQuery);
+				const operationDescriptor = createOperationDescriptor(request, variables);
+				environment.commitPayload(operationDescriptor, liveData);
+			}
+		}, [liveData]);
+
 		return data;
 	};
 
