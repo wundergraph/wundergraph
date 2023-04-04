@@ -11,8 +11,9 @@ import (
 type ServerRunConfig struct {
 	WunderGraphDirAbs string
 	ServerScriptFile  string
-	Production        bool
 	Env               []string
+	Production        bool
+	Debug             bool
 }
 
 func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
@@ -25,11 +26,17 @@ func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.Script
 		hooksEnv = append(hooksEnv, "NODE_ENV=production")
 	}
 
+	scriptArgs := make([]string, 0, 2)
+	if cfg.Debug {
+		scriptArgs = append(scriptArgs, "--inspect")
+	}
+	scriptArgs = append(scriptArgs, cfg.ServerScriptFile)
+
 	hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 		Name:          "hooks-server-runner",
 		Executable:    "node",
 		AbsWorkingDir: cfg.WunderGraphDirAbs,
-		ScriptArgs:    []string{cfg.ServerScriptFile},
+		ScriptArgs:    scriptArgs,
 		Logger:        log,
 		ScriptEnv:     append(cfg.Env, hooksEnv...),
 	})
