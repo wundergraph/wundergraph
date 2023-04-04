@@ -9,10 +9,10 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 			httpTransport: {
 				onOriginRequest: {
 					enableForAllOperations: true,
-					hook: async ({ request, user }) => {
-						console.log('########onRequest##########');
+					hook: async (hook) => {
+						hook.log('########onRequest##########');
 
-						return request;
+						return hook.request;
 					},
 				},
 			},

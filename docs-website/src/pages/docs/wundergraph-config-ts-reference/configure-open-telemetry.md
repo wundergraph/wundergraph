@@ -12,6 +12,8 @@ OpenTelemetry is a collection of tools, APIs, and SDKs used to instrument, gener
 
 To enable Open Telemetry, set the `otelEnabled` option to `true` in the `telemetry` section of the `options` object in the `configureWunderGraphApplication` function.
 If no exporter endpoint is configured, the default exporter is the `Stdout` which prints the traces to the console.
+If both exporter endpoints are configured, the `otelExporterHttpEndpoint` will be used.
+Configuration priority: `otelExporterHttpEndpoint` > `otelExporterJaegerEndpoint` > `Stdout`.
 
 ```typescript
 configureWunderGraphApplication({

@@ -59,6 +59,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		if (config.authentication?.postAuthentication) {
 			fastify.post<{ Body: {} }>('/authentication/postAuthentication', async (request, reply) => {
 				try {
+					const { span } = request.telemetry();
+					span?.setAttributes({
+						'wg.hook.name': 'postAuthentication',
+						'wg.hook.type': 'authentication',
+					});
 					await config.authentication?.postAuthentication?.(request.ctx);
 				} catch (err) {
 					request.log.error(err);
@@ -73,6 +78,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		if (config.authentication?.mutatingPostAuthentication) {
 			fastify.post('/authentication/mutatingPostAuthentication', async (request, reply) => {
 				try {
+					const { span } = request.telemetry();
+					span?.setAttributes({
+						'wg.hook.name': 'mutatingPostAuthentication',
+						'wg.hook.type': 'authentication',
+					});
 					const out = await config.authentication?.mutatingPostAuthentication?.(request.ctx);
 					reply.code(200).send({
 						hook: 'mutatingPostAuthentication',
@@ -89,6 +99,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		if (config.authentication?.revalidate) {
 			fastify.post<{ Body: {} }>('/authentication/revalidateAuthentication', async (request, reply) => {
 				try {
+					const { span } = request.telemetry();
+					span?.setAttributes({
+						'wg.hook.name': 'revalidateAuthentication',
+						'wg.hook.type': 'authentication',
+					});
 					const out = await config.authentication?.revalidate?.(request.ctx);
 					reply.code(200).send({
 						hook: 'revalidateAuthentication',
@@ -105,6 +120,11 @@ const FastifyHooksPlugin: FastifyPluginAsync<FastifyHooksOptions> = async (fasti
 		if (config.authentication?.postLogout) {
 			fastify.post('/authentication/postLogout', async (request, reply) => {
 				try {
+					const { span } = request.telemetry();
+					span?.setAttributes({
+						'wg.hook.name': 'postLogout',
+						'wg.hook.type': 'authentication',
+					});
 					const out = await config.authentication?.postLogout?.(request.ctx);
 					reply.code(200).send({
 						hook: 'postLogout',
