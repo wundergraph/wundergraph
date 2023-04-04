@@ -91,6 +91,10 @@ const navigation = [
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
+						title: 'Next.js + Clerk',
+						href: '/docs/examples/nextjs-clerk',
+					},
+					{
 						title: 'Vite + SWR',
 						href: '/docs/examples/vite-swr',
 					},
