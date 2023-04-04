@@ -71,6 +71,7 @@ func startWunderGraphServer(ctx context.Context) error {
 		WunderGraphDirAbs: wunderGraphDir,
 		ServerScriptFile:  serverScriptFile,
 		Production:        true,
+		Debug:             rootFlags.DebugMode,
 		Env:               helpers.CliEnv(rootFlags),
 	}
 
