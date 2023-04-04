@@ -1,4 +1,5 @@
 import { Client, User } from '@wundergraph/sdk/client';
+import { Middleware } from 'swr';
 
 export type SSRCache = Record<string, any>;
 
@@ -50,4 +51,8 @@ export interface WithWunderGraphOptions {
 	 * Custom WunderGraph cache context.
 	 */
 	context?: React.Context<WunderGraphContextValue | null>;
+	/**
+	 * Custom SWR middleware.
+	 */
+	use?: Middleware[];
 }
