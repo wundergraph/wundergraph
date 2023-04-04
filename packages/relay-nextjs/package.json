@@ -2,7 +2,7 @@
   "name": "@wundergraph/relay-nextjs",
   "version": "0.0.1",
   "license": "Apache-2.0",
-  "description": "WunderGraph Solid Query Integration",
+  "description": "WunderGraph Relay & Next.js Integration",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
