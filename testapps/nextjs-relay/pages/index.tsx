@@ -5,7 +5,7 @@ import type { RelayProps } from 'relay-nextjs';
 import { withRelay } from 'relay-nextjs';
 import type { pages_indexQuery as IndexQueryType } from './__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
-import { createClientEnvironment } from '../lib/createRelayApp';
+import { createClientEnvironment, useLivePreloadedQuery } from '../lib/createRelayApp';
 import TemperatureDetails from '../components/Temperature';
 
 const IndexQuery = graphql`
@@ -24,8 +24,8 @@ const IndexQuery = graphql`
 `;
 
 function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
-	const data = usePreloadedQuery(IndexQuery, preloadedQuery);
-	console.log(data);
+	const data = useLivePreloadedQuery(IndexQuery, preloadedQuery);
+
 	return (
 		<div className={styles.container}>
 			<main className={styles.main}>
