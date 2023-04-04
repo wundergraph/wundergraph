@@ -7,7 +7,7 @@ export type AuthMiddleware = (
 	useSWRNext: SWRHook,
 	/**
 	 * A function that returns an authentication token.
-	 * Returning null will unset the token header.
+	 * Returning null will unset the authorization header.
 	 */
 	getToken: () => Promise<string | null | undefined>
 ) => MiddlewareReturn;
@@ -25,8 +25,8 @@ export const useAuthMiddleware: AuthMiddleware = (useSWRNext, getToken) => {
 					context?.client.unsetAuthorization();
 				}
 			} catch (e: any) {
-				console.error(e);
 				context?.client.unsetAuthorization();
+				throw e;
 			}
 
 			return fetcher?.(...args);
