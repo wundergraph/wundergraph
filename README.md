@@ -21,51 +21,183 @@
 
 </div>
 
-> **Note**: 🌍 WunderGraph Cloud is in beta! :rocket: It's a fully managed and optimized platform for your WunderGraph. Deploy everywhere and scale to millions! Get deep insights in your stack with advanced analytics, distributed tracing and client usage. If you're interested, please signup [here](https://cloud.wundergraph.com/).
-
 ## What is WunderGraph?
 
-WunderGraph is the **Serverless API Developer Platform** with a focus on Developer Experience.
+WunderGraph is a **Backend for Frontend (BFF) Framework** designed to optimize Developer Workflows through API Composition.
 
-At its core, WunderGraph combines the [API Gateway pattern](https://microservices.io/patterns/apigateway.html) with
-the [Backend for Frontend (BFF)](https://samnewman.io/patterns/architectural/bff/) pattern to create the perfect
-Developer Experience for working with APIs.
+At its core, WunderGraph combines two patterns, [API Gateway](https://microservices.io/patterns/apigateway.html) and [BFF](https://samnewman.io/patterns/architectural/bff/)
+with the concept of a package manager, making API composition as simple as npm install.
+Our mantra is: **Compose, don't integrate**.
 
-Take all your (micro-)services, Databases, File Storages, Identity Providers as well as 3rd party APIs and combine them
-into your own Firebase-like Developer Toolkit, without getting locked into a specific vendor.
+**API Composition** is a new pattern that allows you to interact with a heterogeneous set of APIs as if they were a single unified API.
+This not just eliminates a lot of glue code, but also allows you to reason about the API Dependencies of an application.
+Do you actually know what APIs and Services your application depends on?
+WunderGraph can easily answer this question for you,
+and even gives you analytics and observability into what APIs and Endpoints are used by your application and what the quality of service your API dependencies provide.
 
-Imagine that each of your applications could have its own dedicated BFF, while being able to share common logic across
-all your applications, that's the WunderGraph Experience.
+## WunderGraph in a nutshell
+
+Here's how WunderGraph works:
+
+1. **Compose your APIs**
+
+```typescript
+// .wundergraph/wundergraph.config.ts
+
+// introspect a PostgreSQL database
+const pg = introspect.postgresql({
+  apiNamespace: 'pg',
+  databaseURL: new EnvironmentVariable('PG_DATABASE_URL'),
+});
+
+// introspect the Stripe API using OpenAPI
+const stripe = introspect.openApiV2({
+  apiNamespace: 'stripe',
+  source: {
+    kind: 'file',
+    filePath: './stripe.yaml',
+  },
+  headers: (builder) => builder.addClientRequestHeader('Authorization', `Bearer ${process.env.STRIPE_SECRET_KEY}`),
+});
+
+// introspect the Shopify Storefront API using GraphQL
+const shopify = introspect.graphql({
+  apiNamespace: 'shopify',
+  url: 'https://my-shop.myshopify.com/api/2021-07/graphql.json',
+  headers: (builder) =>
+    builder.addStaticHeader('X-Shopify-Storefront-Access-Token', new EnvironmentVariable('SHOPIFY_STOREFRONT_TOKEN')),
+});
+
+configureWunderGraphApplication({
+  // compose the APIs into a unified WunderGraph API
+  apis: [pg, stripe, shopify],
+});
+```
+
+WunderGraph allows you to create a code pipeline to introspect and compose multiple APIs into a unified API.
+This makes it easy to update an API dependency without a single click.
+
+2. **Define an Operation**
+
+By combining the introspected APIs, WunderGraph generates a unified GraphQL Schema across all APIs.
+All we have to do is define an Operation and call it from our Frontend.
+
+```graphql
+# .wundergraph/operations/users/ByID.graphql
+query ($id: String!) {
+  user: db_findFirstUser(where: { id: { equals: $id } }) {
+    id
+    email
+    name
+    bio
+  }
+}
+```
+
+Alternatively, you can also define a custom Operation using TypeScript:
+
+```typescript
+// .wundergraph/operations/users/CustomByID.ts
+import { createOperation, z } from '../../generated/wundergraph.factory';
+
+export default createOperation.query({
+  input: z.object({
+    id: z.string(),
+  }),
+  handler: async ({ input }) => {
+    return {
+      id: input.id,
+      name: 'Jens',
+      bio: 'Founder of WunderGraph',
+    };
+  },
+});
+```
+
+3. **Call the Operation** from your Frontend
+
+As you define Operations, WunderGraph automatically generates a type-safe client for your Frontend,
+supporting all major Frontend Frameworks like React, NextJS, Remix, Astro, Svelte, Expo, Vue, etc...
+
+```typescript jsx
+import { client } from '~/lib/wundergraph';
+
+export default async function ProfilePage(props) {
+  const { data, error } = await client.query({
+    operationName: 'users/ByID',
+    input: {
+      id: props.params.id,
+    },
+  });
+
+  return (
+    <div>
+      <h1>{data.user.name}</h1>
+      <p>{data.user.email}</p>
+    </div>
+  );
+}
+```
+
+In the same vein, you could now add Authentication, Authorization, file uploads, etc...
 
 ## Getting started
 
-The fastest way to get started with WunderGraph is to open a Gitpod. After bootstrapping the [examples/simple](examples/simple) is started.
+The easiest way to get started from scratch is to use the following command:
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/wundergraph/wundergraph)
+```shell
+npx create-wundergraph-app my-project --example nextjs
+```
 
-You can also follow the [**Quickstart (5
-min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you don't want to use Gitpod.
+If you already have an existing project, you can add WunderGraph to it by running:
+
+```shell
+npx create-wundergraph-app --init
+```
 
 ## Examples:
 
-- [Simple Starter](/examples/simple)
-- [NextJS](/examples/nextjs)
-- [FaunaDB Starter](/examples/faunadb-nextjs)
-- [PostgreSQL](/examples/postgres)
-- [Hook into the request lifecycle](/examples/hooks)
-- [Add Webhooks e.g. for GitHub, Stripe](./examples/webhooks)
-- [HTTP & Server-Side Caching](/examples/caching)
-- [NextJS, PostgreSQL, Prisma](/examples/nextjs-postgres-prisma)
-- [Apollo Federation](/examples/apollo-federation)
-- [Subscriptions & Live Queries](./examples/nextjs-postgres-prisma)
-- [Cross API joins across data-sources](/examples/cross-api-joins)
-- [Inject a Bearer Token with Auth0](./examples/inject-bearer)
-- [Migrate from Apollo GraphQL](./examples/migrate-from-apollo)
-- [Publish & Install APIs](./examples/publish-install-api)
-- [Dockerize WunderGraph](https://github.com/wundergraph/docker)
-- [Type-safe Golang Client](/examples/golang-client)
-- [Type-safe Node.js Client](/examples/nodejs-ts-client)
-- [OpenAPI and mocking](/examples/openapi-mocking)
+We've got a comprehensive list of examples to get you started.
+The best way to try them out is by cloning the mono-repo.
+
+// Create a list of examples from this directory: examples
+
+- [Apollo Federation](examples/apollo-federation)
+- [Auth0 OpenID Connect Authentication](examples/auth0-oidc-authentication)
+- [Caching](examples/caching)
+- [Cross API Joins](examples/cross-api-joins)
+- [Expo swr](examples/expo-swr)
+- [FaunaDB NextJS](examples/faunadb-nextjs)
+- [Fragments](examples/fragments)
+- [Golang Client](examples/golang-client)
+- [Apollo Subscriptions](examples/graphql-apollo-subscriptions)
+- [Hasura Subscriptions](examples/graphql-hasura-subscriptions)
+- [SSE Subscriptions](examples/graphql-sse-subscriptions)
+- [Subscriptions Hooks](examples/graphql-subscriptions-hooks)
+- [WebSocket Subscriptions](examples/graphql-ws-subscriptions)
+- [GraphQL Yoga SSE Subscriptions](examples/graphql-yoga-sse-subscriptions)
+- [Hooks](examples/hooks)
+- [Inject Bearer Token](examples/inject-bearer)
+- [Keycloak OIDC Authentication](examples/keycloak-oidc-authentication)
+- [Learn WUnderGraph](examples/learn-wundergraph)
+- [Migrate from Apollo](examples/migrate-from-apollo)
+- [NextJS](examples/nextjs)
+- [NextJS file upload](examples/nextjs-file-upload)
+- [NextJS PostgresSQL Prisma](examples/nextjs-postgres-prisma)
+- [NextJS PostgresQL user filters](examples/nextjs-postgres-user-filters)
+- [NextJS React Query](examples/nextjs-react-query)
+- [NextJS Todos](examples/nextjs-todos)
+- [NextJS TypeScript Operations](examples/nextjs-typescript-functions)
+- [NodeJS TypeScript Client](examples/nodejs-ts-client)
+- [OpenAPI Mocking](examples/openapi-mocking)
+- [PostgreSQL](examples/postgres)
+- [Role based Access control](examples/rbac)
+- [Remix](examples/remix)
+- [Schema Extension](examples/schema-extension)
+- [Simple Example](examples/simple)
+- [Vite SolidJS](examples/vite-solidjs)
+- [Vite swr](examples/vite-swr)
+- [Webhooks](examples/webhooks)
 
 ## Advanced Examples:
 
@@ -77,27 +209,14 @@ min)**](https://wundergraph.com/docs/guides/getting_started/quickstart) if you d
 WunderGraph is made up of the three core components:
 
 - [**wunderctl**](packages/wunderctl): A command line tool to create, deploy and manage your WunderGraph application.
-- [**SDK**](packages/sdk): Auto-generated and type-safe client to configure and interact with your WunderGraph.
-- [**WunderHub**](https://hub.wundergraph.com/) The Package Manager for APIs that allows you to share and integrate your
-  API's in a few clicks.
-
-The auto-generated type-safe client can be used in _any_ Node.js or TypeScript backend application (including serverless
-applications and microservices).
+- [**SDK**](packages/sdk): Create, configure & extend your WunderGraph Application with TypeScript.
 
 ## Core features
 
-- **Unified Graph**: Combine all your data sources into a unified GraphQL Schema.
-- **JSON-RPC**: Expose GraphQL operations through JSON-RPC.
-  Learn [more](https://wundergraph-landing-git-feat-update-landing-jensneuse.vercel.app/blog/graphql_is_not_meant_to_be_exposed_over_the_internet)
-  about this design choice.
-- **Type-Safe Clients**: Auto generate custom type-safe API Clients with Authentication / Authorization and file upload
-  support.
-- **Customizable**: Customizable gateway logic with TypeScript.
-- **Standards**: Build upon standards like GraphQL, OpenAPI, OAuth2, S3...
-- **Open Source**: 100% Open Source, No vendor lock-in.
-- **Community**: First-class support for frameworks like Next.js, React, Svelte...
-
-> **Note**: [WunderHub](https://hub.wundergraph.com/) is our vision of the Package Manager for APIs. Like npm, but for APIs. Sign up for free!
+- **APIs as Dependencies** - Define which data sources your frontend depends on and WunderGraph handles the rest. Say goodbye to unmaintainable glue-code, focus on **adding real business value**.
+- **Backend for Frontend Architecture** - WunderGraph lives next to your frontend code, but can also be used stand alone as an API Gateway. Whatever you're building, you can always depend on the same **great DX**.
+- **End-to-End-TypeSafety** - Start new projects in minutes with powerful conventions and code generation. WunderGraph generates **instant, typesafe API clients**, including authentication and file uploads.
+- **API Composition with Namespacing** - WunderGraph is the only tool that allows you to **compose multiple APIs** into a single unified API without naming collisions or manual configuration thanks to **API namespacing**.
 
 ## Architecture & Key Differentiators
 
@@ -107,27 +226,25 @@ applications and microservices).
 
 You can learn more about the architecture of WunderGraph and why we’ve built it this way in [the architecture section](docs/architecture.md).
 
-## Learn more about WunderGraph
-
-If you'd like to get a quick overview,
-have a look at these [annotated example snippets](docs/at-a-glance.md).
-
 ## How does WunderGraph work
 
 This section provides a high-level overview of how WunderGraph works and its most consumer centric components. For a
 more thorough introduction, visit the [architecture](./docs/architecture) documentation.
 
-After initializing your first WunderGraph application with `npx create-wundergraph-app <project-name> -E simple`, you have a NPM package and
+After initializing your WunderGraph application, you have a NPM package and
 a `.wundergraph` folder. This folder contains the following files:
 
 - `wundergraph.config.ts` - The primary config file for your WunderGraph application. Add data-sources and more.
 - `wundergraph.operations.ts` - Configure authentication, caching and more for a specific or all operations.
 - `wundergraph.server.ts` - The hooks server to hook into different lifecycle events of your gateway.
 
-After configuring your data-sources, you can start writing operations. An operation is just a `*.graphql` file. The name
-of the file will be the operation name. You can write queries, mutations and subscriptions that spans multiple
-data-sources. Each operation will be exposed securely via HTTP JSON-API through the WunderGraph gateway. After writing
-your operations, you can start deploying your WunderGraph application.
+As a user of WunderGraph, you add your data-sources and authentication configuration to the `wundergraph.config.ts` file.
+You will then define your Operations by creating either a `*.graphql` or `*.ts` file in the `.wundergraph/operations/` directory.
+Using GraphQL, you can directly interact with the GraphQL Schema of your data-sources.
+If you'd like to add more customization, you can also use TypeScript to define custom operations.
+
+All Operations are then compiled into JSON-RPC and served by the WunderGraph Gateway.
+You can either use one of the generated type-safe clients, or try out the API using the Postman Collection or OpenAPI Specification which will be generated in the `.wundergraph/generated` directory.
 
 ## Contributing
 

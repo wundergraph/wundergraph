@@ -138,10 +138,18 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	tempUser.ProviderName = "token"
 	tempUser.ProviderID = issuer
 	tempUser.AccessToken = tryParseJWT(token.Raw)
-	u.hooks.PostAuthentication(ctx, tempUser)
+	if err := u.hooks.PostAuthentication(ctx, tempUser); err != nil {
+		return err
+	}
 	tempUser, err := u.hooks.MutatingPostAuthentication(ctx, tempUser)
 	if err != nil {
-		return fmt.Errorf("access denied: %w", err)
+		return err
+	}
+	if revalidate {
+		tempUser, err = u.hooks.RevalidateAuthentication(ctx, tempUser)
+		if err != nil {
+			return err
+		}
 	}
 	*user = *tempUser
 	if cfg.cacheTtlSeconds > 0 {
@@ -325,7 +333,7 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 			return fmt.Errorf("invalid authorization Header")
 		}
 		tokenString := strings.TrimPrefix(authorizationHeader, "Bearer ")
-		revalidate := r.URL.Query().Get("revalidate") == "true"
+		revalidate := r.URL.Query().Has("revalidate")
 		for _, config := range loader.userLoadConfigs {
 			keyFunc := config.Keyfunc()
 			token, err := jwt.Parse(tokenString, keyFunc)

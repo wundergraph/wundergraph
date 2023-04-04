@@ -31,7 +31,7 @@
   },
   "peerDependencies": {
     "@tanstack/svelte-query": "^4.24.6",
-    "@wundergraph/sdk": ">=0.110.0",
+    "@wundergraph/sdk": ">=0.143.0",
     "svelte": "^3.54.0"
   },
   "devDependencies": {
