@@ -1,11 +1,18 @@
 import { Resource } from '@opentelemetry/resources';
 import { NodeTracerProvider, NoopSpanProcessor, SpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { AlwaysOnSampler, BatchSpanProcessor, SpanExporter, ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
+import {
+	AlwaysOnSampler,
+	BatchSpanProcessor,
+	SpanExporter,
+	ConsoleSpanExporter,
+	Tracer,
+} from '@opentelemetry/sdk-trace-base';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { TelemetryOptions, WunderGraphConfiguration } from '@wundergraph/protobuf';
+import { TelemetryOptions } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
+// use for debugging e.g. check if the exporter is called, spans are created etc.
 // import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
 
 export interface TelemetryTracerProvider {

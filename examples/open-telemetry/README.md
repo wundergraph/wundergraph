@@ -40,6 +40,9 @@ To obtain meaningful results, it is recommended to change the trace id in the re
 If you don't provide a traceparent header, a new trace id will be generated automatically.
 
 Header format: `traceparent: {version}-{trace_id}-{span_id}-{trace_flags}`
+https://www.w3.org/TR/trace-context/#trace-context-http-headers-format
+
+Configure hooks in the `wundergraph.server.ts` and check how the tracing data changes.
 
 ## Learn More
 
