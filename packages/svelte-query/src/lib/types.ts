@@ -15,6 +15,7 @@ import type {
 	CreateMutationOptions as TanstackCreateMutationOptions,
 	CreateMutationResult,
 	QueryObserverResult,
+	QueryFunction,
 } from '@tanstack/svelte-query';
 import type { Writable, Readable } from 'svelte/store';
 
@@ -89,6 +90,20 @@ export type CreateQuery<Operations extends OperationsDefinition, ExtraOptions ex
 			isLoading: boolean;
 			isSubscribed: boolean;
 		}>;
+	};
+};
+
+export type CreatePrefetchQuery<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
+	<
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
+		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
+		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
+	>(
+		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
+	): {
+		queryKey: (OperationName | Input | undefined)[];
+		queryFn: QueryFunction<Response['data'], (OperationName | Input | undefined)[]>;
 	};
 };
 

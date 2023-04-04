@@ -13,6 +13,7 @@ import type {
 	CreateFileUpload,
 	CreateMutation,
 	CreateQuery,
+	CreatePrefetchQuery,
 	CreateSubscribeToProps,
 	CreateSubscription,
 	GetUser,
@@ -120,6 +121,41 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 			return withSubscriptionState(queryResult, subscriptionState);
 		}
 		return queryResult;
+	};
+
+	/**
+	 * Return prefetchQuery function with the correct operation key to be used during SSR.
+	 * Can't use createQuery because it returns a store.	 *
+	 *
+	 * Svelte Query supports prefetching queries on the server.
+	 * Using this setup you can fetch data and pass it into QueryClientProvider
+	 * before it is sent to the user's browser.
+	 * Therefore, this data is already available in the cache,
+	 * and no initial fetch occurs client-side.
+	 * https://tanstack.com/query/v4/docs/svelte/ssr#using-prefetchquery
+	 *
+	 * @usage
+	 * ```ts
+	 *
+	 * // /src/route/+page.ts
+	 *
+	 * export const load: PageLoad = async ({ parent }) => {
+	 *   const { queryClient } = await parent();
+	 *   const ssrQuery = createPrefetchQuery({
+	 *     operationName: 'Weather',
+	 *   })
+	 *   await queryClient.prefetchQuery(ssrQuery)
+	 * }
+	 * ```
+	 */
+
+	const createPrefetchQuery: CreatePrefetchQuery<Operations> = (options) => {
+		const { operationName, input, ...queryOptions } = options;
+		return {
+			queryKey: queryKey({ operationName, input }),
+			queryFn: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
+			...queryOptions,
+		};
 	};
 
 	/**
@@ -321,6 +357,7 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 
 	return {
 		createQuery,
+		createPrefetchQuery,
 		createMutation,
 		getAuth,
 		getUser,
