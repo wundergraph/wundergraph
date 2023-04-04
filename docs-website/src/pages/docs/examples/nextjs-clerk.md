@@ -6,7 +6,7 @@ description: An example that demonstrates how to integrate WunderGraph with Next
 
 [The NextJS + Clerk example](https://github.com/wundergraph/wundergraph/tree/main/examples/nextjs-clerk) demonstrates how you can use Clerk as your authentication provider with WunderGraph.
 
-This example uses Clerk JWT Templates, Next.js middleware and the WunderGraph Next.js client.
+This example uses Clerk JWT Templates, Next.js middleware, and the WunderGraph Next.js client.
 
 ## Installation
 
