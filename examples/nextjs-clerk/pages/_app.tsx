@@ -12,6 +12,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 	// Check if the current route matches a public page
 	const isPublicPage = publicPages.includes(pathname);
+
 	return (
 		<>
 			<Head>
