@@ -40,6 +40,8 @@ import * as fs from 'fs';
 import process from 'node:process';
 import { OperationError } from '../client';
 
+export const internalPathRegex = '.*\\/?internal\\/.*';
+
 export interface GraphQLOperation {
 	Name: string;
 	PathName: string;
@@ -253,7 +255,16 @@ export const parseGraphQLOperations = (
 							handleDateTimeDirectives(variable, operation);
 							handleInjectEnvironmentVariableDirectives(variable, operation);
 						});
-						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
+
+						const internalOperationDirective =
+							node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
+						if (internalOperationDirective) {
+							Logger.warn(
+								'Detected use of internalOperation directive. This will be deprecated soon. Please checkout the migration guide: '
+							);
+						}
+						operation.Internal = internalOperationDirective || RegExp(internalPathRegex).test(operationFile.file_path);
+
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
 							const rbac = node.directives?.find((d) => d.name.value === 'rbac');
 							rbac?.arguments?.forEach((arg) => {

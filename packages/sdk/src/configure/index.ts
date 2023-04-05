@@ -30,6 +30,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	internalPathRegex,
 	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
@@ -1307,6 +1308,12 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
 	const filePath = path.join(wgDirAbs, file.module_path);
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+
+	if (implementation.internal) {
+		Logger.warn('Detected use of internal config. This will be deprecated soon. Please checkout the migration guide: ');
+	}
+	const isInternal = implementation.internal || RegExp(internalPathRegex).test(file.file_path);
+
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
 		PathName: file.api_mount_path,
@@ -1359,7 +1366,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 		VariablesConfiguration: {
 			injectVariables: [],
 		},
-		Internal: implementation.internal ? implementation.internal : false,
+		Internal: isInternal,
 		PostResolveTransformations: undefined,
 	};
 	return { operation, implementation };

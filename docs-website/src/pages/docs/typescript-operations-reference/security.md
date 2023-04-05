@@ -29,3 +29,12 @@ The WunderGraph Gateway will validate the request against this JSON Schema befor
 
 This means, that if you're using TypeScript Operations, you don't have to worry about input validation.
 Define an input schema using `zod` and you can trust that the request will be validated before reaching the server.
+
+## Internal Operations
+
+Not all operations need to exposed to the public internet. In this case just place the operation file under a folder named _internal_ and the operation will automatically be marked as internal.
+The internal folder can be nested and the same applies to nested operations within the internal folder.
+
+{% callout type="warning" %}
+The configuration for operations accepts and `internal` prop. This is deprecated. Please use the above method instead.
+{% /callout %}

@@ -1,4 +1,5 @@
 import {
+	internalPathRegex,
 	LoadOperationsOutput,
 	operationResponseToJSONSchema,
 	operationVariablesToJSONSchema,
@@ -1436,3 +1437,17 @@ input CreateEnvironment {
   kind: EnvironmentKind!
   edges: [ID!]
 }`;
+
+test('internalPathRegex', () => {
+	const regex = RegExp(internalPathRegex);
+	const publicPaths = ['foo.ts', 'bar.graphql', 'nested/bat.ts', 'internal.graphql', 'nested/internal.ts'];
+	const internalPaths = ['internal/foo.ts', 'internal/bar.graphql', 'nested/internal/bat.ts'];
+
+	publicPaths.forEach((path) => {
+		expect(regex.test(path)).toBe(false);
+	});
+
+	internalPaths.forEach((path) => {
+		expect(regex.test(path)).toBe(true);
+	});
+});
