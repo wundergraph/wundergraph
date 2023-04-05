@@ -1310,7 +1310,10 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
 
 	if (implementation.internal) {
-		Logger.warn('Detected use of internal config. This will be deprecated soon. Please checkout the migration guide: ');
+		Logger.warn(
+			'Use of the internal prop will be deprecated soon. ' +
+				'More details here: https://docs.wundergraph.com/docs/typescript-operations-reference/security#internal-operations'
+		);
 	}
 	const isInternal = implementation.internal || RegExp(internalPathRegex).test(file.file_path);
 

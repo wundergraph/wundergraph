@@ -260,7 +260,8 @@ export const parseGraphQLOperations = (
 							node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
 						if (internalOperationDirective) {
 							Logger.warn(
-								'Detected use of internalOperation directive. This will be deprecated soon. Please checkout the migration guide: '
+								'Use of internalOperation directive will be deprecated soon. ' +
+									'More details here: https://docs.wundergraph.com/docs/directives-reference/internal-operation-directive'
 							);
 						}
 						operation.Internal = internalOperationDirective || RegExp(internalPathRegex).test(operationFile.file_path);
