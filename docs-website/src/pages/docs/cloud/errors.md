@@ -23,7 +23,7 @@ In the case that your problem persists, we would be happy to assist you [on Disc
 
 **Meaning**: No package manager was detected in your project, or your chosen package manager is currently unsupported.  
 **Why?**: WunderGraph currently supports [npm](https://docs.npmjs.com/about-npm),
-[yarn](https://yarnpkg.com/getting-started), or [pnpm](https://pnpm.io/installation).
+[yarn](https://yarnpkg.com/getting-started), or [pnpm](https://pnpm.io/installation).  
 If you think we're missing support for a popular manager, please [contact us](https://wundergraph.com/discord).
 **Fix**: Make sure you're using one of the following package managers: `npm`, `yarn`, or `pnpm`,
 and that the relevant package manager files have been committed to the repository.
