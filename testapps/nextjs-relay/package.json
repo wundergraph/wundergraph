@@ -21,6 +21,7 @@
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:3003\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3003",
     "build": "pnpm generate && next build && pnpm check",
+    "build:static": "pnpm generate && next build && next export && pnpm check",
     "check": "tsc --noEmit",
     "nextDev": "next dev --port 3003",
     "start": "next start --port 3003",
@@ -62,6 +63,7 @@
     "src": "./",
     "language": "typescript",
     "schema": "./.wundergraph/generated/wundergraph.schema.graphql",
+    "artifactDirectory": "./__generated__",
     "excludes": [
       "**/node_modules/**",
       "**/__generated__/**",

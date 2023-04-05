@@ -1,5 +1,5 @@
 import { createFragmentContainer, graphql } from 'react-relay';
-import type { Weather_Details$data } from './__generated__/Weather_Details.graphql';
+import type { Weather_Details$data } from '../__generated__/Weather_Details.graphql';
 
 const Weather = ({ weather }: { weather: Weather_Details$data }) => (
 	<div>

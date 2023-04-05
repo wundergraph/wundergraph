@@ -2,7 +2,7 @@ import styles from '../styles/Home.module.css';
 import React from 'react';
 import { graphql } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
-import type { pages_indexQuery as IndexQueryType } from './__generated__/pages_indexQuery.graphql';
+import type { pages_indexQuery as IndexQueryType } from '../__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
 import { withWunderGraphRelay, useLivePreloadedQuery } from '../lib/createWunderGraphRelayApp';
 import TemperatureDetails from '../components/Temperature';
