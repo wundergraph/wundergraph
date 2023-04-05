@@ -11,10 +11,11 @@ const spacex = introspect.graphql({
 configureWunderGraphApplication({
 	apis: [spacex],
 	options: {
-		telemetry: {
-			otelEnabled: true,
-			otelExporterHttpEndpoint: '',
-			otelExporterJaegerEndpoint: 'http://localhost:14268/api/traces',
+		openTelemetry: {
+			enabled: true,
+			exporterHttpEndpoint: '',
+			exporterJaegerEndpoint: 'http://localhost:14268/api/traces',
+			jwtToken: '',
 		},
 	},
 	server,
