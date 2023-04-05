@@ -20,8 +20,6 @@ import { WiredOptions, WiredProps } from 'relay-nextjs/wired/component';
 // Reference: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1270716220
 import type {} from 'next';
 
-let clientEnv: Environment | undefined;
-
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
@@ -101,6 +99,7 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		return Network.create(fetchQuery, subscribe);
 	};
 
+	let clientEnv: Environment | undefined;
 	const createClientEnvironment = () => {
 		if (typeof window === 'undefined') return null;
 
