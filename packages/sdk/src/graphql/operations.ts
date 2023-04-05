@@ -40,7 +40,14 @@ import * as fs from 'fs';
 import process from 'node:process';
 import { OperationError } from '../client';
 
-export const internalPathRegex = '.*\\/?internal\\/.*';
+export const isInternalOperationByPath = (path: string) => {
+	return (
+		path.startsWith('internal/') ||
+		path.includes('/internal/') ||
+		path.startsWith('internal\\') ||
+		path.includes('\\internal\\')
+	);
+};
 
 export interface GraphQLOperation {
 	Name: string;
@@ -260,11 +267,11 @@ export const parseGraphQLOperations = (
 							node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
 						if (internalOperationDirective) {
 							Logger.warn(
-								'Use of internalOperation directive will be deprecated soon. ' +
+								'Use of internalOperation directive is deprecated. ' +
 									'More details here: https://docs.wundergraph.com/docs/directives-reference/internal-operation-directive'
 							);
 						}
-						operation.Internal = internalOperationDirective || RegExp(internalPathRegex).test(operationFile.file_path);
+						operation.Internal = internalOperationDirective || isInternalOperationByPath(operationFile.file_path);
 
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
 							const rbac = node.directives?.find((d) => d.name.value === 'rbac');

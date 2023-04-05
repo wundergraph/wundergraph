@@ -30,7 +30,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
-	internalPathRegex,
+	isInternalOperationByPath,
 	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
@@ -1311,11 +1311,11 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 
 	if (implementation.internal) {
 		Logger.warn(
-			'Use of the internal prop will be deprecated soon. ' +
+			'Use of the internal prop is deprecated. ' +
 				'More details here: https://docs.wundergraph.com/docs/typescript-operations-reference/security#internal-operations'
 		);
 	}
-	const isInternal = implementation.internal || RegExp(internalPathRegex).test(file.file_path);
+	const isInternal = implementation.internal || isInternalOperationByPath(file.file_path);
 
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
