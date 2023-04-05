@@ -14,8 +14,8 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.9.5",
-    "@wundergraph/sdk": "^0.138.0",
+    "@wundergraph/nextjs": "^0.10.0",
+    "@wundergraph/sdk": "^0.143.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",

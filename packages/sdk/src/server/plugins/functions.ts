@@ -5,8 +5,8 @@ import type { TypeScriptOperationFile } from '../../graphql/operations';
 import type { NodeJSOperation } from '../../operations/operations';
 import { HandlerContext } from '../../operations/operations';
 import process from 'node:process';
-import { AuthorizationError } from '../../errors';
 import { OperationsClient } from '../operations-client';
+import { InternalError, OperationError } from '../../client/errors';
 
 interface FastifyFunctionsOptions {
 	operations: TypeScriptOperationFile[];
@@ -17,7 +17,11 @@ interface FastifyFunctionsOptions {
 const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = async (fastify, config) => {
 	for (const operation of config.operations) {
 		try {
-			const filePath = path.join(process.env.WG_DIR_ABS!, operation.module_path);
+			let operationPath = operation.module_path;
+			if (operationPath.endsWith('.cjs')) {
+				operationPath = operationPath.slice(0, -4);
+			}
+			const filePath = path.join(process.env.WG_DIR_ABS!, operationPath + '.cjs');
 			const routeUrl = `/functions/${operation.api_mount_path}`;
 			let maybeImplementation: NodeJSOperation<any, any, any, any, any, any, any, any, any, any> | undefined;
 			try {
@@ -96,24 +100,33 @@ const FastifyFunctionsPlugin: FastifyPluginAsync<FastifyFunctionsOptions> = asyn
 
 						return;
 					} catch (e: any) {
-						const isUnauthorized = e instanceof AuthorizationError;
-						fastify.log.error(e);
-						if (implementation.type === 'subscription') {
-							if (isUnauthorized) {
-								reply.raw.writeHead(401);
+						let statusCode: number = 500;
+						const response: { errors: OperationError[] } = {
+							errors: [],
+						};
+
+						if (e instanceof OperationError) {
+							if (e.statusCode) {
+								statusCode = e.statusCode;
 							}
-							reply.raw.write(`${JSON.stringify({ errors: [{ message: e.message || 'Internal Error' }] })}\n\n`);
+							response.errors.push(e);
+						} else if (e instanceof Error) {
+							response.errors.push(new InternalError({ message: e.message }));
+						} else {
+							response.errors.push(new InternalError());
+						}
+
+						fastify.log.error(e);
+
+						if (implementation.type === 'subscription') {
+							// Raw write because we hijacked the reply
+							reply.raw.writeHead(statusCode ?? 500);
+							reply.raw.write(`${JSON.stringify(response)}\n\n`);
 							reply.raw.end();
 						} else {
-							reply.code(isUnauthorized ? 401 : 500);
+							reply.code(statusCode ?? 500);
 							reply.send({
-								response: {
-									errors: [
-										{
-											message: e.message || 'Internal Error',
-										},
-									],
-								},
+								response,
 							});
 						}
 					}

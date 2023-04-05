@@ -12,8 +12,15 @@ import (
 
 const (
 	schema = `
+
+		type Query {
+			queryRaw(query: String! parameters: [String]): String
+			queryRawJSON(query: String! parameters: [String]): JSON
+		}
+
 		type Mutation {
 			createOneusers(data: usersCreateInput): users
+			executeRaw(query: String! parameters: [String]): Int!
 		}
 
 		type users {

@@ -22,7 +22,8 @@
     "packages/swr",
     "packages/create-wundergraph-app",
     "packages/react-query",
-    "packages/solid-query"
+    "packages/solid-query",
+    "packages/svelte-query"
   ],
   "npmClient": "pnpm",
   "version": "independent"

@@ -4,12 +4,13 @@ import {
 	ClientResponse,
 	MutationRequestOptions,
 	QueryRequestOptions,
+	ResponseError,
 	SubscriptionRequestOptions,
 	UploadResponse,
 	UploadValidationOptions,
 	User,
 } from '../src/client';
-import { ExtractMeta, ExtractProfileName, UploadRequestOptions } from '../src/client/types';
+import { ExtractMeta, ExtractProfileName, UploadRequestOptions } from '../src/client';
 
 const client = new Client({
 	baseURL: 'https://api.com',
@@ -20,8 +21,8 @@ const client = new Client({
 
 // Queries
 
-expectType<Promise<ClientResponse<{ id: string }>>>(
-	client.query<QueryRequestOptions<'Weather', { lat: number }>, { id: string }>({
+expectType<Promise<ClientResponse<{ id: string }, ResponseError>>>(
+	client.query<QueryRequestOptions<'Weather', { lat: number }>, { id: string }, ResponseError>({
 		operationName: 'Weather',
 		input: { lat: 1 },
 	})
@@ -36,8 +37,8 @@ expectType<Promise<ClientResponse<any>>>(
 
 // Mutation
 
-expectType<Promise<ClientResponse<{ id: string }>>>(
-	client.mutate<MutationRequestOptions<'Weather', { lat: number }>, { id: string }>({
+expectType<Promise<ClientResponse<{ id: string }, ResponseError>>>(
+	client.mutate<MutationRequestOptions<'Weather', { lat: number }>, { id: string }, ResponseError>({
 		operationName: 'Weather',
 		input: { lat: 1 },
 	})
@@ -52,8 +53,8 @@ expectType<Promise<ClientResponse<any>>>(
 
 // Subscription
 
-expectType<Promise<void | ClientResponse<{ id: string }>>>(
-	client.subscribe<SubscriptionRequestOptions<'Weather', { lat: number }>, { id: string }>(
+expectType<Promise<void | ClientResponse<{ id: string }, ResponseError>>>(
+	client.subscribe<SubscriptionRequestOptions<'Weather', { lat: number }>, { id: string }, ResponseError>(
 		{
 			operationName: 'Weather',
 			input: { lat: 1 },

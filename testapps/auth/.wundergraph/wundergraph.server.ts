@@ -8,7 +8,7 @@ import {
 	GraphQLInputObjectType,
 	GraphQLNonNull,
 } from 'graphql';
-import { configureWunderGraphServer } from '@wundergraph/sdk/server';
+import { AuthenticationResponse, configureWunderGraphServer } from '@wundergraph/sdk/server';
 import type { HooksConfig } from './generated/wundergraph.hooks';
 import type { InternalClient } from './generated/wundergraph.internal.client';
 
@@ -16,6 +16,46 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 	hooks: {
 		queries: {},
 		mutations: {},
+		authentication: {
+			postAuthentication: async (hook) => {
+				console.log(`postAuthentication: ${JSON.stringify(hook.user)}`);
+			},
+			mutatingPostAuthentication: async (hook) => {
+				console.log(`mutatingPostAuthentication: ${JSON.stringify(hook.user)}`);
+				if (hook.user.userId === 'notAllowedByPostAuthentication') {
+					return {
+						status: 'deny',
+						message: 'denied by mutatingPostAuthentication',
+					};
+				}
+				return {
+					status: 'ok',
+					user: {
+						...hook.user,
+						firstName: hook.user.firstName ?? 'mutatingPostAuthentication',
+					},
+				};
+			},
+			revalidate: async (hook) => {
+				console.log(`revalidate: ${JSON.stringify(hook.user)}`);
+				if (hook.user.userId === 'notAllowedByRevalidation') {
+					return {
+						status: 'deny',
+						message: 'denied by revalidate',
+					};
+				}
+				return {
+					status: 'ok',
+					user: {
+						...hook.user,
+						lastName: hook.user.lastName ?? 'revalidate',
+					},
+				};
+			},
+			postLogout: async (hook) => {
+				console.log(`postLogout: ${JSON.stringify(hook.user)}`);
+			},
+		},
 	},
 	graphqlServers: [
 		{

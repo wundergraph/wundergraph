@@ -16,6 +16,16 @@ In this scenario, we're using a local PostgreSQL database via docker-compose.
 npm install && npm start
 ```
 
+## Getting started with Neon database
+
+1. Copy the `.env.example` file to `.env` and replace the `DATABASE_URL` with the connection string of Neon database.
+2. Execute the init.sql file in the Neon console, to add the required tables and insert values into the tables.
+3. Install the dependencies and run the complete example in one command:
+
+```shell
+npm install && npm start:api
+```
+
 ## Checkout the generated Schema
 
 Once the introspection is complete,

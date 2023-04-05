@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/MicahParks/keyfunc"
-	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
 	"github.com/dgraph-io/ristretto"
 	"github.com/golang-jwt/jwt/v4"
@@ -24,10 +23,9 @@ import (
 	"github.com/gorilla/securecookie"
 	"go.uber.org/zap"
 
-	"github.com/wundergraph/wundergraph/pkg/hooks"
+	"github.com/wundergraph/wundergraph/pkg/customhttpclient"
 	"github.com/wundergraph/wundergraph/pkg/jsonpath"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 )
 
@@ -84,6 +82,8 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 
 	cacheKey := token.Raw
 
+	ctx := context.Background()
+
 	if !revalidate {
 		fromCache, exists := u.cache.Get(cacheKey)
 		if exists {
@@ -98,13 +98,15 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	var claims *Claims
 	if cfg.userInfoEndpoint != "" {
 		// Retrieve claims from userInfoEndpoint
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 		defer cancel()
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, cfg.userInfoEndpoint, nil)
 		if err != nil {
 			return err
 		}
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.Raw))
+		// Prevent infinite loops when the userInfo endpoint is also an operation
+		customhttpclient.SetTag(req, customhttpclient.RequestTagUserInfo)
 		res, err := u.client.Do(req)
 		if err != nil {
 			return err
@@ -133,12 +135,20 @@ func (u *UserLoader) userFromToken(token *jwt.Token, cfg *UserLoadConfig, user *
 	tempUser.ProviderName = "token"
 	tempUser.ProviderID = issuer
 	tempUser.AccessToken = tryParseJWT(token.Raw)
-	u.hooks.handlePostAuthentication(context.Background(), tempUser)
-	proceed, _, tempUser := u.hooks.handleMutatingPostAuthentication(context.Background(), tempUser)
-	if !proceed {
-		return fmt.Errorf("access denied")
+	if err := u.hooks.PostAuthentication(ctx, tempUser); err != nil {
+		return err
 	}
-	*user = tempUser
+	tempUser, err := u.hooks.MutatingPostAuthentication(ctx, tempUser)
+	if err != nil {
+		return err
+	}
+	if revalidate {
+		tempUser, err = u.hooks.RevalidateAuthentication(ctx, tempUser)
+		if err != nil {
+			return err
+		}
+	}
+	*user = *tempUser
 	if cfg.cacheTtlSeconds > 0 {
 		u.cache.SetWithTTL(cacheKey, *user, 1, time.Second*time.Duration(cfg.cacheTtlSeconds))
 	}
@@ -312,12 +322,15 @@ func (u *User) Save(s *securecookie.SecureCookie, w http.ResponseWriter, r *http
 func (u *User) Load(loader *UserLoader, r *http.Request) error {
 
 	authorizationHeader := r.Header.Get("Authorization")
-	if loader.userLoadConfigs != nil && authorizationHeader != "" {
+	// If the request is tagged as an attempt to load the userInfo for a token, don't
+	// do anything. Otherwise setting an operation as the endPoint causes an infinite
+	// loop.
+	if loader.userLoadConfigs != nil && authorizationHeader != "" && customhttpclient.Tag(r) != customhttpclient.RequestTagUserInfo {
 		if !strings.HasPrefix(authorizationHeader, "Bearer ") {
 			return fmt.Errorf("invalid authorization Header")
 		}
 		tokenString := strings.TrimPrefix(authorizationHeader, "Bearer ")
-		revalidate := r.URL.Query().Get("revalidate") == "true"
+		revalidate := r.URL.Query().Has("revalidate")
 		for _, config := range loader.userLoadConfigs {
 			keyFunc := config.Keyfunc()
 			token, err := jwt.Parse(tokenString, keyFunc)
@@ -362,93 +375,6 @@ func (u *User) Load(loader *UserLoader, r *http.Request) error {
 	err = loader.s.Decode("id", cookie.Value, &u.RawIDToken)
 	u.IdToken = tryParseJWT(u.RawIDToken)
 	return err
-}
-
-type Hooks struct {
-	Client                     *hooks.Client
-	Log                        *zap.Logger
-	PostAuthentication         bool
-	MutatingPostAuthentication bool
-	PostLogout                 bool
-}
-
-func (h *Hooks) handlePostAuthentication(ctx context.Context, user User) {
-	if !h.PostAuthentication {
-		return
-	}
-	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err != nil {
-		h.Log.Error("Could not marshal user", zap.Error(err))
-		return
-	} else {
-		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
-	}
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostAuthentication, hookData, buf)
-	if err != nil {
-		h.Log.Error("PostAuthentication queries hook", zap.Error(err))
-		return
-	}
-}
-
-func (h *Hooks) handlePostLogout(ctx context.Context, user *User) {
-	if !h.PostLogout || user == nil {
-		return
-	}
-	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err != nil {
-		h.Log.Error("Could not marshal user", zap.Error(err))
-		return
-	} else {
-		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
-	}
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	_, err := h.Client.DoAuthenticationRequest(ctx, hooks.PostLogout, hookData, buf)
-	if err != nil {
-		h.Log.Error("PostLogout queries hook", zap.Error(err))
-	}
-}
-
-type MutatingPostAuthenticationResponse struct {
-	User    User   `json:"user"`
-	Message string `json:"message"`
-	Status  string `json:"status"`
-}
-
-func (h *Hooks) handleMutatingPostAuthentication(ctx context.Context, user User) (proceed bool, message string, updatedUser User) {
-	if !h.MutatingPostAuthentication {
-		return true, "", user
-	}
-	hookData := []byte(`{}`)
-	if userJson, err := json.Marshal(user); err != nil {
-		return false, "", User{}
-	} else {
-		hookData, _ = jsonparser.Set(hookData, userJson, "__wg", "user")
-	}
-	buf := pool.GetBytesBuffer()
-	defer pool.PutBytesBuffer(buf)
-	out, err := h.Client.DoAuthenticationRequest(ctx, hooks.MutatingPostAuthentication, hookData, buf)
-	if err != nil {
-		if errors.Is(err, context.Canceled) {
-			return false, "", updatedUser
-		}
-		h.Log.Error("MutatingPostAuthentication queries hook", zap.Error(err))
-		return
-	}
-	if out.Error != "" {
-		return false, "", User{}
-	}
-	var res MutatingPostAuthenticationResponse
-	err = json.Unmarshal(out.Response, &res)
-	if err != nil {
-		return false, "", User{}
-	}
-	if res.Status == "ok" {
-		return true, "", res.User
-	}
-	return false, res.Message, User{}
 }
 
 func bearerTokenToJSON(token string) ([]byte, error) {
@@ -792,13 +718,12 @@ func UserFromContext(ctx context.Context) *User {
 }
 
 type UserHandler struct {
-	HasRevalidateHook bool
-	MWClient          *hooks.Client
-	Log               *zap.Logger
-	Host              string
-	InsecureCookies   bool
-	Cookie            *securecookie.SecureCookie
-	PublicClaims      []string
+	Log             *zap.Logger
+	Host            string
+	InsecureCookies bool
+	Hooks           Hooks
+	Cookie          *securecookie.SecureCookie
+	PublicClaims    []string
 }
 
 func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -808,48 +733,18 @@ func (u *UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.FromCookie && u.HasRevalidateHook && r.URL.Query().Has("revalidate") {
-		hookData := []byte(`{}`)
-		if userJson, err := json.Marshal(user); err != nil {
-			u.Log.Error("Could not marshal user", zap.Error(err))
-			http.NotFound(w, r)
-			return
-		} else {
-			hookData, _ = jsonparser.Set(hookData, userJson, "user")
-		}
-		if user.AccessToken != nil {
-			hookData, _ = jsonparser.Set(hookData, user.AccessToken, "access_token")
-		}
-		if user.IdToken != nil {
-			hookData, _ = jsonparser.Set(hookData, user.IdToken, "id_token")
-		}
-		buf := pool.GetBytesBuffer()
-		defer pool.PutBytesBuffer(buf)
-		out, err := u.MWClient.DoAuthenticationRequest(r.Context(), hooks.RevalidateAuthentication, hookData, buf)
+	if user.FromCookie && r.URL.Query().Has("revalidate") {
+		var err error
+		user, err = u.Hooks.RevalidateAuthentication(r.Context(), user)
 		if err != nil {
-			u.Log.Error("RevalidateAuthentication request failed", zap.Error(err))
-			http.NotFound(w, r)
+			u.Log.Error("revalidating authentication", zap.Error(err))
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if out.Error != "" {
-			u.Log.Error("RevalidateAuthentication returned an error", zap.Error(err))
-			http.NotFound(w, r)
-			return
-		}
-		var res MutatingPostAuthenticationResponse
-		err = json.Unmarshal(out.Response, &res)
-		if res.Status != "ok" {
-			u.Log.Error("RevalidateAuthentication status is not ok", zap.Error(err))
-			http.NotFound(w, r)
-			return
-		}
-		res.User.AccessToken = user.AccessToken
-		res.User.IdToken = user.IdToken
-		user = &res.User
 		err = user.Save(u.Cookie, w, r, u.Host, u.InsecureCookies)
 		if err != nil {
 			u.Log.Error("RevalidateAuthentication could not save cookie", zap.Error(err))
-			http.NotFound(w, r)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -895,7 +790,13 @@ func (u *UserLogoutHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		return
 	}
-	u.Hooks.handlePostLogout(r.Context(), user)
+	if err := u.Hooks.PostLogout(r.Context(), user); err != nil {
+		if u.Log != nil {
+			u.Log.Error("running postLogout hook", zap.Error(err))
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	if strings.ToLower(r.URL.Query().Get("logout_openid_connect_provider")) == "true" {
 		if err := u.logoutFromProvider(w, r, user); err != nil {
 			if u.Log != nil {
@@ -1010,4 +911,18 @@ func resetUserCookies(w http.ResponseWriter, r *http.Request, secure bool) {
 		}
 		http.SetCookie(w, userCookie)
 	}
+}
+
+func postAuthentication(ctx context.Context, w http.ResponseWriter, r *http.Request, hooks Hooks, user *User, cookie *securecookie.SecureCookie, insecureCookies bool) error {
+	if err := hooks.PostAuthentication(ctx, user); err != nil {
+		return err
+	}
+	user, err := hooks.MutatingPostAuthentication(r.Context(), user)
+	if err != nil {
+		return err
+	}
+	if err := user.Save(cookie, w, r, r.Host, insecureCookies); err != nil {
+		return err
+	}
+	return nil
 }

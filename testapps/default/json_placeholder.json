@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "https://jsonplaceholder.typicode.tld"
+      "url": "https://jsonplaceholder.typicode.com"
     }
   ],
   "paths": {

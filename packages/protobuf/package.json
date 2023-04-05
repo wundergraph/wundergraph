@@ -1,6 +1,6 @@
 {
   "name": "@wundergraph/protobuf",
-  "version": "0.106.0",
+  "version": "0.106.1",
   "license": "Apache-2.0",
   "main": "./dist/wundernode_config.js",
   "types": "./dist/wundernode_config.d.ts",

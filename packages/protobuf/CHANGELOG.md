@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.106.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.0...@wundergraph/protobuf@0.106.1) (2023-03-16)
+
+### Bug Fixes
+
+* custom int/float scalars usage in arguments ([#427](https://github.com/wundergraph/wundergraph/issues/427))Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: spetrunin <neyasut@gmail.com> ([2b424f3](https://github.com/wundergraph/wundergraph/commit/2b424f3daaabea25abb4a23139751ff0ab2adefe)) (@OLingard)
+
 ## [0.106.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.105.0...@wundergraph/protobuf@0.106.0) (2023-03-06)
 
 ### Features

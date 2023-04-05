@@ -61,7 +61,7 @@ func startWunderGraphServer(ctx context.Context) error {
 		return fmt.Errorf("could not find configuration file: %s", configFile)
 	}
 
-	serverScriptFile := filepath.Join("generated", "bundle", "server.js")
+	serverScriptFile := filepath.Join("generated", "bundle", "server.cjs")
 	serverExecutablePath := filepath.Join(wunderGraphDir, serverScriptFile)
 	if !files.FileExists(serverExecutablePath) {
 		return fmt.Errorf(`hooks server executable "%s" not found`, serverExecutablePath)
@@ -71,6 +71,7 @@ func startWunderGraphServer(ctx context.Context) error {
 		WunderGraphDirAbs: wunderGraphDir,
 		ServerScriptFile:  serverScriptFile,
 		Production:        true,
+		Debug:             rootFlags.DebugMode,
 		Env:               helpers.CliEnv(rootFlags),
 	}
 

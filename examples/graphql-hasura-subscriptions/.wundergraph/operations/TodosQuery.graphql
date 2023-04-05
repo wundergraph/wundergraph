@@ -1,0 +1,8 @@
+query ($limit: Int = 3) {
+	hasura_todos(limit: $limit) {
+		id
+		title
+		is_public
+		is_completed
+	}
+}

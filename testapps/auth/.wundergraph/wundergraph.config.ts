@@ -44,7 +44,7 @@ configureWunderGraphApplication({
 				jsonPath: 'currency',
 			},
 		},
-		publicClaims: ['SUBJECT', 'shopID'],
+		publicClaims: ['SUBJECT', 'GIVEN_NAME', 'FAMILY_NAME', 'shopID'],
 	},
 	codeGenerators: [
 		{

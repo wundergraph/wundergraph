@@ -4,7 +4,9 @@ services:
     image: 'postgres:14'
     ports:
       - '54322:5432'
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: example
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql

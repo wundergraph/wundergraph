@@ -9,7 +9,6 @@ import (
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/files"
 	"github.com/wundergraph/wundergraph/pkg/operations"
@@ -49,7 +48,16 @@ var generateCmd = &cobra.Command{
 
 		ctx := context.Background()
 
-		configOutFile := filepath.Join("generated", "bundle", "config.js")
+		configOutFile := filepath.Join("generated", "bundle", "config.cjs")
+
+		// XXX: generate never uses the cache
+		scriptEnv := configScriptEnv(configScriptEnvOptions{
+			RootFlags:      rootFlags,
+			WunderGraphDir: wunderGraphDir,
+		})
+		// Run scripts in prod mode
+		scriptEnv = append(scriptEnv, "NODE_ENV=production", "WG_THROW_ON_OPERATION_LOADING_ERROR=true")
+		scriptEnv = append(scriptEnv, fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline))
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
 			Name:          "config-runner",
@@ -57,16 +65,7 @@ var generateCmd = &cobra.Command{
 			ScriptArgs:    []string{configOutFile},
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
-			ScriptEnv: append(
-				helpers.CliEnv(rootFlags),
-				// Run scripts in prod mode
-				"NODE_ENV=production",
-				"WG_THROW_ON_OPERATION_LOADING_ERROR=true",
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_CACHE=%t", !disableCache),
-				fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline),
-				fmt.Sprintf("WG_DIR_ABS=%s", wunderGraphDir),
-				fmt.Sprintf("%s=%s", wunderctlBinaryPathEnvKey, wunderctlBinaryPath()),
-			),
+			ScriptEnv:     scriptEnv,
 		})
 		defer func() {
 			log.Debug("Stopping config-runner")
@@ -80,9 +79,11 @@ var generateCmd = &cobra.Command{
 		}()
 
 		var onAfterBuild func() error
+		outExtension := make(map[string]string)
+		outExtension[".js"] = ".cjs"
 
 		if codeServerFilePath != "" {
-			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.js")
+			serverOutFile := filepath.Join(wunderGraphDir, "generated", "bundle", "server.cjs")
 			webhooksDir := filepath.Join(wunderGraphDir, webhooks.WebhookDirectoryName)
 			operationsDir := filepath.Join(wunderGraphDir, operations.DirectoryName)
 			generatedBundleOutDir := filepath.Join("generated", "bundle")
@@ -100,6 +101,7 @@ var generateCmd = &cobra.Command{
 					EntryPoints:   webhookPaths,
 					AbsWorkingDir: wunderGraphDir,
 					OutDir:        generatedBundleOutDir,
+					OutExtension:  outExtension,
 					Logger:        log,
 					OnAfterBundle: func() error {
 						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
@@ -137,6 +139,7 @@ var generateCmd = &cobra.Command{
 						EntryPoints:   operationsPaths,
 						AbsWorkingDir: wunderGraphDir,
 						OutDir:        generatedBundleOutDir,
+						OutExtension:  outExtension,
 						Logger:        log,
 					})
 					err = operationsBundler.Bundle()

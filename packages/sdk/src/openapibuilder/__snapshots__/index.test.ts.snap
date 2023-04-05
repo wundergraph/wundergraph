@@ -46,7 +46,7 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
   },
   "openapi": "3.1.0",
   "paths": {
-    "/operations/GetRootObj": {
+    "/GetRootObj": {
       "get": {
         "operationId": "GetRootObj",
         "parameters": [],
@@ -54,7 +54,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -70,9 +74,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "description": "Invalid input",
           },
         },
+        "x-wundergraph-operation-type": "query",
+        "x-wundergraph-requires-authentication": false,
       },
     },
-    "/operations/GetRootObj2": {
+    "/GetRootObj2": {
       "get": {
         "operationId": "GetRootObj2",
         "parameters": [],
@@ -80,7 +86,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -96,9 +106,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "description": "Invalid input",
           },
         },
+        "x-wundergraph-operation-type": "query",
+        "x-wundergraph-requires-authentication": false,
       },
     },
-    "/operations/item/GetID": {
+    "/users/get": {
       "get": {
         "operationId": "GetUser",
         "parameters": [],
@@ -106,7 +118,11 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
           "200": {
             "content": {
               "application/json": {
-                "schema": undefined,
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
               },
             },
             "description": "Success",
@@ -122,12 +138,89 @@ exports[`OpenAPI builder OpenAPI Builder 1`] = `
             "description": "Invalid input",
           },
         },
+        "x-wundergraph-operation-type": "query",
+        "x-wundergraph-requires-authentication": false,
+      },
+    },
+    "/users/put": {
+      "post": {
+        "operationId": "PutUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {},
+                "type": "object",
+              },
+            },
+          },
+          "required": true,
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Success",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputError",
+                },
+              },
+            },
+            "description": "Invalid input",
+          },
+        },
+        "x-wundergraph-operation-type": "mutation",
+        "x-wundergraph-requires-authentication": true,
+      },
+    },
+    "/users/subscribe": {
+      "get": {
+        "operationId": "SubscribeToUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {},
+                  "type": "object",
+                },
+              },
+            },
+            "description": "Success",
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputError",
+                },
+              },
+            },
+            "description": "Invalid input",
+          },
+        },
+        "x-wundergraph-operation-type": "subscription",
+        "x-wundergraph-requires-authentication": false,
       },
     },
   },
   "servers": [
     {
-      "url": "http://localhost:9991",
+      "url": "http://localhost:9991/operations",
     },
   ],
 }
