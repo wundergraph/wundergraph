@@ -1,4 +1,4 @@
-query ($city: String!) @internalOperation {
+query ($city: String!) {
 	weather_getCityByName(name: $city) {
 		name
 		id
