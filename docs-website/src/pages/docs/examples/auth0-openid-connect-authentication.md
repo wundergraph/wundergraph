@@ -35,3 +35,13 @@ npm run start
 ```
 
 That's it! Next, you can check out the `pages/index.tsx` to see how the integration works.
+
+## Learn more
+
+- [Auth0](https://auth0.com/)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="auth0-oidc-authentication" /%}

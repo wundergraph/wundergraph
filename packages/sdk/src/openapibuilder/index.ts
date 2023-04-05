@@ -73,11 +73,17 @@ interface OpenApiResponse {
 	content: Record<string, OpenApiMediaType>;
 }
 
+type OperationTypeName = 'query' | 'mutation' | 'subscription';
+
 interface OpenApiOperation {
 	operationId: string;
 	parameters?: OpenApiParameter[];
 	requestBody?: OpenApiRequestBody;
 	responses: Record<string, OpenApiResponse>;
+
+	// WunderGraph extensions
+	'x-wundergraph-operation-type': OperationTypeName;
+	'x-wundergraph-requires-authentication': boolean;
 }
 
 interface OpenApiPath {
@@ -139,6 +145,26 @@ export class OpenApiBuilder {
 		};
 	}
 
+	private commonOperation(op: GraphQLOperation) {
+		let operationType: OperationTypeName;
+		switch (op.OperationType) {
+			case OperationType.QUERY:
+				operationType = 'query';
+				break;
+			case OperationType.MUTATION:
+				operationType = 'mutation';
+				break;
+			case OperationType.SUBSCRIPTION:
+				operationType = 'subscription';
+				break;
+		}
+		return {
+			operationId: op.Name,
+			'x-wundergraph-operation-type': operationType,
+			'x-wundergraph-requires-authentication': op?.AuthenticationConfig?.required ?? false,
+		};
+	}
+
 	private queryOperation(op: GraphQLOperation): OpenApiOperation {
 		const parameters: OpenApiParameter[] = [];
 		const paths: JSONSchemaParameterPath[] = [];
@@ -157,7 +183,7 @@ export class OpenApiBuilder {
 		}
 
 		return {
-			operationId: op.Name,
+			...this.commonOperation(op),
 			parameters: parameters,
 			responses: this.operationResponses(op),
 		};
@@ -165,7 +191,7 @@ export class OpenApiBuilder {
 
 	private mutationOperation(op: GraphQLOperation): OpenApiOperation {
 		return {
-			operationId: op.Name,
+			...this.commonOperation(op),
 			requestBody: {
 				content: {
 					'application/json': {
@@ -251,6 +277,9 @@ export class OpenApiBuilder {
 		const paths: Record<string, OpenApiPath> = {};
 
 		for (const op of operations) {
+			if (op.Internal) {
+				continue;
+			}
 			let opPath: OpenApiPath | undefined;
 			switch (op.OperationType) {
 				case OperationType.QUERY:
@@ -266,7 +295,7 @@ export class OpenApiBuilder {
 					break;
 			}
 			if (opPath) {
-				paths[`/operations/${op.PathName}`] = opPath;
+				paths[`/${op.PathName}`] = opPath;
 			}
 		}
 
@@ -279,7 +308,7 @@ export class OpenApiBuilder {
 				title: this.config.title ? this.config.title : this.config.baseURL,
 				version: this.config.version,
 			},
-			servers: [{ url: this.config.baseURL }],
+			servers: [{ url: `${this.config.baseURL}/operations` }],
 			paths,
 			components: {
 				schemas: schemas,

@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.13...@wundergraph/nextjs@0.10.0) (2023-04-04)
+
+### Features
+
+* add auth middleware hook to nextjs client ([#795](https://github.com/wundergraph/wundergraph/issues/795)) ([77f92e3](https://github.com/wundergraph/wundergraph/commit/77f92e328028f15b6eede6084dae9318dca1a008)) (@Pagebakers)
+
+## [0.9.13](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.12...@wundergraph/nextjs@0.9.13) (2023-04-04)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.12](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.11...@wundergraph/nextjs@0.9.12) (2023-03-31)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.11](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.10...@wundergraph/nextjs@0.9.11) (2023-03-30)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.10](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.9...@wundergraph/nextjs@0.9.10) (2023-03-29)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.9](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.8...@wundergraph/nextjs@0.9.9) (2023-03-28)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.8](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.7...@wundergraph/nextjs@0.9.8) (2023-03-27)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.7](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.6...@wundergraph/nextjs@0.9.7) (2023-03-23)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
+## [0.9.6](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.5...@wundergraph/nextjs@0.9.6) (2023-03-16)
+
+**Note:** Version bump only for package @wundergraph/nextjs
+
 ## [0.9.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/nextjs@0.9.4...@wundergraph/nextjs@0.9.5) (2023-03-06)
 
 **Note:** Version bump only for package @wundergraph/nextjs

@@ -1,6 +1,7 @@
 import * as z from 'zod';
 import * as fs from 'fs';
 import type { BaseRequestContext, InternalClient, OperationsClient, WunderGraphUser } from '../server';
+import { OperationError } from '../client';
 
 export type SubscriptionHandler<
 	Input,
@@ -73,8 +74,10 @@ const createQuery =
 		requireAuthentication = false,
 		internal = false,
 		rbac,
+		errors = [],
 	}: {
 		input?: Input;
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -109,6 +112,7 @@ const createQuery =
 				requireMatchAll: rbac?.requireMatchAll || [],
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
+			errors,
 			liveQuery: {
 				enable: live?.enable || true,
 				pollingIntervalSeconds: live?.pollingIntervalSeconds || 5,
@@ -125,8 +129,10 @@ const createMutation =
 		requireAuthentication = false,
 		internal = false,
 		rbac,
+		errors = [],
 	}: {
 		input?: Input;
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: ZodResponse extends z.ZodObject<any>
 			? (
@@ -160,6 +166,7 @@ const createMutation =
 				requireMatchAll: rbac?.requireMatchAll || [],
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
+			errors,
 			liveQuery: {
 				enable: false,
 				pollingIntervalSeconds: 0,
@@ -176,8 +183,10 @@ const createSubscription =
 		requireAuthentication = false,
 		internal = false,
 		rbac,
+		errors = [],
 	}: {
 		input?: I;
+		errors?: { new (): OperationError }[];
 		response?: ZodResponse;
 		handler: SubscriptionHandler<
 			I,
@@ -215,6 +224,7 @@ const createSubscription =
 				requireMatchAll: rbac?.requireMatchAll || [],
 				requireMatchAny: rbac?.requireMatchAny || [],
 			},
+			errors,
 			liveQuery: {
 				enable: false,
 				pollingIntervalSeconds: 0,
@@ -271,6 +281,7 @@ export type NodeJSOperation<
 		Mutations,
 		Subscriptions
 	>;
+	errors?: { new (): OperationError }[];
 	requireAuthentication?: boolean;
 	internal: boolean;
 	liveQuery: {
@@ -309,23 +320,23 @@ export const loadNodeJsOperationDefaultModule = async (
 	operationPath: string
 ): Promise<NodeJSOperation<any, any, any, any, any, any, any, any, any, any>> => {
 	// remove .js or / from the end of operationPath if present
-	if (operationPath.endsWith('.js')) {
-		operationPath = operationPath.slice(0, -3);
+	if (operationPath.endsWith('.cjs')) {
+		operationPath = operationPath.slice(0, -4);
 	}
 	if (operationPath.endsWith('/')) {
 		operationPath = operationPath.slice(0, -1);
 	}
 	const modulePath = operationPath;
-	const filePath = modulePath + '.js';
+	const filePath = modulePath + '.cjs';
 	const exists = fs.existsSync(filePath);
 	if (!exists) {
 		throw new Error(`Operation file not found at ${filePath}`);
 	}
 	let module: any | undefined;
 	try {
-		module = await import(modulePath);
+		module = await import(filePath);
 	} catch (e: any) {
-		throw new Error(`Error loading module at ${filePath}: ${e.message}`);
+		throw new Error(`Error loading module at ${filePath}: ${e.message}: ${e?.stack}`);
 	}
 	if (!module || !module.default) {
 		throw new Error(`Module at ${filePath} does not export default`);

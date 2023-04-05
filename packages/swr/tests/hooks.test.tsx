@@ -7,7 +7,7 @@ import nock from 'nock';
 import fetch from 'node-fetch';
 
 import { createHooks } from '../src';
-import { InputValidationError } from '@wundergraph/sdk/dist/client/InputValidationError';
+import { InputValidationError } from '@wundergraph/sdk/client';
 
 export function sleep(time: number) {
 	return new Promise<void>((resolve) => setTimeout(resolve, time));
@@ -20,6 +20,7 @@ type MockError = {
 };
 
 const mockErrorJson = {
+	code: 'InputValidationError',
 	message: 'Bad Request: Invalid input',
 	errors: [
 		{
@@ -156,8 +157,7 @@ describe('SWR - useQuery', () => {
 	});
 
 	it('returns a ResponseError if the response is not 2xx and has a plaintext body', async () => {
-		const errorMessage = 'Computer says no.';
-		const scope = nockQuery().once().reply(400, errorMessage);
+		const scope = nockQuery().once().reply(400, 'Bad Request');
 
 		function Page() {
 			const { error } = useQuery({
@@ -170,7 +170,7 @@ describe('SWR - useQuery', () => {
 		renderWithConfig(<Page />);
 
 		await waitFor(() => {
-			screen.getByText(errorMessage);
+			screen.getByText('Bad Request');
 		});
 
 		scope.done();
@@ -190,13 +190,13 @@ describe('SWR - useQuery', () => {
 		renderWithConfig(<Page />);
 
 		await waitFor(() => {
-			screen.getByText('Response is not OK');
+			screen.getByText('Invalid response from server');
 		});
 
 		scope.done();
 	});
 
-	it('returns an InputValidationError if the response is not 2xx and has a json body', async () => {
+	it('returns an InputValidationError if the response is 400 and has error code "InputValidationError"', async () => {
 		const scope = nockQuery().once().reply(400, mockErrorJson);
 
 		function Page() {
@@ -408,7 +408,7 @@ describe('SWR - useMutation', () => {
 		screen.getByText(/true/);
 
 		await waitFor(() => {
-			screen.getByText('Response is not OK');
+			screen.getByText('Invalid response from server');
 		});
 
 		expect(() => csrfScope.done()).toThrow(); // should not be called

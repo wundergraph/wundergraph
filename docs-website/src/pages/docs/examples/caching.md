@@ -29,10 +29,10 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       },
     },
     mutations: (config) => {
-      return config
+      return config;
     },
     subscriptions: (config) => {
-      return config
+      return config;
     },
     queries: (config) => ({
       ...config,
@@ -57,7 +57,7 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
       }),
     },
   },
-})
+});
 ```
 
 ## Result
@@ -69,3 +69,13 @@ which means that Browsers, Proxies and CDNs will be able to cache the response.
 On top of that, we'll also generate an `ETag` for the response.
 This makes it very efficient to re-validate content.
 You can read more about this in the ETag documentation.
+
+## Learn more
+
+- [Guides](/docs/guides)
+
+## Deploy to WunderGraph Cloud
+
+The easiest way to deploy your WunderGraph app is to use WunderGraph Cloud.
+
+{% deploy template="simple" /%}

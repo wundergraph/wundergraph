@@ -8,8 +8,7 @@ On subsequent requests, the client will automatically attach the ETag to the req
 
 ## Getting Started
 
-1. Copy the `.env.example` file to `.env` and fill in the required values.
-2. Install the dependencies and run the complete example in one command:
+1. Install the dependencies and run the complete example in one command:
 
 ```shell
 npm install && npm start
@@ -18,6 +17,10 @@ npm install && npm start
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
+
+## Deploy to WunderGraph Cloud
+
+[![Deploy to WunderGraph](https://wundergraph.com/button)](https://cloud.wundergraph.com/new/clone?templateName=caching)
 
 ## Got Questions?
 
