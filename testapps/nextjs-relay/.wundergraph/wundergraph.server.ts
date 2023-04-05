@@ -32,48 +32,6 @@ export default configureWunderGraphServer<HooksConfig, InternalClient>(() => ({
 				console.log('postLogout', JSON.stringify(hook.user));
 			},
 		},
-		queries: {
-			Hello: {
-				preResolve: async (hook) => {
-					console.log('###preResolve', hook);
-				},
-				mutatingPreResolve: async (hook) => {
-					console.log('###mutatingPreResolve', hook);
-					return hook.input;
-				},
-				postResolve: async (hook) => {
-					console.log('###postResolve', hook);
-				},
-				mutatingPostResolve: async (hook) => {
-					console.log('###mutatingPostResolve', hook);
-					return hook.response;
-				},
-			},
-			FakeWeather: {
-				mockResolve: async (hook) => {
-					const randomWeatherDescription = ['sunny', 'cloudy', 'rainy', 'stormy', 'snowy', 'windy'];
-					const randomTemperatureCelsius = Math.floor(Math.random() * 40) - 20;
-					// '0°, cloudy'
-					const description = `${randomTemperatureCelsius}°, ${
-						randomWeatherDescription[Math.floor(Math.random() * randomWeatherDescription.length)]
-					}`;
-					return {
-						data: {
-							getCityByName: {
-								id: '1',
-								name: 'Berlin',
-								weather: {
-									summary: {
-										title: 'Weather for Berlin',
-										description,
-									},
-								},
-							},
-						},
-					};
-				},
-			},
-		},
 		mutations: {
 			SetName: {
 				preResolve: async (hook) => {

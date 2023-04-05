@@ -27,20 +27,5 @@ export default configureWunderGraphOperations<OperationsConfiguration>({
 		subscriptions: (config) => ({
 			...config,
 		}),
-		custom: {
-			ProtectedWeather: (config) => ({
-				...config,
-				authentication: {
-					required: true,
-				},
-			}),
-			PastLaunches: (config) => ({
-				...config,
-				caching: {
-					...config.caching,
-					enable: true,
-				},
-			}),
-		},
 	},
 });

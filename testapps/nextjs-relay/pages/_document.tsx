@@ -13,6 +13,8 @@ class ExampleDocument extends NextDocument<DocumentProps> {
 		const renderPage = ctx.renderPage;
 		ctx.renderPage = () =>
 			renderPage({
+				// TODO: Issue with types defined in relay-nextjs package. Need to report it to the author.
+				// @ts-expect-error
 				enhanceApp: (App) => relayDocument.enhance(App),
 			});
 
