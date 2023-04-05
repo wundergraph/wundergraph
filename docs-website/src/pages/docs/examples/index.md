@@ -14,6 +14,7 @@ Here's an overview of all the available examples.
 {% quick-link title="Cross API Joins" icon="core" href="/docs/examples/cross-api-joins" description="An example demonstrating how to join data across two APIs." /%}
 {% quick-link title="Next.js" icon="core" href="/docs/examples/nextjs" description="This example integrates WunderGraph with Next.js." /%}
 {% quick-link title="Next.js TypeScript Operations" icon="core" href="/docs/examples/nextjs-typescript-operations" description="TypeScript Operations with Next.js" /%}
+{% quick-link title="Next.js + Clerk" icon="core" href="/docs/examples/nextjs-clerk" description="WunderGraph with Clerk and Next.js" /%}
 {% quick-link title="Vite + SWR" icon="core" href="/docs/examples/vite-swr" description="This example integrates WunderGraph with Vite and SWR." /%}
 {% quick-link title="Hooks" icon="core" href="/docs/examples/hooks" description="This example demonstrates how to use hooks in WunderGraph." /%}
 {% quick-link title="Caching" icon="core" href="/docs/examples/caching" description="This example demonstrates how to use caching in WunderGraph." /%}

@@ -169,6 +169,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDirAbs: wunderGraphDir,
 				ServerScriptFile:  serverOutFile,
 				Env:               helpers.CliEnv(rootFlags),
+				Debug:             rootFlags.DebugMode,
 			}
 
 			hookServerRunner = helpers.NewServerRunner(log, srvCfg)

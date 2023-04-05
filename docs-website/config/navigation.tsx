@@ -1,23 +1,22 @@
 import {
-	HomeIcon,
+	AcademicCapIcon,
+	ArrowUpCircleIcon,
 	BoltIcon,
-	CircleStackIcon,
-	LockClosedIcon,
-	ShareIcon,
-	ServerIcon,
 	BookOpenIcon,
-	CubeIcon,
+	CircleStackIcon,
 	CloudIcon,
-	ComputerDesktopIcon,
 	CogIcon,
 	CommandLineIcon,
-	QuestionMarkCircleIcon,
-	WrenchIcon,
-	ArrowUpCircleIcon,
+	ComputerDesktopIcon,
+	CubeIcon,
+	HomeIcon,
 	LightBulbIcon,
 	ListBulletIcon,
-	CloudArrowUpIcon,
-	AcademicCapIcon,
+	LockClosedIcon,
+	QuestionMarkCircleIcon,
+	ServerIcon,
+	ShareIcon,
+	WrenchIcon,
 } from '@heroicons/react/24/solid';
 
 const navigation = [
@@ -89,6 +88,10 @@ const navigation = [
 					{
 						title: 'Next.js + React Query',
 						href: '/docs/examples/nextjs-react-query',
+					},
+					{
+						title: 'Next.js + Clerk',
+						href: '/docs/examples/nextjs-clerk',
 					},
 					{
 						title: 'Vite + SWR',
@@ -857,6 +860,10 @@ const navigation = [
 			{
 				title: 'Workspace Configuration (wg.toml)',
 				href: '/docs/cloud/configuration',
+			},
+			{
+				title: 'Errors',
+				href: '/docs/cloud/errors',
 			},
 			{
 				title: 'Deployments',
