@@ -29,6 +29,22 @@ describe('functions', () => {
 			expect(result.data?.data?.chinook_findFirstAlbum?.AlbumId).toBe(1);
 		}
 	});
+
+	test('internal directory operation call from function', async () => {
+		const client = wg.client();
+		const promises = [];
+		for (let ii = 0; ii < 50; ii++) {
+			const op = client.query({
+				operationName: 'nested/InternalDirectoryWrapper',
+			});
+			promises.push(op);
+		}
+		const results = await Promise.all(promises);
+		for (const result of results) {
+			expect(result.error).toBeUndefined();
+			expect(result.data?.data?.chinook_findFirstAlbum?.AlbumId).toBe(1);
+		}
+	});
 });
 
 describe('@jsonSchema', () => {
