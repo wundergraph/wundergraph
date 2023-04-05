@@ -1,10 +1,11 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
 import { usePreloadedQuery, useRelayEnvironment } from 'react-relay/hooks';
-import { useEffect, useState, useRef } from 'react';
-import { hydrateRelayEnvironment } from 'relay-nextjs';
+import { useEffect, useState, useRef, ComponentType } from 'react';
+import { withRelay, hydrateRelayEnvironment } from 'relay-nextjs';
 import {
 	Environment,
 	FetchFunction,
+	GraphQLTaggedNode,
 	Network,
 	Observable,
 	RecordSource,
@@ -13,6 +14,11 @@ import {
 	createOperationDescriptor,
 	getRequest,
 } from 'relay-runtime';
+import { WiredOptions, WiredProps } from 'relay-nextjs/wired/component';
+
+// To avoid the error: The inferred type of X cannot be named without a reference to Y due to dependencies between relay-nextjs & next packages
+// Reference: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1270716220
+import type {} from 'next';
 
 let clientEnv: Environment | undefined;
 
@@ -29,7 +35,7 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	onError?(error: ResponseError): void;
 }
 
-export const createRelayApp = (client: Client) => {
+export const createWunderGraphRelayApp = (client: Client) => {
 	const fetchQuery: FetchFunction = async (params, variables) => {
 		const { id, operationKind } = params;
 		const response =
@@ -192,6 +198,29 @@ export const createRelayApp = (client: Client) => {
 		};
 	};
 
+	const withWunderGraphRelay = <Props extends WiredProps, ServerSideProps>(
+		Component: ComponentType<Props>,
+		query: GraphQLTaggedNode,
+		opts: Omit<WiredOptions<Props, ServerSideProps>, 'createClientEnvironment' | 'createServerEnvironment'>
+	) => {
+		const WrappedComponent: ReturnType<typeof withRelay<Props, ServerSideProps>> & { displayName?: string } = withRelay(
+			Component,
+			query,
+			{
+				createClientEnvironment: () => createClientEnvironment()!,
+				createServerEnvironment: async () => {
+					return createServerEnvironment();
+				},
+				...opts,
+			}
+		);
+
+		// Adding a display Name to help with debugging with React Dev Tools
+		WrappedComponent.displayName = `withWunderGraphRelay(${Component.displayName || Component.name})`;
+
+		return WrappedComponent;
+	};
+
 	const useLivePreloadedQuery = (
 		gqlQuery: Parameters<typeof usePreloadedQuery>[0],
 		preloadedQuery: Parameters<typeof usePreloadedQuery>[1],
@@ -241,5 +270,6 @@ export const createRelayApp = (client: Client) => {
 		createServerEnvironment,
 		createServerNetwork,
 		useLivePreloadedQuery,
+		withWunderGraphRelay,
 	};
 };

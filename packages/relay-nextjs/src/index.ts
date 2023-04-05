@@ -1,3 +1,3 @@
-import { createRelayApp } from './createRelayApp';
+import { createWunderGraphRelayApp } from './createWunderGraphRelayApp';
 
-export { createRelayApp };
+export { createWunderGraphRelayApp };

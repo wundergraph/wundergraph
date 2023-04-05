@@ -1,6 +1,6 @@
 import { RelayEnvironmentProvider } from 'react-relay/hooks';
 import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
-import { createClientEnvironment } from '../lib/createRelayApp';
+import { createClientEnvironment } from '../lib/createWunderGraphRelayApp';
 import type { AppProps } from 'next/app';
 
 const clientEnv = createClientEnvironment();

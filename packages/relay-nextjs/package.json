@@ -46,13 +46,14 @@
     "@wundergraph/sdk": "workspace:*",
     "react-relay": "^15.0.0",
     "relay-nextjs": "^1.0.2",
-    "relay-runtime": "^15.0.0",
-    "tsup": "^6.5.0"
+    "relay-runtime": "^15.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.33",
     "@types/react-relay": "^14.1.3",
     "@types/relay-runtime": "^14.1.10",
+    "next": "12.2.0",
+    "tsup": "^6.5.0",
     "typescript": "^5.0.3"
   }
 }

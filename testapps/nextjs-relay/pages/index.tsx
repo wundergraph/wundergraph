@@ -1,11 +1,10 @@
 import styles from '../styles/Home.module.css';
 import React from 'react';
-import { graphql, usePreloadedQuery } from 'react-relay';
+import { graphql } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
-import { withRelay } from 'relay-nextjs';
 import type { pages_indexQuery as IndexQueryType } from './__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
-import { createClientEnvironment, useLivePreloadedQuery } from '../lib/createRelayApp';
+import { withWunderGraphRelay, useLivePreloadedQuery } from '../lib/createWunderGraphRelayApp';
 import TemperatureDetails from '../components/Temperature';
 
 const IndexQuery = graphql`
@@ -39,12 +38,7 @@ function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 	);
 }
 
-export default withRelay(Home, IndexQuery, {
-	createClientEnvironment: () => createClientEnvironment()!,
-	createServerEnvironment: async () => {
-		const { createServerEnvironment } = await import('../lib/createRelayApp');
-		return createServerEnvironment();
-	},
+export default withWunderGraphRelay(Home, IndexQuery, {
 	variablesFromContext: (ctx) => {
 		return {
 			city: 'Berlin',
