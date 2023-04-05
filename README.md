@@ -160,8 +160,6 @@ npx create-wundergraph-app --init
 We've got a comprehensive list of examples to get you started.
 The best way to try them out is by cloning the mono-repo.
 
-// Create a list of examples from this directory: examples
-
 - [Apollo Federation](examples/apollo-federation)
 - [Auth0 OpenID Connect Authentication](examples/auth0-oidc-authentication)
 - [Caching](examples/caching)
