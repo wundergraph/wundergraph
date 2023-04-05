@@ -24,7 +24,7 @@ const IndexQuery = graphql`
 `;
 
 function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
-	const data = useLivePreloadedQuery(IndexQuery, preloadedQuery);
+	const { data } = useLivePreloadedQuery(IndexQuery, preloadedQuery);
 
 	return (
 		<div className={styles.container}>

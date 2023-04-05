@@ -42,7 +42,6 @@ export const createRelayApp = (client: Client) => {
 						operationName: `relay/${id}`,
 						input: variables,
 				  });
-		// TODO: figure out a better way to return errors for relay
 		return {
 			...response,
 			errors: response.error ? [response.error] : [],
@@ -193,13 +192,22 @@ export const createRelayApp = (client: Client) => {
 		};
 	};
 
-	const useLivePreloadedQuery: typeof usePreloadedQuery = (gqlQuery, preloadedQuery, options) => {
+	const useLivePreloadedQuery = (
+		gqlQuery: Parameters<typeof usePreloadedQuery>[0],
+		preloadedQuery: Parameters<typeof usePreloadedQuery>[1],
+		options?: Parameters<typeof usePreloadedQuery>[2],
+		subscriptionOptions: Omit<UseSubscribeToProps, 'operationName' | 'input'> = {}
+	): {
+		error?: ClientResponse['error'];
+		isSubscribed?: boolean;
+		isLoading?: boolean;
+		data: ReturnType<typeof usePreloadedQuery>;
+	} => {
 		const data = usePreloadedQuery(gqlQuery, preloadedQuery, options);
 		const environment = useRelayEnvironment();
 
 		const { id, variables } = preloadedQuery;
 
-		// TODO: figure out a way to handle error & other states with livequery
 		const {
 			data: liveData,
 			error,
@@ -208,6 +216,7 @@ export const createRelayApp = (client: Client) => {
 		} = useSubscribeTo({
 			operationName: `relay/${id}`,
 			input: variables,
+			...subscriptionOptions,
 		});
 
 		useEffect(() => {
@@ -218,7 +227,12 @@ export const createRelayApp = (client: Client) => {
 			}
 		}, [liveData]);
 
-		return data;
+		return {
+			data,
+			error,
+			isSubscribed,
+			isLoading,
+		};
 	};
 
 	return {
