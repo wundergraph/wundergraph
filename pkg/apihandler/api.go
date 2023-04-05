@@ -28,10 +28,11 @@ type Logging struct {
 	Level zapcore.Level
 }
 
-type Telemetry struct {
-	OtelEnabled                bool
-	OtelExporterHTTPEndpoint   string
-	OtelExporterJaegerEndpoint string
+type OpenTelemetry struct {
+	Enabled                bool
+	ExporterHTTPEndpoint   string
+	ExporterJaegerEndpoint string
+	JWTToken               string
 }
 
 type Options struct {
@@ -40,7 +41,7 @@ type Options struct {
 	Listener       *Listener
 	Logging        Logging
 	DefaultTimeout time.Duration
-	OpenTelemetry  *Telemetry
+	OpenTelemetry  *OpenTelemetry
 }
 
 type CookieBasedSecrets struct {

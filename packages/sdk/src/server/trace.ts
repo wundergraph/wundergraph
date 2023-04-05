@@ -40,17 +40,27 @@ const configureTracerProvider = (config?: TelemetryOptions): TelemetryTracerProv
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 function getExporter(config?: TelemetryOptions): SpanExporter {
-	if (config?.otelExporterHttpEndpoint) {
-		const url = resolveConfigurationVariable(config.otelExporterHttpEndpoint);
+	if (config?.exporterHttpEndpoint) {
+		const url = resolveConfigurationVariable(config.exporterHttpEndpoint);
 		if (url !== '') {
+			const [authHeader, hasAuthHeader] = getAuthHeader(config);
+			if (hasAuthHeader) {
+				return new OTLPTraceExporter({
+					url: url,
+					headers: {
+						Authorization: authHeader,
+					},
+				});
+			}
+
 			return new OTLPTraceExporter({
 				url: url,
 			});
 		}
 	}
 
-	if (config?.otelExporterJaegerEndpoint) {
-		const endpoint = resolveConfigurationVariable(config.otelExporterJaegerEndpoint);
+	if (config?.exporterJaegerEndpoint) {
+		const endpoint = resolveConfigurationVariable(config.exporterJaegerEndpoint);
 		if (endpoint !== '') {
 			return new JaegerExporter({
 				endpoint: endpoint,
@@ -62,13 +72,24 @@ function getExporter(config?: TelemetryOptions): SpanExporter {
 }
 
 function getSpanProcessor(config?: TelemetryOptions): SpanProcessor {
-	if (config?.otelEnabled) {
-		if (resolveConfigurationVariable(config.otelEnabled) == 'true') {
+	if (config?.enabled) {
+		if (resolveConfigurationVariable(config.enabled) == 'true') {
 			return new BatchSpanProcessor(getExporter(config));
 		}
 	}
 
 	return new NoopSpanProcessor();
+}
+
+function getAuthHeader(config?: TelemetryOptions): [string, boolean] {
+	if (config?.jwtToken) {
+		const token = resolveConfigurationVariable(config.jwtToken);
+		if (token !== '') {
+			return ['Bearer ' + token, true];
+		}
+	}
+
+	return ['', false];
 }
 
 export default configureTracerProvider;

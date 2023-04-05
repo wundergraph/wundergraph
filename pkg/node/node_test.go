@@ -147,10 +147,11 @@ func TestNode(t *testing.T) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
-				OpenTelemetry: &apihandler.Telemetry{
-					OtelEnabled:                false,
-					OtelExporterHTTPEndpoint:   "",
-					OtelExporterJaegerEndpoint: "",
+				OpenTelemetry: &apihandler.OpenTelemetry{
+					Enabled:                false,
+					ExporterHTTPEndpoint:   "",
+					ExporterJaegerEndpoint: "",
+					JWTToken:               "",
 				},
 			},
 		},
@@ -320,10 +321,11 @@ func TestInMemoryCache(t *testing.T) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
-				OpenTelemetry: &apihandler.Telemetry{
-					OtelEnabled:                false,
-					OtelExporterJaegerEndpoint: "",
-					OtelExporterHTTPEndpoint:   "",
+				OpenTelemetry: &apihandler.OpenTelemetry{
+					Enabled:                false,
+					ExporterJaegerEndpoint: "",
+					ExporterHTTPEndpoint:   "",
+					JWTToken:               "",
 				},
 			},
 		},
@@ -432,10 +434,10 @@ func TestWebHooks(t *testing.T) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
-				OpenTelemetry: &apihandler.Telemetry{
-					OtelEnabled:                false,
-					OtelExporterJaegerEndpoint: "",
-					OtelExporterHTTPEndpoint:   "",
+				OpenTelemetry: &apihandler.OpenTelemetry{
+					Enabled:                false,
+					ExporterJaegerEndpoint: "",
+					ExporterHTTPEndpoint:   "",
 				},
 			},
 		},
@@ -533,10 +535,10 @@ func BenchmarkNode(t *testing.B) {
 					Port: uint16(port),
 				},
 				Logging: apihandler.Logging{Level: zap.ErrorLevel},
-				OpenTelemetry: &apihandler.Telemetry{
-					OtelEnabled:                false,
-					OtelExporterJaegerEndpoint: "",
-					OtelExporterHTTPEndpoint:   "",
+				OpenTelemetry: &apihandler.OpenTelemetry{
+					Enabled:                false,
+					ExporterJaegerEndpoint: "",
+					ExporterHTTPEndpoint:   "",
 				},
 			},
 			AuthenticationConfig: &wgpb.ApiAuthenticationConfig{

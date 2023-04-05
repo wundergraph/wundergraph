@@ -523,9 +523,10 @@ message NodeLogging {
 }
 
 message TelemetryOptions {
-	ConfigurationVariable otelEnabled = 1;
-	ConfigurationVariable otelExporterHttpEndpoint = 2;
-	ConfigurationVariable otelExporterJaegerEndpoint = 3;
+	ConfigurationVariable enabled = 1;
+	ConfigurationVariable exporterHttpEndpoint = 2;
+	ConfigurationVariable exporterJaegerEndpoint = 3;
+	ConfigurationVariable jwtToken = 4;
 }
 
 message NodeOptions {
@@ -534,7 +535,7 @@ message NodeOptions {
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
 	int64 defaultRequestTimeoutSeconds = 5;
-	TelemetryOptions telemetry = 6;
+	TelemetryOptions openTelemetry = 6;
 }
 
 message ServerLogging {

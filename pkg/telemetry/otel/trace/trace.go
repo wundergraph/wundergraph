@@ -19,6 +19,7 @@ type TracerProviderConfig struct {
 	Endpoint       string
 	JaegerEndpoint string
 	ServiceName    string
+	JWTToken       string
 	Enabled        bool
 }
 
@@ -64,10 +65,17 @@ func NewNoopTracerProvider() *TracerProvider {
 func configureExporter(ctx context.Context, config *TracerProviderConfig) (sdktrace.SpanExporter, error) {
 	switch {
 	case config.Endpoint != "":
-		client := otlptracehttp.NewClient(
-			otlptracehttp.WithInsecure(),
+		opts := []otlptracehttp.Option{
 			otlptracehttp.WithEndpoint(config.Endpoint),
-		)
+		}
+
+		if config.JWTToken != "" {
+			opts = append(opts, otlptracehttp.WithHeaders(map[string]string{
+				"Authorization": "Bearer " + config.JWTToken,
+			}))
+		}
+
+		client := otlptracehttp.NewClient(opts...)
 
 		return otlptrace.New(ctx, client)
 	case config.JaegerEndpoint != "":

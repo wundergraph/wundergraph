@@ -15,6 +15,7 @@ export enum WgEnv {
 	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
 	OtelExporterJaegerEndpoint = 'WG_OTEL_EXPORTER_JAEGER_ENDPOINT',
 	OtelEnabled = 'WG_OTEL_ENABLED',
+	OtelJwtToken = 'WG_OTEL_JWT_TOKEN',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -33,10 +34,11 @@ const DefaultNodeOptions = {
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
-	telemetry: {
-		otelEnabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
-		otelExporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, ''),
-		otelExporterJaegerEndpoint: new EnvironmentVariable(WgEnv.OtelExporterJaegerEndpoint, ''),
+	openTelemetry: {
+		enabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
+		exporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, ''),
+		exporterJaegerEndpoint: new EnvironmentVariable(WgEnv.OtelExporterJaegerEndpoint, ''),
+		jwtToken: new EnvironmentVariable(WgEnv.OtelJwtToken, ''),
 	},
 	defaultRequestTimeoutSeconds: 0,
 };
@@ -52,15 +54,17 @@ export interface ResolvedListenOptions {
 }
 
 export interface TelemetryOptions {
-	otelEnabled: InputVariable<boolean>;
-	otelExporterHttpEndpoint?: InputVariable;
-	otelExporterJaegerEndpoint?: InputVariable;
+	enabled: InputVariable<boolean>;
+	exporterHttpEndpoint?: InputVariable;
+	exporterJaegerEndpoint?: InputVariable;
+	jwtToken?: InputVariable;
 }
 
 export interface ResolvedTelemetryOptions {
-	otelEnabled: ConfigurationVariable;
-	otelExporterHttpEndpoint: ConfigurationVariable;
-	otelExporterJaegerEndpoint: ConfigurationVariable;
+	enabled: ConfigurationVariable;
+	exporterHttpEndpoint: ConfigurationVariable;
+	exporterJaegerEndpoint: ConfigurationVariable;
+	jwtToken: ConfigurationVariable;
 }
 
 export interface NodeOptions {
@@ -70,7 +74,7 @@ export interface NodeOptions {
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
-	telemetry?: TelemetryOptions;
+	openTelemetry?: TelemetryOptions;
 	/**
 	 * Default timeout for network requests, in seconds.
 	 *
@@ -90,7 +94,7 @@ export interface ResolvedNodeOptions {
 	logger: {
 		level: ConfigurationVariable;
 	};
-	telemetry: ResolvedTelemetryOptions;
+	openTelemetry: ResolvedTelemetryOptions;
 	defaultRequestTimeoutSeconds: number;
 }
 
@@ -114,12 +118,13 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
-				telemetry: {
-					otelEnabled: options?.telemetry?.otelEnabled || DefaultNodeOptions.telemetry.otelEnabled,
-					otelExporterHttpEndpoint:
-						options?.telemetry?.otelExporterHttpEndpoint || DefaultNodeOptions.telemetry.otelExporterHttpEndpoint,
-					otelExporterJaegerEndpoint:
-						options?.telemetry?.otelExporterJaegerEndpoint || DefaultNodeOptions.telemetry.otelExporterJaegerEndpoint,
+				openTelemetry: {
+					enabled: options?.openTelemetry?.enabled || DefaultNodeOptions.openTelemetry.enabled,
+					exporterHttpEndpoint:
+						options?.openTelemetry?.exporterHttpEndpoint || DefaultNodeOptions.openTelemetry.exporterHttpEndpoint,
+					exporterJaegerEndpoint:
+						options?.openTelemetry?.exporterJaegerEndpoint || DefaultNodeOptions.openTelemetry.exporterJaegerEndpoint,
+					jwtToken: options?.openTelemetry?.jwtToken || DefaultNodeOptions.openTelemetry.jwtToken,
 				},
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions?.defaultRequestTimeoutSeconds,
@@ -135,10 +140,11 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		logger: {
 			level: mapInputVariable(nodeOptions.logger.level),
 		},
-		telemetry: {
-			otelEnabled: mapInputVariable<boolean>(nodeOptions.telemetry.otelEnabled),
-			otelExporterHttpEndpoint: mapInputVariable(nodeOptions.telemetry.otelExporterHttpEndpoint),
-			otelExporterJaegerEndpoint: mapInputVariable(nodeOptions.telemetry.otelExporterJaegerEndpoint),
+		openTelemetry: {
+			enabled: mapInputVariable<boolean>(nodeOptions.openTelemetry.enabled),
+			exporterHttpEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterHttpEndpoint),
+			exporterJaegerEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterJaegerEndpoint),
+			jwtToken: mapInputVariable(nodeOptions.openTelemetry?.jwtToken),
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
 	};

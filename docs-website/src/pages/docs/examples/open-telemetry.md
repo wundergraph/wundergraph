@@ -11,13 +11,15 @@ description:
 Check the `wundergraph.config.ts` confile:
 
 ```typescript
+// wundergraph.config.ts
 configureWunderGraphApplication({
   apis: [spacex],
   options: {
-    telemetry: {
-      otelEnabled: true,
-      otelExporterHttpEndpoint: '',
-      otelExporterJaegerEndpoint: 'http://localhost:14268/api/traces',
+    openTelemetry: {
+      enabled: true, // default: false
+      exporterHttpEndpoint: '', // standard otel http exporter endpoint
+      exporterJaegerEndpoint: '', // 'http://localhost:14268/api/traces' we recommed to use it for development
+      jwtToken: '', // jwt token for authentication, use for development only, adds authentication header to the exporter
     },
   },
   // ...
@@ -49,3 +51,16 @@ Header format: `traceparent: {version}-{trace_id}-{span_id}-{trace_flags}`
 https://www.w3.org/TR/trace-context/#trace-context-http-headers-format
 
 Configure hooks in the `wundergraph.server.ts` and check how the tracing data changes.
+
+## Environment variables configuration
+
+The Open Telemetry configuration can also be set via environment variables.
+
+```shell
+  WG_OTEL_ENABLED=true
+  WG_OTEL_EXPORTER_HTTP_ENDPOINT=''
+  WG_OTEL_EXPORTER_JAEGER_ENDPOINT='http://localhost:14268/api/traces'
+  WG_OTEL_JWT_TOKEN='' # production mode
+```
+
+Please note that `wundergraph.config.ts` configuration has higher priority than environment variables.
