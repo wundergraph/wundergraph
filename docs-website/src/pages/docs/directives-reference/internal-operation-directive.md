@@ -5,7 +5,7 @@ description:
 ---
 
 {% callout type="warning" %}
-This directive is deprecated. Operations are now automatically marked internal when inside a folder named _internal_ (even if nested).
+This directive is deprecated. Operations are now automatically marked internal when inside a directory named _internal_ (even if nested).
 {% /callout %}
 
 The `@internalOperation` directive marks an Operation as internal.

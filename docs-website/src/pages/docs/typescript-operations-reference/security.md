@@ -32,8 +32,8 @@ Define an input schema using `zod` and you can trust that the request will be va
 
 ## Internal Operations
 
-Not all operations need to exposed to the public internet. In this case just place the operation file under a folder named _internal_ and the operation will automatically be marked as internal.
-The internal folder can be nested and the same applies to nested operations within the internal folder.
+Not all operations need to exposed to the public Internet. In this case, just place the operation file under a directory named _internal_, and the operation will automatically be marked as internal.
+The internal directory can be nested, and the same applies to nested operations within the internal directory.
 
 {% callout type="warning" %}
 The configuration for operations accepts and `internal` prop. This is deprecated. Please use the above method instead.
