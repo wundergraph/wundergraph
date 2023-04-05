@@ -69,6 +69,11 @@ func TestMuxMiddleware(t *testing.T) {
 		called = true
 		got := trace.SpanFromContext(r.Context()).SpanContext()
 		assert.Equal(t, sc, got)
+		assert.Equal(t, sc.TraceID(), got.TraceID())
+		assert.True(t, got.IsSampled())
+		assert.True(t, got.IsRemote())
+		assert.True(t, got.SpanID().IsValid())
+		assert.Equal(t, sc.SpanID(), got.SpanID())
 		w.WriteHeader(http.StatusOK)
 	})
 
