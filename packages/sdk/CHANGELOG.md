@@ -3,6 +3,67 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.143.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.143.0...@wundergraph/sdk@0.143.1) (2023-04-04)
+
+### Bug Fixes
+
+* translating oas spec in the v2 oas introspection ([#787](https://github.com/wundergraph/wundergraph/issues/787)) ([30496a4](https://github.com/wundergraph/wundergraph/commit/30496a44b7bf03aae77a8e5bfb037ce8d3165d37)) (@devsergiy)
+
+## [0.143.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.2...@wundergraph/sdk@0.143.0) (2023-03-31)
+
+### Features
+
+* add beta omnigraph backed open api data ([#771](https://github.com/wundergraph/wundergraph/issues/771)) ([a2c94f6](https://github.com/wundergraph/wundergraph/commit/a2c94f6b081f8ed3d3f2df2e9bf605fa1278713d)) (@devsergiy)
+
+## [0.142.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.1...@wundergraph/sdk@0.142.2) (2023-03-30)
+
+### Bug Fixes
+
+* make TS operation response schema generation more forgiving ([#776](https://github.com/wundergraph/wundergraph/issues/776)) ([f6cde4f](https://github.com/wundergraph/wundergraph/commit/f6cde4fa3c3e3027feab87deb078eca749e975ea)), closes [#762](https://github.com/wundergraph/wundergraph/issues/762) (@fiam)
+
+## [0.142.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.142.0...@wundergraph/sdk@0.142.1) (2023-03-29)
+
+### Bug Fixes
+
+* print compiler error messages during TS operation response schema generation ([#761](https://github.com/wundergraph/wundergraph/issues/761)) ([0ff8feb](https://github.com/wundergraph/wundergraph/commit/0ff8feb80b9ca83452bb8888fc651f4a5a535c4e)) (@fiam)
+* support TS operations that never return ([#762](https://github.com/wundergraph/wundergraph/issues/762)) ([7092f90](https://github.com/wundergraph/wundergraph/commit/7092f907f1448fe6a7455e868726bb6e511478f9)) (@fiam)
+
+## [0.142.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.141.0...@wundergraph/sdk@0.142.0) (2023-03-28)
+
+### Features
+
+* custom error support for typescript operations ([#759](https://github.com/wundergraph/wundergraph/issues/759)) ([7cfa815](https://github.com/wundergraph/wundergraph/commit/7cfa815a44b0b2a1184c2c50d0c4ea7cbb8066a7)) (@StarpTech)
+* use .cjs extension for commonjs to support esm projects ([#752](https://github.com/wundergraph/wundergraph/issues/752)) ([7045b52](https://github.com/wundergraph/wundergraph/commit/7045b529d0f6ac339c6959668c77325777326a6f)) (@Pagebakers)
+
+## [0.141.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.140.0...@wundergraph/sdk@0.141.0) (2023-03-27)
+
+### Features
+
+* add build_info.json to sdk ([#758](https://github.com/wundergraph/wundergraph/issues/758)) ([e34c94f](https://github.com/wundergraph/wundergraph/commit/e34c94fefc6b624ada2d4ad36ce8589309620950)) (@Aenimus)
+
+## [0.140.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.139.0...@wundergraph/sdk@0.140.0) (2023-03-23)
+
+### Features
+
+* add raw sql support ([#745](https://github.com/wundergraph/wundergraph/issues/745)) ([081ef23](https://github.com/wundergraph/wundergraph/commit/081ef23ca4e63a12344b24cfed858a1fb1a0d5b8)) (@jensneuse)
+* new local cache implementation ([#727](https://github.com/wundergraph/wundergraph/issues/727)) ([111decc](https://github.com/wundergraph/wundergraph/commit/111decc1cdba258ce9936cfbe396511536b48ee2)) (@fiam)
+
+### Bug Fixes
+
+* data corruption when polling is enabled for federation sources ([#753](https://github.com/wundergraph/wundergraph/issues/753)) ([daa8a8c](https://github.com/wundergraph/wundergraph/commit/daa8a8c386ab9ad9bfd707f351815d0976d26ae4)) (@fiam)
+
+## [0.139.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.138.0...@wundergraph/sdk@0.139.0) (2023-03-16)
+
+### Features
+
+* annotate OpenAPI spec with operation types and auth requirements ([#728](https://github.com/wundergraph/wundergraph/issues/728)) ([67836a8](https://github.com/wundergraph/wundergraph/commit/67836a84f51ca0875c20e8d9e9a5144e091e4499)) (@fiam)
+
+### Bug Fixes
+
+* custom int/float scalars usage in arguments ([#427](https://github.com/wundergraph/wundergraph/issues/427))Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: spetrunin <neyasut@gmail.com> ([2b424f3](https://github.com/wundergraph/wundergraph/commit/2b424f3daaabea25abb4a23139751ff0ab2adefe)) (@OLingard)
+* do not inject empty queries ([#718](https://github.com/wundergraph/wundergraph/issues/718))Co-authored-by: Sergiy <818351+devsergiy@users.noreply.github.com> Co-authored-by: Eelco Wiersma <contact@pagebakers.nl> Co-authored-by: Alberto García Hierro <alberto@garciahierro.com> ([47c1cf3](https://github.com/wundergraph/wundergraph/commit/47c1cf39b7a36e86e0dc5adc77ac1113fea4f178)) (@erguotou520)
+* fixing multidimensional array schema in codegen ([#731](https://github.com/wundergraph/wundergraph/issues/731))Co-authored-by: abdelhameedalsayed <abdulhameed.azab@gmail.com> ([73e2a09](https://github.com/wundergraph/wundergraph/commit/73e2a097826d593bbb0dbda9c2a7856110aa3b36)) (@abdelhameedhamdy)
+
 ## [0.138.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.137.4...@wundergraph/sdk@0.138.0) (2023-03-06)
 
 ### Features

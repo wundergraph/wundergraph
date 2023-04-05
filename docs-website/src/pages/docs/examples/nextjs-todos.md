@@ -41,10 +41,13 @@ e.g. `npm run migrate "add pets"`.
 npm run cleanup
 ```
 
-## Learn More
+## Learn more
 
-Read the [Docs](https://wundergraph.com/docs).
+- [Guides](/docs/guides)
+- [Next.js client documentation](/docs/clients-reference/nextjs)
 
-## Got Questions?
+## Deploy to WunderGraph Cloud
 
-Join us on [Discord](https://wundergraph.com/discord)!
+The easiest way to deploy your WunderGraph app is to use [WunderGraph Cloud](https://cloud.wundergraph.com). Enable the [Vercel integration](https://vercel.com/integrations/wundergraph) to deploy the Next.js frontend to Vercel.
+
+{% deploy template="nextjs-todos" /%}

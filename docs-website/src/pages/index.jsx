@@ -146,10 +146,10 @@ export default function HomePage() {
 						<Links
 							href="/docs/databases"
 							links={[
-								{ href: '/docs/databases/postgresql', label: 'Postgres', className: 'underline' },
-								{ href: '/docs/databases/mysql', label: 'MySQL', className: 'underline' },
+								{ href: '/docs/databases/prisma', label: 'Prisma', className: 'underline' },
+								{ href: '/docs/databases/prisma#postgre-sql', label: 'PostgreSQL', className: 'underline' },
+								{ href: '/docs/databases/prisma#planetscale', label: 'Planetscale', className: 'underline' },
 								{ href: '/docs/databases/faunadb', label: 'Fauna', className: 'underline' },
-								{ href: '/docs/databases/planetscale', label: 'Planetscale', className: 'underline' },
 								{
 									href: '/docs/databases',
 									label: <QuickLinkMore label="View all" className="underline-0" />,

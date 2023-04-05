@@ -10,14 +10,13 @@ import server from './wundergraph.server';
 import operations from './wundergraph.operations';
 import { golangClient } from '@wundergraph/golang-client';
 
-const jsp = introspect.openApi({
+const jsp = introspect.openApiV2({
+	id: 'jsp',
 	apiNamespace: 'jsp',
 	source: {
 		kind: 'file',
 		filePath: '../json_placeholder.json',
 	},
-	baseURL: 'https://jsonplaceholder.typicode.{tld}',
-	headers: (builder) => builder.addClientRequestHeader('X-Authorization', 'Authorization'),
 });
 
 const jsp2 = introspect.openApi({

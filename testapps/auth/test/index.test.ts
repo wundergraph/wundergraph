@@ -46,6 +46,8 @@ type Tokens = {
 	withCountry: string;
 	withCountryAndMatchingCurrency: string;
 	withCountryAndWrongCurrency: string;
+	withNotAllowedByPostAuthenticationSub: string;
+	withNotAllowedByRevalidationSub: string;
 };
 
 let tokens: Tokens | undefined;
@@ -101,6 +103,8 @@ const startServer = async () => {
 		withCountry: await makeToken({ cc: 'PT' }, privateKey),
 		withCountryAndMatchingCurrency: await makeToken({ cc: 'PT', currency: 'EUR' }, privateKey),
 		withCountryAndWrongCurrency: await makeToken({ cc: 'PT', currency: 'USD' }, privateKey),
+		withNotAllowedByPostAuthenticationSub: await makeToken({ sub: 'notAllowedByPostAuthentication' }, privateKey),
+		withNotAllowedByRevalidationSub: await makeToken({ sub: 'notAllowedByRevalidation' }, privateKey),
 	};
 	return wg.start();
 };
@@ -378,5 +382,48 @@ describe('public claims', () => {
 		const user = await client.fetchUser();
 		expect(user.userId).toBe(defaultTokenSubject);
 		expect((user as any)['providerId']).toBeUndefined();
+	});
+});
+
+// TODO: Check error messages once we implement them instead of returning 404
+describe('user endpoints', () => {
+	test('fetchUser() with authentication and revalidation', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.WithShopIDString);
+		const user = await client.fetchUser();
+
+		expect(user.userId).toBe('admin');
+		// Set by hooks
+		expect(user.firstName).toBe('mutatingPostAuthentication');
+		expect(user.lastName).toBeUndefined();
+
+		const revalidated = await client.fetchUser({ revalidate: true });
+
+		expect(revalidated.userId).toBe('admin');
+		// Set by hooks
+		expect(revalidated.firstName).toBe('mutatingPostAuthentication');
+		expect(revalidated.lastName).toBe('revalidate');
+	});
+
+	test('fetchUser() not allowed in postAuthentication', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withNotAllowedByPostAuthenticationSub);
+		await expect(async () => client.fetchUser()).rejects.toThrow();
+	});
+
+	test('fetchUser() not allowed in revalidation', async () => {
+		const client = wg.client();
+		client.setAuthorizationToken(tokens!.withNotAllowedByRevalidationSub);
+		await expect(async () => client.fetchUser({ revalidate: true })).rejects.toThrow();
+
+		// If we don't revalidate, we should be allowed to authenticate
+		const user = await client.fetchUser();
+		expect(user.userId).toBe('notAllowedByRevalidation');
+	});
+
+	test('fetchUser() without authentication', async () => {
+		const client = wg.client();
+		await expect(async () => client.fetchUser()).rejects.toThrow();
+		await expect(async () => client.fetchUser({ revalidate: true })).rejects.toThrow();
 	});
 });
