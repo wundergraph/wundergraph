@@ -1,6 +1,6 @@
 import styles from '../styles/Home.module.css';
 import React from 'react';
-import { graphql } from 'react-relay';
+import { graphql, usePreloadedQuery } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
 import type { pages_indexQuery as IndexQueryType } from '../__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
@@ -31,8 +31,12 @@ function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 				<h1 className={styles.title}>
 					Welcome to <a href="https://nextjs.org">Next.js!</a>
 				</h1>
-				<Weather weather={data.weather_getCityByName.weather.summary} />
-				<TemperatureDetails weather={data.weather_getCityByName.weather.temperature} />
+				{data?.weather_getCityByName?.weather?.summary && (
+					<Weather weather={data.weather_getCityByName.weather.summary} />
+				)}
+				{data?.weather_getCityByName?.weather?.temperature && (
+					<TemperatureDetails weather={data.weather_getCityByName.weather.temperature} />
+				)}
 			</main>
 		</div>
 	);

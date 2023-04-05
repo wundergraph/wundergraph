@@ -1,5 +1,5 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
-import { usePreloadedQuery, useRelayEnvironment } from 'react-relay/hooks';
+import { PreloadedQuery, usePreloadedQuery, useRelayEnvironment } from 'react-relay/hooks';
 import { useEffect, useState, useRef, ComponentType } from 'react';
 import { withRelay, hydrateRelayEnvironment } from 'relay-nextjs';
 import {
@@ -8,6 +8,7 @@ import {
 	GraphQLTaggedNode,
 	Network,
 	Observable,
+	OperationType,
 	RecordSource,
 	Store,
 	SubscribeFunction,
@@ -68,8 +69,6 @@ export const createWunderGraphRelayApp = (client: Client) => {
 							...response,
 							errors: response.error ? [response.error] : [],
 						};
-						// TODO: response data is unknown & it is throwing type error
-						// @ts-expect-error
 						sink.next(graphQLResponse);
 					}
 				)
@@ -220,16 +219,16 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		return WrappedComponent;
 	};
 
-	const useLivePreloadedQuery = (
+	const useLivePreloadedQuery = <TQuery extends OperationType>(
 		gqlQuery: Parameters<typeof usePreloadedQuery>[0],
-		preloadedQuery: Parameters<typeof usePreloadedQuery>[1],
+		preloadedQuery: PreloadedQuery<TQuery>,
 		options?: Parameters<typeof usePreloadedQuery>[2],
 		subscriptionOptions: Omit<UseSubscribeToProps, 'operationName' | 'input'> = {}
 	): {
 		error?: ClientResponse['error'];
 		isSubscribed?: boolean;
 		isLoading?: boolean;
-		data: ReturnType<typeof usePreloadedQuery>;
+		data: TQuery['response'];
 	} => {
 		const data = usePreloadedQuery(gqlQuery, preloadedQuery, options);
 		const environment = useRelayEnvironment();

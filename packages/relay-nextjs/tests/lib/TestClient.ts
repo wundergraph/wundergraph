@@ -1,9 +1,9 @@
-import { Client, ClientConfig, OperationsDefinition } from '@wundergraph/sdk/client';
+import { Client, ClientConfig, GraphQLError, OperationsDefinition } from '@wundergraph/sdk/client';
 import fetch from 'node-fetch';
 
 export type Queries = {
 	Weather: {
-		data: any;
+		response: { data: any };
 		requiresAuthentication: false;
 		liveQuery: boolean;
 	};
@@ -12,12 +12,12 @@ export type Queries = {
 export type Mutations = {
 	SetNameWithoutAuth: {
 		input: { name: string };
-		data: { id: string };
+		response: { data: { id: string }; error: GraphQLError };
 		requiresAuthentication: false;
 	};
 	SetName: {
 		input: { name: string };
-		data: { id: string };
+		response: { data: { id: string }; error: GraphQLError };
 		requiresAuthentication: true;
 	};
 };
@@ -25,7 +25,7 @@ export type Mutations = {
 export type Subscriptions = {
 	Countdown: {
 		input: { from: number };
-		data: { count: number };
+		response: { data: { count: number } };
 		requiresAuthentication: false;
 	};
 };
