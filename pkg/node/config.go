@@ -53,7 +53,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		Enabled:                loadvariable.Bool(graphConfig.Api.NodeOptions.OpenTelemetry.Enabled),
 		ExporterHTTPEndpoint:   loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.ExporterHttpEndpoint),
 		ExporterJaegerEndpoint: loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.ExporterJaegerEndpoint),
-		JWTToken:               loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.JwtToken),
+		AuthToken:              loadvariable.String(graphConfig.Api.NodeOptions.OpenTelemetry.AuthToken),
 	}
 
 	defaultRequestTimeout := defaultTimeout

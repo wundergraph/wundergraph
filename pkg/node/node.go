@@ -397,7 +397,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 		JaegerEndpoint: nodeConfig.Api.Options.OpenTelemetry.ExporterJaegerEndpoint,
 		ServiceName:    "wundergraph-node",
 		Enabled:        nodeConfig.Api.Options.OpenTelemetry.Enabled,
-		JWTToken:       nodeConfig.Api.Options.OpenTelemetry.JWTToken,
+		AuthToken:      nodeConfig.Api.Options.OpenTelemetry.AuthToken,
 	})
 	if err != nil {
 		n.log.Error("failed to initialize otel tracer provider", zap.Error(err))

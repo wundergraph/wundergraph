@@ -15,7 +15,7 @@ configureWunderGraphApplication({
 			enabled: true,
 			exporterHttpEndpoint: '',
 			exporterJaegerEndpoint: 'http://localhost:14268/api/traces',
-			jwtToken: '',
+			authToken: '',
 		},
 	},
 	server,

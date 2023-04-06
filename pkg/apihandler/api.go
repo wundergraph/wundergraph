@@ -32,7 +32,7 @@ type OpenTelemetry struct {
 	Enabled                bool
 	ExporterHTTPEndpoint   string
 	ExporterJaegerEndpoint string
-	JWTToken               string
+	AuthToken              string
 }
 
 type Options struct {

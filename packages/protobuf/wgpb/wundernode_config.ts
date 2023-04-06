@@ -1170,7 +1170,7 @@ export interface TelemetryOptions {
   enabled: ConfigurationVariable | undefined;
   exporterHttpEndpoint: ConfigurationVariable | undefined;
   exporterJaegerEndpoint: ConfigurationVariable | undefined;
-  jwtToken: ConfigurationVariable | undefined;
+  authToken: ConfigurationVariable | undefined;
 }
 
 export interface NodeOptions {
@@ -3870,7 +3870,7 @@ function createBaseTelemetryOptions(): TelemetryOptions {
     enabled: undefined,
     exporterHttpEndpoint: undefined,
     exporterJaegerEndpoint: undefined,
-    jwtToken: undefined,
+    authToken: undefined,
   };
 }
 
@@ -3884,7 +3884,7 @@ export const TelemetryOptions = {
       exporterJaegerEndpoint: isSet(object.exporterJaegerEndpoint)
         ? ConfigurationVariable.fromJSON(object.exporterJaegerEndpoint)
         : undefined,
-      jwtToken: isSet(object.jwtToken) ? ConfigurationVariable.fromJSON(object.jwtToken) : undefined,
+      authToken: isSet(object.authToken) ? ConfigurationVariable.fromJSON(object.authToken) : undefined,
     };
   },
 
@@ -3898,8 +3898,8 @@ export const TelemetryOptions = {
     message.exporterJaegerEndpoint !== undefined && (obj.exporterJaegerEndpoint = message.exporterJaegerEndpoint
       ? ConfigurationVariable.toJSON(message.exporterJaegerEndpoint)
       : undefined);
-    message.jwtToken !== undefined &&
-      (obj.jwtToken = message.jwtToken ? ConfigurationVariable.toJSON(message.jwtToken) : undefined);
+    message.authToken !== undefined &&
+      (obj.authToken = message.authToken ? ConfigurationVariable.toJSON(message.authToken) : undefined);
     return obj;
   },
 
@@ -3915,8 +3915,8 @@ export const TelemetryOptions = {
       (object.exporterJaegerEndpoint !== undefined && object.exporterJaegerEndpoint !== null)
         ? ConfigurationVariable.fromPartial(object.exporterJaegerEndpoint)
         : undefined;
-    message.jwtToken = (object.jwtToken !== undefined && object.jwtToken !== null)
-      ? ConfigurationVariable.fromPartial(object.jwtToken)
+    message.authToken = (object.authToken !== undefined && object.authToken !== null)
+      ? ConfigurationVariable.fromPartial(object.authToken)
       : undefined;
     return message;
   },

@@ -19,7 +19,7 @@ type TracerProviderConfig struct {
 	Endpoint       string
 	JaegerEndpoint string
 	ServiceName    string
-	JWTToken       string
+	AuthToken      string
 	Enabled        bool
 }
 
@@ -69,9 +69,9 @@ func configureExporter(ctx context.Context, config *TracerProviderConfig) (sdktr
 			otlptracehttp.WithEndpoint(config.Endpoint),
 		}
 
-		if config.JWTToken != "" {
+		if config.AuthToken != "" {
 			opts = append(opts, otlptracehttp.WithHeaders(map[string]string{
-				"Authorization": "Bearer " + config.JWTToken,
+				"Authorization": config.AuthToken,
 			}))
 		}
 

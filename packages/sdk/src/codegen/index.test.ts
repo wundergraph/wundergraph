@@ -102,7 +102,7 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							environmentVariableDefaultValue: '',
 							placeholderVariableName: '',
 						},
-						jwtToken: {
+						authToken: {
 							kind: ConfigurationVariableKind.ENV_CONFIGURATION_VARIABLE,
 							staticVariableContent: '',
 							environmentVariableName: '',

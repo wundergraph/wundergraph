@@ -526,7 +526,7 @@ message TelemetryOptions {
 	ConfigurationVariable enabled = 1;
 	ConfigurationVariable exporterHttpEndpoint = 2;
 	ConfigurationVariable exporterJaegerEndpoint = 3;
-	ConfigurationVariable jwtToken = 4;
+	ConfigurationVariable authToken = 4;
 }
 
 message NodeOptions {

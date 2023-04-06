@@ -15,7 +15,7 @@ export enum WgEnv {
 	OtelExporterHttpEndpoint = 'WG_OTEL_EXPORTER_HTTP_ENDPOINT',
 	OtelExporterJaegerEndpoint = 'WG_OTEL_EXPORTER_JAEGER_ENDPOINT',
 	OtelEnabled = 'WG_OTEL_ENABLED',
-	OtelJwtToken = 'WG_OTEL_JWT_TOKEN',
+	OtelJwt = 'WG_OTEL_JWT',
 }
 
 export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'debug';
@@ -38,7 +38,7 @@ const DefaultNodeOptions = {
 		enabled: new EnvironmentVariable<boolean>(WgEnv.OtelEnabled, false),
 		exporterHttpEndpoint: new EnvironmentVariable(WgEnv.OtelExporterHttpEndpoint, ''),
 		exporterJaegerEndpoint: new EnvironmentVariable(WgEnv.OtelExporterJaegerEndpoint, ''),
-		jwtToken: new EnvironmentVariable(WgEnv.OtelJwtToken, ''),
+		authToken: new EnvironmentVariable(WgEnv.OtelJwt, ''),
 	},
 	defaultRequestTimeoutSeconds: 0,
 };
@@ -57,14 +57,14 @@ export interface TelemetryOptions {
 	enabled: InputVariable<boolean>;
 	exporterHttpEndpoint?: InputVariable;
 	exporterJaegerEndpoint?: InputVariable;
-	jwtToken?: InputVariable;
+	authToken?: InputVariable;
 }
 
 export interface ResolvedTelemetryOptions {
 	enabled: ConfigurationVariable;
 	exporterHttpEndpoint: ConfigurationVariable;
 	exporterJaegerEndpoint: ConfigurationVariable;
-	jwtToken: ConfigurationVariable;
+	authToken: ConfigurationVariable;
 }
 
 export interface NodeOptions {
@@ -124,7 +124,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 						options?.openTelemetry?.exporterHttpEndpoint || DefaultNodeOptions.openTelemetry.exporterHttpEndpoint,
 					exporterJaegerEndpoint:
 						options?.openTelemetry?.exporterJaegerEndpoint || DefaultNodeOptions.openTelemetry.exporterJaegerEndpoint,
-					jwtToken: options?.openTelemetry?.jwtToken || DefaultNodeOptions.openTelemetry.jwtToken,
+					authToken: options?.openTelemetry?.authToken || DefaultNodeOptions.openTelemetry.authToken,
 				},
 				defaultRequestTimeoutSeconds:
 					options?.defaultRequestTimeoutSeconds || DefaultNodeOptions?.defaultRequestTimeoutSeconds,
@@ -144,7 +144,7 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 			enabled: mapInputVariable<boolean>(nodeOptions.openTelemetry.enabled),
 			exporterHttpEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterHttpEndpoint),
 			exporterJaegerEndpoint: mapInputVariable(nodeOptions.openTelemetry.exporterJaegerEndpoint),
-			jwtToken: mapInputVariable(nodeOptions.openTelemetry?.jwtToken),
+			authToken: mapInputVariable(nodeOptions.openTelemetry?.authToken),
 		},
 		defaultRequestTimeoutSeconds: nodeOptions.defaultRequestTimeoutSeconds,
 	};

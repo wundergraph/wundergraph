@@ -82,10 +82,10 @@ function getSpanProcessor(config?: TelemetryOptions): SpanProcessor {
 }
 
 function getAuthHeader(config?: TelemetryOptions): [string, boolean] {
-	if (config?.jwtToken) {
-		const token = resolveConfigurationVariable(config.jwtToken);
+	if (config?.authToken) {
+		const token = resolveConfigurationVariable(config.authToken);
 		if (token !== '') {
-			return ['Bearer ' + token, true];
+			return [token, true];
 		}
 	}
 
