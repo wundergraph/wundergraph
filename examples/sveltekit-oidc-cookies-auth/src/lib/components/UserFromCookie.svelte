@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getUser } from '$lib/svelte-query';\
-	
+	import { getUser } from '$lib/svelte-query';
+
 	const query = getUser();
 
 	$: user = $query.data;
