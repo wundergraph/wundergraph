@@ -117,12 +117,10 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 	const useMutation: UseMutationHook<Operations> = (options) => {
 		const { operationName, variables, ...mutationOptions } = options;
 
-		const result = useTanstackMutation(
-			[operationName],
-			(input) => mutationFetcher({ operationName, input }),
-			// rome-ignore lint/suspicious/noExplicitAny: Bug with the vue query type MaybeRefDeep
-			{ ...mutationOptions, variables: variables as any }
-		);
+		const result = useTanstackMutation([operationName], (input) => mutationFetcher({ operationName, input }), {
+			...mutationOptions,
+			variables: variables as any, //Bug with the vue-query types
+		});
 		return result;
 	};
 
@@ -216,21 +214,17 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 			unref(props);
 
 		const startedAt = ref<number | null>(null);
-		// const onSuccessRef = ref(onSuccess);
-		// const onErrorRef = ref(onError);
 		const isLoading = ref(false);
 		const isSubscribed = ref(false);
 
 		let unsubscribe: ReturnType<typeof subscribeTo> = () => undefined;
 
 		onMounted(() => {
-			console.log('Mounted Subscriber', queryHash);
 			if (!startedAt.value && resetOnMount) {
 				client.removeQueries([operationName, input]);
 			}
 
 			if (enabled) {
-				console.log('Enabled !');
 				isLoading.value = true;
 				isSubscribed.value = false;
 
@@ -240,18 +234,15 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 					liveQuery: unref(liveQuery),
 					subscribeOnce,
 					onError(error) {
-						console.log('have error', error);
 						isLoading.value = false;
 						isSubscribed.value = false;
 						onError?.(error);
 						startedAt.value = null;
 					},
 					onResult(result) {
-						console.log('Have result', result);
 						if (!startedAt.value) {
 							isLoading.value = false;
 							isSubscribed.value = true;
-							console.log('triggering callback');
 							onSuccess?.(result);
 							startedAt.value = new Date().getTime();
 						}
@@ -295,7 +286,6 @@ export const createHooks = <Operations extends OperationsDefinition>(client: Cli
 		const { enabled = true, operationName, input, subscribeOnce, onSuccess, onError } = options;
 		const queryHash = serialize([operationName, input]);
 
-		// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 		const subscription = useTanstackQuery<any, any, any, any>({
 			queryKey: [operationName, input],
 			enabled: false, // we update the cache async
