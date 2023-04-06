@@ -40,12 +40,10 @@ import * as fs from 'fs';
 import process from 'node:process';
 import { OperationError } from '../client';
 
-export const isInternalOperationByPath = (path: string) => {
-	// Determine the directory separator based on the platform
-	const separator = process.platform === 'win32' ? '\\' : '/';
-
-	// Split the file path by the directory separator
-	const elements = path.split(separator);
+export const isInternalOperationByAPIMountPath = (path: string) => {
+	// Split the file path by the path separator
+	// The api mount path is always in UNIX style
+	const elements = path.split('/');
 
 	// Remove the last element (the file name)
 	elements.pop();
@@ -276,7 +274,8 @@ export const parseGraphQLOperations = (
 									'More details here: https://docs.wundergraph.com/docs/directives-reference/internal-operation-directive'
 							);
 						}
-						operation.Internal = internalOperationDirective || isInternalOperationByPath(operationFile.file_path);
+						operation.Internal =
+							internalOperationDirective || isInternalOperationByAPIMountPath(operationFile.api_mount_path);
 
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
 							const rbac = node.directives?.find((d) => d.name.value === 'rbac');

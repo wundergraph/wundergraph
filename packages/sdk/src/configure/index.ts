@@ -30,7 +30,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
-	isInternalOperationByPath,
+	isInternalOperationByAPIMountPath,
 	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
@@ -1315,7 +1315,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 				'More details here: https://docs.wundergraph.com/docs/typescript-operations-reference/security#internal-operations'
 		);
 	}
-	const isInternal = implementation.internal || isInternalOperationByPath(file.file_path);
+	const isInternal = implementation.internal || isInternalOperationByAPIMountPath(file.api_mount_path);
 
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,

@@ -1,5 +1,5 @@
 import {
-	isInternalOperationByPath,
+	isInternalOperationByAPIMountPath,
 	LoadOperationsOutput,
 	operationResponseToJSONSchema,
 	operationVariablesToJSONSchema,
@@ -1439,7 +1439,7 @@ input CreateEnvironment {
   edges: [ID!]
 }`;
 
-test('isInternalOperationByPath', () => {
+test('isInternalOperationByAPIMountPath', () => {
 	const publicPaths = [
 		'foo.ts',
 		'bar.graphql',
@@ -1450,16 +1450,11 @@ test('isInternalOperationByPath', () => {
 	];
 	const internalPaths = ['internal/foo.ts', 'internal/bar.graphql', 'nested/internal/bat.ts'];
 
-	if (process.platform === 'win32') {
-		publicPaths.push('testinternal\\bat.ts');
-		internalPaths.push('test\\internal\\bat.ts');
-	}
-
 	publicPaths.forEach((path) => {
-		expect(isInternalOperationByPath(path)).toBe(false);
+		expect(isInternalOperationByAPIMountPath(path)).toBe(false);
 	});
 
 	internalPaths.forEach((path) => {
-		expect(isInternalOperationByPath(path)).toBe(true);
+		expect(isInternalOperationByAPIMountPath(path)).toBe(true);
 	});
 });
