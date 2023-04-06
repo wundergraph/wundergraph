@@ -85,19 +85,9 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	 *   operationName: 'Weather',
 	 * })
 	 * ```
-	 *
-	 * All queries support liveQuery by default, enabling this will set up a realtime subscription.
-	 * ```ts
-	 * const { data, error, isLoading, isSubscribed } = useQuery({
-	 *   operationName: 'Weather',
-	 *   liveQuery: true,
-	 * })
-	 * ```
 	 */
-	const prefetchQuery: PrefetchQuery<Operations> = (options) => {
+	const prefetchQuery: PrefetchQuery<Operations> = (options, queryClient) => {
 		const { operationName, liveQuery, input, enabled, refetchOnWindowFocus, ...queryOptions } = options;
-
-		const queryClient = useQueryClient();
 
 		queryClient.prefetchQuery({
 			queryKey: queryKey({ operationName, input }),

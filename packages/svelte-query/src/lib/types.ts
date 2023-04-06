@@ -15,6 +15,7 @@ import type {
 	CreateMutationOptions as TanstackCreateMutationOptions,
 	CreateMutationResult,
 	QueryObserverResult,
+	QueryClient,
 } from '@tanstack/svelte-query';
 import type { Writable, Readable } from 'svelte/store';
 
@@ -100,7 +101,8 @@ export type PrefetchQuery<Operations extends OperationsDefinition, ExtraOptions 
 		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
-		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
+		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions,
+		queryClient: QueryClient
 	): void;
 };
 
