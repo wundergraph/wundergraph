@@ -12,6 +12,7 @@ import { JSONSchema7 as JSONSchema } from 'json-schema';
 import { ClaimType, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
+import process from 'node:process';
 
 const MyReviews = `
 query {
@@ -1448,6 +1449,11 @@ test('isInternalOperationByPath', () => {
 		'hellointernal/bob.ts',
 	];
 	const internalPaths = ['internal/foo.ts', 'internal/bar.graphql', 'nested/internal/bat.ts'];
+
+	if (process.platform === 'win32') {
+		publicPaths.push('testinternal\\bat.ts');
+		internalPaths.push('test\\internal\\bat.ts');
+	}
 
 	publicPaths.forEach((path) => {
 		expect(isInternalOperationByPath(path)).toBe(false);

@@ -41,12 +41,17 @@ import process from 'node:process';
 import { OperationError } from '../client';
 
 export const isInternalOperationByPath = (path: string) => {
-	return (
-		path.startsWith('internal/') ||
-		path.includes('/internal/') ||
-		path.startsWith('internal\\') ||
-		path.includes('\\internal\\')
-	);
+	// Determine the directory separator based on the platform
+	const separator = process.platform === 'win32' ? '\\' : '/';
+
+	// Split the file path by the directory separator
+	const elements = path.split(separator);
+
+	// Remove the last element (the file name)
+	elements.pop();
+
+	// check if the resulting array contains internal
+	return elements.includes('internal');
 };
 
 export interface GraphQLOperation {
