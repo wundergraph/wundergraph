@@ -9,7 +9,6 @@ node_modules
 .vercel
 .output
 vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
 
 # WunderGraph generated files
 **/.wundergraph/generated
