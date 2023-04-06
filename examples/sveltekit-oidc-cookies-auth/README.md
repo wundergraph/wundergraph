@@ -19,6 +19,8 @@ Once the login is complete, the backend will insert the logged in user in the da
 ## Learn More
 
 Read the [Docs](https://wundergraph.com/docs).
+  - [Cookie-based Auth](https://docs.wundergraph.com/docs/auth/cookie-based-auth)
+  - [Mutating Post Authentication Hook](https://docs.wundergraph.com/docs/wundergraph-server-ts-reference/mutating-post-authentication-hook)
 
 
 ## Got Questions?
