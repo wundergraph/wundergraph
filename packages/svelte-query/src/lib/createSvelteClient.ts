@@ -86,10 +86,10 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	 * })
 	 * ```
 	 */
-	const prefetchQuery: PrefetchQuery<Operations> = (options, queryClient) => {
+	const prefetchQuery: PrefetchQuery<Operations> = async (options, queryClient) => {
 		const { operationName, liveQuery, input, enabled, refetchOnWindowFocus, ...queryOptions } = options;
 
-		queryClient.prefetchQuery({
+		await queryClient.prefetchQuery({
 			queryKey: queryKey({ operationName, input }),
 			queryFn: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
 			...queryOptions,

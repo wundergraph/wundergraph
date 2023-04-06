@@ -1,4 +1,4 @@
-import { prefetchQuery } from '$lib/wundergraph/wundergraph';
+import { prefetchQuery } from '$lib/wundergraph';
 import type { PageLoad } from './$types';
 
 export const prerender = true;

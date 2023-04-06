@@ -1,9 +1,10 @@
 {
-  "name": "vite-svelte",
+  "name": "wundergraph-vite-svelte",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "npm run dev",
     "dev": "concurrently \"npm run wundergraph\" \"vite --port 3000\" \"npm run browser\"",
     "build": "npm run build:wundergraph && vite build",
     "preview": "vite preview",
