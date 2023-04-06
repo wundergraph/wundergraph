@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { createWGClient } from '$lib/svelte-query';
-
-	const { createQuery } = createWGClient();
+	import { createQuery } from '$lib/svelte-query';
 
 	const query = createQuery({
 		operationName: 'user/Me',

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { createWGClient } from '$lib/svelte-query';
-	const { getUser } = createWGClient();
-
+	import { getUser } from '$lib/svelte-query';\
+	
 	const query = getUser();
 
 	$: user = $query.data;

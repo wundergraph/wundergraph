@@ -8,5 +8,15 @@ export function createWGClient (customFetch?: (input: RequestInfo, init?: Reques
 	}) : createClient());
 }
 
+export const {
+	createFileUpload,
+	createMutation,
+	createQuery,
+	createSubscription,
+	getAuth,
+	getUser,
+	queryKey
+} = createWGClient()
+
 
 

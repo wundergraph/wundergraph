@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { createWGClient } from '$lib/svelte-query';
-
-	const { getAuth, createQuery } = createWGClient();
+	import { getAuth, createQuery } from '$lib/svelte-query';
 
 	const query = createQuery({
 		operationName: 'user/Me',
