@@ -16,8 +16,7 @@ import { openApiSpecificationToGraphQLApi } from '../v2openapi/omnigraph';
 const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 	switch (source.kind) {
 		case 'file':
-			const filePath = path.resolve(process.cwd(), source.filePath);
-			return await fs.readFile(filePath, { encoding: 'utf-8' });
+			return readFile(source.filePath);
 		case 'object':
 			return JSON.stringify(source.openAPIObject);
 		case 'string':
@@ -27,7 +26,12 @@ const loadOpenApi = async (source: OpenAPIIntrospectionSource) => {
 	}
 };
 
-export const openApi = async (introspection: OpenAPIIntrospection) => {
+export const readFile = async (filePath: string) => {
+	const fullPath = path.resolve(process.cwd(), filePath);
+	return fs.readFile(fullPath, { encoding: 'utf-8' });
+};
+
+export const openApi = async (introspection: OpenAPIIntrospection): Promise<RESTApi> => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
@@ -39,18 +43,18 @@ export const openApi = async (introspection: OpenAPIIntrospection) => {
 	);
 };
 
-export interface OpenAPIIntrospectionNew
+export interface OpenAPIIntrospectionV2
 	extends Omit<OpenAPIIntrospection, 'statusCodeUnions' | 'authentication' | 'mTLS' | 'requestTimeoutSeconds'> {
 	id: string;
 }
 
-export const openApiV2 = async (introspection: OpenAPIIntrospectionNew) => {
+export const openApiV2 = async (introspection: OpenAPIIntrospectionV2): Promise<GraphQLApi> => {
 	const spec = await loadOpenApi(introspection.source);
 	const configuration = { keyInput: spec, source: 'localFilesystem' };
 	return introspectWithCache(
 		introspection,
 		configuration,
-		async (introspection: OpenAPIIntrospection, _: ApiIntrospectionOptions): Promise<GraphQLApi> => {
+		async (introspection: OpenAPIIntrospectionV2, _: ApiIntrospectionOptions): Promise<GraphQLApi> => {
 			return await openApiSpecificationToGraphQLApi(spec, introspection);
 		}
 	);

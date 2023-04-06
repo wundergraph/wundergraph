@@ -569,10 +569,10 @@ func (l *EngineConfigLoader) addDataSourceToPrismaSchema(schema, databaseURL str
 	return dataSource + schema
 }
 
-const serverUrlPlaceholder = "WG_SERVER_URL"
+const serverUrlPlaceholder = "WG_SERVER_URL-"
 
 func buildFetchUrl(url, baseUrl, path string, hooksServerUrl string) string {
-	if url == serverUrlPlaceholder {
+	if strings.HasPrefix(url, serverUrlPlaceholder) {
 		return fmt.Sprintf("%s/%s", strings.TrimSuffix(hooksServerUrl, "/"), strings.TrimPrefix(path, "/"))
 	}
 

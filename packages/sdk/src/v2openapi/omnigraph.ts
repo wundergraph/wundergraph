@@ -9,7 +9,7 @@ import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import { getJSONSchemaOptionsFromOpenAPIOptions } from '@omnigraph/openapi';
 import { loadNonExecutableGraphQLSchemaFromJSONSchemas } from '@omnigraph/json-schema';
 import { printSchemaWithDirectives } from '@graphql-tools/utils';
-import fs from 'fs';
+import { OpenAPIIntrospectionV2 } from '../definition/openapi-introspection';
 
 const apiIDRegexp = /^[_\-0-9a-z]+$/;
 const apiIDSchema = zod
@@ -36,17 +36,21 @@ export interface Options {
 	operationHeaders: Record<string, string>;
 }
 
-export const openApiSpecificationToGraphQLApi = async (
-	oas: string,
-	introspection: OpenAPIIntrospection
-): Promise<GraphQLApi> => {
-	const validationResult = await apiIDSchema.safeParseAsync(introspection.id);
+export const validateIntrospectionId = async (id: string): Promise<string> => {
+	const validationResult = await apiIDSchema.safeParseAsync(id);
 	if (!validationResult.success) {
 		const err = validationResult.error.format()._errors.join(', ');
 		throw new Error(`invalid id: ${err}`);
 	}
 
-	const apiID: string = validationResult.data;
+	return validationResult.data;
+};
+
+export const openApiSpecificationToGraphQLApi = async (
+	oas: string,
+	introspection: OpenAPIIntrospectionV2
+): Promise<GraphQLApi> => {
+	const apiID: string = await validateIntrospectionId(introspection.id);
 	const spec = removeExtensions(readSpec(oas, introspection.source));
 
 	const headersBuilder = new HeadersBuilder();
@@ -78,7 +82,7 @@ export const openApiSpecificationToGraphQLApi = async (
 
 	return introspectGraphql(
 		{
-			url: WgEnv.ServerUrl,
+			url: `${WgEnv.ServerUrl}-openapi`,
 			baseUrl: introspection.baseURL || '',
 			path: `/openapis/${apiID}`,
 			apiNamespace: introspection.apiNamespace,

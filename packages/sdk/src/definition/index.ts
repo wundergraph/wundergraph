@@ -22,7 +22,7 @@ import { InputVariable, mapInputVariable } from '../configure/variables';
 import { introspectGraphql, introspectGraphqlWithCache } from './graphql-introspection';
 import { introspectFederation } from './federation-introspection';
 import { IGraphqlIntrospectionHeadersBuilder, IHeadersBuilder } from './headers-builder';
-import { openApi, OpenAPIIntrospectionNew, openApiV2 } from './openapi-introspection';
+import { openApi, OpenAPIIntrospectionV2, openApiV2 } from './openapi-introspection';
 import {
 	introspectMongoDB,
 	introspectMySQL,
