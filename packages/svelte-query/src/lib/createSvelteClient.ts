@@ -17,6 +17,7 @@ import type {
 	CreateSubscription,
 	GetUser,
 	MutationFetcher,
+	PrefetchQuery,
 	QueryFetcher,
 	QueryKey,
 	SubscribeToOptions,
@@ -76,6 +77,38 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	};
 
 	/**
+	 * Prefetch a WunderGraph query for SSR (for frameworks like SvelteKit)
+	 *
+	 * @usage
+	 * ```ts
+	 * prefetchQuery({
+	 *   operationName: 'Weather',
+	 * })
+	 * ```
+	 *
+	 * All queries support liveQuery by default, enabling this will set up a realtime subscription.
+	 * ```ts
+	 * const { data, error, isLoading, isSubscribed } = useQuery({
+	 *   operationName: 'Weather',
+	 *   liveQuery: true,
+	 * })
+	 * ```
+	 */
+	const prefetchQuery: PrefetchQuery<Operations> = (options) => {
+		const { operationName, liveQuery, input, enabled, refetchOnWindowFocus, ...queryOptions } = options;
+
+		const queryClient = useQueryClient();
+
+		queryClient.prefetchQuery({
+			queryKey: queryKey({ operationName, input }),
+			queryFn: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
+			...queryOptions,
+			enabled: liveQuery ? false : enabled,
+			refetchOnWindowFocus: liveQuery ? false : refetchOnWindowFocus,
+		});
+	};
+
+	/**
 	 * Execute a WunderGraph query.
 	 *
 	 * @usage
@@ -117,7 +150,8 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 		});
 
 		if (liveQuery) {
-			return withSubscriptionState(queryResult, subscriptionState);
+			const liveQueryResult = withSubscriptionState(queryResult, subscriptionState);
+			return liveQueryResult;
 		}
 		return queryResult;
 	};
@@ -327,5 +361,6 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 		createFileUpload,
 		queryKey,
 		createSubscription,
+		prefetchQuery,
 	};
 }

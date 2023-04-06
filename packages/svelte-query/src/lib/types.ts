@@ -84,12 +84,24 @@ export type CreateQuery<Operations extends OperationsDefinition, ExtraOptions ex
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
 		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
-	): CreateQueryResult<Response['data'], Response['error']> & {
-		subscriptionState?: Writable<{
-			isLoading: boolean;
-			isSubscribed: boolean;
-		}>;
-	};
+	):
+		| CreateQueryResult<Response['data'], Response['error']>
+		| Readable<
+				QueryObserverResult<Response['data'], Response['error']> & {
+					isSubscribed: boolean;
+				}
+		  >;
+};
+
+export type PrefetchQuery<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
+	<
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
+		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
+		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
+	>(
+		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
+	): void;
 };
 
 export type UseSubscriptionOptions<
