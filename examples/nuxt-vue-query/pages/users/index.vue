@@ -3,12 +3,13 @@ const {
 	$wgraph: { useQuery },
 } = useNuxtApp();
 
-const { data } = useQuery({
+const { data, suspense } = useQuery({
 	operationName: 'users/get',
 	input: {
 		id: '1',
 	},
 });
+await suspense();
 </script>
 <template>
 	<div class="min-h-screen flex flex-col items-center justify-center text-white">

@@ -8,6 +8,7 @@ const { data } = useSubscription({
 		id: '1',
 	},
 });
+//await suspense(); does not work with subscriptions
 </script>
 <template>
 	<div class="min-h-screen flex flex-col items-center justify-center text-white">

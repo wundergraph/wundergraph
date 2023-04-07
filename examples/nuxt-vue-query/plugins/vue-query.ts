@@ -32,7 +32,6 @@ export default defineNuxtPlugin((nuxt) => {
 	return {
 		provide: {
 			wgraph,
-			vueQueryState,
 		},
 	};
 });

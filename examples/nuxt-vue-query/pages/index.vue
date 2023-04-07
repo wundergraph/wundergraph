@@ -1,8 +1,9 @@
 <script setup lang="ts">
 const { $wgraph } = useNuxtApp();
-const { data } = $wgraph.useQuery({
+const { data, suspense } = $wgraph.useQuery({
 	operationName: 'Dragons',
 });
+await suspense();
 </script>
 
 <template>
