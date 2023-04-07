@@ -10,7 +10,6 @@ import { defineComponent, Component, h, onMounted } from 'vue';
 
 export type Queries = {
 	Weather: {
-		// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 		response: { data?: any; error?: ResponseError };
 		requiresAuthentication: false;
 		liveQuery: boolean;
@@ -38,7 +37,6 @@ export type Subscriptions = {
 	};
 };
 
-// rome-ignore lint/suspicious/noEmptyInterface: <explanation>
 export interface Operations extends OperationsDefinition<Queries, Mutations, Subscriptions, string, {}, 'github'> {}
 
 export function sleep(time: number) {
@@ -54,7 +52,6 @@ const createClient = (overrides?: Partial<ClientConfig>) => {
 		sdkVersion: '1.0.0',
 		baseURL: 'https://api.com',
 		applicationHash: '123',
-		// rome-ignore lint/suspicious/noExplicitAny: <explanation>
 		customFetch: fetch as any,
 		operationMetadata: {
 			Weather: {

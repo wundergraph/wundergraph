@@ -43,23 +43,22 @@ export const { useQuery, useMutation, useSubscription, useUser, useFileUpload, u
   createHooks<Operations>(client);
 ```
 
-In your `App.tsx` add QueryClientProvider:
+Finally, register Vue-Query :
 
-```tsx
-import { QueryClient, QueryClientProvider } from '@tanstack/vue-query';
+```ts
+import { createApp } from 'vue';
+import App from './App.vue';
 
-const queryClient = new QueryClient();
-
-export default App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <div>...</div>
-    </QueryClientProvider>
-  );
-}
+import { VueQueryPlugin } from '@tanstack/vue-query';
+const app = createApp(App);
+app.use(VueQueryPlugin);
+app.mount('#app');
 ```
 
-Now you can use the hooks in your components:
+For Nuxt and SSR, refer to the [vue-query documentation](https://tanstack.com/query/v4/docs/vue/overview#ssr-support).
+For Nuxt, you can register vue query and provide the client in the same plugin, like in the example.
+
+Now you can use the hooks in your componentss:
 
 ### useQuery
 
