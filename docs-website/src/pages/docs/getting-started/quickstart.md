@@ -33,7 +33,7 @@ Now edit your `package.json` and add the following scripts, so we can run the Wu
 ```json
 {
   "scripts": {
-    "start": "wunderctl up --debug"
+    "start": "wunderctl up --debug",
     "build": "wunderctl generate"
   }
 }
