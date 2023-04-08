@@ -59,6 +59,10 @@ const navigation = [
 						title: 'SvelteKit',
 						href: '/docs/getting-started/sveltekit-quickstart',
 					},
+					{
+						title: 'Nuxt',
+						href: '/docs/getting-started/nuxt-quickstart',
+					},
 				],
 			},
 			{
@@ -188,6 +192,10 @@ const navigation = [
 					{
 						title: 'Next.js Todos',
 						href: '/docs/examples/nextjs-todos',
+					},
+					{
+						title: 'Nuxt + Vue Query',
+						href: '/docs/examples/nuxt',
 					},
 				],
 			},
