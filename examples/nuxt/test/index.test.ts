@@ -15,3 +15,5 @@ describe('Test Dragons API', () => {
 		expect(result.data?.spacex_dragons?.length).toBe(2);
 	});
 });
+
+//test get users
