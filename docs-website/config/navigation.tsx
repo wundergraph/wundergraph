@@ -679,6 +679,10 @@ const navigation = [
 						href: '/docs/supported-frontend-frameworks/vue',
 					},
 					{
+						title: 'Nuxt',
+						href: '/docs/supported-frontend-frameworks/nuxt',
+					},
+					{
 						title: 'SolidJS',
 						href: '/docs/supported-frontend-frameworks/solidjs',
 					},
