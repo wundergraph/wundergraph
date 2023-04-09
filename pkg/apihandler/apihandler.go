@@ -256,7 +256,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	if err := r.registerAuth(r.insecureCookies); err != nil {
 		if !r.devMode {
 			// If authentication fails in production, consider this a fatal error
-			return nil, err
+			return streamClosers, err
 		}
 		r.log.Error("configuring auth", zap.Error(err))
 	}
@@ -289,7 +289,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			r.log.Error("registerS3UploadClient", zap.Error(err))
+			return streamClosers, err
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
 			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))
@@ -312,6 +312,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		err = r.registerOperation(operation)
 		if err != nil {
 			r.log.Error("registerOperation", zap.Error(err))
+			return streamClosers, err
 		}
 	}
 

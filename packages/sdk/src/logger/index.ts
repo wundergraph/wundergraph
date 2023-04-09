@@ -1,6 +1,6 @@
 import { ConfigurationVariable, LogLevel, logLevelFromJSON } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
-import { pino } from 'pino';
+import { DestinationStream, pino } from 'pino';
 import pretty from 'pino-pretty';
 
 export enum PinoLogLevel {
@@ -40,7 +40,7 @@ const resolvePinoLogLevel = (level: string): PinoLogLevel => {
 	}
 };
 
-const initLogger = (): pino.Logger => {
+const initLogger = (destination: DestinationStream): pino.Logger => {
 	const enablePretty = process.env.WG_CLI_LOG_PRETTY === 'true';
 	const logLevel =
 		process.env.WG_DEBUG_MODE === 'true'
@@ -61,11 +61,12 @@ const initLogger = (): pino.Logger => {
 	if (enablePretty) {
 		const stream = pretty({
 			colorize: true,
-			translateTime: "SYS:yyyy-mm-dd'T'HH:MM:ssp", // https://www.npmjs.com/package/dateformat
+			translateTime: 'HH:MM:ss TT', // https://www.npmjs.com/package/dateformat
 			customPrettifiers: {
 				time: (timestamp: any) => `${timestamp}`,
 			},
 			ignore: 'pid,hostname',
+			destination: destination,
 			messageFormat: '{msg}',
 			singleLine: true,
 		});
@@ -76,7 +77,7 @@ const initLogger = (): pino.Logger => {
 	return pino(options);
 };
 
-const logger = initLogger();
+const logger = initLogger(process.stdout);
 
 export const Logger = logger.child({ component: '@wundergraph/sdk' });
 export const ServerLogger = logger.child(
@@ -85,3 +86,8 @@ export const ServerLogger = logger.child(
 );
 
 export default Logger;
+
+// This logger is used to log errors to stderr
+// which is used by wunderctl to detect errors in TUI mode.
+const errorLogger = initLogger(process.stderr);
+export const ErrorLogger = errorLogger.child({ component: '@wundergraph/sdk' });

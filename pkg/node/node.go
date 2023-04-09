@@ -16,7 +16,6 @@ import (
 	"github.com/rs/cors"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/time/rate"
 
@@ -25,7 +24,6 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/hooks"
 	"github.com/wundergraph/wundergraph/pkg/httpidletimeout"
 	"github.com/wundergraph/wundergraph/pkg/loadvariable"
-	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node/nodetemplates"
 	"github.com/wundergraph/wundergraph/pkg/pool"
 	"github.com/wundergraph/wundergraph/pkg/validate"
@@ -91,6 +89,7 @@ type options struct {
 	hooksServerHealthCheck  bool
 	healthCheckTimeout      time.Duration
 	prettyLogging           bool
+	configLoadCallback      func(config WunderNodeConfig)
 }
 
 type Option func(options *options)
@@ -105,6 +104,12 @@ func WithHooksServerHealthCheck(timeout time.Duration) Option {
 func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	return func(options *options) {
 		options.staticConfig = &config
+	}
+}
+
+func WithConfigLoadCallback(callback func(config WunderNodeConfig)) Option {
+	return func(options *options) {
+		options.configLoadCallback = callback
 	}
 }
 
@@ -196,7 +201,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 	switch {
 	case options.staticConfig != nil:
-		n.log.Info("Api config: static")
+		n.log.Debug("Api config: static")
 
 		g.Go(func() error {
 			err := n.startServer(*options.staticConfig)
@@ -209,7 +214,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 			return nil
 		})
 	case options.fileSystemConfig != nil:
-		n.log.Info("Api config: file polling",
+		n.log.Debug("Api config: file polling",
 			zap.String("config_file_name", *options.fileSystemConfig),
 		)
 		if options.configFileChange != nil {
@@ -323,10 +328,10 @@ func (n *Node) newListeners(configuration *apihandler.Listener) ([]net.Listener,
 func (n *Node) HandleGracefulShutdown(gracefulTimeoutInSeconds int) {
 	<-n.ctx.Done()
 
-	n.log.Info("Initialize WunderNode shutdown ....")
+	n.log.Debug("Initialize WunderNode shutdown ....")
 
 	gracefulTimeoutDur := time.Duration(gracefulTimeoutInSeconds) * time.Second
-	n.log.Info("Graceful shutdown WunderNode ...", zap.String("gracefulTimeout", gracefulTimeoutDur.String()))
+	n.log.Debug("Graceful shutdown WunderNode ...", zap.String("gracefulTimeout", gracefulTimeoutDur.String()))
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), gracefulTimeoutDur)
 	defer cancel()
 
@@ -369,15 +374,6 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 }
 
 func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
-	logLevel := nodeConfig.Api.Options.Logging.Level
-	if n.options.enableDebugMode {
-		logLevel = zapcore.DebugLevel
-	}
-
-	n.log = logging.
-		New(n.options.prettyLogging, n.options.enableDebugMode, logLevel).
-		With(zap.String("component", "@wundergraph/node"))
-
 	router := mux.NewRouter()
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
@@ -455,12 +451,14 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
 		n.log.Error("BuildAndMountApiHandler", zap.Error(err))
+		return err
 	}
 	streamClosers = append(streamClosers, publicClosers...)
 
 	internalClosers, err := internalBuilder.BuildAndMountInternalApiHandler(n.ctx, internalRouter, nodeConfig.Api)
 	if err != nil {
 		n.log.Error("BuildAndMountInternalApiHandler", zap.Error(err))
+		return err
 	}
 
 	streamClosers = append(streamClosers, internalClosers...)
@@ -633,6 +631,9 @@ func (n *Node) reconfigureOnConfigUpdate() error {
 
 			// in a new routine, startServer is blocking
 			g.Go(func() error {
+				if n.options.configLoadCallback != nil {
+					n.options.configLoadCallback(config)
+				}
 				err := n.startServer(config)
 				if err != nil {
 					return err

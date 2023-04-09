@@ -42,11 +42,18 @@ var startCmd = &cobra.Command{
 
 		if !excludeServer {
 			g.Go(func() error {
-				return startWunderGraphServer(ctx)
+				return startHooksServer(ctx)
 			})
 		}
 
 		g.Go(func() error {
+			log.Info("Starting WunderNode",
+				zap.String("version", BuildInfo.Version),
+				zap.String("commit", BuildInfo.Commit),
+				zap.String("date", BuildInfo.Date),
+				zap.String("builtBy", BuildInfo.BuiltBy),
+			)
+
 			return StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
 		})
 

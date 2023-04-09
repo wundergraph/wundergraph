@@ -74,7 +74,7 @@ import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerCon
 import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import logger, { Logger } from '../logger';
+import logger, { ErrorLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -761,6 +761,15 @@ export const configureWunderGraphApplication = <
 			}
 
 			const loadedOperations = loadOperations(schemaFileName);
+
+			if (loadedOperations?.errors && loadedOperations.errors.length > 0) {
+				if (loadedOperations.invalid && loadedOperations.invalid.length > 0) {
+					throw new Error(`Invalid operation '${loadedOperations.invalid[0]}': ${loadedOperations.errors[0]}`);
+				} else {
+					throw new Error(`Operation error: ${loadedOperations.errors[0]}`);
+				}
+			}
+
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,
 				resolved,
@@ -989,12 +998,11 @@ export const configureWunderGraphApplication = <
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
-			Logger.info(`Code generation completed.`);
+			Logger.debug(`Code generation completed.`);
 			process.exit(0);
 		})
 		.catch((e: any) => {
-			//throw e;
-			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
+			ErrorLogger.fatal(e);
 			process.exit(1);
 		});
 };

@@ -45,7 +45,7 @@ func zapJsonEncoder() zapcore.Encoder {
 func zapConsoleEncoder() zapcore.Encoder {
 	ec := zapBaseEncoderConfig()
 	ec.ConsoleSeparator = " "
-	ec.EncodeTime = zapcore.RFC3339TimeEncoder
+	ec.EncodeTime = zapcore.TimeEncoderOfLayout("15:04:05 PM")
 	ec.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	return zapcore.NewConsoleEncoder(ec)
 }

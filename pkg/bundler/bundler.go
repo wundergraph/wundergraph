@@ -3,6 +3,7 @@ package bundler
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -33,7 +34,8 @@ type Bundler struct {
 	outExtension          map[string]string
 	fileLoaders           []string
 	buildResult           *api.BuildResult
-	onAfterBundle         func() error
+	onAfterBundle         func(buildErr error, rebuild bool) error
+	onBeforeBundle        func(rebuild bool)
 
 	newWatchPath chan *watcher.WatchPath
 }
@@ -50,7 +52,8 @@ type Config struct {
 	OutFile               string
 	OutDir                string
 	OutExtension          map[string]string
-	OnAfterBundle         func() error
+	OnAfterBundle         func(buildErr error, rebuild bool) error
+	OnBeforeBundle        func(rebuild bool)
 }
 
 func NewBundler(config Config) *Bundler {
@@ -67,6 +70,7 @@ func NewBundler(config Config) *Bundler {
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
 		onAfterBundle:         config.OnAfterBundle,
+		onBeforeBundle:        config.OnBeforeBundle,
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
 		newWatchPath:          make(chan *watcher.WatchPath),
@@ -98,8 +102,21 @@ func entryPoints(config Config) []api.EntryPoint {
 	return entries
 }
 
+func (b *Bundler) buildErr() error {
+	var err error
+
+	for _, message := range b.buildResult.Errors {
+		err = multierror.Append(err, fmt.Errorf("%s (%d:%d):\n%s\n%s", message.Location.File, message.Location.Line, message.Location.Column, message.Location.LineText, message.Text))
+	}
+
+	return err
+}
+
 func (b *Bundler) Bundle() error {
 	if b.buildResult != nil {
+		if b.onBeforeBundle != nil {
+			b.onBeforeBundle(true)
+		}
 		buildResult := b.buildResult.Rebuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
@@ -107,13 +124,21 @@ func (b *Bundler) Bundle() error {
 				zap.String("bundlerName", b.name),
 				zap.Any("errors", b.buildResult.Errors),
 			)
-			if b.buildResult.Errors[0].Location == nil {
-				return fmt.Errorf("build failed: %s", b.buildResult.Errors[0].Text)
+			if b.onAfterBundle != nil {
+				return b.onAfterBundle(b.buildErr(), true)
 			}
-			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
+			return b.buildErr()
 		}
+
 		b.log.Debug("Build successful", zap.String("bundlerName", b.name))
+
+		if b.onAfterBundle != nil {
+			return b.onAfterBundle(b.buildErr(), true)
+		}
 	} else {
+		if b.onBeforeBundle != nil {
+			b.onBeforeBundle(false)
+		}
 		buildResult := b.initialBuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
@@ -121,12 +146,17 @@ func (b *Bundler) Bundle() error {
 				zap.String("bundlerName", b.name),
 				zap.Any("errors", b.buildResult.Errors),
 			)
-			return fmt.Errorf("build failed: %s, %s", b.buildResult.Errors[0].Location.LineText, b.buildResult.Errors[0].Text)
+			if b.onAfterBundle != nil {
+				return b.onAfterBundle(b.buildErr(), false)
+			}
+			return b.buildErr()
 		}
+
 		b.log.Debug("Initial Build successful", zap.String("bundlerName", b.name))
-	}
-	if b.onAfterBundle != nil {
-		return b.onAfterBundle()
+
+		if b.onAfterBundle != nil {
+			return b.onAfterBundle(b.buildErr(), false)
+		}
 	}
 
 	return nil
@@ -292,26 +322,14 @@ func (b *Bundler) runWatcher(ctx context.Context, rebuild func() api.BuildResult
 
 	go func() {
 		err := w.Watch(ctx, func(paths []string) error {
+			if b.onBeforeBundle != nil {
+				b.onBeforeBundle(true)
+			}
 			result := rebuild()
-			if len(result.Errors) == 0 {
-				if b.onAfterBundle != nil {
-					_ = b.onAfterBundle()
-				}
-			} else {
-				for _, message := range result.Errors {
-					location := message.Location
-					if location == nil {
-						location = &api.Location{
-							File: "<unknown>",
-						}
-					}
-					b.log.Error("Bundler build error",
-						zap.String("watcherName", b.name),
-						zap.String("file", location.File),
-						zap.Int("line", location.Line),
-						zap.Int("column", location.Column),
-						zap.String("message", message.Text),
-					)
+			b.buildResult = &result
+			if b.onAfterBundle != nil {
+				if err := b.onAfterBundle(b.buildErr(), true); err != nil {
+					b.log.Error("Bundler build error on watch", zap.Error(err), zap.String("bundlerName", b.name))
 				}
 			}
 			return nil

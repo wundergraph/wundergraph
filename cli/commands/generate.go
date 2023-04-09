@@ -78,7 +78,7 @@ var generateCmd = &cobra.Command{
 			}
 		}()
 
-		var onAfterBuild func() error
+		var onAfterBuild func(buildErr error, rebuild bool) error
 		outExtension := make(map[string]string)
 		outExtension[".js"] = ".cjs"
 
@@ -103,8 +103,8 @@ var generateCmd = &cobra.Command{
 					OutDir:        generatedBundleOutDir,
 					OutExtension:  outExtension,
 					Logger:        log,
-					OnAfterBundle: func() error {
-						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
+					OnAfterBundle: func(buildErr error, rebuild bool) error {
+						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"), zap.Bool("rebuild", rebuild))
 						return nil
 					},
 				})
@@ -119,7 +119,7 @@ var generateCmd = &cobra.Command{
 				Logger:        log,
 			})
 
-			onAfterBuild = func() error {
+			onAfterBuild = func(buildErr error, rebuild bool) error {
 
 				if files.DirectoryExists(operationsDir) {
 					operationsPaths, err := operations.GetPaths(wunderGraphDir)
@@ -178,7 +178,7 @@ var generateCmd = &cobra.Command{
 
 		} else {
 			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
-			onAfterBuild = func() error {
+			onAfterBuild = func(buildErr error, rebuild bool) error {
 				<-configRunner.Run(ctx)
 
 				if !configRunner.Successful() {
@@ -187,7 +187,7 @@ var generateCmd = &cobra.Command{
 					)
 				}
 
-				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
+				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"), zap.Bool("rebuild", rebuild))
 
 				return nil
 			}

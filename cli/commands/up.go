@@ -3,14 +3,17 @@ package commands
 import (
 	"context"
 	"errors"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
+	"github.com/spf13/cobra"
+	"github.com/wundergraph/wundergraph/pkg/ui/interactive"
+	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"sync"
 	"syscall"
-
-	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/bundler"
@@ -30,6 +33,7 @@ var (
 	defaultDataSourcePollingIntervalSeconds int
 	disableCache                            bool
 	clearCache                              bool
+	verbose                                 bool
 )
 
 // upCmd represents the up command
@@ -41,6 +45,37 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		var devTUI *tea.Program
+		defaultOutput := termenv.DefaultOutput()
+
+		// We only use the dev devTUI if we are in a tty and not in verbose mode
+		if !verbose && defaultOutput.TTY() != nil {
+
+			// TODO: don't hardcode this
+			lipgloss.SetColorProfile(termenv.TrueColor)
+
+			// For windows
+			restoreConsole, err := termenv.EnableVirtualTerminalProcessing(defaultOutput)
+			if err != nil {
+				return err
+			}
+			defer restoreConsole()
+
+			// Bubble Tea UI is not compatible with regular stdout logging
+			// for those reasons we disable it. Any meaningful information should be logged to the dev devTUI
+			log = zap.NewNop()
+			devTUI = interactive.NewModel(ctx, &interactive.Options{
+				ServerVersion: BuildInfo.Version,
+			})
+
+			go func() {
+				if _, err := devTUI.Run(); err != nil {
+					log.Error("error running reporter", zap.Error(err))
+				}
+				cancel()
+			}()
+		}
 
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
 		if err != nil {
@@ -108,6 +143,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
 			}),
+			SuppressStdStreams: devTUI != nil,
 		})
 
 		// responsible for executing the config in "polling" mode
@@ -124,14 +160,54 @@ var upCmd = &cobra.Command{
 				EnableCache:                   !disableCache,
 				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
+			SuppressStdStreams: devTUI != nil,
 		})
 
 		var hookServerRunner *scriptrunner.ScriptRunner
 		var webhooksBundler *bundler.Bundler
-		var onAfterBuild func() error
+		var onAfterBuild func(buildErr error, rebuild bool) error
 
 		outExtension := make(map[string]string)
 		outExtension[".js"] = ".cjs"
+
+		bundleOperations := func() error {
+			if files.DirectoryExists(operationsDir) {
+				operationsPaths, err := operations.GetPaths(wunderGraphDir)
+				if err != nil {
+					return err
+				}
+				err = operations.Cleanup(wunderGraphDir, operationsPaths)
+				if err != nil {
+					return err
+				}
+				err = operations.EnsureWunderGraphFactoryTS(wunderGraphDir)
+				if err != nil {
+					return err
+				}
+				operationsBundler := bundler.NewBundler(bundler.Config{
+					Name:          "operations-bundler",
+					EntryPoints:   operationsPaths,
+					AbsWorkingDir: wunderGraphDir,
+					OutDir:        generatedBundleOutDir,
+					OutExtension:  outExtension,
+					Logger:        log,
+				})
+				err = operationsBundler.Bundle()
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+
+		onBeforeBuild := func(rebuild bool) {
+			if devTUI != nil {
+				task := interactive.TaskStarted{
+					Name: "Building",
+				}
+				devTUI.Send(task)
+			}
+		}
 
 		if codeServerFilePath != "" {
 			hooksBundler := bundler.NewBundler(bundler.Config{
@@ -158,73 +234,64 @@ var upCmd = &cobra.Command{
 					OutDir:        generatedBundleOutDir,
 					OutExtension:  outExtension,
 					Logger:        log,
-					OnAfterBundle: func() error {
-						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"))
+					OnAfterBundle: func(buildErr error, rebuild bool) error {
+						log.Debug("Webhooks bundled!", zap.String("bundlerName", "webhooks-bundler"), zap.Bool("rebuild", rebuild))
 						return nil
 					},
 				})
 			}
 
-			srvCfg := &helpers.ServerRunConfig{
-				WunderGraphDirAbs: wunderGraphDir,
-				ServerScriptFile:  serverOutFile,
-				Env:               helpers.CliEnv(rootFlags),
-				Debug:             rootFlags.DebugMode,
+			srvCfg := &helpers.HooksServerRunConfig{
+				WunderGraphDirAbs:  wunderGraphDir,
+				ServerScriptFile:   serverOutFile,
+				Env:                helpers.CliEnv(rootFlags),
+				Debug:              rootFlags.DebugMode,
+				SuppressStdStreams: devTUI != nil,
 			}
 
-			hookServerRunner = helpers.NewServerRunner(log, srvCfg)
+			hookServerRunner = helpers.NewHooksServerRunner(log, srvCfg)
 
-			onAfterBuild = func() error {
-				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
+			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
+				defer func() {
+					if devTUI != nil {
+						devTUI.Send(interactive.TaskEnded{
+							Name: "Build completed",
+							Err:  err,
+						})
+					}
+				}()
 
-				if files.DirectoryExists(operationsDir) {
-					operationsPaths, err := operations.GetPaths(wunderGraphDir)
-					if err != nil {
-						return err
-					}
-					err = operations.Cleanup(wunderGraphDir, operationsPaths)
-					if err != nil {
-						return err
-					}
-					err = operations.EnsureWunderGraphFactoryTS(wunderGraphDir)
-					if err != nil {
-						return err
-					}
-					operationsBundler := bundler.NewBundler(bundler.Config{
-						Name:          "operations-bundler",
-						EntryPoints:   operationsPaths,
-						AbsWorkingDir: wunderGraphDir,
-						OutDir:        generatedBundleOutDir,
-						OutExtension:  outExtension,
-						Logger:        log,
-					})
-					err = operationsBundler.Bundle()
-					if err != nil {
-						return err
-					}
+				// if there is a build error, we don't want to continue
+				if buildErr != nil {
+					return buildErr
+				}
+
+				bundleOperationsErr := bundleOperations()
+				if bundleOperationsErr != nil {
+					return bundleOperationsErr
 				}
 
 				// generate new config
 				<-configRunner.Run(ctx)
-
-				var wg sync.WaitGroup
-
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					// bundle hooks
-					_ = hooksBundler.Bundle()
-				}()
-
-				if webhooksBundler != nil {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
-						_ = webhooksBundler.Bundle()
-					}()
+				if configRunner.Error() != nil {
+					return configRunner.Error()
 				}
 
-				wg.Wait()
+				var wg errgroup.Group
+
+				wg.Go(func() error {
+					return hooksBundler.Bundle()
+				})
+
+				if webhooksBundler != nil {
+					wg.Go(func() error {
+						return webhooksBundler.Bundle()
+					})
+				}
+
+				if err := wg.Wait(); err != nil {
+					return err
+				}
 
 				go func() {
 					// run or restart hook server
@@ -239,17 +306,36 @@ var upCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
-			onAfterBuild = func() error {
+			log.Debug("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
+
+			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
+				defer func() {
+					devTUI.Send(interactive.TaskEnded{
+						Name: "Build completed",
+						Err:  err,
+					})
+				}()
+
+				// if there is a build error, we don't want to continue
+				if buildErr != nil {
+					return buildErr
+				}
+
 				// generate new config
 				<-configRunner.Run(ctx)
+				if configRunner.Error() != nil {
+					return configRunner.Error()
+				}
 
 				go func() {
 					// run or restart the introspection poller
 					<-configIntrospectionRunner.Run(ctx)
 				}()
 
-				log.Debug("Config built!", zap.String("bundlerName", "config-bundler"))
+				bundleOperationsErr := bundleOperations()
+				if bundleOperationsErr != nil {
+					return bundleOperationsErr
+				}
 
 				return nil
 			}
@@ -281,7 +367,8 @@ var upCmd = &cobra.Command{
 			IgnorePaths: []string{
 				"node_modules",
 			},
-			OnAfterBundle: onAfterBuild,
+			OnBeforeBundle: onBeforeBuild,
+			OnAfterBundle:  onAfterBuild,
 		})
 
 		err = configBundler.Bundle()
@@ -319,7 +406,7 @@ var upCmd = &cobra.Command{
 		n := node.New(ctx, BuildInfo, wunderGraphDir, log)
 		go func() {
 			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
-			err := n.StartBlocking(
+			options := []node.Option{
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
 				node.WithDebugMode(rootFlags.DebugMode),
@@ -328,7 +415,23 @@ var upCmd = &cobra.Command{
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
 				node.WithPrettyLogging(rootFlags.PrettyLogs),
 				node.WithDevMode(),
-			)
+			}
+
+			if devTUI != nil {
+				options = append(options, node.WithConfigLoadCallback(func(config node.WunderNodeConfig) {
+					devTUI.Send(interactive.ServerConfigLoaded{
+						Webhooks:                 len(config.Api.Webhooks),
+						Operations:               len(config.Api.Operations),
+						DatasourceConfigurations: len(config.Api.EngineConfiguration.DatasourceConfigurations),
+						ServerURL:                "http://" + config.Api.PrimaryHost,
+						FileUploads:              len(config.Api.S3UploadConfiguration) > 0,
+						Authentication:           len(config.Api.AuthenticationConfig.CookieBased.Providers) != 0 || len(config.Api.AuthenticationConfig.JwksBased.Providers) != 0,
+						PlaygroundEnabled:        config.Api.EnableGraphqlEndpoint,
+					})
+				}))
+			}
+
+			err := n.StartBlocking(options...)
 			if err != nil {
 				log.Error("node exited", zap.Error(err))
 				// exit context because we can't recover from a server start error
@@ -343,7 +446,7 @@ var upCmd = &cobra.Command{
 		// wait for context to be canceled (signal, context cancellation or via cancel())
 		<-ctx.Done()
 
-		log.Info("Context was canceled. Initialize WunderNode shutdown ....")
+		log.Debug("Context was canceled. Initialize WunderNode shutdown ....")
 
 		// close all listeners without waiting for them to finish
 		_ = n.Close()
@@ -356,6 +459,7 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
+	upCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "disable terminal user interface and print all logs to stdout")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches before startup")

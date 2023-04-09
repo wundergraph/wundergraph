@@ -1,12 +1,13 @@
 package scriptrunner
 
 import (
+	"bytes"
 	"fmt"
-	"os"
-
 	gocmd "github.com/go-cmd/cmd"
+	"github.com/smallnest/ringbuffer"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
+	"os"
 )
 
 type Config struct {
@@ -19,6 +20,8 @@ type Config struct {
 	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        *zap.Logger
+	// SuppressStdStreams suppresses the output of the script to stdout and stderr.
+	SuppressStdStreams bool
 }
 
 type ScriptRunner struct {
@@ -33,18 +36,29 @@ type ScriptRunner struct {
 	cmdDoneChan   chan struct{}
 	log           *zap.Logger
 	cmd           *gocmd.Cmd
+	// stdErrBuf is used to capture the stderr output of the script.
+	// We don't use a ringbuffer here because we want to capture the full output.
+	stdErrBuf *bytes.Buffer
+	// stdoutBuf is used to capture the stdout output of the script.
+	// A ringbuffer is used with a max size of 1MB.
+	stdoutBuf          *ringbuffer.RingBuffer
+	suppressStdStreams bool
 }
 
 func NewScriptRunner(config *Config) *ScriptRunner {
+
 	return &ScriptRunner{
-		name:          config.Name,
-		log:           config.Logger,
-		firstRunEnv:   config.FirstRunEnv,
-		absWorkingDir: config.AbsWorkingDir,
-		executable:    config.Executable,
-		scriptArgs:    config.ScriptArgs,
-		scriptEnv:     config.ScriptEnv,
-		firstRun:      true,
+		name:               config.Name,
+		log:                config.Logger,
+		firstRunEnv:        config.FirstRunEnv,
+		absWorkingDir:      config.AbsWorkingDir,
+		executable:         config.Executable,
+		scriptArgs:         config.ScriptArgs,
+		scriptEnv:          config.ScriptEnv,
+		firstRun:           true,
+		stdErrBuf:          bytes.NewBuffer(nil),
+		stdoutBuf:          ringbuffer.New(1024 * 1024),
+		suppressStdStreams: config.SuppressStdStreams,
 	}
 }
 
@@ -60,6 +74,9 @@ func (b *ScriptRunner) Stop() error {
 	if b.cmd != nil {
 		err := b.cmd.Stop()
 
+		b.stdoutBuf.Reset()
+		b.stdErrBuf.Reset()
+
 		// blocking until the script is done
 		<-b.cmdDoneChan
 
@@ -71,8 +88,10 @@ func (b *ScriptRunner) Stop() error {
 func (b *ScriptRunner) Error() error {
 	if b.cmd != nil {
 		status := b.cmd.Status()
-		if status.Exit > 0 || status.Error != nil {
-			return fmt.Errorf("script %s failed with exit code %d", b.name, status.Exit)
+		// rely only on the status code if there is no error
+		// error is also set when the process was terminated by a signal which is not an error
+		if status.Exit > 0 {
+			return fmt.Errorf("script %s failed with exit code %d\n%s", b.name, status.Exit, b.stdErrBuf.String())
 		}
 	}
 	return nil
@@ -100,10 +119,13 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	}
 
 	cmdOptions := CmdOptions{
-		executable: b.executable,
-		cmdDir:     b.absWorkingDir,
-		scriptArgs: b.scriptArgs,
-		scriptEnv:  b.scriptEnv,
+		executable:         b.executable,
+		cmdDir:             b.absWorkingDir,
+		scriptArgs:         b.scriptArgs,
+		scriptEnv:          b.scriptEnv,
+		stdErrBuf:          b.stdErrBuf,
+		stdoutBuf:          b.stdoutBuf,
+		suppressStdStreams: b.suppressStdStreams,
 	}
 
 	if b.firstRun {
@@ -181,10 +203,13 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 }
 
 type CmdOptions struct {
-	executable string
-	cmdDir     string
-	scriptArgs []string
-	scriptEnv  []string
+	executable         string
+	cmdDir             string
+	scriptArgs         []string
+	scriptEnv          []string
+	stdErrBuf          *bytes.Buffer
+	stdoutBuf          *ringbuffer.RingBuffer
+	suppressStdStreams bool
 }
 
 // newCmd creates a new command to run the bundler script.
@@ -213,13 +238,19 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 					cmd.Stdout = nil
 					continue
 				}
-				fmt.Println(line)
+				if !options.suppressStdStreams {
+					fmt.Println(line)
+				}
+				options.stdoutBuf.WriteString(line + "\n")
 			case line, open := <-cmd.Stderr:
 				if !open {
 					cmd.Stderr = nil
 					continue
 				}
-				fmt.Fprintln(os.Stderr, line)
+				if !options.suppressStdStreams {
+					fmt.Fprintln(os.Stderr, line)
+				}
+				options.stdErrBuf.WriteString(line + "\n")
 			}
 		}
 	}()
