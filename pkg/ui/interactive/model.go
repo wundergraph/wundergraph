@@ -14,9 +14,9 @@ import (
 
 type ServerConfigLoaded struct {
 	ServerURL                string
-	Webhooks                 int
-	Operations               int
-	DatasourceConfigurations int
+	Webhooks                 int32
+	Operations               int32
+	DatasourceConfigurations int32
 	Authentication           bool
 	FileUploads              bool
 	PlaygroundEnabled        bool

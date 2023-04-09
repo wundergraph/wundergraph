@@ -600,3 +600,31 @@ enum ConfigurationVariableKind {
 	ENV_CONFIGURATION_VARIABLE = 1;
 	PLACEHOLDER_CONFIGURATION_VARIABLE = 2;
 }
+
+message BuildInfo {
+	BuildInfoVersion sdk = 1;
+	BuildInfoVersion wunderctl = 2;
+	BuildInfoVersion node = 3;
+	BuildInfoOS os = 4;
+	BuildInfoStats stats = 5;
+}
+
+message BuildInfoVersion {
+	string version = 1;
+}
+
+message BuildInfoOS {
+	string type = 1;
+	string platform = 2;
+	string arch = 3;
+	string version = 4;
+	string release = 5;
+}
+
+message BuildInfoStats {
+	int32 totalApis = 1;
+	int32 totalOperations = 2;
+	int32 totalWebhooks = 3;
+	bool hashAuth = 4;
+	bool hasFileUpload = 5;
+}

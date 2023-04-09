@@ -108,13 +108,13 @@ func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	}
 }
 
-func WithServerConfigLoad(callback func(config WunderNodeConfig)) Option {
+func WithServerConfigLoadHandler(callback func(config WunderNodeConfig)) Option {
 	return func(options *options) {
 		options.onServerConfigLoad = callback
 	}
 }
 
-func WithServerError(callback func(err error)) Option {
+func WithServerErrorHandler(callback func(err error)) Option {
 	return func(options *options) {
 		options.onServerError = callback
 	}

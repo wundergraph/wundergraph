@@ -2,12 +2,14 @@ package commands
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/hashicorp/go-multierror"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/ui/interactive"
+	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"os"
@@ -415,18 +417,25 @@ var upCmd = &cobra.Command{
 			}
 
 			if devTUI != nil {
-				options = append(options, node.WithServerConfigLoad(func(config node.WunderNodeConfig) {
-					devTUI.Send(interactive.ServerConfigLoaded{
-						Webhooks:                 len(config.Api.Webhooks),
-						Operations:               len(config.Api.Operations),
-						DatasourceConfigurations: len(config.Api.EngineConfiguration.DatasourceConfigurations),
-						ServerURL:                "http://" + config.Api.PrimaryHost,
-						FileUploads:              len(config.Api.S3UploadConfiguration) > 0,
-						Authentication:           len(config.Api.AuthenticationConfig.CookieBased.Providers) != 0 || len(config.Api.AuthenticationConfig.JwksBased.Providers) != 0,
-						PlaygroundEnabled:        config.Api.EnableGraphqlEndpoint,
-					})
+				options = append(options, node.WithServerConfigLoadHandler(func(config node.WunderNodeConfig) {
+
+					// The file is guaranteed to exist, because the server is only started after the config was built
+					if data, err := os.ReadFile(filepath.Join(wunderGraphDir, "generated", "wundergraph.build_info.json")); err == nil {
+						var buildInfo wgpb.BuildInfo
+						if err := json.Unmarshal(data, &buildInfo); err == nil {
+							devTUI.Send(interactive.ServerConfigLoaded{
+								Webhooks:                 buildInfo.Stats.TotalWebhooks,
+								Operations:               buildInfo.Stats.TotalOperations,
+								DatasourceConfigurations: buildInfo.Stats.TotalApis,
+								ServerURL:                "http://" + config.Api.PrimaryHost,
+								FileUploads:              buildInfo.Stats.HasFileUpload,
+								Authentication:           buildInfo.Stats.HashAuth,
+								PlaygroundEnabled:        config.Api.EnableGraphqlEndpoint,
+							})
+						}
+					}
 				}))
-				options = append(options, node.WithServerError(func(err error) {
+				options = append(options, node.WithServerErrorHandler(func(err error) {
 					devTUI.Send(interactive.ServerStartError{
 						Err: multierror.Append(errors.New("could not start server"), err),
 					})
