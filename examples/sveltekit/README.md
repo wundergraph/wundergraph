@@ -33,6 +33,50 @@ To create a production version of your app:
 npm run build
 ```
 
+## Using Wundergraph
+
+### SSR
+
+```ts
+// In +page.ts file
+import { prefetchQuery } from '$lib/wundergraph';
+import type { PageLoad } from './$types';
+
+export const load: PageLoad = async ({ parent }) => {
+  const { queryClient } = await parent();
+
+  await prefetchQuery(
+    {
+      operationName: 'Dragons',
+    },
+    queryClient
+  );
+};
+```
+
+### Client side
+
+```svelte
+<!-- In +page.svelte -->
+<script lang="ts">
+	import { createQuery } from '$lib/wundergraph';
+
+	const dragonsQuery = createQuery({
+		operationName: 'Dragons',
+	});
+</script>
+
+<div class="results">
+	{#if $dragonsQuery.isLoading}
+		<p>Loading...</p>
+	{:else if $dragonsQuery.error}
+		<pre>Error: {JSON.stringify($dragonsQuery.error, null, 2)}</pre>
+	{:else}
+		<pre>{JSON.stringify($dragonsQuery.data, null, 2)}</pre>
+	{/if}
+</div>
+```
+
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.

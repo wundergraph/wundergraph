@@ -67,7 +67,10 @@ export type CreateQueryOptions<
 	Input extends object | undefined,
 	OperationName extends string,
 	LiveQuery
-> = Omit<TanstackCreateQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>, 'queryKey' | 'queryFn'> &
+> = Omit<
+	TanstackCreateQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>,
+	'queryKey' | 'queryFn' | 'queryHash' | 'queryKeyHashFn'
+> &
 	WithInput<
 		Input,
 		{
