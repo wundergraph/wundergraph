@@ -1,7 +1,6 @@
 package scriptrunner
 
 import (
-	"bytes"
 	"fmt"
 	gocmd "github.com/go-cmd/cmd"
 	"github.com/smallnest/ringbuffer"
@@ -25,22 +24,18 @@ type Config struct {
 }
 
 type ScriptRunner struct {
-	name          string
-	fatalOnStop   bool
-	executable    string
-	scriptArgs    []string
-	scriptEnv     []string
-	firstRunEnv   []string
-	absWorkingDir string
-	firstRun      bool
-	cmdDoneChan   chan struct{}
-	log           *zap.Logger
-	cmd           *gocmd.Cmd
-	// stdErrBuf is used to capture the stderr output of the script.
-	// We don't use a ringbuffer here because we want to capture the full output.
-	stdErrBuf *bytes.Buffer
-	// stdoutBuf is used to capture the stdout output of the script.
-	// A ringbuffer is used with a max size of 1MB.
+	name               string
+	fatalOnStop        bool
+	executable         string
+	scriptArgs         []string
+	scriptEnv          []string
+	firstRunEnv        []string
+	absWorkingDir      string
+	firstRun           bool
+	cmdDoneChan        chan struct{}
+	log                *zap.Logger
+	cmd                *gocmd.Cmd
+	stdErrBuf          *ringbuffer.RingBuffer
 	stdoutBuf          *ringbuffer.RingBuffer
 	suppressStdStreams bool
 }
@@ -56,7 +51,7 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 		scriptArgs:         config.ScriptArgs,
 		scriptEnv:          config.ScriptEnv,
 		firstRun:           true,
-		stdErrBuf:          bytes.NewBuffer(nil),
+		stdErrBuf:          ringbuffer.New(1024 * 1024),
 		stdoutBuf:          ringbuffer.New(1024 * 1024),
 		suppressStdStreams: config.SuppressStdStreams,
 	}
@@ -91,7 +86,7 @@ func (b *ScriptRunner) Error() error {
 		// rely only on the status code if there is no error
 		// error is also set when the process was terminated by a signal which is not an error
 		if status.Exit > 0 {
-			return fmt.Errorf("script %s failed with exit code %d\n%s", b.name, status.Exit, b.stdErrBuf.String())
+			return fmt.Errorf("script %s failed with exit code %d:\n%s", b.name, status.Exit, b.stdErrBuf.Bytes())
 		}
 	}
 	return nil
@@ -207,7 +202,7 @@ type CmdOptions struct {
 	cmdDir             string
 	scriptArgs         []string
 	scriptEnv          []string
-	stdErrBuf          *bytes.Buffer
+	stdErrBuf          *ringbuffer.RingBuffer
 	stdoutBuf          *ringbuffer.RingBuffer
 	suppressStdStreams bool
 }
@@ -240,8 +235,9 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 				}
 				if !options.suppressStdStreams {
 					fmt.Println(line)
+				} else {
+					options.stdoutBuf.WriteString(line + "\n")
 				}
-				options.stdoutBuf.WriteString(line + "\n")
 			case line, open := <-cmd.Stderr:
 				if !open {
 					cmd.Stderr = nil
@@ -249,8 +245,9 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 				}
 				if !options.suppressStdStreams {
 					fmt.Fprintln(os.Stderr, line)
+				} else {
+					options.stdErrBuf.WriteString(line + "\n")
 				}
-				options.stdErrBuf.WriteString(line + "\n")
 			}
 		}
 	}()

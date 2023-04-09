@@ -45,7 +45,7 @@ require (
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/segmentio/ksuid v1.0.4
 	github.com/smallnest/ringbuffer v0.0.0-20210227121335-0a58434b36f2
-	github.com/spf13/cobra v1.1.3
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.11.0
@@ -82,7 +82,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
-	github.com/google/uuid v1.1.1 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
@@ -90,7 +90,7 @@ require (
 	github.com/huandu/xstrings v1.2.1 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jensneuse/abstractlogger v0.0.4 // indirect
 	github.com/jensneuse/byte-template v0.0.0-20200214152254-4f3cf06e5c68 // indirect
 	github.com/jensneuse/pipeline v0.0.0-20200117120358-9fb4de085cd6 // indirect
