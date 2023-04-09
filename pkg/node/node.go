@@ -89,7 +89,8 @@ type options struct {
 	hooksServerHealthCheck  bool
 	healthCheckTimeout      time.Duration
 	prettyLogging           bool
-	configLoadCallback      func(config WunderNodeConfig)
+	onServerConfigLoad      func(config WunderNodeConfig)
+	onServerError           func(err error)
 }
 
 type Option func(options *options)
@@ -107,9 +108,15 @@ func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
 	}
 }
 
-func WithConfigLoadCallback(callback func(config WunderNodeConfig)) Option {
+func WithServerConfigLoad(callback func(config WunderNodeConfig)) Option {
 	return func(options *options) {
-		options.configLoadCallback = callback
+		options.onServerConfigLoad = callback
+	}
+}
+
+func WithServerError(callback func(err error)) Option {
+	return func(options *options) {
+		options.onServerError = callback
 	}
 }
 
@@ -629,13 +636,17 @@ func (n *Node) reconfigureOnConfigUpdate() error {
 			n.log.Debug("Updated config -> (re-)configuring server")
 			_ = n.Close()
 
+			if n.options.onServerConfigLoad != nil {
+				n.options.onServerConfigLoad(config)
+			}
+
 			// in a new routine, startServer is blocking
 			g.Go(func() error {
-				if n.options.configLoadCallback != nil {
-					n.options.configLoadCallback(config)
-				}
 				err := n.startServer(config)
 				if err != nil {
+					if n.options.onServerError != nil {
+						n.options.onServerError(err)
+					}
 					return err
 				}
 				return nil

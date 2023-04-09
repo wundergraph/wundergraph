@@ -22,6 +22,10 @@ type ServerConfigLoaded struct {
 	PlaygroundEnabled        bool
 }
 
+type ServerStartError struct {
+	Err error
+}
+
 type TaskStarted struct {
 	Name string
 }
@@ -85,7 +89,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
+		case key.Matches(msg, m.keys.Discord):
+			return m, OpenURL("https://discord.com/invite/Jjmc8TC")
 		}
+
 	case tea.WindowSizeMsg:
 		if !m.ready {
 			m.viewHeight = msg.Height
@@ -104,9 +111,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case TaskEnded:
 		m.internalTask.Name = msg.Name
 		m.internalTask.Done = true
-		m.internalTask.Err = msg.Err
+		m.err = msg.Err
 	case ServerConfigLoaded:
 		m.serverConfig = &msg
+	case ServerStartError:
+		m.err = msg.Err
 	case serverURLOpenFinished:
 		if msg.err != nil {
 			m.err = msg.err
@@ -130,12 +139,10 @@ func (m model) View() string {
 
 	docStyle := lipgloss.NewStyle().Padding(1, 2, 1, 2)
 
-	if m.internalTask.Done {
+	if m.err != nil {
 		doc := strings.Builder{}
-		if m.internalTask.Err != nil {
-			doc.WriteString(fmt.Sprintf("%s %s\n", FailStyle.Render("FAIL"), m.internalTask.Err.Error()))
-			return docStyle.Render(doc.String())
-		}
+		doc.WriteString(fmt.Sprintf("%s %s\n", FailStyle.Render("FAIL"), m.err.Error()))
+		return docStyle.Render(doc.String())
 	}
 
 	doc := strings.Builder{}
@@ -154,16 +161,17 @@ func (m model) View() string {
 
 		if m.serverConfig.PlaygroundEnabled {
 			graphiQL := lipgloss.JoinHorizontal(lipgloss.Left,
-				lipgloss.NewStyle().Foreground(Color).Render("➜ Playground: "),
+				BoldStyle.Render("➜ Playground: "),
 				fmt.Sprintf("%s/graphql", m.serverConfig.ServerURL),
 			)
 			doc.WriteString(fmt.Sprintf("%s\n", graphiQL))
 		}
 
 		logModeHint := lipgloss.JoinHorizontal(lipgloss.Left,
-			lipgloss.NewStyle().Foreground(Feint).Render("➜ Logs: use "),
+			BoldStyle.Render("➜ Logs:"),
+			FeintStyle.Render(" use "),
 			BoldStyle.Bold(true).Render("--verbose"),
-			lipgloss.NewStyle().Foreground(Feint).Render(" to see logs"),
+			FeintStyle.Render(" to see logs"),
 		)
 		doc.WriteString(fmt.Sprintf("%s\n\n", logModeHint))
 	}
@@ -191,9 +199,9 @@ func (m model) View() string {
 
 		doc.WriteString(
 			lipgloss.JoinHorizontal(lipgloss.Left, fmt.Sprintf("%s\n%s\n%s\n",
-				lipgloss.NewStyle().Foreground(Orange).PaddingRight(2).Render(fmt.Sprintf("%d DataSources", m.serverConfig.DatasourceConfigurations)),
-				lipgloss.NewStyle().Foreground(Rose).PaddingRight(2).Render(fmt.Sprintf("%d Operations", m.serverConfig.Operations)),
-				lipgloss.NewStyle().Foreground(Green).PaddingRight(2).Render(fmt.Sprintf("%d Webhooks", m.serverConfig.Webhooks)),
+				lipgloss.NewStyle().Foreground(Purple100).PaddingRight(2).Render(fmt.Sprintf("%d DataSources", m.serverConfig.DatasourceConfigurations)),
+				lipgloss.NewStyle().Foreground(Purple300).PaddingRight(2).Render(fmt.Sprintf("%d Operations", m.serverConfig.Operations)),
+				lipgloss.NewStyle().Foreground(Purple600).PaddingRight(2).Render(fmt.Sprintf("%d Webhooks", m.serverConfig.Webhooks)),
 			), fmt.Sprintf("%s\n%s\n",
 				authText,
 				fileUploadText,
@@ -218,11 +226,18 @@ type Options struct {
 func NewModel(ctx context.Context, options *Options) *tea.Program {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	s.Style = SpinnerStyle
+
+	h := help.New()
+	h.Styles.ShortDesc = FeintStyle
+	h.Styles.FullDesc = FeintStyle
+	h.Styles.FullKey = TextStyle
+	h.Styles.ShortKey = TextStyle
+	h.Styles.ShortSeparator = SeparatorStyle
 
 	model := model{
 		keys:          keys,
-		help:          help.New(),
+		help:          h,
 		serverVersion: options.ServerVersion,
 		spinner:       s,
 		internalTask:  &internalTask{},

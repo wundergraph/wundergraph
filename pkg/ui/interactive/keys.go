@@ -7,6 +7,7 @@ import "github.com/charmbracelet/bubbles/key"
 type keyMap struct {
 	ClearConsole key.Binding
 	OpenBrowser  key.Binding
+	Discord      key.Binding
 	Help         key.Binding
 	Quit         key.Binding
 }
@@ -14,7 +15,7 @@ type keyMap struct {
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
 // of the key.Map interface.
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Help, k.OpenBrowser, k.Quit}
+	return []key.Binding{k.Discord, k.OpenBrowser, k.Help}
 }
 
 // FullHelp returns keybindings for the expanded help view. It's part of the
@@ -35,12 +36,16 @@ var keys = keyMap{
 		key.WithKeys("o"),
 		key.WithHelp("o", "Open in browser"),
 	),
-	Help: key.NewBinding(
+	Discord: key.NewBinding(
 		key.WithKeys("h"),
-		key.WithHelp("h", "toggle help"),
+		key.WithHelp("h", "Get help on discord"),
+	),
+	Help: key.NewBinding(
+		key.WithKeys("?"),
+		key.WithHelp("?", "toggle help"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("q", "esc", "ctrl+c"),
-		key.WithHelp("q", "quit"),
+		key.WithHelp("q", "Close server"),
 	),
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/hashicorp/go-multierror"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/ui/interactive"
@@ -414,7 +415,7 @@ var upCmd = &cobra.Command{
 			}
 
 			if devTUI != nil {
-				options = append(options, node.WithConfigLoadCallback(func(config node.WunderNodeConfig) {
+				options = append(options, node.WithServerConfigLoad(func(config node.WunderNodeConfig) {
 					devTUI.Send(interactive.ServerConfigLoaded{
 						Webhooks:                 len(config.Api.Webhooks),
 						Operations:               len(config.Api.Operations),
@@ -423,6 +424,11 @@ var upCmd = &cobra.Command{
 						FileUploads:              len(config.Api.S3UploadConfiguration) > 0,
 						Authentication:           len(config.Api.AuthenticationConfig.CookieBased.Providers) != 0 || len(config.Api.AuthenticationConfig.JwksBased.Providers) != 0,
 						PlaygroundEnabled:        config.Api.EnableGraphqlEndpoint,
+					})
+				}))
+				options = append(options, node.WithServerError(func(err error) {
+					devTUI.Send(interactive.ServerStartError{
+						Err: multierror.Append(errors.New("could not start server"), err),
 					})
 				}))
 			}
