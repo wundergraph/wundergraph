@@ -11,6 +11,7 @@ var (
 	Purple300 = lipgloss.AdaptiveColor{Light: "#6a359c", Dark: "#dcbbfc"}
 	Purple600 = lipgloss.AdaptiveColor{Light: "#2f1845", Dark: "#c288f9"}
 	Feint     = lipgloss.AdaptiveColor{Light: "#5f6771", Dark: "#9FACBD"}
+	Help      = lipgloss.AdaptiveColor{Light: "#9ea4ac", Dark: "#909090"}
 	Disabled  = lipgloss.AdaptiveColor{Light: "#d0d7de", Dark: "#d0d7de"}
 	Seperator = lipgloss.AdaptiveColor{Light: "#d0d7de", Dark: "#d0d7de"}
 
@@ -18,6 +19,7 @@ var (
 	HeadlineTextStyle = lipgloss.NewStyle().Bold(true).Foreground(Primary)
 	DisabledStyle     = lipgloss.NewStyle().Foreground(Disabled)
 	FeintStyle        = TextStyle.Copy().Foreground(Feint)
+	HelpStyle         = TextStyle.Copy().Foreground(Help)
 	BoldStyle         = TextStyle.Copy().Bold(true)
 	SpinnerStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("#763bad"))
 	SeparatorStyle    = lipgloss.NewStyle().Foreground(Seperator)

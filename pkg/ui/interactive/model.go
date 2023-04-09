@@ -87,8 +87,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.Quit):
 			m.quitting = true
 			return m, tea.Quit
-		case key.Matches(msg, m.keys.Help):
-			m.help.ShowAll = !m.help.ShowAll
+		case key.Matches(msg, m.keys.Documentation):
+			return m, OpenURL("https://docs.wundergraph.com")
 		case key.Matches(msg, m.keys.Discord):
 			return m, OpenURL("https://discord.com/invite/Jjmc8TC")
 		}
@@ -171,7 +171,7 @@ func (m model) View() string {
 			BoldStyle.Render("➜ Logs:"),
 			FeintStyle.Render(" use "),
 			BoldStyle.Bold(true).Render("--verbose"),
-			FeintStyle.Render(" to see logs"),
+			FeintStyle.Render(" to switch to log mode"),
 		)
 		doc.WriteString(fmt.Sprintf("%s\n\n", logModeHint))
 	}
@@ -229,8 +229,9 @@ func NewModel(ctx context.Context, options *Options) *tea.Program {
 	s.Style = SpinnerStyle
 
 	h := help.New()
-	h.Styles.ShortDesc = FeintStyle
-	h.Styles.FullDesc = FeintStyle
+	h.ShowAll = true
+	h.Styles.ShortDesc = HelpStyle
+	h.Styles.FullDesc = HelpStyle
 	h.Styles.FullKey = TextStyle
 	h.Styles.ShortKey = TextStyle
 	h.Styles.ShortSeparator = SeparatorStyle
