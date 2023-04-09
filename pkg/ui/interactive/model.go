@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
 	"strings"
 	"time"
 )
@@ -48,10 +47,16 @@ type model struct {
 	spinner       spinner.Model
 	internalTask  *internalTask
 	serverConfig  *ServerConfigLoaded
+	viewHeight    int
+	viewWidth     int
+	ready         bool
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.spinner.Tick)
+	return tea.Batch(
+		m.spinner.Tick,
+		tea.EnterAltScreen,
+	)
 }
 
 type serverURLOpenFinished struct{ err error }
@@ -77,36 +82,36 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, OpenURL(m.serverConfig.ServerURL)
 		case key.Matches(msg, m.keys.Quit):
 			m.quitting = true
-			return m, tea.Batch(tea.ClearScreen, tea.Quit)
+			return m, tea.Quit
 		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
 		}
 	case tea.WindowSizeMsg:
-		// If we set a width on the help menu it can gracefully truncate
-		// its view as needed.
-		m.help.Width = msg.Width
-		cmds = append(cmds, tea.ClearScreen)
+		if !m.ready {
+			m.viewHeight = msg.Height
+			m.viewWidth = msg.Width
+			// If we set a width on the help menu it can gracefully truncate
+			// its view as needed.
+			m.help.Width = m.viewWidth
+			m.ready = true
+		}
 	case TaskStarted:
 		m.internalTask = &internalTask{
 			Name: msg.Name,
 			Done: false,
 			Err:  nil,
 		}
-		cmds = append(cmds, tea.ClearScreen)
 	case TaskEnded:
 		m.internalTask.Name = msg.Name
 		m.internalTask.Done = true
 		m.internalTask.Err = msg.Err
-		cmds = append(cmds, tea.ClearScreen)
 	case ServerConfigLoaded:
 		m.serverConfig = &msg
-		cmds = append(cmds, tea.ClearScreen)
 	case serverURLOpenFinished:
 		if msg.err != nil {
 			m.err = msg.err
 			return m, tea.Quit
 		}
-		cmds = append(cmds, tea.ClearScreen)
 	case spinner.TickMsg:
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
@@ -116,12 +121,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	if !m.ready {
+		return "\n  Initializing..."
+	}
 	if m.quitting {
-		return "\n"
+		return "\n  Quitting..."
 	}
 
+	docStyle := lipgloss.NewStyle().Padding(1, 2, 1, 2)
+
 	if m.internalTask.Done {
-		docStyle := lipgloss.NewStyle().Padding(1, 2, 1, 2)
 		doc := strings.Builder{}
 		if m.internalTask.Err != nil {
 			doc.WriteString(fmt.Sprintf("%s %s\n", FailStyle.Render("FAIL"), m.internalTask.Err.Error()))
@@ -130,8 +139,6 @@ func (m model) View() string {
 	}
 
 	doc := strings.Builder{}
-
-	docStyle := lipgloss.NewStyle().Padding(1, 2, 1, 2)
 
 	title := HeadlineTextStyle.Render("WunderGraph")
 	versionString := HeadlineTextStyle.Render(fmt.Sprintf("(%s)", m.serverVersion))
@@ -221,11 +228,10 @@ func NewModel(ctx context.Context, options *Options) *tea.Program {
 		internalTask:  &internalTask{},
 	}
 
-	termenv.DefaultOutput().ClearScreen()
-
 	p := tea.NewProgram(
 		model,
 		tea.WithContext(ctx),
+		tea.WithAltScreen(),
 	)
 
 	return p

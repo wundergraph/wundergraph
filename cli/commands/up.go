@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/ui/interactive"
@@ -51,9 +50,6 @@ var upCmd = &cobra.Command{
 
 		// We only use the dev devTUI if we are in a tty and not in verbose mode
 		if !verbose && defaultOutput.TTY() != nil {
-
-			// TODO: don't hardcode this
-			lipgloss.SetColorProfile(termenv.TrueColor)
 
 			// For windows
 			restoreConsole, err := termenv.EnableVirtualTerminalProcessing(defaultOutput)

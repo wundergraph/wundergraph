@@ -6,7 +6,7 @@ var (
 	Color    = lipgloss.AdaptiveColor{Light: "#111222", Dark: "#FAFAFA"}
 	Primary  = lipgloss.Color("#a855f7")
 	Green    = lipgloss.Color("#839788")
-	Rose     = lipgloss.Color("#E5D1D0")
+	Rose     = lipgloss.Color("#ff9f9b")
 	Red      = lipgloss.Color("#D1495B")
 	White    = lipgloss.Color("#ffffff")
 	Black    = lipgloss.Color("#000000")
@@ -15,8 +15,6 @@ var (
 	Disabled = lipgloss.AdaptiveColor{Light: "#d0d7de", Dark: "#d0d7de"}
 	Iris     = lipgloss.Color("#5D5FEF")
 	Fuschia  = lipgloss.Color("#EF5DA8")
-
-	SpinnerStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("69"))
 
 	TextStyle         = lipgloss.NewStyle().Foreground(Color)
 	HeadlineTextStyle = lipgloss.NewStyle().Foreground(Primary)
