@@ -717,6 +717,7 @@ export const configureWunderGraphApplication = <
 
 	let buildError: any = null;
 	const buildInfo: BuildInfo = {
+		success: false,
 		sdk: {
 			version: SDK_VERSION ?? unknown,
 		},
@@ -1038,6 +1039,9 @@ export const configureWunderGraphApplication = <
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
 			Logger.debug(`Code generation completed.`);
+		})
+		.then(() => {
+			buildInfo.success = true;
 		})
 		.catch((e: any) => {
 			buildError = e;

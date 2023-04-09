@@ -602,11 +602,12 @@ enum ConfigurationVariableKind {
 }
 
 message BuildInfo {
-	BuildInfoVersion sdk = 1;
-	BuildInfoVersion wunderctl = 2;
-	BuildInfoVersion node = 3;
-	BuildInfoOS os = 4;
-	BuildInfoStats stats = 5;
+	bool success = 1;
+	BuildInfoVersion sdk = 2;
+	BuildInfoVersion wunderctl = 3;
+	BuildInfoVersion node = 4;
+	BuildInfoOS os = 5;
+	BuildInfoStats stats = 6;
 }
 
 message BuildInfoVersion {

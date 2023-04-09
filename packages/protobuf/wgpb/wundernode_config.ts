@@ -1250,6 +1250,7 @@ export interface ConfigurationVariable {
 }
 
 export interface BuildInfo {
+  success: boolean;
   sdk: BuildInfoVersion | undefined;
   wunderctl: BuildInfoVersion | undefined;
   node: BuildInfoVersion | undefined;
@@ -4183,12 +4184,13 @@ export const ConfigurationVariable = {
 };
 
 function createBaseBuildInfo(): BuildInfo {
-  return { sdk: undefined, wunderctl: undefined, node: undefined, os: undefined, stats: undefined };
+  return { success: false, sdk: undefined, wunderctl: undefined, node: undefined, os: undefined, stats: undefined };
 }
 
 export const BuildInfo = {
   fromJSON(object: any): BuildInfo {
     return {
+      success: isSet(object.success) ? Boolean(object.success) : false,
       sdk: isSet(object.sdk) ? BuildInfoVersion.fromJSON(object.sdk) : undefined,
       wunderctl: isSet(object.wunderctl) ? BuildInfoVersion.fromJSON(object.wunderctl) : undefined,
       node: isSet(object.node) ? BuildInfoVersion.fromJSON(object.node) : undefined,
@@ -4199,6 +4201,7 @@ export const BuildInfo = {
 
   toJSON(message: BuildInfo): unknown {
     const obj: any = {};
+    message.success !== undefined && (obj.success = message.success);
     message.sdk !== undefined && (obj.sdk = message.sdk ? BuildInfoVersion.toJSON(message.sdk) : undefined);
     message.wunderctl !== undefined &&
       (obj.wunderctl = message.wunderctl ? BuildInfoVersion.toJSON(message.wunderctl) : undefined);
@@ -4210,6 +4213,7 @@ export const BuildInfo = {
 
   fromPartial<I extends Exact<DeepPartial<BuildInfo>, I>>(object: I): BuildInfo {
     const message = createBaseBuildInfo();
+    message.success = object.success ?? false;
     message.sdk = (object.sdk !== undefined && object.sdk !== null)
       ? BuildInfoVersion.fromPartial(object.sdk)
       : undefined;
