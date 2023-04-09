@@ -88,7 +88,6 @@ type options struct {
 	idleHandler             func()
 	hooksServerHealthCheck  bool
 	healthCheckTimeout      time.Duration
-	prettyLogging           bool
 	onServerConfigLoad      func(config WunderNodeConfig)
 	onServerError           func(err error)
 }
@@ -170,12 +169,6 @@ func WithConfigFileChange(event chan struct{}) Option {
 func WithDebugMode(enable bool) Option {
 	return func(options *options) {
 		options.enableDebugMode = enable
-	}
-}
-
-func WithPrettyLogging(enable bool) Option {
-	return func(options *options) {
-		options.prettyLogging = enable
 	}
 }
 

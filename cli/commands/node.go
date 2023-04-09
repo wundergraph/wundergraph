@@ -140,7 +140,6 @@ func StartWunderGraphNode(n *node.Node, opts ...Option) error {
 		node.WithDebugMode(rootFlags.DebugMode),
 		node.WithForceHttpsRedirects(!disableForceHttpsRedirects),
 		node.WithIntrospection(enableIntrospection),
-		node.WithPrettyLogging(rootFlags.PrettyLogs),
 	}
 
 	if shutdownAfterIdle > 0 {

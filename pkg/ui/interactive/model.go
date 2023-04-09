@@ -168,10 +168,10 @@ func (m model) View() string {
 		}
 
 		logModeHint := lipgloss.JoinHorizontal(lipgloss.Left,
-			BoldStyle.Render("➜ Logs:"),
+			BoldStyle.Render("➜ Debugging:"),
 			FeintStyle.Render(" use "),
-			BoldStyle.Bold(true).Render("--verbose"),
-			FeintStyle.Render(" to switch to log mode"),
+			BoldStyle.Bold(true).Render("--ui=false"),
+			FeintStyle.Render(" to see logs"),
 		)
 		doc.WriteString(fmt.Sprintf("%s\n\n", logModeHint))
 	}

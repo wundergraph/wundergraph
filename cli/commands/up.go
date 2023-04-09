@@ -6,6 +6,7 @@ import (
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/hashicorp/go-multierror"
+	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"github.com/wundergraph/wundergraph/pkg/ui/interactive"
@@ -35,7 +36,7 @@ var (
 	defaultDataSourcePollingIntervalSeconds int
 	disableCache                            bool
 	clearCache                              bool
-	verbose                                 bool
+	enableTUI                               bool
 )
 
 // upCmd represents the up command
@@ -51,8 +52,7 @@ var upCmd = &cobra.Command{
 		var devTUI *tea.Program
 		defaultOutput := termenv.DefaultOutput()
 
-		// We only use the dev devTUI if we are in a tty and not in verbose mode
-		if !verbose && defaultOutput.TTY() != nil {
+		if enableTUI {
 
 			// For windows
 			restoreConsole, err := termenv.EnableVirtualTerminalProcessing(defaultOutput)
@@ -61,9 +61,11 @@ var upCmd = &cobra.Command{
 			}
 			defer restoreConsole()
 
-			// Bubble Tea UI is not compatible with regular stdout logging
-			// for those reasons we disable it. Any meaningful information should be logged to the dev devTUI
+			// Bubbletea UI is not compatible with regular stdout logging
+			// for those reasons we disable it. Any meaningful information should be logged to the UI
+			// or for deeper investigation the user should disable the UI and use the logging mode
 			log = zap.NewNop()
+
 			devTUI = interactive.NewModel(ctx, &interactive.Options{
 				ServerVersion: BuildInfo.Version,
 			})
@@ -412,7 +414,6 @@ var upCmd = &cobra.Command{
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
-				node.WithPrettyLogging(rootFlags.PrettyLogs),
 				node.WithDevMode(),
 			}
 
@@ -470,10 +471,16 @@ var upCmd = &cobra.Command{
 
 func init() {
 	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
-	upCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "disable terminal user interface and print all logs to stdout")
+	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", true, "enable terminal user interface. Set to false if stdout is not a TTY.")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches before startup")
+
+	if !isatty.IsTerminal(os.Stdout.Fd()) {
+		// Always use JSON when not in a terminal
+		upCmdPrettyLogging = false
+		enableTUI = false
+	}
 
 	rootCmd.AddCommand(upCmd)
 }

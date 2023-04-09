@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/mattn/go-isatty"
 	"io/fs"
 	"os"
 	"time"
@@ -280,4 +281,10 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
+
+	if !isatty.IsTerminal(os.Stdout.Fd()) {
+		// Always use JSON when not in a terminal
+		rootFlags.PrettyLogs = false
+	}
+
 }

@@ -34,6 +34,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/klauspost/compress v1.15.15
 	github.com/mattbaird/jsonpatch v0.0.0-20200820163806-098863c1fc24
+	github.com/mattn/go-isatty v0.0.18
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/muesli/termenv v0.15.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
@@ -52,7 +53,7 @@ require (
 	github.com/tidwall/sjson v1.1.5
 	github.com/valyala/fasthttp v1.44.0
 	github.com/wundergraph/graphql-go-tools v1.62.1
-	go.uber.org/zap v1.18.1
+	go.uber.org/zap v1.24.0
 	golang.org/x/net v0.7.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sync v0.1.0
@@ -100,7 +101,6 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
