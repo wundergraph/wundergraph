@@ -228,7 +228,7 @@ type Options struct {
 
 func NewModel(ctx context.Context, options *Options) *tea.Program {
 	s := spinner.New()
-	s.Spinner = spinner.Dot
+	s.Spinner = spinner.MiniDot
 	s.Style = SpinnerStyle
 
 	h := help.New()
