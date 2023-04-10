@@ -90,4 +90,4 @@ export default Logger;
 
 // This logger is used to log fatal errors to stderr
 // which is used by wunderctl to read errors in TUI mode.
-export const FatalLogger = initLogger(process.stderr);
+export const FatalLogger = initLogger(process.stderr).child({ component: '@wundergraph/sdk' });

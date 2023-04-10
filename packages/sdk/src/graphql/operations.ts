@@ -1478,8 +1478,12 @@ export const loadOperations = (schemaFileName: string): LoadOperationsOutput => 
 	out.info?.forEach((msg) => Logger.info(msg));
 	out.errors?.forEach((msg) => Logger.error(msg));
 
-	if (WG_THROW_ON_OPERATION_LOADING_ERROR && (out.errors?.length ?? 0) > 0 && out?.errors?.[0]) {
-		throw new Error(out.errors[0]);
+	if (WG_THROW_ON_OPERATION_LOADING_ERROR && out.errors?.length) {
+		if (out.invalid?.length) {
+			throw new Error(`Could not load operation '${out.invalid[0]}': ${out.errors[0]}`);
+		} else {
+			throw new Error(`Could not load operation: ${out.errors[0]}`);
+		}
 	}
 
 	return out;

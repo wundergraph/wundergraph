@@ -799,14 +799,6 @@ export const configureWunderGraphApplication = <
 
 			const loadedOperations = loadOperations(schemaFileName);
 
-			if (loadedOperations?.errors && loadedOperations.errors.length > 0) {
-				if (loadedOperations.invalid && loadedOperations.invalid.length > 0) {
-					throw new Error(`Invalid operation '${loadedOperations.invalid[0]}': ${loadedOperations.errors[0]}`);
-				} else {
-					throw new Error(`Operation error: ${loadedOperations.errors[0]}`);
-				}
-			}
-
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,
 				resolved,
