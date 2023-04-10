@@ -535,7 +535,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	for _, listener := range listeners {
 		l := listener
 		g.Go(func() error {
-			n.log.Info("listening on",
+			n.log.Info("Listening on",
 				zap.String("addr", l.Addr().String()),
 			)
 
@@ -544,7 +544,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 				return nil
 			}
 			if err == http.ErrServerClosed {
-				n.log.Debug("listener closed",
+				n.log.Debug("Listener closed",
 					zap.String("addr", l.Addr().String()),
 				)
 				return nil
@@ -584,15 +584,15 @@ func (n *Node) setupGlobalMiddlewares(router *mux.Router, nodeConfig WunderNodeC
 
 // setApiDevConfigDefaults sets default values for the api config in dev mode
 func (n *Node) setApiDevConfigDefaults(api *apihandler.Api) {
-	var errorMessages []string
+	var warnMessages []string
 	// we set these values statically so that auth never drops login sessions during development
 	if n.options.devMode {
-		api.CookieBasedSecrets, errorMessages = apihandler.NewDevModeCookieBasedSecrets()
+		api.CookieBasedSecrets, warnMessages = apihandler.NewDevModeCookieBasedSecrets()
 	} else {
-		api.CookieBasedSecrets, errorMessages = apihandler.NewCookieBasedSecrets()
+		api.CookieBasedSecrets, warnMessages = apihandler.NewCookieBasedSecrets()
 	}
-	for _, errorMessage := range errorMessages {
-		n.log.Error(errorMessage)
+	for _, errorMessage := range warnMessages {
+		n.log.Warn(errorMessage)
 	}
 }
 
