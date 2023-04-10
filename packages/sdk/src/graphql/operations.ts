@@ -33,7 +33,7 @@ import {
 } from 'graphql';
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
-import { WG_PRETTY_GRAPHQL_VALIDATION_ERRORS, WG_THROW_ON_OPERATION_LOADING_ERROR } from '../definition';
+import { WG_PRETTY_GRAPHQL_VALIDATION_ERRORS } from '../definition';
 import { wunderctlExec } from '../wunderctlexec';
 import { Logger } from '../logger';
 import * as fs from 'fs';
@@ -1478,7 +1478,7 @@ export const loadOperations = (schemaFileName: string): LoadOperationsOutput => 
 	out.info?.forEach((msg) => Logger.info(msg));
 	out.errors?.forEach((msg) => Logger.error(msg));
 
-	if (WG_THROW_ON_OPERATION_LOADING_ERROR && out.errors?.length) {
+	if (out.errors?.length) {
 		if (out.invalid?.length) {
 			throw new Error(`Could not load operation '${out.invalid[0]}': ${out.errors[0]}`);
 		} else {

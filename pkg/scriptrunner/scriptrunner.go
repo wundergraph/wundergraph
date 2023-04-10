@@ -169,7 +169,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
-				b.log.Error("Script runner exited with non-zero exit code",
+				b.log.Debug("Script runner exited with non-zero exit code",
 					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
 					zap.Error(status.Error),

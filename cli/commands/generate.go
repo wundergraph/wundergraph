@@ -55,7 +55,6 @@ var generateCmd = &cobra.Command{
 			WunderGraphDir: wunderGraphDir,
 		})
 		// Run scripts in prod mode
-		scriptEnv = append(scriptEnv, "NODE_ENV=production", "WG_THROW_ON_OPERATION_LOADING_ERROR=true")
 		scriptEnv = append(scriptEnv, fmt.Sprintf("WG_ENABLE_INTROSPECTION_OFFLINE=%t", offline))
 
 		configRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{

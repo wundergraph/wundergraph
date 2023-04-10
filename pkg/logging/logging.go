@@ -60,9 +60,8 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 		encoder = zapJsonEncoder()
 	}
 
-	zapOpts = append(zapOpts, zap.AddStacktrace(zap.ErrorLevel))
-
 	if debug {
+		zapOpts = append(zapOpts, zap.AddStacktrace(zap.ErrorLevel))
 		zapOpts = append(zapOpts, zap.AddCaller())
 	}
 
