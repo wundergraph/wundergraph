@@ -90,6 +90,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Documentation):
 			return m, OpenURL("https://docs.wundergraph.com")
+		case key.Matches(msg, m.keys.OpenIssue):
+			return m, OpenURL("https://github.com/wundergraph/wundergraph/issues/new/choose")
 		case key.Matches(msg, m.keys.Discord):
 			return m, OpenURL("https://discord.com/invite/Jjmc8TC")
 		}

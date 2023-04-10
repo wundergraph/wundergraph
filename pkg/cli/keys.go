@@ -9,6 +9,7 @@ type keyMap struct {
 	OpenBrowser   key.Binding
 	Documentation key.Binding
 	Discord       key.Binding
+	OpenIssue     key.Binding
 	Quit          key.Binding
 }
 
@@ -22,8 +23,9 @@ func (k keyMap) ShortHelp() []key.Binding {
 // key.Map interface.
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.OpenBrowser, k.Documentation}, // first column
-		{k.ClearConsole, k.Quit},         // second column
+		{k.OpenBrowser, k.Documentation},
+		{k.ClearConsole, k.Quit},
+		{k.Discord, k.OpenIssue},
 	}
 }
 
@@ -38,7 +40,7 @@ var keys = keyMap{
 	),
 	Discord: key.NewBinding(
 		key.WithKeys("h"),
-		key.WithHelp("h", "Get help on discord"),
+		key.WithHelp("h", "Help on discord"),
 	),
 	Documentation: key.NewBinding(
 		key.WithKeys("d"),
@@ -47,5 +49,9 @@ var keys = keyMap{
 	Quit: key.NewBinding(
 		key.WithKeys("q", "esc", "ctrl+c"),
 		key.WithHelp("q", "Close server"),
+	),
+	OpenIssue: key.NewBinding(
+		key.WithKeys("i"),
+		key.WithHelp("i", "Open issue"),
 	),
 }
