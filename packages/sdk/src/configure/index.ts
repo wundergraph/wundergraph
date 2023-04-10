@@ -735,11 +735,12 @@ export const configureWunderGraphApplication = <
 			release: os.release(),
 		},
 		stats: {
+			// This must be read before passing the config to the resolveConfig function
 			totalApis: config.apis?.length ?? 0,
-			hasFileUpload: !!config?.s3UploadProvider?.find((provider) => !!provider.name),
+			hasUploadProvider: !!config?.s3UploadProvider?.find((provider) => !!provider.name),
 			totalOperations: 0,
 			totalWebhooks: 0,
-			hashAuth:
+			hashAuthenticationProvider:
 				!!config?.authentication?.tokenBased?.providers?.length ||
 				!!config?.authentication?.cookieBased?.providers?.length,
 		},

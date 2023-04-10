@@ -1274,8 +1274,8 @@ export interface BuildInfoStats {
   totalApis: number;
   totalOperations: number;
   totalWebhooks: number;
-  hashAuth: boolean;
-  hasFileUpload: boolean;
+  hashAuthenticationProvider: boolean;
+  hasUploadProvider: boolean;
 }
 
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
@@ -4290,7 +4290,13 @@ export const BuildInfoOS = {
 };
 
 function createBaseBuildInfoStats(): BuildInfoStats {
-  return { totalApis: 0, totalOperations: 0, totalWebhooks: 0, hashAuth: false, hasFileUpload: false };
+  return {
+    totalApis: 0,
+    totalOperations: 0,
+    totalWebhooks: 0,
+    hashAuthenticationProvider: false,
+    hasUploadProvider: false,
+  };
 }
 
 export const BuildInfoStats = {
@@ -4299,8 +4305,10 @@ export const BuildInfoStats = {
       totalApis: isSet(object.totalApis) ? Number(object.totalApis) : 0,
       totalOperations: isSet(object.totalOperations) ? Number(object.totalOperations) : 0,
       totalWebhooks: isSet(object.totalWebhooks) ? Number(object.totalWebhooks) : 0,
-      hashAuth: isSet(object.hashAuth) ? Boolean(object.hashAuth) : false,
-      hasFileUpload: isSet(object.hasFileUpload) ? Boolean(object.hasFileUpload) : false,
+      hashAuthenticationProvider: isSet(object.hashAuthenticationProvider)
+        ? Boolean(object.hashAuthenticationProvider)
+        : false,
+      hasUploadProvider: isSet(object.hasUploadProvider) ? Boolean(object.hasUploadProvider) : false,
     };
   },
 
@@ -4309,8 +4317,9 @@ export const BuildInfoStats = {
     message.totalApis !== undefined && (obj.totalApis = Math.round(message.totalApis));
     message.totalOperations !== undefined && (obj.totalOperations = Math.round(message.totalOperations));
     message.totalWebhooks !== undefined && (obj.totalWebhooks = Math.round(message.totalWebhooks));
-    message.hashAuth !== undefined && (obj.hashAuth = message.hashAuth);
-    message.hasFileUpload !== undefined && (obj.hasFileUpload = message.hasFileUpload);
+    message.hashAuthenticationProvider !== undefined &&
+      (obj.hashAuthenticationProvider = message.hashAuthenticationProvider);
+    message.hasUploadProvider !== undefined && (obj.hasUploadProvider = message.hasUploadProvider);
     return obj;
   },
 
@@ -4319,8 +4328,8 @@ export const BuildInfoStats = {
     message.totalApis = object.totalApis ?? 0;
     message.totalOperations = object.totalOperations ?? 0;
     message.totalWebhooks = object.totalWebhooks ?? 0;
-    message.hashAuth = object.hashAuth ?? false;
-    message.hasFileUpload = object.hasFileUpload ?? false;
+    message.hashAuthenticationProvider = object.hashAuthenticationProvider ?? false;
+    message.hasUploadProvider = object.hasUploadProvider ?? false;
     return message;
   },
 };
