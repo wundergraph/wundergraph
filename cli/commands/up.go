@@ -428,6 +428,7 @@ var upCmd = &cobra.Command{
 				node.WithDevMode(),
 			}
 
+			// Request logging is disabled in the dev TUI
 			if devTUI == nil {
 				options = append(options, node.WithRequestLogging(rootFlags.DebugMode))
 			}
