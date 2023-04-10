@@ -54,7 +54,11 @@ var startCmd = &cobra.Command{
 				zap.String("builtBy", BuildInfo.BuiltBy),
 			)
 
-			return StartWunderGraphNode(n, WithIdleHandler(stop), WithHooksServerHealthCheck())
+			return StartWunderGraphNode(n,
+				WithIdleHandler(stop),
+				WithHooksServerHealthCheck(),
+				WithRequestLogging(rootFlags.DebugMode),
+			)
 		})
 
 		n.HandleGracefulShutdown(gracefulTimeout)

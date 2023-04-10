@@ -1,4 +1,4 @@
-package interactive
+package cli
 
 import (
 	"context"
@@ -170,7 +170,7 @@ func (m model) View() string {
 		logModeHint := lipgloss.JoinHorizontal(lipgloss.Left,
 			BoldStyle.Render("➜ Debugging:"),
 			FeintStyle.Render(" use "),
-			BoldStyle.Bold(true).Render("--ui=false"),
+			BoldStyle.Bold(true).Render("--ui=false --debug"),
 			FeintStyle.Render(" to see logs"),
 		)
 		doc.WriteString(fmt.Sprintf("%s\n\n", logModeHint))

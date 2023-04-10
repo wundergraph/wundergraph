@@ -1,4 +1,4 @@
-package interactive
+package cli
 
 import (
 	"os/exec"

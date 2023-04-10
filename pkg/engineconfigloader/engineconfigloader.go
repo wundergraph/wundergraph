@@ -56,7 +56,7 @@ type DefaultFactoryResolver struct {
 }
 
 func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper,
-	debug bool, log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
+	log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
 
 	defaultHttpClient := &http.Client{
 		Timeout:   transportFactory.DefaultTransportTimeout(),
@@ -80,7 +80,6 @@ func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTranspo
 		static: &staticdatasource.Factory{},
 		database: &database.Factory{
 			Client: defaultHttpClient,
-			Debug:  debug,
 			Log:    log,
 		},
 		hooksClient: hooksClient,

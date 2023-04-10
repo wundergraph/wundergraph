@@ -18,7 +18,7 @@
     "dev": "wunderctl up",
     "build": "pnpm generate && pnpm check",
     "start": "wunderctl start",
-    "generate": "wunderctl generate --debug --pretty-logging",
+    "generate": "wunderctl generate",
     "test": "pnpm generate && jest",
     "check": "tsc"
   },

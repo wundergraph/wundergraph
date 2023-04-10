@@ -18,8 +18,7 @@ import (
 )
 
 var (
-	generateAndPublish bool
-	offline            bool
+	offline bool
 )
 
 // generateCmd represents the generate command
@@ -214,7 +213,6 @@ var generateCmd = &cobra.Command{
 }
 
 func init() {
-	generateCmd.Flags().BoolVarP(&generateAndPublish, "publish", "p", false, "publish the generated API immediately")
 	generateCmd.Flags().BoolVar(&offline, "offline", false, "disables loading resources from the network")
 	rootCmd.AddCommand(generateCmd)
 }

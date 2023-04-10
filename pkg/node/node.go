@@ -69,13 +69,13 @@ type Node struct {
 }
 
 type options struct {
-	staticConfig        *WunderNodeConfig
-	fileSystemConfig    *string
-	enableDebugMode     bool
-	forceHttpsRedirects bool
-	enableIntrospection bool
-	configFileChange    chan struct{}
-	globalRateLimit     struct {
+	staticConfig         *WunderNodeConfig
+	fileSystemConfig     *string
+	enableRequestLogging bool
+	forceHttpsRedirects  bool
+	enableIntrospection  bool
+	configFileChange     chan struct{}
+	globalRateLimit      struct {
 		enable      bool
 		requests    int
 		perDuration time.Duration
@@ -166,9 +166,9 @@ func WithConfigFileChange(event chan struct{}) Option {
 	}
 }
 
-func WithDebugMode(enable bool) Option {
+func WithRequestLogging(enable bool) Option {
 	return func(options *options) {
-		options.enableDebugMode = enable
+		options.enableRequestLogging = enable
 	}
 }
 
@@ -421,16 +421,15 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 
 	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
 
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableDebugMode)
+	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
 
 	n.log.Debug("http.Client.Transport",
-		zap.Bool("enableDebugMode", n.options.enableDebugMode),
+		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
 	)
 
 	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(
 		transportFactory,
 		defaultTransport,
-		n.options.enableDebugMode,
 		n.log,
 		hooksClient,
 	))
@@ -438,7 +437,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	builderConfig := apihandler.BuilderConfig{
 		InsecureCookies:            n.options.insecureCookies,
 		ForceHttpsRedirects:        n.options.forceHttpsRedirects,
-		EnableDebugMode:            n.options.enableDebugMode,
+		EnableRequestLogging:       n.options.enableRequestLogging,
 		EnableIntrospection:        n.options.enableIntrospection,
 		GitHubAuthDemoClientID:     n.options.githubAuthDemo.ClientID,
 		GitHubAuthDemoClientSecret: n.options.githubAuthDemo.ClientSecret,

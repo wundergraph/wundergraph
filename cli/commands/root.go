@@ -63,11 +63,11 @@ var rootCmd = &cobra.Command{
 		// because the command output data on stdout
 		case LoadOperationsCmdName:
 			return nil
-			// up command has a different default for global pretty logging
-			// we can't overwrite the default value in the init function because
-			// it would overwrite the default value for all other commands
-		case UpCmdName:
-			rootFlags.PrettyLogs = upCmdPrettyLogging
+		}
+
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			// Always use JSON when not in a terminal
+			rootFlags.PrettyLogs = false
 		}
 
 		if rootFlags.DebugMode {
@@ -281,10 +281,4 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
 	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
 	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
-
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
-		// Always use JSON when not in a terminal
-		rootFlags.PrettyLogs = false
-	}
-
 }

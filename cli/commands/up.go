@@ -9,7 +9,7 @@ import (
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
-	"github.com/wundergraph/wundergraph/pkg/ui/interactive"
+	"github.com/wundergraph/wundergraph/pkg/cli"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -32,7 +32,6 @@ import (
 const UpCmdName = "up"
 
 var (
-	upCmdPrettyLogging                      bool
 	defaultDataSourcePollingIntervalSeconds int
 	disableCache                            bool
 	clearCache                              bool
@@ -48,6 +47,18 @@ var upCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
+
+		// Enable TUI only if stdout is a terminal
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			// Always use JSON when not in a terminal
+			enableTUI = false
+		}
+
+		// Bubbletea UI is not compatible with regular stdout logging
+		if enableTUI && rootFlags.DebugMode {
+			log.Warn("Debug mode is enabled. This will disable the UI.")
+			enableTUI = false
+		}
 
 		var devTUI *tea.Program
 		defaultOutput := termenv.DefaultOutput()
@@ -66,7 +77,7 @@ var upCmd = &cobra.Command{
 			// or for deeper investigation the user should disable the UI and use the logging mode
 			log = zap.NewNop()
 
-			devTUI = interactive.NewModel(ctx, &interactive.Options{
+			devTUI = cli.NewModel(ctx, &cli.Options{
 				ServerVersion: BuildInfo.Version,
 			})
 
@@ -97,7 +108,7 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		// optional, no error check
+		// hook server is optional, so we don't error if it doesn't exist
 		codeServerFilePath, _ := files.CodeFilePath(wunderGraphDir, serverEntryPointFilename)
 
 		ctx, stop := signal.NotifyContext(ctx, os.Interrupt,
@@ -203,7 +214,7 @@ var upCmd = &cobra.Command{
 
 		onBeforeBuild := func(rebuild bool) {
 			if devTUI != nil {
-				task := interactive.TaskStarted{
+				task := cli.TaskStarted{
 					Name: "Building",
 				}
 				devTUI.Send(task)
@@ -255,7 +266,7 @@ var upCmd = &cobra.Command{
 			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
 				defer func() {
 					if devTUI != nil {
-						devTUI.Send(interactive.TaskEnded{
+						devTUI.Send(cli.TaskEnded{
 							Name: "Build completed",
 							Err:  err,
 						})
@@ -311,7 +322,7 @@ var upCmd = &cobra.Command{
 
 			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
 				defer func() {
-					devTUI.Send(interactive.TaskEnded{
+					devTUI.Send(cli.TaskEnded{
 						Name: "Build completed",
 						Err:  err,
 					})
@@ -410,11 +421,14 @@ var upCmd = &cobra.Command{
 			options := []node.Option{
 				node.WithConfigFileChange(configFileChangeChan),
 				node.WithFileSystemConfig(configFile),
-				node.WithDebugMode(rootFlags.DebugMode),
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
 				node.WithDevMode(),
+			}
+
+			if devTUI == nil {
+				options = append(options, node.WithRequestLogging(rootFlags.DebugMode))
 			}
 
 			if devTUI != nil {
@@ -424,7 +438,7 @@ var upCmd = &cobra.Command{
 					if data, err := os.ReadFile(filepath.Join(wunderGraphDir, "generated", "wundergraph.build_info.json")); err == nil {
 						var buildInfo wgpb.BuildInfo
 						if err := json.Unmarshal(data, &buildInfo); err == nil {
-							devTUI.Send(interactive.ServerConfigLoaded{
+							devTUI.Send(cli.ServerConfigLoaded{
 								Webhooks:                 buildInfo.Stats.TotalWebhooks,
 								Operations:               buildInfo.Stats.TotalOperations,
 								DatasourceConfigurations: buildInfo.Stats.TotalApis,
@@ -437,7 +451,7 @@ var upCmd = &cobra.Command{
 					}
 				}))
 				options = append(options, node.WithServerErrorHandler(func(err error) {
-					devTUI.Send(interactive.ServerStartError{
+					devTUI.Send(cli.ServerStartError{
 						Err: multierror.Append(errors.New("could not start server"), err),
 					})
 				}))
@@ -470,17 +484,10 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
-	upCmd.PersistentFlags().BoolVar(&upCmdPrettyLogging, "pretty-logging", true, "switches the logging to human readable format")
 	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", true, "enable terminal user interface. Set to false if stdout is not a TTY.")
 	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
 	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
 	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches before startup")
-
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
-		// Always use JSON when not in a terminal
-		upCmdPrettyLogging = false
-		enableTUI = false
-	}
 
 	rootCmd.AddCommand(upCmd)
 }
