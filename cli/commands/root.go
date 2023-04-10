@@ -2,13 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/mattn/go-isatty"
 	"io/fs"
 	"os"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"

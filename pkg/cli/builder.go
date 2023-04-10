@@ -3,13 +3,14 @@ package cli
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"strings"
-	"time"
 )
 
 type ServerConfigLoaded struct {

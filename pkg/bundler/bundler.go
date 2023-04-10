@@ -3,13 +3,13 @@ package bundler
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/evanw/esbuild/pkg/api"
+	"github.com/hashicorp/go-multierror"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/wundergraph/pkg/watcher"

@@ -2,11 +2,12 @@ package scriptrunner
 
 import (
 	"fmt"
+	"os"
+
 	gocmd "github.com/go-cmd/cmd"
 	"github.com/smallnest/ringbuffer"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
-	"os"
 )
 
 type Config struct {
