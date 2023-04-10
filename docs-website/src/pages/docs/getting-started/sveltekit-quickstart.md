@@ -102,7 +102,7 @@ const dragonsQuery = createQuery({
 });
 ```
 
-The operation name is the name of the file in the operations directory, without the extension. The `useQuery` hook will return the result of the operation.
+The operation name is the name of the file in the operations directory, without the extension. The `createQuery` function will return the result of the operation.
 
 ```svelte
 <div class="results">

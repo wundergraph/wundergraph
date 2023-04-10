@@ -960,6 +960,10 @@ const navigation = [
 				title: 'Next.js',
 				href: '/docs/clients-reference/nextjs',
 			},
+			{
+				title: 'Svelte Query',
+				href: '/docs/clients-reference/svelte-query',
+			},
 		],
 	},
 	{
