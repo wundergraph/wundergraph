@@ -38,6 +38,20 @@ npm run build
 ### SSR
 
 ```ts
+// In lib/wundergraph
+import { createSvelteClient } from '@wundergraph/svelte-query';
+import { createClient } from '../../.wundergraph/generated/client';
+import type { Operations } from '../../.wundergraph/generated/client';
+
+const client = createClient();
+
+const { createFileUpload, createMutation, createQuery, createSubscription, getAuth, getUser, queryKey } =
+  createSvelteClient<Operations>(client);
+
+export { createFileUpload, createMutation, createQuery, createSubscription, getAuth, getUser, queryKey };
+```
+
+```ts
 // In +page.ts file
 import { prefetchQuery } from '$lib/wundergraph';
 import type { PageLoad } from './$types';
