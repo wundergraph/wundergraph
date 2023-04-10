@@ -61,6 +61,7 @@ const initLogger = (destination: DestinationStream): pino.Logger => {
 	if (enablePretty) {
 		const stream = pretty({
 			colorize: true,
+			colorizeObjects: false,
 			translateTime: 'HH:MM:ss TT', // https://www.npmjs.com/package/dateformat
 			customPrettifiers: {
 				time: (timestamp: any) => `${timestamp}`,

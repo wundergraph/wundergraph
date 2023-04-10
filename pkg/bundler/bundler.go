@@ -35,7 +35,7 @@ type Bundler struct {
 	fileLoaders           []string
 	buildResult           *api.BuildResult
 	onAfterBundle         func(buildErr error, rebuild bool) error
-	onBeforeBundle        func(rebuild bool)
+	onWatch               func(paths []string)
 
 	newWatchPath chan *watcher.WatchPath
 }
@@ -53,7 +53,7 @@ type Config struct {
 	OutDir                string
 	OutExtension          map[string]string
 	OnAfterBundle         func(buildErr error, rebuild bool) error
-	OnBeforeBundle        func(rebuild bool)
+	OnWatch               func(paths []string)
 }
 
 func NewBundler(config Config) *Bundler {
@@ -70,7 +70,7 @@ func NewBundler(config Config) *Bundler {
 		ignorePaths:           config.IgnorePaths,
 		skipWatchOnEntryPoint: config.SkipWatchOnEntryPoint,
 		onAfterBundle:         config.OnAfterBundle,
-		onBeforeBundle:        config.OnBeforeBundle,
+		onWatch:               config.OnWatch,
 		log:                   config.Logger,
 		fileLoaders:           []string{".graphql", ".gql", ".graphqls", ".yml", ".yaml"},
 		newWatchPath:          make(chan *watcher.WatchPath),
@@ -114,9 +114,6 @@ func (b *Bundler) buildErr() error {
 
 func (b *Bundler) Bundle() error {
 	if b.buildResult != nil {
-		if b.onBeforeBundle != nil {
-			b.onBeforeBundle(true)
-		}
 		buildResult := b.buildResult.Rebuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
@@ -136,9 +133,6 @@ func (b *Bundler) Bundle() error {
 			return b.onAfterBundle(b.buildErr(), true)
 		}
 	} else {
-		if b.onBeforeBundle != nil {
-			b.onBeforeBundle(false)
-		}
 		buildResult := b.initialBuild()
 		b.buildResult = &buildResult
 		if len(b.buildResult.Errors) != 0 {
@@ -322,8 +316,8 @@ func (b *Bundler) runWatcher(ctx context.Context, rebuild func() api.BuildResult
 
 	go func() {
 		err := w.Watch(ctx, func(paths []string) error {
-			if b.onBeforeBundle != nil {
-				b.onBeforeBundle(true)
+			if b.onWatch != nil {
+				b.onWatch(paths)
 			}
 			result := rebuild()
 			b.buildResult = &result

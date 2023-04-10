@@ -7,6 +7,4 @@ type RootFlags struct {
 	DebugMode          bool
 	Telemetry          bool
 	TelemetryDebugMode bool
-	// Pretty makes the output of the cli pretty printed
-	Pretty bool
 }

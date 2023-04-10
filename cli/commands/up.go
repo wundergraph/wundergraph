@@ -74,8 +74,8 @@ var upCmd = &cobra.Command{
 			defer restoreConsole()
 
 			// Bubbletea UI is not compatible with regular stdout logging
-			// for those reasons we disable it. Any meaningful information should be logged to the UI
-			// or for deeper investigation the user should disable the UI and use the logging mode
+			// for those reasons we disable it and override the global logger. Any meaningful information
+			// should be logged to the UI or for deeper investigation the user should disable the UI and use the logging mode
 			log = zap.NewNop()
 
 			devTUI = cli.NewModel(ctx, &cli.Options{
@@ -213,7 +213,10 @@ var upCmd = &cobra.Command{
 			return nil
 		}
 
-		onBeforeBuild := func(rebuild bool) {
+		onWatch := func(paths []string) {
+			if paths != nil {
+				log.Info("File changed, rebuilding", zap.Strings("paths", paths))
+			}
 			if devTUI != nil {
 				task := cli.TaskStarted{
 					Name: "Building",
@@ -380,9 +383,15 @@ var upCmd = &cobra.Command{
 			IgnorePaths: []string{
 				"node_modules",
 			},
-			OnBeforeBundle: onBeforeBuild,
-			OnAfterBundle:  onAfterBuild,
+			OnWatch:       onWatch,
+			OnAfterBundle: onAfterBuild,
 		})
+
+		if devTUI != nil {
+			devTUI.Send(cli.TaskStarted{
+				Name: "Building",
+			})
+		}
 
 		err = configBundler.Bundle()
 		if err != nil {
@@ -425,12 +434,8 @@ var upCmd = &cobra.Command{
 				node.WithInsecureCookies(),
 				node.WithIntrospection(true),
 				node.WithGitHubAuthDemo(GitHubAuthDemo),
+				node.WithRequestLogging(rootFlags.DebugMode),
 				node.WithDevMode(),
-			}
-
-			// Request logging is disabled in the dev TUI
-			if devTUI == nil {
-				options = append(options, node.WithRequestLogging(rootFlags.DebugMode))
 			}
 
 			if devTUI != nil {
