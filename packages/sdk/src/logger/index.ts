@@ -87,7 +87,6 @@ export const ServerLogger = logger.child(
 
 export default Logger;
 
-// This logger is used to log errors to stderr
-// which is used by wunderctl to detect errors in TUI mode.
-const errorLogger = initLogger(process.stderr);
-export const ErrorLogger = errorLogger.child({ component: '@wundergraph/sdk' });
+// This logger is used to log fatal errors to stderr
+// which is used by wunderctl to read errors in TUI mode.
+export const FatalLogger = initLogger(process.stderr);

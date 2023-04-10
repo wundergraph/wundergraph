@@ -1274,7 +1274,7 @@ export interface BuildInfoStats {
   totalApis: number;
   totalOperations: number;
   totalWebhooks: number;
-  hashAuthenticationProvider: boolean;
+  hasAuthenticationProvider: boolean;
   hasUploadProvider: boolean;
 }
 
@@ -4294,7 +4294,7 @@ function createBaseBuildInfoStats(): BuildInfoStats {
     totalApis: 0,
     totalOperations: 0,
     totalWebhooks: 0,
-    hashAuthenticationProvider: false,
+    hasAuthenticationProvider: false,
     hasUploadProvider: false,
   };
 }
@@ -4305,8 +4305,8 @@ export const BuildInfoStats = {
       totalApis: isSet(object.totalApis) ? Number(object.totalApis) : 0,
       totalOperations: isSet(object.totalOperations) ? Number(object.totalOperations) : 0,
       totalWebhooks: isSet(object.totalWebhooks) ? Number(object.totalWebhooks) : 0,
-      hashAuthenticationProvider: isSet(object.hashAuthenticationProvider)
-        ? Boolean(object.hashAuthenticationProvider)
+      hasAuthenticationProvider: isSet(object.hasAuthenticationProvider)
+        ? Boolean(object.hasAuthenticationProvider)
         : false,
       hasUploadProvider: isSet(object.hasUploadProvider) ? Boolean(object.hasUploadProvider) : false,
     };
@@ -4317,8 +4317,8 @@ export const BuildInfoStats = {
     message.totalApis !== undefined && (obj.totalApis = Math.round(message.totalApis));
     message.totalOperations !== undefined && (obj.totalOperations = Math.round(message.totalOperations));
     message.totalWebhooks !== undefined && (obj.totalWebhooks = Math.round(message.totalWebhooks));
-    message.hashAuthenticationProvider !== undefined &&
-      (obj.hashAuthenticationProvider = message.hashAuthenticationProvider);
+    message.hasAuthenticationProvider !== undefined &&
+      (obj.hasAuthenticationProvider = message.hasAuthenticationProvider);
     message.hasUploadProvider !== undefined && (obj.hasUploadProvider = message.hasUploadProvider);
     return obj;
   },
@@ -4328,7 +4328,7 @@ export const BuildInfoStats = {
     message.totalApis = object.totalApis ?? 0;
     message.totalOperations = object.totalOperations ?? 0;
     message.totalWebhooks = object.totalWebhooks ?? 0;
-    message.hashAuthenticationProvider = object.hashAuthenticationProvider ?? false;
+    message.hasAuthenticationProvider = object.hasAuthenticationProvider ?? false;
     message.hasUploadProvider = object.hasUploadProvider ?? false;
     return message;
   },

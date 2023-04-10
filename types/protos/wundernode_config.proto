@@ -626,6 +626,6 @@ message BuildInfoStats {
 	int32 totalApis = 1;
 	int32 totalOperations = 2;
 	int32 totalWebhooks = 3;
-	bool hashAuthenticationProvider = 4;
+	bool hasAuthenticationProvider = 4;
 	bool hasUploadProvider = 5;
 }

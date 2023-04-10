@@ -443,8 +443,8 @@ var upCmd = &cobra.Command{
 								Operations:               buildInfo.Stats.TotalOperations,
 								DatasourceConfigurations: buildInfo.Stats.TotalApis,
 								ServerURL:                "http://" + config.Api.PrimaryHost,
-								FileUploads:              buildInfo.Stats.HasFileUpload,
-								Authentication:           buildInfo.Stats.HashAuth,
+								FileUploads:              buildInfo.Stats.HasUploadProvider,
+								Authentication:           buildInfo.Stats.HasAuthenticationProvider,
 								PlaygroundEnabled:        config.Api.EnableGraphqlEndpoint,
 							})
 						}

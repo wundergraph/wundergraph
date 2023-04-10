@@ -75,11 +75,10 @@ import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerCon
 import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import logger, { ErrorLogger, Logger } from '../logger';
+import logger, { FatalLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
-import { build } from 'protobufjs';
 
 const utf8 = 'utf8';
 const generated = 'generated';
@@ -740,7 +739,7 @@ export const configureWunderGraphApplication = <
 			hasUploadProvider: !!config?.s3UploadProvider?.find((provider) => !!provider.name),
 			totalOperations: 0,
 			totalWebhooks: 0,
-			hashAuthenticationProvider:
+			hasAuthenticationProvider:
 				!!config?.authentication?.tokenBased?.providers?.length ||
 				!!config?.authentication?.cookieBased?.providers?.length,
 		},
@@ -1054,7 +1053,7 @@ export const configureWunderGraphApplication = <
 			writeWunderGraphFileSync('build_info', buildInfo);
 
 			if (buildError) {
-				ErrorLogger.fatal(buildError);
+				FatalLogger.fatal(buildError);
 				process.exit(1);
 			} else {
 				process.exit(0);
