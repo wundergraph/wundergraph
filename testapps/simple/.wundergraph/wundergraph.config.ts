@@ -22,26 +22,6 @@ configureWunderGraphApplication({
 			// path: "../frontend/src/generated",
 		},
 	],
-	// authentication: {
-	// 	tokenBased: {
-	// 		providers: [
-	// 			{
-	// 				jwksJSON: new EnvironmentVariable('WEATHER_JWKS_JSON'),
-	// 			},
-	// 		],
-	// 	},
-	// },
-	// s3UploadProvider: [
-	// 	{
-	// 		name: 'foo',
-	// 		bucketName: 'wundergraph-test',
-	// 		accessKeyID: new EnvironmentVariable('AWS_ACCESS_KEY_ID'),
-	// 		endpoint: new EnvironmentVariable('AWS_ENDPOINT'),
-	// 		secretAccessKey: new EnvironmentVariable('AWS_SECRET_ACCESS_KEY'),
-	// 		useSSL: true,
-	// 		bucketLocation: 'eu-central-1',
-	// 	},
-	// ],
 	cors: {
 		...cors.allowAll,
 		allowedOrigins: ['http://localhost:9991', 'http://127.0.0.1:9991'],
