@@ -160,6 +160,15 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		}
 	}
 
+	// if we handle on request hook, the headers keys become lower case
+	// we need to set the upgrade headers again
+	// because in some weird cases the origin websocket request upgrade check could be case sensitive
+	// as a result, the upgrade would fail
+	if isUpgradeRequest {
+		request.Header.Set("Connection", "upgrade")
+		request.Header.Set("Upgrade", "websocket")
+	}
+
 	var requestDump []byte
 
 	if t.debugMode {
