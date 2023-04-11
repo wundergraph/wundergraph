@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/hashicorp/go-multierror"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/hashicorp/go-multierror"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
@@ -84,16 +84,20 @@ var upCmd = &cobra.Command{
 			// should be logged to the UI or for deeper investigation the user should disable the UI and use the logging mode
 			log = zap.NewNop()
 
-			devTUI = cli.NewModel(ctx, &cli.Options{
-				ServerVersion: BuildInfo.Version,
-			})
+			devTUI = cli.NewModel(ctx, &cli.Options{ServerVersion: BuildInfo.Version})
 
 			go func() {
 				if _, err := devTUI.Run(); err != nil {
-					log.Error("error running reporter", zap.Error(err))
+					log.Error("error running tui program", zap.Error(err))
 				}
 				cancel()
 			}()
+		}
+
+		reportErrToTUI := func(err error) {
+			if err != nil && devTUI != nil {
+				devTUI.Send(cli.Error{Err: err})
+			}
 		}
 
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
@@ -224,7 +228,9 @@ var upCmd = &cobra.Command{
 				log.Info("File changed", zap.Strings("paths", paths))
 			}
 			if devTUI != nil {
-				task := cli.TaskStarted{}
+				task := cli.TaskStarted{
+					Label: "Building",
+				}
 				devTUI.Send(task)
 			}
 		}
@@ -276,8 +282,8 @@ var upCmd = &cobra.Command{
 				defer func() {
 					if devTUI != nil {
 						devTUI.Send(cli.TaskEnded{
-							Name: "Build completed",
-							Err:  err,
+							Label: "Build completed",
+							Err:   err,
 						})
 					}
 				}()
@@ -317,11 +323,13 @@ var upCmd = &cobra.Command{
 				go func() {
 					// run or restart hook server
 					<-hookServerRunner.Run(ctx)
+					reportErrToTUI(hookServerRunner.Error())
 				}()
 
 				go func() {
 					// run or restart the introspection poller
 					<-configIntrospectionRunner.Run(ctx)
+					reportErrToTUI(configIntrospectionRunner.Error())
 				}()
 
 				return nil
@@ -332,8 +340,8 @@ var upCmd = &cobra.Command{
 			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
 				defer func() {
 					devTUI.Send(cli.TaskEnded{
-						Name: "Build completed",
-						Err:  err,
+						Label: "Build completed",
+						Err:   err,
 					})
 				}()
 
@@ -351,6 +359,7 @@ var upCmd = &cobra.Command{
 				go func() {
 					// run or restart the introspection poller
 					<-configIntrospectionRunner.Run(ctx)
+					reportErrToTUI(configIntrospectionRunner.Error())
 				}()
 
 				bundleOperationsErr := bundleOperations()
@@ -393,7 +402,9 @@ var upCmd = &cobra.Command{
 		})
 
 		if devTUI != nil {
-			devTUI.Send(cli.TaskStarted{})
+			devTUI.Send(cli.TaskStarted{
+				Label: "Building",
+			})
 		}
 
 		err = configBundler.Bundle()
@@ -456,14 +467,14 @@ var upCmd = &cobra.Command{
 								FileUploads:              buildInfo.Stats.HasUploadProvider,
 								Authentication:           buildInfo.Stats.HasAuthenticationProvider,
 								PlaygroundEnabled:        config.Api.EnableGraphqlEndpoint,
+								SdkVersion:               buildInfo.Sdk.Version,
+								WunderctlVersion:         buildInfo.Wunderctl.Version,
 							})
 						}
 					}
 				}))
 				options = append(options, node.WithServerErrorHandler(func(err error) {
-					devTUI.Send(cli.ServerStartError{
-						Err: multierror.Append(errors.New("could not start server"), err),
-					})
+					reportErrToTUI(multierror.Append(errors.New("could not start server"), err))
 				}))
 			}
 

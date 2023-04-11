@@ -18,41 +18,43 @@ type ServerConfigLoaded struct {
 	Webhooks                 int32
 	Operations               int32
 	DatasourceConfigurations int32
+	WunderctlVersion         string
+	SdkVersion               string
 	Authentication           bool
 	FileUploads              bool
 	PlaygroundEnabled        bool
 }
 
-type ServerStartError struct {
+type Error struct {
 	Err error
 }
 
-type TaskStarted struct{}
+type TaskStarted struct {
+	Label string
+}
 
 type TaskEnded struct {
-	Name string
-	Err  error
+	Label string
+	Err   error
 }
 
 type internalTask struct {
-	Name      string
+	Label     string
 	StartTime time.Time
-	Err       error
 	Done      bool
 }
 
 type model struct {
-	keys          keyMap
-	help          help.Model
-	serverVersion string
-	err           error
-	quitting      bool
-	spinner       spinner.Model
-	internalTask  *internalTask
-	serverConfig  *ServerConfigLoaded
-	viewHeight    int
-	viewWidth     int
-	ready         bool
+	keys         keyMap
+	help         help.Model
+	err          error
+	quitting     bool
+	spinner      spinner.Model
+	internalTask *internalTask
+	serverConfig *ServerConfigLoaded
+	viewHeight   int
+	viewWidth    int
+	ready        bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -105,17 +107,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case TaskStarted:
 		m.internalTask = &internalTask{
-			Name: "Building",
-			Done: false,
-			Err:  nil,
+			Label: msg.Label,
+			Done:  false,
 		}
 		m.err = nil
 	case TaskEnded:
 		m.internalTask.Done = true
+		m.internalTask.Label = msg.Label
 		m.err = msg.Err
 	case ServerConfigLoaded:
 		m.serverConfig = &msg
-	case ServerStartError:
+	case Error:
 		m.err = msg.Err
 	case serverURLOpenFinished:
 		m.err = msg.err
@@ -150,11 +152,15 @@ func (m model) View() string {
 	doc := strings.Builder{}
 
 	title := HeadlineTextStyle.Render("WunderGraph")
-	versionString := HeadlineTextStyle.Render(fmt.Sprintf("(%s)", m.serverVersion))
+	sdkVersion := ""
+	if m.serverConfig.SdkVersion != "" {
+		sdkVersion = fmt.Sprintf(", SDK: %s", m.serverConfig.SdkVersion)
+	}
+	versionString := FeintStyle.Render(fmt.Sprintf("(CLI: %s%s)", m.serverConfig.WunderctlVersion, sdkVersion))
 
 	doc.WriteString(fmt.Sprintf("%s %s\n\n", title, versionString))
 
-	if m.serverConfig != nil && m.serverConfig.ServerURL != "" {
+	if m.serverConfig.ServerURL != "" {
 		serverURL := lipgloss.JoinHorizontal(lipgloss.Left,
 			BoldStyle.Render("➜ Local: "),
 			FeintStyle.Render(m.serverConfig.ServerURL),
@@ -180,11 +186,9 @@ func (m model) View() string {
 
 	if m.internalTask != nil {
 		if m.internalTask.Done {
-			if m.internalTask.Err == nil {
-				doc.WriteString(fmt.Sprintf("%s %s\n", PassStyle.Render("SUCCESS"), m.internalTask.Name))
-			}
+			doc.WriteString(fmt.Sprintf("%s %s\n", PassStyle.Render("SUCCESS"), m.internalTask.Label))
 		} else {
-			doc.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), m.internalTask.Name))
+			doc.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), m.internalTask.Label))
 		}
 	}
 
@@ -241,11 +245,13 @@ func NewModel(ctx context.Context, options *Options) *tea.Program {
 	h.Styles.ShortSeparator = SeparatorStyle
 
 	model := model{
-		keys:          keys,
-		help:          h,
-		serverVersion: options.ServerVersion,
-		spinner:       s,
-		internalTask:  &internalTask{},
+		keys:         keys,
+		help:         h,
+		spinner:      s,
+		internalTask: &internalTask{},
+		serverConfig: &ServerConfigLoaded{
+			WunderctlVersion: options.ServerVersion,
+		},
 	}
 
 	p := tea.NewProgram(
