@@ -16,5 +16,9 @@
     "isolatedModules": true
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+  "exclude": [
+    // temporarily exclude wundergraph generated files - due to an issue with references in wundergraph.factory.ts file
+    "./.wundergraph/**"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

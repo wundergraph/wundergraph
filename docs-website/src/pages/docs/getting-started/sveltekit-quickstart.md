@@ -153,6 +153,6 @@ Refresh the page in your browser, the result will look like this:
 
 ## Learn more
 
-- [Guides](../guides/index)
+- [Guides](../guides)
 - [Svelte Query client documentation](../clients-reference/svelte-query)
 - [SvelteKit](https://kit.svelte.dev/)
