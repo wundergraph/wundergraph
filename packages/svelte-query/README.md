@@ -100,6 +100,25 @@ Now you can use svelte-query to call your wundergraph operations!
 </div>
 ```
 
+## SSR
+
+If you are working with SvelteKit, this package provides `prefetchQuery` utility to help with SSR
+
+```ts
+export const load: PageLoad = async ({ parent }) => {
+  const { queryClient } = await parent();
+
+  await prefetchQuery(
+    {
+      operationName: 'Dragons',
+    },
+    queryClient
+  );
+};
+```
+
+This implementation is based on TanStack Svelte Query's [prefetchQuery](https://tanstack.com/query/v4/docs/svelte/ssr#using-prefetchquery) approach
+
 ## Options
 
 You can use all available options from [Svelte Query](https://tanstack.com/query/latest/docs/svelte/overview) with the generated functions.

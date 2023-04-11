@@ -30,6 +30,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	isInternalOperationByAPIMountPath,
 	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
@@ -1307,6 +1308,15 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
 	const filePath = path.join(wgDirAbs, file.module_path);
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+
+	if (implementation.internal) {
+		Logger.warn(
+			'Use of the internal prop is deprecated. ' +
+				'More details here: https://docs.wundergraph.com/docs/typescript-operations-reference/security#internal-operations'
+		);
+	}
+	const isInternal = implementation.internal || isInternalOperationByAPIMountPath(file.api_mount_path);
+
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
 		PathName: file.api_mount_path,
@@ -1359,7 +1369,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 		VariablesConfiguration: {
 			injectVariables: [],
 		},
-		Internal: implementation.internal ? implementation.internal : false,
+		Internal: isInternal,
 		PostResolveTransformations: undefined,
 	};
 	return { operation, implementation };

@@ -40,6 +40,18 @@ import * as fs from 'fs';
 import process from 'node:process';
 import { OperationError } from '../client';
 
+export const isInternalOperationByAPIMountPath = (path: string) => {
+	// Split the file path by the path separator
+	// The api mount path is always in UNIX style
+	const elements = path.split('/');
+
+	// Remove the last element (the file name)
+	elements.pop();
+
+	// check if the resulting array contains internal
+	return elements.includes('internal');
+};
+
 export interface GraphQLOperation {
 	Name: string;
 	PathName: string;
@@ -253,7 +265,18 @@ export const parseGraphQLOperations = (
 							handleDateTimeDirectives(variable, operation);
 							handleInjectEnvironmentVariableDirectives(variable, operation);
 						});
-						operation.Internal = node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
+
+						const internalOperationDirective =
+							node.directives?.find((d) => d.name.value === 'internalOperation') !== undefined;
+						if (internalOperationDirective) {
+							Logger.warn(
+								'Use of internalOperation directive is deprecated. ' +
+									'More details here: https://docs.wundergraph.com/docs/directives-reference/internal-operation-directive'
+							);
+						}
+						operation.Internal =
+							internalOperationDirective || isInternalOperationByAPIMountPath(operationFile.api_mount_path);
+
 						if (wgRoleEnum && wgRoleEnum.kind === 'EnumTypeDefinition') {
 							const rbac = node.directives?.find((d) => d.name.value === 'rbac');
 							rbac?.arguments?.forEach((arg) => {

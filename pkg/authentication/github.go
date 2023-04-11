@@ -135,7 +135,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 
 		state, err := r.Cookie("state")
 		if err != nil {
-			g.log.Error("GithubCookieHandler state missing",
+			g.log.Warn("GithubCookieHandler state missing",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -143,7 +143,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 		}
 
 		if r.URL.Query().Get("state") != state.Value {
-			g.log.Error("GithubCookieHandler state mismatch",
+			g.log.Warn("GithubCookieHandler state mismatch",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)
@@ -152,7 +152,7 @@ func (g *GithubCookieHandler) Register(authorizeRouter, callbackRouter *mux.Rout
 
 		redirectURI, err := r.Cookie("redirect_uri")
 		if err != nil {
-			g.log.Error("GithubCookieHandler redirect uri missing",
+			g.log.Warn("GithubCookieHandler redirect uri missing",
 				zap.Error(err),
 			)
 			w.WriteHeader(http.StatusBadRequest)

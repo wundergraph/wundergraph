@@ -6,7 +6,7 @@ export default createOperation.query({
 	}),
 	handler: async ({ operations, input }) => {
 		const country = await operations.query({
-			operationName: 'weather/Country',
+			operationName: 'weather/internal/Country',
 			input: {
 				code: input.countryCode,
 			},
@@ -15,7 +15,7 @@ export default createOperation.query({
 			throw new Error('No capital found');
 		}
 		const weather = await operations.query({
-			operationName: 'weather/Weather',
+			operationName: 'weather/internal/Weather',
 			input: {
 				city: country.data?.countries_countries[0].capital,
 			},
