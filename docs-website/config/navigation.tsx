@@ -1037,6 +1037,10 @@ const navigation = [
 						href: '/docs/wundergraph-config-ts-reference/configure-token-based-authentication',
 					},
 					{
+						title: 'Custom Claims',
+						href: '/docs/wundergraph-config-ts-reference/configure-custom-claims',
+					},
+					{
 						title: 'Authorization / RBAC',
 						href: '/docs/wundergraph-config-ts-reference/configure-authorization',
 					},
