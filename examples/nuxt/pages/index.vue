@@ -45,7 +45,7 @@ await suspense();
 				<code class="font-mono font-medium text-sky-500 dark:text-sky-400">
 					<a class="text-cyan-400 hover:text-cyan-600" target="_blank" href="https://wundergraph.com"> WunderGraph </a>
 				</code>
-				to make your data-source accessible through JSON-RPC to your Next.js app.
+				to make your data-source accessible through JSON-RPC to your Nuxt app.
 			</p>
 		</div>
 		<div class="relative flex flex-col items-center overflow-hidden p-8">
