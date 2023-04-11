@@ -34,7 +34,7 @@ import {
 import { JSONSchema7 as JSONSchema } from 'json-schema';
 import path from 'path';
 import { WG_PRETTY_GRAPHQL_VALIDATION_ERRORS } from '../definition';
-import { wunderctlExec } from '../wunderctlexec';
+import { wunderctl } from '../wunderctlexec';
 import { Logger } from '../logger';
 import * as fs from 'fs';
 import process from 'node:process';
@@ -1460,16 +1460,18 @@ export interface TypeScriptOperationFile {
 	module_path: string;
 }
 
-export const loadOperations = (schemaFileName: string): LoadOperationsOutput => {
+export const loadOperations = async (schemaFileName: string): Promise<LoadOperationsOutput> => {
 	const operationsPath = path.join(process.env.WG_DIR_ABS!, 'operations');
 	const fragmentsPath = path.join(process.env.WG_DIR_ABS!, 'fragments');
 	const schemaFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', schemaFileName);
 	const outFilePath = path.join(process.env.WG_DIR_ABS!, 'generated', 'wundergraph.operations.json');
-	const result = wunderctlExec({
+	// stdout is not displayed intentionally
+	// we are only interested in the final result
+	const result = await wunderctl({
 		cmd: ['loadoperations', operationsPath, fragmentsPath, schemaFilePath, '--pretty'],
 	});
 	if (result?.failed) {
-		throw new Error(result?.stderr);
+		throw new Error(`Could not load operations: ${result?.stderr}`);
 	}
 
 	const output = fs.readFileSync(outFilePath, 'utf8');

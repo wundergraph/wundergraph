@@ -27,9 +27,7 @@ type ServerStartError struct {
 	Err error
 }
 
-type TaskStarted struct {
-	Name string
-}
+type TaskStarted struct{}
 
 type TaskEnded struct {
 	Name string
@@ -107,12 +105,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case TaskStarted:
 		m.internalTask = &internalTask{
-			Name: msg.Name,
+			Name: "Building",
 			Done: false,
 			Err:  nil,
 		}
+		m.err = nil
 	case TaskEnded:
-		m.internalTask.Name = msg.Name
 		m.internalTask.Done = true
 		m.err = msg.Err
 	case ServerConfigLoaded:
@@ -120,6 +118,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ServerStartError:
 		m.err = msg.Err
 	case serverURLOpenFinished:
+		m.err = msg.err
 		if msg.err != nil {
 			m.err = msg.err
 			return m, tea.Quit
@@ -171,20 +170,22 @@ func (m model) View() string {
 		}
 
 		logModeHint := lipgloss.JoinHorizontal(lipgloss.Left,
-			BoldStyle.Render("➜ Debugging:"),
+			BoldStyle.Render("➜ Logs:"),
 			FeintStyle.Render(" use "),
-			BoldStyle.Bold(true).Render("--debug"),
+			BoldStyle.Bold(true).Render("--logs"),
 			FeintStyle.Render(" to enter log mode"),
 		)
 		doc.WriteString(fmt.Sprintf("%s\n\n", logModeHint))
 	}
 
-	if m.internalTask.Done {
-		if m.internalTask.Err == nil {
-			doc.WriteString(fmt.Sprintf("%s %s\n", PassStyle.Render("SUCCESS"), m.internalTask.Name))
+	if m.internalTask != nil {
+		if m.internalTask.Done {
+			if m.internalTask.Err == nil {
+				doc.WriteString(fmt.Sprintf("%s %s\n", PassStyle.Render("SUCCESS"), m.internalTask.Name))
+			}
+		} else {
+			doc.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), m.internalTask.Name))
 		}
-	} else {
-		doc.WriteString(fmt.Sprintf("%s %s\n", m.spinner.View(), m.internalTask.Name))
 	}
 
 	doc.WriteString("\n")

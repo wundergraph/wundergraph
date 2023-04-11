@@ -77,10 +77,10 @@ var startCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(startCmd)
-	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", defaultNodeGracefulTimeoutSeconds, "graceful-timeout is the time in seconds the server has to graceful shutdown")
-	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "starts the engine without the server")
-	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "enables GraphQL introspection on /%api%/%main%/graphql")
-	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "disables authentication to enforce https redirects")
-	startCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "shuts down the server after given seconds in idle when no requests have been served")
-	startCmd.Flags().IntVar(&healthCheckTimeout, "healthcheck-timeout", 10, "healthcheck timeout in seconds")
+	startCmd.Flags().IntVar(&gracefulTimeout, "graceful-timeout", defaultNodeGracefulTimeoutSeconds, "Graceful-timeout is the time in seconds the server has to graceful shutdown")
+	startCmd.Flags().BoolVar(&excludeServer, "exclude-server", false, "Starts the engine without the server")
+	startCmd.Flags().BoolVar(&enableIntrospection, "enable-introspection", false, "Enables GraphQL introspection on /%api%/%main%/graphql")
+	startCmd.Flags().BoolVar(&disableForceHttpsRedirects, "disable-force-https-redirects", false, "Disables authentication to enforce https redirects")
+	startCmd.Flags().IntVar(&shutdownAfterIdle, "shutdown-after-idle", 0, "Shutdown the server after given seconds in idle when no requests have been served")
+	startCmd.Flags().IntVar(&healthCheckTimeout, "healthcheck-timeout", 10, "Healthcheck timeout in seconds")
 }

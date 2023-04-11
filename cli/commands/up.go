@@ -37,6 +37,7 @@ var (
 	disableCache                            bool
 	clearCache                              bool
 	enableTUI                               bool
+	logs                                    bool
 )
 
 // upCmd represents the up command
@@ -56,9 +57,14 @@ var upCmd = &cobra.Command{
 		}
 
 		// Bubbletea UI is not compatible with regular stdout logging
-		if enableTUI && rootFlags.DebugMode {
-			log.Warn("Debug mode is enabled. This will disable the UI.")
-			enableTUI = false
+		if enableTUI {
+			if rootFlags.DebugMode {
+				log.Warn("Debug mode is enabled. This will disable the UI.")
+				enableTUI = false
+			} else if logs {
+				log.Warn("Logs are enabled. This will disable the UI.")
+				enableTUI = false
+			}
 		}
 
 		var devTUI *tea.Program
@@ -156,7 +162,7 @@ var upCmd = &cobra.Command{
 				WunderGraphDir: wunderGraphDir,
 				EnableCache:    !disableCache,
 			}),
-			SuppressStdStreams: devTUI != nil,
+			Streaming: devTUI == nil,
 		})
 
 		// responsible for executing the config in "polling" mode
@@ -173,7 +179,7 @@ var upCmd = &cobra.Command{
 				EnableCache:                   !disableCache,
 				DefaultPollingIntervalSeconds: defaultDataSourcePollingIntervalSeconds,
 			}), "WG_DATA_SOURCE_POLLING_MODE=true"),
-			SuppressStdStreams: devTUI != nil,
+			Streaming: devTUI == nil,
 		})
 
 		var hookServerRunner *scriptrunner.ScriptRunner
@@ -218,9 +224,7 @@ var upCmd = &cobra.Command{
 				log.Info("File changed", zap.Strings("paths", paths))
 			}
 			if devTUI != nil {
-				task := cli.TaskStarted{
-					Name: "Building",
-				}
+				task := cli.TaskStarted{}
 				devTUI.Send(task)
 			}
 		}
@@ -258,11 +262,12 @@ var upCmd = &cobra.Command{
 			}
 
 			srvCfg := &helpers.HooksServerRunConfig{
-				WunderGraphDirAbs:  wunderGraphDir,
-				ServerScriptFile:   serverOutFile,
-				Env:                helpers.CliEnv(rootFlags),
-				Debug:              rootFlags.DebugMode,
-				SuppressStdStreams: devTUI != nil,
+				WunderGraphDirAbs: wunderGraphDir,
+				ServerScriptFile:  serverOutFile,
+				Env:               helpers.CliEnv(rootFlags),
+				Debug:             rootFlags.DebugMode,
+				LogStreaming:      devTUI == nil,
+				LogLevel:          rootFlags.CliLogLevel,
 			}
 
 			hookServerRunner = helpers.NewHooksServerRunner(log, srvCfg)
@@ -388,9 +393,7 @@ var upCmd = &cobra.Command{
 		})
 
 		if devTUI != nil {
-			devTUI.Send(cli.TaskStarted{
-				Name: "Building",
-			})
+			devTUI.Send(cli.TaskStarted{})
 		}
 
 		err = configBundler.Bundle()
@@ -491,10 +494,11 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
-	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", true, "enable terminal user interface. Set to false if stdout is not a TTY.")
-	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "default polling interval for data sources")
-	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "disables local caches")
-	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "clears local caches before startup")
+	upCmd.PersistentFlags().BoolVar(&enableTUI, "ui", true, "Enable terminal user interface")
+	upCmd.PersistentFlags().BoolVar(&logs, "logs", false, "Enable log mode. Useful for debugging")
+	upCmd.PersistentFlags().IntVar(&defaultDataSourcePollingIntervalSeconds, "default-polling-interval", 5, "Default polling interval for data sources")
+	upCmd.PersistentFlags().BoolVar(&disableCache, "no-cache", false, "Disables local caches")
+	upCmd.PersistentFlags().BoolVar(&clearCache, "clear-cache", false, "Clears local caches before startup")
 
 	rootCmd.AddCommand(upCmd)
 }

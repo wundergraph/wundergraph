@@ -289,7 +289,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 			},
 		)
 		if err != nil {
-			return streamClosers, err
+			r.log.Error("registerS3UploadClient", zap.Error(err))
 		} else {
 			s3Path := fmt.Sprintf("/s3/%s/upload", s3Provider.Name)
 			r.router.Handle(s3Path, http.HandlerFunc(s3.UploadFile))

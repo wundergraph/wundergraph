@@ -20,41 +20,39 @@ type Config struct {
 	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        *zap.Logger
-	// SuppressStdStreams suppresses the output of the script to stdout and stderr.
-	SuppressStdStreams bool
+	// Streaming determines if the script output is streamed to stdout/stderr.
+	Streaming bool
 }
 
 type ScriptRunner struct {
-	name               string
-	fatalOnStop        bool
-	executable         string
-	scriptArgs         []string
-	scriptEnv          []string
-	firstRunEnv        []string
-	absWorkingDir      string
-	firstRun           bool
-	cmdDoneChan        chan struct{}
-	log                *zap.Logger
-	cmd                *gocmd.Cmd
-	stdErrBuf          *ringbuffer.RingBuffer
-	stdoutBuf          *ringbuffer.RingBuffer
-	suppressStdStreams bool
+	name          string
+	fatalOnStop   bool
+	executable    string
+	scriptArgs    []string
+	scriptEnv     []string
+	firstRunEnv   []string
+	absWorkingDir string
+	firstRun      bool
+	cmdDoneChan   chan struct{}
+	log           *zap.Logger
+	cmd           *gocmd.Cmd
+	stdErrBuf     *ringbuffer.RingBuffer
+	streaming     bool
 }
 
 func NewScriptRunner(config *Config) *ScriptRunner {
 
 	return &ScriptRunner{
-		name:               config.Name,
-		log:                config.Logger,
-		firstRunEnv:        config.FirstRunEnv,
-		absWorkingDir:      config.AbsWorkingDir,
-		executable:         config.Executable,
-		scriptArgs:         config.ScriptArgs,
-		scriptEnv:          config.ScriptEnv,
-		firstRun:           true,
-		stdErrBuf:          ringbuffer.New(1024 * 1024),
-		stdoutBuf:          ringbuffer.New(1024 * 1024),
-		suppressStdStreams: config.SuppressStdStreams,
+		name:          config.Name,
+		log:           config.Logger,
+		firstRunEnv:   config.FirstRunEnv,
+		absWorkingDir: config.AbsWorkingDir,
+		executable:    config.Executable,
+		scriptArgs:    config.ScriptArgs,
+		scriptEnv:     config.ScriptEnv,
+		firstRun:      true,
+		stdErrBuf:     ringbuffer.New(1024 * 1024), // 1MB
+		streaming:     config.Streaming,
 	}
 }
 
@@ -67,11 +65,10 @@ func (b *ScriptRunner) ExitCode() int {
 }
 
 func (b *ScriptRunner) Stop() error {
+	defer b.stdErrBuf.Reset()
+
 	if b.cmd != nil {
 		err := b.cmd.Stop()
-
-		b.stdoutBuf.Reset()
-		b.stdErrBuf.Reset()
 
 		// blocking until the script is done
 		<-b.cmdDoneChan
@@ -115,13 +112,12 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 	}
 
 	cmdOptions := CmdOptions{
-		executable:         b.executable,
-		cmdDir:             b.absWorkingDir,
-		scriptArgs:         b.scriptArgs,
-		scriptEnv:          b.scriptEnv,
-		stdErrBuf:          b.stdErrBuf,
-		stdoutBuf:          b.stdoutBuf,
-		suppressStdStreams: b.suppressStdStreams,
+		executable: b.executable,
+		cmdDir:     b.absWorkingDir,
+		scriptArgs: b.scriptArgs,
+		scriptEnv:  b.scriptEnv,
+		stdErrBuf:  b.stdErrBuf,
+		streaming:  b.streaming,
 	}
 
 	if b.firstRun {
@@ -199,13 +195,14 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 }
 
 type CmdOptions struct {
-	executable         string
-	cmdDir             string
-	scriptArgs         []string
-	scriptEnv          []string
-	stdErrBuf          *ringbuffer.RingBuffer
-	stdoutBuf          *ringbuffer.RingBuffer
-	suppressStdStreams bool
+	executable string
+	cmdDir     string
+	scriptArgs []string
+	scriptEnv  []string
+	stdErrBuf  *ringbuffer.RingBuffer
+	stdoutBuf  *ringbuffer.RingBuffer
+	buffered   bool
+	streaming  bool
 }
 
 // newCmd creates a new command to run the bundler script.
@@ -234,21 +231,22 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 					cmd.Stdout = nil
 					continue
 				}
-				if !options.suppressStdStreams {
+				if options.streaming {
 					fmt.Println(line)
-				} else {
-					options.stdoutBuf.WriteString(line + "\n")
 				}
+
 			case line, open := <-cmd.Stderr:
 				if !open {
 					cmd.Stderr = nil
 					continue
 				}
-				if !options.suppressStdStreams {
+				if options.streaming {
 					fmt.Fprintln(os.Stderr, line)
-				} else {
-					options.stdErrBuf.WriteString(line + "\n")
 				}
+
+				// When the script errors, we want to keep the last lines of output
+				// for debugging purposes.
+				options.stdErrBuf.WriteString(line + "\n")
 			}
 		}
 	}()

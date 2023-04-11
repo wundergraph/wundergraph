@@ -45,5 +45,5 @@ var loadoperationsCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loadoperationsCmd)
-	rootCmd.PersistentFlags().BoolVar(&prettyOutput, "pretty", false, "pretty print the output")
+	rootCmd.PersistentFlags().BoolVar(&prettyOutput, "pretty", false, "Pretty print the output")
 }

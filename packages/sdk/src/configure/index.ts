@@ -797,7 +797,7 @@ export const configureWunderGraphApplication = <
 				buildInfo.stats.totalWebhooks = resolved.webhooks?.length ?? 0;
 			}
 
-			const loadedOperations = loadOperations(schemaFileName);
+			const loadedOperations = await loadOperations(schemaFileName);
 
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,

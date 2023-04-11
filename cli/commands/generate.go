@@ -64,6 +64,7 @@ var generateCmd = &cobra.Command{
 			AbsWorkingDir: wunderGraphDir,
 			Logger:        log,
 			ScriptEnv:     scriptEnv,
+			Streaming:     true,
 		})
 		defer func() {
 			log.Debug("Stopping config-runner")
@@ -212,6 +213,6 @@ var generateCmd = &cobra.Command{
 }
 
 func init() {
-	generateCmd.Flags().BoolVar(&offline, "offline", false, "disables loading resources from the network")
+	generateCmd.Flags().BoolVar(&offline, "offline", false, "Disables loading resources from the network")
 	rootCmd.AddCommand(generateCmd)
 }

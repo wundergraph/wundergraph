@@ -34,7 +34,7 @@ It's used by the WunderGraph SDK internally.'`,
 
 func init() {
 	rootCmd.AddCommand(introspectCmd)
-	introspectCmd.PersistentFlags().StringVarP(&introspectionOutputFile, "outfile", "o", "", "If set, the introspection result will be written to the specified file")
+	introspectCmd.PersistentFlags().StringVarP(&introspectionOutputFile, "outfile", "o", "", "The introspection result will be written to the specified file")
 	introspectCmd.PersistentFlags().IntVarP(&introspectionTimeoutSeconds, "timeout", "t", 30, "Timeout in seconds for the introspection process")
 }
 

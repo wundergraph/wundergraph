@@ -6,43 +6,23 @@ export interface WunderCtlExecArgs {
 	cmd: string[];
 	env?: Record<string, string>;
 	timeout?: number;
+	stdio?: 'pipe' | 'ignore' | 'inherit' | readonly execa.StdioOption[];
 }
 
-export const wunderctlExec = (args: WunderCtlExecArgs): execa.ExecaSyncReturnValue<string> | undefined => {
+export type Subprocess = execa.ExecaChildProcess;
+
+export const wunderctl = (args: WunderCtlExecArgs): Subprocess => {
 	const file = wunderCtlFile();
 	const cmdArgs = wunderCtlArgs(args.cmd);
 
-	return execa.sync(file, cmdArgs, {
+	return execa(file, cmdArgs, {
 		encoding: 'utf-8',
 		timeout: args.timeout,
 		cwd: process.env.WG_DIR_ABS || process.cwd(),
 		env: args.env ?? {},
 		extendEnv: true,
-		stdio: 'pipe',
+		stdio: args.stdio,
 	});
-};
-
-export type Subprocess = execa.ExecaChildProcess;
-
-export const wunderctlSubprocess = (args: WunderCtlExecArgs): Subprocess => {
-	const file = wunderCtlFile();
-	const cmdArgs = wunderCtlArgs(args.cmd);
-
-	return execa(file, cmdArgs, {
-		timeout: args.timeout,
-		cwd: process.env.WG_DIR_ABS || process.cwd(),
-		env: args.env ?? {},
-		extendEnv: true,
-	});
-};
-
-export const wunderctlExecAsync = async (args: WunderCtlExecArgs): Promise<string> => {
-	const subprocess = wunderctlSubprocess(args);
-	subprocess.stdout?.pipe(process.stdout);
-	subprocess.stderr?.pipe(process.stderr);
-
-	const { stdout } = await subprocess;
-	return stdout;
 };
 
 const wunderCtlArgs = (args: string[]): string[] => {

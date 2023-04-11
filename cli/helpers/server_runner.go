@@ -9,12 +9,13 @@ import (
 )
 
 type HooksServerRunConfig struct {
-	WunderGraphDirAbs  string
-	ServerScriptFile   string
-	Env                []string
-	Production         bool
-	Debug              bool
-	SuppressStdStreams bool
+	WunderGraphDirAbs string
+	ServerScriptFile  string
+	Env               []string
+	LogLevel          string
+	Production        bool
+	Debug             bool
+	LogStreaming      bool
 }
 
 func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrunner.ScriptRunner {
@@ -27,20 +28,26 @@ func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrun
 		hooksEnv = append(hooksEnv, "NODE_ENV=production")
 	}
 
-	scriptArgs := make([]string, 0, 2)
+	// Align the log level
+	if cfg.LogLevel != "" {
+		hooksEnv = append(hooksEnv, fmt.Sprintf("WG_LOG_LEVEL=%s", cfg.LogLevel))
+	}
+
+	var scriptArgs []string
+
 	if cfg.Debug {
 		scriptArgs = append(scriptArgs, "--inspect")
 	}
 	scriptArgs = append(scriptArgs, cfg.ServerScriptFile)
 
 	hookServerRunner := scriptrunner.NewScriptRunner(&scriptrunner.Config{
-		Name:               "hooks-server-runner",
-		Executable:         "node",
-		AbsWorkingDir:      cfg.WunderGraphDirAbs,
-		ScriptArgs:         scriptArgs,
-		Logger:             log,
-		ScriptEnv:          append(cfg.Env, hooksEnv...),
-		SuppressStdStreams: cfg.SuppressStdStreams,
+		Name:          "hooks-server-runner",
+		Executable:    "node",
+		AbsWorkingDir: cfg.WunderGraphDirAbs,
+		ScriptArgs:    scriptArgs,
+		Logger:        log,
+		ScriptEnv:     append(cfg.Env, hooksEnv...),
+		Streaming:     cfg.LogStreaming,
 	})
 
 	return hookServerRunner

@@ -313,7 +313,6 @@ const introspectGraphQLAPI = async (
 			}, message: ${res.statusText}`
 		);
 	}
-	Logger.debug(`GraphQL introspection: received ${res.data.length} bytes from ${url}`);
 	let response: GraphQLIntrospectionResponse;
 	try {
 		response = JSON.parse(res.data) as GraphQLIntrospectionResponse;
