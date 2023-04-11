@@ -1,7 +1,7 @@
 ---
-title: Svelte
-pageTitle: WunderGraph - Svelte
-description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQL, REST, gRPC, Kafka, etc...) in Svelte.
+title: SvelteKit
+pageTitle: WunderGraph - SvelteKit
+description: WunderGraph is the easiest way to consume all kinds of APIs (GraphQL, REST, gRPC, Kafka, etc...) in SvelteKit.
 ---
 
 WunderGraph has official support for Svelte and SvelteKit
@@ -66,6 +66,27 @@ which we can call from our Svelte page.
   </div>
 </div>
 ```
+
+You add prefetch logic and make the query server rendered. Based on [SvelteQuery SSR support](https://tanstack.com/query/v4/docs/svelte/ssr#using-prefetchquery)
+
+```ts
+export const load: PageLoad = async ({ parent }) => {
+  const { queryClient } = await parent();
+
+  await prefetchQuery(
+    {
+      operationName: 'Weather',
+      input: { forCity: 'Berlin' },
+    },
+    queryClient
+  );
+};
+```
+
+This page, although it's a live query, will be rendered on the server.
+Once the client picks up the page, it will automatically subscribe to the live query.
+This works as well for GraphQL Subscriptions, Kafka Streams, and any other live query.
+But in this case, we're simply using server-side polling to get the latest weather data.
 
 ## Examples
 
