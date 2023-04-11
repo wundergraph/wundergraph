@@ -33,7 +33,7 @@
     "@tanstack/react-query": "^4.20.4",
     "@wundergraph/nextjs": "workspace:*",
     "@wundergraph/react-query": "workspace:*",
-    "@wundergraph/relay-nextjs": "workspace:*",
+    "@wundergraph/nextjs-relay": "workspace:*",
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/swr": "workspace:*",
     "next": "^13.1.1",

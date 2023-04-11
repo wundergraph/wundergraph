@@ -1,5 +1,5 @@
 {
-  "name": "@wundergraph/relay-nextjs",
+  "name": "@wundergraph/nextjs-relay",
   "version": "0.0.1",
   "license": "Apache-2.0",
   "description": "WunderGraph Relay & Next.js Integration",

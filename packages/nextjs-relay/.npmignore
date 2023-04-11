@@ -1,7 +1,0 @@
-node_modules
-src
-tsconfig.json
-.gitignore
-.npmignore
-.npmrc
-dist/tsconfig.tsbuildinfo

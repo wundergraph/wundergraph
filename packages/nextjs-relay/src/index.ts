@@ -1,7 +1,3 @@
-export { withWunderGraph } from './with-wundergraph';
+import { createWunderGraphRelayApp } from './createWunderGraphRelayApp';
 
-export type { WithWunderGraphOptions, SSRCache } from './types';
-
-export { createHooks } from '@wundergraph/swr';
-
-export { createWunderGraphNext } from './create-wundergraph';
+export { createWunderGraphRelayApp };
