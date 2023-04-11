@@ -27,7 +27,7 @@
     "wait-on": "^7.0.1"
   },
   "dependencies": {
-    "@tanstack/svelte-query": "^4.27.0",
+    "@tanstack/svelte-query": "4.24.9",
     "@wundergraph/sdk": "^0.143.1",
     "@wundergraph/svelte-query": "^0.1.0"
   },

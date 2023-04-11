@@ -22,7 +22,7 @@
     "../src/service-worker.ts",
     "../src/service-worker.d.ts",
 
-    // exclude wundergraph generated files
+    // temporarily exclude wundergraph generated files - due to an issue with references in wundergraph.factory.ts file
     "./.wundergraph/**"
   ]
 }
