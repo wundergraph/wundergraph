@@ -150,3 +150,9 @@ Refresh the page in your browser, the result will look like this:
   "isLoading": false
 }
 ```
+
+## Learn more
+
+- [Guides](../guides/index)
+- [Svelte Query client documentation](../clients-reference/svelte-query)
+- [SvelteKit](https://kit.svelte.dev/)
