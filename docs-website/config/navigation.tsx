@@ -55,6 +55,10 @@ const navigation = [
 						title: 'Remix',
 						href: '/docs/getting-started/remix-quickstart',
 					},
+					{
+						title: 'SvelteKit',
+						href: '/docs/getting-started/sveltekit-quickstart',
+					},
 				],
 			},
 			{
@@ -90,6 +94,10 @@ const navigation = [
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
+						title: 'SvelteKit + SSR with TanStack Query',
+						href: '/docs/examples/sveltekit',
+					},
+					{
 						title: 'Next.js + Clerk',
 						href: '/docs/examples/nextjs-clerk',
 					},
@@ -100,6 +108,10 @@ const navigation = [
 					{
 						title: 'Vite + Solid.js',
 						href: '/docs/examples/vite-solidjs',
+					},
+					{
+						title: 'Vite + Svelte',
+						href: '/docs/examples/vite-svelte',
 					},
 					{
 						title: 'Hooks',
@@ -651,6 +663,10 @@ const navigation = [
 						href: '/docs/supported-frontend-frameworks/svelte',
 					},
 					{
+						title: 'SvelteKit',
+						href: '/docs/supported-frontend-frameworks/sveltekit',
+					},
+					{
 						title: 'Vue',
 						href: '/docs/supported-frontend-frameworks/vue',
 					},
@@ -943,6 +959,10 @@ const navigation = [
 			{
 				title: 'Next.js',
 				href: '/docs/clients-reference/nextjs',
+			},
+			{
+				title: 'Svelte Query',
+				href: '/docs/clients-reference/svelte-query',
 			},
 		],
 	},

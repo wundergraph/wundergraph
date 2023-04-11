@@ -1,3 +1,9 @@
+---
+title: Svelte Query Client
+pageTitle: WunderGraph Svelte Query Client
+description: Svelte Query Client reference
+---
+
 # WunderGraph Svelte Query Integration
 
 ![wunderctl](https://img.shields.io/npm/v/@wundergraph/svelte-query.svg)
@@ -49,18 +55,18 @@ Now, in your svelte layout setup Svelte Query Provider such that it is always wr
 
 ```svelte
 <script>
-	import Header from './Header.svelte';
-	import { browser } from '$app/environment'
-	import './styles.css';
-	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query'
+  import Header from './Header.svelte';
+  import { browser } from '$app/environment';
+  import './styles.css';
+  import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: {
-				enabled: browser,
-			},
-		},
-	})
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        enabled: browser,
+      },
+    },
+  });
 </script>
 
 <div class="app">
@@ -74,29 +80,29 @@ Now you can use svelte-query to call your wundergraph operations!
 
 ```svelte
 <script lang="ts">
-	import { createQuery } from '../lib/wundergraph';
+  import { createQuery } from '../lib/wundergraph';
 
-	const query = createQuery({
-		operationName: "Starwars",
-	})
+  const query = createQuery({
+    operationName: 'Starwars',
+  });
 </script>
 
 <div class="counter">
-	<h1>Simple Query</h1>
-	<div>
-		{#if $query.isLoading}
-			Loading...
-		{/if}
-		{#if $query.error}
-			An error has occurred:
-			{$query.error.message}
-		{/if}
-		{#if $query.isSuccess}
+  <h1>Simple Query</h1>
+  <div>
+    {#if $query.isLoading}
+      Loading...
+    {/if}
+    {#if $query.error}
+      An error has occurred:
+      {$query.error.message}
+    {/if}
+    {#if $query.isSuccess}
       <div>
         <pre>{JSON.stringify($query.data.starwars_allPeople)}</pre>
       </div>
     {/if}
-	</div>
+  </div>
 </div>
 ```
 
