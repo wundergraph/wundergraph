@@ -1,6 +1,6 @@
 import styles from '../styles/Home.module.css';
-import React from 'react';
-import { graphql, usePreloadedQuery } from 'react-relay';
+import React, { useMemo } from 'react';
+import { graphql, useSubscription } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
 import type { pages_indexQuery as IndexQueryType } from '../__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
@@ -22,6 +22,21 @@ const IndexQuery = graphql`
 	}
 `;
 
+// const SubscriptionCounter = () => {
+// 	const subscription = useSubscription({
+// 		subscription: graphql`
+// 			subscription pages_countdownSubscription {
+// 				ws_countdown(from: 100) {
+// 					countdown
+// 				}
+// 			}
+// 		`,
+// 		variables: {},
+// 	});
+
+// 	return <div>Subscription running...</div>;
+// };
+
 function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 	const { data } = useLivePreloadedQuery(IndexQuery, preloadedQuery);
 
@@ -37,6 +52,7 @@ function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
 				{data?.weather_getCityByName?.weather?.temperature && (
 					<TemperatureDetails weather={data.weather_getCityByName.weather.temperature} />
 				)}
+				{/* <SubscriptionCounter /> */}
 			</main>
 		</div>
 	);

@@ -17,6 +17,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".wundergraph/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".wundergraph/**/*.ts", "server.js"],
   "exclude": ["node_modules"]
 }
