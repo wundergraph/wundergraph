@@ -165,11 +165,30 @@ export const createServer = async ({
 		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
 		: '';
 
+	let id = 0;
 	const fastify = Fastify({
 		logger,
+		disableRequestLogging: true,
 		genReqId: (req) => {
-			return req.headers['x-request-id']?.toString() || '';
+			if (req.headers['x-request-id']) {
+				return req.headers['x-request-id']?.toString();
+			}
+			return `${++id}`;
 		},
+	});
+
+	/**
+	 * Custom request logging to not log all requests with INFO level.
+	 */
+
+	fastify.addHook('onRequest', (req, reply, done) => {
+		req.log.debug({ req }, 'received request');
+		done();
+	});
+
+	fastify.addHook('onResponse', (req, reply, done) => {
+		req.log.debug({ res: reply, url: req.raw.url, responseTime: reply.getResponseTime() }, 'request completed');
+		done();
 	});
 
 	fastify.decorateRequest('ctx', null);
