@@ -272,8 +272,10 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	// (relative to the .wundergraph directory) during introspection and at runtime
 	e.cmd.Dir = e.wundergraphDir
 
-	// append all environment variables, as demonstrated in prisma/prisma/BinaryEngine.ts
-	e.cmd.Env = append(os.Environ(), "PRISMA_DML="+schema)
+	// append all environment variables, as demonstrated in the following:
+	// https://github.com/prisma/prisma/blob/304c54c732921c88bfb57f5730c7f81405ca83ea/packages/engine-core/src/binary/BinaryEngine.ts#L479
+	e.cmd.Env = append(e.cmd.Env, os.Environ()...)
+	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
 
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
