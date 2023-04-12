@@ -84,7 +84,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.ClearConsole):
 			return m, tea.ClearScreen
 		case key.Matches(msg, m.keys.OpenBrowser):
-			return m, OpenURL(m.serverConfig.ServerURL)
+			if m.serverConfig.ServerURL != "" {
+				return m, OpenURL(m.serverConfig.ServerURL)
+			}
 		case key.Matches(msg, m.keys.Quit):
 			m.quitting = true
 			return m, tea.Quit
