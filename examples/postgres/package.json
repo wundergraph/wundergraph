@@ -6,9 +6,9 @@
     "start": "npm run start:services && npm run wait-on:services && npm run start:api",
     "start:services": "docker-compose up -d",
     "wait-on:services": "wait-on -d 5000 tcp:54322",
-    "start:api": "wunderctl up --debug",
+    "start:api": "wunderctl up",
     "cleanup": "docker-compose down -v",
-    "build:wundergraph": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "check": "tsc --noEmit",
     "test": "jest"
@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.143.1",
+    "@wundergraph/sdk": "^0.144.0",
     "graphql": "^16.3.0"
   },
   "devDependencies": {
