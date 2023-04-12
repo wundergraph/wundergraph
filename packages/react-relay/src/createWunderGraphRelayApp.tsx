@@ -1,5 +1,10 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
-import { PreloadedQuery, RelayEnvironmentProvider, usePreloadedQuery, useRelayEnvironment } from 'react-relay';
+import {
+	PreloadedQuery,
+	RelayEnvironmentProvider,
+	usePreloadedQuery as useRelayPreloadedQuery,
+	useRelayEnvironment,
+} from 'react-relay';
 import React, { useEffect, useState, useRef, ReactNode, FC } from 'react';
 import {
 	Environment,
@@ -161,28 +166,18 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		};
 	};
 
-	const useLivePreloadedQuery = <TQuery extends OperationType>(
-		gqlQuery: Parameters<typeof usePreloadedQuery>[0],
+	const usePreloadedQuery = <TQuery extends OperationType>(
+		gqlQuery: Parameters<typeof useRelayPreloadedQuery>[0],
 		preloadedQuery: PreloadedQuery<TQuery>,
-		options?: Parameters<typeof usePreloadedQuery>[2],
+		options?: Parameters<typeof useRelayPreloadedQuery>[2],
 		subscriptionOptions: Omit<UseSubscribeToProps, 'operationName' | 'input'> = {}
-	): {
-		error?: ClientResponse['error'];
-		isSubscribed?: boolean;
-		isLoading?: boolean;
-		data: TQuery['response'];
-	} => {
-		const data = usePreloadedQuery(gqlQuery, preloadedQuery, options);
+	): TQuery['response'] => {
+		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, options);
 		const environment = useRelayEnvironment();
 
 		const { id, variables } = preloadedQuery;
 
-		const {
-			data: liveData,
-			error,
-			isSubscribed,
-			isLoading,
-		} = useSubscribeTo({
+		const { data: liveData } = useSubscribeTo({
 			operationName: `relay/${id}`,
 			input: variables,
 			...subscriptionOptions,
@@ -196,12 +191,7 @@ export const createWunderGraphRelayApp = (client: Client) => {
 			}
 		}, [liveData]);
 
-		return {
-			data,
-			error,
-			isSubscribed,
-			isLoading,
-		};
+		return data;
 	};
 
 	const clientEnvironment = new Environment({
@@ -216,6 +206,6 @@ export const createWunderGraphRelayApp = (client: Client) => {
 
 	return {
 		WunderGraphRelayProvider,
-		useLivePreloadedQuery,
+		usePreloadedQuery,
 	};
 };
