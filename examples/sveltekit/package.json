@@ -8,9 +8,9 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "wundergraph": "wunderctl up --debug",
+    "wundergraph": "wunderctl up",
     "browser": "wait-on \"http-get://localhost:3000\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
-    "build:wundergraph": "wunderctl generate --debug"
+    "build:wundergraph": "wunderctl generate"
   },
   "devDependencies": {
     "@fontsource/fira-mono": "^4.5.10",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@tanstack/svelte-query": "4.24.9",
-    "@wundergraph/sdk": "^0.143.1",
-    "@wundergraph/svelte-query": "^0.1.0"
+    "@wundergraph/sdk": "^0.144.0",
+    "@wundergraph/svelte-query": "^0.2.0"
   },
   "type": "module"
 }
