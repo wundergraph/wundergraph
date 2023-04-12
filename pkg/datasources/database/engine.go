@@ -271,7 +271,10 @@ func (e *Engine) StartQueryEngine(schema string) error {
 	// this is important for sqlite support as it's expected that the path of the sqlite file is the same
 	// (relative to the .wundergraph directory) during introspection and at runtime
 	e.cmd.Dir = e.wundergraphDir
-	e.cmd.Env = append(e.cmd.Env, "PRISMA_DML="+schema)
+
+	// append all environment variables, as demonstrated in prisma/prisma/BinaryEngine.ts
+	e.cmd.Env = append(os.Environ(), "PRISMA_DML="+schema)
+
 	e.cmd.Stdout = os.Stdout
 	e.cmd.Stderr = os.Stderr
 	e.url = "http://localhost:" + port
