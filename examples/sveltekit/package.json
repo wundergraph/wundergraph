@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@tanstack/svelte-query": "4.24.9",
-    "@wundergraph/sdk": "^0.144.0",
-    "@wundergraph/svelte-query": "^0.2.0"
+    "@wundergraph/sdk": "^0.144.1",
+    "@wundergraph/svelte-query": "^0.2.1"
   },
   "type": "module"
 }
