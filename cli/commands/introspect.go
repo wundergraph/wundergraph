@@ -57,7 +57,10 @@ func introspectDatabase(introspectionSchema string, loadPrismaSchemaFromDatabase
 	}
 	emitIntrospectionResult(result)
 	if introspectionOutputFile != "" {
-		log.Debug("Introspection Successful", zap.String("duration", time.Since(start).String()))
+		log.Debug("Introspection Successful",
+			zap.String("outfile", introspectionOutputFile),
+			zap.String("duration", time.Since(start).String()),
+		)
 	}
 	return nil
 }
