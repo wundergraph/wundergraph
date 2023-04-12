@@ -30,14 +30,14 @@ type ApiTransportFactory interface {
 }
 
 type apiTransportFactory struct {
-	api             *Api
-	hooksClient     *hooks.Client
-	enableDebugMode bool
-	tracerProvider  *trace.TracerProvider
+	api                  *Api
+	hooksClient          *hooks.Client
+	enableRequestLogging bool
+	tracerProvider       *trace.TracerProvider
 }
 
 func (f *apiTransportFactory) RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
-	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableDebugMode, enableStreamingMode, f.tracerProvider)
+	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableRequestLogging, enableStreamingMode, f.tracerProvider)
 }
 
 func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
@@ -47,7 +47,7 @@ func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
 type ApiTransport struct {
 	roundTripper               http.RoundTripper
 	api                        *Api
-	debugMode                  bool
+	enableRequestLogging       bool
 	upstreamAuthConfigurations map[string]*wgpb.UpstreamAuthentication
 	onRequestHook              map[string]struct{}
 	onResponseHook             map[string]struct{}
@@ -55,19 +55,19 @@ type ApiTransport struct {
 	enableStreamingMode        bool
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool, tracerProvider *trace.TracerProvider) ApiTransportFactory {
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableRequestLogging bool, tracerProvider *trace.TracerProvider) ApiTransportFactory {
 	return &apiTransportFactory{
-		api:             api,
-		hooksClient:     hooksClient,
-		enableDebugMode: enableDebugMode,
-		tracerProvider:  tracerProvider,
+		api:                  api,
+		hooksClient:          hooksClient,
+		enableRequestLogging: enableRequestLogging,
+		tracerProvider:       tracerProvider,
 	}
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool, enableStreamingMode bool, tp *trace.TracerProvider) http.RoundTripper {
+func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableRequestLogging bool, enableStreamingMode bool, tp *trace.TracerProvider) http.RoundTripper {
 	transport := &ApiTransport{
 		roundTripper:               tripper,
-		debugMode:                  enableDebugMode,
+		enableRequestLogging:       enableRequestLogging,
 		api:                        api,
 		upstreamAuthConfigurations: map[string]*wgpb.UpstreamAuthentication{},
 		onResponseHook:             map[string]struct{}{},
@@ -171,7 +171,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 
 	var requestDump []byte
 
-	if t.debugMode {
+	if t.enableRequestLogging {
 		requestDump, _ = httputil.DumpRequest(request, true)
 	}
 
@@ -185,7 +185,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	// in case of http Upgrade requests, we must not dump the response
 	// otherwise, the upgrade will fail
 	if isUpgradeRequest || t.enableStreamingMode {
-		if t.debugMode {
+		if t.enableRequestLogging {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
 				duration,
@@ -194,7 +194,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		return
 	}
 
-	if t.debugMode {
+	if t.enableRequestLogging {
 		var responseDump []byte
 		err = request.Context().Err()
 		if err != nil {

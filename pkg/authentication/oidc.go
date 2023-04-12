@@ -163,7 +163,7 @@ func (h *OpenIDConnectCookieHandler) Register(authorizeRouter, callbackRouter *m
 	})
 }
 
-func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
+func (h *OpenIDConnectCookieHandler) authorize(_ context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig) {
 
 	redirectOnCompletionURI := r.URL.Query().Get("redirect_uri")
 
@@ -246,7 +246,7 @@ func (h *OpenIDConnectCookieHandler) authorize(ctx context.Context, w http.Respo
 func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, w http.ResponseWriter, r *http.Request, provider *oidc.Provider, config *OpenIDConnectConfig, hooks Hooks) {
 	state, err := r.Cookie("state")
 	if err != nil {
-		h.log.Error("OIDCCookieHandler state missing",
+		h.log.Warn("OIDCCookieHandler state missing",
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
@@ -254,7 +254,7 @@ func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, 
 	}
 
 	if r.URL.Query().Get("state") != state.Value {
-		h.log.Error("OIDCCookieHandler state mismatch",
+		h.log.Warn("OIDCCookieHandler state mismatch",
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
@@ -263,7 +263,7 @@ func (h *OpenIDConnectCookieHandler) authorizationCallback(ctx context.Context, 
 
 	redirectURI, err := r.Cookie(oidcRedirectURICookieName)
 	if err != nil {
-		h.log.Error("OIDCCookieHandler redirect uri missing",
+		h.log.Warn("OIDCCookieHandler redirect uri missing",
 			zap.Error(err),
 		)
 		w.WriteHeader(http.StatusBadRequest)
@@ -563,7 +563,7 @@ func (p *OpenIDConnectProvider) disconnectDefault(ctx context.Context, user *Use
 	return nil, nil
 }
 
-func (p *OpenIDConnectProvider) disconnectAuth0(ctx context.Context, user *User) (*OpenIDDisconnectResult, error) {
+func (p *OpenIDConnectProvider) disconnectAuth0(_ context.Context, _ *User) (*OpenIDDisconnectResult, error) {
 	return &OpenIDDisconnectResult{
 		Redirect: fmt.Sprintf("%sv2/logout?client_id=%s", p.config.Issuer, p.clientID),
 	}, nil

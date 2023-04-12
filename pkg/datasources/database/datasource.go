@@ -903,7 +903,6 @@ func (p *Planner) addField(ref int) {
 type Factory struct {
 	Client          *http.Client
 	engineFactory   LazyEngineFactory
-	Debug           bool
 	Log             *zap.Logger
 	testsSkipEngine bool
 }
@@ -912,7 +911,6 @@ func (f *Factory) WithHTTPClient(client *http.Client) *Factory {
 	return &Factory{
 		Client:        client,
 		engineFactory: f.engineFactory,
-		Debug:         f.Debug,
 		Log:           f.Log,
 	}
 }
@@ -922,7 +920,6 @@ func (f *Factory) Planner(ctx context.Context) plan.DataSourcePlanner {
 	return &Planner{
 		client:          f.Client,
 		engineFactory:   &f.engineFactory,
-		debug:           f.Debug,
 		log:             f.Log,
 		testsSkipEngine: f.testsSkipEngine,
 	}
@@ -1099,41 +1096,36 @@ func (s *Source) Load(ctx context.Context, input []byte, w io.Writer) (err error
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 	for {
-		if s.debug {
-			s.log.Debug("database.Source.Execute",
-				zap.ByteString("request", request),
-			)
-		}
+		s.log.Debug("database.Source.Execute",
+			zap.ByteString("request", request),
+		)
+
 		err = s.engine.Execute(ctx, request, buf)
 		if err != nil {
-			if s.debug {
-				s.log.Debug("database.Source.Execute.Error",
-					zap.ByteString("request", request),
-					zap.Error(err),
-				)
-			}
+			s.log.Debug("database.Source.Execute.Error",
+				zap.ByteString("request", request),
+				zap.Error(err),
+			)
+
 			if ctx.Err() != nil {
-				if s.debug {
-					s.log.Debug("database.Source.Execute.Deadline Exceeded")
-				}
+				s.log.Debug("database.Source.Execute.Deadline Exceeded")
+
 				return err
 			}
 			err = nil
 			time.Sleep(time.Millisecond * 500)
 			buf.Reset()
-			if s.debug {
-				s.log.Debug("database.Source.Execute.Retry.after.Error")
-			}
+			s.log.Debug("database.Source.Execute.Retry.after.Error")
+
 			continue
 		}
 		break
 	}
-	if s.debug {
-		s.log.Debug("database.Source.Execute.Succeed",
-			zap.ByteString("request", request),
-			zap.String("response", buf.String()),
-		)
-	}
+	s.log.Debug("database.Source.Execute.Succeed",
+		zap.ByteString("request", request),
+		zap.String("response", buf.String()),
+	)
+
 	_, err = buf.WriteTo(w)
 	return
 }

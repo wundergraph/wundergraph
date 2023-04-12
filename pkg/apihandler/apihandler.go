@@ -103,11 +103,11 @@ type Builder struct {
 
 	cache apicache.Cache
 
-	insecureCookies     bool
-	forceHttpsRedirects bool
-	enableDebugMode     bool
-	enableIntrospection bool
-	devMode             bool
+	insecureCookies      bool
+	forceHttpsRedirects  bool
+	enableRequestLogging bool
+	enableIntrospection  bool
+	devMode              bool
 
 	renameTypeNames []resolve.RenameTypeName
 
@@ -118,7 +118,7 @@ type Builder struct {
 type BuilderConfig struct {
 	InsecureCookies            bool
 	ForceHttpsRedirects        bool
-	EnableDebugMode            bool
+	EnableRequestLogging       bool
 	EnableIntrospection        bool
 	GitHubAuthDemoClientID     string
 	GitHubAuthDemoClientSecret string
@@ -138,7 +138,7 @@ func NewBuilder(pool *pool.Pool,
 		insecureCookies:            config.InsecureCookies,
 		middlewareClient:           hooksClient,
 		forceHttpsRedirects:        config.ForceHttpsRedirects,
-		enableDebugMode:            config.EnableDebugMode,
+		enableRequestLogging:       config.EnableRequestLogging,
 		enableIntrospection:        config.EnableIntrospection,
 		githubAuthDemoClientID:     config.GitHubAuthDemoClientID,
 		githubAuthDemoClientSecret: config.GitHubAuthDemoClientSecret,
@@ -237,7 +237,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		})
 	}
 
-	if r.enableDebugMode {
+	if r.enableRequestLogging {
 		r.router.Use(logRequestMiddleware(os.Stderr))
 	}
 
@@ -257,7 +257,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 	if err := r.registerAuth(r.insecureCookies); err != nil {
 		if !r.devMode {
 			// If authentication fails in production, consider this a fatal error
-			return nil, err
+			return streamClosers, err
 		}
 		r.log.Error("configuring auth", zap.Error(err))
 	}
@@ -313,6 +313,7 @@ func (r *Builder) BuildAndMountApiHandler(ctx context.Context, router *mux.Route
 		err = r.registerOperation(operation)
 		if err != nil {
 			r.log.Error("registerOperation", zap.Error(err))
+			return streamClosers, err
 		}
 	}
 

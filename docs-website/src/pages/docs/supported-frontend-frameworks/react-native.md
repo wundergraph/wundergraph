@@ -14,9 +14,9 @@ React Native doesn't support the new Node.js exports field yet. Add this configu
 
 ```js
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require('expo/metro-config')
+const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(__dirname)
+const config = getDefaultConfig(__dirname);
 
 module.exports = {
   ...config,
@@ -25,25 +25,17 @@ module.exports = {
     resolveRequest: (context, moduleName, platform) => {
       // React Native doesn't support exports field in package.json, so we resolve it manually.
       if (moduleName.startsWith('@wundergraph/sdk/client')) {
-        return context.resolveRequest(
-          context,
-          '@wundergraph/sdk/dist/client',
-          platform
-        )
+        return context.resolveRequest(context, '@wundergraph/sdk/dist/client', platform);
       }
 
       if (moduleName.startsWith('@wundergraph/sdk/internal')) {
-        return context.resolveRequest(
-          context,
-          '@wundergraph/sdk/dist/internal',
-          platform
-        )
+        return context.resolveRequest(context, '@wundergraph/sdk/dist/internal', platform);
       }
 
-      return context.resolveRequest(context, moduleName, platform)
+      return context.resolveRequest(context, moduleName, platform);
     },
   },
-}
+};
 ```
 
 ### Fetch Api
@@ -80,4 +72,4 @@ global.EventSource = NativeEventSource || EventSourcePolyfill;
 - [Expo + SWR example](/docs/examples/expo-swr)
 
 If you've got any questions,
-please join our Discord Community and ask away.
+please [join our Discord community](https://wundergraph.com/discord) or [contact us](https://wundergraph.com/contact/sales).

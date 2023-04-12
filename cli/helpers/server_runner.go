@@ -8,15 +8,17 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
 )
 
-type ServerRunConfig struct {
+type HooksServerRunConfig struct {
 	WunderGraphDirAbs string
 	ServerScriptFile  string
 	Env               []string
+	LogLevel          string
 	Production        bool
 	Debug             bool
+	LogStreaming      bool
 }
 
-func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.ScriptRunner {
+func NewHooksServerRunner(log *zap.Logger, cfg *HooksServerRunConfig) *scriptrunner.ScriptRunner {
 	hooksEnv := []string{
 		"START_HOOKS_SERVER=true",
 		fmt.Sprintf("WG_DIR_ABS=%s", cfg.WunderGraphDirAbs),
@@ -26,7 +28,13 @@ func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.Script
 		hooksEnv = append(hooksEnv, "NODE_ENV=production")
 	}
 
-	scriptArgs := make([]string, 0, 2)
+	// Align the log level
+	if cfg.LogLevel != "" {
+		hooksEnv = append(hooksEnv, fmt.Sprintf("WG_LOG_LEVEL=%s", cfg.LogLevel))
+	}
+
+	var scriptArgs []string
+
 	if cfg.Debug {
 		scriptArgs = append(scriptArgs, "--inspect")
 	}
@@ -39,6 +47,7 @@ func NewServerRunner(log *zap.Logger, cfg *ServerRunConfig) *scriptrunner.Script
 		ScriptArgs:    scriptArgs,
 		Logger:        log,
 		ScriptEnv:     append(cfg.Env, hooksEnv...),
+		Streaming:     cfg.LogStreaming,
 	})
 
 	return hookServerRunner

@@ -167,11 +167,30 @@ export const createServer = async ({
 		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
 		: '';
 
+	let id = 0;
 	const fastify = Fastify({
 		logger,
+		disableRequestLogging: true,
 		genReqId: (req) => {
-			return req.headers['x-request-id']?.toString() || '';
+			if (req.headers['x-request-id']) {
+				return req.headers['x-request-id']?.toString();
+			}
+			return `${++id}`;
 		},
+	});
+
+	/**
+	 * Custom request logging to not log all requests with INFO level.
+	 */
+
+	fastify.addHook('onRequest', (req, reply, done) => {
+		req.log.debug({ req }, 'received request');
+		done();
+	});
+
+	fastify.addHook('onResponse', (req, reply, done) => {
+		req.log.debug({ res: reply, url: req.raw.url, responseTime: reply.getResponseTime() }, 'request completed');
+		done();
 	});
 
 	fastify.decorateRequest('ctx', null);
@@ -230,7 +249,7 @@ export const createServer = async ({
 
 		if (serverConfig?.hooks && Object.keys(serverConfig.hooks).length > 0) {
 			await fastify.register(require('./plugins/hooks'), { ...serverConfig.hooks, config });
-			fastify.log.info('Hooks plugin registered');
+			fastify.log.debug('Hooks plugin registered');
 		}
 
 		let openApiServers: Set<OpenApiServerConfig> = new Set();
@@ -269,7 +288,7 @@ export const createServer = async ({
 
 			for (const server of openApiServers) {
 				await fastify.register(omnigraphPlugin, server);
-				fastify.log.info('OpenAPI plugin registered');
+				fastify.log.debug('OpenAPI plugin registered');
 				fastify.log.info(`OpenAPI GraphQL server '${server.serverName}' listening at ${server.mountPath}`);
 			}
 		}
@@ -282,7 +301,7 @@ export const createServer = async ({
 			for await (const server of serverConfig.graphqlServers!) {
 				const routeUrl = customGqlServerMountPath(server.serverName);
 				await fastify.register(graphqlPlugin, { ...server, routeUrl: routeUrl });
-				fastify.log.info('GraphQL plugin registered');
+				fastify.log.debug('GraphQL plugin registered');
 				fastify.log.info(`GraphQL server '${server.serverName}' listening at ${routeUrl}`);
 			}
 		}
@@ -295,7 +314,7 @@ export const createServer = async ({
 			internalClientFactory: clientFactory,
 			nodeURL,
 		});
-		fastify.log.info('Webhooks plugin registered');
+		fastify.log.debug('Webhooks plugin registered');
 	}
 
 	const operationsFilePath = path.join(wundergraphDir, 'generated', 'wundergraph.operations.json');
@@ -314,7 +333,7 @@ export const createServer = async ({
 				internalClientFactory: clientFactory,
 				nodeURL,
 			});
-			fastify.log.info('Functions plugin registered');
+			fastify.log.debug('Functions plugin registered');
 		}
 	}
 
@@ -323,7 +342,7 @@ export const createServer = async ({
 			if (err) {
 				fastify.log.error({ err, signal, manual }, 'error in graceful shutdown listeners');
 			}
-			fastify.log.info({ err, signal, manual }, 'graceful shutdown was initiated manually');
+			fastify.log.debug({ err, signal, manual }, 'graceful shutdown was initiated manually');
 
 			await tracerProvider.provider.shutdown();
 			await fastify.close();
