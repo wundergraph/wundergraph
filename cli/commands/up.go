@@ -224,9 +224,6 @@ var upCmd = &cobra.Command{
 		}
 
 		onWatch := func(paths []string) {
-			if paths != nil {
-				log.Info("File changed", zap.Strings("paths", paths))
-			}
 			if devTUI != nil {
 				task := cli.TaskStarted{
 					Label: "Building",
