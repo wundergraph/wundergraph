@@ -7,11 +7,11 @@
 		"start:services": "docker-compose up -d",
 		"wait-on:services": "wait-on -d 5000 tcp:54321",
 		"wundergraph": "wunderctl up --debug",
-		"open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:5173",		
+		"open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:5173",
 		"build:wundergraph": "wunderctl generate --debug",
 		"build:sveltekit": "vite build",
 		"build": "npm run build:wundergraph && npm run build:sveltekit",
-		"dev": "vite dev",		
+		"dev": "vite dev",
 		"cleanup": "docker-compose down -v",
 		"wunderctl": "wunderctl",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -32,7 +32,7 @@
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte3": "^4.0.0",
-		"graphql": "^16.6.0",		
+		"graphql": "^16.6.0",
 		"npm-run-all": "^4.1.5",
 		"open-cli": "^7.2.0",
 		"postcss": "^8.4.21",
@@ -53,6 +53,6 @@
 		"@prisma/client": "^4.12.0",
 		"@tanstack/svelte-query": "^4.27.0",
 		"@wundergraph/sdk": "^0.143.0",
-		"@wundergraph/svelte-query": "^0.0.1"
+		"@wundergraph/svelte-query": "^0.1.0"
 	}
 }
