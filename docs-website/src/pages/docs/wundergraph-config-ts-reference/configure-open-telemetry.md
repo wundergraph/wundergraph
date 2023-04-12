@@ -12,8 +12,7 @@ OpenTelemetry is a collection of tools, APIs, and SDKs used to instrument, gener
 
 To enable Open Telemetry, set the `enabled` option to `true` in the `telemetry` section of the `options` object in the `configureWunderGraphApplication` function.
 If no exporter endpoint is configured, the default exporter is the `Stdout` which prints the traces to the console.
-If both exporter endpoints are configured, the `exporterHttpEndpoint` will be used.
-Configuration priority: `otelExporterHttpEndpoint` > `exporterJaegerEndpoint` > `Stdout`.
+If both exporter endpoints are configured, the error will be returned.
 
 ```typescript
 // wundergraph.config.ts
@@ -22,7 +21,7 @@ configureWunderGraphApplication({
   options: {
     openTelemetry: {
       enabled: true, // default: false
-      exporterHttpEndpoint: '', // standard otel http exporter endpoint
+      exporterHttpEndpoint: '', // https://your-otel-http-exporter-endpoint.dev/v1/traces, otel http exporter endpoint
       exporterJaegerEndpoint: '', // 'http://localhost:14268/api/traces' we recommend to use it for development
       authToken: '', // jwt for authentication format: 'Bearer ...', use for development only, adds authentication header to the exporter
     },
@@ -39,13 +38,37 @@ The Open Telemetry configuration can also be set via environment variables.
 
 ```shell
   WG_OTEL_ENABLED=true
-  WG_OTEL_EXPORTER_HTTP_ENDPOINT=''
+  WG_OTEL_EXPORTER_HTTP_ENDPOINT='https://your-otel-http-exporter-endpoint.dev/v1/traces'
   WG_OTEL_EXPORTER_JAEGER_ENDPOINT='http://localhost:14268/api/traces'
   WG_OTEL_JWT='Bearer ...' # production mode
 ```
 
+If both enpoints are configured, you will get an error.
 Please note that `wundergraph.config.ts` configuration has higher priority than environment variables.
 Empty values could be omitted.
+
+## Exporter enpoint normalization rules
+
+- if URL scheme is not specified, the `https` scheme will be used
+- if URL path is not specified, the `/v1/traces` path will be used for the `http` exporter and `/api/traces` for the `jaeger` exporter
+
+Examples:
+
+```shell
+  WG_OTEL_EXPORTER_HTTP_ENDPOINT='your-otel-http-exporter-endpoint.dev' # https://your-otel-http-exporter-endpoint.dev/v1/traces
+  WG_OTEL_EXPORTER_JAEGER_ENDPOINT='localhost:14268' # https://localhost:14268/api/traces
+
+  WG_OTEL_EXPORTER_HTTP_ENDPOINT='http://your-otel-http-exporter-endpoint.dev' # http://your-otel-http-exporter-endpoint.dev/v1/traces
+  WG_OTEL_EXPORTER_JAEGER_ENDPOINT='http://localhost:14268' # http://localhost:14268/api/traces
+
+  WG_OTEL_EXPORTER_HTTP_ENDPOINT='https://your-otel-http-exporter-endpoint.dev' # https://your-otel-http-exporter-endpoint.dev/v1/traces
+  WG_OTEL_EXPORTER_JAEGER_ENDPOINT='https://localhost:14268' # https://localhost:14268/api/traces
+
+  WG_OTEL_EXPORTER_HTTP_ENDPOINT='https://your-otel-http-exporter-endpoint.dev/v1/traces' # https://your-otel-http-exporter-endpoint.dev/v1/traces
+  WG_OTEL_EXPORTER_JAEGER_ENDPOINT='http://localhost:14268/api/traces' # http://localhost:14268/api/traces
+```
+
+This rules are applied to the `wundergraph.config.ts` configuration accordingly.
 
 ## Authentication
 

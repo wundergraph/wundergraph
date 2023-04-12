@@ -2,6 +2,9 @@ package trace
 
 import (
 	"context"
+	"errors"
+	"net/url"
+	"strings"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -13,6 +16,10 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
+)
+
+const (
+	defaultJaegerExporterPath = "/api/traces"
 )
 
 type TracerProviderConfig struct {
@@ -63,10 +70,31 @@ func NewNoopTracerProvider() *TracerProvider {
 }
 
 func configureExporter(ctx context.Context, config *TracerProviderConfig) (sdktrace.SpanExporter, error) {
+	if config.Endpoint != "" && config.JaegerEndpoint != "" {
+		return nil, errors.New("cannot configure both OTLP and Jaeger exporters")
+	}
+
 	switch {
 	case config.Endpoint != "":
+		// normalize the endpoint URL, because of the inconsistency in Go and Node.js exporters implementations
+		endpoint := config.Endpoint
+		if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
+			endpoint = "https://" + endpoint
+		}
+
+		parsedURL, err := url.Parse(endpoint)
+		if err != nil {
+			return nil, err
+		}
+
 		opts := []otlptracehttp.Option{
-			otlptracehttp.WithEndpoint(config.Endpoint),
+			otlptracehttp.WithEndpoint(parsedURL.Host),
+		}
+
+		// if the path is not empty, use it as the URL path
+		// otherwise, the default path will be set by the exporter
+		if parsedURL.Path != "" && parsedURL.Path != "/" {
+			opts = append(opts, otlptracehttp.WithURLPath(parsedURL.Path))
 		}
 
 		if config.AuthToken != "" {
@@ -79,8 +107,23 @@ func configureExporter(ctx context.Context, config *TracerProviderConfig) (sdktr
 
 		return otlptrace.New(ctx, client)
 	case config.JaegerEndpoint != "":
+		// normalize the endpoint URL, because of the inconsistency in Go and Node.js exporters implementations
+		endpoint := config.JaegerEndpoint
+		if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
+			endpoint = "https://" + endpoint
+		}
+
+		parsedURL, err := url.Parse(endpoint)
+		if err != nil {
+			return nil, err
+		}
+
+		if parsedURL.Path == "" || parsedURL.Path == "/" {
+			parsedURL.Path = defaultJaegerExporterPath
+		}
+
 		exp, err := jaeger.New(
-			jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(config.JaegerEndpoint)),
+			jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(parsedURL.String())),
 		)
 		if err != nil {
 			return nil, err

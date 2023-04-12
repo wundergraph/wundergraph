@@ -12,14 +12,20 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { TelemetryOptions } from '@wundergraph/protobuf';
 import { resolveConfigurationVariable } from '../configure/variables';
+import { pino } from 'pino';
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 // use for debugging e.g. check if the exporter is called, spans are created etc.
-// import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
+// by setting the log level to debug
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);
+
+const defaultOTLPTraceExporterPath = '/v1/traces';
+const defaultJaegerExporterPath = '/api/traces';
 
 export interface TelemetryTracerProvider {
 	provider: NodeTracerProvider;
 }
 
-const configureTracerProvider = (config?: TelemetryOptions): TelemetryTracerProvider => {
+const configureTracerProvider = (config?: TelemetryOptions, logger?: pino.Logger): TelemetryTracerProvider => {
 	const resource = new Resource({
 		[SemanticResourceAttributes.SERVICE_NAME]: 'hook-server',
 		[SemanticResourceAttributes.SERVICE_VERSION]: '0.0.1',
@@ -30,51 +36,75 @@ const configureTracerProvider = (config?: TelemetryOptions): TelemetryTracerProv
 		sampler: new AlwaysOnSampler(),
 	});
 
-	provider.addSpanProcessor(getSpanProcessor(config));
+	provider.addSpanProcessor(getSpanProcessor(config, logger));
 	provider.register({});
 
 	return { provider: provider };
 };
 
-// use for debugging
-// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+function getExporter(config?: TelemetryOptions, logger?: pino.Logger): SpanExporter {
+	const httpEndpoint = config?.exporterHttpEndpoint ? resolveConfigurationVariable(config.exporterHttpEndpoint) : '';
+	const jaegerEndpoint = config?.exporterJaegerEndpoint
+		? resolveConfigurationVariable(config.exporterJaegerEndpoint)
+		: '';
 
-function getExporter(config?: TelemetryOptions): SpanExporter {
-	if (config?.exporterHttpEndpoint) {
-		const url = resolveConfigurationVariable(config.exporterHttpEndpoint);
-		if (url !== '') {
-			const [authHeader, hasAuthHeader] = getAuthHeader(config);
-			if (hasAuthHeader) {
-				return new OTLPTraceExporter({
-					url: url,
-					headers: {
-						Authorization: authHeader,
-					},
-				});
-			}
-
-			return new OTLPTraceExporter({
-				url: url,
-			});
-		}
+	if (httpEndpoint !== '' && jaegerEndpoint !== '') {
+		throw new Error('cannot configure both OTLP and Jaeger exporters');
 	}
 
-	if (config?.exporterJaegerEndpoint) {
-		const endpoint = resolveConfigurationVariable(config.exporterJaegerEndpoint);
-		if (endpoint !== '') {
-			return new JaegerExporter({
-				endpoint: endpoint,
+	if (httpEndpoint !== '') {
+		const [authHeader, hasAuthHeader] = getAuthHeader(config);
+		logger?.debug(`configuring OTLPTraceExporter with auth header: ${hasAuthHeader} and endpoint: ${httpEndpoint}`);
+		if (hasAuthHeader) {
+			return new OTLPTraceExporter({
+				url: normalizeURL(httpEndpoint, defaultOTLPTraceExporterPath),
+				headers: {
+					Authorization: authHeader,
+				},
 			});
 		}
+
+		return new OTLPTraceExporter({
+			url: normalizeURL(httpEndpoint, defaultOTLPTraceExporterPath),
+		});
+	}
+
+	if (jaegerEndpoint !== '') {
+		logger?.debug(`configuring JaegerExporter with endpoint: ${jaegerEndpoint}`);
+		return new JaegerExporter({
+			endpoint: normalizeURL(jaegerEndpoint, defaultJaegerExporterPath),
+		});
 	}
 
 	return new ConsoleSpanExporter();
 }
 
-function getSpanProcessor(config?: TelemetryOptions): SpanProcessor {
+// normalize the endpoint URL, because of the inconsistency in Go and Node.js exporters implementations
+function normalizeURL(endpoint: string, defaultPath: string): string {
+	try {
+		if (!/^https?:\/\//i.test(endpoint)) {
+			endpoint = 'https://' + endpoint;
+		}
+
+		const url = new URL(endpoint);
+
+		// Set the default path if it's missing or empty
+		if (!url.pathname || url.pathname === '/') {
+			url.pathname = defaultPath;
+		}
+
+		return url.toString();
+	} catch (e) {
+		throw new Error(`invalid URL: ${endpoint}, error: ${e}`);
+	}
+}
+
+function getSpanProcessor(config?: TelemetryOptions, logger?: pino.Logger): SpanProcessor {
 	if (config?.enabled) {
 		if (resolveConfigurationVariable(config.enabled) == 'true') {
-			return new BatchSpanProcessor(getExporter(config));
+			const exporter = getExporter(config, logger);
+			exporter.export;
+			return new BatchSpanProcessor(getExporter(config, logger));
 		}
 	}
 

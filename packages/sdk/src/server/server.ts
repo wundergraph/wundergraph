@@ -162,7 +162,7 @@ export const createServer = async ({
 		logger.level = resolveServerLogLevel(config.api.serverOptions.logger.level);
 	}
 
-	const tracerProvider = configureTracerProvider(config.api?.nodeOptions?.openTelemetry);
+	const tracerProvider = configureTracerProvider(config.api?.nodeOptions?.openTelemetry, logger);
 	const nodeURL = WG_CONFIG?.api?.nodeOptions?.nodeUrl
 		? resolveConfigurationVariable(WG_CONFIG?.api?.nodeOptions?.nodeUrl)
 		: '';
