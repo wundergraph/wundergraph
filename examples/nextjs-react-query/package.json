@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "run-p dev wundergraph open",
-    "wundergraph": "wunderctl up",
+    "wundergraph": "wunderctl up --logs",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "build:wundergraph": "wunderctl generate",
     "build:next": "next build",

@@ -7,7 +7,7 @@
     "start:services": "docker-compose up -d",
     "wait-on:services": "wait-on -d 5000 tcp:54322",
     "setup": "npm run migrate init",
-    "wundergraph": "wunderctl up",
+    "wundergraph": "wunderctl up --logs",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "seed": "wait-on -d 2000 http://localhost:9991 && ts-node ./seed/seed.ts && npm run open",
     "build:wundergraph": "wunderctl generate",

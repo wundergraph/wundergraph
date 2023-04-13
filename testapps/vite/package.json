@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf ./.next",
     "dev": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
-    "wundergraph": "wunderctl up",
+    "wundergraph": "wunderctl up --logs",
     "generate": "wunderctl generate",
     "browser": "wait-on \"http-get://localhost:5173\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
