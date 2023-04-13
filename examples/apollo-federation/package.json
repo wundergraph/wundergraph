@@ -8,8 +8,8 @@
     "wait-on:services": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004",
     "start:nextjs": "next dev",
     "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "wundergraph": "wunderctl up --debug",
-    "build:wundergraph": "wunderctl generate --debug",
+    "wundergraph": "wunderctl up --logs",
+    "build:wundergraph": "wunderctl generate",
     "build:next": "next build",
     "build": "npm run build:wundergraph && npm run build:next",
     "cleanup": "cd federation && docker-compose down -v",
@@ -17,8 +17,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.10.0",
-    "@wundergraph/sdk": "^0.143.1",
+    "@wundergraph/nextjs": "^0.10.2",
+    "@wundergraph/sdk": "^0.144.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",

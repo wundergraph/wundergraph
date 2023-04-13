@@ -15,9 +15,9 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
-    "dev": "wunderctl up --debug",
+    "dev": "wunderctl up",
     "start:server": "cd server && go run main.go",
-    "generate": "wunderctl generate --debug",
+    "generate": "wunderctl generate",
     "check": "tsc"
   },
   "dependencies": {

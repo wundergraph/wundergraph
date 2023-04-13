@@ -1249,6 +1249,35 @@ export interface ConfigurationVariable {
   placeholderVariableName: string;
 }
 
+export interface BuildInfo {
+  success: boolean;
+  sdk: BuildInfoVersion | undefined;
+  wunderctl: BuildInfoVersion | undefined;
+  node: BuildInfoVersion | undefined;
+  os: BuildInfoOS | undefined;
+  stats: BuildInfoStats | undefined;
+}
+
+export interface BuildInfoVersion {
+  version: string;
+}
+
+export interface BuildInfoOS {
+  type: string;
+  platform: string;
+  arch: string;
+  version: string;
+  release: string;
+}
+
+export interface BuildInfoStats {
+  totalApis: number;
+  totalOperations: number;
+  totalWebhooks: number;
+  hasAuthenticationProvider: boolean;
+  hasUploadProvider: boolean;
+}
+
 function createBaseApiAuthenticationConfig(): ApiAuthenticationConfig {
   return { cookieBased: undefined, hooks: undefined, jwksBased: undefined, publicClaims: [] };
 }
@@ -4150,6 +4179,157 @@ export const ConfigurationVariable = {
     message.environmentVariableName = object.environmentVariableName ?? "";
     message.environmentVariableDefaultValue = object.environmentVariableDefaultValue ?? "";
     message.placeholderVariableName = object.placeholderVariableName ?? "";
+    return message;
+  },
+};
+
+function createBaseBuildInfo(): BuildInfo {
+  return { success: false, sdk: undefined, wunderctl: undefined, node: undefined, os: undefined, stats: undefined };
+}
+
+export const BuildInfo = {
+  fromJSON(object: any): BuildInfo {
+    return {
+      success: isSet(object.success) ? Boolean(object.success) : false,
+      sdk: isSet(object.sdk) ? BuildInfoVersion.fromJSON(object.sdk) : undefined,
+      wunderctl: isSet(object.wunderctl) ? BuildInfoVersion.fromJSON(object.wunderctl) : undefined,
+      node: isSet(object.node) ? BuildInfoVersion.fromJSON(object.node) : undefined,
+      os: isSet(object.os) ? BuildInfoOS.fromJSON(object.os) : undefined,
+      stats: isSet(object.stats) ? BuildInfoStats.fromJSON(object.stats) : undefined,
+    };
+  },
+
+  toJSON(message: BuildInfo): unknown {
+    const obj: any = {};
+    message.success !== undefined && (obj.success = message.success);
+    message.sdk !== undefined && (obj.sdk = message.sdk ? BuildInfoVersion.toJSON(message.sdk) : undefined);
+    message.wunderctl !== undefined &&
+      (obj.wunderctl = message.wunderctl ? BuildInfoVersion.toJSON(message.wunderctl) : undefined);
+    message.node !== undefined && (obj.node = message.node ? BuildInfoVersion.toJSON(message.node) : undefined);
+    message.os !== undefined && (obj.os = message.os ? BuildInfoOS.toJSON(message.os) : undefined);
+    message.stats !== undefined && (obj.stats = message.stats ? BuildInfoStats.toJSON(message.stats) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfo>, I>>(object: I): BuildInfo {
+    const message = createBaseBuildInfo();
+    message.success = object.success ?? false;
+    message.sdk = (object.sdk !== undefined && object.sdk !== null)
+      ? BuildInfoVersion.fromPartial(object.sdk)
+      : undefined;
+    message.wunderctl = (object.wunderctl !== undefined && object.wunderctl !== null)
+      ? BuildInfoVersion.fromPartial(object.wunderctl)
+      : undefined;
+    message.node = (object.node !== undefined && object.node !== null)
+      ? BuildInfoVersion.fromPartial(object.node)
+      : undefined;
+    message.os = (object.os !== undefined && object.os !== null) ? BuildInfoOS.fromPartial(object.os) : undefined;
+    message.stats = (object.stats !== undefined && object.stats !== null)
+      ? BuildInfoStats.fromPartial(object.stats)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseBuildInfoVersion(): BuildInfoVersion {
+  return { version: "" };
+}
+
+export const BuildInfoVersion = {
+  fromJSON(object: any): BuildInfoVersion {
+    return { version: isSet(object.version) ? String(object.version) : "" };
+  },
+
+  toJSON(message: BuildInfoVersion): unknown {
+    const obj: any = {};
+    message.version !== undefined && (obj.version = message.version);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfoVersion>, I>>(object: I): BuildInfoVersion {
+    const message = createBaseBuildInfoVersion();
+    message.version = object.version ?? "";
+    return message;
+  },
+};
+
+function createBaseBuildInfoOS(): BuildInfoOS {
+  return { type: "", platform: "", arch: "", version: "", release: "" };
+}
+
+export const BuildInfoOS = {
+  fromJSON(object: any): BuildInfoOS {
+    return {
+      type: isSet(object.type) ? String(object.type) : "",
+      platform: isSet(object.platform) ? String(object.platform) : "",
+      arch: isSet(object.arch) ? String(object.arch) : "",
+      version: isSet(object.version) ? String(object.version) : "",
+      release: isSet(object.release) ? String(object.release) : "",
+    };
+  },
+
+  toJSON(message: BuildInfoOS): unknown {
+    const obj: any = {};
+    message.type !== undefined && (obj.type = message.type);
+    message.platform !== undefined && (obj.platform = message.platform);
+    message.arch !== undefined && (obj.arch = message.arch);
+    message.version !== undefined && (obj.version = message.version);
+    message.release !== undefined && (obj.release = message.release);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfoOS>, I>>(object: I): BuildInfoOS {
+    const message = createBaseBuildInfoOS();
+    message.type = object.type ?? "";
+    message.platform = object.platform ?? "";
+    message.arch = object.arch ?? "";
+    message.version = object.version ?? "";
+    message.release = object.release ?? "";
+    return message;
+  },
+};
+
+function createBaseBuildInfoStats(): BuildInfoStats {
+  return {
+    totalApis: 0,
+    totalOperations: 0,
+    totalWebhooks: 0,
+    hasAuthenticationProvider: false,
+    hasUploadProvider: false,
+  };
+}
+
+export const BuildInfoStats = {
+  fromJSON(object: any): BuildInfoStats {
+    return {
+      totalApis: isSet(object.totalApis) ? Number(object.totalApis) : 0,
+      totalOperations: isSet(object.totalOperations) ? Number(object.totalOperations) : 0,
+      totalWebhooks: isSet(object.totalWebhooks) ? Number(object.totalWebhooks) : 0,
+      hasAuthenticationProvider: isSet(object.hasAuthenticationProvider)
+        ? Boolean(object.hasAuthenticationProvider)
+        : false,
+      hasUploadProvider: isSet(object.hasUploadProvider) ? Boolean(object.hasUploadProvider) : false,
+    };
+  },
+
+  toJSON(message: BuildInfoStats): unknown {
+    const obj: any = {};
+    message.totalApis !== undefined && (obj.totalApis = Math.round(message.totalApis));
+    message.totalOperations !== undefined && (obj.totalOperations = Math.round(message.totalOperations));
+    message.totalWebhooks !== undefined && (obj.totalWebhooks = Math.round(message.totalWebhooks));
+    message.hasAuthenticationProvider !== undefined &&
+      (obj.hasAuthenticationProvider = message.hasAuthenticationProvider);
+    message.hasUploadProvider !== undefined && (obj.hasUploadProvider = message.hasUploadProvider);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BuildInfoStats>, I>>(object: I): BuildInfoStats {
+    const message = createBaseBuildInfoStats();
+    message.totalApis = object.totalApis ?? 0;
+    message.totalOperations = object.totalOperations ?? 0;
+    message.totalWebhooks = object.totalWebhooks ?? 0;
+    message.hasAuthenticationProvider = object.hasAuthenticationProvider ?? false;
+    message.hasUploadProvider = object.hasUploadProvider ?? false;
     return message;
   },
 };
