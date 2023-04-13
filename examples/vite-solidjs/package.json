@@ -6,7 +6,7 @@
     "start": "concurrently \"npm run dev:vite\" \"npm run wundergraph\" \"npm run browser\"",
     "check": "tsc --noEmit",
     "clean": "rimraf ./.next",
-    "wundergraph": "wunderctl up --debug",
+    "wundergraph": "wunderctl up",
     "browser": "wait-on \"http-get://localhost:3000\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:5173",
     "dev:vite": "vite",
     "build:vite": "vite build",
@@ -34,8 +34,8 @@
   },
   "dependencies": {
     "@tanstack/solid-query": "^4.24.6",
-    "@wundergraph/sdk": "^0.143.1",
-    "@wundergraph/solid-query": "^0.4.4",
+    "@wundergraph/sdk": "^0.144.1",
+    "@wundergraph/solid-query": "^0.4.6",
     "solid-js": "^1.6.10"
   }
 }
