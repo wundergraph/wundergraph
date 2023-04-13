@@ -29,7 +29,7 @@ export interface SubscribeToOptions extends SubscriptionRequestOptions {
 }
 
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
-	enabled?: boolean;
+	enabled?: Boolean;
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: ResponseError): void;
 }
@@ -134,7 +134,7 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		data?: ClientResponse['data'];
 		error?: ClientResponse['error'];
 	} => {
-		const { operationName, input, enabled = true, liveQuery = true, subscribeOnce, onSuccess, onError } = props;
+		const { operationName, input, enabled, liveQuery, subscribeOnce, onSuccess, onError } = props;
 		const startedAtRef = useRef<number | null>(null);
 		const onSuccessRef = useRef(onSuccess);
 		const onErrorRef = useRef(onError);
@@ -222,10 +222,11 @@ export const createWunderGraphRelayApp = (client: Client) => {
 	const usePreloadedQuery = <TQuery extends OperationType>(
 		gqlQuery: Parameters<typeof useRelayPreloadedQuery>[0],
 		preloadedQuery: PreloadedQuery<TQuery>,
-		options?: Parameters<typeof useRelayPreloadedQuery>[2],
-		subscriptionOptions: Omit<UseSubscribeToProps, 'operationName' | 'input'> = {}
+		options?: Parameters<typeof useRelayPreloadedQuery>[2] &
+			Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>
 	): TQuery['response'] => {
-		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, options);
+		const { UNSTABLE_renderPolicy, ...subscriptionOptions } = options || {};
+		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, { UNSTABLE_renderPolicy });
 		const environment = useRelayEnvironment();
 
 		const { id, variables } = preloadedQuery;
@@ -234,6 +235,8 @@ export const createWunderGraphRelayApp = (client: Client) => {
 			operationName: `relay/${id}`,
 			input: variables,
 			...subscriptionOptions,
+			enabled: options?.liveQuery ?? false,
+			liveQuery: options?.liveQuery ?? false,
 		});
 
 		useEffect(() => {

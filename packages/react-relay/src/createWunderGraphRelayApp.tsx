@@ -9,7 +9,6 @@ import React, { useEffect, useState, useRef, ReactNode, FC } from 'react';
 import {
 	Environment,
 	FetchFunction,
-	GraphQLTaggedNode,
 	Network,
 	Observable,
 	OperationType,
@@ -28,7 +27,7 @@ export interface SubscribeToOptions extends SubscriptionRequestOptions {
 }
 
 export interface UseSubscribeToProps extends SubscriptionRequestOptions {
-	enabled?: boolean;
+	enabled?: Boolean;
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: ResponseError): void;
 }
@@ -104,7 +103,7 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		data?: ClientResponse['data'];
 		error?: ClientResponse['error'];
 	} => {
-		const { operationName, input, enabled = true, liveQuery = true, subscribeOnce, onSuccess, onError } = props;
+		const { operationName, input, enabled, liveQuery, subscribeOnce, onSuccess, onError } = props;
 		const startedAtRef = useRef<number | null>(null);
 		const onSuccessRef = useRef(onSuccess);
 		const onErrorRef = useRef(onError);
@@ -169,8 +168,8 @@ export const createWunderGraphRelayApp = (client: Client) => {
 	const usePreloadedQuery = <TQuery extends OperationType>(
 		gqlQuery: Parameters<typeof useRelayPreloadedQuery>[0],
 		preloadedQuery: PreloadedQuery<TQuery>,
-		options?: Parameters<typeof useRelayPreloadedQuery>[2],
-		subscriptionOptions: Omit<UseSubscribeToProps, 'operationName' | 'input'> = {}
+		options?: Parameters<typeof useRelayPreloadedQuery>[2] &
+			Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled'>
 	): TQuery['response'] => {
 		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, options);
 		const environment = useRelayEnvironment();
@@ -180,7 +179,11 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		const { data: liveData } = useSubscribeTo({
 			operationName: `relay/${id}`,
 			input: variables,
-			...subscriptionOptions,
+			...{
+				...options,
+				enabled: options?.liveQuery ?? false,
+				liveQuery: options?.liveQuery ?? false,
+			},
 		});
 
 		useEffect(() => {

@@ -3,7 +3,7 @@ import type { Temperature_Details$data } from '../__generated__/Temperature_Deta
 
 const TemperatureDetails = ({ weather }: { weather: Temperature_Details$data }) => (
 	<div>
-		<h1>Blog posts</h1>
+		<h1>Temperature</h1>
 		<ul>
 			min: {weather.min}
 			<br />

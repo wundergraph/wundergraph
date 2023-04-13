@@ -3,7 +3,7 @@ import type { Weather_Details$data } from '../__generated__/Weather_Details.grap
 
 const Weather = ({ weather }: { weather: Weather_Details$data }) => (
 	<div>
-		<h1>Blog posts</h1>
+		<h1>Weather</h1>
 		<ul>
 			title: {weather.title}
 			<br />

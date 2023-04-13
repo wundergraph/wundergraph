@@ -4,7 +4,7 @@ import { graphql, useSubscription } from 'react-relay';
 import type { RelayProps } from 'relay-nextjs';
 import type { pages_indexQuery as IndexQueryType } from '../__generated__/pages_indexQuery.graphql';
 import Weather from '../components/Weather';
-import { withWunderGraphRelay, useLivePreloadedQuery } from '../lib/createWunderGraphRelayApp';
+import { withWunderGraphRelay, usePreloadedQuery } from '../lib/createWunderGraphRelayApp';
 import TemperatureDetails from '../components/Temperature';
 
 const IndexQuery = graphql`
@@ -38,7 +38,9 @@ const IndexQuery = graphql`
 // };
 
 function Home({ preloadedQuery }: RelayProps<{}, IndexQueryType>) {
-	const { data } = useLivePreloadedQuery(IndexQuery, preloadedQuery);
+	const data = usePreloadedQuery(IndexQuery, preloadedQuery, {
+		liveQuery: true,
+	});
 
 	return (
 		<div className={styles.container}>
