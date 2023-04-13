@@ -129,17 +129,16 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 			refetchOnWindowFocus: liveQuery ? false : refetchOnWindowFocus,
 		});
 
-		const subscriptionState = createSubscribeTo({
-			queryHash,
-			operationName,
-			input,
-			liveQuery,
-			enabled: options.enabled !== false && liveQuery,
-			onSuccess: options.onSuccess,
-			onError: options.onError,
-		});
-
 		if (liveQuery) {
+			const subscriptionState = createSubscribeTo({
+				queryHash,
+				operationName,
+				input,
+				liveQuery,
+				enabled: options.enabled !== false && liveQuery,
+				onSuccess: options.onSuccess,
+				onError: options.onError,
+			});
 			const liveQueryResult = withSubscriptionState(queryResult, subscriptionState);
 			return liveQueryResult;
 		}
