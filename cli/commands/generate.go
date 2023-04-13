@@ -23,13 +23,9 @@ var (
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "Generate the production config",
-	Long: `Generate the production config to start the node and hook component
- with 'wunderctl start' or individually with 'wunderctl node start', 'wunderctl
- server start'. All files are stored to .wundergraph/generated. The local
- introspection cache has precedence. You can overwrite this behavior by passing
- --no-cache to the command`,
+	Use:         "generate",
+	Short:       "Generate the production config",
+	Long:        `Generate the production config. You need to run this command before you can start the node or hooks server.`,
 	Annotations: telemetry.Annotations(telemetry.AnnotationCommand | telemetry.AnnotationDataSources),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		wunderGraphDir, err := files.FindWunderGraphDir(_wunderGraphDirConfig)
