@@ -1,5 +1,5 @@
-import { CodeBlock } from './CodeBlock'
+import { CodeBlock } from './CodeBlock';
 
 export function Fence(props) {
-	return <CodeBlock {...props} />
+	return <CodeBlock {...props} />;
 }

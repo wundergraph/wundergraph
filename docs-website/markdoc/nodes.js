@@ -112,6 +112,10 @@ const nodes = {
 			language: {
 				type: String,
 			},
+			filename: {
+				type: String,
+				required: true,
+			},
 		},
 	},
 	link: {

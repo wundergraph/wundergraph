@@ -340,11 +340,6 @@ const navigation = [
 				title: 'Cookie-based Auth',
 				links: [
 					{
-						title: 'Overview',
-						navTitle: 'Cookie-based Auth',
-						href: '/docs/auth/cookie-based-auth',
-					},
-					{
 						title: 'OpenID Connect',
 						href: '/docs/auth/cookie-based-auth/openid-connect',
 					},
@@ -370,17 +365,16 @@ const navigation = [
 				title: 'Token-based Auth',
 				links: [
 					{
-						title: 'Overview',
-						navTitle: 'Token-based Auth',
-						href: '/docs/auth/token-based-auth',
+						title: 'OpenID Connect JWKS',
+						href: '/docs/auth/token-based-auth/openid-connect',
 					},
 					{
 						title: 'Auth.js (NextAuth)',
 						href: '/docs/auth/token-based-auth/auth-js',
 					},
 					{
-						title: 'OpenID Connect',
-						href: '/docs/auth/token-based-auth/openid-connect',
+						title: 'Clerk.com',
+						href: '/docs/auth/token-based-auth/clerk',
 					},
 				],
 			},
