@@ -1,7 +1,7 @@
 ---
 title: Using claims
 pageTitle: WunderGraph - Using claims
-description:
+description: Declare and manipulate user attributes.
 ---
 
 WunderGraph supports claims, which allow you to declare and manipulate user attributes.
