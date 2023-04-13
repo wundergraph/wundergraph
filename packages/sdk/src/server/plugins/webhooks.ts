@@ -35,7 +35,7 @@ const FastifyWebhooksPlugin: FastifyPluginAsync<FastifyWebHooksOptions> = async 
 					try {
 						const operationClient = new OperationsClient({
 							baseURL: config.nodeURL,
-							clientRequest: (request.body as any)?.__wg?.clientRequest || null,
+							clientRequest: null,
 						});
 						const eventResponse = await webhook.handler(
 							{
