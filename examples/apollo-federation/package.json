@@ -8,7 +8,7 @@
     "wait-on:services": "wait-on http://localhost:4001 http://localhost:4002 http://localhost:4003 http://localhost:4004",
     "start:nextjs": "next dev",
     "open:browser": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
-    "wundergraph": "wunderctl up",
+    "wundergraph": "wunderctl up --logs",
     "build:wundergraph": "wunderctl generate",
     "build:next": "next build",
     "build": "npm run build:wundergraph && npm run build:next",
