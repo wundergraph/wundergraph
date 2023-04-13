@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.107.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.1...@wundergraph/protobuf@0.107.0) (2023-04-12)
+
+### Features
+
+* tui + log handling ([#813](https://github.com/wundergraph/wundergraph/issues/813)) ([6bf7498](https://github.com/wundergraph/wundergraph/commit/6bf74980c69def43e4af8bdfdcc0fb5645a1025b)) (@StarpTech)
+
 ## [0.106.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/protobuf@0.106.0...@wundergraph/protobuf@0.106.1) (2023-03-16)
 
 ### Bug Fixes

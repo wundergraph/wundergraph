@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "wunderctl up --debug",
-    "build:wundergraph": "wunderctl generate --debug",
+    "start": "wunderctl up",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "check": "tsc --noEmit",
     "test": "jest"
@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.143.1",
+    "@wundergraph/sdk": "^0.144.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {

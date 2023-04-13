@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@expo/webpack-config": "^0.17.2",
-    "@wundergraph/sdk": "^0.143.1",
-    "@wundergraph/swr": "^0.14.4",
+    "@wundergraph/sdk": "^0.144.1",
+    "@wundergraph/swr": "^0.14.6",
     "event-source-polyfill": "^1.0.31",
     "expo": "^47.0.0",
     "react": "18.1.0",
@@ -25,8 +25,8 @@
   "scripts": {
     "start": "run-p wunder expo",
     "check": "tsc --noEmit",
-    "wunder": "wunderctl up --debug",
-    "build:wundergraph": "wunderctl generate --debug",
+    "wunder": "wunderctl up",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "wunderctl": "wunderctl",
     "expo": "expo start",
