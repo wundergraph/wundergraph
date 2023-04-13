@@ -8,7 +8,7 @@ export const createWebhookFactory = <
 	return createWebhook<InternalOperations, TInternalClient>();
 };
 
-interface CreateWebhookProps<
+export interface CreateWebhookProps<
 	TEvent,
 	TResponse,
 	TOperationsClient extends OperationsClient,
