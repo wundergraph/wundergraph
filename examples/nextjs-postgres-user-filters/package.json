@@ -7,7 +7,7 @@
     "start:services": "docker-compose up -d",
     "wait-on:services": "wait-on -d 5000 tcp:54322",
     "setup": "npm run migrate init",
-    "wundergraph": "wunderctl up",
+    "wundergraph": "wunderctl up --logs",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "seed": "wait-on -d 2000 http://localhost:9991 && ts-node ./seed/seed.ts && npm run open",
     "build:wundergraph": "wunderctl generate",
@@ -21,8 +21,8 @@
     "test": "jest --detectOpenHandles"
   },
   "dependencies": {
-    "@wundergraph/nextjs": "^0.10.1",
-    "@wundergraph/sdk": "^0.144.0",
+    "@wundergraph/nextjs": "^0.10.2",
+    "@wundergraph/sdk": "^0.144.1",
     "graphql": "^16.3.0",
     "next": "^13.1.1",
     "react": "^18.0.0",
