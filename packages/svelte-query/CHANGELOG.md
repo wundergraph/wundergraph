@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.1...@wundergraph/svelte-query@0.2.2) (2023-04-13)
+
+### Bug Fixes
+
+* svelte-query livequery config ([#829](https://github.com/wundergraph/wundergraph/issues/829)) ([42fe921](https://github.com/wundergraph/wundergraph/commit/42fe9219ae7bcd9dd87ce56b298bf57b2bbbcd2c)) (@DaniAkash)
+
 ## [0.2.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/svelte-query@0.2.0...@wundergraph/svelte-query@0.2.1) (2023-04-12)
 
 **Note:** Version bump only for package @wundergraph/svelte-query
