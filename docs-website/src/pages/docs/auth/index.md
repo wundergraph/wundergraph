@@ -7,7 +7,7 @@ fullWidthContent: true
 isIndexFile: true
 ---
 
-An overview authentication supported by WunderGraph.
+An overview of supported authentication methods supported by WunderGraph.
 
 ## Cookie-based Auth
 
