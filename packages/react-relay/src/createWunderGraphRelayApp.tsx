@@ -169,9 +169,10 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		gqlQuery: Parameters<typeof useRelayPreloadedQuery>[0],
 		preloadedQuery: PreloadedQuery<TQuery>,
 		options?: Parameters<typeof useRelayPreloadedQuery>[2] &
-			Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled'>
+			Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>
 	): TQuery['response'] => {
-		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, options);
+		const { UNSTABLE_renderPolicy, ...subscriptionOptions } = options || {};
+		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, { UNSTABLE_renderPolicy });
 		const environment = useRelayEnvironment();
 
 		const { id, variables } = preloadedQuery;
@@ -179,11 +180,9 @@ export const createWunderGraphRelayApp = (client: Client) => {
 		const { data: liveData } = useSubscribeTo({
 			operationName: `relay/${id}`,
 			input: variables,
-			...{
-				...options,
-				enabled: options?.liveQuery ?? false,
-				liveQuery: options?.liveQuery ?? false,
-			},
+			...subscriptionOptions,
+			enabled: options?.liveQuery ?? false,
+			liveQuery: options?.liveQuery ?? false,
 		});
 
 		useEffect(() => {
