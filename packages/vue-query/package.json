@@ -33,7 +33,7 @@
   },
   "peerDependencies": {
     "@tanstack/vue-query": "^4.27.0",
-    "@wundergraph/sdk": ">=0.110.0",
+    "@wundergraph/sdk": ">=0.143.0",
     "vue": "^3.2.47"
   },
   "devDependencies": {

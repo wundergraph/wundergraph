@@ -376,7 +376,6 @@ describe('Vue Query - useSubscription', () => {
 						from: 100,
 					},
 				});
-				console.log('Reply...', data);
 				return { data };
 			},
 			render() {
