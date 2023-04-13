@@ -84,7 +84,7 @@ func NewDevModeCookieBasedSecrets() (cookieBasedSecrets *CookieBasedSecrets, err
 	), nil
 }
 
-func NewCookieBasedSecrets() (cookieBasedSecrets *CookieBasedSecrets, errorMessages []string) {
+func NewCookieBasedSecrets() (cookieBasedSecrets *CookieBasedSecrets, warnMessages []string) {
 	secretNamesAndLength := map[string]int{
 		WgEnvCsrfSecret: 11,
 		WgEnvHashKey:    32,
@@ -97,17 +97,17 @@ func NewCookieBasedSecrets() (cookieBasedSecrets *CookieBasedSecrets, errorMessa
 		if secret == "" {
 			bytes, err := generateRandomBytesOfLength(v)
 			if err != nil {
-				failureWarning := fmt.Sprintf("The secret %s was unset and your system failed to produce a secure, randomly-generated string. Please generate a new one. https://docs.wundergraph.com/docs/self-hosted/security", k)
-				return cookieBasedSecrets, append(errorMessages, failureWarning)
+				unsetWarning := fmt.Sprintf("The secret %s was unset and your system failed to produce a secure, randomly-generated string. Please generate a new one. https://docs.wundergraph.com/docs/self-hosted/security", k)
+				return cookieBasedSecrets, append(warnMessages, unsetWarning)
 			}
 			setCookieBasedSecrets(k, bytes, cookieBasedSecrets)
 			unsetWarning := fmt.Sprintf("The secret %s was unset. A temporary randomised value has been created; please generate a new one. https://docs.wundergraph.com/docs/self-hosted/security", k)
-			errorMessages = append(errorMessages, unsetWarning)
+			warnMessages = append(warnMessages, unsetWarning)
 		} else {
 			setCookieBasedSecrets(k, []byte(secret), cookieBasedSecrets)
 		}
 	}
-	return cookieBasedSecrets, errorMessages
+	return cookieBasedSecrets, warnMessages
 }
 
 type Api struct {

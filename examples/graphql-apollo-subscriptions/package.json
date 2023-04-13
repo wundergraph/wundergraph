@@ -4,9 +4,9 @@
   "description": "",
   "scripts": {
     "start": "run-p start:services start:server",
-    "start:server": "wait-on tcp:8085 && wunderctl up --debug",
+    "start:server": "wait-on tcp:8085 && wunderctl up",
     "start:services": "cd chat && go run server/server.go",
-    "build:wundergraph": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "check": "tsc --noEmit",
     "test": "jest"
@@ -14,7 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@wundergraph/sdk": "^0.143.1",
+    "@wundergraph/sdk": "^0.144.1",
     "graphql": "^16.3.0"
   },
   "devDependencies": {
