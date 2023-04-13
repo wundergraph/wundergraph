@@ -16,6 +16,7 @@ import {
 	ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { NextLogo } from '@/components/logos/next';
+import { SvelteLogo } from '@/components/logos/svelte';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
 import clsx from 'clsx';
@@ -105,6 +106,13 @@ export default function HomePage() {
 						description="Learn how to use WunderGraph with Remix."
 						logo={<RemixLogo />}
 						href="/docs/getting-started/remix-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="SvelteKit"
+						description="Learn how to use WunderGraph with SvelteKit."
+						logo={<SvelteLogo />}
+						href="/docs/getting-started/sveltekit-quickstart"
 						variant="plain"
 					/>
 				</QuickLinks>

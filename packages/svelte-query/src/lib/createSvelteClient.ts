@@ -17,6 +17,7 @@ import type {
 	CreateSubscription,
 	GetUser,
 	MutationFetcher,
+	PrefetchQuery,
 	QueryFetcher,
 	QueryKey,
 	SubscribeToOptions,
@@ -76,6 +77,28 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 	};
 
 	/**
+	 * Prefetch a WunderGraph query for SSR (for frameworks like SvelteKit)
+	 *
+	 * @usage
+	 * ```ts
+	 * prefetchQuery({
+	 *   operationName: 'Weather',
+	 * })
+	 * ```
+	 */
+	const prefetchQuery: PrefetchQuery<Operations> = async (options, queryClient) => {
+		const { operationName, liveQuery, input, enabled, refetchOnWindowFocus, ...queryOptions } = options;
+
+		await queryClient.prefetchQuery({
+			queryKey: queryKey({ operationName, input }),
+			queryFn: ({ signal }: QueryFunctionContext) => queryFetcher({ operationName, input, abortSignal: signal }),
+			...queryOptions,
+			enabled: liveQuery ? false : enabled,
+			refetchOnWindowFocus: liveQuery ? false : refetchOnWindowFocus,
+		});
+	};
+
+	/**
 	 * Execute a WunderGraph query.
 	 *
 	 * @usage
@@ -106,18 +129,18 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 			refetchOnWindowFocus: liveQuery ? false : refetchOnWindowFocus,
 		});
 
-		const subscriptionState = createSubscribeTo({
-			queryHash,
-			operationName,
-			input,
-			liveQuery,
-			enabled: options.enabled !== false && liveQuery,
-			onSuccess: options.onSuccess,
-			onError: options.onError,
-		});
-
 		if (liveQuery) {
-			return withSubscriptionState(queryResult, subscriptionState);
+			const subscriptionState = createSubscribeTo({
+				queryHash,
+				operationName,
+				input,
+				liveQuery,
+				enabled: options.enabled !== false && liveQuery,
+				onSuccess: options.onSuccess,
+				onError: options.onError,
+			});
+			const liveQueryResult = withSubscriptionState(queryResult, subscriptionState);
+			return liveQueryResult;
 		}
 		return queryResult;
 	};
@@ -245,38 +268,40 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 			}
 
 			subscriptionState.set({ isLoading: true, isSubscribed: false });
-			unsubscribe = subscribeTo({
-				operationName,
-				input,
-				liveQuery,
-				subscribeOnce,
-				onError(error) {
-					subscriptionState.set({ isLoading: false, isSubscribed: false });
-					onError?.(error);
-					startedAtRef = null;
-				},
-				onResult(result) {
-					if (!startedAtRef) {
-						subscriptionState.set({ isLoading: false, isSubscribed: true });
-						onSuccess?.(result);
-						startedAtRef = new Date().getTime();
-					}
-
-					// Promise is not handled because we are not interested in the result
-					// Errors are handled by React Query internally
-					client.setQueryData([operationName, input], () => {
-						if (result.error) {
-							throw result.error;
+			if (enabled) {
+				unsubscribe = subscribeTo({
+					operationName,
+					input,
+					liveQuery,
+					subscribeOnce,
+					onError(error) {
+						subscriptionState.set({ isLoading: false, isSubscribed: false });
+						onError?.(error);
+						startedAtRef = null;
+					},
+					onResult(result) {
+						if (!startedAtRef) {
+							subscriptionState.set({ isLoading: false, isSubscribed: true });
+							onSuccess?.(result);
+							startedAtRef = new Date().getTime();
 						}
 
-						return result.data;
-					});
-				},
-				onAbort() {
-					subscriptionState.set({ isLoading: false, isSubscribed: false });
-					startedAtRef = null;
-				},
-			});
+						// Promise is not handled because we are not interested in the result
+						// Errors are handled by React Query internally
+						client.setQueryData([operationName, input], () => {
+							if (result.error) {
+								throw result.error;
+							}
+
+							return result.data;
+						});
+					},
+					onAbort() {
+						subscriptionState.set({ isLoading: false, isSubscribed: false });
+						startedAtRef = null;
+					},
+				});
+			}
 		});
 
 		onDestroy(() => {
@@ -327,5 +352,6 @@ export function createSvelteClient<Operations extends OperationsDefinition>(clie
 		createFileUpload,
 		queryKey,
 		createSubscription,
+		prefetchQuery,
 	};
 }

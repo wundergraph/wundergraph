@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.144.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.0...@wundergraph/sdk@0.144.1) (2023-04-12)
+
+**Note:** Version bump only for package @wundergraph/sdk
+
+## [0.144.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.143.1...@wundergraph/sdk@0.144.0) (2023-04-12)
+
+### Features
+
+* mark operations as internal when inside internal folder ([#803](https://github.com/wundergraph/wundergraph/issues/803)) ([c2ed5b0](https://github.com/wundergraph/wundergraph/commit/c2ed5b0dd2dde342860ba3bd0c2dcdbaa335cbcd)) (@thisisnithin)
+* sveltekit & vite-svelte examples ([#805](https://github.com/wundergraph/wundergraph/issues/805)) ([094ae35](https://github.com/wundergraph/wundergraph/commit/094ae35d0b1fc3acd2aca2b952309367876c73d4)) (@DaniAkash)
+* tui + log handling ([#813](https://github.com/wundergraph/wundergraph/issues/813)) ([6bf7498](https://github.com/wundergraph/wundergraph/commit/6bf74980c69def43e4af8bdfdcc0fb5645a1025b)) (@StarpTech)
+
 ## [0.143.1](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.143.0...@wundergraph/sdk@0.143.1) (2023-04-04)
 
 ### Bug Fixes

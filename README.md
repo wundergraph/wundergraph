@@ -194,7 +194,9 @@ The best way to try them out is by cloning the mono-repo.
 - [Remix](examples/remix)
 - [Schema Extension](examples/schema-extension)
 - [Simple Example](examples/simple)
+- [SvelteKit](examples/sveltekit)
 - [Vite SolidJS](examples/vite-solidjs)
+- [Vite Svelte](examples/vite-svelte)
 - [Vite swr](examples/vite-swr)
 - [Webhooks](examples/webhooks)
 

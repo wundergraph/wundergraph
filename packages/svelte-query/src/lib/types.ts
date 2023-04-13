@@ -15,6 +15,7 @@ import type {
 	CreateMutationOptions as TanstackCreateMutationOptions,
 	CreateMutationResult,
 	QueryObserverResult,
+	QueryClient,
 } from '@tanstack/svelte-query';
 import type { Writable, Readable } from 'svelte/store';
 
@@ -66,7 +67,10 @@ export type CreateQueryOptions<
 	Input extends object | undefined,
 	OperationName extends string,
 	LiveQuery
-> = Omit<TanstackCreateQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>, 'queryKey' | 'queryFn'> &
+> = Omit<
+	TanstackCreateQueryOptions<Data, Error, Data, (OperationName | Input | undefined)[]>,
+	'queryKey' | 'queryFn' | 'queryHash' | 'queryKeyHashFn'
+> &
 	WithInput<
 		Input,
 		{
@@ -84,12 +88,25 @@ export type CreateQuery<Operations extends OperationsDefinition, ExtraOptions ex
 		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
 	>(
 		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions
-	): CreateQueryResult<Response['data'], Response['error']> & {
-		subscriptionState?: Writable<{
-			isLoading: boolean;
-			isSubscribed: boolean;
-		}>;
-	};
+	):
+		| CreateQueryResult<Response['data'], Response['error']>
+		| Readable<
+				QueryObserverResult<Response['data'], Response['error']> & {
+					isSubscribed: boolean;
+				}
+		  >;
+};
+
+export type PrefetchQuery<Operations extends OperationsDefinition, ExtraOptions extends object = {}> = {
+	<
+		OperationName extends Extract<keyof Operations['queries'], string>,
+		Input extends Operations['queries'][OperationName]['input'] = Operations['queries'][OperationName]['input'],
+		Response extends Operations['queries'][OperationName]['response'] = Operations['queries'][OperationName]['response'],
+		LiveQuery extends Operations['queries'][OperationName]['liveQuery'] = Operations['queries'][OperationName]['liveQuery']
+	>(
+		options: CreateQueryOptions<Response['data'], Response['error'], Input, OperationName, LiveQuery> & ExtraOptions,
+		queryClient: QueryClient
+	): void;
 };
 
 export type UseSubscriptionOptions<

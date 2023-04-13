@@ -15,10 +15,10 @@
     "url": "https://github.com/wundergraph/wundergraph/issues"
   },
   "scripts": {
-    "dev": "wunderctl up --debug",
+    "dev": "wunderctl up",
     "build": "pnpm generate && pnpm check",
-    "start": "wunderctl start --debug",
-    "generate": "wunderctl generate --debug",
+    "start": "wunderctl start",
+    "generate": "wunderctl generate",
     "check": "tsc",
     "test": "pnpm generate && jest"
   },
