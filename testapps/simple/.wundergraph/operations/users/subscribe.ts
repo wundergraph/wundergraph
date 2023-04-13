@@ -6,7 +6,7 @@ export default createOperation.subscription({
 	input: z.object({
 		id: z.string(),
 	}),
-	handler: async function* ({ input }) {
+	handler: async function* ({ input, log }) {
 		try {
 			// setup your subscription here, e.g. connect to a queue / stream
 			for (let i = 0; i < 10; i++) {
@@ -22,7 +22,7 @@ export default createOperation.subscription({
 		} finally {
 			// finally gets called, when the client disconnects
 			// you can use it to clean up the queue / stream connection
-			console.log('client disconnected');
+			log.info('client disconnected');
 		}
 	},
 });

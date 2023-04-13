@@ -1,4 +1,4 @@
-import { wunderctlExecAsync } from '../wunderctlexec';
+import { wunderctl } from '../wunderctlexec';
 import { FieldDefinitionNode, InputValueDefinitionNode, Kind, parse, parseType, print, TypeNode, visit } from 'graphql';
 import { DatabaseIntrospection, ReplaceCustomScalarTypeFieldConfiguration } from '../definition';
 import { SingleTypeField } from '@wundergraph/protobuf';
@@ -25,10 +25,13 @@ export interface PrismaDatabaseIntrospectionResult {
 
 const _ensurePrisma = async () => {
 	Logger.info('Installing prisma...');
-	await wunderctlExecAsync({
+	const { failed, stderr } = await wunderctl({
 		cmd: ['installPrismaDependencies'],
 	});
-	Logger.info('Installing prisma... done');
+	if (failed) {
+		throw new Error(`Failed to install prisma: ${stderr}`);
+	}
+	Logger.info('Prisma installed');
 };
 
 let ensurePrisma: Promise<void> | undefined;
@@ -48,7 +51,7 @@ const introspectPrismaDatabase = async (
 	}
 	const introspectionFilePath = path.join('generated', 'introspection', 'database', `${id}.json`);
 	const cmd = ['introspect', databaseSchema, databaseURL, `--outfile=${introspectionFilePath}`, '--debug'];
-	const result = await wunderctlExecAsync({ cmd });
+	const { stdout: result } = await wunderctl({ cmd });
 	if (result === undefined) {
 		return {
 			success: false,

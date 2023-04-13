@@ -39,8 +39,6 @@ export const WG_ENABLE_INTROSPECTION_CACHE = process.env['WG_ENABLE_INTROSPECTIO
 export const WG_INTROSPECTION_CACHE_SKIP = process.env['WG_INTROSPECTION_CACHE_SKIP'] === 'true';
 // Only use the introspection cache, return an error when hitting the network
 export const WG_ENABLE_INTROSPECTION_OFFLINE = process.env['WG_ENABLE_INTROSPECTION_OFFLINE'] === 'true';
-// When true, throw an exception an error is found while loading operations
-export const WG_THROW_ON_OPERATION_LOADING_ERROR = process.env['WG_THROW_ON_OPERATION_LOADING_ERROR'] === 'true';
 
 export const WG_PRETTY_GRAPHQL_VALIDATION_ERRORS = process.env['WG_PRETTY_GRAPHQL_VALIDATION_ERRORS'] === 'true';
 // Default polling interval for data sources without one
