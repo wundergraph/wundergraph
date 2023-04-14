@@ -117,6 +117,8 @@ const _configureWunderGraphServer = <
 			});
 		}
 
+		logger.info('Starting WunderGraph Server');
+
 		startServer({
 			wundergraphDir: process.env.WG_DIR_ABS!,
 			config: WG_CONFIG,

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -80,7 +81,9 @@ func NewWunderGraphNode(ctx context.Context) (*node.Node, error) {
 		return nil, err
 	}
 
-	return node.New(ctx, BuildInfo, wunderGraphDir, log), nil
+	nodeLogger := logging.
+		New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+	return node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger), nil
 }
 
 type options struct {

@@ -1,5 +1,5 @@
 import { EnvironmentVariable, mapInputVariable } from '../configure/variables';
-import { defaultHost, defaultServerPort, fallbackUrl, isCloud, LoggerLevel, WgEnv } from '../configure/options';
+import { defaultHost, defaultServerPort, fallbackServerUrl, isCloud, LoggerLevel, WgEnv } from '../configure/options';
 import { ResolvedServerOptions, ServerOptions, MandatoryServerOptions } from './types';
 
 export const customGqlServerMountPath = (name: string): string => {
@@ -21,9 +21,7 @@ export const serverOptionsWithDefaults = (options?: ServerOptions): MandatorySer
 	return isCloud
 		? DefaultServerOptions
 		: {
-				serverUrl:
-					options?.serverUrl ||
-					new EnvironmentVariable(WgEnv.ServerUrl, fallbackUrl(defaultServerPort, options?.listen)),
+				serverUrl: options?.serverUrl || fallbackServerUrl(options?.listen),
 				listen: {
 					host: options?.listen?.host || DefaultServerOptions.listen.host,
 					port: options?.listen?.port || DefaultServerOptions.listen.port,
