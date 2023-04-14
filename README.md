@@ -116,28 +116,28 @@ query ($id: String!) {
 
 </td><td valign="top">
 
-```yaml
+```ts
 // .wundergraph/operations/users/CustomByID.ts
-  import { createOperation, z } from '../../generated/wundergraph.factory';
+import { createOperation, z } from '../../generated/wundergraph.factory';
 
-  export default createOperation.query({
+export default createOperation.query({
   // Input validation
-input: z.object({
-  id: z.string(),
-}),
-handler: async ({ input }) => {
-  // Call into your virtual graph, type-safe
-  const { errors, data } = await operations.query({
-  operationName: 'ByID',
-  input: {
-    id: input.id,
-  },
-});
+  input: z.object({
+    id: z.string(),
+  }),
+  handler: async ({ input }) => {
+    // Call into your virtual graph, type-safe
+    const { errors, data } = await operations.query({
+      operationName: 'ByID',
+      input: {
+        id: input.id,
+      },
+    });
 
-  return {
-  ...data,
-};
-},
+    return {
+      ...data,
+    };
+  },
 });
 ```
 
