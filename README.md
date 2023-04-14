@@ -155,7 +155,7 @@ import { useQuery } from '../../components/generated/nextjs';
 
 export default async function ProfilePage(props) {
   const { data } = await useQuery({
-    operationName: 'users/CustomByID',
+    operationName: 'users/CustomByID', // or 'users/ByID'
     input: {
       id: props.params.id,
     },
