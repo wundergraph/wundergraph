@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/wundergraph/wundergraph/pkg/logging"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -17,6 +16,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/telemetry"
 	"github.com/wundergraph/wundergraph/pkg/wgpb"

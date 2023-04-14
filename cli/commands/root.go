@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"go.uber.org/zap/zapcore"
 	"io/fs"
 	"os"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
