@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import { PreloadedQuery, graphql } from 'react-relay';
-import { RelayProps } from 'relay-nextjs';
+import { graphql } from 'react-relay';
 import { pagesDragonsQuery as PagesDragonsQueryType } from '../__relay__generated__/pagesDragonsQuery.graphql';
 import { Dragon } from '@/components/Dragon';
-import { usePreloadedQuery, withWunderGraphRelay } from '@/lib/wundergraph';
+import { fetchWunderGraphSSRQuery } from '@/lib/wundergraph';
+import { InferGetServerSidePropsType } from 'next';
 
 const PagesDragonsQuery = graphql`
 	query pagesDragonsQuery {
@@ -13,25 +13,15 @@ const PagesDragonsQuery = graphql`
 	}
 `;
 
-const DragonsList = ({
-	queryReference,
-}: {
-	queryReference: PreloadedQuery<PagesDragonsQueryType, Record<string, unknown>>;
-}) => {
-	const data = usePreloadedQuery(PagesDragonsQuery, queryReference);
+export async function getServerSideProps() {
+	const relayData = await fetchWunderGraphSSRQuery<PagesDragonsQueryType>(PagesDragonsQuery);
 
-	return (
-		<div>
-			<p>Dragons:</p>
-			{data.spacex_dragons?.map((dragon, dragonIndex) => {
-				if (dragon) return <Dragon key={dragonIndex.toString()} dragon={dragon} />;
-				return null;
-			})}
-		</div>
-	);
-};
+	return {
+		props: relayData,
+	};
+}
 
-function Home({ preloadedQuery }: RelayProps<{}, PagesDragonsQueryType>) {
+export default function Home({ queryResponse }: InferGetServerSidePropsType<typeof getServerSideProps>) {
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between p-24">
 			<div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -68,7 +58,13 @@ function Home({ preloadedQuery }: RelayProps<{}, PagesDragonsQueryType>) {
 				/>
 			</div>
 
-			{/* <DragonsList queryReference={preloadedQuery} /> */}
+			<div>
+				<p>Dragons:</p>
+				{queryResponse?.spacex_dragons?.map((dragon, dragonIndex) => {
+					if (dragon) return <Dragon key={dragonIndex.toString()} dragon={dragon} />;
+					return null;
+				})}
+			</div>
 
 			<div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
 				<a
@@ -136,6 +132,3 @@ function Home({ preloadedQuery }: RelayProps<{}, PagesDragonsQueryType>) {
 		</main>
 	);
 }
-
-export default Home;
-// withWunderGraphRelay(Home, PagesDragonsQuery);

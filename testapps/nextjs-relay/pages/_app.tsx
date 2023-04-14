@@ -1,10 +1,10 @@
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
-import { WunderGraphRelaySSRProvider } from '../lib/createWunderGraphRelayApp';
+import { WunderGraphRelayProvider } from '../lib/createWunderGraphRelayApp';
 
 function ExampleApp({ Component, pageProps }: AppProps) {
 	return (
-		<WunderGraphRelaySSRProvider initialRecords={pageProps.initialRecords}>
+		<WunderGraphRelayProvider initialRecords={pageProps.initialRecords}>
 			<nav>
 				Pages
 				<ul>
@@ -20,7 +20,7 @@ function ExampleApp({ Component, pageProps }: AppProps) {
 				</ul>
 			</nav>
 			<Component {...pageProps} />
-		</WunderGraphRelaySSRProvider>
+		</WunderGraphRelayProvider>
 	);
 }
 

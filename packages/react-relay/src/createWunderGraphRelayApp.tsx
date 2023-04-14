@@ -231,8 +231,8 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		return store;
 	};
 
-	const WunderGraphRelaySSRProvider: FC<{
-		initialRecords: RecordMap;
+	const WunderGraphRelayProvider: FC<{
+		initialRecords?: RecordMap;
 		children: ReactNode;
 	}> = ({ initialRecords, children }) => {
 		const environment = useEnvironment(initialRecords);
@@ -241,7 +241,7 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 
 	const fetchWunderGraphSSRQuery = async <T extends OperationType>(
 		query: GraphQLTaggedNode,
-		variables: T['variables'],
+		variables: T['variables'] = {},
 		cacheConfig?: {
 			networkCacheConfig?: CacheConfig | null | undefined;
 			fetchPolicy?: FetchQueryFetchPolicy | null | undefined;
@@ -259,9 +259,7 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 
 	return {
 		usePreloadedQuery,
-		initEnvironment,
-		useEnvironment,
-		WunderGraphRelaySSRProvider,
+		WunderGraphRelayProvider,
 		fetchWunderGraphSSRQuery,
 	};
 };
