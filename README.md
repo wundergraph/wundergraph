@@ -128,7 +128,7 @@ export default createOperation.query({
   handler: async ({ input }) => {
     // Call into your virtual graph, type-safe
     const { errors, data } = await operations.query({
-      operationName: 'ByID',
+      operationName: 'users/ByID',
       input: {
         id: input.id,
       },
