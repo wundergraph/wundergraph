@@ -1,5 +1,6 @@
-import { createWunderGraphRelayApp } from '@wundergraph/nextjs-relay';
+import { createWunderGraphRelayApp } from '@wundergraph/react-relay';
 import { client } from '../components/generated/nextjs';
 
-export const { usePreloadedQuery, useEnvironment, WunderGraphRelaySSRProvider, fetchWunderGraphSSRQuery } =
-	createWunderGraphRelayApp({ client });
+export const { usePreloadedQuery, WunderGraphRelaySSRProvider, fetchWunderGraphSSRQuery } = createWunderGraphRelayApp({
+	client,
+});

@@ -1,14 +1,19 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
 import {
 	PreloadedQuery,
-	RelayEnvironmentProvider,
 	usePreloadedQuery as useRelayPreloadedQuery,
 	useRelayEnvironment,
+	RelayEnvironmentProvider,
+	fetchQuery as relayFetchQuery,
 } from 'react-relay';
-import React, { useEffect, useState, useRef, ReactNode, FC } from 'react';
+import React, { useEffect, useState, useRef, ComponentType, useMemo, ReactNode, FC } from 'react';
+import { withRelay, hydrateRelayEnvironment } from 'relay-nextjs';
 import {
+	CacheConfig,
 	Environment,
 	FetchFunction,
+	FetchQueryFetchPolicy,
+	GraphQLTaggedNode,
 	Network,
 	Observable,
 	OperationType,
@@ -18,6 +23,8 @@ import {
 	createOperationDescriptor,
 	getRequest,
 } from 'relay-runtime';
+import { WiredOptions, WiredProps } from 'relay-nextjs/wired/component';
+import { RecordMap } from 'relay-runtime/lib/store/RelayStoreTypes';
 
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
@@ -31,6 +38,7 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: ResponseError): void;
 }
+
 export interface CreateWunderGraphRelayOptions {
 	client: Client;
 }
@@ -81,10 +89,6 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 				abort.abort();
 			};
 		});
-	};
-
-	const createClientNetwork = () => {
-		return Network.create(fetchQuery, subscribe);
 	};
 
 	const subscribeTo = (options: SubscribeToOptions) => {
@@ -199,18 +203,65 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		return data;
 	};
 
-	const clientEnvironment = new Environment({
-		network: createClientNetwork(),
-		store: new Store(new RecordSource()),
-		isServer: false,
-	});
+	let relayEnvironment: Environment;
 
-	const WunderGraphRelayProvider: FC<{ children?: ReactNode }> = ({ children }) => {
-		return <RelayEnvironmentProvider environment={clientEnvironment}>{children}</RelayEnvironmentProvider>;
+	const createEnvironment = () => {
+		return new Environment({
+			network: Network.create(fetchQuery, subscribe),
+			store: new Store(new RecordSource()),
+		});
+	};
+
+	const initEnvironment = (initialRecords?: RecordMap) => {
+		const environment = relayEnvironment ?? createEnvironment();
+
+		if (initialRecords) {
+			environment.getStore().publish(new RecordSource(initialRecords));
+		}
+		// For SSG and SSR always create a new Relay environment
+		if (typeof window === 'undefined') return environment;
+		// Create the Relay environment once in the client
+		if (!relayEnvironment) relayEnvironment = environment;
+
+		return relayEnvironment;
+	};
+
+	const useEnvironment = (initialRecords?: RecordMap) => {
+		const store = useMemo(() => initEnvironment(initialRecords), [initialRecords]);
+		return store;
+	};
+
+	const WunderGraphRelaySSRProvider: FC<{
+		initialRecords: RecordMap;
+		children: ReactNode;
+	}> = ({ initialRecords, children }) => {
+		const environment = useEnvironment(initialRecords);
+		return <RelayEnvironmentProvider environment={environment}>{children}</RelayEnvironmentProvider>;
+	};
+
+	const fetchWunderGraphSSRQuery = async <T extends OperationType>(
+		query: GraphQLTaggedNode,
+		variables: T['variables'],
+		cacheConfig?: {
+			networkCacheConfig?: CacheConfig | null | undefined;
+			fetchPolicy?: FetchQueryFetchPolicy | null | undefined;
+		} | null
+	): Promise<{ initialRecords: RecordMap; queryResponse?: Awaited<T['response']> }> => {
+		const environment = initEnvironment();
+		const queryResponse = await relayFetchQuery(environment, query, variables, cacheConfig).toPromise();
+		const initialRecords = environment.getStore().getSource().toJSON();
+
+		return {
+			queryResponse,
+			initialRecords,
+		};
 	};
 
 	return {
-		WunderGraphRelayProvider,
 		usePreloadedQuery,
+		initEnvironment,
+		useEnvironment,
+		WunderGraphRelaySSRProvider,
+		fetchWunderGraphSSRQuery,
 	};
 };
