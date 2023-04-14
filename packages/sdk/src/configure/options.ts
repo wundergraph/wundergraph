@@ -79,15 +79,8 @@ export interface ResolvedNodeOptions {
 }
 
 export const fallbackNodeUrl = (listenOptions: ListenOptions | undefined) => {
-	let port = listenOptions?.port || defaultNodePort;
-	let host = listenOptions?.host || defaultHost;
-
-	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
-};
-
-export const fallbackServerUrl = (listenOptions: ListenOptions | undefined) => {
-	let port = listenOptions?.port || defaultServerPort;
-	let host = listenOptions?.host || defaultHost;
+	let port = listenOptions?.port || DefaultNodeOptions.listen.port;
+	let host = listenOptions?.host || DefaultNodeOptions.listen.host;
 
 	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
 };
@@ -96,8 +89,9 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 	let nodeOptions = isCloud
 		? DefaultNodeOptions
 		: {
-				nodeUrl: options?.nodeUrl || fallbackNodeUrl(options?.listen),
-				publicNodeUrl: options?.publicNodeUrl || fallbackNodeUrl(options?.listen),
+				nodeUrl: options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
+				publicNodeUrl:
+					options?.publicNodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,

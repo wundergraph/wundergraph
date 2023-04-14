@@ -534,7 +534,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	for _, listener := range listeners {
 		l := listener
 		g.Go(func() error {
-			n.log.Info(fmt.Sprintf("WunderNode listening at http://%s", l.Addr().String()))
+			n.log.Info(fmt.Sprintf("Node listening at http://%s", l.Addr().String()))
 
 			err := n.server.Serve(l)
 			if err == nil {
