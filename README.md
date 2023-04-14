@@ -149,7 +149,7 @@ As you define Operations, WunderGraph automatically generates a type-safe client
 supporting all major Frontend Frameworks like React, NextJS, Remix, Astro, Svelte, Expo, Vue, etc...
 
 ```typescript jsx
-// .wundergraph/operations/users/CustomByID.ts
+// app/pages/profile.ts
 
 import { useQuery } from '../../components/generated/nextjs';
 
