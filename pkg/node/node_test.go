@@ -91,7 +91,7 @@ func TestNode(t *testing.T) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -262,7 +262,7 @@ func TestInMemoryCache(t *testing.T) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -378,7 +378,7 @@ func TestWebHooks(t *testing.T) {
 	logger := logging.New(true, false, zapcore.DebugLevel)
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               5,
@@ -484,7 +484,7 @@ func BenchmarkNode(t *testing.B) {
 
 	node := New(ctx, BuildInfo{}, "", logger)
 
-	nodeConfig := WunderNodeConfig{
+	nodeConfig := &WunderNodeConfig{
 		Server: &Server{
 			GracefulShutdownTimeout: 0,
 			KeepAlive:               0,
