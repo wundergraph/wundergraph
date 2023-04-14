@@ -116,7 +116,7 @@ query ($id: String!) {
 
 </td><td valign="top">
 
-```ts
+```typescript
 // .wundergraph/operations/users/CustomByID.ts
 import { createOperation, z } from '../../generated/wundergraph.factory';
 
