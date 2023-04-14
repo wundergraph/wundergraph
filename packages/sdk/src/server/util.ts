@@ -11,7 +11,7 @@ const DefaultServerOptions: MandatoryServerOptions = {
 		host: new EnvironmentVariable(WgEnv.ServerHost, defaultHost),
 		port: new EnvironmentVariable(WgEnv.ServerPort, defaultServerPort),
 	},
-	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, `http://localhost:${defaultServerPort}`),
+	serverUrl: new EnvironmentVariable(WgEnv.ServerUrl, `http://${defaultHost}:${defaultServerPort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
