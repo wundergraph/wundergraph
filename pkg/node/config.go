@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,7 +33,7 @@ type WunderNodeConfig struct {
 	Api    *apihandler.Api
 }
 
-func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig, error) {
+func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig, error) {
 	const (
 		defaultTimeout = 10 * time.Second
 	)
@@ -41,12 +42,23 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 
 	logLevel, err := logging.FindLogLevel(logLevelStr)
 	if err != nil {
-		return WunderNodeConfig{}, err
+		return nil, err
+	}
+
+	nodeHost := loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host)
+
+	var nodePort uint64
+	rawNodePort := loadvariable.String(graphConfig.Api.NodeOptions.Listen.Port)
+	if rawNodePort != "" {
+		nodePort, err = strconv.ParseUint(rawNodePort, 10, 16)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse node port %q: %w", graphConfig.Api.NodeOptions.Listen.Port, err)
+		}
 	}
 
 	listener := &apihandler.Listener{
-		Host: loadvariable.String(graphConfig.Api.NodeOptions.Listen.Host),
-		Port: uint16(loadvariable.Int(graphConfig.Api.NodeOptions.Listen.Port)),
+		Host: nodeHost,
+		Port: uint16(nodePort),
 	}
 
 	defaultRequestTimeout := defaultTimeout
@@ -61,7 +73,7 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		if inMemoryCacheConfig != "" {
 			cacheSize, err = units.RAMInBytes(inMemoryCacheConfig)
 			if err != nil {
-				return WunderNodeConfig{}, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
+				return nil, fmt.Errorf("can't parse %s = %q: %w", wgInMemoryCacheConfigEnvKey, inMemoryCacheConfig, err)
 			}
 		}
 		if cacheSize > 0 {
@@ -107,5 +119,5 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (WunderNodeConfig,
 		},
 	}
 
-	return config, nil
+	return &config, nil
 }

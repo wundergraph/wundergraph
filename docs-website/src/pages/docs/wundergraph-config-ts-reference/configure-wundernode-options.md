@@ -28,8 +28,7 @@ The `nodeUrl` is used in internal client requests to WunderNode in the hooks and
 ### `publicNodeUrl` (optional)
 
 This option allows you to configure the Public URL on which you WunderNode Api will be accessible.
-
-The `publicNodeUrl` is used to set a base URL for the `.graphqlconfig` file, postman collection and generated clients.
+It is used for example in the generated clients, in the GraphQL playground, OpenAPI specification and Postman collection.
 
 ### `logger.level` (optional)
 
@@ -93,13 +92,13 @@ configureWunderGraphApplication({
       level: 'DEBUG',
     },
   },
-})
+});
 ```
 
 ### Configure options with custom environment variables
 
 ```typescript
-import { EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk'
+import { EnvironmentVariable, LoggerLevel } from '@wundergraph/sdk';
 
 configureWunderGraphApplication({
   options: {
@@ -108,15 +107,12 @@ configureWunderGraphApplication({
       port: new EnvironmentVariable('NODE_PORT', '4444'),
     },
     nodeUrl: new EnvironmentVariable('NODE_URL', 'http://localhost:4444/'),
-    publicNodeUrl: new EnvironmentVariable(
-      'PUBLIC_NODE_URL',
-      'http://my-api.example.com/'
-    ),
+    publicNodeUrl: new EnvironmentVariable('PUBLIC_NODE_URL', 'http://my-api.example.com/'),
     logger: {
       level: new EnvironmentVariable<LoggerLevel>('NODE_LOG_LEVEL', 'info'),
     },
   },
-})
+});
 ```
 
 ### Configure options with default environment variables
@@ -126,7 +122,7 @@ This configuration illustrates what options you will get when options are not pr
 By using default environment variables names you could stick with Wundergraph Default behaviour but supply different default values.
 
 ```typescript
-import { EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk'
+import { EnvironmentVariable, LoggerLevel, WgEnv } from '@wundergraph/sdk';
 
 // use WgEnv enum to set variable names
 configureWunderGraphApplication({
@@ -136,15 +132,12 @@ configureWunderGraphApplication({
       port: new EnvironmentVariable(WgEnv.NodePort, '9991'),
     },
     nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, 'http://localhost:9991/'),
-    publicNodeUrl: new EnvironmentVariable(
-      WgEnv.PublicNodeUrl,
-      'http://my-api.example.com/'
-    ),
+    publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, 'http://my-api.example.com/'),
     logger: {
       level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
     },
   },
-})
+});
 
 // alternative using plain string variable names
 configureWunderGraphApplication({
@@ -154,13 +147,10 @@ configureWunderGraphApplication({
       port: new EnvironmentVariable('WG_NODE_PORT', '9991'),
     },
     nodeUrl: new EnvironmentVariable('WG_NODE_URL', 'http://localhost:9991/'),
-    publicNodeUrl: new EnvironmentVariable(
-      'WG_PUBLIC_NODE_URL',
-      'http://my-api.example.com/'
-    ),
+    publicNodeUrl: new EnvironmentVariable('WG_PUBLIC_NODE_URL', 'http://my-api.example.com/'),
     logger: {
       level: new EnvironmentVariable<LoggerLevel>('WG_LOG_LEVEL', 'info'),
     },
   },
-})
+});
 ```

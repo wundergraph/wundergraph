@@ -21,6 +21,7 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/bundler"
 	"github.com/wundergraph/wundergraph/pkg/cli"
 	"github.com/wundergraph/wundergraph/pkg/files"
+	"github.com/wundergraph/wundergraph/pkg/logging"
 	"github.com/wundergraph/wundergraph/pkg/node"
 	"github.com/wundergraph/wundergraph/pkg/operations"
 	"github.com/wundergraph/wundergraph/pkg/scriptrunner"
@@ -436,7 +437,10 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		n := node.New(ctx, BuildInfo, wunderGraphDir, log)
+		nodeLogger := logging.
+			New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
+
 		go func() {
 			configFile := filepath.Join(wunderGraphDir, "generated", "wundergraph.config.json")
 			options := []node.Option{
@@ -450,7 +454,7 @@ var upCmd = &cobra.Command{
 			}
 
 			if devTUI != nil {
-				options = append(options, node.WithServerConfigLoadHandler(func(config node.WunderNodeConfig) {
+				options = append(options, node.WithServerConfigLoadHandler(func(config *node.WunderNodeConfig) {
 
 					// The file is guaranteed to exist, because the server is only started after the config was built
 					if data, err := os.ReadFile(filepath.Join(wunderGraphDir, "generated", "wundergraph.build_info.json")); err == nil {

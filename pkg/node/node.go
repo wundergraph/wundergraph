@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -39,7 +38,7 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Lo
 	return &Node{
 		info:           info,
 		ctx:            ctx,
-		configCh:       make(chan WunderNodeConfig),
+		configCh:       make(chan *WunderNodeConfig),
 		pool:           pool.New(),
 		log:            log.With(zap.String("component", "@wundergraph/node")),
 		WundergraphDir: wundergraphDir,
@@ -58,7 +57,7 @@ func New(ctx context.Context, info BuildInfo, wundergraphDir string, log *zap.Lo
 type Node struct {
 	ctx            context.Context
 	info           BuildInfo
-	configCh       chan WunderNodeConfig
+	configCh       chan *WunderNodeConfig
 	builder        *apihandler.Builder
 	server         *http.Server
 	pool           *pool.Pool
@@ -88,7 +87,7 @@ type options struct {
 	idleHandler             func()
 	hooksServerHealthCheck  bool
 	healthCheckTimeout      time.Duration
-	onServerConfigLoad      func(config WunderNodeConfig)
+	onServerConfigLoad      func(config *WunderNodeConfig)
 	onServerError           func(err error)
 }
 
@@ -101,13 +100,13 @@ func WithHooksServerHealthCheck(timeout time.Duration) Option {
 	}
 }
 
-func WithStaticWunderNodeConfig(config WunderNodeConfig) Option {
+func WithStaticWunderNodeConfig(config *WunderNodeConfig) Option {
 	return func(options *options) {
-		options.staticConfig = &config
+		options.staticConfig = config
 	}
 }
 
-func WithServerConfigLoadHandler(callback func(config WunderNodeConfig)) Option {
+func WithServerConfigLoadHandler(callback func(config *WunderNodeConfig)) Option {
 	return func(options *options) {
 		options.onServerConfigLoad = callback
 	}
@@ -204,7 +203,7 @@ func (n *Node) StartBlocking(opts ...Option) error {
 		n.log.Debug("Api config: static")
 
 		g.Go(func() error {
-			err := n.startServer(*options.staticConfig)
+			err := n.startServer(options.staticConfig)
 			if err != nil {
 				n.log.Error("could not start a node",
 					zap.Error(err),
@@ -373,7 +372,7 @@ func (n *Node) GetHealthReport(ctx context.Context, hooksClient *hooks.Client) (
 	return healthCheck, true
 }
 
-func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
+func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	router := mux.NewRouter()
 
 	internalRouter := router.PathPrefix("/internal").Subrouter()
@@ -535,9 +534,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 	for _, listener := range listeners {
 		l := listener
 		g.Go(func() error {
-			n.log.Info("Listening on",
-				zap.String("addr", l.Addr().String()),
-			)
+			n.log.Info(fmt.Sprintf("Node listening at http://%s", l.Addr().String()))
 
 			err := n.server.Serve(l)
 			if err == nil {
@@ -563,7 +560,7 @@ func (n *Node) startServer(nodeConfig WunderNodeConfig) error {
 // setupGlobalMiddlewares sets up middlewares that must run in all endpoints, not just valid ones.
 // gorilla/mux only runs middlewares when a handler path/method matches, that's why this workaround
 // is needed. See https://github.com/gorilla/mux/issues/416
-func (n *Node) setupGlobalMiddlewares(router *mux.Router, nodeConfig WunderNodeConfig) http.Handler {
+func (n *Node) setupGlobalMiddlewares(router *mux.Router, nodeConfig *WunderNodeConfig) http.Handler {
 	handler := http.Handler(router)
 	if corsConfig := nodeConfig.Api.CorsConfiguration; corsConfig != nil {
 		corsMiddleware := cors.New(cors.Options{
@@ -668,7 +665,7 @@ func (n *Node) filePollConfig(filePath string) error {
 }
 
 func (n *Node) reloadFileConfig(filePath string) error {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		n.log.Error("reloadFileConfig ioutil.ReadFile", zap.String("filePath", filePath), zap.Error(err))
 		return err
