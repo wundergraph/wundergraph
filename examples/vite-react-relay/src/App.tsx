@@ -1,11 +1,12 @@
 import { Suspense, useEffect } from 'react';
 import relayLogo from './assets/relay.svg';
 import wundergraphLogo from './assets/wundergraph.png';
-import { PreloadedQuery, graphql, usePreloadedQuery, useQueryLoader } from 'react-relay';
+import { PreloadedQuery, graphql, useQueryLoader } from 'react-relay';
 import viteLogo from '/vite.svg';
 import './App.css';
 import { AppDragonsQuery as AppDragonsQueryType } from './__relay__generated__/AppDragonsQuery.graphql';
 import { Dragon } from './components/Dragon';
+import { usePreloadedQuery } from './lib/wundergraph';
 
 const AppDragonsQuery = graphql`
 	query AppDragonsQuery {
@@ -20,7 +21,7 @@ const DragonsList = ({
 }: {
 	queryReference: PreloadedQuery<AppDragonsQueryType, Record<string, unknown>>;
 }) => {
-	const data = usePreloadedQuery(AppDragonsQuery, queryReference);
+	const data = usePreloadedQuery(AppDragonsQuery, queryReference, { liveQuery: true });
 
 	return (
 		<div>
