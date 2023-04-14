@@ -58,7 +58,7 @@
     "@types/relay-runtime": "^14.1.10",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
-    "next": "12.2.0",
+    "next": "13.3.0",
     "nock": "^13.2.9",
     "node-fetch": "^3.3.1",
     "tsup": "^6.5.0",

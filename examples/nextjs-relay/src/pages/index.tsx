@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import { PreloadedQuery, graphql, usePreloadedQuery } from 'react-relay';
+import { PreloadedQuery, graphql } from 'react-relay';
 import { RelayProps } from 'relay-nextjs';
 import { pagesDragonsQuery as PagesDragonsQueryType } from '../__relay__generated__/pagesDragonsQuery.graphql';
 import { Dragon } from '@/components/Dragon';
-import { withWunderGraphRelay } from '@/lib/wundergraph';
+import { usePreloadedQuery, withWunderGraphRelay } from '@/lib/wundergraph';
 
 const PagesDragonsQuery = graphql`
 	query pagesDragonsQuery {
@@ -68,7 +68,7 @@ function Home({ preloadedQuery }: RelayProps<{}, PagesDragonsQueryType>) {
 				/>
 			</div>
 
-			<DragonsList queryReference={preloadedQuery} />
+			{/* <DragonsList queryReference={preloadedQuery} /> */}
 
 			<div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
 				<a
@@ -137,4 +137,5 @@ function Home({ preloadedQuery }: RelayProps<{}, PagesDragonsQueryType>) {
 	);
 }
 
-export default withWunderGraphRelay(Home, PagesDragonsQuery);
+export default Home;
+// withWunderGraphRelay(Home, PagesDragonsQuery);

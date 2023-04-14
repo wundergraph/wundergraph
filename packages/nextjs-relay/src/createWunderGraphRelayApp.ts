@@ -17,10 +17,6 @@ import {
 } from 'relay-runtime';
 import { WiredOptions, WiredProps } from 'relay-nextjs/wired/component';
 
-// To avoid the error: The inferred type of X cannot be named without a reference to Y due to dependencies between relay-nextjs & next packages
-// Reference: https://github.com/microsoft/TypeScript/issues/47663#issuecomment-1270716220
-import type {} from 'next';
-
 export interface SubscribeToOptions extends SubscriptionRequestOptions {
 	onResult(response: ClientResponse): void;
 	onSuccess?(response: ClientResponse): void;
@@ -34,7 +30,29 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	onError?(error: ResponseError): void;
 }
 
-export const createWunderGraphRelayApp = (client: Client) => {
+export interface CreateWunderGraphRelayOptions {
+	client: Client;
+}
+
+export type createWunderGraphRelayApp = (opts: CreateWunderGraphRelayOptions) => {
+	createClientEnvironment: () => Environment | null;
+	createServerEnvironment: () => Environment;
+	createClientNetwork: () => ReturnType<typeof Network['create']>;
+	createServerNetwork: () => ReturnType<typeof Network['create']>;
+	usePreloadedQuery: <TQuery extends OperationType>(
+		gqlQuery: Parameters<typeof useRelayPreloadedQuery>[0],
+		preloadedQuery: PreloadedQuery<TQuery, Record<string, unknown>>,
+		options?: Parameters<typeof useRelayPreloadedQuery>[2] &
+			Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>
+	) => TQuery['response'];
+	withWunderGraphRelay: <Props extends WiredProps, ServerSideProps>(
+		Component: ComponentType<Props>,
+		query: GraphQLTaggedNode,
+		opts?: Omit<WiredOptions<Props, ServerSideProps>, 'createClientEnvironment' | 'createServerEnvironment'>
+	) => ReturnType<typeof withRelay<Props, ServerSideProps>> & { displayName?: string };
+};
+
+export const createWunderGraphRelayApp: createWunderGraphRelayApp = ({ client }) => {
 	const fetchQuery: FetchFunction = async (params, variables) => {
 		const { id, operationKind } = params;
 		const response =
@@ -199,7 +217,7 @@ export const createWunderGraphRelayApp = (client: Client) => {
 	const withWunderGraphRelay = <Props extends WiredProps, ServerSideProps>(
 		Component: ComponentType<Props>,
 		query: GraphQLTaggedNode,
-		opts: Omit<WiredOptions<Props, ServerSideProps>, 'createClientEnvironment' | 'createServerEnvironment'>
+		opts: Omit<WiredOptions<Props, ServerSideProps>, 'createClientEnvironment' | 'createServerEnvironment'> = {}
 	) => {
 		const WrappedComponent: ReturnType<typeof withRelay<Props, ServerSideProps>> & { displayName?: string } = withRelay(
 			Component,

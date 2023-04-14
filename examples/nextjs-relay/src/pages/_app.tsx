@@ -1,7 +1,7 @@
 import '@/styles/globals.css';
 import { createClientEnvironment } from '@/lib/wundergraph';
 import type { AppProps } from 'next/app';
-import { RelayEnvironmentProvider } from 'react-relay/hooks';
+import { RelayEnvironmentProvider } from 'react-relay';
 import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
 
 const clientEnv = createClientEnvironment();

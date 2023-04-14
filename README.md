@@ -184,6 +184,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Next.js PostgresSQL Prisma](examples/nextjs-postgres-prisma)
 - [Next.js PostgresQL user filters](examples/nextjs-postgres-user-filters)
 - [Next.js React Query](examples/nextjs-react-query)
+- [Next.js Relay](examples/nextjs-relay)
 - [Next.js Todos](examples/nextjs-todos)
 - [Next.js TypeScript Operations](examples/nextjs-typescript-functions)
 - [Next.js Clerk Authentication](examples/nextjs-clerk)
@@ -196,6 +197,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Simple Example](examples/simple)
 - [Vite SolidJS](examples/vite-solidjs)
 - [Vite swr](examples/vite-swr)
+- [Vite React Relay](examples/vite-react-relay)
 - [Webhooks](examples/webhooks)
 
 ## Advanced Examples:

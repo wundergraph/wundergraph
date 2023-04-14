@@ -31,8 +31,11 @@ export interface UseSubscribeToProps extends SubscriptionRequestOptions {
 	onSuccess?(response: ClientResponse): void;
 	onError?(error: ResponseError): void;
 }
+export interface CreateWunderGraphRelayOptions {
+	client: Client;
+}
 
-export const createWunderGraphRelayApp = (client: Client) => {
+export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOptions) => {
 	const fetchQuery: FetchFunction = async (params, variables) => {
 		const { id, operationKind } = params;
 		const response =
