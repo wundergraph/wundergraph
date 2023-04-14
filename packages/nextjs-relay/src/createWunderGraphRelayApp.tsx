@@ -72,14 +72,7 @@ export type createWunderGraphRelayApp = (opts: CreateWunderGraphRelayOptions) =>
 			networkCacheConfig?: CacheConfig | null | undefined;
 			fetchPolicy?: FetchQueryFetchPolicy | null | undefined;
 		} | null
-	) => Promise<
-		| (Awaited<T['response']> & {
-				initialRecords: RecordMap;
-		  })
-		| {
-				initialRecords: RecordMap;
-		  }
-	>;
+	) => Promise<{ initialRecords: RecordMap; queryResponse?: Awaited<T['response']> }>;
 };
 
 export const createWunderGraphRelayApp: createWunderGraphRelayApp = ({ client }) => {
@@ -341,18 +334,13 @@ export const createWunderGraphRelayApp: createWunderGraphRelayApp = ({ client })
 			networkCacheConfig?: CacheConfig | null | undefined;
 			fetchPolicy?: FetchQueryFetchPolicy | null | undefined;
 		} | null
-	): Promise<(Awaited<T['response']> & { initialRecords: RecordMap }) | { initialRecords: RecordMap }> => {
+	): Promise<{ initialRecords: RecordMap; queryResponse?: Awaited<T['response']> }> => {
 		const environment = initEnvironment();
-		const queryProps = await relayFetchQuery(environment, query, variables, cacheConfig).toPromise();
+		const queryResponse = await relayFetchQuery(environment, query, variables, cacheConfig).toPromise();
 		const initialRecords = environment.getStore().getSource().toJSON();
 
-		if (queryProps) {
-			return {
-				...queryProps,
-				initialRecords,
-			};
-		}
 		return {
+			queryResponse,
 			initialRecords,
 		};
 	};

@@ -1,21 +1,26 @@
-import { RelayEnvironmentProvider } from 'react-relay/hooks';
-import { getInitialPreloadedQuery, getRelayProps } from 'relay-nextjs/app';
-import { createClientEnvironment } from '../lib/createWunderGraphRelayApp';
 import type { AppProps } from 'next/app';
-
-const clientEnv = createClientEnvironment();
-const initialPreloadedQuery = getInitialPreloadedQuery({
-	createClientEnvironment: () => createClientEnvironment()!,
-});
+import Link from 'next/link';
+import { WunderGraphRelaySSRProvider } from '../lib/createWunderGraphRelayApp';
 
 function ExampleApp({ Component, pageProps }: AppProps) {
-	const relayProps = getRelayProps(pageProps, initialPreloadedQuery);
-	const env = relayProps.preloadedQuery?.environment ?? clientEnv!;
-
 	return (
-		<RelayEnvironmentProvider environment={env}>
-			<Component {...pageProps} {...relayProps} />
-		</RelayEnvironmentProvider>
+		<WunderGraphRelaySSRProvider initialRecords={pageProps.initialRecords}>
+			<nav>
+				Pages
+				<ul>
+					<li>
+						<Link href="/">Weather</Link>
+					</li>
+					<li>
+						<Link href="/live">Live Weather</Link>
+					</li>
+					<li>
+						<Link href="/subpage">Sub Page</Link>
+					</li>
+				</ul>
+			</nav>
+			<Component {...pageProps} />
+		</WunderGraphRelaySSRProvider>
 	);
 }
 
