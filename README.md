@@ -81,7 +81,7 @@ configureWunderGraphApplication({
     },
     {
       templates: [new NextJsTemplate()],
-      path: '../components/generated',
+      path: '../web/components/generated',
     },
   ],
 });
@@ -149,7 +149,7 @@ As you define Operations, WunderGraph automatically generates a type-safe client
 supporting all major Frontend Frameworks like React, NextJS, Remix, Astro, Svelte, Expo, Vue, etc...
 
 ```typescript jsx
-// app/pages/profile.ts
+// web/pages/profile.ts
 
 import { useQuery } from '../../components/generated/nextjs';
 
