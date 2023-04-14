@@ -5,6 +5,7 @@
     "dev": "run-p dev:nuxt dev:wundergraph open",
     "dev:wundergraph": "wunderctl up",
     "dev:nuxt": "nuxt dev",
+    "start": "wunderctl up",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:3000",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
