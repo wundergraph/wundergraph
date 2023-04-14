@@ -53,6 +53,6 @@
 		"@prisma/client": "^4.12.0",
 		"@tanstack/svelte-query": "^4.27.0",
 		"@wundergraph/sdk": "^0.143.0",
-		"@wundergraph/svelte-query": "^0.1.0"
+		"@wundergraph/svelte-query": "^0.2.2"
 	}
 }
