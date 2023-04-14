@@ -59,6 +59,10 @@ const navigation = [
 						title: 'SvelteKit',
 						href: '/docs/getting-started/sveltekit-quickstart',
 					},
+					{
+						title: 'Nuxt',
+						href: '/docs/getting-started/nuxt-quickstart',
+					},
 				],
 			},
 			{
@@ -188,6 +192,10 @@ const navigation = [
 					{
 						title: 'Next.js Todos',
 						href: '/docs/examples/nextjs-todos',
+					},
+					{
+						title: 'Nuxt + Vue Query',
+						href: '/docs/examples/nuxt',
 					},
 				],
 			},
@@ -340,11 +348,6 @@ const navigation = [
 				title: 'Cookie-based Auth',
 				links: [
 					{
-						title: 'Overview',
-						navTitle: 'Cookie-based Auth',
-						href: '/docs/auth/cookie-based-auth',
-					},
-					{
 						title: 'OpenID Connect',
 						href: '/docs/auth/cookie-based-auth/openid-connect',
 					},
@@ -370,17 +373,16 @@ const navigation = [
 				title: 'Token-based Auth',
 				links: [
 					{
-						title: 'Overview',
-						navTitle: 'Token-based Auth',
-						href: '/docs/auth/token-based-auth',
+						title: 'OpenID Connect JWKS',
+						href: '/docs/auth/token-based-auth/openid-connect',
 					},
 					{
 						title: 'Auth.js (NextAuth)',
 						href: '/docs/auth/token-based-auth/auth-js',
 					},
 					{
-						title: 'OpenID Connect',
-						href: '/docs/auth/token-based-auth/openid-connect',
+						title: 'Clerk.com',
+						href: '/docs/auth/token-based-auth/clerk',
 					},
 				],
 			},
@@ -669,6 +671,10 @@ const navigation = [
 					{
 						title: 'Vue',
 						href: '/docs/supported-frontend-frameworks/vue',
+					},
+					{
+						title: 'Nuxt',
+						href: '/docs/supported-frontend-frameworks/nuxt',
 					},
 					{
 						title: 'SolidJS',
@@ -1055,6 +1061,10 @@ const navigation = [
 					{
 						title: 'Token-based Authentication',
 						href: '/docs/wundergraph-config-ts-reference/configure-token-based-authentication',
+					},
+					{
+						title: 'Custom Claims',
+						href: '/docs/wundergraph-config-ts-reference/configure-custom-claims',
 					},
 					{
 						title: 'Authorization / RBAC',

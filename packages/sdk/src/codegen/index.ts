@@ -86,7 +86,7 @@ export const GenerateCode = async (config: CodeGenConfig, customOutWriter?: Code
 		const content = `${file.header || ''}${file.content}`;
 		const outPath = path.join(config.basePath, file.path);
 		outWriter.writeFileSync(outPath, content);
-		Logger.info(`${outPath} updated`);
+		Logger.debug(`${outPath} updated`);
 	});
 };
 

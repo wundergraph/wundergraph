@@ -1,0 +1,5 @@
+node_modules
+src
+tsconfig.json
+.gitignore
+dist/tsconfig.tsbuildinfo

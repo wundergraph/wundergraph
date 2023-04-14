@@ -390,10 +390,18 @@ func bearerTokenToJSON(token string) ([]byte, error) {
 }
 
 func tryParseJWT(token string) []byte {
+	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return nil, nil
+	})
+	if err != nil && errors.Is(err, jwt.ErrTokenMalformed) {
+		return nil
+	}
+
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return nil
 	}
+
 	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
 		return nil

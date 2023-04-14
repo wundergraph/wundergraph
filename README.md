@@ -188,6 +188,7 @@ The best way to try them out is by cloning the mono-repo.
 - [Next.js TypeScript Operations](examples/nextjs-typescript-functions)
 - [Next.js Clerk Authentication](examples/nextjs-clerk)
 - [NodeJS TypeScript Client](examples/nodejs-ts-client)
+- [Nuxt Vue Query](examples/nuxt-vue-query)
 - [OpenAPI Mocking](examples/openapi-mocking)
 - [PostgreSQL](examples/postgres)
 - [Role based Access control](examples/rbac)
