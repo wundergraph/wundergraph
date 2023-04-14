@@ -7,7 +7,6 @@ import {
 	fetchQuery as relayFetchQuery,
 } from 'react-relay';
 import React, { useEffect, useState, useRef, ComponentType, useMemo, ReactNode, FC } from 'react';
-import { withRelay, hydrateRelayEnvironment } from 'relay-nextjs';
 import {
 	CacheConfig,
 	Environment,
@@ -23,7 +22,6 @@ import {
 	createOperationDescriptor,
 	getRequest,
 } from 'relay-runtime';
-import { WiredOptions, WiredProps } from 'relay-nextjs/wired/component';
 import { RecordMap } from 'relay-runtime/lib/store/RelayStoreTypes';
 
 export interface SubscribeToOptions extends SubscriptionRequestOptions {

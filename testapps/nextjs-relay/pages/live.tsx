@@ -59,7 +59,8 @@ export default function Home({
 				city: 'Berlin',
 			},
 			{
-				// By default fetchPolicy is 'store-or-network' & since SSR already hydrates the store, client side request will not be made
+				// By default fetchPolicy is 'store-or-network' & since SSR already hydrates the store,
+				// no client side network request will be made!
 				// fetchPolicy: 'store-or-network',
 			}
 		);
