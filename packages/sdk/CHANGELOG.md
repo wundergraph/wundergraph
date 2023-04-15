@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.144.4](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.3...@wundergraph/sdk@0.144.4) (2023-04-14)
+
+### Bug Fixes
+
+* overhaul listener option handling ([#840](https://github.com/wundergraph/wundergraph/issues/840)) ([17563a5](https://github.com/wundergraph/wundergraph/commit/17563a541986b4640c3f2b676a4dbb1f7efe1152)) (@StarpTech)
+
 ## [0.144.3](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.2...@wundergraph/sdk@0.144.3) (2023-04-14)
 
 **Note:** Version bump only for package @wundergraph/sdk
