@@ -16,9 +16,6 @@ on:
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/engine-ci.yaml'
-      - 'scripts/minio-setup.sh'
-      - '!examples/**/*'
-      - '!**/*.md'
       # Examples CI
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
@@ -28,13 +25,7 @@ on:
       # Packages CI
       - 'testapps/**/*'
       - 'packages/**/*'
-      - '.github/actions/go/action.yaml'
-      - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
-      - 'examples/**/*'
-      - '!*.md'
-      - '!**/*.md'
-      - '!docs-website/**/*.md'
 jobs:
   build_test:
     runs-on: ubuntu-latest
