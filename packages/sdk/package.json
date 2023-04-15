@@ -61,6 +61,15 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "description": "WunderGraph SDK",
+  "keywords": [
+    "graphql",
+    "wundergraph",
+    "integration",
+    "openapi",
+    "bff",
+    "api",
+    "sdk"
+  ],
   "files": [
     "dist",
     "tsconfig.json"
