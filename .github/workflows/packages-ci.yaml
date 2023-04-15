@@ -5,15 +5,15 @@ on:
       - main
       - next
     paths:
-      - 'packages/**/*'
       - 'testapps/**/*'
+      - 'packages/**/*'
       - '.github/actions/go/action.yaml'
       - '.github/actions/node/action.yaml'
       - '.github/workflows/packages-ci.yaml'
-      - '!packages/*-testapp/**'
       - 'examples/**/*'
       - '!*.md'
       - '!**/*.md'
+      - '!docs-website/**/*.md'
   pull_request:
     branches:
       - main
