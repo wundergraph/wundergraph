@@ -437,8 +437,14 @@ var upCmd = &cobra.Command{
 			}
 		}()
 
-		nodeLogger := logging.
-			New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+		var nodeLogger *zap.Logger
+
+		if enableTUI {
+			nodeLogger = zap.NewNop()
+		} else {
+			nodeLogger = logging.New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel)
+		}
+
 		n := node.New(ctx, BuildInfo, wunderGraphDir, nodeLogger)
 
 		go func() {
