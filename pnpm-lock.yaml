@@ -558,7 +558,6 @@ importers:
     specifiers:
       '@wundergraph/sdk': workspace:*
       '@wundergraph/wunderctl': workspace:*
-      del-cli: ^5.0.0
       execa: 5.1.1
       graphql: ^16.3.0
       jose: ^4.11.1
@@ -569,7 +568,6 @@ importers:
       '@wundergraph/wunderctl': link:../wunderctl
       graphql: 16.6.0
     devDependencies:
-      del-cli: 5.0.0
       execa: 5.1.1
       jose: 4.11.2
       typescript: 4.9.4
