@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "pnpm clean && vitest run",
+    "test": "vitest run",
     "test:watch": "vitest",
-    "coverage": "vitest run --coverage",
-    "clean": "del-cli 'apps/**/.wundergraph/generated/'"
+    "coverage": "vitest run --coverage"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +18,6 @@
   "devDependencies": {
     "execa": "5.1.1",
     "jose": "^4.11.1",
-    "del-cli": "^5.0.0",
     "typescript": "^4.8.2",
     "vitest": "^0.30.1"
   }
