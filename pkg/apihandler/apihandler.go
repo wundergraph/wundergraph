@@ -18,6 +18,7 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
@@ -1706,6 +1707,14 @@ func (h *SubscriptionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	requestLogger := h.log.With(logging.WithRequestIDFromContext(r.Context()))
 	r = setOperationMetaData(r, h.operation)
 
+	// recover from panic if one occured. Set err to nil otherwise.
+	defer func() {
+		if r := recover(); r != nil {
+			requestLogger.Error("panic recovered", zap.Any("panic", r))
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}()
+
 	if proceed := h.rbacEnforcer.Enforce(r); !proceed {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -2434,6 +2443,14 @@ func setOperationMetaData(r *http.Request, operation *wgpb.Operation) *http.Requ
 }
 
 func getOperationMetaData(r *http.Request) *OperationMetaData {
+	spew.Dump("------------>\ngetOperationMetaData", r)
+	if r == nil {
+		return nil
+	}
+	ctx := r.Context()
+	if ctx == nil {
+		return nil
+	}
 	maybeMetaData := r.Context().Value("operationMetaData")
 	if maybeMetaData == nil {
 		return nil

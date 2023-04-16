@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -106,6 +107,10 @@ func FindLogLevel(logLevel string) (zapcore.Level, error) {
 }
 
 func RequestIDFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	spew.Dump("------------>\nRequestIDFromContext", ctx)
 	requestID, ok := ctx.Value(RequestIDKey{}).(string)
 	if !ok {
 		return ""

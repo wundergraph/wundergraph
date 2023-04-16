@@ -11,12 +11,14 @@ query live_IndexQuery($city: String!) {
 		id
 	}
 }
+
 fragment Temperature_Details on weather_Temperature {
 	min
 	max
 	actual
 	feelsLike
 }
+
 fragment Weather_Details on weather_Summary {
 	title
 	description

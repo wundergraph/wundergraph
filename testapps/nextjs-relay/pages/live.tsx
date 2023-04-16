@@ -22,20 +22,20 @@ const IndexQuery = graphql`
 	}
 `;
 
-// const SubscriptionCounter = () => {
-// 	const subscription = useSubscription({
-// 		subscription: graphql`
-// 			subscription pages_countdownSubscription {
-// 				ws_countdown(from: 100) {
-// 					countdown
-// 				}
-// 			}
-// 		`,
-// 		variables: {},
-// 	});
+const SubscriptionCounter = () => {
+	useSubscription({
+		subscription: graphql`
+			subscription live_countdownSubscription {
+				ws_countdown(from: 100) {
+					countdown
+				}
+			}
+		`,
+		variables: {},
+	});
 
-// 	return <div>Subscription running...</div>;
-// };
+	return <div>Subscription running...</div>;
+};
 
 export async function getServerSideProps() {
 	const relayData = await fetchWunderGraphSSRQuery<IndexQueryType>(IndexQuery, {
@@ -84,7 +84,7 @@ const LiveWeather = ({ weather }: { weather: PreloadedQuery<IndexQueryType, Reco
 				{data?.weather_getCityByName?.weather?.temperature && (
 					<TemperatureDetails weather={data.weather_getCityByName.weather.temperature} />
 				)}
-				{/* <SubscriptionCounter /> */}
+				<SubscriptionCounter />
 			</main>
 		</div>
 	);
