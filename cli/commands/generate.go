@@ -173,7 +173,7 @@ var generateCmd = &cobra.Command{
 			}
 
 		} else {
-			log.Info("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
+			log.Debug("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
 			onAfterBuild = func(buildErr error, rebuild bool) error {
 				<-configRunner.Run(ctx)
 
