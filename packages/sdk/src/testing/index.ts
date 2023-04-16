@@ -6,7 +6,6 @@ import terminate from 'terminate/promise';
 import { Subprocess, wunderctl } from '../wunderctlexec';
 import { Client } from '../client';
 import { CreateClientConfig } from '../client/types';
-import { resolveSrv } from 'dns';
 
 const readyStatus = 'READY';
 const skipStatus = 'SKIP';
