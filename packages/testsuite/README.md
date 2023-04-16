@@ -11,7 +11,7 @@ pnpm test
 ## Guide
 
 Tests are written using the [Vitest](https://vitest.dev/) framework. This package is managed as a [Vite workspace](https://vitest.dev/guide/workspace.html).
-This means you can manage all tests from a single package. You can run the tests in watch mode using `pnpm test:watch`. As part of the global setup, every app is built with `wunderctl` and types are validated. A test runs in a separate process. This means that the tests are isolated from each other.
+This means you can manage all tests from a single package. You can run the tests in watch mode using `pnpm test:watch`. As part of the global setup, every app is built with `wunderctl` and the output is validated with `tsc`. A test runs in a separate process. This means that the tests are isolated from each other.
 
 ### Writing tests
 
