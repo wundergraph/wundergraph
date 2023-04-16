@@ -20,7 +20,7 @@ export async function Clean(path: string) {
 }
 
 export async function Generate(path: string) {
-	const cmdArgs = ['generate', '--cli-log-level', 'error'];
+	const cmdArgs = ['generate'];
 
 	await execa(wunderctlBinaryPath(), cmdArgs, {
 		encoding: 'utf-8',

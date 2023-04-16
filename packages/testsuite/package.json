@@ -1,15 +1,17 @@
 {
   "name": "testsuite",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "Integration tests for WunderGraph SDK",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "sdk",
+    "testsuite"
+  ],
+  "license": "Apache-2.0",
   "dependencies": {
     "@wundergraph/sdk": "workspace:*",
     "@wundergraph/wunderctl": "workspace:*",
