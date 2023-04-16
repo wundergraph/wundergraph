@@ -5,8 +5,8 @@
   "description": "",
   "scripts": {
     "start:database": "docker-compose up -d",
-    "dev": "wunderctl up --debug",
-    "generate": "wunderctl generate --debug",
+    "dev": "wunderctl up",
+    "generate": "wunderctl generate",
     "cleanup": "docker-compose down -v"
   },
   "author": "",

@@ -3,7 +3,7 @@ import net from 'net';
 import { retry } from 'ts-retry-promise';
 import terminate from 'terminate/promise';
 
-import { Subprocess, wunderctlSubprocess } from '../wunderctlexec';
+import { Subprocess, wunderctl } from '../wunderctlexec';
 import { Client } from '../client';
 import { CreateClientConfig } from '../client/types';
 
@@ -107,11 +107,9 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			if (this.options.debug || process.env.WG_TEST_DEBUG) {
 				cmd.push('--debug', '--pretty-logging');
 			} else {
-				cmd.push('--cli-log-level', 'warning');
+				cmd.push('--cli-log-level', 'error');
 			}
-			subprocess = wunderctlSubprocess({ cmd, env });
-			subprocess?.stdout?.pipe(process.stdout);
-			subprocess?.stderr?.pipe(process.stderr);
+			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
 		}
 		const health = this.url('/health');
 		const checkHealth = async () => {

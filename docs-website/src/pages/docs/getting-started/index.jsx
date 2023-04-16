@@ -4,6 +4,8 @@ import { QuickLinks, QuickLink } from '@/components/QuickLinks';
 import { NextLogo } from '@/components/logos/next';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
+import { SvelteLogo } from '@/components/logos/svelte';
+import { NuxtLogo } from '@/components/logos/nuxt';
 
 export default function GettingStartedPage() {
 	return (
@@ -48,6 +50,19 @@ export default function GettingStartedPage() {
 						description="Learn how to use WunderGraph with Remix."
 						logo={<RemixLogo />}
 						href="/docs/getting-started/remix-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="SvelteKit"
+						description="Learn how to use WunderGraph with SvelteKit."
+						logo={<SvelteLogo />}
+						href="/docs/getting-started/sveltekit-quickstart"
+					/>
+					<QuickLink
+						title="Nuxt"
+						description="Learn how to use WunderGraph with Nuxt."
+						logo={<NuxtLogo />}
+						href="/docs/getting-started/nuxt-quickstart"
 						variant="plain"
 					/>
 				</QuickLinks>

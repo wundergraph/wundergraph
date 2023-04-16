@@ -4,6 +4,10 @@ pageTitle: WunderGraph - Directives - @internalOperation
 description:
 ---
 
+{% callout type="warning" %}
+This directive is deprecated. Operations are now automatically marked internal when inside a directory named _internal_ (even if nested).
+{% /callout %}
+
 The `@internalOperation` directive marks an Operation as internal.
 The Operation will no longer be accessible from the public API.
 It can only be used from internal hooks.
@@ -28,11 +32,7 @@ If the user exists already, we update the lastLogin field.
 
 ```graphql
 # UpsertLastLogin.graphql
-mutation (
-  $email: String!
-  $name: String!
-  $now: DateTime! @injectCurrentDateTime
-) @internalOperation {
+mutation ($email: String!, $name: String!, $now: DateTime! @injectCurrentDateTime) @internalOperation {
   upsertOneusers(
     where: { email: $email }
     update: { lastlogin: { set: $now } }
@@ -57,18 +57,18 @@ const server = configureWunderGraphServer(() => ({
     authentication: {
       postAuthentication: async (user) => {
         if (!user.email || !user.name) {
-          return
+          return;
         }
         await client.mutations.UpsertLastLogin({
           email: user.email,
           name: user.name,
-        })
+        });
       },
     },
     queries: {},
     mutations: {},
   },
-}))
+}));
 ```
 
 ## Conclusion

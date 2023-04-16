@@ -5,6 +5,7 @@ import (
 	"os"
 
 	gocmd "github.com/go-cmd/cmd"
+	"github.com/smallnest/ringbuffer"
 	"go.uber.org/zap"
 	"golang.org/x/net/context"
 )
@@ -19,6 +20,8 @@ type Config struct {
 	FirstRunEnv   []string
 	AbsWorkingDir string
 	Logger        *zap.Logger
+	// Streaming determines if the script output is streamed to stdout/stderr.
+	Streaming bool
 }
 
 type ScriptRunner struct {
@@ -33,9 +36,12 @@ type ScriptRunner struct {
 	cmdDoneChan   chan struct{}
 	log           *zap.Logger
 	cmd           *gocmd.Cmd
+	stdErrBuf     *ringbuffer.RingBuffer
+	streaming     bool
 }
 
 func NewScriptRunner(config *Config) *ScriptRunner {
+
 	return &ScriptRunner{
 		name:          config.Name,
 		log:           config.Logger,
@@ -45,6 +51,8 @@ func NewScriptRunner(config *Config) *ScriptRunner {
 		scriptArgs:    config.ScriptArgs,
 		scriptEnv:     config.ScriptEnv,
 		firstRun:      true,
+		stdErrBuf:     ringbuffer.New(1024 * 1024), // 1MB
+		streaming:     config.Streaming,
 	}
 }
 
@@ -57,6 +65,8 @@ func (b *ScriptRunner) ExitCode() int {
 }
 
 func (b *ScriptRunner) Stop() error {
+	defer b.stdErrBuf.Reset()
+
 	if b.cmd != nil {
 		err := b.cmd.Stop()
 
@@ -71,8 +81,10 @@ func (b *ScriptRunner) Stop() error {
 func (b *ScriptRunner) Error() error {
 	if b.cmd != nil {
 		status := b.cmd.Status()
-		if status.Exit > 0 || status.Error != nil {
-			return fmt.Errorf("script %s failed with exit code %d", b.name, status.Exit)
+		// rely only on the status code if there is no error
+		// error is also set when the process was terminated by a signal which is not an error
+		if status.Exit > 0 {
+			return fmt.Errorf("script %s failed with exit code %d:\n%s", b.name, status.Exit, b.stdErrBuf.Bytes())
 		}
 	}
 	return nil
@@ -104,6 +116,8 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 		cmdDir:     b.absWorkingDir,
 		scriptArgs: b.scriptArgs,
 		scriptEnv:  b.scriptEnv,
+		stdErrBuf:  b.stdErrBuf,
+		streaming:  b.streaming,
 	}
 
 	if b.firstRun {
@@ -151,7 +165,7 @@ func (b *ScriptRunner) Run(ctx context.Context) chan struct{} {
 				return
 			}
 			if status.Error != nil || status.Exit > 0 {
-				b.log.Error("Script runner exited with non-zero exit code",
+				b.log.Debug("Script runner exited with non-zero exit code",
 					zap.String("runnerName", b.name),
 					zap.Int("exit", status.Exit),
 					zap.Error(status.Error),
@@ -185,6 +199,10 @@ type CmdOptions struct {
 	cmdDir     string
 	scriptArgs []string
 	scriptEnv  []string
+	stdErrBuf  *ringbuffer.RingBuffer
+	stdoutBuf  *ringbuffer.RingBuffer
+	buffered   bool
+	streaming  bool
 }
 
 // newCmd creates a new command to run the bundler script.
@@ -213,13 +231,22 @@ func newCmd(options CmdOptions) (*gocmd.Cmd, chan struct{}) {
 					cmd.Stdout = nil
 					continue
 				}
-				fmt.Println(line)
+				if options.streaming {
+					fmt.Println(line)
+				}
+
 			case line, open := <-cmd.Stderr:
 				if !open {
 					cmd.Stderr = nil
 					continue
 				}
-				fmt.Fprintln(os.Stderr, line)
+				if options.streaming {
+					fmt.Fprintln(os.Stderr, line)
+				}
+
+				// When the script errors, we want to keep the last lines of output
+				// for debugging purposes.
+				options.stdErrBuf.WriteString(line + "\n")
 			}
 		}
 	}()

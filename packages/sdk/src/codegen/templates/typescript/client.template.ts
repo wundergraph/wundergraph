@@ -2,8 +2,7 @@
 
 //language=handlebars
 export const handlebarTemplate = `
-import {
-	Client,
+import type {
 	ClientConfig,
 	CreateClientConfig,
 	User,
@@ -21,6 +20,9 @@ import {
 	ExtractProfileName,
 	ExtractMeta,
 	GraphQLError
+} from "@wundergraph/sdk/client";
+import {
+	Client,
 } from "@wundergraph/sdk/client";
 import type { OperationErrors } from "./ts-operation-errors";
 

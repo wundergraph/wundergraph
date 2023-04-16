@@ -237,33 +237,25 @@ describe('Svelte Query - createMutation', () => {
 	});
 
 	it('should invalidate query', async () => {
-		const mutation = nockMutation('SetNameWithoutAuth', { name: 'Not Rick Astley' })
-			.mutation.once()
-			.reply(200, {
-				data: {
-					name: 'Rick Astley',
-				},
-			});
-
 		const scope = nockQuery()
 			.reply(200, {
 				data: {
 					id: '1',
-					name: 'Rick Astley',
+					name: 'Test',
 				},
 			})
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
-			.get('/operations/Weather')
+			.post('/operations/SetNameWithoutAuth', { name: 'Not Rick Astley' })
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Not Ricky Astley' } })
+			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } })
 			.matchHeader('accept', 'application/json')
 			.matchHeader('content-type', 'application/json')
 			.matchHeader('WG-SDK-Version', '1.0.0')
 			.get('/operations/Weather')
 			.query({ wg_api_hash: '123' })
-			.reply(200, { data: { id: '1', name: 'Not Rick Astley' } });
+			.reply(200, { data: { id: '1', name: 'Rick Astley' } });
 
 		const queryCache = new QueryCache();
 		const queryClient = new QueryClient({ queryCache });
@@ -284,25 +276,14 @@ describe('Svelte Query - createMutation', () => {
 		render(MutationWithInvalidationWrapper, { queryClient, queryCreator, mutationCreator });
 
 		await waitFor(() => {
-			screen.getByText('Rick Astley');
+			screen.getByText('Test');
 		});
-
-		await sleep(1000);
 
 		fireEvent.click(screen.getByText('submit'));
 
-		await sleep(1000);
-
-		await waitFor(
-			() => {
-				screen.getByText('Not Rick Astley');
-			},
-			{
-				timeout: 1000,
-			}
-		);
-
-		mutation.done();
+		await waitFor(() => {
+			screen.getByText('Rick Astley');
+		});
 		scope.done();
 	});
 });

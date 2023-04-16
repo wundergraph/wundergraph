@@ -100,6 +100,118 @@ Now you can use svelte-query to call your wundergraph operations!
 </div>
 ```
 
+### createQuery
+
+```ts
+createQuery({
+  operationName: 'Weather',
+  input: { forCity: city },
+});
+```
+
+### createQuery (Live query)
+
+```ts
+createQuery({
+  operationName: 'Weather',
+  input: { forCity: city },
+  liveQuery: true,
+});
+```
+
+### createSubscription
+
+```ts
+createSubscription({
+  operationName: 'Weather',
+  input: {
+    forCity: 'Berlin',
+  },
+});
+```
+
+### createMutation
+
+```ts
+const mutation = createMutation({
+  operationName: 'SetName',
+});
+
+$mutation.mutate({ name: 'WunderGraph' });
+
+await $mutation.mutateAsync({ name: 'WunderGraph' });
+```
+
+### createFileUpload
+
+```ts
+const fileUploader = createFileUpload();
+
+$fileUploader.upload({
+  provider: 'minio',
+  files: new FileList(),
+});
+
+await $fileUploader.upload({
+  provider: 'minio',
+  files: new FileList(),
+});
+
+$fileUploader.fileKeys; // files that have been uploaded
+```
+
+### getAuth
+
+```ts
+const auth = getAuth();
+
+$auth.login('github');
+
+$auth.logout({ logoutOpenidConnectProvider: true });
+```
+
+### getUser
+
+```ts
+const userQuery = getUser();
+```
+
+### queryKey
+
+You can use the `queryKey` helper function to create a unique key for the query in a typesafe way. This is useful if you want to invalidate the query after mutating.
+
+```ts
+const queryClient = useQueryClient();
+
+const mutation = createMutation({
+  operationName: 'SetName',
+  onSuccess() {
+    queryClient.invalidateQueries(queryKey({ operationName: 'Profile' }));
+  },
+});
+
+$mutation.mutate({ name: 'WunderGraph' });
+```
+
+## SSR
+
+If you are working with SvelteKit, this package provides `prefetchQuery` utility to help with SSR
+
+```ts
+export const load: PageLoad = async ({ parent }) => {
+  const { queryClient } = await parent();
+
+  await prefetchQuery(
+    {
+      operationName: 'Dragons',
+    },
+    queryClient
+  );
+};
+```
+
+This implementation is based on TanStack Svelte Query's [prefetchQuery](https://tanstack.com/query/v4/docs/svelte/ssr#using-prefetchquery) approach
+
 ## Options
 
 You can use all available options from [Svelte Query](https://tanstack.com/query/latest/docs/svelte/overview) with the generated functions.

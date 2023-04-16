@@ -16,8 +16,10 @@ import {
 	ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { NextLogo } from '@/components/logos/next';
+import { SvelteLogo } from '@/components/logos/svelte';
 import { ViteLogo } from '@/components/logos/vite';
 import { RemixLogo } from '@/components/logos/remix';
+import { NuxtLogo } from '@/components/logos/nuxt';
 import clsx from 'clsx';
 import { DiscordIcon } from '../components/logos/discord';
 import { GitHubIcon } from '../components/logos/github';
@@ -105,6 +107,19 @@ export default function HomePage() {
 						description="Learn how to use WunderGraph with Remix."
 						logo={<RemixLogo />}
 						href="/docs/getting-started/remix-quickstart"
+						variant="plain"
+					/>
+					<QuickLink
+						title="SvelteKit"
+						description="Learn how to use WunderGraph with SvelteKit."
+						logo={<SvelteLogo />}
+						href="/docs/getting-started/sveltekit-quickstart"
+					/>
+					<QuickLink
+						title="Nuxt"
+						description="Learn how to use WunderGraph with Nuxt."
+						logo={<NuxtLogo />}
+						href="/docs/getting-started/nuxt-quickstart"
 						variant="plain"
 					/>
 				</QuickLinks>

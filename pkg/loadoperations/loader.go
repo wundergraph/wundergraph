@@ -255,7 +255,7 @@ func (l *Loader) loadOperation(file GraphQLOperationFile, normalizer *astnormali
 	}
 	doc, report := astparser.ParseGraphqlDocumentString(string(content) + fragments)
 	if report.HasErrors() {
-		return "", fmt.Errorf("error parsing operation: %s", report.Error())
+		return "", fmt.Errorf("could not parse operation '%s': %s", file.OperationName, report.Error())
 	}
 	ops := l.countOperations(&doc, schemaDocument)
 	if ops != 1 {

@@ -30,6 +30,7 @@ import {
 import { mergeApis } from '../definition/merge';
 import {
 	GraphQLOperation,
+	isInternalOperationByAPIMountPath,
 	isWellKnownClaim,
 	loadOperations,
 	LoadOperationsOutput,
@@ -45,6 +46,7 @@ import {
 	ArgumentRenderConfiguration,
 	ArgumentSource,
 	AuthProvider,
+	BuildInfo,
 	ConfigurationVariable,
 	ConfigurationVariableKind,
 	CorsConfiguration,
@@ -73,7 +75,7 @@ import { HooksConfiguration, ResolvedServerOptions, WunderGraphHooksAndServerCon
 import { getWebhooks } from '../webhooks';
 import { NodeOptions, ResolvedNodeOptions, resolveNodeOptions } from './options';
 import { EnvironmentVariable, InputVariable, mapInputVariable, resolveConfigurationVariable } from './variables';
-import logger, { Logger } from '../logger';
+import logger, { FatalLogger, Logger } from '../logger';
 import { resolveServerOptions, serverOptionsWithDefaults } from '../server/util';
 import { loadNodeJsOperationDefaultModule, NodeJSOperation } from '../operations/operations';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -712,9 +714,40 @@ export const configureWunderGraphApplication = <
 		throw new Error('environment variable WG_DIR_ABS is empty');
 	}
 
+	let buildError: any = null;
+	const buildInfo: BuildInfo = {
+		success: false,
+		sdk: {
+			version: SDK_VERSION ?? unknown,
+		},
+		wunderctl: {
+			version: process.env.WUNDERCTL_VERSION ?? unknown,
+		},
+		node: {
+			version: process.version,
+		},
+		os: {
+			type: os.type(),
+			platform: os.platform(),
+			arch: os.arch(),
+			version: os.version(),
+			release: os.release(),
+		},
+		stats: {
+			// This must be read before passing the config to the resolveConfig function
+			totalApis: config.apis?.length ?? 0,
+			hasUploadProvider: !!config?.s3UploadProvider?.find((provider) => !!provider.name),
+			totalOperations: 0,
+			totalWebhooks: 0,
+			hasAuthenticationProvider:
+				!!config?.authentication?.tokenBased?.providers?.length ||
+				!!config?.authentication?.cookieBased?.providers?.length,
+		},
+	};
+
 	resolveConfig(config)
 		.then(async (resolved) => {
-			writeWunderGraphFileSync('build_info', buildInfoJSON);
+			Logger.info('Building ...');
 
 			const app = resolved.application;
 			const schemaFileName = `wundergraph.schema.graphql`;
@@ -759,7 +792,13 @@ export const configureWunderGraphApplication = <
 				});
 			}
 
-			const loadedOperations = loadOperations(schemaFileName);
+			// Count total webhooks
+			if (buildInfo.stats) {
+				buildInfo.stats.totalWebhooks = resolved.webhooks?.length ?? 0;
+			}
+
+			const loadedOperations = await loadOperations(schemaFileName);
+
 			const operations = await resolveOperationsConfigurations(
 				wgDirAbs,
 				resolved,
@@ -824,6 +863,11 @@ export const configureWunderGraphApplication = <
 				});
 
 				app.Operations = await Promise.all(ops);
+			}
+
+			// Count total operations
+			if (buildInfo.stats) {
+				buildInfo.stats.totalOperations = app.Operations.length;
 			}
 
 			if (config.server?.hooks?.global?.httpTransport?.onOriginRequest) {
@@ -988,13 +1032,24 @@ export const configureWunderGraphApplication = <
 
 			writeWunderGraphFileSync('openapi', openApiSpec);
 
-			Logger.info(`Code generation completed.`);
-			process.exit(0);
+			Logger.info(`Build completed.`);
+		})
+		.then(() => {
+			buildInfo.success = true;
 		})
 		.catch((e: any) => {
-			//throw e;
-			Logger.fatal(`Couldn't configure your WunderNode: ${e.stack}`);
-			process.exit(1);
+			buildError = e;
+		})
+		.finally(() => {
+			// Ensure that the build info is written even if the build fails
+			writeWunderGraphFileSync('build_info', buildInfo);
+
+			if (buildError) {
+				FatalLogger.fatal(buildError);
+				process.exit(1);
+			} else {
+				process.exit(0);
+			}
 		});
 };
 
@@ -1307,6 +1362,15 @@ const updateTypeScriptOperationsResponseSchemas = async (wgDirAbs: string, opera
 const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFile) => {
 	const filePath = path.join(wgDirAbs, file.module_path);
 	const implementation = await loadNodeJsOperationDefaultModule(filePath);
+
+	if (implementation.internal) {
+		Logger.warn(
+			'Use of the internal prop is deprecated. ' +
+				'More details here: https://docs.wundergraph.com/docs/typescript-operations-reference/security#internal-operations'
+		);
+	}
+	const isInternal = implementation.internal || isInternalOperationByAPIMountPath(file.api_mount_path);
+
 	const operation: TypeScriptOperation = {
 		Name: file.operation_name,
 		PathName: file.api_mount_path,
@@ -1359,7 +1423,7 @@ const loadNodeJsOperation = async (wgDirAbs: string, file: TypeScriptOperationFi
 		VariablesConfiguration: {
 			injectVariables: [],
 		},
-		Internal: implementation.internal ? implementation.internal : false,
+		Internal: isInternal,
 		PostResolveTransformations: undefined,
 	};
 	return { operation, implementation };
@@ -1501,23 +1565,4 @@ const writeWunderGraphFileSync = (fileName: string, contents: object | string, e
 	}
 
 	fs.writeFileSync(path.join(generated, `wundergraph.${fileName}.${extension}`), contents, { encoding: utf8 });
-};
-
-const buildInfoJSON = {
-	sdk: {
-		version: SDK_VERSION ?? unknown,
-	},
-	wunderctl: {
-		version: process.env.WUNDERCTL_VERSION ?? unknown,
-	},
-	node: {
-		version: process.version,
-	},
-	os: {
-		type: os.type(),
-		platform: os.platform(),
-		arch: os.arch(),
-		version: os.version(),
-		release: os.release(),
-	},
 };
