@@ -82,7 +82,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		};
 	}
 
-	private url(rel: string): string {
+	public url(rel?: string): string {
 		return this.nodeUrl + rel;
 	}
 
