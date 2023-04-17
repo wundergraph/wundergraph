@@ -3,4 +3,4 @@ import { createWunderGraphRelayApp } from '../../../../../packages/react-relay/s
 
 const client = createClient();
 
-export const { WunderGraphRelayProvider, usePreloadedQuery } = createWunderGraphRelayApp({ client });
+export const { WunderGraphRelayProvider, useLiveQuery } = createWunderGraphRelayApp({ client });

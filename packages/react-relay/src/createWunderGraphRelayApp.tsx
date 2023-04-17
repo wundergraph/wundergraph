@@ -1,5 +1,11 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
-import { useRelayEnvironment, RelayEnvironmentProvider, fetchQuery as relayFetchQuery } from 'react-relay';
+import {
+	useRelayEnvironment,
+	RelayEnvironmentProvider,
+	fetchQuery as relayFetchQuery,
+	PreloadedQuery,
+	usePreloadedQuery as useRelayPreloadedQuery,
+} from 'react-relay';
 import React, { useEffect, useState, useRef, useMemo, ReactNode, FC } from 'react';
 import {
 	CacheConfig,
@@ -13,7 +19,6 @@ import {
 	RecordSource,
 	Store,
 	SubscribeFunction,
-	VariablesOf,
 	createOperationDescriptor,
 	getRequest,
 } from 'relay-runtime';
@@ -167,19 +172,21 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 
 	const useLiveQuery = <TQuery extends OperationType>({
 		query,
-		variables,
+		queryReference,
 		options = { liveQuery: true },
 	}: {
 		query: GraphQLTaggedNode;
-		variables: VariablesOf<TQuery>;
+		queryReference: PreloadedQuery<TQuery>;
 		options?: Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>;
 	}) => {
+		const data = useRelayPreloadedQuery(query, queryReference);
+		const { id, variables } = queryReference;
 		const request = getRequest(query);
 		const operationDescriptor = createOperationDescriptor(request, variables);
 		const environment = useRelayEnvironment();
 
-		const { data, ...subscriptionResponse } = useSubscribeTo<TQuery>({
-			operationName: `relay/${request.params.id}`,
+		const { data: liveData, ...subscriptionResponse } = useSubscribeTo<TQuery>({
+			operationName: `relay/${id}`,
 			input: variables,
 			...options,
 			enabled: options?.liveQuery ?? false,
@@ -187,14 +194,14 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		});
 
 		useEffect(() => {
-			if (data) {
-				environment.commitPayload(operationDescriptor, data);
+			if (liveData) {
+				environment.commitPayload(operationDescriptor, liveData);
 			}
-		}, [data]);
+		}, [liveData]);
 
 		return {
 			...subscriptionResponse,
-			data: data ?? (environment.lookup(operationDescriptor.fragment).data as TQuery['response'] | undefined),
+			data: data,
 		};
 	};
 

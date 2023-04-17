@@ -93,7 +93,7 @@ The `useLiveQuery` hooks lets you leverage the power of [WunderGraph's Live Quer
 ```tsx
 const { data, isLoading, isSubscribed, error } = useLiveQuery<QueryType>({
   query: /** Query */,
-  variables: { /** Query Variables */ },
+  queryReference,
 });
 ```
 

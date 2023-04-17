@@ -6,7 +6,7 @@ import viteLogo from '/vite.svg';
 import './App.css';
 import { AppDragonsQuery as AppDragonsQueryType } from './__relay__generated__/AppDragonsQuery.graphql';
 import { Dragon } from './components/Dragon';
-import { usePreloadedQuery } from './lib/wundergraph';
+import { useLiveQuery } from './lib/wundergraph';
 
 const AppDragonsQuery = graphql`
 	query AppDragonsQuery {
@@ -21,12 +21,15 @@ const DragonsList = ({
 }: {
 	queryReference: PreloadedQuery<AppDragonsQueryType, Record<string, unknown>>;
 }) => {
-	const data = usePreloadedQuery(AppDragonsQuery, queryReference, { liveQuery: true });
+	const { data } = useLiveQuery<AppDragonsQueryType>({
+		query: AppDragonsQuery,
+		queryReference,
+	});
 
 	return (
 		<div>
 			<p>Dragons:</p>
-			{data.spacex_dragons?.map((dragon, dragonIndex) => {
+			{data?.spacex_dragons?.map((dragon, dragonIndex) => {
 				if (dragon) return <Dragon key={dragonIndex.toString()} dragon={dragon} />;
 				return null;
 			})}
@@ -55,7 +58,7 @@ function App() {
 				</a>
 			</div>
 			<h1>WunderGraph + Vite + Relay</h1>
-			<Suspense fallback="Loading...">{queryReference && <DragonsList queryReference={queryReference} />}</Suspense>
+			<Suspense>{queryReference && <DragonsList queryReference={queryReference} />}</Suspense>
 		</div>
 	);
 }

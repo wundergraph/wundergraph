@@ -3,6 +3,6 @@ import { createClient } from '../../../.wundergraph/generated/nextjs/client';
 
 const client = createClient();
 
-export const { usePreloadedQuery, WunderGraphRelayProvider, fetchWunderGraphSSRQuery } = createWunderGraphRelayApp({
+export const { WunderGraphRelayProvider, useLiveQuery, fetchWunderGraphSSRQuery } = createWunderGraphRelayApp({
 	client,
 });
