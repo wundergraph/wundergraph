@@ -249,10 +249,14 @@ func (n *Node) StartBlocking(opts ...Option) error {
 
 func (n *Node) Shutdown(ctx context.Context) error {
 	if n.server != nil {
-		return n.server.Shutdown(ctx)
+		if err := n.server.Shutdown(ctx); err != nil {
+			return err
+		}
 	}
 	if n.internalServer != nil {
-		return n.internalServer.Shutdown(ctx)
+		if err := n.internalServer.Shutdown(ctx); err != nil {
+			return err
+		}
 	}
 	return nil
 }
