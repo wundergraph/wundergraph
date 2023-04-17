@@ -55,7 +55,7 @@ export default function GettingStartedPage() {
 					/>
 					<QuickLink
 						title="Relay"
-						description="Learn how to use WunderGraph with Remix."
+						description="Learn how to use WunderGraph with Relay."
 						logo={<RelayLogo />}
 						href="/docs/getting-started/relay-quickstart"
 						variant="plain"

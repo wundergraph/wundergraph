@@ -190,3 +190,4 @@ The relay-compiler will need to be configured to function with the WunderGraph c
 
 - [Thinking in Relay](https://relay.dev/docs/principles-and-architecture/thinking-in-relay/)
 - [Official Tutorial](https://relay.dev/docs/tutorial/intro/)
+- [API Reference](https://relay.dev/docs/api-reference/relay-environment-provider/)

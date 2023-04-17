@@ -173,11 +173,13 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 	const useLiveQuery = <TQuery extends OperationType>({
 		query,
 		queryReference,
-		options = { liveQuery: true },
+		enabled = true,
+		options = {},
 	}: {
 		query: GraphQLTaggedNode;
 		queryReference: PreloadedQuery<TQuery>;
-		options?: Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>;
+		enabled?: boolean;
+		options?: Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal' | 'liveQuery'>;
 	}) => {
 		const data = useRelayPreloadedQuery(query, queryReference);
 		const { id, variables } = queryReference;
@@ -189,8 +191,8 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 			operationName: `relay/${id}`,
 			input: variables,
 			...options,
-			enabled: options?.liveQuery ?? false,
-			liveQuery: options?.liveQuery ?? false,
+			enabled: enabled ?? false,
+			liveQuery: enabled ?? false,
 		});
 
 		useEffect(() => {
