@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.145.0](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.5...@wundergraph/sdk@0.145.0) (2023-04-17)
+
+### Features
+
+* sdk testsuite ([#844](https://github.com/wundergraph/wundergraph/issues/844)) ([e3e53a9](https://github.com/wundergraph/wundergraph/commit/e3e53a9c571cb97b65848f1998cce58e1d7b514f)) (@StarpTech)
+
 ## [0.144.5](https://github.com/wundergraph/wundergraph/compare/@wundergraph/sdk@0.144.4...@wundergraph/sdk@0.144.5) (2023-04-15)
 
 **Note:** Version bump only for package @wundergraph/sdk
