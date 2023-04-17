@@ -4,10 +4,10 @@
   "sideEffects": false,
   "scripts": {
     "start": "concurrently \"npm run dev:remix\" \"npm run wundergraph\" \"npm run browser\"",
-    "wundergraph": "wunderctl up --debug",
+    "wundergraph": "wunderctl up",
     "browser": "wait-on \"http-get://localhost:3000\" && wait-on \"http-get://localhost:9991\" && open-cli http://localhost:3000",
     "dev:remix": "remix dev",
-    "build:wundergraph": "wunderctl generate --debug",
+    "build:wundergraph": "wunderctl generate",
     "build:remix": "remix build",
     "build": "npm run build:wundergraph && npm run build:remix",
     "test": "jest"
@@ -17,8 +17,8 @@
     "@remix-run/react": "^1.11.1",
     "@remix-run/vercel": "^1.11.1",
     "@vercel/node": "^2.6.2",
-    "@wundergraph/sdk": "^0.143.1",
-    "@wundergraph/swr": "^0.14.4",
+    "@wundergraph/sdk": "^0.144.3",
+    "@wundergraph/swr": "^0.14.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

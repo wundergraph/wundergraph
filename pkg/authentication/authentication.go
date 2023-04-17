@@ -17,6 +17,7 @@ import (
 
 	"github.com/MicahParks/keyfunc"
 	"github.com/cespare/xxhash"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/ristretto"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/csrf"
@@ -390,10 +391,18 @@ func bearerTokenToJSON(token string) ([]byte, error) {
 }
 
 func tryParseJWT(token string) []byte {
+	_, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return nil, nil
+	})
+	if err != nil && errors.Is(err, jwt.ErrTokenMalformed) {
+		return nil
+	}
+
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return nil
 	}
+
 	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
 	if err != nil {
 		return nil
@@ -710,6 +719,7 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 }
 
 func UserFromContext(ctx context.Context) *User {
+	spew.Dump("------------>\nUserFromContext", ctx)
 	user := ctx.Value("user")
 	if actual, ok := user.(*User); ok {
 		return actual

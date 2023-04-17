@@ -106,7 +106,7 @@ func (b *Watcher) Watch(ctx context.Context, fn func(paths []string) error) erro
 		pathset.Add(path)
 		debounce(func() {
 			paths := pathset.Flush()
-			b.log.Debug("File change detected", zap.String("watcherName", b.name), zap.Strings("paths", paths))
+			b.log.Info("File change detected", zap.String("watcherName", b.name), zap.Strings("paths", paths))
 			if err := fn(paths); err != nil {
 				errorCh <- err
 			}

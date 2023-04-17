@@ -11,9 +11,8 @@ export const cli = async () => {
 
 	const [, , ...args] = process.argv;
 
-	const subprocess = execa(file, args, { windowsHide: false });
-	subprocess.stdout?.pipe(process.stdout);
-	subprocess.stderr?.pipe(process.stderr);
+	// Inherit stdio from parent process. This important for the CLI to work.
+	const subprocess = execa(file, args, { stdio: 'inherit', windowsHide: false });
 
 	process.once('SIGINT', () => {
 		subprocess.cancel();

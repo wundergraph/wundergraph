@@ -48,6 +48,9 @@ const tags = {
 	},
 	'quick-links': {
 		render: QuickLinks,
+		attributes: {
+			className: { type: String },
+		},
 	},
 	'quick-link': {
 		selfClosing: true,

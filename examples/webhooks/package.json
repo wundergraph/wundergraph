@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "run-p wundergraph open",
-    "wundergraph": "wunderctl up --debug",
-    "build:wundergraph": "wunderctl generate --debug",
+    "wundergraph": "wunderctl up",
+    "build:wundergraph": "wunderctl generate",
     "build": "npm run build:wundergraph",
     "open": "wait-on -d 500 http://localhost:9991 && open-cli http://localhost:9991/webhooks/github",
     "wunderctl": "wunderctl",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@jest/globals": "^29.3.1",
     "@types/node-fetch": "^2.6.2",
-    "@wundergraph/sdk": "^0.143.1",
+    "@wundergraph/sdk": "^0.144.3",
     "jest": "^29.3.1",
     "ts-jest": "^29.0.3"
   },

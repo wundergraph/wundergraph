@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	"github.com/wundergraph/graphql-go-tools/pkg/engine/plan"
@@ -130,7 +131,8 @@ func (p *pipeline) updateContextHeaders(ctx *resolve.Context, headers map[string
 		httpHeader.Set(name, headers[name])
 	}
 	ctx.Request.Header = httpHeader
-	clientRequest := ctx.Context.Value(pool.ClientRequestKey)
+	spew.Dump("------------>\nupdateContextHeaders", ctx)
+	clientRequest := ctx.Value(pool.ClientRequestKey)
 	if clientRequest == nil {
 		return
 	}

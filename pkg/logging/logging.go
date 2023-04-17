@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -45,7 +46,7 @@ func zapJsonEncoder() zapcore.Encoder {
 func zapConsoleEncoder() zapcore.Encoder {
 	ec := zapBaseEncoderConfig()
 	ec.ConsoleSeparator = " "
-	ec.EncodeTime = zapcore.RFC3339TimeEncoder
+	ec.EncodeTime = zapcore.TimeEncoderOfLayout("15:04:05 PM")
 	ec.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	return zapcore.NewConsoleEncoder(ec)
 }
@@ -61,7 +62,8 @@ func newZapLogger(syncer zapcore.WriteSyncer, prettyLogging bool, debug bool, le
 	}
 
 	if debug {
-		zapOpts = append(zapOpts, zap.AddCaller(), zap.AddStacktrace(zap.ErrorLevel))
+		zapOpts = append(zapOpts, zap.AddStacktrace(zap.ErrorLevel))
+		zapOpts = append(zapOpts, zap.AddCaller())
 	}
 
 	zapLogger := zap.New(zapcore.NewCore(
@@ -105,6 +107,10 @@ func FindLogLevel(logLevel string) (zapcore.Level, error) {
 }
 
 func RequestIDFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	spew.Dump("------------>\nRequestIDFromContext", ctx)
 	requestID, ok := ctx.Value(RequestIDKey{}).(string)
 	if !ok {
 		return ""

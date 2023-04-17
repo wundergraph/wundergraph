@@ -8,9 +8,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/joho/godotenv"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
@@ -37,6 +39,7 @@ var (
 	DotEnvFile            string
 	log                   *zap.Logger
 	cmdDurationMetric     telemetry.DurationMetric
+	zapLogLevel           zapcore.Level
 	_wunderGraphDirConfig string
 
 	rootFlags helpers.RootFlags
@@ -62,15 +65,15 @@ var rootCmd = &cobra.Command{
 		// because the command output data on stdout
 		case LoadOperationsCmdName:
 			return nil
-			// up command has a different default for global pretty logging
-			// we can't overwrite the default value in the init function because
-			// it would overwrite the default value for all other commands
-		case UpCmdName:
-			rootFlags.PrettyLogs = upCmdPrettyLogging
+		}
+
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			// Always use JSON when not in a terminal
+			rootFlags.PrettyLogs = false
 		}
 
 		if rootFlags.DebugMode {
-			// override log level to debug
+			// override log level to debug in debug mode
 			rootFlags.CliLogLevel = "debug"
 		}
 
@@ -78,9 +81,10 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		zapLogLevel = logLevel
 
 		log = logging.
-			New(rootFlags.PrettyLogs, rootFlags.DebugMode, logLevel).
+			New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel).
 			With(zap.String("component", "@wundergraph/wunderctl"))
 
 		err = godotenv.Load(DotEnvFile)
@@ -272,12 +276,11 @@ func init() {
 	// Can be overwritten by WG_API_URL=<url> env variable
 	viper.SetDefault("API_URL", "https://gateway.wundergraph.com")
 
-	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "sets the CLI log level")
-	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "allows you to set environment variables from an env file")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "enables the debug mode so that all requests and responses will be logged")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", false, "switches to human readable format")
-	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "directory of your wundergraph.config.ts")
-	rootCmd.PersistentFlags().BoolVar(&rootFlags.Pretty, "pretty", false, "pretty print output")
+	rootCmd.PersistentFlags().StringVarP(&rootFlags.CliLogLevel, "cli-log-level", "l", "info", "Sets the CLI log level")
+	rootCmd.PersistentFlags().StringVarP(&DotEnvFile, "env", "e", ".env", "Allows you to set environment variables from an env file")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.DebugMode, "debug", false, "Enables the debug mode so that all requests and responses will be logged")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.Telemetry, "telemetry", !isTelemetryDisabled, "Enables telemetry. Telemetry allows us to accurately gauge WunderGraph feature usage, pain points, and customization across all users.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.TelemetryDebugMode, "telemetry-debug", isTelemetryDebugEnabled, "Enables the debug mode for telemetry. Understand what telemetry is being sent to us.")
+	rootCmd.PersistentFlags().BoolVar(&rootFlags.PrettyLogs, "pretty-logging", true, "Enables pretty logging")
+	rootCmd.PersistentFlags().StringVar(&_wunderGraphDirConfig, "wundergraph-dir", ".", "Directory of your wundergraph.config.ts")
 }

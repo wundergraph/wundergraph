@@ -1,4 +1,5 @@
 import {
+	isInternalOperationByAPIMountPath,
 	LoadOperationsOutput,
 	operationResponseToJSONSchema,
 	operationVariablesToJSONSchema,
@@ -11,6 +12,7 @@ import { JSONSchema7 as JSONSchema } from 'json-schema';
 import { ClaimType, OperationExecutionEngine, OperationType } from '@wundergraph/protobuf';
 import * as fs from 'fs';
 import path from 'path';
+import process from 'node:process';
 
 const MyReviews = `
 query {
@@ -1436,3 +1438,23 @@ input CreateEnvironment {
   kind: EnvironmentKind!
   edges: [ID!]
 }`;
+
+test('isInternalOperationByAPIMountPath', () => {
+	const publicPaths = [
+		'foo.ts',
+		'bar.graphql',
+		'nested/bat.ts',
+		'internal.graphql',
+		'nested/internal.ts',
+		'hellointernal/bob.ts',
+	];
+	const internalPaths = ['internal/foo.ts', 'internal/bar.graphql', 'nested/internal/bat.ts'];
+
+	publicPaths.forEach((path) => {
+		expect(isInternalOperationByAPIMountPath(path)).toBe(false);
+	});
+
+	internalPaths.forEach((path) => {
+		expect(isInternalOperationByAPIMountPath(path)).toBe(true);
+	});
+});

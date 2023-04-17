@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/websocket"
 
@@ -29,13 +30,13 @@ type ApiTransportFactory interface {
 }
 
 type apiTransportFactory struct {
-	api             *Api
-	hooksClient     *hooks.Client
-	enableDebugMode bool
+	api                  *Api
+	hooksClient          *hooks.Client
+	enableRequestLogging bool
 }
 
 func (f *apiTransportFactory) RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper {
-	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableDebugMode, enableStreamingMode)
+	return NewApiTransport(tripper, f.api, f.hooksClient, f.enableRequestLogging, enableStreamingMode)
 }
 
 func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
@@ -45,7 +46,7 @@ func (f *apiTransportFactory) DefaultTransportTimeout() time.Duration {
 type ApiTransport struct {
 	roundTripper               http.RoundTripper
 	api                        *Api
-	debugMode                  bool
+	enableRequestLogging       bool
 	upstreamAuthConfigurations map[string]*wgpb.UpstreamAuthentication
 	onRequestHook              map[string]struct{}
 	onResponseHook             map[string]struct{}
@@ -53,18 +54,18 @@ type ApiTransport struct {
 	enableStreamingMode        bool
 }
 
-func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableDebugMode bool) ApiTransportFactory {
+func NewApiTransportFactory(api *Api, hooksClient *hooks.Client, enableRequestLogging bool) ApiTransportFactory {
 	return &apiTransportFactory{
-		api:             api,
-		hooksClient:     hooksClient,
-		enableDebugMode: enableDebugMode,
+		api:                  api,
+		hooksClient:          hooksClient,
+		enableRequestLogging: enableRequestLogging,
 	}
 }
 
-func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableDebugMode bool, enableStreamingMode bool) http.RoundTripper {
+func NewApiTransport(tripper http.RoundTripper, api *Api, hooksClient *hooks.Client, enableRequestLogging bool, enableStreamingMode bool) http.RoundTripper {
 	transport := &ApiTransport{
 		roundTripper:               tripper,
-		debugMode:                  enableDebugMode,
+		enableRequestLogging:       enableRequestLogging,
 		api:                        api,
 		upstreamAuthConfigurations: map[string]*wgpb.UpstreamAuthentication{},
 		onResponseHook:             map[string]struct{}{},
@@ -159,7 +160,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 
 	var requestDump []byte
 
-	if t.debugMode {
+	if t.enableRequestLogging {
 		requestDump, _ = httputil.DumpRequest(request, true)
 	}
 
@@ -173,7 +174,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 	// in case of http Upgrade requests, we must not dump the response
 	// otherwise, the upgrade will fail
 	if isUpgradeRequest || t.enableStreamingMode {
-		if t.debugMode {
+		if t.enableRequestLogging {
 			fmt.Printf("\n\n--- DebugTransport ---\n\nRequest:\n\n%s\n\nDuration: %d ms\n\n--- DebugTransport\n\n",
 				string(requestDump),
 				duration,
@@ -182,7 +183,7 @@ func (t *ApiTransport) roundTrip(request *http.Request, buf *bytes.Buffer) (res 
 		return
 	}
 
-	if t.debugMode {
+	if t.enableRequestLogging {
 		var responseDump []byte
 		err = request.Context().Err()
 		if err != nil {
@@ -240,7 +241,7 @@ func (t *ApiTransport) internalGraphQLRoundTrip(request *http.Request) (res *htt
 			return nil, err
 		}
 	}
-
+	spew.Dump("------------>\ninternalGraphQLRoundTrip", request)
 	// Make sure we account for both pool.ClientRequestKey being nil and being non present
 	if clientRequest, ok := request.Context().Value(pool.ClientRequestKey).(*http.Request); ok && clientRequest != nil {
 		requestJSON, err := hooks.HttpRequestToWunderGraphRequestJSON(clientRequest, false)

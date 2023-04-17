@@ -68,7 +68,7 @@ export default function Home({
 				{data?.weather_getCityByName?.weather?.temperature && (
 					<TemperatureDetails weather={data.weather_getCityByName.weather.temperature} />
 				)}
-				{/* <SubscriptionCounter /> */}
+				<SubscriptionCounter />
 			</main>
 		</div>
 	);

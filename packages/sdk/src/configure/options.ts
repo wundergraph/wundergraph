@@ -1,5 +1,11 @@
 import { ConfigurationVariable } from '@wundergraph/protobuf';
-import { EnvironmentVariable, InputVariable, mapInputVariable } from './variables';
+import {
+	EnvironmentVariable,
+	InputVariable,
+	mapInputVariable,
+	resolveConfigurationVariable,
+	resolveVariable,
+} from './variables';
 
 export const isCloud = process.env.WG_CLOUD === 'true';
 
@@ -25,8 +31,8 @@ const DefaultNodeOptions = {
 		host: new EnvironmentVariable(WgEnv.NodeHost, defaultHost),
 		port: new EnvironmentVariable(WgEnv.NodePort, defaultNodePort),
 	},
-	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://localhost:${defaultNodePort}`),
-	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://localhost:${defaultNodePort}`),
+	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
+	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	logger: {
 		level: new EnvironmentVariable<LoggerLevel>(WgEnv.LogLevel, 'info'),
 	},
@@ -72,19 +78,20 @@ export interface ResolvedNodeOptions {
 	defaultRequestTimeoutSeconds: number;
 }
 
-export const fallbackUrl = (defaultPort: string, listen?: ListenOptions) => {
-	return `http://${listen?.host || 'localhost'}:${listen?.port || defaultPort}`;
+export const fallbackNodeUrl = (listenOptions: ListenOptions | undefined) => {
+	let port = listenOptions?.port || DefaultNodeOptions.listen.port;
+	let host = listenOptions?.host || DefaultNodeOptions.listen.host;
+
+	return `http://${resolveVariable(host)}:${resolveVariable(port)}`;
 };
 
 export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions => {
 	let nodeOptions = isCloud
 		? DefaultNodeOptions
 		: {
-				nodeUrl:
-					options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackUrl(defaultNodePort, options?.listen)),
+				nodeUrl: options?.nodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
 				publicNodeUrl:
-					options?.publicNodeUrl ||
-					new EnvironmentVariable(WgEnv.PublicNodeUrl, fallbackUrl(defaultNodePort, options?.listen)),
+					options?.publicNodeUrl || new EnvironmentVariable(WgEnv.NodeUrl, fallbackNodeUrl(options?.listen)),
 				listen: {
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,

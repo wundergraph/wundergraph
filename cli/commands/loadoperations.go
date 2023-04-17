@@ -11,6 +11,8 @@ import (
 	"github.com/wundergraph/wundergraph/pkg/loadoperations"
 )
 
+var prettyOutput = false
+
 const LoadOperationsCmdName = "loadoperations"
 
 var loadoperationsCmd = &cobra.Command{
@@ -31,7 +33,7 @@ var loadoperationsCmd = &cobra.Command{
 		}
 
 		loader := loadoperations.NewLoader(args[0], args[1], args[2])
-		out, err := loader.Load(rootFlags.Pretty)
+		out, err := loader.Load(prettyOutput)
 		if err != nil {
 			return err
 		}
@@ -42,4 +44,5 @@ var loadoperationsCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loadoperationsCmd)
+	rootCmd.PersistentFlags().BoolVar(&prettyOutput, "pretty", false, "Pretty print the output")
 }
