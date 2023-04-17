@@ -17,7 +17,6 @@ import (
 
 	"github.com/MicahParks/keyfunc"
 	"github.com/cespare/xxhash"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/dgraph-io/ristretto"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/csrf"
@@ -719,7 +718,6 @@ func NewLoadUserMw(config LoadUserConfig) func(handler http.Handler) http.Handle
 }
 
 func UserFromContext(ctx context.Context) *User {
-	spew.Dump("------------>\nUserFromContext", ctx)
 	user := ctx.Value("user")
 	if actual, ok := user.(*User); ok {
 		return actual

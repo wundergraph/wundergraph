@@ -18,7 +18,6 @@ import (
 
 	"github.com/buger/jsonparser"
 	"github.com/cespare/xxhash"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/hashicorp/go-multierror"
@@ -2443,7 +2442,6 @@ func setOperationMetaData(r *http.Request, operation *wgpb.Operation) *http.Requ
 }
 
 func getOperationMetaData(r *http.Request) *OperationMetaData {
-	spew.Dump("------------>\ngetOperationMetaData", r)
 	if r == nil {
 		return nil
 	}
