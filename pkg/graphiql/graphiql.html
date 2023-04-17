@@ -50,6 +50,49 @@
 		<script src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
 		<script>
 			function graphQLFetcher(graphQLParams,config) {
+				const { operationName = '' } = graphQLParams;
+				const isSubscription = config.documentAST !== undefined ? config.documentAST.definitions.length === 1 ?
+					config.documentAST.definitions[0].operation === 'subscription' :
+					config.documentAST.definitions.some(d=>d.name.value === operationName).operation === 'subscription' :
+					false;
+				if (isSubscription) {
+					const generator = async function* () {
+						const abort = new AbortController();
+						try {
+							const res = await fetch('{{apiURL}}/graphql', {
+								method: 'post',
+								headers: {
+									...config.headers || {},
+									Accept: 'application/json',
+									'Content-Type': 'application/json',
+								},
+								body: JSON.stringify(graphQLParams),
+								credentials: 'include',
+								signal: abort.signal,
+							});
+							if (res.status !== 200 || !res.body) {
+								throw new Error('Bad response' + JSON.stringify(res));
+							}
+							const reader = res.body.getReader();
+							const decoder = new TextDecoder();
+							let message = '';
+							while (true) {
+								const { value, done } = await reader.read();
+								if (done) return;
+								if (!value) continue;
+								message += decoder.decode(value);
+								if (message.endsWith('\n\n')) {
+									const jsonResp = JSON.parse(message.substring(0, message.length - 2));
+									yield jsonResp;
+									message = '';
+								}
+							}
+						} finally {
+							abort.abort();
+						}
+					};
+					return generator();
+				}
 				return fetch('{{apiURL}}/graphql', {
 					method: 'post',
 					headers: {
@@ -60,7 +103,7 @@
 					body: JSON.stringify(graphQLParams),
 					credentials: 'include',
 				}).then(function (response) {
-					return response.json().catch(function () {
+					return response.json().catch(function (e) {
 						return response.text();
 					});
 				});
