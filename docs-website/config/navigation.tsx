@@ -98,12 +98,16 @@ const navigation = [
 						href: '/docs/examples/nextjs-react-query',
 					},
 					{
+						title: 'Next.js + Clerk',
+						href: '/docs/examples/nextjs-clerk',
+					},
+					{
 						title: 'SvelteKit + SSR with TanStack Query',
 						href: '/docs/examples/sveltekit',
 					},
 					{
-						title: 'Next.js + Clerk',
-						href: '/docs/examples/nextjs-clerk',
+						title: 'Astro',
+						href: '/docs/examples/astro',
 					},
 					{
 						title: 'Vite + SWR',
