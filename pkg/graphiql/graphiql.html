@@ -50,10 +50,10 @@
 		<script src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
 		<script>
 			function graphQLFetcher(graphQLParams,config) {
-				const { operationName = '' } = graphQLParams;
+				const { operationName } = graphQLParams;
 				const isSubscription = config.documentAST !== undefined ? config.documentAST.definitions.length === 1 ?
 					config.documentAST.definitions[0].operation === 'subscription' :
-					config.documentAST.definitions.some(d=>d.name.value === operationName).operation === 'subscription' :
+					(config.documentAST.definitions.find(d=>d.name.value === operationName) || {}).operation === 'subscription' :
 					false;
 				if (isSubscription) {
 					const generator = async function* () {
