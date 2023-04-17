@@ -82,9 +82,9 @@ func TestNode(t *testing.T) {
 	defer productService.Close()
 
 	ports, err := freeport.GetFreePorts(2)
+	assert.NoError(t, err)
 	port := ports[0]
 	internalPort := ports[1]
-	assert.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -259,9 +259,9 @@ func TestInMemoryCache(t *testing.T) {
 	defer productService.Close()
 
 	ports, err := freeport.GetFreePorts(2)
+	assert.NoError(t, err)
 	port := ports[0]
 	internalPort := ports[1]
-	assert.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -380,9 +380,9 @@ func TestWebHooks(t *testing.T) {
 	defer testServer.Close()
 
 	ports, err := freeport.GetFreePorts(2)
+	assert.NoError(t, err)
 	port := ports[0]
 	internalPort := ports[1]
-	assert.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
@@ -493,9 +493,9 @@ func BenchmarkNode(t *testing.B) {
 	defer productService.Close()
 
 	ports, err := freeport.GetFreePorts(2)
+	assert.NoError(t, err)
 	port := ports[0]
 	internalPort := ports[1]
-	assert.NoError(t, err)
 
 	nodeURL := fmt.Sprintf(":%d", port)
 
