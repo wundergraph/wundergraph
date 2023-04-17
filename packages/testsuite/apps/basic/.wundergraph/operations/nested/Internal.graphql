@@ -1,0 +1,6 @@
+query @internalOperation {
+	chinook_findFirstAlbum {
+		AlbumId
+		Title
+	}
+}
