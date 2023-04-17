@@ -1,12 +1,6 @@
 import type { Client, ClientResponse, ResponseError, SubscriptionRequestOptions } from '@wundergraph/sdk/client';
-import {
-	PreloadedQuery,
-	usePreloadedQuery as useRelayPreloadedQuery,
-	useRelayEnvironment,
-	RelayEnvironmentProvider,
-	fetchQuery as relayFetchQuery,
-} from 'react-relay';
-import React, { useEffect, useState, useRef, ComponentType, useMemo, ReactNode, FC } from 'react';
+import { useRelayEnvironment, RelayEnvironmentProvider, fetchQuery as relayFetchQuery } from 'react-relay';
+import React, { useEffect, useState, useRef, useMemo, ReactNode, FC } from 'react';
 import {
 	CacheConfig,
 	Environment,
@@ -19,6 +13,7 @@ import {
 	RecordSource,
 	Store,
 	SubscribeFunction,
+	VariablesOf,
 	createOperationDescriptor,
 	getRequest,
 } from 'relay-runtime';
@@ -100,12 +95,12 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		};
 	};
 
-	const useSubscribeTo = (
+	const useSubscribeTo = <TQuery extends OperationType>(
 		props: UseSubscribeToProps
 	): {
 		isLoading: boolean;
 		isSubscribed: boolean;
-		data?: ClientResponse['data'];
+		data?: TQuery['response'];
 		error?: ClientResponse['error'];
 	} => {
 		const { operationName, input, enabled, liveQuery, subscribeOnce, onSuccess, onError } = props;
@@ -170,35 +165,37 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 		};
 	};
 
-	const usePreloadedQuery = <TQuery extends OperationType>(
-		gqlQuery: Parameters<typeof useRelayPreloadedQuery>[0],
-		preloadedQuery: PreloadedQuery<TQuery>,
-		options?: Parameters<typeof useRelayPreloadedQuery>[2] &
-			Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>
-	): TQuery['response'] => {
-		const { UNSTABLE_renderPolicy, ...subscriptionOptions } = options || {};
-		const data = useRelayPreloadedQuery(gqlQuery, preloadedQuery, { UNSTABLE_renderPolicy });
+	const useLiveQuery = <TQuery extends OperationType>({
+		query,
+		variables,
+		options = { liveQuery: true },
+	}: {
+		query: GraphQLTaggedNode;
+		variables: VariablesOf<TQuery>;
+		options?: Omit<UseSubscribeToProps, 'operationName' | 'input' | 'enabled' | 'abortSignal'>;
+	}) => {
+		const request = getRequest(query);
+		const operationDescriptor = createOperationDescriptor(request, variables);
 		const environment = useRelayEnvironment();
 
-		const { id, variables } = preloadedQuery;
-
-		const { data: liveData } = useSubscribeTo({
-			operationName: `relay/${id}`,
+		const { data, ...subscriptionResponse } = useSubscribeTo<TQuery>({
+			operationName: `relay/${request.params.id}`,
 			input: variables,
-			...subscriptionOptions,
+			...options,
 			enabled: options?.liveQuery ?? false,
 			liveQuery: options?.liveQuery ?? false,
 		});
 
 		useEffect(() => {
-			if (liveData) {
-				const request = getRequest(gqlQuery);
-				const operationDescriptor = createOperationDescriptor(request, variables);
-				environment.commitPayload(operationDescriptor, liveData);
+			if (data) {
+				environment.commitPayload(operationDescriptor, data);
 			}
-		}, [liveData]);
+		}, [data]);
 
-		return data;
+		return {
+			...subscriptionResponse,
+			data: data ?? (environment.lookup(operationDescriptor.fragment).data as TQuery['response'] | undefined),
+		};
 	};
 
 	let relayEnvironment: Environment;
@@ -256,8 +253,8 @@ export const createWunderGraphRelayApp = ({ client }: CreateWunderGraphRelayOpti
 	};
 
 	return {
-		usePreloadedQuery,
 		WunderGraphRelayProvider,
 		fetchWunderGraphSSRQuery,
+		useLiveQuery,
 	};
 };
