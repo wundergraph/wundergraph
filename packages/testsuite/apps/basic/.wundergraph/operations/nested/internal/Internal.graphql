@@ -1,0 +1,6 @@
+query {
+	chinook_findFirstAlbum {
+		AlbumId
+		Title
+	}
+}

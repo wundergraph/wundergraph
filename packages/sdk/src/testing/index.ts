@@ -35,6 +35,11 @@ export interface ServerOptions<ClientType extends Client = Client> {
 	 * @default false
 	 */
 	debug: boolean;
+
+	/***
+	 * The WunderGraph directory to use.
+	 */
+	dir?: string;
 }
 
 /**
@@ -77,7 +82,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		};
 	}
 
-	private url(rel: string): string {
+	public url(rel?: string): string {
 		return this.nodeUrl + rel;
 	}
 
@@ -109,6 +114,11 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 			} else {
 				cmd.push('--cli-log-level', 'error');
 			}
+
+			if (this.options.dir) {
+				cmd.push('--wundergraph-dir', this.options.dir);
+			}
+
 			subprocess = wunderctl({ cmd, env, stdio: 'inherit' });
 		}
 		const health = this.url('/health');
@@ -193,6 +203,7 @@ export class WunderGraphTestServer<ClientType extends Client = Client> {
 		// Generate random ports
 		let nodePort = await this.freeport();
 		let serverPort = await this.freeport();
+
 		return {
 			manageServer: true,
 			env: {
