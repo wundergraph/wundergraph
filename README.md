@@ -161,6 +161,7 @@ We've got a comprehensive list of examples to get you started.
 The best way to try them out is by cloning the mono-repo.
 
 - [Apollo Federation](examples/apollo-federation)
+- [Astro](examples/astro)
 - [Auth0 OpenID Connect Authentication](examples/auth0-oidc-authentication)
 - [Caching](examples/caching)
 - [Cross API Joins](examples/cross-api-joins)
