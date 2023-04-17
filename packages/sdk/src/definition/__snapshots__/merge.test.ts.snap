@@ -73,7 +73,14 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "header": {},
           "query": [],
-          "urlEncodeBody": false
+          "urlEncodeBody": false,
+          "proxyUrl": {
+            "kind": 0,
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "placeholderVariableName": "",
+            "staticVariableContent": ""
+          }
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
@@ -153,7 +160,14 @@ exports[`Should be merged: merged_apis 1`] = `
             "placeholderVariableName": "",
             "staticVariableContent": ""
           },
-          "urlEncodeBody": false
+          "urlEncodeBody": false,
+          "proxyUrl": {
+            "kind": 0,
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "placeholderVariableName": "",
+            "staticVariableContent": ""
+          }
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
@@ -251,7 +265,14 @@ exports[`Should be merged: merged_apis 1`] = `
           },
           "header": {},
           "query": [],
-          "urlEncodeBody": false
+          "urlEncodeBody": false,
+          "proxyUrl": {
+            "kind": 0,
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "placeholderVariableName": "",
+            "staticVariableContent": ""
+          }
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {
@@ -329,7 +350,14 @@ exports[`Should be merged: merged_apis 1`] = `
             "placeholderVariableName": "",
             "staticVariableContent": ""
           },
-          "urlEncodeBody": false
+          "urlEncodeBody": false,
+          "proxyUrl": {
+            "kind": 0,
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "placeholderVariableName": "",
+            "staticVariableContent": ""
+          }
         },
         "UpstreamSchema": "",
         "HooksConfiguration": {

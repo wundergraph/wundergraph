@@ -55,6 +55,13 @@ type User @key(fields: "id") {
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
+          "proxyUrl": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
           "query": [],
           "upstreamAuthentication": undefined,
           "url": {
@@ -200,6 +207,13 @@ type Product @extends @key(fields: "upc") {
           "mTLS": undefined,
           "method": 1,
           "path": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "proxyUrl": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
@@ -364,6 +378,13 @@ type Mutation @extends {
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
+          "proxyUrl": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
           "query": [],
           "upstreamAuthentication": undefined,
           "url": {
@@ -508,6 +529,13 @@ type Subscription {
           "mTLS": undefined,
           "method": 1,
           "path": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "proxyUrl": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
@@ -1368,6 +1396,13 @@ type User @key(fields: "id") {
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
+          "proxyUrl": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
           "query": [],
           "upstreamAuthentication": undefined,
           "url": {
@@ -1511,6 +1546,13 @@ type Product @extends @key(fields: "upc") {
           "mTLS": undefined,
           "method": 1,
           "path": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "proxyUrl": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,
@@ -1671,6 +1713,13 @@ type Mutation @extends {
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
+          "proxyUrl": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
           "query": [],
           "upstreamAuthentication": undefined,
           "url": {
@@ -1811,6 +1860,13 @@ type Subscription {
           "mTLS": undefined,
           "method": 1,
           "path": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
+          "proxyUrl": {
             "environmentVariableDefaultValue": "",
             "environmentVariableName": "",
             "kind": 0,

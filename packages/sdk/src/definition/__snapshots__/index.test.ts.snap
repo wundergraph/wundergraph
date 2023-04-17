@@ -55,6 +55,13 @@ GraphQLApi {
             "placeholderVariableName": "",
             "staticVariableContent": "",
           },
+          "proxyUrl": {
+            "environmentVariableDefaultValue": "",
+            "environmentVariableName": "",
+            "kind": 0,
+            "placeholderVariableName": "",
+            "staticVariableContent": "",
+          },
           "query": [],
           "upstreamAuthentication": undefined,
           "url": {
