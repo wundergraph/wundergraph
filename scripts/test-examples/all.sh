@@ -28,6 +28,9 @@ SKIP="${SKIP} graphql-ws-subscriptions"
 # Nuxt uses ESNEXT so skip temporarily
 SKIP="${SKIP} nuxt"
 
+# Astro has issue with incorrect PNPM version defined in its prettier-plugin-astro@0.8.0 package
+SKIP="${SKIP} astro"
+
 # Move to repo root
 cd `dirname ${0}`/../..
 
