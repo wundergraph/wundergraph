@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/graphql-go-tools/pkg/engine/datasource/introspection_datasource"
 	"github.com/wundergraph/wundergraph/pkg/graphiql"
 	"golang.org/x/sync/singleflight"
 	"io"
@@ -34,24 +35,26 @@ import (
 )
 
 type InternalBuilder struct {
-	pool             *pool.Pool
-	log              *zap.Logger
-	loader           *engineconfigloader.EngineConfigLoader
-	api              *Api
-	planConfig       plan.Configuration
-	resolver         *resolve.Resolver
-	definition       *ast.Document
-	router           *mux.Router
-	renameTypeNames  []resolve.RenameTypeName
-	middlewareClient *hooks.Client
+	pool                *pool.Pool
+	log                 *zap.Logger
+	loader              *engineconfigloader.EngineConfigLoader
+	api                 *Api
+	planConfig          plan.Configuration
+	resolver            *resolve.Resolver
+	definition          *ast.Document
+	router              *mux.Router
+	renameTypeNames     []resolve.RenameTypeName
+	middlewareClient    *hooks.Client
+	enableIntrospection bool
 }
 
-func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader) *InternalBuilder {
+func NewInternalBuilder(pool *pool.Pool, log *zap.Logger, hooksClient *hooks.Client, loader *engineconfigloader.EngineConfigLoader, enableIntrospection bool) *InternalBuilder {
 	return &InternalBuilder{
-		pool:             pool,
-		log:              log,
-		loader:           loader,
-		middlewareClient: hooksClient,
+		pool:                pool,
+		log:                 log,
+		loader:              loader,
+		middlewareClient:    hooksClient,
+		enableIntrospection: enableIntrospection,
 	}
 }
 
@@ -83,6 +86,17 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 	err = asttransform.MergeDefinitionWithBaseSchema(i.definition)
 	if err != nil {
 		return streamClosers, err
+	}
+
+	if i.enableIntrospection {
+		introspectionFactory, err := introspection_datasource.NewIntrospectionConfigFactory(i.definition)
+		if err != nil {
+			return streamClosers, err
+		}
+		fieldConfigs := introspectionFactory.BuildFieldConfigurations()
+		i.planConfig.Fields = append(i.planConfig.Fields, fieldConfigs...)
+		dataSource := introspectionFactory.BuildDataSourceConfiguration()
+		i.planConfig.DataSources = append(i.planConfig.DataSources, dataSource)
 	}
 
 	i.log.Debug("configuring API",
@@ -212,6 +226,14 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+		// Don't log for every operation because public ones are
+		// registered twice in the public and the internal router
+		if operation.Internal {
+			i.log.Debug("registered internal operation handler",
+				zap.String("method", http.MethodPost),
+				zap.String("path", apiPath),
+			)
+		}
 	case wgpb.OperationType_SUBSCRIPTION:
 		p, ok := preparedPlan.(*plan.SubscriptionResponsePlan)
 		if !ok {
@@ -239,6 +261,13 @@ func (i *InternalBuilder) registerOperation(operation *wgpb.Operation) error {
 		}
 
 		i.router.Methods(http.MethodPost).Path(apiPath).Handler(handler)
+		// See comment checking operation.Internal above
+		if operation.Internal {
+			i.log.Debug("registered internal subscription handler",
+				zap.String("method", http.MethodPost),
+				zap.String("path", apiPath),
+			)
+		}
 	}
 
 	return nil

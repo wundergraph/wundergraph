@@ -455,7 +455,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}
 
 	n.builder = apihandler.NewBuilder(n.pool, n.log, loader, hooksClient, builderConfig)
-	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader)
+	internalBuilder := apihandler.NewInternalBuilder(n.pool, n.log, hooksClient, loader, n.options.enableIntrospection)
 
 	publicClosers, err := n.builder.BuildAndMountApiHandler(n.ctx, router, nodeConfig.Api)
 	if err != nil {
@@ -510,7 +510,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 	}))
 
 	handler := n.setupGlobalMiddlewares(router, nodeConfig)
-	internalHandler := n.setupGlobalMiddlewares(internalRouter, nodeConfig)
+	internalHandler := http.HandlerFunc(internalRouter.ServeHTTP)
 
 	connContext := func(ctx context.Context, c net.Conn) context.Context {
 		return context.WithValue(ctx, "conn", c)
@@ -582,7 +582,7 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		g.Go(func() error {
 			n.log.Info(fmt.Sprintf("Internal node listening at http://%s", l.Addr().String()))
 
-			err := n.server.Serve(l)
+			err := n.internalServer.Serve(l)
 			if err == nil {
 				return nil
 			}

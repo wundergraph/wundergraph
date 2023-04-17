@@ -2209,8 +2209,6 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r = setOperationMetaData(r, h.operation)
 
-	isInternal := strings.HasPrefix(r.URL.Path, "/internal/")
-
 	ctx := pool.GetCtx(r, r, pool.Config{})
 	defer pool.PutCtx(ctx)
 
@@ -2234,11 +2232,7 @@ func (h *FunctionsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if isInternal {
-			ctx.Variables, _, _, _ = jsonparser.Get(variablesBuf.Bytes(), "input")
-		} else {
-			ctx.Variables = variablesBuf.Bytes()
-		}
+		ctx.Variables = variablesBuf.Bytes()
 	}
 
 	if len(ctx.Variables) == 0 {
