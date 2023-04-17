@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/buger/jsonparser"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/mattbaird/jsonpatch"
 	"go.uber.org/zap"
@@ -382,7 +381,6 @@ func (c *Client) setInternalHookData(ctx context.Context, jsonData []byte, buf *
 	if len(jsonData) == 0 {
 		jsonData = []byte(`{}`)
 	}
-	spew.Dump("------------>\nsetInternalHookData", ctx)
 	// Make sure we account for both pool.ClientRequestKey being nil and being non present
 	if clientRequest, ok := ctx.Value(pool.ClientRequestKey).(*http.Request); ok && clientRequest != nil {
 		_, wgClientRequestType, _, _ := jsonparser.Get(jsonData, "__wg", "clientRequest")
