@@ -333,7 +333,7 @@ var upCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			log.Debug("hooks EntryPoint not found, skipping", zap.String("file", serverEntryPointFilename))
+			log.Debug("wundergraph.server.ts not found, skipping server", zap.String("file", serverEntryPointFilename))
 
 			onAfterBuild = func(buildErr error, rebuild bool) (err error) {
 				defer func() {
