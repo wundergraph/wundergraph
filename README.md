@@ -44,6 +44,8 @@ Here's how WunderGraph works:
 ```typescript
 // .wundergraph/wundergraph.config.ts
 
+import { NextJsTemplate } from '@wundergraph/nextjs/dist/template';
+
 // introspect a PostgreSQL database
 const pg = introspect.postgresql({
   apiNamespace: 'pg',
@@ -71,6 +73,17 @@ const shopify = introspect.graphql({
 configureWunderGraphApplication({
   // compose the APIs into a unified WunderGraph API
   apis: [pg, stripe, shopify],
+
+  // generate type-safe clients for your Frontend
+  codeGenerators: [
+    {
+      templates: [...templates.typescript.all],
+    },
+    {
+      templates: [new NextJsTemplate()],
+      path: '../web/components/generated',
+    },
+  ],
 });
 ```
 
@@ -82,10 +95,17 @@ This makes it easy to update an API dependency without a single click.
 By combining the introspected APIs, WunderGraph generates a unified GraphQL Schema across all APIs.
 All we have to do is define an Operation and call it from our Frontend.
 
+<table>
+<tr>
+<td> GraphQL </td> <td> TypeScript</td>
+</tr>
+<tr>
+<td valign="top">
+
 ```graphql
 # .wundergraph/operations/users/ByID.graphql
 query ($id: String!) {
-  user: db_findFirstUser(where: { id: { equals: $id } }) {
+  user: pg_findFirstUser(where: { id: { equals: $id } }) {
     id
     email
     name
@@ -94,25 +114,34 @@ query ($id: String!) {
 }
 ```
 
-Alternatively, you can also define a custom Operation using TypeScript:
+</td><td valign="top">
 
 ```typescript
 // .wundergraph/operations/users/CustomByID.ts
 import { createOperation, z } from '../../generated/wundergraph.factory';
 
 export default createOperation.query({
+  // Input validation
   input: z.object({
     id: z.string(),
   }),
   handler: async ({ input }) => {
+    // Call into your virtual graph, type-safe
+    const { errors, data } = await operations.query({
+      operationName: 'users/ByID',
+      input: {
+        id: input.id,
+      },
+    });
+
     return {
-      id: input.id,
-      name: 'Jens',
-      bio: 'Founder of WunderGraph',
+      ...data,
     };
   },
 });
 ```
+
+</tr></table>
 
 3. **Call the Operation** from your Frontend
 
@@ -120,11 +149,13 @@ As you define Operations, WunderGraph automatically generates a type-safe client
 supporting all major Frontend Frameworks like React, NextJS, Remix, Astro, Svelte, Expo, Vue, etc...
 
 ```typescript jsx
-import { client } from '~/lib/wundergraph';
+// web/pages/profile.ts
+
+import { useQuery } from '../../components/generated/nextjs';
 
 export default async function ProfilePage(props) {
-  const { data, error } = await client.query({
-    operationName: 'users/ByID',
+  const { data } = await useQuery({
+    operationName: 'users/CustomByID', // or 'users/ByID'
     input: {
       id: props.params.id,
     },
@@ -132,8 +163,8 @@ export default async function ProfilePage(props) {
 
   return (
     <div>
-      <h1>{data.user.name}</h1>
-      <p>{data.user.email}</p>
+      <h1>{data.user.id}</h1>
+      <p>{data.user.name}</p>
     </div>
   );
 }

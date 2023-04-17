@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/wundergraph/wundergraph/cli/helpers"
 	"github.com/wundergraph/wundergraph/pkg/config"
@@ -38,6 +39,7 @@ var (
 	DotEnvFile            string
 	log                   *zap.Logger
 	cmdDurationMetric     telemetry.DurationMetric
+	zapLogLevel           zapcore.Level
 	_wunderGraphDirConfig string
 
 	rootFlags helpers.RootFlags
@@ -79,9 +81,10 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		zapLogLevel = logLevel
 
 		log = logging.
-			New(rootFlags.PrettyLogs, rootFlags.DebugMode, logLevel).
+			New(rootFlags.PrettyLogs, rootFlags.DebugMode, zapLogLevel).
 			With(zap.String("component", "@wundergraph/wunderctl"))
 
 		err = godotenv.Load(DotEnvFile)
