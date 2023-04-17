@@ -107,7 +107,8 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},
-				DefaultTimeout: defaultRequestTimeout,
+				DefaultTimeout:  defaultRequestTimeout,
+				DefaultProxyURL: loadvariable.String(graphConfig.Api.GetNodeOptions().GetDefaultHttpProxyUrl()),
 			},
 		},
 		Server: &Server{

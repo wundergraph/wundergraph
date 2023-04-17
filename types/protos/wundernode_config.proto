@@ -365,6 +365,7 @@ message FetchConfiguration {
 	MTLSConfiguration mTLS = 8;
 	ConfigurationVariable baseUrl = 9;
 	ConfigurationVariable path = 10;
+	ConfigurationVariable proxyUrl = 11;
 }
 
 message MTLSConfiguration {
@@ -528,6 +529,7 @@ message NodeOptions {
 	ListenerOptions listen = 2;
 	NodeLogging logger = 3;
 	int64 defaultRequestTimeoutSeconds = 5;
+	ConfigurationVariable defaultHttpProxyUrl = 6;
 }
 
 message ServerLogging {

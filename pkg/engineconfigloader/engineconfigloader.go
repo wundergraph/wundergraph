@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -42,11 +43,13 @@ type FactoryResolver interface {
 // Defined again here to avoid circular reference to apihandler.ApiTransportFactory
 
 type ApiTransportFactory interface {
-	RoundTripper(tripper http.RoundTripper, enableStreamingMode bool) http.RoundTripper
+	RoundTripper(transport *http.Transport, enableStreamingMode bool) http.RoundTripper
 	DefaultTransportTimeout() time.Duration
+	DefaultProxyURLString() string
 }
+
 type DefaultFactoryResolver struct {
-	baseTransport    http.RoundTripper
+	baseTransport    *http.Transport
 	transportFactory ApiTransportFactory
 	graphql          *graphql_datasource.Factory
 	rest             *oas_datasource.Factory
@@ -55,7 +58,7 @@ type DefaultFactoryResolver struct {
 	hooksClient      *hooks.Client
 }
 
-func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport http.RoundTripper,
+func NewDefaultFactoryResolver(transportFactory ApiTransportFactory, baseTransport *http.Transport,
 	log *zap.Logger, hooksClient *hooks.Client) *DefaultFactoryResolver {
 
 	defaultHttpClient := &http.Client{
@@ -92,15 +95,24 @@ func (d *DefaultFactoryResolver) requiresCustomHTTPClient(ds *wgpb.DataSourceCon
 	if ds != nil && ds.RequestTimeoutSeconds > 0 {
 		return true
 	}
-	// when mTLS is enabled, we need to create a new client
-	if cfg != nil && cfg.MTLS != nil {
-		return true
+	if cfg != nil {
+		// when mTLS is enabled, we need to create a new client
+		if cfg.MTLS != nil {
+			return true
+		}
+		// if the data source uses a custom proxy, create a dedicated client
+		if dataSourceUsesHTTPProxy(ds) {
+			value, found := loadvariable.LookupString(cfg.ProxyUrl)
+			if found && value != d.transportFactory.DefaultProxyURLString() {
+				return true
+			}
+		}
 	}
 	return false
 }
 
-// customTLSRoundTripper returns a TLS http.Roundtripper with the given key and certificates loaded
-func (d *DefaultFactoryResolver) customTLSRoundTripper(mTLS *wgpb.MTLSConfiguration) (http.RoundTripper, error) {
+// customTLSTransport returns a TLS *http.Transport with the given key and certificates loaded
+func (d *DefaultFactoryResolver) customTLSTransport(mTLS *wgpb.MTLSConfiguration) (*http.Transport, error) {
 	privateKey := loadvariable.String(mTLS.Key)
 	caCert := loadvariable.String(mTLS.Cert)
 
@@ -148,16 +160,32 @@ func (d *DefaultFactoryResolver) newHTTPClient(ds *wgpb.DataSourceConfiguration,
 		timeout = time.Duration(ds.RequestTimeoutSeconds) * time.Second
 	}
 	// TLS
-	var transport http.RoundTripper
+	var transport *http.Transport
 	var err error
 	if cfg != nil && cfg.MTLS != nil {
-		transport, err = d.customTLSRoundTripper(cfg.MTLS)
+		transport, err = d.customTLSTransport(cfg.MTLS)
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		transport = d.baseTransport
 	}
+	// Proxy
+	proxyURLString := d.transportFactory.DefaultProxyURLString()
+	value, found := loadvariable.LookupString(cfg.ProxyUrl)
+	if found {
+		proxyURLString = value
+	}
+	if proxyURLString != "" {
+		proxyURL, err := url.Parse(proxyURLString)
+		if err != nil {
+			return nil, fmt.Errorf("invalid proxy URL %q: %w", proxyURLString, err)
+		}
+		transport.Proxy = func(r *http.Request) (*url.URL, error) {
+			return proxyURL, nil
+		}
+	}
+
 	return &http.Client{
 		Timeout:   timeout,
 		Transport: d.transportFactory.RoundTripper(transport, false),
@@ -538,4 +566,23 @@ func buildFetchUrl(url, baseUrl, path string, hooksServerUrl string) string {
 	}
 
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(baseUrl, "/"), strings.TrimPrefix(path, "/"))
+}
+
+func dataSourceUsesHTTPProxy(ds *wgpb.DataSourceConfiguration) bool {
+	if ds == nil {
+		return false
+	}
+	switch ds.Kind {
+	case wgpb.DataSourceKind_REST, wgpb.DataSourceKind_GRAPHQL:
+		return true
+	case wgpb.DataSourceKind_STATIC,
+		wgpb.DataSourceKind_POSTGRESQL,
+		wgpb.DataSourceKind_MYSQL,
+		wgpb.DataSourceKind_SQLSERVER,
+		wgpb.DataSourceKind_MONGODB,
+		wgpb.DataSourceKind_SQLITE,
+		wgpb.DataSourceKind_PRISMA:
+		return false
+	}
+	panic("unhandled data source kind")
 }

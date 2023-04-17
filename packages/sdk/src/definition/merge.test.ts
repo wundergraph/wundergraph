@@ -43,6 +43,7 @@ test('Should be merged', () => {
 						mTLS: undefined,
 						upstreamAuthentication: undefined,
 						urlEncodeBody: false,
+						proxyUrl: mapInputVariable(''),
 					},
 					UpstreamSchema: '',
 					HooksConfiguration: {
@@ -98,6 +99,7 @@ test('Should be merged', () => {
 						mTLS: undefined,
 						upstreamAuthentication: undefined,
 						urlEncodeBody: false,
+						proxyUrl: mapInputVariable(''),
 					},
 					UpstreamSchema: '',
 					HooksConfiguration: {
@@ -183,6 +185,7 @@ test('Should be merged', () => {
 						upstreamAuthentication: undefined,
 						mTLS: undefined,
 						urlEncodeBody: false,
+						proxyUrl: mapInputVariable(''),
 					},
 					UpstreamSchema: '',
 					HooksConfiguration: {
@@ -257,6 +260,7 @@ test('Should be merged', () => {
 						upstreamAuthentication: undefined,
 						mTLS: undefined,
 						urlEncodeBody: false,
+						proxyUrl: mapInputVariable(''),
 					},
 					UpstreamSchema: '',
 					HooksConfiguration: {

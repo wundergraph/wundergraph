@@ -29,11 +29,12 @@ type Logging struct {
 }
 
 type Options struct {
-	ServerUrl      string
-	PublicNodeUrl  string
-	Listener       *Listener
-	Logging        Logging
-	DefaultTimeout time.Duration
+	ServerUrl       string
+	PublicNodeUrl   string
+	Listener        *Listener
+	Logging         Logging
+	DefaultTimeout  time.Duration
+	DefaultProxyURL string
 }
 
 type CookieBasedSecrets struct {

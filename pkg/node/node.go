@@ -403,6 +403,14 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		return errors.New("API config invalid")
 	}
 
+	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
+
+	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
+
+	n.log.Debug("http.Client.Transport",
+		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
+	)
+
 	dialer := &net.Dialer{
 		Timeout:   10 * time.Second,
 		KeepAlive: 90 * time.Second,
@@ -417,14 +425,6 @@ func (n *Node) startServer(nodeConfig *WunderNodeConfig) error {
 		IdleConnTimeout:     90 * time.Second,
 		TLSHandshakeTimeout: 10 * time.Second,
 	}
-
-	hooksClient := hooks.NewClient(nodeConfig.Api.Options.ServerUrl, n.log)
-
-	transportFactory := apihandler.NewApiTransportFactory(nodeConfig.Api, hooksClient, n.options.enableRequestLogging)
-
-	n.log.Debug("http.Client.Transport",
-		zap.Bool("enableRequestLogging", n.options.enableRequestLogging),
-	)
 
 	loader := engineconfigloader.New(n.WundergraphDir, engineconfigloader.NewDefaultFactoryResolver(
 		transportFactory,

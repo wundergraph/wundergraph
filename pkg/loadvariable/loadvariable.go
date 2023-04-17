@@ -9,20 +9,28 @@ import (
 )
 
 func String(variable *wgpb.ConfigurationVariable) string {
+	val, _ := LookupString(variable)
+	return val
+}
+
+func LookupString(variable *wgpb.ConfigurationVariable) (string, bool) {
 	if variable == nil {
-		return ""
+		return "", false
 	}
 	switch variable.GetKind() {
 	case wgpb.ConfigurationVariableKind_ENV_CONFIGURATION_VARIABLE:
-		value := os.Getenv(variable.GetEnvironmentVariableName())
-		if value != "" {
-			return value
+		if varName := variable.GetEnvironmentVariableName(); varName != "" {
+			value, found := os.LookupEnv(variable.GetEnvironmentVariableName())
+			if found {
+				return value, found
+			}
 		}
-		return variable.GetEnvironmentVariableDefaultValue()
+		defValue := variable.GetEnvironmentVariableDefaultValue()
+		return defValue, defValue != ""
 	case wgpb.ConfigurationVariableKind_STATIC_CONFIGURATION_VARIABLE:
-		return variable.GetStaticVariableContent()
+		return variable.GetStaticVariableContent(), true
 	default:
-		return ""
+		panic("unhandled wgpb.ConfigurationVariableKind")
 	}
 }
 

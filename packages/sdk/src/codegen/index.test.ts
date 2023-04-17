@@ -81,6 +81,13 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 						},
 					},
 					defaultRequestTimeoutSeconds: 0,
+					defaultHttpProxyUrl: {
+						kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+						staticVariableContent: '',
+						environmentVariableName: '',
+						environmentVariableDefaultValue: '',
+						placeholderVariableName: '',
+					},
 				},
 				serverOptions: {
 					serverUrl: {

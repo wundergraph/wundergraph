@@ -1027,6 +1027,7 @@ export interface FetchConfiguration {
   mTLS: MTLSConfiguration | undefined;
   baseUrl: ConfigurationVariable | undefined;
   path: ConfigurationVariable | undefined;
+  proxyUrl: ConfigurationVariable | undefined;
 }
 
 export interface FetchConfiguration_HeaderEntry {
@@ -1172,6 +1173,7 @@ export interface NodeOptions {
   listen: ListenerOptions | undefined;
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
+  defaultHttpProxyUrl: ConfigurationVariable | undefined;
 }
 
 export interface ServerLogging {
@@ -2890,6 +2892,7 @@ function createBaseFetchConfiguration(): FetchConfiguration {
     mTLS: undefined,
     baseUrl: undefined,
     path: undefined,
+    proxyUrl: undefined,
   };
 }
 
@@ -2915,6 +2918,7 @@ export const FetchConfiguration = {
       mTLS: isSet(object.mTLS) ? MTLSConfiguration.fromJSON(object.mTLS) : undefined,
       baseUrl: isSet(object.baseUrl) ? ConfigurationVariable.fromJSON(object.baseUrl) : undefined,
       path: isSet(object.path) ? ConfigurationVariable.fromJSON(object.path) : undefined,
+      proxyUrl: isSet(object.proxyUrl) ? ConfigurationVariable.fromJSON(object.proxyUrl) : undefined,
     };
   },
 
@@ -2942,6 +2946,8 @@ export const FetchConfiguration = {
     message.baseUrl !== undefined &&
       (obj.baseUrl = message.baseUrl ? ConfigurationVariable.toJSON(message.baseUrl) : undefined);
     message.path !== undefined && (obj.path = message.path ? ConfigurationVariable.toJSON(message.path) : undefined);
+    message.proxyUrl !== undefined &&
+      (obj.proxyUrl = message.proxyUrl ? ConfigurationVariable.toJSON(message.proxyUrl) : undefined);
     return obj;
   },
 
@@ -2974,6 +2980,9 @@ export const FetchConfiguration = {
       : undefined;
     message.path = (object.path !== undefined && object.path !== null)
       ? ConfigurationVariable.fromPartial(object.path)
+      : undefined;
+    message.proxyUrl = (object.proxyUrl !== undefined && object.proxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.proxyUrl)
       : undefined;
     return message;
   },
@@ -3893,6 +3902,7 @@ function createBaseNodeOptions(): NodeOptions {
     listen: undefined,
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
+    defaultHttpProxyUrl: undefined,
   };
 }
 
@@ -3906,6 +3916,9 @@ export const NodeOptions = {
       defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
+      defaultHttpProxyUrl: isSet(object.defaultHttpProxyUrl)
+        ? ConfigurationVariable.fromJSON(object.defaultHttpProxyUrl)
+        : undefined,
     };
   },
 
@@ -3919,6 +3932,9 @@ export const NodeOptions = {
     message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
     message.defaultRequestTimeoutSeconds !== undefined &&
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
+    message.defaultHttpProxyUrl !== undefined && (obj.defaultHttpProxyUrl = message.defaultHttpProxyUrl
+      ? ConfigurationVariable.toJSON(message.defaultHttpProxyUrl)
+      : undefined);
     return obj;
   },
 
@@ -3937,6 +3953,9 @@ export const NodeOptions = {
       ? NodeLogging.fromPartial(object.logger)
       : undefined;
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
+    message.defaultHttpProxyUrl = (object.defaultHttpProxyUrl !== undefined && object.defaultHttpProxyUrl !== null)
+      ? ConfigurationVariable.fromPartial(object.defaultHttpProxyUrl)
+      : undefined;
     return message;
   },
 };
