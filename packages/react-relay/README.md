@@ -41,7 +41,7 @@ configureWunderGraphApplication({
 });
 ```
 
-In your relay config add the `persistConfig` option and make sure the `persisted.json` file is in your `.wundergraph/operations` directory (you might have to create an empty file in the target location for the first time)
+In your relay config add the `persistConfig` option and make sure the `persisted.json` file is in your `.wundergraph/operations/relay` directory (you might have to create an empty file in the target location for the first time)
 
 ```json
   //...
@@ -85,7 +85,7 @@ The Relay integration also provides two very powerful utilities
 The `useLiveQuery` hooks lets you leverage the power of [WunderGraph's Live Queries](https://docs.wundergraph.com/docs/features/live-queries) feature to make your application realtime!
 
 ```tsx
-const { data, isLoading, isSubscribed, error } = useLiveQuery<IndexQueryType>({
+const { data, isLoading, isSubscribed, error } = useLiveQuery<QueryType>({
   query: /** Query */,
   variables: { /** Query Variables */ },
 });
@@ -100,7 +100,7 @@ The `fetchWunderGraphSSRQuery` lets you fetch queries on the serverside and hydr
 ### On your Server:
 
 ```ts
-const { initialRecords, queryResponse } = await fetchWunderGraphSSRQuery<IndexQueryType>(/** Query */, {
+const { initialRecords, queryResponse } = await fetchWunderGraphSSRQuery<QueryType>(/** Query */, {
   /** Query Variables */
 });
 ```
@@ -119,7 +119,7 @@ const App = () => {
 };
 ```
 
-or You can also use the `queryResponse` directly (useful for SSG projects):
+or You can also use the `queryResponse` directly (useful for SSG projects, especially frameworks like [Astro](https://astro.build/) or [11ty](https://www.11ty.dev/)):
 
 ```tsx
 export default function MyWeatherApp({ queryResponse }) {
