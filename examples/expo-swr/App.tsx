@@ -2,13 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useQuery } from './lib/wundergraph';
 
-// React native doesn't fully support URLSearchParams, so we need to polyfill it.
-import 'url-search-params-polyfill';
-
-// *experimental, React native doesn't support EventSource (SSE), we need it to run live queries and subscriptions.
-// import { NativeEventSource, EventSourcePolyfill } from 'event-source-polyfill';
-// global.EventSource = NativeEventSource || EventSourcePolyfill;
-
 export default function App() {
 	const { data, isLoading, error } = useQuery({
 		operationName: 'Dragons',
