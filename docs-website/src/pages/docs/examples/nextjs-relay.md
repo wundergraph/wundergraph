@@ -55,7 +55,7 @@ export async function getServerSideProps() {
 
 ## Learn more about WunderGraph + Relay
 
-To learn more about WunderGraph Relay integration, read our [Quickstart Guide](https://docs.wundergraph.com/docs/getting-started/relay-quickstart)
+To learn more about WunderGraph Relay integration, read our [Quickstart Guide](/docs/getting-started/relay-quickstart)
 
 ## Learn More about Next.js
 
