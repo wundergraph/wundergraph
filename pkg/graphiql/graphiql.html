@@ -49,15 +49,16 @@
 		<div id="graphiql">Loading...</div>
 		<script src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
 		<script>
-			function graphQLFetcher(graphQLParams) {
+			function graphQLFetcher(graphQLParams,config) {
 				return fetch('{{apiURL}}/graphql', {
 					method: 'post',
 					headers: {
+						...config.headers || {},
 						Accept: 'application/json',
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify(graphQLParams),
-					credentials: 'omit',
+					credentials: 'include',
 				}).then(function (response) {
 					return response.json().catch(function () {
 						return response.text();
