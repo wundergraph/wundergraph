@@ -26,7 +26,7 @@ import type {
 } from './types';
 import type { LoadOperationsOutput } from '../graphql/operations';
 import FastifyFunctionsPlugin from './plugins/functions';
-import { WgEnv } from '../configure/options';
+import { defaultHost, fallbackNodeUrl, WgEnv } from '../configure/options';
 import { OpenApiServerConfig } from './plugins/omnigraph';
 
 let WG_CONFIG: WunderGraphConfiguration;
@@ -60,8 +60,11 @@ if (process.env.START_HOOKS_SERVER === 'true') {
 		});
 		WG_CONFIG = JSON.parse(configContent);
 
-		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.nodeUrl) {
-			const nodeUrl = resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.nodeUrl);
+		if (WG_CONFIG.api && WG_CONFIG.api?.nodeOptions?.listenInternal?.port) {
+			const nodeUrl = fallbackNodeUrl({
+				host: defaultHost,
+				port: resolveConfigurationVariable(WG_CONFIG.api.nodeOptions.listenInternal.port),
+			});
 			clientFactory = internalClientFactory(WG_CONFIG.api.operations, nodeUrl);
 		} else {
 			throw new Error('User defined api is not set.');

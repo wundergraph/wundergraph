@@ -56,9 +56,23 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 		}
 	}
 
+	var internalNodePort uint64
+	rawInternalNodePort := loadvariable.String(graphConfig.Api.NodeOptions.ListenInternal.Port)
+	if rawInternalNodePort != "" {
+		internalNodePort, err = strconv.ParseUint(rawInternalNodePort, 10, 16)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse internal node port %q: %w", graphConfig.Api.NodeOptions.ListenInternal.Port, err)
+		}
+	}
+
 	listener := &apihandler.Listener{
 		Host: nodeHost,
 		Port: uint16(nodePort),
+	}
+
+	internalListener := &apihandler.Listener{
+		Host: "localhost",
+		Port: uint16(internalNodePort),
 	}
 
 	defaultRequestTimeout := defaultTimeout
@@ -101,9 +115,10 @@ func CreateConfig(graphConfig *wgpb.WunderGraphConfiguration) (*WunderNodeConfig
 			AuthenticationConfig:  graphConfig.Api.AuthenticationConfig,
 			Webhooks:              graphConfig.Api.Webhooks,
 			Options: &apihandler.Options{
-				ServerUrl:     strings.TrimSuffix(loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl), "/"),
-				PublicNodeUrl: loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
-				Listener:      listener,
+				ServerUrl:        strings.TrimSuffix(loadvariable.String(graphConfig.Api.ServerOptions.ServerUrl), "/"),
+				PublicNodeUrl:    loadvariable.String(graphConfig.Api.NodeOptions.PublicNodeUrl),
+				Listener:         listener,
+				InternalListener: internalListener,
 				Logging: apihandler.Logging{
 					Level: logLevel,
 				},

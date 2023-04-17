@@ -15,6 +15,7 @@ export enum WgEnv {
 	PublicNodeUrl = 'WG_PUBLIC_NODE_URL',
 	NodeHost = 'WG_NODE_HOST',
 	NodePort = 'WG_NODE_PORT',
+	InternalNodePort = 'WG_INTERNAL_NODE_PORT',
 	ServerUrl = 'WG_SERVER_URL',
 	ServerHost = 'WG_SERVER_HOST',
 	ServerPort = 'WG_SERVER_PORT',
@@ -24,12 +25,16 @@ export type LoggerLevel = 'fatal' | 'panic' | 'warning' | 'error' | 'info' | 'de
 
 export const defaultHost = 'localhost';
 export const defaultNodePort = '9991';
+export const defaultInternalNodePort = '9994';
 export const defaultServerPort = '9992';
 
 const DefaultNodeOptions = {
 	listen: {
 		host: new EnvironmentVariable(WgEnv.NodeHost, defaultHost),
 		port: new EnvironmentVariable(WgEnv.NodePort, defaultNodePort),
+	},
+	listenInternal: {
+		port: new EnvironmentVariable(WgEnv.InternalNodePort, defaultInternalNodePort),
 	},
 	nodeUrl: new EnvironmentVariable(WgEnv.NodeUrl, `http://${defaultHost}:${defaultNodePort}`),
 	publicNodeUrl: new EnvironmentVariable(WgEnv.PublicNodeUrl, `http://${defaultHost}:${defaultNodePort}`),
@@ -44,15 +49,20 @@ export interface ListenOptions {
 	port?: InputVariable;
 }
 
+export interface InternalListenOptions extends Omit<ListenOptions, 'host'> {}
+
 export interface ResolvedListenOptions {
 	host: ConfigurationVariable;
 	port: ConfigurationVariable;
 }
 
+export interface ResolvedInternalListenOptions extends Omit<ResolvedListenOptions, 'host'> {}
+
 export interface NodeOptions {
 	nodeUrl?: InputVariable;
 	publicNodeUrl?: InputVariable;
 	listen?: ListenOptions;
+	listenInternal?: InternalListenOptions;
 	logger?: {
 		level?: InputVariable<LoggerLevel>;
 	};
@@ -72,6 +82,7 @@ export interface ResolvedNodeOptions {
 	nodeUrl: ConfigurationVariable;
 	publicNodeUrl: ConfigurationVariable;
 	listen: ResolvedListenOptions;
+	listenInternal: ResolvedInternalListenOptions;
 	logger: {
 		level: ConfigurationVariable;
 	};
@@ -96,6 +107,9 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 					host: options?.listen?.host || DefaultNodeOptions.listen.host,
 					port: options?.listen?.port || DefaultNodeOptions.listen.port,
 				},
+				listenInternal: {
+					port: options?.listenInternal?.port || DefaultNodeOptions.listenInternal.port,
+				},
 				logger: {
 					level: options?.logger?.level || DefaultNodeOptions.logger.level,
 				},
@@ -109,6 +123,9 @@ export const resolveNodeOptions = (options?: NodeOptions): ResolvedNodeOptions =
 		listen: {
 			host: mapInputVariable(nodeOptions.listen.host),
 			port: mapInputVariable(nodeOptions.listen.port),
+		},
+		listenInternal: {
+			port: mapInputVariable(nodeOptions.listenInternal.port),
 		},
 		logger: {
 			level: mapInputVariable(nodeOptions.logger.level),

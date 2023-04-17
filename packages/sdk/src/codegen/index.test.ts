@@ -71,6 +71,15 @@ export const RunTemplateTest = async (...templates: Template[]) => {
 							placeholderVariableName: '',
 						},
 					},
+					listenInternal: {
+						port: {
+							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,
+							staticVariableContent: '9994',
+							environmentVariableName: '',
+							environmentVariableDefaultValue: '',
+							placeholderVariableName: '',
+						},
+					},
 					logger: {
 						level: {
 							kind: ConfigurationVariableKind.STATIC_CONFIGURATION_VARIABLE,

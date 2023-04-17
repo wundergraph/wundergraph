@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wundergraph/wundergraph/pkg/graphiql"
+	"golang.org/x/sync/singleflight"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/buger/jsonparser"
 	"github.com/gorilla/mux"
@@ -104,6 +107,37 @@ func (i *InternalBuilder) BuildAndMountInternalApiHandler(ctx context.Context, r
 		if err != nil {
 			i.log.Error("registerOperation", zap.Error(err))
 		}
+	}
+
+	if api.EnableGraphqlEndpoint {
+		graphqlHandler := &GraphQLHandler{
+			planConfig:      i.planConfig,
+			definition:      i.definition,
+			resolver:        i.resolver,
+			log:             i.log,
+			pool:            i.pool,
+			sf:              &singleflight.Group{},
+			prepared:        map[uint64]planWithExtractedVariables{},
+			preparedMux:     &sync.RWMutex{},
+			renameTypeNames: i.renameTypeNames,
+		}
+		apiPath := "/graphql"
+		i.router.Methods(http.MethodPost, http.MethodOptions).Path(apiPath).Handler(graphqlHandler)
+		i.log.Debug("registered internal GraphQLHandler",
+			zap.String("method", http.MethodPost),
+			zap.String("path", apiPath),
+		)
+
+		graphqlPlaygroundHandler := &GraphQLPlaygroundHandler{
+			log:     i.log,
+			html:    graphiql.GetGraphiqlPlaygroundHTML(),
+			nodeUrl: fmt.Sprintf("http://%s:%d", api.Options.InternalListener.Host, api.Options.InternalListener.Port),
+		}
+		i.router.Methods(http.MethodGet, http.MethodOptions).Path(apiPath).Handler(graphqlPlaygroundHandler)
+		i.log.Debug("registered internal GraphQLPlaygroundHandler",
+			zap.String("method", http.MethodGet),
+			zap.String("path", apiPath),
+		)
 	}
 
 	return streamClosers, err

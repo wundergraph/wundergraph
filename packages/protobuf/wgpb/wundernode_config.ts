@@ -1162,6 +1162,10 @@ export interface ListenerOptions {
   port: ConfigurationVariable | undefined;
 }
 
+export interface InternalListenerOptions {
+  port: ConfigurationVariable | undefined;
+}
+
 export interface NodeLogging {
   level: ConfigurationVariable | undefined;
 }
@@ -1172,6 +1176,7 @@ export interface NodeOptions {
   listen: ListenerOptions | undefined;
   logger: NodeLogging | undefined;
   defaultRequestTimeoutSeconds: number;
+  listenInternal: InternalListenerOptions | undefined;
 }
 
 export interface ServerLogging {
@@ -3861,6 +3866,30 @@ export const ListenerOptions = {
   },
 };
 
+function createBaseInternalListenerOptions(): InternalListenerOptions {
+  return { port: undefined };
+}
+
+export const InternalListenerOptions = {
+  fromJSON(object: any): InternalListenerOptions {
+    return { port: isSet(object.port) ? ConfigurationVariable.fromJSON(object.port) : undefined };
+  },
+
+  toJSON(message: InternalListenerOptions): unknown {
+    const obj: any = {};
+    message.port !== undefined && (obj.port = message.port ? ConfigurationVariable.toJSON(message.port) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<InternalListenerOptions>, I>>(object: I): InternalListenerOptions {
+    const message = createBaseInternalListenerOptions();
+    message.port = (object.port !== undefined && object.port !== null)
+      ? ConfigurationVariable.fromPartial(object.port)
+      : undefined;
+    return message;
+  },
+};
+
 function createBaseNodeLogging(): NodeLogging {
   return { level: undefined };
 }
@@ -3893,6 +3922,7 @@ function createBaseNodeOptions(): NodeOptions {
     listen: undefined,
     logger: undefined,
     defaultRequestTimeoutSeconds: 0,
+    listenInternal: undefined,
   };
 }
 
@@ -3906,6 +3936,9 @@ export const NodeOptions = {
       defaultRequestTimeoutSeconds: isSet(object.defaultRequestTimeoutSeconds)
         ? Number(object.defaultRequestTimeoutSeconds)
         : 0,
+      listenInternal: isSet(object.listenInternal)
+        ? InternalListenerOptions.fromJSON(object.listenInternal)
+        : undefined,
     };
   },
 
@@ -3919,6 +3952,10 @@ export const NodeOptions = {
     message.logger !== undefined && (obj.logger = message.logger ? NodeLogging.toJSON(message.logger) : undefined);
     message.defaultRequestTimeoutSeconds !== undefined &&
       (obj.defaultRequestTimeoutSeconds = Math.round(message.defaultRequestTimeoutSeconds));
+    message.listenInternal !== undefined &&
+      (obj.listenInternal = message.listenInternal
+        ? InternalListenerOptions.toJSON(message.listenInternal)
+        : undefined);
     return obj;
   },
 
@@ -3937,6 +3974,9 @@ export const NodeOptions = {
       ? NodeLogging.fromPartial(object.logger)
       : undefined;
     message.defaultRequestTimeoutSeconds = object.defaultRequestTimeoutSeconds ?? 0;
+    message.listenInternal = (object.listenInternal !== undefined && object.listenInternal !== null)
+      ? InternalListenerOptions.fromPartial(object.listenInternal)
+      : undefined;
     return message;
   },
 };
