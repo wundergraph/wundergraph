@@ -4,33 +4,146 @@ pageTitle: WunderGraph React Relay Client
 description: React Relay Client reference
 ---
 
-This package provides a type-safe integration of [Relay](https://relay.dev/) with WunderGraph.
+# WunderGraph Relay Integration
 
-The quickest way to setup a new React + Relay project with WunderGraph is to use our template:
+![@wundergraph/react-relay](https://img.shields.io/npm/v/@wundergraph/react-relay.svg)
+
+This package provides a type-safe integration of [react-relay](https://relay.dev/) with WunderGraph.
+Relay is a JavaScript framework for building data-driven React applications, efficiently fetching and managing data from GraphQL APIs. It optimizes network requests, simplifies client-side data management, and enables performant, scalable apps.
+
+> **Warning**: Only works with [WunderGraph](https://wundergraph.com).
+
+## Getting Started
+
+The easiest way to get started with WunderGraph + Relay is to use one of our templates
+
+### Next.js
+
+```sh
+npx create-wundergraph-app my-project --example nextjs-relay
+```
+
+### React with Vite
 
 ```sh
 npx create-wundergraph-app my-project --example vite-react-relay
 ```
 
-Relay is a JavaScript framework for building data-driven React applications, efficiently fetching and managing data from GraphQL APIs. It optimizes network requests, simplifies client-side data management, and enables performant, scalable apps.
+## Add relay to an existing WunderGraph + Relay project
 
-Relay has several advantages over other GraphQL clients:
+Make sure you have set your code generation to include the base typescript client.
 
-- **Performance optimizations**: Relay automatically batches multiple queries into a single request, reducing network overhead. It also intelligently updates the local cache when mutations occur, reducing the need for manual cache management.
-- **Declarative data fetching**: Components declare their own data requirements using GraphQL fragments, making it easier to understand and manage component data dependencies.
-- **Strong typing**: Relay's use of the GraphQL type system and generated TypeScript types helps catch errors early during development, improving code reliability and maintainability.
-- **Predictive fetching**: Relay's support for prefetching data means that it can fetch data for components before they are rendered, reducing perceived load times and improving user experience.
-- **Colocation**: By colocating data requirements with components, Relay makes it easier to reason about how a component fetches and uses data, which simplifies development and debugging.
-- **Built-in garbage collection**: Relay's garbage collection mechanism helps keep the client-side cache small and efficient, reducing memory usage in long-running applications.
+```typescript
+// wundergraph.config.ts
+configureWunderGraphApplication({
+  // ... omitted for brevity
+  codeGenerators: [
+    {
+      templates: [templates.typescript.client],
+      // the location where you want to generate the client
+      path: '../src/components/generated',
+    },
+  ],
+});
+```
 
-These features make Relay a powerful choice for complex, data-driven React applications, offering performance benefits and improved maintainability compared to some other GraphQL clients. Relay has it's own compiler and codegenerator package called `relay-compiler`. Relay uses the `relay-compiler` for several important reasons:
+In your relay config add the `persistConfig` option and make sure the `persisted.json` file is in your `.wundergraph/operations/relay` directory (you might have to create an empty file in the target location for the first time)
 
-1. **Generating artifacts**: The `relay-compiler` processes GraphQL files and generates artifacts containing optimized queries and metadata. These artifacts are used by the Relay runtime to efficiently fetch and manage data.
-2. **Optimizing queries**: The compiler optimizes GraphQL queries by flattening and deduplicating nested fragments, reducing query size and complexity. This helps improve the performance of network requests.
-3. **Validation**: The `relay-compiler` validates your GraphQL queries and fragments against your GraphQL schema, catching errors early in the development process. This helps ensure that your queries are correct and conform to your schema.
-4. **Type generation**: When using TypeScript, the `relay-compiler` generates TypeScript types for your GraphQL schema, queries, and fragments. This provides strong typing for your Relay application, improving code reliability and maintainability.
-5. **Colocation**: The `relay-compiler` enforces the colocation principle, which means keeping GraphQL fragments and their corresponding React components in the same file. This makes it easier to reason about and manage data dependencies in your application.
+```json
+  //...
+  "relay": {
+    //...
+    "persistConfig": {
+      "file": "./.wundergraph/operations/relay/persisted.json"
+    }
+  }
+  //...
+```
 
-In summary, the `relay-compiler` is a crucial part of the Relay ecosystem, as it generates artifacts, optimizes queries, validates queries against the schema, generates TypeScript types, and enforces colocation. These features help Relay applications to be more efficient, reliable, and maintainable.
+WunderGraph will use the `persisted.json` file to generate the necessary Relay code. Now you can use the WunderGraph Relay provider & utility functions.
 
-The relay-compiler will need to be configured to function with the WunderGraph client. Instead of writing client side operations in `.wundergraph/operations` like all the other clients, we will instead write them alongside the react components and have relay generate the code using `relay-compiler`, while using WunderGraph to serve as the relay's client side environment for making network requests.
+```ts
+import { createWunderGraphRelayApp } from '@wundergraph/react-relay';
+import { createClient } from '../generated/client';
+
+const client = createClient(); // Typesafe WunderGraph client
+
+// These utility functions needs to be imported into your app
+export const { WunderGraphRelayProvider, useLiveQuery, fetchWunderGraphSSRQuery } = createWunderGraphRelayApp({
+  client,
+});
+```
+
+Now, in your React App, make sure the whole application is Wrapped under `WunderGraphRelayProvider`.
+
+```tsx
+const App = () => {
+  return <WunderGraphRelayProvider>{/** Rest of your Application */}</WunderGraphRelayProvider>;
+};
+```
+
+All the existing [Relay APIs](https://relay.dev/docs/) will work normally, the provider will make sure that Relay uses the WunderGraph generated client behind the scenes.
+
+The Relay integration also provides two very powerful utilities
+
+## Live Queries
+
+The `useLiveQuery` hooks lets you leverage the power of [WunderGraph's Live Queries](https://docs.wundergraph.com/docs/features/live-queries) feature to make your application realtime!
+
+```tsx
+const { data, isLoading, isSubscribed, error } = useLiveQuery<QueryType>({
+  query: /** Query */,
+  variables: { /** Query Variables */ },
+});
+```
+
+The `useLiveQuery` hook syncs with the Relay store which means if the query is already fetched in SSR, it will render immediately.
+
+## SSR Support
+
+The `fetchWunderGraphSSRQuery` lets you fetch queries on the serverside and hydrate your Relay store on the client using the `WunderGraphRelayProvider`
+
+### On your Server:
+
+```ts
+const { initialRecords, queryResponse } = await fetchWunderGraphSSRQuery<QueryType>(/** Query */, {
+  /** Query Variables */
+});
+```
+
+### On your client:
+
+You can hydrate relay store for the whole application using `initialRecords`:
+
+```tsx
+const App = () => {
+  return (
+    <WunderGraphRelayProvider initialRecords={initialRecords}>
+      {/** Rest of your Application */}
+    </WunderGraphRelayProvider>
+  );
+};
+```
+
+or You can also use the `queryResponse` directly (useful for SSG projects, especially frameworks like [Astro](https://astro.build/) or [11ty](https://www.11ty.dev/)):
+
+```tsx
+export default function MyWeatherApp({ queryResponse }) {
+  return (
+    <div className={styles.container}>
+      <main className={styles.main}>
+        {queryResponse?.weather_getCityByName?.weather?.summary && (
+          <Weather weather={queryResponse.weather_getCityByName.weather.summary} />
+        )}
+        {queryResponse?.weather_getCityByName?.weather?.temperature && (
+          <TemperatureDetails weather={queryResponse.weather_getCityByName.weather.temperature} />
+        )}
+      </main>
+    </div>
+  );
+}
+```
+
+## Learn more
+
+To learn more about Relay, read our [Quickstart Guide](https://docs.wundergraph.com/docs/getting-started/relay-quickstart)

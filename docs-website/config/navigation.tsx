@@ -986,10 +986,6 @@ const navigation = [
 				title: 'Svelte Query',
 				href: '/docs/clients-reference/svelte-query',
 			},
-			{
-				title: 'Next.js Relay',
-				href: '/docs/clients-reference/nextjs-relay',
-			},
 		],
 	},
 	{

@@ -67,10 +67,6 @@ configureWunderGraphApplication({
     {
       templates: [...templates.typescript.all],
     },
-    {
-      templates: [new NextJsTemplate()],
-      path: './generated/nextjs',
-    },
   ],
   //...
 });
@@ -133,6 +129,38 @@ const PagesDragonsQuery = graphql`
 `;
 ```
 
+When you run `npm start` it will do a few things:
+
+- Runs `relay-compiler` in watch mode, which will generate the relay operations & types
+- Runs `wundergraph` compiler which will generate the client sdk based on the relay operations & starts wundergraph server
+- Runs the next js project in dev mode
+
+### How Next.js SSR works
+
+The SSR fetch is written in `src/pages/index.tsx` on the `getServerSideProps()`
+
+```ts
+export async function getServerSideProps() {
+  const relayData = await fetchWunderGraphSSRQuery<PagesDragonsQueryType>(PagesDragonsQuery);
+
+  return {
+    props: relayData,
+  };
+}
+```
+
+The relayData will have the `initialRecords` object which will be picked up by the `_app.tsx` component to hydrate the Relay store.
+
+```tsx
+function ExampleApp({ Component, pageProps }: AppProps) {
+  return (
+    <WunderGraphRelayProvider initialRecords={pageProps.initialRecords}>
+      <Component {...pageProps} />
+    </WunderGraphRelayProvider>
+  );
+}
+```
+
 ## What is Relay?
 
 Relay is a JavaScript framework for building data-driven React applications, efficiently fetching and managing data from GraphQL APIs. It optimizes network requests, simplifies client-side data management, and enables performant, scalable apps.
@@ -157,3 +185,8 @@ These features make Relay a powerful choice for complex, data-driven React appli
 In summary, the `relay-compiler` is a crucial part of the Relay ecosystem, as it generates artifacts, optimizes queries, validates queries against the schema, generates TypeScript types, and enforces colocation. These features help Relay applications to be more efficient, reliable, and maintainable.
 
 The relay-compiler will need to be configured to function with the WunderGraph client. Instead of writing client side operations in `.wundergraph/operations` like all the other clients, we will instead write them alongside the react components and have relay generate the code using `relay-compiler`, while using WunderGraph to serve as the relay's client side environment for making network requests.
+
+### References
+
+- [Thinking in Relay](https://relay.dev/docs/principles-and-architecture/thinking-in-relay/)
+- [Official Tutorial](https://relay.dev/docs/tutorial/intro/)
