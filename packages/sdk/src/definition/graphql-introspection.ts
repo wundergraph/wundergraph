@@ -14,7 +14,7 @@ import {
 	print,
 	printSchema,
 } from 'graphql';
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { AxiosError, AxiosProxyConfig, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConfigurationVariableKind, DataSourceKind, HTTPHeader, HTTPMethod } from '@wundergraph/protobuf';
 import { cleanupSchema } from '../graphql/schema';
 import {
@@ -262,8 +262,32 @@ const introspectGraphQLAPI = async (
 		operationName: 'IntrospectionQuery',
 	});
 
+	let proxyConfig: AxiosProxyConfig | undefined;
+
+	if (introspection.httpProxyUrl !== undefined) {
+		const proxyUrlString = resolveVariable(introspection.httpProxyUrl);
+		try {
+			const proxyUrl = new URL(proxyUrlString);
+			const defaultPort = proxyUrl.protocol.toLowerCase() === 'https' ? 443 : 80;
+			proxyConfig = {
+				host: proxyUrl.host,
+				port: proxyUrl.port ? parseInt(proxyUrl.host, 10) : defaultPort,
+				protocol: proxyUrl.protocol,
+			};
+			if (proxyUrl.username || proxyUrl.password) {
+				proxyConfig.auth = {
+					username: proxyUrl.username,
+					password: proxyUrl.password,
+				};
+			}
+		} catch (e: any) {
+			throw new Error(`invalid HTTP proxy URL '${proxyUrlString}': ${e}`);
+		}
+	}
+
 	let opts: AxiosRequestConfig = {
 		headers: headers,
+		proxy: proxyConfig,
 		// Prevent axios from running JSON.parse() for us
 		transformResponse: (res) => res,
 		'axios-retry': {
