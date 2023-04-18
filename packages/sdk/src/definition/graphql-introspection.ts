@@ -275,6 +275,11 @@ const introspectGraphQLAPI = async (
 		operationName: 'IntrospectionQuery',
 	});
 
+	if (!introspection.url) {
+		throw new MissingKeyError('url', introspection);
+	}
+	const url = resolveVariable(introspection.url);
+
 	let proxyConfig: AxiosProxyConfig | undefined;
 
 	const httpProxyUrl = introspection.httpProxyUrl !== undefined ? introspection.httpProxyUrl : options.httpProxyUrl;
@@ -295,7 +300,7 @@ const introspectGraphQLAPI = async (
 				};
 			}
 		} catch (e: any) {
-			throw new Error(`invalid HTTP proxy URL '${proxyUrlString}': ${e}`);
+			throw new Error(`invalid HTTP proxy URL '${proxyUrlString} when introspecting ${url}': ${e}`);
 		}
 	}
 
@@ -332,10 +337,6 @@ const introspectGraphQLAPI = async (
 	}
 
 	let res: AxiosResponse<string> | undefined;
-	if (!introspection.url) {
-		throw new MissingKeyError('url', introspection);
-	}
-	const url = resolveVariable(introspection.url);
 	try {
 		res = await Fetcher().post(url, data, opts);
 	} catch (e: any) {
